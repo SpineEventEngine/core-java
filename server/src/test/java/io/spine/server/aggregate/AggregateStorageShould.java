@@ -27,7 +27,6 @@ import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import io.spine.core.Event;
 import io.spine.server.command.TestEventFactory;
-import io.spine.server.entity.Entity;
 import io.spine.server.event.Given.EventMessage;
 import io.spine.server.storage.AbstractStorageShould;
 import io.spine.test.Tests;
@@ -69,12 +68,17 @@ public abstract class AggregateStorageShould
 
     @Before
     public void setUpAggregateStorageTest() {
-        storage = getStorage(Entity.class);
+        storage = getDefaultStorage();
     }
 
     @After
     public void tearDownAggregateStorageTest() {
         close(storage);
+    }
+
+    @Override
+    public AggregateStorage<ProjectId> getDefaultStorage() {
+        return getStorage(ProjectId.class, TestAggregate.class);
     }
 
     /**
@@ -332,6 +336,12 @@ public abstract class AggregateStorageShould
                        .setState(Any.getDefaultInstance())
                        .setTimestamp(time)
                        .build();
+    }
+
+    private static class TestAggregate extends Aggregate<ProjectId, Project, ProjectVBuilder> {
+        protected TestAggregate(ProjectId id) {
+            super(id);
+        }
     }
 
     private static class TestAggregateWithIdString

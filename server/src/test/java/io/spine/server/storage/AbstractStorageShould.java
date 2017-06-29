@@ -53,17 +53,31 @@ public abstract class AbstractStorageShould<I,
                                             R extends Message,
                                             S extends AbstractStorage<I, R>> {
 
-    protected S storage;
+    private S storage;
 
     @Before
     public void setUpAbstractStorageTest() {
-        storage = getStorage(Entity.class);
+        storage = getDefaultStorage();
     }
 
     @After
     public void tearDownAbstractStorageTest() {
         close(storage);
     }
+
+    protected final S getStorage() {
+        return storage;
+    }
+
+    /**
+     * Creates the default instance of {@link Storage} for this test suite.
+     *
+     * <p>NOTE: the storage is closed after each test.
+     *
+     * @return an empty storage instance
+     * @see #getDefaultStorage() for a storage instance for a specific {@link Entity}
+     */
+    protected abstract S getDefaultStorage();
 
     /**
      * Used to initialize the storage before each test.

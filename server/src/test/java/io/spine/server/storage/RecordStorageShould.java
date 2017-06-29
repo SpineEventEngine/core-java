@@ -24,7 +24,6 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Maps;
-import com.google.common.reflect.TypeToken;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.FieldMask;
@@ -103,6 +102,11 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     protected abstract Message newState(I id);
 
     @Override
+    protected S getDefaultStorage() {
+        return getStorage(getTestEntityClass());
+    }
+
+    @Override
     protected EntityRecord newStorageRecord() {
         return newStorageRecord(newState(newId()));
     }
@@ -134,7 +138,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     // Converter nullability issues and Optional getting
     @Test
     public void write_and_read_record_by_Message_id() {
-        final RecordStorage<I> storage = getStorage(getTestEntityClass());
+        final RecordStorage<I> storage = getDefaultStorage();
         final I id = newId();
         final EntityRecord expected = newStorageRecord(id);
         storage.write(id, expected);
@@ -155,7 +159,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final FieldMask nonEmptyFieldMask = FieldMask.newBuilder()
                                                      .addPaths("invalid-path")
                                                      .build();
-        final RecordStorage storage = getStorage(getTestEntityClass());
+        final RecordStorage storage = getDefaultStorage();
         final Iterator empty = storage.readAll(nonEmptyFieldMask);
 
         assertNotNull(empty);
@@ -167,7 +171,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     public void read_single_record_with_mask() {
         final I id = newId();
         final EntityRecord record = newStorageRecord(id);
-        final RecordStorage<I> storage = getStorage(getTestEntityClass());
+        final RecordStorage<I> storage = getDefaultStorage();
         storage.write(id, record);
 
         final Descriptors.Descriptor descriptor = newState(id).getDescriptorForType();
@@ -185,7 +189,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     // Converter nullability issues
     @Test
     public void read_multiple_records_with_field_mask() {
-        final RecordStorage<I> storage = getStorage(getTestEntityClass());
+        final RecordStorage<I> storage = getDefaultStorage();
         final int count = 10;
         final List<I> ids = new LinkedList<>();
         Descriptors.Descriptor typeDescriptor = null;
@@ -218,7 +222,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     @SuppressWarnings("ConstantConditions") // converter nullability issues
     @Test
     public void delete_record() {
-        final RecordStorage<I> storage = getStorage(getTestEntityClass());
+        final RecordStorage<I> storage = getDefaultStorage();
         final I id = newId();
         final EntityRecord record = newStorageRecord(id);
 
@@ -235,7 +239,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
 
     @Test
     public void write_none_storage_fields_is_none_passed() {
-        final RecordStorage<I> storage = spy(getStorage(getTestEntityClass()));
+        final RecordStorage<I> storage = spy(getDefaultStorage());
         final I id = newId();
         final Any state = pack(Sample.messageOfType(Project.class));
         final EntityRecord record =
@@ -248,7 +252,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
 
     @Test
     public void write_record_bulk() {
-        final RecordStorage<I> storage = getStorage(getTestEntityClass());
+        final RecordStorage<I> storage = getDefaultStorage();
         final int bulkSize = 5;
 
         final Map<I, EntityRecordWithColumns> initial = new HashMap<>(bulkSize);
@@ -275,7 +279,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     @Test
     public void rewrite_records_in_bulk() {
         final int recordCount = 3;
-        final RecordStorage<I> storage = getStorage(getTestEntityClass());
+        final RecordStorage<I> storage = getDefaultStorage();
 
         final Function<EntityRecord, EntityRecordWithColumns> recordPacker =
                 new Function<EntityRecord, EntityRecordWithColumns>() {
@@ -317,7 +321,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     @Test(expected = IllegalStateException.class)
     public void fail_to_write_visibility_to_non_existing_record() {
         final I id = newId();
-        final RecordStorage<I> storage = getStorage(getTestEntityClass());
+        final RecordStorage<I> storage = getDefaultStorage();
 
         storage.writeLifecycleFlags(id, archived());
     }
@@ -325,7 +329,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     @Test
     public void return_absent_visibility_for_missing_record() {
         final I id = newId();
-        final RecordStorage<I> storage = getStorage(getTestEntityClass());
+        final RecordStorage<I> storage = getDefaultStorage();
         final Optional<LifecycleFlags> optional = storage.readLifecycleFlags(id);
         assertFalse(optional.isPresent());
     }
@@ -335,7 +339,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     public void return_default_visibility_for_new_record() {
         final I id = newId();
         final EntityRecord record = newStorageRecord(id);
-        final RecordStorage<I> storage = getStorage(getTestEntityClass());
+        final RecordStorage<I> storage = getDefaultStorage();
         storage.write(id, record);
 
         final Optional<LifecycleFlags> optional = storage.readLifecycleFlags(id);
@@ -348,7 +352,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     public void load_visibility_when_updated() {
         final I id = newId();
         final EntityRecord record = newStorageRecord(id);
-        final RecordStorage<I> storage = getStorage(getTestEntityClass());
+        final RecordStorage<I> storage = getDefaultStorage();
         storage.write(id, EntityRecordWithColumns.of(record));
 
         storage.writeLifecycleFlags(id, archived());
@@ -366,7 +370,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final EntityRecordWithColumns recordWithStorageFields =
                 EntityRecordWithColumns.of(record);
         assertFalse(recordWithStorageFields.hasColumns());
-        final RecordStorage<I> storage = getStorage(getTestEntityClass());
+        final RecordStorage<I> storage = getDefaultStorage();
 
         storage.write(id, recordWithStorageFields);
         final Optional<EntityRecord> actualRecord = storage.read(id);
@@ -381,7 +385,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final TestCounterEntity<?> testEntity = new TestCounterEntity<>(id);
         final EntityRecordWithColumns recordWithColumns =
                 create(record, testEntity);
-        final S storage = getStorage(getTestEntityClass());
+        final S storage = getDefaultStorage();
         storage.write(id, recordWithColumns);
 
         final Optional<EntityRecord> readRecord = storage.read(id);
@@ -437,7 +441,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final EntityRecordWithColumns recordWrong1 = create(notFineRecord1, wrongEntity1);
         final EntityRecordWithColumns recordWrong2 = create(notFineRecord2, wrongEntity2);
 
-        final RecordStorage<I> storage = getStorage(getTestEntityClass());
+        final RecordStorage<I> storage = getDefaultStorage();
 
         storage.write(idMatching, recordRight);
         storage.write(idWrong1, recordWrong1);
@@ -470,7 +474,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final EntityRecordWithColumns recordWrong1 = create(notFineRecord1, wrongEntity1);
         final EntityRecordWithColumns recordWrong2 = create(notFineRecord2, wrongEntity2);
 
-        final RecordStorage<I> storage = getStorage(getTestEntityClass());
+        final RecordStorage<I> storage = getDefaultStorage();
 
         // Fill the storage
         storage.write(idWrong1, recordWrong1);
