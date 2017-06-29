@@ -18,47 +18,49 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.envelope;
+package io.spine.core.given;
 
-import io.spine.client.TestActorRequestFactory;
-import io.spine.core.Command;
-import io.spine.core.CommandClass;
-import io.spine.core.CommandEnvelope;
-import io.spine.core.MessageEnvelopeShould;
+import com.google.common.testing.NullPointerTester;
+import io.spine.core.UserId;
+import io.spine.test.Tests;
 import org.junit.Test;
 
-import static io.spine.test.TestValues.newUuidValue;
+import static io.spine.core.given.GivenUserId.of;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 /**
  * @author Alexander Yevsyukov
  */
-public class CommandEnvelopeShould extends MessageEnvelopeShould<Command,
-        CommandEnvelope,
-                                                                 CommandClass> {
-
-    private final TestActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(CommandEnvelopeShould.class);
+public class GivenUserIdShould {
 
     @Test
-    public void obtain_command_context() {
-        final Command command = outerObject();
-        final CommandEnvelope envelope = toEnvelope(command);
-        assertEquals(command.getContext(), envelope.getCommandContext());
+    public void have_utility_ctor() {
+        Tests.assertHasPrivateParameterlessCtor(GivenUserId.class);
     }
 
-    @Override
-    protected Command outerObject() {
-        return requestFactory.command().create(newUuidValue());
+    @Test
+    public void pass_null_tolerance_check() {
+        new NullPointerTester()
+                .testAllPublicStaticMethods(GivenUserId.class);
     }
 
-    @Override
-    protected CommandEnvelope toEnvelope(Command obj) {
-        return CommandEnvelope.of(obj);
+    @Test
+    public void create_UserId_by_string() {
+        final String testIdString = "12345";
+        final UserId userId = of(testIdString);
+
+        final UserId expected = UserId.newBuilder()
+                                      .setValue(testIdString)
+                                      .build();
+
+        assertEquals(expected, userId);
     }
 
-    @Override
-    protected CommandClass getMessageClass(Command obj) {
-        return CommandClass.of(obj);
+    @Test
+    public void create_new_UUID_based_UserId() {
+        assertFalse(GivenUserId.newUuid()
+                               .getValue()
+                               .isEmpty());
     }
 }

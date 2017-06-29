@@ -1,10 +1,9 @@
 ---
 exclude_paths:
 - "client/src/main/java/io/spine/net/Patterns.java"
-- "base/src/test/**/*.*"
 - "core/src/test/**/*.*"
 - "client/src/test/**/*.*"
 - "server/src/test/**/*.*"
-- "testutil-base/src/test/**/*.*"
+- "testutil-core/src/test/**/*.*"
 - "testutil-client/src/test/**/*.*"
 - "testutil-server/src/test/**/*.*"

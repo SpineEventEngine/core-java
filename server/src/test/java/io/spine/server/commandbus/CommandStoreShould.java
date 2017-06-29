@@ -40,7 +40,7 @@ import io.spine.test.TimeTests;
 import io.spine.test.command.AddTask;
 import io.spine.test.command.CreateProject;
 import io.spine.test.command.StartProject;
-import io.spine.test.envelope.ProjectCreated;
+import io.spine.test.command.event.ProjectCreated;
 import org.junit.Test;
 
 import javax.annotation.Nonnull;

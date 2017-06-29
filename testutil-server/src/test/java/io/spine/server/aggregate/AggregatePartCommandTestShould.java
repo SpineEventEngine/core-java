@@ -25,7 +25,6 @@ import com.google.protobuf.UInt32Value;
 import io.spine.Identifier;
 import io.spine.client.ActorRequestFactory;
 import io.spine.core.TenantId;
-import io.spine.core.given.GivenUserId;
 import io.spine.server.BoundedContext;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandTest;
@@ -35,6 +34,7 @@ import io.spine.validate.UInt32ValueVBuilder;
 import org.junit.Before;
 import org.junit.Test;
 
+import static io.spine.core.given.GivenUserId.newUuid;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -47,7 +47,7 @@ public class AggregatePartCommandTestShould {
 
     private static ActorRequestFactory newRequestFactory(Class<?> clazz) {
         return ActorRequestFactory.newBuilder()
-                                  .setActor(GivenUserId.newUuid())
+                                  .setActor(newUuid())
                                   .setZoneOffset(ZoneOffsets.UTC)
                                   .setTenantId(TenantId.newBuilder()
                                                        .setValue(clazz.getSimpleName())

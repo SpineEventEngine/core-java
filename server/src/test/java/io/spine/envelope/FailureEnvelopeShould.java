@@ -27,8 +27,9 @@ import io.spine.core.Failure;
 import io.spine.core.FailureClass;
 import io.spine.core.FailureEnvelope;
 import io.spine.core.Failures;
+import io.spine.core.MessageEnvelopeShould;
 import io.spine.protobuf.AnyPacker;
-import io.spine.test.failures.Failures.CannotPerformBusinessOperation;
+import io.spine.test.failure.OperationFailures.CannotPerformBusinessOperation;
 import org.junit.Test;
 
 import static io.spine.Identifier.newUuid;
@@ -53,8 +54,8 @@ public class FailureEnvelopeShould extends MessageEnvelopeShould<Failure,
         final Message commandMessage = Int32Value.getDefaultInstance();
         final Command command = requestFactory.command().create(commandMessage);
         final Message failureMessage = CannotPerformBusinessOperation.newBuilder()
-                                                            .setOperationId(newUuid())
-                                                            .build();
+                                                                     .setOperationId(newUuid())
+                                                                     .build();
         final Failure failure = Failures.createFailure(failureMessage, command);
         return failure;
     }

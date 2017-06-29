@@ -17,38 +17,17 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
+dependencies {
+    compile project(path: ':client')
 
-/**
- *  The versions of the libraries used.
- *
- *  This file is used in both module `build.gradle` scripts and in the integration tests,
- *  as we want to manage the versions in a single source.
- */
+    // Depend on JUnit in the production part of the code, as this module exposes testing utilities
+    // that are based on JUnit.
+    compile group: 'junit', name: 'junit', version: jUnitVersion
 
-def final SPINE_VERSION = '0.9.34-SNAPSHOT'
+    // Depend on Mockito in the production code because this module exposes testing utilities
+    // based on this library.
+    compile group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
 
-ext {
-    // The version of the modules in this project.
-    spineVersion = SPINE_VERSION
-
-    // Depend on `base` for the general definitions and a model compiler.
-    spineBaseVersion = '0.9.34-SNAPSHOT'
-
-    // We use Spine tools in the build process.
-    spineToolsVersion = '0.9.25-SNAPSHOT'
-
-    guavaVersion = '20.0'
-
-    // NOTE: when updating Protobuf dependency, please check that
-    // `KnownTypes.addStandardProtobufTypes()` method is updated with new Message types that may be
-    // introduced in the new version of Protobuf.
-    protobufVersion = '3.3.0'
-    
-    gRpcVersion = '1.4.0'
-    slf4JVersion = '1.7.21'
-    jUnitVersion = '4.12'
-    mockitoVersion = '2.7.22'
-
-    protobufGradlePluginVerison = '0.8.1'
+    // General purpose test utilities.
+    compile group: 'io.spine', name: 'spine-testutil-base', version: spineBaseVersion
 }
-

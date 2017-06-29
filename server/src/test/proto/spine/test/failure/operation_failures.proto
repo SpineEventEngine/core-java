@@ -19,14 +19,19 @@
 //
 syntax = "proto3";
 
-package spine.test.envelope;
+package spine.test.failure;
 
 option (type_url_prefix) = "type.spine.io";
-option java_package="io.spine.test.envelope";
-option java_multiple_files = true;
+option (SPI_all) = true;
+option java_package = "io.spine.test.failure";
+// Keep all the failures under the same outer class called `OperationFailures`.
+option java_generate_equals_and_hash = true;
 
 import "spine/options.proto";
 
-message ProjectId {
-    string id = 1;
+// To be used in `FailureEnvelopesShould`.
+message CannotPerformBusinessOperation {
+
+    // The ID of the operation.
+    string operation_id = 1;
 }

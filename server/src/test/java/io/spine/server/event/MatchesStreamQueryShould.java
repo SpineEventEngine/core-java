@@ -26,8 +26,8 @@ import io.spine.base.FieldFilter;
 import io.spine.core.Event;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.command.TestEventFactory;
-import io.spine.test.envelope.ProjectCreated;
-import io.spine.test.envelope.ProjectId;
+import io.spine.test.event.ProjectCreated;
+import io.spine.test.event.ProjectId;
 import org.junit.Test;
 
 import static io.spine.Identifier.newUuid;

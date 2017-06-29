@@ -45,7 +45,7 @@ import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.tenant.TenantAwareTest;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.test.command.CreateProject;
-import io.spine.test.envelope.ProjectCreated;
+import io.spine.test.command.event.ProjectCreated;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

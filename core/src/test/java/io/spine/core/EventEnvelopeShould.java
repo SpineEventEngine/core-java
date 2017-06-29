@@ -18,15 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.envelope;
+package io.spine.core;
 
 import com.google.protobuf.Message;
-import io.spine.core.Event;
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
-import io.spine.server.command.TestEventFactory;
-import io.spine.test.envelope.ProjectCreated;
-import io.spine.test.envelope.ProjectId;
+import io.spine.protobuf.AnyPacker;
+import io.spine.test.core.ProjectCreated;
+import io.spine.test.core.ProjectId;
 
 import static io.spine.Identifier.newUuid;
 
@@ -35,8 +32,6 @@ import static io.spine.Identifier.newUuid;
  */
 public class EventEnvelopeShould extends MessageEnvelopeShould<Event, EventEnvelope, EventClass> {
 
-    private final TestEventFactory eventFactory =
-            TestEventFactory.newInstance(EventEnvelopeShould.class);
 
     @Override
     protected Event outerObject() {
@@ -47,7 +42,15 @@ public class EventEnvelopeShould extends MessageEnvelopeShould<Event, EventEnvel
         final Message eventMessage = ProjectCreated.newBuilder()
                                                    .setProjectId(projectId)
                                                    .build();
-        return eventFactory.createEvent(eventMessage);
+
+        final EventId.Builder eventIdBuilder = EventId.newBuilder()
+                                                       .setValue(newUuid());
+        final Event event = Event.newBuilder()
+                                 .setId(eventIdBuilder)
+                                 .setMessage(AnyPacker.pack(eventMessage))
+                                 .setContext(EventContext.getDefaultInstance())
+                                 .build();
+        return event;
     }
 
     @Override
