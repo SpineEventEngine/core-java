@@ -129,7 +129,7 @@ public final class Identifier<I> {
      * <li>{@code String}
      * <li>{@code Long}
      * <li>{@code Integer}
-     * <li>A class implementing {@link Message Message}
+     * <li>A class implementing {@link Message}
      * </ul>
      *
      * <p>Consider using {@code Message}-based IDs if you want to have typed IDs in your code,
@@ -159,11 +159,10 @@ public final class Identifier<I> {
      * The type of the value wrapped into the returned instance is defined by the type
      * of the passed value:
      * <ul>
-     * <li>For classes implementing {@link Message Message} — the value
-     * of the message itself
-     * <li>For {@code String} — {@link StringValue StringValue}
-     * <li>For {@code Long} — {@link Int64Value Int64Value}
-     * <li>For {@code Integer} — {@link Int32Value Int32Value}
+     * <li>For classes implementing {@link Message} — the value of the message itself
+     * <li>For {@code String} — {@link StringValue}
+     * <li>For {@code Long} — {@link Int64Value}
+     * <li>For {@code Integer} — {@link Int32Value}
      * </ul>
      *
      * @param id  the value to wrap
@@ -183,9 +182,9 @@ public final class Identifier<I> {
      *
      * <p>Returned type depends on the type of the message wrapped into {@code Any}:
      * <ul>
-     * <li>{@code String} for unwrapped {@link StringValue StringValue}
-     * <li>{@code Integer} for unwrapped {@link Int32Value Int32Value}
-     * <li>{@code Long} for unwrapped {@link Int64Value Int64Value}
+     * <li>{@code String} for unwrapped {@link StringValue}
+     * <li>{@code Integer} for unwrapped {@link Int32Value}
+     * <li>{@code Long} for unwrapped {@link Int64Value}
      * <li>unwrapped {@code Message} instance if its type is none of the above
      * </ul>
      *
