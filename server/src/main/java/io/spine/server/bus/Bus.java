@@ -224,6 +224,11 @@ public abstract class Bus<T extends Message,
      */
     protected abstract Deque<BusFilter<E>> createFilterChain();
 
+    /**
+     * Obtains the {@link IdConverter} for this type of {@code Bus}.
+     *
+     * @return a function converting a {@link MessageEnvelope} to an ID
+     */
     protected abstract IdConverter<E> getIdConverter();
 
     /**
