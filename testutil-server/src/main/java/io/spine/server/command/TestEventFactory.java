@@ -30,12 +30,12 @@ import io.spine.core.CommandId;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.Version;
-import io.spine.protobuf.Wrapper;
 
 import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.protobuf.TypeConverter.toMessage;
 
 /**
  * The factory or producing events for tests.
@@ -53,7 +53,7 @@ public class TestEventFactory extends EventFactory {
         checkNotNull(testSuiteClass);
         checkNotNull(commandContext);
 
-        final StringValue producerId = Wrapper.forString(testSuiteClass.getName());
+        final StringValue producerId = toMessage(testSuiteClass.getName());
         final Builder builder = EventFactory.newBuilder()
                                             .setProducerId(producerId)
                                             .setCommandContext(commandContext);

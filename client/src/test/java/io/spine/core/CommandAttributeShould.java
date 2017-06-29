@@ -23,11 +23,11 @@ package io.spine.core;
 import com.google.protobuf.Empty;
 import com.google.protobuf.StringValue;
 import io.spine.client.TestActorRequestFactory;
-import io.spine.protobuf.Wrapper;
 import io.spine.time.Time;
 import org.junit.Before;
 import org.junit.Test;
 
+import static io.spine.protobuf.TypeConverter.toMessage;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -94,7 +94,7 @@ public class CommandAttributeShould {
     public void set_and_get_message_attribute() {
         final CommandAttribute<StringValue> attr = new CommandAttribute<StringValue>("str-val") {
         };
-        final StringValue value = Wrapper.forString(getClass().getName());
+        final StringValue value = toMessage(getClass().getName());
 
         assertSetGet(attr, value);
     }

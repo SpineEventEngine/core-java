@@ -22,11 +22,11 @@ package io.spine.change;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.StringValue;
-import io.spine.protobuf.Wrapper;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.change.Preconditions2.checkNotEqual;
 import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.protobuf.TypeConverter.toAny;
 
 /**
  * Utility class for working with string values in ValueMismatches.
@@ -91,11 +91,10 @@ public final class StringMismatch {
      * Creates a new instance of {@code ValueMismatch} with the passed values.
      */
     private static ValueMismatch of(String expected, String actual, String newValue, int version) {
-        final Wrapper<String, StringValue> wrapper = Wrapper.forString();
         final ValueMismatch.Builder builder = ValueMismatch.newBuilder()
-                                                           .setExpected(wrapper.pack(expected))
-                                                           .setActual(wrapper.pack(actual))
-                                                           .setNewValue(wrapper.pack(newValue))
+                                                           .setExpected(toAny(expected))
+                                                           .setActual(toAny(actual))
+                                                           .setNewValue(toAny(newValue))
                                                            .setVersion(version);
         return builder.build();
     }

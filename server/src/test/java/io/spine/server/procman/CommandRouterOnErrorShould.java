@@ -26,13 +26,14 @@ import io.grpc.stub.StreamObserver;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
-import io.spine.protobuf.Wrapper;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
 import org.junit.Test;
 
 import java.util.Set;
+
+import static io.spine.protobuf.TypeConverter.toMessage;
 
 /**
  * @author Alexaneder Yevsyukov
@@ -71,7 +72,7 @@ public class CommandRouterOnErrorShould extends AbstractCommandRouterShould<Comm
             }
         });
 
-        final StringValue sourceMessage = Wrapper.forString(getClass().getSimpleName());
+        final StringValue sourceMessage = toMessage(getClass().getSimpleName());
         final CommandContext sourceContext = getRequestFactory().createCommandContext();
 
         final CommandRouter router = createRouter(commandBus, sourceMessage, sourceContext);

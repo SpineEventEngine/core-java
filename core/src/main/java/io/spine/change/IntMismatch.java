@@ -26,7 +26,7 @@ import com.google.protobuf.Int32Value;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.change.Preconditions2.checkNotNullOrEqual;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.protobuf.Wrappers.pack;
+import static io.spine.protobuf.TypeConverter.toAny;
 
 /**
  * Utility class for working with {@code int} values in {@link ValueMismatch}es.
@@ -87,9 +87,9 @@ public final class IntMismatch {
      */
     public static ValueMismatch of(int expected, int actual, int newValue, int version) {
         final ValueMismatch.Builder builder = ValueMismatch.newBuilder()
-                                                           .setExpected(pack(expected))
-                                                           .setActual(pack(actual))
-                                                           .setNewValue(pack(newValue))
+                                                           .setExpected(toAny(expected))
+                                                           .setActual(toAny(actual))
+                                                           .setNewValue(toAny(newValue))
                                                            .setVersion(version);
         return builder.build();
     }

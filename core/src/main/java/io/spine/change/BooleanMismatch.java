@@ -25,7 +25,7 @@ import com.google.protobuf.BoolValue;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.protobuf.Wrappers.pack;
+import static io.spine.protobuf.TypeConverter.toAny;
 
 /**
  * Utility class for working with {@code boolean} values in {@link ValueMismatch}es.
@@ -72,9 +72,9 @@ public final class BooleanMismatch {
                                     boolean newValue,
                                     int version) {
         final ValueMismatch.Builder builder = ValueMismatch.newBuilder()
-                                                           .setExpected(pack(expected))
-                                                           .setActual(pack(actual))
-                                                           .setNewValue(pack(newValue))
+                                                           .setExpected(toAny(expected))
+                                                           .setActual(toAny(actual))
+                                                           .setNewValue(toAny(newValue))
                                                            .setVersion(version);
         return builder.build();
     }

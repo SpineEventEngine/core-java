@@ -33,7 +33,6 @@ import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Commands;
 import io.spine.protobuf.AnyPacker;
-import io.spine.protobuf.Wrapper;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
@@ -44,6 +43,7 @@ import java.util.List;
 import java.util.Set;
 
 import static io.spine.core.Commands.sameActorAndTenant;
+import static io.spine.protobuf.TypeConverter.toMessage;
 import static java.util.Collections.unmodifiableList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -66,11 +66,10 @@ public abstract class AbstractCommandRouterShould<T extends AbstractCommandRoute
     private T router;
 
     /** Command messages to be sent. */
-    private final List<Message> messages = ImmutableList.<Message>of(
-            Wrapper.forString("uno"),
-            Wrapper.forString("dos"),
-            Wrapper.forString("tres"),
-            Wrapper.forString("cuatro")
+    private final List<Message> messages = ImmutableList.of(toMessage("uno"),
+                                                            toMessage("dos"),
+                                                            toMessage("tres"),
+                                                            toMessage("cuatro")
     );
 
     abstract T createRouter(CommandBus commandBus, Message sourceMessage, CommandContext commandContext);
@@ -112,7 +111,7 @@ public abstract class AbstractCommandRouterShould<T extends AbstractCommandRoute
             }
         });
 
-        sourceMessage = Wrapper.forString(getClass().getSimpleName());
+        sourceMessage = toMessage(getClass().getSimpleName());
         sourceContext = requestFactory.createCommandContext();
 
         router = createRouter(commandBus, sourceMessage, sourceContext);

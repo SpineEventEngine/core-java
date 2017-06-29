@@ -27,14 +27,14 @@ import com.google.protobuf.StringValue;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
-import io.spine.protobuf.Wrapper;
+import io.spine.protobuf.TypeConverter;
 import io.spine.server.entity.given.Given;
 import io.spine.validate.StringValueVBuilder;
 import org.junit.Before;
 import org.junit.Test;
 
 import static io.spine.Identifier.newUuid;
-import static io.spine.protobuf.Wrapper.forInteger;
+import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.server.projection.ProjectionEventDispatcher.dispatch;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.Assert.assertEquals;
@@ -49,7 +49,7 @@ public class ProjectionShould {
         projection = Given.projectionOfClass(TestProjection.class)
                           .withId(newUuid())
                           .withVersion(1)
-                          .withState(Wrapper.forString("Initial state"))
+                          .withState(TypeConverter.<String, StringValue>toMessage("Initial state"))
                           .build();
     }
 
@@ -58,7 +58,7 @@ public class ProjectionShould {
         final String stringValue = newUuid();
 
         ProjectionTransaction<?, ?, ?> tx;
-        dispatch(projection, Wrapper.forString(stringValue), EventContext.getDefaultInstance());
+        dispatch(projection, toMessage(stringValue), EventContext.getDefaultInstance());
         assertTrue(projection.getState()
                              .getValue()
                              .contains(stringValue));
@@ -66,7 +66,7 @@ public class ProjectionShould {
         assertTrue(projection.isChanged());
 
         final Integer integerValue = 1024;
-        dispatch(projection, forInteger(integerValue), EventContext.getDefaultInstance());
+        dispatch(projection, toMessage(integerValue), EventContext.getDefaultInstance());
         assertTrue(projection.getState()
                              .getValue()
                              .contains(String.valueOf(integerValue)));
@@ -121,7 +121,7 @@ public class ProjectionShould {
             final String currentState = getState().getValue();
             final String result = currentState + (currentState.length() > 0 ? " + " : "") +
                     type + '(' + value + ')' + System.lineSeparator();
-            return Wrapper.forString(result);
+            return toMessage(result);
         }
     }
 }
