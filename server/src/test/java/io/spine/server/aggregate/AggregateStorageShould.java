@@ -90,7 +90,7 @@ public abstract class AggregateStorageShould
      * @return an empty storage instance
      */
     protected abstract <I> AggregateStorage<I> getStorage(Class<? extends I> idClass,
-                                                          Class<? extends Entity> aggregateClass);
+                                                          Class<? extends Aggregate<I, ?, ?>> aggregateClass);
 
     @Override
     protected AggregateStateRecord newStorageRecord() {

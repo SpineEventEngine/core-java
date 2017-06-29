@@ -53,7 +53,7 @@ public abstract class AbstractStorageShould<I,
                                             R extends Message,
                                             S extends AbstractStorage<I, R>> {
 
-    private S storage;
+    protected S storage;
 
     @Before
     public void setUpAbstractStorageTest() {
