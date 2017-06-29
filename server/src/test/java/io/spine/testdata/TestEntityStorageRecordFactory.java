@@ -24,7 +24,7 @@ import io.spine.server.entity.EntityRecord;
 import io.spine.test.Values;
 
 import static io.spine.Identifier.newUuid;
-import static io.spine.protobuf.Wrappers.pack;
+import static io.spine.protobuf.TypeConverter.toAny;
 
 /**
  * Creates {@link EntityRecord}s for tests.
@@ -40,7 +40,7 @@ public class TestEntityStorageRecordFactory {
     public static EntityRecord newEntityStorageRecord() {
         final EntityRecord.Builder builder =
                 EntityRecord.newBuilder()
-                         .setState(pack(newUuid()))
+                         .setState(toAny(newUuid()))
                          .setVersion(Values.newVersionWithNumber(5));
                             // set any non-default (non-zero) value
         return builder.build();

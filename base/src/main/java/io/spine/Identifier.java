@@ -23,15 +23,15 @@ package io.spine;
 import com.google.common.base.Optional;
 import com.google.common.reflect.TypeToken;
 import com.google.protobuf.Any;
+import com.google.protobuf.Int32Value;
+import com.google.protobuf.Int64Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.MessageOrBuilder;
 import com.google.protobuf.StringValue;
-import com.google.protobuf.UInt32Value;
-import com.google.protobuf.UInt64Value;
 import io.spine.annotation.Internal;
 import io.spine.protobuf.AnyPacker;
 import io.spine.protobuf.Messages;
-import io.spine.protobuf.Wrapper;
+import io.spine.protobuf.TypeConverter;
 import io.spine.string.Stringifier;
 import io.spine.string.StringifierRegistry;
 
@@ -129,7 +129,7 @@ public final class Identifier<I> {
      * <li>{@code String}
      * <li>{@code Long}
      * <li>{@code Integer}
-     * <li>A class implementing {@link Message Message}
+     * <li>A class implementing {@link Message}
      * </ul>
      *
      * <p>Consider using {@code Message}-based IDs if you want to have typed IDs in your code,
@@ -159,11 +159,10 @@ public final class Identifier<I> {
      * The type of the value wrapped into the returned instance is defined by the type
      * of the passed value:
      * <ul>
-     * <li>For classes implementing {@link Message Message} — the value
-     * of the message itself
-     * <li>For {@code String} — {@link StringValue StringValue}
-     * <li>For {@code Long} — {@link UInt64Value UInt64Value}
-     * <li>For {@code Integer} — {@link UInt32Value UInt32Value}
+     * <li>For classes implementing {@link Message} — the value of the message itself
+     * <li>For {@code String} — {@link StringValue}
+     * <li>For {@code Long} — {@link Int64Value}
+     * <li>For {@code Integer} — {@link Int32Value}
      * </ul>
      *
      * @param id  the value to wrap
@@ -183,9 +182,9 @@ public final class Identifier<I> {
      *
      * <p>Returned type depends on the type of the message wrapped into {@code Any}:
      * <ul>
-     * <li>{@code String} for unwrapped {@link StringValue StringValue}
-     * <li>{@code Integer} for unwrapped {@link UInt32Value UInt32Value}
-     * <li>{@code Long} for unwrapped {@link UInt64Value UInt64Value}
+     * <li>{@code String} for unwrapped {@link StringValue}
+     * <li>{@code Integer} for unwrapped {@link Int32Value}
+     * <li>{@code Long} for unwrapped {@link Int64Value}
      * <li>unwrapped {@code Message} instance if its type is none of the above
      * </ul>
      *
@@ -370,11 +369,6 @@ public final class Identifier<I> {
             }
 
             @Override
-            <I> Message toMessage(I id) {
-                return Wrapper.forString((String) id);
-            }
-
-            @Override
             String fromMessage(Message message) {
                 return ((StringValue) message).getValue();
             }
@@ -393,7 +387,7 @@ public final class Identifier<I> {
 
             @Override
             boolean matchMessage(Message message) {
-                return message instanceof UInt32Value;
+                return message instanceof Int32Value;
             }
 
             @Override
@@ -402,15 +396,8 @@ public final class Identifier<I> {
             }
 
             @Override
-            <I> Message toMessage(I id) {
-                return UInt32Value.newBuilder()
-                                  .setValue((Integer) id)
-                                  .build();
-            }
-
-            @Override
             Integer fromMessage(Message message) {
-                return ((UInt32Value) message).getValue();
+                return ((Int32Value) message).getValue();
             }
 
             @Override
@@ -427,7 +414,7 @@ public final class Identifier<I> {
 
             @Override
             boolean matchMessage(Message message) {
-                return message instanceof UInt64Value;
+                return message instanceof Int64Value;
             }
 
             @Override
@@ -436,15 +423,8 @@ public final class Identifier<I> {
             }
 
             @Override
-            <I> Message toMessage(I id) {
-                return UInt64Value.newBuilder()
-                                  .setValue((Long) id)
-                                  .build();
-            }
-
-            @Override
             Long fromMessage(Message message) {
-                return ((UInt64Value) message).getValue();
+                return ((Int64Value) message).getValue();
             }
 
             @Override
@@ -464,13 +444,13 @@ public final class Identifier<I> {
              * simple types that are used for packing simple Java types into {@code Any}.
              *
              * @return {@code true} if the message is neither {@code StringValue}, nor
-             *         {@code UInt32Value}, nor {@code UInt64Value}
+             *         {@code Int32Value}, nor {@code Int64Value}
              */
             @Override
             boolean matchMessage(Message message) {
                 return !(message instanceof StringValue
-                        || message instanceof UInt32Value
-                        || message instanceof UInt64Value);
+                        || message instanceof Int32Value
+                        || message instanceof Int64Value);
             }
 
             @Override
@@ -511,7 +491,10 @@ public final class Identifier<I> {
 
         abstract <I> boolean matchClass(Class<I> idClass);
 
-        abstract <I> Message toMessage(I id);
+        <I> Message toMessage(I id) {
+            final Message message = TypeConverter.toMessage(id);
+            return message;
+        }
 
         abstract Object fromMessage(Message message);
 

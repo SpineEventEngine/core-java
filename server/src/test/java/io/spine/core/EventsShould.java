@@ -28,7 +28,6 @@ import com.google.protobuf.Timestamp;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.given.GivenEvent;
-import io.spine.protobuf.Wrapper;
 import io.spine.server.command.EventFactory;
 import io.spine.string.Stringifiers;
 import io.spine.test.Tests;
@@ -50,7 +49,7 @@ import static io.spine.core.Events.getProducer;
 import static io.spine.core.Events.getTimestamp;
 import static io.spine.core.Events.sort;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.protobuf.Wrapper.forBoolean;
+import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Values.newUuidValue;
 import static org.junit.Assert.assertEquals;
@@ -74,17 +73,17 @@ public class EventsShould {
     private Event event;
     private EventContext context;
 
-    private final StringValue stringValue = Wrapper.forString(newUuid());
-    private final BoolValue boolValue = forBoolean(true);
+    private final StringValue stringValue = toMessage(newUuid());
+    private final BoolValue boolValue = toMessage(true);
     @SuppressWarnings("MagicNumber")
-    private final DoubleValue doubleValue = Wrapper.forDouble(10.1);
+    private final DoubleValue doubleValue = toMessage(10.1);
 
     @Before
     public void setUp() {
         final TestActorRequestFactory requestFactory =
                 TestActorRequestFactory.newInstance(getClass());
         final Command cmd = requestFactory.command().create(Time.getCurrentTime());
-        final StringValue producerId = Wrapper.forString(getClass().getSimpleName());
+        final StringValue producerId = toMessage(getClass().getSimpleName());
         EventFactory eventFactory = EventFactory.newBuilder()
                                                 .setCommandId(Commands.generateId())
                                                 .setProducerId(producerId)
@@ -193,7 +192,7 @@ public class EventsShould {
     @Test
     public void obtain_type_name_of_event() {
         final Command command = requestFactory.command().create(newUuidValue());
-        final StringValue producerId = Wrapper.forString(getClass().getSimpleName());
+        final StringValue producerId = toMessage(getClass().getSimpleName());
         final EventFactory ef = EventFactory.newBuilder()
                                             .setCommandId(Commands.generateId())
                                             .setProducerId(producerId)

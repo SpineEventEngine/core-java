@@ -23,11 +23,11 @@ package io.spine.server.entity;
 import com.google.common.testing.SerializableTester;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.StringValue;
-import io.spine.protobuf.Wrapper;
 import io.spine.server.BoundedContext;
 import org.junit.Before;
 import org.junit.Test;
 
+import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.server.entity.DefaultEntityStorageConverter.forAllFields;
 import static org.junit.Assert.assertEquals;
 
@@ -73,7 +73,8 @@ public class DefaultEntityStorageConverterShould {
 
     @Test
     public void convert_forward_and_backward() throws Exception {
-        final TestEntity entity = createEntity(100L, Wrapper.forString("back and forth"));
+        final StringValue entityState = toMessage("back and forth");
+        final TestEntity entity = createEntity(100L, entityState);
 
         final EntityRecord out = converter.convert(entity);
         final TestEntity back = converter.reverse()

@@ -24,9 +24,10 @@ import com.google.protobuf.Descriptors.FieldDescriptor;
 import io.spine.base.FieldPath;
 import io.spine.option.OptionsProto;
 import io.spine.option.PatternOption;
-import io.spine.protobuf.Wrapper;
 
 import java.util.List;
+
+import static io.spine.protobuf.TypeConverter.toAny;
 
 /**
  * Validates fields of type {@link String}.
@@ -81,8 +82,7 @@ class StringFieldValidator extends FieldValidator<String> {
                                    .setMsgFormat(msg)
                                    .addParam(regex)
                                    .setFieldPath(getFieldPath())
-                                   .setFieldValue(Wrapper.forString()
-                                                         .pack(fieldValue))
+                                   .setFieldValue(toAny(fieldValue))
                                    .build();
         return violation;
     }

@@ -25,7 +25,6 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.spine.core.UserId;
-import io.spine.protobuf.Wrapper;
 import io.spine.server.event.Given;
 import io.spine.server.event.enrich.EventEnricher.SameTransition;
 import io.spine.test.Tests;
@@ -35,6 +34,7 @@ import org.junit.Test;
 
 import javax.annotation.Nullable;
 
+import static io.spine.protobuf.TypeConverter.toMessage;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -56,7 +56,7 @@ public class EventEnricherBuilderShould {
                 if (input == null) {
                     return null;
                 }
-                return Wrapper.forString(Timestamps.toString(input));
+                return toMessage(Timestamps.toString(input));
             }
         };
         this.fieldEnricher = FieldEnricher.newInstance(Timestamp.class, StringValue.class, function);

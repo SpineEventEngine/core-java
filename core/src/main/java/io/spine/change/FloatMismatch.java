@@ -26,7 +26,7 @@ import com.google.protobuf.FloatValue;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.change.Preconditions2.checkNotNullOrEqual;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.protobuf.Wrappers.pack;
+import static io.spine.protobuf.TypeConverter.toAny;
 
 /**
  * Utility class for working with {@code float} values in {@link ValueMismatch}es.
@@ -86,9 +86,9 @@ public final class FloatMismatch {
      */
     public static ValueMismatch of(float expected, float actual, float newValue, int version) {
         final ValueMismatch.Builder builder = ValueMismatch.newBuilder()
-                                                           .setExpected(pack(expected))
-                                                           .setActual(pack(actual))
-                                                           .setNewValue(pack(newValue))
+                                                           .setExpected(toAny(expected))
+                                                           .setActual(toAny(actual))
+                                                           .setNewValue(toAny(newValue))
                                                            .setVersion(version);
         return builder.build();
     }
