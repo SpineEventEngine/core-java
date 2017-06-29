@@ -21,10 +21,10 @@
 package io.spine.server.event.error;
 
 import com.google.protobuf.StringValue;
-import io.spine.protobuf.Wrapper;
 import io.spine.server.event.UnsupportedEventException;
 import org.junit.Test;
 
+import static io.spine.protobuf.TypeConverter.toMessage;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -35,7 +35,7 @@ public class UnsupportedEventExceptionShould {
 
     @Test
     public void have_msg_and_error() {
-        final StringValue msg = Wrapper.forString("");
+        final StringValue msg = toMessage("");
 
         final UnsupportedEventException exception = new UnsupportedEventException(msg);
 

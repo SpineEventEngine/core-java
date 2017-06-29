@@ -31,7 +31,6 @@ import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
 import io.spine.core.Version;
-import io.spine.protobuf.Wrapper;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
@@ -54,6 +53,7 @@ import java.util.List;
 import java.util.Set;
 
 import static io.spine.Identifier.newUuid;
+import static io.spine.protobuf.TypeConverter.toMessage;
 
 /**
  * @author Dmytro Dashenkov
@@ -81,7 +81,7 @@ class Given {
                                                           .setProjectId(ProjectId.newBuilder()
                                                                                  .setId("12345AD0"))
                                                           .build();
-        final StringValue producerId = Wrapper.forString(Given.class.getSimpleName());
+        final StringValue producerId = toMessage(Given.class.getSimpleName());
         final EventFactory eventFactory = EventFactory.newBuilder()
                                                       .setCommandId(cmd.getId())
                                                       .setProducerId(producerId)

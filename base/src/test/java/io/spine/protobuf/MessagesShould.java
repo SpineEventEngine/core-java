@@ -28,7 +28,7 @@ import io.spine.time.Time;
 import org.junit.Test;
 
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.protobuf.Wrappers.pack;
+import static io.spine.protobuf.TypeConverter.toAny;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -45,7 +45,7 @@ public class MessagesShould {
 
     @Test
     public void return_the_same_any_from_toAny() {
-        final Any any = pack(getClass().getSimpleName());
+        final Any any = toAny(getClass().getSimpleName());
         assertSame(any, AnyPacker.pack(any));
     }
 

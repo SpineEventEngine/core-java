@@ -30,7 +30,6 @@ import com.google.protobuf.Timestamp;
 import io.spine.base.FieldPath;
 import io.spine.option.OptionsProto;
 import io.spine.option.Time;
-import io.spine.protobuf.Wrapper;
 import io.spine.test.validate.msg.CustomMessageRequiredByteStringFieldValue;
 import io.spine.test.validate.msg.CustomMessageRequiredEnumFieldValue;
 import io.spine.test.validate.msg.CustomMessageRequiredMsgFieldValue;
@@ -74,6 +73,7 @@ import static com.google.common.collect.ImmutableList.copyOf;
 import static com.google.protobuf.util.Timestamps.add;
 import static com.google.protobuf.util.Timestamps.subtract;
 import static io.spine.Identifier.newUuid;
+import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.test.Verify.assertSize;
 import static io.spine.time.Time.getCurrentTime;
 import static java.lang.String.format;
@@ -876,7 +876,7 @@ public class MessageValidatorShould {
     }
 
     private static StringValue newStringValue() {
-        return Wrapper.forString(newUuid());
+        return toMessage(newUuid());
     }
 
     private static ByteString newByteString() {

@@ -25,13 +25,13 @@ import io.spine.core.TenantId;
 import io.spine.core.UserId;
 import io.spine.core.Version;
 import io.spine.core.Versions;
-import io.spine.protobuf.Wrapper;
 import io.spine.time.Time;
 
 import java.util.concurrent.ThreadLocalRandom;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.Identifier.newUuid;
+import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.validate.Validate.checkNotEmptyOrBlank;
 
 /**
@@ -110,7 +110,7 @@ public class Values {
      * but do not want to resort to {@code Timestamp} via {@code Timestamps#getCurrentTime()}.
      */
     public static StringValue newUuidValue() {
-        return Wrapper.forString(newUuid());
+        return toMessage(newUuid());
     }
 
     /**

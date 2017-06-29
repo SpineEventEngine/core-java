@@ -35,6 +35,8 @@ import io.spine.option.OptionsProto;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import static io.spine.protobuf.TypeConverter.toAny;
+
 /**
  * Validates fields of number types (protobuf: int32, double, etc).
  *
@@ -87,7 +89,10 @@ abstract class NumberFieldValidator<V extends Number & Comparable<V>> extends Fi
      * ({@link com.google.protobuf.DoubleValue DoubleValue},
      * {@link com.google.protobuf.Int32Value Int32Value}, etc) and {@link Any}.
      */
-    protected abstract Any wrap(V value);
+    protected Any wrap(V value) {
+        final Any result = toAny(value);
+        return result;
+    }
 
     @Override
     protected List<ConstraintViolation> validate() {
