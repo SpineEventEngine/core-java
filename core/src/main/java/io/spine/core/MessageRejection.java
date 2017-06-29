@@ -33,21 +33,18 @@ import io.spine.base.Error;
  *     <li>an actor request (query, topic or subscription).
  * </ul>
  *
- * <p>This interface is designed to be implemented in {@link Throwable} types only.
- *
  * @author Dmytro Dashenkov
  */
 @Internal
 public interface MessageRejection {
 
     /**
-     * Converts this {@link Exception} into an {@link Error io.spine.base.Error}.
+     * Converts this {@code MessageRejection} into an {@link Error io.spine.base.Error}.
      */
     Error asError();
 
     /**
-     * Obtains the instance of this error whose compile-time type is
-     * {@link Throwable java.lang.Throwable}.
+     * Converts this {@code MessageRejection} into a {@link Throwable java.lang.Throwable}.
      */
     Throwable asThrowable();
 }
