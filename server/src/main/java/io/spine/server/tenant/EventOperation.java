@@ -21,7 +21,9 @@
 package io.spine.server.tenant;
 
 import io.spine.annotation.Internal;
-import io.spine.base.Event;
+import io.spine.core.Event;
+
+import static io.spine.core.Events.getTenantId;
 
 /**
  * A tenant-aware operation performed in relation to an event.
@@ -42,10 +44,7 @@ public abstract class EventOperation extends TenantAwareOperation {
      * @param event the event from which to obtain the tenant ID
      */
     protected EventOperation(Event event) {
-        super(event.getContext()
-                   .getCommandContext()
-                   .getActorContext()
-                   .getTenantId());
+        super(getTenantId(event));
         this.event = event;
     }
 

@@ -25,12 +25,14 @@ import com.google.common.collect.Queues;
 import com.google.common.util.concurrent.SettableFuture;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
-import io.spine.base.ActorContext;
-import io.spine.base.Command;
-import io.spine.base.CommandContext;
-import io.spine.base.Response;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.CommandFactory;
+import io.spine.core.ActorContext;
+import io.spine.core.Command;
+import io.spine.core.CommandContext;
+import io.spine.core.CommandId;
+import io.spine.core.IsSent;
+import io.spine.core.Status;
 import io.spine.server.commandbus.CommandBus;
 
 import java.util.Iterator;
@@ -39,6 +41,8 @@ import java.util.Queue;
 import java.util.concurrent.ExecutionException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+import static io.spine.protobuf.AnyPacker.unpack;
 
 /**
  * Abstract base for command routers.
@@ -61,16 +65,6 @@ abstract class AbstractCommandRouter<T extends AbstractCommandRouter> {
      * Command messages for commands that we post during routing.
      */
     private final Queue<Message> queue;
-
-    /**
-     * The future for waiting until the {@link CommandBus#post posting of the command} completes.
-     */
-    private final SettableFuture<Void> finishFuture = SettableFuture.create();
-
-    /**
-     * The observer for posting commands.
-     */
-    private final StreamObserver<Response> responseObserver = newResponseObserver(finishFuture);
 
     AbstractCommandRouter(CommandBus commandBus,
                           Message commandMessage,
@@ -142,21 +136,24 @@ abstract class AbstractCommandRouter<T extends AbstractCommandRouter> {
      */
     protected Command route(Message message) {
         final Command command = produceCommand(message);
-        commandBus.post(command, responseObserver);
+        final SettableFuture<IsSent> finishFuture = SettableFuture.create();
+        final StreamObserver<IsSent> observer = newAckingObserver(finishFuture);
+        commandBus.post(command, observer);
+        final IsSent isSent;
         // Wait till the call is completed.
         try {
-            finishFuture.get();
+            isSent = finishFuture.get();
         } catch (InterruptedException | ExecutionException e) {
             throw new IllegalStateException(e);
         }
+        checkSent(command, isSent);
         return command;
     }
 
     private Command produceCommand(Message commandMessage) {
         final CommandContext sourceContext = source.getContext();
         final CommandFactory commandFactory = commandFactory(sourceContext);
-        final Command result = commandFactory
-                .createBasedOnContext(commandMessage, sourceContext);
+        final Command result = commandFactory.createBasedOnContext(commandMessage, sourceContext);
         return result;
     }
 
@@ -171,29 +168,29 @@ abstract class AbstractCommandRouter<T extends AbstractCommandRouter> {
         return result;
     }
 
-    private static StreamObserver<Response> newResponseObserver(
-            final SettableFuture<Void> finishFuture) {
-        return new StreamObserver<Response>() {
+    private static StreamObserver<IsSent> newAckingObserver(
+            final SettableFuture<IsSent> finishFuture) {
+        return new StreamObserver<IsSent>() {
             @Override
-            public void onNext(Response response) {
-                // Do nothing. It's just a confirmation of successful post to Command Bus.
+            public void onNext(IsSent value) {
+                finishFuture.set(value);
             }
 
             @Override
-            public void onError(Throwable throwable) {
-                finishFuture.setException(throwable);
+            public void onError(Throwable t) {
+                finishFuture.setException(t);
             }
 
             @Override
             public void onCompleted() {
-                finishFuture.set(null);
+                // Do nothing. It's just a confirmation of successful post to Command Bus.
             }
         };
     }
 
     /**
-     * Creates a {@code CommandFactory} using the {@linkplain io.spine.base.UserId actor},
-     * {@linkplain io.spine.base.TenantId tenant ID} and {@linkplain io.spine.time.ZoneOffset
+     * Creates a {@code CommandFactory} using the {@linkplain io.spine.core.UserId actor},
+     * {@linkplain io.spine.core.TenantId tenant ID} and {@linkplain io.spine.time.ZoneOffset
      * zone offset} from the given command context.
      */
     private static CommandFactory commandFactory(CommandContext sourceContext) {
@@ -210,5 +207,18 @@ abstract class AbstractCommandRouter<T extends AbstractCommandRouter> {
     private static Command asCommand(Message message, CommandContext context) {
         final Command command = commandFactory(context).createWithContext(message, context);
         return command;
+    }
+
+    private static void checkSent(Command command, IsSent isSent) {
+        final Status status = isSent.getStatus();
+        final CommandId routedCommandId = unpack(isSent.getMessageId());
+        final CommandId commandId = command.getId();
+        checkState(commandId.equals(routedCommandId),
+                   "Unexpected command posted. Intending (%s) but was (%s).",
+                   commandId,
+                   routedCommandId);
+        checkState(status.getStatusCase() == Status.StatusCase.OK,
+                   "Command posting failed with status: %s.",
+                   status);
     }
 }

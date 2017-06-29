@@ -22,12 +22,14 @@ package io.spine.server.event;
 
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
-import io.spine.base.Event;
-import io.spine.base.EventId;
-import io.spine.base.Events;
+import io.spine.core.Event;
+import io.spine.core.EventEnvelope;
+import io.spine.core.EventId;
+import io.spine.core.Events;
 import io.spine.server.entity.AbstractEntity;
 import io.spine.type.TypeName;
 
+import javax.annotation.Nullable;
 import java.util.Comparator;
 
 /**
@@ -57,6 +59,10 @@ public class EEntity extends AbstractEntity<EventId, Event> {
      */
     static final String TYPE_COLUMN = "type";
 
+    /** Cached value of the event message type name. */
+    @Nullable
+    private TypeName typeName;
+
     /**
      * Compares event entities by timestamps of events.
      */
@@ -81,6 +87,13 @@ public class EEntity extends AbstractEntity<EventId, Event> {
     }
 
     /**
+     * Returns comparator which sorts event entities chronologically.
+     */
+    static Comparator<EEntity> comparator() {
+        return comparator;
+    }
+
+    /**
      * Retrieves the time of the event occurrence.
      *
      * <p>This method represents an Entity Column {@code created}.
@@ -102,14 +115,10 @@ public class EEntity extends AbstractEntity<EventId, Event> {
      * @see #TYPE_COLUMN
      */
     public String getType() {
-        return TypeName.ofEvent(getState())
-                       .value();
-    }
-
-    /**
-     * Returns comparator which sorts event entities chronologically.
-     */
-    static Comparator<EEntity> comparator() {
-        return comparator;
+        if (typeName == null) {
+            typeName = EventEnvelope.of(getState())
+                                    .getTypeName();
+        }
+        return typeName.value();
     }
 }

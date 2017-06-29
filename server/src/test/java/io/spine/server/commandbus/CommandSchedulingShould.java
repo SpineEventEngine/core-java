@@ -22,11 +22,11 @@ package io.spine.server.commandbus;
 
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
-import io.spine.base.Command;
-import io.spine.base.CommandContext;
-import io.spine.envelope.CommandEnvelope;
+import io.spine.client.TestActorRequestFactory;
+import io.spine.core.Command;
+import io.spine.core.CommandContext;
+import io.spine.core.CommandEnvelope;
 import io.spine.protobuf.Wrapper;
-import io.spine.test.TestActorRequestFactory;
 import io.spine.test.Tests;
 import io.spine.time.Durations2;
 import org.junit.Test;
@@ -36,12 +36,12 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static io.spine.base.CommandStatus.SCHEDULED;
-import static io.spine.base.Identifier.newUuid;
+import static io.spine.Identifier.newUuid;
+import static io.spine.core.CommandStatus.SCHEDULED;
 import static io.spine.server.commandbus.CommandScheduler.setSchedule;
-import static io.spine.server.commandbus.Given.Command.addTask;
-import static io.spine.server.commandbus.Given.Command.createProject;
-import static io.spine.server.commandbus.Given.Command.startProject;
+import static io.spine.server.commandbus.Given.ACommand.addTask;
+import static io.spine.server.commandbus.Given.ACommand.createProject;
+import static io.spine.server.commandbus.Given.ACommand.startProject;
 import static io.spine.test.TimeTests.Past.minutesAgo;
 import static io.spine.time.Durations2.minutes;
 import static io.spine.time.Time.getCurrentTime;
@@ -69,10 +69,10 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
         commandBus.register(createProjectHandler);
         final Command cmd = createProject(/*delay=*/minutes(1));
 
-        commandBus.post(cmd, responseObserver);
+        commandBus.post(cmd, observer);
 
         verify(commandStore).store(cmd, SCHEDULED);
-        responseObserver.assertResponseOkAndCompleted();
+        checkResult(cmd);
     }
 
     @Test
@@ -80,7 +80,7 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
         commandBus.register(createProjectHandler);
         final Command cmd = createProject(/*delay=*/minutes(1));
 
-        commandBus.post(cmd, responseObserver);
+        commandBus.post(cmd, observer);
 
         verify(scheduler).schedule(cmd);
     }
@@ -89,10 +89,11 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
     public void not_schedule_command_if_no_scheduling_options_are_set() {
         commandBus.register(new CreateProjectHandler());
 
-        commandBus.post(createProject(), responseObserver);
+        final Command command = createProject();
+        commandBus.post(command, observer);
 
         verify(scheduler, never()).schedule(createProject());
-        responseObserver.assertResponseOkAndCompleted();
+        checkResult(command);
     }
 
     @Test

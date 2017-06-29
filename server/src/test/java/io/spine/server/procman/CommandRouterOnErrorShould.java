@@ -21,19 +21,18 @@
 package io.spine.server.procman;
 
 import com.google.protobuf.Message;
+import com.google.protobuf.StringValue;
 import io.grpc.stub.StreamObserver;
-import io.spine.base.Command;
-import io.spine.base.CommandContext;
-import io.spine.base.Response;
+import io.spine.core.CommandClass;
+import io.spine.core.CommandContext;
+import io.spine.core.CommandEnvelope;
+import io.spine.protobuf.Wrapper;
+import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandBus;
+import io.spine.server.commandbus.CommandDispatcher;
 import org.junit.Test;
-import org.mockito.ArgumentMatchers;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
+import java.util.Set;
 
 /**
  * @author Alexaneder Yevsyukov
@@ -43,27 +42,41 @@ public class CommandRouterOnErrorShould extends AbstractCommandRouterShould<Comm
     /**
      * Creates a router with mocked {@code CommandBus} which always calls
      * {@link StreamObserver#onError(Throwable) StreamObserver.onError()} when
-     * {@link CommandBus#post(Command, StreamObserver) CommandBus.post()} is invoked.
+     * {@link CommandBus#post(Message, StreamObserver) CommandBus.post()} is invoked.
      */
     @Override
-    CommandRouter createRouter(CommandBus ignored, Message sourceMessage, CommandContext commandContext) {
-        final CommandBus mockBus = mock(CommandBus.class);
-
-        doAnswer(new Answer() {
-            @SuppressWarnings("ReturnOfNull") // is OK for Answer
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                final StreamObserver<Response> observer = invocation.getArgument(1);
-                observer.onError(new RuntimeException("simulate error"));
-                return null;
-            }
-        }).when(mockBus).post(any(Command.class), ArgumentMatchers.<StreamObserver<Response>>any());
-
-        return new CommandRouter(mockBus, sourceMessage, commandContext);
+    CommandRouter createRouter(CommandBus commandBus,
+                               Message sourceMessage,
+                               CommandContext commandContext) {
+        return new CommandRouter(commandBus, sourceMessage, commandContext);
     }
 
     @Test(expected = IllegalStateException.class)
     public void throw_IllegalStateException_when_caught_error_when_posting() {
-        router().routeAll();
+        final BoundedContext boundedContext = BoundedContext.newBuilder()
+                                                            .build();
+        final CommandBus commandBus = boundedContext.getCommandBus();
+
+        // Register dispatcher for `StringValue` message type.
+        // Fails each time of dispatch().
+        commandBus.register(new CommandDispatcher() {
+            @Override
+            public Set<CommandClass> getMessageClasses() {
+                return CommandClass.setOf(StringValue.class);
+            }
+
+            @Override
+            public void dispatch(CommandEnvelope envelope) {
+                throw new IllegalStateException("I am faulty!");
+            }
+        });
+
+        final StringValue sourceMessage = Wrapper.forString(getClass().getSimpleName());
+        final CommandContext sourceContext = getRequestFactory().createCommandContext();
+
+        final CommandRouter router = createRouter(commandBus, sourceMessage, sourceContext);
+        router.addAll(getMessages());
+
+        router.routeAll();
     }
 }

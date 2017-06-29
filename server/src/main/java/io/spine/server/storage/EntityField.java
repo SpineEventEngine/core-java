@@ -23,7 +23,7 @@ package io.spine.server.storage;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import io.spine.base.Event;
+import io.spine.core.Event;
 import io.spine.type.TypeUrl;
 
 /**
@@ -33,7 +33,7 @@ import io.spine.type.TypeUrl;
  * <ul>
  *     <li>Storing custom {@link io.spine.server.entity.Entity Entity} state fields.
  *     <li>Storing custom {@link Event Event} and
- *                 {@link io.spine.base.Command Command} messages fields.
+ *                 {@link io.spine.core.Command Command} messages fields.
  * </ul>
  *
  * @author Dmytro Dashenkov
@@ -85,7 +85,7 @@ public enum EntityField implements StorageField {
      * {@linkplain io.spine.server.projection.Projection Projections}, etc.) do have this field.
      *
      * @see io.spine.server.entity.VersionableEntity
-     * @see io.spine.base.Version
+     * @see io.spine.core.Version
      */
     version
 }

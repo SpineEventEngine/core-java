@@ -22,13 +22,20 @@ package io.spine.server.commandbus;
 
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
-import io.spine.base.ActorContext;
-import io.spine.base.Command;
-import io.spine.base.CommandContext;
-import io.spine.base.CommandValidationError;
 import io.spine.base.Error;
-import io.spine.base.TenantId;
 import io.spine.client.ActorRequestFactory;
+import io.spine.client.TestActorRequestFactory;
+import io.spine.core.ActorContext;
+import io.spine.core.Command;
+import io.spine.core.CommandContext;
+import io.spine.core.CommandEnvelope;
+import io.spine.core.CommandId;
+import io.spine.core.CommandValidationError;
+import io.spine.core.IsSent;
+import io.spine.core.Status;
+import io.spine.core.TenantId;
+import io.spine.grpc.StreamObservers;
+import io.spine.grpc.StreamObservers.MemoizingObserver;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.commandstore.CommandStore;
@@ -37,19 +44,32 @@ import io.spine.server.failure.FailureBus;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.tenant.TenantAwareTest;
 import io.spine.server.tenant.TenantIndex;
-import io.spine.test.TestActorRequestFactory;
 import io.spine.test.command.CreateProject;
-import io.spine.test.command.event.ProjectCreated;
+import io.spine.test.envelope.ProjectCreated;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 
-import static io.spine.base.CommandStatus.SCHEDULED;
-import static io.spine.base.CommandValidationError.INVALID_COMMAND;
-import static io.spine.server.commandbus.Given.Command.createProject;
+import java.util.List;
+
+import static com.google.common.collect.Lists.newArrayList;
+import static io.spine.core.CommandStatus.SCHEDULED;
+import static io.spine.core.CommandValidationError.INVALID_COMMAND;
+import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.server.commandbus.CommandScheduler.setSchedule;
+import static io.spine.server.commandbus.Given.ACommand.createProject;
 import static io.spine.test.Values.newTenantUuid;
+import static io.spine.test.Verify.assertContainsAll;
+import static io.spine.test.Verify.assertSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 /**
  * Abstract base for test suites of {@code CommandBus}.
@@ -70,7 +90,7 @@ public abstract class AbstractCommandBusTestSuite {
     protected FailureBus failureBus;
     protected ExecutorCommandScheduler scheduler;
     protected CreateProjectHandler createProjectHandler;
-    protected TestResponseObserver responseObserver;
+    protected MemoizingObserver<IsSent> observer;
 
     /**
      * A public constructor for derived test cases.
@@ -89,19 +109,30 @@ public abstract class AbstractCommandBusTestSuite {
         return invalidCmd;
     }
 
-    static <E extends CommandException>
-    void checkCommandError(Throwable throwable,
-                           CommandValidationError validationError,
-                           Class<E> exceptionClass,
-                           Command cmd) {
-        final Throwable cause = throwable.getCause();
-        assertEquals(exceptionClass, cause.getClass());
-        @SuppressWarnings("unchecked")
-        final E exception = (E) cause;
-        assertEquals(cmd, exception.getCommand());
-        final Error error = exception.getError();
-        assertEquals(CommandValidationError.getDescriptor()
-                                           .getFullName(), error.getType());
+    static void checkCommandError(IsSent sendingResult,
+                                  CommandValidationError validationError,
+                                  Class<? extends CommandException> exceptionClass,
+                                  Command cmd) {
+        checkCommandError(sendingResult,
+                          validationError,
+                          exceptionClass.getCanonicalName(),
+                          exceptionClass,
+                          cmd);
+    }
+
+    static void checkCommandError(IsSent sendingResult,
+                                  CommandValidationError validationError,
+                                  String errorType,
+                                  Class<? extends CommandException> exceptionClass,
+                                  Command cmd) {
+        final Status status = sendingResult.getStatus();
+        assertEquals(status.getStatusCase(), Status.StatusCase.ERROR);
+        final CommandId commandId = cmd.getId();
+        assertEquals(commandId, unpack(sendingResult.getMessageId()));
+
+        final Error error = status.getError();
+        assertEquals(errorType,
+                     error.getType());
         assertEquals(validationError.getNumber(), error.getCode());
         assertFalse(error.getMessage()
                          .isEmpty());
@@ -165,7 +196,7 @@ public abstract class AbstractCommandBusTestSuite {
                             ? TestActorRequestFactory.newInstance(getClass(), newTenantUuid())
                             : TestActorRequestFactory.newInstance(getClass());
         createProjectHandler = new CreateProjectHandler();
-        responseObserver = new TestResponseObserver();
+        observer = StreamObservers.memoizingObserver();
     }
 
     @After
@@ -176,11 +207,53 @@ public abstract class AbstractCommandBusTestSuite {
         eventBus.close();
     }
 
+    @Test
+    public void post_commands_in_bulk() {
+        final Command first = newCommand();
+        final Command second = newCommand();
+        final List<Command> commands = newArrayList(first, second);
+
+        // Some derived test suite classes may register the handler in setUp().
+        // This prevents the repeating registration (which is an illegal operation).
+        commandBus.unregister(createProjectHandler);
+        commandBus.register(createProjectHandler);
+
+        final CommandBus spy = spy(commandBus);
+        spy.post(commands, StreamObservers.<IsSent>memoizingObserver());
+
+        @SuppressWarnings("unchecked")
+        final ArgumentCaptor<Iterable<Command>> storingCaptor = forClass(Iterable.class);
+        verify(spy).store(storingCaptor.capture());
+        final Iterable<Command> storingArgs = storingCaptor.getValue();
+        assertSize(commands.size(), storingArgs);
+        assertContainsAll(storingArgs, first, second);
+
+        final ArgumentCaptor<CommandEnvelope> postingCaptor = forClass(CommandEnvelope.class);
+        verify(spy, times(2)).doPost(postingCaptor.capture());
+        final List<CommandEnvelope> postingArgs = postingCaptor.getAllValues();
+        assertSize(commands.size(), postingArgs);
+        assertEquals(commands.get(0), postingArgs.get(0).getCommand());
+        assertEquals(commands.get(1), postingArgs.get(1).getCommand());
+
+        commandBus.unregister(createProjectHandler);
+    }
+
+    protected Command newCommand() {
+        return Given.ACommand.createProject();
+    }
+
+    protected void checkResult(Command cmd) {
+        assertNull(observer.getError());
+        assertTrue(observer.isCompleted());
+        final CommandId commandId = unpack(observer.firstResponse().getMessageId());
+        assertEquals(cmd.getId(), commandId);
+    }
+
     void storeAsScheduled(Iterable<Command> commands,
                           Duration delay,
                           Timestamp schedulingTime) {
         for (Command cmd : commands) {
-            final Command cmdWithSchedule = CommandScheduler.setSchedule(cmd, delay, schedulingTime);
+            final Command cmdWithSchedule = setSchedule(cmd, delay, schedulingTime);
             commandStore.store(cmdWithSchedule, SCHEDULED);
         }
     }

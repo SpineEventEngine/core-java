@@ -26,8 +26,8 @@ import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Experimental;
 import io.spine.annotation.Internal;
-import io.spine.base.Event;
-import io.spine.base.Response;
+import io.spine.core.Event;
+import io.spine.core.Response;
 import io.spine.option.EntityOption.Visibility;
 import io.spine.server.command.EventFactory;
 import io.spine.server.commandbus.CommandBus;
@@ -54,7 +54,7 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.grpc.StreamObservers.ack;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static io.spine.validate.Validate.checkNameNotEmptyOrBlank;
 import static java.lang.String.format;
@@ -240,11 +240,14 @@ public final class BoundedContext
     @Override
     public void notify(IntegrationEvent integrationEvent,
                        StreamObserver<Response> responseObserver) {
-        final Message eventMsg = unpack(integrationEvent.getMessage());
-        final boolean isValid = eventBus.validate(eventMsg, responseObserver);
+        final Event event = EventFactory.toEvent(integrationEvent);
+        final Optional<Throwable> violation = eventBus.validate(event);
+        final boolean isValid = !violation.isPresent();
         if (isValid) {
-            final Event event = EventFactory.toEvent(integrationEvent);
             eventBus.post(event);
+            ack(responseObserver);
+        } else {
+            responseObserver.onError(violation.get());
         }
     }
 
@@ -489,7 +492,7 @@ public final class BoundedContext
 
         /**
          * Ensures that the value of the passed flag is equal to the value of
-         * the {@link BoundedContext.Builder#multitenant}.
+         * the {@link Builder#multitenant}.
          *
          * @throws IllegalStateException if the flags values do not match
          */

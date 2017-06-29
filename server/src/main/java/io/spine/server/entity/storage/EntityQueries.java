@@ -22,8 +22,8 @@ package io.spine.server.entity.storage;
 
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Any;
+import io.spine.Identifier;
 import io.spine.annotation.Internal;
-import io.spine.base.Identifier;
 import io.spine.client.ColumnFilter;
 import io.spine.client.CompositeColumnFilter;
 import io.spine.client.CompositeColumnFilter.CompositeOperator;
@@ -116,8 +116,7 @@ public final class EntityQueries {
         final Collection<I> ids = new LinkedList<>();
         for (EntityId entityId : idFilter.getIdsList()) {
             final Any wrappedMessageId = entityId.getId();
-            @SuppressWarnings("unchecked") // Checked at runtime
-            final I genericId = (I) Identifier.unpack(wrappedMessageId);
+            final I genericId = Identifier.unpack(wrappedMessageId);
             ids.add(genericId);
         }
         return ids;

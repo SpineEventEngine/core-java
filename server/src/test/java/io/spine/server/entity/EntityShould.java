@@ -23,8 +23,8 @@ package io.spine.server.entity;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
-import io.spine.base.Version;
-import io.spine.base.Versions;
+import io.spine.core.Version;
+import io.spine.core.Versions;
 import io.spine.protobuf.Wrapper;
 import io.spine.test.Tests;
 import io.spine.test.TimeTests;
@@ -42,7 +42,7 @@ import org.junit.Test;
 
 import java.lang.reflect.Constructor;
 
-import static io.spine.base.Identifier.newUuid;
+import static io.spine.Identifier.newUuid;
 import static io.spine.server.entity.AbstractEntity.createEntity;
 import static io.spine.server.entity.AbstractEntity.getConstructor;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;

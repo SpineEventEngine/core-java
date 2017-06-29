@@ -1,0 +1,44 @@
+//
+// Copyright 2017, TeamDev Ltd. All rights reserved.
+//
+// Redistribution and use in source and/or binary forms, with or without
+// modification, must retain the above copyright notice and the following
+// disclaimer.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+syntax = "proto3";
+
+package spine.net;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_generate_equals_and_hash = true;
+option java_multiple_files = true;
+option java_outer_classname = "EmailAddressProto";
+option java_package = "io.spine.net";
+
+// An email address.
+message EmailAddress {
+
+    //TODO:2016-02-20:alexander.yevsyukov: Make it structured, to reflect http://www.ietf.org/rfc/rfc822.txt
+    // A minimum it should have fields like `user`, `domain`, `personal`, `suffix` - the part coming after `+`.
+    // See also InternetAddress from JavaMail: http://docs.oracle.com/javaee/6/api/javax/mail/internet/InternetAddress.html
+    // See how it's done for Url in url.proto and related utilities.
+
+    // String value of the address.
+    //
+    // No validation is performed for the passed value.
+    string value = 1;
+}

@@ -40,11 +40,14 @@ import io.spine.type.TypeUrl;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
+import java.util.Collection;
 import java.util.Iterator;
+import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Iterators.filter;
 import static com.google.common.collect.Iterators.transform;
+import static com.google.common.collect.Maps.newHashMapWithExpectedSize;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.EntityWithLifecycle.Predicates.isEntityVisible;
 import static io.spine.util.Exceptions.newIllegalStateException;
@@ -110,6 +113,22 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         final EntityRecordWithColumns record = toRecord(entity);
         final RecordStorage<I> storage = recordStorage();
         storage.write(entity.getId(), record);
+    }
+
+    /**
+     * Stores {@linkplain Entity Entities} in bulk.
+     *
+     * <p>NOTE: The storage must be assigned before calling this method.
+     *
+     * @param entities the {@linkplain Entity Entities} to store
+     */
+    public void store(Collection<E> entities) {
+        final Map<I, EntityRecordWithColumns> records = newHashMapWithExpectedSize(entities.size());
+        for (E entity : entities) {
+            final EntityRecordWithColumns recordWithColumns = toRecord(entity);
+            records.put(entity.getId(), recordWithColumns);
+        }
+        recordStorage().write(records);
     }
 
     /**

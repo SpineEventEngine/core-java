@@ -21,10 +21,10 @@ package io.spine.server.event;
 
 import com.google.common.annotations.VisibleForTesting;
 import io.spine.annotation.SPI;
-import io.spine.base.Event;
-import io.spine.envelope.EventEnvelope;
+import io.spine.core.Event;
+import io.spine.core.EventClass;
+import io.spine.core.EventEnvelope;
 import io.spine.server.outbus.CommandOutputDelivery;
-import io.spine.type.EventClass;
 
 import java.util.concurrent.Executor;
 

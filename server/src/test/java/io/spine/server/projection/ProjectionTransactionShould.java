@@ -21,9 +21,9 @@ package io.spine.server.projection;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
-import io.spine.annotation.Subscribe;
-import io.spine.base.Event;
-import io.spine.base.Version;
+import io.spine.core.Event;
+import io.spine.core.Subscribe;
+import io.spine.core.Version;
 import io.spine.server.entity.ThrowingValidatingBuilder;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionListener;

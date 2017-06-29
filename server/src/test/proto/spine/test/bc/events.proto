@@ -21,12 +21,13 @@ syntax = "proto3";
 
 package spine.test.bc.event;
 
+import "spine/options.proto";
+
 option (type_url_prefix) = "type.spine.io";
 option java_package="io.spine.test.bc.event";
 option java_outer_classname = "TestBcEventsProto";
 option java_multiple_files = true;
 
-import "spine/options.proto";
 import "spine/test/bc/project.proto";
 
 message ProjectCreated {

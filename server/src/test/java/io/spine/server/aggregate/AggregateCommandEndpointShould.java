@@ -21,10 +21,10 @@
 package io.spine.server.aggregate;
 
 import com.google.common.base.Optional;
-import io.spine.annotation.Subscribe;
-import io.spine.base.Command;
-import io.spine.base.Identifier;
-import io.spine.envelope.CommandEnvelope;
+import io.spine.Identifier;
+import io.spine.core.Command;
+import io.spine.core.CommandEnvelope;
+import io.spine.core.Subscribe;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.given.AggregateCommandEndpointTestEnv.ProjectAggregate;
 import io.spine.server.aggregate.given.AggregateCommandEndpointTestEnv.ProjectAggregateRepository;

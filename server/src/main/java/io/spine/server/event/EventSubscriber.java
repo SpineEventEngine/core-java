@@ -22,12 +22,12 @@ package io.spine.server.event;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
-import io.spine.base.EventContext;
-import io.spine.envelope.EventEnvelope;
+import io.spine.core.EventClass;
+import io.spine.core.EventContext;
+import io.spine.core.EventEnvelope;
 import io.spine.server.bus.MessageDispatcher;
 import io.spine.server.reflect.EventSubscriberMethod;
 import io.spine.server.tenant.EventOperation;
-import io.spine.type.EventClass;
 
 import javax.annotation.Nullable;
 import java.util.Set;

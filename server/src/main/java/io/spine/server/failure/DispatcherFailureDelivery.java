@@ -21,10 +21,10 @@ package io.spine.server.failure;
 
 import com.google.common.annotations.VisibleForTesting;
 import io.spine.annotation.SPI;
-import io.spine.base.Failure;
-import io.spine.envelope.FailureEnvelope;
+import io.spine.core.Failure;
+import io.spine.core.FailureClass;
+import io.spine.core.FailureEnvelope;
 import io.spine.server.outbus.CommandOutputDelivery;
-import io.spine.type.FailureClass;
 
 import java.util.concurrent.Executor;
 

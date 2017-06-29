@@ -21,6 +21,7 @@
 package io.spine.server.commandbus;
 
 import com.google.protobuf.Message;
+import io.spine.core.CommandClass;
 import io.spine.server.BoundedContext;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.commandbus.given.CommandDispatcherRegistryTestEnv.AddTaskDispatcher;
@@ -36,7 +37,6 @@ import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.test.command.AddTask;
 import io.spine.test.command.CreateProject;
 import io.spine.test.command.StartProject;
-import io.spine.type.CommandClass;
 import org.junit.Before;
 import org.junit.Test;
 

@@ -22,7 +22,7 @@ package io.spine.server.tenant;
 
 import com.google.protobuf.Empty;
 import io.spine.annotation.SPI;
-import io.spine.base.TenantId;
+import io.spine.core.TenantId;
 
 import javax.annotation.Nullable;
 

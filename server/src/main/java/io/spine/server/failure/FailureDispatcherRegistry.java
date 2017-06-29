@@ -19,8 +19,8 @@
  */
 package io.spine.server.failure;
 
+import io.spine.core.FailureClass;
 import io.spine.server.outbus.OutputDispatcherRegistry;
-import io.spine.type.FailureClass;
 
 import java.util.Set;
 

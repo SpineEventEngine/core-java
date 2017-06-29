@@ -25,7 +25,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
-import io.spine.base.EventContext;
+import io.spine.core.EventClass;
+import io.spine.core.EventContext;
 import io.spine.server.BoundedContext;
 import io.spine.server.entity.EntityStorageConverter;
 import io.spine.server.entity.EventDispatchingRepository;
@@ -36,7 +37,6 @@ import io.spine.server.event.EventStreamQuery;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
-import io.spine.type.EventClass;
 import io.spine.type.TypeName;
 
 import javax.annotation.Nullable;

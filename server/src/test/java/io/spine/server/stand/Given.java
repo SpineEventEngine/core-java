@@ -23,13 +23,14 @@ package io.spine.server.stand;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
-import io.spine.annotation.Subscribe;
-import io.spine.base.Command;
-import io.spine.base.CommandContext;
-import io.spine.base.Enrichment;
-import io.spine.base.Event;
-import io.spine.base.EventContext;
-import io.spine.base.Version;
+import io.spine.client.TestActorRequestFactory;
+import io.spine.core.Command;
+import io.spine.core.CommandContext;
+import io.spine.core.Enrichment;
+import io.spine.core.Event;
+import io.spine.core.EventContext;
+import io.spine.core.Subscribe;
+import io.spine.core.Version;
 import io.spine.protobuf.Wrapper;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.Aggregate;
@@ -40,7 +41,6 @@ import io.spine.server.command.EventFactory;
 import io.spine.server.entity.idfunc.EventTargetsFunction;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
-import io.spine.test.TestActorRequestFactory;
 import io.spine.test.Tests;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
@@ -53,7 +53,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import static io.spine.base.Identifier.newUuid;
+import static io.spine.Identifier.newUuid;
 
 /**
  * @author Dmytro Dashenkov
@@ -98,13 +98,13 @@ class Given {
         return result;
     }
 
-    static ProjectionRepository<?, ?, ?> projectionRepo(BoundedContext context) {
-        return new StandTestProjectionRepository(context);
+    static ProjectionRepository<?, ?, ?> projectionRepo() {
+        return new StandTestProjectionRepository();
     }
 
     static AggregateRepository<ProjectId, StandTestAggregate>
     aggregateRepo(BoundedContext context) {
-        return new StandTestAggregateRepository(context);
+        return new StandTestAggregateRepository();
     }
 
     static AggregateRepository<ProjectId, StandTestAggregate> aggregateRepo() {
@@ -115,32 +115,28 @@ class Given {
 
     static class StandTestProjectionRepository
             extends ProjectionRepository<ProjectId, StandTestProjection, Project> {
-        StandTestProjectionRepository(BoundedContext boundedContext) {
-            super();
-            addIdSetFunction(ProjectCreated.class,
-                             new EventTargetsFunction<ProjectId, ProjectCreated>() {
-                                 private static final long serialVersionUID = 0L;
 
-                                 @Override
-                                 public Set<ProjectId> apply(ProjectCreated message,
-                                                             EventContext context) {
-                                     return ImmutableSet.of(ProjectId.newBuilder()
-                                                                     .setId(PROJECT_UUID)
-                                                                     .build());
-                                 }
-                             });
+        private static final EventTargetsFunction<ProjectId, ProjectCreated> EVENT_TARGETS_FN =
+                new EventTargetsFunction<ProjectId, ProjectCreated>() {
+            private static final long serialVersionUID = 0L;
+
+            @Override
+            public Set<ProjectId> apply(ProjectCreated message, EventContext context) {
+                return ImmutableSet.of(ProjectId.newBuilder()
+                                                .setId(PROJECT_UUID)
+                                                .build());
+            }
+        };
+
+        StandTestProjectionRepository() {
+            super();
+            addIdSetFunction(ProjectCreated.class, EVENT_TARGETS_FN);
         }
     }
 
     static class StandTestAggregateRepository
             extends AggregateRepository<ProjectId, StandTestAggregate> {
-
-        /**
-         * Creates a new repository instance.
-         *
-         * @param boundedContext the bounded context to which this repository belongs
-         */
-        StandTestAggregateRepository(BoundedContext boundedContext) {
+        private StandTestAggregateRepository() {
             super();
         }
     }

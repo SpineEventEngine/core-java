@@ -22,9 +22,9 @@ package io.spine.server.entity;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import io.spine.base.Identifier;
-import io.spine.base.Version;
-import io.spine.base.Versions;
+import io.spine.Identifier;
+import io.spine.core.Version;
+import io.spine.core.Versions;
 import io.spine.server.entity.failure.CannotModifyArchivedEntity;
 import io.spine.server.entity.failure.CannotModifyDeletedEntity;
 

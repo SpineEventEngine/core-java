@@ -24,13 +24,13 @@ import com.google.common.base.Function;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import io.spine.base.CommandContext;
-import io.spine.base.Event;
-import io.spine.base.EventId;
-import io.spine.base.UserId;
+import io.spine.core.CommandContext;
+import io.spine.core.Event;
+import io.spine.core.EventId;
+import io.spine.core.UserId;
 import io.spine.people.PersonName;
+import io.spine.server.command.TestEventFactory;
 import io.spine.server.event.enrich.EventEnricher;
-import io.spine.test.TestEventFactory;
 import io.spine.test.Values;
 import io.spine.test.event.ProjectCompleted;
 import io.spine.test.event.ProjectCreated;
@@ -40,13 +40,13 @@ import io.spine.test.event.ProjectStarted;
 import io.spine.test.event.user.permission.PermissionGrantedEvent;
 import io.spine.test.event.user.permission.PermissionRevokedEvent;
 import io.spine.test.event.user.sharing.SharingRequestApproved;
+import io.spine.time.ZoneId;
 import io.spine.time.ZoneOffset;
 
 import javax.annotation.Nullable;
 
-import static io.spine.base.Identifier.newUuid;
+import static io.spine.Identifier.newUuid;
 import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.test.TestEventFactory.newInstance;
 
 /**
  * Is for usage only in tests under the `event` package.
@@ -141,7 +141,8 @@ public class Given {
         private AnEvent() {}
 
         private static TestEventFactory eventFactory() {
-            final TestEventFactory result = newInstance(pack(PROJECT_ID), AnEvent.class);
+            final TestEventFactory result = TestEventFactory.newInstance(pack(PROJECT_ID),
+                                                                         AnEvent.class);
             return result;
         }
 
@@ -287,8 +288,11 @@ public class Given {
                     @Override
                     public ZoneOffset apply(@Nullable String input) {
                         return input == null
-                               ? ZoneOffset.getDefaultInstance()
-                               : ZoneOffset.newBuilder().setId(input).build();
+                                ? ZoneOffset.getDefaultInstance()
+                                : ZoneOffset.newBuilder()
+                                            .setId(ZoneId.newBuilder()
+                                                         .setValue(input))
+                                            .build();
                     }
                 };
 

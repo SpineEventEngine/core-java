@@ -22,21 +22,26 @@ package io.spine.server;
 
 import com.google.common.collect.Sets;
 import com.google.protobuf.StringValue;
-import io.grpc.stub.StreamObserver;
-import io.spine.base.Command;
-import io.spine.base.Response;
-import io.spine.base.Responses;
+import io.spine.base.Error;
+import io.spine.client.TestActorRequestFactory;
+import io.spine.core.Command;
+import io.spine.core.CommandId;
+import io.spine.core.IsSent;
+import io.spine.core.Status;
+import io.spine.grpc.StreamObservers.MemoizingObserver;
+import io.spine.protobuf.AnyPacker;
 import io.spine.server.commandbus.UnsupportedCommandException;
 import io.spine.server.transport.GrpcContainer;
-import io.spine.test.TestActorRequestFactory;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.util.Set;
 
+import static io.spine.core.Status.StatusCase.ERROR;
+import static io.spine.grpc.StreamObservers.memoizingObserver;
+import static io.spine.validate.Validate.isNotDefault;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -52,7 +57,7 @@ public class CommandServiceShould {
     private BoundedContext projectsContext;
 
     private BoundedContext customersContext;
-    private final TestResponseObserver responseObserver = new TestResponseObserver();
+    private final MemoizingObserver<IsSent> responseObserver = memoizingObserver();
 
     @Before
     public void setUp() {
@@ -110,24 +115,32 @@ public class CommandServiceShould {
     }
 
     private void verifyPostsCommand(Command cmd) {
-        service.post(cmd, responseObserver);
+        final MemoizingObserver<IsSent> observer = memoizingObserver();
+        service.post(cmd, observer);
 
-        Assert.assertEquals(Responses.ok(), responseObserver.getResponseHandled());
-        assertTrue(responseObserver.isCompleted());
-        assertNull(responseObserver.getThrowable());
+        assertNull(observer.getError());
+        assertTrue(observer.isCompleted());
+        final IsSent acked = observer.firstResponse();
+        final CommandId id = AnyPacker.unpack(acked.getMessageId());
+        assertEquals(cmd.getId(), id);
     }
 
     @Test
-    public void return_error_if_command_is_unsupported() {
+    public void return_error_status_if_command_is_unsupported() {
         final TestActorRequestFactory factory = TestActorRequestFactory.newInstance(getClass());
 
         final Command unsupportedCmd = factory.createCommand(StringValue.getDefaultInstance());
 
         service.post(unsupportedCmd, responseObserver);
 
-        final Throwable exception = responseObserver.getThrowable()
-                                                    .getCause();
-        assertEquals(UnsupportedCommandException.class, exception.getClass());
+        assertTrue(responseObserver.isCompleted());
+        final IsSent result = responseObserver.firstResponse();
+        assertNotNull(result);
+        assertTrue(isNotDefault(result));
+        final Status status = result.getStatus();
+        assertEquals(ERROR, status.getStatusCase());
+        final Error error = status.getError();
+        assertEquals(UnsupportedCommandException.class.getCanonicalName(), error.getType());
     }
 
     @Test
@@ -147,44 +160,6 @@ public class CommandServiceShould {
             if (!grpcContainer.isShutdown()) {
                 grpcContainer.shutdown();
             }
-        }
-    }
-
-    /*
-     * Stub repositories and aggregates
-     ***************************************************/
-
-    private static class TestResponseObserver implements StreamObserver<Response> {
-
-        private Response responseHandled;
-        private Throwable throwable;
-        private boolean isCompleted = false;
-
-        @Override
-        public void onNext(Response response) {
-            this.responseHandled = response;
-        }
-
-        @Override
-        public void onError(Throwable throwable) {
-            this.throwable = throwable;
-        }
-
-        @Override
-        public void onCompleted() {
-            this.isCompleted = true;
-        }
-
-        Response getResponseHandled() {
-            return responseHandled;
-        }
-
-        Throwable getThrowable() {
-            return throwable;
-        }
-
-        boolean isCompleted() {
-            return isCompleted;
         }
     }
 }

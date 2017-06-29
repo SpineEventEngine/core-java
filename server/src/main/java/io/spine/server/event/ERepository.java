@@ -22,13 +22,14 @@ package io.spine.server.event;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Timestamp;
-import io.spine.base.Event;
-import io.spine.base.EventId;
 import io.spine.client.ColumnFilter;
 import io.spine.client.CompositeColumnFilter;
 import io.spine.client.EntityFilters;
+import io.spine.core.Event;
+import io.spine.core.EventId;
 import io.spine.server.entity.DefaultRecordBasedRepository;
 import io.spine.server.storage.RecordStorage;
 
@@ -101,6 +102,11 @@ class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> 
     void store(Event event) {
         final EEntity entity = new EEntity(event);
         store(entity);
+    }
+
+    void store(Iterable<Event> events) {
+        final Iterable<EEntity> entities = Iterables.transform(events, EventToEEntity.instance());
+        store(newArrayList(entities));
     }
 
     private static Function<EEntity, Event> getEvent() {
@@ -176,6 +182,23 @@ class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> 
             final Event event = input.getState();
             final boolean result = filter.apply(event);
             return result;
+        }
+    }
+
+    /**
+     * Transforms an {@link Event} to the {@linkplain EEntity Event Entity}.
+     */
+    private enum EventToEEntity implements Function<Event, EEntity> {
+        INSTANCE;
+
+        private static Function<Event, EEntity> instance() {
+            return INSTANCE;
+        }
+
+        @Override
+        public EEntity apply(@Nullable Event event) {
+            checkNotNull(event);
+            return new EEntity(event);
         }
     }
 }

@@ -23,17 +23,17 @@ package io.spine.server.commandbus;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
-import io.spine.base.CommandContext;
-import io.spine.base.CommandId;
-import io.spine.base.Identifier;
-import io.spine.envelope.CommandEnvelope;
+import io.spine.Identifier;
+import io.spine.core.CommandContext;
+import io.spine.core.CommandEnvelope;
+import io.spine.core.CommandId;
 import io.spine.server.entity.idfunc.GetTargetIdFromCommand;
 import io.spine.validate.ConstraintViolation;
 import io.spine.validate.MessageValidator;
 
 import java.util.List;
 
-import static io.spine.base.Identifier.EMPTY_ID;
+import static io.spine.Identifier.EMPTY_ID;
 import static io.spine.validate.Validate.isDefault;
 
 /**
@@ -65,7 +65,7 @@ class Validator {
         final ImmutableList.Builder<ConstraintViolation> result = ImmutableList.builder();
         final Message message = envelope.getMessage();
         final CommandContext context = envelope.getCommandContext();
-        final CommandId id = envelope.getCommandId();
+        final CommandId id = envelope.getId();
         validateCommandId(id, result);
         validateMessage(message, result);
         validateContext(context, result);

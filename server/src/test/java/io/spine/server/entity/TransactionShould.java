@@ -21,11 +21,11 @@ package io.spine.server.entity;
 
 import com.google.common.collect.Lists;
 import com.google.protobuf.Message;
-import io.spine.base.Event;
-import io.spine.base.Version;
+import io.spine.core.Event;
+import io.spine.core.Version;
 import io.spine.server.command.EventFactory;
+import io.spine.server.command.TestEventFactory;
 import io.spine.server.entity.Transaction.Phase;
-import io.spine.test.TestEventFactory;
 import io.spine.validate.ConstraintViolation;
 import io.spine.validate.ValidatingBuilder;
 import io.spine.validate.ValidationException;
@@ -35,7 +35,7 @@ import org.mockito.ArgumentMatcher;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static io.spine.base.Versions.newVersion;
+import static io.spine.core.Versions.newVersion;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.time.Time.getCurrentTime;
 import static org.junit.Assert.assertEquals;

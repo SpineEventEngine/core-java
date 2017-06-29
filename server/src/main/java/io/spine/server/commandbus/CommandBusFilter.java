@@ -20,15 +20,15 @@
 
 package io.spine.server.commandbus;
 
+import com.google.common.base.Optional;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.SPI;
-import io.spine.base.Command;
-import io.spine.base.Response;
-import io.spine.envelope.CommandEnvelope;
+import io.spine.core.CommandEnvelope;
+import io.spine.core.IsSent;
 
 /**
  * A {@code CommandBus} can have several filters that can prevent a command to be
- * {@linkplain CommandBus#post(Command, StreamObserver) posted}.
+ * {@linkplain CommandBus#post(com.google.protobuf.Message, StreamObserver) posted}.
  *
  * @author Alexander Yevsyukov
  */
@@ -40,22 +40,18 @@ public interface CommandBusFilter {
      *
      * <p>A filter can:
      * <ul>
-     *     <li>Accept the command (by returning {@code true}).
-     *     <li>Reject the command and {@linkplain StreamObserver#onError(Throwable) notify} the
-     *         response observer with an error. An example of this case would be an invalid command.
-     *     <li>Reject a command but {@linkplain StreamObserver#onCompleted()} acknowledge it to the
-     *         response observer. For example, a scheduled command would not pass a filter, but
-     *         is acknowledged to the observer.
+     *     <li>accept the command (by returning {@code Optional.absent()};
+     *     <li>reject the command with {@link io.spine.base.Error} status e.g. if it fails to pass
+     *         the validation;
+     *     <li>reject the command with {@code OK} status. For example, a scheduled command may not
+     *         pass a filter.
      * </ul>
      *
-     * @param envelope         the envelope with the command to filter
-     * @param responseObserver the observer to be {@linkplain StreamObserver#onError(Throwable)
-     *                         notified} about the error which caused not accepting the passed
-     *                         command
-     *
-     * @return {@code true} if the command passes the filter, {@code false} otherwise
+     * @param envelope      the envelope with the command to filter
+     * @return {@code Optional.absent()} if the command passes the filter,
+     *         {@linkplain IsSent IsSent response} with either status otherwise
      */
-    boolean accept(CommandEnvelope envelope, StreamObserver<Response> responseObserver);
+    Optional<IsSent> accept(CommandEnvelope envelope);
 
     void onClose(CommandBus commandBus);
 }

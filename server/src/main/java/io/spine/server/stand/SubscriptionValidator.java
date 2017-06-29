@@ -21,9 +21,9 @@ package io.spine.server.stand;
 
 import com.google.common.base.Optional;
 import io.spine.base.Error;
-import io.spine.base.TenantId;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionValidationError;
+import io.spine.core.TenantId;
 import io.spine.server.tenant.TenantAwareFunction;
 
 import javax.annotation.Nullable;

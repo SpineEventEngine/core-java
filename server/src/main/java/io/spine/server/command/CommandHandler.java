@@ -24,14 +24,14 @@ import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
-import io.spine.base.Event;
-import io.spine.envelope.CommandEnvelope;
+import io.spine.core.CommandClass;
+import io.spine.core.CommandEnvelope;
+import io.spine.core.Event;
 import io.spine.protobuf.AnyPacker;
 import io.spine.protobuf.Wrapper;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.event.EventBus;
 import io.spine.server.reflect.CommandHandlerMethod;
-import io.spine.type.CommandClass;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -128,9 +128,7 @@ public abstract class CommandHandler implements CommandDispatcher {
 
     /** Posts passed events to {@link EventBus}. */
     private void postEvents(Iterable<Event> events) {
-        for (Event event : events) {
-            eventBus.post(event);
-        }
+        eventBus.post(events);
     }
 
     /**

@@ -20,26 +20,28 @@
 
 package io.spine.server.commandbus;
 
+import com.google.common.base.Optional;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
-import io.grpc.stub.StreamObserver;
-import io.spine.base.Command;
-import io.spine.base.CommandContext;
-import io.spine.base.CommandId;
-import io.spine.base.Response;
-import io.spine.base.Responses;
-import io.spine.envelope.CommandEnvelope;
+import io.spine.core.Command;
+import io.spine.core.CommandContext;
+import io.spine.core.CommandEnvelope;
+import io.spine.core.CommandId;
+import io.spine.core.IsSent;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
 import java.util.Set;
 
+import static com.google.common.base.Optional.absent;
+import static com.google.common.base.Optional.of;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.google.protobuf.util.Timestamps.checkValid;
-import static io.spine.base.CommandStatus.SCHEDULED;
-import static io.spine.base.Commands.isScheduled;
+import static io.spine.core.CommandStatus.SCHEDULED;
+import static io.spine.core.Commands.isScheduled;
+import static io.spine.server.bus.Buses.acknowledge;
 import static io.spine.time.Time.getCurrentTime;
 
 /**
@@ -78,21 +80,20 @@ public abstract class CommandScheduler implements CommandBusFilter {
     }
 
     @Override
-    public boolean accept(CommandEnvelope envelope, StreamObserver<Response> responseObserver) {
+    public Optional<IsSent> accept(CommandEnvelope envelope) {
         final Command command = envelope.getCommand();
         if (isScheduled(command)) {
-            scheduleAndStore(command, responseObserver);
-            return false;
+            scheduleAndStore(envelope);
+            return of(acknowledge(envelope.getId()));
         }
-        return true;
+        return absent();
     }
 
-    private void scheduleAndStore(Command command, StreamObserver<Response> responseObserver) {
+    private void scheduleAndStore(CommandEnvelope commandEnvelope) {
+        final Command command = commandEnvelope.getCommand();
         schedule(command);
         commandBus().commandStore()
                     .store(command, SCHEDULED);
-        responseObserver.onNext(Responses.ok());
-        responseObserver.onCompleted();
     }
 
     @Override

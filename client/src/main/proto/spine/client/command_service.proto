@@ -21,22 +21,22 @@ syntax = "proto3";
 
 package spine.client;
 
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
 // We put gRPC-based classes into `grpc` sub-package, which is annotated as `@Internal`
 // to hide implementation details from the public API of the framework.
-option (type_url_prefix) = "type.spine.io";
 option java_package = "io.spine.client.grpc";
 option java_multiple_files = true;
 option java_outer_classname = "CommandServiceProto";
 option java_generate_equals_and_hash = true;
 
-import "spine/options.proto";
-import "spine/base/command.proto";
-import "spine/base/response.proto";
-
+import "spine/core/command.proto";
+import "spine/core/bus.proto";
 
 // A service for sending commands from clients.
 service CommandService {
 
     // Request to handle a command.
-    rpc Post(base.Command) returns (base.Response);
+    rpc Post(core.Command) returns (core.IsSent);
 }

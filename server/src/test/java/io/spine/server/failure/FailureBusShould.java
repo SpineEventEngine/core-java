@@ -19,23 +19,23 @@
  */
 package io.spine.server.failure;
 
-import io.spine.annotation.Subscribe;
-import io.spine.base.Command;
-import io.spine.base.CommandContext;
-import io.spine.base.Commands;
-import io.spine.base.Failure;
-import io.spine.base.Failures;
-import io.spine.base.TenantId;
 import io.spine.change.StringChange;
 import io.spine.client.CommandFactory;
-import io.spine.envelope.FailureEnvelope;
+import io.spine.client.TestActorRequestFactory;
+import io.spine.core.Command;
+import io.spine.core.CommandContext;
+import io.spine.core.Commands;
+import io.spine.core.Failure;
+import io.spine.core.FailureClass;
+import io.spine.core.FailureEnvelope;
+import io.spine.core.Failures;
+import io.spine.core.Subscribe;
+import io.spine.core.TenantId;
 import io.spine.server.commandbus.Given;
-import io.spine.test.TestActorRequestFactory;
 import io.spine.test.failure.ProjectId;
 import io.spine.test.failure.command.RemoveOwner;
 import io.spine.test.failure.command.UpdateProjectName;
 import io.spine.testdata.Sample;
-import io.spine.type.FailureClass;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -45,8 +45,8 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 
 import static com.google.common.collect.Maps.newHashMap;
-import static io.spine.base.Failures.getMessage;
-import static io.spine.base.Identifier.newUuid;
+import static io.spine.Identifier.newUuid;
+import static io.spine.core.Failures.getMessage;
 import static io.spine.test.failure.ProjectFailures.InvalidProjectName;
 import static io.spine.test.failure.ProjectFailures.MissingOwner;
 import static org.junit.Assert.assertEquals;
@@ -367,7 +367,7 @@ public class FailureBusShould {
         final MissingOwner msg = MissingOwner.newBuilder()
                                              .setProjectId(projectId)
                                              .build();
-        final Command command = Given.Command.withMessage(Sample.messageOfType(RemoveOwner.class));
+        final Command command = Given.ACommand.withMessage(Sample.messageOfType(RemoveOwner.class));
         return Failures.createFailure(msg, command);
     }
 

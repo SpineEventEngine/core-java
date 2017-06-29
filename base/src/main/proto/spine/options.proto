@@ -1,0 +1,759 @@
+//
+// Copyright 2017, TeamDev Ltd. All rights reserved.
+//
+// Redistribution and use in source and/or binary forms, with or without
+// modification, must retain the above copyright notice and the following
+// disclaimer.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+syntax = "proto3";
+
+// We do not define the package for this file to allow shorter options for user-defined types.
+// This would allow to write:
+//
+//     option (internal) = true;
+//
+// instead of:
+//
+//      option (spine.base.internal) = true;
+//
+
+// The custom `type_url_prefix` option allows to define specify custom type URL prefix for messages
+// defined in a proto file. This option is declared in this file. Other proto files must import
+// `options.proto` to be able to specify custom type URL prefix.
+//
+// It is recommended that the import statement is provided before the line with `type_url_prefix`
+// option to make it obvious that custom option is defined in the imported file.
+//
+// For example:
+//
+// syntax = "proto3";
+//
+// package my.package;
+//
+// import "spine/options.proto";
+//
+// option (type_url_prefix) = "type.example.org";
+//
+option (type_url_prefix) = "type.spine.io";
+option java_generate_equals_and_hash = false;
+option java_multiple_files = true;
+option java_outer_classname = "OptionsProto";
+option java_package = "io.spine.option";
+
+import "google/protobuf/descriptor.proto";
+
+//
+// Spine Options use the range of option field numbers from the internal range reserved for
+// individual organizations. For details of custom Protobuf options and this range please see:
+//
+//      https://developers.google.com/protocol-buffers/docs/proto#customoptions
+//
+// The whole range reserved for individual organizations is 50000-99999.
+// The range used by Spine Options is 73812-75000.
+// In order to prevent number collision with custom options used by a project based on Spine,
+// numbers for custom options in this project should be in the range 50000-73811 or 75001-99999.
+//
+
+extend google.protobuf.FieldOptions {
+
+    // Validation Options
+    //--------------------
+
+    // The option to mark a field as required.
+    //
+    // If the field type is a `message`, it must be set to a non-default instance.
+    // If it is `string` or `bytes`, the value must not be an empty string or an array.
+    // Other field types are not applicable.
+    // If the field is repeated, it must have at least one value set, and all its values must be
+    // valid.
+    //
+    // Unlike the `required` keyword used in Protobuf 2, the option does not affect the transfer
+    // layer. Even if a message content violates the requirement set by the option, it would still
+    // be a valid message for the Protobuf library.
+    //
+    // Example:
+    //
+    // MyMessage field = 1 [(required) = true];
+    //
+    bool required = 73812;
+
+    IfMissingOption if_missing = 73813;
+
+    // The option to define maximal decimal value.
+    DecimalMaxOption decimal_max = 73814;
+
+    // The option to define minimal decimal value.
+    DecimalMinOption decimal_min = 73815;
+
+    MaxOption max = 73816;
+    MinOption min = 73817;
+
+    DigitsOption digits = 73818;
+
+    TimeOption when = 73819;
+
+    PatternOption pattern = 73820;
+
+    // The option to indicate that the fields's internal field should be included into the
+    // validation.
+    //
+    // The target type of the option is Message.
+    //
+    // Default value is false.
+    //
+    bool valid = 73821;
+
+    IfInvalidOption if_invalid = 73822;
+
+    GoesOption goes = 73823;
+
+    // reserved 73824 to 73849 for future validation options.
+
+    // API Annotations
+    //-----------------
+
+    // Indicates a field which is internal to Spine, not part of the public API, and should not be
+    // used by users of the framework.
+    //
+    // If you plan to implement an extension of the framework, which is going to be
+    // wired into the framework, you may use the internal parts. Please consult with the Spine
+    // team, as the internal APIs do not have the same stability API guarantee as public ones.
+    //
+    // See `SPI` option if you plan to write an extension of the framework.
+    //
+    bool internal = 73850;
+
+    // Indicates a file which contains elements of Service Provider Interface (SPI).
+    //
+    // SPI is used to enable framework extension and replaceable components (implement a new
+    // storage, etc). See "Effective Java 2nd Edition", chapter 2, item 1 for more info about
+    // service provider framework pattern.
+    //
+    bool SPI = 73851;
+
+    // Indicates a field that can change at any time, and has no guarantee of API stability and
+    // backward-compatibility.
+    //
+    // Usage guidelines:
+    // 1. This annotation is used only on public API. Internal interfaces should not use it.
+    // 2. This annotation can only be added to new API. Adding it to an existing API is considered
+    //    API-breaking.
+    // 3. Removing this annotation from an API gives it stable status.
+    //
+    bool experimental = 73852;
+
+    // Signifies that a public API is subject to incompatible changes, or even removal, in a future
+    // release.
+    //
+    // An API bearing this annotation is exempt from any compatibility guarantees made by its
+    // containing library. Note that the presence of this annotation implies nothing about the
+    // quality of the API in question, only the fact that it is not "API-frozen."
+    // It is generally safe for applications to depend on beta APIs, at the cost of some extra work
+    // during upgrades.
+    //
+    bool beta = 73853;
+
+    // reserved 73854 to 73899 for future options.
+
+    // Reference Option `by`
+    // ---------------------
+    //
+    // Using `by` for Queryable Fields
+    // --------------------------------
+    // A field of an entity can be marked as one which can participate in queries. If this is done
+    // in a regular way by adding option `(query)=true` to a field, the field name can be used in
+    // queries. If a field type is message and one of the nested fields is wanted in queries, the
+    // following syntax should be used:
+    //
+    //  message MyProjection {
+    //      option (entity).kind = PROJECTION;
+    //      ...
+    //      // Use this field in queries by the `name` field of the `User` message.
+    //      User admin = 1 [(query) = true, (by) = "admin.name"];
+    //  }
+    //
+    // If more than one nested fields are wanted for queries, they should be separated by the comma:
+    //
+    //  message MyAggregate {
+    //      option (entity).kind = AGGREGATE;
+    //      ...
+    //      // Use this field in queries by the `name` and `email` fields of the `User` message.
+    //      User author = 1 [(query) = true, (by) = "author.name, author.email"];
+    //  }
+    //
+    //
+    // Using `by` for Enrichments
+    // ---------------------------
+    // An instruction to associate an enrichment message field with the field from an event message
+    // to enrich (or event context field).
+    //
+    // The value of the option is the name of the target event message/context field
+    // which is used to set the corresponding enrichment's field.
+    // The value must have event/context FQN prefix if `enrichment_for` option is omitted
+    // ("example.events.MyEvent.user_id" instead of just "user_id").
+    //
+    // An example:
+    //
+    // message MyEvent {
+    //    spine.base.UserId user_id = 1;
+    //    ...
+    //    message Enrichment {
+    //       spine.people.PersonName name = 1 [(by) = "user_id"];
+    //
+    //       string time = 2 [(by) = "context.timestamp"];
+    //    }
+    // }
+    //
+    // message MyEventEnrichment {
+    //     string username = 1 [(by) = "MyEvent.user_id"];
+    // }
+    //
+    // If a single enrichment message is used to enrich several events, a wildcard syntax may be
+    // used.
+    //
+    // An example:
+    //
+    // message EnrichmentForSeveralEvents {
+    //     string username = 1 [(by) = "*.user_id"];
+    // }
+    //
+    // message EventOne {
+    //     option (enrichment) = "EnrichmentForSeveralEvents";
+    //
+    //     int32 user_id = 1;
+    // }
+    //
+    // message EventTwo {
+    //     option (enrichment) = "EnrichmentForSeveralEvents";
+    //
+    //     int32 user_id = 1;
+    // }
+    //
+    // Also, the multiple arguments are supported. The syntax is:
+    //
+    // message EnrichmentForSeveralEvents {
+    //     option (enrichment) = "EnrichmentForSeveralEvents";
+    //
+    //     int32 user_id = 1 [(by) = "qualifier.One.target_field | qualifier.Two.alternate_target_field"];
+    // }
+    //
+    // Wildcard syntax for the target fields is supported in cases when annotation `enrichment_for`
+    // gives a not ambiguous definition for the target type.
+    //
+    // If using the FQN field names, the `enrichment_for` annotation may be omitted
+    // (the same behavior as with a single-argument `by` annotation).
+    //
+    string by = 73900; // NOTE: this field number is used in the `tools` project,
+                       // EnrichmentLookupPlugin (update it there on changing).
+}
+
+extend google.protobuf.MessageOptions {
+
+    // Validation Options
+    //--------------------
+
+    // The default format string for validation error message text.
+    //
+    // This option extends message types that extend `FieldOptions`
+    // The number of parameters and their types are determined by the type of field options.
+    //
+    string default_message = 73901;
+
+    // The option to require at least one of the fields or a combination of fields.
+    //
+    // Unlike the `required` field option which always require corresponding field,
+    // this message option allows to require alternative fields.
+    //
+    // Field names are separated using the pipe (`|`) symbol. The combination of fields is defined
+    // using the ampersand (`&`) symbol.
+    //
+    // For example:
+    //
+    // message PersonName {
+    //    option (required_field) = "given_name|honorific_prefix & family_name";
+    //
+    //    string honorific_prefix = 1;
+    //    string given_name = 2;
+    //    string middle_name = 3;
+    //    string family_name = 4;
+    //    string honorific_suffix = 5;
+    // }
+    //
+    string required_field = 73902;
+
+    // The option to mark a message as state of an entity.
+    EntityOption entity = 73903;
+
+    // reserved 73904 to 73910 for future validation options
+
+    // API Annotations
+    //-----------------
+
+    // Indicates a file which is internal to Spine, not part of the public API, and should not be
+    // used by users of the framework.
+    bool internal_type = 73911;
+
+    // Indicates a file which contains elements of Service Provider Interface (SPI).
+    bool SPI_type = 73912;
+
+    // Indicates a public API that can change at any time, and has no guarantee of API stability and
+    // backward-compatibility.
+    bool experimental_type = 73913;
+
+    // Signifies that a public API is subject to incompatible changes, or even removal, in a future
+    // release.
+    bool beta_type = 73914;
+
+    // reserved 73915 to 73921 for future API annotation options.
+
+    // Enrichment Options
+    //--------------------
+    // An instruction to associate an enrichment message with event message(s) to enrich.
+    //
+    // If the event message to enrich is in another package, the event type name(s) should be
+    // qualified according to Protobuf conventions.
+    // If the enrichment is for multiple events, their type names should be separated with comma.
+    //
+    // For example:
+    //
+    // message MyEventEnrichment {
+    //     option (enrichment_for) = "example.events.MyEvent";
+    //     ...
+    // }
+    //
+    // message EventEnrichmentForSeveralEvents {
+    //     option (enrichment_for) = "example.events.FirstEvent,"
+    //                               "example.events.SecondEvent";
+    //     ...
+    // }
+    //
+    //
+    // This option can be omitted if:
+    // - the enrichment message is enclosed into the target event message;
+    // - all `by` options have the event name prefix ("example.events.MyEvent.user_id" instead of
+    //   just "user_id").
+    //
+    string enrichment_for = 73922;  // NOTE: this field number is used in `tools` project,
+                                    // EnrichmentLookupPlugin (update it there on changing).
+
+    // An instruction to enrich an event with one or more enrichments.
+    //
+    // This option is defined in event messages.
+    // If more than one enrichment should be added, their type names should be separated with
+    // the comma. For example:
+    //
+    // message MyEvent {
+    //     option (enrichment) = "EnrichmentOne,"
+    //                           "EnrichmentTwo";
+    //     ...
+    // }
+    //
+    // Fields of the referenced enrichment types refer to the fields of the event message via
+    // `by` option. Therefore, if `enrichment` option is used in more than event message, the fields
+    // participating in the enrichment process must have the same names.
+    //
+    // In the enrichment message a wildcard `by` option syntax may be used to reference more than
+    // a single target events to enrich.
+    //
+    // For example:
+    //
+    // message EnrichmentForSeveralEvents {
+    //     string username = 1 [(by) = "*.user_id"];
+    // }
+    //
+    string enrichment = 73923; // NOTE: this field number is used in the `tools` project,
+                               // EnrichmentLookupPlugin (update it there on changing).
+
+    // reserved 73924 to 73939 for future options.
+
+    // Command Options
+    //-------------------
+
+    // Specifies Protobuf type names of the events that are produced after a command is handled.
+    //
+    // The type names should be separated with commas. Space characters are allowed.
+    // If the events are of the same aggregate with the command, non-qualified names can be used.
+    // Otherwise, please use fully qualified names.
+    //
+    string events = 73939;
+
+    // Specifies Protobuf type names of the failures that can be returned to the attempt to handle
+    // a command if business conditions do not allow the command execution.
+    //
+    // The type names should be separated with commas. Space characters are allowed.
+    // If the failures are of the same aggregate with the command, non-qualified names can be used.
+    // Otherwise, please use fully qualified names.
+    //
+    string failures = 73940;
+}
+
+extend google.protobuf.FileOptions {
+
+    // Specifies a type URL prefix for all types within a file.
+    //
+    // This type URL will be used when packing messages into `Any`.
+    // See `any.proto` for more details.
+    //
+    string type_url_prefix = 73941; // NOTE: this field number is used in `tools` project,
+                                    // ProtoToJavaMapperPlugin (update it there on changing).
+
+    // Indicates a file which should not be used by users of the framework.
+    bool internal_all = 73942;
+
+    // Indicates a file which contains elements of Service Provider Interface (SPI).
+    bool SPI_all = 73943;
+
+    // Indicates a public API that can change at any time, and has no guarantee of API stability and
+    // backward-compatibility.
+    bool experimental_all = 73944;
+
+    // Signifies that a public API is subject to incompatible changes, or even removal, in a future
+    // release.
+    bool beta_all = 73945;
+
+    // reserved 73946 to 73970 for future use.
+}
+
+extend google.protobuf.ServiceOptions {
+
+    // Indicates that the service is a part of Service Provider Interface (SPI).
+    bool SPI_service = 73971;
+
+    // reserved 73971 to 73980
+}
+
+// reserved 73981 to 74000 for other future Spine Options numbers.
+
+//
+// Validation Option Types
+//---------------------------
+
+// Defines the error handling for `required` field with no value set.
+//
+// Applies only to the fields marked as `required`.
+// Validation error message is composed according to the rules defined by this option.
+//
+// Example:
+//
+// MyMessage field = 1 [(required) = true, (if_missing).msg_format = "This field is required."];
+//
+message IfMissingOption {
+
+    // The default error message.
+    option (default_message) = "Value must be set.";
+
+    // A user-defined validation error format message.
+    string msg_format = 1;
+}
+
+// The field value must be greater than (or equal to, if the `inclusive` parameter is true) the
+// given minimum number.
+//
+// Is applicable only to numbers.
+// Repeated fields are supported.
+//
+// Example:
+//
+//     double value = 1 [(decimal_min).value = "10.5", (decimal_min).inclusive = true];
+//
+message DecimalMinOption {
+
+    // The default error message format string.
+    //
+    // The format parameters are:
+    //   1) "or equal to " string (if the `inclusive` parameter is true) or an empty one;
+    //   2) the minimum number.
+    //
+    option (default_message) = "Number must be greater than %s%s.";
+
+    // The string representation of the minimum field value.
+    string value = 1;
+
+    // Specifies if the field can be equal to the minimum value.
+    // The default value is false.
+    bool inclusive = 2;
+
+    // A user-defined validation error format message.
+    string msg_format = 3;
+}
+
+// The field value must be less than (or equal to, if the `inclusive` option is true) the given
+// maximum number.
+// Is applicable only to numbers.
+// Repeated fields are supported.
+//
+// Example:
+//     double value = 1 [(decimal_max).value = "10.5", (decimal_max).inclusive = true];
+//
+message DecimalMaxOption {
+
+    // The default error message format string.
+    //
+    // The format parameters are:
+    //   1) "or equal to " string (if the `inclusive` parameter is true) or an empty string;
+    //   2) the maximum number.
+    //
+    option (default_message) = "Number must be less than %s%s.";
+
+    // The string representation of the maximum field value.
+    string value = 1;
+
+    // Specifies if the field can be equal to the maximum value.
+    //
+    // The default value is false.
+    //
+    bool inclusive = 2;
+
+    // A user-defined validation error format message.
+    string msg_format = 3;
+}
+
+// The field value must be greater than or equal to the given minimum number.
+//
+// Is applicable only to numbers.
+// Repeated fields are supported.
+//
+// Example:
+//     double value = 1 [(min).value = "10.5"];
+//
+message MinOption {
+
+    // The default error message format string.
+    //
+    // The format parameter is the minimum number.
+    //
+    option (default_message) = "Number must be greater than or equal to %s.";
+
+    // The string representation of the minimum field value.
+    string value = 1;
+
+    // A user-defined validation error format message.
+    string msg_format = 2;
+}
+
+// The field value must be less than or equal to the given maximum number.
+//
+// Is applicable only to numbers.
+// Repeated fields are supported.
+//
+// Example:
+//    double value = 1 [(max).value = "10.5"];
+//
+message MaxOption {
+
+    // The default error message format string.
+    //
+    // The format parameter is the maximum number.
+    option (default_message) = "Number must be less than or equal to %s.";
+
+    // The string representation of the maximum field value.
+    string value = 1;
+
+    // A user-defined validation error format message.
+    string msg_format = 2;
+}
+
+// The field value must be a number with the certain integral/fractional digit count.
+//
+// Is applicable only to numbers.
+// Repeated fields are supported.
+// This option is considered as not set if either `integer_max` or `fraction_max` parameter is not
+// set (is zero).
+//
+// Example:
+//     double value = 1 [(digits).integer_max = 2, (digits).fraction_max = 2];
+//
+message DigitsOption {
+
+    // The default error message format string.
+    //
+    // The format parameters are:
+    //   1) max integral digit count;
+    //   2) max fractional digit count;
+    //
+    option (default_message) = "Number value is out of bounds, expected: <%s max digits>.<%s max digits>.";
+
+    // Maximum count of integral digits of the number (inclusive).
+    //
+    // Must be greater than zero.
+    //
+    int32 integer_max = 1;
+
+    // Maximum count of fractional digits of the number (inclusive).
+    //
+    // Must be greater than or equal to zero.
+    //
+    int32 fraction_max = 2;
+
+    // A user-defined validation error format message.
+    string msg_format = 3;
+}
+
+// The field value is a `Timestamp` which points to the moment in the future or the past.
+//
+// Is applicable only to `Timestamp`s.
+// Repeated fields are supported.
+//
+// Example:
+//     google.protobuf.Timestamp field = 1 [(when).in = FUTURE];
+//
+message TimeOption {
+
+    // The default error message format string.
+    //
+    // The format parameter is "past" or "future" string, depending on the restriction.
+    //
+    option (default_message) = "Timestamp value must be in the %s.";
+
+    // Defines a restriction for the timestamp.
+    Time in = 1;
+
+    // A user-defined validation error format message.
+    string msg_format = 2;
+}
+
+// This enumeration defines restriction for date/time values.
+enum Time {
+
+    // The default value (if the time option is not set).
+    TIME_UNDEFINED = 0;
+
+    // The value must be in the past.
+    PAST = 1;
+
+    // The value must be in the future.
+    FUTURE = 2;
+}
+
+// A string field value must match the given regular expression.
+// Is applicable only to strings.
+// Repeated fields are supported.
+//
+// Example:
+//     string field = 1 [(pattern).regex = "^[A-Za-z0-9+]+$"];
+//
+message PatternOption {
+
+    // The default error message format string.
+    //
+    // The format parameter is the regular expression to which the value must match.
+    //
+    option (default_message) = "String must match the regular expression '%s'.";
+
+    // The regular expression to match.
+    string regex = 1;
+
+    // The regex flag.
+    int32 flag = 2;
+
+    // A user-defined validation error format message.
+    string msg_format = 3;
+}
+
+// Specifies the message to show if a validated field happens to be invalid.
+// Is applicable only to messages.
+// Repeated fields are supported.
+//
+// Example:
+//     MyMessage field = 1 [(valid) = true, (if_invalid).msg_format = "The field is invalid."];
+//
+message IfInvalidOption {
+
+    // The default error message for the field.
+    option (default_message) = "Message must have valid properties.";
+
+    // A user-defined validation error format message.
+    string msg_format = 1;
+}
+
+// Specifies that a message field can be present only if another field is present.
+//
+// Unlike `required_field` that handles combination of required fields, this option is useful when
+// it is needed to say that an optional field makes sense only when another optional field is
+// present.
+//
+// Example:
+//
+// message ScheduledItem {
+//     ...
+//     spine.time.LocalDate date = 4;
+//     spine.time.LocalTime time = 5 [(goes).with = "date"];
+// }
+//
+message GoesOption {
+
+    // The default error message format string.
+    //
+    // The first parameter is the name of the field for which we specify the option.
+    // The second parameter is the name of the field set in the "with" value.
+    //
+    option (default_message) = "The field '%s' can only be set when the field '%s' is defined.";
+
+    // A name of the field required for presence of the field for which we set the option.
+    string with = 1;
+
+    // A user-defined validation error format message.
+    string msg_format = 2;
+}
+
+// Defines options of a message representing a state of an entity.
+message EntityOption {
+
+    // A type of an entity for state of which the message is defined.
+    enum Kind {
+        // Reserved for errors.
+        KIND_UNKNOWN = 0;
+
+        // The message is an aggregate state.
+        AGGREGATE = 1;
+
+        // The message is a state of a projection.
+        PROJECTION = 2;
+
+        // The message is a state of a process manager.
+        PROCESS_MANAGER = 3;
+
+        // The message is a state of an entity.
+        ENTITY = 4;
+    }
+
+    // The type of the entity.
+    Kind kind = 1;
+
+    // The level of visibility of the entity to queries.
+    enum Visibility {
+
+        // Reserved for errors.
+        VISIBILITY_UNKNOWN = 0;
+
+        // The entity is not visible to queries.
+        NONE = 1;
+
+        // Client-side applications can subscribe to updates of entities of this type.
+        SUBSCRIBE = 2;
+
+        // Client-side applications can query this type of entities.
+        QUERY = 3;
+
+        // Client-side applications can subscribe and query this type of entity.
+        FULL = 4;
+    }
+
+    // The visibility of the entity.
+    //
+    // If not defined, the value of this option is `FULL`.
+    //
+    Visibility visibility = 2;
+}

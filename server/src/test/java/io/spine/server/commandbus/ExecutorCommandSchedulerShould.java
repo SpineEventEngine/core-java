@@ -22,19 +22,19 @@ package io.spine.server.commandbus;
 
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
-import io.spine.base.Command;
-import io.spine.base.CommandContext;
 import io.spine.client.CommandFactory;
-import io.spine.test.TestActorRequestFactory;
+import io.spine.client.TestActorRequestFactory;
+import io.spine.core.Command;
+import io.spine.core.CommandContext;
+import io.spine.core.given.GivenCommandContext;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
-import static io.spine.base.Identifier.newUuid;
+import static io.spine.Identifier.newUuid;
 import static io.spine.server.commandbus.Given.CommandMessage.addTask;
 import static io.spine.server.commandbus.Given.CommandMessage.createProjectMessage;
-import static io.spine.testdata.TestCommandContextFactory.createCommandContext;
 import static io.spine.time.Durations2.milliseconds;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -65,7 +65,7 @@ public class ExecutorCommandSchedulerShould {
     @Before
     public void setUp() {
         scheduler = spy(ExecutorCommandScheduler.class);
-        context = createCommandContext(DELAY);
+        context = GivenCommandContext.withScheduledDelayOf(DELAY);
     }
 
     @After
@@ -111,7 +111,7 @@ public class ExecutorCommandSchedulerShould {
     public void throw_exception_if_is_shutdown() {
         scheduler.shutdown();
         try {
-            scheduler.schedule(Given.Command.createProject());
+            scheduler.schedule(Given.ACommand.createProject());
         } catch (IllegalStateException expected) {
             // is OK as it is shutdown
             return;

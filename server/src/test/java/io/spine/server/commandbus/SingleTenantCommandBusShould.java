@@ -20,13 +20,15 @@
 
 package io.spine.server.commandbus;
 
-import io.grpc.stub.StreamObserver;
-import io.spine.base.Command;
-import io.spine.base.CommandContext;
-import io.spine.base.Failure;
-import io.spine.base.Response;
-import io.spine.envelope.CommandEnvelope;
-import io.spine.io.StreamObservers;
+import com.google.protobuf.Message;
+import io.spine.client.TestActorRequestFactory;
+import io.spine.core.Command;
+import io.spine.core.CommandContext;
+import io.spine.core.CommandEnvelope;
+import io.spine.core.CommandValidationError;
+import io.spine.core.Failure;
+import io.spine.core.IsSent;
+import io.spine.grpc.StreamObservers.MemoizingObserver;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.event.EventBus;
@@ -36,17 +38,19 @@ import io.spine.test.command.event.TaskAdded;
 import io.spine.test.failure.InvalidProjectName;
 import io.spine.test.failure.ProjectId;
 import org.junit.Test;
-import org.mockito.ArgumentMatchers;
 
-import static io.spine.base.CommandValidationError.INVALID_COMMAND;
-import static io.spine.base.CommandValidationError.TENANT_INAPPLICABLE;
-import static io.spine.server.commandbus.Given.Command.addTask;
-import static io.spine.server.commandbus.Given.Command.createProject;
+import static io.spine.core.CommandValidationError.INVALID_COMMAND;
+import static io.spine.core.CommandValidationError.TENANT_INAPPLICABLE;
+import static io.spine.core.Failures.toFailure;
+import static io.spine.grpc.StreamObservers.memoizingObserver;
+import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.server.commandbus.Given.ACommand.addTask;
+import static io.spine.server.commandbus.Given.ACommand.createProject;
 import static io.spine.server.tenant.TenantAwareOperation.isTenantSet;
+import static io.spine.validate.Validate.isNotDefault;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
 
 /**
  * @author Alexander Yevsyukov
@@ -66,7 +70,7 @@ public class SingleTenantCommandBusShould extends AbstractCommandBusTestSuite {
 
     @Test
     public void post_command_and_do_not_set_current_tenant() {
-        commandBus.post(newCommandWithoutTenantId(), responseObserver);
+        commandBus.post(newCommandWithoutTenantId(), observer);
 
         assertFalse(isTenantSet());
     }
@@ -75,13 +79,13 @@ public class SingleTenantCommandBusShould extends AbstractCommandBusTestSuite {
     public void reject_invalid_command() {
         final Command cmd = newCommandWithoutContext();
 
-        commandBus.post(cmd, responseObserver);
+        commandBus.post(cmd, observer);
 
-        checkCommandError(responseObserver.getThrowable(),
+        checkCommandError(observer.firstResponse(),
                           INVALID_COMMAND,
+                          CommandValidationError.getDescriptor().getFullName(),
                           InvalidCommandException.class,
                           cmd);
-        assertTrue(responseObserver.getResponses().isEmpty());
     }
 
     @Test
@@ -89,19 +93,17 @@ public class SingleTenantCommandBusShould extends AbstractCommandBusTestSuite {
         // Create a multi-tenant command.
         final Command cmd = createProject();
 
-        commandBus.post(cmd, responseObserver);
+        commandBus.post(cmd, observer);
 
-        checkCommandError(responseObserver.getThrowable(),
+        checkCommandError(observer.firstResponse(),
                           TENANT_INAPPLICABLE,
                           InvalidCommandException.class,
                           cmd);
-        assertTrue(responseObserver.getResponses().isEmpty());
     }
 
     @Test
     public void do_nothing_in_handleDeadMessage() {
-        commandBus.handleDeadMessage(Tests.<CommandEnvelope>nullRef(),
-                                     Tests.<StreamObserver<Response>>nullRef());
+        commandBus.handleDeadMessage(Tests.<CommandEnvelope>nullRef());
     }
 
     @Test
@@ -110,12 +112,22 @@ public class SingleTenantCommandBusShould extends AbstractCommandBusTestSuite {
         commandBus.register(faultyHandler);
 
         final Command addTaskCommand = clearTenantId(addTask());
-        commandBus.post(addTaskCommand, StreamObservers.<Response>noOpObserver());
+        final MemoizingObserver<IsSent> observer = memoizingObserver();
+        commandBus.post(addTaskCommand, observer);
 
-        final InvalidProjectName failureThrowable = faultyHandler.getThrowable();
-        final Failure expectedFailure = failureThrowable.toFailure(addTaskCommand);
-        verify(failureBus).post(eq(expectedFailure),
-                                ArgumentMatchers.<StreamObserver<Response>>any());
+        final InvalidProjectName throwable = faultyHandler.getThrowable();
+        final Failure expectedFailure = toFailure(throwable, addTaskCommand);
+        final IsSent isSent = observer.firstResponse();
+        final Failure actualFailure = isSent.getStatus().getFailure();
+        assertTrue(isNotDefault(actualFailure));
+        assertEquals(unpack(expectedFailure.getMessage()), unpack(actualFailure.getMessage()));
+    }
+
+    @Override
+    protected Command newCommand() {
+        final Message commandMessage = Given.CommandMessage.createProjectMessage();
+        return TestActorRequestFactory.newInstance(SingleTenantCommandBusShould.class)
+                                      .createCommand(commandMessage);
     }
 
     /**

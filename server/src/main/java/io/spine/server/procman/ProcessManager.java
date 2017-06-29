@@ -23,16 +23,16 @@ package io.spine.server.procman;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
-import io.spine.base.CommandContext;
-import io.spine.base.Event;
-import io.spine.base.EventContext;
-import io.spine.envelope.CommandEnvelope;
+import io.spine.core.CommandClass;
+import io.spine.core.CommandContext;
+import io.spine.core.CommandEnvelope;
+import io.spine.core.Event;
+import io.spine.core.EventClass;
+import io.spine.core.EventContext;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.reflect.CommandHandlerMethod;
 import io.spine.server.reflect.EventSubscriberMethod;
-import io.spine.type.CommandClass;
-import io.spine.type.EventClass;
 import io.spine.util.Exceptions;
 import io.spine.validate.ValidatingBuilder;
 
@@ -112,9 +112,9 @@ public abstract class ProcessManager<I,
      */
     @Override
     protected List<Event> dispatchCommand(CommandEnvelope envelope) {
-            final List<? extends Message> messages = super.dispatchCommand(envelope);
-            final List<Event> result = toEvents(messages, envelope);
-            return result;
+        final List<? extends Message> messages = super.dispatchCommand(envelope);
+        final List<Event> result = toEvents(messages, envelope);
+        return result;
     }
 
     /**

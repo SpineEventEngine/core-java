@@ -28,16 +28,16 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
-import io.spine.base.CommandContext;
-import io.spine.base.Response;
-import io.spine.base.Responses;
-import io.spine.base.TenantId;
-import io.spine.base.Version;
 import io.spine.client.Queries;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
 import io.spine.client.Subscription;
 import io.spine.client.Topic;
+import io.spine.core.CommandContext;
+import io.spine.core.Response;
+import io.spine.core.Responses;
+import io.spine.core.TenantId;
+import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.AggregateRepository;
@@ -61,7 +61,7 @@ import java.util.concurrent.Executor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static io.spine.io.StreamObservers.ack;
+import static io.spine.grpc.StreamObservers.ack;
 
 /**
  * A container for storing the latest {@link io.spine.server.aggregate.Aggregate Aggregate}
@@ -200,7 +200,7 @@ public class Stand implements AutoCloseable {
 
             @Override
             public void run() {
-                final Object id = envelope.getEntityId();
+                final Object id = envelope.getId();
                 final Message entityState = envelope.getMessage();
                 final Any packedState = AnyPacker.pack(entityState);
 

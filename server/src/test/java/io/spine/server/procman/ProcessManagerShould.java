@@ -24,14 +24,15 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
-import io.grpc.stub.StreamObserver;
-import io.spine.annotation.Subscribe;
-import io.spine.base.Command;
-import io.spine.base.CommandContext;
-import io.spine.base.Event;
-import io.spine.base.EventContext;
-import io.spine.base.Events;
-import io.spine.envelope.CommandEnvelope;
+import io.spine.client.TestActorRequestFactory;
+import io.spine.core.CommandClass;
+import io.spine.core.CommandContext;
+import io.spine.core.CommandEnvelope;
+import io.spine.core.Event;
+import io.spine.core.EventClass;
+import io.spine.core.EventContext;
+import io.spine.core.Events;
+import io.spine.core.Subscribe;
 import io.spine.protobuf.AnyPacker;
 import io.spine.protobuf.Wrapper;
 import io.spine.server.BoundedContext;
@@ -39,11 +40,10 @@ import io.spine.server.command.Assign;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.commandstore.CommandStore;
+import io.spine.server.entity.given.Given;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantAwareTest;
 import io.spine.server.tenant.TenantIndex;
-import io.spine.test.Given;
-import io.spine.test.TestActorRequestFactory;
 import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.command.AddTask;
 import io.spine.test.procman.command.CreateProject;
@@ -52,29 +52,27 @@ import io.spine.test.procman.event.ProjectCreated;
 import io.spine.test.procman.event.ProjectStarted;
 import io.spine.test.procman.event.TaskAdded;
 import io.spine.testdata.Sample;
-import io.spine.type.CommandClass;
-import io.spine.type.EventClass;
 import io.spine.validate.AnyVBuilder;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import static io.spine.base.Commands.getMessage;
+import static io.spine.core.Commands.getMessage;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.procman.ProcManTransaction.start;
 import static io.spine.server.procman.ProcessManagerDispatcher.dispatch;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static io.spine.test.Verify.assertSize;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 @SuppressWarnings("OverlyCoupledClass")
 public class ProcessManagerShould {
@@ -176,7 +174,8 @@ public class ProcessManagerShould {
     @Test
     public void route_commands() {
         // Add dispatcher for the routed command. Otherwise the command would reject the command.
-        commandBus.register(new AddTaskDispatcher());
+        final AddTaskDispatcher dispatcher = new AddTaskDispatcher();
+        commandBus.register(dispatcher);
         processManager.setCommandBus(commandBus);
 
         final List<Event> events = testDispatchCommand(startProject());
@@ -192,22 +191,16 @@ public class ProcessManagerShould {
         final Message message = AnyPacker.unpack(event.getMessage());
 
         // The event type is CommandRouted.
-        assertTrue(message instanceof CommandRouted);
+        assertThat(message, instanceOf(CommandRouted.class));
 
         final CommandRouted commandRouted = (CommandRouted) message;
 
         // The source of the command is StartProject.
-        assertTrue(getMessage(commandRouted.getSource()) instanceof StartProject);
-        verifyPostedCmd(commandRouted.getProduced(0));
-    }
-
-    @SuppressWarnings("unchecked")
-    private void verifyPostedCmd(Command cmd) {
-        // The produced command was posted to CommandBus once, and the same
-        // command is in the generated event.
-        // We are not interested in observer instance here.
-        verify(commandBus, times(1))
-                .post(eq(cmd), any(StreamObserver.class));
+        assertThat(getMessage(commandRouted.getSource()), instanceOf(StartProject.class));
+        final List<CommandEnvelope> dispatchedCommands = dispatcher.getCommands();
+        assertSize(1, dispatchedCommands);
+        final CommandEnvelope dispatchedCommand = dispatcher.getCommands().get(0);
+        assertEquals(commandRouted.getProduced(0), dispatchedCommand.getCommand());
     }
 
     @Test(expected = IllegalStateException.class)
@@ -353,6 +346,8 @@ public class ProcessManagerShould {
 
     private static class AddTaskDispatcher implements CommandDispatcher {
 
+        private final List<CommandEnvelope> commands = new LinkedList<>();
+
         @Override
         public Set<CommandClass> getMessageClasses() {
             return CommandClass.setOf(AddTask.class);
@@ -360,7 +355,12 @@ public class ProcessManagerShould {
 
         @Override
         public void dispatch(CommandEnvelope envelope) {
-            // Do nothing in this dummy dispatcher.
+            commands.add(envelope);
+        }
+
+        @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK for tests.
+        public List<CommandEnvelope> getCommands() {
+            return commands;
         }
     }
 }

@@ -22,13 +22,13 @@ package io.spine.server.stand;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import io.spine.base.Responses;
-import io.spine.base.TenantId;
-import io.spine.base.Version;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
 import io.spine.client.Topic;
+import io.spine.core.Responses;
+import io.spine.core.TenantId;
+import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.test.Values;

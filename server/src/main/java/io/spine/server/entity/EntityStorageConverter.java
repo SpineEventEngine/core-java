@@ -24,7 +24,7 @@ import com.google.common.base.Converter;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import io.spine.base.Identifier;
+import io.spine.Identifier;
 import io.spine.type.TypeUrl;
 
 import javax.annotation.Nullable;
@@ -111,10 +111,10 @@ public abstract class EntityStorageConverter<I, E extends Entity<I, S>, S extend
     @Override
     @SuppressWarnings("unchecked")
     protected E doBackward(EntityRecord entityRecord) {
-        final Message unpacked = unpack(entityRecord.getState());
-        final S state = (S) FieldMasks.applyMask(getFieldMask(), unpacked, entityStateType);
+        final S unpacked = unpack(entityRecord.getState());
+        final S state = FieldMasks.applyMask(getFieldMask(), unpacked, entityStateType);
 
-        final I id = (I) Identifier.unpack(entityRecord.getEntityId());
+        final I id = Identifier.unpack(entityRecord.getEntityId());
         final E entity = entityFactory.create(id);
 
         if (entity != null) {

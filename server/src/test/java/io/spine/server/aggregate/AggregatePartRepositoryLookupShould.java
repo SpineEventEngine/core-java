@@ -22,7 +22,7 @@ package io.spine.server.aggregate;
 
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
-import io.spine.base.CommandContext;
+import io.spine.core.CommandContext;
 import io.spine.server.BoundedContext;
 import io.spine.server.command.Assign;
 import io.spine.test.aggregate.Project;
@@ -38,7 +38,7 @@ import io.spine.test.aggregate.event.TaskAdded;
 import org.junit.Before;
 import org.junit.Test;
 
-import static io.spine.base.Identifier.newUuid;
+import static io.spine.Identifier.newUuid;
 import static io.spine.server.aggregate.AggregatePartRepositoryLookup.createLookup;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -113,7 +113,7 @@ public class AggregatePartRepositoryLookupShould {
 
     private static class ProjectPart extends AggregatePart<ProjectId,
                                                            Project,
-                                                           ProjectVBuilder,
+            ProjectVBuilder,
                                                            ProjectRoot> {
         private ProjectPart(ProjectRoot root) {
             super(root);
@@ -155,9 +155,9 @@ public class AggregatePartRepositoryLookupShould {
     }
 
     private static class TaskAggregatePart extends AggregatePart<TaskId,
-                                                                     Task,
-                                                                     TaskVBuilder,
-                                                                     TaskRoot> {
+                                                                 Task,
+                                                                 TaskVBuilder,
+                                                                 TaskRoot> {
         private TaskAggregatePart(TaskRoot root) {
             super(root);
         }

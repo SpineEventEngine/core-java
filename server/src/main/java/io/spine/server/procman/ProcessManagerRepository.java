@@ -21,11 +21,13 @@
 package io.spine.server.procman;
 
 import com.google.protobuf.Message;
-import io.spine.base.CommandContext;
-import io.spine.base.Event;
-import io.spine.base.EventContext;
-import io.spine.envelope.CommandEnvelope;
-import io.spine.envelope.EventEnvelope;
+import io.spine.core.CommandClass;
+import io.spine.core.CommandContext;
+import io.spine.core.CommandEnvelope;
+import io.spine.core.Event;
+import io.spine.core.EventClass;
+import io.spine.core.EventContext;
+import io.spine.core.EventEnvelope;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcherDelegate;
@@ -33,8 +35,6 @@ import io.spine.server.commandbus.DelegatingCommandDispatcher;
 import io.spine.server.entity.EventDispatchingRepository;
 import io.spine.server.entity.idfunc.GetTargetIdFromCommand;
 import io.spine.server.event.EventBus;
-import io.spine.type.CommandClass;
-import io.spine.type.EventClass;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;

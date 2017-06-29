@@ -22,19 +22,19 @@ package io.spine.server;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import io.spine.base.Command;
-import io.spine.base.CommandContext;
-import io.spine.base.Identifier;
-import io.spine.base.TenantId;
-import io.spine.base.UserId;
+import io.spine.Identifier;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.Query;
+import io.spine.client.TestActorRequestFactory;
+import io.spine.core.Command;
+import io.spine.core.CommandContext;
+import io.spine.core.TenantId;
+import io.spine.core.UserId;
 import io.spine.people.PersonName;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
-import io.spine.test.TestActorRequestFactory;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.ProjectVBuilder;
@@ -57,7 +57,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static io.spine.base.Identifier.newUuid;
+import static io.spine.Identifier.newUuid;
 import static io.spine.test.Values.newUserId;
 import static io.spine.time.Time.getCurrentTime;
 

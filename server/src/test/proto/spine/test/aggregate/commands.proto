@@ -21,14 +21,16 @@ syntax = "proto3";
 
 package spine.test.aggregate.command;
 
+import "spine/options.proto";
+
 option (type_url_prefix) = "type.spine.io";
 option java_package="io.spine.test.aggregate.command";
 option java_outer_classname = "AggregateCommandsProto";
 option java_multiple_files = true;
 
-import "spine/options.proto";
+import "spine/core/event.proto";
+
 import "spine/test/aggregate/project.proto";
-import "spine/base/event.proto";
 
 message CreateProject {
     ProjectId project_id = 1;
@@ -46,5 +48,5 @@ message StartProject {
 
 message ImportEvents {
     ProjectId project_id = 1;
-    repeated spine.base.Event event = 2;
+    repeated core.Event event = 2;
 }

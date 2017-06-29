@@ -23,7 +23,7 @@ package io.spine.server.event.enrich;
 import com.google.common.base.Function;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Predicate;
-import io.spine.base.EventContext;
+import io.spine.core.EventContext;
 import io.spine.server.event.EventBus;
 
 import javax.annotation.Nullable;

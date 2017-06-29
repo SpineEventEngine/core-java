@@ -23,30 +23,33 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
+import io.spine.Identifier;
 import io.spine.annotation.Internal;
-import io.spine.base.Command;
-import io.spine.base.FailureThrowable;
-import io.spine.base.Identifier;
-import io.spine.base.Response;
-import io.spine.base.Responses;
-import io.spine.envelope.CommandEnvelope;
-import io.spine.io.StreamObservers;
+import io.spine.base.Error;
+import io.spine.base.ThrowableMessage;
+import io.spine.core.Command;
+import io.spine.core.CommandClass;
+import io.spine.core.CommandEnvelope;
+import io.spine.core.Failure;
+import io.spine.core.IsSent;
 import io.spine.server.Environment;
 import io.spine.server.bus.Bus;
 import io.spine.server.commandstore.CommandStore;
 import io.spine.server.failure.FailureBus;
-import io.spine.type.CommandClass;
 
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Set;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.getRootCause;
-import static io.spine.validate.Validate.isNotDefault;
+import static io.spine.core.Failures.toFailure;
+import static io.spine.server.bus.Buses.acknowledge;
+import static io.spine.server.bus.Buses.reject;
+import static io.spine.util.Exceptions.toError;
 import static java.lang.String.format;
 
 /**
@@ -57,7 +60,10 @@ import static java.lang.String.format;
  * @author Alexander Litus
  * @author Alex Tymchenko
  */
-public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, CommandDispatcher> {
+public class CommandBus extends Bus<Command,
+                                    CommandEnvelope,
+                                    CommandClass,
+                                    CommandDispatcher> {
 
     private final CommandStore commandStore;
 
@@ -161,6 +167,42 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
         return new CommandDispatcherRegistry();
     }
 
+    @Override
+    protected Optional<IsSent> preProcess(CommandEnvelope message) {
+        final Optional<IsSent> result = filterChain.accept(message);
+        return result;
+    }
+
+    @Override
+    protected CommandEnvelope toEnvelope(Command message) {
+        return CommandEnvelope.of(message);
+    }
+
+    @Override
+    protected IsSent doPost(CommandEnvelope envelope) {
+        final CommandDispatcher dispatcher = getDispatcher(envelope);
+        IsSent result;
+        try {
+            dispatcher.dispatch(envelope);
+            commandStore.setCommandStatusOk(envelope);
+            result = acknowledge(envelope.getId());
+        } catch (RuntimeException e) {
+            final Throwable cause = getRootCause(e);
+            commandStore.updateCommandStatus(envelope, cause, log);
+
+            if (cause instanceof ThrowableMessage) {
+                final ThrowableMessage throwableMessage = (ThrowableMessage) cause;
+                final Failure failure = toFailure(throwableMessage, envelope.getCommand());
+                failureBus().post(failure);
+                result = reject(envelope.getId(), failure);
+            } else {
+                final Error error = toError(cause);
+                result = reject(envelope.getId(), error);
+            }
+        }
+        return result;
+    }
+
     /**
      * Obtains the view {@code Set} of commands that are known to this {@code CommandBus}.
      *
@@ -177,46 +219,20 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
     }
 
     /**
-     * Directs the command to be dispatched.
-     *
-     * <p>If the command has scheduling attributes, it will be posted for execution by
-     * the configured scheduler according to values of those scheduling attributes.
-     *
-     * <p>If a command does not have a dispatcher, the error is
-     * {@linkplain StreamObserver#onError(Throwable) returned} with
-     * {@link UnsupportedCommandException} as the cause.
-     *
-     * @param command the command to be processed
-     * @param responseObserver the observer to return the result of the call
-     */
-    @Override
-    public void post(Command command, StreamObserver<Response> responseObserver) {
-        checkNotNull(command);
-        checkNotNull(responseObserver);
-        checkArgument(isNotDefault(command));
-
-        final CommandEnvelope commandEnvelope = CommandEnvelope.of(command);
-        if (!filterChain.accept(commandEnvelope, responseObserver)) {
-            return;
-        }
-        commandStore().store(command);
-        responseObserver.onNext(Responses.ok());
-
-        doPost(commandEnvelope);
-        responseObserver.onCompleted();
-    }
-
-    /**
      * Does nothing because commands for which are no registered dispatchers
      * are rejected by a built-in {@link CommandBusFilter} invoked when such a command is
-     * {@linkplain #post(Command, StreamObserver) posted} to the bus.
+     * {@linkplain #post(com.google.protobuf.Message, StreamObserver) posted} to the bus.
      */
     @Override
-    public void handleDeadMessage(CommandEnvelope message,
-                                  StreamObserver<Response> responseObserver) {
+    public void handleDeadMessage(CommandEnvelope message) {
         // Do nothing because this is the responsibility of `DeadCommandFilter`.
         //TODO:2017-03-30:alexander.yevsyukov: Handle dead messages in other buses using filters
         // and remove this method from the interface.
+    }
+
+    @Override
+    protected Message getId(CommandEnvelope envelope) {
+        return envelope.getId();
     }
 
     /**
@@ -228,7 +244,7 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
     }
 
     private static IllegalStateException noDispatcherFound(CommandEnvelope commandEnvelope) {
-        final String idStr = Identifier.toString(commandEnvelope.getCommandId());
+        final String idStr = Identifier.toString(commandEnvelope.getId());
         final String msg = format("No dispatcher found for the command (class: %s id: %s).",
                                   commandEnvelope.getMessageClass()
                                                  .getClassName(),
@@ -236,33 +252,10 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
         throw new IllegalStateException(msg);
     }
 
-    /**
-     * Directs a command to be dispatched.
-     */
-    @SuppressWarnings("ConstantConditions")
-        // OK to get without checking because the command was validated before this call.
-    void doPost(CommandEnvelope commandEnvelope) {
-        final CommandDispatcher dispatcher = getDispatcher(commandEnvelope);
-        try {
-            dispatcher.dispatch(commandEnvelope);
-            commandStore.setCommandStatusOk(commandEnvelope);
-        } catch (RuntimeException e) {
-            final Throwable cause = getRootCause(e);
-            commandStore.updateCommandStatus(commandEnvelope, cause, log);
-
-            emitFailure(commandEnvelope, cause);
-        }
-    }
-
-    /**
-     * Emits the {@code Failure} and posts it to the {@code FailureBus},
-     * if the given {@code cause} is in fact a {@code FailureThrowable} instance.
-     */
-    private void emitFailure(CommandEnvelope commandEnvelope, Throwable cause) {
-        if (cause instanceof FailureThrowable) {
-            final FailureThrowable failure = (FailureThrowable) cause;
-            failureBus.post(failure.toFailure(commandEnvelope.getCommand()),
-                            StreamObservers.<Response>noOpObserver());
+    @Override
+    protected void store(Iterable<Command> commands) {
+        for (Command command : commands) {
+            commandStore().store(command);
         }
     }
 
@@ -281,9 +274,9 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
      *
      * <p>The following operations are performed:
      * <ol>
-     *     <li>All command dispatchers are un-registered.
-     *     <li>{@code CommandStore} is closed.
-     *     <li>{@code CommandScheduler} is shut down.
+     * <li>All command dispatchers are un-registered.
+     * <li>{@code CommandStore} is closed.
+     * <li>{@code CommandScheduler} is shut down.
      * </ol>
      *
      * @throws Exception if closing the {@code CommandStore} cases an exception
@@ -489,7 +482,7 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
             }
 
             final CommandBus commandBus = createCommandBus();
-            
+
             commandScheduler.setCommandBus(commandBus);
 
             if (autoReschedule) {

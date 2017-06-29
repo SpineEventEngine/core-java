@@ -26,7 +26,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.TreeMultimap;
-import io.spine.base.Event;
+import io.spine.core.Event;
 import io.spine.server.aggregate.AggregateEventRecord;
 import io.spine.server.entity.EntityWithLifecycle;
 import io.spine.server.entity.LifecycleFlags;

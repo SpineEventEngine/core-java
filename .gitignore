@@ -14,14 +14,10 @@
 /core-java/target
 
 # Generated source code
-*/generated/*
+generated/
 
 # Gradle build files
-build/*
-*/build/*
-
-# Class files produced by the IDE
-classes/*
+build/
 
 # Login details to Maven repository.
 # Each workstation should have developer's login defined in this file.

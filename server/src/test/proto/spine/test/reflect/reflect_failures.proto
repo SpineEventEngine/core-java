@@ -21,16 +21,16 @@ syntax = "proto3";
 
 package spine.test.reflect;
 
+import "spine/options.proto";
+
 option (type_url_prefix) = "type.spine.io";
 option (SPI_all) = true;
 option java_package = "io.spine.test.reflect";
 // Keep all the failures under the same outer class called `ReflectFailures`.
 option java_generate_equals_and_hash = true;
 
-import "spine/options.proto";
 import "spine/test/reflect/project.proto";
 
 message InvalidProjectName {
-
     ProjectId project_id = 1;
 }

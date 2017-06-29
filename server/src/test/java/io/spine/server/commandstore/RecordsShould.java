@@ -20,8 +20,8 @@
 
 package io.spine.server.commandstore;
 
-import io.spine.base.Command;
-import io.spine.base.CommandStatus;
+import io.spine.core.Command;
+import io.spine.core.CommandStatus;
 import io.spine.server.commandbus.CommandRecord;
 import io.spine.server.commandbus.Given;
 import org.junit.Test;
@@ -46,7 +46,7 @@ public class RecordsShould {
 
     @Test
     public void convert_cmd_to_record() {
-        final Command command = Given.Command.createProject();
+        final Command command = Given.ACommand.createProject();
         final CommandStatus status = CommandStatus.RECEIVED;
 
         final CommandRecord record = newRecordBuilder(command,

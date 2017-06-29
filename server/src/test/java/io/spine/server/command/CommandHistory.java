@@ -22,9 +22,9 @@ package io.spine.server.command;
 
 import com.google.common.collect.Lists;
 import com.google.protobuf.Message;
-import io.spine.base.Command;
-import io.spine.base.CommandContext;
-import io.spine.base.Commands;
+import io.spine.core.Command;
+import io.spine.core.CommandContext;
+import io.spine.core.Commands;
 
 import java.util.List;
 

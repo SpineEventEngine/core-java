@@ -22,12 +22,12 @@ package io.spine.server.entity.storage;
 
 import com.google.common.testing.EqualsTester;
 import com.google.protobuf.Any;
-import io.spine.base.Version;
+import io.spine.core.Version;
 import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.server.entity.EntityWithLifecycle;
 import io.spine.server.entity.VersionableEntity;
-import io.spine.test.Given;
+import io.spine.server.entity.given.Given;
 import org.junit.Test;
 
 import javax.annotation.Nullable;

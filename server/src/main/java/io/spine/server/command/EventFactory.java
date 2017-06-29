@@ -24,12 +24,12 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
-import io.spine.base.CommandContext;
-import io.spine.base.CommandId;
-import io.spine.base.Event;
-import io.spine.base.EventContext;
-import io.spine.base.EventId;
-import io.spine.base.Version;
+import io.spine.core.CommandContext;
+import io.spine.core.CommandId;
+import io.spine.core.Event;
+import io.spine.core.EventContext;
+import io.spine.core.EventId;
+import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
 import io.spine.protobuf.Wrapper;
 import io.spine.server.integration.IntegrationEvent;
@@ -41,7 +41,6 @@ import javax.annotation.Nullable;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.protobuf.Messages.toAny;
 import static io.spine.time.Time.getCurrentTime;
 import static io.spine.validate.Validate.checkValid;
 import static io.spine.validate.Validate.isNotDefault;
@@ -117,7 +116,7 @@ public class EventFactory {
     private static Event createEvent(EventId id, Message messageOrAny, EventContext context) {
         checkNotNull(messageOrAny);
         checkNotNull(context);
-        final Any packed = toAny(messageOrAny);
+        final Any packed = pack(messageOrAny);
         final Event result = Event.newBuilder()
                                   .setId(id)
                                   .setMessage(packed)
@@ -187,7 +186,7 @@ public class EventFactory {
          * Sets the ID of an entity which is producing the events wrapped into {@code Any}.
          */
         public Builder setProducerId(Message messageOrAny) {
-            this.producerId = toAny(checkNotNull(messageOrAny));
+            this.producerId = pack(checkNotNull(messageOrAny));
             return this;
         }
 

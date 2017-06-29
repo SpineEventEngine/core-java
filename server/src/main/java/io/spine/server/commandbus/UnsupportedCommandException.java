@@ -19,15 +19,9 @@
  */
 package io.spine.server.commandbus;
 
-import com.google.protobuf.Message;
-import io.spine.base.Command;
-import io.spine.base.CommandValidationError;
-import io.spine.base.Commands;
 import io.spine.base.Error;
-import io.spine.type.CommandClass;
-import io.spine.type.TypeName;
-
-import static java.lang.String.format;
+import io.spine.core.Command;
+import io.spine.core.CommandValidationError;
 
 /**
  * Exception that is thrown when unsupported command is obtained
@@ -41,33 +35,17 @@ public class UnsupportedCommandException extends CommandException {
     private static final long serialVersionUID = 0L;
 
     public UnsupportedCommandException(Command command) {
-        super(messageFormat(command),
+        super(messageFormat(
+                 "No registered handler or dispatcher for the command of class: `%s`. " +
+                 "Protobuf type: `%s`.", command),
               command,
-              unsupportedCommandError(Commands.getMessage(command)));
-    }
-
-    private static String messageFormat(Command command) {
-        final CommandClass commandClass = CommandClass.of(command);
-        final String typeName = TypeName.ofCommand(command)
-                                        .value();
-        final String result = format(
-                "There is no registered handler or dispatcher for the command of class: `%s`. " +
-                "Protobuf type: `%s`",
-                commandClass,
-                typeName
-        );
-        return result;
+              unsupportedCommand(command));
     }
 
     /** Creates an instance of unsupported command error. */
-    private static Error unsupportedCommandError(Message commandMessage) {
-        final String commandType = commandMessage.getDescriptorForType().getFullName();
-        final String errMsg = format("Commands of the type `%s` are not supported.", commandType);
-        final Error.Builder error = Error.newBuilder()
-                .setType(CommandValidationError.getDescriptor().getFullName())
-                .setCode(CommandValidationError.UNSUPPORTED_COMMAND.getNumber())
-                .putAllAttributes(commandTypeAttribute(commandMessage))
-                .setMessage(errMsg);
-        return error.build();
+    private static Error unsupportedCommand(Command command) {
+        final String format = "Commands of the type `%s` are not supported.";
+        final CommandValidationError errorCode = CommandValidationError.UNSUPPORTED_COMMAND;
+        return createError(format, command, errorCode);
     }
 }

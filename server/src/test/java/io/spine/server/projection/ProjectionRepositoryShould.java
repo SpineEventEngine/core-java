@@ -25,26 +25,28 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
-import io.spine.annotation.Subscribe;
-import io.spine.base.Event;
-import io.spine.base.EventContext;
-import io.spine.base.Events;
-import io.spine.base.TenantId;
-import io.spine.base.Version;
-import io.spine.base.Versions;
-import io.spine.envelope.EventEnvelope;
+import io.spine.Identifier;
+import io.spine.client.TestActorRequestFactory;
+import io.spine.core.Event;
+import io.spine.core.EventClass;
+import io.spine.core.EventContext;
+import io.spine.core.EventEnvelope;
+import io.spine.core.Events;
+import io.spine.core.Subscribe;
+import io.spine.core.TenantId;
+import io.spine.core.Version;
+import io.spine.core.Versions;
+import io.spine.core.given.GivenEvent;
 import io.spine.server.BoundedContext;
+import io.spine.server.command.TestEventFactory;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.RecordBasedRepositoryShould;
+import io.spine.server.entity.given.Given;
 import io.spine.server.entity.idfunc.EventTargetsFunction;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.NoOpTaskNamesRepository;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.TestProjection;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.TestProjectionRepository;
 import io.spine.server.storage.RecordStorage;
-import io.spine.test.EventTests;
-import io.spine.test.Given;
-import io.spine.test.TestActorRequestFactory;
-import io.spine.test.TestEventFactory;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.ProjectTaskNames;
@@ -52,7 +54,6 @@ import io.spine.test.projection.ProjectTaskNamesVBuilder;
 import io.spine.test.projection.event.ProjectCreated;
 import io.spine.test.projection.event.ProjectStarted;
 import io.spine.test.projection.event.TaskAdded;
-import io.spine.type.EventClass;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -63,8 +64,7 @@ import java.util.List;
 import java.util.Set;
 
 import static com.google.common.collect.Sets.newHashSet;
-import static io.spine.base.Identifier.newUuid;
-import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.Identifier.newUuid;
 import static io.spine.test.Verify.assertContainsAll;
 import static io.spine.time.Time.getCurrentTime;
 import static java.lang.String.format;
@@ -91,7 +91,7 @@ public class ProjectionRepositoryShould
     private static final ProjectId ID = ProjectId.newBuilder()
                                                  .setId("p-123")
                                                  .build();
-    private static final Any PRODUCER_ID = pack(ID);
+    private static final Any PRODUCER_ID = Identifier.pack(ID);
 
     private BoundedContext boundedContext;
 
@@ -234,7 +234,7 @@ public class ProjectionRepositoryShould
     public void throw_exception_if_dispatch_unknown_event() {
         final StringValue unknownEventMessage = StringValue.getDefaultInstance();
 
-        final Event event = EventTests.createContextlessEvent(unknownEventMessage);
+        final Event event = GivenEvent.withMessage(unknownEventMessage);
 
         repository().dispatch(EventEnvelope.of(event));
     }

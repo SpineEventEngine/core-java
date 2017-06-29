@@ -25,7 +25,7 @@ import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.spine.annotation.Internal;
 import io.spine.base.Error;
-import io.spine.base.MetadataConverter;
+import io.spine.grpc.MetadataConverter;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.grpc.Status.INVALID_ARGUMENT;

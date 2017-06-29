@@ -21,11 +21,12 @@
 package io.spine.server.commandbus;
 
 import com.google.protobuf.Any;
-import io.spine.base.Command;
-import io.spine.base.CommandContext;
-import io.spine.envelope.CommandEnvelope;
+import io.spine.client.TestActorRequestFactory;
+import io.spine.core.Command;
+import io.spine.core.CommandContext;
+import io.spine.core.CommandEnvelope;
+import io.spine.core.given.GivenCommandContext;
 import io.spine.protobuf.AnyPacker;
-import io.spine.test.TestActorRequestFactory;
 import io.spine.test.command.CreateProject;
 import io.spine.time.Time;
 import io.spine.validate.ConstraintViolation;
@@ -33,9 +34,8 @@ import org.junit.Test;
 
 import java.util.List;
 
-import static io.spine.base.Commands.generateId;
+import static io.spine.core.Commands.generateId;
 import static io.spine.server.commandbus.Given.CommandMessage.createProjectMessage;
-import static io.spine.testdata.TestCommandContextFactory.createCommandContext;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -47,7 +47,7 @@ public class ValidatorShould {
 
     @Test
     public void validate_command_and_return_nothing_if_it_is_valid() {
-        final Command cmd = Given.Command.createProject();
+        final Command cmd = Given.ACommand.createProject();
 
         final List<ConstraintViolation> violations = validator.validate(CommandEnvelope.of(cmd));
 
@@ -60,7 +60,8 @@ public class ValidatorShould {
         final Command commandWithEmptyMessage = Command.newBuilder()
                                                        .setId(generateId())
                                                        .setMessage(invalidMessagePacked)
-                                                       .setContext(createCommandContext())
+                                                       .setContext(
+                                                               GivenCommandContext.withRandomUser())
                                                        .build();
 
         final List<ConstraintViolation> violations =

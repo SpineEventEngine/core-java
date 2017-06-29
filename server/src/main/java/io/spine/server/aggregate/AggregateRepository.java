@@ -22,10 +22,11 @@ package io.spine.server.aggregate;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.protobuf.Message;
-import io.spine.base.Command;
-import io.spine.base.CommandContext;
-import io.spine.base.Event;
-import io.spine.envelope.CommandEnvelope;
+import io.spine.core.Command;
+import io.spine.core.CommandClass;
+import io.spine.core.CommandContext;
+import io.spine.core.CommandEnvelope;
+import io.spine.core.Event;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.Repository;
@@ -36,7 +37,6 @@ import io.spine.server.stand.Stand;
 import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.CommandOperation;
-import io.spine.type.CommandClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -227,9 +227,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * Posts passed events to {@link EventBus}.
      */
     private void postEvents(Iterable<Event> events) {
-        for (Event event : events) {
-            getEventBus().post(event);
-        }
+        getEventBus().post(events);
     }
 
     /**

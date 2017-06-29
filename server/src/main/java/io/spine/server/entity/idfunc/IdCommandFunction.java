@@ -21,7 +21,7 @@
 package io.spine.server.entity.idfunc;
 
 import com.google.protobuf.Message;
-import io.spine.base.CommandContext;
+import io.spine.core.CommandContext;
 
 /**
  * Base interface for function obtaining target identifiers from commands.

@@ -24,10 +24,10 @@ import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import io.spine.base.Identifier;
-import io.spine.base.TenantId;
-import io.spine.base.Version;
-import io.spine.envelope.MessageEnvelope;
+import io.spine.Identifier;
+import io.spine.core.MessageEnvelope;
+import io.spine.core.TenantId;
+import io.spine.core.Version;
 import io.spine.string.Stringifiers;
 
 import javax.annotation.Nullable;
@@ -102,7 +102,7 @@ public final class EntityStateEnvelope<I, S extends Message>
      * just on its properties.
      *
      * <p>To obtain an entity instance, use the corresponding {@code Repository} instance along
-     * with {@linkplain #getEntityId() entity ID} instead.
+     * with {@linkplain #getId() entity ID} instead.
      *
      * @return {@code null}
      */
@@ -113,6 +113,14 @@ public final class EntityStateEnvelope<I, S extends Message>
         return null;
     }
 
+    /**
+     * Obtains the {@link Entity} ID.
+     */
+    public I getId() {
+        final I result = Identifier.unpack(entityId);
+        return result;
+    }
+
     @Override
     public S getMessage() {
         return entityState;
@@ -121,13 +129,6 @@ public final class EntityStateEnvelope<I, S extends Message>
     @Override
     public EntityStateClass getMessageClass() {
         return this.entityStateClass;
-    }
-
-    public I getEntityId() {
-        final Object rawId = Identifier.unpack(entityId);
-        @SuppressWarnings("unchecked")  // as `Any` was created out of `I`-typed object previously.
-        final I result = (I) rawId;
-        return result;
     }
 
     public Optional<Version> getEntityVersion() {

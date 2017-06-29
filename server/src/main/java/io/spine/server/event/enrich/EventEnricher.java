@@ -33,13 +33,13 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import io.spine.base.Enrichment;
-import io.spine.base.Enrichment.Container;
-import io.spine.base.Event;
-import io.spine.base.EventContext;
-import io.spine.envelope.EventEnvelope;
+import io.spine.core.Enrichment;
+import io.spine.core.Enrichment.Container;
+import io.spine.core.Event;
+import io.spine.core.EventClass;
+import io.spine.core.EventContext;
+import io.spine.core.EventEnvelope;
 import io.spine.protobuf.AnyPacker;
-import io.spine.type.EventClass;
 import io.spine.type.TypeName;
 
 import javax.annotation.Nullable;
@@ -53,7 +53,7 @@ import static com.google.common.collect.Collections2.filter;
 import static com.google.common.collect.FluentIterable.from;
 import static com.google.common.collect.LinkedListMultimap.create;
 import static com.google.common.collect.Multimaps.synchronizedMultimap;
-import static io.spine.base.Enrichments.isEnrichmentEnabled;
+import static io.spine.core.Enrichments.isEnrichmentEnabled;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**

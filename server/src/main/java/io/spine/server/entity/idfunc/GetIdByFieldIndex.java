@@ -21,8 +21,8 @@
 package io.spine.server.entity.idfunc;
 
 import com.google.protobuf.Message;
-import io.spine.base.EventContext;
-import io.spine.base.Identifier;
+import io.spine.Identifier;
+import io.spine.core.EventContext;
 import io.spine.protobuf.MessageField;
 
 /**
@@ -33,7 +33,7 @@ import io.spine.protobuf.MessageField;
  * @param <I> the type of entity IDs
  * @param <M> the type of messages to get IDs from
  * @param <C> either {@link EventContext EventContext} or
- *            {@link io.spine.base.CommandContext CommandContext} type
+ *            {@link io.spine.core.CommandContext CommandContext} type
  */
 abstract class GetIdByFieldIndex<I, M extends Message, C extends Message>
          implements IdFunction<I, M, C> {

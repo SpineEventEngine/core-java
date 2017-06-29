@@ -20,18 +20,18 @@
 
 package io.spine.server.commandstore;
 
-import io.spine.base.Command;
-import io.spine.base.CommandId;
-import io.spine.base.CommandStatus;
 import io.spine.base.Error;
-import io.spine.base.Failure;
+import io.spine.core.Command;
+import io.spine.core.CommandId;
+import io.spine.core.CommandStatus;
+import io.spine.core.Failure;
 import io.spine.server.commandbus.CommandRecord;
 import io.spine.server.entity.AbstractEntity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.base.CommandStatus.ERROR;
-import static io.spine.base.CommandStatus.FAILURE;
-import static io.spine.base.CommandStatus.OK;
+import static io.spine.core.CommandStatus.ERROR;
+import static io.spine.core.CommandStatus.FAILURE;
+import static io.spine.core.CommandStatus.OK;
 
 /**
  * An entity for storing a command and its processing status.

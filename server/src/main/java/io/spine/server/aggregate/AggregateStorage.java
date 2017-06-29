@@ -22,10 +22,10 @@ package io.spine.server.aggregate;
 
 import com.google.common.base.Optional;
 import com.google.protobuf.Timestamp;
+import io.spine.Identifier;
 import io.spine.annotation.SPI;
-import io.spine.base.Event;
-import io.spine.base.EventContext;
-import io.spine.base.Identifier;
+import io.spine.core.Event;
+import io.spine.core.EventContext;
 import io.spine.server.storage.AbstractStorage;
 import io.spine.server.storage.StorageWithLifecycleFlags;
 

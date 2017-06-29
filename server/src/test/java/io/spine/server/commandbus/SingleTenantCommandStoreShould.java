@@ -20,6 +20,10 @@
 
 package io.spine.server.commandbus;
 
+import com.google.protobuf.Message;
+import io.spine.client.TestActorRequestFactory;
+import io.spine.core.Command;
+
 /**
  * @author Alexander Yevsyukov
  */
@@ -27,5 +31,12 @@ public class SingleTenantCommandStoreShould extends CommandStoreShould {
 
     public SingleTenantCommandStoreShould() {
         super(false);
+    }
+
+    @Override
+    protected Command newCommand() {
+        final Message commandMessage = Given.CommandMessage.createProjectMessage();
+        return TestActorRequestFactory.newInstance(SingleTenantCommandBusShould.class)
+                                      .createCommand(commandMessage);
     }
 }

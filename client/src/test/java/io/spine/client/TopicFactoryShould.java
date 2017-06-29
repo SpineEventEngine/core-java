@@ -21,7 +21,7 @@ package io.spine.client;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
-import io.spine.base.ActorContext;
+import io.spine.core.ActorContext;
 import io.spine.protobuf.AnyPacker;
 import io.spine.test.client.TestEntity;
 import io.spine.test.client.TestEntityId;

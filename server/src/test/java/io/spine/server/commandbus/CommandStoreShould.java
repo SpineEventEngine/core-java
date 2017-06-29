@@ -23,14 +23,15 @@ package io.spine.server.commandbus;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import io.spine.base.Command;
-import io.spine.base.CommandContext;
-import io.spine.base.CommandId;
-import io.spine.base.CommandStatus;
 import io.spine.base.Error;
-import io.spine.base.FailureThrowable;
-import io.spine.base.TenantId;
-import io.spine.envelope.CommandEnvelope;
+import io.spine.base.ThrowableMessage;
+import io.spine.core.Command;
+import io.spine.core.CommandClass;
+import io.spine.core.CommandContext;
+import io.spine.core.CommandEnvelope;
+import io.spine.core.CommandId;
+import io.spine.core.CommandStatus;
+import io.spine.core.TenantId;
 import io.spine.protobuf.Wrapper;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandler;
@@ -39,8 +40,7 @@ import io.spine.test.TimeTests;
 import io.spine.test.command.AddTask;
 import io.spine.test.command.CreateProject;
 import io.spine.test.command.StartProject;
-import io.spine.test.command.event.ProjectCreated;
-import io.spine.type.CommandClass;
+import io.spine.test.envelope.ProjectCreated;
 import org.junit.Test;
 
 import javax.annotation.Nonnull;
@@ -50,10 +50,11 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
-import static io.spine.base.Commands.getMessage;
-import static io.spine.server.commandbus.Given.Command.addTask;
-import static io.spine.server.commandbus.Given.Command.createProject;
-import static io.spine.server.commandbus.Given.Command.startProject;
+import static io.spine.core.Commands.getMessage;
+import static io.spine.core.Failures.toFailure;
+import static io.spine.server.commandbus.Given.ACommand.addTask;
+import static io.spine.server.commandbus.Given.ACommand.createProject;
+import static io.spine.server.commandbus.Given.ACommand.startProject;
 import static io.spine.server.commandbus.Given.CommandMessage.createProjectMessage;
 import static io.spine.time.Durations2.fromMinutes;
 import static org.junit.Assert.assertEquals;
@@ -72,7 +73,7 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
 
         final Command command = requestFactory.command()
                                               .create(createProjectMessage());
-        commandBus.post(command, responseObserver);
+        commandBus.post(command, observer);
 
         final TenantId tenantId = command.getContext()
                                          .getActorContext()
@@ -90,13 +91,13 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
         final Command command = requestFactory.command()
                                               .create(createProjectMessage());
 
-        commandBus.post(command, responseObserver);
+        commandBus.post(command, observer);
 
         // Check that the logging was called.
         final CommandEnvelope envelope = CommandEnvelope.of(command);
         verify(log).errorHandling(dispatcher.exception,
                                   envelope.getMessage(),
-                                  envelope.getCommandId());
+                                  envelope.getId());
 
         // Check that the command status has the correct code,
         // and the error matches the thrown exception.
@@ -110,7 +111,7 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
         final CommandId commandId = command.getId();
         final Message commandMessage = getMessage(command);
 
-        commandBus.post(command, responseObserver);
+        commandBus.post(command, observer);
 
         // Check that the logging was called.
         verify(log).failureHandling(eq(failure), eq(commandMessage), eq(commandId));
@@ -123,9 +124,8 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
         final ProcessingStatus status = getStatus(commandId, tenantId);
 
         assertEquals(CommandStatus.FAILURE, status.getCode());
-        assertEquals(failure.toFailure(command)
-                            .getMessage(), status.getFailure()
-                                                 .getMessage());
+        assertEquals(toFailure(failure, command).getMessage(),
+                     status.getFailure().getMessage());
     }
 
     private ProcessingStatus getStatus(CommandId commandId, final TenantId tenantId) {
@@ -146,12 +146,12 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
         final Command command = givenThrowingHandler(exception);
         final CommandEnvelope envelope = CommandEnvelope.of(command);
 
-        commandBus.post(command, responseObserver);
+        commandBus.post(command, observer);
 
         // Check that the logging was called.
         verify(log).errorHandling(eq(exception),
                                   eq(envelope.getMessage()),
-                                  eq(envelope.getCommandId()));
+                                  eq(envelope.getId()));
 
         final String errorMessage = exception.getMessage();
         assertHasErrorStatusWithMessage(envelope, errorMessage);
@@ -182,7 +182,7 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
                         return commandStore.getStatus(checkNotNull(input));
                     }
                 };
-        final ProcessingStatus result = func.execute(commandEnvelope.getCommandId());
+        final ProcessingStatus result = func.execute(commandEnvelope.getId());
         return result;
     }
 
@@ -193,12 +193,12 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
         final Command command = givenThrowingHandler(throwable);
         final CommandEnvelope envelope = CommandEnvelope.of(command);
 
-        commandBus.post(command, responseObserver);
+        commandBus.post(command, observer);
 
         // Check that the logging was called.
         verify(log).errorHandlingUnknown(eq(throwable),
                                          eq(envelope.getMessage()),
-                                         eq(envelope.getCommandId()));
+                                         eq(envelope.getId()));
 
         // Check that the status and message.
         assertHasErrorStatusWithMessage(envelope, throwable.getMessage());
@@ -218,7 +218,7 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
         for (Command cmd : commands) {
             final CommandEnvelope envelope = CommandEnvelope.of(cmd);
             final Message msg = envelope.getMessage();
-            final CommandId id = envelope.getCommandId();
+            final CommandId id = envelope.getId();
 
             // Check the expired status error was set.
             final ProcessingStatus status = getProcessingStatus(envelope);
@@ -226,7 +226,7 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
             // Check that the logging was called.
             verify(log).errorExpiredCommand(msg, id);
 
-            final Error expected = CommandExpiredException.commandExpiredError(msg);
+            final Error expected = CommandExpiredException.commandExpired(cmd);
             assertEquals(expected, status.getError());
         }
     }
@@ -269,7 +269,7 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
      * Throwables
      ********************/
 
-    private static class TestFailure extends FailureThrowable {
+    private static class TestFailure extends ThrowableMessage {
         private static final long serialVersionUID = 0L;
 
         private TestFailure() {

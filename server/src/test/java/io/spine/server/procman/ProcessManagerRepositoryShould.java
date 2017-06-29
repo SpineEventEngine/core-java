@@ -24,23 +24,23 @@ import com.google.common.collect.Lists;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
-import io.spine.annotation.Subscribe;
-import io.spine.base.Command;
-import io.spine.base.Event;
-import io.spine.base.EventContext;
-import io.spine.base.TenantId;
-import io.spine.envelope.CommandEnvelope;
-import io.spine.envelope.EventEnvelope;
+import io.spine.client.TestActorRequestFactory;
+import io.spine.core.Command;
+import io.spine.core.CommandClass;
+import io.spine.core.CommandEnvelope;
+import io.spine.core.Event;
+import io.spine.core.EventClass;
+import io.spine.core.EventEnvelope;
+import io.spine.core.Subscribe;
+import io.spine.core.TenantId;
+import io.spine.core.given.GivenEvent;
 import io.spine.server.BoundedContext;
-import io.spine.server.command.EventFactory;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.RecordBasedRepositoryShould;
+import io.spine.server.entity.given.Given;
 import io.spine.server.event.EventSubscriber;
 import io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.TestProcessManager;
 import io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.TestProcessManagerRepository;
-import io.spine.test.EventTests;
-import io.spine.test.Given;
-import io.spine.test.TestActorRequestFactory;
 import io.spine.test.procman.Project;
 import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.command.AddTask;
@@ -50,8 +50,6 @@ import io.spine.test.procman.event.ProjectCreated;
 import io.spine.test.procman.event.ProjectStarted;
 import io.spine.test.procman.event.TaskAdded;
 import io.spine.testdata.Sample;
-import io.spine.type.CommandClass;
-import io.spine.type.EventClass;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -60,7 +58,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Set;
 
-import static io.spine.base.Identifier.newUuid;
+import static io.spine.Identifier.newUuid;
 import static java.lang.String.format;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -77,18 +75,6 @@ public class ProcessManagerRepositoryShould
     private static final ProjectId ID = Sample.messageOfType(ProjectId.class);
 
     private BoundedContext boundedContext;
-
-    /**
-     * Creates an instance of {@link Event} for the passed message.
-     *
-     * <p>Under normal circumstances an event is produced via {@link EventFactory}.
-     * Processing of events in a {@link ProcessManagerRepository} is based on event messages
-     * and does not need a properly configured {@link EventContext}. That's why this factory method
-     * is sufficient for the purpose of this test suite.
-     */
-    private static Event createEvent(Message eventMessage) {
-        return EventTests.createContextlessEvent(eventMessage);
-    }
 
     private static CreateProject createProject() {
         return ((CreateProject.Builder) Sample.builderForType(CreateProject.class))
@@ -189,7 +175,7 @@ public class ProcessManagerRepositoryShould
     }
 
     private void testDispatchEvent(Message eventMessage) {
-        final Event event = createEvent(eventMessage);
+        final Event event = GivenEvent.withMessage(eventMessage);
         repository().dispatch(EventEnvelope.of(event));
         assertTrue(TestProcessManager.processed(eventMessage));
     }
@@ -255,7 +241,7 @@ public class ProcessManagerRepositoryShould
     @Test(expected = IllegalArgumentException.class)
     public void throw_exception_if_dispatch_unknown_event() {
         final StringValue unknownEventMessage = StringValue.getDefaultInstance();
-        final Event event = createEvent(unknownEventMessage);
+        final Event event = GivenEvent.withMessage(unknownEventMessage);
         repository().dispatch(EventEnvelope.of(event));
     }
 

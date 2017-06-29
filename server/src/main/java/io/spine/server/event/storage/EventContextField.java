@@ -21,7 +21,7 @@
 package io.spine.server.event.storage;
 
 import io.spine.annotation.SPI;
-import io.spine.base.EventContext;
+import io.spine.core.EventContext;
 import io.spine.server.storage.StorageField;
 
 /**
@@ -41,7 +41,7 @@ public enum EventContextField implements StorageField {
     context_timestamp,
 
     /**
-     * A field representing a {@link io.spine.base.CommandContext CommandContext}.
+     * A field representing a {@link io.spine.core.CommandContext CommandContext}.
      *
      * <p>Presumably the field would contain a serialized format, but other storage options
      * (e.g. Json) are possible.

@@ -21,7 +21,7 @@
 package io.spine.server.bc.given;
 
 import com.google.protobuf.Message;
-import io.spine.base.EventId;
+import io.spine.core.EventId;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.integration.IntegrationEvent;
 import io.spine.server.integration.IntegrationEventContext;
@@ -30,7 +30,7 @@ import io.spine.test.bc.event.ProjectCreated;
 import io.spine.test.bc.event.ProjectStarted;
 import io.spine.test.bc.event.TaskAdded;
 
-import static io.spine.base.Identifier.newUuid;
+import static io.spine.Identifier.newUuid;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.time.Time.getCurrentTime;
 
