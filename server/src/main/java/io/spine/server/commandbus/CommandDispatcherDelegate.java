@@ -28,7 +28,7 @@ import java.util.Set;
 
 /**
  * A common interface for objects which need to dispatch the
- * {@linkplain io.spine.base.Command commands}, but are unable to implement
+ * {@linkplain io.spine.core.Command commands}, but are unable to implement
  * the {@linkplain io.spine.server.commandbus.CommandDispatcher CommandDispatcher}.
  *
  * <p>A typical example of a {@code CommandDispatcherDelegate} usage is a routine, which

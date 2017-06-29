@@ -36,7 +36,7 @@ import java.lang.annotation.Target;
  *          a {@link java.util.List List} of messages;
  *     <li>accepts a command derived from {@link com.google.protobuf.Message Message}
  *          as a first parameter;
- *     <li>(optional) accepts a {@link io.spine.base.CommandContext CommandContext}
+ *     <li>(optional) accepts a {@link io.spine.core.CommandContext CommandContext}
  *          as the second parameter.
  * </ul>
  *
