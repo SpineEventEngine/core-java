@@ -155,7 +155,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     }
 
     @Test
-    public void retrieve_empty_map_if_storage_is_empty() {
+    public void retrieve_empty_iterator_if_storage_is_empty() {
         final FieldMask nonEmptyFieldMask = FieldMask.newBuilder()
                                                      .addPaths("invalid-path")
                                                      .build();

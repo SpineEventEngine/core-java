@@ -48,7 +48,6 @@ import static com.google.protobuf.util.Timestamps.add;
 import static io.spine.Identifier.newUuid;
 import static io.spine.test.Tests.assertMatchesMask;
 import static io.spine.test.Verify.assertContains;
-import static io.spine.test.Verify.assertEmpty;
 import static io.spine.test.Verify.assertSize;
 import static io.spine.testdata.TestEntityStorageRecordFactory.newEntityStorageRecord;
 import static io.spine.time.Time.getCurrentTime;
@@ -136,24 +135,6 @@ public abstract class ProjectionStorageShould
             final Project state = AnyPacker.unpack(packedState);
             assertMatchesMask(state, fieldMask);
         }
-    }
-
-    @SuppressWarnings("MethodDoesntCallSuperMethod") // because the behaviour to test is different
-    @Override
-    @Test
-    public void retrieve_empty_map_if_storage_is_empty() {
-        final Iterator<EntityRecord> noMaskEntries = storage.readAll();
-
-        final FieldMask nonEmptyMask = FieldMask.newBuilder()
-                                                .addPaths("invalid_path")
-                                                .build();
-        final Iterator<EntityRecord> maskedEntries = storage.readAll(nonEmptyMask);
-
-        assertEmpty(noMaskEntries);
-        assertEmpty(maskedEntries);
-
-        // Same type
-        assertEquals(noMaskEntries, maskedEntries);
     }
 
     @SuppressWarnings({"MethodWithMultipleLoops", "BreakStatement"})
