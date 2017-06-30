@@ -59,19 +59,16 @@ import static org.junit.Assert.assertTrue;
 /**
  * Projection storage tests.
  *
- * @param <I> the type of IDs of storage records
  * @author Alexander Litus
  */
-public abstract class ProjectionStorageShould<I>
-        extends RecordStorageShould<I, ProjectionStorage<I>> {
+public abstract class ProjectionStorageShould
+        extends RecordStorageShould<ProjectId, ProjectionStorage<ProjectId>> {
 
-    private ProjectionStorage<I> storage;
+    private ProjectionStorage<ProjectId> storage;
 
     @Override
-    protected Message newState(I id) {
-        final String projectId = id.getClass()
-                                   .getName();
-        final Project state = Given.project(projectId,"Projection name " + projectId);
+    protected Message newState(ProjectId id) {
+        final Project state = Given.project(id,"Projection name " + id.getId());
         return state;
     }
 
@@ -101,7 +98,7 @@ public abstract class ProjectionStorageShould<I>
     @SuppressWarnings("MethodWithMultipleLoops")
     @Test
     public void read_all_messages() {
-        final List<I> ids = fillStorage(5);
+        final List<ProjectId> ids = fillStorage(5);
 
         final Iterator<EntityRecord> read = storage.readAll();
         final Collection<EntityRecord> readRecords = newArrayList(read);
@@ -116,7 +113,7 @@ public abstract class ProjectionStorageShould<I>
     @SuppressWarnings("MethodWithMultipleLoops")
     @Test
     public void read_all_messages_with_field_mask() {
-        final List<I> ids = fillStorage(5);
+        final List<ProjectId> ids = fillStorage(5);
 
         final String projectDescriptor = Project.getDescriptor()
                                                 .getFullName();
@@ -155,7 +152,7 @@ public abstract class ProjectionStorageShould<I>
     @Test
     public void perform_read_bulk_operations() {
         // Get a subset of IDs
-        final List<I> ids = fillStorage(10).subList(0, 5);
+        final List<ProjectId> ids = fillStorage(10).subList(0, 5);
 
         final Iterator<EntityRecord> read = storage.readMultiple(ids);
         final Collection<EntityRecord> readRecords = newArrayList(read);
@@ -171,7 +168,7 @@ public abstract class ProjectionStorageShould<I>
     @Test
     public void perform_bulk_read_with_field_mask_operation() {
         // Get a subset of IDs
-        final List<I> ids = fillStorage(10).subList(0, 5);
+        final List<ProjectId> ids = fillStorage(10).subList(0, 5);
 
         final String projectDescriptor = Project.getDescriptor()
                                                 .getFullName();
@@ -207,12 +204,12 @@ public abstract class ProjectionStorageShould<I>
     }
 
     @SuppressWarnings("ConstantConditions") // Converter nullability issues
-    private List<I> fillStorage(int count) {
-        final List<I> ids = new LinkedList<>();
+    private List<ProjectId> fillStorage(int count) {
+        final List<ProjectId> ids = new LinkedList<>();
 
         for (int i = 0; i < count; i++) {
-            final I id = newId();
-            final Project state = Given.project(id.toString(), format("project-%d", i));
+            final ProjectId id = newId();
+            final Project state = Given.project(id, format("project-%d", i));
             final Any packedState = AnyPacker.pack(state);
 
             final EntityRecord record = EntityRecord.newBuilder()
@@ -235,16 +232,14 @@ public abstract class ProjectionStorageShould<I>
     }
 
     @SuppressWarnings("BreakStatement")
-    private static <I> Project checkProjectIdIsInList(EntityRecord project, List<I> ids) {
+    private static Project checkProjectIdIsInList(EntityRecord project, List<ProjectId> ids) {
         final Any packedState = project.getState();
         final Project state = AnyPacker.unpack(packedState);
         final ProjectId id = state.getId();
-        final String stringIdRepr = id.getId();
 
         boolean isIdPresent = false;
-        for (I genericId : ids) {
-            isIdPresent = genericId.toString()
-                                   .equals(stringIdRepr);
+        for (ProjectId genericId : ids) {
+            isIdPresent = genericId.equals(id);
             if (isIdPresent) {
                 break;
             }
@@ -263,12 +258,9 @@ public abstract class ProjectionStorageShould<I>
 
     private static class Given {
 
-        private static Project project(String id, String name) {
-            final ProjectId projectId = ProjectId.newBuilder()
-                                                 .setId(id)
-                                                 .build();
+        private static Project project(ProjectId id, String name) {
             final Project project = Project.newBuilder()
-                                           .setId(projectId)
+                                           .setId(id)
                                            .setName(name)
                                            .setStatus(Project.Status.CREATED)
                                            .addTask(Task.getDefaultInstance())
