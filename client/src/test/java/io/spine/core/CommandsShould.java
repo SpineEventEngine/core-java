@@ -61,6 +61,14 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+/**
+ * * Tests for {@linkplain Commands Commands utility class}.
+ *
+ * <p>The test suite is located under the "client" module since actor request generation
+ * is required. So we want to avoid circular dependencies between "core" and "client" modules.
+ *
+ * @author Alexander Yevsyukov
+ */
 public class CommandsShould {
 
     private static final FileDescriptor DEFAULT_FILE_DESCRIPTOR = Any.getDescriptor()
