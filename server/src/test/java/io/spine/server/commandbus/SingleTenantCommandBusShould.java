@@ -29,10 +29,10 @@ import io.spine.core.CommandValidationError;
 import io.spine.core.Failure;
 import io.spine.core.IsSent;
 import io.spine.grpc.StreamObservers.MemoizingObserver;
+import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.event.EventBus;
-import io.spine.test.Tests;
 import io.spine.test.command.AddTask;
 import io.spine.test.command.event.TaskAdded;
 import io.spine.test.failure.InvalidProjectName;
@@ -50,6 +50,8 @@ import static io.spine.server.tenant.TenantAwareOperation.isTenantSet;
 import static io.spine.validate.Validate.isNotDefault;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -84,7 +86,6 @@ public class SingleTenantCommandBusShould extends AbstractCommandBusTestSuite {
         checkCommandError(observer.firstResponse(),
                           INVALID_COMMAND,
                           CommandValidationError.getDescriptor().getFullName(),
-                          InvalidCommandException.class,
                           cmd);
     }
 
@@ -102,11 +103,6 @@ public class SingleTenantCommandBusShould extends AbstractCommandBusTestSuite {
     }
 
     @Test
-    public void do_nothing_in_handleDeadMessage() {
-        commandBus.handleDeadMessage(Tests.<CommandEnvelope>nullRef());
-    }
-
-    @Test
     public void propagate_failures_to_failure_bus() {
         final FaultyHandler faultyHandler = new FaultyHandler(eventBus);
         commandBus.register(faultyHandler);
@@ -121,6 +117,13 @@ public class SingleTenantCommandBusShould extends AbstractCommandBusTestSuite {
         final Failure actualFailure = isSent.getStatus().getFailure();
         assertTrue(isNotDefault(actualFailure));
         assertEquals(unpack(expectedFailure.getMessage()), unpack(actualFailure.getMessage()));
+    }
+
+    @Test
+    public void create_validator_once() {
+        final EnvelopeValidator<CommandEnvelope> validator = commandBus.getValidator();
+        assertNotNull(validator);
+        assertSame(validator, commandBus.getValidator());
     }
 
     @Override

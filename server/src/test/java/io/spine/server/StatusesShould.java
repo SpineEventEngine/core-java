@@ -25,7 +25,11 @@ import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.spine.base.Error;
 import io.spine.grpc.MetadataConverter;
+import io.spine.server.event.UnsupportedEventException;
+import io.spine.core.MessageRejection;
 import io.spine.server.transport.Statuses;
+import io.spine.test.event.ProjectCreated;
+import io.spine.testdata.Sample;
 import org.junit.Test;
 
 import static io.spine.server.transport.Statuses.invalidArgumentWithCause;
@@ -42,17 +46,15 @@ public class StatusesShould {
     @Test
     @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
     public void create_invalid_argument_status_exception() {
-        final IllegalArgumentException exception = new IllegalArgumentException("");
-        final Error expectedError = Error.getDefaultInstance();
-        final StatusRuntimeException statusRuntimeEx = invalidArgumentWithCause(exception,
-                                                                                expectedError);
-
+        final MessageRejection rejection =
+                new UnsupportedEventException(Sample.messageOfType(ProjectCreated.class));
+        final StatusRuntimeException statusRuntimeEx = invalidArgumentWithCause(rejection);
         final Error actualError = MetadataConverter.toError(statusRuntimeEx.getTrailers())
                                                    .get();
         assertEquals(Status.INVALID_ARGUMENT.getCode(), statusRuntimeEx.getStatus()
                                                                        .getCode());
-        assertEquals(exception, statusRuntimeEx.getCause());
-        assertEquals(expectedError, actualError);
+        assertEquals(rejection, statusRuntimeEx.getCause());
+        assertEquals(rejection.asError(), actualError);
     }
 
     @Test

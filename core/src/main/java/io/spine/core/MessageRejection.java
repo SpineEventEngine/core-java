@@ -18,42 +18,33 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event;
+package io.spine.core;
 
-import io.spine.core.EventClass;
-import io.spine.server.outbus.OutputDispatcherRegistry;
-
-import java.util.Set;
+import io.spine.annotation.Internal;
+import io.spine.base.Error;
 
 /**
- * The registry of objects that dispatch event to handlers.
+ * The report about a message being rejected from processing.
  *
- * <p>There can be multiple dispatchers per event class.
+ * <p>Such message could be:
+ * <ul>
+ *     <li>an event;
+ *     <li>a command;
+ *     <li>an actor request (query, topic or subscription).
+ * </ul>
  *
- * @author Alexander Yevsyukov
- * @author Alex Tymchenko
+ * @author Dmytro Dashenkov
  */
-class EventDispatcherRegistry extends OutputDispatcherRegistry<EventClass, EventDispatcher> {
+@Internal
+public interface MessageRejection {
 
     /**
-     * {@inheritDoc}
-     *
-     * <p>Overrides to expose this method to
-     * {@linkplain EventBus#hasDispatchers(EventClass)} EventBus}.
+     * Converts this {@code MessageRejection} into an {@link Error io.spine.base.Error}.
      */
-    @Override
-    protected boolean hasDispatchersFor(EventClass eventClass) {
-        return super.hasDispatchersFor(eventClass);
-    }
+    Error asError();
 
     /**
-     * {@inheritDoc}
-     *
-     * <p>Overrides in order to expose itself to
-     * {@linkplain EventBus#getDispatchers(EventClass)}) EventBus}.
+     * Converts this {@code MessageRejection} into a {@link Throwable java.lang.Throwable}.
      */
-    @Override
-    protected Set<EventDispatcher> getDispatchers(EventClass eventClass) {
-        return super.getDispatchers(eventClass);
-    }
+    Throwable asThrowable();
 }

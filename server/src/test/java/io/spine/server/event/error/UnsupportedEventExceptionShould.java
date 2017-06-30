@@ -40,7 +40,7 @@ public class UnsupportedEventExceptionShould {
         final UnsupportedEventException exception = new UnsupportedEventException(msg);
 
         assertNotNull(exception.getMessage());
-        assertNotNull(exception.getError());
+        assertNotNull(exception.asError());
         assertEquals(msg, exception.getEventMessage());
     }
 }

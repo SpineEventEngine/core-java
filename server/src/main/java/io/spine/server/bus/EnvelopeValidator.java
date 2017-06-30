@@ -18,42 +18,27 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event;
+package io.spine.server.bus;
 
-import io.spine.core.EventClass;
-import io.spine.server.outbus.OutputDispatcherRegistry;
-
-import java.util.Set;
+import com.google.common.base.Optional;
+import io.spine.core.MessageEnvelope;
+import io.spine.core.MessageInvalid;
 
 /**
- * The registry of objects that dispatch event to handlers.
+ * An interface defining the validator for a {@link MessageEnvelope}.
  *
- * <p>There can be multiple dispatchers per event class.
- *
- * @author Alexander Yevsyukov
- * @author Alex Tymchenko
+ * @param <E> the type of the {@link MessageEnvelope} to validate
+ * @author Dmytro Dashenkov
  */
-class EventDispatcherRegistry extends OutputDispatcherRegistry<EventClass, EventDispatcher> {
+public interface EnvelopeValidator<E extends MessageEnvelope<?>> {
 
     /**
-     * {@inheritDoc}
+     * Validates the given {@link MessageEnvelope} by some specific rules.
      *
-     * <p>Overrides to expose this method to
-     * {@linkplain EventBus#hasDispatchers(EventClass)} EventBus}.
+     * @param envelope the envelope to validate
+     * @return {@link Optional#absent() Optional.absent()} if the envelope passes the validation or
+     *         the cause of the validation failure
+     * @see MessageInvalid for the detailed description of the returned value
      */
-    @Override
-    protected boolean hasDispatchersFor(EventClass eventClass) {
-        return super.hasDispatchersFor(eventClass);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Overrides in order to expose itself to
-     * {@linkplain EventBus#getDispatchers(EventClass)}) EventBus}.
-     */
-    @Override
-    protected Set<EventDispatcher> getDispatchers(EventClass eventClass) {
-        return super.getDispatchers(eventClass);
-    }
+    Optional<MessageInvalid> validate(E envelope);
 }

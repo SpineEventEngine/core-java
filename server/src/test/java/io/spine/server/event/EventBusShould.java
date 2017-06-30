@@ -21,7 +21,6 @@
 package io.spine.server.event;
 
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
@@ -29,17 +28,13 @@ import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Events;
-import io.spine.core.Response;
 import io.spine.core.Subscribe;
-import io.spine.grpc.StreamObservers;
-import io.spine.grpc.StreamObservers.MemoizingObserver;
 import io.spine.server.BoundedContext;
+import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.event.enrich.EventEnricher;
 import io.spine.server.storage.StorageFactory;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.ProjectId;
-import io.spine.validate.ConstraintViolation;
-import io.spine.validate.MessageValidator;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -50,15 +45,12 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
-import static io.spine.server.event.Given.EventMessage.projectCreated;
-import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
@@ -73,7 +65,6 @@ public class EventBusShould {
 
     private EventBus eventBus;
     private EventBus eventBusWithPosponedExecution;
-    private MemoizingObserver<Response> responseObserver;
     private PostponedDispatcherEventDelivery postponedDispatcherDelivery;
     private Executor delegateDispatcherExecutor;
     private StorageFactory storageFactory;
@@ -97,7 +88,6 @@ public class EventBusShould {
                 new PostponedDispatcherEventDelivery(delegateDispatcherExecutor);
         buildEventBus(enricher);
         buildEventBusWithPostponedExecution(enricher);
-        this.responseObserver = StreamObservers.memoizingObserver();
     }
 
     @SuppressWarnings("MethodMayBeStatic")   /* it cannot, as its result is used in {@code org.mockito.Mockito.spy() */
@@ -293,50 +283,6 @@ public class EventBusShould {
     }
 
     @Test
-    public void assure_that_event_is_valid_and_subscriber_registered() {
-        eventBus.register(new ProjectCreatedSubscriber());
-
-        final Optional<Throwable> violation =
-                eventBus.validate(projectCreated());
-        assertFalse(violation.isPresent());
-    }
-
-    @Test
-    public void assure_that_event_is_valid_and_dispatcher_registered() {
-        eventBus.register(new BareDispatcher());
-
-        final Optional<Throwable> violation = eventBus.validate(projectCreated());
-        assertFalse(violation.isPresent());
-    }
-
-    @Test
-    public void call_onError_if_event_is_invalid() {
-        final MessageValidator validator = mock(MessageValidator.class);
-        doReturn(newArrayList(ConstraintViolation.getDefaultInstance()))
-                .when(validator)
-                .validate(any(Message.class));
-
-        final EventBus eventBus = EventBus.newBuilder()
-                                          .setStorageFactory(storageFactory)
-                                          .setEventValidator(validator)
-                                          .build();
-        eventBus.register(new ProjectCreatedSubscriber());
-
-        final Optional<Throwable> violation = eventBus.validate(projectCreated());
-        assertTrue(violation.isPresent());
-        final Throwable actualError = violation.get().getCause();
-        assertThat(actualError, instanceOf(InvalidEventException.class));
-    }
-
-    @Test
-    public void call_onError_if_event_is_unsupported() {
-        final Optional<Throwable> violation = eventBus.validate(projectCreated());
-        assertTrue(violation.isPresent());
-        final Throwable actualError = violation.get().getCause();
-        assertThat(actualError, instanceOf(UnsupportedEventException.class));
-    }
-
-    @Test
     public void unregister_registries_on_close() throws Exception {
         final EventStore eventStore = spy(mock(EventStore.class));
         final EventBus eventBus = EventBus.newBuilder()
@@ -447,6 +393,13 @@ public class EventBusShould {
     @Test(expected = NullPointerException.class)
     public void not_accept_null_function_passed_as_field_enrichment_configuration_param() {
         eventBus.addFieldEnrichment(ProjectId.class, String.class, null);
+    }
+
+    @Test
+    public void create_validator_once() {
+        final EnvelopeValidator<EventEnvelope> validator = eventBus.getValidator();
+        assertNotNull(validator);
+        assertSame(validator, eventBus.getValidator());
     }
 
     private static class ProjectCreatedSubscriber extends EventSubscriber {
