@@ -199,10 +199,10 @@ public abstract class AbstractStorageShould<I,
         }
 
         final Iterator<I> index = storage.index();
-        final Collection indexValues = Sets.newHashSet(index);
+        final Collection<I> indexValues = Sets.newHashSet(index);
 
         assertEquals(ids.size(), indexValues.size());
-        Verify.assertContainsAll(indexValues, ids.toArray());
+        Verify.assertContainsAll(indexValues, (I[]) ids.toArray());
     }
 
     @Test
