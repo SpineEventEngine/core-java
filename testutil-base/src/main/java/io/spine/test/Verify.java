@@ -648,18 +648,6 @@ public final class Verify extends Assert {
         }
     }
 
-    public static void assertSize(int expectedSize,
-                                  Iterator<?> iterator) {
-        try {
-            assertObjectNotNull("Iterator", iterator);
-
-            final int actualSize = newArrayList(iterator).size();
-            failOnSizeMismatch("the Iterator", expectedSize, actualSize);
-        } catch (AssertionError e) {
-            throw mangledException(e);
-        }
-    }
-
     private static void failOnSizeMismatch(String collectionName,
                                            int expectedSize,
                                            int actualSize) {

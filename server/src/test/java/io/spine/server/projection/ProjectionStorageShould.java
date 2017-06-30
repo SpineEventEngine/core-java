@@ -37,10 +37,12 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.protobuf.util.Durations.fromSeconds;
 import static com.google.protobuf.util.Timestamps.add;
 import static io.spine.test.Tests.assertMatchesMask;
@@ -102,9 +104,9 @@ public abstract class ProjectionStorageShould<I>
         final List<I> ids = fillStorage(5);
 
         final Iterator<EntityRecord> read = storage.readAll();
-        assertSize(ids.size(), read);
-        while (read.hasNext()) {
-            final EntityRecord record = read.next();
+        final Collection<EntityRecord> readRecords = newArrayList(read);
+        assertSize(ids.size(), readRecords);
+        for (EntityRecord record : readRecords) {
             final Project state = AnyPacker.unpack(record.getState());
             final ProjectId id = state.getId();
             assertContains(id, ids);
@@ -122,9 +124,9 @@ public abstract class ProjectionStorageShould<I>
         final FieldMask fieldMask = maskForPaths(projectDescriptor + ".id", projectDescriptor + ".name");
 
         final Iterator<EntityRecord> read = storage.readAll(fieldMask);
-        assertSize(ids.size(), read);
-        while (read.hasNext()) {
-            final EntityRecord record = read.next();
+        final Collection<EntityRecord> readRecords = newArrayList(read);
+        assertSize(ids.size(), readRecords);
+        for (EntityRecord record : readRecords) {
             final Any packedState = record.getState();
             final Project state = AnyPacker.unpack(packedState);
             assertMatchesMask(state, fieldMask);
@@ -156,11 +158,11 @@ public abstract class ProjectionStorageShould<I>
         final List<I> ids = fillStorage(10).subList(0, 5);
 
         final Iterator<EntityRecord> read = storage.readMultiple(ids);
-        assertSize(ids.size(), read);
+        final Collection<EntityRecord> readRecords = newArrayList(read);
+        assertSize(ids.size(), readRecords);
 
         // Check data consistency
-        while (read.hasNext()) {
-            final EntityRecord record = read.next();
+        for (EntityRecord record : readRecords) {
             checkProjectIdIsInList(record, ids);
         }
     }
@@ -176,11 +178,11 @@ public abstract class ProjectionStorageShould<I>
         final FieldMask fieldMask = maskForPaths(projectDescriptor + ".id", projectDescriptor + ".status");
 
         final Iterator<EntityRecord> read = storage.readMultiple(ids, fieldMask);
-        assertSize(ids.size(), read);
+        final Collection<EntityRecord> readRecords  =newArrayList(read);
+        assertSize(ids.size(), readRecords);
 
         // Check data consistency
-        while (read.hasNext()) {
-            final EntityRecord record = read.next();
+        for (EntityRecord record : readRecords) {
             final Project state = checkProjectIdIsInList(record, ids);
             assertMatchesMask(state, fieldMask);
         }

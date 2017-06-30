@@ -50,6 +50,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.test.Tests.assertMatchesMask;
 import static io.spine.test.Verify.assertContains;
 import static io.spine.test.Verify.assertSize;
@@ -205,7 +206,8 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
     }
 
     protected void checkIds(List<AggregateStateId> ids, Iterator<EntityRecord> records) {
-        assertSize(ids.size(), records);
+        final Collection<EntityRecord> recordsToCheck = newArrayList(records);
+        assertSize(ids.size(), recordsToCheck);
 
         final Collection<ProjectId> projectIds = Collections2.transform(ids, new Function<AggregateStateId, ProjectId>() {
             @Nullable
@@ -218,8 +220,7 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
             }
         });
 
-        while (records.hasNext()) {
-            final EntityRecord record = records.next();
+        for (EntityRecord record : recordsToCheck) {
             final Any packedState = record.getState();
             final Project state = AnyPacker.unpack(packedState);
             final ProjectId id = state.getId();
