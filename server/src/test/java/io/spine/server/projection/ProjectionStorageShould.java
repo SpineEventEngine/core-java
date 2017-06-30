@@ -29,9 +29,9 @@ import io.spine.server.entity.EntityRecord;
 import io.spine.server.storage.RecordStorageShould;
 import io.spine.test.Tests;
 import io.spine.test.Values;
-import io.spine.test.projection.Project;
-import io.spine.test.projection.ProjectId;
-import io.spine.test.projection.Task;
+import io.spine.test.storage.Project;
+import io.spine.test.storage.ProjectId;
+import io.spine.test.storage.Task;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -45,6 +45,7 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.protobuf.util.Durations.fromSeconds;
 import static com.google.protobuf.util.Timestamps.add;
+import static io.spine.Identifier.newUuid;
 import static io.spine.test.Tests.assertMatchesMask;
 import static io.spine.test.Verify.assertContains;
 import static io.spine.test.Verify.assertEmpty;
@@ -68,8 +69,15 @@ public abstract class ProjectionStorageShould
 
     @Override
     protected Message newState(ProjectId id) {
-        final Project state = Given.project(id,"Projection name " + id.getId());
+        final Project state = Given.project(id, "Projection name " + id.getId());
         return state;
+    }
+
+    @Override
+    protected ProjectId newId() {
+        return ProjectId.newBuilder()
+                        .setId(newUuid())
+                        .build();
     }
 
     @Before

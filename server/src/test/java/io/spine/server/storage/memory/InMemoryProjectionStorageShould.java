@@ -23,10 +23,8 @@ package io.spine.server.storage.memory;
 import io.spine.server.entity.Entity;
 import io.spine.server.projection.ProjectionStorage;
 import io.spine.server.projection.ProjectionStorageShould;
-import io.spine.test.projection.ProjectId;
+import io.spine.test.storage.ProjectId;
 import io.spine.type.TypeUrl;
-
-import static io.spine.Identifier.newUuid;
 
 /**
  * @author Alexander Litus
@@ -44,12 +42,5 @@ public class InMemoryProjectionStorageShould extends ProjectionStorageShould {
                 InMemoryProjectionStorage.newInstance(
                         InMemoryRecordStorage.newInstance(spec, false));
         return storage;
-    }
-
-    @Override
-    protected ProjectId newId() {
-        return ProjectId.newBuilder()
-                        .setId(newUuid())
-                        .build();
     }
 }
