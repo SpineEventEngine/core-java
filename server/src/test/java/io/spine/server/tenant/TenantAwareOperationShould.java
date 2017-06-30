@@ -24,7 +24,7 @@ import io.spine.core.TenantId;
 import io.spine.test.Tests;
 import org.junit.Test;
 
-import static io.spine.test.Values.newTenantUuid;
+import static io.spine.core.given.GivenTenantId.newUuid;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
@@ -48,10 +48,10 @@ public class TenantAwareOperationShould {
 
     @Test
     public void remember_and_restore_current_tenant() {
-        final TenantId previousTenant = newTenantUuid();
+        final TenantId previousTenant = newUuid();
         CurrentTenant.set(previousTenant);
 
-        final TenantId newTenant = newTenantUuid();
+        final TenantId newTenant = newUuid();
         final TenantAwareOperation op = createOperation(newTenant);
 
         // Check that the construction of the operation does not change the current tenant.
@@ -74,7 +74,7 @@ public class TenantAwareOperationShould {
         CurrentTenant.clear();
 
         // Create new operation.
-        final TenantId newTenant = newTenantUuid();
+        final TenantId newTenant = newUuid();
         final TenantAwareOperation op = createOperation(newTenant);
 
         // Check that the construction did not set the tenant.
@@ -93,7 +93,7 @@ public class TenantAwareOperationShould {
 
     @Test
     public void create_instance_for_non_command_execution_context() {
-        final TenantId tenant = newTenantUuid();
+        final TenantId tenant = newUuid();
         CurrentTenant.set(tenant);
 
         final TenantAwareOperation op = createOperation();

@@ -27,6 +27,8 @@ import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.TenantId;
 import io.spine.core.UserId;
+import io.spine.core.given.GivenTenantId;
+import io.spine.core.given.GivenUserId;
 import io.spine.test.TimeTests;
 import io.spine.test.commands.RequiredFieldCommand;
 import io.spine.time.Timestamps2;
@@ -35,8 +37,6 @@ import io.spine.time.ZoneOffsets;
 import io.spine.validate.ValidationException;
 import org.junit.Test;
 
-import static io.spine.test.Values.newTenantUuid;
-import static io.spine.test.Values.newUserUuid;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -44,8 +44,8 @@ public class CommandFactoryShould extends ActorRequestFactoryShould {
 
     @Test
     public void create_command_context() {
-        final TenantId tenantId = newTenantUuid();
-        final UserId userId = newUserUuid();
+        final TenantId tenantId = GivenTenantId.newUuid();
+        final UserId userId = GivenUserId.newUuid();
         final ZoneOffset zoneOffset = ZoneOffsets.ofHours(-3);
         final int targetVersion = 100500;
 

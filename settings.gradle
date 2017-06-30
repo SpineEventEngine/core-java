@@ -1,10 +1,8 @@
 rootProject.name = 'spine'
 
-include 'base'
 include 'core'
 include 'client'
 include 'server'
-include 'testutil-base'
+include 'testutil-core'
 include 'testutil-client'
 include 'testutil-server'
-

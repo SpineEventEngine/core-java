@@ -25,8 +25,8 @@ import io.spine.core.TenantId;
 import io.spine.test.Tests;
 import org.junit.Test;
 
+import static io.spine.core.given.GivenTenantId.nameOf;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
-import static io.spine.test.Values.newTenantId;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -51,7 +51,7 @@ public class CurrentTenantShould {
     @SuppressWarnings("OptionalGetWithoutIsPresent") // we check isPresent() in assertion
     @Test
     public void keep_set_value() {
-        final TenantId expected = newTenantId(getClass());
+        final TenantId expected = nameOf(getClass());
 
         CurrentTenant.set(expected);
 
@@ -62,7 +62,7 @@ public class CurrentTenantShould {
 
     @Test
     public void clear_set_value() {
-        final TenantId value = newTenantId(getClass());
+        final TenantId value = nameOf(getClass());
         CurrentTenant.set(value);
 
         CurrentTenant.clear();

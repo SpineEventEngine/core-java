@@ -63,6 +63,7 @@ import java.util.Set;
 import static com.google.common.base.Throwables.getRootCause;
 import static com.google.common.collect.Collections2.transform;
 import static com.google.common.collect.Lists.newArrayList;
+import static io.spine.core.given.GivenVersion.withNumber;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.aggregate.AggregateCommandDispatcher.dispatch;
 import static io.spine.server.aggregate.Given.EventMessage.projectCreated;
@@ -70,7 +71,6 @@ import static io.spine.server.aggregate.Given.EventMessage.projectStarted;
 import static io.spine.server.aggregate.Given.EventMessage.taskAdded;
 import static io.spine.server.entity.given.Given.aggregateOfClass;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
-import static io.spine.test.Values.newVersionWithNumber;
 import static io.spine.test.Verify.assertSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -705,7 +705,7 @@ public class AggregateShould {
     }
 
     private static Event event(Message eventMessage, int versionNumber) {
-        return eventFactory.createEvent(eventMessage, newVersionWithNumber(versionNumber));
+        return eventFactory.createEvent(eventMessage, withNumber(versionNumber));
     }
 
     private static List<Event> generateProjectEvents() {

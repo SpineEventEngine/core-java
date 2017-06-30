@@ -24,9 +24,10 @@ import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
+import io.spine.core.MessageEnvelopeShould;
 import org.junit.Test;
 
-import static io.spine.test.Values.newUuidValue;
+import static io.spine.test.TestValues.newUuidValue;
 import static org.junit.Assert.assertEquals;
 
 /**

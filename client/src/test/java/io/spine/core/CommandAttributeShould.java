@@ -31,6 +31,11 @@ import static io.spine.protobuf.TypeConverter.toMessage;
 import static org.junit.Assert.assertEquals;
 
 /**
+ * Tests for {@linkplain CommandAttribute CommandAttribute API}.
+ *
+ * <p>The test suite is located under the "client" module since actor request generation
+ * is required. So we want to avoid circular dependencies between "core" and "client" modules.
+ *
  * @author Alexander Yevsyukov
  */
 public class CommandAttributeShould {

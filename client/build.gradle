@@ -24,10 +24,8 @@ dependencies {
 
     compile project(path: ':core')
 
-    testCompile project(path: ":testutil-base")
-    //TODO:2017-06-20:alexander.yevsyukov: Remove after moving TestActorRequestFactory
-    testCompile project(path: ":testutil-server")
-
+    testCompile group: 'io.spine', name: 'spine-testutil-base', version: spineBaseVersion
+    testCompile project(path: ":testutil-client")
     testCompile project(path: ":core", configuration: 'testArtifacts')
 }
 

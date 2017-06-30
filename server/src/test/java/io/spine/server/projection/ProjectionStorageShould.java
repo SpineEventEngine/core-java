@@ -24,12 +24,12 @@ import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import io.spine.core.given.GivenVersion;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.storage.RecordStorageShould;
 import io.spine.test.Tests;
-import io.spine.test.Values;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.Task;
@@ -216,7 +216,8 @@ public abstract class ProjectionStorageShould<I>
 
             final EntityRecord record = EntityRecord.newBuilder()
                                                     .setState(packedState)
-                                                    .setVersion(Values.newVersionWithNumber(1))
+                                                    .setVersion(
+                                                            GivenVersion.withNumber(1))
                                                     .build();
             storage.write(id, record);
             ids.add(id);

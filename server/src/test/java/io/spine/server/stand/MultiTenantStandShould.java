@@ -29,9 +29,9 @@ import io.spine.client.Topic;
 import io.spine.core.Responses;
 import io.spine.core.TenantId;
 import io.spine.core.Version;
+import io.spine.core.given.GivenVersion;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
-import io.spine.test.Values;
 import io.spine.test.commandservice.customer.Customer;
 import io.spine.test.commandservice.customer.CustomerId;
 import org.junit.After;
@@ -40,7 +40,7 @@ import org.junit.Test;
 
 import java.util.Map;
 
-import static io.spine.test.Values.newTenantUuid;
+import static io.spine.core.given.GivenTenantId.newUuid;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -53,7 +53,7 @@ public class MultiTenantStandShould extends StandShould {
     @Override
     @Before
     public void setUp() {
-        final TenantId tenantId = newTenantUuid();
+        final TenantId tenantId = newUuid();
 
         setCurrentTenant(tenantId);
         setMultitenant(true);
@@ -69,7 +69,7 @@ public class MultiTenantStandShould extends StandShould {
     public void not_allow_reading_aggregate_records_for_another_tenant() {
         final Stand stand = doCheckReadingCustomersById(15);
 
-        final TenantId anotherTenant = newTenantUuid();
+        final TenantId anotherTenant = newUuid();
         final ActorRequestFactory requestFactory = createRequestFactory(anotherTenant);
 
         final Query readAllCustomers = requestFactory.query().all(Customer.class);
@@ -96,7 +96,7 @@ public class MultiTenantStandShould extends StandShould {
                                                                                    Customer.class);
 
         // --- Another Tenant
-        final TenantId anotherTenant = newTenantUuid();
+        final TenantId anotherTenant = newUuid();
         final ActorRequestFactory anotherFactory = createRequestFactory(anotherTenant);
         final MemoizeEntityUpdateCallback anotherCallback = subscribeToAllOf(stand,
                                                                              anotherFactory,
@@ -108,7 +108,7 @@ public class MultiTenantStandShould extends StandShould {
                                                                                  .next();
         final CustomerId customerId = sampleData.getKey();
         final Customer customer = sampleData.getValue();
-        final Version stateVersion = Values.newVersionWithNumber(1);
+        final Version stateVersion = GivenVersion.withNumber(1);
         stand.update(asEnvelope(customerId, customer, stateVersion));
 
         final Any packedState = AnyPacker.pack(customer);

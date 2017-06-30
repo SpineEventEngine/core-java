@@ -33,8 +33,8 @@ import io.spine.time.ZoneOffsets;
 import org.junit.Before;
 import org.junit.Test;
 
-import static io.spine.test.Values.newUserUuid;
-import static io.spine.test.Values.newUuidValue;
+import static io.spine.core.given.GivenUserId.newUuid;
+import static io.spine.test.TestValues.newUuidValue;
 import static io.spine.validate.Validate.checkNotDefault;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -99,7 +99,7 @@ public class CommandTestShould {
      */
     static ActorRequestFactory newRequestFactory(Class<?> clazz) {
         return ActorRequestFactory.newBuilder()
-                             .setActor(newUserUuid())
+                             .setActor(newUuid())
                              .setZoneOffset(ZoneOffsets.UTC)
                              .setTenantId(TenantId.newBuilder()
                                                   .setValue(clazz.getSimpleName())

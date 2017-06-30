@@ -45,7 +45,7 @@ import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.tenant.TenantAwareTest;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.test.command.CreateProject;
-import io.spine.test.envelope.ProjectCreated;
+import io.spine.test.command.event.ProjectCreated;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -56,10 +56,10 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.core.CommandStatus.SCHEDULED;
 import static io.spine.core.CommandValidationError.INVALID_COMMAND;
+import static io.spine.core.given.GivenTenantId.newUuid;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.commandbus.CommandScheduler.setSchedule;
 import static io.spine.server.commandbus.Given.ACommand.createProject;
-import static io.spine.test.Values.newTenantUuid;
 import static io.spine.test.Verify.assertContainsAll;
 import static io.spine.test.Verify.assertSize;
 import static org.junit.Assert.assertEquals;
@@ -191,7 +191,7 @@ public abstract class AbstractCommandBusTestSuite {
                            .setStorageFactory(storageFactory)
                            .build();
         requestFactory = this.multitenant
-                            ? TestActorRequestFactory.newInstance(getClass(), newTenantUuid())
+                            ? TestActorRequestFactory.newInstance(getClass(), newUuid())
                             : TestActorRequestFactory.newInstance(getClass());
         createProjectHandler = new CreateProjectHandler();
         observer = StreamObservers.memoizingObserver();

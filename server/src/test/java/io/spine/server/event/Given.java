@@ -28,10 +28,10 @@ import io.spine.core.CommandContext;
 import io.spine.core.Event;
 import io.spine.core.EventId;
 import io.spine.core.UserId;
+import io.spine.core.given.GivenUserId;
 import io.spine.people.PersonName;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.event.enrich.EventEnricher;
-import io.spine.test.Values;
 import io.spine.test.event.ProjectCompleted;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.ProjectId;
@@ -226,7 +226,7 @@ public class Given {
                 if (id == null) {
                     return null;
                 }
-                return Values.newUserId("Project owner " + id.getId());
+                return GivenUserId.of("Project owner " + id.getId());
             }
         }
 
