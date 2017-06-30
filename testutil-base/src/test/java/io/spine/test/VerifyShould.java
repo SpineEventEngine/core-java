@@ -1247,6 +1247,16 @@ public class VerifyShould {
                                      throwsRuntimeException);
     }
 
+    @Test(expected = AssertionError.class)
+    public void fail_assertEmpty_if_Iterator_contains_values() {
+        assertEmpty(Collections.singleton("foo").iterator());
+    }
+
+    @Test
+    public void pass_assertEmpty_if_iterator_is_empty() {
+        assertEmpty(Collections.emptyIterator());
+    }
+
     @SuppressWarnings("EqualsAndHashcode")
     private static class ClassThatViolateHashCodeAndCloneableContract implements Cloneable {
         private final int value;
