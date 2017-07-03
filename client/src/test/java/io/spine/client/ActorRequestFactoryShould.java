@@ -21,10 +21,10 @@ package io.spine.client;
 
 import com.google.common.reflect.TypeToken;
 import com.google.common.testing.NullPointerTester;
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.core.ActorContext;
 import io.spine.core.UserId;
-import io.spine.test.TestValues;
 import io.spine.test.client.TestEntity;
 import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
@@ -132,7 +132,7 @@ public abstract class ActorRequestFactoryShould {
                             TestEntity.class)
                 .setDefault((new TypeToken<Set<? extends Message>>() {
                             }).getRawType(),
-                            newHashSet(TestValues.newUuidValue()))
+                            newHashSet(Any.getDefaultInstance()))
                 .testInstanceMethods(factory(), NullPointerTester.Visibility.PUBLIC);
     }
 

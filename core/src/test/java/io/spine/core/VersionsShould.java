@@ -40,7 +40,7 @@ public class VersionsShould {
     @Test
     public void pass_null_tolerance_check() {
         new NullPointerTester()
-                .setDefault(Version.class, Versions.zero())
+                .setDefault(Version.class, Version.getDefaultInstance())
                 .testAllPublicStaticMethods(Versions.class);
     }
 

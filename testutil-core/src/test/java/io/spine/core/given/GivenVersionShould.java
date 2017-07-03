@@ -21,10 +21,10 @@
 package io.spine.core.given;
 
 import io.spine.core.Version;
-import io.spine.test.TestValues;
 import io.spine.test.Tests;
 import org.junit.Test;
 
+import static io.spine.test.TestValues.random;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -39,7 +39,7 @@ public class GivenVersionShould {
 
     @Test
     public void generate_version_by_number() {
-        final int number = TestValues.random(100);
+        final int number = random(100);
 
         final Version version = GivenVersion.withNumber(number);
 
