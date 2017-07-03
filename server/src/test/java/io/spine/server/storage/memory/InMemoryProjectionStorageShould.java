@@ -23,30 +23,24 @@ package io.spine.server.storage.memory;
 import io.spine.server.entity.Entity;
 import io.spine.server.projection.ProjectionStorage;
 import io.spine.server.projection.ProjectionStorageShould;
+import io.spine.test.storage.ProjectId;
 import io.spine.type.TypeUrl;
-
-import static io.spine.Identifier.newUuid;
 
 /**
  * @author Alexander Litus
  */
-public class InMemoryProjectionStorageShould extends ProjectionStorageShould<String> {
+public class InMemoryProjectionStorageShould extends ProjectionStorageShould {
 
     @Override
-    protected ProjectionStorage<String> getStorage(Class<? extends Entity> cls) {
-        final StorageSpec<String> spec = StorageSpec.of(
+    protected ProjectionStorage<ProjectId> getStorage(Class<? extends Entity> cls) {
+        final StorageSpec<ProjectId> spec = StorageSpec.of(
                 getClass().getSimpleName(),
                 TypeUrl.of(io.spine.test.projection.Project.class),
-                String.class
+                ProjectId.class
         );
-        final InMemoryProjectionStorage<String> storage =
+        final InMemoryProjectionStorage<ProjectId> storage =
                 InMemoryProjectionStorage.newInstance(
                         InMemoryRecordStorage.newInstance(spec, false));
         return storage;
-    }
-
-    @Override
-    protected String newId() {
-        return newUuid();
     }
 }

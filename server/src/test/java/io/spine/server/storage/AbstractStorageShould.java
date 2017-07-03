@@ -57,13 +57,27 @@ public abstract class AbstractStorageShould<I,
 
     @Before
     public void setUpAbstractStorageTest() {
-        storage = getStorage(Entity.class);
+        storage = getDefaultStorage();
     }
 
     @After
     public void tearDownAbstractStorageTest() {
         close(storage);
     }
+
+    protected final S getStorage() {
+        return storage;
+    }
+
+    /**
+     * Creates the default instance of {@link Storage} for this test suite.
+     *
+     * <p>NOTE: the storage is closed after each test.
+     *
+     * @return an empty storage instance
+     * @see #getDefaultStorage() for a storage instance for a specific {@link Entity}
+     */
+    protected abstract S getDefaultStorage();
 
     /**
      * Used to initialize the storage before each test.
@@ -185,10 +199,10 @@ public abstract class AbstractStorageShould<I,
         }
 
         final Iterator<I> index = storage.index();
-        final Collection indexValues = Sets.newHashSet(index);
+        final Collection<I> indexValues = Sets.newHashSet(index);
 
         assertEquals(ids.size(), indexValues.size());
-        Verify.assertContainsAll(indexValues, ids.toArray());
+        Verify.assertContainsAll(indexValues, (I[]) ids.toArray());
     }
 
     @Test

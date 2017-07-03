@@ -20,10 +20,13 @@
 
 package io.spine.server.storage.memory;
 
+import com.google.protobuf.Message;
+import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.aggregate.AggregateStorageShould;
 import io.spine.server.entity.Entity;
 import io.spine.test.aggregate.ProjectId;
+import io.spine.validate.ValidatingBuilder;
 
 /**
  * @author Alexander Litus
@@ -36,8 +39,11 @@ public class InMemoryAggregateStorageShould extends AggregateStorageShould {
     }
 
     @Override
-    protected <I> AggregateStorage<I> getStorage(Class<? extends I> idClass,
-                                                 Class<? extends Entity> aggregateClass) {
+    protected <I> AggregateStorage<I> getStorage(
+            Class<? extends I> idClass,
+            Class<? extends Aggregate<I,
+                                      ? extends Message,
+                                      ? extends ValidatingBuilder<?, ?>>> aggregateClass) {
         return InMemoryAggregateStorage.newInstance();
     }
 }
