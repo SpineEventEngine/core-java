@@ -28,8 +28,6 @@ import io.spine.core.CommandContext.Schedule;
 import io.spine.core.TenantId;
 import io.spine.core.UserId;
 
-import static io.spine.Identifier.newUuid;
-import static io.spine.test.Values.newUserId;
 import static io.spine.time.Time.getCurrentTime;
 import static io.spine.time.ZoneOffsets.UTC;
 
@@ -45,23 +43,19 @@ public class GivenCommandContext {
 
     /** Creates a new {@link CommandContext} instance. */
     public static CommandContext withRandomUser() {
-        final UserId userId = newUserId(newUuid());
+        final UserId userId = GivenUserId.newUuid();
         final Timestamp now = getCurrentTime();
         return withUserAndTime(userId, now);
     }
 
     /** Creates a new {@link CommandContext} instance. */
     public static CommandContext withUserAndTime(UserId userId, Timestamp when) {
-
-        //TODO:2017-03-23:alexander.yevsyukov: Generate commands using TestActorRequestFactory
-
-        final TenantId.Builder generatedTenantId = TenantId.newBuilder()
-                                                           .setValue(newUuid());
+        final TenantId tenantId = GivenTenantId.newUuid();
         final ActorContext.Builder actorContext = ActorContext.newBuilder()
                                                               .setActor(userId)
                                                               .setTimestamp(when)
                                                               .setZoneOffset(UTC)
-                                                              .setTenantId(generatedTenantId);
+                                                              .setTenantId(tenantId);
         final CommandContext.Builder builder = CommandContext.newBuilder()
                                                              .setActorContext(actorContext);
         return builder.build();

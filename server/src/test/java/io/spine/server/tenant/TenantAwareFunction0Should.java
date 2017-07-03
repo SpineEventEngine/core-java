@@ -24,7 +24,7 @@ import com.google.protobuf.Timestamp;
 import io.spine.time.Time;
 import org.junit.Test;
 
-import static io.spine.test.Values.newTenantUuid;
+import static io.spine.core.given.GivenTenantId.newUuid;
 
 /**
  * @author Alexander Yevsyukov
@@ -41,7 +41,7 @@ public class TenantAwareFunction0Should {
         };
 
         // This should pass.
-        new TenantAwareOperation(newTenantUuid()) {
+        new TenantAwareOperation(newUuid()) {
             @Override
             public void run() {
                 whichTime.execute();

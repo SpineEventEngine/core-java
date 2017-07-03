@@ -183,7 +183,7 @@ public class ProjectionRepositoryShould
                                      Message eventMessage,
                                      Any producerId,
                                      Timestamp when) {
-        final Version version = Versions.increment(Versions.create());
+        final Version version = Versions.increment(Versions.zero());
         return newEventFactory(tenantId, producerId).createEvent(eventMessage,
                                                                  version,
                                                                  when);

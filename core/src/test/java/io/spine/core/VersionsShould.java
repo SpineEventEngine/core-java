@@ -21,10 +21,11 @@
 package io.spine.core;
 
 import com.google.common.testing.NullPointerTester;
-import io.spine.test.Values;
+import io.spine.core.given.GivenVersion;
 import org.junit.Test;
 
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Alexander Yevsyukov
@@ -39,15 +40,22 @@ public class VersionsShould {
     @Test
     public void pass_null_tolerance_check() {
         new NullPointerTester()
-                .setDefault(Version.class, Versions.create())
+                .setDefault(Version.class, Versions.zero())
                 .testAllPublicStaticMethods(Versions.class);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void check_version_increment() {
         Versions.checkIsIncrement(
-                Values.newVersionWithNumber(2),
-                Values.newVersionWithNumber(1)
+                GivenVersion.withNumber(2),
+                GivenVersion.withNumber(1)
         );
+    }
+
+    @Test
+    public void increment() {
+        final Version v1 = GivenVersion.withNumber(1);
+        assertEquals(v1.getNumber() + 1, Versions.increment(v1)
+                                                 .getNumber());
     }
 }

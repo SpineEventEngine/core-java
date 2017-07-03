@@ -65,9 +65,6 @@ buildscript {
                                            version: spineToolsVersion
         classpath group: 'io.spine.tools', name: 'gcs-plugin', version: spineToolsVersion
     }
-    configurations.all({
-        resolutionStrategy.cacheChangingModulesFor(0, 'seconds')
-    })
 }
 
 apply from: 'ext.gradle'
@@ -81,11 +78,10 @@ ext {
 
     credentialsPropertyFile = 'credentials.properties'
     publishPlugin = "$rootDir/scripts/publish.gradle"
-    projectsToPublish = ["base",
-                         "core",
+    projectsToPublish = ["core",
                          "client",
                          "server",
-                         "testutil-base",
+                         "testutil-core",
                          "testutil-client",
                          "testutil-server"]
 }

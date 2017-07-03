@@ -30,6 +30,7 @@ import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.TenantId;
 import io.spine.core.UserId;
+import io.spine.core.given.GivenUserId;
 import io.spine.people.PersonName;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
@@ -58,7 +59,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.Identifier.newUuid;
-import static io.spine.test.Values.newUserId;
+import static io.spine.core.given.GivenUserId.of;
 import static io.spine.time.Time.getCurrentTime;
 
 public class Given {
@@ -111,7 +112,7 @@ public class Given {
 
     static class ACommand {
 
-        private static final UserId USER_ID = newUserId(newUuid());
+        private static final UserId USER_ID = GivenUserId.newUuid();
         private static final ProjectId PROJECT_ID = newProjectId();
 
         /* This hack is just for the testing purposes.
@@ -125,7 +126,7 @@ public class Given {
          * Creates a new {@link ACommand} with the given command message, userId and
          * timestamp using default {@link ACommand} instance.
          */
-        static Command create(Message command, UserId userId, Timestamp when) {
+        private static Command create(Message command, UserId userId, Timestamp when) {
             final TenantId generatedTenantId = TenantId.newBuilder()
                                                        .setValue(newUuid())
                                                        .build();
@@ -139,11 +140,11 @@ public class Given {
             return createProject(getCurrentTime());
         }
 
-        static Command createProject(Timestamp when) {
+        private static Command createProject(Timestamp when) {
             return createProject(USER_ID, PROJECT_ID, when);
         }
 
-        static Command createProject(UserId userId, ProjectId projectId, Timestamp when) {
+        private static Command createProject(UserId userId, ProjectId projectId, Timestamp when) {
             final CreateProject command = CommandMessage.createProject(projectId);
             return create(command, userId, when);
         }
@@ -168,7 +169,7 @@ public class Given {
                                               .setCustomerId(customerId)
                                               .setCustomer(customer)
                                               .build();
-            final UserId userId = newUserId(Identifier.newUuid());
+            final UserId userId = of(Identifier.newUuid());
             final Command result = create(msg, userId, getCurrentTime());
             return result;
         }
@@ -176,11 +177,11 @@ public class Given {
 
     static class AQuery {
 
-
         private static final ActorRequestFactory requestFactory =
                 TestActorRequestFactory.newInstance(AQuery.class);
 
-        private AQuery() {}
+        private AQuery() {
+        }
 
         static Query readAllProjects() {
             // DO NOT replace the type name with another Project class.
@@ -192,7 +193,7 @@ public class Given {
 
     static class ProjectAggregateRepository
             extends AggregateRepository<ProjectId, ProjectAggregate> {
-        ProjectAggregateRepository(BoundedContext boundedContext) {
+        ProjectAggregateRepository() {
             super();
         }
     }
@@ -244,7 +245,7 @@ public class Given {
 
     public static class CustomerAggregateRepository
             extends AggregateRepository<CustomerId, CustomerAggregate> {
-        public CustomerAggregateRepository(BoundedContext boundedContext) {
+        public CustomerAggregateRepository() {
             super();
         }
     }

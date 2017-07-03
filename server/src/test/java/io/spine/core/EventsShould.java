@@ -33,7 +33,6 @@ import io.spine.string.Stringifiers;
 import io.spine.test.Tests;
 import io.spine.time.Time;
 import io.spine.type.TypeName;
-import io.spine.type.TypeNameShould;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -50,8 +49,8 @@ import static io.spine.core.Events.getTimestamp;
 import static io.spine.core.Events.sort;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.TypeConverter.toMessage;
+import static io.spine.test.TestValues.newUuidValue;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
-import static io.spine.test.Values.newUuidValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -68,7 +67,7 @@ import static org.junit.Assert.assertTrue;
 public class EventsShould {
 
     private static final ActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(TypeNameShould.class);
+            TestActorRequestFactory.newInstance(EventsShould.class);
 
     private Event event;
     private EventContext context;

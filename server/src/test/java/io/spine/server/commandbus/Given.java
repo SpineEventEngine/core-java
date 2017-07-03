@@ -30,13 +30,13 @@ import io.spine.core.CommandContext;
 import io.spine.core.TenantId;
 import io.spine.core.UserId;
 import io.spine.core.given.GivenCommandContext;
+import io.spine.core.given.GivenUserId;
 import io.spine.test.command.AddTask;
 import io.spine.test.command.CreateProject;
 import io.spine.test.command.ProjectId;
 import io.spine.test.command.StartProject;
 
 import static io.spine.Identifier.newUuid;
-import static io.spine.test.Values.newUserId;
 import static io.spine.time.Time.getCurrentTime;
 
 public class Given {
@@ -54,7 +54,7 @@ public class Given {
 
     public static class ACommand {
 
-        private static final UserId USER_ID = newUserId(newUuid());
+        private static final UserId USER_ID = GivenUserId.newUuid();
         private static final ProjectId PROJECT_ID = newProjectId();
 
         private ACommand() {

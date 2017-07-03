@@ -20,8 +20,8 @@
 
 package io.spine.testdata;
 
+import io.spine.core.given.GivenVersion;
 import io.spine.server.entity.EntityRecord;
-import io.spine.test.Values;
 
 import static io.spine.Identifier.newUuid;
 import static io.spine.protobuf.TypeConverter.toAny;
@@ -41,7 +41,7 @@ public class TestEntityStorageRecordFactory {
         final EntityRecord.Builder builder =
                 EntityRecord.newBuilder()
                          .setState(toAny(newUuid()))
-                         .setVersion(Values.newVersionWithNumber(5));
+                         .setVersion(GivenVersion.withNumber(5));
                             // set any non-default (non-zero) value
         return builder.build();
     }

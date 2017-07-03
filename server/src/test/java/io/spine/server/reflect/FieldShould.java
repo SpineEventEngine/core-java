@@ -37,9 +37,9 @@ import com.google.protobuf.Timestamp;
 import io.spine.base.FieldFilter;
 import io.spine.core.Command;
 import io.spine.protobuf.Messages;
-import io.spine.test.messages.MessageWithStringValue;
-import io.spine.test.messages.TestEnum;
-import io.spine.test.messages.TestEnumValue;
+import io.spine.test.reflect.MessageWithStringValue;
+import io.spine.test.reflect.TestEnum;
+import io.spine.test.reflect.TestEnumValue;
 import io.spine.type.TypeUrl;
 import org.junit.Test;
 

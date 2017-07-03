@@ -51,8 +51,8 @@ import org.mockito.internal.matchers.GreaterThan;
 import java.util.Iterator;
 import java.util.Set;
 
+import static io.spine.core.given.GivenTenantId.newUuid;
 import static io.spine.server.aggregate.AggregateCommandDispatcher.dispatch;
-import static io.spine.test.Values.newTenantUuid;
 import static io.spine.validate.Validate.isDefault;
 import static io.spine.validate.Validate.isNotDefault;
 import static org.junit.Assert.assertEquals;
@@ -253,7 +253,7 @@ public class AggregateRepositoryShould {
         createAndStoreAggregate();
 
         // Store a troublesome entity, which cannot be loaded.
-        final TenantAwareOperation op = new TenantAwareOperation(newTenantUuid()) {
+        final TenantAwareOperation op = new TenantAwareOperation(newUuid()) {
             @Override
             public void run() {
                 createAndStore(ProjectAggregateRepository.troublesome.getId());

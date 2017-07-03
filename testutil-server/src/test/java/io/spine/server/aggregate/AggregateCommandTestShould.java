@@ -33,7 +33,7 @@ import io.spine.validate.StringValueVBuilder;
 import org.junit.Before;
 import org.junit.Test;
 
-import static io.spine.test.Values.newUserUuid;
+import static io.spine.core.given.GivenUserId.newUuid;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -73,7 +73,7 @@ public class AggregateCommandTestShould {
 
     private static ActorRequestFactory newRequestFactory(Class<?> clazz) {
         return ActorRequestFactory.newBuilder()
-                                  .setActor(newUserUuid())
+                                  .setActor(newUuid())
                                   .setZoneOffset(ZoneOffsets.UTC)
                                   .setTenantId(TenantId.newBuilder()
                                                        .setValue(clazz.getSimpleName())

@@ -34,8 +34,8 @@ import io.spine.Identifier;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.given.GivenCommandContext;
+import io.spine.core.given.GivenUserId;
 import io.spine.string.Stringifiers;
-import io.spine.test.Values;
 import io.spine.time.Durations2;
 import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
@@ -47,15 +47,13 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.protobuf.Descriptors.FileDescriptor;
-import static io.spine.Identifier.newUuid;
 import static io.spine.core.Commands.sameActorAndTenant;
+import static io.spine.core.given.GivenTenantId.newUuid;
 import static io.spine.protobuf.TypeConverter.toMessage;
+import static io.spine.test.TestValues.newUuidValue;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.TimeTests.Past.minutesAgo;
 import static io.spine.test.TimeTests.Past.secondsAgo;
-import static io.spine.test.Values.newTenantUuid;
-import static io.spine.test.Values.newUserUuid;
-import static io.spine.test.Values.newUuidValue;
 import static io.spine.time.Durations2.seconds;
 import static io.spine.time.Time.getCurrentTime;
 import static org.junit.Assert.assertEquals;
@@ -63,6 +61,14 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+/**
+ * * Tests for {@linkplain Commands Commands utility class}.
+ *
+ * <p>The test suite is located under the "client" module since actor request generation
+ * is required. So we want to avoid circular dependencies between "core" and "client" modules.
+ *
+ * @author Alexander Yevsyukov
+ */
 public class CommandsShould {
 
     private static final FileDescriptor DEFAULT_FILE_DESCRIPTOR = Any.getDescriptor()
@@ -97,8 +103,8 @@ public class CommandsShould {
     public void check_if_contexts_have_same_actor_and_tenantId() {
         final ActorContext.Builder actorContext =
                 ActorContext.newBuilder()
-                            .setActor(newUserUuid())
-                            .setTenantId(newTenantUuid());
+                            .setActor(GivenUserId.newUuid())
+                            .setTenantId(newUuid());
         final CommandContext c1 =
                 CommandContext.newBuilder()
                               .setActorContext(actorContext)
@@ -122,7 +128,7 @@ public class CommandsShould {
                                                          minutesAgo(1)))
                 .setDefault(CommandContext.class, requestFactory.createCommandContext())
                 .setDefault(ZoneOffset.class, ZoneOffsets.UTC)
-                .setDefault(UserId.class, Values.newUserUuid())
+                .setDefault(UserId.class, GivenUserId.newUuid())
                 .testStaticMethods(Commands.class, NullPointerTester.Visibility.PACKAGE);
     }
 
@@ -173,7 +179,6 @@ public class CommandsShould {
         assertEquals(3, FluentIterable.from(filter)
                                       .size());
     }
-
 
     @Test
     public void when_command_delay_is_set_then_consider_it_scheduled() {
@@ -235,7 +240,7 @@ public class CommandsShould {
     public void obtain_type_url_of_command() {
         final ActorRequestFactory factory =
                 TestActorRequestFactory.newInstance(CommandsShould.class);
-        final StringValue message = toMessage(newUuid());
+        final StringValue message = toMessage(Identifier.newUuid());
         final Command command = factory.command()
                                        .create(message);
 

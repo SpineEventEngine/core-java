@@ -26,13 +26,13 @@ dependencies {
     // based on this library.
     compile group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
     
-    // Depend on the client module that contains `Timestamps` and other utility classes.
-    compile project(path: ':base')
+    // Depend on the base module that contains `Timestamps` and other utility classes.
+    compile group: 'io.spine', name: 'spine-base', version: spineBaseVersion
 
     // Depend on `io.spine.server.entity` and other packages for the GivenXxx classes.
     compile project(path: ':server')
 
     // General purpose test utilities.
-    compile project(path: ':testutil-base')
+    compile group: 'io.spine', name: 'spine-testutil-base', version: spineBaseVersion
     compile project(path: ':testutil-client')
 }

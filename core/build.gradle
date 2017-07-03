@@ -18,9 +18,9 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 dependencies {
-    compile project(path: ':base')
+    compile group: 'io.spine', name: 'spine-base', version: spineBaseVersion
 
-    testCompile project(path: ":testutil-base")
+    testCompile project(path: ":testutil-core")
 }
 
 apply from: generateDescriptorSetScript
