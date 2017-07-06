@@ -20,6 +20,7 @@
 
 package io.spine.server.aggregate;
 
+import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -55,5 +56,12 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
+@Documented
 public @interface React {
+
+    /**
+     * When {@code true}, the annotated method of the aggregate reacts on the event generated from
+     * outside of the Bounded Context to which this aggregate belongs.
+     */
+    boolean external() default false;
 }
