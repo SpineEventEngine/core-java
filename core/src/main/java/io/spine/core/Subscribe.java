@@ -79,6 +79,7 @@ import java.lang.annotation.Target;
  * delivery.
  *
  * @author Alexander Yevsyukov
+ * @author Alex Tymchenko
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
