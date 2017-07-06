@@ -334,6 +334,46 @@ public class ProjectionRepositoryShould
     }
 
     /**
+     * Ensures that {@link ProjectionRepository#readLastHandledEventTime()} and
+     * {@link ProjectionRepository#writeLastHandledEventTime(Timestamp)} which are used by
+     * Beam-based catch-up are exposed.
+     */
+    @Test
+    public void expose_read_and_write_methods_for_last_handled_event_timestamp() {
+        final Timestamp timestamp = repository().readLastHandledEventTime();
+        if (timestamp != null) {
+            repository().writeLastHandledEventTime(timestamp);
+        }
+    }
+
+    /**
+     * Ensures that {@link ProjectionRepository#createStreamQuery()}, which is used by the catch-up
+     * procedures is exposed.
+     */
+    @Test
+    public void crete_stream_query() {
+        assertNotNull(repository().createStreamQuery());
+    }
+
+    /**
+     * Ensures that {@link ProjectionRepository#getEventStore()} which is used by the catch-up
+     * functionality is exposed to the package.
+     */
+    @Test
+    public void expose_event_store_to_package() {
+        assertNotNull(repository().getEventStore());
+    }
+
+    /**
+     * Ensures that {@link ProjectionRepository#boundedContext()} which is used by the catch-up
+     * functionality is exposed to the package.
+     */
+    @Test
+    public void expose_bounded_context_to_package() {
+        assertNotNull(repository().boundedContext());
+    }
+
+    /**
      * The projection stub with the event subscribing methods that do nothing.
      *
      * <p>Such a projection allows to reproduce a use case, when the event-handling method
