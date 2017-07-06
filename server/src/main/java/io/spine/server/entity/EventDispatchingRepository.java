@@ -120,7 +120,7 @@ public abstract class EventDispatchingRepository<I,
 
     @Override
     @CheckReturnValue
-    public Set<I> getTargetIds(EventEnvelope envelope) {
+    public Set<I> getTargets(EventEnvelope envelope) {
         return idSetFunctions.apply(envelope.getMessage(), envelope.getEventContext());
     }
 
@@ -133,7 +133,7 @@ public abstract class EventDispatchingRepository<I,
     public void dispatch(EventEnvelope envelope) {
         final Message eventMessage = envelope.getMessage();
         final EventContext context = envelope.getEventContext();
-        final Set<I> ids = getTargetIds(envelope);
+        final Set<I> ids = getTargets(envelope);
         final EventOperation op = new EventOperation(envelope.getOuterObject()) {
             @Override
             public void run() {
