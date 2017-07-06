@@ -25,7 +25,6 @@ import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
-import io.spine.core.given.GivenCommandContext;
 import io.spine.protobuf.AnyPacker;
 import io.spine.test.command.CreateProject;
 import io.spine.time.Time;
@@ -35,6 +34,7 @@ import org.junit.Test;
 import java.util.List;
 
 import static io.spine.core.Commands.generateId;
+import static io.spine.core.given.GivenCommandContext.withRandomActor;
 import static io.spine.server.commandbus.Given.CommandMessage.createProjectMessage;
 import static org.junit.Assert.assertEquals;
 
@@ -60,8 +60,7 @@ public class ValidatorShould {
         final Command commandWithEmptyMessage = Command.newBuilder()
                                                        .setId(generateId())
                                                        .setMessage(invalidMessagePacked)
-                                                       .setContext(
-                                                               GivenCommandContext.withRandomUser())
+                                                       .setContext(withRandomActor())
                                                        .build();
 
         final List<ConstraintViolation> violations =

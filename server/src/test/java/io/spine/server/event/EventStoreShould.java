@@ -30,7 +30,6 @@ import io.spine.core.CommandContext;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.TenantId;
-import io.spine.core.given.GivenCommandContext;
 import io.spine.server.BoundedContext;
 import io.spine.server.command.TestEventFactory;
 import io.spine.test.event.ProjectCreated;
@@ -48,6 +47,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static com.google.common.collect.Sets.newConcurrentHashSet;
 import static com.google.protobuf.util.Timestamps.add;
 import static com.google.protobuf.util.Timestamps.subtract;
+import static io.spine.core.given.GivenCommandContext.withRandomActor;
 import static io.spine.test.Verify.assertContainsAll;
 import static io.spine.test.Verify.assertSize;
 import static io.spine.time.Time.getCurrentTime;
@@ -78,7 +78,7 @@ public class EventStoreShould {
 
     @BeforeClass
     public static void prepare() {
-        final CommandContext context = GivenCommandContext.withRandomUser();
+        final CommandContext context = withRandomActor();
         eventFactory = TestEventFactory.newInstance(EventStoreShould.class, context);
     }
 
