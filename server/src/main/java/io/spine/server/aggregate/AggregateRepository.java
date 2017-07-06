@@ -37,8 +37,6 @@ import io.spine.server.stand.Stand;
 import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.CommandOperation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
@@ -352,8 +350,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      *
      * <p>{@link AggregateStateRecord} is considered valid when one of the following is true:
      * <ul>
-     *     <li>{@linkplain AggregateStateRecord#getSnapshot() snapshot} is not default;</li>
-     *     <li>{@linkplain AggregateStateRecord#getEventList() event list} is not empty.</li>
+     *     <li>{@linkplain AggregateStateRecord#getSnapshot() snapshot} is not default;
+     *     <li>{@linkplain AggregateStateRecord#getEventList() event list} is not empty.
      * </ul>
      *
      * @param aggregateStateRecord the record to check
@@ -378,16 +376,5 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     /** The Stand instance for sending updated aggregate states. */
     private Stand getStand() {
         return getBoundedContext().getStand();
-    }
-
-    private enum LogSingleton {
-        INSTANCE;
-
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(AggregateRepository.class);
-    }
-
-    static Logger log() {
-        return LogSingleton.INSTANCE.value;
     }
 }

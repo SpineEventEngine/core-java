@@ -26,6 +26,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import io.spine.core.Event;
+import io.spine.server.aggregate.given.Given;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.event.Given.EventMessage;
 import io.spine.server.storage.AbstractStorageShould;

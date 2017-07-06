@@ -73,7 +73,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     /**
      * {@inheritDoc}
      *
-     * <p>Overrides to open the method to the {@code beam} package.
+     * <p>Overrides to open the method to the package.
      */
     @Override
     protected EventTargetsFunction<I, Message> getIdSetFunction() {

@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.aggregate;
+package io.spine.server.aggregate.given;
 
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
@@ -28,6 +28,7 @@ import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.UserId;
 import io.spine.core.given.GivenUserId;
+import io.spine.server.aggregate.AggregateEventRecord;
 import io.spine.server.command.TestEventFactory;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AddTask;
@@ -42,43 +43,43 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.protobuf.util.Timestamps.add;
-import static io.spine.server.aggregate.Given.EventMessage.projectCreated;
-import static io.spine.server.aggregate.Given.EventMessage.taskAdded;
+import static io.spine.server.aggregate.given.Given.EventMessage.projectCreated;
+import static io.spine.server.aggregate.given.Given.EventMessage.taskAdded;
 import static io.spine.server.command.TestEventFactory.newInstance;
 import static io.spine.time.Durations2.seconds;
 import static io.spine.time.Time.getCurrentTime;
 
-class Given {
+public class Given {
 
     private Given() {
     }
 
-    static class EventMessage {
+    public static class EventMessage {
 
         private EventMessage() {
         }
 
-        static ProjectCreated projectCreated(ProjectId id, String projectName) {
+        public static ProjectCreated projectCreated(ProjectId id, String projectName) {
             return ProjectCreated.newBuilder()
                                  .setProjectId(id)
                                  .setName(projectName)
                                  .build();
         }
 
-        static TaskAdded taskAdded(ProjectId id) {
+        public static TaskAdded taskAdded(ProjectId id) {
             return TaskAdded.newBuilder()
                             .setProjectId(id)
                             .build();
         }
 
-        static ProjectStarted projectStarted(ProjectId id) {
+        public static ProjectStarted projectStarted(ProjectId id) {
             return ProjectStarted.newBuilder()
                                  .setProjectId(id)
                                  .build();
         }
     }
 
-    static class ACommand {
+    public static class ACommand {
 
         private static final UserId USER_ID = GivenUserId.newUuid();
         private static final ProjectId PROJECT_ID = Sample.messageOfType(ProjectId.class);
@@ -86,31 +87,31 @@ class Given {
         private ACommand() {
         }
 
-        static Command createProject() {
+        public static Command createProject() {
             return createProject(getCurrentTime());
         }
 
-        static Command createProject(ProjectId id) {
+        public static Command createProject(ProjectId id) {
             return createProject(USER_ID, id, getCurrentTime());
         }
 
-        static Command createProject(Timestamp when) {
+        public static Command createProject(Timestamp when) {
             return createProject(USER_ID, PROJECT_ID, when);
         }
 
-        static Command createProject(UserId userId,
+        public static Command createProject(UserId userId,
                 ProjectId projectId,
                 Timestamp when) {
             final CreateProject command = CommandMessage.createProject(projectId);
             return create(command, userId, when);
         }
 
-        static Command addTask(ProjectId id) {
+        public static Command addTask(ProjectId id) {
             final AddTask command = CommandMessage.addTask(id);
             return create(command, USER_ID, getCurrentTime());
         }
 
-        static Command startProject(ProjectId id) {
+        public static Command startProject(ProjectId id) {
             final StartProject command = CommandMessage.startProject(id);
             return create(command, USER_ID, getCurrentTime());
         }
@@ -120,32 +121,32 @@ class Given {
          * userId and timestamp using default
          * {@link io.spine.core.CommandId CommandId} instance.
          */
-        static Command create(Message command, UserId userId, Timestamp when) {
+        public static Command create(Message command, UserId userId, Timestamp when) {
             final Command result = TestActorRequestFactory.newInstance(userId)
                                                           .createCommand(command, when);
             return result;
         }
     }
 
-    static class CommandMessage {
+    public static class CommandMessage {
 
         private CommandMessage() {
         }
 
-        static CreateProject createProject(ProjectId id) {
+        public static CreateProject createProject(ProjectId id) {
             final CreateProject.Builder builder = CreateProject.newBuilder()
                                                                .setProjectId(id)
                                                                .setName(projectName(id));
             return builder.build();
         }
 
-        static AddTask addTask(ProjectId id) {
+        public static AddTask addTask(ProjectId id) {
             final AddTask.Builder builder = AddTask.newBuilder()
                                                    .setProjectId(id);
             return builder.build();
         }
 
-        static StartProject startProject(ProjectId id) {
+        public static StartProject startProject(ProjectId id) {
             final StartProject.Builder builder = StartProject.newBuilder()
                                                              .setProjectId(id);
             return builder.build();
@@ -156,14 +157,14 @@ class Given {
         return "Project_" + id.getId();
     }
 
-    static class StorageRecord {
+    public static class StorageRecord {
 
         private static final TestEventFactory eventFactory = newInstance(Given.class);
 
         private StorageRecord() {
         }
 
-        static AggregateEventRecord create(Timestamp timestamp) {
+        public static AggregateEventRecord create(Timestamp timestamp) {
             final Message eventMessage = Sample.messageOfType(ProjectCreated.class);
             final Event event = eventFactory.createEvent(eventMessage);
             final AggregateEventRecord.Builder builder
@@ -173,7 +174,7 @@ class Given {
             return builder.build();
         }
 
-        static AggregateEventRecord create(Timestamp timestamp, Event event) {
+        public static AggregateEventRecord create(Timestamp timestamp, Event event) {
             final AggregateEventRecord.Builder builder = create(timestamp)
                     .toBuilder()
                     .setEvent(event);
@@ -181,7 +182,7 @@ class Given {
         }
     }
 
-    static class StorageRecords {
+    public static class StorageRecords {
 
         private StorageRecords() {
         }
@@ -190,7 +191,7 @@ class Given {
          * Returns several records sorted by timestamp ascending.
          * First record's timestamp is the current time.
          */
-        static List<AggregateEventRecord> sequenceFor(ProjectId id) {
+        public static List<AggregateEventRecord> sequenceFor(ProjectId id) {
             return sequenceFor(id, getCurrentTime());
         }
 
@@ -199,7 +200,7 @@ class Given {
          *
          * @param timestamp1 the timestamp of first record.
          */
-        static List<AggregateEventRecord> sequenceFor(ProjectId id, Timestamp timestamp1) {
+        public static List<AggregateEventRecord> sequenceFor(ProjectId id, Timestamp timestamp1) {
             final Duration delta = seconds(10);
             final Timestamp timestamp2 = add(timestamp1, delta);
             final Timestamp timestamp3 = add(timestamp2, delta);
