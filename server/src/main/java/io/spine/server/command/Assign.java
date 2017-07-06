@@ -30,7 +30,7 @@ import java.lang.annotation.Target;
  *
  * <p>A command handler method <strong>must</strong>:
  * <ul>
- *     <li>be annotated with {@link Assign};
+ *     <li>be annotated with {@link Assign @Assign};
  *     <li>return an event derived from {@link com.google.protobuf.Message Message}
  *     <strong>or</strong> a {@link java.util.List List} of messages;
  *     <li>accept a command message derived from {@link com.google.protobuf.Message Message}
