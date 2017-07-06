@@ -85,9 +85,9 @@ public abstract class EventDispatchingRepository<I,
      *
      * <p>Such a mapping may be required when...
      * <ul>
-     *     <li>An event should be matched to more than one projection.
-     *     <li>The type of an event producer ID (stored in {@code EventContext})
-     *     differs from {@code <I>}.
+     * <li>An event should be matched to more than one projection.
+     * <li>The type of an event producer ID (stored in {@code EventContext})
+     * differs from {@code <I>}.
      * </ul>
      *
      * <p>If there is no function for the class of the passed event message,
@@ -95,10 +95,10 @@ public abstract class EventDispatchingRepository<I,
      * with the event message.
      *
      * @param func the function instance
-     * @param <M> the type of the event message handled by the function
+     * @param <M>  the type of the event message handled by the function
      */
-    public <M extends Message> void addTargetsFunction(Class<M> eventClass,
-                                                       EventTargetsFunction<I, M> func) {
+    public <M extends Message>
+    void addTargetsFunction(Class<M> eventClass, EventTargetsFunction<I, M> func) {
         idSetFunctions.put(eventClass, func);
     }
 
@@ -106,7 +106,7 @@ public abstract class EventDispatchingRepository<I,
      * Removes {@code IdSetFunction} from the repository.
      *
      * @param eventClass the class of the event message
-     * @param <M> the type of the event message handled by the function we want to remove
+     * @param <M>        the type of the event message handled by the function we want to remove
      */
     public <M extends Message> void removeTargetsFunction(Class<M> eventClass) {
         idSetFunctions.remove(eventClass);
@@ -116,7 +116,7 @@ public abstract class EventDispatchingRepository<I,
      * Obtains the targets function for the passed event message class.
      */
     public <M extends Message>
-           Optional<EventTargetsFunction<I, M>> getTargetsFunction(Class<M> eventClass) {
+    Optional<EventTargetsFunction<I, M>> getTargetsFunction(Class<M> eventClass) {
         return idSetFunctions.get(eventClass);
     }
 
@@ -150,9 +150,9 @@ public abstract class EventDispatchingRepository<I,
     /**
      * Dispatches the event to an entity with the passed ID.
      *
-     * @param id the ID of the entity
+     * @param id           the ID of the entity
      * @param eventMessage the event message
-     * @param context the event context
+     * @param context      the event context
      */
     protected abstract void dispatchToEntity(I id, Message eventMessage, EventContext context);
 }
