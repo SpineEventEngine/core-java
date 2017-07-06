@@ -130,7 +130,7 @@ class Given {
 
         StandTestProjectionRepository() {
             super();
-            addIdSetFunction(ProjectCreated.class, EVENT_TARGETS_FN);
+            addTargetsFunction(ProjectCreated.class, EVENT_TARGETS_FN);
         }
     }
 

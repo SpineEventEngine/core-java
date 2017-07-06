@@ -76,8 +76,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      * <p>Overrides to open the method to the package.
      */
     @Override
-    protected EventTargetsFunction<I, Message> getIdSetFunction() {
-        return super.getIdSetFunction();
+    protected EventTargetsFunction<I, Message> getTargetsFunction() {
+        return super.getTargetsFunction();
     }
 
     /**

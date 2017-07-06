@@ -60,7 +60,7 @@ public abstract class EventDispatchingRepository<I,
      * Obtains the {@link EventTargetsFunction} used by the repository for calculating identifiers
      * of event targets.
      */
-    protected EventTargetsFunction<I, Message> getIdSetFunction() {
+    protected EventTargetsFunction<I, Message> getTargetsFunction() {
         return idSetFunctions;
     }
 
@@ -97,8 +97,8 @@ public abstract class EventDispatchingRepository<I,
      * @param func the function instance
      * @param <M> the type of the event message handled by the function
      */
-    public <M extends Message> void addIdSetFunction(Class<M> eventClass,
-                                                     EventTargetsFunction<I, M> func) {
+    public <M extends Message> void addTargetsFunction(Class<M> eventClass,
+                                                       EventTargetsFunction<I, M> func) {
         idSetFunctions.put(eventClass, func);
     }
 
@@ -108,12 +108,15 @@ public abstract class EventDispatchingRepository<I,
      * @param eventClass the class of the event message
      * @param <M> the type of the event message handled by the function we want to remove
      */
-    public <M extends Message> void removeIdSetFunction(Class<M> eventClass) {
+    public <M extends Message> void removeTargetsFunction(Class<M> eventClass) {
         idSetFunctions.remove(eventClass);
     }
 
+    /**
+     * Obtains the targets function for the passed event message class.
+     */
     public <M extends Message>
-           Optional<EventTargetsFunction<I, M>> getIdSetFunction(Class<M> eventClass) {
+           Optional<EventTargetsFunction<I, M>> getTargetsFunction(Class<M> eventClass) {
         return idSetFunctions.get(eventClass);
     }
 

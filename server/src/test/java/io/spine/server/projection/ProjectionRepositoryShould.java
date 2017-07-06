@@ -267,7 +267,7 @@ public class ProjectionRepositoryShould
                 };
 
         final EventTargetsFunction<ProjectId, ProjectCreated> idSetFunction = spy(delegateFn);
-        repository().addIdSetFunction(ProjectCreated.class, idSetFunction);
+        repository().addTargetsFunction(ProjectCreated.class, idSetFunction);
 
         final Event event = createEvent(tenantId(), projectCreated(), PRODUCER_ID, getCurrentTime());
         repository().dispatch(EventEnvelope.of(event));
@@ -279,10 +279,10 @@ public class ProjectionRepositoryShould
 
     @Test
     public void obtain_id_set_function_after_put() {
-        repository().addIdSetFunction(ProjectCreated.class, creteProjectTargets);
+        repository().addTargetsFunction(ProjectCreated.class, creteProjectTargets);
 
         final Optional<EventTargetsFunction<ProjectId, ProjectCreated>> func =
-                repository().getIdSetFunction(ProjectCreated.class);
+                repository().getTargetsFunction(ProjectCreated.class);
 
         assertTrue(func.isPresent());
         assertEquals(creteProjectTargets, func.get());
@@ -290,11 +290,11 @@ public class ProjectionRepositoryShould
 
     @Test
     public void remove_id_set_function_after_put() {
-        repository().addIdSetFunction(ProjectCreated.class, creteProjectTargets);
+        repository().addTargetsFunction(ProjectCreated.class, creteProjectTargets);
 
-        repository().removeIdSetFunction(ProjectCreated.class);
+        repository().removeTargetsFunction(ProjectCreated.class);
         final Optional<EventTargetsFunction<ProjectId, ProjectCreated>> out =
-                repository().getIdSetFunction(ProjectCreated.class);
+                repository().getTargetsFunction(ProjectCreated.class);
 
         assertFalse(out.isPresent());
     }
@@ -324,12 +324,12 @@ public class ProjectionRepositoryShould
     }
 
     /**
-     * Ensures that {@link ProjectionRepository#getIdSetFunction(Class)} which is used by Beam-based
+     * Ensures that {@link ProjectionRepository#getTargetsFunction(Class)} which is used by Beam-based
      * catch-up is exposed.
      */
     @Test
     public void expose_event_targets_function() {
-        final EventTargetsFunction<ProjectId, Message> fn = repository().getIdSetFunction();
+        final EventTargetsFunction<ProjectId, Message> fn = repository().getTargetsFunction();
         assertNotNull(fn);
     }
 
