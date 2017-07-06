@@ -324,8 +324,8 @@ public class ProjectionRepositoryShould
     }
 
     /**
-     * Ensures that {@link ProjectionRepository#getTargetsFunction(Class)} which is used by Beam-based
-     * catch-up is exposed.
+     * Ensures that {@link ProjectionRepository#getTargetsFunction(Class)} which is used by
+     * Beam-based catch-up is exposed.
      */
     @Test
     public void expose_event_targets_function() {
