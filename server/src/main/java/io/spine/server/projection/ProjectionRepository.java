@@ -31,6 +31,7 @@ import io.spine.server.BoundedContext;
 import io.spine.server.entity.EntityStorageConverter;
 import io.spine.server.entity.EventDispatchingRepository;
 import io.spine.server.entity.idfunc.EventTargetsFunction;
+import io.spine.server.entity.idfunc.Producers;
 import io.spine.server.event.EventFilter;
 import io.spine.server.event.EventStore;
 import io.spine.server.event.EventStreamQuery;
@@ -60,7 +61,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      * Creates a new {@code ProjectionRepository}.
      */
     protected ProjectionRepository() {
-        super(EventDispatchingRepository.<I>producerFromContext());
+        super(Producers.<I>fromContext());
     }
 
     /** Obtains {@link EventStore} from which to get events during catch-up. */

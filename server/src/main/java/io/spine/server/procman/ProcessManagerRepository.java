@@ -34,6 +34,7 @@ import io.spine.server.commandbus.CommandDispatcherDelegate;
 import io.spine.server.commandbus.DelegatingCommandDispatcher;
 import io.spine.server.entity.EventDispatchingRepository;
 import io.spine.server.entity.idfunc.GetTargetIdFromCommand;
+import io.spine.server.entity.idfunc.Producers;
 import io.spine.server.event.EventBus;
 
 import javax.annotation.CheckReturnValue;
@@ -70,7 +71,7 @@ public abstract class ProcessManagerRepository<I,
 
     /** {@inheritDoc} */
     protected ProcessManagerRepository() {
-        super(EventDispatchingRepository.<I>producerFromFirstMessageField());
+        super(Producers.<I>fromFirstMessageField());
     }
 
     @Override

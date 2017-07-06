@@ -25,7 +25,6 @@ import com.google.protobuf.Message;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.server.entity.idfunc.EventTargetsFunction;
-import io.spine.server.entity.idfunc.Producers;
 import io.spine.server.tenant.EventOperation;
 
 import javax.annotation.CheckReturnValue;
@@ -153,19 +152,4 @@ public abstract class EventDispatchingRepository<I,
      * @param context the event context
      */
     protected abstract void dispatchToEntity(I id, Message eventMessage, EventContext context);
-
-    /**
-     * Obtains default {@code IdSetFunction} that retrieves an event producer
-     * from the event context.
-     *
-     * @param <I> the type of the event producer
-     * @return {@code IdSetFunction} instance that returns a set with a single element
-     */
-    protected static <I> EventTargetsFunction<I, Message> producerFromContext() {
-        return Producers.fromContext();
-    }
-
-    protected static <I> EventTargetsFunction<I, Message> producerFromFirstMessageField() {
-        return Producers.fromFirstMessageField();
-    }
 }
