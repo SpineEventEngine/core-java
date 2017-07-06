@@ -32,27 +32,37 @@ import static io.spine.time.Time.getCurrentTime;
 import static io.spine.time.ZoneOffsets.UTC;
 
 /**
- * Creates Context for tests.
+ * Factory methods to create {@code CommandContext} instances for test purposes.
  *
  * @author Mikhail Mikhaylov
  */
 public class GivenCommandContext {
 
     private GivenCommandContext() {
+        // Prevent instantiation of this utility class.
     }
 
-    /** Creates a new {@link CommandContext} instance. */
-    public static CommandContext withRandomUser() {
+    /**
+     * Creates a new {@link CommandContext} instance with a randomly
+     * generated {@linkplain UserId actor} and current timestamp as a creation date.
+     *
+     * @return a new {@code CommandContext} instance
+     */
+    public static CommandContext withRandomActor() {
         final UserId userId = GivenUserId.newUuid();
         final Timestamp now = getCurrentTime();
-        return withUserAndTime(userId, now);
+        return withActorAndTime(userId, now);
     }
 
-    /** Creates a new {@link CommandContext} instance. */
-    public static CommandContext withUserAndTime(UserId userId, Timestamp when) {
+    /**
+     * Creates a new {@link CommandContext} instance based upon given actor and creation date.
+     *
+     * @return a new {@code CommandContext} instance
+     */
+    public static CommandContext withActorAndTime(UserId actor, Timestamp when) {
         final TenantId tenantId = GivenTenantId.newUuid();
         final ActorContext.Builder actorContext = ActorContext.newBuilder()
-                                                              .setActor(userId)
+                                                              .setActor(actor)
                                                               .setTimestamp(when)
                                                               .setZoneOffset(UTC)
                                                               .setTenantId(tenantId);
@@ -61,7 +71,13 @@ public class GivenCommandContext {
         return builder.build();
     }
 
-    /** Creates a new context with the given delay before the delivery time. */
+    /**
+     * Creates a new {@link CommandContext} with the given delay before the delivery time.
+     *
+     * <p>The actor identifier for the context is generated randomly.
+     *
+     * @return a new {@code CommandContext} instance
+     */
     public static CommandContext withScheduledDelayOf(Duration delay) {
         final Schedule schedule = Schedule.newBuilder()
                                           .setDelay(delay)
@@ -69,10 +85,16 @@ public class GivenCommandContext {
         return withSchedule(schedule);
     }
 
-    /** Creates a new context with the given scheduling options. */
+    /**
+     * Creates a new {@link CommandContext} with the given scheduling options.
+     *
+     * <p>The actor identifier for the context is generated randomly.
+     *
+     * @return a new {@code CommandContext} instance
+     */
     private static CommandContext withSchedule(Schedule schedule) {
-        final CommandContext.Builder builder = withRandomUser().toBuilder()
-                                                               .setSchedule(schedule);
+        final CommandContext.Builder builder = withRandomActor().toBuilder()
+                                                                .setSchedule(schedule);
         return builder.build();
     }
 }
