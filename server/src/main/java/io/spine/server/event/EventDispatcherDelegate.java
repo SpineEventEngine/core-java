@@ -31,11 +31,12 @@ import java.util.Set;
  * but are unable to implement {@link io.spine.server.event.EventDispatcher EventDispatcher}.
  *
  * <p>This interface defines own contract (instead of extending {@linkplain
- * io.spine.server.bus.MessageDispatcher MessageDispatcher} to allow classes that can dispatch
+ * io.spine.server.bus.MessageDispatcher MessageDispatcher} to allow classes that dispatch
  * messages other than events (by implementing {@linkplain io.spine.server.bus.MessageDispatcher
- * MessageDispatcher}) and dispatch events by implementing this interface.
+ * MessageDispatcher}), and dispatch events by implementing this interface.
  *
  * @author Alexander Yevsyukov
+ * @see DelegatingEventDispatcher
  */
 @Internal
 public interface EventDispatcherDelegate {
