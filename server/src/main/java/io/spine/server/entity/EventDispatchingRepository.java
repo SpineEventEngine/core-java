@@ -44,7 +44,7 @@ public abstract class EventDispatchingRepository<I,
         extends DefaultRecordBasedRepository<I, E, S>
         implements EntityEventDispatcher<I> {
 
-    private final CompositeEventDispatchFunction<I> idSetFunctions;
+    private final CompositeEventDispatchFunction<I> dispatchFunctions;
 
     /**
      * Creates new repository instance.
@@ -53,7 +53,7 @@ public abstract class EventDispatchingRepository<I,
      */
     protected EventDispatchingRepository(EventDispatchFunction<I, Message> defaultFunction) {
         super();
-        this.idSetFunctions = new CompositeEventDispatchFunction<>(defaultFunction);
+        this.dispatchFunctions = new CompositeEventDispatchFunction<>(defaultFunction);
     }
 
     /**
@@ -61,7 +61,7 @@ public abstract class EventDispatchingRepository<I,
      * of event targets.
      */
     protected EventDispatchFunction<I, Message> getDispatchFunction() {
-        return idSetFunctions;
+        return dispatchFunctions;
     }
 
     /**
@@ -99,7 +99,7 @@ public abstract class EventDispatchingRepository<I,
      */
     public <M extends Message>
     void addDispatchFunction(Class<M> eventClass, EventDispatchFunction<I, M> func) {
-        idSetFunctions.put(eventClass, func);
+        dispatchFunctions.put(eventClass, func);
     }
 
     /**
@@ -109,7 +109,7 @@ public abstract class EventDispatchingRepository<I,
      * @param <M>        the type of the event message handled by the function we want to remove
      */
     public <M extends Message> void removeDispatchFunction(Class<M> eventClass) {
-        idSetFunctions.remove(eventClass);
+        dispatchFunctions.remove(eventClass);
     }
 
     /**
@@ -117,13 +117,13 @@ public abstract class EventDispatchingRepository<I,
      */
     public <M extends Message>
     Optional<EventDispatchFunction<I, M>> getDispatchFunction(Class<M> eventClass) {
-        return idSetFunctions.get(eventClass);
+        return dispatchFunctions.get(eventClass);
     }
 
     @Override
     @CheckReturnValue
     public Set<I> getTargets(EventEnvelope envelope) {
-        return idSetFunctions.apply(envelope.getMessage(), envelope.getEventContext());
+        return dispatchFunctions.apply(envelope.getMessage(), envelope.getEventContext());
     }
 
     /**
