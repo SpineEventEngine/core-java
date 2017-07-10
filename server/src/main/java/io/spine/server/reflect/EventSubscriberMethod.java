@@ -39,6 +39,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * A wrapper for an event subscriber method.
  *
  * @author Alexander Yevsyukov
+ * @see Subscribe
  */
 public class EventSubscriberMethod extends HandlerMethod<EventContext> {
 
@@ -63,8 +64,7 @@ public class EventSubscriberMethod extends HandlerMethod<EventContext> {
         checkNotNull(context);
 
         try {
-            final EventSubscriberMethod method = forMessage(target.getClass(),
-                                                            eventMessage);
+            final EventSubscriberMethod method = forMessage(target.getClass(), eventMessage);
             method.invoke(target, eventMessage, context);
         } catch (InvocationTargetException e) {
             log().error("Exception handling event. Event message: {}, context: {}, cause: {}",
@@ -123,8 +123,16 @@ public class EventSubscriberMethod extends HandlerMethod<EventContext> {
         return PREDICATE;
     }
 
-    /** The factory for filtering methods that match {@code EventHandlerMethod} specification. */
+    /**
+     * The factory for creating {@linkplain EventSubscriberMethod event subscriber} methods.
+     */
     private static class Factory implements HandlerMethod.Factory<EventSubscriberMethod> {
+
+        private static final Factory INSTANCE = new Factory();
+
+        private static Factory getInstance() {
+            return INSTANCE;
+        }
 
         @Override
         public Class<EventSubscriberMethod> getMethodClass() {
@@ -146,16 +154,6 @@ public class EventSubscriberMethod extends HandlerMethod<EventContext> {
             if (!Modifier.isPublic(method.getModifiers())) {
                 warnOnWrongModifier("Event subscriber {} must be declared 'public'", method);
             }
-        }
-
-        private enum Singleton {
-            INSTANCE;
-            @SuppressWarnings("NonSerializableFieldInSerializableClass")
-            private final EventSubscriberMethod.Factory value = new EventSubscriberMethod.Factory();
-        }
-
-        private static Factory getInstance() {
-            return Singleton.INSTANCE.value;
         }
     }
 

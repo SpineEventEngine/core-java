@@ -27,6 +27,7 @@ import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
+import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.Repository;
@@ -109,8 +110,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     public void onRegistered() {
         super.onRegistered();
-        getBoundedContext().getCommandBus()
-                           .register(this);
+        final BoundedContext boundedContext = getBoundedContext();
+        boundedContext.getCommandBus()
+                      .register(this);
     }
 
     /**

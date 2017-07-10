@@ -21,7 +21,6 @@ package io.spine.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
@@ -29,6 +28,7 @@ import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
+import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.Version;
 import io.spine.core.Versions;
@@ -37,6 +37,7 @@ import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.command.EventFactory;
 import io.spine.server.reflect.CommandHandlerMethod;
 import io.spine.server.reflect.EventApplierMethod;
+import io.spine.server.reflect.EventReactorMethod;
 import io.spine.validate.ValidatingBuilder;
 
 import javax.annotation.CheckReturnValue;
@@ -366,7 +367,11 @@ public abstract class Aggregate<I,
         }
 
         static Set<CommandClass> getCommandClasses(Class<? extends Aggregate> aggregateClass) {
-            return ImmutableSet.copyOf(CommandHandlerMethod.getCommandClasses(aggregateClass));
+            return CommandHandlerMethod.inspect(aggregateClass);
+        }
+
+        static Set<EventClass> getReactedEventClasses(Class<? extends Aggregate> aggregateClass) {
+            return EventReactorMethod.inspect(aggregateClass);
         }
     }
 }

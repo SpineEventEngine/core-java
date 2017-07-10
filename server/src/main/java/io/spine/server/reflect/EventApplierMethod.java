@@ -62,10 +62,9 @@ public class EventApplierMethod extends HandlerMethod<Empty> {
         checkNotNull(cls);
         checkNotNull(eventMessage);
 
-        final EventApplierMethod method = MethodRegistry.getInstance()
-                                                        .get(cls,
-                                                             eventMessage.getClass(),
-                                                             factory());
+        final EventApplierMethod method =
+                MethodRegistry.getInstance()
+                              .get(cls, eventMessage.getClass(), factory());
         if (method == null) {
             throw missingEventApplier(cls, eventMessage.getClass());
         }
@@ -73,7 +72,7 @@ public class EventApplierMethod extends HandlerMethod<Empty> {
     }
 
     private static IllegalStateException missingEventApplier(Class<? extends Aggregate> cls,
-                                                      Class<? extends Message> eventClass) {
+                                                             Class<? extends Message> eventClass) {
         return newIllegalStateException(
                 "Missing event applier for event class %s in aggregate class %s.",
                 eventClass.getName(),
@@ -83,6 +82,10 @@ public class EventApplierMethod extends HandlerMethod<Empty> {
     @VisibleForTesting
     static MethodPredicate predicate() {
         return PREDICATE;
+    }
+
+    public static HandlerMethod.Factory<EventApplierMethod> factory() {
+        return Factory.getInstance();
     }
 
     /**
@@ -101,12 +104,14 @@ public class EventApplierMethod extends HandlerMethod<Empty> {
         return invoke(aggregate, message, Empty.getDefaultInstance());
     }
 
-    public static HandlerMethod.Factory<EventApplierMethod> factory() {
-        return Factory.getInstance();
-    }
-
     /** The factory for filtering methods that match {@code EventApplier} specification. */
     private static class Factory implements HandlerMethod.Factory<EventApplierMethod> {
+
+        private static final Factory INSTANCE = new Factory();
+
+        private static Factory getInstance() {
+            return INSTANCE;
+        }
 
         @Override
         public Class<EventApplierMethod> getMethodClass() {
@@ -128,16 +133,6 @@ public class EventApplierMethod extends HandlerMethod<Empty> {
             if (!Modifier.isPrivate(method.getModifiers())) {
                 warnOnWrongModifier("Event applier method {} must be declared 'private'.", method);
             }
-        }
-
-        private enum Singleton {
-            INSTANCE;
-            @SuppressWarnings("NonSerializableFieldInSerializableClass")
-            private final EventApplierMethod.Factory value = new EventApplierMethod.Factory();
-        }
-
-        private static Factory getInstance() {
-            return Singleton.INSTANCE.value;
         }
     }
 

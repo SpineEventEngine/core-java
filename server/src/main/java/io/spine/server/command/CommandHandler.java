@@ -117,7 +117,7 @@ public abstract class CommandHandler implements CommandDispatcher {
     public Set<CommandClass> getMessageClasses() {
         if (commandClasses == null) {
             commandClasses = ImmutableSet.copyOf(
-                    CommandHandlerMethod.getCommandClasses(getClass()));
+                    CommandHandlerMethod.inspect(getClass()));
         }
         return commandClasses;
     }

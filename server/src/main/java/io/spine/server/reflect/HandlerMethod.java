@@ -72,21 +72,71 @@ abstract class HandlerMethod<C extends Message> {
      * @return immutable set of message classes or an empty set
      */
     @CheckReturnValue
-    static ImmutableSet<Class<? extends Message>> getHandledMessageClasses(
-            Class<?> cls,
-            Predicate<Method> predicate) {
+    static ImmutableSet<Class<? extends Message>>
+    getHandledMessageClasses(Class<?> cls, Predicate<Method> predicate) {
         final ImmutableSet.Builder<Class<? extends Message>> builder = ImmutableSet.builder();
 
         for (Method method : cls.getDeclaredMethods()) {
             final boolean methodMatches = predicate.apply(method);
             if (methodMatches) {
-                final Class<? extends Message> firstParamType =
-                        getFirstParamType(method);
+                final Class<? extends Message> firstParamType = getFirstParamType(method);
                 builder.add(firstParamType);
             }
         }
 
         return builder.build();
+    }
+
+    /**
+     * Returns {@code true} if the method has package-private access, {@code false} otherwise.
+     */
+    protected static boolean isPackagePrivate(Method method) {
+        final int modifiers = method.getModifiers();
+        final boolean result =
+                !(Modifier.isPublic(modifiers)
+                        || Modifier.isProtected(modifiers)
+                        || Modifier.isPrivate(modifiers));
+        return result;
+    }
+
+    /**
+     * Logs a message at the WARN level according to the specified format and method.
+     */
+    protected static void warnOnWrongModifier(String messageFormat, Method method) {
+        log().warn(messageFormat, getFullMethodName(method));
+    }
+
+    /**
+     * Returns a full method name without parameters.
+     *
+     * @param method a method to get name for
+     * @return full method name
+     */
+    private static String getFullMethodName(Method method) {
+        return method.getDeclaringClass()
+                     .getName() + '.' + method.getName() + "()";
+    }
+
+    /**
+     * Returns the class of the first parameter of the passed handler method object.
+     *
+     * <p>It is expected that the first parameter of the passed method is always of
+     * a class implementing {@link Message}.
+     *
+     * @param handler the method object to take first parameter type from
+     * @return the class of the first method parameter
+     * @throws ClassCastException if the first parameter isn't a class implementing {@link Message}
+     */
+    static Class<? extends Message> getFirstParamType(Method handler) {
+        @SuppressWarnings("unchecked") /* we always expect first param as {@link Message} */
+        final Class<? extends Message> result =
+                (Class<? extends Message>) handler.getParameterTypes()[0];
+        return result;
+    }
+
+    /** The common logger used by message handling method classes. */
+    protected static Logger log() {
+        return LogSingleton.INSTANCE.value;
     }
 
     /** Returns the handling method. */
@@ -161,33 +211,6 @@ abstract class HandlerMethod<C extends Message> {
         return getFullMethodName(method);
     }
 
-    /**
-     * Logs a message at the WARN level according to the specified format and method.
-     */
-    protected static void warnOnWrongModifier(String messageFormat, Method method) {
-        log().warn(messageFormat, getFullMethodName(method));
-    }
-
-    /**
-     * Returns a full method name without parameters.
-     *
-     * @param method a method to get name for
-     * @return full method name
-     */
-    private static String getFullMethodName(Method method) {
-        return method.getDeclaringClass()
-                     .getName() + '.' + method.getName() + "()";
-    }
-
-    /**
-     * @return full name of the handler method
-     * @see #getFullName()
-     */
-    @Override
-    public String toString() {
-        return getFullName();
-    }
-
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -208,20 +231,18 @@ abstract class HandlerMethod<C extends Message> {
     }
 
     /**
-     * Returns the class of the first parameter of the passed handler method object.
-     *
-     * <p>It is expected that the first parameter of the passed method is always of
-     * a class implementing {@link Message}.
-     *
-     * @param handler the method object to take first parameter type from
-     * @return the class of the first method parameter
-     * @throws ClassCastException if the first parameter isn't a class implementing {@link Message}
+     * @return full name of the handler method
+     * @see #getFullName()
      */
-    static Class<? extends Message> getFirstParamType(Method handler) {
-        @SuppressWarnings("unchecked") /* we always expect first param as {@link Message} */
-        final Class<? extends Message> result =
-                (Class<? extends Message>) handler.getParameterTypes()[0];
-        return result;
+    @Override
+    public String toString() {
+        return getFullName();
+    }
+
+    private enum LogSingleton {
+        INSTANCE;
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Logger value = LoggerFactory.getLogger(HandlerMethod.class);
     }
 
     /**
@@ -249,16 +270,5 @@ abstract class HandlerMethod<C extends Message> {
          * @see HandlerMethod#warnOnWrongModifier(String, Method)
          */
         void checkAccessModifier(Method method);
-    }
-
-    private enum LogSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(HandlerMethod.class);
-    }
-
-    /** The common logger used by message handling method classes. */
-    protected static Logger log() {
-        return LogSingleton.INSTANCE.value;
     }
 }

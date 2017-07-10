@@ -38,7 +38,6 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.Set;
 
@@ -68,14 +67,27 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
     }
 
     /**
+     * Returns command classes handled by the passed class.
+     *
+     * @param cls the class of objects that handle commands
+     * @return immutable set of command classes
+     */
+    @CheckReturnValue
+    public static Set<CommandClass> inspect(Class<?> cls) {
+        final Set<CommandClass> result =
+                CommandClass.setOf(getHandledMessageClasses(cls, predicate()));
+        return result;
+    }
+
+    /**
      * Obtains handler method for the command message.
      *
-     * @param cls the class that handles the message
+     * @param cls            the class that handles the message
      * @param commandMessage the message
      * @return handler method
      * @throws IllegalStateException if the passed class does not handle messages of this class
      */
-    private static CommandHandlerMethod forMessage(Class<?> cls, Message commandMessage)  {
+    private static CommandHandlerMethod forMessage(Class<?> cls, Message commandMessage) {
         final Class<? extends Message> commandClass = commandMessage.getClass();
         final CommandHandlerMethod method = MethodRegistry.getInstance()
                                                           .get(cls, commandClass, factory());
@@ -89,27 +101,14 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
         return new CommandHandlerMethod(method);
     }
 
-    private static IllegalStateException missingCommandHandler(Class<?> cls,
-                        Class<? extends Message> commandClass) {
+    private static IllegalStateException
+    missingCommandHandler(Class<?> cls, Class<? extends Message> commandClass) {
         throw newIllegalStateException("No handler for the command class %s found in the class %s.",
-                                        commandClass.getName(), cls.getName());
+                                       commandClass.getName(), cls.getName());
     }
 
     static MethodPredicate predicate() {
         return PREDICATE;
-    }
-
-    /**
-     * Returns the set of the command classes handled by the passed class.
-     *
-     * @param cls the class of objects that handle commands
-     * @return immutable set of command classes
-     */
-    @CheckReturnValue
-    public static Set<CommandClass> getCommandClasses(Class<?> cls) {
-        final Set<CommandClass> result = CommandClass.setOf(
-                getHandledMessageClasses(cls, predicate()));
-        return result;
     }
 
     /**
@@ -147,11 +146,9 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
         final Message commandMessage = ensureCommandMessage(command);
 
         try {
-            final CommandHandlerMethod method = forMessage(object.getClass(),
-                                                           commandMessage);
-            final List<? extends Message> eventMessages = method.invoke(object,
-                                                                        commandMessage,
-                                                                        context);
+            final CommandHandlerMethod method = forMessage(object.getClass(), commandMessage);
+            final List<? extends Message> eventMessages =
+                    method.invoke(object, commandMessage, context);
             return eventMessages;
         } catch (InvocationTargetException e) {
             throw illegalStateWithCauseOf(e);
@@ -166,12 +163,13 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
         checkNotNull(eventMessages);
         checkNotNull(envelope);
 
-        final EventFactory eventFactory = EventFactory.newBuilder()
-                .setCommandId(envelope.getId())
-                .setProducerId(producerId)
-                .setMaxEventCount(eventMessages.size())
-                .setCommandContext(envelope.getCommandContext())
-                .build();
+        final EventFactory eventFactory =
+                EventFactory.newBuilder()
+                            .setCommandId(envelope.getId())
+                            .setProducerId(producerId)
+                            .setMaxEventCount(eventMessages.size())
+                            .setCommandContext(envelope.getCommandContext())
+                            .build();
 
         return Lists.transform(eventMessages, new Function<Message, Event>() {
             @Override
@@ -183,23 +181,6 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
                 return result;
             }
         });
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @return the list of event messages (or an empty list if the handler returns nothing)
-     */
-    @Override
-    public <R> R invoke(Object target, Message message, CommandContext context)
-            throws InvocationTargetException {
-        final R handlingResult = super.invoke(target, message, context);
-
-        final List<? extends Message> events = toList(handlingResult);
-        // The list of event messages/records is the return type expected.
-        @SuppressWarnings("unchecked")
-        final R result = (R) events;
-        return result;
     }
 
     /**
@@ -216,8 +197,7 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
         if (output instanceof List) {
             // Cast to the list of messages as it is the one of the return types
             // we expect by methods we call.
-            @SuppressWarnings("unchecked")
-            final List<? extends Message> result = (List<? extends Message>) output;
+            @SuppressWarnings("unchecked") final List<? extends Message> result = (List<? extends Message>) output;
             return result;
         } else {
             // Another type of result is single event message (as Message).
@@ -231,9 +211,31 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
     }
 
     /**
-     * The factory for filtering methods that match {@code CommandHandlerMethod} specification.
+     * {@inheritDoc}
+     *
+     * @return the list of event messages (or an empty list if the handler returns nothing)
+     */
+    @Override
+    public <R> R invoke(Object target, Message message, CommandContext context)
+            throws InvocationTargetException {
+        final R handlingResult = super.invoke(target, message, context);
+
+        final List<? extends Message> events = toList(handlingResult);
+        // The list of event messages/records is the return type expected.
+        @SuppressWarnings("unchecked") final R result = (R) events;
+        return result;
+    }
+
+    /**
+     * The factory for filtering {@linkplain CommandHandlerMethod command handling methods}.
      */
     private static class Factory implements HandlerMethod.Factory<CommandHandlerMethod> {
+
+        private static final Factory INSTANCE = new Factory();
+
+        private static Factory getInstance() {
+            return INSTANCE;
+        }
 
         @Override
         public Class<CommandHandlerMethod> getMethodClass() {
@@ -252,31 +254,15 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
 
         @Override
         public void checkAccessModifier(Method method) {
-            final int modifiers = method.getModifiers();
-            final boolean nonDefaultModifier =
-                    Modifier.isPublic(modifiers)
-                    || Modifier.isProtected(modifiers)
-                    || Modifier.isPrivate(modifiers);
-            if (nonDefaultModifier) {
+            if (!isPackagePrivate(method)) {
                 warnOnWrongModifier(
-                   "Command handler method {} should be declared with the default access modifier.",
-                   method);
+                        "Command handler method {} should be package-private.", method);
             }
-        }
-
-        private enum Singleton {
-            INSTANCE;
-            @SuppressWarnings("NonSerializableFieldInSerializableClass")
-            private final Factory value = new Factory();
-        }
-
-        private static Factory getInstance() {
-            return Singleton.INSTANCE.value;
         }
     }
 
     /**
-     * The predicate class that allows to filter command handling methods.
+     * The predicate that filters command handling methods.
      *
      * <p>See {@link Assign} annotation for more info about such methods.
      */
@@ -288,13 +274,7 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
 
         @Override
         protected boolean verifyReturnType(Method method) {
-            final Class<?> returnType = method.getReturnType();
-            final boolean isMessage = Message.class.isAssignableFrom(returnType);
-            if (isMessage) {
-                return true;
-            }
-            final boolean isList = List.class.isAssignableFrom(returnType);
-            return isList;
+            return returnsMessageOrList(method);
         }
     }
 }

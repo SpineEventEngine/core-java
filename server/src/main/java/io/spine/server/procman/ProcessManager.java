@@ -251,7 +251,7 @@ public abstract class ProcessManager<I,
          * @return immutable set of command classes or an empty set if no commands are handled
          */
         static Set<CommandClass> getCommandClasses(Class<? extends ProcessManager> pmClass) {
-            return ImmutableSet.copyOf(CommandHandlerMethod.getCommandClasses(pmClass));
+            return ImmutableSet.copyOf(CommandHandlerMethod.inspect(pmClass));
         }
 
         /**
