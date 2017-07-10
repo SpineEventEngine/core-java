@@ -74,8 +74,8 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
      */
     @CheckReturnValue
     public static Set<CommandClass> inspect(Class<?> cls) {
-        final Set<CommandClass> result =
-                CommandClass.setOf(getHandledMessageClasses(cls, predicate()));
+        checkNotNull(cls);
+        final Set<CommandClass> result = CommandClass.setOf(inspect(cls, predicate()));
         return result;
     }
 

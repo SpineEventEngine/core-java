@@ -21,7 +21,6 @@
 package io.spine.server.projection;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
@@ -31,6 +30,7 @@ import io.spine.server.reflect.EventSubscriberMethod;
 import io.spine.validate.ValidatingBuilder;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Set;
 
 import static io.spine.server.reflect.EventSubscriberMethod.forMessage;
 
@@ -100,8 +100,8 @@ public abstract class Projection<I,
          * @param cls the class to inspect
          * @return immutable set of event classes or an empty set if no events are handled
          */
-        static ImmutableSet<EventClass> getEventClasses(Class<? extends Projection> cls) {
-            return EventSubscriberMethod.getEventClasses(cls);
+        static Set<EventClass> getEventClasses(Class<? extends Projection> cls) {
+            return EventSubscriberMethod.inspect(cls);
         }
     }
 }

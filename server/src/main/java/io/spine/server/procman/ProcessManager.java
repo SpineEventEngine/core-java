@@ -261,7 +261,7 @@ public abstract class ProcessManager<I,
          * @return immutable set of event classes or an empty set if no events are handled
          */
         static Set<EventClass> getEventClasses(Class<? extends ProcessManager> pmClass) {
-            return EventSubscriberMethod.getEventClasses(pmClass);
+            return EventSubscriberMethod.inspect(pmClass);
         }
     }
 }

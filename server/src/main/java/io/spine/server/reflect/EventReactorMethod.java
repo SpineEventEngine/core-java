@@ -30,6 +30,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Set;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -63,8 +64,8 @@ public class EventReactorMethod extends HandlerMethod<EventContext> {
      */
     @CheckReturnValue
     public static Set<EventClass> inspect(Class<?> cls) {
-        final Set<EventClass> result =
-                EventClass.setOf(getHandledMessageClasses(cls, predicate()));
+        checkNotNull(cls);
+        final Set<EventClass> result = EventClass.setOf(inspect(cls, predicate()));
         return result;
     }
 

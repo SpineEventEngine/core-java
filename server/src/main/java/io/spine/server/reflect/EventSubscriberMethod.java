@@ -31,6 +31,7 @@ import javax.annotation.CheckReturnValue;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalStateException;
@@ -106,11 +107,9 @@ public class EventSubscriberMethod extends HandlerMethod<EventContext> {
     }
 
     @CheckReturnValue
-    public static ImmutableSet<EventClass> getEventClasses(Class<?> cls) {
+    public static Set<EventClass> inspect(Class<?> cls) {
         checkNotNull(cls);
-
-        final ImmutableSet<EventClass> result =
-                EventClass.setOf(HandlerMethod.getHandledMessageClasses(cls, predicate()));
+        final ImmutableSet<EventClass> result = EventClass.setOf(inspect(cls, predicate()));
         return result;
     }
 

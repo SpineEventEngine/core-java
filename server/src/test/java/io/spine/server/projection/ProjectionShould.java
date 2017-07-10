@@ -20,7 +20,6 @@
 
 package io.spine.server.projection;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.StringValue;
@@ -32,6 +31,8 @@ import io.spine.server.entity.given.Given;
 import io.spine.validate.StringValueVBuilder;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.Set;
 
 import static io.spine.Identifier.newUuid;
 import static io.spine.protobuf.TypeConverter.toMessage;
@@ -57,7 +58,6 @@ public class ProjectionShould {
     public void handle_events() {
         final String stringValue = newUuid();
 
-        ProjectionTransaction<?, ?, ?> tx;
         dispatch(projection, toMessage(stringValue), EventContext.getDefaultInstance());
         assertTrue(projection.getState()
                              .getValue()
@@ -81,8 +81,7 @@ public class ProjectionShould {
 
     @Test
     public void return_event_classes_which_it_handles() {
-        final ImmutableSet<EventClass> classes =
-                Projection.TypeInfo.getEventClasses(TestProjection.class);
+        final Set<EventClass> classes = Projection.TypeInfo.getEventClasses(TestProjection.class);
 
         assertEquals(TestProjection.HANDLING_EVENT_COUNT, classes.size());
         assertTrue(classes.contains(EventClass.of(StringValue.class)));

@@ -32,6 +32,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Objects;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.throwIfUnchecked;
@@ -72,8 +73,7 @@ abstract class HandlerMethod<C extends Message> {
      * @return immutable set of message classes or an empty set
      */
     @CheckReturnValue
-    static ImmutableSet<Class<? extends Message>>
-    getHandledMessageClasses(Class<?> cls, Predicate<Method> predicate) {
+    static Set<Class<? extends Message>> inspect(Class<?> cls, Predicate<Method> predicate) {
         final ImmutableSet.Builder<Class<? extends Message>> builder = ImmutableSet.builder();
 
         for (Method method : cls.getDeclaredMethods()) {

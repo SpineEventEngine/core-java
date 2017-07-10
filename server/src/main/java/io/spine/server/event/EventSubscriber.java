@@ -20,7 +20,6 @@
 
 package io.spine.server.event;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
@@ -65,7 +64,7 @@ public abstract class EventSubscriber implements EventDispatcher {
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // as we return an immutable collection.
     public Set<EventClass> getMessageClasses() {
         if (eventClasses == null) {
-            eventClasses = ImmutableSet.copyOf(EventSubscriberMethod.getEventClasses(getClass()));
+            eventClasses = EventSubscriberMethod.inspect(getClass());
         }
         return eventClasses;
     }
