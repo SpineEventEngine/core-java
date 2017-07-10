@@ -42,7 +42,7 @@ import io.spine.server.command.TestEventFactory;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.RecordBasedRepositoryShould;
 import io.spine.server.entity.given.Given;
-import io.spine.server.entity.idfunc.EventTargetsFunction;
+import io.spine.server.entity.idfunc.EventDispatchFunction;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.NoOpTaskNamesRepository;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.TestProjection;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.TestProjectionRepository;
@@ -100,10 +100,10 @@ public class ProjectionRepositoryShould
     }
 
     /**
-     * {@link EventTargetsFunction} used for testing add/get/remove of functions.
+     * {@link EventDispatchFunction} used for testing add/get/remove of functions.
      */
-    private static final EventTargetsFunction<ProjectId, ProjectCreated> creteProjectTargets =
-            new EventTargetsFunction<ProjectId, ProjectCreated>() {
+    private static final EventDispatchFunction<ProjectId, ProjectCreated> creteProjectTargets =
+            new EventDispatchFunction<ProjectId, ProjectCreated>() {
                 private static final long serialVersionUID = 0L;
 
                 @Override
@@ -257,8 +257,8 @@ public class ProjectionRepositoryShould
     @Test
     @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass") // OK for this test.
     public void use_id_set_function() {
-        final EventTargetsFunction<ProjectId, ProjectCreated> delegateFn =
-                new EventTargetsFunction<ProjectId, ProjectCreated>() {
+        final EventDispatchFunction<ProjectId, ProjectCreated> delegateFn =
+                new EventDispatchFunction<ProjectId, ProjectCreated>() {
                     private static final long serialVersionUID = 0L;
                     @Override
                     public Set<ProjectId> apply(ProjectCreated message, EventContext context) {
@@ -266,8 +266,8 @@ public class ProjectionRepositoryShould
                     }
                 };
 
-        final EventTargetsFunction<ProjectId, ProjectCreated> idSetFunction = spy(delegateFn);
-        repository().addTargetsFunction(ProjectCreated.class, idSetFunction);
+        final EventDispatchFunction<ProjectId, ProjectCreated> idSetFunction = spy(delegateFn);
+        repository().addDispatchFunction(ProjectCreated.class, idSetFunction);
 
         final Event event = createEvent(tenantId(), projectCreated(), PRODUCER_ID, getCurrentTime());
         repository().dispatch(EventEnvelope.of(event));
@@ -279,10 +279,10 @@ public class ProjectionRepositoryShould
 
     @Test
     public void obtain_id_set_function_after_put() {
-        repository().addTargetsFunction(ProjectCreated.class, creteProjectTargets);
+        repository().addDispatchFunction(ProjectCreated.class, creteProjectTargets);
 
-        final Optional<EventTargetsFunction<ProjectId, ProjectCreated>> func =
-                repository().getTargetsFunction(ProjectCreated.class);
+        final Optional<EventDispatchFunction<ProjectId, ProjectCreated>> func =
+                repository().getDispatchFunction(ProjectCreated.class);
 
         assertTrue(func.isPresent());
         assertEquals(creteProjectTargets, func.get());
@@ -290,11 +290,11 @@ public class ProjectionRepositoryShould
 
     @Test
     public void remove_id_set_function_after_put() {
-        repository().addTargetsFunction(ProjectCreated.class, creteProjectTargets);
+        repository().addDispatchFunction(ProjectCreated.class, creteProjectTargets);
 
-        repository().removeTargetsFunction(ProjectCreated.class);
-        final Optional<EventTargetsFunction<ProjectId, ProjectCreated>> out =
-                repository().getTargetsFunction(ProjectCreated.class);
+        repository().removeDispatchFunction(ProjectCreated.class);
+        final Optional<EventDispatchFunction<ProjectId, ProjectCreated>> out =
+                repository().getDispatchFunction(ProjectCreated.class);
 
         assertFalse(out.isPresent());
     }
@@ -324,12 +324,12 @@ public class ProjectionRepositoryShould
     }
 
     /**
-     * Ensures that {@link ProjectionRepository#getTargetsFunction(Class)} which is used by
+     * Ensures that {@link ProjectionRepository#getDispatchFunction(Class)} which is used by
      * Beam-based catch-up is exposed.
      */
     @Test
     public void expose_event_targets_function() {
-        final EventTargetsFunction<ProjectId, Message> fn = repository().getTargetsFunction();
+        final EventDispatchFunction<ProjectId, Message> fn = repository().getDispatchFunction();
         assertNotNull(fn);
     }
 

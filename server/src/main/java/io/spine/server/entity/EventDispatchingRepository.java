@@ -24,7 +24,7 @@ import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
-import io.spine.server.entity.idfunc.EventTargetsFunction;
+import io.spine.server.entity.idfunc.EventDispatchFunction;
 import io.spine.server.tenant.EventOperation;
 
 import javax.annotation.CheckReturnValue;
@@ -44,23 +44,23 @@ public abstract class EventDispatchingRepository<I,
         extends DefaultRecordBasedRepository<I, E, S>
         implements EntityEventDispatcher<I> {
 
-    private final CompositeEventTargetsFunction<I> idSetFunctions;
+    private final CompositeEventDispatchFunction<I> idSetFunctions;
 
     /**
      * Creates new repository instance.
      *
      * @param defaultFunction the default function for getting an target entity IDs
      */
-    protected EventDispatchingRepository(EventTargetsFunction<I, Message> defaultFunction) {
+    protected EventDispatchingRepository(EventDispatchFunction<I, Message> defaultFunction) {
         super();
-        this.idSetFunctions = new CompositeEventTargetsFunction<>(defaultFunction);
+        this.idSetFunctions = new CompositeEventDispatchFunction<>(defaultFunction);
     }
 
     /**
-     * Obtains the {@link EventTargetsFunction} used by the repository for calculating identifiers
+     * Obtains the {@link EventDispatchFunction} used by the repository for calculating identifiers
      * of event targets.
      */
-    protected EventTargetsFunction<I, Message> getTargetsFunction() {
+    protected EventDispatchFunction<I, Message> getDispatchFunction() {
         return idSetFunctions;
     }
 
@@ -98,7 +98,7 @@ public abstract class EventDispatchingRepository<I,
      * @param <M>  the type of the event message handled by the function
      */
     public <M extends Message>
-    void addTargetsFunction(Class<M> eventClass, EventTargetsFunction<I, M> func) {
+    void addDispatchFunction(Class<M> eventClass, EventDispatchFunction<I, M> func) {
         idSetFunctions.put(eventClass, func);
     }
 
@@ -108,7 +108,7 @@ public abstract class EventDispatchingRepository<I,
      * @param eventClass the class of the event message
      * @param <M>        the type of the event message handled by the function we want to remove
      */
-    public <M extends Message> void removeTargetsFunction(Class<M> eventClass) {
+    public <M extends Message> void removeDispatchFunction(Class<M> eventClass) {
         idSetFunctions.remove(eventClass);
     }
 
@@ -116,7 +116,7 @@ public abstract class EventDispatchingRepository<I,
      * Obtains the targets function for the passed event message class.
      */
     public <M extends Message>
-    Optional<EventTargetsFunction<I, M>> getTargetsFunction(Class<M> eventClass) {
+    Optional<EventDispatchFunction<I, M>> getDispatchFunction(Class<M> eventClass) {
         return idSetFunctions.get(eventClass);
     }
 

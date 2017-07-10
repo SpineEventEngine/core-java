@@ -25,19 +25,19 @@ import com.google.common.collect.Maps;
 import com.google.protobuf.Message;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
-import io.spine.server.entity.idfunc.EventTargetsFunction;
+import io.spine.server.entity.idfunc.EventDispatchFunction;
 
 import java.util.HashMap;
 import java.util.Set;
 
 /**
- * Helper class for managing {@link EventTargetsFunction}s associated with
+ * Helper class for managing {@link EventDispatchFunction}s associated with
  * a repository that dispatches events to its entities.
  *
  * @param <I> the type of the entity IDs of this repository
  * @author Alexander Yevsyukov
  */
-class CompositeEventTargetsFunction<I> implements EventTargetsFunction<I, Message> {
+class CompositeEventDispatchFunction<I> implements EventDispatchFunction<I, Message> {
 
     private static final long serialVersionUID = 0L;
 
@@ -46,17 +46,17 @@ class CompositeEventTargetsFunction<I> implements EventTargetsFunction<I, Messag
      * for the corresponding event.
      */
     @SuppressWarnings("CollectionDeclaredAsConcreteClass") // need a serializable field.
-    private final HashMap<EventClass, EventTargetsFunction<I, Message>> map = Maps.newHashMap();
+    private final HashMap<EventClass, EventDispatchFunction<I, Message>> map = Maps.newHashMap();
 
     /** The function used when there's no matching entry in the map. */
-    private final EventTargetsFunction<I, Message> defaultFunction;
+    private final EventDispatchFunction<I, Message> defaultFunction;
 
     /**
      * Creates new instance with the passed default function.
      *
      * @param defaultFunction the function which used when there is no matching entry in the map
      */
-    CompositeEventTargetsFunction(EventTargetsFunction<I, Message> defaultFunction) {
+    CompositeEventDispatchFunction(EventDispatchFunction<I, Message> defaultFunction) {
         this.defaultFunction = defaultFunction;
     }
 
@@ -80,7 +80,7 @@ class CompositeEventTargetsFunction<I> implements EventTargetsFunction<I, Messag
     @Override
     public Set<I> apply(Message event, EventContext context) {
         final EventClass eventClass = EventClass.of(event);
-        final EventTargetsFunction<I, Message> func = map.get(eventClass);
+        final EventDispatchFunction<I, Message> func = map.get(eventClass);
         if (func != null) {
             final Set<I> result = func.apply(event, context);
             return result;
@@ -97,12 +97,12 @@ class CompositeEventTargetsFunction<I> implements EventTargetsFunction<I, Messag
      * @param func       the function instance
      * @param <E>        the type of the event message
      */
-    <E extends Message> void put(Class<E> eventClass, EventTargetsFunction<I, E> func) {
+    <E extends Message> void put(Class<E> eventClass, EventDispatchFunction<I, E> func) {
         final EventClass clazz = EventClass.of(eventClass);
 
         @SuppressWarnings("unchecked")
         // since we want to store {@code IdSetFunction}s for various event types.
-        final EventTargetsFunction<I, Message> casted = (EventTargetsFunction<I, Message>) func;
+        final EventDispatchFunction<I, Message> casted = (EventDispatchFunction<I, Message>) func;
         map.put(clazz, casted);
     }
 
@@ -114,12 +114,12 @@ class CompositeEventTargetsFunction<I> implements EventTargetsFunction<I, Messag
      * @return the function wrapped into {@code Optional} or empty {@code Optional}
      * if there is no matching function
      */
-    <E extends Message> Optional<EventTargetsFunction<I, E>> get(Class<E> eventClass) {
+    <E extends Message> Optional<EventDispatchFunction<I, E>> get(Class<E> eventClass) {
         final EventClass clazz = EventClass.of(eventClass);
-        final EventTargetsFunction<I, Message> func = map.get(clazz);
+        final EventDispatchFunction<I, Message> func = map.get(clazz);
 
         @SuppressWarnings("unchecked")  // we ensure the type when we put into the map.
-        final EventTargetsFunction<I, E> result = (EventTargetsFunction<I, E>) func;
+        final EventDispatchFunction<I, E> result = (EventDispatchFunction<I, E>) func;
         return Optional.fromNullable(result);
     }
 }

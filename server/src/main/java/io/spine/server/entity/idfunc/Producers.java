@@ -31,7 +31,7 @@ import java.util.Set;
 import static io.spine.server.entity.idfunc.GetProducerIdFromEvent.fromFieldIndex;
 
 /**
- * Internal utility class that provides default {@link EventTargetsFunction}s
+ * Internal utility class that provides default {@link EventDispatchFunction}s
  * for obtaining a producer from an event.
  *
  * @author Alexander Yevsyukov
@@ -50,7 +50,7 @@ public class Producers {
      * @param <I> the type of the IDs managed by the repository
      * @return new function instance
      */
-    public static <I> EventTargetsFunction<I, Message> fromContext() {
+    public static <I> EventDispatchFunction<I, Message> fromContext() {
         return new ProducerFromContext<>();
     }
 
@@ -61,7 +61,7 @@ public class Producers {
      * @param <I> the type of the IDs managed by the repository
      * @return new function instance
      */
-    public static <I> EventTargetsFunction<I, Message> fromFirstMessageField() {
+    public static <I> EventDispatchFunction<I, Message> fromFirstMessageField() {
         return new ProducerFromFirstEventMessageField<>();
     }
 
@@ -70,7 +70,7 @@ public class Producers {
      *
      * @param <I> the type of entity IDs
      */
-    private static class ProducerFromContext<I> implements EventTargetsFunction<I, Message> {
+    private static class ProducerFromContext<I> implements EventDispatchFunction<I, Message> {
 
         private static final long serialVersionUID = 0L;
 
@@ -92,7 +92,7 @@ public class Producers {
      * @param <I> the type of entity IDs
      */
     private static class ProducerFromFirstEventMessageField<I>
-            implements EventTargetsFunction<I, Message> {
+            implements EventDispatchFunction<I, Message> {
 
         private static final long serialVersionUID = 0L;
 

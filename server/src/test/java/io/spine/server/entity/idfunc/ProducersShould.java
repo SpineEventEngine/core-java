@@ -39,20 +39,20 @@ public class ProducersShould {
 
     @Test
     public void create_function_for_taking_id_fromContext() {
-        final EventTargetsFunction<Object, Message> fn = Producers.fromContext();
+        final EventDispatchFunction<Object, Message> fn = Producers.fromContext();
         assertFunction(fn);
     }
 
     @Test
     public void create_function_for_getting_id_fromFirstMessageField() {
-        final EventTargetsFunction<Object, Message> fn = Producers.fromFirstMessageField();
+        final EventDispatchFunction<Object, Message> fn = Producers.fromFirstMessageField();
         assertFunction(fn);
     }
 
-    private static void assertFunction(EventTargetsFunction<Object, Message> fn) {
+    private static void assertFunction(EventDispatchFunction<Object, Message> fn) {
         assertNotNull(fn);
 
         // Check that custom toString() is provided.
-        assertFalse(fn.toString().contains(EventTargetsFunction.class.getSimpleName()));
+        assertFalse(fn.toString().contains(EventDispatchFunction.class.getSimpleName()));
     }
 }
