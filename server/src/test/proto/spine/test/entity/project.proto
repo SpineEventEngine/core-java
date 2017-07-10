@@ -21,11 +21,12 @@ syntax = "proto3";
 
 package spine.test.entity;
 
+import "spine/options.proto";
+
 option (type_url_prefix) = "type.spine.io";
 option java_package="io.spine.test.entity";
 option java_multiple_files = true;
 
-import "spine/options.proto";
 
 message ProjectId {
     string id = 1;
