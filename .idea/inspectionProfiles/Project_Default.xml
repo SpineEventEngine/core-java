@@ -148,11 +148,6 @@
     <inspection_tool class="ConfusingMainMethod" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="ConfusingOctalEscape" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="ConstantAssertCondition" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="ConstantConditions" enabled="true" level="WARNING" enabled_by_default="true">
-      <option name="SUGGEST_NULLABLE_ANNOTATIONS" value="false" />
-      <option name="DONT_REPORT_TRUE_ASSERT_STATEMENTS" value="false" />
-      <option name="REPORT_UNCHECKED_OPTIONALS" value="false" />
-    </inspection_tool>
     <inspection_tool class="ConstantNamingConvention" enabled="false" level="WARNING" enabled_by_default="false">
       <option name="onlyCheckImmutables" value="true" />
       <option name="m_regex" value="[A-Z_\d]*" />
@@ -527,7 +522,7 @@
     <inspection_tool class="PackageWithTooManyClasses" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="limit" value="50" />
     </inspection_tool>
-    <inspection_tool class="ParameterNamingConvention" enabled="true" level="WARNING" enabled_by_default="true">
+    <inspection_tool class="ParameterNamingConvention" enabled="true" level="TYPO" enabled_by_default="true">
       <option name="m_regex" value="[a-z][A-Za-z\d]*" />
       <option name="m_minLength" value="1" />
       <option name="m_maxLength" value="20" />
