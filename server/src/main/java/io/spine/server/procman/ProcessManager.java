@@ -235,6 +235,12 @@ public abstract class ProcessManager<I,
         return commandBus;
     }
 
+    @Override
+    protected String getMissingTxMessage() {
+        return "ProcessManager modification is not available this way. Please modify the state from" +
+                " a command handling or event subscribing method.";
+    }
+
     /**
      * Provides type information for process manager classes.
      */

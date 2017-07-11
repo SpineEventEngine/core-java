@@ -72,6 +72,12 @@ public abstract class Projection<I,
         return super.getBuilder();
     }
 
+    @Override
+    protected String getMissingTxMessage() {
+        return "Projection modification is not available this way. " +
+                "Please modify the state from an event subscribing method.";
+    }
+
     /**
      * Plays events on the projection.
      *

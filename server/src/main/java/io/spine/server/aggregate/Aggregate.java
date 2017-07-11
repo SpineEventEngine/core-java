@@ -332,6 +332,15 @@ public abstract class Aggregate<I,
     }
 
     /**
+     * Instructs to modify the state of an aggregate only within an event applier method.
+     */
+    @Override
+    protected String getMissingTxMessage() {
+        return "Modification of aggregate state or its lifecycle flags is not available this way." +
+                " Make sure to modify those only from an event applier method.";
+    }
+
+    /**
      * Transforms the current state of the aggregate into the {@link Snapshot} instance.
      *
      * @return new snapshot
