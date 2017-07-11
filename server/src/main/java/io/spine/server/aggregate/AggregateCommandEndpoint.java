@@ -20,19 +20,13 @@
 
 package io.spine.server.aggregate;
 
-import com.google.common.base.Optional;
 import com.google.protobuf.Message;
-import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.tenant.CommandOperation;
-import io.spine.server.tenant.TenantAwareOperation;
 
-import javax.annotation.Nullable;
 import java.util.List;
-
-import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * Dispatches commands to aggregates of the associated {@code AggregateRepository}.
@@ -44,65 +38,39 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @param <A> the type of the aggregates managed by the parent repository
  * @author Alexander Yevsyukov
  */
-class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
-        extends TenantAwareOperation {
+class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>> extends CommandOperation {
 
     private final AggregateRepository<I, A> repository;
-    private final CommandEnvelope command;
-
-    @Nullable
-    private A aggregate;
+    private final CommandEnvelope envelope;
 
     private AggregateCommandEndpoint(AggregateRepository<I, A> repo, CommandEnvelope envelope) {
-        super(envelope.getTenantId());
+        super(envelope.getCommand());
         this.repository = repo;
-        this.command = envelope;
+        this.envelope = envelope;
     }
 
     static <I, A extends Aggregate<I, ?, ?>>
-    void handle(final AggregateRepository<I, A> repository, final CommandEnvelope envelope) {
+    void handle(AggregateRepository<I, A> repository, CommandEnvelope envelope) {
         final AggregateCommandEndpoint<I, A> commandEndpoint =
                 new AggregateCommandEndpoint<>(repository, envelope);
 
-        final Command command = envelope.getCommand();
-        final CommandOperation op = new CommandOperation(command) {
-            @Override
-            public void run() {
-                commandEndpoint.execute();
-
-                final Optional<A> processedAggregate = commandEndpoint.processedAggregate();
-                if (!processedAggregate.isPresent()) {
-                    throw newIllegalStateException(
-                            "No aggregate loaded for command (class: %s, id: %s)",
-                            envelope.getMessageClass(),
-                            envelope.getId());
-                }
-
-                final A aggregate = processedAggregate.get();
-                final List<Event> events = aggregate.getUncommittedEvents();
-
-                repository.store(aggregate);
-                repository.updateStand(aggregate, command.getContext());
-                repository.postEvents(events);
-            }
-        };
-        op.execute();
+        commandEndpoint.execute();
     }
 
     @Override
     public void run() {
-        aggregate = receive(command);
-    }
-
-    Optional<A> processedAggregate() {
-        return Optional.fromNullable(aggregate);
+        final A aggregate = dispatch(envelope);
+        final List<Event> events = aggregate.getUncommittedEvents();
+        repository.store(aggregate);
+        repository.updateStand(aggregate, command().getContext());
+        repository.postEvents(events);
     }
 
     /**
-     * Dispatches the command.
+     * Dispatches the command to an aggregate.
      */
-    private A receive(CommandEnvelope envelope) {
-        final I aggregateId = getAggregateId(envelope);
+    private A dispatch(CommandEnvelope envelope) {
+        final I aggregateId = getAggregateId();
         final A aggregate = repository.loadOrCreate(aggregateId);
 
         final LifecycleFlags statusBefore = aggregate.getLifecycleFlags();
@@ -122,11 +90,11 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
         return aggregate;
     }
 
-    private AggregateStorage<I> storage() {
-        return repository.aggregateStorage();
+    private I getAggregateId() {
+        return repository.getAggregateId(envelope.getMessage(), envelope.getCommandContext());
     }
 
-    private I getAggregateId(CommandEnvelope envelope) {
-        return repository.getAggregateId(envelope.getMessage(), envelope.getCommandContext());
+    private AggregateStorage<I> storage() {
+        return repository.aggregateStorage();
     }
 }
