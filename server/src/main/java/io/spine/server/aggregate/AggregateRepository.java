@@ -23,7 +23,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
-import io.spine.core.Command;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
@@ -47,20 +46,16 @@ import io.spine.server.event.EventDispatcherDelegate;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
-import io.spine.server.tenant.CommandOperation;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
-import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static io.spine.server.aggregate.AggregateCommandEndpoint.createFor;
 import static io.spine.server.entity.AbstractEntity.createEntity;
 import static io.spine.server.entity.AbstractEntity.getConstructor;
 import static io.spine.server.entity.EntityWithLifecycle.Predicates.isEntityVisible;
-import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * The repository which manages instances of {@code Aggregate}s.
@@ -146,7 +141,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * Obtains the constructor.
      *
      * <p>The method returns cached value if called more than once.
-     * During the first call, it {@linkplain #findEntityConstructor() finds}  the constructor.
+     * During the first call, it {@linkplain #findEntityConstructor() finds} the constructor.
      */
     protected Constructor<A> getEntityConstructor() {
         if (this.entityConstructor == null) {
@@ -242,32 +237,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     @Override
     public void dispatch(final CommandEnvelope envelope) {
-        final Command command = envelope.getCommand();
-        final CommandOperation op = new CommandOperation(command) {
-            @Override
-            public void run() {
-                final AggregateCommandEndpoint<I, A> commandEndpoint =
-                        createFor(AggregateRepository.this, envelope);
-                commandEndpoint.execute();
-
-                final Optional<A> processedAggregate = commandEndpoint.processedAggregate();
-                if (!processedAggregate.isPresent()) {
-                    throw newIllegalStateException(
-                            "No aggregate loaded for command (class: %s, id: %s)",
-                            envelope.getMessageClass(),
-                            envelope.getId());
-                }
-
-                final A aggregate = processedAggregate.get();
-                final List<Event> events = aggregate.getUncommittedEvents();
-
-                store(aggregate);
-                getStand().post(aggregate, command.getContext());
-
-                postEvents(events);
-            }
-        };
-        op.execute();
+        AggregateCommandEndpoint.handle(this, envelope);
     }
 
     @Override
@@ -294,8 +264,12 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     /**
      * Posts passed events to {@link EventBus}.
      */
-    private void postEvents(Iterable<Event> events) {
+    void postEvents(Iterable<Event> events) {
         getEventBus().post(events);
+    }
+
+    void updateStand(A aggregate, CommandContext context) {
+        getStand().post(aggregate, context);
     }
 
     /**

@@ -22,12 +22,17 @@ package io.spine.server.aggregate;
 
 import com.google.common.base.Optional;
 import com.google.protobuf.Message;
+import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
+import io.spine.core.Event;
 import io.spine.server.entity.LifecycleFlags;
+import io.spine.server.tenant.CommandOperation;
 import io.spine.server.tenant.TenantAwareOperation;
 
 import javax.annotation.Nullable;
 import java.util.List;
+
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * Dispatches commands to aggregates of the associated {@code AggregateRepository}.
@@ -48,17 +53,40 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
     @Nullable
     private A aggregate;
 
-    static <I, A extends Aggregate<I, ?, ?>>
-            AggregateCommandEndpoint<I, A> createFor(AggregateRepository<I, A> repository,
-                                                     CommandEnvelope command) {
-        return new AggregateCommandEndpoint<>(repository, command);
+    private AggregateCommandEndpoint(AggregateRepository<I, A> repo, CommandEnvelope envelope) {
+        super(envelope.getTenantId());
+        this.repository = repo;
+        this.command = envelope;
     }
 
-    private AggregateCommandEndpoint(AggregateRepository<I, A> repository,
-                                     CommandEnvelope command) {
-        super(command.getTenantId());
-        this.repository = repository;
-        this.command = command;
+    static <I, A extends Aggregate<I, ?, ?>>
+    void handle(final AggregateRepository<I, A> repository, final CommandEnvelope envelope) {
+        final AggregateCommandEndpoint<I, A> commandEndpoint =
+                new AggregateCommandEndpoint<>(repository, envelope);
+
+        final Command command = envelope.getCommand();
+        final CommandOperation op = new CommandOperation(command) {
+            @Override
+            public void run() {
+                commandEndpoint.execute();
+
+                final Optional<A> processedAggregate = commandEndpoint.processedAggregate();
+                if (!processedAggregate.isPresent()) {
+                    throw newIllegalStateException(
+                            "No aggregate loaded for command (class: %s, id: %s)",
+                            envelope.getMessageClass(),
+                            envelope.getId());
+                }
+
+                final A aggregate = processedAggregate.get();
+                final List<Event> events = aggregate.getUncommittedEvents();
+
+                repository.store(aggregate);
+                repository.updateStand(aggregate, command.getContext());
+                repository.postEvents(events);
+            }
+        };
+        op.execute();
     }
 
     @Override
