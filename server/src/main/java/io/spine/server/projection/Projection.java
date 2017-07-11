@@ -73,10 +73,18 @@ public abstract class Projection<I,
     }
 
     /**
-     * Exposes playing events on a projection for the package.
+     * Plays events on the projection.
+     *
+     * <p>Unlike {@link Projection#play(Iterable)} this static method opens the
+     * {@linkplain ProjectionTransaction transaction} before events are played, and closes it after.
+     *
+     * @return {@code true} if the projection state was changed as the result of playing the events
      */
-    static void play(Projection projection, Iterable<Event> events) {
+    static boolean play(Projection projection, Iterable<Event> events) {
+        final ProjectionTransaction tx = ProjectionTransaction.start(projection);
         projection.play(events);
+        tx.commit();
+        return projection.isChanged();
     }
 
     void apply(Message eventMessage, EventContext eventContext)  {

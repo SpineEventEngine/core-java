@@ -20,13 +20,18 @@
 
 package io.spine.server.projection;
 
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.StringValue;
+import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
+import io.spine.core.Version;
+import io.spine.core.Versions;
 import io.spine.protobuf.TypeConverter;
+import io.spine.server.command.TestEventFactory;
 import io.spine.server.entity.given.Given;
 import io.spine.validate.StringValueVBuilder;
 import org.junit.Before;
@@ -89,6 +94,27 @@ public class ProjectionShould {
     }
 
     @Test
+    public void expose_playing_events_to_the_package() {
+        final TestEventFactory eventFactory = TestEventFactory.newInstance(getClass());
+        final StringValue strValue = StringValue.newBuilder()
+                                             .setValue("eins zwei drei")
+                                             .build();
+        final Int32Value intValue = Int32Value.newBuilder().setValue(123).build();
+        final Version nextVersion = Versions.increment(projection.getVersion());
+        final Event e1 = eventFactory.createEvent(strValue, nextVersion);
+        final Event e2 = eventFactory.createEvent(intValue, Versions.increment(nextVersion));
+
+        final boolean projectionChanged = Projection.play(projection, ImmutableList.of(e1, e2));
+
+        final String projectionState = projection.getState()
+                                                 .getValue();
+
+        assertTrue(projectionChanged);
+        assertTrue(projectionState.contains(strValue.getValue()));
+        assertTrue(projectionState.contains(String.valueOf(intValue.getValue())));
+    }
+
+    @Test
     public void have_TypeInfo_utility_class() {
         assertHasPrivateParameterlessCtor(Projection.TypeInfo.class);
     }
@@ -117,7 +143,9 @@ public class ProjectionShould {
         }
 
         private StringValue createNewState(String type, String value) {
-            final String currentState = getState().getValue();
+            // Get the current state within the transaction.
+            final String currentState = getBuilder().internalBuild()
+                                                    .getValue();
             final String result = currentState + (currentState.length() > 0 ? " + " : "") +
                     type + '(' + value + ')' + System.lineSeparator();
             return toMessage(result);

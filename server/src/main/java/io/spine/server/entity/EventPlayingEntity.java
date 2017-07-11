@@ -104,6 +104,7 @@ public abstract class EventPlayingEntity <I,
 
     private void ensureTransaction() {
         if (!isTransactionInProgress()) {
+            //TODO:2017-07-11:alexander.yevsyukov: Report specific error text via protectedMethod
             throw new IllegalStateException(
                     "Modification of state and lifecycle is not available. " +
                             "Make sure to modify those only from an event applier method.");
