@@ -53,7 +53,7 @@ public abstract class EventDispatchingRepository<I,
      */
     protected EventDispatchingRepository(EventDispatchFunction<I, Message> defaultFunction) {
         super();
-        this.dispatchFunctions = new CompositeEventDispatchFunction<>(defaultFunction);
+        this.dispatchFunctions = CompositeEventDispatchFunction.withDefault(defaultFunction);
     }
 
     /**

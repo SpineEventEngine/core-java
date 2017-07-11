@@ -22,7 +22,6 @@ package io.spine.server.aggregate;
 
 import com.google.common.base.Optional;
 import com.google.protobuf.Message;
-import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.tenant.TenantAwareOperation;
@@ -67,7 +66,7 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
         aggregate = receive(command);
     }
 
-    Optional<A> getAggregate() {
+    Optional<A> processedAggregate() {
         return Optional.fromNullable(aggregate);
     }
 
@@ -75,62 +74,31 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
      * Dispatches the command.
      */
     private A receive(CommandEnvelope envelope) {
-        final Action<I, A> action = new Action<>(this, envelope);
-        final A result = action.loadAndDispatch();
-        return result;
+        final I aggregateId = getAggregateId(envelope);
+        final A aggregate = repository.loadOrCreate(aggregateId);
+
+        final LifecycleFlags statusBefore = aggregate.getLifecycleFlags();
+
+        final List<? extends Message> eventMessages = aggregate.dispatchCommand(envelope);
+
+        final AggregateTransaction tx = AggregateTransaction.start(aggregate);
+        aggregate.apply(eventMessages, envelope);
+        tx.commit();
+
+        // Update status only if the command was handled successfully.
+        final LifecycleFlags statusAfter = aggregate.getLifecycleFlags();
+        if (statusAfter != null && !statusBefore.equals(statusAfter)) {
+            storage().writeLifecycleFlags(aggregateId, statusAfter);
+        }
+
+        return aggregate;
     }
 
-    /**
-     * The method object class for dispatching a command to an aggregate.
-     *
-     * @param <I> the type of aggregate IDs
-     * @param <A> the type of the aggregate
-     */
-    private static class Action<I, A extends Aggregate<I, ?, ?>> {
-
-        private final AggregateRepository<I, A> repository;
-        private final CommandEnvelope envelope;
-        private final I aggregateId;
-
-        private Action(AggregateCommandEndpoint<I, A> commandEndpoint, CommandEnvelope envelope) {
-            this.repository = commandEndpoint.repository;
-            this.envelope = envelope;
-            this.aggregateId = commandEndpoint.getAggregateId(envelope.getMessage(),
-                                                              envelope.getCommandContext());
-        }
-
-        /**
-         * Loads an aggregate and dispatches the command to it.
-         */
-        private A loadAndDispatch() {
-            final A aggregate = repository.loadOrCreate(aggregateId);
-
-            final LifecycleFlags statusBefore = aggregate.getLifecycleFlags();
-
-            final List<? extends Message> eventMessages = aggregate.dispatchCommand(envelope);
-
-            final AggregateTransaction tx = AggregateTransaction.start(aggregate);
-            aggregate.apply(eventMessages, envelope);
-            tx.commit();
-
-            // Update status only if the command was handled successfully.
-            final LifecycleFlags statusAfter = aggregate.getLifecycleFlags();
-            if (statusAfter != null && !statusBefore.equals(statusAfter)) {
-                storage().writeLifecycleFlags(aggregateId, statusAfter);
-            }
-
-            return aggregate;
-        }
-
-        /**
-         * Obtains the aggregate storage from the repository.
-         */
-        private AggregateStorage<I> storage() {
-            return repository.aggregateStorage();
-        }
+    private AggregateStorage<I> storage() {
+        return repository.aggregateStorage();
     }
 
-    private I getAggregateId(Message commandMessage, CommandContext commandContext) {
-        return repository.getAggregateId(commandMessage, commandContext);
+    private I getAggregateId(CommandEnvelope envelope) {
+        return repository.getAggregateId(envelope.getMessage(), envelope.getCommandContext());
     }
 }

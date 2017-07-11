@@ -190,7 +190,7 @@ public class AggregateRepositoryViewsShould {
          */
         @SuppressWarnings("MethodDoesntCallSuperMethod") // This is the purpose of the method.
         @Override
-        protected IdCommandFunction<Long, Message> getIdFunction() {
+        protected IdCommandFunction<Long, Message> getHandlerFunction() {
             return parsingFunc;
         }
     }

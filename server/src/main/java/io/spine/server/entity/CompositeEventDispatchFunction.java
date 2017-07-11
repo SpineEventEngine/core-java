@@ -37,7 +37,7 @@ import java.util.Set;
  * @param <I> the type of the entity IDs of this repository
  * @author Alexander Yevsyukov
  */
-class CompositeEventDispatchFunction<I> implements EventDispatchFunction<I, Message> {
+public final class CompositeEventDispatchFunction<I> implements EventDispatchFunction<I, Message> {
 
     private static final long serialVersionUID = 0L;
 
@@ -49,15 +49,20 @@ class CompositeEventDispatchFunction<I> implements EventDispatchFunction<I, Mess
     private final HashMap<EventClass, EventDispatchFunction<I, Message>> map = Maps.newHashMap();
 
     /** The function used when there's no matching entry in the map. */
-    private final EventDispatchFunction<I, Message> defaultFunction;
+    private final EventDispatchFunction<I, Message> defaultFn;
+
+    public static <I>
+    CompositeEventDispatchFunction<I> withDefault(EventDispatchFunction<I, Message> defaultFn) {
+        return new CompositeEventDispatchFunction<>(defaultFn);
+    }
 
     /**
      * Creates new instance with the passed default function.
      *
-     * @param defaultFunction the function which used when there is no matching entry in the map
+     * @param defaultFn the function which used when there is no matching entry in the map
      */
-    CompositeEventDispatchFunction(EventDispatchFunction<I, Message> defaultFunction) {
-        this.defaultFunction = defaultFunction;
+    private CompositeEventDispatchFunction(EventDispatchFunction<I, Message> defaultFn) {
+        this.defaultFn = defaultFn;
     }
 
     /**
@@ -86,7 +91,7 @@ class CompositeEventDispatchFunction<I> implements EventDispatchFunction<I, Mess
             return result;
         }
 
-        final Set<I> result = defaultFunction.apply(event, context);
+        final Set<I> result = defaultFn.apply(event, context);
         return result;
     }
 

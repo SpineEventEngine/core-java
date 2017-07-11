@@ -24,6 +24,8 @@ import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.bus.MessageDispatcher;
 
+import static io.spine.util.Exceptions.newIllegalArgumentException;
+
 /**
  * Delivers commands to their handlers.
  *
@@ -32,4 +34,27 @@ import io.spine.server.bus.MessageDispatcher;
  * @author Alexander Yevsyukov
  */
 public interface CommandDispatcher extends MessageDispatcher<CommandClass, CommandEnvelope> {
+
+    /**
+     * Utility class for reporting command dispatching errors.
+     */
+    class Error {
+        private Error() {
+            // Prevent instantiation of this utility class.
+        }
+
+        /**
+         * Throws {@link IllegalArgumentException} to report unexpected command class.
+         *
+         * @param cls the command class which name will be used in the exception message
+         * @return nothing ever
+         * @throws IllegalArgumentException always
+         */
+        public static IllegalArgumentException unexpectedCommandEncountered(CommandClass cls)
+                throws IllegalArgumentException {
+            final String eventClassName = cls.value()
+                                             .getName();
+            throw newIllegalArgumentException("Unexpected command of class: %s", eventClassName);
+        }
+    }
 }

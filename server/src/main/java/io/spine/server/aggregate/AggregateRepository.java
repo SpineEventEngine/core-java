@@ -21,19 +21,29 @@ package io.spine.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import io.spine.core.Command;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
+import io.spine.core.EventClass;
+import io.spine.core.EventContext;
+import io.spine.core.EventEnvelope;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandDispatcher;
+import io.spine.server.entity.CompositeEventDispatchFunction;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.Repository;
+import io.spine.server.entity.idfunc.EventDispatchFunction;
 import io.spine.server.entity.idfunc.GetTargetIdFromCommand;
 import io.spine.server.entity.idfunc.IdCommandFunction;
+import io.spine.server.entity.idfunc.Producers;
+import io.spine.server.event.DelegatingEventDispatcher;
 import io.spine.server.event.EventBus;
+import io.spine.server.event.EventDispatcher;
+import io.spine.server.event.EventDispatcherDelegate;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
@@ -50,6 +60,7 @@ import static io.spine.server.aggregate.AggregateCommandEndpoint.createFor;
 import static io.spine.server.entity.AbstractEntity.createEntity;
 import static io.spine.server.entity.AbstractEntity.getConstructor;
 import static io.spine.server.entity.EntityWithLifecycle.Predicates.isEntityVisible;
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * The repository which manages instances of {@code Aggregate}s.
@@ -75,23 +86,31 @@ import static io.spine.server.entity.EntityWithLifecycle.Predicates.isEntityVisi
  */
 public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
                 extends Repository<I, A>
-                implements CommandDispatcher {
+                implements CommandDispatcher, EventDispatcherDelegate {
 
     /** The default number of events to be stored before a next snapshot is made. */
     static final int DEFAULT_SNAPSHOT_TRIGGER = 100;
 
-    private final IdCommandFunction<I, Message> defaultIdFunction =
-            GetTargetIdFromCommand.newInstance();
+    /** The number of events to store between snapshots. */
+    private int snapshotTrigger = DEFAULT_SNAPSHOT_TRIGGER;
 
     /** The constructor for creating entity instances. */
     private Constructor<A> entityConstructor;
 
-    /** The number of events to store between snapshots. */
-    private int snapshotTrigger = DEFAULT_SNAPSHOT_TRIGGER;
-
     /** The set of command classes dispatched to aggregates by this repository. */
     @Nullable
-    private Set<CommandClass> messageClasses;
+    private Set<CommandClass> commandClasses;
+
+    /** The function for getting aggregate ID from a command. */
+    private final IdCommandFunction<I, Message> handlerFn =
+            GetTargetIdFromCommand.newInstance();
+
+    /** The set of event classes to which aggregates {@linkplain React react}. */
+    @Nullable
+    private Set<EventClass> reactedEventClasses;
+
+    private final CompositeEventDispatchFunction<I> reactorFn =
+            CompositeEventDispatchFunction.withDefault(Producers.<I>fromContext());
 
     /**
      * Creates a new instance.
@@ -113,6 +132,14 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         final BoundedContext boundedContext = getBoundedContext();
         boundedContext.getCommandBus()
                       .register(this);
+
+        // If there are any events on which aggregates react, register via delegating dispatcher.
+        final DelegatingEventDispatcher delegatingDispatcher = DelegatingEventDispatcher.of(this);
+        if (!delegatingDispatcher.getMessageClasses()
+                                 .isEmpty()) {
+            boundedContext.getEventBus()
+                          .register(delegatingDispatcher);
+        }
     }
 
     /**
@@ -160,10 +187,19 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // We return immutable impl.
     @Override
     public Set<CommandClass> getMessageClasses() {
-        if (messageClasses == null) {
-            messageClasses = Aggregate.TypeInfo.getCommandClasses(getAggregateClass());
+        if (commandClasses == null) {
+            commandClasses = Aggregate.TypeInfo.getCommandClasses(getAggregateClass());
         }
-        return messageClasses;
+        return commandClasses;
+    }
+
+    @Override
+    @SuppressWarnings("ReturnOfCollectionOrArrayField") // We return immutable impl.
+    public Set<EventClass> getEventClasses() {
+        if (reactedEventClasses == null) {
+            reactedEventClasses = Aggregate.TypeInfo.getReactedEventClasses(getAggregateClass());
+        }
+        return reactedEventClasses;
     }
 
     /**
@@ -176,13 +212,22 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      *
      * @return default implementation of {@code IdCommandFunction}
      */
-    protected IdCommandFunction<I, Message> getIdFunction() {
-        return defaultIdFunction;
+    protected IdCommandFunction<I, Message> getHandlerFunction() {
+        return handlerFn;
+    }
+
+    protected EventDispatchFunction<I, Message> getReactorsFunction() {
+        return reactorFn;
     }
 
     I getAggregateId(Message commandMessage, CommandContext commandContext) {
-        final I id = getIdFunction().apply(commandMessage, commandContext);
+        final I id = getHandlerFunction().apply(commandMessage, commandContext);
         return id;
+    }
+
+    Set<I> getAggregateIds(Message eventMessage, EventContext eventContext) {
+        final Set<I> ids = getReactorsFunction().apply(eventMessage, eventContext);
+        return ids;
     }
 
     /**
@@ -201,13 +246,16 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         final CommandOperation op = new CommandOperation(command) {
             @Override
             public void run() {
-                final AggregateCommandEndpoint<I, A> commandEndpoint = createFor(
-                        AggregateRepository.this, envelope);
+                final AggregateCommandEndpoint<I, A> commandEndpoint =
+                        createFor(AggregateRepository.this, envelope);
                 commandEndpoint.execute();
 
-                final Optional<A> processedAggregate = commandEndpoint.getAggregate();
+                final Optional<A> processedAggregate = commandEndpoint.processedAggregate();
                 if (!processedAggregate.isPresent()) {
-                    throw new IllegalStateException("No aggregate loaded for command: " + command);
+                    throw newIllegalStateException(
+                            "No aggregate loaded for command (class: %s, id: %s)",
+                            envelope.getMessageClass(),
+                            envelope.getId());
                 }
 
                 final A aggregate = processedAggregate.get();
@@ -222,6 +270,26 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         op.execute();
     }
 
+    @Override
+    public void dispatchEvent(EventEnvelope envelope) {
+        checkEventClass(envelope.getMessageClass());
+        final Message eventMessage = envelope.getMessage();
+        final EventContext context = envelope.getEventContext();
+        final Iterable<I> targets = getAggregateIds(eventMessage, context);
+        for (I target : targets) {
+            A aggregate = loadOrCreate(target);
+            //TODO:2017-07-11:alexander.yevsyukov: dispatch event to reactor method
+            final Iterable<Event> events = ImmutableList.of();
+            postEvents(events);
+        }
+    }
+
+    private void checkEventClass(EventClass eventClass) throws IllegalArgumentException {
+        final Set<EventClass> classes = getEventClasses();
+        if (!classes.contains(eventClass)) {
+            throw EventDispatcher.Error.unexpectedEventEncountered(eventClass);
+        }
+    }
 
     /**
      * Posts passed events to {@link EventBus}.

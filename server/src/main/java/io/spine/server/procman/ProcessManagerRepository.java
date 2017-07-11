@@ -30,6 +30,7 @@ import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.commandbus.CommandBus;
+import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.commandbus.CommandDispatcherDelegate;
 import io.spine.server.commandbus.DelegatingCommandDispatcher;
 import io.spine.server.entity.EventDispatchingRepository;
@@ -41,8 +42,6 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Set;
-
-import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
  * The abstract base for Process Managers repositories.
@@ -60,7 +59,7 @@ public abstract class ProcessManagerRepository<I,
                 extends EventDispatchingRepository<I, P, S>
                 implements CommandDispatcherDelegate {
 
-    private final GetTargetIdFromCommand<I, Message> getIdFromCommandMessage =
+    private final GetTargetIdFromCommand<I, Message> handlerFn =
             GetTargetIdFromCommand.newInstance();
 
     @Nullable
@@ -115,7 +114,7 @@ public abstract class ProcessManagerRepository<I,
         final CommandContext context = envelope.getCommandContext();
         final CommandClass commandClass = envelope.getMessageClass();
         checkCommandClass(commandClass);
-        final I id = getIdFromCommandMessage.apply(commandMessage, context);
+        final I id = handlerFn.apply(commandMessage, context);
         final P manager = findOrCreate(id);
 
         final ProcManTransaction<?, ?, ?> tx = beginTransactionFor(manager);
@@ -153,8 +152,7 @@ public abstract class ProcessManagerRepository<I,
      */
     @Override
     public void dispatch(EventEnvelope event) throws IllegalArgumentException {
-        checkEventClass(event);
-
+        checkEventClass(event.getMessageClass());
         super.dispatch(event);
     }
 
@@ -190,20 +188,14 @@ public abstract class ProcessManagerRepository<I,
     private void checkCommandClass(CommandClass commandClass) throws IllegalArgumentException {
         final Set<CommandClass> classes = getCommandClasses();
         if (!classes.contains(commandClass)) {
-            final String eventClassName = commandClass.value()
-                                                      .getName();
-            throw newIllegalArgumentException("Unexpected command of class: %s", eventClassName);
+            throw CommandDispatcher.Error.unexpectedCommandEncountered(commandClass);
         }
     }
 
-    private void checkEventClass(EventEnvelope eventEnvelope) throws IllegalArgumentException {
-        final EventClass eventClass = eventEnvelope.getMessageClass();
-
+    private void checkEventClass(EventClass eventClass) throws IllegalArgumentException {
         final Set<EventClass> classes = getMessageClasses();
         if (!classes.contains(eventClass)) {
-            final String eventClassName = eventClass.value()
-                                                    .getName();
-            throw newIllegalArgumentException("Unexpected event of class: %s", eventClassName);
+            throw Error.unexpectedEventEncountered(eventClass);
         }
     }
 }
