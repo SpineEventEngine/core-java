@@ -43,7 +43,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Alex Tymchenko
  */
-@SuppressWarnings({"LocalVariableNamingConvention", "MethodParameterNamingConvention"})
+@SuppressWarnings("LocalVariableNamingConvention")
 public class QueryFactoryShould extends ActorRequestFactoryShould {
 
     // See {@code client_requests} for declaration.
