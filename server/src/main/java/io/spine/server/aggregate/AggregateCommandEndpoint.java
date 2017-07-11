@@ -20,13 +20,17 @@
 
 package io.spine.server.aggregate;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
+import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.tenant.CommandOperation;
+import io.spine.server.tenant.TenantAwareOperation;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Dispatches commands to aggregates of the associated {@code AggregateRepository}.
@@ -38,13 +42,12 @@ import java.util.List;
  * @param <A> the type of the aggregates managed by the parent repository
  * @author Alexander Yevsyukov
  */
-class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>> extends CommandOperation {
+class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>> {
 
     private final AggregateRepository<I, A> repository;
     private final CommandEnvelope envelope;
 
     private AggregateCommandEndpoint(AggregateRepository<I, A> repo, CommandEnvelope envelope) {
-        super(envelope.getCommand());
         this.repository = repo;
         this.envelope = envelope;
     }
@@ -54,28 +57,30 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>> extends CommandO
         final AggregateCommandEndpoint<I, A> commandEndpoint =
                 new AggregateCommandEndpoint<>(repository, envelope);
 
-        commandEndpoint.execute();
+        final TenantAwareOperation operation = commandEndpoint.createOperation();
+        operation.execute();
     }
 
-    @Override
-    public void run() {
-        final A aggregate = dispatch(envelope);
-        final List<Event> events = aggregate.getUncommittedEvents();
-        repository.store(aggregate);
-        repository.updateStand(aggregate, command().getContext());
-        repository.postEvents(events);
+    protected TenantAwareOperation createOperation() {
+        return new Operation(envelope.getCommand());
     }
 
     /**
      * Dispatches the command to an aggregate.
      */
-    private A dispatch(CommandEnvelope envelope) {
-        final I aggregateId = getAggregateId();
+    protected void dispatch(CommandEnvelope envelope) {
+        final Set<I> targets = getTargets();
+        for (I target : targets) {
+            dispatchTo(target, envelope);
+        }
+    }
+
+    protected void dispatchTo(I aggregateId, CommandEnvelope envelope) {
         final A aggregate = repository.loadOrCreate(aggregateId);
 
         final LifecycleFlags statusBefore = aggregate.getLifecycleFlags();
 
-        final List<? extends Message> eventMessages = aggregate.dispatchCommand(envelope);
+        final List<? extends Message> eventMessages = dispatchEnvelope(aggregate, envelope);
 
         final AggregateTransaction tx = AggregateTransaction.start(aggregate);
         aggregate.apply(eventMessages, envelope);
@@ -87,14 +92,45 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>> extends CommandO
             storage().writeLifecycleFlags(aggregateId, statusAfter);
         }
 
-        return aggregate;
+        store(aggregate);
     }
 
-    private I getAggregateId() {
-        return repository.getAggregateId(envelope.getMessage(), envelope.getCommandContext());
+    protected List<? extends Message> dispatchEnvelope(A aggregate, CommandEnvelope envelope) {
+        return aggregate.dispatchCommand(envelope);
+    }
+
+    protected void store(A aggregate) {
+        final List<Event> events = aggregate.getUncommittedEvents();
+        if (!events.isEmpty()) {
+            repository.store(aggregate);
+            repository.updateStand(aggregate, envelope.getCommandContext());
+            repository.postEvents(events);
+        }
+        //TODO:2017-07-11:alexander.yevsyukov: For command handling complain if the list of events is empty.
+        // An aggregate cannot silently accept commands without either producing events or rejecting commands.
+    }
+
+    protected Set<I> getTargets() {
+        return ImmutableSet.of(repository.getAggregateId(envelope.getMessage(),
+                                                         envelope.getCommandContext()));
     }
 
     private AggregateStorage<I> storage() {
         return repository.aggregateStorage();
+    }
+
+    /**
+     * The operation executed under the command's tenant.
+     */
+    private class Operation extends CommandOperation {
+
+        private Operation(Command command) {
+            super(command);
+        }
+
+        @Override
+        public void run() {
+            dispatch(envelope);
+        }
     }
 }
