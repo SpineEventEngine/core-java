@@ -18,16 +18,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.command;
+package io.spine.server.event;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.core.CommandContext;
-import io.spine.core.CommandId;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventId;
+import io.spine.core.MessageEnvelope;
 import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.integration.IntegrationEvent;
@@ -58,8 +58,29 @@ public class EventFactory {
     protected EventFactory(Builder builder) {
         this.producerId = builder.producerId;
         this.commandContext = builder.commandContext;
-        this.idSequence = EventIdSequence.on(builder.commandId)
+        this.idSequence = EventIdSequence.on(builder.originId)
                                          .withMaxSize(builder.maxEventCount);
+    }
+
+    /**
+     * Creates new builder for a factory.
+     */
+    public static Builder newBuilder() {
+        return new Builder();
+    }
+
+    public static EventFactory onMessage(Any producerId,
+                                         int eventCount,
+                                         MessageEnvelope envelope) {
+        final EventFactory result = newBuilder().setOriginId(envelope.getId())
+                                                .setProducerId(producerId)
+                                                .setMaxEventCount(eventCount)
+                                                .setCommandContext(
+                                                        //TODO:2017-07-13:alexander.yevsyukov: Pass origin
+                                                        CommandContext.getDefaultInstance()
+                                                        /*envelope.getCommandContext()*/)
+                                                .build();
+        return result;
     }
 
     /**
@@ -160,19 +181,12 @@ public class EventFactory {
     }
 
     /**
-     * Creates new builder for a factory.
-     */
-    public static Builder newBuilder() {
-        return new Builder();
-    }
-
-    /**
      * Builds an event factory.
      */
     public static class Builder {
 
         private Any producerId;
-        private CommandId commandId;
+        private Message originId;
         private CommandContext commandContext;
         private int maxEventCount = EventIdSequence.MAX_ONE_DIGIT_SIZE;
 
@@ -191,8 +205,8 @@ public class EventFactory {
         /**
          * Sets the ID of the command which caused events we are about to generate.
          */
-        public Builder setCommandId(CommandId commandId) {
-            this.commandId = checkNotNull(commandId);
+        public Builder setOriginId(Message originId) {
+            this.originId = checkNotNull(originId);
             return this;
         }
 
@@ -222,7 +236,7 @@ public class EventFactory {
 
         public EventFactory build() {
             checkNotNull(producerId, "Producer ID must be set.");
-            checkNotNull(commandId, "Command ID must be set.");
+            checkNotNull(originId, "Command ID must be set.");
             checkNotNull(commandContext, "Command must be set.");
 
             final EventFactory result = new EventFactory(this);

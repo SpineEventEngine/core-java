@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.command;
+package io.spine.server.event;
 
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
@@ -60,7 +60,7 @@ public class EventFactoryShould {
     public void require_producer_id_in_builder() {
         EventFactory.newBuilder()
                     .setCommandContext(commandContext)
-                    .setCommandId(commandId)
+                    .setOriginId(commandId)
                     .build();
     }
 
@@ -68,7 +68,7 @@ public class EventFactoryShould {
     public void require_non_null_command_context_in_builder() {
         EventFactory.newBuilder()
                     .setProducerId(producerId)
-                    .setCommandId(commandId)
+                    .setOriginId(commandId)
                     .build();
     }
 
@@ -76,14 +76,14 @@ public class EventFactoryShould {
     public void require_non_default_command_context_in_builder() {
         EventFactory.newBuilder()
                     .setProducerId(producerId)
-                    .setCommandId(commandId)
+                    .setOriginId(commandId)
                     .setCommandContext(CommandContext.getDefaultInstance())
                     .build();
     }
 
     @Test(expected = NullPointerException.class)
     public void require_non_null_command_id() {
-        EventFactory.newBuilder().setCommandId(Tests.<CommandId>nullRef());
+        EventFactory.newBuilder().setOriginId(Tests.<CommandId>nullRef());
     }
     
     @Test(expected = NullPointerException.class)
@@ -98,7 +98,7 @@ public class EventFactoryShould {
     public void validate_event_messages_before_creation() {
         final EventFactory factory = EventFactory.newBuilder()
                                                .setCommandContext(commandContext)
-                                               .setCommandId(commandId)
+                                               .setOriginId(commandId)
                                                .setProducerId(producerId)
                                                .build();
         factory.createEvent(MandatoryFieldEvent.getDefaultInstance(), null);

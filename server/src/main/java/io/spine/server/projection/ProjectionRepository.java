@@ -209,7 +209,9 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
             final Timestamp eventTime = context.getTimestamp();
             store(projection);
             projectionStorage().writeLastHandledEventTime(eventTime);
-            getStand().post(projection, context.getCommandContext());
+            getStand().post(context.getCommandContext()
+                                   .getActorContext()
+                                   .getTenantId(), projection);
         }
     }
 

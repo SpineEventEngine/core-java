@@ -40,7 +40,7 @@ import static com.google.common.collect.Lists.newLinkedList;
  *
  * @author Dmytro Dashenkov
  */
-final class FilterChain<E extends MessageEnvelope<?>> implements BusFilter<E> {
+final class FilterChain<E extends MessageEnvelope<?, ?>> implements BusFilter<E> {
 
     private final Deque<BusFilter<E>> chain;
 

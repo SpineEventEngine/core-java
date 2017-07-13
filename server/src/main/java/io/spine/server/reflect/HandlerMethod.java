@@ -21,8 +21,9 @@ package io.spine.server.reflect;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import io.spine.util.Exceptions;
+import io.spine.protobuf.AnyPacker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +36,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Throwables.throwIfUnchecked;
+import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 
 /**
  * An abstract base for wrappers over methods handling messages.
@@ -166,18 +167,33 @@ abstract class HandlerMethod<C extends Message> {
     }
 
     /**
+     * Ensures that the passed instance of {@code Message} is not an {@code Any},
+     * and unwraps the message if {@code Any} is passed.
+     */
+    protected static Message ensureMessage(Message msgOrAny) {
+        Message commandMessage;
+        if (msgOrAny instanceof Any) {
+            /* It looks that we're getting the result of `command.getMessage()` or
+               `event.getMessage()` because the calling code did not bother to unwrap it.
+               Extract the wrapped message (instead of treating this as an error).
+               There may be occasions of such a call especially from tests code. */
+            final Any any = (Any) msgOrAny;
+            commandMessage = AnyPacker.unpack(any);
+        } else {
+            commandMessage = msgOrAny;
+        }
+        return commandMessage;
+    }
+
+    /**
      * Invokes the wrapped subscriber method to handle {@code message} with the {@code context}.
      *
      * @param <R>     the type of the expected handler invocation result
      * @param target  the target object on which call the method
      * @param message the message to handle   @return the result of message handling
      * @param context the context of the message
-     * @throws InvocationTargetException if the wrapped method throws any {@link Throwable} that
-     *                                   is not an {@link Error}.
-     *                                   {@code Error} instances are propagated as-is.
      */
-    public <R> R invoke(Object target, Message message, C context)
-            throws InvocationTargetException {
+    public <R> R invoke(Object target, Message message, C context) {
         checkNotNull(message);
         checkNotNull(context);
         try {
@@ -193,9 +209,8 @@ abstract class HandlerMethod<C extends Message> {
                 final R result = (R) method.invoke(target, message, context);
                 return result;
             }
-        } catch (IllegalArgumentException | IllegalAccessException e) {
-            throwIfUnchecked(e);
-            throw Exceptions.illegalStateWithCauseOf(e);
+        } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
+            throw illegalStateWithCauseOf(e);
         }
     }
 

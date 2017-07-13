@@ -18,18 +18,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.command;
+package io.spine.server.event;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
+import com.google.protobuf.Message;
 import io.spine.Identifier;
-import io.spine.core.CommandId;
 import io.spine.core.EventId;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Generates a sequence of identifiers of events produced in response to a command.
+ * Generates a sequence of identifiers of events produced in response to a message which caused
+ * these events.
  *
  * @author Alexander Yevsyukov
  * @see EventId
@@ -60,9 +61,9 @@ final class EventIdSequence {
     static final char LEADING_ZERO = '0';
 
     /**
-     * The prefix with the command ID.
+     * The prefix with an origin message ID.
      */
-    private final String commandIdPrefix;
+    private final String originPrefix;
 
     /**
      * The length of the sequence number suffix.
@@ -75,27 +76,27 @@ final class EventIdSequence {
     private final AtomicInteger count = new AtomicInteger(0);
 
     /**
-     * Creates a new one digit event ID sequence for the command with the passed ID.
+     * Creates a new one digit event ID sequence for the origin message ID.
      */
-    static EventIdSequence on(CommandId commandId) {
-        return new EventIdSequence(commandId);
+    static EventIdSequence on(Message originId) {
+        return new EventIdSequence(originId);
     }
 
-    private EventIdSequence(CommandId commandId, int maxSize) {
-        this(createPrefix(commandId), maxSize);
+    private EventIdSequence(Message originId, int maxSize) {
+        this(createPrefix(originId), maxSize);
     }
 
     private EventIdSequence(String prefix, int maxSize) {
-        this.commandIdPrefix = prefix;
+        this.originPrefix = prefix;
         this.suffixLength = maxSize % RADIX + 1;
     }
 
-    private EventIdSequence(CommandId commandId) {
-        this(commandId, MAX_ONE_DIGIT_SIZE);
+    private EventIdSequence(Message originId) {
+        this(originId, MAX_ONE_DIGIT_SIZE);
     }
 
-    private static String createPrefix(CommandId commandId) {
-        final String result = Identifier.toString(commandId) + SEPARATOR;
+    private static String createPrefix(Message originId) {
+        final String result = Identifier.toString(originId) + SEPARATOR;
         return result;
     }
 
@@ -103,7 +104,7 @@ final class EventIdSequence {
      * Creates a new sequence with the same command ID and the passed maximum size.
      */
     EventIdSequence withMaxSize(int maxSize) {
-        return new EventIdSequence(this.commandIdPrefix, maxSize);
+        return new EventIdSequence(this.originPrefix, maxSize);
     }
 
     /**
@@ -123,6 +124,6 @@ final class EventIdSequence {
         final String suffix = (suffixLength == 1)
                     ? sequenceNumber
                     : Strings.padStart(sequenceNumber, suffixLength, LEADING_ZERO);
-        return commandIdPrefix + suffix;
+        return originPrefix + suffix;
     }
 }

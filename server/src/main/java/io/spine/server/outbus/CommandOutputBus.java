@@ -58,7 +58,7 @@ import static java.lang.String.format;
  */
 @Internal
 public abstract class CommandOutputBus<M extends Message,
-                                       E extends MessageEnvelope<M>,
+                                       E extends MessageEnvelope<?, M>,
                                        C extends MessageClass,
                                        D extends MessageDispatcher<C,E>>
                 extends Bus<M, E, C, D> {

@@ -30,11 +30,13 @@ import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
+import io.spine.core.EventEnvelope;
+import io.spine.core.MessageEnvelope;
 import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.command.CommandHandlingEntity;
-import io.spine.server.command.EventFactory;
+import io.spine.server.event.EventFactory;
 import io.spine.server.reflect.CommandHandlerMethod;
 import io.spine.server.reflect.EventApplierMethod;
 import io.spine.server.reflect.EventReactorMethod;
@@ -160,6 +162,11 @@ public abstract class Aggregate<I,
         return super.dispatchCommand(envelope);
     }
 
+    protected List<? extends Message> dispatchEvent(EventEnvelope envelope) {
+        return EventReactorMethod.invokeHandler(this, envelope.getMessage(),
+                                                envelope.getEventContext());
+    }
+
     /**
      * Invokes applier method for the passed event message.
      *
@@ -196,39 +203,42 @@ public abstract class Aggregate<I,
      * Applies event messages.
      *
      * @param eventMessages the event message to apply
-     * @param envelope      the envelope of the command which caused the events
+     * @param envelope      the envelope of a message which caused the events
      */
-    void apply(Iterable<? extends Message> eventMessages, CommandEnvelope envelope) {
+    void apply(Iterable<? extends Message> eventMessages, MessageEnvelope envelope) {
         applyMessages(eventMessages, envelope);
     }
 
     /**
-     * Applies the passed event message or {@code Event} to the aggregate.
+     * Applies the passed event messages or {@code Event}s to the aggregate.
      *
      * @param eventMessages the event messages or events to apply
-     * @param envelope      the envelope of the command which generated the events
+     * @param origin      the envelope of the command which generated the events
      * @see #ensureEventMessage(Message)
      */
-    private void applyMessages(Iterable<? extends Message> eventMessages,
-                               CommandEnvelope envelope) {
+    private void applyMessages(Iterable<? extends Message> eventMessages, MessageEnvelope origin) {
         final List<? extends Message> messages = newArrayList(eventMessages);
-        final EventFactory eventFactory = createEventFactory(envelope, messages.size());
+        final EventFactory eventFactory =
+                EventFactory.onMessage(getProducerId(), messages.size(), origin);
 
         final List<Event> events = newArrayListWithCapacity(messages.size());
 
         Version projectedEventVersion = getVersion();
 
         for (Message eventOrMessage : messages) {
-
-            // Applying each message would increment the entity version.
-            // Therefore we should simulate this behaviour.
+            /* Applying each message would increment the entity version.
+               Therefore, we should simulate this behaviour. */
             projectedEventVersion = Versions.increment(projectedEventVersion);
             final Message eventMessage = ensureEventMessage(eventOrMessage);
 
             final Event event;
             if (eventOrMessage instanceof Event) {
+                /* If we get instances of Event, it means we are dealing with an import command,
+                   which contains these events in the body. So we deal with a command envelope.
+                */
+                final CommandEnvelope ce = (CommandEnvelope)origin;
                 event = importEvent((Event) eventOrMessage,
-                                    envelope.getCommandContext(),
+                                    ce.getCommandContext(),
                                     projectedEventVersion);
             } else {
                 event = eventFactory.createEvent(eventMessage, projectedEventVersion);
@@ -256,16 +266,6 @@ public abstract class Aggregate<I,
         final Event result = event.toBuilder()
                                   .setContext(eventContext)
                                   .build();
-        return result;
-    }
-
-    private EventFactory createEventFactory(CommandEnvelope envelope, int eventCount) {
-        final EventFactory result = EventFactory.newBuilder()
-                                                .setCommandId(envelope.getId())
-                                                .setProducerId(getProducerId())
-                                                .setMaxEventCount(eventCount)
-                                                .setCommandContext(envelope.getCommandContext())
-                                                .build();
         return result;
     }
 

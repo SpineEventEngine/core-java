@@ -30,19 +30,16 @@ import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.Version;
-import io.spine.protobuf.AnyPacker;
 import io.spine.server.command.Assign;
-import io.spine.server.command.EventFactory;
+import io.spine.server.event.EventFactory;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -112,47 +109,22 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
     }
 
     /**
-     * Ensures that the passed instance of {@code Message} is not an {@code Any},
-     * and unwraps the command message if {@code Any} is passed.
-     */
-    private static Message ensureCommandMessage(Message msgOrAny) {
-        Message commandMessage;
-        if (msgOrAny instanceof Any) {
-            /* It looks that we're getting the result of `command.getMessage()`
-               because the calling code did not bother to unwrap it.
-               Extract the wrapped message (instead of treating this as an error).
-               There may be many occasions of such a call especially from the
-               testing code. */
-            final Any any = (Any) msgOrAny;
-            commandMessage = AnyPacker.unpack(any);
-        } else {
-            commandMessage = msgOrAny;
-        }
-        return commandMessage;
-    }
-
-    /**
      * Invokes the handler method in the passed object.
      *
      * @return the list of events produced by the handler method
      */
-    public static List<? extends Message> invokeHandler(Object object,
+    public static List<? extends Message> invokeHandler(Object target,
                                                         Message command,
                                                         CommandContext context) {
-        checkNotNull(object);
+        checkNotNull(target);
         checkNotNull(command);
         checkNotNull(context);
+        final Message commandMessage = ensureMessage(command);
 
-        final Message commandMessage = ensureCommandMessage(command);
-
-        try {
-            final CommandHandlerMethod method = forMessage(object.getClass(), commandMessage);
-            final List<? extends Message> eventMessages =
-                    method.invoke(object, commandMessage, context);
-            return eventMessages;
-        } catch (InvocationTargetException e) {
-            throw illegalStateWithCauseOf(e);
-        }
+        final CommandHandlerMethod method = forMessage(target.getClass(), commandMessage);
+        final List<? extends Message> eventMessages =
+                method.invoke(target, commandMessage, context);
+        return eventMessages;
     }
 
     public static List<Event> toEvents(final Any producerId,
@@ -165,7 +137,7 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
 
         final EventFactory eventFactory =
                 EventFactory.newBuilder()
-                            .setCommandId(envelope.getId())
+                            .setOriginId(envelope.getId())
                             .setProducerId(producerId)
                             .setMaxEventCount(eventMessages.size())
                             .setCommandContext(envelope.getCommandContext())
@@ -216,8 +188,7 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
      * @return the list of event messages (or an empty list if the handler returns nothing)
      */
     @Override
-    public <R> R invoke(Object target, Message message, CommandContext context)
-            throws InvocationTargetException {
+    public <R> R invoke(Object target, Message message, CommandContext context) {
         final R handlingResult = super.invoke(target, message, context);
 
         final List<? extends Message> events = toList(handlingResult);

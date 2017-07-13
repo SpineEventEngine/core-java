@@ -18,15 +18,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.command;
+package io.spine.server.event;
 
 import io.spine.core.Commands;
 import org.junit.Test;
 
-import static io.spine.server.command.EventIdSequence.LEADING_ZERO;
-import static io.spine.server.command.EventIdSequence.MAX_ONE_DIGIT_SIZE;
-import static io.spine.server.command.EventIdSequence.SEPARATOR;
-import static io.spine.server.command.EventIdSequence.on;
+import static io.spine.server.event.EventIdSequence.LEADING_ZERO;
+import static io.spine.server.event.EventIdSequence.MAX_ONE_DIGIT_SIZE;
+import static io.spine.server.event.EventIdSequence.SEPARATOR;
+import static io.spine.server.event.EventIdSequence.on;
 import static io.spine.validate.Validate.isDefault;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

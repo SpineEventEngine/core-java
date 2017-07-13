@@ -31,7 +31,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alexander Yevsyukov
  * @author Alex Tymchenko
  */
-public final class EventEnvelope extends AbstractMessageEnvelope<Event> {
+public final class EventEnvelope extends AbstractMessageEnvelope<EventId, Event> {
 
     private final Message eventMessage;
     private final EventClass eventClass;
@@ -55,6 +55,7 @@ public final class EventEnvelope extends AbstractMessageEnvelope<Event> {
     /**
      * Obtains the event ID.
      */
+    @Override
     public EventId getId() {
         final EventId result = getOuterObject().getId();
         return result;
@@ -74,6 +75,12 @@ public final class EventEnvelope extends AbstractMessageEnvelope<Event> {
     @Override
     public EventClass getMessageClass() {
         return this.eventClass;
+    }
+
+    @Override
+    public ActorContext getActorContext() {
+        return getEventContext().getCommandContext()
+                                .getActorContext();
     }
 
     /**

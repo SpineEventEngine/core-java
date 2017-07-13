@@ -28,7 +28,7 @@ import com.google.protobuf.Timestamp;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.given.GivenEvent;
-import io.spine.server.command.EventFactory;
+import io.spine.server.event.EventFactory;
 import io.spine.string.Stringifiers;
 import io.spine.test.Tests;
 import io.spine.time.Time;
@@ -49,8 +49,8 @@ import static io.spine.core.Events.getTimestamp;
 import static io.spine.core.Events.sort;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.TypeConverter.toMessage;
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.TestValues.newUuidValue;
+import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -84,7 +84,7 @@ public class EventsShould {
         final Command cmd = requestFactory.command().create(Time.getCurrentTime());
         final StringValue producerId = toMessage(getClass().getSimpleName());
         EventFactory eventFactory = EventFactory.newBuilder()
-                                                .setCommandId(Commands.generateId())
+                                                .setOriginId(Commands.generateId())
                                                 .setProducerId(producerId)
                                                 .setCommandContext(cmd.getContext())
                                                 .build();
@@ -193,7 +193,7 @@ public class EventsShould {
         final Command command = requestFactory.command().create(newUuidValue());
         final StringValue producerId = toMessage(getClass().getSimpleName());
         final EventFactory ef = EventFactory.newBuilder()
-                                            .setCommandId(Commands.generateId())
+                                            .setOriginId(Commands.generateId())
                                             .setProducerId(producerId)
                                             .setCommandContext(command.getContext())
                                             .build();

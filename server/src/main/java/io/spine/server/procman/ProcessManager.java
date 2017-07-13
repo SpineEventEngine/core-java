@@ -33,10 +33,8 @@ import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.reflect.CommandHandlerMethod;
 import io.spine.server.reflect.EventSubscriberMethod;
-import io.spine.util.Exceptions;
 import io.spine.validate.ValidatingBuilder;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Set;
 
@@ -138,17 +136,12 @@ public abstract class ProcessManager<I,
      * @param eventMessage the event to be handled by the process manager
      * @param context of the event
      */
-    void dispatchEvent(Message eventMessage,
-                       EventContext context)  {
+    void dispatchEvent(Message eventMessage, EventContext context)  {
         checkNotNull(context);
         checkNotNull(eventMessage);
 
         final EventSubscriberMethod method = forMessage(getClass(), eventMessage);
-        try {
-            method.invoke(this, eventMessage, context);
-        } catch (InvocationTargetException e) {
-            throw Exceptions.illegalStateWithCauseOf(e);
-        }
+        method.invoke(this, eventMessage, context);
     }
 
     /**

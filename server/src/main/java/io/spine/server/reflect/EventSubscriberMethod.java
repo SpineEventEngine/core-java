@@ -28,7 +28,6 @@ import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
 
 import javax.annotation.CheckReturnValue;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Set;
@@ -67,7 +66,7 @@ public class EventSubscriberMethod extends HandlerMethod<EventContext> {
         try {
             final EventSubscriberMethod method = forMessage(target.getClass(), eventMessage);
             method.invoke(target, eventMessage, context);
-        } catch (InvocationTargetException e) {
+        } catch (RuntimeException e) {
             log().error("Exception handling event. Event message: {}, context: {}, cause: {}",
                         eventMessage, context, e.getCause());
         }

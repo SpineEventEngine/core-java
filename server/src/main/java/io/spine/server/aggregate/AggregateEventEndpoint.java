@@ -20,66 +20,66 @@
 
 package io.spine.server.aggregate;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
-import io.spine.core.Command;
-import io.spine.core.CommandEnvelope;
-import io.spine.server.tenant.CommandOperation;
+import io.spine.core.Event;
+import io.spine.core.EventEnvelope;
+import io.spine.server.tenant.EventOperation;
 import io.spine.server.tenant.TenantAwareOperation;
 
 import java.util.List;
 import java.util.Set;
 
 /**
- * Dispatches commands to aggregates of the associated {@code AggregateRepository}.
+ * Dispatches events to aggregates of the associated {@code AggregateRepository}.
  *
  * <p>Loading and storing an aggregate is a tenant-sensitive operation,
  * which depends on the tenant ID of the command we dispatch.
  *
  * @param <I> the type of the aggregate IDs
- * @param <A> the type of the aggregates managed by the parent repository
+ * @param <A> the type of the aggregates
+ *
  * @author Alexander Yevsyukov
+ * @see React
  */
-class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
-    extends AggregateMessageEndpoint<I, A, CommandEnvelope> {
+public class AggregateEventEndpoint<I, A extends Aggregate<I, ?, ?>>
+        extends AggregateMessageEndpoint<I, A, EventEnvelope>{
 
-    private AggregateCommandEndpoint(AggregateRepository<I, A> repo, CommandEnvelope envelope) {
+    private AggregateEventEndpoint(AggregateRepository<I, A> repo, EventEnvelope envelope) {
         super(repo, envelope);
     }
 
     static <I, A extends Aggregate<I, ?, ?>>
-    void handle(AggregateRepository<I, A> repository, CommandEnvelope envelope) {
-        final AggregateCommandEndpoint<I, A> commandEndpoint =
-                new AggregateCommandEndpoint<>(repository, envelope);
+    void handle(AggregateRepository<I, A> repository, EventEnvelope envelope) {
+        final AggregateEventEndpoint<I, A> eventEndpoint =
+                new AggregateEventEndpoint<>(repository, envelope);
 
-        final TenantAwareOperation operation = commandEndpoint.createOperation();
+        final TenantAwareOperation operation = eventEndpoint.createOperation();
         operation.execute();
     }
 
     @Override
-    protected List<? extends Message> dispatchEnvelope(A aggregate, CommandEnvelope envelope) {
-        return aggregate.dispatchCommand(envelope);
+    protected TenantAwareOperation createOperation() {
+        return new Operation(envelope().getOuterObject());
     }
 
     @Override
-    protected TenantAwareOperation createOperation() {
-        return new Operation(envelope().getCommand());
+    protected List<? extends Message> dispatchEnvelope(A aggregate, EventEnvelope envelope) {
+        return aggregate.dispatchEvent(envelope);
     }
 
     @Override
     protected Set<I> getTargets() {
-        final CommandEnvelope envelope = envelope();
-        return ImmutableSet.of(repository().getAggregateId(envelope.getMessage(),
-                                                           envelope.getCommandContext()));
+        final EventEnvelope env = envelope();
+        return repository().getAggregateIds(env.getMessage(), env.getEventContext());
     }
 
     /**
-     * The operation executed under the command's tenant.
+     * The operation executed under the event's tenant.
      */
-    private class Operation extends CommandOperation {
+    private class Operation extends EventOperation {
 
-        private Operation(Command command) {
-            super(command);
+        private Operation(Event event) {
+            super(event);
         }
 
         @Override

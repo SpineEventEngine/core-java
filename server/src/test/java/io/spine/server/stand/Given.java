@@ -36,8 +36,8 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
-import io.spine.server.command.EventFactory;
 import io.spine.server.entity.idfunc.EventDispatchFunction;
+import io.spine.server.event.EventFactory;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.test.Tests;
@@ -83,7 +83,7 @@ class Given {
                                                           .build();
         final StringValue producerId = toMessage(Given.class.getSimpleName());
         final EventFactory eventFactory = EventFactory.newBuilder()
-                                                      .setCommandId(cmd.getId())
+                                                      .setOriginId(cmd.getId())
                                                       .setProducerId(producerId)
                                                       .setCommandContext(cmd.getContext())
                                                       .build();

@@ -25,6 +25,7 @@ import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.Identifier;
+import io.spine.core.ActorContext;
 import io.spine.core.MessageEnvelope;
 import io.spine.core.TenantId;
 import io.spine.core.Version;
@@ -38,7 +39,7 @@ import javax.annotation.Nullable;
  * @author Alex Tymchenko
  */
 public final class EntityStateEnvelope<I, S extends Message>
-                                    implements MessageEnvelope<Entity<I, S>> {
+                                    implements MessageEnvelope<Any, Entity<I, S>> {
 
     /**
      * The state of the entity.
@@ -102,7 +103,7 @@ public final class EntityStateEnvelope<I, S extends Message>
      * just on its properties.
      *
      * <p>To obtain an entity instance, use the corresponding {@code Repository} instance along
-     * with {@linkplain #getId() entity ID} instead.
+     * with {@linkplain #getEntityId() entity ID} instead.
      *
      * @return {@code null}
      */
@@ -113,10 +114,15 @@ public final class EntityStateEnvelope<I, S extends Message>
         return null;
     }
 
+    @Override
+    public Any getId() {
+        return entityId;
+    }
+
     /**
      * Obtains the {@link Entity} ID.
      */
-    public I getId() {
+    public I getEntityId() {
         final I result = Identifier.unpack(entityId);
         return result;
     }
@@ -129,6 +135,13 @@ public final class EntityStateEnvelope<I, S extends Message>
     @Override
     public EntityStateClass getMessageClass() {
         return this.entityStateClass;
+    }
+
+    @Override
+    public ActorContext getActorContext() {
+        return ActorContext.newBuilder()
+                           .setTenantId(tenantId)
+                           .build();
     }
 
     public Optional<Version> getEntityVersion() {

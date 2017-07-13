@@ -30,6 +30,7 @@ import io.spine.core.CommandId;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.Version;
+import io.spine.server.event.EventFactory;
 
 import javax.annotation.Nullable;
 
@@ -76,7 +77,7 @@ public class TestEventFactory extends EventFactory {
         final Builder builder = EventFactory.newBuilder()
                                             .setProducerId(producerId)
                                             .setCommandContext(commandContext)
-                                            .setCommandId(commandId);
+                                            .setOriginId(commandId);
         final TestEventFactory result = new TestEventFactory(builder);
         return result;
     }

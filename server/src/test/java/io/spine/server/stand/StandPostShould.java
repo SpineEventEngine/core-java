@@ -86,13 +86,15 @@ public class StandPostShould {
         final Stand innerStand = Stand.newBuilder().build();
         final Stand stand = spy(innerStand);
 
-        stand.post(entity, requestFactory.createCommandContext());
+        stand.post(requestFactory.createCommandContext()
+                                 .getActorContext()
+                                 .getTenantId(), entity);
 
         final ArgumentMatcher<EntityStateEnvelope<?, ?>> argumentMatcher =
                 new ArgumentMatcher<EntityStateEnvelope<?, ?>>() {
                     @Override
                     public boolean matches(EntityStateEnvelope<?, ?> argument) {
-                        final boolean entityIdMatches = argument.getId()
+                        final boolean entityIdMatches = argument.getEntityId()
                                                                 .equals(entityId);
                         final boolean versionMatches = version.equals(argument.getEntityVersion()
                                                                               .orNull());
@@ -131,7 +133,8 @@ public class StandPostShould {
         when(entity.getVersion()).thenReturn(newVersion(17, Time.getCurrentTime()));
 
         final CommandContext context = requestFactory.createCommandContext();
-        stand.post(entity, context);
+        stand.post(context.getActorContext()
+                          .getTenantId(), entity);
 
         final EntityStateEnvelope envelope = EntityStateEnvelope.of(entity,
                                                                     context.getActorContext()
@@ -285,7 +288,9 @@ public class StandPostShould {
                                                      .build();
                 final Given.StandTestAggregate entity = Given.aggregateRepo()
                                                              .create(enitityId);
-                stand.post(entity, requestFactory.createCommandContext());
+                stand.post(requestFactory.createCommandContext()
+                                         .getActorContext()
+                                         .getTenantId(), entity);
 
                 threadInvocationRegistry.add(threadName);
             }

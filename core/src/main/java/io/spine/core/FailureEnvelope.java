@@ -29,7 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alex Tymchenko
  */
-public class FailureEnvelope extends AbstractMessageEnvelope<Failure> {
+public class FailureEnvelope extends AbstractMessageEnvelope<FailureId, Failure> {
 
     /**
      * The failure message.
@@ -73,6 +73,7 @@ public class FailureEnvelope extends AbstractMessageEnvelope<Failure> {
     /**
      * Obtains the Failure ID.
      */
+    @Override
     public FailureId getId() {
         return getOuterObject().getId();
     }
@@ -85,6 +86,11 @@ public class FailureEnvelope extends AbstractMessageEnvelope<Failure> {
     @Override
     public FailureClass getMessageClass() {
         return failureClass;
+    }
+
+    @Override
+    public ActorContext getActorContext() {
+        return getCommandContext().getActorContext();
     }
 
     public Message getCommandMessage() {

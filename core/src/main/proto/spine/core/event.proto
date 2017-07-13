@@ -91,6 +91,19 @@ message EventContext {
     // When the event occurred.
     google.protobuf.Timestamp timestamp = 1 [(required) = true];
 
+    message Origin {
+        message Command {
+            CommandId id = 1;
+            CommandContext context = 2;
+        }
+
+        message Event {
+            EventId id = 1;
+            EventContext context = 3;
+        }
+    }
+    Origin origin = 6;
+
     // The context of the command, which generated this event.
     //
     // This field is empty if an event was converted from `IntegrationEvent`.

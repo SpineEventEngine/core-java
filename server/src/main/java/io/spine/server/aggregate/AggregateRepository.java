@@ -21,7 +21,6 @@ package io.spine.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
@@ -30,6 +29,7 @@ import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
+import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.entity.CompositeEventDispatchFunction;
@@ -243,15 +243,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     public void dispatchEvent(EventEnvelope envelope) {
         checkEventClass(envelope.getMessageClass());
-        final Message eventMessage = envelope.getMessage();
-        final EventContext context = envelope.getEventContext();
-        final Iterable<I> targets = getAggregateIds(eventMessage, context);
-        for (I target : targets) {
-            A aggregate = loadOrCreate(target);
-            //TODO:2017-07-11:alexander.yevsyukov: dispatch event to reactor method
-            final Iterable<Event> events = ImmutableList.of();
-            postEvents(events);
-        }
+        AggregateEventEndpoint.handle(this, envelope);
     }
 
     private void checkEventClass(EventClass eventClass) throws IllegalArgumentException {
@@ -268,8 +260,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         getEventBus().post(events);
     }
 
-    void updateStand(A aggregate, CommandContext context) {
-        getStand().post(aggregate, context);
+    void updateStand(TenantId tenantId, A aggregate) {
+        getStand().post(tenantId, aggregate);
     }
 
     /**

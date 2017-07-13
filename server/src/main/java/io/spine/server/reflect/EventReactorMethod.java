@@ -21,6 +21,7 @@
 package io.spine.server.reflect;
 
 import com.google.common.base.Predicate;
+import com.google.protobuf.Message;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.server.aggregate.React;
@@ -47,6 +48,27 @@ public class EventReactorMethod extends HandlerMethod<EventContext> {
         super(method);
     }
 
+    public static List<? extends Message> invokeHandler(Object target,
+                                                        Message event,
+                                                        EventContext context) {
+        checkNotNull(target);
+        checkNotNull(event);
+        checkNotNull(context);
+        final Message eventMessage = ensureMessage(event);
+
+        final EventReactorMethod method = forMessage(target.getClass(), eventMessage);
+        final List<? extends Message> eventMessages =
+                method.invoke(target, eventMessage, context);
+        return eventMessages;
+    }
+
+    private static EventReactorMethod forMessage(Class<?> cls, Message eventMessage) {
+        final Class<? extends Message> eventClass = eventMessage.getClass();
+        final EventReactorMethod method = MethodRegistry.getInstance()
+                                                        .get(cls, eventClass, factory());
+        return method;
+    }
+
     static EventReactorMethod from(Method method) {
         return new EventReactorMethod(method);
     }
@@ -67,6 +89,10 @@ public class EventReactorMethod extends HandlerMethod<EventContext> {
         checkNotNull(cls);
         final Set<EventClass> result = EventClass.setOf(inspect(cls, predicate()));
         return result;
+    }
+
+    private static HandlerMethod.Factory<EventReactorMethod> factory() {
+        return Factory.getInstance();
     }
 
     /**

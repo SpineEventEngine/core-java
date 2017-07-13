@@ -29,7 +29,6 @@ import io.spine.server.entity.EventPlayingEntity;
 import io.spine.server.reflect.EventSubscriberMethod;
 import io.spine.validate.ValidatingBuilder;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Set;
 
 import static io.spine.server.reflect.EventSubscriberMethod.forMessage;
@@ -95,11 +94,7 @@ public abstract class Projection<I,
 
     void apply(Message eventMessage, EventContext eventContext)  {
         final EventSubscriberMethod method = forMessage(getClass(), eventMessage);
-        try {
-            method.invoke(this, eventMessage, eventContext);
-        } catch (InvocationTargetException e) {
-            throw new IllegalStateException(e);
-        }
+        method.invoke(this, eventMessage, eventContext);
     }
 
     static class TypeInfo {

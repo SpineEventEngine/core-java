@@ -40,7 +40,7 @@ import static org.mockito.Mockito.mock;
  * @see io.spine.server.failure.FailureBusBuilderShould
  */
 public abstract class BusBuilderShould<B extends Bus.AbstractBuilder<E, T, ?>,
-                                       E extends MessageEnvelope<T>,
+                                       E extends MessageEnvelope<?, T>,
                                        T extends Message> {
 
     protected abstract B builder();
