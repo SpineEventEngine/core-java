@@ -20,19 +20,16 @@
 
 package io.spine.server.event;
 
-import com.google.protobuf.Empty;
-import com.google.protobuf.Message;
-import io.spine.client.ActorRequestFactory;
+import com.google.protobuf.Any;
 import io.spine.client.TestActorRequestFactory;
-import io.spine.core.CommandContext;
-import io.spine.core.CommandId;
-import io.spine.core.Commands;
+import io.spine.core.CommandEnvelope;
 import io.spine.test.Tests;
 import io.spine.test.command.event.MandatoryFieldEvent;
 import io.spine.validate.ValidationException;
 import org.junit.Before;
 import org.junit.Test;
 
+import static io.spine.Identifier.pack;
 import static io.spine.test.TestValues.newUuidValue;
 
 /**
@@ -40,67 +37,31 @@ import static io.spine.test.TestValues.newUuidValue;
  */
 public class EventFactoryShould {
 
-    private final ActorRequestFactory requestFactory =
+    private final TestActorRequestFactory requestFactory =
             TestActorRequestFactory.newInstance(getClass());
 
-    private Message producerId;
-    private CommandContext commandContext;
-    private CommandId commandId;
+    private Any producerId;
+    private CommandEnvelope origin;
 
     @Before
     public void setUp() {
-        commandContext = requestFactory.command()
-                                       .create(Empty.getDefaultInstance())
-                                       .getContext();
-        producerId = newUuidValue();
-        commandId = Commands.generateId();
+        producerId = pack(newUuidValue());
+        origin = requestFactory.generateAndWrap();
     }
 
     @Test(expected = NullPointerException.class)
-    public void require_producer_id_in_builder() {
-        EventFactory.newBuilder()
-                    .setCommandContext(commandContext)
-                    .setOriginId(commandId)
-                    .build();
+    public void require_producer_id() {
+        EventFactory.on(origin, Tests.<Any>nullRef());
     }
 
     @Test(expected = NullPointerException.class)
-    public void require_non_null_command_context_in_builder() {
-        EventFactory.newBuilder()
-                    .setProducerId(producerId)
-                    .setOriginId(commandId)
-                    .build();
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void require_non_default_command_context_in_builder() {
-        EventFactory.newBuilder()
-                    .setProducerId(producerId)
-                    .setOriginId(commandId)
-                    .setCommandContext(CommandContext.getDefaultInstance())
-                    .build();
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void require_non_null_command_id() {
-        EventFactory.newBuilder().setOriginId(Tests.<CommandId>nullRef());
-    }
-    
-    @Test(expected = NullPointerException.class)
-    public void require_set_command_id() {
-        EventFactory.newBuilder()
-                    .setProducerId(producerId)
-                    .setCommandContext(commandContext)
-                    .build();
+    public void require_origin() {
+        EventFactory.on(Tests.<CommandEnvelope>nullRef(), producerId);
     }
 
     @Test(expected = ValidationException.class)
     public void validate_event_messages_before_creation() {
-        final EventFactory factory = EventFactory.newBuilder()
-                                               .setCommandContext(commandContext)
-                                               .setOriginId(commandId)
-                                               .setProducerId(producerId)
-                                               .build();
+        final EventFactory factory = EventFactory.on(origin, producerId);
         factory.createEvent(MandatoryFieldEvent.getDefaultInstance(), null);
     }
 }

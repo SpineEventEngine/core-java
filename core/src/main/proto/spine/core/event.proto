@@ -33,6 +33,7 @@ import "google/protobuf/timestamp.proto";
 import "google/protobuf/any.proto";
 
 import "spine/core/command.proto";
+import "spine/core/failure.proto";
 import "spine/core/version.proto";
 import "spine/core/enrichment.proto";
 
@@ -91,24 +92,16 @@ message EventContext {
     // When the event occurred.
     google.protobuf.Timestamp timestamp = 1 [(required) = true];
 
-    message Origin {
-        message Command {
-            CommandId id = 1;
-            CommandContext context = 2;
-        }
+    oneof origin {
+        // The context of the command, which generated this event.
+        CommandContext command_context = 2;
 
-        message Event {
-            EventId id = 1;
-            EventContext context = 3;
-        }
+        // The context of the command which generated this event.
+        EventContext event_context = 6;
+
+        // The context of a rejection which generated this event.
+        FailureContext failure_context = 7;
     }
-    Origin origin = 6;
-
-    // The context of the command, which generated this event.
-    //
-    // This field is empty if an event was converted from `IntegrationEvent`.
-    //
-    CommandContext command_context = 2;
 
     // The ID of the entity which generated the event.
     //

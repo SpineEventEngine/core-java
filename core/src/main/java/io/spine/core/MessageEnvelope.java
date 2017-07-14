@@ -57,4 +57,12 @@ public interface MessageEnvelope<I extends Message, T> {
      * Obtains an actor context for the wrapped message.
      */
     ActorContext getActorContext();
+
+    /**
+     * Sets the context of the enclosed message into as the origin in the context of an event
+     * to be build.
+     *
+     * @param builder event context builder into which set the event origin context
+     */
+    void setOriginContext(EventContext.Builder builder);
 }

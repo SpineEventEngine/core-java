@@ -93,6 +93,16 @@ public class FailureEnvelope extends AbstractMessageEnvelope<FailureId, Failure>
         return getCommandContext().getActorContext();
     }
 
+    /**
+     * Sets the context of the failure as the context origin of the event being built.
+     *
+     * @param builder event context builder into which set the event origin context
+     */
+    @Override
+    public void setOriginContext(EventContext.Builder builder) {
+        builder.setFailureContext(getOuterObject().getContext());
+    }
+
     public Message getCommandMessage() {
         return commandMessage;
     }

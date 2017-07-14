@@ -215,7 +215,7 @@ public class StandPostShould {
             @Override
             public void perform(BoundedContext context) {
                 // Init repository
-                final AggregateRepository<?, ?> repository = Given.aggregateRepo(context);
+                final AggregateRepository<?, ?> repository = Given.aggregateRepo();
 
                 repository.initStorage(storageFactory(context.isMultitenant()));
 

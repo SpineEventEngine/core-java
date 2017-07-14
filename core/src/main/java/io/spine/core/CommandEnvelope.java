@@ -96,10 +96,22 @@ public final class CommandEnvelope extends AbstractMessageEnvelope<CommandId, Co
         return commandClass;
     }
 
+    /**
+     * Obtains the actor context of the enclosed command.
+     */
     @Override
     public ActorContext getActorContext() {
-        return getOuterObject().getContext()
-                               .getActorContext();
+        return getCommandContext().getActorContext();
+    }
+
+    /**
+     * Sets the context of the enclosed command as the origin for the event being built.
+     *
+     * @param builder event context builder into which set the event origin context
+     */
+    @Override
+    public void setOriginContext(EventContext.Builder builder) {
+        builder.setCommandContext(getCommandContext());
     }
 
     /**

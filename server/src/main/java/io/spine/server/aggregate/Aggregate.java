@@ -219,7 +219,7 @@ public abstract class Aggregate<I,
     private void applyMessages(Iterable<? extends Message> eventMessages, MessageEnvelope origin) {
         final List<? extends Message> messages = newArrayList(eventMessages);
         final EventFactory eventFactory =
-                EventFactory.onMessage(getProducerId(), messages.size(), origin);
+                EventFactory.on(origin, getProducerId(), messages.size());
 
         final List<Event> events = newArrayListWithCapacity(messages.size());
 

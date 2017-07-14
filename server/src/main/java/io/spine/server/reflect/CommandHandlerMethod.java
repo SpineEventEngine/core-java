@@ -130,18 +130,13 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
     public static List<Event> toEvents(final Any producerId,
                                        @Nullable final Version version,
                                        final List<? extends Message> eventMessages,
-                                       final CommandEnvelope envelope) {
+                                       final CommandEnvelope origin) {
         checkNotNull(producerId);
         checkNotNull(eventMessages);
-        checkNotNull(envelope);
+        checkNotNull(origin);
 
         final EventFactory eventFactory =
-                EventFactory.newBuilder()
-                            .setOriginId(envelope.getId())
-                            .setProducerId(producerId)
-                            .setMaxEventCount(eventMessages.size())
-                            .setCommandContext(envelope.getCommandContext())
-                            .build();
+                EventFactory.on(origin, producerId, eventMessages.size());
 
         return Lists.transform(eventMessages, new Function<Message, Event>() {
             @Override

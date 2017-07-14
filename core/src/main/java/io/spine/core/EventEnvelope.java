@@ -84,6 +84,17 @@ public final class EventEnvelope extends AbstractMessageEnvelope<EventId, Event>
     }
 
     /**
+     * Sets the context of the enclosed event as origin for the event which context
+     * is being built.
+     *
+     * @param builder event context builder into which set the event origin context
+     */
+    @Override
+    public void setOriginContext(EventContext.Builder builder) {
+        builder.setEventContext(getEventContext());
+    }
+
+    /**
      * Obtains the context of the event.
      */
     public EventContext getEventContext() {

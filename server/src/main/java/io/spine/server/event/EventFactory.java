@@ -23,7 +23,6 @@ package io.spine.server.event;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import io.spine.core.CommandContext;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventId;
@@ -36,13 +35,11 @@ import io.spine.validate.ValidationException;
 
 import javax.annotation.Nullable;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.TypeConverter.toAny;
 import static io.spine.time.Time.getCurrentTime;
 import static io.spine.validate.Validate.checkValid;
-import static io.spine.validate.Validate.isNotDefault;
 
 /**
  * Produces events in response to a command.
@@ -52,35 +49,40 @@ import static io.spine.validate.Validate.isNotDefault;
 public class EventFactory {
 
     private final Any producerId;
-    private final CommandContext commandContext;
+    private final MessageEnvelope<?, ?> origin;
     private final EventIdSequence idSequence;
 
-    protected EventFactory(Builder builder) {
-        this.producerId = builder.producerId;
-        this.commandContext = builder.commandContext;
-        this.idSequence = EventIdSequence.on(builder.originId)
-                                         .withMaxSize(builder.maxEventCount);
+    protected EventFactory(MessageEnvelope<?, ?> origin, Any producerId, int eventCount) {
+        this.origin = origin;
+        this.producerId = producerId;
+        this.idSequence = EventIdSequence.on(origin.getId())
+                                         .withMaxSize(eventCount);
     }
 
     /**
-     * Creates new builder for a factory.
+     * Creates a new event factory for producing events in response to the passed message.
+     *
+     * @param origin     the message in response to which events will be generated
+     * @param producerId the ID of the entity producing the events
+     * @param maxCount   the maximum number of events to be produced
+     * @return new event factory
      */
-    public static Builder newBuilder() {
-        return new Builder();
+    public static EventFactory on(MessageEnvelope origin, Any producerId, int maxCount) {
+        checkNotNull(origin);
+        checkNotNull(producerId);
+        return new EventFactory(origin, producerId, maxCount);
     }
 
-    public static EventFactory onMessage(Any producerId,
-                                         int eventCount,
-                                         MessageEnvelope envelope) {
-        final EventFactory result = newBuilder().setOriginId(envelope.getId())
-                                                .setProducerId(producerId)
-                                                .setMaxEventCount(eventCount)
-                                                .setCommandContext(
-                                                        //TODO:2017-07-13:alexander.yevsyukov: Pass origin
-                                                        CommandContext.getDefaultInstance()
-                                                        /*envelope.getCommandContext()*/)
-                                                .build();
-        return result;
+    /**
+     * Creates a new event factory for producing {@linkplain EventIdSequence#MAX_ONE_DIGIT_SIZE
+     * 36 events or less} in response to the passed message.
+     *
+     * @param origin     the message in response to which events will be generated
+     * @param producerId the ID of the entity producing the events. Can be passed as {@link Any}.
+     * @return new event factory
+     */
+    public static EventFactory on(MessageEnvelope origin, Any producerId) {
+        return on(origin, producerId, EventIdSequence.MAX_ONE_DIGIT_SIZE);
     }
 
     /**
@@ -106,7 +108,7 @@ public class EventFactory {
         validate(messageOrAny);     // we must validate it now before emitting the next ID.
 
         final EventId eventId = idSequence.next();
-        final EventContext context = createContext(producerId, commandContext, version);
+        final EventContext context = createContext(version);
         final Event result = createEvent(eventId, messageOrAny, context);
         return result;
     }
@@ -166,81 +168,15 @@ public class EventFactory {
                            .build();
     }
 
-    private static EventContext createContext(Any producerId,
-                                              CommandContext commandContext,
-                                              @Nullable Version version) {
+    private EventContext createContext(@Nullable Version version) {
         final Timestamp timestamp = getCurrentTime();
         final EventContext.Builder builder = EventContext.newBuilder()
                                                          .setTimestamp(timestamp)
-                                                         .setCommandContext(commandContext)
                                                          .setProducerId(producerId);
+        origin.setOriginContext(builder);
         if (version != null) {
             builder.setVersion(version);
         }
         return builder.build();
-    }
-
-    /**
-     * Builds an event factory.
-     */
-    public static class Builder {
-
-        private Any producerId;
-        private Message originId;
-        private CommandContext commandContext;
-        private int maxEventCount = EventIdSequence.MAX_ONE_DIGIT_SIZE;
-
-        private Builder() {
-            // Prevent instantiation from outside.
-        }
-
-        /**
-         * Sets the ID of an entity which is producing the events wrapped into {@code Any}.
-         */
-        public Builder setProducerId(Message messageOrAny) {
-            this.producerId = pack(checkNotNull(messageOrAny));
-            return this;
-        }
-
-        /**
-         * Sets the ID of the command which caused events we are about to generate.
-         */
-        public Builder setOriginId(Message originId) {
-            this.originId = checkNotNull(originId);
-            return this;
-        }
-
-        /**
-         * Sets the command in response to which we generate events.
-         */
-        public Builder setCommandContext(CommandContext commandContext) {
-            checkNotNull(commandContext);
-            checkArgument(isNotDefault(commandContext));
-            this.commandContext = commandContext;
-            return this;
-        }
-
-        /**
-         * Sets the maximum count of events the factory may produce in response a command.
-         *
-         * <p>Set the maximum event count to have leading zeroes in the sequence part of identifiers
-         * of events generated by the factory.
-         *
-         * <p>If a value is not set, the {@linkplain EventIdSequence#MAX_ONE_DIGIT_SIZE
-         * default value} will be used.
-         */
-        public Builder setMaxEventCount(int maxEventCount) {
-            this.maxEventCount = maxEventCount;
-            return this;
-        }
-
-        public EventFactory build() {
-            checkNotNull(producerId, "Producer ID must be set.");
-            checkNotNull(originId, "Command ID must be set.");
-            checkNotNull(commandContext, "Command must be set.");
-
-            final EventFactory result = new EventFactory(this);
-            return result;
-        }
     }
 }

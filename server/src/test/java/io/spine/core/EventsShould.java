@@ -25,7 +25,7 @@ import com.google.protobuf.DoubleValue;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
-import io.spine.client.ActorRequestFactory;
+import io.spine.Identifier;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.given.GivenEvent;
 import io.spine.server.event.EventFactory;
@@ -49,7 +49,6 @@ import static io.spine.core.Events.getTimestamp;
 import static io.spine.core.Events.sort;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.TypeConverter.toMessage;
-import static io.spine.test.TestValues.newUuidValue;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -66,7 +65,7 @@ import static org.junit.Assert.assertTrue;
  */
 public class EventsShould {
 
-    private static final ActorRequestFactory requestFactory =
+    private static final TestActorRequestFactory requestFactory =
             TestActorRequestFactory.newInstance(EventsShould.class);
 
     private Event event;
@@ -81,13 +80,9 @@ public class EventsShould {
     public void setUp() {
         final TestActorRequestFactory requestFactory =
                 TestActorRequestFactory.newInstance(getClass());
-        final Command cmd = requestFactory.command().create(Time.getCurrentTime());
+        final CommandEnvelope cmd = requestFactory.generateAndWrap();
         final StringValue producerId = toMessage(getClass().getSimpleName());
-        EventFactory eventFactory = EventFactory.newBuilder()
-                                                .setOriginId(Commands.generateId())
-                                                .setProducerId(producerId)
-                                                .setCommandContext(cmd.getContext())
-                                                .build();
+        EventFactory eventFactory = EventFactory.on(cmd, Identifier.pack(producerId));
         event = eventFactory.createEvent(Time.getCurrentTime(),
                                                      Tests.<Version>nullRef());
         context = event.getContext();
@@ -190,13 +185,9 @@ public class EventsShould {
 
     @Test
     public void obtain_type_name_of_event() {
-        final Command command = requestFactory.command().create(newUuidValue());
+        final CommandEnvelope command = requestFactory.generateAndWrap();
         final StringValue producerId = toMessage(getClass().getSimpleName());
-        final EventFactory ef = EventFactory.newBuilder()
-                                            .setOriginId(Commands.generateId())
-                                            .setProducerId(producerId)
-                                            .setCommandContext(command.getContext())
-                                            .build();
+        final EventFactory ef = EventFactory.on(command, Identifier.pack(producerId));
         final Event event = ef.createEvent(Time.getCurrentTime(), Tests.<Version>nullRef());
 
         final TypeName typeName = EventEnvelope.of(event)
