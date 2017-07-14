@@ -64,7 +64,7 @@ public class EventSubscriberMethod extends HandlerMethod<EventContext> {
         checkNotNull(context);
 
         try {
-            final EventSubscriberMethod method = forMessage(target.getClass(), eventMessage);
+            final EventSubscriberMethod method = getMethod(target.getClass(), eventMessage);
             method.invoke(target, eventMessage, context);
         } catch (RuntimeException e) {
             log().error("Exception handling event. Event message: {}, context: {}, cause: {}",
@@ -78,31 +78,22 @@ public class EventSubscriberMethod extends HandlerMethod<EventContext> {
      * @throws IllegalStateException if the passed class does not have an event handling method
      *                               for the class of the passed message
      */
-    public static EventSubscriberMethod forMessage(Class<?> cls, Message eventMessage) {
+    public static EventSubscriberMethod getMethod(Class<?> cls, Message eventMessage) {
         checkNotNull(cls);
         checkNotNull(eventMessage);
 
         final Class<? extends Message> eventClass = eventMessage.getClass();
-        final MethodRegistry registry = MethodRegistry.getInstance();
-        final EventSubscriberMethod method = registry.get(cls,
-                                                          eventClass,
-                                                          factory());
+        final EventSubscriberMethod method = MethodRegistry.getInstance()
+                                                           .get(cls, eventClass, factory());
         if (method == null) {
-            throw missingEventHandler(cls, eventClass);
+            throw newIllegalStateException("The class %s is not subscribed to events of %s.",
+                                           cls.getName(), eventClass.getName());
         }
         return method;
     }
 
     static EventSubscriberMethod from(Method method) {
         return new EventSubscriberMethod(method);
-    }
-
-    private static IllegalStateException missingEventHandler(Class<?> cls,
-                                                             Class<? extends Message> eventClass) {
-        return newIllegalStateException(
-                "Missing event handler for event class %s in the stream projection class %s",
-                eventClass,
-                cls);
     }
 
     @CheckReturnValue

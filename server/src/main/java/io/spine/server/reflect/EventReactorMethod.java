@@ -48,25 +48,48 @@ public class EventReactorMethod extends HandlerMethod<EventContext> {
         super(method);
     }
 
-    public static List<? extends Message> invokeHandler(Object target,
-                                                        Message event,
-                                                        EventContext context) {
+    /**
+     * Invokes reacting method for the passed event.
+     *
+     * @param target  the object which method to be invoked
+     * @param event   the event message
+     * @param context the event context
+     * @return a list of produced event messages or an empty list if a target object did not
+     * modified its state because of the passed event
+     */
+    public static
+    List<? extends Message> invokeHandler(Object target, Message event, EventContext context) {
         checkNotNull(target);
         checkNotNull(event);
         checkNotNull(context);
         final Message eventMessage = ensureMessage(event);
-
-        final EventReactorMethod method = forMessage(target.getClass(), eventMessage);
-        final List<? extends Message> eventMessages =
-                method.invoke(target, eventMessage, context);
-        return eventMessages;
+        final EventReactorMethod method = getMethod(target.getClass(), eventMessage);
+        return method.invoke(target, eventMessage, context);
     }
 
-    private static EventReactorMethod forMessage(Class<?> cls, Message eventMessage) {
+    private static EventReactorMethod getMethod(Class<?> cls, Message eventMessage) {
         final Class<? extends Message> eventClass = eventMessage.getClass();
         final EventReactorMethod method = MethodRegistry.getInstance()
                                                         .get(cls, eventClass, factory());
+        if (method == null) {
+            throw newIllegalStateException("The class %s does not react to events of class %s.",
+                                           cls.getName(), eventClass.getName());
+        }
         return method;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @return the list of event messages (or an empty list if the reactor method returns nothing)
+     */
+    @Override
+    public <R> R invoke(Object target, Message message, EventContext context) {
+        final R handlingResult = super.invoke(target, message, context);
+        final List<? extends Message> events = toList(handlingResult);
+        // The list of event messages is the return type expected.
+        @SuppressWarnings("unchecked") final R result = (R) events;
+        return result;
     }
 
     static EventReactorMethod from(Method method) {
@@ -149,8 +172,10 @@ public class EventReactorMethod extends HandlerMethod<EventContext> {
          *                               the return value
          */
         private static void checkOutputMessageType(Method method) {
+            final Class<?> returnType = method.getReturnType();
+
             // The method returns List. We're OK.
-            if (List.class.isAssignableFrom(method.getReturnType())) {
+            if (Iterable.class.isAssignableFrom(returnType)) {
                 return;
             }
 
@@ -163,7 +188,6 @@ public class EventReactorMethod extends HandlerMethod<EventContext> {
                 return;
             }
             final Class<?> firstParamType = paramTypes[0];
-            final Class<?> returnType = method.getReturnType();
             if (firstParamType.equals(returnType)) {
                 throw newIllegalStateException(
                         "React method cannot return the same event message {}",
@@ -173,8 +197,8 @@ public class EventReactorMethod extends HandlerMethod<EventContext> {
 
         @Override
         protected boolean verifyReturnType(Method method) {
-            final boolean returnsMessageOrList = returnsMessageOrList(method);
-            if (returnsMessageOrList) {
+            final boolean returnsMessageOrIterable = returnsMessageOrIterable(method);
+            if (returnsMessageOrIterable) {
                 checkOutputMessageType(method);
                 return true;
             }

@@ -41,8 +41,6 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalStateException;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
 
 /**
  * The wrapper for a command handler method.
@@ -84,24 +82,19 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
      * @return handler method
      * @throws IllegalStateException if the passed class does not handle messages of this class
      */
-    private static CommandHandlerMethod forMessage(Class<?> cls, Message commandMessage) {
+    private static CommandHandlerMethod getMethod(Class<?> cls, Message commandMessage) {
         final Class<? extends Message> commandClass = commandMessage.getClass();
         final CommandHandlerMethod method = MethodRegistry.getInstance()
                                                           .get(cls, commandClass, factory());
         if (method == null) {
-            throw missingCommandHandler(cls, commandClass);
+            throw newIllegalStateException("The class %s does not handle commands of the class %s.",
+                                           cls.getName(), commandClass.getName());
         }
         return method;
     }
 
     static CommandHandlerMethod from(Method method) {
         return new CommandHandlerMethod(method);
-    }
-
-    private static IllegalStateException
-    missingCommandHandler(Class<?> cls, Class<? extends Message> commandClass) {
-        throw newIllegalStateException("No handler for the command class %s found in the class %s.",
-                                       commandClass.getName(), cls.getName());
     }
 
     static MethodPredicate predicate() {
@@ -121,7 +114,7 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
         checkNotNull(context);
         final Message commandMessage = ensureMessage(command);
 
-        final CommandHandlerMethod method = forMessage(target.getClass(), commandMessage);
+        final CommandHandlerMethod method = getMethod(target.getClass(), commandMessage);
         final List<? extends Message> eventMessages =
                 method.invoke(target, commandMessage, context);
         return eventMessages;
@@ -150,29 +143,6 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
         });
     }
 
-    /**
-     * Casts a command handling result to a list of event messages.
-     *
-     * @param output the command handler method return value.
-     *               Could be a {@link Message}, a list of messages, or {@code null}.
-     * @return the list of event messages or an empty list if {@code null} is passed
-     */
-    private static <R> List<? extends Message> toList(@Nullable R output) {
-        if (output == null) {
-            return emptyList();
-        }
-        if (output instanceof List) {
-            // Cast to the list of messages as it is the one of the return types
-            // we expect by methods we call.
-            @SuppressWarnings("unchecked") final List<? extends Message> result = (List<? extends Message>) output;
-            return result;
-        } else {
-            // Another type of result is single event message (as Message).
-            final List<Message> result = singletonList((Message) output);
-            return result;
-        }
-    }
-
     private static HandlerMethod.Factory<CommandHandlerMethod> factory() {
         return Factory.getInstance();
     }
@@ -187,7 +157,7 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
         final R handlingResult = super.invoke(target, message, context);
 
         final List<? extends Message> events = toList(handlingResult);
-        // The list of event messages/records is the return type expected.
+        // The list of event messages is the return type expected.
         @SuppressWarnings("unchecked") final R result = (R) events;
         return result;
     }

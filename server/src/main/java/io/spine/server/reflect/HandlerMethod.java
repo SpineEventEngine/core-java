@@ -32,11 +32,14 @@ import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 
 /**
  * An abstract base for wrappers over methods handling messages.
@@ -186,7 +189,30 @@ abstract class HandlerMethod<C extends Message> {
     }
 
     /**
-     * Invokes the wrapped subscriber method to handle {@code message} with the {@code context}.
+     * Casts a handling result to a list of event messages.
+     *
+     * @param output the command handler method return value.
+     *               Could be a {@link Message}, a list of messages, or {@code null}.
+     * @return the list of event messages or an empty list if {@code null} is passed
+     */
+    protected static <R> List<? extends Message> toList(@Nullable R output) {
+        if (output == null) {
+            return emptyList();
+        }
+        if (output instanceof List) {
+            // Cast to the list of messages as it is the one of the return types
+            // we expect by methods we call.
+            @SuppressWarnings("unchecked") final List<? extends Message> result = (List<? extends Message>) output;
+            return result;
+        } else {
+            // Another type of result is single event message (as Message).
+            final List<Message> result = singletonList((Message) output);
+            return result;
+        }
+    }
+
+    /**
+     * Invokes the wrapped method to handle {@code message} with the {@code context}.
      *
      * @param <R>     the type of the expected handler invocation result
      * @param target  the target object on which call the method

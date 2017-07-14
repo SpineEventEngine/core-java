@@ -40,7 +40,7 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static io.spine.server.reflect.EventSubscriberMethod.forMessage;
+import static io.spine.server.reflect.EventSubscriberMethod.getMethod;
 
 /**
  * A central processing unit used to maintain the state of the business process and determine
@@ -140,7 +140,7 @@ public abstract class ProcessManager<I,
         checkNotNull(context);
         checkNotNull(eventMessage);
 
-        final EventSubscriberMethod method = forMessage(getClass(), eventMessage);
+        final EventSubscriberMethod method = getMethod(getClass(), eventMessage);
         method.invoke(this, eventMessage, context);
     }
 

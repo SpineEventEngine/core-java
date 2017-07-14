@@ -31,7 +31,7 @@ import io.spine.validate.ValidatingBuilder;
 
 import java.util.Set;
 
-import static io.spine.server.reflect.EventSubscriberMethod.forMessage;
+import static io.spine.server.reflect.EventSubscriberMethod.getMethod;
 
 /**
  * {@link Projection} holds a structural representation of data extracted from a stream of events.
@@ -93,7 +93,7 @@ public abstract class Projection<I,
     }
 
     void apply(Message eventMessage, EventContext eventContext)  {
-        final EventSubscriberMethod method = forMessage(getClass(), eventMessage);
+        final EventSubscriberMethod method = getMethod(getClass(), eventMessage);
         method.invoke(this, eventMessage, eventContext);
     }
 

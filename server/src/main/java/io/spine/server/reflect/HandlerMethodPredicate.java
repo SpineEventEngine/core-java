@@ -96,4 +96,18 @@ abstract class HandlerMethodPredicate<C extends Message> extends MethodPredicate
         final boolean isList = List.class.isAssignableFrom(returnType);
         return isList;
     }
+
+    /**
+     * Returns {@code true} if a method returns an instance of the class assignable from
+     * {@link Message}, or {@link Iterable}.
+     */
+    protected static boolean returnsMessageOrIterable(Method method) {
+        final Class<?> returnType = method.getReturnType();
+        final boolean isMessage = Message.class.isAssignableFrom(returnType);
+        if (isMessage) {
+            return true;
+        }
+        final boolean isList = Iterable.class.isAssignableFrom(returnType);
+        return isList;
+    }
 }
