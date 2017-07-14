@@ -35,11 +35,11 @@ import io.spine.core.EventContext;
  * @param <M> the type of event messages to get IDs from
  * @author Alexander Litus
  */
-class GetProducerIdFromEvent<I, M extends Message> extends GetIdByFieldIndex<I, M, EventContext> {
+class GetEventProducer<I, M extends Message> extends GetIdByFieldIndex<I, M, EventContext> {
 
     private static final long serialVersionUID = 0L;
 
-    private GetProducerIdFromEvent(int idIndex) {
+    private GetEventProducer(int idIndex) {
         super(idIndex);
     }
 
@@ -48,7 +48,7 @@ class GetProducerIdFromEvent<I, M extends Message> extends GetIdByFieldIndex<I, 
      *
      * @param index a zero-based index of an ID field in this type of messages
      */
-    static<I, M extends Message> GetProducerIdFromEvent<I, M> fromFieldIndex(int index) {
-        return new GetProducerIdFromEvent<>(index);
+    static<I, M extends Message> GetEventProducer<I, M> fromFieldIndex(int index) {
+        return new GetEventProducer<>(index);
     }
 }

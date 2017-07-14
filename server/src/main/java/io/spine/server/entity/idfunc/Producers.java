@@ -28,7 +28,7 @@ import io.spine.core.Events;
 
 import java.util.Set;
 
-import static io.spine.server.entity.idfunc.GetProducerIdFromEvent.fromFieldIndex;
+import static io.spine.server.entity.idfunc.GetEventProducer.fromFieldIndex;
 
 /**
  * Internal utility class that provides default {@link EventDispatchFunction}s
@@ -96,7 +96,7 @@ public class Producers {
 
         private static final long serialVersionUID = 0L;
 
-        private final GetProducerIdFromEvent<I, Message> func = fromFieldIndex(0);
+        private final GetEventProducer<I, Message> func = fromFieldIndex(0);
 
         @Override
         public Set<I> apply(Message message, EventContext context) {
