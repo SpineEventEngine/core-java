@@ -57,9 +57,9 @@ public class EventReactorMethod extends HandlerMethod<EventContext> {
      * @return a list of produced event messages or an empty list if a target object did not
      * modified its state because of the passed event
      */
-    public static List<? extends Message> invokeHandler(Object target,
-                                                        Message event,
-                                                        EventContext context) {
+    public static List<? extends Message> invokeFor(Object target,
+                                                    Message event,
+                                                    EventContext context) {
         checkNotNull(target);
         checkNotNull(event);
         checkNotNull(context);

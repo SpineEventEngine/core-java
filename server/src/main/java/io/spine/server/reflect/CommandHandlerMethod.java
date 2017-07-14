@@ -106,9 +106,9 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
      *
      * @return the list of events produced by the handler method
      */
-    public static List<? extends Message> invokeHandler(Object target,
-                                                        Message command,
-                                                        CommandContext context) {
+    public static List<? extends Message> invokeFor(Object target,
+                                                    Message command,
+                                                    CommandContext context) {
         checkNotNull(target);
         checkNotNull(command);
         checkNotNull(context);

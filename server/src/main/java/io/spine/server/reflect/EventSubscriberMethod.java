@@ -58,7 +58,7 @@ public class EventSubscriberMethod extends HandlerMethod<EventContext> {
     /**
      * Invokes the subscriber method in the passed object.
      */
-    public static void invokeSubscriber(Object target, Message eventMessage, EventContext context) {
+    public static void invokeFor(Object target, Message eventMessage, EventContext context) {
         checkNotNull(target);
         checkNotNull(eventMessage);
         checkNotNull(context);

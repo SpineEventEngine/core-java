@@ -55,7 +55,7 @@ public class EventReactorMethodShould {
                                                                 .setValue(value)
                                                                 .build());
         final List<? extends Message> messages =
-                EventReactorMethod.invokeHandler(aggregate, event.getMessage(), event.getContext());
+                EventReactorMethod.invokeFor(aggregate, event.getMessage(), event.getContext());
 
         final StringValue msg = (StringValue) messages.get(0);
         final String expected = String.valueOf(value);

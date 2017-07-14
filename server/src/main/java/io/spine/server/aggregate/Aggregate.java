@@ -50,7 +50,7 @@ import java.util.Set;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static io.spine.core.Events.getMessage;
-import static io.spine.server.reflect.EventApplierMethod.forEventMessage;
+import static io.spine.server.reflect.EventApplierMethod.getMethod;
 import static io.spine.time.Time.getCurrentTime;
 import static io.spine.validate.Validate.isNotDefault;
 
@@ -157,14 +157,25 @@ public abstract class Aggregate<I,
         return super.getBuilder();
     }
 
-    @Override               // Overridden to expose this method to `AggregateCommandEndpoint`.
-    protected List<? extends Message> dispatchCommand(CommandEnvelope envelope) {
-        return super.dispatchCommand(envelope);
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Overrides to expose the method to the package.
+     */
+    @Override
+    protected List<? extends Message> dispatchCommand(CommandEnvelope cmd) {
+        return super.dispatchCommand(cmd);
     }
 
-    protected List<? extends Message> dispatchEvent(EventEnvelope envelope) {
-        return EventReactorMethod.invokeHandler(this, envelope.getMessage(),
-                                                envelope.getEventContext());
+    /**
+     * Dispatches the event on which the aggreagate reacts.
+     *
+     * @param event the envelope with the event to dispatch
+     * @return a list with event messages that the aggregate produces in reaction to the event or
+     * an empty list if the aggregate state does not change in reaction to the event
+     */
+    protected List<? extends Message> dispatchEvent(EventEnvelope event) {
+        return EventReactorMethod.invokeFor(this, event.getMessage(), event.getEventContext());
     }
 
     /**
@@ -174,7 +185,7 @@ public abstract class Aggregate<I,
      * @throws InvocationTargetException if an exception was thrown during the method invocation
      */
     void invokeApplier(Message eventMessage) throws InvocationTargetException {
-        final EventApplierMethod method = forEventMessage(getClass(), eventMessage);
+        final EventApplierMethod method = getMethod(getClass(), eventMessage);
         method.invoke(this, eventMessage);
     }
 
@@ -185,7 +196,7 @@ public abstract class Aggregate<I,
      * a {@code Snapshot}) loaded by a repository and passed to the aggregate so that
      * it restores its state.
      *
-     * @param aggregateStateRecord the events to play
+     * @param aggregateStateRecord the aggregate state with events to play
      * @throws IllegalStateException if applying events caused an exception, which is set as
      *                               the {@code cause} for the thrown instance
      */
@@ -202,21 +213,11 @@ public abstract class Aggregate<I,
     /**
      * Applies event messages.
      *
-     * @param eventMessages the event message to apply
-     * @param envelope      the envelope of a message which caused the events
-     */
-    void apply(Iterable<? extends Message> eventMessages, MessageEnvelope envelope) {
-        applyMessages(eventMessages, envelope);
-    }
-
-    /**
-     * Applies the passed event messages or {@code Event}s to the aggregate.
-     *
      * @param eventMessages the event messages or events to apply
-     * @param origin      the envelope of the command which generated the events
+     * @param origin        the envelope of a message which caused the events
      * @see #ensureEventMessage(Message)
      */
-    private void applyMessages(Iterable<? extends Message> eventMessages, MessageEnvelope origin) {
+    void apply(Iterable<? extends Message> eventMessages, MessageEnvelope origin) {
         final List<? extends Message> messages = newArrayList(eventMessages);
         final EventFactory eventFactory =
                 EventFactory.on(origin, getProducerId(), messages.size());

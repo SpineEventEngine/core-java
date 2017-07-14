@@ -70,6 +70,6 @@ public abstract class EventSubscriber implements EventDispatcher {
     }
 
     public void handle(Message eventMessage, EventContext context) {
-        EventSubscriberMethod.invokeSubscriber(this, eventMessage, context);
+        EventSubscriberMethod.invokeFor(this, eventMessage, context);
     }
 }

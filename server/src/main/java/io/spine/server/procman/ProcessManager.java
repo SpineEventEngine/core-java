@@ -105,13 +105,13 @@ public abstract class ProcessManager<I,
      * Dispatches the command to the handler method and transforms the output
      * into a list of events.
      *
-     * @param envelope the envelop with the command to dispatch
+     * @param cmd the envelope with the command to dispatch
      * @return the list of events generated as the result of handling the command.
      */
     @Override
-    protected List<Event> dispatchCommand(CommandEnvelope envelope) {
-        final List<? extends Message> messages = super.dispatchCommand(envelope);
-        final List<Event> result = toEvents(messages, envelope);
+    protected List<Event> dispatchCommand(CommandEnvelope cmd) {
+        final List<? extends Message> messages = super.dispatchCommand(cmd);
+        final List<Event> result = toEvents(messages, cmd);
         return result;
     }
 

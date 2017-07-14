@@ -105,9 +105,9 @@ public abstract class CommandHandler implements CommandDispatcher {
     @Override
     public void dispatch(CommandEnvelope envelope) {
         final List<? extends Message> eventMessages =
-                CommandHandlerMethod.invokeHandler(this,
-                                                   envelope.getMessage(),
-                                                   envelope.getCommandContext());
+                CommandHandlerMethod.invokeFor(this,
+                                               envelope.getMessage(),
+                                               envelope.getCommandContext());
         final List<Event> events = toEvents(eventMessages, envelope);
         postEvents(events);
     }
