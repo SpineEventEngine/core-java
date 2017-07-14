@@ -27,7 +27,7 @@ import io.spine.Identifier;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandId;
-import io.spine.server.entity.idfunc.GetTargetIdFromCommand;
+import io.spine.server.entity.idfunc.DefaultAssignmentFunction;
 import io.spine.validate.ConstraintViolation;
 import io.spine.validate.MessageValidator;
 
@@ -100,7 +100,7 @@ class Validator {
 
     private static void validateTargetId(Message message,
                                          ImmutableList.Builder<ConstraintViolation> result) {
-        final Optional targetId = GetTargetIdFromCommand.asOptional(message);
+        final Optional targetId = DefaultAssignmentFunction.asOptional(message);
         if (targetId.isPresent()) {
             final String targetIdString = Identifier.toString(targetId.get());
             if (targetIdString.equals(EMPTY_ID)) {

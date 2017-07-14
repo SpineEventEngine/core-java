@@ -22,7 +22,7 @@ package io.spine.server.entity;
 
 import com.google.common.base.Optional;
 import com.google.protobuf.StringValue;
-import io.spine.server.entity.idfunc.GetTargetIdFromCommand;
+import io.spine.server.entity.idfunc.DefaultAssignmentFunction;
 import io.spine.test.entity.command.CreateProject;
 import io.spine.testdata.Sample;
 import org.junit.Test;
@@ -34,11 +34,11 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Alexander Litus
  */
-public class GetTargetIdFromCommandShould {
+public class DefaultAssignmentFunctionShould {
 
     @Test
     public void return_empty_Optional_if_fail_to_get_ID_from_command_message_without_ID_field() {
-        final Optional id = GetTargetIdFromCommand.asOptional(StringValue.getDefaultInstance());
+        final Optional id = DefaultAssignmentFunction.asOptional(StringValue.getDefaultInstance());
 
         assertFalse(id.isPresent());
     }
@@ -48,7 +48,7 @@ public class GetTargetIdFromCommandShould {
     public void get_ID_from_command_message() {
         final CreateProject msg = Sample.messageOfType(CreateProject.class);
 
-        final Optional id = GetTargetIdFromCommand.asOptional(msg);
+        final Optional id = DefaultAssignmentFunction.asOptional(msg);
 
         assertTrue(id.isPresent());
         assertEquals(msg.getProjectId(), id.get());

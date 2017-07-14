@@ -36,8 +36,8 @@ import io.spine.server.entity.CompositeEventDispatchFunction;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.Repository;
 import io.spine.server.entity.idfunc.AssignmentFunction;
+import io.spine.server.entity.idfunc.DefaultAssignmentFunction;
 import io.spine.server.entity.idfunc.EventDispatchFunction;
-import io.spine.server.entity.idfunc.GetTargetIdFromCommand;
 import io.spine.server.entity.idfunc.Producers;
 import io.spine.server.event.DelegatingEventDispatcher;
 import io.spine.server.event.EventBus;
@@ -98,7 +98,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     /** The function for getting aggregate ID from a command. */
     private final AssignmentFunction<I, Message> handlerFn =
-            GetTargetIdFromCommand.newInstance();
+            DefaultAssignmentFunction.newInstance();
 
     /** The set of event classes to which aggregates {@linkplain React react}. */
     @Nullable
