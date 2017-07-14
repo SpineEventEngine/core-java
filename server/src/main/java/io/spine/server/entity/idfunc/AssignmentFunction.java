@@ -24,9 +24,9 @@ import com.google.protobuf.Message;
 import io.spine.core.CommandContext;
 
 /**
- * Base interface for function obtaining target identifiers from commands.
+ * Base interface for function obtaining command target identifiers from commands.
  *
  * @author Alexander Yevsykov
  */
-public interface IdCommandFunction<I, M extends Message> extends IdFunction<I, M, CommandContext> {
+public interface AssignmentFunction<I, M extends Message> extends IdFunction<I, M, CommandContext> {
 }

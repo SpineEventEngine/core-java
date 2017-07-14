@@ -28,7 +28,7 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
-import io.spine.server.entity.idfunc.IdCommandFunction;
+import io.spine.server.entity.idfunc.AssignmentFunction;
 import io.spine.validate.StringValueVBuilder;
 
 import static io.spine.protobuf.TypeConverter.toMessage;
@@ -93,8 +93,8 @@ public class AggregateRepositoryViewTestEnv {
         /**
          * Custom {@code IdCommandFunction} that parses an aggregate ID from {@code StringValue}.
          */
-        private static final IdCommandFunction<Long, Message> parsingFunc =
-                new IdCommandFunction<Long, Message>() {
+        private static final AssignmentFunction<Long, Message> parsingFunc =
+                new AssignmentFunction<Long, Message>() {
 
                     private static final long serialVersionUID = 0L;
 
@@ -130,7 +130,7 @@ public class AggregateRepositoryViewTestEnv {
          */
         @SuppressWarnings("MethodDoesntCallSuperMethod") // This is the purpose of the method.
         @Override
-        protected IdCommandFunction<Long, Message> getHandlerFunction() {
+        protected AssignmentFunction<Long, Message> getHandlerFunction() {
             return parsingFunc;
         }
     }

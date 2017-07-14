@@ -37,7 +37,7 @@ import io.spine.core.CommandContext;
 @Internal
 public class GetTargetIdFromCommand<I, M extends Message>
         extends GetIdByFieldIndex<I, M, CommandContext>
-        implements IdCommandFunction<I, M> {
+        implements AssignmentFunction<I, M> {
 
     private static final long serialVersionUID = 0L;
     private static final int ID_FIELD_INDEX = 0;

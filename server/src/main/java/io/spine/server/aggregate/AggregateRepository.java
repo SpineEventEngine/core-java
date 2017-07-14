@@ -35,9 +35,9 @@ import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.entity.CompositeEventDispatchFunction;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.Repository;
+import io.spine.server.entity.idfunc.AssignmentFunction;
 import io.spine.server.entity.idfunc.EventDispatchFunction;
 import io.spine.server.entity.idfunc.GetTargetIdFromCommand;
-import io.spine.server.entity.idfunc.IdCommandFunction;
 import io.spine.server.entity.idfunc.Producers;
 import io.spine.server.event.DelegatingEventDispatcher;
 import io.spine.server.event.EventBus;
@@ -97,7 +97,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     private Set<CommandClass> commandClasses;
 
     /** The function for getting aggregate ID from a command. */
-    private final IdCommandFunction<I, Message> handlerFn =
+    private final AssignmentFunction<I, Message> handlerFn =
             GetTargetIdFromCommand.newInstance();
 
     /** The set of event classes to which aggregates {@linkplain React react}. */
@@ -207,7 +207,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      *
      * @return default implementation of {@code IdCommandFunction}
      */
-    protected IdCommandFunction<I, Message> getHandlerFunction() {
+    protected AssignmentFunction<I, Message> getHandlerFunction() {
         return handlerFn;
     }
 
