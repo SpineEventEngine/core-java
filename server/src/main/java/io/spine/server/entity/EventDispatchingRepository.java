@@ -49,7 +49,7 @@ public abstract class EventDispatchingRepository<I,
     /**
      * Creates new repository instance.
      *
-     * @param defaultFunction the default function for getting an target entity IDs
+     * @param defaultFunction the default function for getting target entity IDs
      */
     protected EventDispatchingRepository(EventDispatchFunction<I, Message> defaultFunction) {
         super();
@@ -78,7 +78,7 @@ public abstract class EventDispatchingRepository<I,
     }
 
     /**
-     * Adds {@code IdSetFunction} for the repository.
+     * Adds {@link EventDispatchFunction} for the repository.
      *
      * <p>Typical usage for this method would be in a constructor of a {@code ProjectionRepository}
      * (derived from this class) to provide mapping between events to projection identifiers.
@@ -103,7 +103,7 @@ public abstract class EventDispatchingRepository<I,
     }
 
     /**
-     * Removes {@code IdSetFunction} from the repository.
+     * Removes {@link EventDispatchFunction} from the repository.
      *
      * @param eventClass the class of the event message
      * @param <M>        the type of the event message handled by the function we want to remove
@@ -113,7 +113,7 @@ public abstract class EventDispatchingRepository<I,
     }
 
     /**
-     * Obtains the targets function for the passed event message class.
+     * Obtains a {@link EventDispatchFunction} for the passed event message class.
      */
     public <M extends Message>
     Optional<EventDispatchFunction<I, M>> getDispatchFunction(Class<M> eventClass) {

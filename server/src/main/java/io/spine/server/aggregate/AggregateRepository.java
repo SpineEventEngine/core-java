@@ -56,6 +56,7 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkArgument;
 import static io.spine.server.entity.AbstractEntity.createEntity;
 import static io.spine.server.entity.AbstractEntity.getConstructor;
+import static io.spine.server.entity.CompositeEventDispatchFunction.withDefault;
 import static io.spine.server.entity.EntityWithLifecycle.Predicates.isEntityVisible;
 
 /**
@@ -80,6 +81,7 @@ import static io.spine.server.entity.EntityWithLifecycle.Predicates.isEntityVisi
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
+@SuppressWarnings("OverlyCoupledClass")
 public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
                 extends Repository<I, A>
                 implements CommandDispatcher, EventDispatcherDelegate {
@@ -106,7 +108,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     private Set<EventClass> reactedEventClasses;
 
     private final CompositeEventDispatchFunction<I> reactorFn =
-            CompositeEventDispatchFunction.withDefault(Producers.<I>fromContext());
+            withDefault(Producers.<I>fromContext());
 
     /**
      * Creates a new instance.
@@ -400,19 +402,19 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      *
      * <p>{@link AggregateStateRecord} is considered valid when one of the following is true:
      * <ul>
-     *     <li>{@linkplain AggregateStateRecord#getSnapshot() snapshot} is not default;
-     *     <li>{@linkplain AggregateStateRecord#getEventList() event list} is not empty.
+     * <li>{@linkplain AggregateStateRecord#getSnapshot() snapshot} is not default;
+     * <li>{@linkplain AggregateStateRecord#getEventList() event list} is not empty.
      * </ul>
      *
-     * @param aggregateStateRecord the record to check
+     * @param record the record to check
      * @throws IllegalStateException if the {@link AggregateStateRecord} is not valid
      */
-    private static void checkAggregateStateRecord(AggregateStateRecord aggregateStateRecord) {
-        final boolean snapshotIsNotSet =
-                aggregateStateRecord.getSnapshot().equals(Snapshot.getDefaultInstance());
-
-        if (snapshotIsNotSet && aggregateStateRecord.getEventList()
-                                                    .isEmpty()) {
+    private static void checkAggregateStateRecord(AggregateStateRecord record)
+            throws IllegalStateException {
+        final boolean snapshotIsNotSet = record.getSnapshot()
+                                               .equals(Snapshot.getDefaultInstance());
+        if (snapshotIsNotSet && record.getEventList()
+                                      .isEmpty()) {
             throw new IllegalStateException("AggregateStateRecord instance should have either "
                                                     + "snapshot or non-empty event list.");
         }
