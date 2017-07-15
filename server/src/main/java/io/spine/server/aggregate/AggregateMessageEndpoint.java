@@ -43,26 +43,33 @@ abstract class AggregateMessageEndpoint<I,
     private final AggregateRepository<I, A> repository;
     private final E envelope;
 
-    protected AggregateMessageEndpoint(AggregateRepository<I, A> repository, E envelope) {
+    AggregateMessageEndpoint(AggregateRepository<I, A> repository, E envelope) {
         this.repository = repository;
         this.envelope = envelope;
     }
 
-    protected abstract TenantAwareOperation createOperation();
+    /**
+     * Creates a tenant-aware operation based on the message this endpoint processes.
+     */
+    abstract TenantAwareOperation createOperation();
 
     /**
      * {@linkplain #getTargets() Selects} one or more message targets and {@linkplain #dispatchTo(I)
      * dispatches} the message to them.
      */
-    protected void dispatch() {
+    void dispatch() {
         final Set<I> targets = getTargets();
         for (I target : targets) {
             dispatchTo(target);
         }
     }
 
-    protected void dispatchTo(I aggregateId) {
-        final E envelope = envelope();
+    /**
+     * Dispatched the message to the aggregate with the passed ID.
+     *
+     * @param aggregateId the ID of the aggreagate to which dispatch the message
+     */
+    private void dispatchTo(I aggregateId) {
         final A aggregate = repository().loadOrCreate(aggregateId);
 
         final LifecycleFlags statusBefore = aggregate.getLifecycleFlags();
@@ -84,30 +91,42 @@ abstract class AggregateMessageEndpoint<I,
         store(aggregate);
     }
 
-    protected abstract List<? extends Message> dispatchEnvelope(A aggregate, E envelope);
+    abstract List<? extends Message> dispatchEnvelope(A aggregate, E envelope);
 
-    protected void store(A aggregate) {
+    /**
+     * Stores the aggregate if it has uncommitted events.
+     *
+     * @param aggregate the aggregate to store
+     */
+    private void store(A aggregate) {
         final List<Event> events = aggregate.getUncommittedEvents();
         if (!events.isEmpty()) {
-            repository.store(aggregate);
-            repository.updateStand(envelope.getActorContext()
-                                           .getTenantId(), aggregate);
-            repository.postEvents(events);
+            repository.onModifiedAggregate(envelope.getActorContext()
+                                                   .getTenantId(), aggregate);
+        } else {
+            onEmptyResult(aggregate, envelope);
         }
-        //TODO:2017-07-11:alexander.yevsyukov: For command handling complain if the list of events is empty.
-        // An aggregate cannot silently accept commands without either producing events or rejecting commands.
     }
+
+    /**
+     * Allows derived classes to handle empty list of uncommitted events returned by the aggregate
+     * in response to the message.
+     */
+    abstract void onEmptyResult(A aggregate, E envelope);
 
     /**
      * Obtains IDs of aggregates to which the endpoint delivers the message.
      */
-    protected abstract Set<I> getTargets();
+    abstract Set<I> getTargets();
 
-    protected E envelope() {
+    /**
+     * Obtains the envelope of the message processed by this endpoint.
+     */
+    E envelope() {
         return envelope;
     }
 
-    protected AggregateRepository<I, A> repository() {
+    AggregateRepository<I, A> repository() {
         return repository;
     }
 

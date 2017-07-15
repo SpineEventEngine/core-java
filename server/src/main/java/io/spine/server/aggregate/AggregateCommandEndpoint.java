@@ -26,9 +26,12 @@ import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.tenant.CommandOperation;
 import io.spine.server.tenant.TenantAwareOperation;
+import io.spine.string.Stringifiers;
 
 import java.util.List;
 import java.util.Set;
+
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * Dispatches commands to aggregates of the associated {@code AggregateRepository}.
@@ -57,12 +60,29 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
-    protected List<? extends Message> dispatchEnvelope(A aggregate, CommandEnvelope envelope) {
+    List<? extends Message> dispatchEnvelope(A aggregate, CommandEnvelope envelope) {
         return aggregate.dispatchCommand(envelope);
     }
 
+    /**
+     * Throws {@link IllegalStateException} with the message containing details of the aggregate and
+     * the command in response to which the aggregate generated empty set of event messages.
+     * @throws IllegalStateException always
+     */
     @Override
-    protected TenantAwareOperation createOperation() {
+    void onEmptyResult(A aggregate, CommandEnvelope envelope) throws IllegalStateException {
+        throw newIllegalStateException(
+                "The aggregate (class: %s, id: %s) produced empty response for " +
+                        "command (class: %s, id: %s).",
+                aggregate.getClass()
+                         .getName(),
+                Stringifiers.toString(aggregate.getId()),
+                envelope.getMessageClass(),
+                Stringifiers.toString(envelope.getId()));
+    }
+
+    @Override
+    TenantAwareOperation createOperation() {
         return new Operation(envelope().getCommand());
     }
 
@@ -71,7 +91,7 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
      * handling the command.
      */
     @Override
-    protected Set<I> getTargets() {
+    Set<I> getTargets() {
         final CommandEnvelope envelope = envelope();
         return ImmutableSet.of(repository().getCommandTarget(envelope.getMessage(),
                                                              envelope.getCommandContext()));

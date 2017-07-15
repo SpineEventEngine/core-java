@@ -50,6 +50,7 @@ import io.spine.server.storage.StorageFactory;
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
+import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -343,6 +344,19 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         if (aggregate.lifecycleFlagsChanged()) {
             storage.writeLifecycleFlags(aggregate.getId(), aggregate.getLifecycleFlags());
         }
+    }
+
+    /**
+     * Invoked by an endpoint after a message was dispatched to the aggregate.
+     *
+     * @param tenantId  the tenant associated with the processed message
+     * @param aggregate the updated aggregate
+     */
+    void onModifiedAggregate(TenantId tenantId, A aggregate) {
+        final List<Event> events = aggregate.getUncommittedEvents();
+        store(aggregate);
+        updateStand(tenantId, aggregate);
+        postEvents(events);
     }
 
     /**

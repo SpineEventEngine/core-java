@@ -41,7 +41,7 @@ import java.util.Set;
  * @author Alexander Yevsyukov
  * @see React
  */
-public class AggregateEventEndpoint<I, A extends Aggregate<I, ?, ?>>
+class AggregateEventEndpoint<I, A extends Aggregate<I, ?, ?>>
         extends AggregateMessageEndpoint<I, A, EventEnvelope>{
 
     private AggregateEventEndpoint(AggregateRepository<I, A> repo, EventEnvelope envelope) {
@@ -50,28 +50,36 @@ public class AggregateEventEndpoint<I, A extends Aggregate<I, ?, ?>>
 
     static <I, A extends Aggregate<I, ?, ?>>
     void handle(AggregateRepository<I, A> repository, EventEnvelope envelope) {
-        final AggregateEventEndpoint<I, A> eventEndpoint =
+        final AggregateEventEndpoint<I, A> endpoint =
                 new AggregateEventEndpoint<>(repository, envelope);
 
-        final TenantAwareOperation operation = eventEndpoint.createOperation();
+        final TenantAwareOperation operation = endpoint.createOperation();
         operation.execute();
     }
 
     @Override
-    protected TenantAwareOperation createOperation() {
+    TenantAwareOperation createOperation() {
         return new Operation(envelope().getOuterObject());
     }
 
     @Override
-    protected List<? extends Message> dispatchEnvelope(A aggregate, EventEnvelope envelope) {
+    List<? extends Message> dispatchEnvelope(A aggregate, EventEnvelope envelope) {
         return aggregate.dispatchEvent(envelope);
+    }
+
+    /**
+     * Does nothing since an aggregate is not required to produce events in reaction to an event.
+     */
+    @Override
+    void onEmptyResult(A aggregate, EventEnvelope envelope) {
+        // Do nothing.
     }
 
     /**
      * Obtains IDs of aggregates that react on the event processed by this endpoint.
      */
     @Override
-    protected Set<I> getTargets() {
+    Set<I> getTargets() {
         final EventEnvelope env = envelope();
         return repository().getEventTargets(env.getMessage(), env.getEventContext());
     }
