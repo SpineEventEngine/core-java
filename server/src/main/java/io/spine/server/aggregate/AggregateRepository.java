@@ -316,7 +316,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * @param aggregate an instance to store
      */
     @Override
-    public void store(A aggregate) {
+    protected void store(A aggregate) {
         final I id = aggregate.getId();
         final int snapshotTrigger = getSnapshotTrigger();
         final AggregateStorage<I> storage = aggregateStorage();
