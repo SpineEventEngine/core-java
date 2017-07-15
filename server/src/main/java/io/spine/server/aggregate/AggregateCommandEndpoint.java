@@ -66,11 +66,15 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
         return new Operation(envelope().getCommand());
     }
 
+    /**
+     * Returns immutable set containing ID of the aggregate that is responsible for
+     * handling the command.
+     */
     @Override
     protected Set<I> getTargets() {
         final CommandEnvelope envelope = envelope();
-        return ImmutableSet.of(repository().getAggregateId(envelope.getMessage(),
-                                                           envelope.getCommandContext()));
+        return ImmutableSet.of(repository().getCommandTarget(envelope.getMessage(),
+                                                             envelope.getCommandContext()));
     }
 
     /**

@@ -51,7 +51,8 @@ abstract class AggregateMessageEndpoint<I,
     protected abstract TenantAwareOperation createOperation();
 
     /**
-     * Dispatches the command to an aggregate.
+     * {@linkplain #getTargets() Selects} one or more message targets and {@linkplain #dispatchTo(I)
+     * dispatches} the message to them.
      */
     protected void dispatch() {
         final Set<I> targets = getTargets();
@@ -74,7 +75,7 @@ abstract class AggregateMessageEndpoint<I,
 
         tx.commit();
 
-        // Update status only if the command was handled successfully.
+        // Update status only if the message was handled successfully.
         final LifecycleFlags statusAfter = aggregate.getLifecycleFlags();
         if (statusAfter != null && !statusBefore.equals(statusAfter)) {
             storage().writeLifecycleFlags(aggregateId, statusAfter);
@@ -97,6 +98,9 @@ abstract class AggregateMessageEndpoint<I,
         // An aggregate cannot silently accept commands without either producing events or rejecting commands.
     }
 
+    /**
+     * Obtains IDs of aggregates to which the endpoint delivers the message.
+     */
     protected abstract Set<I> getTargets();
 
     protected E envelope() {

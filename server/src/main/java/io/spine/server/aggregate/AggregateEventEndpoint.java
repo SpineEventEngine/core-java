@@ -67,10 +67,13 @@ public class AggregateEventEndpoint<I, A extends Aggregate<I, ?, ?>>
         return aggregate.dispatchEvent(envelope);
     }
 
+    /**
+     * Obtains IDs of aggregates that react on the event processed by this endpoint.
+     */
     @Override
     protected Set<I> getTargets() {
         final EventEnvelope env = envelope();
-        return repository().getAggregateIds(env.getMessage(), env.getEventContext());
+        return repository().getEventTargets(env.getMessage(), env.getEventContext());
     }
 
     /**

@@ -215,12 +215,12 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         return reactorFn;
     }
 
-    I getAggregateId(Message commandMessage, CommandContext commandContext) {
+    I getCommandTarget(Message commandMessage, CommandContext commandContext) {
         final I id = getHandlerFunction().apply(commandMessage, commandContext);
         return id;
     }
 
-    Set<I> getAggregateIds(Message eventMessage, EventContext eventContext) {
+    Set<I> getEventTargets(Message eventMessage, EventContext eventContext) {
         final Set<I> ids = getReactorsFunction().apply(eventMessage, eventContext);
         return ids;
     }
