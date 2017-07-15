@@ -41,7 +41,6 @@ import io.spine.server.entity.idfunc.EventDispatchFunction;
 import io.spine.server.entity.idfunc.Producers;
 import io.spine.server.event.DelegatingEventDispatcher;
 import io.spine.server.event.EventBus;
-import io.spine.server.event.EventDispatcher;
 import io.spine.server.event.EventDispatcherDelegate;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.Storage;
@@ -245,15 +244,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     @Override
     public void dispatchEvent(EventEnvelope envelope) {
-        checkEventClass(envelope.getMessageClass());
         AggregateEventEndpoint.handle(this, envelope);
-    }
-
-    private void checkEventClass(EventClass eventClass) throws IllegalArgumentException {
-        final Set<EventClass> classes = getEventClasses();
-        if (!classes.contains(eventClass)) {
-            throw EventDispatcher.Error.unexpectedEventEncountered(eventClass);
-        }
     }
 
     /**
