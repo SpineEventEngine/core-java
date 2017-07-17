@@ -35,7 +35,7 @@ import io.spine.core.EventContext;
  * @param <M> the type of event messages to get IDs from
  * @author Alexander Litus
  */
-class GetEventProducer<I, M extends Message> extends GetIdByFieldIndex<I, M, EventContext> {
+class GetEventProducer<I, M extends Message> extends FieldAtIndex<I, M, EventContext> {
 
     private static final long serialVersionUID = 0L;
 

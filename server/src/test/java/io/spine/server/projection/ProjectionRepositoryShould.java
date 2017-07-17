@@ -42,7 +42,7 @@ import io.spine.server.command.TestEventFactory;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.RecordBasedRepositoryShould;
 import io.spine.server.entity.given.Given;
-import io.spine.server.entity.idfunc.EventDispatchFunction;
+import io.spine.server.entity.idfunc.EventRoute;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.NoOpTaskNamesRepository;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.TestProjection;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.TestProjectionRepository;
@@ -100,10 +100,10 @@ public class ProjectionRepositoryShould
     }
 
     /**
-     * {@link EventDispatchFunction} used for testing add/get/remove of functions.
+     * {@link EventRoute} used for testing add/get/remove of functions.
      */
-    private static final EventDispatchFunction<ProjectId, ProjectCreated> creteProjectTargets =
-            new EventDispatchFunction<ProjectId, ProjectCreated>() {
+    private static final EventRoute<ProjectId, ProjectCreated> creteProjectTargets =
+            new EventRoute<ProjectId, ProjectCreated>() {
                 private static final long serialVersionUID = 0L;
 
                 @Override
@@ -257,8 +257,8 @@ public class ProjectionRepositoryShould
     @Test
     @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass") // OK for this test.
     public void use_id_set_function() {
-        final EventDispatchFunction<ProjectId, ProjectCreated> delegateFn =
-                new EventDispatchFunction<ProjectId, ProjectCreated>() {
+        final EventRoute<ProjectId, ProjectCreated> delegateFn =
+                new EventRoute<ProjectId, ProjectCreated>() {
                     private static final long serialVersionUID = 0L;
                     @Override
                     public Set<ProjectId> apply(ProjectCreated message, EventContext context) {
@@ -266,7 +266,7 @@ public class ProjectionRepositoryShould
                     }
                 };
 
-        final EventDispatchFunction<ProjectId, ProjectCreated> idSetFunction = spy(delegateFn);
+        final EventRoute<ProjectId, ProjectCreated> idSetFunction = spy(delegateFn);
         repository().addDispatchFunction(ProjectCreated.class, idSetFunction);
 
         final Event event = createEvent(tenantId(), projectCreated(), PRODUCER_ID, getCurrentTime());
@@ -281,7 +281,7 @@ public class ProjectionRepositoryShould
     public void obtain_id_set_function_after_put() {
         repository().addDispatchFunction(ProjectCreated.class, creteProjectTargets);
 
-        final Optional<EventDispatchFunction<ProjectId, ProjectCreated>> func =
+        final Optional<EventRoute<ProjectId, ProjectCreated>> func =
                 repository().getDispatchFunction(ProjectCreated.class);
 
         assertTrue(func.isPresent());
@@ -293,7 +293,7 @@ public class ProjectionRepositoryShould
         repository().addDispatchFunction(ProjectCreated.class, creteProjectTargets);
 
         repository().removeDispatchFunction(ProjectCreated.class);
-        final Optional<EventDispatchFunction<ProjectId, ProjectCreated>> out =
+        final Optional<EventRoute<ProjectId, ProjectCreated>> out =
                 repository().getDispatchFunction(ProjectCreated.class);
 
         assertFalse(out.isPresent());
@@ -329,7 +329,7 @@ public class ProjectionRepositoryShould
      */
     @Test
     public void expose_event_targets_function() {
-        final EventDispatchFunction<ProjectId, Message> fn = repository().getDispatchFunction();
+        final EventRoute<ProjectId, Message> fn = repository().getDispatchFunction();
         assertNotNull(fn);
     }
 

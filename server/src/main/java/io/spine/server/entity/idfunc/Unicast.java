@@ -22,24 +22,11 @@ package io.spine.server.entity.idfunc;
 
 import com.google.protobuf.Message;
 
-import java.io.Serializable;
-
 /**
- * Obtains an entity ID based on a message and its context.
+ * A route for a message to be delivered ton one entity.
  *
- * @param <I> the type of entity IDs
- * @param <M> the type of messages to get IDs from
- * @param <C> the type of the message context
- * @see io.spine.server.entity.Entity Entity
+ * @param <I> the type of entity ID
+ * @author Alexander Yevsyukov
  */
-interface IdFunction<I, M extends Message, C extends Message> extends Serializable {
-
-    /**
-     * Obtains an entity ID based on the passed message and its context.
-     *
-     * @param message a message from which to get the ID
-     * @param context a context of the message
-     * @return an entity ID
-     */
-    I apply(M message, C context);
+public interface Unicast<I, M extends Message, C extends Message> extends Route<M, C, I> {
 }

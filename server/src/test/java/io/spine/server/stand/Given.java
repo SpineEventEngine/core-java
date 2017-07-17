@@ -37,7 +37,7 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
-import io.spine.server.entity.idfunc.EventDispatchFunction;
+import io.spine.server.entity.idfunc.EventRoute;
 import io.spine.server.event.EventFactory;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
@@ -107,8 +107,8 @@ class Given {
     static class StandTestProjectionRepository
             extends ProjectionRepository<ProjectId, StandTestProjection, Project> {
 
-        private static final EventDispatchFunction<ProjectId, ProjectCreated> EVENT_TARGETS_FN =
-                new EventDispatchFunction<ProjectId, ProjectCreated>() {
+        private static final EventRoute<ProjectId, ProjectCreated> EVENT_TARGETS_FN =
+                new EventRoute<ProjectId, ProjectCreated>() {
             private static final long serialVersionUID = 0L;
 
             @Override

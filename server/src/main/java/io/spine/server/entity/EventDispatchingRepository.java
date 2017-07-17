@@ -24,7 +24,7 @@ import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
-import io.spine.server.entity.idfunc.EventDispatchFunction;
+import io.spine.server.entity.idfunc.EventRoute;
 import io.spine.server.tenant.EventOperation;
 
 import javax.annotation.CheckReturnValue;
@@ -44,23 +44,23 @@ public abstract class EventDispatchingRepository<I,
         extends DefaultRecordBasedRepository<I, E, S>
         implements EntityEventDispatcher<I> {
 
-    private final CompositeEventDispatchFunction<I> dispatchFunctions;
+    private final EventRouting<I> dispatchFunctions;
 
     /**
      * Creates new repository instance.
      *
      * @param defaultFunction the default function for getting target entity IDs
      */
-    protected EventDispatchingRepository(EventDispatchFunction<I, Message> defaultFunction) {
+    protected EventDispatchingRepository(EventRoute<I, Message> defaultFunction) {
         super();
-        this.dispatchFunctions = CompositeEventDispatchFunction.withDefault(defaultFunction);
+        this.dispatchFunctions = EventRouting.withDefault(defaultFunction);
     }
 
     /**
-     * Obtains the {@link EventDispatchFunction} used by the repository for calculating identifiers
+     * Obtains the {@link EventRoute} used by the repository for calculating identifiers
      * of event targets.
      */
-    protected EventDispatchFunction<I, Message> getDispatchFunction() {
+    protected EventRoute<I, Message> getDispatchFunction() {
         return dispatchFunctions;
     }
 
@@ -78,7 +78,7 @@ public abstract class EventDispatchingRepository<I,
     }
 
     /**
-     * Adds {@link EventDispatchFunction} for the repository.
+     * Adds {@link EventRoute} for the repository.
      *
      * <p>Typical usage for this method would be in a constructor of a {@code ProjectionRepository}
      * (derived from this class) to provide mapping between events to projection identifiers.
@@ -98,12 +98,12 @@ public abstract class EventDispatchingRepository<I,
      * @param <M>  the type of the event message handled by the function
      */
     public <M extends Message>
-    void addDispatchFunction(Class<M> eventClass, EventDispatchFunction<I, M> func) {
+    void addDispatchFunction(Class<M> eventClass, EventRoute<I, M> func) {
         dispatchFunctions.put(eventClass, func);
     }
 
     /**
-     * Removes {@link EventDispatchFunction} from the repository.
+     * Removes {@link EventRoute} from the repository.
      *
      * @param eventClass the class of the event message
      * @param <M>        the type of the event message handled by the function we want to remove
@@ -113,10 +113,10 @@ public abstract class EventDispatchingRepository<I,
     }
 
     /**
-     * Obtains a {@link EventDispatchFunction} for the passed event message class.
+     * Obtains a {@link EventRoute} for the passed event message class.
      */
     public <M extends Message>
-    Optional<EventDispatchFunction<I, M>> getDispatchFunction(Class<M> eventClass) {
+    Optional<EventRoute<I, M>> getDispatchFunction(Class<M> eventClass) {
         return dispatchFunctions.get(eventClass);
     }
 

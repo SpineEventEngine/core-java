@@ -21,28 +21,13 @@
 package io.spine.server.entity.idfunc;
 
 import com.google.protobuf.Message;
-import io.spine.core.EventContext;
-
-import java.io.Serializable;
-import java.util.Set;
+import io.spine.core.CommandContext;
 
 /**
- * Obtains a set of entity IDs based on an event/command message and its context.
+ * Obtains an ID of an entity which handles the command.
  *
- * @param <I> the type of entity IDs
- * @param <M> the type of messages to get IDs from
- * @param <C> the type of message context
+ * @param <I> the type of the entity ID
  * @author Alexander Yevsyukov
  */
-public interface DispatchFunction<I, M extends Message, C extends Message> extends Serializable {
-
-    /**
-     * Obtains a set of entity IDs based on the passed event or command message and its context.
-     *
-     * @param message an event or a command message
-     * @param context either {@link EventContext EventContext} or
-     *                  {@link io.spine.core.CommandContext CommandContext} instance
-     * @return a set of entity identifiers
-     */
-    Set<I> apply(M message, C context);
+public interface CommandRoute<I, M extends Message> extends Unicast<I, M, CommandContext> {
 }

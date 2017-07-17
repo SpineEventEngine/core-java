@@ -22,7 +22,6 @@ package io.spine.server.entity.idfunc;
 
 import com.google.protobuf.Message;
 import io.spine.Identifier;
-import io.spine.core.EventContext;
 import io.spine.protobuf.MessageField;
 
 /**
@@ -32,11 +31,9 @@ import io.spine.protobuf.MessageField;
  *
  * @param <I> the type of entity IDs
  * @param <M> the type of messages to get IDs from
- * @param <C> either {@link EventContext EventContext} or
- *            {@link io.spine.core.CommandContext CommandContext} type
+ * @param <C> the type of the message context
  */
-abstract class GetIdByFieldIndex<I, M extends Message, C extends Message>
-         implements IdFunction<I, M, C> {
+abstract class FieldAtIndex<I, M extends Message, C extends Message> implements Unicast<I, M, C> {
 
     private static final long serialVersionUID = 0L;
     private final EntityIdField idField;
@@ -46,7 +43,7 @@ abstract class GetIdByFieldIndex<I, M extends Message, C extends Message>
      *
      * @param idIndex a zero-based index of an ID field in this type of messages
      */
-    GetIdByFieldIndex(int idIndex) {
+    FieldAtIndex(int idIndex) {
         this.idField = new EntityIdField(idIndex);
     }
 

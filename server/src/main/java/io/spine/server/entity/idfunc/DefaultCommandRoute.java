@@ -35,20 +35,19 @@ import io.spine.core.CommandContext;
  * @author Alexander Litus
  */
 @Internal
-public class DefaultAssignmentFunction<I, M extends Message>
-        extends GetIdByFieldIndex<I, M, CommandContext>
-        implements AssignmentFunction<I, M> {
+public class DefaultCommandRoute<I, M extends Message> extends FieldAtIndex<I, M, CommandContext>
+        implements CommandRoute<I, M> {
 
     private static final long serialVersionUID = 0L;
     private static final int ID_FIELD_INDEX = 0;
 
-    private DefaultAssignmentFunction() {
+    private DefaultCommandRoute() {
         super(ID_FIELD_INDEX);
     }
 
     /** Creates a new instance. */
-    public static <I, M extends Message> DefaultAssignmentFunction<I, M> newInstance() {
-        return new DefaultAssignmentFunction<>();
+    public static <I, M extends Message> DefaultCommandRoute<I, M> newInstance() {
+        return new DefaultCommandRoute<>();
     }
 
     /**
@@ -56,12 +55,12 @@ public class DefaultAssignmentFunction<I, M extends Message>
      *
      * @param commandMessage a message to get ID from
      * @return an {@link Optional} of the ID or {@code Optional.absent()}
-     * if {@link DefaultAssignmentFunction#apply(Message, Message)} throws an exception
+     * if {@link DefaultCommandRoute#apply(Message, Message)} throws an exception
      * (in the case if the command is not for an entity)
      */
     public static <I> Optional<I> asOptional(Message commandMessage) {
         try {
-            final DefaultAssignmentFunction<I, Message> function = newInstance();
+            final DefaultCommandRoute<I, Message> function = newInstance();
             final I id = function.apply(commandMessage, CommandContext.getDefaultInstance());
             return Optional.of(id);
         } catch (MissingEntityIdException | ClassCastException ignored) {

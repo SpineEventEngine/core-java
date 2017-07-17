@@ -34,7 +34,7 @@ import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.commandbus.CommandDispatcherDelegate;
 import io.spine.server.commandbus.DelegatingCommandDispatcher;
 import io.spine.server.entity.EventDispatchingRepository;
-import io.spine.server.entity.idfunc.DefaultAssignmentFunction;
+import io.spine.server.entity.idfunc.DefaultCommandRoute;
 import io.spine.server.entity.idfunc.Producers;
 import io.spine.server.event.EventBus;
 
@@ -59,8 +59,8 @@ public abstract class ProcessManagerRepository<I,
                 extends EventDispatchingRepository<I, P, S>
                 implements CommandDispatcherDelegate {
 
-    private final DefaultAssignmentFunction<I, Message> handlerFn =
-            DefaultAssignmentFunction.newInstance();
+    private final DefaultCommandRoute<I, Message> handlerFn =
+            DefaultCommandRoute.newInstance();
 
     @Nullable
     private Set<CommandClass> commandClasses;

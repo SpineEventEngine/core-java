@@ -31,7 +31,7 @@ import java.util.Set;
 import static io.spine.server.entity.idfunc.GetEventProducer.fromFieldIndex;
 
 /**
- * Internal utility class that provides default {@link EventDispatchFunction}s
+ * Internal utility class that provides default {@link EventRoute}s
  * for obtaining a producer from an event.
  *
  * @author Alexander Yevsyukov
@@ -50,7 +50,7 @@ public class Producers {
      * @param <I> the type of the IDs managed by the repository
      * @return new function instance
      */
-    public static <I> EventDispatchFunction<I, Message> fromContext() {
+    public static <I> EventRoute<I, Message> fromContext() {
         return new ProducerFromContext<>();
     }
 
@@ -61,7 +61,7 @@ public class Producers {
      * @param <I> the type of the IDs managed by the repository
      * @return new function instance
      */
-    public static <I> EventDispatchFunction<I, Message> fromFirstMessageField() {
+    public static <I> EventRoute<I, Message> fromFirstMessageField() {
         return new ProducerFromFirstEventMessageField<>();
     }
 
@@ -70,7 +70,7 @@ public class Producers {
      *
      * @param <I> the type of entity IDs
      */
-    private static class ProducerFromContext<I> implements EventDispatchFunction<I, Message> {
+    private static class ProducerFromContext<I> implements EventRoute<I, Message> {
 
         private static final long serialVersionUID = 0L;
 
@@ -92,7 +92,7 @@ public class Producers {
      * @param <I> the type of entity IDs
      */
     private static class ProducerFromFirstEventMessageField<I>
-            implements EventDispatchFunction<I, Message> {
+            implements EventRoute<I, Message> {
 
         private static final long serialVersionUID = 0L;
 

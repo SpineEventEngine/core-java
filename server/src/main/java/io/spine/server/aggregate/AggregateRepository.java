@@ -32,12 +32,11 @@ import io.spine.core.EventEnvelope;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandDispatcher;
-import io.spine.server.entity.CompositeEventDispatchFunction;
+import io.spine.server.entity.EventRouting;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.Repository;
-import io.spine.server.entity.idfunc.AssignmentFunction;
-import io.spine.server.entity.idfunc.DefaultAssignmentFunction;
-import io.spine.server.entity.idfunc.EventDispatchFunction;
+import io.spine.server.entity.idfunc.CommandRoute;
+import io.spine.server.entity.idfunc.DefaultCommandRoute;
 import io.spine.server.entity.idfunc.Producers;
 import io.spine.server.event.DelegatingEventDispatcher;
 import io.spine.server.event.EventBus;
@@ -55,8 +54,8 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkArgument;
 import static io.spine.server.entity.AbstractEntity.createEntity;
 import static io.spine.server.entity.AbstractEntity.getConstructor;
-import static io.spine.server.entity.CompositeEventDispatchFunction.withDefault;
 import static io.spine.server.entity.EntityWithLifecycle.Predicates.isEntityVisible;
+import static io.spine.server.entity.EventRouting.withDefault;
 
 /**
  * The repository which manages instances of {@code Aggregate}s.
@@ -99,15 +98,13 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     private Set<CommandClass> commandClasses;
 
     /** The function for getting aggregate ID from a command. */
-    private final AssignmentFunction<I, Message> handlerFn =
-            DefaultAssignmentFunction.newInstance();
+    private final CommandRoute<I,Message> commandRoute = DefaultCommandRoute.newInstance();
 
     /** The set of event classes to which aggregates {@linkplain React react}. */
     @Nullable
     private Set<EventClass> reactedEventClasses;
 
-    private final CompositeEventDispatchFunction<I> reactorFn =
-            withDefault(Producers.<I>fromContext());
+    private final EventRouting<I> eventRouting = withDefault(Producers.<I>fromContext());
 
     /**
      * Creates a new instance.
@@ -209,21 +206,21 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      *
      * @return default implementation of {@code IdCommandFunction}
      */
-    protected AssignmentFunction<I, Message> getHandlerFunction() {
-        return handlerFn;
+    protected CommandRoute<I,Message> getCommandRoute() {
+        return commandRoute;
     }
 
-    protected EventDispatchFunction<I, Message> getReactorsFunction() {
-        return reactorFn;
+    protected EventRouting<I> getEventRouting() {
+        return eventRouting;
     }
 
     I getCommandTarget(Message commandMessage, CommandContext commandContext) {
-        final I id = getHandlerFunction().apply(commandMessage, commandContext);
+        final I id = getCommandRoute().apply(commandMessage, commandContext);
         return id;
     }
 
     Set<I> getEventTargets(Message eventMessage, EventContext eventContext) {
-        final Set<I> ids = getReactorsFunction().apply(eventMessage, eventContext);
+        final Set<I> ids = getEventRouting().apply(eventMessage, eventContext);
         return ids;
     }
 
