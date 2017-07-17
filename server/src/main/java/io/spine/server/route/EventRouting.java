@@ -66,36 +66,6 @@ public final class EventRouting<I> implements EventRoute<I, Message> {
     }
 
     /**
-     * Removes a function for the passed event class.
-     */
-    public <E extends Message> void remove(Class<E> eventClass) {
-        final EventClass clazz = EventClass.of(eventClass);
-        map.remove(clazz);
-    }
-
-    /**
-     * Finds a function for the passed event and applies it.
-     *
-     * <p>If there is no function for the passed event applies the default function.
-     *
-     * @param event   the event message
-     * @param context the event context
-     * @return the set of entity IDs
-     */
-    @Override
-    public Set<I> apply(Message event, EventContext context) {
-        final EventClass eventClass = EventClass.of(event);
-        final EventRoute<I, Message> func = map.get(eventClass);
-        if (func != null) {
-            final Set<I> result = func.apply(event, context);
-            return result;
-        }
-
-        final Set<I> result = defaultRoute.apply(event, context);
-        return result;
-    }
-
-    /**
      * Sets a custom route for the passed event class.
      *
      * <p>Typical usage for this method would be in a constructor of a {@code ProjectionRepository}
@@ -140,6 +110,36 @@ public final class EventRouting<I> implements EventRoute<I, Message> {
         @SuppressWarnings("unchecked")  // we ensure the type when we put into the map.
         final EventRoute<I, E> result = (EventRoute<I, E>) route;
         return Optional.fromNullable(result);
+    }
+
+    /**
+     * Removes a function for the passed event class.
+     */
+    public <E extends Message> void remove(Class<E> eventClass) {
+        final EventClass clazz = EventClass.of(eventClass);
+        map.remove(clazz);
+    }
+
+    /**
+     * Finds a function for the passed event and applies it.
+     *
+     * <p>If there is no function for the passed event applies the default function.
+     *
+     * @param event   the event message
+     * @param context the event context
+     * @return the set of entity IDs
+     */
+    @Override
+    public Set<I> apply(Message event, EventContext context) {
+        final EventClass eventClass = EventClass.of(event);
+        final EventRoute<I, Message> func = map.get(eventClass);
+        if (func != null) {
+            final Set<I> result = func.apply(event, context);
+            return result;
+        }
+
+        final Set<I> result = defaultRoute.apply(event, context);
+        return result;
     }
 
     //TODO:2017-07-17:alexander.yevsyukov: Add verification of matching filled in routing with event classes exposed by a dispatcher.

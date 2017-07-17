@@ -128,18 +128,6 @@ public class AggregateRepositoryShould {
         assertEquals(expected.getState(), actual.getState());
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void reject_invalid_AggregateStateRecord_instance() {
-        final ProjectId id = Sample.messageOfType(ProjectId.class);
-        final AggregateStorage<ProjectId> storage = givenAggregateStorageMock();
-
-        doReturn(Optional.of(AggregateStateRecord.getDefaultInstance()))
-                .when(storage)
-                .read(id);
-
-        repositorySpy.loadOrCreate(id);
-    }
-
     @Test
     public void restore_aggregate_using_snapshot() {
         final ProjectId id = Sample.messageOfType(ProjectId.class);

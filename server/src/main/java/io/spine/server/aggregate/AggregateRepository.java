@@ -298,7 +298,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
         if (eventsFromStorage.isPresent()) {
             final AggregateStateRecord aggregateStateRecord = eventsFromStorage.get();
-            checkAggregateStateRecord(aggregateStateRecord);
             final AggregateTransaction tx = AggregateTransaction.start(result);
             result.play(aggregateStateRecord);
             tx.commit();
@@ -383,29 +382,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     protected Storage<I, ?> createStorage(StorageFactory factory) {
         final Storage<I, ?> result = factory.createAggregateStorage(getAggregateClass());
         return result;
-    }
-
-    /**
-     * Ensures that the {@link AggregateStateRecord} is valid.
-     *
-     * <p>{@link AggregateStateRecord} is considered valid when one of the following is true:
-     * <ul>
-     * <li>{@linkplain AggregateStateRecord#getSnapshot() snapshot} is not default;
-     * <li>{@linkplain AggregateStateRecord#getEventList() event list} is not empty.
-     * </ul>
-     *
-     * @param record the record to check
-     * @throws IllegalStateException if the {@link AggregateStateRecord} is not valid
-     */
-    private static void checkAggregateStateRecord(AggregateStateRecord record)
-            throws IllegalStateException {
-        final boolean snapshotIsNotSet = record.getSnapshot()
-                                               .equals(Snapshot.getDefaultInstance());
-        if (snapshotIsNotSet && record.getEventList()
-                                      .isEmpty()) {
-            throw new IllegalStateException("AggregateStateRecord instance should have either "
-                                                    + "snapshot or non-empty event list.");
-        }
     }
 
     /** The EventBus to which we post events produced by aggregates. */
