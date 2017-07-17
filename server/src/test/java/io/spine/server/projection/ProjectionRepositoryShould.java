@@ -268,7 +268,8 @@ public class ProjectionRepositoryShould
                 };
 
         final EventRoute<ProjectId, ProjectCreated> route = spy(delegateFn);
-        repository().getRouting().set(ProjectCreated.class, route);
+        repository().routing()
+                    .set(ProjectCreated.class, route);
 
         final Event event = createEvent(tenantId(), projectCreated(), PRODUCER_ID, getCurrentTime());
         repository().dispatch(EventEnvelope.of(event));
@@ -280,11 +281,11 @@ public class ProjectionRepositoryShould
 
     @Test
     public void obtain_custom_route() {
-        repository().getRouting()
+        repository().routing()
                     .set(ProjectCreated.class, creteProjectTargets);
 
         final Optional<EventRoute<ProjectId, ProjectCreated>> route =
-                repository().getRouting()
+                repository().routing()
                             .get(ProjectCreated.class);
 
         assertTrue(route.isPresent());
@@ -293,7 +294,7 @@ public class ProjectionRepositoryShould
 
     @Test
     public void remove_custom_route() {
-        final EventRouting<ProjectId> routing = repository().getRouting();
+        final EventRouting<ProjectId> routing = repository().routing();
         routing.set(ProjectCreated.class, creteProjectTargets);
 
         routing.remove(ProjectCreated.class);

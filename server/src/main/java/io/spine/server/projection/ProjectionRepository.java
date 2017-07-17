@@ -71,13 +71,14 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     }
 
     /**
-     * {@inheritDoc}
+     * Exposes {@linkplain #getRouting() routing} to the package.
      *
-     * <p>Overrides to open the method to the package.
+     * <p>{@link EventDispatchingRepository#getRouting()} is {@code final} to restrict routing
+     * customization only via adding custom entries.
      */
-    @Override
-    protected EventRouting<I> getRouting() {
-        return super.getRouting();
+    @VisibleForTesting
+    EventRouting<I> routing() {
+        return getRouting();
     }
 
     /**

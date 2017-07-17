@@ -57,10 +57,10 @@ public abstract class EventDispatchingRepository<I,
     }
 
     /**
-     * Obtains the {@link EventRoute} used by the repository for calculating identifiers
+     * Obtains the {@link EventRouting} schema used by the repository for calculating identifiers
      * of event targets.
      */
-    protected EventRouting<I> getRouting() {
+    protected final EventRouting<I> getRouting() {
         return routing;
     }
 
@@ -79,8 +79,8 @@ public abstract class EventDispatchingRepository<I,
 
     @Override
     @CheckReturnValue
-    public Set<I> getTargets(EventEnvelope envelope) {
-        return routing.apply(envelope.getMessage(), envelope.getEventContext());
+    public final Set<I> getTargets(EventEnvelope envelope) {
+        return getRouting().apply(envelope.getMessage(), envelope.getEventContext());
     }
 
     /**
