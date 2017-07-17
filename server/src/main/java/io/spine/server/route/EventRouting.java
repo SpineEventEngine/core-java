@@ -33,7 +33,10 @@ import java.util.Set;
  * A routing schema used by an {@link io.spine.server.event.EventDispatcher EventDispatcher} for
  * delivering events.
  *
- * //TODO:2017-07-17:alexander.yevsyukov: Add description of defaultRoute, and slots.
+ * <p>A routing schema consists of a default route and custom routes per event class. When
+ * calculating a set of event targets, {@code EventRouting} would see if there is a custom route
+ * set for the type of the event. If not found, the default route will be
+ * {@linkplain EventRoute#apply(Message, Message) applied}.
  *
  * @param <I> the type of the entity IDs of this repository
  * @author Alexander Yevsyukov
@@ -52,8 +55,8 @@ public final class EventRouting<I> implements EventRoute<I, Message> {
     /** The function used when there's no matching entry in the map. */
     private final EventRoute<I, Message> defaultRoute;
 
-    public static <I> EventRouting<I> withDefault(EventRoute<I, Message> defaultFn) {
-        return new EventRouting<>(defaultFn);
+    public static <I> EventRouting<I> withDefault(EventRoute<I, Message> defaultRoute) {
+        return new EventRouting<>(defaultRoute);
     }
 
     /**
