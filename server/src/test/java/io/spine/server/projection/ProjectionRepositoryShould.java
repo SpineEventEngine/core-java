@@ -46,6 +46,7 @@ import io.spine.server.projection.given.ProjectionRepositoryTestEnv.NoOpTaskName
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.TestProjection;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.TestProjectionRepository;
 import io.spine.server.route.EventRoute;
+import io.spine.server.route.EventRouting;
 import io.spine.server.storage.RecordStorage;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
@@ -256,7 +257,7 @@ public class ProjectionRepositoryShould
 
     @Test
     @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass") // OK for this test.
-    public void use_id_set_function() {
+    public void use_custom_route() {
         final EventRoute<ProjectId, ProjectCreated> delegateFn =
                 new EventRoute<ProjectId, ProjectCreated>() {
                     private static final long serialVersionUID = 0L;
@@ -266,35 +267,38 @@ public class ProjectionRepositoryShould
                     }
                 };
 
-        final EventRoute<ProjectId, ProjectCreated> idSetFunction = spy(delegateFn);
-        repository().addDispatchFunction(ProjectCreated.class, idSetFunction);
+        final EventRoute<ProjectId, ProjectCreated> route = spy(delegateFn);
+        repository().getRouting().set(ProjectCreated.class, route);
 
         final Event event = createEvent(tenantId(), projectCreated(), PRODUCER_ID, getCurrentTime());
         repository().dispatch(EventEnvelope.of(event));
 
         final ProjectCreated expectedEventMessage = Events.getMessage(event);
         final EventContext context = event.getContext();
-        verify(idSetFunction).apply(eq(expectedEventMessage), eq(context));
+        verify(route).apply(eq(expectedEventMessage), eq(context));
     }
 
     @Test
-    public void obtain_id_set_function_after_put() {
-        repository().addDispatchFunction(ProjectCreated.class, creteProjectTargets);
+    public void obtain_custom_route() {
+        repository().getRouting()
+                    .set(ProjectCreated.class, creteProjectTargets);
 
-        final Optional<EventRoute<ProjectId, ProjectCreated>> func =
-                repository().getRoute(ProjectCreated.class);
+        final Optional<EventRoute<ProjectId, ProjectCreated>> route =
+                repository().getRouting()
+                            .get(ProjectCreated.class);
 
-        assertTrue(func.isPresent());
-        assertEquals(creteProjectTargets, func.get());
+        assertTrue(route.isPresent());
+        assertEquals(creteProjectTargets, route.get());
     }
 
     @Test
-    public void remove_id_set_function_after_put() {
-        repository().addDispatchFunction(ProjectCreated.class, creteProjectTargets);
+    public void remove_custom_route() {
+        final EventRouting<ProjectId> routing = repository().getRouting();
+        routing.set(ProjectCreated.class, creteProjectTargets);
 
-        repository().removeDispatchFunction(ProjectCreated.class);
+        routing.remove(ProjectCreated.class);
         final Optional<EventRoute<ProjectId, ProjectCreated>> out =
-                repository().getRoute(ProjectCreated.class);
+                routing.get(ProjectCreated.class);
 
         assertFalse(out.isPresent());
     }
@@ -321,16 +325,6 @@ public class ProjectionRepositoryShould
 
         final Iterator<?> items = repo.loadAll();
         assertFalse(items.hasNext());
-    }
-
-    /**
-     * Ensures that {@link ProjectionRepository#getRoute(Class)} which is used by
-     * Beam-based catch-up is exposed.
-     */
-    @Test
-    public void expose_event_targets_function() {
-        final EventRoute<ProjectId, Message> fn = repository().getRouting();
-        assertNotNull(fn);
     }
 
     /**

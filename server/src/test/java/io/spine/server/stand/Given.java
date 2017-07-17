@@ -121,7 +121,7 @@ class Given {
 
         StandTestProjectionRepository() {
             super();
-            addDispatchFunction(ProjectCreated.class, EVENT_TARGETS_FN);
+            getRouting().set(ProjectCreated.class, EVENT_TARGETS_FN);
         }
     }
 

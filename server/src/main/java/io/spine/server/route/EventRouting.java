@@ -96,13 +96,27 @@ public final class EventRouting<I> implements EventRoute<I, Message> {
     }
 
     /**
-     * Puts a function into the map.
+     * Sets a custom route for the passed event class.
+     *
+     * <p>Typical usage for this method would be in a constructor of a {@code ProjectionRepository}
+     * to provide mapping between events to projection identifiers.
+     *
+     * <p>Such a mapping may be required when...
+     * <ul>
+     * <li>An event should be matched to more than one projection.
+     * <li>The type of an event producer ID (stored in {@code EventContext})
+     * differs from {@code <I>}.
+     * </ul>
+     *
+     * <p>If there is no function for the class of the passed event message,
+     * the repository will use the event producer ID from an {@code EventContext} passed
+     * with the event message.
      *
      * @param eventClass the class of the event handled by the function
-     * @param route       the function instance
+     * @param route      the function instance
      * @param <E>        the type of the event message
      */
-    public <E extends Message> void put(Class<E> eventClass, EventRoute<I, E> route) {
+    public <E extends Message> void set(Class<E> eventClass, EventRoute<I, E> route) {
         final EventClass clazz = EventClass.of(eventClass);
 
         @SuppressWarnings("unchecked")

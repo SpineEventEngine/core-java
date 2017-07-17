@@ -20,7 +20,6 @@
 
 package io.spine.server.entity;
 
-import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
@@ -76,49 +75,6 @@ public abstract class EventDispatchingRepository<I,
         super.onRegistered();
         getBoundedContext().getEventBus()
                            .register(this);
-    }
-
-    /**
-     * Adds {@link EventRoute} for the repository.
-     *
-     * <p>Typical usage for this method would be in a constructor of a {@code ProjectionRepository}
-     * (derived from this class) to provide mapping between events to projection identifiers.
-     *
-     * <p>Such a mapping may be required when...
-     * <ul>
-     * <li>An event should be matched to more than one projection.
-     * <li>The type of an event producer ID (stored in {@code EventContext})
-     * differs from {@code <I>}.
-     * </ul>
-     *
-     * <p>If there is no function for the class of the passed event message,
-     * the repository will use the event producer ID from an {@code EventContext} passed
-     * with the event message.
-     *
-     * @param func the function instance
-     * @param <M>  the type of the event message handled by the function
-     */
-    public <M extends Message>
-    void addDispatchFunction(Class<M> eventClass, EventRoute<I, M> func) {
-        routing.put(eventClass, func);
-    }
-
-    /**
-     * Removes {@link EventRoute} from the repository.
-     *
-     * @param eventClass the class of the event message
-     * @param <M>        the type of the event message handled by the function we want to remove
-     */
-    public <M extends Message> void removeDispatchFunction(Class<M> eventClass) {
-        routing.remove(eventClass);
-    }
-
-    /**
-     * Obtains a {@link EventRoute} for the passed event message class.
-     */
-    public <M extends Message>
-    Optional<EventRoute<I, M>> getRoute(Class<M> eventClass) {
-        return routing.get(eventClass);
     }
 
     @Override

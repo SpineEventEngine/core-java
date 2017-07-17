@@ -93,7 +93,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     /**
      * Obtains event filters for event classes handled by projections of this repository.
      */
-    Set<EventFilter> createEventFilters() {
+    private Set<EventFilter> createEventFilters() {
         final ImmutableSet.Builder<EventFilter> builder = ImmutableSet.builder();
         final Set<EventClass> eventClasses = getMessageClasses();
         for (EventClass eventClass : eventClasses) {
