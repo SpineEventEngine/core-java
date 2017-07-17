@@ -35,21 +35,20 @@ import java.util.List;
 
 import static io.spine.core.Commands.generateId;
 import static io.spine.core.given.GivenCommandContext.withRandomActor;
+import static io.spine.server.commandbus.CommandValidator.inspect;
 import static io.spine.server.commandbus.Given.CommandMessage.createProjectMessage;
 import static org.junit.Assert.assertEquals;
 
 /**
  * @author Alexander Litus
  */
-public class ValidatorShould {
-
-    private final Validator validator = Validator.getInstance();
+public class CommandValidatorViolationCheckShould {
 
     @Test
     public void validate_command_and_return_nothing_if_it_is_valid() {
         final Command cmd = Given.ACommand.createProject();
 
-        final List<ConstraintViolation> violations = validator.validate(CommandEnvelope.of(cmd));
+        final List<ConstraintViolation> violations = inspect(CommandEnvelope.of(cmd));
 
         assertEquals(0, violations.size());
     }
@@ -64,22 +63,23 @@ public class ValidatorShould {
                                                        .build();
 
         final List<ConstraintViolation> violations =
-                validator.validate(CommandEnvelope.of(commandWithEmptyMessage));
+                inspect(CommandEnvelope.of(commandWithEmptyMessage));
 
         assertEquals(3, violations.size());
     }
 
     @Test
     public void validate_command_and_return_violations_if_context_is_NOT_valid() {
-        final Command command = TestActorRequestFactory.newInstance(ValidatorShould.class)
+        final Command command = TestActorRequestFactory.newInstance(getClass())
                                                        .createCommand(createProjectMessage(),
                                                                       Time.getCurrentTime());
-        final Command commandWithoutContext = command.toBuilder()
-                                     .setContext(CommandContext.getDefaultInstance())
-                                     .build();
+        final Command commandWithoutContext =
+                command.toBuilder()
+                       .setContext(CommandContext.getDefaultInstance())
+                       .build();
 
         final List<ConstraintViolation> violations =
-                validator.validate(CommandEnvelope.of(commandWithoutContext));
+                inspect(CommandEnvelope.of(commandWithoutContext));
 
         assertEquals(1, violations.size());
     }
