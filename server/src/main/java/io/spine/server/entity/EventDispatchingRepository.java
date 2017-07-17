@@ -24,7 +24,8 @@ import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
-import io.spine.server.entity.idfunc.EventRoute;
+import io.spine.server.route.EventRoute;
+import io.spine.server.route.EventRouting;
 import io.spine.server.tenant.EventOperation;
 
 import javax.annotation.CheckReturnValue;
@@ -44,7 +45,7 @@ public abstract class EventDispatchingRepository<I,
         extends DefaultRecordBasedRepository<I, E, S>
         implements EntityEventDispatcher<I> {
 
-    private final EventRouting<I> dispatchFunctions;
+    private final EventRouting<I> routing;
 
     /**
      * Creates new repository instance.
@@ -53,15 +54,15 @@ public abstract class EventDispatchingRepository<I,
      */
     protected EventDispatchingRepository(EventRoute<I, Message> defaultFunction) {
         super();
-        this.dispatchFunctions = EventRouting.withDefault(defaultFunction);
+        this.routing = EventRouting.withDefault(defaultFunction);
     }
 
     /**
      * Obtains the {@link EventRoute} used by the repository for calculating identifiers
      * of event targets.
      */
-    protected EventRoute<I, Message> getDispatchFunction() {
-        return dispatchFunctions;
+    protected EventRouting<I> getRouting() {
+        return routing;
     }
 
     /**
@@ -99,7 +100,7 @@ public abstract class EventDispatchingRepository<I,
      */
     public <M extends Message>
     void addDispatchFunction(Class<M> eventClass, EventRoute<I, M> func) {
-        dispatchFunctions.put(eventClass, func);
+        routing.put(eventClass, func);
     }
 
     /**
@@ -109,21 +110,21 @@ public abstract class EventDispatchingRepository<I,
      * @param <M>        the type of the event message handled by the function we want to remove
      */
     public <M extends Message> void removeDispatchFunction(Class<M> eventClass) {
-        dispatchFunctions.remove(eventClass);
+        routing.remove(eventClass);
     }
 
     /**
      * Obtains a {@link EventRoute} for the passed event message class.
      */
     public <M extends Message>
-    Optional<EventRoute<I, M>> getDispatchFunction(Class<M> eventClass) {
-        return dispatchFunctions.get(eventClass);
+    Optional<EventRoute<I, M>> getRoute(Class<M> eventClass) {
+        return routing.get(eventClass);
     }
 
     @Override
     @CheckReturnValue
     public Set<I> getTargets(EventEnvelope envelope) {
-        return dispatchFunctions.apply(envelope.getMessage(), envelope.getEventContext());
+        return routing.apply(envelope.getMessage(), envelope.getEventContext());
     }
 
     /**

@@ -18,11 +18,41 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.server.route;
+
+import com.google.protobuf.Message;
+import io.spine.test.Tests;
+import org.junit.Test;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+
 /**
- * This package contains classes and interfaces for obtaining entity identifiers.
+ * @author Alexander Yevsyukov
  */
+public class ProducersShould {
 
-@ParametersAreNonnullByDefault
-package io.spine.server.entity.idfunc;
+    @Test
+    public void have_utility_ctor() {
+        Tests.assertHasPrivateParameterlessCtor(Producers.class);
+    }
 
-import javax.annotation.ParametersAreNonnullByDefault;
+    @Test
+    public void create_function_for_taking_id_fromContext() {
+        final EventRoute<Object, Message> fn = Producers.fromContext();
+        assertFunction(fn);
+    }
+
+    @Test
+    public void create_function_for_getting_id_fromFirstMessageField() {
+        final EventRoute<Object, Message> fn = Producers.fromFirstMessageField();
+        assertFunction(fn);
+    }
+
+    private static void assertFunction(EventRoute<Object, Message> fn) {
+        assertNotNull(fn);
+
+        // Check that custom toString() is provided.
+        assertFalse(fn.toString().contains(EventRoute.class.getSimpleName()));
+    }
+}

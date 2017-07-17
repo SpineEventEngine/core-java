@@ -18,17 +18,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity.idfunc;
+package io.spine.server.route;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
+import io.spine.Identifier;
 import io.spine.annotation.Internal;
 import io.spine.core.EventContext;
 import io.spine.core.Events;
 
 import java.util.Set;
-
-import static io.spine.server.entity.idfunc.GetEventProducer.fromFieldIndex;
 
 /**
  * Internal utility class that provides default {@link EventRoute}s
@@ -51,7 +50,7 @@ public class Producers {
      * @return new function instance
      */
     public static <I> EventRoute<I, Message> fromContext() {
-        return new ProducerFromContext<>();
+        return new FromContext<>();
     }
 
     /**
@@ -62,15 +61,15 @@ public class Producers {
      * @return new function instance
      */
     public static <I> EventRoute<I, Message> fromFirstMessageField() {
-        return new ProducerFromFirstEventMessageField<>();
+        return new FromFirstMessageField<>();
     }
 
     /**
-     * The {@code IdSetFunction} that obtains an event producer ID from the context of the event.
+     * Obtains an event producer ID from the context of the event.
      *
      * @param <I> the type of entity IDs
      */
-    private static class ProducerFromContext<I> implements EventRoute<I, Message> {
+    private static class FromContext<I> implements EventRoute<I, Message> {
 
         private static final long serialVersionUID = 0L;
 
@@ -91,12 +90,11 @@ public class Producers {
      *
      * @param <I> the type of entity IDs
      */
-    private static class ProducerFromFirstEventMessageField<I>
-            implements EventRoute<I, Message> {
+    private static class FromFirstMessageField<I> implements EventRoute<I, Message> {
 
         private static final long serialVersionUID = 0L;
 
-        private final GetEventProducer<I, Message> func = fromFieldIndex(0);
+        private final FromEventMessage<I, Message> func = FromEventMessage.fieldAt(0);
 
         @Override
         public Set<I> apply(Message message, EventContext context) {
@@ -107,6 +105,36 @@ public class Producers {
         @Override
         public String toString() {
             return "Producers.fromFirstMessageField()";
+        }
+    }
+
+    /**
+     * Obtains an event producer ID based on an event {@link Message} and context.
+     *
+     * <p>An ID must be the first field in event messages (in Protobuf definition).
+     * Its name must end with the
+     * {@link Identifier#ID_PROPERTY_SUFFIX Identifier.ID_PROPERTY_SUFFIX}.
+     *
+     * @param <I> the type of target entity IDs
+     * @param <M> the type of event messages to get IDs from
+     * @author Alexander Litus
+     */
+    private static class FromEventMessage<I, M extends Message>
+            extends FieldAtIndex<I, M, EventContext> {
+
+        private static final long serialVersionUID = 0L;
+
+        private FromEventMessage(int idIndex) {
+            super(idIndex);
+        }
+
+        /**
+         * Creates a new instance.
+         *
+         * @param index a zero-based index of an ID field in this type of messages
+         */
+        static<I, M extends Message> FromEventMessage<I, M> fieldAt(int index) {
+            return new FromEventMessage<>(index);
         }
     }
 }

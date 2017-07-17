@@ -28,7 +28,7 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
-import io.spine.server.entity.idfunc.CommandRoute;
+import io.spine.server.route.CommandRoute;
 import io.spine.validate.StringValueVBuilder;
 
 import static io.spine.protobuf.TypeConverter.toMessage;

@@ -22,7 +22,7 @@ package io.spine.server.entity;
 
 import com.google.common.base.Optional;
 import com.google.protobuf.StringValue;
-import io.spine.server.entity.idfunc.DefaultCommandRoute;
+import io.spine.server.route.DefaultCommandRoute;
 import io.spine.test.entity.command.CreateProject;
 import io.spine.testdata.Sample;
 import org.junit.Test;

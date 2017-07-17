@@ -1,4 +1,4 @@
-package io.spine.server.entity.idfunc;
+package io.spine.server.route;
 
 import com.google.protobuf.Message;
 

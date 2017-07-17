@@ -34,9 +34,10 @@ import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.commandbus.CommandDispatcherDelegate;
 import io.spine.server.commandbus.DelegatingCommandDispatcher;
 import io.spine.server.entity.EventDispatchingRepository;
-import io.spine.server.entity.idfunc.DefaultCommandRoute;
-import io.spine.server.entity.idfunc.Producers;
 import io.spine.server.event.EventBus;
+import io.spine.server.route.CommandRoute;
+import io.spine.server.route.DefaultCommandRoute;
+import io.spine.server.route.Producers;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
@@ -59,8 +60,7 @@ public abstract class ProcessManagerRepository<I,
                 extends EventDispatchingRepository<I, P, S>
                 implements CommandDispatcherDelegate {
 
-    private final DefaultCommandRoute<I, Message> handlerFn =
-            DefaultCommandRoute.newInstance();
+    private final CommandRoute<I, Message> commandRoute = DefaultCommandRoute.newInstance();
 
     @Nullable
     private Set<CommandClass> commandClasses;
@@ -114,7 +114,7 @@ public abstract class ProcessManagerRepository<I,
         final CommandContext context = envelope.getCommandContext();
         final CommandClass commandClass = envelope.getMessageClass();
         checkCommandClass(commandClass);
-        final I id = handlerFn.apply(commandMessage, context);
+        final I id = commandRoute.apply(commandMessage, context);
         final P manager = findOrCreate(id);
 
         final ProcManTransaction<?, ?, ?> tx = beginTransactionFor(manager);

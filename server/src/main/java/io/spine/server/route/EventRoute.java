@@ -18,37 +18,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity.idfunc;
+package io.spine.server.route;
 
 import com.google.protobuf.Message;
-import io.spine.Identifier;
 import io.spine.core.EventContext;
 
 /**
- * Obtains an event producer ID based on an event {@link Message} and context.
+ * Obtains a set of entity IDs for which to deliver the message.
  *
- * <p>An ID must be the first field in event messages (in Protobuf definition).
- * Its name must end with the
- * {@link Identifier#ID_PROPERTY_SUFFIX Identifier.ID_PROPERTY_SUFFIX}.
- *
- * @param <I> the type of target entity IDs
- * @param <M> the type of event messages to get IDs from
- * @author Alexander Litus
+ * @param <I> the type of entity IDs
+ * @param <M> the type of messages to get IDs from
+ * @author Alexander Yevsyukov
  */
-class GetEventProducer<I, M extends Message> extends FieldAtIndex<I, M, EventContext> {
-
-    private static final long serialVersionUID = 0L;
-
-    private GetEventProducer(int idIndex) {
-        super(idIndex);
-    }
-
-    /**
-     * Creates a new instance.
-     *
-     * @param index a zero-based index of an ID field in this type of messages
-     */
-    static<I, M extends Message> GetEventProducer<I, M> fromFieldIndex(int index) {
-        return new GetEventProducer<>(index);
-    }
+public interface EventRoute<I, M extends Message> extends Multicast<I, M, EventContext> {
 }

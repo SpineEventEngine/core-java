@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity.idfunc;
+package io.spine.server.route;
 
 import com.google.protobuf.Message;
 import io.spine.core.CommandContext;

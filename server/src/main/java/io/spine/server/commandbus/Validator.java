@@ -27,7 +27,7 @@ import io.spine.Identifier;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandId;
-import io.spine.server.entity.idfunc.DefaultCommandRoute;
+import io.spine.server.route.DefaultCommandRoute;
 import io.spine.validate.ConstraintViolation;
 import io.spine.validate.MessageValidator;
 
@@ -43,10 +43,8 @@ import static io.spine.validate.Validate.isDefault;
  */
 class Validator {
 
-    private static final String COMMAND_TARGET_ENTITY_ID_CANNOT_BE_EMPTY_OR_BLANK =
-            "Command target entity ID cannot be empty or blank.";
-
     private Validator() {
+        // Prevent direct instantiation of this singleton class.
     }
 
     /** Returns a validator instance. */
@@ -76,7 +74,7 @@ class Validator {
     private static void validateMessage(Message message,
                                         ImmutableList.Builder<ConstraintViolation> result) {
         if (isDefault(message)) {
-            result.add(newConstraintViolation("Non-default command message must be set."));
+            result.add(violation("Non-default command message must be set."));
         }
         final List<ConstraintViolation> messageViolations = MessageValidator.newInstance()
                                                                             .validate(message);
@@ -86,7 +84,7 @@ class Validator {
     private static void validateContext(CommandContext context,
                                         ImmutableList.Builder<ConstraintViolation> result) {
         if (isDefault(context)) {
-            result.add(newConstraintViolation("Non-default command context must be set."));
+            result.add(violation("Non-default command context must be set."));
         }
     }
 
@@ -94,7 +92,7 @@ class Validator {
                                           ImmutableList.Builder<ConstraintViolation> result) {
         final String commandId = Identifier.toString(id);
         if (commandId.equals(EMPTY_ID)) {
-            result.add(newConstraintViolation("Command ID cannot be empty or blank."));
+            result.add(violation("Command ID cannot be empty or blank."));
         }
     }
 
@@ -104,18 +102,15 @@ class Validator {
         if (targetId.isPresent()) {
             final String targetIdString = Identifier.toString(targetId.get());
             if (targetIdString.equals(EMPTY_ID)) {
-                final ConstraintViolation violation = newConstraintViolation(
-                        COMMAND_TARGET_ENTITY_ID_CANNOT_BE_EMPTY_OR_BLANK);
-                result.add(violation);
+                result.add(violation("Command target entity ID cannot be empty or blank."));
             }
         }
     }
 
-    private static ConstraintViolation newConstraintViolation(String msgFormat) {
-        final ConstraintViolation violation = ConstraintViolation.newBuilder()
-                .setMsgFormat(msgFormat)
-                .build();
-        return violation;
+    private static ConstraintViolation violation(String msg) {
+        return ConstraintViolation.newBuilder()
+                                  .setMsgFormat(msg)
+                                  .build();
     }
 
     private enum Singleton {

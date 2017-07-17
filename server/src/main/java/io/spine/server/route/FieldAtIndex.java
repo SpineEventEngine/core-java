@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity.idfunc;
+package io.spine.server.route;
 
 import com.google.protobuf.Message;
 import io.spine.Identifier;
@@ -71,10 +71,11 @@ abstract class FieldAtIndex<I, M extends Message, C extends Message> implements 
         }
 
         @Override
-        protected RuntimeException createUnavailableFieldException(Message message,
-                                                                   String fieldName) {
-            return new MissingEntityIdException(message.getClass().getName(),
-                                                fieldName, getIndex());
+        protected MissingEntityIdException createUnavailableFieldException(Message message,
+                                                                           String fieldName) {
+            final String messageClass = message.getClass()
+                                               .getName();
+            return new MissingEntityIdException(messageClass, fieldName, getIndex());
         }
 
         @Override

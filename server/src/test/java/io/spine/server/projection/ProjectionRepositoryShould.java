@@ -42,10 +42,10 @@ import io.spine.server.command.TestEventFactory;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.RecordBasedRepositoryShould;
 import io.spine.server.entity.given.Given;
-import io.spine.server.entity.idfunc.EventRoute;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.NoOpTaskNamesRepository;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.TestProjection;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.TestProjectionRepository;
+import io.spine.server.route.EventRoute;
 import io.spine.server.storage.RecordStorage;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
@@ -282,7 +282,7 @@ public class ProjectionRepositoryShould
         repository().addDispatchFunction(ProjectCreated.class, creteProjectTargets);
 
         final Optional<EventRoute<ProjectId, ProjectCreated>> func =
-                repository().getDispatchFunction(ProjectCreated.class);
+                repository().getRoute(ProjectCreated.class);
 
         assertTrue(func.isPresent());
         assertEquals(creteProjectTargets, func.get());
@@ -294,7 +294,7 @@ public class ProjectionRepositoryShould
 
         repository().removeDispatchFunction(ProjectCreated.class);
         final Optional<EventRoute<ProjectId, ProjectCreated>> out =
-                repository().getDispatchFunction(ProjectCreated.class);
+                repository().getRoute(ProjectCreated.class);
 
         assertFalse(out.isPresent());
     }
@@ -324,12 +324,12 @@ public class ProjectionRepositoryShould
     }
 
     /**
-     * Ensures that {@link ProjectionRepository#getDispatchFunction(Class)} which is used by
+     * Ensures that {@link ProjectionRepository#getRoute(Class)} which is used by
      * Beam-based catch-up is exposed.
      */
     @Test
     public void expose_event_targets_function() {
-        final EventRoute<ProjectId, Message> fn = repository().getDispatchFunction();
+        final EventRoute<ProjectId, Message> fn = repository().getRouting();
         assertNotNull(fn);
     }
 

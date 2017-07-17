@@ -30,11 +30,11 @@ import io.spine.core.EventContext;
 import io.spine.server.BoundedContext;
 import io.spine.server.entity.EntityStorageConverter;
 import io.spine.server.entity.EventDispatchingRepository;
-import io.spine.server.entity.idfunc.EventRoute;
-import io.spine.server.entity.idfunc.Producers;
 import io.spine.server.event.EventFilter;
 import io.spine.server.event.EventStore;
 import io.spine.server.event.EventStreamQuery;
+import io.spine.server.route.EventRouting;
+import io.spine.server.route.Producers;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
@@ -76,8 +76,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      * <p>Overrides to open the method to the package.
      */
     @Override
-    protected EventRoute<I, Message> getDispatchFunction() {
-        return super.getDispatchFunction();
+    protected EventRouting<I> getRouting() {
+        return super.getRouting();
     }
 
     /**

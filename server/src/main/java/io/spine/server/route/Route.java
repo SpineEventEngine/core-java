@@ -18,17 +18,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity.idfunc;
+package io.spine.server.route;
 
 import com.google.protobuf.Message;
 import io.spine.core.EventContext;
 
+import java.io.Serializable;
+
 /**
- * Obtains a set of entity IDs for which to deliver the message.
+ * Obtains on or more entity identifiers based on a message and its context.
  *
- * @param <I> the type of entity IDs
  * @param <M> the type of messages to get IDs from
+ * @param <C> the type of message context
+ * @param <R> the type of the route function result
  * @author Alexander Yevsyukov
  */
-public interface EventRoute<I, M extends Message> extends Multicast<I, M, EventContext> {
+public interface Route<M extends Message, C extends Message, R> extends Serializable {
+
+    /**
+     * Obtains a set of entity IDs based on the passed event or command message and its context.
+     *
+     * @param message an event or a command message
+     * @param context either {@link EventContext EventContext} or
+     *                  {@link io.spine.core.CommandContext CommandContext} instance
+     * @return a set of entity identifiers
+     */
+    R apply(M message, C context);
 }

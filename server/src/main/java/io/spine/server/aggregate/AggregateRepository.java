@@ -32,15 +32,15 @@ import io.spine.core.EventEnvelope;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandDispatcher;
-import io.spine.server.entity.EventRouting;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.Repository;
-import io.spine.server.entity.idfunc.CommandRoute;
-import io.spine.server.entity.idfunc.DefaultCommandRoute;
-import io.spine.server.entity.idfunc.Producers;
 import io.spine.server.event.DelegatingEventDispatcher;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcherDelegate;
+import io.spine.server.route.CommandRoute;
+import io.spine.server.route.DefaultCommandRoute;
+import io.spine.server.route.EventRouting;
+import io.spine.server.route.Producers;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
@@ -55,7 +55,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static io.spine.server.entity.AbstractEntity.createEntity;
 import static io.spine.server.entity.AbstractEntity.getConstructor;
 import static io.spine.server.entity.EntityWithLifecycle.Predicates.isEntityVisible;
-import static io.spine.server.entity.EventRouting.withDefault;
+import static io.spine.server.route.EventRouting.withDefault;
 
 /**
  * The repository which manages instances of {@code Aggregate}s.

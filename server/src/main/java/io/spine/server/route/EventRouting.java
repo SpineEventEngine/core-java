@@ -18,14 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity;
+package io.spine.server.route;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import com.google.protobuf.Message;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
-import io.spine.server.entity.idfunc.EventRoute;
 
 import java.util.HashMap;
 import java.util.Set;
@@ -53,8 +52,7 @@ public final class EventRouting<I> implements EventRoute<I, Message> {
     /** The function used when there's no matching entry in the map. */
     private final EventRoute<I, Message> defaultRoute;
 
-    public static <I>
-    EventRouting<I> withDefault(EventRoute<I, Message> defaultFn) {
+    public static <I> EventRouting<I> withDefault(EventRoute<I, Message> defaultFn) {
         return new EventRouting<>(defaultFn);
     }
 
@@ -70,7 +68,7 @@ public final class EventRouting<I> implements EventRoute<I, Message> {
     /**
      * Removes a function for the passed event class.
      */
-    <E extends Message> void remove(Class<E> eventClass) {
+    public <E extends Message> void remove(Class<E> eventClass) {
         final EventClass clazz = EventClass.of(eventClass);
         map.remove(clazz);
     }
@@ -101,15 +99,15 @@ public final class EventRouting<I> implements EventRoute<I, Message> {
      * Puts a function into the map.
      *
      * @param eventClass the class of the event handled by the function
-     * @param func       the function instance
+     * @param route       the function instance
      * @param <E>        the type of the event message
      */
-    <E extends Message> void put(Class<E> eventClass, EventRoute<I, E> func) {
+    public <E extends Message> void put(Class<E> eventClass, EventRoute<I, E> route) {
         final EventClass clazz = EventClass.of(eventClass);
 
         @SuppressWarnings("unchecked")
         // since we want to store {@code IdSetFunction}s for various event types.
-        final EventRoute<I, Message> casted = (EventRoute<I, Message>) func;
+        final EventRoute<I, Message> casted = (EventRoute<I, Message>) route;
         map.put(clazz, casted);
     }
 
@@ -121,12 +119,12 @@ public final class EventRouting<I> implements EventRoute<I, Message> {
      * @return the function wrapped into {@code Optional} or empty {@code Optional}
      * if there is no matching function
      */
-    <E extends Message> Optional<EventRoute<I, E>> get(Class<E> eventClass) {
+    public <E extends Message> Optional<EventRoute<I, E>> get(Class<E> eventClass) {
         final EventClass clazz = EventClass.of(eventClass);
-        final EventRoute<I, Message> func = map.get(clazz);
+        final EventRoute<I, Message> route = map.get(clazz);
 
         @SuppressWarnings("unchecked")  // we ensure the type when we put into the map.
-        final EventRoute<I, E> result = (EventRoute<I, E>) func;
+        final EventRoute<I, E> result = (EventRoute<I, E>) route;
         return Optional.fromNullable(result);
     }
 
