@@ -79,7 +79,6 @@ import static io.spine.server.route.EventRouting.withDefault;
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings("OverlyCoupledClass")
 public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
                 extends Repository<I, A>
                 implements CommandDispatcher, EventDispatcherDelegate {
