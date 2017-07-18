@@ -20,7 +20,6 @@
 
 package io.spine.server.projection;
 
-import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
@@ -31,7 +30,6 @@ import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
-import io.spine.core.Events;
 import io.spine.core.Subscribe;
 import io.spine.core.TenantId;
 import io.spine.core.Version;
@@ -46,7 +44,6 @@ import io.spine.server.projection.given.ProjectionRepositoryTestEnv.NoOpTaskName
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.TestProjection;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.TestProjectionRepository;
 import io.spine.server.route.EventRoute;
-import io.spine.server.route.EventRouting;
 import io.spine.server.storage.RecordStorage;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
@@ -73,21 +70,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
 
 /**
  * @author Alexander Litus
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings({
-        "ClassWithTooManyMethods",
-        "OverlyCoupledClass"})
 public class ProjectionRepositoryShould
-        extends RecordBasedRepositoryShould<TestProjection,
-                                            ProjectId,
-                                            Project> {
+        extends RecordBasedRepositoryShould<TestProjection, ProjectId, Project> {
 
     private static final ProjectId ID = ProjectId.newBuilder()
                                                  .setId("p-123")
@@ -253,55 +242,6 @@ public class ProjectionRepositoryShould
     public void return_entity_storage() {
         final RecordStorage<ProjectId> recordStorage = repository().recordStorage();
         assertNotNull(recordStorage);
-    }
-
-    @Test
-    @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass") // OK for this test.
-    public void use_custom_route() {
-        final EventRoute<ProjectId, ProjectCreated> delegateFn =
-                new EventRoute<ProjectId, ProjectCreated>() {
-                    private static final long serialVersionUID = 0L;
-                    @Override
-                    public Set<ProjectId> apply(ProjectCreated message, EventContext context) {
-                        return newHashSet();
-                    }
-                };
-
-        final EventRoute<ProjectId, ProjectCreated> route = spy(delegateFn);
-        repository().routing()
-                    .set(ProjectCreated.class, route);
-
-        final Event event = createEvent(tenantId(), projectCreated(), PRODUCER_ID, getCurrentTime());
-        repository().dispatch(EventEnvelope.of(event));
-
-        final ProjectCreated expectedEventMessage = Events.getMessage(event);
-        final EventContext context = event.getContext();
-        verify(route).apply(eq(expectedEventMessage), eq(context));
-    }
-
-    @Test
-    public void obtain_custom_route() {
-        repository().routing()
-                    .set(ProjectCreated.class, creteProjectTargets);
-
-        final Optional<EventRoute<ProjectId, ProjectCreated>> route =
-                repository().routing()
-                            .get(ProjectCreated.class);
-
-        assertTrue(route.isPresent());
-        assertEquals(creteProjectTargets, route.get());
-    }
-
-    @Test
-    public void remove_custom_route() {
-        final EventRouting<ProjectId> routing = repository().routing();
-        routing.set(ProjectCreated.class, creteProjectTargets);
-
-        routing.remove(ProjectCreated.class);
-        final Optional<EventRoute<ProjectId, ProjectCreated>> out =
-                routing.get(ProjectCreated.class);
-
-        assertFalse(out.isPresent());
     }
 
     @Test

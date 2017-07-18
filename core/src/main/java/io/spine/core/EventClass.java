@@ -21,7 +21,9 @@
 package io.spine.core;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.protobuf.AnyPacker;
 import io.spine.type.MessageClass;
 
 import java.util.Set;
@@ -52,21 +54,36 @@ public final class EventClass extends MessageClass {
     /**
      * Creates a new instance of the event class by passed event instance.
      *
-     * <p>If an instance of {@link Event} (which implements {@code Message}) is passed to
-     * this method, enclosing event message will be un-wrapped to determine the class of the event.
+     * <p>If an instance of {@link Event} is passed to this method, enclosing event message will be
+     * un-wrapped to determine the class of the event.
      *
-     * @param event an event instance
+     * <p>If an instance of {@link Any} is passed, it will be unpacked, and the class of the wrapped
+     * message will be used.
+     *
+     * @param eventOrMessage an event message, or {@link Any}, {@link Event}
      * @return new instance
      */
-    public static EventClass of(Message event) {
-        final Message message = checkNotNull(event);
-        if (message instanceof Event) {
-            final Event eventRecord = (Event) event;
-            final Message enclosed = Events.getMessage(eventRecord);
-            return of(enclosed.getClass());
+    public static EventClass of(Message eventOrMessage) {
+        final Message eventMessage = ensureEventMessage(eventOrMessage);
+        return of(eventMessage.getClass());
+    }
+
+    /**
+     * Extracts an event message if the passed instance is {@link Event} or {@link Any},
+     * otherwise returns the passed message.
+     */
+    @SuppressWarnings("ChainOfInstanceofChecks")
+    private static Message ensureEventMessage(Message eventOrMessage) {
+        Message eventMessage;
+        final Message input = checkNotNull(eventOrMessage);
+        if (input instanceof Event) {
+            eventMessage = Events.getMessage((Event) eventOrMessage);
+        } else if (input instanceof Any) {
+            eventMessage = AnyPacker.unpack((Any) eventOrMessage);
+        } else {
+            eventMessage = input;
         }
-        final EventClass result = of(message.getClass());
-        return result;
+        return eventMessage;
     }
 
     /** Creates immutable set of {@code EventClass} from the passed set. */

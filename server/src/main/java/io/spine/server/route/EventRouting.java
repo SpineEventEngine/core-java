@@ -29,6 +29,8 @@ import io.spine.core.EventContext;
 import java.util.HashMap;
 import java.util.Set;
 
+import static io.spine.util.Exceptions.newIllegalStateException;
+
 /**
  * A routing schema used by an {@link io.spine.server.event.EventDispatcher EventDispatcher} for
  * delivering events.
@@ -69,6 +71,13 @@ public final class EventRouting<I> implements EventRoute<I, Message> {
     }
 
     /**
+     * Obtains the default route used by the schema.
+     */
+    public EventRoute<I, Message> getDefault() {
+        return defaultRoute;
+    }
+
+    /**
      * Sets a custom route for the passed event class.
      *
      * <p>Typical usage for this method would be in a constructor of a {@code ProjectionRepository}
@@ -88,9 +97,19 @@ public final class EventRouting<I> implements EventRoute<I, Message> {
      * @param eventClass the class of the event handled by the function
      * @param route      the function instance
      * @param <E>        the type of the event message
+     * @throws IllegalStateException if the route for this event class is already set
      */
-    public <E extends Message> void set(Class<E> eventClass, EventRoute<I, E> route) {
+    public <E extends Message> void set(Class<E> eventClass, EventRoute<I, E> route)
+            throws IllegalStateException {
         final EventClass clazz = EventClass.of(eventClass);
+
+        final Optional<EventRoute<I, E>> alreadySet = get(eventClass);
+        if (alreadySet.isPresent()) {
+            throw newIllegalStateException(
+                    "The route for event class %s already set. " +
+                    "Please remove the route (%s) before setting new route.",
+                    eventClass.getName(), alreadySet.get());
+        }
 
         @SuppressWarnings("unchecked")
         // since we want to store {@code IdSetFunction}s for various event types.
@@ -117,10 +136,18 @@ public final class EventRouting<I> implements EventRoute<I, Message> {
 
     /**
      * Removes a function for the passed event class.
+     *
+     * @throws IllegalStateException if a custom route for this event class was not previously
+     * {@linkplain #set(Class, EventRoute) set}.
      */
     public <E extends Message> void remove(Class<E> eventClass) {
-        final EventClass clazz = EventClass.of(eventClass);
-        map.remove(clazz);
+        final EventClass cls = EventClass.of(eventClass);
+        if (!map.containsKey(cls)) {
+            throw newIllegalStateException("Cannot remove the route for the event class (%s):" +
+                                                   " a custom route was not previously set.",
+                                           eventClass.getName());
+        }
+        map.remove(cls);
     }
 
     /**
@@ -131,9 +158,10 @@ public final class EventRouting<I> implements EventRoute<I, Message> {
      * @param event   the event message
      * @param context the event context
      * @return the set of entity IDs
+     * @throws IllegalStateException if the route for this event class is already set
      */
     @Override
-    public Set<I> apply(Message event, EventContext context) {
+    public Set<I> apply(Message event, EventContext context) throws IllegalStateException {
         final EventClass eventClass = EventClass.of(event);
         final EventRoute<I, Message> func = map.get(eventClass);
         if (func != null) {
@@ -144,6 +172,4 @@ public final class EventRouting<I> implements EventRoute<I, Message> {
         final Set<I> result = defaultRoute.apply(event, context);
         return result;
     }
-
-    //TODO:2017-07-17:alexander.yevsyukov: Add verification of matching filled in routing with event classes exposed by a dispatcher.
 }
