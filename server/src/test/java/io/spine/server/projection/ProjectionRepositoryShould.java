@@ -28,9 +28,7 @@ import io.spine.Identifier;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
-import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
-import io.spine.core.Subscribe;
 import io.spine.core.TenantId;
 import io.spine.core.Version;
 import io.spine.core.Versions;
@@ -40,15 +38,13 @@ import io.spine.server.command.TestEventFactory;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.RecordBasedRepositoryShould;
 import io.spine.server.entity.given.Given;
+import io.spine.server.projection.given.ProjectionRepositoryTestEnv.GivenEventMessage;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.NoOpTaskNamesRepository;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.TestProjection;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.TestProjectionRepository;
-import io.spine.server.route.EventRoute;
 import io.spine.server.storage.RecordStorage;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
-import io.spine.test.projection.ProjectTaskNames;
-import io.spine.test.projection.ProjectTaskNamesVBuilder;
 import io.spine.test.projection.event.ProjectCreated;
 import io.spine.test.projection.event.ProjectStarted;
 import io.spine.test.projection.event.TaskAdded;
@@ -61,7 +57,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import static com.google.common.collect.Sets.newHashSet;
 import static io.spine.Identifier.newUuid;
 import static io.spine.test.Verify.assertContainsAll;
 import static io.spine.time.Time.getCurrentTime;
@@ -78,29 +73,13 @@ import static org.junit.Assert.assertTrue;
 public class ProjectionRepositoryShould
         extends RecordBasedRepositoryShould<TestProjection, ProjectId, Project> {
 
-    private static final ProjectId ID = ProjectId.newBuilder()
-                                                 .setId("p-123")
-                                                 .build();
-    private static final Any PRODUCER_ID = Identifier.pack(ID);
+    private static final Any PRODUCER_ID = Identifier.pack(GivenEventMessage.ENTITY_ID);
 
     private BoundedContext boundedContext;
 
     private ProjectionRepository<ProjectId, TestProjection, Project> repository() {
         return (ProjectionRepository<ProjectId, TestProjection, Project>) repository;
     }
-
-    /**
-     * {@link EventRoute} used for testing add/get/remove of functions.
-     */
-    private static final EventRoute<ProjectId, ProjectCreated> creteProjectTargets =
-            new EventRoute<ProjectId, ProjectCreated>() {
-                private static final long serialVersionUID = 0L;
-
-                @Override
-                public Set<ProjectId> apply(ProjectCreated message, EventContext context) {
-                    return newHashSet(message.getProjectId());
-                }
-            };
 
     @Override
     protected RecordBasedRepository<ProjectId, TestProjection, Project> createRepository() {
@@ -185,14 +164,14 @@ public class ProjectionRepositoryShould
 
     @Test
     public void dispatch_event_and_load_projection() {
-        checkDispatchesEvent(projectStarted());
+        checkDispatchesEvent(GivenEventMessage.projectStarted());
     }
 
     @Test
     public void dispatch_several_events() {
-        checkDispatchesEvent(projectCreated());
-        checkDispatchesEvent(taskAdded());
-        checkDispatchesEvent(projectStarted());
+        checkDispatchesEvent(GivenEventMessage.projectCreated());
+        checkDispatchesEvent(GivenEventMessage.taskAdded());
+        checkDispatchesEvent(GivenEventMessage.projectStarted());
     }
 
     private void checkDispatchesEvent(Message eventMessage) {
@@ -259,7 +238,7 @@ public class ProjectionRepositoryShould
         assertFalse(repo.loadAll().hasNext());
 
         final Event event = createEvent(tenantId(),
-                                        projectCreated(),
+                                        GivenEventMessage.projectCreated(),
                                         PRODUCER_ID,
                                         getCurrentTime());
         repo.dispatch(EventEnvelope.of(event));
@@ -306,50 +285,5 @@ public class ProjectionRepositoryShould
     @Test
     public void expose_bounded_context_to_package() {
         assertNotNull(repository().boundedContext());
-    }
-
-    /**
-     * The projection stub with the event subscribing methods that do nothing.
-     *
-     * <p>Such a projection allows to reproduce a use case, when the event-handling method
-     * does not modify the state of an {@code Entity}. For the newly created entities it could lead
-     * to an invalid entry created in the storage.
-     */
-    @SuppressWarnings("unused") // OK as event subscriber methods do nothing in this class.
-    static class NoopTaskNamesProjection extends Projection<ProjectId,
-            ProjectTaskNames,
-            ProjectTaskNamesVBuilder> {
-
-        public NoopTaskNamesProjection(ProjectId id) {
-            super(id);
-        }
-
-        @Subscribe
-        public void on(ProjectCreated event) {
-            // do nothing.
-        }
-
-        @Subscribe
-        public void on(TaskAdded event) {
-            // do nothing
-        }
-    }
-
-    private static ProjectStarted projectStarted() {
-        return ProjectStarted.newBuilder()
-                             .setProjectId(ID)
-                             .build();
-    }
-
-    private static ProjectCreated projectCreated() {
-        return ProjectCreated.newBuilder()
-                             .setProjectId(ID)
-                             .build();
-    }
-
-    private static TaskAdded taskAdded() {
-        return TaskAdded.newBuilder()
-                        .setProjectId(ID)
-                        .build();
     }
 }
