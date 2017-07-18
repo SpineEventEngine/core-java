@@ -42,12 +42,20 @@ import static io.spine.util.Exceptions.illegalStateWithCauseOf;
  *
  * @author Dmytro Dashenkov
  */
-class AggregateStateIdStringifier extends Stringifier<AggregateStateId> {
+final class AggregateStateIdStringifier extends Stringifier<AggregateStateId> {
 
     private static final String DIVIDER = "-";
     private static final int MEAN_STRING_LENGTH = 256;
     private static final String TYPE_NAME_DIVIDER = ".";
     private static final String JAVA_LANG_PACKAGE_NAME = "java.lang.";
+
+    static Stringifier<AggregateStateId> getInstance() {
+        return Singleton.INSTANCE.value;
+    }
+
+    private AggregateStateIdStringifier() {
+        // Prevent direct instantiation.
+    }
 
     @Override
     protected String toString(AggregateStateId id) {
@@ -118,5 +126,11 @@ class AggregateStateIdStringifier extends Stringifier<AggregateStateId> {
             }
         }
         return result;
+    }
+
+    private enum Singleton {
+        INSTANCE;
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Stringifier<AggregateStateId> value = new AggregateStateIdStringifier();
     }
 }

@@ -43,7 +43,8 @@ public final class AggregateStateId<I> {
 
     static {
         StringifierRegistry.getInstance()
-                           .register(new AggregateStateIdStringifier(), AggregateStateId.class);
+                           .register(AggregateStateIdStringifier.getInstance(),
+                                     AggregateStateId.class);
     }
 
     private final I aggregateId;
