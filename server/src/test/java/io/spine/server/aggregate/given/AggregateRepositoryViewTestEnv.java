@@ -53,9 +53,10 @@ public class AggregateRepositoryViewTestEnv {
      * <p>We use {@code StringValue} for messages to save on code generation
      * in the tests. Real aggregates should use generated messages.
      */
-    public static class SHAggregate extends Aggregate<Long, StringValue, StringValueVBuilder> {
+    public static class AggregateWithLifecycle
+            extends Aggregate<Long, StringValue, StringValueVBuilder> {
 
-        private SHAggregate(Long id) {
+        private AggregateWithLifecycle(Long id) {
             super(id);
         }
 
@@ -68,7 +69,7 @@ public class AggregateRepositoryViewTestEnv {
 
         @Apply
         private void on(StringValue eventMessage) {
-            final String msg = SHRepository.getMessage(eventMessage);
+            final String msg = RepoOfAggregateWithLifecycle.getMessage(eventMessage);
             if (archived.name()
                         .equalsIgnoreCase(msg)) {
                 setArchived(true);
@@ -87,7 +88,8 @@ public class AggregateRepositoryViewTestEnv {
      * <p>The repository accepts commands as {@code StringValue}s in the form:
      * {@code AggregateId-CommandMessage}.
      */
-    public static class SHRepository extends AggregateRepository<Long, SHAggregate> {
+    public static class RepoOfAggregateWithLifecycle
+            extends AggregateRepository<Long, AggregateWithLifecycle> {
 
         private static final char SEPARATOR = '-';
         /**
@@ -105,10 +107,16 @@ public class AggregateRepositoryViewTestEnv {
                     }
                 };
 
-        public SHRepository() {
+        public RepoOfAggregateWithLifecycle() {
             super();
         }
 
+        /**
+         * Creates a command message in the form {@code <id>-<action>}.
+         *
+         * @see #getId(StringValue)
+         * @see #getMessage(StringValue)
+         */
         public static StringValue createCommandMessage(Long id, String msg) {
             return toMessage(format("%d%s%s", id, SEPARATOR, msg));
         }

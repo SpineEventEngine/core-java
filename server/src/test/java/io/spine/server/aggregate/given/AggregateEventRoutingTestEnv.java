@@ -20,20 +20,26 @@
 
 package io.spine.server.aggregate.given;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.BoolValue;
+import com.google.protobuf.FloatValue;
+import com.google.protobuf.Int64Value;
 import com.google.protobuf.Message;
+import com.google.protobuf.StringValue;
 import com.google.protobuf.util.Timestamps;
 import io.spine.core.EventContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
+import io.spine.server.aggregate.React;
 import io.spine.server.command.Assign;
 import io.spine.server.route.EventRoute;
 import io.spine.server.route.EventRouting;
 import io.spine.string.Stringifiers;
 import io.spine.time.Time;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -47,14 +53,10 @@ public class AggregateEventRoutingTestEnv {
 
     /**
      * An aggregate that accepts some standard Protobuf types as commands and events.
-     *
-     * <p>Both commands and events are recorded into the log. Validating builders are not available
-     * for {@link com.google.protobuf.Struct Struct} and {@link com.google.protobuf.Value Value}.
-     * That's why the log is backed
      */
-    public static class MessageLog extends Aggregate<Long, Log, LogVBuilder> {
+    public static class OptimisticLog extends Aggregate<Long, Log, LogVBuilder> {
 
-        private MessageLog(Long id) {
+        private OptimisticLog(Long id) {
             super(id);
         }
 
@@ -70,17 +72,47 @@ public class AggregateEventRoutingTestEnv {
             return ack(cmd);
         }
 
+        @Assign
+        MessageReceived handle(StringValue cmd) {
+            return ack(cmd);
+        }
+
         @Apply
         void event(MessageReceived event) {
             final Map<String, String> map = getBuilder().getRecords();
             map.put(Timestamps.toString(event.getTimestamp()),
                     Stringifiers.toString(unpack(event.getMessage())));
         }
+
+        /**
+         * Reacts with {@link MessageReceived} only if the passed value is positive.
+         */
+        @React
+        List<Message> thinkPositive(FloatValue event) {
+            final Number number = event.getValue();
+            return doReact(event, number);
+        }
+
+        /**
+         * Reacts with {@link MessageReceived} only if the passed value is positive.
+         */
+        @React
+        List<Message> thinkPositive(Int64Value event) {
+            final Number number = event.getValue();
+            return doReact(event, number);
+        }
+
+        private static List<Message> doReact(Message event, Number asNumber) {
+            if (asNumber.longValue() > 0) {
+                return ImmutableList.<Message>of(ack(event));
+            }
+            return ImmutableList.of();
+        }
     }
 
     @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
     // OK as the routes do not refer to the instance of the repository.
-    public static class LogRepository extends AggregateRepository<Long, MessageLog> {
+    public static class LogRepository extends AggregateRepository<Long, OptimisticLog> {
 
         private static final EventRoute<Long, Message> defaultRoute =
                 new EventRoute<Long, Message>() {

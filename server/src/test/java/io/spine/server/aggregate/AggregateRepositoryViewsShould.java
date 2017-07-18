@@ -27,8 +27,8 @@ import io.spine.core.Command;
 import io.spine.core.IsSent;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
-import io.spine.server.aggregate.given.AggregateRepositoryViewTestEnv.SHAggregate;
-import io.spine.server.aggregate.given.AggregateRepositoryViewTestEnv.SHRepository;
+import io.spine.server.aggregate.given.AggregateRepositoryViewTestEnv.AggregateWithLifecycle;
+import io.spine.server.aggregate.given.AggregateRepositoryViewTestEnv.RepoOfAggregateWithLifecycle;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -48,15 +48,15 @@ public class AggregateRepositoryViewsShould {
     /**
      * The default behaviour of an {@code AggregateRepository}.
      */
-    private AggregateRepository<Long, SHAggregate> repository;
+    private AggregateRepository<Long, AggregateWithLifecycle> repository;
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType") // It's on purpose for tests.
-    private Optional<SHAggregate> aggregate;
+    private Optional<AggregateWithLifecycle> aggregate;
 
     @Before
     public void setUp() {
         boundedContext = BoundedContext.newBuilder()
                                        .build();
-        repository = new SHRepository();
+        repository = new RepoOfAggregateWithLifecycle();
         boundedContext.register(repository);
 
         // Create the aggregate instance.
@@ -70,7 +70,7 @@ public class AggregateRepositoryViewsShould {
     private void postCommand(String cmd) {
         final Command command =
                 requestFactory.command()
-                              .create(SHRepository.createCommandMessage(id, cmd));
+                              .create(RepoOfAggregateWithLifecycle.createCommandMessage(id, cmd));
         boundedContext.getCommandBus()
                       .post(command, StreamObservers.<IsSent>noOpObserver());
     }
@@ -80,7 +80,7 @@ public class AggregateRepositoryViewsShould {
         aggregate = repository.find(id);
 
         assertTrue(aggregate.isPresent());
-        final SHAggregate agg = aggregate.get();
+        final AggregateWithLifecycle agg = aggregate.get();
         assertFalse(agg.isArchived());
         assertFalse(agg.isDeleted());
     }

@@ -68,7 +68,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass", "ConstantConditions"})
+@SuppressWarnings("ConstantConditions")
 public class AggregateRepositoryShould {
 
     private AggregateRepository<ProjectId, ProjectAggregate> repository;
