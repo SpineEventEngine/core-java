@@ -102,7 +102,7 @@ public class EventRoutingShould {
 
     @Test
     public void set_custom_route() {
-        eventRouting.set(StringValue.class, customRoute);
+        assertEquals(eventRouting, eventRouting.route(StringValue.class, customRoute));
 
         final Optional<EventRoute<Long, StringValue>> route = eventRouting.get(StringValue.class);
 
@@ -112,13 +112,13 @@ public class EventRoutingShould {
 
     @Test(expected = IllegalStateException.class)
     public void not_allow_overwriting_a_set_route() {
-        eventRouting.set(StringValue.class, customRoute);
-        eventRouting.set(StringValue.class, customRoute);
+        eventRouting.route(StringValue.class, customRoute);
+        eventRouting.route(StringValue.class, customRoute);
     }
 
     @Test
     public void remove_previously_set_route() {
-        eventRouting.set(StringValue.class, customRoute);
+        eventRouting.route(StringValue.class, customRoute);
         eventRouting.remove(StringValue.class);
 
         assertFalse(eventRouting.get(StringValue.class).isPresent());
@@ -133,7 +133,7 @@ public class EventRoutingShould {
     public void apply_default_route() {
         final TestEventFactory eventFactory = TestEventFactory.newInstance(getClass());
 
-        eventRouting.set(StringValue.class, customRoute);
+        assertEquals(eventRouting, eventRouting.route(StringValue.class, customRoute));
 
         // An event which has `Timestamp` as its message.
         // It should go through the default route, because only `StringValue` has a custom route.
@@ -147,7 +147,7 @@ public class EventRoutingShould {
     public void apply_custom_route() {
         final TestEventFactory eventFactory = TestEventFactory.newInstance(getClass());
 
-        eventRouting.set(StringValue.class, customRoute);
+        assertEquals(eventRouting, eventRouting.route(StringValue.class, customRoute));
 
         // An event which has `StringValue` as its message, which should go the custom route.
         final EventEnvelope event = EventEnvelope.of(
@@ -169,7 +169,7 @@ public class EventRoutingShould {
             }
         };
 
-        eventRouting.replaceDefault(newDefault);
+        assertEquals(eventRouting, eventRouting.replaceDefault(newDefault));
 
         assertEquals(newDefault, eventRouting.getDefault());
     }

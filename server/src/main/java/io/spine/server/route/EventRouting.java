@@ -58,11 +58,6 @@ public final class EventRouting<I> implements EventRoute<I, Message> {
     /** The function used when there's no matching entry in the map. */
     private EventRoute<I, Message> defaultRoute;
 
-    public static <I> EventRouting<I> withDefault(EventRoute<I, Message> defaultRoute) {
-        checkNotNull(defaultRoute);
-        return new EventRouting<>(defaultRoute);
-    }
-
     /**
      * Creates new instance with the passed default function.
      *
@@ -70,6 +65,18 @@ public final class EventRouting<I> implements EventRoute<I, Message> {
      */
     private EventRouting(EventRoute<I, Message> defaultRoute) {
         this.defaultRoute = defaultRoute;
+    }
+
+    /**
+     * Creates a new routing with the passed default route.
+     *
+     * @param defaultRoute the default route
+     * @param <I>          the type of entity identifiers returned by new routing
+     * @return new routing instance
+     */
+    public static <I> EventRouting<I> withDefault(EventRoute<I, Message> defaultRoute) {
+        checkNotNull(defaultRoute);
+        return new EventRouting<>(defaultRoute);
     }
 
     /**
@@ -96,29 +103,29 @@ public final class EventRouting<I> implements EventRoute<I, Message> {
      * the repository will use the event producer ID from an {@code EventContext} passed
      * with the event message.
      *
-     * @param eventClass the class of the event handled by the function
-     * @param route      the function instance
+     * @param eventClass the class of events to route
+     * @param via        the instance of the route to be used
      * @param <E>        the type of the event message
      * @throws IllegalStateException if the route for this event class is already set
      */
-    public <E extends Message> void set(Class<E> eventClass, EventRoute<I, E> route)
+    public <E extends Message> EventRouting<I> route(Class<E> eventClass, EventRoute<I, E> via)
             throws IllegalStateException {
         checkNotNull(eventClass);
-        checkNotNull(route);
+        checkNotNull(via);
         final EventClass clazz = EventClass.of(eventClass);
 
-        final Optional<EventRoute<I, E>> alreadySet = get(eventClass);
-        if (alreadySet.isPresent()) {
+        final Optional<EventRoute<I, E>> route = get(eventClass);
+        if (route.isPresent()) {
             throw newIllegalStateException(
                     "The route for event class %s already set. " +
-                    "Please remove the route (%s) before setting new route.",
-                    eventClass.getName(), alreadySet.get());
+                            "Please remove the route (%s) before setting new route.",
+                    eventClass.getName(), route.get());
         }
 
-        @SuppressWarnings("unchecked")
-        // since we want to store {@code IdSetFunction}s for various event types.
-        final EventRoute<I, Message> casted = (EventRoute<I, Message>) route;
+        @SuppressWarnings("unchecked") // We cast because we store routes for various event types.
+        final EventRoute<I, Message> casted = (EventRoute<I, Message>) via;
         map.put(clazz, casted);
+        return this;
     }
 
     /**
@@ -143,7 +150,7 @@ public final class EventRouting<I> implements EventRoute<I, Message> {
      * Removes a function for the passed event class.
      *
      * @throws IllegalStateException if a custom route for this event class was not previously
-     * {@linkplain #set(Class, EventRoute) set}.
+     *                               {@linkplain #route(Class, EventRoute) set}.
      */
     public <E extends Message> void remove(Class<E> eventClass) {
         checkNotNull(eventClass);
@@ -186,8 +193,9 @@ public final class EventRouting<I> implements EventRoute<I, Message> {
      *
      * @param newDefault the new route to be used as default
      */
-    public void replaceDefault(EventRoute<I, Message> newDefault) {
+    public EventRouting<I> replaceDefault(EventRoute<I, Message> newDefault) {
         checkNotNull(newDefault);
         defaultRoute = newDefault;
+        return this;
     }
 }
