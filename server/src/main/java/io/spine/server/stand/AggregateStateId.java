@@ -43,17 +43,12 @@ public final class AggregateStateId<I> {
 
     static {
         StringifierRegistry.getInstance()
-                           .register(new AggregateStateIdStringifier(), AggregateStateId.class);
+                           .register(AggregateStateIdStringifier.getInstance(),
+                                     AggregateStateId.class);
     }
 
     private final I aggregateId;
     private final TypeUrl stateType;
-
-    static {
-        StringifierRegistry.getInstance()
-                           .register(new AggregateStateIdStringifier(),
-                                     AggregateStateId.class);
-    }
 
     private AggregateStateId(I aggregateId, TypeUrl stateType) {
         this.aggregateId = checkNotNull(aggregateId);
