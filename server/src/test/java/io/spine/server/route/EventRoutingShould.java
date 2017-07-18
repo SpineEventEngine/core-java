@@ -22,6 +22,7 @@ package io.spine.server.route;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.core.Event;
@@ -154,5 +155,31 @@ public class EventRoutingShould {
 
         final Set<Long> ids = eventRouting.apply(event.getMessage(), event.getEventContext());
         assertEquals(CUSTOM_ROUTE, ids);
+    }
+
+    @Test
+    public void allow_replacing_default_route() {
+        final EventRoute<Long, Message> newDefault = new EventRoute<Long, Message>() {
+
+            private static final long serialVersionUID = 0L;
+
+            @Override
+            public Set<Long> apply(Message message, EventContext context) {
+                return ImmutableSet.of(10L, 20L);
+            }
+        };
+
+        eventRouting.replaceDefault(newDefault);
+
+        assertEquals(newDefault, eventRouting.getDefault());
+    }
+
+    @Test
+    public void pass_null_tolerance() {
+        final NullPointerTester nullPointerTester = new NullPointerTester()
+                .setDefault(EventContext.class, EventContext.getDefaultInstance());
+
+        nullPointerTester.testAllPublicInstanceMethods(eventRouting);
+        nullPointerTester.testAllPublicStaticMethods(EventRouting.class);
     }
 }

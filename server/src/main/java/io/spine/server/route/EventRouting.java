@@ -29,6 +29,7 @@ import io.spine.core.EventContext;
 import java.util.HashMap;
 import java.util.Set;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -55,9 +56,10 @@ public final class EventRouting<I> implements EventRoute<I, Message> {
     private final HashMap<EventClass, EventRoute<I, Message>> map = Maps.newHashMap();
 
     /** The function used when there's no matching entry in the map. */
-    private final EventRoute<I, Message> defaultRoute;
+    private EventRoute<I, Message> defaultRoute;
 
     public static <I> EventRouting<I> withDefault(EventRoute<I, Message> defaultRoute) {
+        checkNotNull(defaultRoute);
         return new EventRouting<>(defaultRoute);
     }
 
@@ -101,6 +103,8 @@ public final class EventRouting<I> implements EventRoute<I, Message> {
      */
     public <E extends Message> void set(Class<E> eventClass, EventRoute<I, E> route)
             throws IllegalStateException {
+        checkNotNull(eventClass);
+        checkNotNull(route);
         final EventClass clazz = EventClass.of(eventClass);
 
         final Optional<EventRoute<I, E>> alreadySet = get(eventClass);
@@ -126,6 +130,7 @@ public final class EventRouting<I> implements EventRoute<I, Message> {
      * if there is no matching function
      */
     public <E extends Message> Optional<EventRoute<I, E>> get(Class<E> eventClass) {
+        checkNotNull(eventClass);
         final EventClass clazz = EventClass.of(eventClass);
         final EventRoute<I, Message> route = map.get(clazz);
 
@@ -141,6 +146,7 @@ public final class EventRouting<I> implements EventRoute<I, Message> {
      * {@linkplain #set(Class, EventRoute) set}.
      */
     public <E extends Message> void remove(Class<E> eventClass) {
+        checkNotNull(eventClass);
         final EventClass cls = EventClass.of(eventClass);
         if (!map.containsKey(cls)) {
             throw newIllegalStateException("Cannot remove the route for the event class (%s):" +
@@ -162,6 +168,8 @@ public final class EventRouting<I> implements EventRoute<I, Message> {
      */
     @Override
     public Set<I> apply(Message event, EventContext context) throws IllegalStateException {
+        checkNotNull(event);
+        checkNotNull(context);
         final EventClass eventClass = EventClass.of(event);
         final EventRoute<I, Message> func = map.get(eventClass);
         if (func != null) {
@@ -171,5 +179,15 @@ public final class EventRouting<I> implements EventRoute<I, Message> {
 
         final Set<I> result = defaultRoute.apply(event, context);
         return result;
+    }
+
+    /**
+     * Sets new default route in the schema.
+     *
+     * @param newDefault the new route to be used as default
+     */
+    public void replaceDefault(EventRoute<I, Message> newDefault) {
+        checkNotNull(newDefault);
+        defaultRoute = newDefault;
     }
 }
