@@ -21,16 +21,13 @@
 package io.spine.server.route;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.Maps;
 import com.google.protobuf.Message;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 
-import java.util.HashMap;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * A routing schema used by an {@link io.spine.server.event.EventDispatcher EventDispatcher} for
@@ -44,19 +41,10 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @param <I> the type of the entity IDs of this repository
  * @author Alexander Yevsyukov
  */
-public final class EventRouting<I> implements EventRoute<I, Message> {
+public final class EventRouting<I> extends MessageRouting<EventContext, EventClass, Set<I>>
+        implements EventRoute<I, Message> {
 
     private static final long serialVersionUID = 0L;
-
-    /**
-     * The map from event class to a function that generates a set of project IDs
-     * for the corresponding event.
-     */
-    @SuppressWarnings("CollectionDeclaredAsConcreteClass") // need a serializable field.
-    private final HashMap<EventClass, EventRoute<I, Message>> map = Maps.newHashMap();
-
-    /** The function used when there's no matching entry in the map. */
-    private EventRoute<I, Message> defaultRoute;
 
     /**
      * Creates new instance with the passed default function.
@@ -64,7 +52,7 @@ public final class EventRouting<I> implements EventRoute<I, Message> {
      * @param defaultRoute the function which used when there is no matching entry in the map
      */
     private EventRouting(EventRoute<I, Message> defaultRoute) {
-        this.defaultRoute = defaultRoute;
+        super(defaultRoute);
     }
 
     /**
@@ -80,28 +68,18 @@ public final class EventRouting<I> implements EventRoute<I, Message> {
     }
 
     /**
-     * Obtains the default route used by the schema.
-     */
-    public EventRoute<I, Message> getDefault() {
-        return defaultRoute;
-    }
-
-    /**
      * Sets a custom route for the passed event class.
-     *
-     * <p>Typical usage for this method would be in a constructor of a {@code ProjectionRepository}
-     * to provide mapping between events to projection identifiers.
      *
      * <p>Such a mapping may be required when...
      * <ul>
-     * <li>An event should be matched to more than one projection.
-     * <li>The type of an event producer ID (stored in {@code EventContext})
-     * differs from {@code <I>}.
+     * <li>An an event message should be matched to more than one entity (e.g. several projections
+     * updated in response to one event).
+     * <li>The type of an event producer ID (stored in the event context) differs from the type
+     * of entity identifiers ({@code <I>}.
      * </ul>
      *
-     * <p>If there is no function for the class of the passed event message,
-     * the repository will use the event producer ID from an {@code EventContext} passed
-     * with the event message.
+     * <p>If there is no specific route for the class of the passed event, the routing will use
+     * the {@linkplain #getDefault() default route}.
      *
      * @param eventClass the class of events to route
      * @param via        the instance of the route to be used
@@ -110,92 +88,41 @@ public final class EventRouting<I> implements EventRoute<I, Message> {
      */
     public <E extends Message> EventRouting<I> route(Class<E> eventClass, EventRoute<I, E> via)
             throws IllegalStateException {
-        checkNotNull(eventClass);
-        checkNotNull(via);
-        final EventClass clazz = EventClass.of(eventClass);
-
-        final Optional<EventRoute<I, E>> route = get(eventClass);
-        if (route.isPresent()) {
-            throw newIllegalStateException(
-                    "The route for event class %s already set. " +
-                            "Please remove the route (%s) before setting new route.",
-                    eventClass.getName(), route.get());
-        }
-
-        @SuppressWarnings("unchecked") // We cast because we store routes for various event types.
-        final EventRoute<I, Message> casted = (EventRoute<I, Message>) via;
-        map.put(clazz, casted);
-        return this;
+        @SuppressWarnings("unchecked") // The cast is required to adapt the type to internal API.
+        final Route<Message, EventContext, Set<I>> casted =
+                (Route<Message, EventContext, Set<I>>) via;
+        return (EventRouting<I>) doRoute(eventClass, casted);
     }
 
     /**
-     * Obtains a function for the passed event class.
+     * Obtains a route for the passed event class.
      *
-     * @param eventClass the class of the event message
-     * @param <E>        the type of the event message
-     * @return the function wrapped into {@code Optional} or empty {@code Optional}
-     * if there is no matching function
+     * @param eventClass the class of the event messages
+     * @param <M>        the type of the event message
+     * @return optionally available route
      */
-    public <E extends Message> Optional<EventRoute<I, E>> get(Class<E> eventClass) {
-        checkNotNull(eventClass);
-        final EventClass clazz = EventClass.of(eventClass);
-        final EventRoute<I, Message> route = map.get(clazz);
-
-        @SuppressWarnings("unchecked")  // we ensure the type when we put into the map.
-        final EventRoute<I, E> result = (EventRoute<I, E>) route;
-        return Optional.fromNullable(result);
-    }
-
-    /**
-     * Removes a function for the passed event class.
-     *
-     * @throws IllegalStateException if a custom route for this event class was not previously
-     *                               {@linkplain #route(Class, EventRoute) set}.
-     */
-    public <E extends Message> void remove(Class<E> eventClass) {
-        checkNotNull(eventClass);
-        final EventClass cls = EventClass.of(eventClass);
-        if (!map.containsKey(cls)) {
-            throw newIllegalStateException("Cannot remove the route for the event class (%s):" +
-                                                   " a custom route was not previously set.",
-                                           eventClass.getName());
+    public <M extends Message> Optional<EventRoute<I, M>> get(Class<M> eventClass) {
+        final Optional<? extends Route<Message, EventContext, Set<I>>> optional = doGet(eventClass);
+        if (optional.isPresent()) {
+            final EventRoute<I, M> route = (EventRoute<I, M>) optional.get();
+            return Optional.of(route);
         }
-        map.remove(cls);
+        return Optional.absent();
     }
 
     /**
-     * Finds a function for the passed event and applies it.
-     *
-     * <p>If there is no function for the passed event applies the default function.
-     *
-     * @param event   the event message
-     * @param context the event context
-     * @return the set of entity IDs
-     * @throws IllegalStateException if the route for this event class is already set
+     * Creates {@link EventClass} by the passed class value.
      */
     @Override
-    public Set<I> apply(Message event, EventContext context) throws IllegalStateException {
-        checkNotNull(event);
-        checkNotNull(context);
-        final EventClass eventClass = EventClass.of(event);
-        final EventRoute<I, Message> func = map.get(eventClass);
-        if (func != null) {
-            final Set<I> result = func.apply(event, context);
-            return result;
-        }
-
-        final Set<I> result = defaultRoute.apply(event, context);
-        return result;
+    EventClass toMessageClass(Class<? extends Message> classOfEvents) {
+        return EventClass.of(classOfEvents);
     }
 
     /**
-     * Sets new default route in the schema.
-     *
-     * @param newDefault the new route to be used as default
+     * Obtains the {@link EventClass} for the passed event or event message.
      */
-    public EventRouting<I> replaceDefault(EventRoute<I, Message> newDefault) {
-        checkNotNull(newDefault);
-        defaultRoute = newDefault;
-        return this;
+    @Override
+    EventClass toMessageClass(Message eventOrMessage) {
+        return EventClass.of(eventOrMessage);
     }
 }

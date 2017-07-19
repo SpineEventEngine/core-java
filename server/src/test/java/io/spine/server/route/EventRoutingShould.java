@@ -121,7 +121,7 @@ public class EventRoutingShould {
         eventRouting.route(StringValue.class, customRoute);
         eventRouting.remove(StringValue.class);
 
-        assertFalse(eventRouting.get(StringValue.class).isPresent());
+        assertFalse(eventRouting.doGet(StringValue.class).isPresent());
     }
 
     @Test(expected = IllegalStateException.class)
