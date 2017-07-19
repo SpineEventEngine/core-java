@@ -101,7 +101,7 @@ public class EventRoutingShould {
             }
         };
 
-        eventRouting.replaceDefault(newDefault);
+        assertEquals(eventRouting, eventRouting.replaceDefault(newDefault));
 
         assertEquals(newDefault, eventRouting.getDefault());
     }
