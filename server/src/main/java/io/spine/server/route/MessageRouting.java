@@ -59,7 +59,7 @@ abstract class MessageRouting<C extends Message, K extends MessageClass, R>
     /**
      * Obtains the default route used by the schema.
      */
-    public Route<Message, C, R> getDefault() {
+    protected Route<Message, C, R> getDefault() {
         return defaultRoute;
     }
 

@@ -37,8 +37,7 @@ import io.spine.server.entity.Repository;
 import io.spine.server.event.DelegatingEventDispatcher;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcherDelegate;
-import io.spine.server.route.CommandRoute;
-import io.spine.server.route.DefaultCommandRoute;
+import io.spine.server.route.CommandRouting;
 import io.spine.server.route.EventRouting;
 import io.spine.server.route.Producers;
 import io.spine.server.stand.Stand;
@@ -55,7 +54,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static io.spine.server.entity.AbstractEntity.createEntity;
 import static io.spine.server.entity.AbstractEntity.getConstructor;
 import static io.spine.server.entity.EntityWithLifecycle.Predicates.isEntityVisible;
-import static io.spine.server.route.EventRouting.withDefault;
 
 /**
  * The repository which manages instances of {@code Aggregate}s.
@@ -96,18 +94,18 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Nullable
     private Set<CommandClass> commandClasses;
 
-    /** The function for getting aggregate ID from a command. */
-    private final CommandRoute<I,Message> commandRoute = DefaultCommandRoute.newInstance();
+    /** The routing schema for commands handled by the aggregates. */
+    private final CommandRouting<I> commandRouting = CommandRouting.newInstance();
 
-    /** The set of event classes to which aggregates {@linkplain React react}. */
+    /** The set of event classes to which aggregates of this repository {@linkplain React react}. */
     @Nullable
     private Set<EventClass> reactedEventClasses;
 
-    private final EventRouting<I> eventRouting = withDefault(Producers.<I>fromContext());
+    /** The routing schema for */
+    private final EventRouting<I> eventRouting =
+            EventRouting.withDefault(Producers.<I>fromContext());
 
-    /**
-     * Creates a new instance.
-     */
+    /** Creates a new instance. */
     protected AggregateRepository() {
         super();
     }
@@ -196,26 +194,22 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     /**
-     * Returns the function which obtains an aggregate ID from a command.
-     *
-     * <p>The default implementation takes the first field from a command message.
-     *
-     * <p>If your repository needs another way of getting aggregate IDs, override
-     * this method returning custom implementation of {@code IdCommandFunction}.
-     *
-     * @return default implementation of {@code IdCommandFunction}
+     * Obtains command routing instance used by this repository.
      */
-    protected CommandRoute<I,Message> getCommandRoute() {
-        return commandRoute;
-    }
-
-    protected EventRouting<I> getEventRouting() {
-        return eventRouting;
+    protected final CommandRouting<I> getCommandRouting() {
+        return commandRouting;
     }
 
     I getCommandTarget(Message commandMessage, CommandContext commandContext) {
-        final I id = getCommandRoute().apply(commandMessage, commandContext);
+        final I id = getCommandRouting().apply(commandMessage, commandContext);
         return id;
+    }
+
+    /**
+     * Obtains event routing instance used by this repository.
+     */
+    protected final EventRouting<I> getEventRouting() {
+        return eventRouting;
     }
 
     Set<I> getEventTargets(Message eventMessage, EventContext eventContext) {

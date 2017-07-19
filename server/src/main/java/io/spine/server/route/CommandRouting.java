@@ -59,6 +59,14 @@ public final class CommandRouting<I> extends MessageRouting<CommandContext, Comm
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final CommandRoute<I, Message> getDefault() {
+        return (CommandRoute<I, Message>) super.getDefault();
+    }
+
+    /**
      * Sets new default route in the schema.
      *
      * @param newDefault the new route to be used as default

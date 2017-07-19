@@ -68,6 +68,14 @@ public final class EventRouting<I> extends MessageRouting<EventContext, EventCla
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final EventRoute<I, Message> getDefault() {
+        return (EventRoute<I, Message>) super.getDefault();
+    }
+
+    /**
      * Sets new default route in the schema.
      *
      * @param newDefault the new route to be used as default

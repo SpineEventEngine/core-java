@@ -109,6 +109,7 @@ public class AggregateRepositoryViewTestEnv {
 
         public RepoOfAggregateWithLifecycle() {
             super();
+            getCommandRouting().replaceDefault(parsingRoute);
         }
 
         /**
@@ -131,15 +132,6 @@ public class AggregateRepositoryViewTestEnv {
             return Splitter.on(SEPARATOR)
                            .splitToList(commandMessage.getValue())
                            .get(1);
-        }
-
-        /**
-         * Provides custom function for obtaining aggregate IDs from commands.
-         */
-        @SuppressWarnings("MethodDoesntCallSuperMethod") // This is the purpose of the method.
-        @Override
-        protected CommandRoute<Long,Message> getCommandRoute() {
-            return parsingRoute;
         }
     }
 }
