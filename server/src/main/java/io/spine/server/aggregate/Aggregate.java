@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.grpc.Internal;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
@@ -319,6 +320,15 @@ public abstract class Aggregate<I,
     @CheckReturnValue
     List<Event> getUncommittedEvents() {
         return ImmutableList.copyOf(uncommittedEvents);
+    }
+
+    /**
+     * Obtains the number of uncommitted events.
+     */
+    @Internal
+    @VisibleForTesting
+    protected int uncommittedEventsCount() {
+        return uncommittedEvents.size();
     }
 
     /**
