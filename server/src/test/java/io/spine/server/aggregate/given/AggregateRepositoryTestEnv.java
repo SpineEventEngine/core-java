@@ -48,6 +48,7 @@ import static io.spine.server.aggregate.AggregateCommandDispatcher.dispatch;
 /**
  * @author Alexander Yevsyukov
  */
+@SuppressWarnings({"TypeMayBeWeakened", "ResultOfMethodCallIgnored"})
 public class AggregateRepositoryTestEnv {
 
     private static final TestActorRequestFactory factory =
@@ -62,7 +63,6 @@ public class AggregateRepositoryTestEnv {
         return CommandEnvelope.of(factory.command().create(commandMessage));
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     public static class GivenAggregate {
 
         private GivenAggregate() {
@@ -99,7 +99,6 @@ public class AggregateRepositoryTestEnv {
         }
     }
 
-    @SuppressWarnings({"TypeMayBeWeakened", "ResultOfMethodCallIgnored"})
     public static class ProjectAggregate
             extends Aggregate<ProjectId, Project, ProjectVBuilder> {
 
