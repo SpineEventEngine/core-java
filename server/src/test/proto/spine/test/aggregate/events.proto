@@ -43,3 +43,14 @@ message TaskAdded {
 message ProjectStarted {
     ProjectId project_id = 1;
 }
+
+message ProjectArchived {
+    ProjectId project_id = 1;
+    repeated ProjectId child_project_id = 2;
+}
+
+message ProjectDeleted {
+    ProjectId project_id = 1;
+    repeated ProjectId child_project_id = 2;
+}
+

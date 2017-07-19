@@ -22,6 +22,7 @@ package io.spine.server.aggregate.given;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.CommandEnvelope;
@@ -29,6 +30,7 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.AggregateRepositoryShould;
 import io.spine.server.aggregate.Apply;
+import io.spine.server.aggregate.React;
 import io.spine.server.command.Assign;
 import io.spine.server.entity.given.Given;
 import io.spine.test.aggregate.Project;
@@ -38,7 +40,9 @@ import io.spine.test.aggregate.Status;
 import io.spine.test.aggregate.command.AddTask;
 import io.spine.test.aggregate.command.CreateProject;
 import io.spine.test.aggregate.command.StartProject;
+import io.spine.test.aggregate.event.ProjectArchived;
 import io.spine.test.aggregate.event.ProjectCreated;
+import io.spine.test.aggregate.event.ProjectDeleted;
 import io.spine.test.aggregate.event.ProjectStarted;
 import io.spine.test.aggregate.event.TaskAdded;
 import io.spine.testdata.Sample;
@@ -149,6 +153,48 @@ public class AggregateRepositoryTestEnv {
         @Apply
         private void apply(ProjectStarted event) {
             getBuilder().setStatus(Status.STARTED);
+        }
+
+        @React
+        private Iterable<ProjectArchived> on(ProjectArchived event) {
+            if (getId().equals(event.getProjectId())) {
+                return nothing();
+            }
+
+            // If the archived project is our parent — archive itself.
+            if (event.getChildProjectIdList().contains(getId())) {
+                return ImmutableList.of(ProjectArchived.newBuilder()
+                                                       .setProjectId(getId())
+                                                       .build());
+            }
+
+            return nothing();
+        }
+
+        @Apply
+        private void apply(ProjectArchived event) {
+            setArchived(true);
+        }
+
+        @React
+        private Iterable<ProjectDeleted> on(ProjectDeleted event) {
+            if (getId().equals(event.getProjectId())) {
+                return nothing();
+            }
+
+            // If the archived project is our parent — archive itself.
+            if (event.getChildProjectIdList().contains(getId())) {
+                return ImmutableList.of(ProjectDeleted.newBuilder()
+                                                       .setProjectId(getId())
+                                                       .build());
+            }
+
+            return nothing();
+        }
+
+        //TODO:2017-07-19:alexander.yevsyukov: Return Optional.absent() instead.
+        private static <M> Iterable<M> nothing() {
+            return ImmutableList.of();
         }
 
         /**

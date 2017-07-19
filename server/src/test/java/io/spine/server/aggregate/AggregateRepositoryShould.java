@@ -23,6 +23,7 @@ package io.spine.server.aggregate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.Lists;
 import io.spine.core.CommandClass;
+import io.spine.core.EventClass;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.GivenAggregate;
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.ProjectAggregate;
@@ -30,6 +31,8 @@ import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.ProjectAggrega
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
+import io.spine.test.aggregate.event.ProjectArchived;
+import io.spine.test.aggregate.event.ProjectDeleted;
 import io.spine.testdata.Sample;
 import org.junit.After;
 import org.junit.Before;
@@ -229,6 +232,13 @@ public class AggregateRepositoryShould {
 
         // This should iterate through all and fail.
         Lists.newArrayList(iterator);
+    }
+
+    @Test
+    public void expose_event_classes_on_which_aggregates_react() {
+        final Set<EventClass> eventClasses = repository.getEventClasses();
+        assertTrue(eventClasses.contains(EventClass.of(ProjectArchived.class)));
+        assertTrue(eventClasses.contains(EventClass.of(ProjectDeleted.class)));
     }
 
     /*
