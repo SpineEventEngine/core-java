@@ -65,8 +65,8 @@ import static io.spine.server.entity.EntityWithLifecycle.Predicates.isEntityVisi
  * <pre>
  * {@code
  *  public class OrderRepository extends AggregateRepository<OrderId, OrderAggregate> {
- *      public OrderRepository(BoundedContext boundedContext) {
- *          super(boundedContext);
+ *      public OrderRepository() {
+ *          super();
  *      }
  *  }
  * }
