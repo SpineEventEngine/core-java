@@ -56,7 +56,7 @@ public final class EventRouting<I> extends MessageRouting<EventContext, EventCla
     }
 
     /**
-     * Creates a new routing with the passed default route.
+     * Creates a new event routing with the passed default route.
      *
      * @param defaultRoute the default route
      * @param <I>          the type of entity identifiers returned by new routing
@@ -65,6 +65,16 @@ public final class EventRouting<I> extends MessageRouting<EventContext, EventCla
     public static <I> EventRouting<I> withDefault(EventRoute<I, Message> defaultRoute) {
         checkNotNull(defaultRoute);
         return new EventRouting<>(defaultRoute);
+    }
+
+    /**
+     * Sets new default route in the schema.
+     *
+     * @param newDefault the new route to be used as default
+     * @return {@code this} to allow chained calls when configuring the routing
+     */
+    public EventRouting<I> replaceDefault(EventRoute<I, Message> newDefault) {
+        return (EventRouting<I>) super.replaceDefault(newDefault);
     }
 
     /**
@@ -84,6 +94,7 @@ public final class EventRouting<I> extends MessageRouting<EventContext, EventCla
      * @param eventClass the class of events to route
      * @param via        the instance of the route to be used
      * @param <E>        the type of the event message
+     * @return {@code this} to allow chained calls when configuring the routing
      * @throws IllegalStateException if the route for this event class is already set
      */
     public <E extends Message> EventRouting<I> route(Class<E> eventClass, EventRoute<I, E> via)

@@ -68,7 +68,7 @@ abstract class MessageRouting<C extends Message, K extends MessageClass, R>
      *
      * @param newDefault the new route to be used as default
      */
-    public MessageRouting<C, K, R> replaceDefault(Route<Message, C, R> newDefault) {
+    MessageRouting<C, K, R> replaceDefault(Route<Message, C, R> newDefault) {
         checkNotNull(newDefault);
         defaultRoute = newDefault;
         return this;

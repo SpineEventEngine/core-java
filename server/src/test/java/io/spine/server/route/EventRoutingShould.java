@@ -28,11 +28,9 @@ import com.google.protobuf.StringValue;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
-import io.spine.server.BoundedContext;
 import io.spine.server.command.TestEventFactory;
 import io.spine.test.TestValues;
 import io.spine.time.Time;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -47,7 +45,7 @@ import static org.junit.Assert.assertTrue;
  * @author Alexander Yevsyukov
  */
 @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
-    // OK as custom routes do not refer to the test data.
+    // OK as custom routes do not refer to the test suite.
 public class EventRoutingShould {
 
     /** The set of IDs returned by the {@link #customRoute}. */
@@ -56,7 +54,7 @@ public class EventRoutingShould {
     /** The set of IDs returned by the {@link #defaultRoute}. */
     private static final ImmutableSet<Long> DEFAULT_ROUTE = ImmutableSet.of(0L, 1L);
 
-    private BoundedContext boundedContext;
+    /** The object under the test. */
     private EventRouting<Long> eventRouting;
 
     /** A custom route for {@code StringValue} messages. */
@@ -83,21 +81,29 @@ public class EventRoutingShould {
 
     @Before
     public void setUp() {
-        boundedContext = BoundedContext.newBuilder()
-                                       .setName(getClass().getSimpleName())
-                                       .build();
-
         eventRouting = EventRouting.withDefault(defaultRoute);
-    }
-
-    @After
-    public void shutDown() throws Exception {
-        boundedContext.close();
     }
 
     @Test
     public void have_default_route() throws Exception {
         assertNotNull(eventRouting.getDefault());
+    }
+
+    @Test
+    public void allow_replacing_default_route() {
+        final EventRoute<Long, Message> newDefault = new EventRoute<Long, Message>() {
+
+            private static final long serialVersionUID = 0L;
+
+            @Override
+            public Set<Long> apply(Message message, EventContext context) {
+                return ImmutableSet.of(10L, 20L);
+            }
+        };
+
+        eventRouting.replaceDefault(newDefault);
+
+        assertEquals(newDefault, eventRouting.getDefault());
     }
 
     @Test
@@ -133,7 +139,8 @@ public class EventRoutingShould {
     public void apply_default_route() {
         final TestEventFactory eventFactory = TestEventFactory.newInstance(getClass());
 
-        assertEquals(eventRouting, eventRouting.route(StringValue.class, customRoute));
+        // Have custom route too.
+        eventRouting.route(StringValue.class, customRoute);
 
         // An event which has `Timestamp` as its message.
         // It should go through the default route, because only `StringValue` has a custom route.
@@ -147,7 +154,7 @@ public class EventRoutingShould {
     public void apply_custom_route() {
         final TestEventFactory eventFactory = TestEventFactory.newInstance(getClass());
 
-        assertEquals(eventRouting, eventRouting.route(StringValue.class, customRoute));
+        eventRouting.route(StringValue.class, customRoute);
 
         // An event which has `StringValue` as its message, which should go the custom route.
         final EventEnvelope event = EventEnvelope.of(
@@ -155,23 +162,6 @@ public class EventRoutingShould {
 
         final Set<Long> ids = eventRouting.apply(event.getMessage(), event.getEventContext());
         assertEquals(CUSTOM_ROUTE, ids);
-    }
-
-    @Test
-    public void allow_replacing_default_route() {
-        final EventRoute<Long, Message> newDefault = new EventRoute<Long, Message>() {
-
-            private static final long serialVersionUID = 0L;
-
-            @Override
-            public Set<Long> apply(Message message, EventContext context) {
-                return ImmutableSet.of(10L, 20L);
-            }
-        };
-
-        assertEquals(eventRouting, eventRouting.replaceDefault(newDefault));
-
-        assertEquals(newDefault, eventRouting.getDefault());
     }
 
     @Test

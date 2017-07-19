@@ -23,12 +23,12 @@ package io.spine.core;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import io.spine.protobuf.AnyPacker;
 import io.spine.type.MessageClass;
 
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.core.Messages.ensureMessage;
 
 /**
  * A value object holding a class of events.
@@ -64,26 +64,8 @@ public final class EventClass extends MessageClass {
      * @return new instance
      */
     public static EventClass of(Message eventOrMessage) {
-        final Message eventMessage = ensureEventMessage(eventOrMessage);
+        final Message eventMessage = ensureMessage(eventOrMessage);
         return of(eventMessage.getClass());
-    }
-
-    /**
-     * Extracts an event message if the passed instance is {@link Event} or {@link Any},
-     * otherwise returns the passed message.
-     */
-    @SuppressWarnings("ChainOfInstanceofChecks")
-    private static Message ensureEventMessage(Message eventOrMessage) {
-        Message eventMessage;
-        final Message input = checkNotNull(eventOrMessage);
-        if (input instanceof Event) {
-            eventMessage = Events.getMessage((Event) eventOrMessage);
-        } else if (input instanceof Any) {
-            eventMessage = AnyPacker.unpack((Any) eventOrMessage);
-        } else {
-            eventMessage = input;
-        }
-        return eventMessage;
     }
 
     /** Creates immutable set of {@code EventClass} from the passed set. */

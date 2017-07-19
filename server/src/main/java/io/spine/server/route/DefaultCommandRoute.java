@@ -22,7 +22,6 @@ package io.spine.server.route;
 
 import com.google.common.base.Optional;
 import com.google.protobuf.Message;
-import io.spine.annotation.Internal;
 import io.spine.core.CommandContext;
 
 /**
@@ -31,12 +30,11 @@ import io.spine.core.CommandContext;
  * <p>The command target must be the first field defined in the command message.
  *
  * @param <I> the type of target entity IDs
- * @param <M> the type of command messages to get IDs from
  * @author Alexander Litus
+ * @author Alexander Yevsyukov
  */
-@Internal
-public class DefaultCommandRoute<I, M extends Message> extends FieldAtIndex<I, M, CommandContext>
-        implements CommandRoute<I, M> {
+public class DefaultCommandRoute<I> extends FieldAtIndex<I, Message, CommandContext>
+        implements CommandRoute<I, Message> {
 
     private static final long serialVersionUID = 0L;
     private static final int ID_FIELD_INDEX = 0;
@@ -46,7 +44,7 @@ public class DefaultCommandRoute<I, M extends Message> extends FieldAtIndex<I, M
     }
 
     /** Creates a new instance. */
-    public static <I, M extends Message> DefaultCommandRoute<I, M> newInstance() {
+    public static <I> DefaultCommandRoute<I> newInstance() {
         return new DefaultCommandRoute<>();
     }
 
@@ -60,7 +58,7 @@ public class DefaultCommandRoute<I, M extends Message> extends FieldAtIndex<I, M
      */
     public static <I> Optional<I> asOptional(Message commandMessage) {
         try {
-            final DefaultCommandRoute<I, Message> function = newInstance();
+            final DefaultCommandRoute<I> function = newInstance();
             final I id = function.apply(commandMessage, CommandContext.getDefaultInstance());
             return Optional.of(id);
         } catch (MissingEntityIdException | ClassCastException ignored) {
