@@ -23,9 +23,11 @@ package io.spine.server.aggregate.given;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.CommandEnvelope;
+import io.spine.core.EventContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.AggregateRepositoryShould;
@@ -33,6 +35,7 @@ import io.spine.server.aggregate.Apply;
 import io.spine.server.aggregate.React;
 import io.spine.server.command.Assign;
 import io.spine.server.entity.given.Given;
+import io.spine.server.route.EventRoute;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.ProjectVBuilder;
@@ -46,6 +49,8 @@ import io.spine.test.aggregate.event.ProjectDeleted;
 import io.spine.test.aggregate.event.ProjectStarted;
 import io.spine.test.aggregate.event.TaskAdded;
 import io.spine.testdata.Sample;
+
+import java.util.Set;
 
 import static io.spine.server.aggregate.AggregateCommandDispatcher.dispatch;
 
@@ -64,7 +69,8 @@ public class AggregateRepositoryTestEnv {
 
     /** Generates a command for the passed message and wraps it into the envelope. */
     private static CommandEnvelope env(Message commandMessage) {
-        return CommandEnvelope.of(factory.command().create(commandMessage));
+        return CommandEnvelope.of(factory.command()
+                                         .create(commandMessage));
     }
 
     public static class GivenAggregate {
@@ -108,6 +114,11 @@ public class AggregateRepositoryTestEnv {
 
         private ProjectAggregate(ProjectId id) {
             super(id);
+        }
+
+        //TODO:2017-07-19:alexander.yevsyukov: Return Optional.absent() instead.
+        private static <M> Iterable<M> nothing() {
+            return ImmutableList.of();
         }
 
         @Override
@@ -155,19 +166,18 @@ public class AggregateRepositoryTestEnv {
             getBuilder().setStatus(Status.STARTED);
         }
 
+        /**
+         * Emits {@link ProjectArchived} if the event is from the parent project.
+         * Otherwise returns empty iterable.
+         */
         @React
         private Iterable<ProjectArchived> on(ProjectArchived event) {
-            if (getId().equals(event.getProjectId())) {
-                return nothing();
-            }
-
-            // If the archived project is our parent — archive itself.
-            if (event.getChildProjectIdList().contains(getId())) {
+            if (event.getChildProjectIdList()
+                     .contains(getId())) {
                 return ImmutableList.of(ProjectArchived.newBuilder()
                                                        .setProjectId(getId())
                                                        .build());
             }
-
             return nothing();
         }
 
@@ -176,25 +186,19 @@ public class AggregateRepositoryTestEnv {
             setArchived(true);
         }
 
+        /**
+         * Emits {@link ProjectDeleted} if the event is from the parent project.
+         * Otherwise returns empty iterable.
+         */
         @React
         private Iterable<ProjectDeleted> on(ProjectDeleted event) {
-            if (getId().equals(event.getProjectId())) {
-                return nothing();
-            }
-
-            // If the archived project is our parent — archive itself.
-            if (event.getChildProjectIdList().contains(getId())) {
+            if (event.getChildProjectIdList()
+                     .contains(getId())) {
                 return ImmutableList.of(ProjectDeleted.newBuilder()
-                                                       .setProjectId(getId())
-                                                       .build());
+                                                      .setProjectId(getId())
+                                                      .build());
             }
-
             return nothing();
-        }
-
-        //TODO:2017-07-19:alexander.yevsyukov: Return Optional.absent() instead.
-        private static <M> Iterable<M> nothing() {
-            return ImmutableList.of();
         }
 
         /**
@@ -220,12 +224,37 @@ public class AggregateRepositoryTestEnv {
         }
     }
 
+    @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
     public static class ProjectAggregateRepository
             extends AggregateRepository<ProjectId, ProjectAggregate> {
 
         public static final ProjectId troublesome = ProjectId.newBuilder()
-                                                              .setId("INVALID_ID")
-                                                              .build();
+                                                             .setId("INVALID_ID")
+                                                             .build();
+
+        public ProjectAggregateRepository() {
+            super();
+            getEventRouting()
+                    .route(ProjectArchived.class,
+                           new EventRoute<ProjectId, ProjectArchived>() {
+                               private static final long serialVersionUID = 0L;
+
+                               @Override
+                               public Set<ProjectId> apply(ProjectArchived msg, EventContext ctx) {
+                                   return ImmutableSet.copyOf(msg.getChildProjectIdList());
+                               }
+                           })
+                    .route(ProjectDeleted.class,
+                           new EventRoute<ProjectId, ProjectDeleted>() {
+                               private static final long serialVersionUID = 0L;
+
+                               @Override
+                               public Set<ProjectId> apply(ProjectDeleted msg, EventContext ctx) {
+                                   return ImmutableSet.copyOf(msg.getChildProjectIdList());
+                               }
+                           });
+        }
+
         @Override
         public Optional<ProjectAggregate> find(ProjectId id) {
             if (id.equals(troublesome)) {

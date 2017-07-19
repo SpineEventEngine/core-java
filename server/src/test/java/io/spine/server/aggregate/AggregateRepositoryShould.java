@@ -23,11 +23,13 @@ package io.spine.server.aggregate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.Lists;
 import io.spine.core.CommandClass;
+import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.GivenAggregate;
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.ProjectAggregate;
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.ProjectAggregateRepository;
+import io.spine.server.command.TestEventFactory;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
@@ -53,6 +55,7 @@ import static org.mockito.Mockito.verify;
 
 public class AggregateRepositoryShould {
 
+    private BoundedContext boundedContext;
     private AggregateRepository<ProjectId, ProjectAggregate> repository;
 
     /**
@@ -63,7 +66,7 @@ public class AggregateRepositoryShould {
 
     @Before
     public void setUp() {
-        final BoundedContext boundedContext = BoundedContext.newBuilder()
+        boundedContext = BoundedContext.newBuilder()
                                                             .build();
         repository = new ProjectAggregateRepository();
         boundedContext.register(repository);
@@ -239,6 +242,36 @@ public class AggregateRepositoryShould {
         final Set<EventClass> eventClasses = repository.getEventClasses();
         assertTrue(eventClasses.contains(EventClass.of(ProjectArchived.class)));
         assertTrue(eventClasses.contains(EventClass.of(ProjectDeleted.class)));
+    }
+
+    @Test
+    public void route_events_to_aggregates() {
+        final ProjectAggregate parent = givenStoredAggregate();
+        final ProjectAggregate child = givenStoredAggregate();
+
+        assertTrue(repository.find(parent.getId())
+                             .isPresent());
+        assertTrue(repository.find(child.getId())
+                             .isPresent());
+
+        final TestEventFactory factory = TestEventFactory.newInstance(getClass());
+        final ProjectArchived msg = ProjectArchived.newBuilder()
+                                                   .setProjectId(parent.getId())
+                                                   .addChildProjectId(child.getId())
+                                                   .build();
+        final Event event = factory.createEvent(msg);
+
+        boundedContext.getEventBus()
+                      .post(event);
+
+        // Check that the child aggregate was archived.
+        assertFalse(repository.find(child.getId())
+                              .isPresent());
+
+        // The parent should not be archived since the dispatch route uses only child aggregates
+        // from the `ProjectArchived` event.
+        assertTrue(repository.find(parent.getId())
+                             .isPresent());
     }
 
     /*
