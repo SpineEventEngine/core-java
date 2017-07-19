@@ -22,12 +22,13 @@ syntax = "proto3";
 //Cannot use `.entity` package due to a confict with `(entity)` annotation.
 package spine.test.serverentity;
 
+import "spine/options.proto";
+
 option (type_url_prefix) = "type.spine.io";
 option java_package="io.spine.test.entity";
 option java_multiple_files = true;
 option java_outer_classname = "VisibilityGuardShouldProto";
 
-import "spine/options.proto";
 
 message FullAccessAggregate {
     option (entity).kind = AGGREGATE;

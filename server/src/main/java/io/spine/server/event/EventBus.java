@@ -423,7 +423,7 @@ public class EventBus extends CommandOutputBus<Event,
          *
          * @see #setEventStore(EventStore)
          */
-        @SuppressWarnings("MethodParameterNamingConvention")
+
         public Builder setEventStoreStreamExecutor(Executor eventStoreStreamExecutor) {
             checkState(eventStore == null, MSG_EVENT_STORE_CONFIGURED);
             this.eventStoreStreamExecutor = eventStoreStreamExecutor;

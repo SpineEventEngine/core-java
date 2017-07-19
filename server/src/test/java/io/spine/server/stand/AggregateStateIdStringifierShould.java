@@ -195,6 +195,6 @@ public class AggregateStateIdStringifierShould {
     }
 
     private static Stringifier<AggregateStateId> stringifier() {
-        return new AggregateStateIdStringifier();
+        return AggregateStateIdStringifier.getInstance();
     }
 }

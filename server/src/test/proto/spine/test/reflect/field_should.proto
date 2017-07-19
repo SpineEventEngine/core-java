@@ -21,6 +21,8 @@ syntax = "proto3";
 
 package spine.test.reflect;
 
+import "spine/options.proto";
+
 option (type_url_prefix) = "type.spine.io";
 option java_package="io.spine.test.reflect";
 option java_multiple_files = true;
@@ -28,7 +30,6 @@ option java_outer_classname = "FieldShouldShouldProto";
 
 import "google/protobuf/wrappers.proto";
 
-import "spine/options.proto";
 
 // Only for usage in `FieldShould` class.
 
