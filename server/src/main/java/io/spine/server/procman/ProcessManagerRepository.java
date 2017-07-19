@@ -35,8 +35,7 @@ import io.spine.server.commandbus.CommandDispatcherDelegate;
 import io.spine.server.commandbus.DelegatingCommandDispatcher;
 import io.spine.server.entity.EventDispatchingRepository;
 import io.spine.server.event.EventBus;
-import io.spine.server.route.CommandRoute;
-import io.spine.server.route.DefaultCommandRoute;
+import io.spine.server.route.CommandRouting;
 import io.spine.server.route.Producers;
 
 import javax.annotation.CheckReturnValue;
@@ -60,11 +59,14 @@ public abstract class ProcessManagerRepository<I,
                 extends EventDispatchingRepository<I, P, S>
                 implements CommandDispatcherDelegate {
 
-    private final CommandRoute<I, Message> commandRoute = DefaultCommandRoute.newInstance();
+    /** The command routing schema used by this repository. */
+    private final CommandRouting<I> commandRouting = CommandRouting.newInstance();
 
+    /** Cached set of command classes handled by process managers of this repository. */
     @Nullable
     private Set<CommandClass> commandClasses;
 
+    /** Cached set of event classes to which process managers of this repository are subscribed. */
     @Nullable
     private Set<EventClass> eventClasses;
 
@@ -73,6 +75,12 @@ public abstract class ProcessManagerRepository<I,
         super(Producers.<I>fromFirstMessageField());
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Registers with the {@code CommandBus} for dispatching commands
+     * (via {@linkplain DelegatingCommandDispatcher delegating dispatcher}).
+     */
     @Override
     public void onRegistered() {
         super.onRegistered();
@@ -100,6 +108,13 @@ public abstract class ProcessManagerRepository<I,
     }
 
     /**
+     * Obtains command routing schema used by this repository.
+     */
+    protected final CommandRouting<I> getCommandRouting() {
+        return commandRouting;
+    }
+
+    /**
      * Dispatches the command to a corresponding process manager.
      *
      * <p>If there is no stored process manager with such an ID,
@@ -114,7 +129,7 @@ public abstract class ProcessManagerRepository<I,
         final CommandContext context = envelope.getCommandContext();
         final CommandClass commandClass = envelope.getMessageClass();
         checkCommandClass(commandClass);
-        final I id = commandRoute.apply(commandMessage, context);
+        final I id = getCommandRouting().apply(commandMessage, context);
         final P manager = findOrCreate(id);
 
         final ProcManTransaction<?, ?, ?> tx = beginTransactionFor(manager);
