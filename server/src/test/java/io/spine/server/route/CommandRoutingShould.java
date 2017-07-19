@@ -44,8 +44,10 @@ public class CommandRoutingShould {
 
     /** Default result of the command routing function. */
     private static final long DEFAULT_ANSWER = 42L;
+
     /** Custom result of the command routing function. */
     private static final long CUSTOM_ANSWER = 100500L;
+
     /** A custom default route. */
     private final CommandRoute<Long, Message> customDefault =
             new CommandRoute<Long, Message>() {
