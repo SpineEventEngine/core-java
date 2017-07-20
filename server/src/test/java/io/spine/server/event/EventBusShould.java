@@ -60,7 +60,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
-@SuppressWarnings({"ResultOfMethodCallIgnored", "ClassWithTooManyMethods", "OverlyCoupledClass"})
 public class EventBusShould {
 
     private EventBus eventBus;

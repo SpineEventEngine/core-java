@@ -31,7 +31,8 @@ import io.spine.server.BoundedContext;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventSubscriber;
-import io.spine.server.event.Given;
+import io.spine.server.event.enrich.given.EventEnricherTestEnv.GivenEvent;
+import io.spine.server.event.enrich.given.EventEnricherTestEnv.GivenEventMessage;
 import io.spine.test.event.ProjectCompleted;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.ProjectCreatedDynamicallyConfiguredEnrichment;
@@ -49,12 +50,12 @@ import static io.spine.Identifier.newUuid;
 import static io.spine.core.Enrichments.getEnrichment;
 import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.server.command.TestEventFactory.newInstance;
-import static io.spine.server.event.Given.AnEvent.projectStarted;
-import static io.spine.server.event.Given.Enrichment.GetProjectMaxMemberCount;
-import static io.spine.server.event.Given.Enrichment.GetProjectName;
-import static io.spine.server.event.Given.Enrichment.GetProjectOwnerId;
-import static io.spine.server.event.Given.Enrichment.newEventEnricher;
 import static io.spine.server.event.Given.EventMessage.projectCreated;
+import static io.spine.server.event.enrich.given.EventEnricherTestEnv.Enrichment.GetProjectMaxMemberCount;
+import static io.spine.server.event.enrich.given.EventEnricherTestEnv.Enrichment.GetProjectName;
+import static io.spine.server.event.enrich.given.EventEnricherTestEnv.Enrichment.GetProjectOwnerId;
+import static io.spine.server.event.enrich.given.EventEnricherTestEnv.Enrichment.newEventEnricher;
+import static io.spine.server.event.enrich.given.EventEnricherTestEnv.GivenEvent.projectStarted;
 import static io.spine.testdata.TestBoundedContextFactory.MultiTenant.newBoundedContext;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -97,7 +98,7 @@ public class EventEnricherShould {
 
     @Test
     public void enrich_event_if_enrichment_definition_is_enclosed_to_event() {
-        final ProjectStarted msg = Given.EventMessage.projectStarted();
+        final ProjectStarted msg = GivenEventMessage.projectStarted();
 
         eventBus.post(createEvent(msg));
 
@@ -140,8 +141,8 @@ public class EventEnricherShould {
 
     @Test
     public void enrich_several_events_with_same_enrichment_message_with_wildcard_by() {
-        final ProjectCompleted completed = Given.EventMessage.projectCompleted();
-        final ProjectStarred starred = Given.EventMessage.projectStarred();
+        final ProjectCompleted completed = GivenEventMessage.projectCompleted();
+        final ProjectStarred starred = GivenEventMessage.projectStarred();
         final ProjectId completedProjectId = completed.getProjectId();
         final ProjectId starredProjectId = starred.getProjectId();
 
@@ -156,9 +157,9 @@ public class EventEnricherShould {
 
     @Test
     public void enrich_several_events_bound_by_fields() {
-        final Event permissionGranted = Given.AnEvent.permissionGranted();
-        final Event permissionRevoked = Given.AnEvent.permissionRevoked();
-        final Event sharingRequestApproved = Given.AnEvent.sharingRequestApproved();
+        final Event permissionGranted = GivenEvent.permissionGranted();
+        final Event permissionRevoked = GivenEvent.permissionRevoked();
+        final Event sharingRequestApproved = GivenEvent.sharingRequestApproved();
 
         assertTrue(enricher.canBeEnriched(permissionGranted));
         assertTrue(enricher.canBeEnriched(permissionRevoked));
