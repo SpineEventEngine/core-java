@@ -43,7 +43,6 @@ import static io.spine.core.Responses.ok;
  *
  * @author Alex Tymchenko
  */
-@Internal
 public class StreamObservers {
 
     private StreamObservers() {

@@ -218,8 +218,7 @@ public class EventEnricherShould {
     }
 
     @SuppressWarnings({"OptionalGetWithoutIsPresent",
-                       "UnusedParameters",
-                       "InstanceVariableNamingConvention"})
+            "UnusedParameters", "InstanceVariableNamingConvention", "ConstantConditions"})
     private static class TestEventSubscriber extends EventSubscriber {
 
         private ProjectCreated.Enrichment projectCreatedEnrichment;
@@ -242,7 +241,7 @@ public class EventEnricherShould {
             final Optional<ProjectCreatedDynamicallyConfiguredEnrichment> enrichment =
                     getEnrichment(ProjectCreatedDynamicallyConfiguredEnrichment.class, context);
 
-            //TODO:2017-07-20:alexander.yevsyukov: Find out why this enrichment is not present.
+            // See if dynamically added enrichment available. Only some tests use it.
             this.projectCreatedDynamicEnrichment = enrichment.isPresent()
                     ? enrichment.get()
                     : ProjectCreatedDynamicallyConfiguredEnrichment.getDefaultInstance();

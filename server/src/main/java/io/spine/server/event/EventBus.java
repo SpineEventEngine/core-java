@@ -115,6 +115,7 @@ public class EventBus extends CommandOutputBus<Event,
     private final MessageValidator eventMessageValidator;
 
     private final Deque<BusFilter<EventEnvelope>> filterChain;
+    private final StreamObserver<IsSent> streamObserver = StreamObservers.noOpObserver();
 
     /** The validator for events posted to the bus. */
     @Nullable
@@ -210,7 +211,7 @@ public class EventBus extends CommandOutputBus<Event,
      * @see CommandOutputBus#post(Message, StreamObserver)
      */
     public final void post(Event event) {
-        post(event, StreamObservers.<IsSent>noOpObserver());
+        post(event, streamObserver);
     }
 
     /**
@@ -226,7 +227,7 @@ public class EventBus extends CommandOutputBus<Event,
      * @see CommandOutputBus#post(Message, StreamObserver)
      */
     public final void post(Iterable<Event> events) {
-        post(events, StreamObservers.<IsSent>noOpObserver());
+        post(events, streamObserver);
     }
 
     @Override
