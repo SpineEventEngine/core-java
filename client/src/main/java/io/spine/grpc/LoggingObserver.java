@@ -83,7 +83,7 @@ public final class LoggingObserver<V> implements StreamObserver<V> {
 
     @Override
     public void onError(Throwable throwable) {
-        log().error("", throwable);
+        log().error("onError()", throwable);
     }
 
     @Override
