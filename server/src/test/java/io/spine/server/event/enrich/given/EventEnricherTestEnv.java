@@ -31,7 +31,6 @@ import io.spine.core.UserId;
 import io.spine.core.given.GivenUserId;
 import io.spine.people.PersonName;
 import io.spine.server.command.TestEventFactory;
-import io.spine.server.event.Given;
 import io.spine.server.event.enrich.EventEnricher;
 import io.spine.test.event.ProjectCompleted;
 import io.spine.test.event.ProjectCreated;
@@ -91,46 +90,46 @@ public class EventEnricherTestEnv {
             return PROJECT_STARRED;
         }
 
-        public static ProjectCreated projectCreated(ProjectId id) {
+        private static ProjectCreated projectCreated(ProjectId id) {
             return ProjectCreated.newBuilder()
                                  .setProjectId(id)
                                  .build();
         }
 
-        public static ProjectStarted projectStarted(ProjectId id) {
+        private static ProjectStarted projectStarted(ProjectId id) {
             return ProjectStarted.newBuilder()
                                  .setProjectId(id)
                                  .build();
         }
 
-        public static ProjectCompleted projectCompleted(ProjectId id) {
+        private static ProjectCompleted projectCompleted(ProjectId id) {
             return ProjectCompleted.newBuilder()
                                    .setProjectId(id)
                                    .build();
         }
 
-        public static ProjectStarred projectStarred(ProjectId id) {
+        private static ProjectStarred projectStarred(ProjectId id) {
             return ProjectStarred.newBuilder()
                                  .setProjectId(id)
                                  .build();
         }
 
-        public static PermissionGrantedEvent permissionGranted() {
+        static PermissionGrantedEvent permissionGranted() {
             return PermissionGrantedEvent.newBuilder()
                                          .setGranterUid(newUuid())
-                                         .setPermissionId("mock-permission")
+                                         .setPermissionId("mock_permission")
                                          .setUserUid(newUuid())
                                          .build();
         }
 
-        public static PermissionRevokedEvent permissionRevoked() {
+        static PermissionRevokedEvent permissionRevoked() {
             return PermissionRevokedEvent.newBuilder()
-                                         .setPermissionId("old-permission")
+                                         .setPermissionId("old_permission")
                                          .setUserUid(newUuid())
                                          .build();
         }
 
-        public static SharingRequestApproved sharingRequestApproved() {
+        static SharingRequestApproved sharingRequestApproved() {
             return SharingRequestApproved.newBuilder()
                                          .setUserUid(newUuid())
                                          .build();
@@ -144,8 +143,8 @@ public class EventEnricherTestEnv {
         private GivenEvent() {}
 
         private static TestEventFactory eventFactory() {
-            final TestEventFactory result = TestEventFactory.newInstance(pack(PROJECT_ID),
-                                                                         Given.AnEvent.class);
+            final TestEventFactory result =
+                    TestEventFactory.newInstance(pack(PROJECT_ID), GivenEvent.class);
             return result;
         }
 
@@ -154,31 +153,31 @@ public class EventEnricherTestEnv {
         }
 
         public static Event projectStarted() {
-            final ProjectStarted msg = Given.EventMessage.projectStarted();
+            final ProjectStarted msg = GivenEventMessage.projectStarted();
             final Event event = eventFactory().createEvent(msg);
             return event;
         }
 
         public static Event projectCreated(ProjectId projectId) {
-            final ProjectCreated msg = Given.EventMessage.projectCreated(projectId);
+            final ProjectCreated msg = GivenEventMessage.projectCreated(projectId);
             final Event event = eventFactory().createEvent(msg);
             return event;
         }
 
         public static Event permissionGranted() {
-            final PermissionGrantedEvent message = Given.EventMessage.permissionGranted();
+            final PermissionGrantedEvent message = GivenEventMessage.permissionGranted();
             final Event permissionGranted = createGenericEvent(message);
             return permissionGranted;
         }
 
         public static Event permissionRevoked() {
-            final PermissionRevokedEvent message = Given.EventMessage.permissionRevoked();
+            final PermissionRevokedEvent message = GivenEventMessage.permissionRevoked();
             final Event permissionRevoked = createGenericEvent(message);
             return permissionRevoked;
         }
 
         public static Event sharingRequestApproved() {
-            final SharingRequestApproved message = Given.EventMessage.sharingRequestApproved();
+            final SharingRequestApproved message = GivenEventMessage.sharingRequestApproved();
             final Event sharingReqquestApproved = createGenericEvent(message);
             return sharingReqquestApproved;
         }

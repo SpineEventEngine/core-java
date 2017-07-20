@@ -32,6 +32,7 @@ import io.spine.core.Subscribe;
 import io.spine.server.BoundedContext;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.event.enrich.EventEnricher;
+import io.spine.server.event.given.EventBusTestEnv.GivenEvent;
 import io.spine.server.storage.StorageFactory;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.ProjectId;
@@ -183,7 +184,7 @@ public class EventBusShould {
     @Test
     public void call_subscriber_when_event_posted() {
         final ProjectCreatedSubscriber subscriber = new ProjectCreatedSubscriber();
-        final Event event = Given.AnEvent.projectCreated();
+        final Event event = GivenEvent.projectCreated();
         eventBus.register(subscriber);
 
         eventBus.post(event);
@@ -209,7 +210,7 @@ public class EventBusShould {
 
         eventBus.register(dispatcher);
 
-        eventBus.post(Given.AnEvent.projectCreated());
+        eventBus.post(GivenEvent.projectCreated());
 
         assertTrue(dispatcher.isDispatchCalled());
     }
@@ -226,7 +227,7 @@ public class EventBusShould {
 
         eventBusWithPosponedExecution.register(dispatcher);
 
-        final Event event = Given.AnEvent.projectCreated();
+        final Event event = GivenEvent.projectCreated();
         eventBusWithPosponedExecution.post(event);
         assertFalse(dispatcher.isDispatchCalled());
 
@@ -240,7 +241,7 @@ public class EventBusShould {
 
         eventBusWithPosponedExecution.register(dispatcher);
 
-        final Event event = Given.AnEvent.projectCreated();
+        final Event event = GivenEvent.projectCreated();
         eventBusWithPosponedExecution.post(event);
         final Set<EventEnvelope> postponedEvents = postponedDispatcherDelivery.getPostponedEvents();
         final EventEnvelope postponedEvent = postponedEvents.iterator()
@@ -276,7 +277,7 @@ public class EventBusShould {
         final FaultySubscriber faultySubscriber = new FaultySubscriber();
 
         eventBus.register(faultySubscriber);
-        eventBus.post(Given.AnEvent.projectCreated());
+        eventBus.post(GivenEvent.projectCreated());
 
         assertTrue(faultySubscriber.isMethodCalled());
     }
@@ -311,7 +312,7 @@ public class EventBusShould {
     @Test
     public void enrich_event_if_it_can_be_enriched() {
         final EventEnricher enricher = mock(EventEnricher.class);
-        final Event event = Given.AnEvent.projectCreated();
+        final Event event = GivenEvent.projectCreated();
         doReturn(true).when(enricher)
                       .canBeEnriched(any(Event.class));
         doReturn(event).when(enricher)
@@ -332,7 +333,7 @@ public class EventBusShould {
         setUp(enricher);
         eventBus.register(new ProjectCreatedSubscriber());
 
-        eventBus.post(Given.AnEvent.projectCreated());
+        eventBus.post(GivenEvent.projectCreated());
 
         verify(enricher, never()).enrich(any(Event.class));
     }

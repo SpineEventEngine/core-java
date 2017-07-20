@@ -50,7 +50,6 @@ import static io.spine.Identifier.newUuid;
 import static io.spine.core.Enrichments.getEnrichment;
 import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.server.command.TestEventFactory.newInstance;
-import static io.spine.server.event.Given.EventMessage.projectCreated;
 import static io.spine.server.event.enrich.given.EventEnricherTestEnv.Enrichment.GetProjectMaxMemberCount;
 import static io.spine.server.event.enrich.given.EventEnricherTestEnv.Enrichment.GetProjectName;
 import static io.spine.server.event.enrich.given.EventEnricherTestEnv.Enrichment.GetProjectOwnerId;
@@ -108,7 +107,7 @@ public class EventEnricherShould {
 
     @Test
     public void enrich_event_if_enrichment_definition_is_not_enclosed_to_event_same_package() {
-        final ProjectCreated msg = projectCreated();
+        final ProjectCreated msg = GivenEventMessage.projectCreated();
 
         eventBus.post(createEvent(msg));
 
@@ -118,7 +117,7 @@ public class EventEnricherShould {
 
     @Test
     public void enrich_event_if_enrichment_definition_is_in_another_package() {
-        final ProjectCreated msg = projectCreated();
+        final ProjectCreated msg = GivenEventMessage.projectCreated();
 
         eventBus.post(createEvent(msg));
 
@@ -128,7 +127,7 @@ public class EventEnricherShould {
 
     @Test
     public void enrich_event_with_several_fields_by_same_source_id() {
-        final ProjectCreated msg = projectCreated();
+        final ProjectCreated msg = GivenEventMessage.projectCreated();
         final ProjectId projectId = msg.getProjectId();
 
         eventBus.post(createEvent(msg));
@@ -171,7 +170,7 @@ public class EventEnricherShould {
         final GetProjectMaxMemberCount function = new GetProjectMaxMemberCount();
         enricher.registerFieldEnrichment(ProjectId.class, Integer.class,function);
 
-        final ProjectCreated msg = projectCreated();
+        final ProjectCreated msg = GivenEventMessage.projectCreated();
         final ProjectId projectId = msg.getProjectId();
 
         eventBus.post(createEvent(msg));
