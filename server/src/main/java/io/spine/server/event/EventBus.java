@@ -43,8 +43,6 @@ import io.spine.server.outbus.CommandOutputBus;
 import io.spine.server.outbus.OutputDispatcherRegistry;
 import io.spine.server.storage.StorageFactory;
 import io.spine.validate.MessageValidator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -546,15 +544,5 @@ public class EventBus extends CommandOutputBus<Event,
             checkNotNull(input);
             return input.getId();
         }
-    }
-
-    private enum LogSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(EventBus.class);
-    }
-
-    static Logger log() {
-        return LogSingleton.INSTANCE.value;
     }
 }

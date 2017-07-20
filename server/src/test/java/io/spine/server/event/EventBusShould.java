@@ -300,11 +300,6 @@ public class EventBusShould {
     }
 
     @Test
-    public void have_log() {
-        assertNotNull(EventBus.log());
-    }
-
-    @Test
     public void do_not_have_Enricher_by_default() {
         assertNull(eventBus.getEnricher());
     }
