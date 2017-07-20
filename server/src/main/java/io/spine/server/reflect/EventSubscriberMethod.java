@@ -63,13 +63,8 @@ public class EventSubscriberMethod extends HandlerMethod<EventContext> {
         checkNotNull(eventMessage);
         checkNotNull(context);
 
-        try {
-            final EventSubscriberMethod method = getMethod(target.getClass(), eventMessage);
-            method.invoke(target, eventMessage, context);
-        } catch (RuntimeException e) {
-            log().error("Exception handling event. Event message: {}, context: {}, cause: {}",
-                        eventMessage, context, e.getCause());
-        }
+        final EventSubscriberMethod method = getMethod(target.getClass(), eventMessage);
+        method.invoke(target, eventMessage, context);
     }
 
     /**
