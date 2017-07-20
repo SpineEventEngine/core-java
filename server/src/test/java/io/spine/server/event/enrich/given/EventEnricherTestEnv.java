@@ -178,8 +178,8 @@ public class EventEnricherTestEnv {
 
         public static Event sharingRequestApproved() {
             final SharingRequestApproved message = GivenEventMessage.sharingRequestApproved();
-            final Event sharingReqquestApproved = createGenericEvent(message);
-            return sharingReqquestApproved;
+            final Event sharingRequestApproved = createGenericEvent(message);
+            return sharingRequestApproved;
         }
 
         private static Event createGenericEvent(Message eventMessage) {

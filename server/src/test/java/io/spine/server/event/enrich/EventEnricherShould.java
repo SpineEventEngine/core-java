@@ -21,6 +21,7 @@
 package io.spine.server.event.enrich;
 
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.core.Event;
@@ -237,9 +238,14 @@ public class EventEnricherShould {
                     getEnrichment(ProjectCreatedSeparateEnrichment.class, context).get();
             this.projectCreatedAnotherPackEnrichment =
                     getEnrichment(ProjectCreatedEnrichmentAnotherPackage.class, context).get();
-            this.projectCreatedDynamicEnrichment =
-                    getEnrichment(ProjectCreatedDynamicallyConfiguredEnrichment.class,
-                                  context).get();
+
+            final Optional<ProjectCreatedDynamicallyConfiguredEnrichment> enrichment =
+                    getEnrichment(ProjectCreatedDynamicallyConfiguredEnrichment.class, context);
+
+            //TODO:2017-07-20:alexander.yevsyukov: Find out why this enrichment is not present.
+            this.projectCreatedDynamicEnrichment = enrichment.isPresent()
+                    ? enrichment.get()
+                    : ProjectCreatedDynamicallyConfiguredEnrichment.getDefaultInstance();
         }
 
         @Subscribe
