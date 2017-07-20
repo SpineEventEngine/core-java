@@ -114,8 +114,8 @@ public abstract class AggregateStorage<I>
      *
      * <p>{@link AggregateStateRecord} is considered valid when one of the following is true:
      * <ul>
-     * <li>{@linkplain AggregateStateRecord#getSnapshot() snapshot} is not default;
-     * <li>{@linkplain AggregateStateRecord#getEventList() event list} is not empty.
+     *     <li>{@linkplain AggregateStateRecord#getSnapshot() snapshot} is not default;
+     *     <li>{@linkplain AggregateStateRecord#getEventList() event list} is not empty.
      * </ul>
      *
      * @param record the record to check

@@ -41,7 +41,13 @@ import java.util.Set;
 @Internal
 public interface EventDispatcherDelegate {
 
+    /**
+     * Obtains event classes dispatched by this delegate.
+     */
     Set<EventClass> getEventClasses();
 
+    /**
+     * Dispatches the event.
+     */
     void dispatchEvent(EventEnvelope envelope);
 }

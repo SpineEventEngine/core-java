@@ -101,7 +101,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Nullable
     private Set<EventClass> reactedEventClasses;
 
-    /** The routing schema for */
+    /** The routing schema for events to which aggregates react. */
     private final EventRouting<I> eventRouting =
             EventRouting.withDefault(Producers.<I>fromContext());
 
