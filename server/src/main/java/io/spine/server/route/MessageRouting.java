@@ -89,9 +89,9 @@ abstract class MessageRouting<C extends Message, K extends MessageClass, R>
      *
      * <p>Such a mapping may be required when...
      * <ul>
-     * <li>An message should be matched to more than one entity.
-     * <li>The type of an message producer ID (stored in the message context) differs from the type
-     * of entity identifiers.
+     *     <li>A message should be matched to more than one entity.
+     *     <li>The type of an message producer ID (stored in the message context) differs from the
+     *         type of entity identifiers.
      * </ul>
      *
      * <p>If there is no specific route for the class of the passed message, the routing will use
