@@ -32,7 +32,8 @@ import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.core.EventId;
 import io.spine.core.IsSent;
-import io.spine.grpc.StreamObservers;
+import io.spine.grpc.LoggingObserver;
+import io.spine.grpc.LoggingObserver.Level;
 import io.spine.server.bus.Bus;
 import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.DeadMessageTap;
@@ -115,18 +116,17 @@ public class EventBus extends CommandOutputBus<Event,
     private final MessageValidator eventMessageValidator;
 
     private final Deque<BusFilter<EventEnvelope>> filterChain;
-    private final StreamObserver<IsSent> streamObserver = StreamObservers.noOpObserver();
-
+    private final StreamObserver<IsSent> streamObserver = LoggingObserver.forClass(getClass(),
+                                                                                   Level.TRACE);
     /** The validator for events posted to the bus. */
     @Nullable
     private EventValidator eventValidator;
+
     /** The enricher for posted events or {@code null} if the enrichment is not supported. */
     @Nullable
     private EventEnricher enricher;
 
-    /**
-     * Creates new instance by the passed builder.
-     */
+    /** Creates new instance by the passed builder. */
     private EventBus(Builder builder) {
         super(checkNotNull(builder.dispatcherEventDelivery));
         this.eventStore = builder.eventStore;
