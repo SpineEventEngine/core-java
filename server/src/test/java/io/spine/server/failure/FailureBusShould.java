@@ -33,7 +33,7 @@ import io.spine.core.Failures;
 import io.spine.core.IsSent;
 import io.spine.core.Subscribe;
 import io.spine.core.TenantId;
-import io.spine.grpc.StreamObservers.MemoizingObserver;
+import io.spine.grpc.MemoizingObserver;
 import io.spine.server.commandbus.Given;
 import io.spine.test.failure.ProjectId;
 import io.spine.test.failure.command.RemoveOwner;
