@@ -38,7 +38,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *
  * @author Alexander Yevsyukov
  */
-public class EventApplierMethod extends HandlerMethod<Empty> {
+public final class EventApplierMethod extends HandlerMethod<Empty> {
 
     /** The instance of the predicate to filter event applier methods of an aggregate class. */
     private static final MethodPredicate PREDICATE = new FilterPredicate();

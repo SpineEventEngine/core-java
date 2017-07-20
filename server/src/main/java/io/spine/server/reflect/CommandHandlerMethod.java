@@ -47,7 +47,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *
  * @author Alexander Yevsyukov
  */
-public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
+public final class CommandHandlerMethod extends HandlerMethod<CommandContext> {
 
     /** The instance of the predicate to filter command handler methods of a class. */
     private static final MethodPredicate PREDICATE = new FilterPredicate();

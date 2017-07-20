@@ -41,7 +41,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @author Alexander Yevsyukov
  * @see Subscribe
  */
-public class EventSubscriberMethod extends HandlerMethod<EventContext> {
+public final class EventSubscriberMethod extends HandlerMethod<EventContext> {
 
     /** The instance of the predicate to filter event subscriber methods of a class. */
     private static final MethodPredicate PREDICATE = new FilterPredicate();
