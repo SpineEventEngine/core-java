@@ -20,6 +20,7 @@
 
 package io.spine.grpc;
 
+import com.google.common.annotations.VisibleForTesting;
 import io.grpc.Internal;
 import io.grpc.stub.StreamObserver;
 import io.spine.Environment;
@@ -44,6 +45,7 @@ public final class LoggingObserver<V> implements StreamObserver<V> {
 
     private static final String FMT_ON_NEXT = "onNext(%s)";
     private static final String ON_COMPLETED = "onCompleted()";
+    private static final Object[] emptyParam = {};
 
     private final Class<?> parentClass;
     private final Level level;
@@ -103,7 +105,10 @@ public final class LoggingObserver<V> implements StreamObserver<V> {
                 logger.trace(out);
                 break;
             case DEBUG:
-                logger.debug(out);
+                // We use this call until the following Slf4J issue is fixed.
+                //      https://jira.qos.ch/browse/SLF4J-376
+                // The bug cases the event created on debug(String) have `TRACE` level.
+                logger.debug(out, emptyParam);
                 break;
             case INFO:
                 logger.info(out);
@@ -117,7 +122,8 @@ public final class LoggingObserver<V> implements StreamObserver<V> {
      * Obtains logger instance. Lazily creates logger if it's not created yet.
      */
     @SuppressWarnings("SynchronizeOnThis") // See “Effective Java 2nd Edition”, Item #71.
-    private Logger log() {
+    @VisibleForTesting
+    Logger log() {
         Logger result = logger;
         if (result == null) {
             synchronized (this) {

@@ -45,7 +45,7 @@ ext {
     protobufVersion = '3.3.0'
     
     gRpcVersion = '1.4.0'
-    slf4JVersion = '1.7.21'
+    slf4JVersion = '1.7.25'
     jUnitVersion = '4.12'
     mockitoVersion = '2.7.22'
 
