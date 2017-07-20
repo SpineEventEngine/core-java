@@ -22,6 +22,7 @@ package io.spine.envelope;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import io.spine.client.TestActorRequestFactory;
+import io.spine.core.ActorContext;
 import io.spine.core.Command;
 import io.spine.core.Failure;
 import io.spine.core.FailureClass;
@@ -87,5 +88,17 @@ public class FailureEnvelopeShould extends MessageEnvelopeShould<Failure,
         final Message commandMessage = AnyPacker.unpack(command.getMessage());
         final FailureEnvelope envelope = toEnvelope(failure);
         assertEquals(commandMessage, envelope.getCommandMessage());
+    }
+
+    @Test
+    public void obtain_actor_context() {
+        final FailureEnvelope failure = toEnvelope(outerObject());
+        final ActorContext actorContext = failure.getActorContext();
+
+        /* Since we're using `TestActorRequestFactory` initialized with the class of this test suite
+           the actor ID should be the suite class name.
+         */
+        assertEquals(getClass().getName(), actorContext.getActor()
+                                                       .getValue());
     }
 }

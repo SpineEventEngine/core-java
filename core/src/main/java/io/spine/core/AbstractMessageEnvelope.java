@@ -29,7 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Abstract base for classes implementing {@link MessageEnvelope}.
  *
- * @param <I> the the of the message id
+ * @param <I> the class of the message ID
  * @param <T> the type of the object that wraps a message
  * @author Alexander Yevsyukov
  * @author Alex Tymchenko
