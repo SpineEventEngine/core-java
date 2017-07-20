@@ -18,12 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server;
+package io.spine;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import io.spine.annotation.SPI;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.helpers.SubstituteLogger;
 
 import javax.annotation.Nullable;
 
@@ -44,15 +46,6 @@ public final class Environment {
      * set this property to {@code true} before running tests.
      */
     public static final String ENV_KEY_TESTS = "io.spine.tests";
-
-    /** The key of the Google AppEngine runtime version system property. */
-    @VisibleForTesting
-    static final String ENV_KEY_APP_ENGINE_RUNTIME_VERSION = "com.google.appengine.runtime.version";
-
-    /** If set, contains the version of AppEngine obtained from the system property. */
-    @Nullable
-    private static final String appEngineRuntimeVersion =
-            System.getProperty(ENV_KEY_APP_ENGINE_RUNTIME_VERSION);
 
     private static final String VAL_TRUE = "true";
     private static final String VAL_FALSE = "false";
@@ -92,24 +85,6 @@ public final class Environment {
     public void restoreFrom(Environment copy) {
         // Make sure this matches the set of fields copied in the copy constructor.
         this.tests = copy.tests;
-    }
-
-    /**
-     * Returns {@code true} if the code is running on the Google AppEngine,
-     * {@code false} otherwise.
-     */
-    public boolean isAppEngine() {
-        final boolean isVersionPresent = (appEngineRuntimeVersion != null) &&
-                !appEngineRuntimeVersion.isEmpty();
-        return isVersionPresent;
-    }
-
-    /**
-     * Returns the current Google AppEngine version
-     * or {@code null} if the program is running not on the AppEngine.
-     */
-    public Optional<String> appEngineVersion() {
-        return Optional.fromNullable(appEngineRuntimeVersion);
     }
 
     /**
@@ -194,6 +169,30 @@ public final class Environment {
     public void reset() {
         this.tests = null;
         System.clearProperty(ENV_KEY_TESTS);
+    }
+
+    /**
+     * Obtains a logger for the passed class depending on the state of the environment.
+     *
+     * <p>In {@linkplain #isTests() tests mode}, the returned logger is an instance of
+     * {@link org.slf4j.helpers.SubstituteLogger SubstituteLogger} delegating to a logger obtained
+     * from the {@link LoggerFactory#getLogger(Class) LoggerFactory}.
+     *
+     * <p>In {@linkplain #isProduction() production mode}, returns the instance obtained from
+     * the {@link LoggerFactory#getLogger(Class) LoggerFactory}.
+     *
+     * @param cls the class for which to create the logger
+     * @return the logger instance
+     */
+    public Logger getLogger(Class<?> cls) {
+        final Logger logger = LoggerFactory.getLogger(cls);
+        if (isTests()) {
+            final SubstituteLogger substLogger = new SubstituteLogger(cls.getName(), null, true);
+            substLogger.setDelegate(logger);
+            return substLogger;
+        } else {
+            return logger;
+        }
     }
 
     private enum Singleton {

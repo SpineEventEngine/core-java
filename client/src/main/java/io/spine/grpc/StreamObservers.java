@@ -38,6 +38,8 @@ import static io.spine.core.Responses.ok;
  *
  * @author Alex Tymchenko
  */
+@SuppressWarnings("OverlyComplexAnonymousInnerClass")
+    // We allow custom `toString()` in the anonymous classes for easier diagnostics.
 public class StreamObservers {
 
     private StreamObservers() {
@@ -68,6 +70,11 @@ public class StreamObservers {
             @Override
             public void onCompleted() {
                 // Do nothing.
+            }
+
+            @Override
+            public String toString() {
+                return "StreamObservers.noOpObserver()";
             }
         };
     }
@@ -105,6 +112,11 @@ public class StreamObservers {
             @Override
             public void onCompleted() {
                 // do nothing.
+            }
+
+            @Override
+            public String toString() {
+                return "StreamObservers.forwardErrorsOnly()";
             }
         };
     }

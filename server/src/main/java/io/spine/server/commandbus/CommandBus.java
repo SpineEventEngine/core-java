@@ -21,6 +21,7 @@ package io.spine.server.commandbus;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
+import io.spine.Environment;
 import io.spine.Identifier;
 import io.spine.annotation.Internal;
 import io.spine.base.Error;
@@ -31,7 +32,7 @@ import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandId;
 import io.spine.core.Failure;
 import io.spine.core.IsSent;
-import io.spine.server.Environment;
+import io.spine.server.ServerEnvironment;
 import io.spine.server.bus.Bus;
 import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.DeadMessageTap;
@@ -354,8 +355,7 @@ public class CommandBus extends Bus<Command,
          * the current runtime environment.
          */
         private static boolean detectThreadsAllowed() {
-            final boolean appEngine = Environment.getInstance()
-                                                 .isAppEngine();
+            final boolean appEngine = ServerEnvironment.isAppEngine();
             return !appEngine;
         }
 
