@@ -33,7 +33,7 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  *
  * @author Alexander Yevsyukov
  */
-public interface CommandDispatcher extends UnicastDispatcher<CommandClass, CommandEnvelope> {
+public interface CommandDispatcher<I> extends UnicastDispatcher<CommandClass, CommandEnvelope, I> {
 
     /**
      * Utility class for reporting command dispatching errors.

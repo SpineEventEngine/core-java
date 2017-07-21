@@ -154,7 +154,8 @@ public class EventBusShould {
         final EventClass eventClass = EventClass.of(ProjectCreated.class);
         assertTrue(eventBus.hasDispatchers(eventClass));
 
-        final Collection<EventDispatcher> dispatchers = eventBus.getDispatchers(eventClass);
+        final Collection<? extends EventDispatcher<?>> dispatchers =
+                eventBus.getDispatchers(eventClass);
         assertTrue(dispatchers.contains(subscriberOne));
         assertTrue(dispatchers.contains(subscriberTwo));
     }
@@ -171,7 +172,8 @@ public class EventBusShould {
 
         // Check that the 2nd subscriber with the same event subscriber method remains
         // after the 1st subscriber unregisters.
-        final Collection<EventDispatcher> subscribers = eventBus.getDispatchers(eventClass);
+        final Collection<? extends EventDispatcher<?>> subscribers =
+                eventBus.getDispatchers(eventClass);
         assertFalse(subscribers.contains(subscriberOne));
         assertTrue(subscribers.contains(subscriberTwo));
 
@@ -262,7 +264,7 @@ public class EventBusShould {
         eventBus.register(dispatcherTwo);
 
         eventBus.unregister(dispatcherOne);
-        final Set<EventDispatcher> dispatchers = eventBus.getDispatchers(eventClass);
+        final Set<? extends EventDispatcher<?>> dispatchers = eventBus.getDispatchers(eventClass);
 
         // Check we don't have 1st dispatcher, but have 2nd.
         assertFalse(dispatchers.contains(dispatcherOne));
@@ -442,7 +444,7 @@ public class EventBusShould {
      * A simple dispatcher class, which only dispatch and does not have own event
      * subscribing methods.
      */
-    private static class BareDispatcher implements EventDispatcher {
+    private static class BareDispatcher implements EventDispatcher<String> {
 
         private boolean dispatchCalled = false;
 
@@ -452,8 +454,9 @@ public class EventBusShould {
         }
 
         @Override
-        public void dispatch(EventEnvelope event) {
+        public Set<String> dispatch(EventEnvelope event) {
             dispatchCalled = true;
+            return ImmutableSet.of(toString());
         }
 
         private boolean isDispatchCalled() {

@@ -21,6 +21,8 @@
 package io.spine.server.commandbus;
 
 import com.google.common.testing.NullPointerTester;
+import com.google.protobuf.Empty;
+import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Error;
 import io.spine.core.Command;
@@ -145,7 +147,7 @@ public class MultiTenantCommandBusShould extends AbstractCommandBusTestSuite {
 
     @Test
     public void unregister_command_dispatcher() {
-        final CommandDispatcher dispatcher = new AddTaskDispatcher();
+        final CommandDispatcher<Message> dispatcher = new AddTaskDispatcher();
         commandBus.register(dispatcher);
         commandBus.unregister(dispatcher);
 
@@ -273,7 +275,7 @@ public class MultiTenantCommandBusShould extends AbstractCommandBusTestSuite {
      * {@link CommandDispatcher#dispatch(MessageEnvelope) dispatch()}
      * was called.
      */
-    private static class AddTaskDispatcher implements CommandDispatcher {
+    private static class AddTaskDispatcher implements CommandDispatcher<Message> {
 
         private boolean dispatcherInvoked = false;
 
@@ -283,8 +285,9 @@ public class MultiTenantCommandBusShould extends AbstractCommandBusTestSuite {
         }
 
         @Override
-        public void dispatch(CommandEnvelope envelope) {
+        public Message dispatch(CommandEnvelope envelope) {
             dispatcherInvoked = true;
+            return Empty.getDefaultInstance();
         }
 
         public boolean wasDispatcherInvoked() {

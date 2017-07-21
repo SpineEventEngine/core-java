@@ -89,7 +89,7 @@ public abstract class EventDispatchingRepository<I,
      * @param envelope the event envelope to dispatch
      */
     @Override
-    public void dispatch(EventEnvelope envelope) {
+    public Set<I> dispatch(EventEnvelope envelope) {
         final Message eventMessage = envelope.getMessage();
         final EventContext context = envelope.getEventContext();
         final Set<I> ids = getTargets(envelope);
@@ -102,6 +102,7 @@ public abstract class EventDispatchingRepository<I,
             }
         };
         op.execute();
+        return ids;
     }
 
     /**

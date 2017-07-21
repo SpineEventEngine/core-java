@@ -20,6 +20,7 @@
 
 package io.spine.server.event;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
@@ -41,7 +42,7 @@ import java.util.Set;
  * @author Alex Tymchenko
  * @see EventBus#register(MessageDispatcher)
  */
-public abstract class EventSubscriber implements EventDispatcher {
+public abstract class EventSubscriber implements EventDispatcher<String> {
 
     /**
      * Cached set of the event classes this subscriber is subscribed to.
@@ -49,8 +50,15 @@ public abstract class EventSubscriber implements EventDispatcher {
     @Nullable
     private Set<EventClass> eventClasses;
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param envelope the envelope with the message
+     * @return a one element set with the result of {@link #toString()}
+     * as the identify of the subscriber
+     */
     @Override
-    public void dispatch(final EventEnvelope envelope) {
+    public Set<String> dispatch(final EventEnvelope envelope) {
         final EventOperation op = new EventOperation(envelope.getOuterObject()) {
             @Override
             public void run() {
@@ -58,6 +66,7 @@ public abstract class EventSubscriber implements EventDispatcher {
             }
         };
         op.execute();
+        return ImmutableSet.of(toString());
     }
 
     @Override

@@ -204,7 +204,7 @@ public class CommandHandlerShould {
         }
     }
 
-    private static class EventCatcher implements EventDispatcher {
+    private static class EventCatcher implements EventDispatcher<String> {
 
         private final List<EventEnvelope> dispatched = new LinkedList<>();
 
@@ -215,8 +215,9 @@ public class CommandHandlerShould {
         }
 
         @Override
-        public void dispatch(EventEnvelope envelope) {
+        public Set<String> dispatch(EventEnvelope envelope) {
             dispatched.add(envelope);
+            return ImmutableSet.of(toString());
         }
 
         @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK for tests.

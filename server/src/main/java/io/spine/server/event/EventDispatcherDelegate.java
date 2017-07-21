@@ -39,7 +39,7 @@ import java.util.Set;
  * @see DelegatingEventDispatcher
  */
 @Internal
-public interface EventDispatcherDelegate {
+public interface EventDispatcherDelegate<I> {
 
     /**
      * Obtains event classes dispatched by this delegate.
@@ -49,5 +49,5 @@ public interface EventDispatcherDelegate {
     /**
      * Dispatches the event.
      */
-    void dispatchEvent(EventEnvelope envelope);
+    Set<I> dispatchEvent(EventEnvelope envelope);
 }

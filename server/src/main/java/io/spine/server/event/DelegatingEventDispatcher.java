@@ -32,16 +32,17 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * A {@link EventDispatcher} which delegates the responsibilities to an aggregated {@link
  * EventDispatcherDelegate delegate instance}.
  *
+ * @param <I> the type of entity IDs
  * @author Alexander Yevsyukov
  * @see EventDispatcherDelegate
  */
 @Internal
-public final class DelegatingEventDispatcher implements EventDispatcher {
+public final class DelegatingEventDispatcher<I> implements EventDispatcher<I> {
 
     /**
      * A target delegate.
      */
-    private final EventDispatcherDelegate delegate;
+    private final EventDispatcherDelegate<I> delegate;
 
     /**
      * Creates a new instance of {@code DelegatingCommandDispatcher}, proxying the calls
@@ -50,12 +51,12 @@ public final class DelegatingEventDispatcher implements EventDispatcher {
      * @param delegate a delegate to pass the dispatching duties to
      * @return new instance
      */
-    public static DelegatingEventDispatcher of(EventDispatcherDelegate delegate) {
+    public static <I> DelegatingEventDispatcher<I> of(EventDispatcherDelegate<I> delegate) {
         checkNotNull(delegate);
-        return new DelegatingEventDispatcher(delegate);
+        return new DelegatingEventDispatcher<>(delegate);
     }
 
-    private DelegatingEventDispatcher(EventDispatcherDelegate delegate) {
+    private DelegatingEventDispatcher(EventDispatcherDelegate<I> delegate) {
         this.delegate = delegate;
     }
 
@@ -65,7 +66,7 @@ public final class DelegatingEventDispatcher implements EventDispatcher {
     }
 
     @Override
-    public void dispatch(EventEnvelope envelope) {
-        delegate.dispatchEvent(envelope);
+    public Set<I> dispatch(EventEnvelope envelope) {
+        return delegate.dispatchEvent(envelope);
     }
 }

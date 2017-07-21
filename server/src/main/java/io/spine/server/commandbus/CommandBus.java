@@ -66,7 +66,7 @@ import static java.lang.String.format;
 public class CommandBus extends Bus<Command,
                                     CommandEnvelope,
                                     CommandClass,
-                                    CommandDispatcher> {
+                                    CommandDispatcher<?>> {
 
     private final CommandStore commandStore;
 
@@ -199,7 +199,7 @@ public class CommandBus extends Bus<Command,
 
     @Override
     protected IsSent doPost(CommandEnvelope envelope) {
-        final CommandDispatcher dispatcher = getDispatcher(envelope);
+        final CommandDispatcher<?> dispatcher = getDispatcher(envelope);
         IsSent result;
         try {
             dispatcher.dispatch(envelope);
@@ -233,7 +233,7 @@ public class CommandBus extends Bus<Command,
         return registry().getRegisteredMessageClasses();
     }
 
-    private Optional<CommandDispatcher> getDispatcher(CommandClass commandClass) {
+    private Optional<? extends CommandDispatcher<?>> getDispatcher(CommandClass commandClass) {
         return registry().getDispatcher(commandClass);
     }
 
@@ -274,8 +274,8 @@ public class CommandBus extends Bus<Command,
         }
     }
 
-    private CommandDispatcher getDispatcher(CommandEnvelope commandEnvelope) {
-        final Optional<CommandDispatcher> dispatcher = getDispatcher(
+    private CommandDispatcher<?> getDispatcher(CommandEnvelope commandEnvelope) {
+        final Optional<? extends CommandDispatcher<?>> dispatcher = getDispatcher(
                 commandEnvelope.getMessageClass()
         );
         if (!dispatcher.isPresent()) {

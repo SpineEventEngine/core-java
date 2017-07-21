@@ -99,7 +99,7 @@ import static com.google.common.base.Preconditions.checkState;
 public class EventBus extends CommandOutputBus<Event,
                                                EventEnvelope,
                                                EventClass,
-                                               EventDispatcher> {
+                                               EventDispatcher<?>> {
 
     /*
      * NOTE: Even though, the EventBus has a private constructor and
@@ -145,7 +145,7 @@ public class EventBus extends CommandOutputBus<Event,
     }
 
     @VisibleForTesting
-    Set<EventDispatcher> getDispatchers(EventClass eventClass) {
+    Set<? extends EventDispatcher<?>> getDispatchers(EventClass eventClass) {
         return registry().getDispatchers(eventClass);
     }
 
@@ -168,7 +168,7 @@ public class EventBus extends CommandOutputBus<Event,
     }
 
     @Override
-    protected OutputDispatcherRegistry<EventClass, EventDispatcher> createRegistry() {
+    protected OutputDispatcherRegistry<EventClass, EventDispatcher<?>> createRegistry() {
         return new EventDispatcherRegistry();
     }
 

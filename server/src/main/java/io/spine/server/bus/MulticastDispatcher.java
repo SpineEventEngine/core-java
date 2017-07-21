@@ -23,21 +23,16 @@ package io.spine.server.bus;
 import io.spine.core.MessageEnvelope;
 import io.spine.type.MessageClass;
 
+import java.util.Set;
+
 /**
  * Dispatches a message to several entities.
  *
  * @param <C> the type of dispatched messages
  * @param <E> the type of envelopes for dispatched objects that contain messages
+ * @param <I> the type of IDs of entities to which messages are dispatched
  * @author Alexander Yevsyukov
  */
-public interface MulticastDispatcher <C extends MessageClass, E extends MessageEnvelope>
-        extends MessageDispatcher<C> {
-
-    /**
-     * Dispatches the message contained in the passed envelope.
-     *
-     * @param envelope the envelope with the message
-     */
-    void dispatch(E envelope);
-
+public interface MulticastDispatcher <C extends MessageClass, E extends MessageEnvelope, I>
+        extends MessageDispatcher<C, E, Set<I>> {
 }

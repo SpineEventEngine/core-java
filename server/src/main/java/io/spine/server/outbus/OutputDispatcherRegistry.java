@@ -42,7 +42,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 @Internal
 public class OutputDispatcherRegistry<C extends MessageClass,
-                                      D extends MessageDispatcher<C>>
+                                      D extends MessageDispatcher<C, ?, ?>>
                                 extends DispatcherRegistry<C, D> {
     /**
      * {@inheritDoc}
@@ -96,10 +96,9 @@ public class OutputDispatcherRegistry<C extends MessageClass,
      *
      * <p>Overrides in order to expose itself to {@link CommandOutputBus#close() CommandOutputBus}.
      */
+    @SuppressWarnings("RedundantMethodOverride")
     @Override
     protected void unregisterAll() {
         super.unregisterAll();
     }
-
-
 }

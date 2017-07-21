@@ -40,7 +40,8 @@ public class DelegatingEventDispatcherShould {
                 .testAllPublicStaticMethods(DelegatingEventDispatcher.class);
     }
 
-    private static final class EmptyEventDispatcherDelegate implements EventDispatcherDelegate {
+    private static final class EmptyEventDispatcherDelegate
+            implements EventDispatcherDelegate<String> {
 
         @Override
         public Set<EventClass> getEventClasses() {
@@ -48,8 +49,9 @@ public class DelegatingEventDispatcherShould {
         }
 
         @Override
-        public void dispatchEvent(EventEnvelope envelope) {
+        public Set<String> dispatchEvent(EventEnvelope envelope) {
             // Do nothing.
+            return ImmutableSet.of();
         }
     }
 }

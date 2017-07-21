@@ -79,7 +79,7 @@ import static io.spine.server.entity.EntityWithLifecycle.Predicates.isEntityVisi
  */
 public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
                 extends Repository<I, A>
-                implements CommandDispatcher, EventDispatcherDelegate {
+                implements CommandDispatcher<I>, EventDispatcherDelegate<I> {
 
     /** The default number of events to be stored before a next snapshot is made. */
     static final int DEFAULT_SNAPSHOT_TRIGGER = 100;
@@ -125,7 +125,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
                       .register(this);
 
         // If there are any events on which aggregates react, register via delegating dispatcher.
-        final DelegatingEventDispatcher delegatingDispatcher = DelegatingEventDispatcher.of(this);
+        final DelegatingEventDispatcher<I> delegatingDispatcher = DelegatingEventDispatcher.of(this);
         if (!delegatingDispatcher.getMessageClasses()
                                  .isEmpty()) {
             boundedContext.getEventBus()
@@ -228,13 +228,13 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * @param envelope the envelope of the command to dispatch
      */
     @Override
-    public void dispatch(final CommandEnvelope envelope) {
-        AggregateCommandEndpoint.handle(this, envelope);
+    public I dispatch(final CommandEnvelope envelope) {
+        return AggregateCommandEndpoint.handle(this, envelope);
     }
 
     @Override
-    public void dispatchEvent(EventEnvelope envelope) {
-        AggregateEventEndpoint.handle(this, envelope);
+    public Set<I> dispatchEvent(EventEnvelope envelope) {
+        return AggregateEventEndpoint.handle(this, envelope);
     }
 
     /**

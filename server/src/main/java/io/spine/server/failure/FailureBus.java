@@ -28,6 +28,7 @@ import io.spine.core.FailureClass;
 import io.spine.core.FailureEnvelope;
 import io.spine.core.FailureId;
 import io.spine.core.IsSent;
+import io.spine.core.MessageInvalid;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.bus.Bus;
 import io.spine.server.bus.BusFilter;
@@ -35,7 +36,6 @@ import io.spine.server.bus.DeadMessageTap;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.outbus.CommandOutputBus;
 import io.spine.server.outbus.OutputDispatcherRegistry;
-import io.spine.core.MessageInvalid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,7 +60,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class FailureBus extends CommandOutputBus<Failure,
                                                  FailureEnvelope,
                                                  FailureClass,
-                                                 FailureDispatcher> {
+                                                 FailureDispatcher<?>> {
 
     private final Deque<BusFilter<FailureEnvelope>> filterChain;
 
@@ -102,7 +102,7 @@ public class FailureBus extends CommandOutputBus<Failure,
     }
 
     @Override
-    protected OutputDispatcherRegistry<FailureClass, FailureDispatcher> createRegistry() {
+    protected OutputDispatcherRegistry<FailureClass, FailureDispatcher<?>> createRegistry() {
         return new FailureDispatcherRegistry();
     }
 
@@ -144,7 +144,7 @@ public class FailureBus extends CommandOutputBus<Failure,
     }
 
     @VisibleForTesting
-    Set<FailureDispatcher> getDispatchers(FailureClass failureClass) {
+    Set<FailureDispatcher<?>> getDispatchers(FailureClass failureClass) {
         return registry().getDispatchers(failureClass);
     }
 

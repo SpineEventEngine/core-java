@@ -118,7 +118,7 @@ public class CommandDispatcherRegistryShould {
 
     @Test
     public void unregister_command_dispatcher() {
-        final CommandDispatcher dispatcher = new AllCommandDispatcher();
+        final CommandDispatcher<Message> dispatcher = new AllCommandDispatcher();
 
         registry.register(dispatcher);
         registry.unregister(dispatcher);

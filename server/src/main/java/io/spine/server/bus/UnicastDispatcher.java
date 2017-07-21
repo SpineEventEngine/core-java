@@ -28,15 +28,9 @@ import io.spine.type.MessageClass;
  *
  * @param <C> the type of dispatched messages
  * @param <E> the type of envelopes for dispatched objects that contain messages
+ * @param <I> the type of the entity ID
  * @author Alexander Yevsyukov
  */
-public interface UnicastDispatcher<C extends MessageClass, E extends MessageEnvelope>
-        extends MessageDispatcher<C> {
-
-    /**
-     * Dispatches the message contained in the passed envelope.
-     *
-     * @param envelope the envelope with the message
-     */
-    void dispatch(E envelope);
+public interface UnicastDispatcher<C extends MessageClass, E extends MessageEnvelope, I>
+        extends MessageDispatcher<C, E, I> {
 }
