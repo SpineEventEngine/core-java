@@ -29,12 +29,7 @@ import io.spine.base.Error;
 import io.spine.core.Response;
 import io.spine.core.Responses;
 
-import javax.annotation.Nullable;
-import java.util.List;
-
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.core.Responses.ok;
 
 /**
@@ -43,7 +38,8 @@ import static io.spine.core.Responses.ok;
  *
  * @author Alex Tymchenko
  */
-@Internal
+@SuppressWarnings("OverlyComplexAnonymousInnerClass")
+    // We allow custom `toString()` in the anonymous classes for easier diagnostics.
 public class StreamObservers {
 
     private StreamObservers() {
@@ -74,6 +70,11 @@ public class StreamObservers {
             @Override
             public void onCompleted() {
                 // Do nothing.
+            }
+
+            @Override
+            public String toString() {
+                return "StreamObservers.noOpObserver()";
             }
         };
     }
@@ -112,6 +113,11 @@ public class StreamObservers {
             public void onCompleted() {
                 // do nothing.
             }
+
+            @Override
+            public String toString() {
+                return "StreamObservers.forwardErrorsOnly()";
+            }
         };
     }
 
@@ -123,7 +129,7 @@ public class StreamObservers {
      */
     @Internal
     public static <T> MemoizingObserver<T> memoizingObserver() {
-        return new MemoizingObserver<>();
+        return MemoizingObserver.newInstance();
     }
 
     /**
@@ -153,79 +159,5 @@ public class StreamObservers {
         }
 
         return Optional.absent();
-    }
-
-    /**
-     * The {@link StreamObserver} which stores the input data and then exposes it via API calls.
-     *
-     * @param <T> the type of streamed objects
-     */
-    @Internal
-    public static class MemoizingObserver<T> implements StreamObserver<T> {
-        private final List<T> responses = newLinkedList();
-        private Throwable throwable;
-        private boolean completed = false;
-
-        private MemoizingObserver() {
-            // prevent instantiation from the outside.
-        }
-
-        @Override
-        public void onNext(T value) {
-            responses.add(value);
-        }
-
-        @Override
-        public void onError(Throwable t) {
-            throwable = t;
-        }
-
-        @Override
-        public void onCompleted() {
-            completed = true;
-        }
-
-        /**
-         * Returns the first item which has been fed to this {@code StreamObserver}.
-         *
-         * <p>If there were no responses yet, {@link IllegalStateException} is thrown.
-         *
-         * @return the first item responded
-         */
-        public T firstResponse() {
-            final boolean noResponses = responses.isEmpty();
-            if (noResponses) {
-                throw new IllegalStateException("No responses have been received yet");
-            }
-            return responses.get(0);
-        }
-
-        /**
-         * Returns all the responses received so far.
-         *
-         * @return all objects received by this {@code StreamObserver}
-         */
-        public List<T> responses() {
-            return newArrayList(responses);
-        }
-
-        /**
-         * Allows to understand whether the response has been completed.
-         *
-         * @return {@code true} if the response has been completed, {@code false} otherwise
-         */
-        public boolean isCompleted() {
-            return completed;
-        }
-
-        /**
-         * Obtains the {@linkplain Throwable error} if it has been received by this observer.
-         *
-         * @return an error, or {@code null} if no error has been received
-         */
-        @Nullable
-        public Throwable getError() {
-            return throwable;
-        }
     }
 }

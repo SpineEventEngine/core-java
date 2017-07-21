@@ -40,5 +40,5 @@ public interface EntityEventDispatcher<I> extends EventDispatcher {
      * @param envelope the envelope with the event to dispatch
      * @return non-empty set of event identifiers
      */
-    Set<I> getTargetIds(EventEnvelope envelope);
+    Set<I> getTargets(EventEnvelope envelope);
 }

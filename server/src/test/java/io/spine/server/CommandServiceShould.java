@@ -29,7 +29,7 @@ import io.spine.core.CommandId;
 import io.spine.core.CommandValidationError;
 import io.spine.core.IsSent;
 import io.spine.core.Status;
-import io.spine.grpc.StreamObservers.MemoizingObserver;
+import io.spine.grpc.MemoizingObserver;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.transport.GrpcContainer;
 import org.junit.After;

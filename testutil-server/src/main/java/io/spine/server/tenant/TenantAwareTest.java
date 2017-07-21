@@ -22,9 +22,9 @@ package io.spine.server.tenant;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
+import io.spine.Environment;
 import io.spine.annotation.Internal;
 import io.spine.core.TenantId;
-import io.spine.server.Environment;
 import io.spine.server.storage.StorageFactory;
 
 import static com.google.common.base.Preconditions.checkNotNull;

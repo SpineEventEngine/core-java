@@ -167,7 +167,7 @@ public abstract class FailureSubscriberMethod extends HandlerMethod<CommandConte
         checkNotNull(cls);
 
         final ImmutableSet<FailureClass> result =
-                FailureClass.setOf(getHandledMessageClasses(cls, predicate()));
+                FailureClass.setOf(inspect(cls, predicate()));
         return result;
     }
 

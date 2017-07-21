@@ -32,7 +32,8 @@ import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.core.EventId;
 import io.spine.core.IsSent;
-import io.spine.grpc.StreamObservers;
+import io.spine.grpc.LoggingObserver;
+import io.spine.grpc.LoggingObserver.Level;
 import io.spine.server.bus.Bus;
 import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.DeadMessageTap;
@@ -42,8 +43,6 @@ import io.spine.server.outbus.CommandOutputBus;
 import io.spine.server.outbus.OutputDispatcherRegistry;
 import io.spine.server.storage.StorageFactory;
 import io.spine.validate.MessageValidator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -115,17 +114,17 @@ public class EventBus extends CommandOutputBus<Event,
     private final MessageValidator eventMessageValidator;
 
     private final Deque<BusFilter<EventEnvelope>> filterChain;
-
+    private final StreamObserver<IsSent> streamObserver = LoggingObserver.forClass(getClass(),
+                                                                                   Level.TRACE);
     /** The validator for events posted to the bus. */
     @Nullable
     private EventValidator eventValidator;
+
     /** The enricher for posted events or {@code null} if the enrichment is not supported. */
     @Nullable
     private EventEnricher enricher;
 
-    /**
-     * Creates new instance by the passed builder.
-     */
+    /** Creates new instance by the passed builder. */
     private EventBus(Builder builder) {
         super(checkNotNull(builder.dispatcherEventDelivery));
         this.eventStore = builder.eventStore;
@@ -210,7 +209,7 @@ public class EventBus extends CommandOutputBus<Event,
      * @see CommandOutputBus#post(Message, StreamObserver)
      */
     public final void post(Event event) {
-        post(event, StreamObservers.<IsSent>noOpObserver());
+        post(event, streamObserver);
     }
 
     /**
@@ -226,7 +225,7 @@ public class EventBus extends CommandOutputBus<Event,
      * @see CommandOutputBus#post(Message, StreamObserver)
      */
     public final void post(Iterable<Event> events) {
-        post(events, StreamObservers.<IsSent>noOpObserver());
+        post(events, streamObserver);
     }
 
     @Override
@@ -545,15 +544,5 @@ public class EventBus extends CommandOutputBus<Event,
             checkNotNull(input);
             return input.getId();
         }
-    }
-
-    private enum LogSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(EventBus.class);
-    }
-
-    static Logger log() {
-        return LogSingleton.INSTANCE.value;
     }
 }

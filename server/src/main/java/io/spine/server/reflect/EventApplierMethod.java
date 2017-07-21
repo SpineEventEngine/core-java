@@ -27,7 +27,6 @@ import com.google.protobuf.Message;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
@@ -39,7 +38,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *
  * @author Alexander Yevsyukov
  */
-public class EventApplierMethod extends HandlerMethod<Empty> {
+public final class EventApplierMethod extends HandlerMethod<Empty> {
 
     /** The instance of the predicate to filter event applier methods of an aggregate class. */
     private static final MethodPredicate PREDICATE = new FilterPredicate();
@@ -57,32 +56,30 @@ public class EventApplierMethod extends HandlerMethod<Empty> {
         return new EventApplierMethod(method);
     }
 
-    public static EventApplierMethod forEventMessage(Class<? extends Aggregate> cls,
-                                                     Message eventMessage) {
+    public static EventApplierMethod getMethod(Class<? extends Aggregate> cls,
+                                               Message eventMessage) {
         checkNotNull(cls);
         checkNotNull(eventMessage);
 
-        final EventApplierMethod method = MethodRegistry.getInstance()
-                                                        .get(cls,
-                                                             eventMessage.getClass(),
-                                                             factory());
+        final EventApplierMethod method =
+                MethodRegistry.getInstance()
+                              .get(cls, eventMessage.getClass(), factory());
         if (method == null) {
-            throw missingEventApplier(cls, eventMessage.getClass());
+            throw newIllegalStateException(
+                    "Missing event applier for event class %s in aggregate class %s.",
+                    eventMessage.getClass().getName(),
+                    cls.getName());
         }
         return method;
-    }
-
-    private static IllegalStateException missingEventApplier(Class<? extends Aggregate> cls,
-                                                      Class<? extends Message> eventClass) {
-        return newIllegalStateException(
-                "Missing event applier for event class %s in aggregate class %s.",
-                eventClass.getName(),
-                cls.getName());
     }
 
     @VisibleForTesting
     static MethodPredicate predicate() {
         return PREDICATE;
+    }
+
+    public static HandlerMethod.Factory<EventApplierMethod> factory() {
+        return Factory.getInstance();
     }
 
     /**
@@ -93,20 +90,20 @@ public class EventApplierMethod extends HandlerMethod<Empty> {
      * as the context parameter because event appliers do not have a context parameter.
      * Such redirection is correct because {@linkplain #getParamCount()} the number of parameters}
      * is set to one during instance construction.
-     *
-     * @throws InvocationTargetException if the method call results in an exception
      */
-    public <R> R invoke(Aggregate aggregate, Message message) throws InvocationTargetException {
+    public <R> R invoke(Aggregate aggregate, Message message) {
         // Make this method visible to Aggregate class.
         return invoke(aggregate, message, Empty.getDefaultInstance());
     }
 
-    public static HandlerMethod.Factory<EventApplierMethod> factory() {
-        return Factory.getInstance();
-    }
-
     /** The factory for filtering methods that match {@code EventApplier} specification. */
     private static class Factory implements HandlerMethod.Factory<EventApplierMethod> {
+
+        private static final Factory INSTANCE = new Factory();
+
+        private static Factory getInstance() {
+            return INSTANCE;
+        }
 
         @Override
         public Class<EventApplierMethod> getMethodClass() {
@@ -129,19 +126,11 @@ public class EventApplierMethod extends HandlerMethod<Empty> {
                 warnOnWrongModifier("Event applier method {} must be declared 'private'.", method);
             }
         }
-
-        private enum Singleton {
-            INSTANCE;
-            @SuppressWarnings("NonSerializableFieldInSerializableClass")
-            private final EventApplierMethod.Factory value = new EventApplierMethod.Factory();
-        }
-
-        private static Factory getInstance() {
-            return Singleton.INSTANCE.value;
-        }
     }
 
-    /** The predicate for filtering event applier methods. */
+    /**
+     * The predicate for filtering event applier methods.
+     */
     private static class FilterPredicate extends HandlerMethodPredicate<Empty> {
 
         private static final int NUMBER_OF_PARAMS = 1;

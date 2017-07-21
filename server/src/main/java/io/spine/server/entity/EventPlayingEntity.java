@@ -104,10 +104,16 @@ public abstract class EventPlayingEntity <I,
 
     private void ensureTransaction() {
         if (!isTransactionInProgress()) {
-            throw new IllegalStateException(
-                    "Modification of state and lifecycle is not available. " +
-                            "Make sure to modify those only from an event applier method.");
+            throw new IllegalStateException(getMissingTxMessage());
         }
+    }
+
+    /**
+     * Provides error message text for the case of not having an active transaction when a state
+     * modification call is made.
+     */
+    protected String getMissingTxMessage() {
+        return "Cannot modify entity state: transaction is not available.";
     }
 
     private Transaction<I, ? extends EventPlayingEntity<I,S,B>, S, B> tx() {

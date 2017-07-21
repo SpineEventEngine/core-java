@@ -34,7 +34,14 @@ import java.util.Objects;
  */
 class MethodRegistry {
 
+    private static final MethodRegistry INSTANCE = new MethodRegistry();
+
     private final Map<Key<?, ?>, MethodMap> items = Maps.newConcurrentMap();
+
+    @CheckReturnValue
+    static MethodRegistry getInstance() {
+        return INSTANCE;
+    }
 
     /**
      * Obtains a handler method, which handles the passed message class.
@@ -43,11 +50,11 @@ class MethodRegistry {
      * they are created using the passed {@code factory} of the handler methods.
      * Then the method is obtained.
      *
-     * @param targetClass the class of the target object
+     * @param targetClass  the class of the target object
      * @param messageClass the class of the message to handle
-     * @param factory the handler method factory for getting methods from the target class
-     * @param <T> the type of the target object class
-     * @param <H> the type of the message handler method
+     * @param factory      the handler method factory for getting methods from the target class
+     * @param <T>          the type of the target object class
+     * @param <H>          the type of the message handler method
      * @return a handler method
      */
     public <T, H extends HandlerMethod> H get(Class<T> targetClass,
@@ -58,7 +65,7 @@ class MethodRegistry {
         @SuppressWarnings("unchecked")
             /* We can cast as the map type is the same as one of the passed factory,
                which is used in creating the entry in the `if` block below. */
-        MethodMap<H> methods = items.get(key);
+                MethodMap<H> methods = items.get(key);
         if (methods == null) {
             methods = MethodMap.create(targetClass, factory);
             items.put(key, methods);
@@ -84,6 +91,11 @@ class MethodRegistry {
         }
 
         @Override
+        public int hashCode() {
+            return Objects.hash(targetClass, methodClass);
+        }
+
+        @Override
         public boolean equals(Object o) {
             if (this == o) {
                 return true;
@@ -95,21 +107,5 @@ class MethodRegistry {
             return Objects.equals(targetClass, key.targetClass) &&
                     Objects.equals(methodClass, key.methodClass);
         }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(targetClass, methodClass);
-        }
-    }
-
-    @CheckReturnValue
-    public static MethodRegistry getInstance() {
-        return Singleton.INSTANCE.value;
-    }
-
-    private enum Singleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final MethodRegistry value = new MethodRegistry();
     }
 }

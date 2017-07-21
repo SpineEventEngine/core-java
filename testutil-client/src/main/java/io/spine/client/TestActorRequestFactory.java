@@ -22,15 +22,16 @@ package io.spine.client;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
+import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
-import io.spine.Identifier;
 import io.spine.annotation.Internal;
 import io.spine.core.ActorContext;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
-import io.spine.core.CommandId;
+import io.spine.core.CommandEnvelope;
 import io.spine.core.TenantId;
 import io.spine.core.UserId;
+import io.spine.test.TestValues;
 import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
 
@@ -106,6 +107,24 @@ public class TestActorRequestFactory extends ActorRequestFactory {
     }
 
     /**
+     * Generates a test instance of a command based on {@link StringValue}
+     */
+    public Command generate() {
+        final String randomSuffix = String.valueOf(TestValues.random(10_000));
+        final StringValue msg = StringValue.newBuilder()
+                                           .setValue("GeneratedTestCommand" + randomSuffix)
+                                           .build();
+        return createCommand(msg);
+    }
+
+    /**
+     * Generates a command and wraps it into envelope.
+     */
+    public CommandEnvelope generateAndWrap() {
+        return CommandEnvelope.of(generate());
+    }
+
+    /**
      * {@inheritDoc}
      *
      * <p>Overrides to open access to creating command contexts in tests.
@@ -113,13 +132,5 @@ public class TestActorRequestFactory extends ActorRequestFactory {
     @Override
     public CommandContext createCommandContext() {
         return super.createCommandContext();
-    }
-
-    public CommandId createCommandId() {
-        final String uid = Identifier.newUuid();
-        final CommandId commandId = CommandId.newBuilder()
-                                             .setUuid(uid)
-                                             .build();
-        return commandId;
     }
 }

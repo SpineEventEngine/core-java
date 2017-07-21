@@ -23,23 +23,24 @@ package io.spine.server.stand;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
+import io.spine.Identifier;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
+import io.spine.core.CommandEnvelope;
 import io.spine.core.Enrichment;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
 import io.spine.core.Version;
-import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
-import io.spine.server.command.EventFactory;
-import io.spine.server.entity.idfunc.EventTargetsFunction;
+import io.spine.server.event.EventFactory;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
+import io.spine.server.route.EventRoute;
 import io.spine.test.Tests;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
@@ -82,11 +83,8 @@ class Given {
                                                                                  .setId("12345AD0"))
                                                           .build();
         final StringValue producerId = toMessage(Given.class.getSimpleName());
-        final EventFactory eventFactory = EventFactory.newBuilder()
-                                                      .setCommandId(cmd.getId())
-                                                      .setProducerId(producerId)
-                                                      .setCommandContext(cmd.getContext())
-                                                      .build();
+        final EventFactory eventFactory = EventFactory.on(CommandEnvelope.of(cmd),
+                                                          Identifier.pack(producerId));
         final Event event = eventFactory.createEvent(eventMessage, Tests.<Version>nullRef());
         final Event result = event.toBuilder()
                                   .setContext(event.getContext()
@@ -102,22 +100,15 @@ class Given {
         return new StandTestProjectionRepository();
     }
 
-    static AggregateRepository<ProjectId, StandTestAggregate>
-    aggregateRepo(BoundedContext context) {
-        return new StandTestAggregateRepository();
-    }
-
     static AggregateRepository<ProjectId, StandTestAggregate> aggregateRepo() {
-        final BoundedContext boundedContext = BoundedContext.newBuilder()
-                                                            .build();
-        return aggregateRepo(boundedContext);
+        return new StandTestAggregateRepository();
     }
 
     static class StandTestProjectionRepository
             extends ProjectionRepository<ProjectId, StandTestProjection, Project> {
 
-        private static final EventTargetsFunction<ProjectId, ProjectCreated> EVENT_TARGETS_FN =
-                new EventTargetsFunction<ProjectId, ProjectCreated>() {
+        private static final EventRoute<ProjectId, ProjectCreated> EVENT_TARGETS_FN =
+                new EventRoute<ProjectId, ProjectCreated>() {
             private static final long serialVersionUID = 0L;
 
             @Override
@@ -130,7 +121,7 @@ class Given {
 
         StandTestProjectionRepository() {
             super();
-            addIdSetFunction(ProjectCreated.class, EVENT_TARGETS_FN);
+            getRouting().route(ProjectCreated.class, EVENT_TARGETS_FN);
         }
     }
 

@@ -58,7 +58,7 @@ import static java.lang.String.format;
  */
 @Internal
 public abstract class CommandOutputBus<M extends Message,
-                                       E extends MessageEnvelope<M>,
+                                       E extends MessageEnvelope<?, M>,
                                        C extends MessageClass,
                                        D extends MessageDispatcher<C,E>>
                 extends Bus<M, E, C, D> {
@@ -142,6 +142,11 @@ public abstract class CommandOutputBus<M extends Message,
         final C messageClass = (C) messageEnvelope.getMessageClass();
         final Collection<D> dispatchers = registry().getDispatchers(messageClass);
         delivery().deliver(messageEnvelope);
+        //TODO:2017-07-20:alexander.yevsyukov: What if delivery to some of the targets failed?
+        // We cannot return the size just like that. It should be responsibility of Delivery, which
+        // should return at least two numbers: successfully delivery count, and failed delivery count.
+        // Assuming a delivery can be postponed on per-consumer basis, we should probably return
+        // three counts (delivered, failed, postponed), and extend `IsSent` accordingly.
         return dispatchers.size();
     }
 

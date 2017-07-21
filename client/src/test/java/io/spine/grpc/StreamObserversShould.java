@@ -28,7 +28,6 @@ import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Error;
 import io.spine.core.Response;
-import io.spine.grpc.StreamObservers.MemoizingObserver;
 import io.spine.test.Tests;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;

@@ -22,20 +22,19 @@ package io.spine.server.command;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.spine.client.TestActorRequestFactory;
-import io.spine.core.CommandContext;
-import io.spine.core.CommandId;
+import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
+import io.spine.core.MessageEnvelope;
 import io.spine.core.Version;
+import io.spine.server.event.EventFactory;
 
 import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.protobuf.TypeConverter.toMessage;
 
 /**
  * The factory or producing events for tests.
@@ -44,41 +43,19 @@ import static io.spine.protobuf.TypeConverter.toMessage;
  */
 public class TestEventFactory extends EventFactory {
 
-    private TestEventFactory(Builder builder) {
-        super(builder);
-    }
-
-    public static TestEventFactory newInstance(Class<?> testSuiteClass,
-                                               CommandContext commandContext) {
-        checkNotNull(testSuiteClass);
-        checkNotNull(commandContext);
-
-        final StringValue producerId = toMessage(testSuiteClass.getName());
-        final Builder builder = EventFactory.newBuilder()
-                                            .setProducerId(producerId)
-                                            .setCommandContext(commandContext);
-
-        final TestEventFactory result = new TestEventFactory(builder);
-        return result;
+    private TestEventFactory(MessageEnvelope<?, ?> origin, Any producerId, int eventCount) {
+        super(origin, producerId, eventCount);
     }
 
     public static TestEventFactory newInstance(Any producerId, Class<?> testSuiteClass) {
-        final TestActorRequestFactory commandFactory =
-                TestActorRequestFactory.newInstance(testSuiteClass);
-        return newInstance(producerId, commandFactory);
+        return newInstance(producerId, TestActorRequestFactory.newInstance(testSuiteClass));
     }
 
     public static TestEventFactory newInstance(Any producerId,
                                                TestActorRequestFactory requestFactory) {
         checkNotNull(requestFactory);
-        final CommandContext commandContext = requestFactory.createCommandContext();
-        final CommandId commandId = requestFactory.createCommandId();
-        final Builder builder = EventFactory.newBuilder()
-                                            .setProducerId(producerId)
-                                            .setCommandContext(commandContext)
-                                            .setCommandId(commandId);
-        final TestEventFactory result = new TestEventFactory(builder);
-        return result;
+        final CommandEnvelope cmd = requestFactory.generateAndWrap();
+        return new TestEventFactory(cmd, producerId, 1);
     }
 
     public static TestEventFactory newInstance(TestActorRequestFactory requestFactory) {
@@ -87,9 +64,7 @@ public class TestEventFactory extends EventFactory {
     }
 
     public static TestEventFactory newInstance(Class<?> testSuiteClass) {
-        final TestActorRequestFactory requestFactory =
-                TestActorRequestFactory.newInstance(testSuiteClass);
-        return newInstance(requestFactory);
+        return newInstance(TestActorRequestFactory.newInstance(testSuiteClass));
     }
 
     /**
@@ -102,9 +77,7 @@ public class TestEventFactory extends EventFactory {
     /**
      * Creates an event produced at the passed time.
      */
-    public Event createEvent(Message messageOrAny,
-                             @Nullable Version version,
-                             Timestamp atTime) {
+    public Event createEvent(Message messageOrAny, @Nullable Version version, Timestamp atTime) {
         final Event event = createEvent(messageOrAny, version);
         final EventContext context = event.getContext()
                                           .toBuilder()

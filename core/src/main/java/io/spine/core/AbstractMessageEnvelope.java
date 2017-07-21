@@ -20,6 +20,8 @@
 
 package io.spine.core;
 
+import com.google.protobuf.Message;
+
 import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -27,11 +29,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Abstract base for classes implementing {@link MessageEnvelope}.
  *
+ * @param <I> the class of the message ID
  * @param <T> the type of the object that wraps a message
  * @author Alexander Yevsyukov
  * @author Alex Tymchenko
  */
-public abstract class AbstractMessageEnvelope<T> implements MessageEnvelope<T> {
+public abstract class AbstractMessageEnvelope<I extends Message, T>
+        implements MessageEnvelope<I, T> {
 
     private final T object;
 

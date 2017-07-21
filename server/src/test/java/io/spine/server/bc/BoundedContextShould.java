@@ -24,7 +24,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.core.IsSent;
 import io.spine.core.Responses;
-import io.spine.grpc.StreamObservers.MemoizingObserver;
+import io.spine.grpc.MemoizingObserver;
 import io.spine.option.EntityOption;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;

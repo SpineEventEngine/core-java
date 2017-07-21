@@ -39,7 +39,7 @@ import static io.spine.server.bus.Buses.reject;
  * @author Dmytro Dashenkov
  */
 final class DeadMessageFilter<T extends Message,
-                              E extends MessageEnvelope<T>,
+                              E extends MessageEnvelope<?, T>,
                               C extends MessageClass,
                               D extends MessageDispatcher<C, E>>
         extends AbstractBusFilter<E> {

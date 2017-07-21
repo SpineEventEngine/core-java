@@ -30,7 +30,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alexander Yevsyukov
  */
-public final class CommandEnvelope extends AbstractMessageEnvelope<Command> {
+public final class CommandEnvelope extends AbstractMessageEnvelope<CommandId, Command> {
 
     // The below fields are calculated from the command.
 
@@ -75,6 +75,7 @@ public final class CommandEnvelope extends AbstractMessageEnvelope<Command> {
     /**
      * Obtains the command ID.
      */
+    @Override
     public CommandId getId() {
         return commandId;
     }
@@ -93,6 +94,24 @@ public final class CommandEnvelope extends AbstractMessageEnvelope<Command> {
     @Override
     public CommandClass getMessageClass() {
         return commandClass;
+    }
+
+    /**
+     * Obtains the actor context of the enclosed command.
+     */
+    @Override
+    public ActorContext getActorContext() {
+        return getCommandContext().getActorContext();
+    }
+
+    /**
+     * Sets the context of the enclosed command as the origin for the event being built.
+     *
+     * @param builder event context builder into which set the event origin context
+     */
+    @Override
+    public void setOriginContext(EventContext.Builder builder) {
+        builder.setCommandContext(getCommandContext());
     }
 
     /**

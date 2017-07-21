@@ -33,7 +33,6 @@ import io.spine.client.Query;
 import io.spine.client.QueryResponse;
 import io.spine.client.Subscription;
 import io.spine.client.Topic;
-import io.spine.core.CommandContext;
 import io.spine.core.Response;
 import io.spine.core.Responses;
 import io.spine.core.TenantId;
@@ -154,13 +153,10 @@ public class Stand implements AutoCloseable {
 
     /**
      * Posts the state of an {@link VersionableEntity} to this {@link Stand}.
+     *  @param entity         the entity which state should be delivered to the {@code Stand}
      *
-     * @param entity         the entity which state should be delivered to the {@code Stand}
-     * @param commandContext the context of the command, which triggered the entity state update.
      */
-    public void post(final VersionableEntity entity, CommandContext commandContext) {
-        final TenantId tenantId = commandContext.getActorContext()
-                                                .getTenantId();
+    public void post(TenantId tenantId, final VersionableEntity entity) {
         final EntityStateEnvelope envelope = EntityStateEnvelope.of(entity, tenantId);
         delivery.deliver(envelope);
     }
@@ -200,7 +196,7 @@ public class Stand implements AutoCloseable {
 
             @Override
             public void run() {
-                final Object id = envelope.getId();
+                final Object id = envelope.getEntityId();
                 final Message entityState = envelope.getMessage();
                 final Any packedState = AnyPacker.pack(entityState);
 
