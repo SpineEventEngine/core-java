@@ -456,7 +456,7 @@ public class EventBusShould {
         @Override
         public Set<String> dispatch(EventEnvelope event) {
             dispatchCalled = true;
-            return ImmutableSet.of(toString());
+            return Identity.of(this);
         }
 
         private boolean isDispatchCalled() {

@@ -20,7 +20,6 @@
 
 package io.spine.server.event;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
@@ -66,7 +65,7 @@ public abstract class EventSubscriber implements EventDispatcher<String> {
             }
         };
         op.execute();
-        return ImmutableSet.of(toString());
+        return Identity.of(this);
     }
 
     @Override

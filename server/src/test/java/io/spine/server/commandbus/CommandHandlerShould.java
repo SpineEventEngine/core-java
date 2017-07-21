@@ -217,7 +217,7 @@ public class CommandHandlerShould {
         @Override
         public Set<String> dispatch(EventEnvelope envelope) {
             dispatched.add(envelope);
-            return ImmutableSet.of(toString());
+            return Identity.of(this);
         }
 
         @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK for tests.

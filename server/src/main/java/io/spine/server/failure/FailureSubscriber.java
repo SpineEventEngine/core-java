@@ -62,7 +62,7 @@ public class FailureSubscriber implements FailureDispatcher<String> {
             }
         };
         op.execute();
-        return ImmutableSet.of(toString());
+        return Identity.of(this);
     }
 
     @Override

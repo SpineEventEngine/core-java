@@ -22,40 +22,52 @@ package io.spine.server.bus;
 
 import com.google.common.collect.ImmutableSet;
 import io.spine.core.MessageEnvelope;
+import io.spine.test.Tests;
 import io.spine.type.MessageClass;
+import org.junit.Test;
 
 import java.util.Set;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.Identifier.newUuid;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
- * Dispatches a message to several entities.
- *
- * @param <C> the type of dispatched messages
- * @param <E> the type of envelopes for dispatched objects that contain messages
- * @param <I> the type of IDs of entities to which messages are dispatched
  * @author Alexander Yevsyukov
  */
-public interface MulticastDispatcher <C extends MessageClass, E extends MessageEnvelope, I>
-        extends MessageDispatcher<C, E, Set<I>> {
+public class MulticastDispatcherIdentityShould {
 
-    class Identity {
+    @Test
+    public void have_utility_ctor() {
+        Tests.assertHasPrivateParameterlessCtor(MulticastDispatcher.Identity.class);
+    }
 
-        /** Prevent instantiation of this utility class. */
-        private Identity() {}
+    @Test
+    public void return_dispatcher_identity() throws Exception {
+        final Set<String> set = MulticastDispatcher.Identity.of(new IdentityTest());
 
-        /**
-         * Returns immutable set with one element with the identity of the multicast dispatcher
-         * that dispatches messages to itself.
-         *
-         * <p>The identity obtained as the result of {@link MulticastDispatcher#toString()}.
-         *
-         * @param self the instance of the dispatcher
-         * @return immutable set with the dispatcher identity
-         */
-        public static Set<String> of(MulticastDispatcher self) {
-            checkNotNull(self);
-            return ImmutableSet.of(self.toString());
+        assertTrue(set.contains(IdentityTest.ID));
+        assertEquals(1, set.size());
+    }
+
+    private static class IdentityTest
+            implements MulticastDispatcher<MessageClass, MessageEnvelope, String> {
+
+        private static final String ID = newUuid();
+
+        @Override
+        public Set<MessageClass> getMessageClasses() {
+            return ImmutableSet.of();
+        }
+
+        @Override
+        public Set<String> dispatch(MessageEnvelope envelope) {
+            return Identity.of(this);
+        }
+
+        @Override
+        public String toString() {
+            return ID;
         }
     }
 }

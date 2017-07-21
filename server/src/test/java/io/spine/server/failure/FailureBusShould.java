@@ -19,7 +19,6 @@
  */
 package io.spine.server.failure;
 
-import com.google.common.collect.ImmutableSet;
 import io.spine.base.Error;
 import io.spine.change.StringChange;
 import io.spine.client.CommandFactory;
@@ -412,7 +411,7 @@ public class FailureBusShould {
         @Override
         public Set<String> dispatch(FailureEnvelope failure) {
             dispatchCalled = true;
-            return ImmutableSet.of(toString());
+            return Identity.of(this);
         }
 
         private boolean isDispatchCalled() {
