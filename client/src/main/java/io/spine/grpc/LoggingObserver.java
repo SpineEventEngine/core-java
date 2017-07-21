@@ -115,6 +115,7 @@ public final class LoggingObserver<V> implements StreamObserver<V> {
                 break;
             case WARN:
                 logger.warn(out);
+                break;
         }
     }
 
