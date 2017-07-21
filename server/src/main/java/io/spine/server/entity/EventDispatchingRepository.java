@@ -21,13 +21,18 @@
 package io.spine.server.entity;
 
 import com.google.protobuf.Message;
+import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
+import io.spine.core.ExternalMessageEnvelope;
+import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.route.EventRoute;
 import io.spine.server.route.EventRouting;
 import io.spine.server.tenant.EventOperation;
+import io.spine.type.MessageClass;
 
 import javax.annotation.CheckReturnValue;
+import java.util.Collections;
 import java.util.Set;
 
 /**
@@ -75,6 +80,10 @@ public abstract class EventDispatchingRepository<I,
         super.onRegistered();
         getBoundedContext().getEventBus()
                            .register(this);
+
+        getBoundedContext().getIntegrationBus()
+                           .register(getExternalDispatcher());
+
     }
 
     @Override
@@ -112,4 +121,32 @@ public abstract class EventDispatchingRepository<I,
      * @param context      the event context
      */
     protected abstract void dispatchToEntity(I id, Message eventMessage, EventContext context);
+
+    /**
+     * Obtains an external event dispatcher for this repository.
+     *
+     * <p>This method should be overridden by the repositories, which are eligible
+     * to handle external messages. In this case the implementation would typically delegate
+     * the dispatching of external messages to the repository itself.
+     *
+     * <p>Such a delegate-based approach is chosen, since it's not possible to make
+     * {@code EventDispatchingRepository} extend another
+     * {@link io.spine.server.bus.MessageDispatcher} interface due to clashes in the class
+     * hierarchy.
+     *
+     * @return the external event dispatcher
+     */
+    protected ExternalMessageDispatcher getExternalDispatcher() {
+        return new ExternalMessageDispatcher() {
+            @Override
+            public Set<MessageClass> getMessageClasses() {
+                return Collections.emptySet();
+            }
+
+            @Override
+            public void dispatch(ExternalMessageEnvelope envelope) {
+                // do nothing by default.
+            }
+        };
+    }
 }

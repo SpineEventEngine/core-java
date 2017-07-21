@@ -31,6 +31,8 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
 import java.lang.reflect.Method;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -42,16 +44,55 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 class MethodMap<H extends HandlerMethod> {
 
-    private final ImmutableMap<Class<? extends Message>, H> map;
+    private final ImmutableMap<Key, H> map;
+
+    /**
+     * A key in the method map, which allows to distinguish the methods
+     * with different attribute sets.
+     */
+    static class Key {
+        private final Class<? extends Message> clazz;
+        private final Set<MethodAttribute<?>> attributes;
+
+        Key(Class<? extends Message> clazz,
+            Set<MethodAttribute<?>> attributes) {
+            this.clazz = clazz;
+            this.attributes = attributes;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            Key key = (Key) o;
+            return Objects.equals(clazz, key.clazz) &&
+                    Objects.equals(attributes, key.attributes);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(clazz, attributes);
+        }
+    }
+
 
     private MethodMap(Class<?> clazz, HandlerMethod.Factory<H> factory) {
         final Predicate<Method> predicate = factory.getPredicate();
         final Map<Class<? extends Message>, Method> rawMethods = scan(clazz, predicate);
-        final ImmutableMap.Builder<Class<? extends Message>, H> builder = ImmutableMap.builder();
+        final ImmutableMap.Builder<Key, H> builder = ImmutableMap.builder();
         for (Map.Entry<Class<? extends Message>, Method> entry : rawMethods.entrySet()) {
             final H handler = factory.create(entry.getValue());
             factory.checkAccessModifier(handler.getMethod());
-            builder.put(entry.getKey(), handler);
+
+
+            //TODO:7/19/17:alex.tymchenko: deal with the generics in the inheritance tree.
+            final Set<MethodAttribute<?>> attributes = handler.getAttributes();
+            final Key key = new Key(entry.getKey(), attributes);
+            builder.put(key, handler);
         }
         this.map = builder.build();
     }
@@ -107,12 +148,12 @@ class MethodMap<H extends HandlerMethod> {
     }
 
     @CheckReturnValue
-    public ImmutableSet<Class<? extends Message>> keySet() {
+    public ImmutableSet<Key> keySet() {
         return map.keySet();
     }
 
     @CheckReturnValue
-    public ImmutableSet<Map.Entry<Class<? extends Message>, H>> entrySet() {
+    public ImmutableSet<Map.Entry<Key, H>> entrySet() {
         return map.entrySet();
     }
 
@@ -123,7 +164,7 @@ class MethodMap<H extends HandlerMethod> {
 
     @CheckReturnValue
     @Nullable
-    public H get(Class<? extends Message> messageClass) {
+    public H get(Key messageClass) {
         return map.get(checkNotNull(messageClass));
     }
 }

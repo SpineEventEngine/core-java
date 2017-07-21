@@ -93,7 +93,7 @@ public abstract class Projection<I,
     }
 
     void apply(Message eventMessage, EventContext eventContext)  {
-        final EventSubscriberMethod method = getMethod(getClass(), eventMessage);
+        final EventSubscriberMethod method = getMethod(getClass(), eventMessage, eventContext);
         method.invoke(this, eventMessage, eventContext);
     }
 
@@ -111,6 +111,16 @@ public abstract class Projection<I,
          */
         static Set<EventClass> getEventClasses(Class<? extends Projection> cls) {
             return EventSubscriberMethod.inspect(cls);
+        }
+
+        /**
+         * Returns the set of event classes handled by the passed {@link Projection} class.
+         *
+         * @param cls the class to inspect
+         * @return immutable set of event classes or an empty set if no events are handled
+         */
+        static Set<EventClass> getExternalEventClasses(Class<? extends Projection> cls) {
+            return EventSubscriberMethod.inspectExternal(cls);
         }
     }
 }

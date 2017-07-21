@@ -20,12 +20,15 @@
 
 package io.spine.server.reflect;
 
-import com.google.common.collect.Maps;
 import com.google.protobuf.Message;
 
 import javax.annotation.CheckReturnValue;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+
+import static com.google.common.collect.Maps.newConcurrentMap;
 
 /**
  * The {@code MethodRegistry} stores handler methods per class exposing those methods.
@@ -36,7 +39,7 @@ class MethodRegistry {
 
     private static final MethodRegistry INSTANCE = new MethodRegistry();
 
-    private final Map<Key<?, ?>, MethodMap> items = Maps.newConcurrentMap();
+    private final Map<Key<?, ?>, MethodMap> items = newConcurrentMap();
 
     @CheckReturnValue
     static MethodRegistry getInstance() {
@@ -46,19 +49,48 @@ class MethodRegistry {
     /**
      * Obtains a handler method, which handles the passed message class.
      *
+     * <p>Searches through the methods, which have no additional {@linkplain MethodAttribute
+     * attributes} set.
+     *
      * <p>If the registry does not have the data structures ready for the target class,
      * they are created using the passed {@code factory} of the handler methods.
      * Then the method is obtained.
      *
-     * @param targetClass  the class of the target object
+     * @param targetClass the class of the target object
      * @param messageClass the class of the message to handle
-     * @param factory      the handler method factory for getting methods from the target class
-     * @param <T>          the type of the target object class
-     * @param <H>          the type of the message handler method
+     * @param factory the handler method factory for getting methods from the target class
+     * @param <T> the type of the target object class
+     * @param <H> the type of the message handler method
      * @return a handler method
      */
     public <T, H extends HandlerMethod> H get(Class<T> targetClass,
                                               Class<? extends Message> messageClass,
+                                              HandlerMethod.Factory<H> factory) {
+
+        return get(targetClass, messageClass, Collections.<MethodAttribute<?>>emptySet(), factory);
+    }
+
+    /**
+     * Obtains a handler method, which handles the passed message class.
+     *
+     * <p>Allows to specify a set of {@linkplain MethodAttribute method attributes} for additional
+     * filtering.
+     *
+     * <p>If the registry does not have the data structures ready for the target class,
+     * they are created using the passed {@code factory} of the handler methods.
+     * Then the method is obtained.
+     *
+     * @param targetClass the class of the target object
+     * @param messageClass the class of the message to handle
+     * @param attributes the attributes of the method to look for
+     * @param factory the handler method factory for getting methods from the target class
+     * @param <T> the type of the target object class
+     * @param <H> the type of the message handler method
+     * @return a handler method
+     */
+    public <T, H extends HandlerMethod> H get(Class<T> targetClass,
+                                              Class<? extends Message> messageClass,
+                                              Set<MethodAttribute<?>> attributes,
                                               HandlerMethod.Factory<H> factory) {
 
         final Key<?, H> key = new Key<>(targetClass, factory.getMethodClass());
@@ -71,7 +103,7 @@ class MethodRegistry {
             items.put(key, methods);
         }
 
-        final H handlerMethod = methods.get(messageClass);
+        final H handlerMethod = methods.get(new MethodMap.Key(messageClass, attributes));
         return handlerMethod;
     }
 

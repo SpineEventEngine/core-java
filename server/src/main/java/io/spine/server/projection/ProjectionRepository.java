@@ -25,19 +25,24 @@ import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
+import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
+import io.spine.core.ExternalMessageEnvelope;
 import io.spine.server.BoundedContext;
 import io.spine.server.entity.EntityStorageConverter;
 import io.spine.server.entity.EventDispatchingRepository;
 import io.spine.server.event.EventFilter;
 import io.spine.server.event.EventStore;
 import io.spine.server.event.EventStreamQuery;
+import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.route.EventRouting;
 import io.spine.server.route.Producers;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
+import io.spine.server.tenant.EventOperation;
+import io.spine.type.MessageClass;
 import io.spine.type.TypeName;
 
 import javax.annotation.Nullable;
@@ -236,5 +241,44 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
                                .setAfter(timestamp)
                                .addAllFilter(eventFilters)
                                .build();
+    }
+
+    @Override
+    protected ExternalMessageDispatcher getExternalDispatcher() {
+        return new ProjectionExternalMessageDispatcher();
+    }
+
+    /**
+     * An implementation of an external message dispatcher feeding external events
+     * to {@code Projection} instances.
+     */
+    private class ProjectionExternalMessageDispatcher implements ExternalMessageDispatcher {
+
+        @Override
+        public Set<MessageClass> getMessageClasses() {
+            final Class<? extends Projection> projectionClass = getEntityClass();
+            final Set<EventClass> eventClasses =
+                    Projection.TypeInfo.getExternalEventClasses(projectionClass);
+            final ImmutableSet<MessageClass> messageClasses =
+                    ImmutableSet.<MessageClass>copyOf(eventClasses);
+            return messageClasses;
+        }
+
+        @Override
+        public void dispatch(ExternalMessageEnvelope envelope) {
+            final Event event = (Event) envelope.getOuterObject();
+            final Message eventMessage = event.getMessage();
+            final EventContext context = event.getContext();
+            final Set<I> ids = getRouting().apply(eventMessage, context);
+            final EventOperation op = new EventOperation(event) {
+                @Override
+                public void run() {
+                    for (I id : ids) {
+                        dispatchToEntity(id, eventMessage, context);
+                    }
+                }
+            };
+            op.execute();
+        }
     }
 }

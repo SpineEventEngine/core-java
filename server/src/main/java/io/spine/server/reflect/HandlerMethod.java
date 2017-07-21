@@ -39,6 +39,7 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.emptySet;
 import static java.util.Collections.singletonList;
 
 /**
@@ -167,6 +168,12 @@ abstract class HandlerMethod<C extends Message> {
     /** Returns the count of the method parameters. */
     protected int getParamCount() {
         return paramCount;
+    }
+
+    /** Returns the set of method attributes configured for this method. */
+    protected Set<MethodAttribute<?>> getAttributes() {
+        // Most handler methods do not have any attributes available for configuration.
+        return emptySet();
     }
 
     /**

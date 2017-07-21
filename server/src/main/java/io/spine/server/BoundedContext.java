@@ -37,6 +37,7 @@ import io.spine.server.entity.VisibilityGuard;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventFactory;
 import io.spine.server.failure.FailureBus;
+import io.spine.server.integration.IntegrationBus;
 import io.spine.server.integration.IntegrationEvent;
 import io.spine.server.integration.grpc.IntegrationEventSubscriberGrpc;
 import io.spine.server.stand.Stand;
@@ -82,6 +83,7 @@ public final class BoundedContext
 
     private final CommandBus commandBus;
     private final EventBus eventBus;
+    private final IntegrationBus integrationBus;
     private final Stand stand;
 
     /** Controls access to entities of all repositories registered with this bounded context. */
@@ -101,6 +103,7 @@ public final class BoundedContext
         this.commandBus = builder.commandBus.build();
         this.eventBus = builder.eventBus.build();
         this.stand = builder.stand.build();
+        this.integrationBus = builder.integrationBus.build();
         this.tenantIndex = builder.tenantIndex;
     }
 
@@ -252,6 +255,12 @@ public final class BoundedContext
         return this.eventBus;
     }
 
+    /** Obtains instance of {@link IntegrationBus} of this {@code BoundedContext}. */
+    public IntegrationBus getIntegrationBus() {
+        return this.integrationBus;
+    }
+
+
     /** Obtains instance of {@link FailureBus} of this {@code BoundedContext}. */
     public FailureBus getFailureBus() {
         return this.commandBus.failureBus();
@@ -301,6 +310,7 @@ public final class BoundedContext
         private CommandBus.Builder commandBus;
         private EventBus.Builder eventBus;
         private Stand.Builder stand;
+        private IntegrationBus.Builder integrationBus;
 
         /**
          * Sets the name for a new bounded context.
@@ -381,6 +391,15 @@ public final class BoundedContext
             return Optional.fromNullable(stand);
         }
 
+        public Builder setIntegrationBus(IntegrationBus.Builder integrationBus) {
+            this.integrationBus = checkNotNull(integrationBus);
+            return this;
+        }
+
+        public Optional<IntegrationBus.Builder> getIntegrationBus() {
+            return Optional.fromNullable(integrationBus);
+        }
+
         public Builder setTenantIndex(TenantIndex tenantIndex) {
             if (this.multitenant) {
                 checkNotNull(tenantIndex,
@@ -397,6 +416,7 @@ public final class BoundedContext
             initCommandBus(storageFactory);
             initEventBus(storageFactory);
             initStand(storageFactory);
+            initIntegrationBus();
 
             final BoundedContext result = new BoundedContext(this);
             result.init();
@@ -478,6 +498,12 @@ public final class BoundedContext
                                             "Status in BoundedContext.Builder: %s Stand: %s",
                                    standMultitenant);
                 }
+            }
+        }
+
+        private void initIntegrationBus() {
+            if(integrationBus == null) {
+                integrationBus = IntegrationBus.newBuilder();
             }
         }
 

@@ -21,15 +21,19 @@
 package io.spine.server.reflect;
 
 import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
+import io.spine.core.Events;
 import io.spine.core.Subscribe;
 
 import javax.annotation.CheckReturnValue;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Objects;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -43,8 +47,12 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  */
 public final class EventSubscriberMethod extends HandlerMethod<EventContext> {
 
-    /** The instance of the predicate to filter event subscriber methods of a class. */
-    private static final MethodPredicate PREDICATE = new FilterPredicate();
+    /** The instance of the predicate to filter non-external event subscriber methods of a class. */
+    private static final MethodPredicate DOMESTIC_SUBSCRIBERS = new FilterPredicate();
+
+    /** The instance of the predicate to filter external event subscriber methods of a class. */
+    private static final MethodPredicate EXTERNAL_SUBSCRIBERS = new FilterPredicate(true);
+
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
@@ -63,7 +71,7 @@ public final class EventSubscriberMethod extends HandlerMethod<EventContext> {
         checkNotNull(eventMessage);
         checkNotNull(context);
 
-        final EventSubscriberMethod method = getMethod(target.getClass(), eventMessage);
+        final EventSubscriberMethod method = getMethod(target.getClass(), eventMessage, context);
         method.invoke(target, eventMessage, context);
     }
 
@@ -73,6 +81,7 @@ public final class EventSubscriberMethod extends HandlerMethod<EventContext> {
      * @throws IllegalStateException if the passed class does not have an event handling method
      *                               for the class of the passed message
      */
+    //TODO:2017-07-21:alex.tymchenko: eliminate code duplication
     public static EventSubscriberMethod getMethod(Class<?> cls, Message eventMessage) {
         checkNotNull(cls);
         checkNotNull(eventMessage);
@@ -87,6 +96,43 @@ public final class EventSubscriberMethod extends HandlerMethod<EventContext> {
         return method;
     }
 
+    /**
+     * Obtains the method for handling the event in the passed class.
+     *
+     * @throws IllegalStateException if the passed class does not have an event handling method
+     *                               for the class of the passed message
+     */
+    public static EventSubscriberMethod getMethod(Class<?> cls,
+                                                   Message eventMessage,
+                                                   EventContext eventContext) {
+        checkNotNull(cls);
+        checkNotNull(eventMessage);
+        checkNotNull(eventContext);
+
+
+        final Class<? extends Message> eventClass = eventMessage.getClass();
+        final MethodRegistry registry = MethodRegistry.getInstance();
+
+        final Set<MethodAttribute<?>> attributes = attributesFor(eventContext);
+        final EventSubscriberMethod method = registry.get(cls,
+                                                          eventClass, attributes,
+                                                          factory());
+        if (method == null) {
+            throw newIllegalStateException("The class %s is not subscribed to events of %s.",
+                                           cls.getName(), eventClass.getName());
+        }
+        return method;
+    }
+
+    private static Set<MethodAttribute<?>> attributesFor(EventContext eventContext) {
+        final ImmutableSet.Builder<MethodAttribute<?>> builder = ImmutableSet.builder();
+
+        if(Events.isExternal(eventContext)) {
+            builder.add(new ExternalAttribute(true));
+        }
+        return builder.build();
+    }
+
     static EventSubscriberMethod from(Method method) {
         return new EventSubscriberMethod(method);
     }
@@ -94,7 +140,16 @@ public final class EventSubscriberMethod extends HandlerMethod<EventContext> {
     @CheckReturnValue
     public static Set<EventClass> inspect(Class<?> cls) {
         checkNotNull(cls);
-        final ImmutableSet<EventClass> result = EventClass.setOf(inspect(cls, predicate()));
+        final ImmutableSet<EventClass> result =
+                EventClass.setOf(inspect(cls, domesticSubscribers()));
+        return result;
+    }
+
+    @CheckReturnValue
+    public static Set<EventClass> inspectExternal(Class<?> cls) {
+        checkNotNull(cls);
+        final ImmutableSet<EventClass> result =
+                EventClass.setOf(inspect(cls, externalSubscribers()));
         return result;
     }
 
@@ -103,8 +158,13 @@ public final class EventSubscriberMethod extends HandlerMethod<EventContext> {
         return Factory.getInstance();
     }
 
-    static MethodPredicate predicate() {
-        return PREDICATE;
+    static MethodPredicate domesticSubscribers() {
+        return DOMESTIC_SUBSCRIBERS;
+    }
+
+    //TODO:2017-07-21:alex.tymchenko: cover external subscribers with tests as well.
+    static MethodPredicate externalSubscribers() {
+        return EXTERNAL_SUBSCRIBERS;
     }
 
     /**
@@ -130,7 +190,7 @@ public final class EventSubscriberMethod extends HandlerMethod<EventContext> {
 
         @Override
         public Predicate<Method> getPredicate() {
-            return predicate();
+            return Predicates.or(domesticSubscribers(), externalSubscribers());
         }
 
         @Override
@@ -148,14 +208,69 @@ public final class EventSubscriberMethod extends HandlerMethod<EventContext> {
      */
     private static class FilterPredicate extends HandlerMethodPredicate<EventContext> {
 
+        private final boolean externalOnly;
+
         private FilterPredicate() {
+            this(false);
+        }
+
+        private FilterPredicate(boolean externalOnly) {
             super(Subscribe.class, EventContext.class);
+            this.externalOnly = externalOnly;
         }
 
         @Override
         protected boolean verifyReturnType(Method method) {
             final boolean isVoid = Void.TYPE.equals(method.getReturnType());
             return isVoid;
+        }
+
+        @Override
+        protected boolean verifyAnnotation(Method method) {
+            return super.verifyAnnotation(method) && matchesExternal(externalOnly, method);
+        }
+
+        private boolean matchesExternal(boolean externalOnly, Method method) {
+            final Annotation annotation = method.getAnnotation(getAnnotationClass());
+            final Subscribe subscribeAnnotation = (Subscribe) annotation;
+            final boolean result = externalOnly == subscribeAnnotation.external();
+            return result;
+        }
+    }
+
+    private static class ExternalAttribute implements MethodAttribute<Boolean> {
+
+        private final boolean value;
+
+        private ExternalAttribute(boolean value) {
+            this.value = value;
+        }
+
+        @Override
+        public String getName() {
+            return "external";
+        }
+
+        @Override
+        public Boolean getValue() {
+            return value;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            ExternalAttribute that = (ExternalAttribute) o;
+            return value == that.value;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(value);
         }
     }
 }

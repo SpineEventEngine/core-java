@@ -111,6 +111,10 @@ message EventContext {
 
     // Optional enrichment of the event.
     Enrichment enrichment = 5;
+
+    // An internal runtime attribute, which marks an event as external to the `BoundedContext`
+    // in which the event is being processed.
+    bool external = 8 [(internal) = true];
 }
 
 // Enumeration of possible event validation technical error reasons.
