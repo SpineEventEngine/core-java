@@ -44,9 +44,9 @@ import io.spine.test.bc.SecretProjectVBuilder;
 import io.spine.test.bc.command.AddTask;
 import io.spine.test.bc.command.CreateProject;
 import io.spine.test.bc.command.StartProject;
-import io.spine.test.bc.event.ProjectCreated;
-import io.spine.test.bc.event.ProjectStarted;
-import io.spine.test.bc.event.TaskAdded;
+import io.spine.test.bc.event.BcProjectCreated;
+import io.spine.test.bc.event.BcProjectStarted;
+import io.spine.test.bc.event.BcTaskAdded;
 import io.spine.validate.EmptyVBuilder;
 
 import java.util.List;
@@ -65,35 +65,35 @@ public class BoundedContextTestEnv {
         }
 
         @Assign
-        public ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
+        public BcProjectCreated handle(CreateProject cmd, CommandContext ctx) {
             return Given.EventMessage.projectCreated(cmd.getProjectId());
         }
 
         @Assign
-        public TaskAdded handle(AddTask cmd, CommandContext ctx) {
+        public BcTaskAdded handle(AddTask cmd, CommandContext ctx) {
             return Given.EventMessage.taskAdded(cmd.getProjectId());
         }
 
         @Assign
-        public List<ProjectStarted> handle(StartProject cmd, CommandContext ctx) {
-            final ProjectStarted message = Given.EventMessage.projectStarted(cmd.getProjectId());
+        public List<BcProjectStarted> handle(StartProject cmd, CommandContext ctx) {
+            final BcProjectStarted message = Given.EventMessage.projectStarted(cmd.getProjectId());
             return newArrayList(message);
         }
 
         @Apply
-        private void event(ProjectCreated event) {
+        private void event(BcProjectCreated event) {
             getBuilder()
                     .setId(event.getProjectId())
                     .setStatus(Project.Status.CREATED);
         }
 
         @Apply
-        private void event(TaskAdded event) {
+        private void event(BcTaskAdded event) {
             // NOP
         }
 
         @Apply
-        private void event(ProjectStarted event) {
+        private void event(BcProjectStarted event) {
             getBuilder()
                     .setId(event.getProjectId())
                     .setStatus(Project.Status.STARTED)
@@ -110,16 +110,16 @@ public class BoundedContextTestEnv {
         private Message handledEvent;
 
         @Subscribe
-        public void on(ProjectCreated event, EventContext context) {
+        public void on(BcProjectCreated event, EventContext context) {
             this.handledEvent = event;
         }
 
         @Subscribe
-        public void on(TaskAdded event, EventContext context) {
+        public void on(BcTaskAdded event, EventContext context) {
         }
 
         @Subscribe
-        public void on(ProjectStarted event, EventContext context) {
+        public void on(BcProjectStarted event, EventContext context) {
         }
 
         public Message getHandledEvent() {
@@ -134,7 +134,7 @@ public class BoundedContextTestEnv {
         }
 
         @Assign
-        public List<ProjectStarted> handle(StartProject cmd, CommandContext ctx) {
+        public List<BcProjectStarted> handle(StartProject cmd, CommandContext ctx) {
             return Lists.newArrayList();
         }
     }
@@ -160,7 +160,7 @@ public class BoundedContextTestEnv {
 
         @SuppressWarnings("UnusedParameters") // OK for test method
         @Subscribe
-        public void on(ProjectCreated event, EventContext ctx) {
+        public void on(BcProjectCreated event, EventContext ctx) {
             // Do nothing, just watch.
         }
     }
@@ -180,7 +180,7 @@ public class BoundedContextTestEnv {
 
         @SuppressWarnings("UnusedParameters") // OK for test method.
         @Subscribe
-        public void on(ProjectCreated event, EventContext context) {
+        public void on(BcProjectCreated event, EventContext context) {
             // Do nothing. We have the method so that there's one event class exposed
             // by the repository.
         }
