@@ -28,9 +28,6 @@ import javax.annotation.Nullable;
 @SuppressWarnings("AccessOfSystemProperties") // OK as we need system properties for this class.
 public class ServerEnvironment {
 
-    /** Prevents instantiation of this utility class. */
-    private ServerEnvironment() {}
-
     /** The key of the Google AppEngine runtime version system property. */
     @VisibleForTesting
     static final String ENV_KEY_APP_ENGINE_RUNTIME_VERSION = "com.google.appengine.runtime.version";
@@ -39,6 +36,9 @@ public class ServerEnvironment {
     @Nullable
     private static final String appEngineRuntimeVersion =
             System.getProperty(ENV_KEY_APP_ENGINE_RUNTIME_VERSION);
+
+    /** Prevents instantiation of this utility class. */
+    private ServerEnvironment() {}
 
     /**
      * Returns {@code true} if the code is running on the Google AppEngine,
