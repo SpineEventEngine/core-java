@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 
+import static io.spine.util.Exceptions.unsupported;
 import static java.lang.String.format;
 
 /**
@@ -116,6 +117,9 @@ public final class LoggingObserver<V> implements StreamObserver<V> {
             case WARN:
                 logger.warn(out);
                 break;
+            default:
+                // A safety net for unlikely extension of logging levels.
+                throw unsupported(level.name());
         }
     }
 
@@ -130,7 +134,8 @@ public final class LoggingObserver<V> implements StreamObserver<V> {
             synchronized (this) {
                 result = logger;
                 if (result == null) {
-                    logger = Environment.getInstance().getLogger(parentClass);
+                    logger = Environment.getInstance()
+                                        .getLogger(parentClass);
                     result = logger;
                 }
             }
