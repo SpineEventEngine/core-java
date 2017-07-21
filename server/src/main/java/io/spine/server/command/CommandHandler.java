@@ -95,6 +95,17 @@ public abstract class CommandHandler implements CommandDispatcher<String> {
     }
 
     /**
+     * Obtains identity string of the handler.
+     *
+     * <p>Default implementation returns the result of {@link #toString()}.
+     *
+     * @return the string with the handler identity
+     */
+    protected String getId() {
+        return toString();
+    }
+
+    /**
      * Dispatches the command to the handler method and
      * posts resulting events to the {@link EventBus}.
      *
@@ -111,7 +122,7 @@ public abstract class CommandHandler implements CommandDispatcher<String> {
                                                envelope.getCommandContext());
         final List<Event> events = toEvents(eventMessages, envelope);
         postEvents(events);
-        return toString();
+        return getId();
     }
 
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK as we return immutable impl.
