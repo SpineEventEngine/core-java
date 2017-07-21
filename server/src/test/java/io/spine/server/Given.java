@@ -43,9 +43,9 @@ import io.spine.test.aggregate.Status;
 import io.spine.test.aggregate.command.AddTask;
 import io.spine.test.aggregate.command.CreateProject;
 import io.spine.test.aggregate.command.StartProject;
-import io.spine.test.aggregate.event.ProjectCreated;
-import io.spine.test.aggregate.event.ProjectStarted;
-import io.spine.test.aggregate.event.TaskAdded;
+import io.spine.test.aggregate.event.AggProjectCreated;
+import io.spine.test.aggregate.event.AggProjectStarted;
+import io.spine.test.aggregate.event.AggTaskAdded;
 import io.spine.test.commandservice.customer.Customer;
 import io.spine.test.commandservice.customer.CustomerId;
 import io.spine.test.commandservice.customer.CustomerVBuilder;
@@ -79,20 +79,20 @@ public class Given {
         private EventMessage() {
         }
 
-        static TaskAdded taskAdded(ProjectId id) {
-            return TaskAdded.newBuilder()
+        static AggTaskAdded taskAdded(ProjectId id) {
+            return AggTaskAdded.newBuilder()
                             .setProjectId(id)
                             .build();
         }
 
-        static ProjectCreated projectCreated(ProjectId id) {
-            return ProjectCreated.newBuilder()
+        static AggProjectCreated projectCreated(ProjectId id) {
+            return AggProjectCreated.newBuilder()
                                  .setProjectId(id)
                                  .build();
         }
 
-        static ProjectStarted projectStarted(ProjectId id) {
-            return ProjectStarted.newBuilder()
+        static AggProjectStarted projectStarted(ProjectId id) {
+            return AggProjectStarted.newBuilder()
                                  .setProjectId(id)
                                  .build();
         }
@@ -207,23 +207,23 @@ public class Given {
         }
 
         @Assign
-        ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
+        AggProjectCreated handle(CreateProject cmd, CommandContext ctx) {
             return EventMessage.projectCreated(cmd.getProjectId());
         }
 
         @Assign
-        TaskAdded handle(AddTask cmd, CommandContext ctx) {
+        AggTaskAdded handle(AddTask cmd, CommandContext ctx) {
             return EventMessage.taskAdded(cmd.getProjectId());
         }
 
         @Assign
-        List<ProjectStarted> handle(StartProject cmd, CommandContext ctx) {
-            final ProjectStarted message = EventMessage.projectStarted(cmd.getProjectId());
+        List<AggProjectStarted> handle(StartProject cmd, CommandContext ctx) {
+            final AggProjectStarted message = EventMessage.projectStarted(cmd.getProjectId());
             return newArrayList(message);
         }
 
         @Apply
-        private void event(ProjectCreated event) {
+        private void event(AggProjectCreated event) {
             getBuilder()
                     .setId(event.getProjectId())
                     .setStatus(Status.CREATED)
@@ -231,11 +231,11 @@ public class Given {
         }
 
         @Apply
-        private void event(TaskAdded event) {
+        private void event(AggTaskAdded event) {
         }
 
         @Apply
-        private void event(ProjectStarted event) {
+        private void event(AggProjectStarted event) {
             getBuilder()
                     .setId(event.getProjectId())
                     .setStatus(Status.STARTED)

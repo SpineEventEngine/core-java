@@ -31,7 +31,7 @@ import io.spine.server.aggregate.given.AggregateCommandEndpointTestEnv.ProjectAg
 import io.spine.server.event.EventSubscriber;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.CreateProject;
-import io.spine.test.aggregate.event.ProjectCreated;
+import io.spine.test.aggregate.event.AggProjectCreated;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -80,7 +80,7 @@ public class AggregateCommandEndpointShould {
 
         repository.dispatch(cmd);
 
-        final ProjectCreated msg = subscriber.remembered;
+        final AggProjectCreated msg = subscriber.remembered;
         assertEquals(projectId, msg.getProjectId());
     }
 
@@ -125,10 +125,10 @@ public class AggregateCommandEndpointShould {
 
     private static class Subscriber extends EventSubscriber {
 
-        private ProjectCreated remembered;
+        private AggProjectCreated remembered;
 
         @Subscribe
-        void on(ProjectCreated msg) {
+        void on(AggProjectCreated msg) {
             remembered = msg;
         }
     }

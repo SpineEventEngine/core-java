@@ -31,8 +31,8 @@ import io.spine.test.aggregate.Task;
 import io.spine.test.aggregate.TaskVBuilder;
 import io.spine.test.aggregate.command.AddTask;
 import io.spine.test.aggregate.command.CreateProject;
-import io.spine.test.aggregate.event.ProjectCreated;
-import io.spine.test.aggregate.event.TaskAdded;
+import io.spine.test.aggregate.event.AggProjectCreated;
+import io.spine.test.aggregate.event.AggTaskAdded;
 import io.spine.test.aggregate.user.User;
 import io.spine.test.aggregate.user.UserVBuilder;
 import io.spine.validate.StringValueVBuilder;
@@ -78,15 +78,15 @@ public class AggregatePartTestEnv {
         }
 
         @Assign
-        TaskAdded handle(AddTask msg) {
-            final TaskAdded result = TaskAdded.newBuilder()
+        AggTaskAdded handle(AddTask msg) {
+            final AggTaskAdded result = AggTaskAdded.newBuilder()
                                               .build();
             //This command can be empty since we use apply method to setup aggregate part.
             return result;
         }
 
         @Apply
-        private void apply(TaskAdded event) {
+        private void apply(AggTaskAdded event) {
             getBuilder().setDescription(TASK_DESCRIPTION);
         }
     }
@@ -101,16 +101,16 @@ public class AggregatePartTestEnv {
         }
 
         @Assign
-        ProjectCreated handle(CreateProject msg) {
-            final ProjectCreated result = ProjectCreated.newBuilder()
-                                                        .setProjectId(msg.getProjectId())
-                                                        .setName(msg.getName())
-                                                        .build();
+        AggProjectCreated handle(CreateProject msg) {
+            final AggProjectCreated result = AggProjectCreated.newBuilder()
+                                                              .setProjectId(msg.getProjectId())
+                                                              .setName(msg.getName())
+                                                              .build();
             return result;
         }
 
         @Apply
-        private void apply(TaskAdded event) {
+        private void apply(AggTaskAdded event) {
             getBuilder().setValue("Description value");
         }
     }

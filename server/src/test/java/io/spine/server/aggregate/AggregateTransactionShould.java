@@ -32,8 +32,8 @@ import io.spine.server.entity.TransactionShould;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.CreateProject;
-import io.spine.test.aggregate.event.ProjectCreated;
-import io.spine.test.aggregate.event.TaskAdded;
+import io.spine.test.aggregate.event.AggProjectCreated;
+import io.spine.test.aggregate.event.AggTaskAdded;
 import io.spine.validate.ConstraintViolation;
 
 import javax.annotation.Nullable;
@@ -162,12 +162,12 @@ public class AggregateTransactionShould
         }
 
         @Assign
-        ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
+        AggProjectCreated handle(CreateProject cmd, CommandContext ctx) {
             return projectCreated(cmd.getProjectId(), cmd.getName());
         }
 
         @Apply
-        private void event(ProjectCreated event) {
+        private void event(AggProjectCreated event) {
             receivedEvents.add(event);
             final Project newState = Project.newBuilder(getState())
                                             .setId(event.getProjectId())
@@ -177,7 +177,7 @@ public class AggregateTransactionShould
         }
 
         @Apply
-        private void event(TaskAdded event) {
+        private void event(AggTaskAdded event) {
             throw new RuntimeException("that tests the tx behaviour");
         }
 

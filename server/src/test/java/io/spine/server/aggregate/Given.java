@@ -33,9 +33,9 @@ import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AddTask;
 import io.spine.test.aggregate.command.CreateProject;
 import io.spine.test.aggregate.command.StartProject;
-import io.spine.test.aggregate.event.ProjectCreated;
-import io.spine.test.aggregate.event.ProjectStarted;
-import io.spine.test.aggregate.event.TaskAdded;
+import io.spine.test.aggregate.event.AggProjectCreated;
+import io.spine.test.aggregate.event.AggProjectStarted;
+import io.spine.test.aggregate.event.AggTaskAdded;
 import io.spine.testdata.Sample;
 
 import java.util.List;
@@ -58,21 +58,21 @@ class Given {
         private EventMessage() {
         }
 
-        static ProjectCreated projectCreated(ProjectId id, String projectName) {
-            return ProjectCreated.newBuilder()
+        static AggProjectCreated projectCreated(ProjectId id, String projectName) {
+            return AggProjectCreated.newBuilder()
                                  .setProjectId(id)
                                  .setName(projectName)
                                  .build();
         }
 
-        static TaskAdded taskAdded(ProjectId id) {
-            return TaskAdded.newBuilder()
+        static AggTaskAdded taskAdded(ProjectId id) {
+            return AggTaskAdded.newBuilder()
                             .setProjectId(id)
                             .build();
         }
 
-        static ProjectStarted projectStarted(ProjectId id) {
-            return ProjectStarted.newBuilder()
+        static AggProjectStarted projectStarted(ProjectId id) {
+            return AggProjectStarted.newBuilder()
                                  .setProjectId(id)
                                  .build();
         }
@@ -164,7 +164,7 @@ class Given {
         }
 
         static AggregateEventRecord create(Timestamp timestamp) {
-            final Message eventMessage = Sample.messageOfType(ProjectCreated.class);
+            final Message eventMessage = Sample.messageOfType(AggProjectCreated.class);
             final Event event = eventFactory.createEvent(eventMessage);
             final AggregateEventRecord.Builder builder
                     = AggregateEventRecord.newBuilder()

@@ -33,8 +33,8 @@ import io.spine.test.aggregate.TaskId;
 import io.spine.test.aggregate.TaskVBuilder;
 import io.spine.test.aggregate.command.AddTask;
 import io.spine.test.aggregate.command.CreateProject;
-import io.spine.test.aggregate.event.ProjectCreated;
-import io.spine.test.aggregate.event.TaskAdded;
+import io.spine.test.aggregate.event.AggProjectCreated;
+import io.spine.test.aggregate.event.AggTaskAdded;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -120,15 +120,15 @@ public class AggregatePartRepositoryLookupShould {
         }
 
         @Assign
-        public ProjectCreated handle(CreateProject msg, CommandContext context) {
-            return ProjectCreated.newBuilder()
+        public AggProjectCreated handle(CreateProject msg, CommandContext context) {
+            return AggProjectCreated.newBuilder()
                                  .setProjectId(msg.getProjectId())
                                  .setName(msg.getName())
                                  .build();
         }
 
         @Apply
-        private void apply(ProjectCreated event) {
+        private void apply(AggProjectCreated event) {
             getBuilder().setId(event.getProjectId())
                         .setName(event.getName());
         }
@@ -163,14 +163,14 @@ public class AggregatePartRepositoryLookupShould {
         }
 
         @Assign
-        public TaskAdded handle(AddTask cmd) {
-            return TaskAdded.newBuilder()
+        public AggTaskAdded handle(AddTask cmd) {
+            return AggTaskAdded.newBuilder()
                             .setProjectId(cmd.getProjectId())
                             .build();
         }
 
         @Apply
-        public void apply(TaskAdded event) {
+        public void apply(AggTaskAdded event) {
             final Task task = event.getTask();
             getBuilder().setTitle(task.getTitle())
                         .setDescription(task.getDescription())
