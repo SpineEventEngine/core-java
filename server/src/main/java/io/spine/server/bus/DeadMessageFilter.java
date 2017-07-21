@@ -41,7 +41,7 @@ import static io.spine.server.bus.Buses.reject;
 final class DeadMessageFilter<T extends Message,
                               E extends MessageEnvelope<?, T>,
                               C extends MessageClass,
-                              D extends MessageDispatcher<C, E>>
+                              D extends MessageDispatcher<C>>
         extends AbstractBusFilter<E> {
 
     private final Bus.IdConverter<E> idConverter;

@@ -42,6 +42,9 @@ message IsSent {
     // The correlation ID of the message, i.e. the ID of the message which has been posted.
     google.protobuf.Any message_id = 1 [(required) = true];
 
+    // The ID of the consumer of the message.
+    google.protobuf.Any consumer_id = 2 [(required) = true];
+
     // The response status.
-    Status status = 2 [(required) = true];
+    Status status = 3 [(required) = true];
 }

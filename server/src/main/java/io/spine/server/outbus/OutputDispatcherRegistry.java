@@ -42,7 +42,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 @Internal
 public class OutputDispatcherRegistry<C extends MessageClass,
-                                      D extends MessageDispatcher<C, ?>>
+                                      D extends MessageDispatcher<C>>
                                 extends DispatcherRegistry<C, D> {
     /**
      * {@inheritDoc}

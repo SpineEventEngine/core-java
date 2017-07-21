@@ -55,7 +55,7 @@ import static java.util.Collections.singleton;
 public abstract class Bus<T extends Message,
                           E extends MessageEnvelope<?, T>,
                           C extends MessageClass,
-                          D extends MessageDispatcher<C, E>> implements AutoCloseable {
+                          D extends MessageDispatcher<C>> implements AutoCloseable {
 
     private final Function<T, E> messageConverter = new MessageToEnvelope();
 

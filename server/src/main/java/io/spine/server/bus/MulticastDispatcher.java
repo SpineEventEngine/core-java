@@ -17,16 +17,27 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.failure;
 
-import io.spine.core.FailureClass;
-import io.spine.core.FailureEnvelope;
-import io.spine.server.bus.MulticastDispatcher;
+package io.spine.server.bus;
+
+import io.spine.core.MessageEnvelope;
+import io.spine.type.MessageClass;
 
 /**
- * Responsible for delivering the business failures to the corresponding subscribers.
+ * Dispatches a message to several entities.
  *
- * @author Alex Tymchenko
+ * @param <C> the type of dispatched messages
+ * @param <E> the type of envelopes for dispatched objects that contain messages
+ * @author Alexander Yevsyukov
  */
-public interface FailureDispatcher extends MulticastDispatcher<FailureClass, FailureEnvelope> {
+public interface MulticastDispatcher <C extends MessageClass, E extends MessageEnvelope>
+        extends MessageDispatcher<C> {
+
+    /**
+     * Dispatches the message contained in the passed envelope.
+     *
+     * @param envelope the envelope with the message
+     */
+    void dispatch(E envelope);
+
 }

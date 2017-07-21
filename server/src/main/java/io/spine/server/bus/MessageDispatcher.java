@@ -20,7 +20,6 @@
 
 package io.spine.server.bus;
 
-import io.spine.core.MessageEnvelope;
 import io.spine.type.MessageClass;
 
 import java.util.Set;
@@ -28,24 +27,16 @@ import java.util.Set;
 /**
  * A dispatcher of a message.
  *
- * @param <C> the type of dispatched messages
- * @param <E> the type of envelopes for dispatched objects that contain messages
+ * @param <C> the type of class of the dispatched messages
  * @author Alex Tymchenko
  * @author Alexander Yevsyukov
  */
-public interface MessageDispatcher<C extends MessageClass,
-                                   E extends MessageEnvelope> {
+public interface MessageDispatcher<C extends MessageClass> {
+
     /**
      * Obtains a set of message classes that can be processed by this dispatcher.
      *
      * @return non-empty set of message classes
      */
     Set<C> getMessageClasses();
-
-    /**
-     * Dispatches the message contained in the passed envelope.
-     *
-     * @param envelope the envelope with the message
-     */
-    void dispatch(E envelope);
 }

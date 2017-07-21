@@ -22,7 +22,7 @@ package io.spine.server.commandbus;
 
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
-import io.spine.server.bus.MessageDispatcher;
+import io.spine.server.bus.UnicastDispatcher;
 
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
@@ -33,7 +33,7 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  *
  * @author Alexander Yevsyukov
  */
-public interface CommandDispatcher extends MessageDispatcher<CommandClass, CommandEnvelope> {
+public interface CommandDispatcher extends UnicastDispatcher<CommandClass, CommandEnvelope> {
 
     /**
      * Utility class for reporting command dispatching errors.

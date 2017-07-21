@@ -60,7 +60,7 @@ import static java.lang.String.format;
 public abstract class CommandOutputBus<M extends Message,
                                        E extends MessageEnvelope<?, M>,
                                        C extends MessageClass,
-                                       D extends MessageDispatcher<C,E>>
+                                       D extends MessageDispatcher<C>>
                 extends Bus<M, E, C, D> {
 
     /**
