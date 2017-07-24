@@ -51,9 +51,9 @@ import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.ProjectTaskNames;
 import io.spine.test.projection.ProjectTaskNamesVBuilder;
-import io.spine.test.projection.event.ProjectCreated;
-import io.spine.test.projection.event.ProjectStarted;
-import io.spine.test.projection.event.TaskAdded;
+import io.spine.test.projection.event.PjnProjectCreated;
+import io.spine.test.projection.event.PjnProjectStarted;
+import io.spine.test.projection.event.PjnTaskAdded;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -102,12 +102,12 @@ public class ProjectionRepositoryShould
     /**
      * {@link EventTargetsFunction} used for testing add/get/remove of functions.
      */
-    private static final EventTargetsFunction<ProjectId, ProjectCreated> creteProjectTargets =
-            new EventTargetsFunction<ProjectId, ProjectCreated>() {
+    private static final EventTargetsFunction<ProjectId, PjnProjectCreated> creteProjectTargets =
+            new EventTargetsFunction<ProjectId, PjnProjectCreated>() {
                 private static final long serialVersionUID = 0L;
 
                 @Override
-                public Set<ProjectId> apply(ProjectCreated message, EventContext context) {
+                public Set<ProjectId> apply(PjnProjectCreated message, EventContext context) {
                     return newHashSet(message.getProjectId());
                 }
             };
@@ -243,9 +243,9 @@ public class ProjectionRepositoryShould
     public void return_event_classes() {
         final Set<EventClass> eventClasses = repository().getMessageClasses();
         assertContainsAll(eventClasses,
-                          EventClass.of(ProjectCreated.class),
-                          EventClass.of(TaskAdded.class),
-                          EventClass.of(ProjectStarted.class));
+                          EventClass.of(PjnProjectCreated.class),
+                          EventClass.of(PjnTaskAdded.class),
+                          EventClass.of(PjnProjectStarted.class));
     }
 
     @Test
@@ -257,32 +257,32 @@ public class ProjectionRepositoryShould
     @Test
     @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass") // OK for this test.
     public void use_id_set_function() {
-        final EventTargetsFunction<ProjectId, ProjectCreated> delegateFn =
-                new EventTargetsFunction<ProjectId, ProjectCreated>() {
+        final EventTargetsFunction<ProjectId, PjnProjectCreated> delegateFn =
+                new EventTargetsFunction<ProjectId, PjnProjectCreated>() {
                     private static final long serialVersionUID = 0L;
                     @Override
-                    public Set<ProjectId> apply(ProjectCreated message, EventContext context) {
+                    public Set<ProjectId> apply(PjnProjectCreated message, EventContext context) {
                         return newHashSet();
                     }
                 };
 
-        final EventTargetsFunction<ProjectId, ProjectCreated> idSetFunction = spy(delegateFn);
-        repository().addIdSetFunction(ProjectCreated.class, idSetFunction);
+        final EventTargetsFunction<ProjectId, PjnProjectCreated> idSetFunction = spy(delegateFn);
+        repository().addIdSetFunction(PjnProjectCreated.class, idSetFunction);
 
         final Event event = createEvent(tenantId(), projectCreated(), PRODUCER_ID, getCurrentTime());
         repository().dispatch(EventEnvelope.of(event));
 
-        final ProjectCreated expectedEventMessage = Events.getMessage(event);
+        final PjnProjectCreated expectedEventMessage = Events.getMessage(event);
         final EventContext context = event.getContext();
         verify(idSetFunction).apply(eq(expectedEventMessage), eq(context));
     }
 
     @Test
     public void obtain_id_set_function_after_put() {
-        repository().addIdSetFunction(ProjectCreated.class, creteProjectTargets);
+        repository().addIdSetFunction(PjnProjectCreated.class, creteProjectTargets);
 
-        final Optional<EventTargetsFunction<ProjectId, ProjectCreated>> func =
-                repository().getIdSetFunction(ProjectCreated.class);
+        final Optional<EventTargetsFunction<ProjectId, PjnProjectCreated>> func =
+                repository().getIdSetFunction(PjnProjectCreated.class);
 
         assertTrue(func.isPresent());
         assertEquals(creteProjectTargets, func.get());
@@ -290,11 +290,11 @@ public class ProjectionRepositoryShould
 
     @Test
     public void remove_id_set_function_after_put() {
-        repository().addIdSetFunction(ProjectCreated.class, creteProjectTargets);
+        repository().addIdSetFunction(PjnProjectCreated.class, creteProjectTargets);
 
-        repository().removeIdSetFunction(ProjectCreated.class);
-        final Optional<EventTargetsFunction<ProjectId, ProjectCreated>> out =
-                repository().getIdSetFunction(ProjectCreated.class);
+        repository().removeIdSetFunction(PjnProjectCreated.class);
+        final Optional<EventTargetsFunction<ProjectId, PjnProjectCreated>> out =
+                repository().getIdSetFunction(PjnProjectCreated.class);
 
         assertFalse(out.isPresent());
     }
@@ -350,30 +350,30 @@ public class ProjectionRepositoryShould
         }
 
         @Subscribe
-        public void on(ProjectCreated event) {
+        public void on(PjnProjectCreated event) {
             // do nothing.
         }
 
         @Subscribe
-        public void on(TaskAdded event) {
+        public void on(PjnTaskAdded event) {
             // do nothing
         }
     }
 
-    private static ProjectStarted projectStarted() {
-        return ProjectStarted.newBuilder()
+    private static PjnProjectStarted projectStarted() {
+        return PjnProjectStarted.newBuilder()
                              .setProjectId(ID)
                              .build();
     }
 
-    private static ProjectCreated projectCreated() {
-        return ProjectCreated.newBuilder()
+    private static PjnProjectCreated projectCreated() {
+        return PjnProjectCreated.newBuilder()
                              .setProjectId(ID)
                              .build();
     }
 
-    private static TaskAdded taskAdded() {
-        return TaskAdded.newBuilder()
+    private static PjnTaskAdded taskAdded() {
+        return PjnTaskAdded.newBuilder()
                         .setProjectId(ID)
                         .build();
     }

@@ -45,7 +45,7 @@ import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.ProjectVBuilder;
 import io.spine.test.projection.command.CreateProject;
-import io.spine.test.projection.event.ProjectCreated;
+import io.spine.test.projection.event.PjnProjectCreated;
 import io.spine.validate.StringValueVBuilder;
 
 import java.util.Collections;
@@ -77,7 +77,7 @@ class Given {
 
     static Event validEvent() {
         final Command cmd = validCommand();
-        final ProjectCreated eventMessage = ProjectCreated.newBuilder()
+        final PjnProjectCreated eventMessage = PjnProjectCreated.newBuilder()
                                                           .setProjectId(ProjectId.newBuilder()
                                                                                  .setId("12345AD0"))
                                                           .build();
@@ -116,12 +116,12 @@ class Given {
     static class StandTestProjectionRepository
             extends ProjectionRepository<ProjectId, StandTestProjection, Project> {
 
-        private static final EventTargetsFunction<ProjectId, ProjectCreated> EVENT_TARGETS_FN =
-                new EventTargetsFunction<ProjectId, ProjectCreated>() {
+        private static final EventTargetsFunction<ProjectId, PjnProjectCreated> EVENT_TARGETS_FN =
+                new EventTargetsFunction<ProjectId, PjnProjectCreated>() {
             private static final long serialVersionUID = 0L;
 
             @Override
-            public Set<ProjectId> apply(ProjectCreated message, EventContext context) {
+            public Set<ProjectId> apply(PjnProjectCreated message, EventContext context) {
                 return ImmutableSet.of(ProjectId.newBuilder()
                                                 .setId(PROJECT_UUID)
                                                 .build());
@@ -130,7 +130,7 @@ class Given {
 
         StandTestProjectionRepository() {
             super();
-            addIdSetFunction(ProjectCreated.class, EVENT_TARGETS_FN);
+            addIdSetFunction(PjnProjectCreated.class, EVENT_TARGETS_FN);
         }
     }
 
@@ -162,7 +162,7 @@ class Given {
         }
 
         @Apply
-        public void handle(ProjectCreated event) {
+        public void handle(PjnProjectCreated event) {
             // Do nothing
         }
     }
@@ -176,7 +176,7 @@ class Given {
 
         @SuppressWarnings("unused") // OK for test class.
         @Subscribe
-        public void handle(ProjectCreated event, EventContext context) {
+        public void handle(PjnProjectCreated event, EventContext context) {
             getBuilder().setId(event.getProjectId());
         }
     }

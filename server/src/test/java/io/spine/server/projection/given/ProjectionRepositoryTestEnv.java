@@ -33,9 +33,9 @@ import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.ProjectTaskNames;
 import io.spine.test.projection.ProjectTaskNamesVBuilder;
 import io.spine.test.projection.ProjectVBuilder;
-import io.spine.test.projection.event.ProjectCreated;
-import io.spine.test.projection.event.ProjectStarted;
-import io.spine.test.projection.event.TaskAdded;
+import io.spine.test.projection.event.PjnProjectCreated;
+import io.spine.test.projection.event.PjnProjectStarted;
+import io.spine.test.projection.event.PjnTaskAdded;
 
 public class ProjectionRepositoryTestEnv {
 
@@ -60,12 +60,12 @@ public class ProjectionRepositoryTestEnv {
         }
 
         @Subscribe
-        public void on(ProjectCreated event) {
+        public void on(PjnProjectCreated event) {
             // do nothing.
         }
 
         @Subscribe
-        public void on(TaskAdded event) {
+        public void on(PjnTaskAdded event) {
             // do nothing
         }
     }
@@ -75,7 +75,7 @@ public class ProjectionRepositoryTestEnv {
             extends ProjectionRepository<ProjectId, TestProjection, Project> {
 
         @Subscribe
-        public void apply(ProjectCreated event, EventContext eventContext) {
+        public void apply(PjnProjectCreated event, EventContext eventContext) {
             // NOP
         }
     }
@@ -115,7 +115,7 @@ public class ProjectionRepositoryTestEnv {
         }
 
         @Subscribe
-        public void on(ProjectCreated event) {
+        public void on(PjnProjectCreated event) {
             // Keep the event message for further inspection in tests.
             keep(event);
 
@@ -127,7 +127,7 @@ public class ProjectionRepositoryTestEnv {
         }
 
         @Subscribe
-        public void on(TaskAdded event) {
+        public void on(PjnTaskAdded event) {
             keep(event);
             final Project newState = getState().toBuilder()
                                                .addTask(event.getTask())
@@ -136,14 +136,14 @@ public class ProjectionRepositoryTestEnv {
         }
 
         /**
-         * Handles the {@link ProjectStarted} event.
+         * Handles the {@link PjnProjectStarted} event.
          *
          * @param event   the event message
          * @param ignored this parameter is left to show that a projection subscriber
          *                can have two parameters
          */
         @Subscribe
-        public void on(ProjectStarted event,
+        public void on(PjnProjectStarted event,
                        @SuppressWarnings("UnusedParameters") EventContext ignored) {
             keep(event);
             final Project newState = getState().toBuilder()

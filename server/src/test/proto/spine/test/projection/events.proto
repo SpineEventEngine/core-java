@@ -30,15 +30,15 @@ option java_multiple_files = true;
 
 import "spine/test/projection/project.proto";
 
-message ProjectCreated {
+message PjnProjectCreated {
     ProjectId project_id = 1;
 }
 
-message TaskAdded {
+message PjnTaskAdded {
     ProjectId project_id = 1;
     Task task = 2;
 }
 
-message ProjectStarted {
+message PjnProjectStarted {
     ProjectId project_id = 1;
 }
