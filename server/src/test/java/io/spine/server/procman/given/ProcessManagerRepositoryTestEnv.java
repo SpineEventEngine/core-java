@@ -38,9 +38,9 @@ import io.spine.test.procman.Task;
 import io.spine.test.procman.command.AddTask;
 import io.spine.test.procman.command.CreateProject;
 import io.spine.test.procman.command.StartProject;
-import io.spine.test.procman.event.ProjectCreated;
-import io.spine.test.procman.event.ProjectStarted;
-import io.spine.test.procman.event.TaskAdded;
+import io.spine.test.procman.event.PrmnProjectCreated;
+import io.spine.test.procman.event.PrmnProjectStarted;
+import io.spine.test.procman.event.PrmnTaskAdded;
 import io.spine.testdata.Sample;
 
 public class ProcessManagerRepositoryTestEnv {
@@ -84,7 +84,7 @@ public class ProcessManagerRepositoryTestEnv {
         @SuppressWarnings("UnusedParameters")
             /* The parameter left to show that a projection subscriber can have two parameters. */
         @Subscribe
-        public void on(ProjectCreated event, EventContext ignored) {
+        public void on(PrmnProjectCreated event, EventContext ignored) {
             // Keep the event message for further inspection in tests.
             keep(event);
 
@@ -100,7 +100,7 @@ public class ProcessManagerRepositoryTestEnv {
         }
 
         @Subscribe
-        public void on(TaskAdded event) {
+        public void on(PrmnTaskAdded event) {
             keep(event);
 
             final Task task = event.getTask();
@@ -115,7 +115,7 @@ public class ProcessManagerRepositoryTestEnv {
         }
 
         @Subscribe
-        public void on(ProjectStarted event) {
+        public void on(PrmnProjectStarted event) {
             keep(event);
 
             handleProjectStarted();
@@ -131,12 +131,12 @@ public class ProcessManagerRepositoryTestEnv {
         @SuppressWarnings("UnusedParameters")
             /* The parameter left to show that a command subscriber can have two parameters. */
         @Assign
-        ProjectCreated handle(CreateProject command, CommandContext ignored) {
+        PrmnProjectCreated handle(CreateProject command, CommandContext ignored) {
             keep(command);
 
             handleProjectCreated(command.getProjectId());
-            final ProjectCreated event = ((ProjectCreated.Builder) Sample.builderForType(
-                    ProjectCreated.class))
+            final PrmnProjectCreated event = ((PrmnProjectCreated.Builder) Sample.builderForType(
+                    PrmnProjectCreated.class))
                     .setProjectId(command.getProjectId())
                     .build();
             return event;
@@ -145,11 +145,11 @@ public class ProcessManagerRepositoryTestEnv {
         @SuppressWarnings("UnusedParameters")
             /* The parameter left to show that a command subscriber can have two parameters. */
         @Assign
-        TaskAdded handle(AddTask command, CommandContext ignored) {
+        PrmnTaskAdded handle(AddTask command, CommandContext ignored) {
             keep(command);
 
             handleTaskAdded(command.getTask());
-            final TaskAdded event = ((TaskAdded.Builder) Sample.builderForType(TaskAdded.class))
+            final PrmnTaskAdded event = ((PrmnTaskAdded.Builder) Sample.builderForType(PrmnTaskAdded.class))
                     .setProjectId(command.getProjectId())
                     .build();
             return event;
