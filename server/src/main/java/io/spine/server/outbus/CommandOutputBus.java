@@ -68,16 +68,16 @@ public abstract class CommandOutputBus<M extends Message,
     /**
      * The strategy to deliver the messages to the dispatchers.
      */
-    private final CommandOutputDelivery<E, C, D> delivery;
+    private final MulticastDelivery<E, C, D> delivery;
 
-    protected CommandOutputBus(CommandOutputDelivery<E, C, D> delivery) {
+    protected CommandOutputBus(MulticastDelivery<E, C, D> delivery) {
         super();
         this.delivery = delivery;
         injectDispatcherProvider();
     }
 
     /**
-     * Sets up the {@code CommandOutputDelivery} with an ability to obtain
+     * Sets up the {@code MulticastDelivery} with an ability to obtain
      * {@linkplain MessageDispatcher message dispatchers} by a given
      * {@linkplain MessageClass message class} instance at runtime.
      */
@@ -108,7 +108,7 @@ public abstract class CommandOutputBus<M extends Message,
      *
      * @return the delivery strategy
      */
-    protected CommandOutputDelivery<E, C, D> delivery() {
+    protected MulticastDelivery<E, C, D> delivery() {
         return this.delivery;
     }
 

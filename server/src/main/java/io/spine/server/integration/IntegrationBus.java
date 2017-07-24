@@ -32,6 +32,7 @@ import io.spine.type.MessageClass;
 import java.util.Deque;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Lists.newLinkedList;
 
 /**
  * Dispatches external messages from and to the current bounded context.
@@ -44,21 +45,11 @@ public class IntegrationBus extends Bus<Message,
                                         ExternalMessageDispatcher<?>> {
 
     private IntegrationBus(Builder builder) {
-
+        super();
     }
 
     public static Builder newBuilder() {
         return new Builder();
-    }
-
-    @Override
-    protected DeadMessageTap<ExternalMessageEnvelope> getDeadMessageHandler() {
-        return null;
-    }
-
-    @Override
-    protected EnvelopeValidator<ExternalMessageEnvelope> getValidator() {
-        return null;
     }
 
     @Override
@@ -67,8 +58,18 @@ public class IntegrationBus extends Bus<Message,
     }
 
     @Override
-    protected Deque<BusFilter<ExternalMessageEnvelope>> createFilterChain() {
+    protected DeadMessageTap<ExternalMessageEnvelope> getDeadMessageHandler() {
+        return DeadExternalMessageTap.INSTANCE;
+    }
+
+    @Override
+    protected EnvelopeValidator<ExternalMessageEnvelope> getValidator() {
         return null;
+    }
+
+    @Override
+    protected Deque<BusFilter<ExternalMessageEnvelope>> createFilterChain() {
+        return newLinkedList();
     }
 
 
@@ -84,7 +85,12 @@ public class IntegrationBus extends Bus<Message,
 
     @Override
     protected void store(Iterable<Message> messages) {
+    }
 
+    @Override
+    public void register(ExternalMessageDispatcher dispatcher) {
+        
+        super.register(dispatcher);
     }
 
     public static class Builder
@@ -113,6 +119,22 @@ public class IntegrationBus extends Bus<Message,
             // Do not call `super()`, as long as we don't want to enforce
             // non-empty message class set for an external message dispatcher.
             checkNotNull(dispatcher);
+        }
+    }
+
+    /**
+     * Produces an {@link UnsupportedExternalMessageException} upon capturing an external message,
+     * which has no targets to be dispatched to.
+     */
+    private enum DeadExternalMessageTap implements DeadMessageTap<ExternalMessageEnvelope> {
+        INSTANCE;
+
+        @Override
+        public UnsupportedExternalMessageException capture(ExternalMessageEnvelope envelope) {
+            final Message message = envelope.getMessage();
+            final UnsupportedExternalMessageException exception =
+                    new UnsupportedExternalMessageException(message);
+            return exception;
         }
     }
 }

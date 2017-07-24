@@ -33,8 +33,8 @@ import java.util.concurrent.Executor;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Base functionality for the routines delivering the
- * {@linkplain MessageEnvelope message envelopes} to the consumers, such as
+ * Base functionality for the routines delivering a single
+ * {@linkplain MessageEnvelope message envelope} to several consumers, such as
  * {@linkplain io.spine.server.bus.MessageDispatcher message dispatchers}.
  *
  * @param <E> the type of the envelope
@@ -43,8 +43,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alex Tymchenko
  */
 @Internal
-public abstract class CommandOutputDelivery<E extends MessageEnvelope,
-                                            T extends MessageClass, C> extends Delivery<E, C> {
+public abstract class MulticastDelivery<E extends MessageEnvelope,
+                                        T extends MessageClass, C> extends Delivery<E, C> {
 
     /**
      *  A function, returning a set of consumers by the message class.
@@ -56,12 +56,12 @@ public abstract class CommandOutputDelivery<E extends MessageEnvelope,
     private Function<T, Set<C>> consumerProvider;
 
     /** {@inheritDoc} */
-    protected CommandOutputDelivery(Executor delegate) {
+    protected MulticastDelivery(Executor delegate) {
         super(delegate);
     }
 
     /** {@inheritDoc} */
-    protected CommandOutputDelivery() {
+    protected MulticastDelivery() {
         super();
     }
 

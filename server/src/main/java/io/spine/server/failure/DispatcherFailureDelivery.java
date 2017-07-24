@@ -24,7 +24,7 @@ import io.spine.annotation.SPI;
 import io.spine.core.Failure;
 import io.spine.core.FailureClass;
 import io.spine.core.FailureEnvelope;
-import io.spine.server.outbus.CommandOutputDelivery;
+import io.spine.server.outbus.MulticastDelivery;
 
 import java.util.concurrent.Executor;
 
@@ -38,13 +38,13 @@ import java.util.concurrent.Executor;
 @SPI
 @SuppressWarnings("WeakerAccess")   // Part of API.
 public abstract class DispatcherFailureDelivery
-        extends CommandOutputDelivery<FailureEnvelope, FailureClass, FailureDispatcher<?>> {
+        extends MulticastDelivery<FailureEnvelope, FailureClass, FailureDispatcher<?>> {
 
     /**
      * Create a dispatcher failure delivery with an {@link Executor} used for the operation.
      *
      * @param delegate the instance of {@code Executor} used to dispatch business failures.
-     * @see CommandOutputDelivery#CommandOutputDelivery(Executor)
+     * @see MulticastDelivery#MulticastDelivery(Executor)
      */
     protected DispatcherFailureDelivery(Executor delegate) {
         super(delegate);
@@ -55,7 +55,7 @@ public abstract class DispatcherFailureDelivery
      * {@link com.google.common.util.concurrent.MoreExecutors#directExecutor() direct executor}
      * used for the business failure dispatching.
      *
-     * @see CommandOutputDelivery#CommandOutputDelivery()
+     * @see MulticastDelivery#MulticastDelivery()
      */
     protected DispatcherFailureDelivery() {
         super();

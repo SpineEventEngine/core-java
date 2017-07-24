@@ -24,7 +24,7 @@ import io.spine.annotation.SPI;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
-import io.spine.server.outbus.CommandOutputDelivery;
+import io.spine.server.outbus.MulticastDelivery;
 
 import java.util.concurrent.Executor;
 
@@ -37,7 +37,7 @@ import java.util.concurrent.Executor;
  */
 @SPI
 @SuppressWarnings("WeakerAccess")   // Part of API.
-public abstract class DispatcherEventDelivery extends CommandOutputDelivery<EventEnvelope,
+public abstract class DispatcherEventDelivery extends MulticastDelivery<EventEnvelope,
                                                                             EventClass,
                                                                             EventDispatcher<?>> {
 
@@ -45,7 +45,7 @@ public abstract class DispatcherEventDelivery extends CommandOutputDelivery<Even
      * Create a dispatcher event delivery with an {@link Executor} used for the operation.
      *
      * @param delegate the instance of {@code Executor} used to dispatch events.
-     * @see CommandOutputDelivery#CommandOutputDelivery(Executor)
+     * @see MulticastDelivery#MulticastDelivery(Executor)
      */
     protected DispatcherEventDelivery(Executor delegate) {
         super(delegate);
@@ -56,7 +56,7 @@ public abstract class DispatcherEventDelivery extends CommandOutputDelivery<Even
      * {@link com.google.common.util.concurrent.MoreExecutors#directExecutor() direct executor}
      * used for event dispatching.
      *
-     * @see CommandOutputDelivery#CommandOutputDelivery()
+     * @see MulticastDelivery#MulticastDelivery()
      */
     protected DispatcherEventDelivery() {
         super();
