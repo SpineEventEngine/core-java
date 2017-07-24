@@ -50,18 +50,18 @@ public class Buses {
      * Acknowledges the envelope posted.
      *
      * @param id the ID of the message to acknowledge
-     * @return {@code IsSent} with an {@code OK} status
+     * @return {@code Ack} with an {@code OK} status
      */
     public static Ack acknowledge(Message id) {
         return setStatus(id, Responses.statusOk());
     }
 
     /**
-     * Creates {@code IsSent} response for the given message ID with the error status.
+     * Creates {@code Ack} response for the given message ID with the error status.
      *
      * @param id    the ID of the message to provide with the status
      * @param cause the cause of the message rejection
-     * @return the {@code IsSent} response with the given message ID
+     * @return the {@code Ack} response with the given message ID
      */
     public static Ack reject(Message id, Error cause) {
         checkNotNull(cause);
@@ -73,11 +73,11 @@ public class Buses {
     }
 
     /**
-     * Creates {@code IsSent} response for the given message ID with the failure status.
+     * Creates {@code Ack} response for the given message ID with the failure status.
      *
      * @param id    the ID of the message to provide with the status
      * @param cause the cause of the message rejection
-     * @return the {@code IsSent} response with the given message ID
+     * @return the {@code Ack} response with the given message ID
      */
     public static Ack reject(Message id, Rejection cause) {
         checkNotNull(cause);

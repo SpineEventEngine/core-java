@@ -32,7 +32,7 @@ import io.spine.core.CommandValidationError;
 import io.spine.core.MessageEnvelope;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.command.CommandHandler;
-import io.spine.server.failure.FailureBus;
+import io.spine.server.rejection.RejectionBus;
 import io.spine.test.command.AddTask;
 import io.spine.test.command.CreateProject;
 import org.junit.Test;
@@ -60,15 +60,15 @@ public class MultiTenantCommandBusShould extends AbstractCommandBusTestSuite {
 
     @Test
     public void allow_to_specify_failure_bus_via_builder() {
-        final FailureBus expectedFailureBus = mock(FailureBus.class);
+        final RejectionBus expectedRejectionBus = mock(RejectionBus.class);
         final CommandBus commandBus = CommandBus.newBuilder()
                                                 .setCommandStore(commandStore)
-                                                .setFailureBus(expectedFailureBus)
+                                                .setRejectionBus(expectedRejectionBus)
                                                 .build();
         assertNotNull(commandBus);
 
-        final FailureBus actualFailureBus = commandBus.failureBus();
-        assertEquals(expectedFailureBus, actualFailureBus);
+        final RejectionBus actualRejectionBus = commandBus.rejectionBus();
+        assertEquals(expectedRejectionBus, actualRejectionBus);
     }
 
     @Test
@@ -81,7 +81,7 @@ public class MultiTenantCommandBusShould extends AbstractCommandBusTestSuite {
         final CommandBus bus = CommandBus.newBuilder()
                                            .setCommandStore(commandStore)
                                            .build();
-        assertNotNull(bus.failureBus());
+        assertNotNull(bus.rejectionBus());
     }
 
     @Test
@@ -95,7 +95,7 @@ public class MultiTenantCommandBusShould extends AbstractCommandBusTestSuite {
     public void close_FailureBus_when_closed() throws Exception {
         commandBus.close();
 
-        verify(failureBus).close();
+        verify(rejectionBus).close();
     }
 
     @Test

@@ -17,7 +17,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.failure;
+package io.spine.server.rejection;
 
 import io.spine.base.Error;
 import io.spine.change.StringChange;
@@ -27,9 +27,9 @@ import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.Commands;
-import io.spine.core.FailureClass;
-import io.spine.core.FailureEnvelope;
 import io.spine.core.Rejection;
+import io.spine.core.RejectionClass;
+import io.spine.core.RejectionEnvelope;
 import io.spine.core.Rejections;
 import io.spine.core.Subscribe;
 import io.spine.core.TenantId;
@@ -72,23 +72,23 @@ import static org.mockito.Mockito.verify;
     // OK as for the test class for one of the primary framework features
 public class RejectionBusShould {
 
-    private FailureBus failureBus;
-    private PostponedDispatcherFailureDelivery postponedDelivery;
+    private RejectionBus rejectionBus;
+    private PostponedDispatcherRejectionDelivery postponedDelivery;
     private Executor delegateDispatcherExecutor;
-    private FailureBus failureBusWithPostponedExecution;
+    private RejectionBus rejectionBusWithPostponedExecution;
 
     @Before
     public void setUp() {
-        this.failureBus = FailureBus.newBuilder()
-                                    .build();
+        this.rejectionBus = RejectionBus.newBuilder()
+                                        .build();
         this.delegateDispatcherExecutor = spy(directExecutor());
         this.postponedDelivery =
-                new PostponedDispatcherFailureDelivery(delegateDispatcherExecutor);
-        this.failureBusWithPostponedExecution =
-                FailureBus.newBuilder()
-                          .setDispatcherFailureDelivery(
+                new PostponedDispatcherRejectionDelivery(delegateDispatcherExecutor);
+        this.rejectionBusWithPostponedExecution =
+                RejectionBus.newBuilder()
+                            .setDispatcherRejectionDelivery(
                                   postponedDelivery)
-                          .build();
+                            .build();
     }
 
     @SuppressWarnings("MethodMayBeStatic")   /* it cannot, as its result is used in {@code org.mockito.Mockito.spy() */
@@ -103,83 +103,85 @@ public class RejectionBusShould {
 
     @Test
     public void have_builder() {
-        assertNotNull(FailureBus.newBuilder());
+        assertNotNull(RejectionBus.newBuilder());
     }
 
     @Test
     public void return_associated_DispatcherDelivery() {
-        final DispatcherFailureDelivery delivery = mock(DispatcherFailureDelivery.class);
-        final FailureBus result = FailureBus.newBuilder()
-                                            .setDispatcherFailureDelivery(delivery)
-                                            .build();
+        final DispatcherRejectionDelivery delivery = mock(DispatcherRejectionDelivery.class);
+        final RejectionBus result = RejectionBus.newBuilder()
+                                                .setDispatcherRejectionDelivery(delivery)
+                                                .build();
         assertEquals(delivery, result.delivery());
     }
 
     @Test
     public void return_direct_DispatcherDelivery_if_none_customized() {
-        final DispatcherFailureDelivery actual = failureBus.delivery();
-        assertTrue(actual instanceof DispatcherFailureDelivery.DirectDelivery);
+        final DispatcherRejectionDelivery actual = rejectionBus.delivery();
+        assertTrue(actual instanceof DispatcherRejectionDelivery.DirectDelivery);
     }
 
     @Test   // as the FailureBus instances do not support enrichment yet.
     public void not_enrich_failure_messages() {
         final Rejection original = Rejection.getDefaultInstance();
-        final Rejection enriched = failureBus.enrich(original);
+        final Rejection enriched = rejectionBus.enrich(original);
         assertEquals(original, enriched);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void reject_object_with_no_subscriber_methods() {
-        failureBus.register(new FailureSubscriber());
+        rejectionBus.register(new RejectionSubscriber());
     }
 
     @Test
     public void register_failure_subscriber() {
-        final FailureSubscriber subscriberOne = new InvalidProjectNameSubscriber();
-        final FailureSubscriber subscriberTwo = new InvalidProjectNameSubscriber();
+        final RejectionSubscriber subscriberOne = new InvalidProjectNameSubscriber();
+        final RejectionSubscriber subscriberTwo = new InvalidProjectNameSubscriber();
 
-        failureBus.register(subscriberOne);
-        failureBus.register(subscriberTwo);
+        rejectionBus.register(subscriberOne);
+        rejectionBus.register(subscriberTwo);
 
-        final FailureClass failureClass = FailureClass.of(InvalidProjectName.class);
-        assertTrue(failureBus.hasDispatchers(failureClass));
+        final RejectionClass rejectionClass = RejectionClass.of(InvalidProjectName.class);
+        assertTrue(rejectionBus.hasDispatchers(rejectionClass));
 
-        final Collection<FailureDispatcher<?>> dispatchers = failureBus.getDispatchers(failureClass);
+        final Collection<RejectionDispatcher<?>> dispatchers = rejectionBus.getDispatchers(
+                rejectionClass);
         assertTrue(dispatchers.contains(subscriberOne));
         assertTrue(dispatchers.contains(subscriberTwo));
     }
 
     @Test
     public void unregister_subscribers() {
-        final FailureSubscriber subscriberOne = new InvalidProjectNameSubscriber();
-        final FailureSubscriber subscriberTwo = new InvalidProjectNameSubscriber();
-        failureBus.register(subscriberOne);
-        failureBus.register(subscriberTwo);
-        final FailureClass failureClass = FailureClass.of(
+        final RejectionSubscriber subscriberOne = new InvalidProjectNameSubscriber();
+        final RejectionSubscriber subscriberTwo = new InvalidProjectNameSubscriber();
+        rejectionBus.register(subscriberOne);
+        rejectionBus.register(subscriberTwo);
+        final RejectionClass rejectionClass = RejectionClass.of(
                 InvalidProjectName.class);
 
-        failureBus.unregister(subscriberOne);
+        rejectionBus.unregister(subscriberOne);
 
         // Check that the 2nd subscriber with the same failure subscriber method remains
         // after the 1st subscriber unregisters.
-        final Collection<FailureDispatcher<?>> subscribers = failureBus.getDispatchers(failureClass);
+        final Collection<RejectionDispatcher<?>> subscribers = rejectionBus.getDispatchers(
+                rejectionClass);
         assertFalse(subscribers.contains(subscriberOne));
         assertTrue(subscribers.contains(subscriberTwo));
 
         // Check that after 2nd subscriber us unregisters he's no longer in
-        failureBus.unregister(subscriberTwo);
+        rejectionBus.unregister(subscriberTwo);
 
-        assertFalse(failureBus.getDispatchers(failureClass)
-                              .contains(subscriberTwo));
+        assertFalse(rejectionBus.getDispatchers(rejectionClass)
+                                .contains(subscriberTwo));
     }
 
     @Test
     public void call_subscriber_when_failure_posted() {
         final InvalidProjectNameSubscriber subscriber = new InvalidProjectNameSubscriber();
         final Rejection rejection = invalidProjectNameFailure();
-        failureBus.register(subscriber);
+        rejectionBus.register(subscriber);
 
-        failureBus.post(rejection);
+        rejectionBus.post(rejection);
 
         final Rejection handled = subscriber.getRejectionHandled();
         // Compare the content without command ID, which is different in the remembered
@@ -200,22 +202,22 @@ public class RejectionBusShould {
 
     @Test
     public void register_dispatchers() {
-        final FailureDispatcher<?> dispatcher = new BareDispatcher();
+        final RejectionDispatcher<?> dispatcher = new BareDispatcher();
 
-        failureBus.register(dispatcher);
+        rejectionBus.register(dispatcher);
 
-        final FailureClass failureClass = FailureClass.of(InvalidProjectName.class);
-        assertTrue(failureBus.getDispatchers(failureClass)
-                             .contains(dispatcher));
+        final RejectionClass rejectionClass = RejectionClass.of(InvalidProjectName.class);
+        assertTrue(rejectionBus.getDispatchers(rejectionClass)
+                               .contains(dispatcher));
     }
 
     @Test
     public void call_dispatchers() {
         final BareDispatcher dispatcher = new BareDispatcher();
 
-        failureBus.register(dispatcher);
+        rejectionBus.register(dispatcher);
 
-        failureBus.post(invalidProjectNameFailure());
+        rejectionBus.post(invalidProjectNameFailure());
 
         assertTrue(dispatcher.isDispatchCalled());
     }
@@ -224,10 +226,10 @@ public class RejectionBusShould {
     public void not_call_dispatchers_if_dispatcher_failure_execution_postponed() {
         final BareDispatcher dispatcher = new BareDispatcher();
 
-        failureBusWithPostponedExecution.register(dispatcher);
+        rejectionBusWithPostponedExecution.register(dispatcher);
 
         final Rejection rejection = invalidProjectNameFailure();
-        failureBusWithPostponedExecution.post(rejection);
+        rejectionBusWithPostponedExecution.post(rejection);
         assertFalse(dispatcher.isDispatchCalled());
 
         final boolean failurePostponed = postponedDelivery.isPostponed(rejection, dispatcher);
@@ -238,13 +240,13 @@ public class RejectionBusShould {
     public void deliver_postponed_failure_to_dispatcher_using_configured_executor() {
         final BareDispatcher dispatcher = new BareDispatcher();
 
-        failureBusWithPostponedExecution.register(dispatcher);
+        rejectionBusWithPostponedExecution.register(dispatcher);
 
         final Rejection rejection = invalidProjectNameFailure();
-        failureBusWithPostponedExecution.post(rejection);
-        final Set<FailureEnvelope> postponedFailures = postponedDelivery.getPostponedFailures();
-        final FailureEnvelope postponedFailure = postponedFailures.iterator()
-                                                                  .next();
+        rejectionBusWithPostponedExecution.post(rejection);
+        final Set<RejectionEnvelope> postponedFailures = postponedDelivery.getPostponedFailures();
+        final RejectionEnvelope postponedFailure = postponedFailures.iterator()
+                                                                    .next();
         verify(delegateDispatcherExecutor, never()).execute(any(Runnable.class));
         postponedDelivery.deliverNow(postponedFailure, dispatcher.getClass());
         assertTrue(dispatcher.isDispatchCalled());
@@ -253,51 +255,51 @@ public class RejectionBusShould {
 
     @Test
     public void unregister_dispatchers() {
-        final FailureDispatcher<?> dispatcherOne = new BareDispatcher();
-        final FailureDispatcher<?> dispatcherTwo = new BareDispatcher();
-        final FailureClass failureClass = FailureClass.of(InvalidProjectName.class);
-        failureBus.register(dispatcherOne);
-        failureBus.register(dispatcherTwo);
+        final RejectionDispatcher<?> dispatcherOne = new BareDispatcher();
+        final RejectionDispatcher<?> dispatcherTwo = new BareDispatcher();
+        final RejectionClass rejectionClass = RejectionClass.of(InvalidProjectName.class);
+        rejectionBus.register(dispatcherOne);
+        rejectionBus.register(dispatcherTwo);
 
-        failureBus.unregister(dispatcherOne);
-        final Set<FailureDispatcher<?>> dispatchers = failureBus.getDispatchers(failureClass);
+        rejectionBus.unregister(dispatcherOne);
+        final Set<RejectionDispatcher<?>> dispatchers = rejectionBus.getDispatchers(rejectionClass);
 
         // Check we don't have 1st dispatcher, but have 2nd.
         assertFalse(dispatchers.contains(dispatcherOne));
         assertTrue(dispatchers.contains(dispatcherTwo));
 
-        failureBus.unregister(dispatcherTwo);
-        assertFalse(failureBus.getDispatchers(failureClass)
-                              .contains(dispatcherTwo));
+        rejectionBus.unregister(dispatcherTwo);
+        assertFalse(rejectionBus.getDispatchers(rejectionClass)
+                                .contains(dispatcherTwo));
     }
 
     @Test
     public void catch_exceptions_caused_by_subscribers() {
         final VerifiableSubscriber faultySubscriber = new FaultySubscriber();
 
-        failureBus.register(faultySubscriber);
-        failureBus.post(invalidProjectNameFailure());
+        rejectionBus.register(faultySubscriber);
+        rejectionBus.post(invalidProjectNameFailure());
 
         assertTrue(faultySubscriber.isMethodCalled());
     }
 
     @Test
     public void unregister_registries_on_close() throws Exception {
-        final FailureBus failureBus = FailureBus.newBuilder()
-                                                .build();
-        failureBus.register(new BareDispatcher());
-        failureBus.register(new InvalidProjectNameSubscriber());
-        final FailureClass failureClass = FailureClass.of(InvalidProjectName.class);
+        final RejectionBus rejectionBus = RejectionBus.newBuilder()
+                                                      .build();
+        rejectionBus.register(new BareDispatcher());
+        rejectionBus.register(new InvalidProjectNameSubscriber());
+        final RejectionClass rejectionClass = RejectionClass.of(InvalidProjectName.class);
 
-        failureBus.close();
+        rejectionBus.close();
 
-        assertTrue(failureBus.getDispatchers(failureClass)
-                             .isEmpty());
+        assertTrue(rejectionBus.getDispatchers(rejectionClass)
+                               .isEmpty());
     }
 
     @Test
     public void support_short_form_subscriber_methods() {
-        final FailureMessageSubscriber subscriber = new FailureMessageSubscriber();
+        final RejectionMessageSubscriber subscriber = new RejectionMessageSubscriber();
         checkFailure(subscriber);
     }
 
@@ -324,16 +326,16 @@ public class RejectionBusShould {
                 // In Bus ->  No message types are forwarded by this dispatcher.
     )
     public void not_support_subscriber_methods_with_wrong_parameter_sequence() {
-        final FailureDispatcher<?> subscriber = new InvalidOrderSubscriber();
+        final RejectionDispatcher<?> subscriber = new InvalidOrderSubscriber();
 
-        failureBus.register(subscriber);
-        failureBus.post(missingOwnerFailure());
+        rejectionBus.register(subscriber);
+        rejectionBus.post(missingOwnerFailure());
     }
 
     @Test
     public void report_dead_messages() {
         final MemoizingObserver<Ack> observer = memoizingObserver();
-        failureBus.post(missingOwnerFailure(), observer);
+        rejectionBus.post(missingOwnerFailure(), observer);
         assertTrue(observer.isCompleted());
         final Ack result = observer.firstResponse();
         assertNotNull(result);
@@ -344,13 +346,13 @@ public class RejectionBusShould {
 
     @Test
     public void have_log() {
-        assertNotNull(FailureBus.log());
+        assertNotNull(RejectionBus.log());
     }
 
     private void checkFailure(VerifiableSubscriber subscriber) {
         final Rejection rejection = missingOwnerFailure();
-        failureBus.register(subscriber);
-        failureBus.post(rejection);
+        rejectionBus.register(subscriber);
+        rejectionBus.post(rejection);
 
         assertTrue(subscriber.isMethodCalled());
         subscriber.verifyGot(rejection);
@@ -399,17 +401,17 @@ public class RejectionBusShould {
      * A simple dispatcher class, which only dispatch and does not have own failure
      * subscribing methods.
      */
-    private static class BareDispatcher implements FailureDispatcher<String> {
+    private static class BareDispatcher implements RejectionDispatcher<String> {
 
         private boolean dispatchCalled = false;
 
         @Override
-        public Set<FailureClass> getMessageClasses() {
-            return FailureClass.setOf(InvalidProjectName.class);
+        public Set<RejectionClass> getMessageClasses() {
+            return RejectionClass.setOf(InvalidProjectName.class);
         }
 
         @Override
-        public Set<String> dispatch(FailureEnvelope failure) {
+        public Set<String> dispatch(RejectionEnvelope failure) {
             dispatchCalled = true;
             return Identity.of(this);
         }
@@ -419,7 +421,7 @@ public class RejectionBusShould {
         }
     }
 
-    private static class InvalidProjectNameSubscriber extends FailureSubscriber {
+    private static class InvalidProjectNameSubscriber extends RejectionSubscriber {
 
         private Rejection rejectionHandled;
 
@@ -439,25 +441,25 @@ public class RejectionBusShould {
         }
     }
 
-    private static class PostponedDispatcherFailureDelivery extends DispatcherFailureDelivery {
+    private static class PostponedDispatcherRejectionDelivery extends DispatcherRejectionDelivery {
 
-        private final Map<FailureEnvelope,
-                Class<? extends FailureDispatcher>> postponedExecutions = newHashMap();
+        private final Map<RejectionEnvelope,
+                Class<? extends RejectionDispatcher>> postponedExecutions = newHashMap();
 
-        private PostponedDispatcherFailureDelivery(Executor delegate) {
+        private PostponedDispatcherRejectionDelivery(Executor delegate) {
             super(delegate);
         }
 
         @Override
-        public boolean shouldPostponeDelivery(FailureEnvelope failure,
-                                              FailureDispatcher<?> consumer) {
+        public boolean shouldPostponeDelivery(RejectionEnvelope failure,
+                                              RejectionDispatcher<?> consumer) {
             postponedExecutions.put(failure, consumer.getClass());
             return true;
         }
 
-        private boolean isPostponed(Rejection rejection, FailureDispatcher<?> dispatcher) {
-            final FailureEnvelope envelope = FailureEnvelope.of(rejection);
-            final Class<? extends FailureDispatcher> actualClass = postponedExecutions.get(
+        private boolean isPostponed(Rejection rejection, RejectionDispatcher<?> dispatcher) {
+            final RejectionEnvelope envelope = RejectionEnvelope.of(rejection);
+            final Class<? extends RejectionDispatcher> actualClass = postponedExecutions.get(
                     envelope);
             final boolean failurePostponed = actualClass != null;
             final boolean dispatcherMatches = failurePostponed && dispatcher.getClass()
@@ -465,13 +467,13 @@ public class RejectionBusShould {
             return dispatcherMatches;
         }
 
-        private Set<FailureEnvelope> getPostponedFailures() {
-            final Set<FailureEnvelope> envelopes = postponedExecutions.keySet();
+        private Set<RejectionEnvelope> getPostponedFailures() {
+            final Set<RejectionEnvelope> envelopes = postponedExecutions.keySet();
             return envelopes;
         }
     }
 
-    private abstract static class VerifiableSubscriber extends FailureSubscriber {
+    private abstract static class VerifiableSubscriber extends RejectionSubscriber {
 
         private boolean methodCalled = false;
 
@@ -504,7 +506,7 @@ public class RejectionBusShould {
         }
     }
 
-    private static class FailureMessageSubscriber extends VerifiableSubscriber {
+    private static class RejectionMessageSubscriber extends VerifiableSubscriber {
 
         private MissingOwner failure;
 

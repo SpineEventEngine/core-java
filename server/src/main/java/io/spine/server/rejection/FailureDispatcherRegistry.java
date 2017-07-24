@@ -17,9 +17,9 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.failure;
+package io.spine.server.rejection;
 
-import io.spine.core.FailureClass;
+import io.spine.core.RejectionClass;
 import io.spine.server.outbus.OutputDispatcherRegistry;
 
 import java.util.Set;
@@ -31,16 +31,16 @@ import java.util.Set;
  *
  * @author Alex Tymchenko
  */
-public class FailureDispatcherRegistry extends OutputDispatcherRegistry<FailureClass,
-                                                                        FailureDispatcher<?>> {
+public class FailureDispatcherRegistry extends OutputDispatcherRegistry<RejectionClass,
+        RejectionDispatcher<?>> {
     /**
      * {@inheritDoc}
      *
      * Overrides to expose this method to
-     * {@linkplain FailureBus#getDispatchers(FailureClass) failureBus}.
+     * {@linkplain RejectionBus#getDispatchers(RejectionClass) failureBus}.
      */
     @Override
-    protected Set<FailureDispatcher<?>> getDispatchers(FailureClass messageClass) {
+    protected Set<RejectionDispatcher<?>> getDispatchers(RejectionClass messageClass) {
         return super.getDispatchers(messageClass);
     }
 
@@ -48,10 +48,10 @@ public class FailureDispatcherRegistry extends OutputDispatcherRegistry<FailureC
      * {@inheritDoc}
      *
      * Overrides to expose this method to
-     * {@linkplain FailureBus#hasDispatchers(FailureClass) failureBus}.
+     * {@linkplain RejectionBus#hasDispatchers(RejectionClass) failureBus}.
      */
     @Override
-    protected boolean hasDispatchersFor(FailureClass eventClass) {
+    protected boolean hasDispatchersFor(RejectionClass eventClass) {
         return super.hasDispatchersFor(eventClass);
     }
 }

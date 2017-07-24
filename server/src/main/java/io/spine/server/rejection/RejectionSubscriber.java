@@ -17,38 +17,38 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.failure;
+package io.spine.server.rejection;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
-import io.spine.core.FailureClass;
-import io.spine.core.FailureEnvelope;
-import io.spine.server.reflect.FailureSubscriberMethod;
+import io.spine.core.RejectionClass;
+import io.spine.core.RejectionEnvelope;
+import io.spine.server.reflect.RejectionSubscriberMethod;
 import io.spine.server.tenant.CommandOperation;
 
 import javax.annotation.Nullable;
 import java.util.Set;
 
 /**
- * The abstract base for objects that can be subscribed to receive business failures
- * from {@link FailureBus FailureBus}.
+ * The abstract base for objects that can be subscribed to receive business rejections
+ * from {@link RejectionBus FailureBus}.
  *
  * @author Alex Tymchenko
  * @author Alexander Yevsyukov
- * @see FailureBus#register(io.spine.server.bus.MessageDispatcher)
+ * @see RejectionBus#register(io.spine.server.bus.MessageDispatcher)
  */
-public class FailureSubscriber implements FailureDispatcher<String> {
+public class RejectionSubscriber implements RejectionDispatcher<String> {
 
     /**
-     * Cached set of the failure classes this subscriber is subscribed to.
+     * Cached set of the rejection classes this subscriber is subscribed to.
      */
     @Nullable
-    private Set<FailureClass> failureClasses;
+    private Set<RejectionClass> rejectionClasses;
 
     @Override
-    public Set<String> dispatch(final FailureEnvelope envelope) {
+    public Set<String> dispatch(final RejectionEnvelope envelope) {
         final Command originCommand = envelope.getOuterObject()
                                               .getContext()
                                               .getCommand();
@@ -67,16 +67,15 @@ public class FailureSubscriber implements FailureDispatcher<String> {
 
     @Override
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // as we return an immutable collection.
-    public Set<FailureClass> getMessageClasses() {
-        if (failureClasses == null) {
-            failureClasses = ImmutableSet.copyOf(
-                    FailureSubscriberMethod.getFailureClasses(getClass()));
+    public Set<RejectionClass> getMessageClasses() {
+        if (rejectionClasses == null) {
+            rejectionClasses = ImmutableSet.copyOf(
+                    RejectionSubscriberMethod.getRejectionClasses(getClass()));
         }
-        return failureClasses;
+        return rejectionClasses;
     }
 
-    public void handle(Message failureMessage, Message commandMessage, CommandContext context) {
-        FailureSubscriberMethod.invokeSubscriber(this,
-                                                 failureMessage, commandMessage, context);
+    public void handle(Message rejectionMessage, Message commandMessage, CommandContext context) {
+        RejectionSubscriberMethod.invokeFor(this, rejectionMessage, commandMessage, context);
     }
 }

@@ -74,7 +74,7 @@ class CommandTestUtil {
                 assertTrue(isNotDefault(record.getStatus()
                                               .getError()));
                 break;
-            case FAILURE:
+            case REJECTED:
                 assertTrue(isNotDefault(record.getStatus()
                                               .getRejection()));
                 break;

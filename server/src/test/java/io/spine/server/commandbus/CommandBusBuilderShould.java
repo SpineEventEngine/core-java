@@ -24,7 +24,7 @@ import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.bus.BusBuilderShould;
 import io.spine.server.commandstore.CommandStore;
-import io.spine.server.failure.FailureBus;
+import io.spine.server.rejection.RejectionBus;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.tenant.TenantAwareTest;
 import io.spine.server.tenant.TenantIndex;
@@ -100,12 +100,12 @@ public class CommandBusBuilderShould extends BusBuilderShould<CommandBus.Builder
 
     @Test
     public void allow_to_specify_failure_bus() {
-        final FailureBus expectedFailureBus = mock(FailureBus.class);
+        final RejectionBus expectedRejectionBus = mock(RejectionBus.class);
 
         final CommandBus.Builder builder = builder().setCommandStore(commandStore)
-                                                    .setFailureBus(expectedFailureBus);
-        assertEquals(expectedFailureBus, builder.getFailureBus()
-                                                .get());
+                                                    .setRejectionBus(expectedRejectionBus);
+        assertEquals(expectedRejectionBus, builder.getRejectionBus()
+                                                  .get());
     }
 
     @Test

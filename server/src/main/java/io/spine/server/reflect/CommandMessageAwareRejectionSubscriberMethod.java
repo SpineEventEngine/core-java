@@ -40,14 +40,14 @@ import java.lang.reflect.Method;
  *
  * @author Dmytro Dashenkov
  */
-final class CommandMessageAwareFailureSubscriberMethod extends FailureSubscriberMethod {
+final class CommandMessageAwareRejectionSubscriberMethod extends RejectionSubscriberMethod {
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
      *
      * @param method subscriber method
      */
-    CommandMessageAwareFailureSubscriberMethod(Method method) {
+    CommandMessageAwareRejectionSubscriberMethod(Method method) {
         super(method);
     }
 
@@ -60,11 +60,11 @@ final class CommandMessageAwareFailureSubscriberMethod extends FailureSubscriber
      */
     @Override
     protected void doInvoke(Object target,
-                            Message failureMessage,
+                            Message rejectionMessage,
                             CommandContext context,
                             Message commandMessage) throws IllegalArgumentException,
                                                            IllegalAccessException,
                                                            InvocationTargetException {
-        getMethod().invoke(target, failureMessage, commandMessage);
+        getMethod().invoke(target, rejectionMessage, commandMessage);
     }
 }

@@ -21,7 +21,6 @@
 package io.spine.server.reflect;
 
 import com.google.common.base.Predicate;
-import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
@@ -94,7 +93,7 @@ public final class EventSubscriberMethod extends HandlerMethod<EventContext> {
     @CheckReturnValue
     public static Set<EventClass> inspect(Class<?> cls) {
         checkNotNull(cls);
-        final ImmutableSet<EventClass> result = EventClass.setOf(inspect(cls, predicate()));
+        final Set<EventClass> result = EventClass.setOf(inspect(cls, predicate()));
         return result;
     }
 

@@ -24,10 +24,10 @@ import com.google.protobuf.Message;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.ActorContext;
 import io.spine.core.Command;
-import io.spine.core.FailureClass;
-import io.spine.core.FailureEnvelope;
 import io.spine.core.MessageEnvelopeShould;
 import io.spine.core.Rejection;
+import io.spine.core.RejectionClass;
+import io.spine.core.RejectionEnvelope;
 import io.spine.core.Rejections;
 import io.spine.protobuf.AnyPacker;
 import io.spine.test.rejection.OperationRejections.CannotPerformBusinessOperation;
@@ -37,15 +37,15 @@ import static io.spine.Identifier.newUuid;
 import static org.junit.Assert.assertEquals;
 
 /**
- * Test of {@link FailureEnvelope}.
+ * Test of {@link RejectionEnvelope}.
  *
  * <p>This test suite is placed under the {@code server} to ease the inter-module dependencies.
  *
  * @author Alex Tymchenko
  */
 public class RejectionEnvelopeShould extends MessageEnvelopeShould<Rejection,
-                                                                 FailureEnvelope,
-                                                                 FailureClass> {
+        RejectionEnvelope,
+        RejectionClass> {
 
     private final TestActorRequestFactory requestFactory =
             TestActorRequestFactory.newInstance(RejectionEnvelopeShould.class);
@@ -62,13 +62,13 @@ public class RejectionEnvelopeShould extends MessageEnvelopeShould<Rejection,
     }
 
     @Override
-    protected FailureEnvelope toEnvelope(Rejection obj) {
-        return FailureEnvelope.of(obj);
+    protected RejectionEnvelope toEnvelope(Rejection obj) {
+        return RejectionEnvelope.of(obj);
     }
 
     @Override
-    protected FailureClass getMessageClass(Rejection obj) {
-        return FailureClass.of(obj);
+    protected RejectionClass getMessageClass(Rejection obj) {
+        return RejectionClass.of(obj);
     }
 
     @Test
@@ -76,7 +76,7 @@ public class RejectionEnvelopeShould extends MessageEnvelopeShould<Rejection,
         final Rejection rejection = outerObject();
         final Command command = rejection.getContext()
                                          .getCommand();
-        final FailureEnvelope envelope = toEnvelope(rejection);
+        final RejectionEnvelope envelope = toEnvelope(rejection);
         assertEquals(command.getContext(), envelope.getCommandContext());
     }
 
@@ -86,13 +86,13 @@ public class RejectionEnvelopeShould extends MessageEnvelopeShould<Rejection,
         final Command command = rejection.getContext()
                                          .getCommand();
         final Message commandMessage = AnyPacker.unpack(command.getMessage());
-        final FailureEnvelope envelope = toEnvelope(rejection);
+        final RejectionEnvelope envelope = toEnvelope(rejection);
         assertEquals(commandMessage, envelope.getCommandMessage());
     }
 
     @Test
     public void obtain_actor_context() {
-        final FailureEnvelope failure = toEnvelope(outerObject());
+        final RejectionEnvelope failure = toEnvelope(outerObject());
         final ActorContext actorContext = failure.getActorContext();
 
         /* Since we're using `TestActorRequestFactory` initialized with the class of this test suite

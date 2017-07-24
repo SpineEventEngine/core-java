@@ -17,17 +17,17 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.failure;
+package io.spine.server.rejection;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.core.Ack;
-import io.spine.core.FailureClass;
-import io.spine.core.FailureEnvelope;
 import io.spine.core.MessageInvalid;
 import io.spine.core.Rejection;
+import io.spine.core.RejectionClass;
+import io.spine.core.RejectionEnvelope;
 import io.spine.core.Rejections;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.bus.BusFilter;
@@ -46,7 +46,7 @@ import static com.google.common.base.Optional.absent;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Dispatches the business failures that occur during the command processing
+ * Dispatches the business rejections that occur during the command processing
  * to the corresponding subscriber.
  *
  * @author Alexander Yevsyuov
@@ -55,18 +55,18 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @see Rejections
  * @see io.spine.core.Subscribe @Subscribe
  */
-public class FailureBus extends CommandOutputBus<Rejection,
-                                                 FailureEnvelope,
-                                                 FailureClass,
-                                                 FailureDispatcher<?>> {
+public class RejectionBus extends CommandOutputBus<Rejection,
+                                                   RejectionEnvelope,
+                                                   RejectionClass,
+                                                   RejectionDispatcher<?>> {
 
-    private final Deque<BusFilter<FailureEnvelope>> filterChain;
+    private final Deque<BusFilter<RejectionEnvelope>> filterChain;
 
     /**
      * Creates a new instance according to the pre-configured {@code Builder}.
      */
-    private FailureBus(Builder builder) {
-        super(checkNotNull(builder.dispatcherFailureDelivery));
+    private RejectionBus(Builder builder) {
+        super(checkNotNull(builder.dispatcherRejectionDelivery));
         this.filterChain = builder.getFilters();
     }
 
@@ -100,29 +100,29 @@ public class FailureBus extends CommandOutputBus<Rejection,
     }
 
     @Override
-    protected OutputDispatcherRegistry<FailureClass, FailureDispatcher<?>> createRegistry() {
+    protected OutputDispatcherRegistry<RejectionClass, RejectionDispatcher<?>> createRegistry() {
         return new FailureDispatcherRegistry();
     }
 
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK for this method.
     @Override
-    protected Deque<BusFilter<FailureEnvelope>> createFilterChain() {
+    protected Deque<BusFilter<RejectionEnvelope>> createFilterChain() {
         return filterChain;
     }
 
     @Override
-    protected FailureEnvelope toEnvelope(Rejection message) {
-        final FailureEnvelope result = FailureEnvelope.of(message);
+    protected RejectionEnvelope toEnvelope(Rejection message) {
+        final RejectionEnvelope result = RejectionEnvelope.of(message);
         return result;
     }
 
     @Override
-    protected DeadMessageTap<FailureEnvelope> getDeadMessageHandler() {
+    protected DeadMessageTap<RejectionEnvelope> getDeadMessageHandler() {
         return DeadFailureTap.INSTANCE;
     }
 
     @Override
-    protected EnvelopeValidator<FailureEnvelope> getValidator() {
+    protected EnvelopeValidator<RejectionEnvelope> getValidator() {
         return NoOpValidator.INSTANCE;
     }
 
@@ -137,13 +137,13 @@ public class FailureBus extends CommandOutputBus<Rejection,
     }
 
     @VisibleForTesting
-    Set<FailureDispatcher<?>> getDispatchers(FailureClass failureClass) {
-        return registry().getDispatchers(failureClass);
+    Set<RejectionDispatcher<?>> getDispatchers(RejectionClass rejectionClass) {
+        return registry().getDispatchers(rejectionClass);
     }
 
     @VisibleForTesting
-    boolean hasDispatchers(FailureClass failureClass) {
-        return registry().hasDispatchersFor(failureClass);
+    boolean hasDispatchers(RejectionClass rejectionClass) {
+        return registry().hasDispatchersFor(rejectionClass);
     }
 
     /**
@@ -151,8 +151,8 @@ public class FailureBus extends CommandOutputBus<Rejection,
      */
     @VisibleForTesting
     @Override
-    protected DispatcherFailureDelivery delivery() {
-        return (DispatcherFailureDelivery) super.delivery();
+    protected DispatcherRejectionDelivery delivery() {
+        return (DispatcherRejectionDelivery) super.delivery();
     }
 
     /**
@@ -170,7 +170,7 @@ public class FailureBus extends CommandOutputBus<Rejection,
     }
 
     /** The {@code Builder} for {@code FailureBus}. */
-    public static class Builder extends AbstractBuilder<FailureEnvelope, Rejection, Builder> {
+    public static class Builder extends AbstractBuilder<RejectionEnvelope, Rejection, Builder> {
 
         /**
          * Optional {@code DispatcherFailureDelivery} for calling the dispatchers.
@@ -178,7 +178,7 @@ public class FailureBus extends CommandOutputBus<Rejection,
          * <p>If not set, a default value will be set by the builder.
          */
         @Nullable
-        private DispatcherFailureDelivery dispatcherFailureDelivery;
+        private DispatcherRejectionDelivery dispatcherRejectionDelivery;
 
         private Builder() {
             super();
@@ -190,24 +190,24 @@ public class FailureBus extends CommandOutputBus<Rejection,
          * to the dispatchers in the {@code FailureBus} being built.
          *
          * <p>If the {@code DispatcherFailureDelivery} is not set,
-         * {@linkplain  DispatcherFailureDelivery#directDelivery() direct delivery} will be used.
+         * {@linkplain  DispatcherRejectionDelivery#directDelivery() direct delivery} will be used.
          */
-        public Builder setDispatcherFailureDelivery(DispatcherFailureDelivery delivery) {
-            this.dispatcherFailureDelivery = checkNotNull(delivery);
+        public Builder setDispatcherRejectionDelivery(DispatcherRejectionDelivery delivery) {
+            this.dispatcherRejectionDelivery = checkNotNull(delivery);
             return this;
         }
 
-        public Optional<DispatcherFailureDelivery> getDispatcherFailureDelivery() {
-            return Optional.fromNullable(dispatcherFailureDelivery);
+        public Optional<DispatcherRejectionDelivery> getDispatcherRejectionDelivery() {
+            return Optional.fromNullable(dispatcherRejectionDelivery);
         }
 
         @Override
-        public FailureBus build() {
-            if(dispatcherFailureDelivery == null) {
-                dispatcherFailureDelivery = DispatcherFailureDelivery.directDelivery();
+        public RejectionBus build() {
+            if(dispatcherRejectionDelivery == null) {
+                dispatcherRejectionDelivery = DispatcherRejectionDelivery.directDelivery();
             }
 
-            return new FailureBus(this);
+            return new RejectionBus(this);
         }
 
         @Override
@@ -220,11 +220,11 @@ public class FailureBus extends CommandOutputBus<Rejection,
      * Generates an {@link UnhandledFailureException} upon a dead
      * message.
      */
-    private enum DeadFailureTap implements DeadMessageTap<FailureEnvelope> {
+    private enum DeadFailureTap implements DeadMessageTap<RejectionEnvelope> {
         INSTANCE;
 
         @Override
-        public UnhandledFailureException capture(FailureEnvelope envelope) {
+        public UnhandledFailureException capture(RejectionEnvelope envelope) {
             final Message message = envelope.getMessage();
             final UnhandledFailureException exception = new UnhandledFailureException(message);
             return exception;
@@ -234,11 +234,11 @@ public class FailureBus extends CommandOutputBus<Rejection,
     /**
      * Performs no validation and reports the given message valid.
      */
-    private enum NoOpValidator implements EnvelopeValidator<FailureEnvelope> {
+    private enum NoOpValidator implements EnvelopeValidator<RejectionEnvelope> {
         INSTANCE;
 
         @Override
-        public Optional<MessageInvalid> validate(FailureEnvelope envelope) {
+        public Optional<MessageInvalid> validate(RejectionEnvelope envelope) {
             checkNotNull(envelope);
             return absent();
         }
@@ -247,7 +247,7 @@ public class FailureBus extends CommandOutputBus<Rejection,
     private enum LogSingleton {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(FailureBus.class);
+        private final Logger value = LoggerFactory.getLogger(RejectionBus.class);
     }
 
     @VisibleForTesting

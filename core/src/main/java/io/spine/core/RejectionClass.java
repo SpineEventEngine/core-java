@@ -23,67 +23,65 @@ import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.type.MessageClass;
 
+import java.util.Arrays;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A value object holding a class of a business failure.
+ * A value object holding a class of a business rejection.
  *
  * @author Alex Tymchenko
  */
-public class FailureClass extends MessageClass {
+public class RejectionClass extends MessageClass {
 
-    protected FailureClass(Class<? extends Message> value) {
+    protected RejectionClass(Class<? extends Message> value) {
         super(value);
     }
 
     /**
-     * Creates a new instance of the failure class.
+     * Creates a new instance of the rejection class.
      *
      * @param value a value to hold
      * @return new instance
      */
-    public static FailureClass of(Class<? extends Message> value) {
-        return new FailureClass(checkNotNull(value));
+    public static RejectionClass of(Class<? extends Message> value) {
+        return new RejectionClass(checkNotNull(value));
     }
 
     /**
-     * Creates a new instance of the failure class by passed failure instance.
+     * Creates a new instance of the rejection class by passed rejection instance.
      *
-     * <p>If an instance of {@link Rejection} (which implements {@code Message}) is passed to this
-     * method, enclosing failure message will be un-wrapped to determine the class of the failure.
+     * <p>If an instance of {@link Rejection} (which implements {@code Message}) is
+     * passed to this method, enclosing rejection message will be un-wrapped to determine
+     * the class of the rejection.
      *
-     * @param failure a failure instance
+     * @param rejection a rejection instance
      * @return new instance
      */
-    public static FailureClass of(Message failure) {
-        final Message message = checkNotNull(failure);
+    public static RejectionClass of(Message rejection) {
+        final Message message = checkNotNull(rejection);
         if (message instanceof Rejection) {
-            final Rejection rejectionRecord = (Rejection) failure;
+            final Rejection rejectionRecord = (Rejection) rejection;
             final Message enclosed = Rejections.getMessage(rejectionRecord);
             return of(enclosed.getClass());
         }
-        final FailureClass result = of(message.getClass());
+        final RejectionClass result = of(message.getClass());
         return result;
     }
 
-    /** Creates an immutable set of {@code FailureClass} from the passed classes. */
-    public static ImmutableSet<FailureClass> setOf(Set<Class<? extends Message>> classes) {
-        final ImmutableSet.Builder<FailureClass> builder = ImmutableSet.builder();
+    /** Creates an immutable set of {@code RejectionClass} from the passed classes. */
+    public static Set<RejectionClass> setOf(Iterable<Class<? extends Message>> classes) {
+        final ImmutableSet.Builder<RejectionClass> builder = ImmutableSet.builder();
         for (Class<? extends Message> cls : classes) {
             builder.add(of(cls));
         }
         return builder.build();
     }
 
-    /** Creates an immutable set of {@code FailureClass} from the passed classes. */
+    /** Creates an immutable set of {@code RejectionClass} from the passed classes. */
     @SafeVarargs
-    public static ImmutableSet<FailureClass> setOf(Class<? extends Message> ...classes) {
-        final ImmutableSet.Builder<FailureClass> builder = ImmutableSet.builder();
-        for (Class<? extends Message> cls : classes) {
-            builder.add(of(cls));
-        }
-        return builder.build();
+    public static Set<RejectionClass> setOf(Class<? extends Message> ...classes) {
+        return setOf(Arrays.asList(classes));
     }
 }

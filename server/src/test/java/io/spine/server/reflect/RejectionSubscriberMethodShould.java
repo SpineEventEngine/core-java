@@ -22,6 +22,7 @@ package io.spine.server.reflect;
 import com.google.common.testing.NullPointerTester;
 import io.spine.core.CommandContext;
 import io.spine.core.Subscribe;
+import io.spine.server.reflect.given.Given;
 import io.spine.test.reflect.ReflectFailures;
 import io.spine.test.rejection.command.UpdateProjectName;
 import org.junit.Test;
@@ -44,15 +45,15 @@ public class RejectionSubscriberMethodShould {
     public void pass_null_tolerance_check() {
         new NullPointerTester()
                 .setDefault(CommandContext.class, CommandContext.getDefaultInstance())
-                .testAllPublicStaticMethods(FailureSubscriberMethod.class);
+                .testAllPublicStaticMethods(RejectionSubscriberMethod.class);
     }
 
     @Test
     public void invoke_subscriber_method() throws InvocationTargetException {
         final ValidSubscriberThreeParams subscriberObject = spy(new ValidSubscriberThreeParams());
-        final FailureSubscriberMethod subscriber =
-                new CommandAwareFailureSubscriberMethod(subscriberObject.getMethod());
-        final ReflectFailures.InvalidProjectName msg = Given.FailureMessage.invalidProjectName();
+        final RejectionSubscriberMethod subscriber =
+                new CommandAwareRejectionSubscriberMethod(subscriberObject.getMethod());
+        final ReflectFailures.InvalidProjectName msg = Given.RejectionMessage.invalidProjectName();
 
         subscriber.invoke(subscriberObject, msg,
                           UpdateProjectName.getDefaultInstance(),
@@ -134,7 +135,7 @@ public class RejectionSubscriberMethodShould {
     }
 
     private static void assertIsFailureSubscriber(Method subscriber, boolean isSubscriber) {
-        assertEquals(isSubscriber, FailureSubscriberMethod.predicate().apply(subscriber));
+        assertEquals(isSubscriber, RejectionSubscriberMethod.predicate().apply(subscriber));
     }
 
     /*

@@ -74,7 +74,7 @@ public final class Rejections {
     }
 
     /**
-     * Generates a {@code FailureId} based upon a {@linkplain CommandId command ID} in a format:
+     * Generates a {@code RejectionId} based upon a {@linkplain CommandId command ID} in a format:
      *
      * <pre>{@code <commandId>-reject}</pre>
      *

@@ -124,7 +124,7 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
                                          .getTenantId();
         final ProcessingStatus status = getStatus(commandId, tenantId);
 
-        assertEquals(CommandStatus.FAILURE, status.getCode());
+        assertEquals(CommandStatus.REJECTED, status.getCode());
         assertEquals(toRejection(failure, command).getMessage(),
                      status.getRejection()
                            .getMessage());

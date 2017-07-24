@@ -17,53 +17,53 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.failure;
+package io.spine.server.rejection;
 
 import com.google.common.annotations.VisibleForTesting;
 import io.spine.annotation.SPI;
-import io.spine.core.FailureClass;
-import io.spine.core.FailureEnvelope;
 import io.spine.core.Rejection;
+import io.spine.core.RejectionClass;
+import io.spine.core.RejectionEnvelope;
 import io.spine.server.outbus.CommandOutputDelivery;
 
 import java.util.concurrent.Executor;
 
 /**
- * A base class for the strategies on delivering the {@linkplain Rejection failures}
- * from the {@linkplain FailureBus failure bus} to the corresponding
- * {@linkplain FailureDispatcher failure dispatchers}.
+ * A base class for the strategies on delivering the {@linkplain Rejection rejections}
+ * from the {@linkplain RejectionBus rejection bus} to the corresponding
+ * {@linkplain RejectionDispatcher rejection dispatchers}.
  *
  * @author Alex Tymchenko
  */
 @SPI
 @SuppressWarnings("WeakerAccess")   // Part of API.
-public abstract class DispatcherFailureDelivery
-        extends CommandOutputDelivery<FailureEnvelope, FailureClass, FailureDispatcher<?>> {
+public abstract class DispatcherRejectionDelivery
+        extends CommandOutputDelivery<RejectionEnvelope, RejectionClass, RejectionDispatcher<?>> {
 
     /**
-     * Create a dispatcher failure delivery with an {@link Executor} used for the operation.
+     * Create a dispatcher rejection delivery with an {@link Executor} used for the operation.
      *
-     * @param delegate the instance of {@code Executor} used to dispatch business failures.
+     * @param delegate the instance of {@code Executor} used to dispatch business rejections.
      * @see CommandOutputDelivery#CommandOutputDelivery(Executor)
      */
-    protected DispatcherFailureDelivery(Executor delegate) {
+    protected DispatcherRejectionDelivery(Executor delegate) {
         super(delegate);
     }
 
     /**
-     * Creates an instance of failure delivery with a
+     * Creates an instance of rejection delivery with a
      * {@link com.google.common.util.concurrent.MoreExecutors#directExecutor() direct executor}
-     * used for the business failure dispatching.
+     * used for the business rejection dispatching.
      *
      * @see CommandOutputDelivery#CommandOutputDelivery()
      */
-    protected DispatcherFailureDelivery() {
+    protected DispatcherRejectionDelivery() {
         super();
     }
 
     @Override
-    protected Runnable getDeliveryAction(final FailureDispatcher<?> consumer,
-                                         final FailureEnvelope deliverable) {
+    protected Runnable getDeliveryAction(final RejectionDispatcher<?> consumer,
+                                         final RejectionEnvelope deliverable) {
         return new Runnable() {
             @Override
             public void run() {
@@ -74,13 +74,13 @@ public abstract class DispatcherFailureDelivery
 
     /**
      * Obtains a pre-defined instance of the {@code DispatcherFailureDelivery}, which does not
-     * postpone any failure dispatching and uses
+     * postpone any rejeciton dispatching and uses
      * {@link com.google.common.util.concurrent.MoreExecutors#directExecutor() direct executor}
      * for operation.
      *
      * @return the pre-configured direct delivery
      */
-    public static DispatcherFailureDelivery directDelivery() {
+    public static DispatcherRejectionDelivery directDelivery() {
         return new DirectDelivery();
     }
 
@@ -90,10 +90,10 @@ public abstract class DispatcherFailureDelivery
      * @see #directDelivery()
      */
     @VisibleForTesting
-    static final class DirectDelivery extends DispatcherFailureDelivery {
+    static final class DirectDelivery extends DispatcherRejectionDelivery {
         @Override
-        public boolean shouldPostponeDelivery(FailureEnvelope envelope,
-                                              FailureDispatcher<?> dispatcher) {
+        public boolean shouldPostponeDelivery(RejectionEnvelope envelope,
+                                              RejectionDispatcher<?> dispatcher) {
             return false;
         }
     }

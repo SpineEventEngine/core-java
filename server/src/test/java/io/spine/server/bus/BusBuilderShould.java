@@ -22,7 +22,7 @@ package io.spine.server.bus;
 
 import com.google.protobuf.Message;
 import io.spine.core.MessageEnvelope;
-import io.spine.server.failure.RejectionBusBuilderShould;
+import io.spine.server.rejection.RejectionBusBuilderShould;
 import org.junit.Test;
 
 import java.util.Deque;

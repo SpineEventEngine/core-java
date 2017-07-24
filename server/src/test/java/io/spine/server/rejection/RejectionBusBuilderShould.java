@@ -17,10 +17,10 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.failure;
+package io.spine.server.rejection;
 
-import io.spine.core.FailureEnvelope;
 import io.spine.core.Rejection;
+import io.spine.core.RejectionEnvelope;
 import io.spine.server.bus.BusBuilderShould;
 import io.spine.test.Tests;
 import org.junit.Test;
@@ -30,34 +30,34 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author Alex Tymchenko
  */
-public class RejectionBusBuilderShould extends BusBuilderShould<FailureBus.Builder,
-                                                              FailureEnvelope,
+public class RejectionBusBuilderShould extends BusBuilderShould<RejectionBus.Builder,
+        RejectionEnvelope,
         Rejection> {
 
     @Override
-    protected FailureBus.Builder builder() {
-        return FailureBus.newBuilder();
+    protected RejectionBus.Builder builder() {
+        return RejectionBus.newBuilder();
     }
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_DispatcherDelivery() {
-        builder().setDispatcherFailureDelivery(Tests.<DispatcherFailureDelivery>nullRef());
+        builder().setDispatcherRejectionDelivery(Tests.<DispatcherRejectionDelivery>nullRef());
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")    //It's fine as for the Builder tests.
     @Test
     public void return_set_DispatcherDelivery() {
-        final DispatcherFailureDelivery delivery = deliveryForTests();
-        assertEquals(delivery, builder().setDispatcherFailureDelivery(delivery)
-                                        .getDispatcherFailureDelivery()
+        final DispatcherRejectionDelivery delivery = deliveryForTests();
+        assertEquals(delivery, builder().setDispatcherRejectionDelivery(delivery)
+                                        .getDispatcherRejectionDelivery()
                                         .get());
     }
 
-    private static DispatcherFailureDelivery deliveryForTests() {
-        return new DispatcherFailureDelivery() {
+    private static DispatcherRejectionDelivery deliveryForTests() {
+        return new DispatcherRejectionDelivery() {
             @Override
-            protected boolean shouldPostponeDelivery(FailureEnvelope deliverable,
-                                                     FailureDispatcher<?> consumer) {
+            protected boolean shouldPostponeDelivery(RejectionEnvelope deliverable,
+                                                     RejectionDispatcher<?> consumer) {
                 return false;   // Does not really matter for tests.
             }
         };

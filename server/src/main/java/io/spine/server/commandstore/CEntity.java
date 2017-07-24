@@ -30,8 +30,8 @@ import io.spine.server.entity.AbstractEntity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.core.CommandStatus.ERROR;
-import static io.spine.core.CommandStatus.FAILURE;
 import static io.spine.core.CommandStatus.OK;
+import static io.spine.core.CommandStatus.REJECTED;
 
 /**
  * An entity for storing a command and its processing status.
@@ -107,7 +107,7 @@ class CEntity extends AbstractEntity<CommandId, CommandRecord> {
     void setToFailure(Rejection rejection) {
         final CommandRecord.Builder builder = getState().toBuilder();
         builder.getStatusBuilder()
-               .setCode(FAILURE)
+               .setCode(REJECTED)
                .setRejection(rejection);
         final CommandRecord record = builder.build();
         updateState(record);

@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.reflect;
+package io.spine.server.reflect.given;
 
 import io.spine.test.reflect.ProjectId;
 import io.spine.test.reflect.ReflectFailures.InvalidProjectName;
@@ -28,8 +28,9 @@ import io.spine.test.reflect.event.ProjectCreated;
 
 import static io.spine.Identifier.newUuid;
 
-class Given {
+public class Given {
 
+    /** Prevents instantiation of this utility class. */
     private Given() {}
 
     static ProjectId newProjectId() {
@@ -39,13 +40,13 @@ class Given {
                         .build();
     }
 
-    static class EventMessage {
+    public static class EventMessage {
 
         private static final ProjectId DUMMY_PROJECT_ID = newProjectId();
         private static final ProjectCreated PROJECT_CREATED = projectCreated(DUMMY_PROJECT_ID);
 
-        private EventMessage() {
-        }
+        /** Prevents instantiation of this utility class. */
+        private EventMessage() {}
 
         public static ProjectCreated projectCreated() {
             return PROJECT_CREATED;
@@ -58,10 +59,10 @@ class Given {
         }
     }
 
-    static class CommandMessage {
+    public static class CommandMessage {
 
-        private CommandMessage() {
-        }
+        /** Prevents instantiation of this utility class. */
+        private CommandMessage() {}
 
         public static CreateProject createProject() {
             return CreateProject.newBuilder()
@@ -76,20 +77,20 @@ class Given {
         }
     }
 
-    static class FailureMessage {
+    public static class RejectionMessage {
 
         private static final ProjectId DUMMY_PROJECT_ID = newProjectId();
         private static final InvalidProjectName INVALID_PROJECT_NAME =
                 invalidProjectName(DUMMY_PROJECT_ID);
 
-        private FailureMessage() {
-        }
+        /** Prevents instantiation of this utility class. */
+        private RejectionMessage() {}
 
         public static InvalidProjectName invalidProjectName() {
             return INVALID_PROJECT_NAME;
         }
 
-        public static InvalidProjectName  invalidProjectName(ProjectId id) {
+        private static InvalidProjectName  invalidProjectName(ProjectId id) {
             final InvalidProjectName invalidProjectName = InvalidProjectName.newBuilder()
                                                                             .setProjectId(id)
                                                                             .build();

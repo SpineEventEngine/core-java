@@ -21,11 +21,10 @@ package io.spine.server.reflect;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
-import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.CommandContext;
-import io.spine.core.FailureClass;
+import io.spine.core.RejectionClass;
 import io.spine.core.Subscribe;
 
 import javax.annotation.CheckReturnValue;
@@ -33,21 +32,22 @@ import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.throwIfUnchecked;
 import static java.lang.String.format;
 
 /**
- * A wrapper for a failure subscriber method.
+ * A wrapper for a rejection subscriber method.
  *
  * @author Alex Tymchenko
  * @author Dmytro Dashenkov
  */
 @Internal
-public abstract class FailureSubscriberMethod extends HandlerMethod<CommandContext> {
+public abstract class RejectionSubscriberMethod extends HandlerMethod<CommandContext> {
 
-    /** The instance of the predicate to filter failure subscriber methods of a class. */
+    /** The instance of the predicate to filter rejection subscriber methods of a class. */
     private static final MethodPredicate PREDICATE = new FilterPredicate();
 
     /**
@@ -55,34 +55,36 @@ public abstract class FailureSubscriberMethod extends HandlerMethod<CommandConte
      *
      * @param method subscriber method
      */
-    FailureSubscriberMethod(Method method) {
+    RejectionSubscriberMethod(Method method) {
         super(method);
     }
 
     /**
-     * Invokes the wrapped subscriber method to handle {@code failureMessage},
+     * Invokes the wrapped subscriber method to handle {@code rejectionMessage},
      * {@code commandMessage} with the passed {@code context} of the {@code Command}.
      *
      * <p>Unlike the {@linkplain #invoke(Object, Message, Message) overloaded alternative method},
-     * this one does return any value, since the failure subscriber methods are {@code void}
+     * this one does return any value, since the rejection subscriber methods are {@code void}
      * by design.
      *
-     * @param target         the target object on which call the method
-     * @param failureMessage the failure message to handle
-     * @param commandMessage the command message
-     * @param context        the context of the command
+     * @param target           the target object on which call the method
+     * @param rejectionMessage the rejection message to handle
+     * @param commandMessage   the command message
+     * @param context          the context of the command
      * @throws InvocationTargetException if the wrapped method throws any {@link Throwable} that
      *                                   is not an {@link Error}.
      *                                   {@code Error} instances are propagated as-is.
      */
-    public void invoke(Object target, Message failureMessage,
-                       Message commandMessage, CommandContext context)
+    public void invoke(Object target,
+                       Message rejectionMessage,
+                       Message commandMessage,
+                       CommandContext context)
             throws InvocationTargetException {
-        checkNotNull(failureMessage);
+        checkNotNull(rejectionMessage);
         checkNotNull(commandMessage);
         checkNotNull(context);
         try {
-            doInvoke(target, failureMessage, context, commandMessage);
+            doInvoke(target, rejectionMessage, context, commandMessage);
         } catch (IllegalArgumentException | IllegalAccessException e) {
             throwIfUnchecked(e);
             throw new IllegalStateException(e);
@@ -94,16 +96,16 @@ public abstract class FailureSubscriberMethod extends HandlerMethod<CommandConte
      *
      * <p>Depending on the implementation, some parameters may be omitted.
      *
-     * @param target         the invocation target
-     * @param failureMessage the failure message parameter of the handler method
-     * @param context        the {@link CommandContext} parameter of the handler method
-     * @param commandMessage the command message parameter of the handler method
+     * @param target           the invocation target
+     * @param rejectionMessage the rejection message parameter of the handler method
+     * @param context          the {@link CommandContext} parameter of the handler method
+     * @param commandMessage   the command message parameter of the handler method
      * @throws IllegalArgumentException  if thrown by the handler method invocation
      * @throws IllegalAccessException    if thrown by the handler method invocation
      * @throws InvocationTargetException if thrown by the handler method invocation
      */
     protected abstract void doInvoke(Object target,
-                                     Message failureMessage,
+                                     Message rejectionMessage,
                                      CommandContext context,
                                      Message commandMessage) throws IllegalArgumentException,
                                                                     IllegalAccessException,
@@ -112,67 +114,68 @@ public abstract class FailureSubscriberMethod extends HandlerMethod<CommandConte
     /**
      * Invokes the subscriber method in the passed object.
      */
-    public static void invokeSubscriber(Object target, Message failureMessage,
-                                        Message commandMessage, CommandContext context) {
+    public static void invokeFor(Object target,
+                                 Message rejectionMessage,
+                                 Message commandMessage,
+                                 CommandContext context) {
         checkNotNull(target);
-        checkNotNull(failureMessage);
+        checkNotNull(rejectionMessage);
         checkNotNull(commandMessage);
         checkNotNull(context);
 
         try {
-            final FailureSubscriberMethod method = forMessage(target.getClass(),
-                                                              failureMessage, commandMessage);
-            method.invoke(target, failureMessage, commandMessage, context);
+            final RejectionSubscriberMethod method = getMethod(target.getClass(),
+                                                               rejectionMessage, commandMessage);
+            method.invoke(target, rejectionMessage, commandMessage, context);
         } catch (InvocationTargetException e) {
-            log().error("Exception handling failure. Failure message: {}, context: {}, cause: {}",
-                        failureMessage, context, e.getCause());
+            log().error("Exception handling a rejection. " +
+                                "Rejection message: {}, context: {}, cause: {}",
+                        rejectionMessage, context, e.getCause());
         }
     }
 
     /**
-     * Obtains the method for handling the failure in the passed class.
+     * Obtains the method for handling the rejection in the passed class.
      *
-     * @throws IllegalStateException if the passed class does not have an failure handling method
+     * @throws IllegalStateException if the passed class does not have an rejection handling method
      *                               for the class of the passed message
      */
-    public static FailureSubscriberMethod forMessage(Class<?> cls,
-                                                     Message failureMessage,
-                                                     Message commandMessage) {
+    public static RejectionSubscriberMethod getMethod(Class<?> cls,
+                                                      Message rejectionMessage,
+                                                      Message commandMessage) {
         checkNotNull(cls);
-        checkNotNull(failureMessage);
+        checkNotNull(rejectionMessage);
         checkNotNull(commandMessage);
 
-        final Class<? extends Message> failureClass = failureMessage.getClass();
+        final Class<? extends Message> rejectionClass = rejectionMessage.getClass();
         final MethodRegistry registry = MethodRegistry.getInstance();
-        final FailureSubscriberMethod method = registry.get(cls,
-                                                            failureClass,
-                                                            factory());
+        final RejectionSubscriberMethod method = registry.get(cls,
+                                                              rejectionClass,
+                                                              factory());
         if (method == null) {
-            throw missingFailureHandler(cls, failureClass);
+            throw missingRejectionHandler(cls, rejectionClass);
         }
         return method;
     }
 
-    private static IllegalStateException missingFailureHandler(
-            Class<?> cls, Class<? extends Message> failureClass) {
+    private static IllegalStateException missingRejectionHandler(
+            Class<?> cls, Class<? extends Message> rejectionClass) {
         final String msg = format(
-                "Missing failure handler for failure class %s in the class %s",
-                failureClass, cls
+                "Missing handler for rejection class %s in the class %s",
+                rejectionClass, cls
         );
         return new IllegalStateException(msg);
     }
 
     @CheckReturnValue
-    public static ImmutableSet<FailureClass> getFailureClasses(Class<?> cls) {
+    public static Set<RejectionClass> getRejectionClasses(Class<?> cls) {
         checkNotNull(cls);
-
-        final ImmutableSet<FailureClass> result =
-                FailureClass.setOf(inspect(cls, predicate()));
+        final Set<RejectionClass> result = RejectionClass.setOf(inspect(cls, predicate()));
         return result;
     }
 
-    /** Returns the factory for filtering and creating failure subscriber methods. */
-    private static HandlerMethod.Factory<FailureSubscriberMethod> factory() {
+    /** Returns the factory for filtering and creating rejection subscriber methods. */
+    private static HandlerMethod.Factory<RejectionSubscriberMethod> factory() {
         return Factory.getInstance();
     }
 
@@ -181,20 +184,20 @@ public abstract class FailureSubscriberMethod extends HandlerMethod<CommandConte
     }
 
     /**
-     * The factory for filtering methods that match {@code FailureSubscriberMethod} specification.
+     * The factory for filtering methods that match {@code RejectionSubscriberMethod} specification.
      */
-    private static class Factory implements HandlerMethod.Factory<FailureSubscriberMethod> {
+    private static class Factory implements HandlerMethod.Factory<RejectionSubscriberMethod> {
 
         @Override
-        public Class<FailureSubscriberMethod> getMethodClass() {
-            return FailureSubscriberMethod.class;
+        public Class<RejectionSubscriberMethod> getMethodClass() {
+            return RejectionSubscriberMethod.class;
         }
 
         @Override
-        public FailureSubscriberMethod create(Method method) {
+        public RejectionSubscriberMethod create(Method method) {
             final Class[] paramTypes = method.getParameterTypes();
             final MethodWrapper wrapper = MethodWrapper.forParams(paramTypes);
-            final FailureSubscriberMethod result = wrapper.apply(method);
+            final RejectionSubscriberMethod result = wrapper.apply(method);
             return result;
         }
 
@@ -206,7 +209,7 @@ public abstract class FailureSubscriberMethod extends HandlerMethod<CommandConte
         @Override
         public void checkAccessModifier(Method method) {
             if (!Modifier.isPublic(method.getModifiers())) {
-                warnOnWrongModifier("Failure subscriber {} must be declared 'public'",
+                warnOnWrongModifier("Rejection subscriber {} must be declared 'public'",
                                     method);
             }
         }
@@ -226,57 +229,57 @@ public abstract class FailureSubscriberMethod extends HandlerMethod<CommandConte
      * A {@link Function} wrapping the given {@link Method} into a corresponding
      * {@code FailureSubscriberMethod}.
      */
-    private enum MethodWrapper implements Function<Method, FailureSubscriberMethod> {
+    private enum MethodWrapper implements Function<Method, RejectionSubscriberMethod> {
 
         /**
          * Wraps the given {@link Method} with an instance of
-         * {@link FailureMessageSubscriberMethod}.
+         * {@link RejectionMessageSubscriberMethod}.
          */
         FAILURE_MESSAGE_AWARE {
             @Override
-            FailureSubscriberMethod wrap(Method method) {
-                return new FailureMessageSubscriberMethod(method);
+            RejectionSubscriberMethod wrap(Method method) {
+                return new RejectionMessageSubscriberMethod(method);
             }
         },
 
         /**
          * Wraps the given {@link Method} with an instance of
-         * {@link CommandContextAwareFailureSubscriberMethod}.
+         * {@link CommandContextAwareRejectionSubscriberMethod}.
          */
         COMMAND_CONTEXT_AWARE {
             @Override
-            FailureSubscriberMethod wrap(Method method) {
-                return new CommandContextAwareFailureSubscriberMethod(method);
+            RejectionSubscriberMethod wrap(Method method) {
+                return new CommandContextAwareRejectionSubscriberMethod(method);
             }
         },
 
         /**
          * Wraps the given {@link Method} with an instance of
-         * {@link CommandMessageAwareFailureSubscriberMethod}.
+         * {@link CommandMessageAwareRejectionSubscriberMethod}.
          */
         COMMAND_MESSAGE_AWARE {
             @Override
-            FailureSubscriberMethod wrap(Method method) {
-                return new CommandMessageAwareFailureSubscriberMethod(method);
+            RejectionSubscriberMethod wrap(Method method) {
+                return new CommandMessageAwareRejectionSubscriberMethod(method);
             }
         },
 
         /**
          * Wraps the given {@link Method} with an instance of
-         * {@link CommandAwareFailureSubscriberMethod}.
+         * {@link CommandAwareRejectionSubscriberMethod}.
          */
         COMMAND_AWARE {
             @Override
-            FailureSubscriberMethod wrap(Method method) {
-                return new CommandAwareFailureSubscriberMethod(method);
+            RejectionSubscriberMethod wrap(Method method) {
+                return new CommandAwareRejectionSubscriberMethod(method);
             }
         };
 
         /**
-         * Retrieves the wrapper implementation for the given set of parameters of a failure
+         * Retrieves the wrapper implementation for the given set of parameters of a rejection
          * subscriber method
          *
-         * @param paramTypes the parameter types of the failure subscriber method
+         * @param paramTypes the parameter types of the rejection subscriber method
          * @return the corresponding instance of {@code MethodWrapper}
          */
         private static MethodWrapper forParams(Class[] paramTypes) {
@@ -298,23 +301,23 @@ public abstract class FailureSubscriberMethod extends HandlerMethod<CommandConte
                     break;
                 default:
                     throw new IllegalArgumentException(
-                            format("Invalid Failure handler method parameter count: %s.",
+                            format("Invalid Rejection handler method parameter count: %s.",
                                    paramCount));
             }
             return methodWrapper;
         }
 
         @Override
-        public FailureSubscriberMethod apply(@Nullable Method method) {
+        public RejectionSubscriberMethod apply(@Nullable Method method) {
             checkNotNull(method);
             return wrap(method);
         }
 
-        abstract FailureSubscriberMethod wrap(Method method);
+        abstract RejectionSubscriberMethod wrap(Method method);
     }
 
     /**
-     * The predicate class allowing to filter failure subscriber methods.
+     * The predicate class allowing to filter rejection subscriber methods.
      *
      * <p>Please see {@link Subscribe} annotation for more information.
      */

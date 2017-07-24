@@ -125,7 +125,7 @@ message CommandContext {
     Schedule schedule = 4;
 }
 
-// Enumeration of possible failures when validating a command.
+// Enumeration of possible errors when validating a command.
 enum CommandValidationError {
 
     // Reserved value.
@@ -169,6 +169,6 @@ enum CommandStatus {
     // There was an exception or another kind of technical error during command processing.
     ERROR = 4;
 
-    // A business failure encountered during command processing.
-    FAILURE = 5;
+    // A command was rejected during processing.
+    REJECTED = 5;
 }

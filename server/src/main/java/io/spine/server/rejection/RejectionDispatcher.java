@@ -17,10 +17,10 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.failure;
+package io.spine.server.rejection;
 
-import io.spine.core.FailureClass;
-import io.spine.core.FailureEnvelope;
+import io.spine.core.RejectionClass;
+import io.spine.core.RejectionEnvelope;
 import io.spine.server.bus.MulticastDispatcher;
 
 /**
@@ -29,6 +29,6 @@ import io.spine.server.bus.MulticastDispatcher;
  * @param <I> the type of entities to which deliver failures
  * @author Alex Tymchenko
  */
-public interface FailureDispatcher<I>
-        extends MulticastDispatcher<FailureClass, FailureEnvelope, I> {
+public interface RejectionDispatcher<I>
+        extends MulticastDispatcher<RejectionClass, RejectionEnvelope, I> {
 }

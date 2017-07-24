@@ -23,6 +23,6 @@
  */
 
 @ParametersAreNonnullByDefault
-package io.spine.server.failure;
+package io.spine.server.rejection;
 
 import javax.annotation.ParametersAreNonnullByDefault;

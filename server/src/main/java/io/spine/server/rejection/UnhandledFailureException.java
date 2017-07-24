@@ -18,11 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.failure;
+package io.spine.server.rejection;
 
 import com.google.protobuf.Message;
 import io.spine.base.Error;
-import io.spine.core.FailureClass;
+import io.spine.core.RejectionClass;
 import io.spine.server.bus.MessageUnhandled;
 import io.spine.type.TypeName;
 
@@ -46,7 +46,7 @@ public class UnhandledFailureException extends RuntimeException implements Messa
     }
 
     private static String msgFormat(Message msg) {
-        final FailureClass cls = FailureClass.of(msg);
+        final RejectionClass cls = RejectionClass.of(msg);
         final String typeName = TypeName.of(msg).value();
         final String result = format(
                 "There is no registered handler for the failure class: `%s`. Protobuf type: `%s`",

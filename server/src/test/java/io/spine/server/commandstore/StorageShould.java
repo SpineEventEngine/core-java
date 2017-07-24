@@ -51,9 +51,9 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.core.CommandStatus.ERROR;
-import static io.spine.core.CommandStatus.FAILURE;
 import static io.spine.core.CommandStatus.OK;
 import static io.spine.core.CommandStatus.RECEIVED;
+import static io.spine.core.CommandStatus.REJECTED;
 import static io.spine.core.CommandStatus.SCHEDULED;
 import static io.spine.core.Commands.generateId;
 import static io.spine.core.given.GivenTenantId.newUuid;
@@ -239,8 +239,8 @@ public class StorageShould extends TenantAwareTest {
         repository.updateStatus(id, rejection);
 
         final CommandRecord actual = read(id).get();
-        assertEquals(FAILURE, actual.getStatus()
-                                    .getCode());
+        assertEquals(REJECTED, actual.getStatus()
+                                     .getCode());
         assertEquals(rejection, actual.getStatus()
                                       .getRejection());
     }
