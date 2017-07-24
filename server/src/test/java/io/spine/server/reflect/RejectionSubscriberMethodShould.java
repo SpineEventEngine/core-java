@@ -23,7 +23,7 @@ import com.google.common.testing.NullPointerTester;
 import io.spine.core.CommandContext;
 import io.spine.core.Subscribe;
 import io.spine.server.reflect.given.Given;
-import io.spine.test.reflect.ReflectFailures;
+import io.spine.test.reflect.ReflectRejections.InvalidProjectName;
 import io.spine.test.rejection.command.UpdateProjectName;
 import org.junit.Test;
 
@@ -53,7 +53,7 @@ public class RejectionSubscriberMethodShould {
         final ValidSubscriberThreeParams subscriberObject = spy(new ValidSubscriberThreeParams());
         final RejectionSubscriberMethod subscriber =
                 new CommandAwareRejectionSubscriberMethod(subscriberObject.getMethod());
-        final ReflectFailures.InvalidProjectName msg = Given.RejectionMessage.invalidProjectName();
+        final InvalidProjectName msg = Given.RejectionMessage.invalidProjectName();
 
         subscriber.invoke(subscriberObject, msg,
                           UpdateProjectName.getDefaultInstance(),
@@ -144,20 +144,20 @@ public class RejectionSubscriberMethodShould {
 
     private static class ValidSubscriberTwoParams extends TestFailureSubscriber {
         @Subscribe
-        public void handle(ReflectFailures.InvalidProjectName failure, UpdateProjectName command) {
+        public void handle(InvalidProjectName failure, UpdateProjectName command) {
         }
     }
 
     private static class ValidSubscriberThreeParams extends TestFailureSubscriber {
         @Subscribe
-        public void handle(ReflectFailures.InvalidProjectName failure,
+        public void handle(InvalidProjectName failure,
                            UpdateProjectName command, CommandContext context) {
         }
     }
 
     private static class ValidSubscriberButPrivate extends TestFailureSubscriber {
         @Subscribe
-        private void handle(ReflectFailures.InvalidProjectName failure, UpdateProjectName command) {
+        private void handle(InvalidProjectName failure, UpdateProjectName command) {
         }
     }
 
@@ -170,7 +170,7 @@ public class RejectionSubscriberMethodShould {
      */
     private static class InvalidSubscriberNoAnnotation extends TestFailureSubscriber {
         @SuppressWarnings("unused")
-        public void handle(ReflectFailures.InvalidProjectName failure,  UpdateProjectName command) {
+        public void handle(InvalidProjectName failure,  UpdateProjectName command) {
         }
     }
 
@@ -188,7 +188,7 @@ public class RejectionSubscriberMethodShould {
      */
     private static class InvalidSubscriberTooManyParams extends TestFailureSubscriber {
         @Subscribe
-        public void handle(ReflectFailures.InvalidProjectName failure,
+        public void handle(InvalidProjectName failure,
                            UpdateProjectName command,
                            CommandContext context,
                            Object redundant) {
@@ -218,7 +218,7 @@ public class RejectionSubscriberMethodShould {
      */
     private static class InvalidSubscriberTwoParamsSecondInvalid extends TestFailureSubscriber {
         @Subscribe
-        public void handle(ReflectFailures.InvalidProjectName failure, Exception invalid) {
+        public void handle(InvalidProjectName failure, Exception invalid) {
         }
     }
 
@@ -227,7 +227,7 @@ public class RejectionSubscriberMethodShould {
      */
     private static class InvalidSubscriberNotVoid extends TestFailureSubscriber {
         @Subscribe
-        public Object handle(ReflectFailures.InvalidProjectName failure, UpdateProjectName command) {
+        public Object handle(InvalidProjectName failure, UpdateProjectName command) {
             return failure;
         }
     }
@@ -251,7 +251,8 @@ public class RejectionSubscriberMethodShould {
                     return method;
                 }
             }
-            throw new RuntimeException("No failure subscriber method found " + HANDLER_METHOD_NAME);
+            throw new RuntimeException("No rejection subscriber method found " +
+                                               HANDLER_METHOD_NAME);
         }
     }
 }

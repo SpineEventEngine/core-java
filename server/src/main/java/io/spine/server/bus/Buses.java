@@ -73,7 +73,7 @@ public class Buses {
     }
 
     /**
-     * Creates {@code Ack} response for the given message ID with the failure status.
+     * Creates {@code Ack} response for the given message ID with the rejection status.
      *
      * @param id    the ID of the message to provide with the status
      * @param cause the cause of the message rejection
