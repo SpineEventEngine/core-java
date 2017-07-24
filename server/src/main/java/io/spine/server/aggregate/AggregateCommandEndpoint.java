@@ -20,16 +20,13 @@
 
 package io.spine.server.aggregate;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
-import io.spine.server.tenant.CommandOperation;
-import io.spine.server.tenant.TenantAwareOperation;
+import io.spine.server.tenant.TenantAwareFunction0;
 import io.spine.string.Stringifiers;
 
 import java.util.List;
-import java.util.Set;
 
 import static io.spine.util.Exceptions.newIllegalStateException;
 
@@ -44,19 +41,19 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @author Alexander Yevsyukov
  */
 class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
-    extends AggregateMessageEndpoint<I, A, CommandEnvelope> {
+    extends AggregateMessageEndpoint<I, A, CommandEnvelope, I> {
 
     private AggregateCommandEndpoint(AggregateRepository<I, A> repo, CommandEnvelope envelope) {
         super(repo, envelope);
     }
 
     static <I, A extends Aggregate<I, ?, ?>>
-    void handle(AggregateRepository<I, A> repository, CommandEnvelope envelope) {
+    I handle(AggregateRepository<I, A> repository, CommandEnvelope envelope) {
         final AggregateCommandEndpoint<I, A> commandEndpoint =
                 new AggregateCommandEndpoint<>(repository, envelope);
 
-        final TenantAwareOperation operation = commandEndpoint.createOperation();
-        operation.execute();
+        final TenantAwareFunction0<I> operation = commandEndpoint.createOperation();
+        return operation.execute();
     }
 
     @Override
@@ -82,7 +79,7 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
-    TenantAwareOperation createOperation() {
+    TenantAwareFunction0<I> createOperation() {
         return new Operation(envelope().getCommand());
     }
 
@@ -91,24 +88,27 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
      * handling the command.
      */
     @Override
-    Set<I> getTargets() {
+    I getTargets() {
         final CommandEnvelope envelope = envelope();
-        return ImmutableSet.of(repository().getCommandTarget(envelope.getMessage(),
-                                                             envelope.getCommandContext()));
+        final I commandTarget = repository().getCommandTarget(envelope.getMessage(),
+                                                              envelope.getCommandContext());
+        return commandTarget;
     }
 
     /**
      * The operation executed under the command's tenant.
      */
-    private class Operation extends CommandOperation {
+    private class Operation extends TenantAwareFunction0<I> {
 
         private Operation(Command command) {
-            super(command);
+            super(command.getContext()
+                         .getActorContext()
+                         .getTenantId());
         }
 
         @Override
-        public void run() {
-            dispatch();
+        public I apply() {
+            return dispatch();
         }
     }
 }

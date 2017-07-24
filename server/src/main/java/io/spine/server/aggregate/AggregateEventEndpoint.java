@@ -23,8 +23,7 @@ package io.spine.server.aggregate;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
-import io.spine.server.tenant.EventOperation;
-import io.spine.server.tenant.TenantAwareOperation;
+import io.spine.server.tenant.TenantAwareFunction0;
 
 import java.util.List;
 import java.util.Set;
@@ -42,23 +41,23 @@ import java.util.Set;
  * @see React
  */
 class AggregateEventEndpoint<I, A extends Aggregate<I, ?, ?>>
-        extends AggregateMessageEndpoint<I, A, EventEnvelope>{
+        extends AggregateMessageEndpoint<I, A, EventEnvelope, Set<I>>{
 
     private AggregateEventEndpoint(AggregateRepository<I, A> repo, EventEnvelope envelope) {
         super(repo, envelope);
     }
 
     static <I, A extends Aggregate<I, ?, ?>>
-    void handle(AggregateRepository<I, A> repository, EventEnvelope envelope) {
+    Set<I> handle(AggregateRepository<I, A> repository, EventEnvelope envelope) {
         final AggregateEventEndpoint<I, A> endpoint =
                 new AggregateEventEndpoint<>(repository, envelope);
 
-        final TenantAwareOperation operation = endpoint.createOperation();
-        operation.execute();
+        final TenantAwareFunction0<Set<I>> operation = endpoint.createOperation();
+        return operation.execute();
     }
 
     @Override
-    TenantAwareOperation createOperation() {
+    TenantAwareFunction0<Set<I>> createOperation() {
         return new Operation(envelope().getOuterObject());
     }
 
@@ -87,15 +86,18 @@ class AggregateEventEndpoint<I, A extends Aggregate<I, ?, ?>>
     /**
      * The operation executed under the event's tenant.
      */
-    private class Operation extends EventOperation {
+    private class Operation extends TenantAwareFunction0<Set<I>> {
 
         private Operation(Event event) {
-            super(event);
+            super(event.getContext()
+                       .getCommandContext()
+                       .getActorContext()
+                       .getTenantId());
         }
 
         @Override
-        public void run() {
-            dispatch();
+        public Set<I> apply() {
+            return dispatch();
         }
     }
 }

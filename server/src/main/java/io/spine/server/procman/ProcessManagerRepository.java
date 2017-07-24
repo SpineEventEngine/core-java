@@ -57,7 +57,7 @@ public abstract class ProcessManagerRepository<I,
                                                P extends ProcessManager<I, S, ?>,
                                                S extends Message>
                 extends EventDispatchingRepository<I, P, S>
-                implements CommandDispatcherDelegate {
+                implements CommandDispatcherDelegate<I> {
 
     /** The command routing schema used by this repository. */
     private final CommandRouting<I> commandRouting = CommandRouting.newInstance();
@@ -124,7 +124,7 @@ public abstract class ProcessManagerRepository<I,
      * @see CommandHandlingEntity#dispatchCommand(CommandEnvelope)
      */
     @Override
-    public void dispatchCommand(CommandEnvelope envelope) {
+    public I dispatchCommand(CommandEnvelope envelope) {
         final Message commandMessage = envelope.getMessage();
         final CommandContext context = envelope.getCommandContext();
         final CommandClass commandClass = envelope.getMessageClass();
@@ -138,6 +138,7 @@ public abstract class ProcessManagerRepository<I,
         tx.commit();
 
         postEvents(events);
+        return id;
     }
 
     private ProcManTransaction<?, ?, ?> beginTransactionFor(P manager) {
@@ -166,9 +167,9 @@ public abstract class ProcessManagerRepository<I,
      * @see ProcessManager#dispatchEvent(Message, EventContext)
      */
     @Override
-    public void dispatch(EventEnvelope event) throws IllegalArgumentException {
+    public Set<I> dispatch(EventEnvelope event) throws IllegalArgumentException {
         checkEventClass(event.getMessageClass());
-        super.dispatch(event);
+        return super.dispatch(event);
     }
 
     @Override

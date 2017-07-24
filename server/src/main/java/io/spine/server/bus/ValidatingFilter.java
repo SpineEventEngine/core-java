@@ -23,7 +23,7 @@ package io.spine.server.bus;
 import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import io.spine.base.Error;
-import io.spine.core.IsSent;
+import io.spine.core.Ack;
 import io.spine.core.MessageEnvelope;
 import io.spine.core.MessageInvalid;
 
@@ -49,12 +49,12 @@ final class ValidatingFilter<E extends MessageEnvelope<?, T>, T extends Message>
     }
 
     @Override
-    public Optional<IsSent> accept(E envelope) {
+    public Optional<Ack> accept(E envelope) {
         checkNotNull(envelope);
         final Optional<MessageInvalid> violation = validator.validate(envelope);
         if (violation.isPresent()) {
             final Error error = violation.get().asError();
-            final IsSent result = reject(idConverter.apply(envelope), error);
+            final Ack result = reject(idConverter.apply(envelope), error);
             return Optional.of(result);
         } else {
             return Optional.absent();

@@ -37,9 +37,8 @@ import java.util.concurrent.Executor;
  */
 @SPI
 @SuppressWarnings("WeakerAccess")   // Part of API.
-public abstract class DispatcherFailureDelivery extends CommandOutputDelivery<FailureEnvelope,
-                                                                              FailureClass,
-                                                                              FailureDispatcher> {
+public abstract class DispatcherFailureDelivery
+        extends CommandOutputDelivery<FailureEnvelope, FailureClass, FailureDispatcher<?>> {
 
     /**
      * Create a dispatcher failure delivery with an {@link Executor} used for the operation.
@@ -63,7 +62,7 @@ public abstract class DispatcherFailureDelivery extends CommandOutputDelivery<Fa
     }
 
     @Override
-    protected Runnable getDeliveryAction(final FailureDispatcher consumer,
+    protected Runnable getDeliveryAction(final FailureDispatcher<?> consumer,
                                          final FailureEnvelope deliverable) {
         return new Runnable() {
             @Override
@@ -94,7 +93,7 @@ public abstract class DispatcherFailureDelivery extends CommandOutputDelivery<Fa
     static final class DirectDelivery extends DispatcherFailureDelivery {
         @Override
         public boolean shouldPostponeDelivery(FailureEnvelope envelope,
-                                              FailureDispatcher dispatcher) {
+                                              FailureDispatcher<?> dispatcher) {
             return false;
         }
     }

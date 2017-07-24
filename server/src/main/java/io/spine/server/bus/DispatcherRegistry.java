@@ -39,7 +39,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alex Tymchenko
  */
 public class DispatcherRegistry<C extends MessageClass,
-                                D extends MessageDispatcher<C, ?>> {
+                                D extends MessageDispatcher<C, ?, ?>> {
 
     /**
      * The map from a message class to one or more dispatchers of

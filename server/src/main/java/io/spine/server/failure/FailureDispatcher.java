@@ -21,12 +21,14 @@ package io.spine.server.failure;
 
 import io.spine.core.FailureClass;
 import io.spine.core.FailureEnvelope;
-import io.spine.server.bus.MessageDispatcher;
+import io.spine.server.bus.MulticastDispatcher;
 
 /**
  * Responsible for delivering the business failures to the corresponding subscribers.
  *
+ * @param <I> the type of entities to which deliver failures
  * @author Alex Tymchenko
  */
-public interface FailureDispatcher extends MessageDispatcher<FailureClass, FailureEnvelope> {
+public interface FailureDispatcher<I>
+        extends MulticastDispatcher<FailureClass, FailureEnvelope, I> {
 }
