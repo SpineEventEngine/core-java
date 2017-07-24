@@ -38,5 +38,5 @@ import "spine/core/ack.proto";
 service CommandService {
 
     // Request to handle a command.
-    rpc Post(core.Command) returns (core.IsSent);
+    rpc Post(core.Command) returns (core.Ack);
 }

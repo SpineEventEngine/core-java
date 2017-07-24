@@ -33,18 +33,18 @@ import "google/protobuf/any.proto";
 
 import "spine/core/response.proto";
 
-// The result of posting a message to a bus.
+// An acknowledgement of posting a message to a bus.
 //
-// The response message brings the ID of the message which has been acknowledged or rejected.
+// This response means that a message was either accepted for further processing, or rejected
+// (e.g. because of a validation error).
 //
-message IsSent {
+// The acknowledgement does not mean that the message was handled or even delivered to recipients.
+//
+message Ack {
 
-    // The correlation ID of the message, i.e. the ID of the message which has been posted.
+    // The ID of the message which has been posted.
     google.protobuf.Any message_id = 1 [(required) = true];
 
-    // The ID of the consumer of the message.
-    google.protobuf.Any consumer_id = 2 [(required) = true];
-
     // The response status.
-    Status status = 3 [(required) = true];
+    Status status = 2 [(required) = true];
 }

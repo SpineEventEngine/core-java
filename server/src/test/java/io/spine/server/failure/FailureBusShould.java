@@ -23,6 +23,7 @@ import io.spine.base.Error;
 import io.spine.change.StringChange;
 import io.spine.client.CommandFactory;
 import io.spine.client.TestActorRequestFactory;
+import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.Commands;
@@ -30,7 +31,6 @@ import io.spine.core.Failure;
 import io.spine.core.FailureClass;
 import io.spine.core.FailureEnvelope;
 import io.spine.core.Failures;
-import io.spine.core.IsSent;
 import io.spine.core.Subscribe;
 import io.spine.core.TenantId;
 import io.spine.grpc.MemoizingObserver;
@@ -332,10 +332,10 @@ public class FailureBusShould {
 
     @Test
     public void report_dead_messages() {
-        final MemoizingObserver<IsSent> observer = memoizingObserver();
+        final MemoizingObserver<Ack> observer = memoizingObserver();
         failureBus.post(missingOwnerFailure(), observer);
         assertTrue(observer.isCompleted());
-        final IsSent result = observer.firstResponse();
+        final Ack result = observer.firstResponse();
         assertNotNull(result);
         assertEquals(ERROR, result.getStatus().getStatusCase());
         final Error error = result.getStatus().getError();

@@ -26,12 +26,12 @@ import io.spine.Identifier;
 import io.spine.annotation.Internal;
 import io.spine.base.Error;
 import io.spine.base.ThrowableMessage;
+import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandId;
 import io.spine.core.Failure;
-import io.spine.core.IsSent;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.bus.Bus;
 import io.spine.server.bus.BusFilter;
@@ -198,9 +198,9 @@ public class CommandBus extends Bus<Command,
     }
 
     @Override
-    protected IsSent doPost(CommandEnvelope envelope) {
+    protected Ack doPost(CommandEnvelope envelope) {
         final CommandDispatcher<?> dispatcher = getDispatcher(envelope);
-        IsSent result;
+        Ack result;
         try {
             dispatcher.dispatch(envelope);
             commandStore.setCommandStatusOk(envelope);

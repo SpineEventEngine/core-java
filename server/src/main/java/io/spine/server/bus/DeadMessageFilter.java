@@ -23,7 +23,7 @@ package io.spine.server.bus;
 import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import io.spine.base.Error;
-import io.spine.core.IsSent;
+import io.spine.core.Ack;
 import io.spine.core.MessageEnvelope;
 import io.spine.type.MessageClass;
 
@@ -58,14 +58,14 @@ final class DeadMessageFilter<T extends Message,
     }
 
     @Override
-    public Optional<IsSent> accept(E envelope) {
+    public Optional<Ack> accept(E envelope) {
         @SuppressWarnings("unchecked")
         final C cls = (C) envelope.getMessageClass();
         final Collection<D> dispatchers = registry.getDispatchers(cls);
         if (dispatchers.isEmpty()) {
             final MessageUnhandled report = deadMessageTap.capture(envelope);
             final Error error = report.asError();
-            final IsSent result = reject(idConverter.apply(envelope), error);
+            final Ack result = reject(idConverter.apply(envelope), error);
             return Optional.of(result);
         } else {
             return Optional.absent();

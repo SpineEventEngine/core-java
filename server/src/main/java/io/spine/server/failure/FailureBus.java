@@ -23,11 +23,11 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
+import io.spine.core.Ack;
 import io.spine.core.Failure;
 import io.spine.core.FailureClass;
 import io.spine.core.FailureEnvelope;
 import io.spine.core.FailureId;
-import io.spine.core.IsSent;
 import io.spine.core.MessageInvalid;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.bus.Bus;
@@ -173,7 +173,7 @@ public class FailureBus extends CommandOutputBus<Failure,
      * @see #post(Message, StreamObserver)
      */
     public final void post(Failure failure) {
-        post(failure, StreamObservers.<IsSent>noOpObserver());
+        post(failure, StreamObservers.<Ack>noOpObserver());
     }
 
     /** The {@code Builder} for {@code FailureBus}. */

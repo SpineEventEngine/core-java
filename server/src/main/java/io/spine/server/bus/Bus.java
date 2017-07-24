@@ -24,7 +24,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
-import io.spine.core.IsSent;
+import io.spine.core.Ack;
 import io.spine.core.MessageEnvelope;
 import io.spine.type.MessageClass;
 
@@ -100,7 +100,7 @@ public abstract class Bus<T extends Message,
      * @param observer the observer to receive outcome of the operation
      * @see #post(Iterable, StreamObserver) for posing multiple messages at once
      */
-    public final void post(T message, StreamObserver<IsSent> observer) {
+    public final void post(T message, StreamObserver<Ack> observer) {
         checkNotNull(message);
         checkNotNull(observer);
         checkArgument(isNotDefault(message));
@@ -115,7 +115,7 @@ public abstract class Bus<T extends Message,
      * of the call. The {@link StreamObserver#onNext StreamObserver.onNext()} is called for each
      * message posted to the bus.
      *
-     * <p>In case the message is accepted by the bus, {@linkplain IsSent IsSent} with the
+     * <p>In case the message is accepted by the bus, {@linkplain Ack IsSent} with the
      * {@link io.spine.core.Status.StatusCase#OK OK} status is passed to the observer.
      *
      * <p>If the message cannot be sent due to some issues, a corresponding
@@ -123,7 +123,7 @@ public abstract class Bus<T extends Message,
      *
      * <p>Depending on the underlying {@link MessageDispatcher}, a message which causes a business
      * {@link io.spine.core.Failure} may result ether a {@link io.spine.core.Failure} status or
-     * an {@link io.spine.core.Status.StatusCase#OK OK} status {@link IsSent} instance. Usually,
+     * an {@link io.spine.core.Status.StatusCase#OK OK} status {@link Ack} instance. Usually,
      * the {@link io.spine.core.Failure} status may only pop up if the {@link MessageDispatcher}
      * processes the message sequentially and throws the failure (wrapped in a
      * the {@linkplain io.spine.base.ThrowableMessage ThrowableMessages}) instead of handling them.
@@ -135,7 +135,7 @@ public abstract class Bus<T extends Message,
      * @param messages the messages to post
      * @param observer the observer to receive outcome of the operation
      */
-    public final void post(Iterable<T> messages, StreamObserver<IsSent> observer) {
+    public final void post(Iterable<T> messages, StreamObserver<Ack> observer) {
         checkNotNull(messages);
         checkNotNull(observer);
 
@@ -248,12 +248,12 @@ public abstract class Bus<T extends Message,
      * @return the message itself if it passes the filtering or
      * {@link Optional#absent() Optional.absent()} otherwise
      */
-    private Iterable<T> filter(Iterable<T> messages, StreamObserver<IsSent> observer) {
+    private Iterable<T> filter(Iterable<T> messages, StreamObserver<Ack> observer) {
         checkNotNull(messages);
         checkNotNull(observer);
         final Collection<T> result = newLinkedList();
         for (T message : messages) {
-            final Optional<IsSent> response = filter(toEnvelope(message));
+            final Optional<Ack> response = filter(toEnvelope(message));
             if (response.isPresent()) {
                 observer.onNext(response.get());
             } else {
@@ -277,8 +277,8 @@ public abstract class Bus<T extends Message,
      * @return the result of message processing by this bus if any, or
      * {@link Optional#absent() Optional.absent()} otherwise
      */
-    private Optional<IsSent> filter(E message) {
-        final Optional<IsSent> filterOutput = filterChain().accept(message);
+    private Optional<Ack> filter(E message) {
+        final Optional<Ack> filterOutput = filterChain().accept(message);
         return filterOutput;
     }
 
@@ -310,7 +310,7 @@ public abstract class Bus<T extends Message,
      *         </ul>
      * @see #post(Message, StreamObserver) for the public API
      */
-    protected abstract IsSent doPost(E envelope);
+    protected abstract Ack doPost(E envelope);
 
     /**
      * Posts each of the given envelopes into the bus and notifies the given observer.
@@ -319,9 +319,9 @@ public abstract class Bus<T extends Message,
      * @param observer  the observer to be notified of the operation result
      * @see #doPost(MessageEnvelope)
      */
-    private void doPost(Iterable<E> envelopes, StreamObserver<IsSent> observer) {
+    private void doPost(Iterable<E> envelopes, StreamObserver<Ack> observer) {
         for (E message : envelopes) {
-            final IsSent result = doPost(message);
+            final Ack result = doPost(message);
             observer.onNext(result);
         }
     }

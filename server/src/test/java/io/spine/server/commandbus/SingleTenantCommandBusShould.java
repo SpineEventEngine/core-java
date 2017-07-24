@@ -22,12 +22,12 @@ package io.spine.server.commandbus;
 
 import com.google.protobuf.Message;
 import io.spine.client.TestActorRequestFactory;
+import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandValidationError;
 import io.spine.core.Failure;
-import io.spine.core.IsSent;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.command.Assign;
@@ -108,13 +108,13 @@ public class SingleTenantCommandBusShould extends AbstractCommandBusTestSuite {
         commandBus.register(faultyHandler);
 
         final Command addTaskCommand = clearTenantId(addTask());
-        final MemoizingObserver<IsSent> observer = memoizingObserver();
+        final MemoizingObserver<Ack> observer = memoizingObserver();
         commandBus.post(addTaskCommand, observer);
 
         final InvalidProjectName throwable = faultyHandler.getThrowable();
         final Failure expectedFailure = toFailure(throwable, addTaskCommand);
-        final IsSent isSent = observer.firstResponse();
-        final Failure actualFailure = isSent.getStatus().getFailure();
+        final Ack ack = observer.firstResponse();
+        final Failure actualFailure = ack.getStatus().getFailure();
         assertTrue(isNotDefault(actualFailure));
         assertEquals(unpack(expectedFailure.getMessage()), unpack(actualFailure.getMessage()));
     }

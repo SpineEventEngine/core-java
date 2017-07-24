@@ -22,9 +22,9 @@ package io.spine.server.outbus;
 import com.google.common.base.Function;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.core.Ack;
 import io.spine.core.Event;
 import io.spine.core.Failure;
-import io.spine.core.IsSent;
 import io.spine.core.MessageEnvelope;
 import io.spine.server.bus.Bus;
 import io.spine.server.bus.MessageDispatcher;
@@ -119,7 +119,7 @@ public abstract class CommandOutputBus<M extends Message,
     protected abstract OutputDispatcherRegistry<C, D> createRegistry();
 
     @Override
-    protected IsSent doPost(E envelope) {
+    protected Ack doPost(E envelope) {
         final M enriched = enrich(envelope.getOuterObject());
         final E enrichedEnvelope = toEnvelope(enriched);
         final int dispatchersCalled = callDispatchers(enrichedEnvelope);
@@ -127,7 +127,7 @@ public abstract class CommandOutputBus<M extends Message,
         final Message id = getIdConverter().apply(envelope);
         checkState(dispatchersCalled != 0,
                    format("Message %s has no dispatchers.", envelope.getMessage()));
-        final IsSent result = acknowledge(id);
+        final Ack result = acknowledge(id);
         return result;
     }
 
@@ -142,11 +142,6 @@ public abstract class CommandOutputBus<M extends Message,
         final C messageClass = (C) messageEnvelope.getMessageClass();
         final Collection<D> dispatchers = registry().getDispatchers(messageClass);
         delivery().deliver(messageEnvelope);
-        //TODO:2017-07-20:alexander.yevsyukov: What if delivery to some of the targets failed?
-        // We cannot return the size just like that. It should be responsibility of Delivery, which
-        // should return at least two numbers: successfully delivery count, and failed delivery count.
-        // Assuming a delivery can be postponed on per-consumer basis, we should probably return
-        // three counts (delivered, failed, postponed), and extend `IsSent` accordingly.
         return dispatchers.size();
     }
 

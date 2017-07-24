@@ -26,12 +26,12 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
+import io.spine.core.Ack;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.core.EventId;
-import io.spine.core.IsSent;
 import io.spine.grpc.LoggingObserver;
 import io.spine.grpc.LoggingObserver.Level;
 import io.spine.server.bus.Bus;
@@ -114,8 +114,8 @@ public class EventBus extends CommandOutputBus<Event,
     private final MessageValidator eventMessageValidator;
 
     private final Deque<BusFilter<EventEnvelope>> filterChain;
-    private final StreamObserver<IsSent> streamObserver = LoggingObserver.forClass(getClass(),
-                                                                                   Level.TRACE);
+    private final StreamObserver<Ack> streamObserver = LoggingObserver.forClass(getClass(),
+                                                                                Level.TRACE);
     /** The validator for events posted to the bus. */
     @Nullable
     private EventValidator eventValidator;
