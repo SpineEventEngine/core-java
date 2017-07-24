@@ -24,7 +24,7 @@ import io.spine.test.reflect.ProjectId;
 import io.spine.test.reflect.ReflectFailures.InvalidProjectName;
 import io.spine.test.reflect.command.CreateProject;
 import io.spine.test.reflect.command.StartProject;
-import io.spine.test.reflect.event.ProjectCreated;
+import io.spine.test.reflect.event.RefProjectCreated;
 
 import static io.spine.Identifier.newUuid;
 
@@ -42,17 +42,17 @@ class Given {
     static class EventMessage {
 
         private static final ProjectId DUMMY_PROJECT_ID = newProjectId();
-        private static final ProjectCreated PROJECT_CREATED = projectCreated(DUMMY_PROJECT_ID);
+        private static final RefProjectCreated PROJECT_CREATED = projectCreated(DUMMY_PROJECT_ID);
 
         private EventMessage() {
         }
 
-        public static ProjectCreated projectCreated() {
+        public static RefProjectCreated projectCreated() {
             return PROJECT_CREATED;
         }
 
-        public static ProjectCreated projectCreated(ProjectId id) {
-            return ProjectCreated.newBuilder()
+        public static RefProjectCreated projectCreated(ProjectId id) {
+            return RefProjectCreated.newBuilder()
                                  .setProjectId(id)
                                  .build();
         }

@@ -24,7 +24,7 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.StringValue;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
-import io.spine.test.reflect.event.ProjectCreated;
+import io.spine.test.reflect.event.RefProjectCreated;
 import io.spine.testdata.Sample;
 import io.spine.validate.StringValueVBuilder;
 import org.junit.Test;
@@ -51,7 +51,7 @@ public class EventApplierMethodShould {
     public void invoke_applier_method() throws InvocationTargetException {
         final ValidApplier applierObject = new ValidApplier();
         final EventApplierMethod applier = EventApplierMethod.from(applierObject.getMethod());
-        final ProjectCreated event = Sample.messageOfType(ProjectCreated.class);
+        final RefProjectCreated event = Sample.messageOfType(RefProjectCreated.class);
 
         applier.invoke(applierObject, event);
 
@@ -152,17 +152,17 @@ public class EventApplierMethodShould {
 
     private static class ValidApplier extends TestEventApplier {
 
-        private ProjectCreated eventApplied;
+        private RefProjectCreated eventApplied;
 
         @Apply
-        private void apply(ProjectCreated event) {
+        private void apply(RefProjectCreated event) {
             this.eventApplied = event;
         }
     }
 
     private static class ValidApplierButNotPrivate extends TestEventApplier {
         @Apply
-        public void apply(ProjectCreated event) {
+        public void apply(RefProjectCreated event) {
         }
     }
 
@@ -172,7 +172,7 @@ public class EventApplierMethodShould {
 
     private static class InvalidApplierNoAnnotation extends TestEventApplier {
         @SuppressWarnings("unused")
-        public void apply(ProjectCreated event) {
+        public void apply(RefProjectCreated event) {
         }
     }
 
@@ -184,7 +184,7 @@ public class EventApplierMethodShould {
 
     private static class InvalidApplierTooManyParams extends TestEventApplier {
         @Apply
-        public void apply(ProjectCreated event, Object redundant) {
+        public void apply(RefProjectCreated event, Object redundant) {
         }
     }
 
@@ -196,7 +196,7 @@ public class EventApplierMethodShould {
 
     private static class InvalidApplierNotVoid extends TestEventApplier {
         @Apply
-        public Object apply(ProjectCreated event) {
+        public Object apply(RefProjectCreated event) {
             return event;
         }
     }
