@@ -164,7 +164,8 @@ enum CommandStatus {
 
     // The command has been successfully handled.
     // Expect one or more events produced in as the result of handling this command.
-    OK = 3;
+    OK = 3; // We name this status with such a short text (e.g. instead of `HANDLED`)
+            // so that an abnormal command status is more visible in diagnostic messages.
 
     // There was an exception or another kind of technical error during command processing.
     ERROR = 4;

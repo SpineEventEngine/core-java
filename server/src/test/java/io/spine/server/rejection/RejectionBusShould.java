@@ -20,45 +20,35 @@
 package io.spine.server.rejection;
 
 import io.spine.base.Error;
-import io.spine.change.StringChange;
-import io.spine.client.CommandFactory;
-import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Ack;
-import io.spine.core.Command;
-import io.spine.core.CommandContext;
-import io.spine.core.Commands;
 import io.spine.core.Rejection;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
-import io.spine.core.Rejections;
-import io.spine.core.Subscribe;
-import io.spine.core.TenantId;
 import io.spine.grpc.MemoizingObserver;
-import io.spine.server.commandbus.Given;
-import io.spine.test.rejection.ProjectId;
-import io.spine.test.rejection.command.RemoveOwner;
-import io.spine.test.rejection.command.UpdateProjectName;
-import io.spine.testdata.Sample;
+import io.spine.server.rejection.given.BareDispatcher;
+import io.spine.server.rejection.given.CommandAwareSubscriber;
+import io.spine.server.rejection.given.CommandMessageAwareSubscriber;
+import io.spine.server.rejection.given.ContextAwareSubscriber;
+import io.spine.server.rejection.given.FaultySubscriber;
+import io.spine.server.rejection.given.InvalidOrderSubscriber;
+import io.spine.server.rejection.given.InvalidProjectNameSubscriber;
+import io.spine.server.rejection.given.PostponedDispatcherRejectionDelivery;
+import io.spine.server.rejection.given.RejectionMessageSubscriber;
+import io.spine.server.rejection.given.VerifiableSubscriber;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Collection;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
 
-import static com.google.common.collect.Maps.newHashMap;
-import static io.spine.Identifier.newUuid;
-import static io.spine.core.Rejections.getMessage;
 import static io.spine.core.Status.StatusCase.ERROR;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.test.rejection.ProjectRejections.InvalidProjectName;
-import static io.spine.test.rejection.ProjectRejections.MissingOwner;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -68,7 +58,7 @@ import static org.mockito.Mockito.verify;
 /**
  * @author Alex Tymchenko
  */
-@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
+@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass", "InstanceVariableNamingConvention"})
     // OK as for the test class for one of the primary framework features
 public class RejectionBusShould {
 
@@ -121,8 +111,8 @@ public class RejectionBusShould {
         assertTrue(actual instanceof DispatcherRejectionDelivery.DirectDelivery);
     }
 
-    @Test   // as the FailureBus instances do not support enrichment yet.
-    public void not_enrich_failure_messages() {
+    @Test   // as the RejectionBus instances do not support enrichment yet.
+    public void not_enrich_rejection_messages() {
         final Rejection original = Rejection.getDefaultInstance();
         final Rejection enriched = rejectionBus.enrich(original);
         assertEquals(original, enriched);
@@ -134,7 +124,7 @@ public class RejectionBusShould {
     }
 
     @Test
-    public void register_failure_subscriber() {
+    public void register_rejection_subscriber() {
         final RejectionSubscriber subscriberOne = new InvalidProjectNameSubscriber();
         final RejectionSubscriber subscriberTwo = new InvalidProjectNameSubscriber();
 
@@ -161,7 +151,7 @@ public class RejectionBusShould {
 
         rejectionBus.unregister(subscriberOne);
 
-        // Check that the 2nd subscriber with the same failure subscriber method remains
+        // Check that the 2nd subscriber with the same rejection subscriber method remains
         // after the 1st subscriber unregisters.
         final Collection<RejectionDispatcher<?>> subscribers = rejectionBus.getDispatchers(
                 rejectionClass);
@@ -176,9 +166,9 @@ public class RejectionBusShould {
     }
 
     @Test
-    public void call_subscriber_when_failure_posted() {
+    public void call_subscriber_when_rejection_posted() {
         final InvalidProjectNameSubscriber subscriber = new InvalidProjectNameSubscriber();
-        final Rejection rejection = invalidProjectNameFailure();
+        final Rejection rejection = io.spine.server.rejection.given.Given.invalidProjectNameRejection();
         rejectionBus.register(subscriber);
 
         rejectionBus.post(rejection);
@@ -217,35 +207,35 @@ public class RejectionBusShould {
 
         rejectionBus.register(dispatcher);
 
-        rejectionBus.post(invalidProjectNameFailure());
+        rejectionBus.post(io.spine.server.rejection.given.Given.invalidProjectNameRejection());
 
         assertTrue(dispatcher.isDispatchCalled());
     }
 
     @Test
-    public void not_call_dispatchers_if_dispatcher_failure_execution_postponed() {
+    public void not_call_dispatchers_if_dispatcher_rejection_execution_postponed() {
         final BareDispatcher dispatcher = new BareDispatcher();
 
         rejectionBusWithPostponedExecution.register(dispatcher);
 
-        final Rejection rejection = invalidProjectNameFailure();
+        final Rejection rejection = io.spine.server.rejection.given.Given.invalidProjectNameRejection();
         rejectionBusWithPostponedExecution.post(rejection);
         assertFalse(dispatcher.isDispatchCalled());
 
-        final boolean failurePostponed = postponedDelivery.isPostponed(rejection, dispatcher);
-        assertTrue(failurePostponed);
+        final boolean rejectionPostponed = postponedDelivery.isPostponed(rejection, dispatcher);
+        assertTrue(rejectionPostponed);
     }
 
     @Test
-    public void deliver_postponed_failure_to_dispatcher_using_configured_executor() {
+    public void deliver_postponed_rejection_to_dispatcher_using_configured_executor() {
         final BareDispatcher dispatcher = new BareDispatcher();
 
         rejectionBusWithPostponedExecution.register(dispatcher);
 
-        final Rejection rejection = invalidProjectNameFailure();
+        final Rejection rejection = io.spine.server.rejection.given.Given.invalidProjectNameRejection();
         rejectionBusWithPostponedExecution.post(rejection);
-        final Set<RejectionEnvelope> postponedFailures = postponedDelivery.getPostponedFailures();
-        final RejectionEnvelope postponedFailure = postponedFailures.iterator()
+        final Set<RejectionEnvelope> postponedRejections = postponedDelivery.getPostponedRejections();
+        final RejectionEnvelope postponedFailure = postponedRejections.iterator()
                                                                     .next();
         verify(delegateDispatcherExecutor, never()).execute(any(Runnable.class));
         postponedDelivery.deliverNow(postponedFailure, dispatcher.getClass());
@@ -278,7 +268,7 @@ public class RejectionBusShould {
         final VerifiableSubscriber faultySubscriber = new FaultySubscriber();
 
         rejectionBus.register(faultySubscriber);
-        rejectionBus.post(invalidProjectNameFailure());
+        rejectionBus.post(io.spine.server.rejection.given.Given.invalidProjectNameRejection());
 
         assertTrue(faultySubscriber.isMethodCalled());
     }
@@ -329,13 +319,13 @@ public class RejectionBusShould {
         final RejectionDispatcher<?> subscriber = new InvalidOrderSubscriber();
 
         rejectionBus.register(subscriber);
-        rejectionBus.post(missingOwnerFailure());
+        rejectionBus.post(io.spine.server.rejection.given.Given.missingOwnerRejection());
     }
 
     @Test
     public void report_dead_messages() {
         final MemoizingObserver<Ack> observer = memoizingObserver();
-        rejectionBus.post(missingOwnerFailure(), observer);
+        rejectionBus.post(io.spine.server.rejection.given.Given.missingOwnerRejection(), observer);
         assertTrue(observer.isCompleted());
         final Ack result = observer.firstResponse();
         assertNotNull(result);
@@ -350,7 +340,7 @@ public class RejectionBusShould {
     }
 
     private void checkFailure(VerifiableSubscriber subscriber) {
-        final Rejection rejection = missingOwnerFailure();
+        final Rejection rejection = io.spine.server.rejection.given.Given.missingOwnerRejection();
         rejectionBus.register(subscriber);
         rejectionBus.post(rejection);
 
@@ -358,246 +348,4 @@ public class RejectionBusShould {
         subscriber.verifyGot(rejection);
     }
 
-    private static Rejection invalidProjectNameFailure() {
-        final ProjectId projectId = newProjectId();
-        final InvalidProjectName invalidProjectName =
-                InvalidProjectName.newBuilder()
-                                  .setProjectId(projectId)
-                                  .build();
-        final StringChange nameChange = StringChange.newBuilder()
-                                                    .setNewValue("Too short")
-                                                    .build();
-        final UpdateProjectName updateProjectName = UpdateProjectName.newBuilder()
-                                                                     .setId(projectId)
-                                                                     .setNameUpdate(nameChange)
-                                                                     .build();
-
-        final TenantId generatedTenantId = TenantId.newBuilder()
-                                                   .setValue(newUuid())
-                                                   .build();
-        final TestActorRequestFactory factory =
-                TestActorRequestFactory.newInstance(RejectionBusShould.class, generatedTenantId);
-        final Command command = factory.createCommand(updateProjectName);
-        return Rejections.createRejection(invalidProjectName, command);
-    }
-
-    private static Rejection missingOwnerFailure() {
-        final ProjectId projectId = newProjectId();
-        final MissingOwner msg = MissingOwner.newBuilder()
-                                             .setProjectId(projectId)
-                                             .build();
-        final Command command = Given.ACommand.withMessage(Sample.messageOfType(RemoveOwner.class));
-        return Rejections.createRejection(msg, command);
-    }
-
-    private static ProjectId newProjectId() {
-        final ProjectId projectId = ProjectId.newBuilder()
-                                             .setId(newUuid())
-                                             .build();
-        return projectId;
-    }
-
-    /**
-     * A simple dispatcher class, which only dispatch and does not have own failure
-     * subscribing methods.
-     */
-    private static class BareDispatcher implements RejectionDispatcher<String> {
-
-        private boolean dispatchCalled = false;
-
-        @Override
-        public Set<RejectionClass> getMessageClasses() {
-            return RejectionClass.setOf(InvalidProjectName.class);
-        }
-
-        @Override
-        public Set<String> dispatch(RejectionEnvelope failure) {
-            dispatchCalled = true;
-            return Identity.of(this);
-        }
-
-        private boolean isDispatchCalled() {
-            return dispatchCalled;
-        }
-    }
-
-    private static class InvalidProjectNameSubscriber extends RejectionSubscriber {
-
-        private Rejection rejectionHandled;
-
-        @Subscribe
-        public void on(InvalidProjectName failure,
-                       UpdateProjectName commandMessage,
-                       CommandContext context) {
-            final CommandFactory commandFactory =
-                    TestActorRequestFactory.newInstance(InvalidProjectNameSubscriber.class)
-                                           .command();
-            final Command command = commandFactory.createWithContext(commandMessage, context);
-            this.rejectionHandled = Rejections.createRejection(failure, command);
-        }
-
-        private Rejection getRejectionHandled() {
-            return rejectionHandled;
-        }
-    }
-
-    private static class PostponedDispatcherRejectionDelivery extends DispatcherRejectionDelivery {
-
-        private final Map<RejectionEnvelope,
-                Class<? extends RejectionDispatcher>> postponedExecutions = newHashMap();
-
-        private PostponedDispatcherRejectionDelivery(Executor delegate) {
-            super(delegate);
-        }
-
-        @Override
-        public boolean shouldPostponeDelivery(RejectionEnvelope failure,
-                                              RejectionDispatcher<?> consumer) {
-            postponedExecutions.put(failure, consumer.getClass());
-            return true;
-        }
-
-        private boolean isPostponed(Rejection rejection, RejectionDispatcher<?> dispatcher) {
-            final RejectionEnvelope envelope = RejectionEnvelope.of(rejection);
-            final Class<? extends RejectionDispatcher> actualClass = postponedExecutions.get(
-                    envelope);
-            final boolean failurePostponed = actualClass != null;
-            final boolean dispatcherMatches = failurePostponed && dispatcher.getClass()
-                                                                            .equals(actualClass);
-            return dispatcherMatches;
-        }
-
-        private Set<RejectionEnvelope> getPostponedFailures() {
-            final Set<RejectionEnvelope> envelopes = postponedExecutions.keySet();
-            return envelopes;
-        }
-    }
-
-    private abstract static class VerifiableSubscriber extends RejectionSubscriber {
-
-        private boolean methodCalled = false;
-
-        void triggerCall() {
-            methodCalled = true;
-        }
-
-        private boolean isMethodCalled() {
-            return methodCalled;
-        }
-
-        abstract void verifyGot(Rejection rejection);
-    }
-
-    /** The subscriber which throws exception from the subscriber method. */
-    private static class FaultySubscriber extends VerifiableSubscriber {
-
-        @SuppressWarnings("unused") // It's fine for a faulty subscriber.
-        @Subscribe
-        public void on(InvalidProjectName failure, CommandContext context) {
-            triggerCall();
-            throw new UnsupportedOperationException(
-                    "Faulty subscriber should have failed: " +
-                            FaultySubscriber.class.getSimpleName());
-        }
-
-        @Override
-        void verifyGot(Rejection ignored) {
-            fail("FaultySubscriber");
-        }
-    }
-
-    private static class RejectionMessageSubscriber extends VerifiableSubscriber {
-
-        private MissingOwner failure;
-
-        @Subscribe
-        public void on(MissingOwner failure) {
-            triggerCall();
-            this.failure = failure;
-        }
-
-        @Override
-        void verifyGot(Rejection rejection) {
-            assertEquals(getMessage(rejection), this.failure);
-        }
-    }
-
-    private static class ContextAwareSubscriber extends VerifiableSubscriber {
-
-        private MissingOwner failure;
-        private CommandContext context;
-
-        @Subscribe
-        public void on(MissingOwner failure, CommandContext context) {
-            triggerCall();
-            this.failure = failure;
-            this.context = context;
-        }
-
-        @Override
-        void verifyGot(Rejection rejection) {
-            assertEquals(getMessage(rejection), this.failure);
-            assertEquals(rejection.getContext().getCommand().getContext(), context);
-        }
-    }
-
-    private static class CommandMessageAwareSubscriber extends VerifiableSubscriber {
-
-        private MissingOwner failure;
-        private RemoveOwner command;
-
-        @Subscribe
-        public void on(MissingOwner failure, RemoveOwner command) {
-            triggerCall();
-            this.failure = failure;
-            this.command = command;
-        }
-
-        @Override
-        void verifyGot(Rejection rejection) {
-            assertEquals(getMessage(rejection), this.failure);
-            assertEquals(Commands.getMessage(rejection.getContext().getCommand()), command);
-        }
-    }
-
-    private static class CommandAwareSubscriber extends VerifiableSubscriber {
-
-        private MissingOwner failure;
-        private RemoveOwner command;
-        private CommandContext context;
-
-        @Subscribe
-        public void on(MissingOwner failure,
-                       RemoveOwner command,
-                       CommandContext context) {
-            triggerCall();
-            this.failure = failure;
-            this.command = command;
-            this.context = context;
-        }
-
-        @Override
-        void verifyGot(Rejection rejection) {
-            assertEquals(getMessage(rejection), this.failure);
-            assertEquals(Commands.getMessage(rejection.getContext().getCommand()), command);
-            assertEquals(rejection.getContext().getCommand().getContext(), context);
-        }
-    }
-
-    private static class InvalidOrderSubscriber extends VerifiableSubscriber {
-
-        @SuppressWarnings("unused") // The method should never be invoked, so the params are unused.
-        @Subscribe
-        public void on(MissingOwner failure,
-                       CommandContext context,
-                       RemoveOwner command) {
-            triggerCall();
-            fail("InvalidOrderSubscriber invoked the handler method");
-        }
-
-        @Override
-        void verifyGot(Rejection rejection) {
-            fail("InvalidOrderSubscriber");
-        }
-    }
 }
