@@ -20,15 +20,15 @@
 package io.spine.server.integration;
 
 import io.spine.core.ExternalMessageEnvelope;
-import io.spine.server.bus.MessageDispatcher;
+import io.spine.server.bus.MulticastDispatcher;
 import io.spine.type.MessageClass;
 
 /**
- * Delivers messages, produced outside of the current {@code BoundedContext} to dispatchers,
+ * Delivers messages produced outside of the current {@code BoundedContext} to dispatchers,
  * that are {@linkplain io.spine.core.Subscribe#external() configured} to receive external events.
  *
  * @author Alex Tymchenko
  */
-public interface ExternalMessageDispatcher
-        extends MessageDispatcher<MessageClass, ExternalMessageEnvelope> {
+public interface ExternalMessageDispatcher<I>
+        extends MulticastDispatcher<MessageClass, ExternalMessageEnvelope, I> {
 }

@@ -244,7 +244,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     }
 
     @Override
-    protected ExternalMessageDispatcher getExternalDispatcher() {
+    protected ExternalMessageDispatcher<I> getExternalDispatcher() {
         return new ProjectionExternalMessageDispatcher();
     }
 
@@ -252,7 +252,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      * An implementation of an external message dispatcher feeding external events
      * to {@code Projection} instances.
      */
-    private class ProjectionExternalMessageDispatcher implements ExternalMessageDispatcher {
+    private class ProjectionExternalMessageDispatcher implements ExternalMessageDispatcher<I> {
 
         @Override
         public Set<MessageClass> getMessageClasses() {
@@ -265,7 +265,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         }
 
         @Override
-        public void dispatch(ExternalMessageEnvelope envelope) {
+        public Set<I> dispatch(ExternalMessageEnvelope envelope) {
             final Event event = (Event) envelope.getOuterObject();
             final Message eventMessage = event.getMessage();
             final EventContext context = event.getContext();
@@ -279,6 +279,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
                 }
             };
             op.execute();
+            return ids;
         }
     }
 }

@@ -20,8 +20,8 @@
 package io.spine.server.integration;
 
 import com.google.protobuf.Message;
+import io.spine.core.Ack;
 import io.spine.core.ExternalMessageEnvelope;
-import io.spine.core.IsSent;
 import io.spine.server.bus.Bus;
 import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.DeadMessageTap;
@@ -41,7 +41,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class IntegrationBus extends Bus<Message,
                                         ExternalMessageEnvelope,
                                         MessageClass,
-                                        ExternalMessageDispatcher> {
+                                        ExternalMessageDispatcher<?>> {
 
     private IntegrationBus(Builder builder) {
 
@@ -71,10 +71,6 @@ public class IntegrationBus extends Bus<Message,
         return null;
     }
 
-    @Override
-    protected IdConverter<ExternalMessageEnvelope> getIdConverter() {
-        return null;
-    }
 
     @Override
     protected ExternalMessageEnvelope toEnvelope(Message message) {
@@ -82,7 +78,7 @@ public class IntegrationBus extends Bus<Message,
     }
 
     @Override
-    protected IsSent doPost(ExternalMessageEnvelope envelope) {
+    protected Ack doPost(ExternalMessageEnvelope envelope) {
         return null;
     }
 
@@ -110,7 +106,7 @@ public class IntegrationBus extends Bus<Message,
      * to handle external messages.
      */
     private static class LocalDispatcherRegistry
-            extends DispatcherRegistry<MessageClass, ExternalMessageDispatcher> {
+            extends DispatcherRegistry<MessageClass, ExternalMessageDispatcher<?>> {
         @Override
         protected void checkDispatcher(ExternalMessageDispatcher dispatcher)
                 throws IllegalArgumentException {

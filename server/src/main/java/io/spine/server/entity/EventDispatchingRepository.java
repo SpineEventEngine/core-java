@@ -21,7 +21,6 @@
 package io.spine.server.entity;
 
 import com.google.protobuf.Message;
-import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.core.ExternalMessageEnvelope;
@@ -137,16 +136,16 @@ public abstract class EventDispatchingRepository<I,
      *
      * @return the external event dispatcher
      */
-    protected ExternalMessageDispatcher getExternalDispatcher() {
-        return new ExternalMessageDispatcher() {
+    protected ExternalMessageDispatcher<I> getExternalDispatcher() {
+        return new ExternalMessageDispatcher<I>() {
             @Override
             public Set<MessageClass> getMessageClasses() {
                 return Collections.emptySet();
             }
 
             @Override
-            public void dispatch(ExternalMessageEnvelope envelope) {
-                // do nothing by default.
+            public Set<I> dispatch(ExternalMessageEnvelope envelope) {
+                return Collections.emptySet();
             }
         };
     }
