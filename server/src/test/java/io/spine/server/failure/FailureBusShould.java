@@ -23,6 +23,7 @@ import io.spine.base.Error;
 import io.spine.change.StringChange;
 import io.spine.client.CommandFactory;
 import io.spine.client.TestActorRequestFactory;
+import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.Commands;
@@ -30,7 +31,6 @@ import io.spine.core.Failure;
 import io.spine.core.FailureClass;
 import io.spine.core.FailureEnvelope;
 import io.spine.core.Failures;
-import io.spine.core.IsSent;
 import io.spine.core.Subscribe;
 import io.spine.core.TenantId;
 import io.spine.grpc.MemoizingObserver;
@@ -144,7 +144,7 @@ public class FailureBusShould {
         final FailureClass failureClass = FailureClass.of(InvalidProjectName.class);
         assertTrue(failureBus.hasDispatchers(failureClass));
 
-        final Collection<FailureDispatcher> dispatchers = failureBus.getDispatchers(failureClass);
+        final Collection<FailureDispatcher<?>> dispatchers = failureBus.getDispatchers(failureClass);
         assertTrue(dispatchers.contains(subscriberOne));
         assertTrue(dispatchers.contains(subscriberTwo));
     }
@@ -162,7 +162,7 @@ public class FailureBusShould {
 
         // Check that the 2nd subscriber with the same failure subscriber method remains
         // after the 1st subscriber unregisters.
-        final Collection<FailureDispatcher> subscribers = failureBus.getDispatchers(failureClass);
+        final Collection<FailureDispatcher<?>> subscribers = failureBus.getDispatchers(failureClass);
         assertFalse(subscribers.contains(subscriberOne));
         assertTrue(subscribers.contains(subscriberTwo));
 
@@ -200,7 +200,7 @@ public class FailureBusShould {
 
     @Test
     public void register_dispatchers() {
-        final FailureDispatcher dispatcher = new BareDispatcher();
+        final FailureDispatcher<?> dispatcher = new BareDispatcher();
 
         failureBus.register(dispatcher);
 
@@ -253,14 +253,14 @@ public class FailureBusShould {
 
     @Test
     public void unregister_dispatchers() {
-        final FailureDispatcher dispatcherOne = new BareDispatcher();
-        final FailureDispatcher dispatcherTwo = new BareDispatcher();
+        final FailureDispatcher<?> dispatcherOne = new BareDispatcher();
+        final FailureDispatcher<?> dispatcherTwo = new BareDispatcher();
         final FailureClass failureClass = FailureClass.of(InvalidProjectName.class);
         failureBus.register(dispatcherOne);
         failureBus.register(dispatcherTwo);
 
         failureBus.unregister(dispatcherOne);
-        final Set<FailureDispatcher> dispatchers = failureBus.getDispatchers(failureClass);
+        final Set<FailureDispatcher<?>> dispatchers = failureBus.getDispatchers(failureClass);
 
         // Check we don't have 1st dispatcher, but have 2nd.
         assertFalse(dispatchers.contains(dispatcherOne));
@@ -324,7 +324,7 @@ public class FailureBusShould {
                 // In Bus ->  No message types are forwarded by this dispatcher.
     )
     public void not_support_subscriber_methods_with_wrong_parameter_sequence() {
-        final FailureDispatcher subscriber = new InvalidOrderSubscriber();
+        final FailureDispatcher<?> subscriber = new InvalidOrderSubscriber();
 
         failureBus.register(subscriber);
         failureBus.post(missingOwnerFailure());
@@ -332,10 +332,10 @@ public class FailureBusShould {
 
     @Test
     public void report_dead_messages() {
-        final MemoizingObserver<IsSent> observer = memoizingObserver();
+        final MemoizingObserver<Ack> observer = memoizingObserver();
         failureBus.post(missingOwnerFailure(), observer);
         assertTrue(observer.isCompleted());
-        final IsSent result = observer.firstResponse();
+        final Ack result = observer.firstResponse();
         assertNotNull(result);
         assertEquals(ERROR, result.getStatus().getStatusCase());
         final Error error = result.getStatus().getError();
@@ -399,7 +399,7 @@ public class FailureBusShould {
      * A simple dispatcher class, which only dispatch and does not have own failure
      * subscribing methods.
      */
-    private static class BareDispatcher implements FailureDispatcher {
+    private static class BareDispatcher implements FailureDispatcher<String> {
 
         private boolean dispatchCalled = false;
 
@@ -409,8 +409,9 @@ public class FailureBusShould {
         }
 
         @Override
-        public void dispatch(FailureEnvelope failure) {
+        public Set<String> dispatch(FailureEnvelope failure) {
             dispatchCalled = true;
+            return Identity.of(this);
         }
 
         private boolean isDispatchCalled() {
@@ -448,12 +449,13 @@ public class FailureBusShould {
         }
 
         @Override
-        public boolean shouldPostponeDelivery(FailureEnvelope failure, FailureDispatcher consumer) {
+        public boolean shouldPostponeDelivery(FailureEnvelope failure,
+                                              FailureDispatcher<?> consumer) {
             postponedExecutions.put(failure, consumer.getClass());
             return true;
         }
 
-        private boolean isPostponed(Failure failure, FailureDispatcher dispatcher) {
+        private boolean isPostponed(Failure failure, FailureDispatcher<?> dispatcher) {
             final FailureEnvelope envelope = FailureEnvelope.of(failure);
             final Class<? extends FailureDispatcher> actualClass = postponedExecutions.get(
                     envelope);

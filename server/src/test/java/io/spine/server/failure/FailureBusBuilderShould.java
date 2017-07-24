@@ -57,7 +57,7 @@ public class FailureBusBuilderShould extends BusBuilderShould<FailureBus.Builder
         return new DispatcherFailureDelivery() {
             @Override
             protected boolean shouldPostponeDelivery(FailureEnvelope deliverable,
-                                                     FailureDispatcher consumer) {
+                                                     FailureDispatcher<?> consumer) {
                 return false;   // Does not really matter for tests.
             }
         };

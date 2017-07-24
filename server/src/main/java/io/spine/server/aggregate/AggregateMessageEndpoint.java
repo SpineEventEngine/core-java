@@ -24,7 +24,7 @@ import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.core.MessageEnvelope;
 import io.spine.server.entity.LifecycleFlags;
-import io.spine.server.tenant.TenantAwareOperation;
+import io.spine.server.tenant.TenantAwareFunction0;
 
 import java.util.List;
 import java.util.Set;
@@ -35,11 +35,13 @@ import java.util.Set;
  * @param <I> the type of aggregate IDs
  * @param <A> the type of aggregates
  * @param <E> the type of message envelopes
+ * @param <R> the type of the dispatch result, can be {@code <I>} for unicast dispatching, or
+ *            {@code Set<I>} for multicast
  * @author Alexander Yevsyukov
  */
 abstract class AggregateMessageEndpoint<I,
                                         A extends Aggregate<I, ?, ?>,
-                                        E extends MessageEnvelope<?, ?>> {
+                                        E extends MessageEnvelope<?, ?>, R> {
     private final AggregateRepository<I, A> repository;
     private final E envelope;
 
@@ -51,17 +53,26 @@ abstract class AggregateMessageEndpoint<I,
     /**
      * Creates a tenant-aware operation based on the message this endpoint processes.
      */
-    abstract TenantAwareOperation createOperation();
+    abstract TenantAwareFunction0<R> createOperation();
 
     /**
      * {@linkplain #getTargets() Selects} one or more message targets and {@linkplain #dispatchTo(I)
      * dispatches} the message to them.
      */
-    void dispatch() {
-        final Set<I> targets = getTargets();
-        for (I target : targets) {
-            dispatchTo(target);
+    @SuppressWarnings("unchecked")
+    R dispatch() {
+        final R targets = getTargets();
+        if (targets instanceof Set) {
+            final Set<I> set = (Set<I>) targets;
+            for (I id : set) { //TODO:2017-07-21:alexander.yevsyukov: Can we run this in parallel?
+                //TODO:2017-07-21:alexander.yevsyukov: What if we dispatch events to multiple aggregates
+                // and one of them fails?
+                dispatchTo(id);
+            }
+        } else {
+            dispatchTo((I)targets);
         }
+        return targets;
     }
 
     /**
@@ -117,7 +128,7 @@ abstract class AggregateMessageEndpoint<I,
     /**
      * Obtains IDs of aggregates to which the endpoint delivers the message.
      */
-    abstract Set<I> getTargets();
+    abstract R getTargets();
 
     /**
      * Obtains the envelope of the message processed by this endpoint.

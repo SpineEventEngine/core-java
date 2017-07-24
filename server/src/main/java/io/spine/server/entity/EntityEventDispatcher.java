@@ -32,7 +32,7 @@ import java.util.Set;
  * @author Alexander Litus
  * @see EventDispatcher
  */
-public interface EntityEventDispatcher<I> extends EventDispatcher {
+public interface EntityEventDispatcher<I> extends EventDispatcher<I> {
 
     /**
      * Obtains a set of entity identifiers to which dispatch the passed event.

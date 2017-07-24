@@ -23,8 +23,8 @@ package io.spine.server.aggregate;
 import com.google.common.base.Optional;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.TestActorRequestFactory;
+import io.spine.core.Ack;
 import io.spine.core.Command;
-import io.spine.core.IsSent;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.given.AggregateRepositoryViewTestEnv.AggregateWithLifecycle;
@@ -72,7 +72,7 @@ public class AggregateRepositoryViewsShould {
                 requestFactory.command()
                               .create(RepoOfAggregateWithLifecycle.createCommandMessage(id, cmd));
         boundedContext.getCommandBus()
-                      .post(command, StreamObservers.<IsSent>noOpObserver());
+                      .post(command, StreamObservers.<Ack>noOpObserver());
     }
 
     @Test

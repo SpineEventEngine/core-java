@@ -23,11 +23,11 @@ package io.spine.server.commandbus;
 import com.google.common.base.Optional;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
+import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandId;
-import io.spine.core.IsSent;
 import io.spine.server.bus.BusFilter;
 
 import javax.annotation.CheckReturnValue;
@@ -81,7 +81,7 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
     }
 
     @Override
-    public Optional<IsSent> accept(CommandEnvelope envelope) {
+    public Optional<Ack> accept(CommandEnvelope envelope) {
         final Command command = envelope.getCommand();
         if (isScheduled(command)) {
             scheduleAndStore(envelope);

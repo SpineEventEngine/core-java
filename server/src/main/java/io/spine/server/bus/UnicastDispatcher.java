@@ -20,36 +20,17 @@
 
 package io.spine.server.bus;
 
-import com.google.common.base.Optional;
-import io.spine.annotation.SPI;
-import io.spine.core.Ack;
 import io.spine.core.MessageEnvelope;
+import io.spine.type.MessageClass;
 
 /**
- * The filter for the messages posted to a bus.
+ * Dispatches a message to one entity.
  *
- * <p>A bus may have several filters which can prevent a message from being posted.
- *
- * @author Dmytro Dashenkov
+ * @param <C> the type of dispatched messages
+ * @param <E> the type of envelopes for dispatched objects that contain messages
+ * @param <I> the type of the entity ID
+ * @author Alexander Yevsyukov
  */
-@SPI
-public interface BusFilter<E extends MessageEnvelope<?, ?>> extends AutoCloseable {
-
-    /**
-     * Accepts or rejects a passed message.
-     *
-     * <p>A filter can:
-     * <ul>
-     *     <li>accept the message (by returning {@code Optional.absent()};
-     *     <li>reject the message with {@link io.spine.base.Error Error} status e.g. if it fails
-     *         to pass the validation;
-     *     <li>reject the message with {@code OK} status. For example, a scheduled command may not
-     *         pass a filter.
-     * </ul>
-     *
-     * @param envelope the envelope with the message to filter
-     * @return {@code Optional.absent()} if the message passes the filter,
-     *         {@linkplain Ack posting result} with either status otherwise
-     */
-    Optional<Ack> accept(E envelope);
+public interface UnicastDispatcher<C extends MessageClass, E extends MessageEnvelope, I>
+        extends MessageDispatcher<C, E, I> {
 }

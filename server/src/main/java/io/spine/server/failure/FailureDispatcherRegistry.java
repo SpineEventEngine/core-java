@@ -32,7 +32,7 @@ import java.util.Set;
  * @author Alex Tymchenko
  */
 public class FailureDispatcherRegistry extends OutputDispatcherRegistry<FailureClass,
-                                                                        FailureDispatcher> {
+                                                                        FailureDispatcher<?>> {
     /**
      * {@inheritDoc}
      *
@@ -40,7 +40,7 @@ public class FailureDispatcherRegistry extends OutputDispatcherRegistry<FailureC
      * {@linkplain FailureBus#getDispatchers(FailureClass) failureBus}.
      */
     @Override
-    protected Set<FailureDispatcher> getDispatchers(FailureClass messageClass) {
+    protected Set<FailureDispatcher<?>> getDispatchers(FailureClass messageClass) {
         return super.getDispatchers(messageClass);
     }
 

@@ -18,40 +18,56 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event;
+package io.spine.server.bus;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.testing.NullPointerTester;
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
+import io.spine.core.MessageEnvelope;
+import io.spine.test.Tests;
+import io.spine.type.MessageClass;
 import org.junit.Test;
 
 import java.util.Set;
 
+import static io.spine.Identifier.newUuid;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 /**
  * @author Alexander Yevsyukov
  */
-public class DelegatingEventDispatcherShould {
+public class MulticastDispatcherIdentityShould {
 
     @Test
-    public void pass_null_tolerance_test() {
-        new NullPointerTester()
-                .setDefault(EventDispatcherDelegate.class, new EmptyEventDispatcherDelegate())
-                .testAllPublicStaticMethods(DelegatingEventDispatcher.class);
+    public void have_utility_ctor() {
+        Tests.assertHasPrivateParameterlessCtor(MulticastDispatcher.Identity.class);
     }
 
-    private static final class EmptyEventDispatcherDelegate
-            implements EventDispatcherDelegate<String> {
+    @Test
+    public void return_dispatcher_identity() throws Exception {
+        final Set<String> set = MulticastDispatcher.Identity.of(new IdentityTest());
+
+        assertTrue(set.contains(IdentityTest.ID));
+        assertEquals(1, set.size());
+    }
+
+    private static class IdentityTest
+            implements MulticastDispatcher<MessageClass, MessageEnvelope, String> {
+
+        private static final String ID = newUuid();
 
         @Override
-        public Set<EventClass> getEventClasses() {
+        public Set<MessageClass> getMessageClasses() {
             return ImmutableSet.of();
         }
 
         @Override
-        public Set<String> dispatchEvent(EventEnvelope envelope) {
-            // Do nothing.
-            return ImmutableSet.of();
+        public Set<String> dispatch(MessageEnvelope envelope) {
+            return Identity.of(this);
+        }
+
+        @Override
+        public String toString() {
+            return ID;
         }
     }
 }

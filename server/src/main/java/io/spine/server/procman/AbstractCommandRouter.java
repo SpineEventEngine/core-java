@@ -27,11 +27,11 @@ import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.CommandFactory;
+import io.spine.core.Ack;
 import io.spine.core.ActorContext;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandId;
-import io.spine.core.IsSent;
 import io.spine.core.Status;
 import io.spine.server.commandbus.CommandBus;
 
@@ -136,17 +136,17 @@ abstract class AbstractCommandRouter<T extends AbstractCommandRouter> {
      */
     protected Command route(Message message) {
         final Command command = produceCommand(message);
-        final SettableFuture<IsSent> finishFuture = SettableFuture.create();
-        final StreamObserver<IsSent> observer = newAckingObserver(finishFuture);
+        final SettableFuture<Ack> finishFuture = SettableFuture.create();
+        final StreamObserver<Ack> observer = newAckingObserver(finishFuture);
         commandBus.post(command, observer);
-        final IsSent isSent;
+        final Ack ack;
         // Wait till the call is completed.
         try {
-            isSent = finishFuture.get();
+            ack = finishFuture.get();
         } catch (InterruptedException | ExecutionException e) {
             throw new IllegalStateException(e);
         }
-        checkSent(command, isSent);
+        checkSent(command, ack);
         return command;
     }
 
@@ -168,11 +168,11 @@ abstract class AbstractCommandRouter<T extends AbstractCommandRouter> {
         return result;
     }
 
-    private static StreamObserver<IsSent> newAckingObserver(
-            final SettableFuture<IsSent> finishFuture) {
-        return new StreamObserver<IsSent>() {
+    private static StreamObserver<Ack> newAckingObserver(
+            final SettableFuture<Ack> finishFuture) {
+        return new StreamObserver<Ack>() {
             @Override
-            public void onNext(IsSent value) {
+            public void onNext(Ack value) {
                 finishFuture.set(value);
             }
 
@@ -209,9 +209,9 @@ abstract class AbstractCommandRouter<T extends AbstractCommandRouter> {
         return command;
     }
 
-    private static void checkSent(Command command, IsSent isSent) {
-        final Status status = isSent.getStatus();
-        final CommandId routedCommandId = unpack(isSent.getMessageId());
+    private static void checkSent(Command command, Ack ack) {
+        final Status status = ack.getStatus();
+        final CommandId routedCommandId = unpack(ack.getMessageId());
         final CommandId commandId = command.getId();
         checkState(commandId.equals(routedCommandId),
                    "Unexpected command posted. Intending (%s) but was (%s).",

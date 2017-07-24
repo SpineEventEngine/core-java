@@ -25,9 +25,9 @@ import com.google.common.collect.Sets;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Error;
 import io.spine.client.grpc.CommandServiceGrpc;
+import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandClass;
-import io.spine.core.IsSent;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.UnsupportedCommandException;
 import org.slf4j.Logger;
@@ -67,7 +67,7 @@ public class CommandService extends CommandServiceGrpc.CommandServiceImplBase {
     @SuppressWarnings("MethodDoesntCallSuperMethod")
     // as we override default implementation with `unimplemented` status.
     @Override
-    public void post(Command request, StreamObserver<IsSent> responseObserver) {
+    public void post(Command request, StreamObserver<Ack> responseObserver) {
         final CommandClass commandClass = CommandClass.of(request);
         final BoundedContext boundedContext = boundedContextMap.get(commandClass);
         if (boundedContext == null) {
@@ -79,11 +79,11 @@ public class CommandService extends CommandServiceGrpc.CommandServiceImplBase {
     }
 
     private static void handleUnsupported(Command request,
-                                          StreamObserver<IsSent> responseObserver) {
+                                          StreamObserver<Ack> responseObserver) {
         final UnsupportedCommandException unsupported = new UnsupportedCommandException(request);
         log().error("Unsupported command posted to CommandService", unsupported);
         final Error error = unsupported.asError();
-        final IsSent response = reject(request.getId(), error);
+        final Ack response = reject(request.getId(), error);
         responseObserver.onNext(response);
         responseObserver.onCompleted();
     }

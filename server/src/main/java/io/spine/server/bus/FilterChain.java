@@ -21,7 +21,7 @@
 package io.spine.server.bus;
 
 import com.google.common.base.Optional;
-import io.spine.core.IsSent;
+import io.spine.core.Ack;
 import io.spine.core.MessageEnvelope;
 
 import java.util.Deque;
@@ -51,10 +51,10 @@ final class FilterChain<E extends MessageEnvelope<?, ?>> implements BusFilter<E>
     }
 
     @Override
-    public Optional<IsSent> accept(E envelope) {
+    public Optional<Ack> accept(E envelope) {
         checkNotNull(envelope);
         for (BusFilter<E> filter : chain) {
-            final Optional<IsSent> output = filter.accept(envelope);
+            final Optional<Ack> output = filter.accept(envelope);
             if (output.isPresent()) {
                 return output;
             }

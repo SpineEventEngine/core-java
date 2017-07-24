@@ -22,16 +22,17 @@ package io.spine.server.event;
 
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
-import io.spine.server.bus.MessageDispatcher;
+import io.spine.server.bus.MulticastDispatcher;
 
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
  * {@code EventDispatcher} delivers events to subscribers.
  *
+ * @param <I> the type of entity IDs
  * @author Alexander Yevsyukov
  */
-public interface EventDispatcher extends MessageDispatcher<EventClass, EventEnvelope> {
+public interface EventDispatcher<I> extends MulticastDispatcher<EventClass, EventEnvelope, I> {
 
     /**
      * Utility class for reporting event dispatching errors.

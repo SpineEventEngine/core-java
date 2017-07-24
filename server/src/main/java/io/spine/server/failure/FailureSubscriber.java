@@ -39,7 +39,7 @@ import java.util.Set;
  * @author Alexander Yevsyukov
  * @see FailureBus#register(io.spine.server.bus.MessageDispatcher)
  */
-public class FailureSubscriber implements FailureDispatcher {
+public class FailureSubscriber implements FailureDispatcher<String> {
 
     /**
      * Cached set of the failure classes this subscriber is subscribed to.
@@ -48,7 +48,7 @@ public class FailureSubscriber implements FailureDispatcher {
     private Set<FailureClass> failureClasses;
 
     @Override
-    public void dispatch(final FailureEnvelope envelope) {
+    public Set<String> dispatch(final FailureEnvelope envelope) {
         final Command originCommand = envelope.getOuterObject()
                                               .getContext()
                                               .getCommand();
@@ -62,6 +62,7 @@ public class FailureSubscriber implements FailureDispatcher {
             }
         };
         op.execute();
+        return Identity.of(this);
     }
 
     @Override

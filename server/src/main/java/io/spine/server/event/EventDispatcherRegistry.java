@@ -33,7 +33,7 @@ import java.util.Set;
  * @author Alexander Yevsyukov
  * @author Alex Tymchenko
  */
-class EventDispatcherRegistry extends OutputDispatcherRegistry<EventClass, EventDispatcher> {
+class EventDispatcherRegistry extends OutputDispatcherRegistry<EventClass, EventDispatcher<?>> {
 
     /**
      * {@inheritDoc}
@@ -53,7 +53,7 @@ class EventDispatcherRegistry extends OutputDispatcherRegistry<EventClass, Event
      * {@linkplain EventBus#getDispatchers(EventClass)}) EventBus}.
      */
     @Override
-    protected Set<EventDispatcher> getDispatchers(EventClass eventClass) {
+    protected Set<EventDispatcher<?>> getDispatchers(EventClass eventClass) {
         return super.getDispatchers(eventClass);
     }
 }

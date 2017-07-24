@@ -26,15 +26,13 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
+import io.spine.core.Ack;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
-import io.spine.core.EventId;
-import io.spine.core.IsSent;
 import io.spine.grpc.LoggingObserver;
 import io.spine.grpc.LoggingObserver.Level;
-import io.spine.server.bus.Bus;
 import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.DeadMessageTap;
 import io.spine.server.bus.EnvelopeValidator;
@@ -44,7 +42,6 @@ import io.spine.server.outbus.OutputDispatcherRegistry;
 import io.spine.server.storage.StorageFactory;
 import io.spine.validate.MessageValidator;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Deque;
 import java.util.Set;
@@ -99,7 +96,7 @@ import static com.google.common.base.Preconditions.checkState;
 public class EventBus extends CommandOutputBus<Event,
                                                EventEnvelope,
                                                EventClass,
-                                               EventDispatcher> {
+                                               EventDispatcher<?>> {
 
     /*
      * NOTE: Even though, the EventBus has a private constructor and
@@ -114,8 +111,8 @@ public class EventBus extends CommandOutputBus<Event,
     private final MessageValidator eventMessageValidator;
 
     private final Deque<BusFilter<EventEnvelope>> filterChain;
-    private final StreamObserver<IsSent> streamObserver = LoggingObserver.forClass(getClass(),
-                                                                                   Level.TRACE);
+    private final StreamObserver<Ack> streamObserver = LoggingObserver.forClass(getClass(),
+                                                                                Level.TRACE);
     /** The validator for events posted to the bus. */
     @Nullable
     private EventValidator eventValidator;
@@ -145,7 +142,7 @@ public class EventBus extends CommandOutputBus<Event,
     }
 
     @VisibleForTesting
-    Set<EventDispatcher> getDispatchers(EventClass eventClass) {
+    Set<? extends EventDispatcher<?>> getDispatchers(EventClass eventClass) {
         return registry().getDispatchers(eventClass);
     }
 
@@ -168,7 +165,7 @@ public class EventBus extends CommandOutputBus<Event,
     }
 
     @Override
-    protected OutputDispatcherRegistry<EventClass, EventDispatcher> createRegistry() {
+    protected OutputDispatcherRegistry<EventClass, EventDispatcher<?>> createRegistry() {
         return new EventDispatcherRegistry();
     }
 
@@ -176,11 +173,6 @@ public class EventBus extends CommandOutputBus<Event,
     @Override
     protected Deque<BusFilter<EventEnvelope>> createFilterChain() {
         return filterChain;
-    }
-
-    @Override
-    protected IdConverter<EventEnvelope> getIdConverter() {
-        return EventIdConverter.INSTANCE;
     }
 
     @Override
@@ -532,17 +524,6 @@ public class EventBus extends CommandOutputBus<Event,
             final Message message = envelope.getMessage();
             final UnsupportedEventException exception = new UnsupportedEventException(message);
             return exception;
-        }
-    }
-
-    private enum EventIdConverter implements Bus.IdConverter<EventEnvelope> {
-        INSTANCE;
-
-        @Nonnull
-        @Override
-        public EventId apply(@Nullable EventEnvelope input) {
-            checkNotNull(input);
-            return input.getId();
         }
     }
 }

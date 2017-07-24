@@ -44,8 +44,8 @@ import java.util.Set;
  * returned.
  *
  * <p>The same interference takes place in attempt to implement
- * {@link io.spine.server.bus.MessageDispatcher#dispatch(MessageEnvelope)
- * MessageDispatcher.dispatch(MessageEnvelope)} method with the different types of
+ * {@link io.spine.server.bus.UnicastDispatcher#dispatch(MessageEnvelope)
+ * UnicastDispatcher.dispatch(MessageEnvelope)} method with the different types of
  * {@code MessageEnvelope}s dispatches simultaneously.
  *
  * <p>That's why unlike {@linkplain io.spine.server.bus.MessageDispatcher MessageDispatcher},
@@ -54,12 +54,13 @@ import java.util.Set;
  * {@code MessageDispatcher} API.
  *
  * @author Alex Tymchenko
+ * @param <I> the type of IDs of entities that handle the commands dispatched by the delegate
  * @see DelegatingCommandDispatcher
  */
 @Internal
-public interface CommandDispatcherDelegate {
+public interface CommandDispatcherDelegate<I> {
 
     Set<CommandClass> getCommandClasses();
 
-    void dispatchCommand(CommandEnvelope envelope);
+    I dispatchCommand(CommandEnvelope envelope);
 }

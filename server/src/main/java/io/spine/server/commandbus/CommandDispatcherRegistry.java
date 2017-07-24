@@ -39,7 +39,7 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  *
  * @author Alexander Yevsyukov
  */
-class CommandDispatcherRegistry extends DispatcherRegistry<CommandClass, CommandDispatcher> {
+class CommandDispatcherRegistry extends DispatcherRegistry<CommandClass, CommandDispatcher<?>> {
 
     /**
      * {@inheritDoc}
@@ -55,7 +55,7 @@ class CommandDispatcherRegistry extends DispatcherRegistry<CommandClass, Command
      * @param dispatcher the dispatcher to register
      */
     @Override
-    protected void register(CommandDispatcher dispatcher) {
+    protected void register(CommandDispatcher<?> dispatcher) {
         if (dispatcher instanceof DelegatingCommandDispatcher
             && dispatcher.getMessageClasses().isEmpty()) {
             return;
@@ -74,21 +74,21 @@ class CommandDispatcherRegistry extends DispatcherRegistry<CommandClass, Command
      *                               that already has a registered dispatcher
      */
     @Override
-    protected void checkDispatcher(CommandDispatcher dispatcher) throws IllegalArgumentException {
+    protected void checkDispatcher(CommandDispatcher<?> dispatcher) throws IllegalArgumentException {
         super.checkDispatcher(dispatcher);
         checkNotAlreadyRegistered(dispatcher);
     }
 
-    Optional<CommandDispatcher> getDispatcher(CommandClass commandClass) {
-        final Set<CommandDispatcher> dispatchers = getDispatchers(commandClass);
+    Optional<? extends CommandDispatcher<?>> getDispatcher(CommandClass commandClass) {
+        final Set<CommandDispatcher<?>> dispatchers = getDispatchers(commandClass);
         if (dispatchers.isEmpty()) {
             return Optional.absent();
         }
 
         // Since there can be only one dispatcher per command the returned set
         // contains only one element.
-        final CommandDispatcher result = FluentIterable.from(dispatchers)
-                                                       .get(0);
+        final CommandDispatcher<?> result = FluentIterable.from(dispatchers)
+                                                          .get(0);
         return Optional.of(result);
     }
 
@@ -99,12 +99,13 @@ class CommandDispatcherRegistry extends DispatcherRegistry<CommandClass, Command
      * @throws IllegalArgumentException if at least one command class already has
      *                                  a registered dispatcher
      */
-    private void checkNotAlreadyRegistered(CommandDispatcher dispatcher) {
+    private void checkNotAlreadyRegistered(CommandDispatcher<?> dispatcher) {
         final Set<CommandClass> commandClasses = dispatcher.getMessageClasses();
-        final Map<CommandClass, CommandDispatcher> alreadyRegistered = Maps.newHashMap();
+        final Map<CommandClass, CommandDispatcher<?>> alreadyRegistered = Maps.newHashMap();
         // Gather command classes from this dispatcher that are registered.
         for (CommandClass commandClass : commandClasses) {
-            final Optional<CommandDispatcher> registeredDispatcher = getDispatcher(commandClass);
+            final Optional<? extends CommandDispatcher<?>> registeredDispatcher =
+                    getDispatcher(commandClass);
             if (registeredDispatcher.isPresent()) {
                 alreadyRegistered.put(commandClass, registeredDispatcher.get());
             }
@@ -122,7 +123,7 @@ class CommandDispatcherRegistry extends DispatcherRegistry<CommandClass, Command
      * @param registeringObject the object which tries to register dispatching or handling
      * @throws IllegalArgumentException if the set is not empty
      */
-    private static void doCheck(Map<CommandClass, CommandDispatcher> alreadyRegistered,
+    private static void doCheck(Map<CommandClass, CommandDispatcher<?>> alreadyRegistered,
                                 Object registeringObject) {
         if (!alreadyRegistered.isEmpty()) {
             throw newIllegalArgumentException(
@@ -151,7 +152,7 @@ class CommandDispatcherRegistry extends DispatcherRegistry<CommandClass, Command
      */
     @VisibleForTesting
     @Override
-    protected void unregister(CommandDispatcher dispatcher) {
+    protected void unregister(CommandDispatcher<?> dispatcher) {
         super.unregister(dispatcher);
     }
 
