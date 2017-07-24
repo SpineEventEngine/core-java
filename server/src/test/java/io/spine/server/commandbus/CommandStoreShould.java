@@ -41,7 +41,7 @@ import io.spine.test.TimeTests;
 import io.spine.test.command.AddTask;
 import io.spine.test.command.CreateProject;
 import io.spine.test.command.StartProject;
-import io.spine.test.command.event.ProjectCreated;
+import io.spine.test.command.event.CmdProjectCreated;
 import org.junit.Test;
 
 import javax.annotation.Nonnull;
@@ -252,7 +252,7 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
         @Assign
         @SuppressWarnings({"unused", "ProhibitedExceptionThrown"})
             // Throwing is the purpose of this method.
-        ProjectCreated handle(CreateProject msg, CommandContext context) throws Throwable {
+        CmdProjectCreated handle(CreateProject msg, CommandContext context) throws Throwable {
             throw throwable;
         }
     }
