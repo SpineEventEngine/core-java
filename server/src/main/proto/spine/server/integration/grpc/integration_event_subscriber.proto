@@ -29,7 +29,7 @@ option java_multiple_files = true;
 option java_outer_classname = "IntegrationEventSubscriberProto";
 option java_generate_equals_and_hash = true;
 
-import "spine/core/bus.proto";
+import "spine/core/ack.proto";
 import "spine/server/integration/integration_event.proto";
 
 // A service for notifying integration event subscribers.

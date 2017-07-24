@@ -33,7 +33,7 @@ import "google/protobuf/any.proto";
 
 import "spine/core/response.proto";
 
-// The result of sending a message to a bus.
+// The result of posting a message to a bus.
 //
 // The response message brings the ID of the message which has been acknowledged or rejected.
 //
