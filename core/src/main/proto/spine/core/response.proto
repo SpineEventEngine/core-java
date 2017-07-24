@@ -33,11 +33,11 @@ import "google/protobuf/empty.proto";
 import "google/protobuf/any.proto";
 
 import "spine/base/error.proto";
-import "spine/core/failure.proto";
+import "spine/core/rejection.proto";
 
 // The result of a call returned by a service.
 //
-// A service may return either `ok` or an `error` (technical failure) or a `business_failure`.
+// A service may return either `ok` or an `error` (technical problem) or a `rejection`.
 // The client may expect results (returned via a separate call to read-side or via event stream)
 // only upon receiving the `ok` status.
 //
@@ -57,7 +57,7 @@ message Status {
         // processing would occur.
         base.Error error = 2;
 
-        // It is not possible to satisfy the request because of the business failure.
-        Failure failure = 3;
+        // It is not possible to satisfy the request because of the business rejection.
+        Rejection rejection = 3;
     }
 }

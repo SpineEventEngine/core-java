@@ -29,7 +29,7 @@ import io.spine.base.Error;
 import io.spine.core.Command;
 import io.spine.core.CommandId;
 import io.spine.core.CommandStatus;
-import io.spine.core.Failure;
+import io.spine.core.Rejection;
 import io.spine.server.commandbus.CommandRecord;
 import io.spine.server.commandbus.ProcessingStatus;
 import io.spine.server.entity.DefaultRecordBasedRepository;
@@ -150,12 +150,12 @@ class CRepository extends DefaultRecordBasedRepository<CommandId, CEntity, Comma
      * Updates the status of the command with the business failure.
      *
      * @param commandId the command to update
-     * @param failure   the business failure occurred during command processing
+     * @param rejection   the business failure occurred during command processing
      */
-    void updateStatus(CommandId commandId, Failure failure) {
+    void updateStatus(CommandId commandId, Rejection rejection) {
         checkNotClosed();
         final CEntity entity = loadEntity(commandId);
-        entity.setToFailure(failure);
+        entity.setToFailure(rejection);
         store(entity);
     }
 

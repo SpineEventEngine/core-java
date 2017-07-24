@@ -27,17 +27,17 @@ import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.Commands;
-import io.spine.core.Failure;
 import io.spine.core.FailureClass;
 import io.spine.core.FailureEnvelope;
-import io.spine.core.Failures;
+import io.spine.core.Rejection;
+import io.spine.core.Rejections;
 import io.spine.core.Subscribe;
 import io.spine.core.TenantId;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.commandbus.Given;
-import io.spine.test.failure.ProjectId;
-import io.spine.test.failure.command.RemoveOwner;
-import io.spine.test.failure.command.UpdateProjectName;
+import io.spine.test.rejection.ProjectId;
+import io.spine.test.rejection.command.RemoveOwner;
+import io.spine.test.rejection.command.UpdateProjectName;
 import io.spine.testdata.Sample;
 import org.junit.Before;
 import org.junit.Test;
@@ -49,11 +49,11 @@ import java.util.concurrent.Executor;
 
 import static com.google.common.collect.Maps.newHashMap;
 import static io.spine.Identifier.newUuid;
-import static io.spine.core.Failures.getMessage;
+import static io.spine.core.Rejections.getMessage;
 import static io.spine.core.Status.StatusCase.ERROR;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
-import static io.spine.test.failure.ProjectFailures.InvalidProjectName;
-import static io.spine.test.failure.ProjectFailures.MissingOwner;
+import static io.spine.test.rejection.ProjectRejections.InvalidProjectName;
+import static io.spine.test.rejection.ProjectRejections.MissingOwner;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -70,7 +70,7 @@ import static org.mockito.Mockito.verify;
  */
 @SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
     // OK as for the test class for one of the primary framework features
-public class FailureBusShould {
+public class RejectionBusShould {
 
     private FailureBus failureBus;
     private PostponedDispatcherFailureDelivery postponedDelivery;
@@ -123,8 +123,8 @@ public class FailureBusShould {
 
     @Test   // as the FailureBus instances do not support enrichment yet.
     public void not_enrich_failure_messages() {
-        final Failure original = Failure.getDefaultInstance();
-        final Failure enriched = failureBus.enrich(original);
+        final Rejection original = Rejection.getDefaultInstance();
+        final Rejection enriched = failureBus.enrich(original);
         assertEquals(original, enriched);
     }
 
@@ -176,23 +176,23 @@ public class FailureBusShould {
     @Test
     public void call_subscriber_when_failure_posted() {
         final InvalidProjectNameSubscriber subscriber = new InvalidProjectNameSubscriber();
-        final Failure failure = invalidProjectNameFailure();
+        final Rejection rejection = invalidProjectNameFailure();
         failureBus.register(subscriber);
 
-        failureBus.post(failure);
+        failureBus.post(rejection);
 
-        final Failure handled = subscriber.getFailureHandled();
+        final Rejection handled = subscriber.getRejectionHandled();
         // Compare the content without command ID, which is different in the remembered
-        assertEquals(failure.getMessage(), handled.getMessage());
-        assertEquals(failure.getContext()
-                            .getCommand()
-                            .getMessage(),
+        assertEquals(rejection.getMessage(), handled.getMessage());
+        assertEquals(rejection.getContext()
+                              .getCommand()
+                              .getMessage(),
                      handled.getContext()
                             .getCommand()
                             .getMessage());
-        assertEquals(failure.getContext()
-                            .getCommand()
-                            .getContext(),
+        assertEquals(rejection.getContext()
+                              .getCommand()
+                              .getContext(),
                      handled.getContext()
                             .getCommand()
                             .getContext());
@@ -226,11 +226,11 @@ public class FailureBusShould {
 
         failureBusWithPostponedExecution.register(dispatcher);
 
-        final Failure failure = invalidProjectNameFailure();
-        failureBusWithPostponedExecution.post(failure);
+        final Rejection rejection = invalidProjectNameFailure();
+        failureBusWithPostponedExecution.post(rejection);
         assertFalse(dispatcher.isDispatchCalled());
 
-        final boolean failurePostponed = postponedDelivery.isPostponed(failure, dispatcher);
+        final boolean failurePostponed = postponedDelivery.isPostponed(rejection, dispatcher);
         assertTrue(failurePostponed);
     }
 
@@ -240,8 +240,8 @@ public class FailureBusShould {
 
         failureBusWithPostponedExecution.register(dispatcher);
 
-        final Failure failure = invalidProjectNameFailure();
-        failureBusWithPostponedExecution.post(failure);
+        final Rejection rejection = invalidProjectNameFailure();
+        failureBusWithPostponedExecution.post(rejection);
         final Set<FailureEnvelope> postponedFailures = postponedDelivery.getPostponedFailures();
         final FailureEnvelope postponedFailure = postponedFailures.iterator()
                                                                   .next();
@@ -348,15 +348,15 @@ public class FailureBusShould {
     }
 
     private void checkFailure(VerifiableSubscriber subscriber) {
-        final Failure failure = missingOwnerFailure();
+        final Rejection rejection = missingOwnerFailure();
         failureBus.register(subscriber);
-        failureBus.post(failure);
+        failureBus.post(rejection);
 
         assertTrue(subscriber.isMethodCalled());
-        subscriber.verifyGot(failure);
+        subscriber.verifyGot(rejection);
     }
 
-    private static Failure invalidProjectNameFailure() {
+    private static Rejection invalidProjectNameFailure() {
         final ProjectId projectId = newProjectId();
         final InvalidProjectName invalidProjectName =
                 InvalidProjectName.newBuilder()
@@ -374,18 +374,18 @@ public class FailureBusShould {
                                                    .setValue(newUuid())
                                                    .build();
         final TestActorRequestFactory factory =
-                TestActorRequestFactory.newInstance(FailureBusShould.class, generatedTenantId);
+                TestActorRequestFactory.newInstance(RejectionBusShould.class, generatedTenantId);
         final Command command = factory.createCommand(updateProjectName);
-        return Failures.createFailure(invalidProjectName, command);
+        return Rejections.createRejection(invalidProjectName, command);
     }
 
-    private static Failure missingOwnerFailure() {
+    private static Rejection missingOwnerFailure() {
         final ProjectId projectId = newProjectId();
         final MissingOwner msg = MissingOwner.newBuilder()
                                              .setProjectId(projectId)
                                              .build();
         final Command command = Given.ACommand.withMessage(Sample.messageOfType(RemoveOwner.class));
-        return Failures.createFailure(msg, command);
+        return Rejections.createRejection(msg, command);
     }
 
     private static ProjectId newProjectId() {
@@ -421,7 +421,7 @@ public class FailureBusShould {
 
     private static class InvalidProjectNameSubscriber extends FailureSubscriber {
 
-        private Failure failureHandled;
+        private Rejection rejectionHandled;
 
         @Subscribe
         public void on(InvalidProjectName failure,
@@ -431,11 +431,11 @@ public class FailureBusShould {
                     TestActorRequestFactory.newInstance(InvalidProjectNameSubscriber.class)
                                            .command();
             final Command command = commandFactory.createWithContext(commandMessage, context);
-            this.failureHandled = Failures.createFailure(failure, command);
+            this.rejectionHandled = Rejections.createRejection(failure, command);
         }
 
-        private Failure getFailureHandled() {
-            return failureHandled;
+        private Rejection getRejectionHandled() {
+            return rejectionHandled;
         }
     }
 
@@ -455,8 +455,8 @@ public class FailureBusShould {
             return true;
         }
 
-        private boolean isPostponed(Failure failure, FailureDispatcher<?> dispatcher) {
-            final FailureEnvelope envelope = FailureEnvelope.of(failure);
+        private boolean isPostponed(Rejection rejection, FailureDispatcher<?> dispatcher) {
+            final FailureEnvelope envelope = FailureEnvelope.of(rejection);
             final Class<? extends FailureDispatcher> actualClass = postponedExecutions.get(
                     envelope);
             final boolean failurePostponed = actualClass != null;
@@ -483,7 +483,7 @@ public class FailureBusShould {
             return methodCalled;
         }
 
-        abstract void verifyGot(Failure failure);
+        abstract void verifyGot(Rejection rejection);
     }
 
     /** The subscriber which throws exception from the subscriber method. */
@@ -499,7 +499,7 @@ public class FailureBusShould {
         }
 
         @Override
-        void verifyGot(Failure ignored) {
+        void verifyGot(Rejection ignored) {
             fail("FaultySubscriber");
         }
     }
@@ -515,8 +515,8 @@ public class FailureBusShould {
         }
 
         @Override
-        void verifyGot(Failure failure) {
-            assertEquals(getMessage(failure), this.failure);
+        void verifyGot(Rejection rejection) {
+            assertEquals(getMessage(rejection), this.failure);
         }
     }
 
@@ -533,9 +533,9 @@ public class FailureBusShould {
         }
 
         @Override
-        void verifyGot(Failure failure) {
-            assertEquals(getMessage(failure), this.failure);
-            assertEquals(failure.getContext().getCommand().getContext(), context);
+        void verifyGot(Rejection rejection) {
+            assertEquals(getMessage(rejection), this.failure);
+            assertEquals(rejection.getContext().getCommand().getContext(), context);
         }
     }
 
@@ -552,9 +552,9 @@ public class FailureBusShould {
         }
 
         @Override
-        void verifyGot(Failure failure) {
-            assertEquals(getMessage(failure), this.failure);
-            assertEquals(Commands.getMessage(failure.getContext().getCommand()), command);
+        void verifyGot(Rejection rejection) {
+            assertEquals(getMessage(rejection), this.failure);
+            assertEquals(Commands.getMessage(rejection.getContext().getCommand()), command);
         }
     }
 
@@ -575,10 +575,10 @@ public class FailureBusShould {
         }
 
         @Override
-        void verifyGot(Failure failure) {
-            assertEquals(getMessage(failure), this.failure);
-            assertEquals(Commands.getMessage(failure.getContext().getCommand()), command);
-            assertEquals(failure.getContext().getCommand().getContext(), context);
+        void verifyGot(Rejection rejection) {
+            assertEquals(getMessage(rejection), this.failure);
+            assertEquals(Commands.getMessage(rejection.getContext().getCommand()), command);
+            assertEquals(rejection.getContext().getCommand().getContext(), context);
         }
     }
 
@@ -594,7 +594,7 @@ public class FailureBusShould {
         }
 
         @Override
-        void verifyGot(Failure failure) {
+        void verifyGot(Rejection rejection) {
             fail("InvalidOrderSubscriber");
         }
     }

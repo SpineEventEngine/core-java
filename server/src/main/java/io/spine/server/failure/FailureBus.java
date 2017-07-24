@@ -24,10 +24,11 @@ import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.core.Ack;
-import io.spine.core.Failure;
 import io.spine.core.FailureClass;
 import io.spine.core.FailureEnvelope;
 import io.spine.core.MessageInvalid;
+import io.spine.core.Rejection;
+import io.spine.core.Rejections;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.DeadMessageTap;
@@ -51,10 +52,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alexander Yevsyuov
  * @author Alex Tymchenko
  * @see io.spine.base.ThrowableMessage
- * @see io.spine.core.Failures
+ * @see Rejections
  * @see io.spine.core.Subscribe @Subscribe
  */
-public class FailureBus extends CommandOutputBus<Failure,
+public class FailureBus extends CommandOutputBus<Rejection,
                                                  FailureEnvelope,
                                                  FailureClass,
                                                  FailureDispatcher<?>> {
@@ -82,7 +83,7 @@ public class FailureBus extends CommandOutputBus<Failure,
      * <p>Performs no action.
      */
     @Override
-    protected void store(Iterable<Failure> message) {
+    protected void store(Iterable<Rejection> message) {
         // do nothing for now.
     }
 
@@ -94,7 +95,7 @@ public class FailureBus extends CommandOutputBus<Failure,
      * @return the same message
      */
     @Override
-    protected Failure enrich(Failure originalMessage) {
+    protected Rejection enrich(Rejection originalMessage) {
         return originalMessage;
     }
 
@@ -110,7 +111,7 @@ public class FailureBus extends CommandOutputBus<Failure,
     }
 
     @Override
-    protected FailureEnvelope toEnvelope(Failure message) {
+    protected FailureEnvelope toEnvelope(Rejection message) {
         final FailureEnvelope result = FailureEnvelope.of(message);
         return result;
     }
@@ -161,15 +162,15 @@ public class FailureBus extends CommandOutputBus<Failure,
      * acknowledgement responses. Otherwise, an
      * {@linkplain #post(Message, StreamObserver) alternative method} should be used.
      *
-     * @param failure the business failure to deliver to the dispatchers.
+     * @param rejection the business failure to deliver to the dispatchers.
      * @see #post(Message, StreamObserver)
      */
-    public final void post(Failure failure) {
-        post(failure, StreamObservers.<Ack>noOpObserver());
+    public final void post(Rejection rejection) {
+        post(rejection, StreamObservers.<Ack>noOpObserver());
     }
 
     /** The {@code Builder} for {@code FailureBus}. */
-    public static class Builder extends AbstractBuilder<FailureEnvelope, Failure, Builder> {
+    public static class Builder extends AbstractBuilder<FailureEnvelope, Rejection, Builder> {
 
         /**
          * Optional {@code DispatcherFailureDelivery} for calling the dispatchers.

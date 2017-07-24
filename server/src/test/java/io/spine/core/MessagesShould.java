@@ -26,7 +26,7 @@ import io.spine.client.TestActorRequestFactory;
 import io.spine.server.command.TestEventFactory;
 import io.spine.test.TestValues;
 import io.spine.test.Tests;
-import io.spine.test.failure.OperationFailures.CannotPerformBusinessOperation;
+import io.spine.test.rejection.OperationRejections.CannotPerformBusinessOperation;
 import io.spine.time.Time;
 import org.junit.Before;
 import org.junit.Test;
@@ -84,9 +84,9 @@ public class MessagesShould {
 
     @Test
     public void ensure_failure_message() {
-        final Failure failure = Failures.createFailure(failureMessage, command);
+        final Rejection rejection = Rejections.createRejection(failureMessage, command);
 
-        assertEquals(failureMessage, ensureMessage(failure));
+        assertEquals(failureMessage, ensureMessage(rejection));
     }
 
     @Test

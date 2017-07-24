@@ -27,7 +27,7 @@ import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandValidationError;
-import io.spine.core.Failure;
+import io.spine.core.Rejection;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.command.Assign;
@@ -35,13 +35,13 @@ import io.spine.server.command.CommandHandler;
 import io.spine.server.event.EventBus;
 import io.spine.test.command.AddTask;
 import io.spine.test.command.event.TaskAdded;
-import io.spine.test.failure.InvalidProjectName;
-import io.spine.test.failure.ProjectId;
+import io.spine.test.rejection.InvalidProjectName;
+import io.spine.test.rejection.ProjectId;
 import org.junit.Test;
 
 import static io.spine.core.CommandValidationError.INVALID_COMMAND;
 import static io.spine.core.CommandValidationError.TENANT_INAPPLICABLE;
-import static io.spine.core.Failures.toFailure;
+import static io.spine.core.Rejections.toRejection;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.commandbus.Given.ACommand.addTask;
@@ -112,11 +112,12 @@ public class SingleTenantCommandBusShould extends AbstractCommandBusTestSuite {
         commandBus.post(addTaskCommand, observer);
 
         final InvalidProjectName throwable = faultyHandler.getThrowable();
-        final Failure expectedFailure = toFailure(throwable, addTaskCommand);
+        final Rejection expectedRejection = toRejection(throwable, addTaskCommand);
         final Ack ack = observer.firstResponse();
-        final Failure actualFailure = ack.getStatus().getFailure();
-        assertTrue(isNotDefault(actualFailure));
-        assertEquals(unpack(expectedFailure.getMessage()), unpack(actualFailure.getMessage()));
+        final Rejection actualRejection = ack.getStatus()
+                                             .getRejection();
+        assertTrue(isNotDefault(actualRejection));
+        assertEquals(unpack(expectedRejection.getMessage()), unpack(actualRejection.getMessage()));
     }
 
     @Test

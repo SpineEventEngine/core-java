@@ -19,22 +19,45 @@
 //
 syntax = "proto3";
 
-package spine.test.failure;
+package spine.server.entity;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
 option (SPI_all) = true;
-option java_package = "io.spine.test.failure";
-// Keep all the failures under the same outer class called `ProjectFailures`.
+option java_package = "io.spine.server.entity.rejection";
+// Keep all the rejections under the same outer class called `Rejections`.
 option java_generate_equals_and_hash = true;
 
-import "spine/test/failure/project.proto";
 
-message InvalidProjectName {
-    ProjectId project_id = 1;
+// The rejection thrown when a request for modification of an entity cannot be satisfied
+// because the entity is marked as `archived`.
+message CannotModifyArchivedEntity {
+
+    // The ID of the archived entity.
+    string entity_id = 1;
 }
 
-message MissingOwner {
-    ProjectId project_id = 1;
+// The rejection thrown when a request for modification of an entity cannot be satisfied
+// because the entity is marked as `deleted`.
+message CannotModifyDeletedEntity {
+
+    // The ID of the deleted entity.
+    string entity_id = 1;
+}
+
+// The rejection thrown when a request to mark the entity as `archived`
+// is received for the already archived entity.
+message EntityAlreadyArchived {
+
+    // The ID of the archived entity.
+    string entity_id = 1;
+}
+
+// The rejection thrown when a request to mark the entity as `deleted`
+// is received for the entity which is already marked as `deleted`.
+message EntityAlreadyDeleted {
+
+    // The ID of the entity which is already marked as `deleted`.
+    string entity_id = 1;
 }

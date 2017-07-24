@@ -21,15 +21,15 @@ package io.spine.server.failure;
 
 import com.google.common.annotations.VisibleForTesting;
 import io.spine.annotation.SPI;
-import io.spine.core.Failure;
 import io.spine.core.FailureClass;
 import io.spine.core.FailureEnvelope;
+import io.spine.core.Rejection;
 import io.spine.server.outbus.CommandOutputDelivery;
 
 import java.util.concurrent.Executor;
 
 /**
- * A base class for the strategies on delivering the {@linkplain Failure failures}
+ * A base class for the strategies on delivering the {@linkplain Rejection failures}
  * from the {@linkplain FailureBus failure bus} to the corresponding
  * {@linkplain FailureDispatcher failure dispatchers}.
  *

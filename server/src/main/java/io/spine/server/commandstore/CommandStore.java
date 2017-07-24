@@ -28,7 +28,7 @@ import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandId;
 import io.spine.core.CommandStatus;
-import io.spine.core.Failure;
+import io.spine.core.Rejection;
 import io.spine.server.commandbus.CommandException;
 import io.spine.server.commandbus.CommandRecord;
 import io.spine.server.commandbus.Log;
@@ -44,7 +44,7 @@ import java.util.Iterator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static io.spine.core.Failures.toFailure;
+import static io.spine.core.Rejections.toRejection;
 
 /**
  * Manages storage of commands received by a Bounded Context.
@@ -210,14 +210,14 @@ public class CommandStore implements AutoCloseable {
     /**
      * Updates the status of the command with the business failure.
      *  @param commandEnvelope the command to update
-     * @param failure the business failure occurred during command processing
+     * @param rejection the business failure occurred during command processing
      */
-    private void updateStatus(CommandEnvelope commandEnvelope, final Failure failure) {
+    private void updateStatus(CommandEnvelope commandEnvelope, final Rejection rejection) {
         keepTenantId(commandEnvelope.getCommand());
         final TenantAwareOperation op = new Operation(this, commandEnvelope) {
             @Override
             public void run() {
-                repository.updateStatus(commandId(), failure);
+                repository.updateStatus(commandId(), rejection);
             }
         };
         op.execute();
@@ -266,7 +266,7 @@ public class CommandStore implements AutoCloseable {
             final ThrowableMessage throwableMessage = (ThrowableMessage) cause;
             log.failureHandling(throwableMessage, commandMessage, commandId);
             updateStatus(commandEnvelope,
-                         toFailure(throwableMessage, commandEnvelope.getCommand()));
+                         toRejection(throwableMessage, commandEnvelope.getCommand()));
         } else if (cause instanceof Exception) {
             final Exception exception = (Exception) cause;
             log.errorHandling(exception, commandMessage, commandId);

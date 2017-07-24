@@ -19,8 +19,8 @@
  */
 package io.spine.server.failure;
 
-import io.spine.core.Failure;
 import io.spine.core.FailureEnvelope;
+import io.spine.core.Rejection;
 import io.spine.server.bus.BusBuilderShould;
 import io.spine.test.Tests;
 import org.junit.Test;
@@ -30,9 +30,9 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author Alex Tymchenko
  */
-public class FailureBusBuilderShould extends BusBuilderShould<FailureBus.Builder,
+public class RejectionBusBuilderShould extends BusBuilderShould<FailureBus.Builder,
                                                               FailureEnvelope,
-                                                              Failure> {
+        Rejection> {
 
     @Override
     protected FailureBus.Builder builder() {

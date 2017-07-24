@@ -30,7 +30,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author Alex Tymchenko
  */
-public class FailureClassShould {
+public class RejectionClassShould {
 
     @Test
     public void create_set_on_varargs() {

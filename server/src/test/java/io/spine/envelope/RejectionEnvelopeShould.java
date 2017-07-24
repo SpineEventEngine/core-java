@@ -24,13 +24,13 @@ import com.google.protobuf.Message;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.ActorContext;
 import io.spine.core.Command;
-import io.spine.core.Failure;
 import io.spine.core.FailureClass;
 import io.spine.core.FailureEnvelope;
-import io.spine.core.Failures;
 import io.spine.core.MessageEnvelopeShould;
+import io.spine.core.Rejection;
+import io.spine.core.Rejections;
 import io.spine.protobuf.AnyPacker;
-import io.spine.test.failure.OperationFailures.CannotPerformBusinessOperation;
+import io.spine.test.rejection.OperationRejections.CannotPerformBusinessOperation;
 import org.junit.Test;
 
 import static io.spine.Identifier.newUuid;
@@ -43,50 +43,50 @@ import static org.junit.Assert.assertEquals;
  *
  * @author Alex Tymchenko
  */
-public class FailureEnvelopeShould extends MessageEnvelopeShould<Failure,
+public class RejectionEnvelopeShould extends MessageEnvelopeShould<Rejection,
                                                                  FailureEnvelope,
                                                                  FailureClass> {
 
     private final TestActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(FailureEnvelopeShould.class);
+            TestActorRequestFactory.newInstance(RejectionEnvelopeShould.class);
 
     @Override
-    protected Failure outerObject() {
+    protected Rejection outerObject() {
         final Message commandMessage = Int32Value.getDefaultInstance();
         final Command command = requestFactory.command().create(commandMessage);
         final Message failureMessage = CannotPerformBusinessOperation.newBuilder()
                                                                      .setOperationId(newUuid())
                                                                      .build();
-        final Failure failure = Failures.createFailure(failureMessage, command);
-        return failure;
+        final Rejection rejection = Rejections.createRejection(failureMessage, command);
+        return rejection;
     }
 
     @Override
-    protected FailureEnvelope toEnvelope(Failure obj) {
+    protected FailureEnvelope toEnvelope(Rejection obj) {
         return FailureEnvelope.of(obj);
     }
 
     @Override
-    protected FailureClass getMessageClass(Failure obj) {
+    protected FailureClass getMessageClass(Rejection obj) {
         return FailureClass.of(obj);
     }
 
     @Test
     public void obtain_command_context() {
-        final Failure failure = outerObject();
-        final Command command = failure.getContext()
-                                       .getCommand();
-        final FailureEnvelope envelope = toEnvelope(failure);
+        final Rejection rejection = outerObject();
+        final Command command = rejection.getContext()
+                                         .getCommand();
+        final FailureEnvelope envelope = toEnvelope(rejection);
         assertEquals(command.getContext(), envelope.getCommandContext());
     }
 
     @Test
     public void obtain_command_message() {
-        final Failure failure = outerObject();
-        final Command command = failure.getContext()
-                                       .getCommand();
+        final Rejection rejection = outerObject();
+        final Command command = rejection.getContext()
+                                         .getCommand();
         final Message commandMessage = AnyPacker.unpack(command.getMessage());
-        final FailureEnvelope envelope = toEnvelope(failure);
+        final FailureEnvelope envelope = toEnvelope(rejection);
         assertEquals(commandMessage, envelope.getCommandMessage());
     }
 

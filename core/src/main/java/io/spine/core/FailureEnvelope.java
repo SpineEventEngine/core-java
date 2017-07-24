@@ -29,7 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alex Tymchenko
  */
-public class FailureEnvelope extends AbstractMessageEnvelope<FailureId, Failure> {
+public class FailureEnvelope extends AbstractMessageEnvelope<RejectionId, Rejection> {
 
     /**
      * The failure message.
@@ -51,30 +51,30 @@ public class FailureEnvelope extends AbstractMessageEnvelope<FailureId, Failure>
      */
     private final CommandContext commandContext;
 
-    private FailureEnvelope(Failure failure) {
-        super(failure);
-        this.failureMessage = Failures.getMessage(failure);
+    private FailureEnvelope(Rejection rejection) {
+        super(rejection);
+        this.failureMessage = Rejections.getMessage(rejection);
         this.failureClass = FailureClass.of(failureMessage);
-        this.commandMessage = Commands.getMessage(failure.getContext()
-                                                         .getCommand());
-        this.commandContext = failure.getContext()
-                                     .getCommand()
-                                     .getContext();
+        this.commandMessage = Commands.getMessage(rejection.getContext()
+                                                           .getCommand());
+        this.commandContext = rejection.getContext()
+                                       .getCommand()
+                                       .getContext();
     }
 
     /**
      * Creates instance for the passed failure.
      */
-    public static FailureEnvelope of(Failure failure) {
-        checkNotNull(failure);
-        return new FailureEnvelope(failure);
+    public static FailureEnvelope of(Rejection rejection) {
+        checkNotNull(rejection);
+        return new FailureEnvelope(rejection);
     }
 
     /**
      * Obtains the Failure ID.
      */
     @Override
-    public FailureId getId() {
+    public RejectionId getId() {
         return getOuterObject().getId();
     }
 
@@ -100,7 +100,7 @@ public class FailureEnvelope extends AbstractMessageEnvelope<FailureId, Failure>
      */
     @Override
     public void setOriginContext(EventContext.Builder builder) {
-        builder.setFailureContext(getOuterObject().getContext());
+        builder.setRejectionContext(getOuterObject().getContext());
     }
 
     public Message getCommandMessage() {

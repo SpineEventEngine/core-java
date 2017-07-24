@@ -25,17 +25,17 @@
  *  as we want to manage the versions in a single source.
  */
 
-def final SPINE_VERSION = '0.9.40-SNAPSHOT'
+def final SPINE_VERSION = '0.9.41-SNAPSHOT'
 
 ext {
     // The version of the modules in this project.
     spineVersion = SPINE_VERSION
 
     // Depend on `base` for the general definitions and a model compiler.
-    spineBaseVersion = '0.9.35-SNAPSHOT'
+    spineBaseVersion = '0.9.41-SNAPSHOT'
 
     // We use Spine tools in the build process.
-    spineToolsVersion = '0.9.25-SNAPSHOT'
+    spineToolsVersion = '0.9.41-SNAPSHOT'
 
     guavaVersion = '20.0'
 

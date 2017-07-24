@@ -68,7 +68,7 @@ class CommandTestUtil {
                 assertTrue(isDefault(record.getStatus()
                                            .getError()));
                 assertTrue(isDefault(record.getStatus()
-                                           .getFailure()));
+                                           .getRejection()));
                 break;
             case ERROR:
                 assertTrue(isNotDefault(record.getStatus()
@@ -76,7 +76,7 @@ class CommandTestUtil {
                 break;
             case FAILURE:
                 assertTrue(isNotDefault(record.getStatus()
-                                              .getFailure()));
+                                              .getRejection()));
                 break;
             case UNDEFINED:
             case UNRECOGNIZED:

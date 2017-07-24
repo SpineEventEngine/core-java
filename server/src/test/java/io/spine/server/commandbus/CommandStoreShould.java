@@ -52,7 +52,7 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.core.Commands.getMessage;
-import static io.spine.core.Failures.toFailure;
+import static io.spine.core.Rejections.toRejection;
 import static io.spine.server.commandbus.Given.ACommand.addTask;
 import static io.spine.server.commandbus.Given.ACommand.createProject;
 import static io.spine.server.commandbus.Given.ACommand.startProject;
@@ -125,8 +125,9 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
         final ProcessingStatus status = getStatus(commandId, tenantId);
 
         assertEquals(CommandStatus.FAILURE, status.getCode());
-        assertEquals(toFailure(failure, command).getMessage(),
-                     status.getFailure().getMessage());
+        assertEquals(toRejection(failure, command).getMessage(),
+                     status.getRejection()
+                           .getMessage());
     }
 
     private ProcessingStatus getStatus(CommandId commandId, final TenantId tenantId) {

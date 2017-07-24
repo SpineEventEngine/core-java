@@ -26,6 +26,7 @@ import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.core.Ack;
 import io.spine.core.MessageEnvelope;
+import io.spine.core.Rejection;
 import io.spine.type.MessageClass;
 
 import javax.annotation.Nullable;
@@ -121,9 +122,9 @@ public abstract class Bus<T extends Message,
      * {@link io.spine.base.Error Error} status is passed in {@code IsSent} instance.
      *
      * <p>Depending on the underlying {@link MessageDispatcher}, a message which causes a business
-     * {@link io.spine.core.Failure} may result ether a {@link io.spine.core.Failure} status or
+     * {@link Rejection} may result ether a {@link Rejection} status or
      * an {@link io.spine.core.Status.StatusCase#OK OK} status {@link Ack} instance. Usually,
-     * the {@link io.spine.core.Failure} status may only pop up if the {@link MessageDispatcher}
+     * the {@link Rejection} status may only pop up if the {@link MessageDispatcher}
      * processes the message sequentially and throws the failure (wrapped in a
      * the {@linkplain io.spine.base.ThrowableMessage ThrowableMessages}) instead of handling them.
      * Otherwise, the {@code OK} status should be expected.
@@ -292,7 +293,7 @@ public abstract class Bus<T extends Message,
      *         <ul>
      *             <li>{@link io.spine.core.Status.StatusCase#OK OK} status if the message has been
      *                 passed to the dispatcher;
-     *             <li>{@link io.spine.core.Failure Failure} status, if a {@code Failure} has
+     *             <li>{@link Rejection Failure} status, if a {@code Failure} has
      *                 happened during the message handling (if applicable);
      *             <li>{@link io.spine.base.Error Error} status if a {@link Throwable}, which is not
      *                 a {@link io.spine.base.ThrowableMessage ThrowableMessage}, has been thrown

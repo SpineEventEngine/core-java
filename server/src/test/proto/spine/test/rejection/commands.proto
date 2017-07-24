@@ -19,14 +19,28 @@
 //
 syntax = "proto3";
 
-package spine.test.failure;
+package spine.test.rejection.command;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package="io.spine.test.failure";
+option java_package="io.spine.test.rejection.command";
+option java_outer_classname = "RejectionCommandsProto";
 option java_multiple_files = true;
 
-message ProjectId {
-    string id = 1;
+import "spine/change/change.proto";
+import "spine/test/rejection/project.proto";
+
+message UpdateProjectName {
+
+    ProjectId id = 1;
+
+    spine.change.StringChange name_update = 2;
+}
+
+message RemoveOwner {
+
+    ProjectId id = 1;
+
+    string owner_user_id = 2;
 }

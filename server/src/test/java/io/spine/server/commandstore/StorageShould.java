@@ -32,10 +32,10 @@ import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandId;
 import io.spine.core.CommandStatus;
 import io.spine.core.Commands;
-import io.spine.core.Failure;
-import io.spine.core.FailureContext;
-import io.spine.core.FailureId;
-import io.spine.core.Failures;
+import io.spine.core.Rejection;
+import io.spine.core.RejectionContext;
+import io.spine.core.RejectionId;
+import io.spine.core.Rejections;
 import io.spine.server.commandbus.CommandRecord;
 import io.spine.server.commandbus.Given;
 import io.spine.server.commandbus.ProcessingStatus;
@@ -76,7 +76,7 @@ import static org.junit.Assert.assertTrue;
 public class StorageShould extends TenantAwareTest {
 
     private static final Error defaultError = Error.getDefaultInstance();
-    private static final Failure defaultFailure = Failure.getDefaultInstance();
+    private static final Rejection DEFAULT_REJECTION = Rejection.getDefaultInstance();
 
     private CRepository repository;
 
@@ -234,15 +234,15 @@ public class StorageShould extends TenantAwareTest {
     @Test
     public void set_failure_command_status() {
         givenNewRecord();
-        final Failure failure = newFailure();
+        final Rejection rejection = newFailure();
 
-        repository.updateStatus(id, failure);
+        repository.updateStatus(id, rejection);
 
         final CommandRecord actual = read(id).get();
         assertEquals(FAILURE, actual.getStatus()
                                     .getCode());
-        assertEquals(failure, actual.getStatus()
-                                    .getFailure());
+        assertEquals(rejection, actual.getStatus()
+                                      .getRejection());
     }
 
     /*
@@ -280,7 +280,7 @@ public class StorageShould extends TenantAwareTest {
 
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_try_to_set_failure_status_by_null_ID() {
-        repository.updateStatus(Tests.<CommandId>nullRef(), defaultFailure);
+        repository.updateStatus(Tests.<CommandId>nullRef(), DEFAULT_REJECTION);
     }
 
     /*
@@ -364,15 +364,15 @@ public class StorageShould extends TenantAwareTest {
                     .build();
     }
 
-    private static Failure newFailure() {
+    private static Rejection newFailure() {
         final Any packedFailureMessage = toAny("newFailure");
-        final FailureId id = Failures.generateId(Commands.generateId());
-        return Failure.newBuilder()
-                      .setId(id)
-                      .setMessage(packedFailureMessage)
-                      .setContext(FailureContext.newBuilder()
-                                                .setStacktrace("failure stacktrace")
-                                                .setTimestamp(getCurrentTime()))
-                      .build();
+        final RejectionId id = Rejections.generateId(Commands.generateId());
+        return Rejection.newBuilder()
+                        .setId(id)
+                        .setMessage(packedFailureMessage)
+                        .setContext(RejectionContext.newBuilder()
+                                                    .setStacktrace("failure stacktrace")
+                                                    .setTimestamp(getCurrentTime()))
+                        .build();
     }
 }

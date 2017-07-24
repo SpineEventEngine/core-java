@@ -30,7 +30,7 @@ import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
-import io.spine.core.Failure;
+import io.spine.core.Rejection;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.bus.Bus;
 import io.spine.server.bus.BusFilter;
@@ -46,7 +46,7 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.getRootCause;
-import static io.spine.core.Failures.toFailure;
+import static io.spine.core.Rejections.toRejection;
 import static io.spine.server.bus.Buses.acknowledge;
 import static io.spine.server.bus.Buses.reject;
 import static io.spine.util.Exceptions.toError;
@@ -204,9 +204,9 @@ public class CommandBus extends Bus<Command,
 
             if (cause instanceof ThrowableMessage) {
                 final ThrowableMessage throwableMessage = (ThrowableMessage) cause;
-                final Failure failure = toFailure(throwableMessage, envelope.getCommand());
-                failureBus().post(failure);
-                result = reject(envelope.getId(), failure);
+                final Rejection rejection = toRejection(throwableMessage, envelope.getCommand());
+                failureBus().post(rejection);
+                result = reject(envelope.getId(), rejection);
             } else {
                 final Error error = toError(cause);
                 result = reject(envelope.getId(), error);

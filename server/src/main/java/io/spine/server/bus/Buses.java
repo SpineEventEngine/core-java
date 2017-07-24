@@ -25,7 +25,7 @@ import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.base.Error;
 import io.spine.core.Ack;
-import io.spine.core.Failure;
+import io.spine.core.Rejection;
 import io.spine.core.Responses;
 import io.spine.core.Status;
 
@@ -79,11 +79,11 @@ public class Buses {
      * @param cause the cause of the message rejection
      * @return the {@code IsSent} response with the given message ID
      */
-    public static Ack reject(Message id, Failure cause) {
+    public static Ack reject(Message id, Rejection cause) {
         checkNotNull(cause);
         checkArgument(isNotDefault(cause));
         final Status status = Status.newBuilder()
-                                    .setFailure(cause)
+                                    .setRejection(cause)
                                     .build();
         return setStatus(id, status);
     }

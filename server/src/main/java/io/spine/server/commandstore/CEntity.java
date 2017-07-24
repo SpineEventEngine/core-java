@@ -24,7 +24,7 @@ import io.spine.base.Error;
 import io.spine.core.Command;
 import io.spine.core.CommandId;
 import io.spine.core.CommandStatus;
-import io.spine.core.Failure;
+import io.spine.core.Rejection;
 import io.spine.server.commandbus.CommandRecord;
 import io.spine.server.entity.AbstractEntity;
 
@@ -104,11 +104,11 @@ class CEntity extends AbstractEntity<CommandId, CommandRecord> {
         updateState(record);
     }
 
-    void setToFailure(Failure failure) {
+    void setToFailure(Rejection rejection) {
         final CommandRecord.Builder builder = getState().toBuilder();
         builder.getStatusBuilder()
                .setCode(FAILURE)
-               .setFailure(failure);
+               .setRejection(rejection);
         final CommandRecord record = builder.build();
         updateState(record);
     }

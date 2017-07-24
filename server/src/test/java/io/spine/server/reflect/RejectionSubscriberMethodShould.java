@@ -22,8 +22,8 @@ package io.spine.server.reflect;
 import com.google.common.testing.NullPointerTester;
 import io.spine.core.CommandContext;
 import io.spine.core.Subscribe;
-import io.spine.test.failure.command.UpdateProjectName;
 import io.spine.test.reflect.ReflectFailures;
+import io.spine.test.rejection.command.UpdateProjectName;
 import org.junit.Test;
 
 import java.lang.reflect.InvocationTargetException;
@@ -38,7 +38,7 @@ import static org.mockito.Mockito.verify;
  * @author Alex Tymchenko
  */
 @SuppressWarnings("unused")     // some of tests address just the fact of method declaration.
-public class FailureSubscriberMethodShould {
+public class RejectionSubscriberMethodShould {
 
     @Test
     public void pass_null_tolerance_check() {
