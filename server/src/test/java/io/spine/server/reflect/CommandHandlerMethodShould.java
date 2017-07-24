@@ -204,9 +204,9 @@ public class CommandHandlerMethodShould {
     @Test(expected = IllegalStateException.class)
     public void throw_ISE_for_not_handled_command_type() {
         final Object handler = new ValidHandlerOneParam();
-        CommandHandlerMethod.invokeHandler(handler,
-                                           startProject(),
-                                           CommandContext.getDefaultInstance());
+        CommandHandlerMethod.invokeFor(handler,
+                                       startProject(),
+                                       CommandContext.getDefaultInstance());
     }
 
     /*

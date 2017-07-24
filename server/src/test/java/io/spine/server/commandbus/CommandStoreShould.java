@@ -285,7 +285,7 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
         }
     }
 
-    private static class ThrowingDispatcher implements CommandDispatcher {
+    private static class ThrowingDispatcher implements CommandDispatcher<Message> {
 
         @SuppressWarnings("ThrowableInstanceNeverThrown")
         private final RuntimeException exception = new RuntimeException("Dispatching exception.");
@@ -296,7 +296,7 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
         }
 
         @Override
-        public void dispatch(CommandEnvelope envelope) {
+        public Message dispatch(CommandEnvelope envelope) {
             throw exception;
         }
     }

@@ -25,17 +25,17 @@ import com.google.protobuf.Timestamp;
 import io.spine.base.Error;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.TestActorRequestFactory;
+import io.spine.core.Ack;
 import io.spine.core.ActorContext;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandId;
 import io.spine.core.CommandValidationError;
-import io.spine.core.IsSent;
 import io.spine.core.Status;
 import io.spine.core.TenantId;
+import io.spine.grpc.MemoizingObserver;
 import io.spine.grpc.StreamObservers;
-import io.spine.grpc.StreamObservers.MemoizingObserver;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.commandstore.CommandStore;
@@ -90,7 +90,7 @@ public abstract class AbstractCommandBusTestSuite {
     protected FailureBus failureBus;
     protected ExecutorCommandScheduler scheduler;
     protected CreateProjectHandler createProjectHandler;
-    protected MemoizingObserver<IsSent> observer;
+    protected MemoizingObserver<Ack> observer;
 
     /**
      * A public constructor for derived test cases.
@@ -109,7 +109,7 @@ public abstract class AbstractCommandBusTestSuite {
         return invalidCmd;
     }
 
-    static void checkCommandError(IsSent sendingResult,
+    static void checkCommandError(Ack sendingResult,
                                   CommandValidationError validationError,
                                   Class<? extends CommandException> exceptionClass,
                                   Command cmd) {
@@ -119,7 +119,7 @@ public abstract class AbstractCommandBusTestSuite {
                           cmd);
     }
 
-    static void checkCommandError(IsSent sendingResult,
+    static void checkCommandError(Ack sendingResult,
                                   CommandValidationError validationError,
                                   String errorType,
                                   Command cmd) {
@@ -217,7 +217,7 @@ public abstract class AbstractCommandBusTestSuite {
         commandBus.register(createProjectHandler);
 
         final CommandBus spy = spy(commandBus);
-        spy.post(commands, StreamObservers.<IsSent>memoizingObserver());
+        spy.post(commands, StreamObservers.<Ack>memoizingObserver());
 
         @SuppressWarnings("unchecked")
         final ArgumentCaptor<Iterable<Command>> storingCaptor = forClass(Iterable.class);

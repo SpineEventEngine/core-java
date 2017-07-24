@@ -28,9 +28,9 @@ import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
 
 import javax.annotation.CheckReturnValue;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalStateException;
@@ -39,8 +39,9 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * A wrapper for an event subscriber method.
  *
  * @author Alexander Yevsyukov
+ * @see Subscribe
  */
-public class EventSubscriberMethod extends HandlerMethod<EventContext> {
+public final class EventSubscriberMethod extends HandlerMethod<EventContext> {
 
     /** The instance of the predicate to filter event subscriber methods of a class. */
     private static final MethodPredicate PREDICATE = new FilterPredicate();
@@ -57,19 +58,13 @@ public class EventSubscriberMethod extends HandlerMethod<EventContext> {
     /**
      * Invokes the subscriber method in the passed object.
      */
-    public static void invokeSubscriber(Object target, Message eventMessage, EventContext context) {
+    public static void invokeFor(Object target, Message eventMessage, EventContext context) {
         checkNotNull(target);
         checkNotNull(eventMessage);
         checkNotNull(context);
 
-        try {
-            final EventSubscriberMethod method = forMessage(target.getClass(),
-                                                            eventMessage);
-            method.invoke(target, eventMessage, context);
-        } catch (InvocationTargetException e) {
-            log().error("Exception handling event. Event message: {}, context: {}, cause: {}",
-                        eventMessage, context, e.getCause());
-        }
+        final EventSubscriberMethod method = getMethod(target.getClass(), eventMessage);
+        method.invoke(target, eventMessage, context);
     }
 
     /**
@@ -78,17 +73,16 @@ public class EventSubscriberMethod extends HandlerMethod<EventContext> {
      * @throws IllegalStateException if the passed class does not have an event handling method
      *                               for the class of the passed message
      */
-    public static EventSubscriberMethod forMessage(Class<?> cls, Message eventMessage) {
+    public static EventSubscriberMethod getMethod(Class<?> cls, Message eventMessage) {
         checkNotNull(cls);
         checkNotNull(eventMessage);
 
         final Class<? extends Message> eventClass = eventMessage.getClass();
-        final MethodRegistry registry = MethodRegistry.getInstance();
-        final EventSubscriberMethod method = registry.get(cls,
-                                                          eventClass,
-                                                          factory());
+        final EventSubscriberMethod method = MethodRegistry.getInstance()
+                                                           .get(cls, eventClass, factory());
         if (method == null) {
-            throw missingEventHandler(cls, eventClass);
+            throw newIllegalStateException("The class %s is not subscribed to events of %s.",
+                                           cls.getName(), eventClass.getName());
         }
         return method;
     }
@@ -97,20 +91,10 @@ public class EventSubscriberMethod extends HandlerMethod<EventContext> {
         return new EventSubscriberMethod(method);
     }
 
-    private static IllegalStateException missingEventHandler(Class<?> cls,
-                                                             Class<? extends Message> eventClass) {
-        return newIllegalStateException(
-                "Missing event handler for event class %s in the stream projection class %s",
-                eventClass,
-                cls);
-    }
-
     @CheckReturnValue
-    public static ImmutableSet<EventClass> getEventClasses(Class<?> cls) {
+    public static Set<EventClass> inspect(Class<?> cls) {
         checkNotNull(cls);
-
-        final ImmutableSet<EventClass> result =
-                EventClass.setOf(HandlerMethod.getHandledMessageClasses(cls, predicate()));
+        final ImmutableSet<EventClass> result = EventClass.setOf(inspect(cls, predicate()));
         return result;
     }
 
@@ -123,8 +107,16 @@ public class EventSubscriberMethod extends HandlerMethod<EventContext> {
         return PREDICATE;
     }
 
-    /** The factory for filtering methods that match {@code EventHandlerMethod} specification. */
+    /**
+     * The factory for creating {@linkplain EventSubscriberMethod event subscriber} methods.
+     */
     private static class Factory implements HandlerMethod.Factory<EventSubscriberMethod> {
+
+        private static final Factory INSTANCE = new Factory();
+
+        private static Factory getInstance() {
+            return INSTANCE;
+        }
 
         @Override
         public Class<EventSubscriberMethod> getMethodClass() {
@@ -146,16 +138,6 @@ public class EventSubscriberMethod extends HandlerMethod<EventContext> {
             if (!Modifier.isPublic(method.getModifiers())) {
                 warnOnWrongModifier("Event subscriber {} must be declared 'public'", method);
             }
-        }
-
-        private enum Singleton {
-            INSTANCE;
-            @SuppressWarnings("NonSerializableFieldInSerializableClass")
-            private final EventSubscriberMethod.Factory value = new EventSubscriberMethod.Factory();
-        }
-
-        private static Factory getInstance() {
-            return Singleton.INSTANCE.value;
         }
     }
 

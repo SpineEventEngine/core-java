@@ -36,9 +36,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import static io.spine.server.aggregate.Given.ACommand.addTask;
-import static io.spine.server.aggregate.Given.ACommand.createProject;
-import static io.spine.server.aggregate.Given.ACommand.startProject;
+import static io.spine.server.aggregate.given.Given.ACommand.addTask;
+import static io.spine.server.aggregate.given.Given.ACommand.createProject;
+import static io.spine.server.aggregate.given.Given.ACommand.startProject;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 

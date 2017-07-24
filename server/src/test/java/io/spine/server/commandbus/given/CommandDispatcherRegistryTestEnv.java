@@ -23,6 +23,7 @@ package io.spine.server.commandbus.given;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
+import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
@@ -129,14 +130,15 @@ public class CommandDispatcherRegistryTestEnv {
         }
     }
 
-    public static class EmptyDispatcher implements CommandDispatcher {
+    public static class EmptyDispatcher implements CommandDispatcher<Message> {
         @Override
         public Set<CommandClass> getMessageClasses() {
             return Collections.emptySet();
         }
 
         @Override
-        public void dispatch(CommandEnvelope envelope) {
+        public Message dispatch(CommandEnvelope envelope) {
+            return Empty.getDefaultInstance();
         }
     }
 
@@ -144,7 +146,7 @@ public class CommandDispatcherRegistryTestEnv {
             extends ProcessManagerRepository<ProjectId, NoCommandsProcessManager, Project> {
     }
 
-    public static class AllCommandDispatcher implements CommandDispatcher {
+    public static class AllCommandDispatcher implements CommandDispatcher<Message> {
         @Override
         public Set<CommandClass> getMessageClasses() {
             return CommandClass.setOf(CreateProject.class,
@@ -153,22 +155,24 @@ public class CommandDispatcherRegistryTestEnv {
         }
 
         @Override
-        public void dispatch(CommandEnvelope envelope) {
+        public Message dispatch(CommandEnvelope envelope) {
+            return Empty.getDefaultInstance();
         }
     }
 
-    public static class CreateProjectDispatcher implements CommandDispatcher {
+    public static class CreateProjectDispatcher implements CommandDispatcher<Message> {
         @Override
         public Set<CommandClass> getMessageClasses() {
             return CommandClass.setOf(CreateProject.class);
         }
 
         @Override
-        public void dispatch(CommandEnvelope envelope) {
+        public Message dispatch(CommandEnvelope envelope) {
+            return Empty.getDefaultInstance();
         }
     }
 
-    public static class AddTaskDispatcher implements CommandDispatcher {
+    public static class AddTaskDispatcher implements CommandDispatcher<Message> {
 
         @Override
         public Set<CommandClass> getMessageClasses() {
@@ -176,8 +180,9 @@ public class CommandDispatcherRegistryTestEnv {
         }
 
         @Override
-        public void dispatch(CommandEnvelope envelope) {
+        public Message dispatch(CommandEnvelope envelope) {
             // Do nothing.
+            return Empty.getDefaultInstance();
         }
     }
 

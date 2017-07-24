@@ -21,6 +21,7 @@
 package io.spine.server.procman;
 
 import com.google.protobuf.Any;
+import com.google.protobuf.Empty;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
@@ -346,7 +347,7 @@ public class ProcessManagerShould {
         assertHasPrivateParameterlessCtor(ProcessManager.TypeInfo.class);
     }
 
-    private static class AddTaskDispatcher implements CommandDispatcher {
+    private static class AddTaskDispatcher implements CommandDispatcher<Message> {
 
         private final List<CommandEnvelope> commands = new LinkedList<>();
 
@@ -356,8 +357,9 @@ public class ProcessManagerShould {
         }
 
         @Override
-        public void dispatch(CommandEnvelope envelope) {
+        public Message dispatch(CommandEnvelope envelope) {
             commands.add(envelope);
+            return Empty.getDefaultInstance();
         }
 
         @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK for tests.

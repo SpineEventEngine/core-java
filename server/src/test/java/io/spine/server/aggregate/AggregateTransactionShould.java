@@ -24,6 +24,7 @@ import com.google.protobuf.Message;
 import io.spine.core.CommandContext;
 import io.spine.core.Event;
 import io.spine.core.Version;
+import io.spine.server.aggregate.given.Given;
 import io.spine.server.command.Assign;
 import io.spine.server.entity.ThrowingValidatingBuilder;
 import io.spine.server.entity.Transaction;
@@ -41,7 +42,7 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.server.aggregate.Given.EventMessage.projectCreated;
+import static io.spine.server.aggregate.given.Given.EventMessage.projectCreated;
 import static org.junit.Assert.assertTrue;
 
 /**

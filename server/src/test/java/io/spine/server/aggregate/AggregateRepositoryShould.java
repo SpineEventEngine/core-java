@@ -20,69 +20,53 @@
 
 package io.spine.server.aggregate;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Predicates;
 import com.google.common.collect.Lists;
-import com.google.protobuf.Message;
-import io.spine.client.TestActorRequestFactory;
 import io.spine.core.CommandClass;
-import io.spine.core.CommandContext;
-import io.spine.core.CommandEnvelope;
+import io.spine.core.Event;
+import io.spine.core.EventClass;
 import io.spine.server.BoundedContext;
-import io.spine.server.command.Assign;
-import io.spine.server.entity.given.Given;
+import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.GivenAggregate;
+import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.ProjectAggregate;
+import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.ProjectAggregateRepository;
+import io.spine.server.command.TestEventFactory;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
-import io.spine.test.aggregate.ProjectVBuilder;
-import io.spine.test.aggregate.Status;
-import io.spine.test.aggregate.command.AddTask;
-import io.spine.test.aggregate.command.CreateProject;
-import io.spine.test.aggregate.command.StartProject;
-import io.spine.test.aggregate.event.AggProjectCreated;
-import io.spine.test.aggregate.event.AggProjectStarted;
-import io.spine.test.aggregate.event.AggTaskAdded;
+import io.spine.test.aggregate.event.ProjectArchived;
+import io.spine.test.aggregate.event.ProjectDeleted;
 import io.spine.testdata.Sample;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.internal.matchers.GreaterThan;
 
 import java.util.Iterator;
 import java.util.Set;
 
 import static io.spine.core.given.GivenTenantId.newUuid;
-import static io.spine.server.aggregate.AggregateCommandDispatcher.dispatch;
 import static io.spine.validate.Validate.isDefault;
 import static io.spine.validate.Validate.isNotDefault;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.intThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass", "ConstantConditions"})
 public class AggregateRepositoryShould {
 
+    private BoundedContext boundedContext;
     private AggregateRepository<ProjectId, ProjectAggregate> repository;
 
-    /** Use spy only when it is required to avoid problems,
-     * make tests faster and make it easier to debug. */
+    /**
+     * Use spy only when it is required to avoid problems,
+     * make tests faster and make it easier to debug.
+     */
     private AggregateRepository<ProjectId, ProjectAggregate> repositorySpy;
-
-    private static final TestActorRequestFactory factory =
-            TestActorRequestFactory.newInstance(AggregateRepositoryShould.class);
 
     @Before
     public void setUp() {
-        final BoundedContext boundedContext = BoundedContext.newBuilder()
+        boundedContext = BoundedContext.newBuilder()
                                                             .build();
         repository = new ProjectAggregateRepository();
         boundedContext.register(repository);
@@ -95,7 +79,7 @@ public class AggregateRepositoryShould {
     }
 
     @Test
-    public void call_get_aggregate_constructor_method_only_once(){
+    public void call_get_aggregate_constructor_method_only_once() {
         final ProjectId id = Sample.messageOfType(ProjectId.class);
         repositorySpy.create(id);
         repositorySpy.create(id);
@@ -103,7 +87,6 @@ public class AggregateRepositoryShould {
         verify(repositorySpy, times(1)).findEntityConstructor();
     }
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent") // OK as the aggregate is created if missing.
     @Test
     public void create_aggregate_with_default_state_if_no_aggregate_found() {
         final ProjectAggregate aggregate = repository.find(Sample.messageOfType(ProjectId.class))
@@ -116,10 +99,9 @@ public class AggregateRepositoryShould {
     @Test
     public void store_and_load_aggregate() {
         final ProjectId id = Sample.messageOfType(ProjectId.class);
-        final ProjectAggregate expected = givenAggregateWithUncommittedEvents(id);
+        final ProjectAggregate expected = GivenAggregate.withUncommittedEvents(id);
 
         repository.store(expected);
-        @SuppressWarnings("OptionalGetWithoutIsPresent")
         final ProjectAggregate actual = repository.find(id)
                                                   .get();
 
@@ -128,28 +110,14 @@ public class AggregateRepositoryShould {
         assertEquals(expected.getState(), actual.getState());
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void reject_invalid_AggregateStateRecord_instance() {
-        final ProjectId id = Sample.messageOfType(ProjectId.class);
-        final AggregateStorage<ProjectId> storage = givenAggregateStorageMock();
-
-        doReturn(Optional.of(AggregateStateRecord.getDefaultInstance()))
-                .when(storage)
-                .read(id);
-
-        repositorySpy.loadOrCreate(id);
-    }
-
     @Test
     public void restore_aggregate_using_snapshot() {
         final ProjectId id = Sample.messageOfType(ProjectId.class);
-        final ProjectAggregate expected = givenAggregateWithUncommittedEvents(id);
+        final ProjectAggregate expected = GivenAggregate.withUncommittedEvents(id);
 
-        repository.setSnapshotTrigger(expected.getUncommittedEvents()
-                                              .size());
+        repository.setSnapshotTrigger(expected.uncommittedEventsCount());
         repository.store(expected);
 
-        @SuppressWarnings("OptionalGetWithoutIsPresent")
         final ProjectAggregate actual = repository.find(id)
                                                   .get();
 
@@ -159,27 +127,28 @@ public class AggregateRepositoryShould {
 
     @Test
     public void store_snapshot_and_set_event_count_to_zero_if_needed() {
-        final AggregateStorage<ProjectId> storage = givenAggregateStorageMock();
-        final ProjectAggregate aggregate = givenAggregateWithUncommittedEvents();
-        repositorySpy.setSnapshotTrigger(aggregate.getUncommittedEvents()
-                                                  .size());
+        final ProjectAggregate aggregate = GivenAggregate.withUncommittedEvents();
+        // This should make the repository write the snapshot.
+        repository.setSnapshotTrigger(aggregate.uncommittedEventsCount());
 
-        repositorySpy.store(aggregate);
-
-        verify(storage).writeSnapshot(any(ProjectId.class), any(Snapshot.class));
-        verify(storage).writeEventCountAfterLastSnapshot(any(ProjectId.class), eq(0));
+        repository.store(aggregate);
+        final AggregateStateRecord record = repository.aggregateStorage()
+                                                      .read(aggregate.getId())
+                                                      .get();
+        assertTrue(record.hasSnapshot());
+        assertEquals(0, repository.aggregateStorage()
+                                  .readEventCountAfterLastSnapshot(aggregate.getId()));
     }
 
     @Test
     public void not_store_snapshot_if_not_needed() {
-        final AggregateStorage<ProjectId> storage = givenAggregateStorageMock();
-        final ProjectAggregate aggregate = givenAggregateWithUncommittedEvents();
+        final ProjectAggregate aggregate = GivenAggregate.withUncommittedEvents();
 
-        repositorySpy.store(aggregate);
-
-        verify(storage, never()).writeSnapshot(any(ProjectId.class), any(Snapshot.class));
-        verify(storage).writeEventCountAfterLastSnapshot(any(ProjectId.class),
-                                                         intThat(new GreaterThan<>(0)));
+        repository.store(aggregate);
+        final AggregateStateRecord record = repository.aggregateStorage()
+                                                      .read(aggregate.getId())
+                                                      .get();
+        assertFalse(record.hasSnapshot());
     }
 
     @Test
@@ -221,11 +190,10 @@ public class AggregateRepositoryShould {
     }
 
     @Test
-    public void mark_aggregate_archived() {
-        final ProjectAggregate aggregate = createAndStoreAggregate();
+    public void not_find_archived_aggregates() {
+        final ProjectAggregate aggregate = givenStoredAggregate();
 
         final AggregateTransaction tx = AggregateTransaction.start(aggregate);
-        // archive the aggregate.
         aggregate.setArchived(true);
         tx.commit();
         repository.store(aggregate);
@@ -235,8 +203,8 @@ public class AggregateRepositoryShould {
     }
 
     @Test
-    public void mark_aggregate_deleted() {
-        final ProjectAggregate aggregate = createAndStoreAggregate();
+    public void not_find_deleted_aggregates() {
+        final ProjectAggregate aggregate = givenStoredAggregate();
 
         final AggregateTransaction tx = AggregateTransaction.start(aggregate);
         aggregate.setDeleted(true);
@@ -250,13 +218,14 @@ public class AggregateRepositoryShould {
 
     @Test(expected = IllegalStateException.class)
     public void throw_ISE_if_unable_to_load_entity_by_id_from_storage_index() {
-        createAndStoreAggregate();
+        // Store a valid aggregate.
+        givenStoredAggregate();
 
         // Store a troublesome entity, which cannot be loaded.
         final TenantAwareOperation op = new TenantAwareOperation(newUuid()) {
             @Override
             public void run() {
-                createAndStore(ProjectAggregateRepository.troublesome.getId());
+                givenStoredAggregateWithId(ProjectAggregateRepository.troublesome.getId());
             }
         };
         op.execute();
@@ -264,157 +233,65 @@ public class AggregateRepositoryShould {
         final Iterator<ProjectAggregate> iterator = repository.iterator(
                 Predicates.<ProjectAggregate>alwaysTrue());
 
-        // This should iterate through all.
+        // This should iterate through all and fail.
         Lists.newArrayList(iterator);
     }
 
+    @Test
+    public void expose_event_classes_on_which_aggregates_react() {
+        final Set<EventClass> eventClasses = repository.getEventClasses();
+        assertTrue(eventClasses.contains(EventClass.of(ProjectArchived.class)));
+        assertTrue(eventClasses.contains(EventClass.of(ProjectDeleted.class)));
+    }
+
+    @Test
+    public void route_events_to_aggregates() {
+        final ProjectAggregate parent = givenStoredAggregate();
+        final ProjectAggregate child = givenStoredAggregate();
+
+        assertTrue(repository.find(parent.getId())
+                             .isPresent());
+        assertTrue(repository.find(child.getId())
+                             .isPresent());
+
+        final TestEventFactory factory = TestEventFactory.newInstance(getClass());
+        final ProjectArchived msg = ProjectArchived.newBuilder()
+                                                   .setProjectId(parent.getId())
+                                                   .addChildProjectId(child.getId())
+                                                   .build();
+        final Event event = factory.createEvent(msg);
+
+        boundedContext.getEventBus()
+                      .post(event);
+
+        // Check that the child aggregate was archived.
+        assertFalse(repository.find(child.getId())
+                              .isPresent());
+
+        // The parent should not be archived since the dispatch route uses only child aggregates
+        // from the `ProjectArchived` event.
+        assertTrue(repository.find(parent.getId())
+                             .isPresent());
+    }
+
     /*
-     * Utility methods.
-     ****************************/
+     * Test environment methods that use internals of this test suite.
+     ******************************************************************/
 
-    private static ProjectAggregate givenAggregateWithUncommittedEvents() {
-        return givenAggregateWithUncommittedEvents(Sample.messageOfType(ProjectId.class));
-    }
-
-    private static CommandEnvelope env(Message commandMessage) {
-        return CommandEnvelope.of(factory.command().create(commandMessage));
-    }
-
-    private static ProjectAggregate givenAggregateWithUncommittedEvents(ProjectId id) {
-        final ProjectAggregate aggregate = Given.aggregateOfClass(ProjectAggregate.class)
-                                                .withId(id)
-                                                .build();
-
-        final CreateProject createProject =
-                ((CreateProject.Builder) Sample.builderForType(CreateProject.class))
-                        .setProjectId(id)
-                        .build();
-        final AddTask addTask =
-                ((AddTask.Builder) Sample.builderForType(AddTask.class))
-                        .setProjectId(id)
-                        .build();
-        final StartProject startProject =
-                ((StartProject.Builder) Sample.builderForType(StartProject.class))
-                        .setProjectId(id)
-                        .build();
-
-        dispatch(aggregate, env(createProject));
-        dispatch(aggregate, env(addTask));
-        dispatch(aggregate, env(startProject));
-
-        return aggregate;
-    }
-
-    private ProjectAggregate createAndStoreAggregate() {
+    private ProjectAggregate givenStoredAggregate() {
         final ProjectId id = Sample.messageOfType(ProjectId.class);
-        final ProjectAggregate aggregate = givenAggregateWithUncommittedEvents(id);
+        final ProjectAggregate aggregate = GivenAggregate.withUncommittedEvents(id);
 
         repository.store(aggregate);
         return aggregate;
     }
 
-    private void createAndStore(String id) {
+    private void givenStoredAggregateWithId(String id) {
         final ProjectId projectId = ProjectId.newBuilder()
                                              .setId(id)
                                              .build();
-        final ProjectAggregate aggregate = givenAggregateWithUncommittedEvents(projectId);
+        final ProjectAggregate aggregate = GivenAggregate.withUncommittedEvents(projectId);
 
         repository.store(aggregate);
-    }
-
-    private AggregateStorage<ProjectId> givenAggregateStorageMock() {
-        @SuppressWarnings("unchecked")
-        final AggregateStorage<ProjectId> storage = mock(AggregateStorage.class);
-        doReturn(storage).when(repositorySpy)
-                         .aggregateStorage();
-        return storage;
-    }
-
-    /*
-     * Test environment classes
-     ****************************/
-
-    @SuppressWarnings("RedundantMethodOverride")
-    private static class ProjectAggregate
-            extends Aggregate<ProjectId, Project, ProjectVBuilder> {
-
-        private ProjectAggregate(ProjectId id) {
-            super(id);
-        }
-
-        @Assign
-        AggProjectCreated handle(CreateProject msg, CommandContext context) {
-            return AggProjectCreated.newBuilder()
-                                 .setProjectId(msg.getProjectId())
-                                 .setName(msg.getName())
-                                 .build();
-        }
-
-        @Apply
-        private void apply(AggProjectCreated event) {
-            getBuilder().setId(event.getProjectId())
-                        .setName(event.getName());
-        }
-
-        @Assign
-        AggTaskAdded handle(AddTask msg, CommandContext context) {
-            return AggTaskAdded.newBuilder()
-                            .setProjectId(msg.getProjectId())
-                            .setTask(msg.getTask())
-                            .build();
-        }
-
-        @Apply
-        private void apply(AggTaskAdded event) {
-            getBuilder().setId(event.getProjectId())
-                        .addTask(event.getTask());
-        }
-
-        @Assign
-        AggProjectStarted handle(StartProject msg, CommandContext context) {
-            return AggProjectStarted.newBuilder()
-                                    .setProjectId(msg.getProjectId())
-                                    .build();
-        }
-
-        @Apply
-        private void apply(AggProjectStarted event) {
-            getBuilder().setStatus(Status.STARTED);
-        }
-
-        /**
-         * {@inheritDoc}
-         *
-         * <p>Overrides to open the method to this test suite.
-         */
-        @Override
-        protected void setArchived(boolean archived) {
-            super.setArchived(archived);
-        }
-
-        /**
-         * {@inheritDoc}
-         *
-         * <p>Overrides to open the method to this test suite.
-         */
-        @Override
-        protected void setDeleted(boolean deleted) {
-            super.setDeleted(deleted);
-        }
-    }
-
-    private static class ProjectAggregateRepository
-                   extends AggregateRepository<ProjectId, ProjectAggregate> {
-
-        private static final ProjectId troublesome = ProjectId.newBuilder()
-                                                              .setId("CANNOT_BE_LOADED")
-                                                              .build();
-        @Override
-        public Optional<ProjectAggregate> find(ProjectId id) {
-            if (id.equals(troublesome)) {
-                return Optional.absent();
-            }
-            return super.find(id);
-        }
     }
 }

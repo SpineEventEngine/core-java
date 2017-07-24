@@ -25,6 +25,8 @@ import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.Identifier;
+import io.spine.core.ActorContext;
+import io.spine.core.EventContext;
 import io.spine.core.MessageEnvelope;
 import io.spine.core.TenantId;
 import io.spine.core.Version;
@@ -32,13 +34,15 @@ import io.spine.string.Stringifiers;
 
 import javax.annotation.Nullable;
 
+import static io.spine.util.Exceptions.unsupported;
+
 /**
  * An envelope holder of the {@linkplain Entity entity} state.
  *
  * @author Alex Tymchenko
  */
 public final class EntityStateEnvelope<I, S extends Message>
-                                    implements MessageEnvelope<Entity<I, S>> {
+        implements MessageEnvelope<Any, Entity<I, S>> {
 
     /**
      * The state of the entity.
@@ -97,12 +101,17 @@ public final class EntityStateEnvelope<I, S extends Message>
         return new EntityStateEnvelope<>(entityId, entityState, tenantId, entityVersion);
     }
 
+    @Override
+    public Any getId() {
+        return entityId;
+    }
+
     /**
      * Always returns {@code null}, as it is impossible to create a {@code Entity} instance basing
      * just on its properties.
      *
      * <p>To obtain an entity instance, use the corresponding {@code Repository} instance along
-     * with {@linkplain #getId() entity ID} instead.
+     * with {@linkplain #getEntityId() entity ID} instead.
      *
      * @return {@code null}
      */
@@ -111,14 +120,6 @@ public final class EntityStateEnvelope<I, S extends Message>
     @Nullable
     public Entity<I, S> getOuterObject() {
         return null;
-    }
-
-    /**
-     * Obtains the {@link Entity} ID.
-     */
-    public I getId() {
-        final I result = Identifier.unpack(entityId);
-        return result;
     }
 
     @Override
@@ -131,12 +132,44 @@ public final class EntityStateEnvelope<I, S extends Message>
         return this.entityStateClass;
     }
 
+    @Override
+    public ActorContext getActorContext() {
+        return ActorContext.newBuilder()
+                           .setTenantId(tenantId)
+                           .build();
+    }
+
+    /**
+     * This method is not supported and always throws {@link UnsupportedOperationException}.
+     *
+     * @param builder not used
+     * @throws UnsupportedOperationException always
+     */
+    @Override
+    public void setOriginContext(EventContext.Builder builder)
+            throws UnsupportedOperationException {
+        throw unsupported();
+    }
+
+    /**
+     * Obtains the {@link Entity} ID.
+     */
+    public I getEntityId() {
+        final I result = Identifier.unpack(entityId);
+        return result;
+    }
+
     public Optional<Version> getEntityVersion() {
         return Optional.fromNullable(entityVersion);
     }
 
     public TenantId getTenantId() {
         return tenantId;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(entityState, entityId, entityVersion);
     }
 
     @Override
@@ -151,11 +184,6 @@ public final class EntityStateEnvelope<I, S extends Message>
         return Objects.equal(entityState, that.entityState) &&
                 Objects.equal(entityId, that.entityId) &&
                 Objects.equal(entityVersion, that.entityVersion);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(entityState, entityId, entityVersion);
     }
 
     @Override

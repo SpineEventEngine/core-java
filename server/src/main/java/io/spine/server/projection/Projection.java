@@ -21,7 +21,6 @@
 package io.spine.server.projection;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
@@ -30,9 +29,9 @@ import io.spine.server.entity.EventPlayingEntity;
 import io.spine.server.reflect.EventSubscriberMethod;
 import io.spine.validate.ValidatingBuilder;
 
-import java.lang.reflect.InvocationTargetException;
+import java.util.Set;
 
-import static io.spine.server.reflect.EventSubscriberMethod.forMessage;
+import static io.spine.server.reflect.EventSubscriberMethod.getMethod;
 
 /**
  * {@link Projection} holds a structural representation of data extracted from a stream of events.
@@ -72,20 +71,30 @@ public abstract class Projection<I,
         return super.getBuilder();
     }
 
+    @Override
+    protected String getMissingTxMessage() {
+        return "Projection modification is not available this way. " +
+                "Please modify the state from an event subscribing method.";
+    }
+
     /**
-     * Exposes playing events on a projection for the package.
+     * Plays events on the projection.
+     *
+     * <p>Unlike {@link Projection#play(Iterable)} this static method opens the
+     * {@linkplain ProjectionTransaction transaction} before events are played, and closes it after.
+     *
+     * @return {@code true} if the projection state was changed as the result of playing the events
      */
-    static void play(Projection projection, Iterable<Event> events) {
+    static boolean play(Projection projection, Iterable<Event> events) {
+        final ProjectionTransaction tx = ProjectionTransaction.start(projection);
         projection.play(events);
+        tx.commit();
+        return projection.isChanged();
     }
 
     void apply(Message eventMessage, EventContext eventContext)  {
-        final EventSubscriberMethod method = forMessage(getClass(), eventMessage);
-        try {
-            method.invoke(this, eventMessage, eventContext);
-        } catch (InvocationTargetException e) {
-            throw new IllegalStateException(e);
-        }
+        final EventSubscriberMethod method = getMethod(getClass(), eventMessage);
+        method.invoke(this, eventMessage, eventContext);
     }
 
     static class TypeInfo {
@@ -100,8 +109,8 @@ public abstract class Projection<I,
          * @param cls the class to inspect
          * @return immutable set of event classes or an empty set if no events are handled
          */
-        static ImmutableSet<EventClass> getEventClasses(Class<? extends Projection> cls) {
-            return EventSubscriberMethod.getEventClasses(cls);
+        static Set<EventClass> getEventClasses(Class<? extends Projection> cls) {
+            return EventSubscriberMethod.inspect(cls);
         }
     }
 }

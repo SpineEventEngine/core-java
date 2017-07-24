@@ -30,10 +30,11 @@ import io.spine.core.EventContext;
 import io.spine.server.BoundedContext;
 import io.spine.server.entity.EntityStorageConverter;
 import io.spine.server.entity.EventDispatchingRepository;
-import io.spine.server.entity.idfunc.EventTargetsFunction;
 import io.spine.server.event.EventFilter;
 import io.spine.server.event.EventStore;
 import io.spine.server.event.EventStreamQuery;
+import io.spine.server.route.EventRouting;
+import io.spine.server.route.Producers;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
@@ -60,7 +61,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      * Creates a new {@code ProjectionRepository}.
      */
     protected ProjectionRepository() {
-        super(EventDispatchingRepository.<I>producerFromContext());
+        super(Producers.<I>fromContext());
     }
 
     /** Obtains {@link EventStore} from which to get events during catch-up. */
@@ -70,13 +71,14 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     }
 
     /**
-     * {@inheritDoc}
+     * Exposes {@linkplain #getRouting() routing} to the package.
      *
-     * <p>Overrides to open the method to the {@code beam} package.
+     * <p>{@link EventDispatchingRepository#getRouting()} is {@code final} to restrict routing
+     * customization only via adding custom entries.
      */
-    @Override
-    protected EventTargetsFunction<I, Message> getIdSetFunction() {
-        return super.getIdSetFunction();
+    @VisibleForTesting
+    EventRouting<I> routing() {
+        return getRouting();
     }
 
     /**
@@ -92,7 +94,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     /**
      * Obtains event filters for event classes handled by projections of this repository.
      */
-    Set<EventFilter> createEventFilters() {
+    private Set<EventFilter> createEventFilters() {
         final ImmutableSet.Builder<EventFilter> builder = ImmutableSet.builder();
         final Set<EventClass> eventClasses = getMessageClasses();
         for (EventClass eventClass : eventClasses) {
@@ -208,7 +210,9 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
             final Timestamp eventTime = context.getTimestamp();
             store(projection);
             projectionStorage().writeLastHandledEventTime(eventTime);
-            getStand().post(projection, context.getCommandContext());
+            getStand().post(context.getCommandContext()
+                                   .getActorContext()
+                                   .getTenantId(), projection);
         }
     }
 

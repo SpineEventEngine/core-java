@@ -24,7 +24,7 @@ import com.google.common.base.Function;
 import com.google.common.testing.EqualsTester;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.StringValue;
-import io.spine.server.event.Given;
+import io.spine.server.event.enrich.given.EnrichmentFunctionTestEnv.GivenEventMessage;
 import io.spine.test.Tests;
 import io.spine.test.event.ProjectCreated;
 import org.junit.Before;
@@ -116,7 +116,7 @@ public class EnrichmentFunctionShould {
 
     @Test
     public void apply_enrichment() throws Exception {
-        final ProjectCreated event = Given.EventMessage.projectCreated();
+        final ProjectCreated event = GivenEventMessage.projectCreated();
 
         final ProjectCreated.Enrichment enriched = fieldEnricher.apply(event);
 

@@ -51,9 +51,8 @@ public class ProjectionRepositoryTestEnv {
      * to an invalid entry created in the storage.
      */
     @SuppressWarnings("unused")
-    public static class NoOpTaskNamesProjection extends Projection<ProjectId,
-            ProjectTaskNames,
-            ProjectTaskNamesVBuilder> {
+    public static class NoOpTaskNamesProjection
+            extends Projection<ProjectId, ProjectTaskNames, ProjectTaskNamesVBuilder> {
 
         public NoOpTaskNamesProjection(ProjectId id) {
             super(id);
@@ -155,6 +154,35 @@ public class ProjectionRepositoryTestEnv {
         @Override
         public String getIdString() {
             return getId().toString();
+        }
+    }
+
+    public static class GivenEventMessage {
+
+        public static final ProjectId ENTITY_ID = ProjectId.newBuilder()
+                                                           .setId("p-123")
+                                                           .build();
+
+        private GivenEventMessage() {
+            // Prevent instantiation of this utility class.
+        }
+
+        public static ProjectStarted projectStarted() {
+            return ProjectStarted.newBuilder()
+                                 .setProjectId(ENTITY_ID)
+                                 .build();
+        }
+
+        public static ProjectCreated projectCreated() {
+            return ProjectCreated.newBuilder()
+                                 .setProjectId(ENTITY_ID)
+                                 .build();
+        }
+
+        public static TaskAdded taskAdded() {
+            return TaskAdded.newBuilder()
+                            .setProjectId(ENTITY_ID)
+                            .build();
         }
     }
 }

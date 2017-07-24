@@ -20,7 +20,6 @@
 
 package io.spine.server.projection;
 
-import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
@@ -29,10 +28,7 @@ import io.spine.Identifier;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
-import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
-import io.spine.core.Events;
-import io.spine.core.Subscribe;
 import io.spine.core.TenantId;
 import io.spine.core.Version;
 import io.spine.core.Versions;
@@ -42,18 +38,16 @@ import io.spine.server.command.TestEventFactory;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.RecordBasedRepositoryShould;
 import io.spine.server.entity.given.Given;
-import io.spine.server.entity.idfunc.EventTargetsFunction;
+import io.spine.server.projection.given.ProjectionRepositoryTestEnv.GivenEventMessage;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.NoOpTaskNamesRepository;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.TestProjection;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.TestProjectionRepository;
 import io.spine.server.storage.RecordStorage;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
-import io.spine.test.projection.ProjectTaskNames;
-import io.spine.test.projection.ProjectTaskNamesVBuilder;
-import io.spine.test.projection.event.PjnProjectCreated;
-import io.spine.test.projection.event.PjnProjectStarted;
-import io.spine.test.projection.event.PjnTaskAdded;
+import io.spine.test.projection.event.ProjectCreated;
+import io.spine.test.projection.event.ProjectStarted;
+import io.spine.test.projection.event.TaskAdded;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -63,7 +57,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import static com.google.common.collect.Sets.newHashSet;
 import static io.spine.Identifier.newUuid;
 import static io.spine.test.Verify.assertContainsAll;
 import static io.spine.time.Time.getCurrentTime;
@@ -72,45 +65,21 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
 
 /**
  * @author Alexander Litus
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings({
-        "ClassWithTooManyMethods",
-        "OverlyCoupledClass"})
 public class ProjectionRepositoryShould
-        extends RecordBasedRepositoryShould<TestProjection,
-                                            ProjectId,
-                                            Project> {
+        extends RecordBasedRepositoryShould<TestProjection, ProjectId, Project> {
 
-    private static final ProjectId ID = ProjectId.newBuilder()
-                                                 .setId("p-123")
-                                                 .build();
-    private static final Any PRODUCER_ID = Identifier.pack(ID);
+    private static final Any PRODUCER_ID = Identifier.pack(GivenEventMessage.ENTITY_ID);
 
     private BoundedContext boundedContext;
 
     private ProjectionRepository<ProjectId, TestProjection, Project> repository() {
         return (ProjectionRepository<ProjectId, TestProjection, Project>) repository;
     }
-
-    /**
-     * {@link EventTargetsFunction} used for testing add/get/remove of functions.
-     */
-    private static final EventTargetsFunction<ProjectId, PjnProjectCreated> creteProjectTargets =
-            new EventTargetsFunction<ProjectId, PjnProjectCreated>() {
-                private static final long serialVersionUID = 0L;
-
-                @Override
-                public Set<ProjectId> apply(PjnProjectCreated message, EventContext context) {
-                    return newHashSet(message.getProjectId());
-                }
-            };
 
     @Override
     protected RecordBasedRepository<ProjectId, TestProjection, Project> createRepository() {
@@ -195,14 +164,14 @@ public class ProjectionRepositoryShould
 
     @Test
     public void dispatch_event_and_load_projection() {
-        checkDispatchesEvent(projectStarted());
+        checkDispatchesEvent(GivenEventMessage.projectStarted());
     }
 
     @Test
     public void dispatch_several_events() {
-        checkDispatchesEvent(projectCreated());
-        checkDispatchesEvent(taskAdded());
-        checkDispatchesEvent(projectStarted());
+        checkDispatchesEvent(GivenEventMessage.projectCreated());
+        checkDispatchesEvent(GivenEventMessage.taskAdded());
+        checkDispatchesEvent(GivenEventMessage.projectStarted());
     }
 
     private void checkDispatchesEvent(Message eventMessage) {
@@ -243,60 +212,15 @@ public class ProjectionRepositoryShould
     public void return_event_classes() {
         final Set<EventClass> eventClasses = repository().getMessageClasses();
         assertContainsAll(eventClasses,
-                          EventClass.of(PjnProjectCreated.class),
-                          EventClass.of(PjnTaskAdded.class),
-                          EventClass.of(PjnProjectStarted.class));
+                          EventClass.of(ProjectCreated.class),
+                          EventClass.of(TaskAdded.class),
+                          EventClass.of(ProjectStarted.class));
     }
 
     @Test
     public void return_entity_storage() {
         final RecordStorage<ProjectId> recordStorage = repository().recordStorage();
         assertNotNull(recordStorage);
-    }
-
-    @Test
-    @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass") // OK for this test.
-    public void use_id_set_function() {
-        final EventTargetsFunction<ProjectId, PjnProjectCreated> delegateFn =
-                new EventTargetsFunction<ProjectId, PjnProjectCreated>() {
-                    private static final long serialVersionUID = 0L;
-                    @Override
-                    public Set<ProjectId> apply(PjnProjectCreated message, EventContext context) {
-                        return newHashSet();
-                    }
-                };
-
-        final EventTargetsFunction<ProjectId, PjnProjectCreated> idSetFunction = spy(delegateFn);
-        repository().addIdSetFunction(PjnProjectCreated.class, idSetFunction);
-
-        final Event event = createEvent(tenantId(), projectCreated(), PRODUCER_ID, getCurrentTime());
-        repository().dispatch(EventEnvelope.of(event));
-
-        final PjnProjectCreated expectedEventMessage = Events.getMessage(event);
-        final EventContext context = event.getContext();
-        verify(idSetFunction).apply(eq(expectedEventMessage), eq(context));
-    }
-
-    @Test
-    public void obtain_id_set_function_after_put() {
-        repository().addIdSetFunction(PjnProjectCreated.class, creteProjectTargets);
-
-        final Optional<EventTargetsFunction<ProjectId, PjnProjectCreated>> func =
-                repository().getIdSetFunction(PjnProjectCreated.class);
-
-        assertTrue(func.isPresent());
-        assertEquals(creteProjectTargets, func.get());
-    }
-
-    @Test
-    public void remove_id_set_function_after_put() {
-        repository().addIdSetFunction(PjnProjectCreated.class, creteProjectTargets);
-
-        repository().removeIdSetFunction(PjnProjectCreated.class);
-        final Optional<EventTargetsFunction<ProjectId, PjnProjectCreated>> out =
-                repository().getIdSetFunction(PjnProjectCreated.class);
-
-        assertFalse(out.isPresent());
     }
 
     @Test
@@ -314,7 +238,7 @@ public class ProjectionRepositoryShould
         assertFalse(repo.loadAll().hasNext());
 
         final Event event = createEvent(tenantId(),
-                                        projectCreated(),
+                                        GivenEventMessage.projectCreated(),
                                         PRODUCER_ID,
                                         getCurrentTime());
         repo.dispatch(EventEnvelope.of(event));
@@ -324,57 +248,42 @@ public class ProjectionRepositoryShould
     }
 
     /**
-     * Ensures that {@link ProjectionRepository#getIdSetFunction(Class)} which is used by Beam-based
-     * catch-up is exposed.
+     * Ensures that {@link ProjectionRepository#readLastHandledEventTime()} and
+     * {@link ProjectionRepository#writeLastHandledEventTime(Timestamp)} which are used by
+     * Beam-based catch-up are exposed.
      */
     @Test
-    public void expose_event_targets_function() {
-        final EventTargetsFunction<ProjectId, Message> fn = repository().getIdSetFunction();
-        assertNotNull(fn);
+    public void expose_read_and_write_methods_for_last_handled_event_timestamp() {
+        final Timestamp timestamp = repository().readLastHandledEventTime();
+        if (timestamp != null) {
+            repository().writeLastHandledEventTime(timestamp);
+        }
     }
 
     /**
-     * The projection stub with the event subscribing methods that do nothing.
-     *
-     * <p>Such a projection allows to reproduce a use case, when the event-handling method
-     * does not modify the state of an {@code Entity}. For the newly created entities it could lead
-     * to an invalid entry created in the storage.
+     * Ensures that {@link ProjectionRepository#createStreamQuery()}, which is used by the catch-up
+     * procedures is exposed.
      */
-    @SuppressWarnings("unused") // OK as event subscriber methods do nothing in this class.
-    static class NoopTaskNamesProjection extends Projection<ProjectId,
-            ProjectTaskNames,
-            ProjectTaskNamesVBuilder> {
-
-        public NoopTaskNamesProjection(ProjectId id) {
-            super(id);
-        }
-
-        @Subscribe
-        public void on(PjnProjectCreated event) {
-            // do nothing.
-        }
-
-        @Subscribe
-        public void on(PjnTaskAdded event) {
-            // do nothing
-        }
+    @Test
+    public void crete_stream_query() {
+        assertNotNull(repository().createStreamQuery());
     }
 
-    private static PjnProjectStarted projectStarted() {
-        return PjnProjectStarted.newBuilder()
-                             .setProjectId(ID)
-                             .build();
+    /**
+     * Ensures that {@link ProjectionRepository#getEventStore()} which is used by the catch-up
+     * functionality is exposed to the package.
+     */
+    @Test
+    public void expose_event_store_to_package() {
+        assertNotNull(repository().getEventStore());
     }
 
-    private static PjnProjectCreated projectCreated() {
-        return PjnProjectCreated.newBuilder()
-                             .setProjectId(ID)
-                             .build();
-    }
-
-    private static PjnTaskAdded taskAdded() {
-        return PjnTaskAdded.newBuilder()
-                        .setProjectId(ID)
-                        .build();
+    /**
+     * Ensures that {@link ProjectionRepository#boundedContext()} which is used by the catch-up
+     * functionality is exposed to the package.
+     */
+    @Test
+    public void expose_bounded_context_to_package() {
+        assertNotNull(repository().boundedContext());
     }
 }

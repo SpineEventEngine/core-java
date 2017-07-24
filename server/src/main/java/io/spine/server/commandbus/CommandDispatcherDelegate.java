@@ -29,23 +29,23 @@ import java.util.Set;
 /**
  * A common interface for objects which need to dispatch the
  * {@linkplain io.spine.core.Command commands}, but are unable to implement
- * the {@linkplain io.spine.server.commandbus.CommandDispatcher CommandDispatcher}.
+ * the {@link io.spine.server.commandbus.CommandDispatcher CommandDispatcher}.
  *
  * <p>A typical example of a {@code CommandDispatcherDelegate} usage is a routine, which
  * simultaneously dispatches different types of {@linkplain com.google.protobuf.Message messages}
  * in addition to {@code Command}s.
  *
  * <p>In this case such a class would have to implement several
- * {@linkplain io.spine.server.bus.MessageDispatcher MessageDispatcher} child interfaces
- * (such as {@linkplain io.spine.server.commandbus.CommandDispatcher CommandDispatcher} or
- * {@linkplain io.spine.server.event.EventDispatcher EventDispatcher}). However, it is impossible
+ * {@link io.spine.server.bus.MessageDispatcher MessageDispatcher} child interfaces
+ * (such as {@link io.spine.server.commandbus.CommandDispatcher CommandDispatcher} or
+ * {@link io.spine.server.event.EventDispatcher EventDispatcher}). However, it is impossible
  * to implement the same {@link io.spine.server.bus.MessageDispatcher#getMessageClasses()
  * getMessageClasses()} method several times with the different types of {@code MessageClass}es
  * returned.
  *
  * <p>The same interference takes place in attempt to implement
- * {@link io.spine.server.bus.MessageDispatcher#dispatch(MessageEnvelope)
- * MessageDispatcher#dispatch(MessageEnvelope)} method with the different types of
+ * {@link io.spine.server.bus.UnicastDispatcher#dispatch(MessageEnvelope)
+ * UnicastDispatcher.dispatch(MessageEnvelope)} method with the different types of
  * {@code MessageEnvelope}s dispatches simultaneously.
  *
  * <p>That's why unlike {@linkplain io.spine.server.bus.MessageDispatcher MessageDispatcher},
@@ -54,12 +54,13 @@ import java.util.Set;
  * {@code MessageDispatcher} API.
  *
  * @author Alex Tymchenko
+ * @param <I> the type of IDs of entities that handle the commands dispatched by the delegate
  * @see DelegatingCommandDispatcher
  */
 @Internal
-public interface CommandDispatcherDelegate {
+public interface CommandDispatcherDelegate<I> {
 
     Set<CommandClass> getCommandClasses();
 
-    void dispatchCommand(CommandEnvelope envelope);
+    I dispatchCommand(CommandEnvelope envelope);
 }

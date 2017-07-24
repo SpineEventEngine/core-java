@@ -23,29 +23,30 @@ package io.spine.server.stand;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
+import io.spine.Identifier;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
+import io.spine.core.CommandEnvelope;
 import io.spine.core.Enrichment;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
 import io.spine.core.Version;
-import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
-import io.spine.server.command.EventFactory;
-import io.spine.server.entity.idfunc.EventTargetsFunction;
+import io.spine.server.event.EventFactory;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
+import io.spine.server.route.EventRoute;
 import io.spine.test.Tests;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.ProjectVBuilder;
 import io.spine.test.projection.command.CreateProject;
-import io.spine.test.projection.event.PjnProjectCreated;
+import io.spine.test.projection.event.ProjectCreated;
 import io.spine.validate.StringValueVBuilder;
 
 import java.util.Collections;
@@ -77,16 +78,13 @@ class Given {
 
     static Event validEvent() {
         final Command cmd = validCommand();
-        final PjnProjectCreated eventMessage = PjnProjectCreated.newBuilder()
+        final ProjectCreated eventMessage = ProjectCreated.newBuilder()
                                                           .setProjectId(ProjectId.newBuilder()
                                                                                  .setId("12345AD0"))
                                                           .build();
         final StringValue producerId = toMessage(Given.class.getSimpleName());
-        final EventFactory eventFactory = EventFactory.newBuilder()
-                                                      .setCommandId(cmd.getId())
-                                                      .setProducerId(producerId)
-                                                      .setCommandContext(cmd.getContext())
-                                                      .build();
+        final EventFactory eventFactory = EventFactory.on(CommandEnvelope.of(cmd),
+                                                          Identifier.pack(producerId));
         final Event event = eventFactory.createEvent(eventMessage, Tests.<Version>nullRef());
         final Event result = event.toBuilder()
                                   .setContext(event.getContext()
@@ -102,26 +100,19 @@ class Given {
         return new StandTestProjectionRepository();
     }
 
-    static AggregateRepository<ProjectId, StandTestAggregate>
-    aggregateRepo(BoundedContext context) {
-        return new StandTestAggregateRepository();
-    }
-
     static AggregateRepository<ProjectId, StandTestAggregate> aggregateRepo() {
-        final BoundedContext boundedContext = BoundedContext.newBuilder()
-                                                            .build();
-        return aggregateRepo(boundedContext);
+        return new StandTestAggregateRepository();
     }
 
     static class StandTestProjectionRepository
             extends ProjectionRepository<ProjectId, StandTestProjection, Project> {
 
-        private static final EventTargetsFunction<ProjectId, PjnProjectCreated> EVENT_TARGETS_FN =
-                new EventTargetsFunction<ProjectId, PjnProjectCreated>() {
+        private static final EventRoute<ProjectId, ProjectCreated> EVENT_TARGETS_FN =
+                new EventRoute<ProjectId, ProjectCreated>() {
             private static final long serialVersionUID = 0L;
 
             @Override
-            public Set<ProjectId> apply(PjnProjectCreated message, EventContext context) {
+            public Set<ProjectId> apply(ProjectCreated message, EventContext context) {
                 return ImmutableSet.of(ProjectId.newBuilder()
                                                 .setId(PROJECT_UUID)
                                                 .build());
@@ -130,7 +121,7 @@ class Given {
 
         StandTestProjectionRepository() {
             super();
-            addIdSetFunction(PjnProjectCreated.class, EVENT_TARGETS_FN);
+            getRouting().route(ProjectCreated.class, EVENT_TARGETS_FN);
         }
     }
 
@@ -162,7 +153,7 @@ class Given {
         }
 
         @Apply
-        public void handle(PjnProjectCreated event) {
+        public void handle(ProjectCreated event) {
             // Do nothing
         }
     }
@@ -176,7 +167,7 @@ class Given {
 
         @SuppressWarnings("unused") // OK for test class.
         @Subscribe
-        public void handle(PjnProjectCreated event, EventContext context) {
+        public void handle(ProjectCreated event, EventContext context) {
             getBuilder().setId(event.getProjectId());
         }
     }

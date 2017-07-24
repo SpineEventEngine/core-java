@@ -20,6 +20,7 @@
 
 package io.spine.core;
 
+import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -63,8 +64,8 @@ import java.lang.annotation.Target;
  * {@code (FailureMessage, CommandMessage, CommandContext)}. Otherwise, an exception may be thrown
  * at runtime.
  *
- * <p>The type of the command argument, if specified, acts as a filter, i.e.
- * the subscriber receives the failure if:
+ * <p>The type of the command argument, if specified, acts as a filter, i.e. the subscriber receives
+ * the failure if:
  * <ul>
  *     <li>the failure type matches the first argument type;
  *     <li>the command, which processing caused the failure, has the same type as
@@ -78,8 +79,16 @@ import java.lang.annotation.Target;
  * delivery.
  *
  * @author Alexander Yevsyukov
+ * @author Alex Tymchenko
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
+@Documented
 public @interface Subscribe {
+
+    /**
+     * When {@code true}, the annotated method of receives an event generated from outside of the
+     * Bounded Context to which the annotated method's class belongs.
+     */
+    boolean external() default false;
 }

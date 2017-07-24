@@ -60,14 +60,14 @@ public class CommandRouterOnErrorShould extends AbstractCommandRouterShould<Comm
 
         // Register dispatcher for `StringValue` message type.
         // Fails each time of dispatch().
-        commandBus.register(new CommandDispatcher() {
+        commandBus.register(new CommandDispatcher<Message>() {
             @Override
             public Set<CommandClass> getMessageClasses() {
                 return CommandClass.setOf(StringValue.class);
             }
 
             @Override
-            public void dispatch(CommandEnvelope envelope) {
+            public Message dispatch(CommandEnvelope envelope) {
                 throw new IllegalStateException("I am faulty!");
             }
         });

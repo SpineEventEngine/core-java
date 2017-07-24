@@ -21,17 +21,17 @@ package io.spine.server.commandbus;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
+import io.spine.Environment;
 import io.spine.Identifier;
 import io.spine.annotation.Internal;
 import io.spine.base.Error;
 import io.spine.base.ThrowableMessage;
+import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
-import io.spine.core.CommandId;
 import io.spine.core.Failure;
-import io.spine.core.IsSent;
-import io.spine.server.Environment;
+import io.spine.server.ServerEnvironment;
 import io.spine.server.bus.Bus;
 import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.DeadMessageTap;
@@ -39,7 +39,6 @@ import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.commandstore.CommandStore;
 import io.spine.server.failure.FailureBus;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Deque;
 import java.util.Set;
@@ -65,7 +64,7 @@ import static java.lang.String.format;
 public class CommandBus extends Bus<Command,
                                     CommandEnvelope,
                                     CommandClass,
-                                    CommandDispatcher> {
+                                    CommandDispatcher<?>> {
 
     private final CommandStore commandStore;
 
@@ -187,19 +186,14 @@ public class CommandBus extends Bus<Command,
     }
 
     @Override
-    protected Bus.IdConverter<CommandEnvelope> getIdConverter() {
-        return CommandIdConverter.INSTANCE;
-    }
-
-    @Override
     protected CommandEnvelope toEnvelope(Command message) {
         return CommandEnvelope.of(message);
     }
 
     @Override
-    protected IsSent doPost(CommandEnvelope envelope) {
-        final CommandDispatcher dispatcher = getDispatcher(envelope);
-        IsSent result;
+    protected Ack doPost(CommandEnvelope envelope) {
+        final CommandDispatcher<?> dispatcher = getDispatcher(envelope);
+        Ack result;
         try {
             dispatcher.dispatch(envelope);
             commandStore.setCommandStatusOk(envelope);
@@ -232,7 +226,7 @@ public class CommandBus extends Bus<Command,
         return registry().getRegisteredMessageClasses();
     }
 
-    private Optional<CommandDispatcher> getDispatcher(CommandClass commandClass) {
+    private Optional<? extends CommandDispatcher<?>> getDispatcher(CommandClass commandClass) {
         return registry().getDispatcher(commandClass);
     }
 
@@ -273,8 +267,8 @@ public class CommandBus extends Bus<Command,
         }
     }
 
-    private CommandDispatcher getDispatcher(CommandEnvelope commandEnvelope) {
-        final Optional<CommandDispatcher> dispatcher = getDispatcher(
+    private CommandDispatcher<?> getDispatcher(CommandEnvelope commandEnvelope) {
+        final Optional<? extends CommandDispatcher<?>> dispatcher = getDispatcher(
                 commandEnvelope.getMessageClass()
         );
         if (!dispatcher.isPresent()) {
@@ -354,8 +348,7 @@ public class CommandBus extends Bus<Command,
          * the current runtime environment.
          */
         private static boolean detectThreadsAllowed() {
-            final boolean appEngine = Environment.getInstance()
-                                                 .isAppEngine();
+            final boolean appEngine = ServerEnvironment.isAppEngine();
             return !appEngine;
         }
 
@@ -512,17 +505,6 @@ public class CommandBus extends Bus<Command,
             final UnsupportedCommandException exception = new UnsupportedCommandException(command);
             commandStore().storeWithError(command, exception);
             return exception;
-        }
-    }
-
-    private enum CommandIdConverter implements Bus.IdConverter<CommandEnvelope> {
-        INSTANCE;
-
-        @Nonnull
-        @Override
-        public CommandId apply(@Nullable CommandEnvelope input) {
-            checkNotNull(input);
-            return input.getId();
         }
     }
 }

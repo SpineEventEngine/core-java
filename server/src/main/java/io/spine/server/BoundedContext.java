@@ -26,16 +26,16 @@ import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Experimental;
 import io.spine.annotation.Internal;
+import io.spine.core.Ack;
 import io.spine.core.Event;
-import io.spine.core.IsSent;
 import io.spine.option.EntityOption.Visibility;
-import io.spine.server.command.EventFactory;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandstore.CommandStore;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.Repository;
 import io.spine.server.entity.VisibilityGuard;
 import io.spine.server.event.EventBus;
+import io.spine.server.event.EventFactory;
 import io.spine.server.failure.FailureBus;
 import io.spine.server.integration.IntegrationEvent;
 import io.spine.server.integration.grpc.IntegrationEventSubscriberGrpc;
@@ -237,7 +237,7 @@ public final class BoundedContext
      */
     @Experimental
     @Override
-    public void notify(IntegrationEvent integrationEvent, StreamObserver<IsSent> observer) {
+    public void notify(IntegrationEvent integrationEvent, StreamObserver<Ack> observer) {
         final Event event = EventFactory.toEvent(integrationEvent);
         eventBus.post(event, observer);
     }

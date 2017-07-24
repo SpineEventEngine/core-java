@@ -23,23 +23,20 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
+import io.spine.core.Ack;
 import io.spine.core.Failure;
 import io.spine.core.FailureClass;
 import io.spine.core.FailureEnvelope;
-import io.spine.core.FailureId;
-import io.spine.core.IsSent;
+import io.spine.core.MessageInvalid;
 import io.spine.grpc.StreamObservers;
-import io.spine.server.bus.Bus;
 import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.DeadMessageTap;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.outbus.CommandOutputBus;
 import io.spine.server.outbus.OutputDispatcherRegistry;
-import io.spine.core.MessageInvalid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Deque;
 import java.util.Set;
@@ -60,7 +57,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class FailureBus extends CommandOutputBus<Failure,
                                                  FailureEnvelope,
                                                  FailureClass,
-                                                 FailureDispatcher> {
+                                                 FailureDispatcher<?>> {
 
     private final Deque<BusFilter<FailureEnvelope>> filterChain;
 
@@ -102,7 +99,7 @@ public class FailureBus extends CommandOutputBus<Failure,
     }
 
     @Override
-    protected OutputDispatcherRegistry<FailureClass, FailureDispatcher> createRegistry() {
+    protected OutputDispatcherRegistry<FailureClass, FailureDispatcher<?>> createRegistry() {
         return new FailureDispatcherRegistry();
     }
 
@@ -110,11 +107,6 @@ public class FailureBus extends CommandOutputBus<Failure,
     @Override
     protected Deque<BusFilter<FailureEnvelope>> createFilterChain() {
         return filterChain;
-    }
-
-    @Override
-    protected IdConverter<FailureEnvelope> getIdConverter() {
-        return FailureIdConverter.INSTANCE;
     }
 
     @Override
@@ -144,7 +136,7 @@ public class FailureBus extends CommandOutputBus<Failure,
     }
 
     @VisibleForTesting
-    Set<FailureDispatcher> getDispatchers(FailureClass failureClass) {
+    Set<FailureDispatcher<?>> getDispatchers(FailureClass failureClass) {
         return registry().getDispatchers(failureClass);
     }
 
@@ -173,7 +165,7 @@ public class FailureBus extends CommandOutputBus<Failure,
      * @see #post(Message, StreamObserver)
      */
     public final void post(Failure failure) {
-        post(failure, StreamObservers.<IsSent>noOpObserver());
+        post(failure, StreamObservers.<Ack>noOpObserver());
     }
 
     /** The {@code Builder} for {@code FailureBus}. */
@@ -248,17 +240,6 @@ public class FailureBus extends CommandOutputBus<Failure,
         public Optional<MessageInvalid> validate(FailureEnvelope envelope) {
             checkNotNull(envelope);
             return absent();
-        }
-    }
-
-    private enum FailureIdConverter implements Bus.IdConverter<FailureEnvelope> {
-        INSTANCE;
-
-        @Nonnull
-        @Override
-        public FailureId apply(@Nullable FailureEnvelope input) {
-            checkNotNull(input);
-            return input.getId();
         }
     }
 
