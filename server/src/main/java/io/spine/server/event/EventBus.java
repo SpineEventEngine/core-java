@@ -31,10 +31,8 @@ import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
-import io.spine.core.EventId;
 import io.spine.grpc.LoggingObserver;
 import io.spine.grpc.LoggingObserver.Level;
-import io.spine.server.bus.Bus;
 import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.DeadMessageTap;
 import io.spine.server.bus.EnvelopeValidator;
@@ -44,7 +42,6 @@ import io.spine.server.outbus.OutputDispatcherRegistry;
 import io.spine.server.storage.StorageFactory;
 import io.spine.validate.MessageValidator;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Deque;
 import java.util.Set;
@@ -176,11 +173,6 @@ public class EventBus extends CommandOutputBus<Event,
     @Override
     protected Deque<BusFilter<EventEnvelope>> createFilterChain() {
         return filterChain;
-    }
-
-    @Override
-    protected IdConverter<EventEnvelope> getIdConverter() {
-        return EventIdConverter.INSTANCE;
     }
 
     @Override
@@ -532,17 +524,6 @@ public class EventBus extends CommandOutputBus<Event,
             final Message message = envelope.getMessage();
             final UnsupportedEventException exception = new UnsupportedEventException(message);
             return exception;
-        }
-    }
-
-    private enum EventIdConverter implements Bus.IdConverter<EventEnvelope> {
-        INSTANCE;
-
-        @Nonnull
-        @Override
-        public EventId apply(@Nullable EventEnvelope input) {
-            checkNotNull(input);
-            return input.getId();
         }
     }
 }

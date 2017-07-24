@@ -21,7 +21,9 @@
 package io.spine.server.bus;
 
 import com.google.common.base.Optional;
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.Identifier;
 import io.spine.base.Error;
 import io.spine.core.Ack;
 import io.spine.core.MessageEnvelope;
@@ -44,15 +46,11 @@ final class DeadMessageFilter<T extends Message,
                               D extends MessageDispatcher<C, E, ?>>
         extends AbstractBusFilter<E> {
 
-    private final Bus.IdConverter<E> idConverter;
     private final DeadMessageTap<E> deadMessageTap;
     private final DispatcherRegistry<C, D> registry;
 
-    DeadMessageFilter(Bus.IdConverter<E> idConverter,
-                      DeadMessageTap<E> deadMessageTap,
-                      DispatcherRegistry<C, D> registry) {
+    DeadMessageFilter(DeadMessageTap<E> deadMessageTap, DispatcherRegistry<C, D> registry) {
         super();
-        this.idConverter = checkNotNull(idConverter);
         this.deadMessageTap = checkNotNull(deadMessageTap);
         this.registry = checkNotNull(registry);
     }
@@ -65,7 +63,8 @@ final class DeadMessageFilter<T extends Message,
         if (dispatchers.isEmpty()) {
             final MessageUnhandled report = deadMessageTap.capture(envelope);
             final Error error = report.asError();
-            final Ack result = reject(idConverter.apply(envelope), error);
+            final Any packedId = Identifier.pack(envelope.getId());
+            final Ack result = reject(packedId, error);
             return Optional.of(result);
         } else {
             return Optional.absent();

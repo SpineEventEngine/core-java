@@ -27,10 +27,8 @@ import io.spine.core.Ack;
 import io.spine.core.Failure;
 import io.spine.core.FailureClass;
 import io.spine.core.FailureEnvelope;
-import io.spine.core.FailureId;
 import io.spine.core.MessageInvalid;
 import io.spine.grpc.StreamObservers;
-import io.spine.server.bus.Bus;
 import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.DeadMessageTap;
 import io.spine.server.bus.EnvelopeValidator;
@@ -39,7 +37,6 @@ import io.spine.server.outbus.OutputDispatcherRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Deque;
 import java.util.Set;
@@ -110,11 +107,6 @@ public class FailureBus extends CommandOutputBus<Failure,
     @Override
     protected Deque<BusFilter<FailureEnvelope>> createFilterChain() {
         return filterChain;
-    }
-
-    @Override
-    protected IdConverter<FailureEnvelope> getIdConverter() {
-        return FailureIdConverter.INSTANCE;
     }
 
     @Override
@@ -248,17 +240,6 @@ public class FailureBus extends CommandOutputBus<Failure,
         public Optional<MessageInvalid> validate(FailureEnvelope envelope) {
             checkNotNull(envelope);
             return absent();
-        }
-    }
-
-    private enum FailureIdConverter implements Bus.IdConverter<FailureEnvelope> {
-        INSTANCE;
-
-        @Nonnull
-        @Override
-        public FailureId apply(@Nullable FailureEnvelope input) {
-            checkNotNull(input);
-            return input.getId();
         }
     }
 

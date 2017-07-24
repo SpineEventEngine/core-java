@@ -30,7 +30,6 @@ import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
-import io.spine.core.CommandId;
 import io.spine.core.Failure;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.bus.Bus;
@@ -40,7 +39,6 @@ import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.commandstore.CommandStore;
 import io.spine.server.failure.FailureBus;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Deque;
 import java.util.Set;
@@ -185,11 +183,6 @@ public class CommandBus extends Bus<Command,
     protected Deque<BusFilter<CommandEnvelope>> createFilterChain() {
         filterChain.push(scheduler);
         return filterChain;
-    }
-
-    @Override
-    protected Bus.IdConverter<CommandEnvelope> getIdConverter() {
-        return CommandIdConverter.INSTANCE;
     }
 
     @Override
@@ -512,17 +505,6 @@ public class CommandBus extends Bus<Command,
             final UnsupportedCommandException exception = new UnsupportedCommandException(command);
             commandStore().storeWithError(command, exception);
             return exception;
-        }
-    }
-
-    private enum CommandIdConverter implements Bus.IdConverter<CommandEnvelope> {
-        INSTANCE;
-
-        @Nonnull
-        @Override
-        public CommandId apply(@Nullable CommandEnvelope input) {
-            checkNotNull(input);
-            return input.getId();
         }
     }
 }
