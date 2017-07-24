@@ -28,7 +28,6 @@ import io.spine.core.Ack;
 import io.spine.core.MessageEnvelope;
 import io.spine.type.MessageClass;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Deque;
@@ -196,11 +195,9 @@ public abstract class Bus<T extends Message,
     private BusFilter<E> filterChain() {
         if (filterChain == null) {
             final Deque<BusFilter<E>> filters = createFilterChain();
-            final BusFilter<E> deadMsgFilter = new DeadMessageFilter<>(getIdConverter(),
-                                                                       getDeadMessageHandler(),
+            final BusFilter<E> deadMsgFilter = new DeadMessageFilter<>(getDeadMessageHandler(),
                                                                        registry());
-            final BusFilter<E> validatingFilter = new ValidatingFilter<>(getIdConverter(),
-                                                                         getValidator());
+            final BusFilter<E> validatingFilter = new ValidatingFilter<>(getValidator());
             filters.push(deadMsgFilter);
             filters.push(validatingFilter);
             filterChain = new FilterChain<>(filters);
@@ -223,13 +220,6 @@ public abstract class Bus<T extends Message,
      * @return a dequeue of the bus custom filters
      */
     protected abstract Deque<BusFilter<E>> createFilterChain();
-
-    /**
-     * Obtains the {@link IdConverter} for this type of {@code Bus}.
-     *
-     * @return a function converting a {@link MessageEnvelope} to an ID
-     */
-    protected abstract IdConverter<E> getIdConverter();
 
     /**
      * Filters the given messages.
@@ -422,20 +412,5 @@ public abstract class Bus<T extends Message,
             final E result = toEnvelope(message);
             return result;
         }
-    }
-
-    /**
-     * The function which receives a {@link MessageEnvelope} as a parameter and returns the ID of
-     * the message enclosed in that parameter.
-     *
-     * @param <E> the type of the envelope
-     */
-    public interface IdConverter<E extends MessageEnvelope<?, ?>> extends Function<E, Message> {
-
-        @SuppressWarnings({"AbstractMethodOverridesAbstractMethod", "NullableProblems"})
-            // Changes nullability contract.
-        @Nonnull
-        @Override
-        Message apply(@Nullable E input);
     }
 }

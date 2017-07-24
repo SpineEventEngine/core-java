@@ -20,7 +20,9 @@
 package io.spine.server.outbus;
 
 import com.google.common.base.Function;
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.Identifier;
 import io.spine.annotation.Internal;
 import io.spine.core.Ack;
 import io.spine.core.Event;
@@ -124,10 +126,10 @@ public abstract class CommandOutputBus<M extends Message,
         final E enrichedEnvelope = toEnvelope(enriched);
         final int dispatchersCalled = callDispatchers(enrichedEnvelope);
 
-        final Message id = getIdConverter().apply(envelope);
+        final Any packedId = Identifier.pack(envelope.getId());
         checkState(dispatchersCalled != 0,
                    format("Message %s has no dispatchers.", envelope.getMessage()));
-        final Ack result = acknowledge(id);
+        final Ack result = acknowledge(packedId);
         return result;
     }
 
