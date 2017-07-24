@@ -44,6 +44,8 @@ import java.util.concurrent.Executor;
 
 import static io.spine.core.Status.StatusCase.ERROR;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
+import static io.spine.server.rejection.given.Given.invalidProjectNameRejection;
+import static io.spine.server.rejection.given.Given.missingOwnerRejection;
 import static io.spine.test.rejection.ProjectRejections.InvalidProjectName;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -168,7 +170,7 @@ public class RejectionBusShould {
     @Test
     public void call_subscriber_when_rejection_posted() {
         final InvalidProjectNameSubscriber subscriber = new InvalidProjectNameSubscriber();
-        final Rejection rejection = io.spine.server.rejection.given.Given.invalidProjectNameRejection();
+        final Rejection rejection = invalidProjectNameRejection();
         rejectionBus.register(subscriber);
 
         rejectionBus.post(rejection);
@@ -207,7 +209,7 @@ public class RejectionBusShould {
 
         rejectionBus.register(dispatcher);
 
-        rejectionBus.post(io.spine.server.rejection.given.Given.invalidProjectNameRejection());
+        rejectionBus.post(invalidProjectNameRejection());
 
         assertTrue(dispatcher.isDispatchCalled());
     }
@@ -218,7 +220,7 @@ public class RejectionBusShould {
 
         rejectionBusWithPostponedExecution.register(dispatcher);
 
-        final Rejection rejection = io.spine.server.rejection.given.Given.invalidProjectNameRejection();
+        final Rejection rejection = invalidProjectNameRejection();
         rejectionBusWithPostponedExecution.post(rejection);
         assertFalse(dispatcher.isDispatchCalled());
 
@@ -232,13 +234,13 @@ public class RejectionBusShould {
 
         rejectionBusWithPostponedExecution.register(dispatcher);
 
-        final Rejection rejection = io.spine.server.rejection.given.Given.invalidProjectNameRejection();
+        final Rejection rejection = invalidProjectNameRejection();
         rejectionBusWithPostponedExecution.post(rejection);
         final Set<RejectionEnvelope> postponedRejections = postponedDelivery.getPostponedRejections();
-        final RejectionEnvelope postponedFailure = postponedRejections.iterator()
-                                                                    .next();
+        final RejectionEnvelope postponedRejection = postponedRejections.iterator()
+                                                                        .next();
         verify(delegateDispatcherExecutor, never()).execute(any(Runnable.class));
-        postponedDelivery.deliverNow(postponedFailure, dispatcher.getClass());
+        postponedDelivery.deliverNow(postponedRejection, dispatcher.getClass());
         assertTrue(dispatcher.isDispatchCalled());
         verify(delegateDispatcherExecutor).execute(any(Runnable.class));
     }
@@ -268,7 +270,7 @@ public class RejectionBusShould {
         final VerifiableSubscriber faultySubscriber = new FaultySubscriber();
 
         rejectionBus.register(faultySubscriber);
-        rejectionBus.post(io.spine.server.rejection.given.Given.invalidProjectNameRejection());
+        rejectionBus.post(invalidProjectNameRejection());
 
         assertTrue(faultySubscriber.isMethodCalled());
     }
@@ -290,25 +292,25 @@ public class RejectionBusShould {
     @Test
     public void support_short_form_subscriber_methods() {
         final RejectionMessageSubscriber subscriber = new RejectionMessageSubscriber();
-        checkFailure(subscriber);
+        checkRejection(subscriber);
     }
 
     @Test
     public void support_context_aware_subscriber_methods() {
         final ContextAwareSubscriber subscriber = new ContextAwareSubscriber();
-        checkFailure(subscriber);
+        checkRejection(subscriber);
     }
 
     @Test
     public void support_command_msg_aware_subscriber_methods() {
         final CommandMessageAwareSubscriber subscriber = new CommandMessageAwareSubscriber();
-        checkFailure(subscriber);
+        checkRejection(subscriber);
     }
 
     @Test
     public void support_command_aware_subscriber_methods() {
         final CommandAwareSubscriber subscriber = new CommandAwareSubscriber();
-        checkFailure(subscriber);
+        checkRejection(subscriber);
     }
 
     @Test(
@@ -319,19 +321,19 @@ public class RejectionBusShould {
         final RejectionDispatcher<?> subscriber = new InvalidOrderSubscriber();
 
         rejectionBus.register(subscriber);
-        rejectionBus.post(io.spine.server.rejection.given.Given.missingOwnerRejection());
+        rejectionBus.post(missingOwnerRejection());
     }
 
     @Test
     public void report_dead_messages() {
         final MemoizingObserver<Ack> observer = memoizingObserver();
-        rejectionBus.post(io.spine.server.rejection.given.Given.missingOwnerRejection(), observer);
+        rejectionBus.post(missingOwnerRejection(), observer);
         assertTrue(observer.isCompleted());
         final Ack result = observer.firstResponse();
         assertNotNull(result);
         assertEquals(ERROR, result.getStatus().getStatusCase());
         final Error error = result.getStatus().getError();
-        assertEquals(UnhandledFailureException.class.getCanonicalName(), error.getType());
+        assertEquals(UnhandledRejectionException.class.getCanonicalName(), error.getType());
     }
 
     @Test
@@ -339,8 +341,8 @@ public class RejectionBusShould {
         assertNotNull(RejectionBus.log());
     }
 
-    private void checkFailure(VerifiableSubscriber subscriber) {
-        final Rejection rejection = io.spine.server.rejection.given.Given.missingOwnerRejection();
+    private void checkRejection(VerifiableSubscriber subscriber) {
+        final Rejection rejection = missingOwnerRejection();
         rejectionBus.register(subscriber);
         rejectionBus.post(rejection);
 

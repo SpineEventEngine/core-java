@@ -24,12 +24,13 @@ import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
 import io.spine.server.rejection.RejectionDispatcher;
 import io.spine.test.rejection.ProjectRejections;
+import io.spine.test.rejection.ProjectRejections.InvalidProjectName;
 
 import java.util.Set;
 
 /**
- * A simple dispatcher class, which only dispatch and does not have own failure
- * subscribing methods.
+ * A simple dispatcher class, which only dispatch and does not have own rejection subscribing
+ * methods.
  */
 public class BareDispatcher implements RejectionDispatcher<String> {
 
@@ -37,11 +38,11 @@ public class BareDispatcher implements RejectionDispatcher<String> {
 
     @Override
     public Set<RejectionClass> getMessageClasses() {
-        return RejectionClass.setOf(ProjectRejections.InvalidProjectName.class);
+        return RejectionClass.setOf(InvalidProjectName.class);
     }
 
     @Override
-    public Set<String> dispatch(RejectionEnvelope failure) {
+    public Set<String> dispatch(RejectionEnvelope rejection) {
         dispatchCalled = true;
         return Identity.of(this);
     }

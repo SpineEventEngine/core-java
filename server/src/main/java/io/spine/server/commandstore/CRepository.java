@@ -147,15 +147,15 @@ class CRepository extends DefaultRecordBasedRepository<CommandId, CEntity, Comma
     }
 
     /**
-     * Updates the status of the command with the business failure.
+     * Updates the status of the command with the rejection.
      *
      * @param commandId the command to update
-     * @param rejection   the business failure occurred during command processing
+     * @param rejection why the command was rejected
      */
     void updateStatus(CommandId commandId, Rejection rejection) {
         checkNotClosed();
         final CEntity entity = loadEntity(commandId);
-        entity.setToFailure(rejection);
+        entity.setToRejected(rejection);
         store(entity);
     }
 

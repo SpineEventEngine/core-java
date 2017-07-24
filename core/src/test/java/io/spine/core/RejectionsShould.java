@@ -26,11 +26,10 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.util.Timestamps;
 import io.spine.base.ThrowableMessage;
 import io.spine.protobuf.AnyPacker;
+import io.spine.test.TestValues;
 import org.junit.Test;
 
-import static io.spine.Identifier.newUuid;
 import static io.spine.core.Rejections.toRejection;
-import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.test.TestValues.newUuidValue;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.Assert.assertEquals;
@@ -57,7 +56,7 @@ public class RejectionsShould {
     }
 
     @Test
-    public void generate_failure_id_upon_command_id() {
+    public void generate_rejection_id_upon_command_id() {
         final CommandId commandId = Commands.generateId();
         final RejectionId actual = Rejections.generateId(commandId);
 
@@ -67,8 +66,8 @@ public class RejectionsShould {
 
 
     @Test
-    public void convert_throwable_message_to_failure_message() {
-        final StringValue failureState = toMessage(newUuid());
+    public void convert_throwable_message_to_rejection_message() {
+        final StringValue rejectionState = TestValues.newUuidValue();
         final CommandContext context = CommandContext.newBuilder()
                                                    .build();
         final Command command = Command.newBuilder()
@@ -76,10 +75,10 @@ public class RejectionsShould {
                                      .setContext(context)
                                      .build();
 
-        final TestThrowableMessage throwableMessage = new TestThrowableMessage(failureState);
+        final TestThrowableMessage throwableMessage = new TestThrowableMessage(rejectionState);
         final Rejection rejectionWrapper = toRejection(throwableMessage, command);
 
-        assertEquals(failureState, AnyPacker.unpack(rejectionWrapper.getMessage()));
+        assertEquals(rejectionState, AnyPacker.unpack(rejectionWrapper.getMessage()));
         assertFalse(rejectionWrapper.getContext()
                                     .getStacktrace()
                                     .isEmpty());

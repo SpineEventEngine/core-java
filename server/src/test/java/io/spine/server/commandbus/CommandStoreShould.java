@@ -115,7 +115,7 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
         commandBus.post(command, observer);
 
         // Check that the logging was called.
-        verify(log).failureHandling(eq(failure), eq(commandMessage), eq(commandId));
+        verify(log).rejectedWith(eq(failure), eq(commandMessage), eq(commandId));
 
         // Check that the status has the correct code,
         // and the failure matches the thrown failure.

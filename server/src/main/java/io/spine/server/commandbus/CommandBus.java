@@ -162,10 +162,10 @@ public class CommandBus extends Bus<Command,
     }
 
     /**
-     * Exposes the {@code FailureBus} instance for this {@code CommandBus}.
+     * Exposes the {@code RejectionBus} instance for this {@code CommandBus}.
      *
      * <p>This method is designed for internal use only. Client code should use
-     * {@link io.spine.server.BoundedContext#getRejectionBus() BoundedContext.getFailureBus()}
+     * {@link io.spine.server.BoundedContext#getRejectionBus() BoundedContext.getRejectionBus()}
      * instead.
      */
     @Internal

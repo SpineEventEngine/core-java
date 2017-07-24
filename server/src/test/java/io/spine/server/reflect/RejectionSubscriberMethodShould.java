@@ -21,8 +21,17 @@ package io.spine.server.reflect;
 
 import com.google.common.testing.NullPointerTester;
 import io.spine.core.CommandContext;
-import io.spine.core.Subscribe;
 import io.spine.server.reflect.given.Given;
+import io.spine.server.reflect.given.RejectionSubscriberMethodTestEnv.InvalidSubscriberNoAnnotation;
+import io.spine.server.reflect.given.RejectionSubscriberMethodTestEnv.InvalidSubscriberNoParams;
+import io.spine.server.reflect.given.RejectionSubscriberMethodTestEnv.InvalidSubscriberNotVoid;
+import io.spine.server.reflect.given.RejectionSubscriberMethodTestEnv.InvalidSubscriberOneNotMsgParam;
+import io.spine.server.reflect.given.RejectionSubscriberMethodTestEnv.InvalidSubscriberTooManyParams;
+import io.spine.server.reflect.given.RejectionSubscriberMethodTestEnv.InvalidSubscriberTwoParamsFirstInvalid;
+import io.spine.server.reflect.given.RejectionSubscriberMethodTestEnv.InvalidSubscriberTwoParamsSecondInvalid;
+import io.spine.server.reflect.given.RejectionSubscriberMethodTestEnv.ValidSubscriberButPrivate;
+import io.spine.server.reflect.given.RejectionSubscriberMethodTestEnv.ValidSubscriberThreeParams;
+import io.spine.server.reflect.given.RejectionSubscriberMethodTestEnv.ValidSubscriberTwoParams;
 import io.spine.test.reflect.ReflectRejections.InvalidProjectName;
 import io.spine.test.rejection.command.UpdateProjectName;
 import org.junit.Test;
@@ -68,191 +77,73 @@ public class RejectionSubscriberMethodShould {
     public void consider_subscriber_with_two_msg_param_valid() {
         final Method subscriber = new ValidSubscriberTwoParams().getMethod();
 
-        assertIsFailureSubscriber(subscriber, true);
+        assertIsRejectionSubscriber(subscriber, true);
     }
 
     @Test
     public void consider_subscriber_with_both_messages_and_context_params_valid() {
         final Method subscriber = new ValidSubscriberThreeParams().getMethod();
 
-        assertIsFailureSubscriber(subscriber, true);
+        assertIsRejectionSubscriber(subscriber, true);
     }
 
     @Test
     public void consider_not_public_subscriber_valid() {
         final Method method = new ValidSubscriberButPrivate().getMethod();
 
-        assertIsFailureSubscriber(method, true);
+        assertIsRejectionSubscriber(method, true);
     }
 
     @Test
     public void consider_not_annotated_subscriber_invalid() {
         final Method subscriber = new InvalidSubscriberNoAnnotation().getMethod();
 
-        assertIsFailureSubscriber(subscriber, false);
+        assertIsRejectionSubscriber(subscriber, false);
     }
 
     @Test
     public void consider_subscriber_without_params_invalid() {
         final Method subscriber = new InvalidSubscriberNoParams().getMethod();
 
-        assertIsFailureSubscriber(subscriber, false);
+        assertIsRejectionSubscriber(subscriber, false);
     }
 
     @Test
     public void consider_subscriber_with_too_many_params_invalid() {
         final Method subscriber = new InvalidSubscriberTooManyParams().getMethod();
 
-        assertIsFailureSubscriber(subscriber, false);
+        assertIsRejectionSubscriber(subscriber, false);
     }
 
     @Test
     public void consider_subscriber_with_one_invalid_param_invalid() {
         final Method subscriber = new InvalidSubscriberOneNotMsgParam().getMethod();
 
-        assertIsFailureSubscriber(subscriber, false);
+        assertIsRejectionSubscriber(subscriber, false);
     }
 
     @Test
     public void consider_subscriber_with_first_not_message_param_invalid() {
         final Method subscriber = new InvalidSubscriberTwoParamsFirstInvalid().getMethod();
 
-        assertIsFailureSubscriber(subscriber, false);
+        assertIsRejectionSubscriber(subscriber, false);
     }
 
     @Test
     public void consider_subscriber_with_second_not_context_param_invalid() {
         final Method subscriber = new InvalidSubscriberTwoParamsSecondInvalid().getMethod();
 
-        assertIsFailureSubscriber(subscriber, false);
+        assertIsRejectionSubscriber(subscriber, false);
     }
 
     @Test
     public void consider_not_void_subscriber_invalid() {
         final Method subscriber = new InvalidSubscriberNotVoid().getMethod();
 
-        assertIsFailureSubscriber(subscriber, false);
+        assertIsRejectionSubscriber(subscriber, false);
     }
 
-    private static void assertIsFailureSubscriber(Method subscriber, boolean isSubscriber) {
+    private static void assertIsRejectionSubscriber(Method subscriber, boolean isSubscriber) {
         assertEquals(isSubscriber, RejectionSubscriberMethod.predicate().apply(subscriber));
-    }
-
-    /*
-     * Valid subscribers
-     */
-
-    private static class ValidSubscriberTwoParams extends TestFailureSubscriber {
-        @Subscribe
-        public void handle(InvalidProjectName failure, UpdateProjectName command) {
-        }
-    }
-
-    private static class ValidSubscriberThreeParams extends TestFailureSubscriber {
-        @Subscribe
-        public void handle(InvalidProjectName failure,
-                           UpdateProjectName command, CommandContext context) {
-        }
-    }
-
-    private static class ValidSubscriberButPrivate extends TestFailureSubscriber {
-        @Subscribe
-        private void handle(InvalidProjectName failure, UpdateProjectName command) {
-        }
-    }
-
-    /*
-     * Invalid subscribers
-     */
-
-    /**
-     * The subscriber with a method which is not annotated.
-     */
-    private static class InvalidSubscriberNoAnnotation extends TestFailureSubscriber {
-        @SuppressWarnings("unused")
-        public void handle(InvalidProjectName failure,  UpdateProjectName command) {
-        }
-    }
-
-    /**
-     * The subscriber with a method which does not have parameters.
-     */
-    private static class InvalidSubscriberNoParams extends TestFailureSubscriber {
-        @Subscribe
-        public void handle() {
-        }
-    }
-
-    /**
-     * The subscriber which has too many parameters.
-     */
-    private static class InvalidSubscriberTooManyParams extends TestFailureSubscriber {
-        @Subscribe
-        public void handle(InvalidProjectName failure,
-                           UpdateProjectName command,
-                           CommandContext context,
-                           Object redundant) {
-        }
-    }
-
-    /**
-     * The subscriber which has invalid single argument.
-     */
-    private static class InvalidSubscriberOneNotMsgParam extends TestFailureSubscriber {
-        @Subscribe
-        public void handle(Exception invalid) {
-        }
-    }
-
-    /**
-     * The subscriber with a method with first invalid parameter.
-     */
-    private static class InvalidSubscriberTwoParamsFirstInvalid extends TestFailureSubscriber {
-        @Subscribe
-        public void handle(Exception invalid,  UpdateProjectName command) {
-        }
-    }
-
-    /**
-     * The subscriber which has invalid second parameter.
-     */
-    private static class InvalidSubscriberTwoParamsSecondInvalid extends TestFailureSubscriber {
-        @Subscribe
-        public void handle(InvalidProjectName failure, Exception invalid) {
-        }
-    }
-
-    /**
-     * The class with failure subscriber that returns {@code Object} instead of {@code void}.
-     */
-    private static class InvalidSubscriberNotVoid extends TestFailureSubscriber {
-        @Subscribe
-        public Object handle(InvalidProjectName failure, UpdateProjectName command) {
-            return failure;
-        }
-    }
-
-    /**
-     * The abstract base for test subscriber classes.
-     *
-     * <p>The purpose of this class is to obtain a reference to a
-     * {@linkplain #HANDLER_METHOD_NAME single subscriber method}.
-     * This reference will be later used for assertions.
-     */
-    private abstract static class TestFailureSubscriber {
-
-        @SuppressWarnings("DuplicateStringLiteralInspection")
-        private static final String HANDLER_METHOD_NAME = "handle";
-
-        Method getMethod() {
-            final Method[] methods = getClass().getDeclaredMethods();
-            for (Method method : methods) {
-                if (method.getName().equals(HANDLER_METHOD_NAME)) {
-                    return method;
-                }
-            }
-            throw new RuntimeException("No rejection subscriber method found " +
-                                               HANDLER_METHOD_NAME);
-        }
     }
 }

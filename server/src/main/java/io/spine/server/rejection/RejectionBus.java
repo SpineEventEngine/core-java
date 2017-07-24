@@ -217,16 +217,16 @@ public class RejectionBus extends CommandOutputBus<Rejection,
     }
 
     /**
-     * Generates an {@link UnhandledFailureException} upon a dead
+     * Generates an {@link UnhandledRejectionException} upon a dead
      * message.
      */
     private enum DeadFailureTap implements DeadMessageTap<RejectionEnvelope> {
         INSTANCE;
 
         @Override
-        public UnhandledFailureException capture(RejectionEnvelope envelope) {
+        public UnhandledRejectionException capture(RejectionEnvelope envelope) {
             final Message message = envelope.getMessage();
-            final UnhandledFailureException exception = new UnhandledFailureException(message);
+            final UnhandledRejectionException exception = new UnhandledRejectionException(message);
             return exception;
         }
     }

@@ -208,9 +208,9 @@ public class CommandStore implements AutoCloseable {
     }
 
     /**
-     * Updates the status of the command with the business failure.
-     *  @param commandEnvelope the command to update
-     * @param rejection the business failure occurred during command processing
+     * Updates the status of the command with the rejection.
+     * @param commandEnvelope the command to update
+     * @param rejection       why the command was rejected
      */
     private void updateStatus(CommandEnvelope commandEnvelope, final Rejection rejection) {
         keepTenantId(commandEnvelope.getCommand());
@@ -264,7 +264,7 @@ public class CommandStore implements AutoCloseable {
         final CommandId commandId = commandEnvelope.getId();
         if (cause instanceof ThrowableMessage) {
             final ThrowableMessage throwableMessage = (ThrowableMessage) cause;
-            log.failureHandling(throwableMessage, commandMessage, commandId);
+            log.rejectedWith(throwableMessage, commandMessage, commandId);
             updateStatus(commandEnvelope,
                          toRejection(throwableMessage, commandEnvelope.getCommand()));
         } else if (cause instanceof Exception) {

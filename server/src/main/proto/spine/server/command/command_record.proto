@@ -71,12 +71,12 @@ message ProcessingStatus {
     core.CommandStatus code = 1;
 
     // The `cause` provides additional information on what went wrong
-    // if the value of `status` is `ERROR` or `FAILURE`.
+    // if the value of `status` is `ERROR` or `REJECTED`.
     oneof cause {
         // The technical error occurred during command processing.
         base.Error error = 2;
 
-        // A business rejection occurred during command processing.
+        // Why the command was rejected.
         core.Rejection rejection = 3;
     }
 }

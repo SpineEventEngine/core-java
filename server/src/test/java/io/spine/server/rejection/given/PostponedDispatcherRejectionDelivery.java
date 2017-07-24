@@ -41,9 +41,9 @@ public class PostponedDispatcherRejectionDelivery extends DispatcherRejectionDel
     }
 
     @Override
-    public boolean shouldPostponeDelivery(RejectionEnvelope failure,
+    public boolean shouldPostponeDelivery(RejectionEnvelope rejection,
                                           RejectionDispatcher<?> consumer) {
-        postponedExecutions.put(failure, consumer.getClass());
+        postponedExecutions.put(rejection, consumer.getClass());
         return true;
     }
 

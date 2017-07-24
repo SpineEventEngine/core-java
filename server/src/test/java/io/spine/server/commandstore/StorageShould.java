@@ -92,7 +92,7 @@ public class StorageShould extends TenantAwareTest {
     }
 
     @After
-    public void tearDownCommandStorageTest() throws Exception {
+    public void tearDownCommandStorageTest() {
         repository.close();
         clearCurrentTenant();
     }
@@ -232,9 +232,9 @@ public class StorageShould extends TenantAwareTest {
 
     @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we update status.
     @Test
-    public void set_failure_command_status() {
+    public void set_rejected_command_status() {
         givenNewRecord();
-        final Rejection rejection = newFailure();
+        final Rejection rejection = newRejection();
 
         repository.updateStatus(id, rejection);
 
@@ -279,7 +279,7 @@ public class StorageShould extends TenantAwareTest {
     }
 
     @Test(expected = NullPointerException.class)
-    public void throw_exception_if_try_to_set_failure_status_by_null_ID() {
+    public void throw_exception_if_try_to_set_rejection_status_by_null_ID() {
         repository.updateStatus(Tests.<CommandId>nullRef(), DEFAULT_REJECTION);
     }
 
@@ -288,7 +288,7 @@ public class StorageShould extends TenantAwareTest {
      **************************************************************/
 
     @Test(expected = IllegalStateException.class)
-    public void throw_exception_if_try_to_store_cmd_to_closed_storage() throws Exception {
+    public void throw_exception_if_try_to_store_cmd_to_closed_storage() {
         repository.close();
         repository.store(Given.ACommand.createProject());
     }
@@ -315,22 +315,21 @@ public class StorageShould extends TenantAwareTest {
     }
 
     @Test(expected = IllegalStateException.class)
-    public void throw_exception_if_try_to_set_OK_status_using_closed_storage() throws Exception {
+    public void throw_exception_if_try_to_set_OK_status_using_closed_storage() {
         repository.close();
         repository.setOkStatus(generateId());
     }
 
     @Test(expected = IllegalStateException.class)
-    public void throw_exception_if_try_to_set_ERROR_status_using_closed_storage() throws Exception {
+    public void throw_exception_if_try_to_set_ERROR_status_using_closed_storage() {
         repository.close();
         repository.updateStatus(generateId(), newError());
     }
 
     @Test(expected = IllegalStateException.class)
-    public void throw_exception_if_try_to_set_FAILURE_status_using_closed_storage() throws
-                                                                                    Exception {
+    public void throw_exception_if_try_to_set_REJECTED_status_using_closed_storage() {
         repository.close();
-        repository.updateStatus(generateId(), newFailure());
+        repository.updateStatus(generateId(), newRejection());
     }
 
     @Test
@@ -364,14 +363,14 @@ public class StorageShould extends TenantAwareTest {
                     .build();
     }
 
-    private static Rejection newFailure() {
-        final Any packedFailureMessage = toAny("newFailure");
+    private static Rejection newRejection() {
+        final Any packedMessage = toAny("newRejection");
         final RejectionId id = Rejections.generateId(Commands.generateId());
         return Rejection.newBuilder()
                         .setId(id)
-                        .setMessage(packedFailureMessage)
+                        .setMessage(packedMessage)
                         .setContext(RejectionContext.newBuilder()
-                                                    .setStacktrace("failure stacktrace")
+                                                    .setStacktrace("rejection stacktrace")
                                                     .setTimestamp(getCurrentTime()))
                         .build();
     }

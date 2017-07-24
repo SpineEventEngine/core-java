@@ -170,6 +170,6 @@ enum CommandStatus {
     // There was an exception or another kind of technical error during command processing.
     ERROR = 4;
 
-    // A command was rejected during processing.
+    // A command was rejected during processing. No events were generated.
     REJECTED = 5;
 }

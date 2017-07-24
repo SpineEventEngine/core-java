@@ -227,7 +227,7 @@ public abstract class RejectionSubscriberMethod extends HandlerMethod<CommandCon
 
     /**
      * A {@link Function} wrapping the given {@link Method} into a corresponding
-     * {@code FailureSubscriberMethod}.
+     * {@code RejectionSubscriberMethod}.
      */
     private enum MethodWrapper implements Function<Method, RejectionSubscriberMethod> {
 
@@ -235,7 +235,7 @@ public abstract class RejectionSubscriberMethod extends HandlerMethod<CommandCon
          * Wraps the given {@link Method} with an instance of
          * {@link RejectionMessageSubscriberMethod}.
          */
-        FAILURE_MESSAGE_AWARE {
+        REJECTION_MESSAGE_AWARE {
             @Override
             RejectionSubscriberMethod wrap(Method method) {
                 return new RejectionMessageSubscriberMethod(method);
@@ -288,7 +288,7 @@ public abstract class RejectionSubscriberMethod extends HandlerMethod<CommandCon
             final MethodWrapper methodWrapper;
             switch (paramCount) {
                 case 1:
-                    methodWrapper = FAILURE_MESSAGE_AWARE;
+                    methodWrapper = REJECTION_MESSAGE_AWARE;
                     break;
                 case 2:
                     final Class<?> secondParamType = paramTypes[1];

@@ -30,18 +30,18 @@ import static com.google.common.base.Throwables.getStackTraceAsString;
 import static java.lang.String.format;
 
 /**
- * Exception that is thrown when unhandled failure is thrown.
+ * Exception that is thrown when unhandled rejection is thrown.
  *
  * @author Dmytro Dashenkov
  */
-public class UnhandledFailureException extends RuntimeException implements MessageUnhandled {
+public class UnhandledRejectionException extends RuntimeException implements MessageUnhandled {
 
     private static final long serialVersionUID = 0L;
 
     private final Error error;
 
-    public UnhandledFailureException(Message failureMsg) {
-        super(msgFormat(failureMsg));
+    public UnhandledRejectionException(Message rejectionMsg) {
+        super(msgFormat(rejectionMsg));
         this.error = buildError();
     }
 
@@ -49,7 +49,7 @@ public class UnhandledFailureException extends RuntimeException implements Messa
         final RejectionClass cls = RejectionClass.of(msg);
         final String typeName = TypeName.of(msg).value();
         final String result = format(
-                "There is no registered handler for the failure class: `%s`. Protobuf type: `%s`",
+                "There is no registered handler for the rejection class: `%s`. Protobuf type: `%s`",
                 cls, typeName
         );
         return result;
@@ -72,7 +72,7 @@ public class UnhandledFailureException extends RuntimeException implements Messa
      */
     private Error buildError() {
         final Error error = Error.newBuilder()
-                                 .setType(UnhandledFailureException.class.getCanonicalName())
+                                 .setType(UnhandledRejectionException.class.getCanonicalName())
                                  .setMessage(getMessage())
                                  .setStacktrace(getStackTraceAsString(this))
                                  .build();

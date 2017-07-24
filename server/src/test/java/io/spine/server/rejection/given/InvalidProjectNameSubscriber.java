@@ -37,14 +37,14 @@ public class InvalidProjectNameSubscriber extends RejectionSubscriber {
     private Rejection rejectionHandled;
 
     @Subscribe
-    public void on(ProjectRejections.InvalidProjectName failure,
+    public void on(ProjectRejections.InvalidProjectName rejection,
                    UpdateProjectName commandMessage,
                    CommandContext context) {
         final CommandFactory commandFactory =
                 TestActorRequestFactory.newInstance(InvalidProjectNameSubscriber.class)
                                        .command();
         final Command command = commandFactory.createWithContext(commandMessage, context);
-        this.rejectionHandled = Rejections.createRejection(failure, command);
+        this.rejectionHandled = Rejections.createRejection(rejection, command);
     }
 
     public Rejection getRejectionHandled() {

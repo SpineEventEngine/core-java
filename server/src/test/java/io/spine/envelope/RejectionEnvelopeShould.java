@@ -54,10 +54,10 @@ public class RejectionEnvelopeShould extends MessageEnvelopeShould<Rejection,
     protected Rejection outerObject() {
         final Message commandMessage = Int32Value.getDefaultInstance();
         final Command command = requestFactory.command().create(commandMessage);
-        final Message failureMessage = CannotPerformBusinessOperation.newBuilder()
-                                                                     .setOperationId(newUuid())
-                                                                     .build();
-        final Rejection rejection = Rejections.createRejection(failureMessage, command);
+        final Message rejectionMessage = CannotPerformBusinessOperation.newBuilder()
+                                                                       .setOperationId(newUuid())
+                                                                       .build();
+        final Rejection rejection = Rejections.createRejection(rejectionMessage, command);
         return rejection;
     }
 
@@ -92,8 +92,8 @@ public class RejectionEnvelopeShould extends MessageEnvelopeShould<Rejection,
 
     @Test
     public void obtain_actor_context() {
-        final RejectionEnvelope failure = toEnvelope(outerObject());
-        final ActorContext actorContext = failure.getActorContext();
+        final RejectionEnvelope rejection = toEnvelope(outerObject());
+        final ActorContext actorContext = rejection.getActorContext();
 
         /* Since we're using `TestActorRequestFactory` initialized with the class of this test suite
            the actor ID should be the suite class name.

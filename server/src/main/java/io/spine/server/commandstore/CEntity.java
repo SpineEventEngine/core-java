@@ -104,7 +104,7 @@ class CEntity extends AbstractEntity<CommandId, CommandRecord> {
         updateState(record);
     }
 
-    void setToFailure(Rejection rejection) {
+    void setToRejected(Rejection rejection) {
         final CommandRecord.Builder builder = getState().toBuilder();
         builder.getStatusBuilder()
                .setCode(REJECTED)

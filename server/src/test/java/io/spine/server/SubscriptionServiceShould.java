@@ -320,12 +320,12 @@ public class SubscriptionServiceShould {
                 new MemoizeStreamObserver<>();
         subscriptionService.subscribe(topic, subscriptionObserver);
 
-        final String failureMessage = "Execution breaking exception";
+        final String rejectionMessage = "Execution breaking exception";
         final MemoizeStreamObserver<Response> observer = new MemoizeStreamObserver<Response>() {
             @Override
             public void onNext(Response value) {
                 super.onNext(value);
-                throw new RuntimeException(failureMessage);
+                throw new RuntimeException(rejectionMessage);
             }
         };
         subscriptionService.cancel(subscriptionObserver.streamFlowValue, observer);
@@ -333,7 +333,7 @@ public class SubscriptionServiceShould {
         assertFalse(observer.isCompleted);
         assertNotNull(observer.throwable);
         assertInstanceOf(RuntimeException.class, observer.throwable);
-        assertEquals(observer.throwable.getMessage(), failureMessage);
+        assertEquals(observer.throwable.getMessage(), rejectionMessage);
     }
 
     private static BoundedContext setupBoundedContextWithProjectAggregateRepo() {
