@@ -29,7 +29,7 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Dispatches a message to several entities.
+ * Dispatches a message to several entities of the same type.
  *
  * @param <C> the type of dispatched messages
  * @param <E> the type of envelopes for dispatched objects that contain messages
