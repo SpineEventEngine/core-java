@@ -50,9 +50,9 @@ import io.spine.test.aggregate.command.AddTask;
 import io.spine.test.aggregate.command.CreateProject;
 import io.spine.test.aggregate.command.ImportEvents;
 import io.spine.test.aggregate.command.StartProject;
-import io.spine.test.aggregate.event.ProjectCreated;
-import io.spine.test.aggregate.event.ProjectStarted;
-import io.spine.test.aggregate.event.TaskAdded;
+import io.spine.test.aggregate.event.AggProjectCreated;
+import io.spine.test.aggregate.event.AggProjectStarted;
+import io.spine.test.aggregate.event.AggTaskAdded;
 import io.spine.test.aggregate.user.User;
 import io.spine.time.Time;
 import io.spine.validate.ConstraintViolation;
@@ -360,7 +360,7 @@ public class AggregateShould {
         final List<Event> events = aggregate.getUncommittedEvents();
 
         assertContains(eventsToClasses(events),
-                       ProjectCreated.class, TaskAdded.class, ProjectStarted.class);
+                       AggProjectCreated.class, AggTaskAdded.class, AggProjectStarted.class);
     }
 
     @Test
@@ -379,7 +379,7 @@ public class AggregateShould {
         final List<Event> events = aggregate.commitEvents();
 
         assertContains(eventsToClasses(events),
-                       ProjectCreated.class, TaskAdded.class, ProjectStarted.class);
+                       AggProjectCreated.class, AggTaskAdded.class, AggProjectStarted.class);
     }
 
     @Test
@@ -613,26 +613,26 @@ public class AggregateShould {
         }
 
         @Assign
-        ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
+        AggProjectCreated handle(CreateProject cmd, CommandContext ctx) {
             isCreateProjectCommandHandled = true;
-            final ProjectCreated event = projectCreated(cmd.getProjectId(),
-                                                        cmd.getName());
+            final AggProjectCreated event = projectCreated(cmd.getProjectId(),
+                                                           cmd.getName());
             return event;
         }
 
         @Assign
-        TaskAdded handle(AddTask cmd, CommandContext ctx) {
+        AggTaskAdded handle(AddTask cmd, CommandContext ctx) {
             isAddTaskCommandHandled = true;
-            final TaskAdded event = taskAdded(cmd.getProjectId());
+            final AggTaskAdded event = taskAdded(cmd.getProjectId());
             return event.toBuilder()
                         .setTask(cmd.getTask())
                         .build();
         }
 
         @Assign
-        List<ProjectStarted> handle(StartProject cmd, CommandContext ctx) {
+        List<AggProjectStarted> handle(StartProject cmd, CommandContext ctx) {
             isStartProjectCommandHandled = true;
-            final ProjectStarted message = projectStarted(cmd.getProjectId());
+            final AggProjectStarted message = projectStarted(cmd.getProjectId());
             return newArrayList(message);
         }
 
@@ -642,7 +642,7 @@ public class AggregateShould {
         }
 
         @Apply
-        private void event(ProjectCreated event) {
+        private void event(AggProjectCreated event) {
             getBuilder()
                     .setId(event.getProjectId())
                     .setStatus(Status.CREATED);
@@ -651,13 +651,13 @@ public class AggregateShould {
         }
 
         @Apply
-        private void event(TaskAdded event) {
+        private void event(AggTaskAdded event) {
             isTaskAddedEventApplied = true;
             getBuilder().addTask(event.getTask());
         }
 
         @Apply
-        private void event(ProjectStarted event) {
+        private void event(AggProjectStarted event) {
             getBuilder()
                     .setId(event.getProjectId())
                     .setStatus(Status.STARTED);

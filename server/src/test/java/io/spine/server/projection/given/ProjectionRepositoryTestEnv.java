@@ -167,22 +167,22 @@ public class ProjectionRepositoryTestEnv {
             // Prevent instantiation of this utility class.
         }
 
-        public static ProjectStarted projectStarted() {
-            return ProjectStarted.newBuilder()
-                                 .setProjectId(ENTITY_ID)
-                                 .build();
+        public static PjnProjectStarted projectStarted() {
+            return PjnProjectStarted.newBuilder()
+                                    .setProjectId(ENTITY_ID)
+                                    .build();
         }
 
-        public static ProjectCreated projectCreated() {
-            return ProjectCreated.newBuilder()
-                                 .setProjectId(ENTITY_ID)
-                                 .build();
+        public static PjnProjectCreated projectCreated() {
+            return PjnProjectCreated.newBuilder()
+                                    .setProjectId(ENTITY_ID)
+                                    .build();
         }
 
-        public static TaskAdded taskAdded() {
-            return TaskAdded.newBuilder()
-                            .setProjectId(ENTITY_ID)
-                            .build();
+        public static PjnTaskAdded taskAdded() {
+            return PjnTaskAdded.newBuilder()
+                               .setProjectId(ENTITY_ID)
+                               .build();
         }
     }
 }

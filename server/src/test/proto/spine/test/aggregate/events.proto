@@ -44,12 +44,12 @@ message AggProjectStarted {
     ProjectId project_id = 1;
 }
 
-message ProjectArchived {
+message AggProjectArchived {
     ProjectId project_id = 1;
     repeated ProjectId child_project_id = 2;
 }
 
-message ProjectDeleted {
+message AggProjectDeleted {
     ProjectId project_id = 1;
     repeated ProjectId child_project_id = 2;
 }

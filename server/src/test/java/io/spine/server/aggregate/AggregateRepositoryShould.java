@@ -33,8 +33,8 @@ import io.spine.server.command.TestEventFactory;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
-import io.spine.test.aggregate.event.ProjectArchived;
-import io.spine.test.aggregate.event.ProjectDeleted;
+import io.spine.test.aggregate.event.AggProjectArchived;
+import io.spine.test.aggregate.event.AggProjectDeleted;
 import io.spine.testdata.Sample;
 import org.junit.After;
 import org.junit.Before;
@@ -240,8 +240,8 @@ public class AggregateRepositoryShould {
     @Test
     public void expose_event_classes_on_which_aggregates_react() {
         final Set<EventClass> eventClasses = repository.getEventClasses();
-        assertTrue(eventClasses.contains(EventClass.of(ProjectArchived.class)));
-        assertTrue(eventClasses.contains(EventClass.of(ProjectDeleted.class)));
+        assertTrue(eventClasses.contains(EventClass.of(AggProjectArchived.class)));
+        assertTrue(eventClasses.contains(EventClass.of(AggProjectDeleted.class)));
     }
 
     @Test
@@ -255,7 +255,7 @@ public class AggregateRepositoryShould {
                              .isPresent());
 
         final TestEventFactory factory = TestEventFactory.newInstance(getClass());
-        final ProjectArchived msg = ProjectArchived.newBuilder()
+        final AggProjectArchived msg = AggProjectArchived.newBuilder()
                                                    .setProjectId(parent.getId())
                                                    .addChildProjectId(child.getId())
                                                    .build();

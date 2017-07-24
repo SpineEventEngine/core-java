@@ -24,7 +24,7 @@ import io.spine.test.storage.ProjectId;
 import io.spine.test.storage.command.AddTask;
 import io.spine.test.storage.command.CreateProject;
 import io.spine.test.storage.command.StartProject;
-import io.spine.test.storage.event.ProjectCreated;
+import io.spine.test.storage.event.StgProjectCreated;
 
 import static io.spine.Identifier.newUuid;
 
@@ -46,10 +46,10 @@ public class Given {
         private EventMessage() {
         }
 
-        public static ProjectCreated projectCreated(ProjectId id) {
-            return ProjectCreated.newBuilder()
-                                 .setProjectId(id)
-                                 .build();
+        public static StgProjectCreated projectCreated(ProjectId id) {
+            return StgProjectCreated.newBuilder()
+                                    .setProjectId(id)
+                                    .build();
         }
     }
 
