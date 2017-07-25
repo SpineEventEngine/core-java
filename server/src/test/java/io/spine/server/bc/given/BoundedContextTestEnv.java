@@ -41,9 +41,9 @@ import io.spine.test.bc.ProjectId;
 import io.spine.test.bc.ProjectVBuilder;
 import io.spine.test.bc.SecretProject;
 import io.spine.test.bc.SecretProjectVBuilder;
-import io.spine.test.bc.command.AddTask;
-import io.spine.test.bc.command.CreateProject;
-import io.spine.test.bc.command.StartProject;
+import io.spine.test.bc.command.BcAddTask;
+import io.spine.test.bc.command.BcCreateProject;
+import io.spine.test.bc.command.BcStartProject;
 import io.spine.test.bc.event.BcProjectCreated;
 import io.spine.test.bc.event.BcProjectStarted;
 import io.spine.test.bc.event.BcTaskAdded;
@@ -65,17 +65,17 @@ public class BoundedContextTestEnv {
         }
 
         @Assign
-        public BcProjectCreated handle(CreateProject cmd, CommandContext ctx) {
+        public BcProjectCreated handle(BcCreateProject cmd, CommandContext ctx) {
             return Given.EventMessage.projectCreated(cmd.getProjectId());
         }
 
         @Assign
-        public BcTaskAdded handle(AddTask cmd, CommandContext ctx) {
+        public BcTaskAdded handle(BcAddTask cmd, CommandContext ctx) {
             return Given.EventMessage.taskAdded(cmd.getProjectId());
         }
 
         @Assign
-        public List<BcProjectStarted> handle(StartProject cmd, CommandContext ctx) {
+        public List<BcProjectStarted> handle(BcStartProject cmd, CommandContext ctx) {
             final BcProjectStarted message = Given.EventMessage.projectStarted(cmd.getProjectId());
             return newArrayList(message);
         }
@@ -134,7 +134,7 @@ public class BoundedContextTestEnv {
         }
 
         @Assign
-        public List<BcProjectStarted> handle(StartProject cmd, CommandContext ctx) {
+        public List<BcProjectStarted> handle(BcStartProject cmd, CommandContext ctx) {
             return Lists.newArrayList();
         }
     }
@@ -154,7 +154,7 @@ public class BoundedContextTestEnv {
 
         @Assign
         @SuppressWarnings({"UnusedParameters", "unused"}) // OK for test method
-        public CommandRouted handle(CreateProject command, CommandContext ctx) {
+        public CommandRouted handle(BcCreateProject command, CommandContext ctx) {
             return CommandRouted.getDefaultInstance();
         }
 
