@@ -35,9 +35,9 @@ import io.spine.test.procman.Project;
 import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.ProjectVBuilder;
 import io.spine.test.procman.Task;
-import io.spine.test.procman.command.AddTask;
-import io.spine.test.procman.command.CreateProject;
-import io.spine.test.procman.command.StartProject;
+import io.spine.test.procman.command.PmAddTask;
+import io.spine.test.procman.command.PmCreateProject;
+import io.spine.test.procman.command.PmStartProject;
 import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.event.PmTaskAdded;
@@ -131,7 +131,7 @@ public class ProcessManagerRepositoryTestEnv {
         @SuppressWarnings("UnusedParameters")
             /* The parameter left to show that a command subscriber can have two parameters. */
         @Assign
-        PmProjectCreated handle(CreateProject command, CommandContext ignored) {
+        PmProjectCreated handle(PmCreateProject command, CommandContext ignored) {
             keep(command);
 
             handleProjectCreated(command.getProjectId());
@@ -145,7 +145,7 @@ public class ProcessManagerRepositoryTestEnv {
         @SuppressWarnings("UnusedParameters")
             /* The parameter left to show that a command subscriber can have two parameters. */
         @Assign
-        PmTaskAdded handle(AddTask command, CommandContext ignored) {
+        PmTaskAdded handle(PmAddTask command, CommandContext ignored) {
             keep(command);
 
             handleTaskAdded(command.getTask());
@@ -156,11 +156,11 @@ public class ProcessManagerRepositoryTestEnv {
         }
 
         @Assign
-        CommandRouted handle(StartProject command, CommandContext context) {
+        CommandRouted handle(PmStartProject command, CommandContext context) {
             keep(command);
 
             handleProjectStarted();
-            final Message addTask = ((AddTask.Builder) Sample.builderForType(AddTask.class))
+            final Message addTask = ((PmAddTask.Builder) Sample.builderForType(PmAddTask.class))
                     .setProjectId(command.getProjectId())
                     .build();
             return newRouterFor(command, context)
