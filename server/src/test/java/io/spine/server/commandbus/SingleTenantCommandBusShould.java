@@ -35,8 +35,8 @@ import io.spine.server.command.CommandHandler;
 import io.spine.server.event.EventBus;
 import io.spine.test.command.CmdAddTask;
 import io.spine.test.command.event.CmdTaskAdded;
-import io.spine.test.failure.InvalidProjectName;
-import io.spine.test.failure.ProjectId;
+import io.spine.test.reflect.InvalidProjectName;
+import io.spine.test.reflect.ProjectId;
 import org.junit.Test;
 
 import static io.spine.core.CommandValidationError.INVALID_COMMAND;

@@ -21,7 +21,7 @@
 package io.spine.server.reflect.given;
 
 import io.spine.test.reflect.ProjectId;
-import io.spine.test.reflect.ReflectFailures.InvalidProjectName;
+import io.spine.test.reflect.ReflectRejections.InvalidProjectName;
 import io.spine.test.reflect.command.RefCreateProject;
 import io.spine.test.reflect.command.RefStartProject;
 import io.spine.test.reflect.event.RefProjectCreated;
