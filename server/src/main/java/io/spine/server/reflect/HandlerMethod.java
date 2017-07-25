@@ -216,25 +216,21 @@ abstract class HandlerMethod<C extends Message> {
      *
      * @param <R>     the type of the expected handler invocation result
      * @param target  the target object on which call the method
-     * @param message the message to handle   @return the result of message handling
+     * @param message the message to handle
      * @param context the context of the message
+     * @return the result of message handling
      */
     public <R> R invoke(Object target, Message message, C context) {
         checkNotNull(message);
         checkNotNull(context);
         try {
             final int paramCount = getParamCount();
-            if (paramCount == 1) {
-                @SuppressWarnings("unchecked")
-                // it is assumed that the method returns the result of this type
-                final R result = (R) method.invoke(target, message);
-                return result;
-            } else {
-                @SuppressWarnings("unchecked")
-                // it is assumed that the method returns the result of this type
-                final R result = (R) method.invoke(target, message, context);
-                return result;
-            }
+            final Object returnedValue = (paramCount == 1)
+                    ? method.invoke(target, message)
+                    : method.invoke(target, message, context);
+            @SuppressWarnings("unchecked") // It is assumed that the method returns this type.
+            final R result = (R)returnedValue;
+            return result;
         } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
             throw illegalStateWithCauseOf(e);
         }

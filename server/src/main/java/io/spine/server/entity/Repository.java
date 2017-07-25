@@ -157,7 +157,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     }
 
     /**
-     * Verifies if the passed repository manages instances of versionable entities.
+     * Verifies if the repository manages instances of {@link VersionableEntity}.
      */
     private boolean managesVersionableEntities() {
         final Class entityClass = getEntityClass();
