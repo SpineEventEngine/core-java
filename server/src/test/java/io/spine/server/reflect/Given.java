@@ -22,8 +22,8 @@ package io.spine.server.reflect;
 
 import io.spine.test.reflect.ProjectId;
 import io.spine.test.reflect.ReflectFailures.InvalidProjectName;
-import io.spine.test.reflect.command.CreateProject;
-import io.spine.test.reflect.command.StartProject;
+import io.spine.test.reflect.command.RefCreateProject;
+import io.spine.test.reflect.command.RefStartProject;
 import io.spine.test.reflect.event.RefProjectCreated;
 
 import static io.spine.Identifier.newUuid;
@@ -63,14 +63,14 @@ class Given {
         private CommandMessage() {
         }
 
-        public static CreateProject createProject() {
-            return CreateProject.newBuilder()
+        public static RefCreateProject createProject() {
+            return RefCreateProject.newBuilder()
                                 .setProjectId(newProjectId())
                                 .build();
         }
 
-        public static StartProject startProject() {
-            return StartProject.newBuilder()
+        public static RefStartProject startProject() {
+            return RefStartProject.newBuilder()
                                .setProjectId(newProjectId())
                                .build();
         }

@@ -30,7 +30,7 @@ import io.spine.server.BoundedContext;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.event.EventBus;
-import io.spine.test.reflect.command.CreateProject;
+import io.spine.test.reflect.command.RefCreateProject;
 import io.spine.test.reflect.event.RefProjectCreated;
 import org.junit.Before;
 import org.junit.Test;
@@ -87,7 +87,7 @@ public class CommandHandlerMethodShould {
     public void invoke_handler_method_which_returns_one_message() throws InvocationTargetException {
         final ValidHandlerTwoParams handlerObject = spy(new ValidHandlerTwoParams());
         final CommandHandlerMethod handler = from(handlerObject.getHandler());
-        final CreateProject cmd = createProject();
+        final RefCreateProject cmd = createProject();
 
         final List<? extends Message> events = handler.invoke(handlerObject, cmd, defCmdCtx);
 
@@ -103,7 +103,7 @@ public class CommandHandlerMethodShould {
         final ValidHandlerOneParamReturnsList handlerObject =
                 spy(new ValidHandlerOneParamReturnsList());
         final CommandHandlerMethod handler = from(handlerObject.getHandler());
-        final CreateProject cmd = createProject();
+        final RefCreateProject cmd = createProject();
 
         final List<? extends Message> events = handler.invoke(handlerObject, cmd, defCmdCtx);
 
@@ -216,7 +216,7 @@ public class CommandHandlerMethodShould {
     private class ValidHandlerOneParam extends TestCommandHandler {
         @Assign
         @SuppressWarnings("unused")
-        RefProjectCreated handleTest(CreateProject cmd) {
+        RefProjectCreated handleTest(RefCreateProject cmd) {
             return projectCreated(cmd.getProjectId());
         }
     }
@@ -224,7 +224,7 @@ public class CommandHandlerMethodShould {
     private class ValidHandlerOneParamReturnsList extends TestCommandHandler {
         @SuppressWarnings("UnusedReturnValue")
         @Assign
-        List<Message> handleTest(CreateProject cmd) {
+        List<Message> handleTest(RefCreateProject cmd) {
             final List<Message> result = newLinkedList();
             result.add(projectCreated(cmd.getProjectId()));
             return result;
@@ -235,7 +235,7 @@ public class CommandHandlerMethodShould {
     private class ValidHandlerTwoParams extends TestCommandHandler {
         @Assign
         @SuppressWarnings("unused")
-        RefProjectCreated handleTest(CreateProject cmd, CommandContext context) {
+        RefProjectCreated handleTest(RefCreateProject cmd, CommandContext context) {
             return projectCreated(cmd.getProjectId());
         }
     }
@@ -243,7 +243,7 @@ public class CommandHandlerMethodShould {
     private class ValidHandlerTwoParamsReturnsList extends TestCommandHandler {
         @Assign
         @SuppressWarnings("unused")
-        List<Message> handleTest(CreateProject cmd, CommandContext context) {
+        List<Message> handleTest(RefCreateProject cmd, CommandContext context) {
             final List<Message> result = newLinkedList();
             result.add(projectCreated(cmd.getProjectId()));
             return result;
@@ -252,7 +252,7 @@ public class CommandHandlerMethodShould {
 
     private class ValidHandlerButPrivate extends TestCommandHandler {
         @Assign
-        private RefProjectCreated handleTest(CreateProject cmd) {
+        private RefProjectCreated handleTest(RefCreateProject cmd) {
             return projectCreated(cmd.getProjectId());
         }
     }
@@ -264,7 +264,7 @@ public class CommandHandlerMethodShould {
     @SuppressWarnings("unused")
         // because the method is not annotated, which is the purpose of this test class.
     private class InvalidHandlerNoAnnotation extends TestCommandHandler {
-        public RefProjectCreated handleTest(CreateProject cmd, CommandContext context) {
+        public RefProjectCreated handleTest(RefCreateProject cmd, CommandContext context) {
             return projectCreated(cmd.getProjectId());
         }
     }
@@ -278,7 +278,7 @@ public class CommandHandlerMethodShould {
 
     private class InvalidHandlerTooManyParams extends TestCommandHandler {
         @Assign
-        RefProjectCreated handleTest(CreateProject cmd, CommandContext context, Object redundant) {
+        RefProjectCreated handleTest(RefCreateProject cmd, CommandContext context, Object redundant) {
             return projectCreated(cmd.getProjectId());
         }
     }
@@ -299,14 +299,14 @@ public class CommandHandlerMethodShould {
 
     private class InvalidHandlerTwoParamsSecondInvalid extends TestCommandHandler {
         @Assign
-        RefProjectCreated handleTest(CreateProject cmd, Exception invalid) {
+        RefProjectCreated handleTest(RefCreateProject cmd, Exception invalid) {
             return projectCreated(cmd.getProjectId());
         }
     }
 
     private class InvalidHandlerReturnsVoid extends TestCommandHandler {
         @Assign
-        void handleTest(CreateProject cmd, CommandContext context) {
+        void handleTest(RefCreateProject cmd, CommandContext context) {
         }
     }
 
