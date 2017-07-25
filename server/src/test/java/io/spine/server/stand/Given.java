@@ -45,7 +45,7 @@ import io.spine.test.Tests;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.ProjectVBuilder;
-import io.spine.test.projection.command.CreateProject;
+import io.spine.test.projection.command.PrjCreateProject;
 import io.spine.test.projection.event.PrjProjectCreated;
 import io.spine.validate.StringValueVBuilder;
 
@@ -73,7 +73,7 @@ class Given {
         final TestActorRequestFactory requestFactory =
                 TestActorRequestFactory.newInstance(Given.class);
         return requestFactory.command()
-                             .create(CreateProject.getDefaultInstance());
+                             .create(PrjCreateProject.getDefaultInstance());
     }
 
     static Event validEvent() {
@@ -146,7 +146,7 @@ class Given {
         }
 
         @Assign
-        List<? extends Message> handle(CreateProject createProject, CommandContext context) {
+        List<? extends Message> handle(PrjCreateProject createProject, CommandContext context) {
             // In real life we would return a list with at least one element
             // populated with real data.
             return Collections.emptyList();
