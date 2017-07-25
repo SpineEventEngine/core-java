@@ -246,7 +246,7 @@ public abstract class Transaction<I,
      * Applies all the outstanding modifications to the enclosed entity.
      *
      * @throws InvalidEntityStateException in case the new entity state is not valid
-     * @throws IllegalStateException       in case of a generic failure
+     * @throws IllegalStateException       in case of a generic error
      */
     protected void commit() throws InvalidEntityStateException, IllegalStateException {
 

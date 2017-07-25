@@ -26,6 +26,7 @@ import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.core.Ack;
 import io.spine.core.MessageEnvelope;
+import io.spine.core.Rejection;
 import io.spine.type.MessageClass;
 
 import javax.annotation.Nullable;
@@ -114,22 +115,22 @@ public abstract class Bus<T extends Message,
      * of the call. The {@link StreamObserver#onNext StreamObserver.onNext()} is called for each
      * message posted to the bus.
      *
-     * <p>In case the message is accepted by the bus, {@linkplain Ack IsSent} with the
+     * <p>In case the message is accepted by the bus, {@link Ack} with the
      * {@link io.spine.core.Status.StatusCase#OK OK} status is passed to the observer.
      *
      * <p>If the message cannot be sent due to some issues, a corresponding
-     * {@link io.spine.base.Error Error} status is passed in {@code IsSent} instance.
+     * {@link io.spine.base.Error Error} status is passed in {@code Ack} instance.
      *
      * <p>Depending on the underlying {@link MessageDispatcher}, a message which causes a business
-     * {@link io.spine.core.Failure} may result ether a {@link io.spine.core.Failure} status or
+     * {@link Rejection} may result ether a {@link Rejection} status or
      * an {@link io.spine.core.Status.StatusCase#OK OK} status {@link Ack} instance. Usually,
-     * the {@link io.spine.core.Failure} status may only pop up if the {@link MessageDispatcher}
-     * processes the message sequentially and throws the failure (wrapped in a
+     * the {@link Rejection} status may only pop up if the {@link MessageDispatcher}
+     * processes the message sequentially and throws the rejection (wrapped in a
      * the {@linkplain io.spine.base.ThrowableMessage ThrowableMessages}) instead of handling them.
      * Otherwise, the {@code OK} status should be expected.
      *
      * <p>Note that {@linkplain StreamObserver#onError StreamObserver.onError()} is never called
-     * for the passed observer, since errors are propagated as statuses of {@code IsSent} response.
+     * for the passed observer, since errors are propagated as statuses of {@code Ack} response.
      *
      * @param messages the messages to post
      * @param observer the observer to receive outcome of the operation
@@ -217,7 +218,7 @@ public abstract class Bus<T extends Message,
      * <p>This method should be invoked only once when initializing
      * the {@linkplain #filterChain() filter chain} of this bus.
      *
-     * @return a dequeue of the bus custom filters
+     * @return a deque of the bus custom filters
      */
     protected abstract Deque<BusFilter<E>> createFilterChain();
 
@@ -292,7 +293,7 @@ public abstract class Bus<T extends Message,
      *         <ul>
      *             <li>{@link io.spine.core.Status.StatusCase#OK OK} status if the message has been
      *                 passed to the dispatcher;
-     *             <li>{@link io.spine.core.Failure Failure} status, if a {@code Failure} has
+     *             <li>{@link Rejection} status, if a {@code Rejection} has
      *                 happened during the message handling (if applicable);
      *             <li>{@link io.spine.base.Error Error} status if a {@link Throwable}, which is not
      *                 a {@link io.spine.base.ThrowableMessage ThrowableMessage}, has been thrown

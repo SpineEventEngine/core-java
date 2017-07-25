@@ -29,6 +29,7 @@ import io.spine.change.StringMismatch;
 import io.spine.change.ValueMismatch;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
+import io.spine.core.Rejections;
 import io.spine.server.entity.EventPlayingEntity;
 import io.spine.server.reflect.CommandHandlerMethod;
 import io.spine.validate.ValidatingBuilder;
@@ -51,9 +52,8 @@ import java.util.List;
  * <p>The method may throw one or more throwables derived from
  * {@link io.spine.base.ThrowableMessage ThrowableMessage}.
  * Throwing a {@code ThrowableMessage} indicates that the passed command cannot be handled
- * because of a
- * {@linkplain io.spine.core.Failures#toFailure(ThrowableMessage, io.spine.core.Command)
- * business failure}.
+ * because of a {@linkplain Rejections#toRejection(ThrowableMessage, io.spine.core.Command)
+ * rejection}.
  *
  * {@inheritDoc}
  *

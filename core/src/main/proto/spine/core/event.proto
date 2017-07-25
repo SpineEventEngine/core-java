@@ -33,7 +33,7 @@ import "google/protobuf/timestamp.proto";
 import "google/protobuf/any.proto";
 
 import "spine/core/command.proto";
-import "spine/core/failure.proto";
+import "spine/core/rejection.proto";
 import "spine/core/version.proto";
 import "spine/core/enrichment.proto";
 
@@ -96,7 +96,7 @@ message EventContext {
         EventContext event_context = 6 [(required) = true];
 
         // The context of a rejection which generated this event.
-        FailureContext failure_context = 7 [(required) = true];
+        RejectionContext rejection_context = 7 [(required) = true];
     }
 
     // The ID of the entity which generated the event.

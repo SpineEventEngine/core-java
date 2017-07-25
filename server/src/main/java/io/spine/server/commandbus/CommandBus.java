@@ -30,14 +30,14 @@ import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
-import io.spine.core.Failure;
+import io.spine.core.Rejection;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.bus.Bus;
 import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.DeadMessageTap;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.commandstore.CommandStore;
-import io.spine.server.failure.FailureBus;
+import io.spine.server.rejection.RejectionBus;
 
 import javax.annotation.Nullable;
 import java.util.Deque;
@@ -46,7 +46,7 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.getRootCause;
-import static io.spine.core.Failures.toFailure;
+import static io.spine.core.Rejections.toRejection;
 import static io.spine.server.bus.Buses.acknowledge;
 import static io.spine.server.bus.Buses.reject;
 import static io.spine.util.Exceptions.toError;
@@ -72,7 +72,7 @@ public class CommandBus extends Bus<Command,
 
     private final CommandScheduler scheduler;
 
-    private final FailureBus failureBus;
+    private final RejectionBus rejectionBus;
 
     private final Log log;
 
@@ -118,7 +118,7 @@ public class CommandBus extends Bus<Command,
         this.scheduler = builder.commandScheduler;
         this.log = builder.log;
         this.isThreadSpawnAllowed = builder.threadSpawnAllowed;
-        this.failureBus = builder.failureBus;
+        this.rejectionBus = builder.rejectionBus;
         this.filterChain = builder.getFilters();
         this.deadCommandHandler = new DeadCommandTap();
     }
@@ -162,15 +162,15 @@ public class CommandBus extends Bus<Command,
     }
 
     /**
-     * Exposes the {@code FailureBus} instance for this {@code CommandBus}.
+     * Exposes the {@code RejectionBus} instance for this {@code CommandBus}.
      *
      * <p>This method is designed for internal use only. Client code should use
-     * {@link io.spine.server.BoundedContext#getFailureBus() BoundedContext.getFailureBus()}
+     * {@link io.spine.server.BoundedContext#getRejectionBus() BoundedContext.getRejectionBus()}
      * instead.
      */
     @Internal
-    public FailureBus failureBus() {
-        return this.failureBus;
+    public RejectionBus rejectionBus() {
+        return this.rejectionBus;
     }
 
     @Override
@@ -204,9 +204,9 @@ public class CommandBus extends Bus<Command,
 
             if (cause instanceof ThrowableMessage) {
                 final ThrowableMessage throwableMessage = (ThrowableMessage) cause;
-                final Failure failure = toFailure(throwableMessage, envelope.getCommand());
-                failureBus().post(failure);
-                result = reject(envelope.getId(), failure);
+                final Rejection rejection = toRejection(throwableMessage, envelope.getCommand());
+                rejectionBus().post(rejection);
+                result = reject(envelope.getId(), rejection);
             } else {
                 final Error error = toError(cause);
                 result = reject(envelope.getId(), error);
@@ -293,7 +293,7 @@ public class CommandBus extends Bus<Command,
     public void close() throws Exception {
         super.close();
         commandStore.close();
-        failureBus.close();
+        rejectionBus.close();
     }
 
     /**
@@ -341,7 +341,7 @@ public class CommandBus extends Bus<Command,
         /** @see #setAutoReschedule(boolean) */
         private boolean autoReschedule;
 
-        private FailureBus failureBus;
+        private RejectionBus rejectionBus;
 
         /**
          * Checks whether the manual {@link Thread} spawning is allowed within
@@ -376,8 +376,8 @@ public class CommandBus extends Bus<Command,
             return Optional.fromNullable(commandScheduler);
         }
 
-        public Optional<FailureBus> getFailureBus() {
-            return Optional.fromNullable(failureBus);
+        public Optional<RejectionBus> getRejectionBus() {
+            return Optional.fromNullable(rejectionBus);
         }
 
         public Builder setCommandStore(CommandStore commandStore) {
@@ -392,9 +392,9 @@ public class CommandBus extends Bus<Command,
             return this;
         }
 
-        public Builder setFailureBus(FailureBus failureBus) {
-            checkNotNull(failureBus);
-            this.failureBus = failureBus;
+        public Builder setRejectionBus(RejectionBus rejectionBus) {
+            checkNotNull(rejectionBus);
+            this.rejectionBus = rejectionBus;
             return this;
         }
 
@@ -463,9 +463,9 @@ public class CommandBus extends Bus<Command,
                 log = new Log();
             }
 
-            if (failureBus == null) {
-                failureBus = FailureBus.newBuilder()
-                                       .build();
+            if (rejectionBus == null) {
+                rejectionBus = RejectionBus.newBuilder()
+                                           .build();
             }
 
             final CommandBus commandBus = createCommandBus();

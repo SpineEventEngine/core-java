@@ -46,25 +46,25 @@ public class Log {
 
     public void errorHandling(Exception exception, Message commandMessage, CommandId commandId) {
         final String msg = formatMessageTypeAndId(
-                "Exception while handling command `%s` (ID: `%s`)",
+                "Exception while handling command `%s` (ID: `%s`).",
                 commandMessage,
                 commandId);
         log().error(msg, exception);
     }
 
-    public void failureHandling(ThrowableMessage flr, Message commandMessage, CommandId commandId) {
+    public void rejectedWith(ThrowableMessage rej, Message commandMessage, CommandId commandId) {
         final String msg = formatMessageTypeAndId(
-                "Business failure occurred when handling command `%s` (ID: `%s`)",
+                "The command `%s` (ID: `%s`) was rejected.",
                 commandMessage,
                 commandId);
-        log().warn(msg, flr);
+        log().warn(msg, rej);
     }
 
     public void errorHandlingUnknown(Throwable throwable,
                                      Message commandMessage,
                                      CommandId commandId) {
         final String msg = formatMessageTypeAndId(
-                "Throwable encountered when handling command `%s` (ID: `%s`)",
+                "Throwable encountered when handling command `%s` (ID: `%s`).",
                 commandMessage,
                 commandId);
         log().error(msg, throwable);

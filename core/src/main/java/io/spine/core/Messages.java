@@ -51,8 +51,8 @@ class Messages {
             msg = Commands.getMessage((Command) outerOrMessage);
         } else if (input instanceof Event) {
             msg = Events.getMessage((Event) outerOrMessage);
-        } else if (input instanceof Failure) {
-            msg = Failures.getMessage((Failure) outerOrMessage);
+        } else if (input instanceof Rejection) {
+            msg = Rejections.getMessage((Rejection) outerOrMessage);
         } else if (input instanceof Any) {
             msg = AnyPacker.unpack((Any) outerOrMessage);
         } else {

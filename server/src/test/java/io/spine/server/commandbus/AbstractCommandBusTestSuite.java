@@ -40,7 +40,7 @@ import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.commandstore.CommandStore;
 import io.spine.server.event.EventBus;
-import io.spine.server.failure.FailureBus;
+import io.spine.server.rejection.RejectionBus;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.tenant.TenantAwareTest;
 import io.spine.server.tenant.TenantIndex;
@@ -87,7 +87,7 @@ public abstract class AbstractCommandBusTestSuite {
     protected CommandStore commandStore;
     protected Log log;
     protected EventBus eventBus;
-    protected FailureBus failureBus;
+    protected RejectionBus rejectionBus;
     protected ExecutorCommandScheduler scheduler;
     protected CreateProjectHandler createProjectHandler;
     protected MemoizingObserver<Ack> observer;
@@ -176,13 +176,13 @@ public abstract class AbstractCommandBusTestSuite {
         commandStore = spy(new CommandStore(storageFactory, tenantIndex));
         scheduler = spy(new ExecutorCommandScheduler());
         log = spy(new Log());
-        failureBus = spy(FailureBus.newBuilder()
-                                   .build());
+        rejectionBus = spy(RejectionBus.newBuilder()
+                                       .build());
         commandBus = CommandBus.newBuilder()
                                .setMultitenant(this.multitenant)
                                .setCommandStore(commandStore)
                                .setCommandScheduler(scheduler)
-                               .setFailureBus(failureBus)
+                               .setRejectionBus(rejectionBus)
                                .setThreadSpawnAllowed(false)
                                .setLog(log)
                                .setAutoReschedule(false)

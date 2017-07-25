@@ -26,7 +26,7 @@ import io.spine.client.TestActorRequestFactory;
 import io.spine.server.command.TestEventFactory;
 import io.spine.test.TestValues;
 import io.spine.test.Tests;
-import io.spine.test.failure.OperationFailures.CannotPerformBusinessOperation;
+import io.spine.test.rejection.OperationRejections.CannotPerformBusinessOperation;
 import io.spine.time.Time;
 import org.junit.Before;
 import org.junit.Test;
@@ -51,16 +51,16 @@ public class MessagesShould {
 
     private Command command;
     private StringValue commandMessage;
-    private CannotPerformBusinessOperation failureMessage;
+    private CannotPerformBusinessOperation rejectionMessage;
     private Message eventMessage;
 
     @Before
     public void setUp() {
         commandMessage = TestValues.newUuidValue();
         command = factory.createCommand(commandMessage);
-        failureMessage = CannotPerformBusinessOperation.newBuilder()
-                                                       .setOperationId(newUuid())
-                                                       .build();
+        rejectionMessage = CannotPerformBusinessOperation.newBuilder()
+                                                         .setOperationId(newUuid())
+                                                         .build();
         eventMessage = Time.getCurrentTime();
     }
 
@@ -83,16 +83,16 @@ public class MessagesShould {
     }
 
     @Test
-    public void ensure_failure_message() {
-        final Failure failure = Failures.createFailure(failureMessage, command);
+    public void ensure_rejection_message() {
+        final Rejection rejection = Rejections.createRejection(rejectionMessage, command);
 
-        assertEquals(failureMessage, ensureMessage(failure));
+        assertEquals(rejectionMessage, ensureMessage(rejection));
     }
 
     @Test
     public void unpack_messages() {
         assertEquals(commandMessage, ensureMessage(pack(commandMessage)));
         assertEquals(eventMessage, ensureMessage(pack(eventMessage)));
-        assertEquals(failureMessage, ensureMessage(pack(failureMessage)));
+        assertEquals(rejectionMessage, ensureMessage(pack(rejectionMessage)));
     }
 }
