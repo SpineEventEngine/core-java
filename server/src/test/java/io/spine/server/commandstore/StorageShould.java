@@ -32,10 +32,10 @@ import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandId;
 import io.spine.core.CommandStatus;
 import io.spine.core.Commands;
-import io.spine.core.Failure;
-import io.spine.core.FailureContext;
-import io.spine.core.FailureId;
-import io.spine.core.Failures;
+import io.spine.core.Rejection;
+import io.spine.core.RejectionContext;
+import io.spine.core.RejectionId;
+import io.spine.core.Rejections;
 import io.spine.server.commandbus.CommandRecord;
 import io.spine.server.commandbus.Given;
 import io.spine.server.commandbus.ProcessingStatus;
@@ -51,9 +51,9 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.core.CommandStatus.ERROR;
-import static io.spine.core.CommandStatus.FAILURE;
 import static io.spine.core.CommandStatus.OK;
 import static io.spine.core.CommandStatus.RECEIVED;
+import static io.spine.core.CommandStatus.REJECTED;
 import static io.spine.core.CommandStatus.SCHEDULED;
 import static io.spine.core.Commands.generateId;
 import static io.spine.core.given.GivenTenantId.newUuid;
@@ -76,7 +76,7 @@ import static org.junit.Assert.assertTrue;
 public class StorageShould extends TenantAwareTest {
 
     private static final Error defaultError = Error.getDefaultInstance();
-    private static final Failure defaultFailure = Failure.getDefaultInstance();
+    private static final Rejection DEFAULT_REJECTION = Rejection.getDefaultInstance();
 
     private CRepository repository;
 
@@ -92,7 +92,7 @@ public class StorageShould extends TenantAwareTest {
     }
 
     @After
-    public void tearDownCommandStorageTest() throws Exception {
+    public void tearDownCommandStorageTest() {
         repository.close();
         clearCurrentTenant();
     }
@@ -232,17 +232,17 @@ public class StorageShould extends TenantAwareTest {
 
     @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we update status.
     @Test
-    public void set_failure_command_status() {
+    public void set_rejected_command_status() {
         givenNewRecord();
-        final Failure failure = newFailure();
+        final Rejection rejection = newRejection();
 
-        repository.updateStatus(id, failure);
+        repository.updateStatus(id, rejection);
 
         final CommandRecord actual = read(id).get();
-        assertEquals(FAILURE, actual.getStatus()
-                                    .getCode());
-        assertEquals(failure, actual.getStatus()
-                                    .getFailure());
+        assertEquals(REJECTED, actual.getStatus()
+                                     .getCode());
+        assertEquals(rejection, actual.getStatus()
+                                      .getRejection());
     }
 
     /*
@@ -279,8 +279,8 @@ public class StorageShould extends TenantAwareTest {
     }
 
     @Test(expected = NullPointerException.class)
-    public void throw_exception_if_try_to_set_failure_status_by_null_ID() {
-        repository.updateStatus(Tests.<CommandId>nullRef(), defaultFailure);
+    public void throw_exception_if_try_to_set_rejection_status_by_null_ID() {
+        repository.updateStatus(Tests.<CommandId>nullRef(), DEFAULT_REJECTION);
     }
 
     /*
@@ -288,7 +288,7 @@ public class StorageShould extends TenantAwareTest {
      **************************************************************/
 
     @Test(expected = IllegalStateException.class)
-    public void throw_exception_if_try_to_store_cmd_to_closed_storage() throws Exception {
+    public void throw_exception_if_try_to_store_cmd_to_closed_storage() {
         repository.close();
         repository.store(Given.ACommand.createProject());
     }
@@ -315,22 +315,21 @@ public class StorageShould extends TenantAwareTest {
     }
 
     @Test(expected = IllegalStateException.class)
-    public void throw_exception_if_try_to_set_OK_status_using_closed_storage() throws Exception {
+    public void throw_exception_if_try_to_set_OK_status_using_closed_storage() {
         repository.close();
         repository.setOkStatus(generateId());
     }
 
     @Test(expected = IllegalStateException.class)
-    public void throw_exception_if_try_to_set_ERROR_status_using_closed_storage() throws Exception {
+    public void throw_exception_if_try_to_set_ERROR_status_using_closed_storage() {
         repository.close();
         repository.updateStatus(generateId(), newError());
     }
 
     @Test(expected = IllegalStateException.class)
-    public void throw_exception_if_try_to_set_FAILURE_status_using_closed_storage() throws
-                                                                                    Exception {
+    public void throw_exception_if_try_to_set_REJECTED_status_using_closed_storage() {
         repository.close();
-        repository.updateStatus(generateId(), newFailure());
+        repository.updateStatus(generateId(), newRejection());
     }
 
     @Test
@@ -364,15 +363,15 @@ public class StorageShould extends TenantAwareTest {
                     .build();
     }
 
-    private static Failure newFailure() {
-        final Any packedFailureMessage = toAny("newFailure");
-        final FailureId id = Failures.generateId(Commands.generateId());
-        return Failure.newBuilder()
-                      .setId(id)
-                      .setMessage(packedFailureMessage)
-                      .setContext(FailureContext.newBuilder()
-                                                .setStacktrace("failure stacktrace")
-                                                .setTimestamp(getCurrentTime()))
-                      .build();
+    private static Rejection newRejection() {
+        final Any packedMessage = toAny("newRejection");
+        final RejectionId id = Rejections.generateId(Commands.generateId());
+        return Rejection.newBuilder()
+                        .setId(id)
+                        .setMessage(packedMessage)
+                        .setContext(RejectionContext.newBuilder()
+                                                    .setStacktrace("rejection stacktrace")
+                                                    .setTimestamp(getCurrentTime()))
+                        .build();
     }
 }

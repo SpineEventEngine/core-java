@@ -23,6 +23,7 @@ package io.spine.server.reflect;
 import com.google.common.testing.NullPointerTester;
 import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
+import io.spine.server.reflect.given.Given;
 import io.spine.test.reflect.event.RefProjectCreated;
 import org.junit.Test;
 
@@ -37,7 +38,6 @@ import static org.mockito.Mockito.verify;
 /**
  * @author Alexander Litus
  */
-@SuppressWarnings("unused") // OK as we have some
 public class EventSubscriberMethodShould {
 
     @Test

@@ -112,8 +112,8 @@ public class BoundedContextShould {
     }
 
     @Test
-    public void return_FailureBus() {
-        assertNotNull(boundedContext.getFailureBus());
+    public void return_RejectionBus() {
+        assertNotNull(boundedContext.getRejectionBus());
     }
 
     @Test

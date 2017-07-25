@@ -34,7 +34,7 @@ import "google/protobuf/timestamp.proto";
 
 import "spine/base/error.proto";
 import "spine/core/command.proto";
-import "spine/core/failure.proto";
+import "spine/core/rejection.proto";
 
 // This type defines the way commands are stored in command storage.
 //
@@ -71,12 +71,12 @@ message ProcessingStatus {
     core.CommandStatus code = 1;
 
     // The `cause` provides additional information on what went wrong
-    // if the value of `status` is `ERROR` or `FAILURE`.
+    // if the value of `status` is `ERROR` or `REJECTED`.
     oneof cause {
         // The technical error occurred during command processing.
         base.Error error = 2;
 
-        // A business failure occurred during command processing.
-        core.Failure failure = 3;
+        // Why the command was rejected.
+        core.Rejection rejection = 3;
     }
 }

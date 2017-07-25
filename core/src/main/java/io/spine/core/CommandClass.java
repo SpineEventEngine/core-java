@@ -26,6 +26,7 @@ import com.google.protobuf.Message;
 import io.spine.type.MessageClass;
 
 import java.util.Arrays;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.core.Messages.ensureMessage;
@@ -69,7 +70,7 @@ public final class CommandClass extends MessageClass {
     }
 
     /** Creates immutable set of {@code CommandClass} from the passed set. */
-    public static ImmutableSet<CommandClass> setOf(Iterable<Class<? extends Message>> classes) {
+    public static Set<CommandClass> setOf(Iterable<Class<? extends Message>> classes) {
         final ImmutableSet.Builder<CommandClass> builder = ImmutableSet.builder();
         for (Class<? extends Message> cls : classes) {
             builder.add(of(cls));
@@ -79,7 +80,7 @@ public final class CommandClass extends MessageClass {
 
     /** Creates immutable set of {@code CommandClass} from the passed classes. */
     @SafeVarargs
-    public static ImmutableSet<CommandClass> setOf(Class<? extends Message>... classes) {
+    public static Set<CommandClass> setOf(Class<? extends Message>... classes) {
         return setOf(Arrays.asList(classes));
     }
 }
