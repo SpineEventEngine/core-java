@@ -26,7 +26,7 @@ import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.protobuf.AnyPacker;
-import io.spine.test.command.CreateProject;
+import io.spine.test.command.CmdCreateProject;
 import io.spine.time.Time;
 import io.spine.validate.ConstraintViolation;
 import org.junit.Test;
@@ -55,7 +55,7 @@ public class CommandValidatorViolationCheckShould {
 
     @Test
     public void validate_command_and_return_violations_if_message_is_NOT_valid() {
-        final Any invalidMessagePacked = AnyPacker.pack(CreateProject.getDefaultInstance());
+        final Any invalidMessagePacked = AnyPacker.pack(CmdCreateProject.getDefaultInstance());
         final Command commandWithEmptyMessage = Command.newBuilder()
                                                        .setId(generateId())
                                                        .setMessage(invalidMessagePacked)

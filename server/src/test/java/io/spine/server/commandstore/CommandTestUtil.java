@@ -25,7 +25,7 @@ import io.spine.core.CommandContext;
 import io.spine.core.CommandId;
 import io.spine.core.CommandStatus;
 import io.spine.server.commandbus.CommandRecord;
-import io.spine.test.command.CreateProject;
+import io.spine.test.command.CmdCreateProject;
 
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.validate.Validate.isDefault;
@@ -49,7 +49,7 @@ class CommandTestUtil {
                             CommandStatus statusExpected) {
         final CommandContext context = cmd.getContext();
         final CommandId commandId = cmd.getId();
-        final CreateProject message = unpack(cmd.getMessage());
+        final CmdCreateProject message = unpack(cmd.getMessage());
         assertEquals(cmd.getMessage(), record.getCommand()
                                              .getMessage());
         assertTrue(record.getTimestamp()

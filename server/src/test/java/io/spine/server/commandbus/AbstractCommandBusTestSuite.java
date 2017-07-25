@@ -44,7 +44,7 @@ import io.spine.server.failure.FailureBus;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.tenant.TenantAwareTest;
 import io.spine.server.tenant.TenantIndex;
-import io.spine.test.command.CreateProject;
+import io.spine.test.command.CmdCreateProject;
 import io.spine.test.command.event.CmdProjectCreated;
 import org.junit.After;
 import org.junit.Before;
@@ -268,7 +268,7 @@ public abstract class AbstractCommandBusTestSuite {
         }
 
         @Assign
-        CmdProjectCreated handle(CreateProject command, CommandContext ctx) {
+        CmdProjectCreated handle(CmdCreateProject command, CommandContext ctx) {
             handlerInvoked = true;
             return CmdProjectCreated.getDefaultInstance();
         }

@@ -36,12 +36,12 @@ import io.spine.server.entity.TestEntityWithStringColumn;
 import io.spine.server.event.EventBus;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
-import io.spine.test.command.AddTask;
-import io.spine.test.command.CreateProject;
+import io.spine.test.command.CmdAddTask;
+import io.spine.test.command.CmdCreateProject;
 import io.spine.test.command.Project;
 import io.spine.test.command.ProjectId;
 import io.spine.test.command.ProjectVBuilder;
-import io.spine.test.command.StartProject;
+import io.spine.test.command.CmdStartProject;
 import io.spine.test.command.Task;
 import io.spine.test.command.event.CmdProjectCreated;
 import io.spine.test.command.event.CmdProjectStarted;
@@ -149,9 +149,9 @@ public class CommandDispatcherRegistryTestEnv {
     public static class AllCommandDispatcher implements CommandDispatcher<Message> {
         @Override
         public Set<CommandClass> getMessageClasses() {
-            return CommandClass.setOf(CreateProject.class,
-                                      StartProject.class,
-                                      AddTask.class);
+            return CommandClass.setOf(CmdCreateProject.class,
+                                      CmdStartProject.class,
+                                      CmdAddTask.class);
         }
 
         @Override
@@ -163,7 +163,7 @@ public class CommandDispatcherRegistryTestEnv {
     public static class CreateProjectDispatcher implements CommandDispatcher<Message> {
         @Override
         public Set<CommandClass> getMessageClasses() {
-            return CommandClass.setOf(CreateProject.class);
+            return CommandClass.setOf(CmdCreateProject.class);
         }
 
         @Override
@@ -176,7 +176,7 @@ public class CommandDispatcherRegistryTestEnv {
 
         @Override
         public Set<CommandClass> getMessageClasses() {
-            return CommandClass.setOf(AddTask.class);
+            return CommandClass.setOf(CmdAddTask.class);
         }
 
         @Override
@@ -197,7 +197,7 @@ public class CommandDispatcherRegistryTestEnv {
         }
 
         @Assign
-        CmdProjectCreated handle(CreateProject command, CommandContext ctx) {
+        CmdProjectCreated handle(CmdCreateProject command, CommandContext ctx) {
             return CmdProjectCreated.getDefaultInstance();
         }
     }
@@ -209,17 +209,17 @@ public class CommandDispatcherRegistryTestEnv {
         }
 
         @Assign
-        CmdProjectCreated handle(CreateProject command, CommandContext ctx) {
+        CmdProjectCreated handle(CmdCreateProject command, CommandContext ctx) {
             return CmdProjectCreated.getDefaultInstance();
         }
 
         @Assign
-        CmdTaskAdded handle(AddTask command) {
+        CmdTaskAdded handle(CmdAddTask command) {
             return CmdTaskAdded.getDefaultInstance();
         }
 
         @Assign
-        CmdProjectStarted handle(StartProject command) {
+        CmdProjectStarted handle(CmdStartProject command) {
             return CmdProjectStarted.getDefaultInstance();
         }
     }

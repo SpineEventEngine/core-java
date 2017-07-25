@@ -36,9 +36,9 @@ import io.spine.server.command.CommandHandler;
 import io.spine.server.command.CommandHistory;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
-import io.spine.test.command.AddTask;
-import io.spine.test.command.CreateProject;
-import io.spine.test.command.StartProject;
+import io.spine.test.command.CmdAddTask;
+import io.spine.test.command.CmdCreateProject;
+import io.spine.test.command.CmdStartProject;
 import io.spine.test.command.event.CmdProjectCreated;
 import io.spine.test.command.event.CmdProjectStarted;
 import io.spine.test.command.event.CmdTaskAdded;
@@ -180,19 +180,19 @@ public class CommandHandlerShould {
         }
 
         @Assign
-        CmdProjectCreated handle(CreateProject msg, CommandContext context) {
+        CmdProjectCreated handle(CmdCreateProject msg, CommandContext context) {
             commandsHandled.add(msg, context);
             return CmdProjectCreated.getDefaultInstance();
         }
 
         @Assign
-        CmdTaskAdded handle(AddTask msg, CommandContext context) {
+        CmdTaskAdded handle(CmdAddTask msg, CommandContext context) {
             commandsHandled.add(msg, context);
             return CmdTaskAdded.getDefaultInstance();
         }
 
         @Assign
-        List<Message> handle(StartProject msg, CommandContext context) {
+        List<Message> handle(CmdStartProject msg, CommandContext context) {
             commandsHandled.add(msg, context);
             return eventsOnStartProjectCmd;
         }
