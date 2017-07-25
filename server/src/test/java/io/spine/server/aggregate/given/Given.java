@@ -31,9 +31,9 @@ import io.spine.core.given.GivenUserId;
 import io.spine.server.aggregate.AggregateEventRecord;
 import io.spine.server.command.TestEventFactory;
 import io.spine.test.aggregate.ProjectId;
-import io.spine.test.aggregate.command.AddTask;
-import io.spine.test.aggregate.command.CreateProject;
-import io.spine.test.aggregate.command.StartProject;
+import io.spine.test.aggregate.command.AggAddTask;
+import io.spine.test.aggregate.command.AggCreateProject;
+import io.spine.test.aggregate.command.AggStartProject;
 import io.spine.test.aggregate.event.AggProjectCreated;
 import io.spine.test.aggregate.event.AggProjectStarted;
 import io.spine.test.aggregate.event.AggTaskAdded;
@@ -102,17 +102,17 @@ public class Given {
         public static Command createProject(UserId userId,
                                             ProjectId projectId,
                                             Timestamp when) {
-            final CreateProject command = CommandMessage.createProject(projectId);
+            final AggCreateProject command = CommandMessage.createProject(projectId);
             return create(command, userId, when);
         }
 
         public static Command addTask(ProjectId id) {
-            final AddTask command = CommandMessage.addTask(id);
+            final AggAddTask command = CommandMessage.addTask(id);
             return create(command, USER_ID, getCurrentTime());
         }
 
         public static Command startProject(ProjectId id) {
-            final StartProject command = CommandMessage.startProject(id);
+            final AggStartProject command = CommandMessage.startProject(id);
             return create(command, USER_ID, getCurrentTime());
         }
 
@@ -133,21 +133,21 @@ public class Given {
         private CommandMessage() {
         }
 
-        public static CreateProject createProject(ProjectId id) {
-            final CreateProject.Builder builder = CreateProject.newBuilder()
+        public static AggCreateProject createProject(ProjectId id) {
+            final AggCreateProject.Builder builder = AggCreateProject.newBuilder()
                                                                .setProjectId(id)
                                                                .setName(projectName(id));
             return builder.build();
         }
 
-        public static AddTask addTask(ProjectId id) {
-            final AddTask.Builder builder = AddTask.newBuilder()
+        public static AggAddTask addTask(ProjectId id) {
+            final AggAddTask.Builder builder = AggAddTask.newBuilder()
                                                    .setProjectId(id);
             return builder.build();
         }
 
-        public static StartProject startProject(ProjectId id) {
-            final StartProject.Builder builder = StartProject.newBuilder()
+        public static AggStartProject startProject(ProjectId id) {
+            final AggStartProject.Builder builder = AggStartProject.newBuilder()
                                                              .setProjectId(id);
             return builder.build();
         }

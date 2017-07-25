@@ -40,9 +40,9 @@ import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.ProjectVBuilder;
 import io.spine.test.aggregate.Status;
-import io.spine.test.aggregate.command.AddTask;
-import io.spine.test.aggregate.command.CreateProject;
-import io.spine.test.aggregate.command.StartProject;
+import io.spine.test.aggregate.command.AggAddTask;
+import io.spine.test.aggregate.command.AggCreateProject;
+import io.spine.test.aggregate.command.AggStartProject;
 import io.spine.test.aggregate.event.AggProjectCreated;
 import io.spine.test.aggregate.event.AggProjectStarted;
 import io.spine.test.aggregate.event.AggTaskAdded;
@@ -103,8 +103,8 @@ public class Given {
         private CommandMessage() {
         }
 
-        public static CreateProject createProject(ProjectId id) {
-            return CreateProject.newBuilder()
+        public static AggCreateProject createProject(ProjectId id) {
+            return AggCreateProject.newBuilder()
                                 .setProjectId(id)
                                 .build();
         }
@@ -145,7 +145,7 @@ public class Given {
         }
 
         private static Command createProject(UserId userId, ProjectId projectId, Timestamp when) {
-            final CreateProject command = CommandMessage.createProject(projectId);
+            final AggCreateProject command = CommandMessage.createProject(projectId);
             return create(command, userId, when);
         }
 
@@ -207,17 +207,17 @@ public class Given {
         }
 
         @Assign
-        AggProjectCreated handle(CreateProject cmd, CommandContext ctx) {
+        AggProjectCreated handle(AggCreateProject cmd, CommandContext ctx) {
             return EventMessage.projectCreated(cmd.getProjectId());
         }
 
         @Assign
-        AggTaskAdded handle(AddTask cmd, CommandContext ctx) {
+        AggTaskAdded handle(AggAddTask cmd, CommandContext ctx) {
             return EventMessage.taskAdded(cmd.getProjectId());
         }
 
         @Assign
-        List<AggProjectStarted> handle(StartProject cmd, CommandContext ctx) {
+        List<AggProjectStarted> handle(AggStartProject cmd, CommandContext ctx) {
             final AggProjectStarted message = EventMessage.projectStarted(cmd.getProjectId());
             return newArrayList(message);
         }

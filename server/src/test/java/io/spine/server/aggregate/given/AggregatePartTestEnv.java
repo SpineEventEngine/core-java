@@ -29,8 +29,8 @@ import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.test.aggregate.Task;
 import io.spine.test.aggregate.TaskVBuilder;
-import io.spine.test.aggregate.command.AddTask;
-import io.spine.test.aggregate.command.CreateProject;
+import io.spine.test.aggregate.command.AggAddTask;
+import io.spine.test.aggregate.command.AggCreateProject;
 import io.spine.test.aggregate.event.AggProjectCreated;
 import io.spine.test.aggregate.event.AggTaskAdded;
 import io.spine.test.aggregate.user.User;
@@ -78,7 +78,7 @@ public class AggregatePartTestEnv {
         }
 
         @Assign
-        AggTaskAdded handle(AddTask msg) {
+        AggTaskAdded handle(AggAddTask msg) {
             final AggTaskAdded result = AggTaskAdded.newBuilder()
                                               .build();
             //This command can be empty since we use apply method to setup aggregate part.
@@ -101,7 +101,7 @@ public class AggregatePartTestEnv {
         }
 
         @Assign
-        AggProjectCreated handle(CreateProject msg) {
+        AggProjectCreated handle(AggCreateProject msg) {
             final AggProjectCreated result = AggProjectCreated.newBuilder()
                                                               .setProjectId(msg.getProjectId())
                                                               .setName(msg.getName())

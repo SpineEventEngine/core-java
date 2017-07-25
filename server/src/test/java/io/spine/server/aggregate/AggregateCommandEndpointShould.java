@@ -30,7 +30,7 @@ import io.spine.server.aggregate.given.AggregateCommandEndpointTestEnv.ProjectAg
 import io.spine.server.aggregate.given.AggregateCommandEndpointTestEnv.ProjectAggregateRepository;
 import io.spine.server.event.EventSubscriber;
 import io.spine.test.aggregate.ProjectId;
-import io.spine.test.aggregate.command.CreateProject;
+import io.spine.test.aggregate.command.AggCreateProject;
 import io.spine.test.aggregate.event.AggProjectCreated;
 import org.junit.After;
 import org.junit.Before;
@@ -87,7 +87,7 @@ public class AggregateCommandEndpointShould {
     @Test
     public void store_aggregate_on_command_dispatching() {
         final CommandEnvelope cmd = CommandEnvelope.of(createProject(projectId));
-        final CreateProject msg = (CreateProject) cmd.getMessage();
+        final AggCreateProject msg = (AggCreateProject) cmd.getMessage();
 
         repository.dispatch(cmd);
 

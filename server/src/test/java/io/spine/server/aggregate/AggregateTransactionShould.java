@@ -32,7 +32,7 @@ import io.spine.server.entity.TransactionListener;
 import io.spine.server.entity.TransactionShould;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
-import io.spine.test.aggregate.command.CreateProject;
+import io.spine.test.aggregate.command.AggCreateProject;
 import io.spine.test.aggregate.event.AggProjectCreated;
 import io.spine.test.aggregate.event.AggTaskAdded;
 import io.spine.validate.ConstraintViolation;
@@ -163,7 +163,7 @@ public class AggregateTransactionShould
         }
 
         @Assign
-        AggProjectCreated handle(CreateProject cmd, CommandContext ctx) {
+        AggProjectCreated handle(AggCreateProject cmd, CommandContext ctx) {
             return projectCreated(cmd.getProjectId(), cmd.getName());
         }
 

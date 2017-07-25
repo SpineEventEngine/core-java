@@ -31,8 +31,8 @@ import io.spine.test.aggregate.ProjectVBuilder;
 import io.spine.test.aggregate.Task;
 import io.spine.test.aggregate.TaskId;
 import io.spine.test.aggregate.TaskVBuilder;
-import io.spine.test.aggregate.command.AddTask;
-import io.spine.test.aggregate.command.CreateProject;
+import io.spine.test.aggregate.command.AggAddTask;
+import io.spine.test.aggregate.command.AggCreateProject;
 import io.spine.test.aggregate.event.AggProjectCreated;
 import io.spine.test.aggregate.event.AggTaskAdded;
 import org.junit.Before;
@@ -120,7 +120,7 @@ public class AggregatePartRepositoryLookupShould {
         }
 
         @Assign
-        public AggProjectCreated handle(CreateProject msg, CommandContext context) {
+        public AggProjectCreated handle(AggCreateProject msg, CommandContext context) {
             return AggProjectCreated.newBuilder()
                                  .setProjectId(msg.getProjectId())
                                  .setName(msg.getName())
@@ -163,7 +163,7 @@ public class AggregatePartRepositoryLookupShould {
         }
 
         @Assign
-        public AggTaskAdded handle(AddTask cmd) {
+        public AggTaskAdded handle(AggAddTask cmd) {
             return AggTaskAdded.newBuilder()
                             .setProjectId(cmd.getProjectId())
                             .build();

@@ -40,9 +40,9 @@ import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.ProjectVBuilder;
 import io.spine.test.aggregate.Status;
-import io.spine.test.aggregate.command.AddTask;
-import io.spine.test.aggregate.command.CreateProject;
-import io.spine.test.aggregate.command.StartProject;
+import io.spine.test.aggregate.command.AggAddTask;
+import io.spine.test.aggregate.command.AggCreateProject;
+import io.spine.test.aggregate.command.AggStartProject;
 import io.spine.test.aggregate.event.AggProjectArchived;
 import io.spine.test.aggregate.event.AggProjectCreated;
 import io.spine.test.aggregate.event.AggProjectDeleted;
@@ -88,16 +88,16 @@ public class AggregateRepositoryTestEnv {
                                                     .withId(id)
                                                     .build();
 
-            final CreateProject createProject =
-                    ((CreateProject.Builder) Sample.builderForType(CreateProject.class))
+            final AggCreateProject createProject =
+                    ((AggCreateProject.Builder) Sample.builderForType(AggCreateProject.class))
                             .setProjectId(id)
                             .build();
-            final AddTask addTask =
-                    ((AddTask.Builder) Sample.builderForType(AddTask.class))
+            final AggAddTask addTask =
+                    ((AggAddTask.Builder) Sample.builderForType(AggAddTask.class))
                             .setProjectId(id)
                             .build();
-            final StartProject startProject =
-                    ((StartProject.Builder) Sample.builderForType(StartProject.class))
+            final AggStartProject startProject =
+                    ((AggStartProject.Builder) Sample.builderForType(AggStartProject.class))
                             .setProjectId(id)
                             .build();
 
@@ -127,7 +127,7 @@ public class AggregateRepositoryTestEnv {
         }
 
         @Assign
-        AggProjectCreated handle(CreateProject msg) {
+        AggProjectCreated handle(AggCreateProject msg) {
             return AggProjectCreated.newBuilder()
                                     .setProjectId(msg.getProjectId())
                                     .setName(msg.getName())
@@ -141,7 +141,7 @@ public class AggregateRepositoryTestEnv {
         }
 
         @Assign
-        AggTaskAdded handle(AddTask msg) {
+        AggTaskAdded handle(AggAddTask msg) {
             return AggTaskAdded.newBuilder()
                                .setProjectId(msg.getProjectId())
                                .setTask(msg.getTask())
@@ -155,7 +155,7 @@ public class AggregateRepositoryTestEnv {
         }
 
         @Assign
-        AggProjectStarted handle(StartProject msg) {
+        AggProjectStarted handle(AggStartProject msg) {
             return AggProjectStarted.newBuilder()
                                     .setProjectId(msg.getProjectId())
                                     .build();

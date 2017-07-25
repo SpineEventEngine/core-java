@@ -35,7 +35,7 @@ import io.spine.server.aggregate.given.AggregatePartTestEnv.WrongAggregatePart;
 import io.spine.server.entity.InvalidEntityStateException;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.Task;
-import io.spine.test.aggregate.command.AddTask;
+import io.spine.test.aggregate.command.AggAddTask;
 import io.spine.test.aggregate.user.User;
 import io.spine.testdata.Sample;
 import io.spine.validate.ConstraintViolation;
@@ -189,8 +189,8 @@ public class AggregatePartShould {
     }
 
     private void prepareAggregatePart() {
-        final AddTask addTask =
-                ((AddTask.Builder) Sample.builderForType(AddTask.class))
+        final AggAddTask addTask =
+                ((AggAddTask.Builder) Sample.builderForType(AggAddTask.class))
                         .setProjectId(ProjectId.newBuilder()
                                                .setId("agg-part-ID"))
                         .build();

@@ -30,9 +30,9 @@ import io.spine.server.command.CommandHistory;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.ProjectVBuilder;
-import io.spine.test.aggregate.command.AddTask;
-import io.spine.test.aggregate.command.CreateProject;
-import io.spine.test.aggregate.command.StartProject;
+import io.spine.test.aggregate.command.AggAddTask;
+import io.spine.test.aggregate.command.AggCreateProject;
+import io.spine.test.aggregate.command.AggStartProject;
 import io.spine.test.aggregate.event.AggProjectCreated;
 import io.spine.test.aggregate.event.AggProjectStarted;
 import io.spine.test.aggregate.event.AggTaskAdded;
@@ -65,7 +65,7 @@ public class AggregateCommandEndpointTestEnv {
         }
 
         @Assign
-        AggProjectCreated handle(CreateProject msg, CommandContext context) {
+        AggProjectCreated handle(AggCreateProject msg, CommandContext context) {
             commandsHandled.add(msg, context);
             return AggProjectCreated.newBuilder()
                                  .setProjectId(msg.getProjectId())
@@ -80,7 +80,7 @@ public class AggregateCommandEndpointTestEnv {
         }
 
         @Assign
-        AggTaskAdded handle(AddTask msg, CommandContext context) {
+        AggTaskAdded handle(AggAddTask msg, CommandContext context) {
             commandsHandled.add(msg, context);
             return AggTaskAdded.newBuilder()
                             .setProjectId(msg.getProjectId())
@@ -93,7 +93,7 @@ public class AggregateCommandEndpointTestEnv {
         }
 
         @Assign
-        AggProjectStarted handle(StartProject msg, CommandContext context) {
+        AggProjectStarted handle(AggStartProject msg, CommandContext context) {
             commandsHandled.add(msg, context);
             return AggProjectStarted.newBuilder()
                                  .setProjectId(msg.getProjectId())

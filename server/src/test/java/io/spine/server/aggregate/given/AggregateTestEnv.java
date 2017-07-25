@@ -28,7 +28,7 @@ import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.ProjectVBuilder;
 import io.spine.test.aggregate.Status;
-import io.spine.test.aggregate.command.CreateProject;
+import io.spine.test.aggregate.command.AggCreateProject;
 import io.spine.test.aggregate.event.AggProjectCreated;
 import io.spine.test.aggregate.user.User;
 import io.spine.test.aggregate.user.UserVBuilder;
@@ -58,7 +58,7 @@ public class AggregateTestEnv {
 
         /** There is no event applier for ProjectCreated event (intentionally). */
         @Assign
-        AggProjectCreated handle(CreateProject cmd, CommandContext ctx) {
+        AggProjectCreated handle(AggCreateProject cmd, CommandContext ctx) {
             createProjectCommandHandled = true;
             return projectCreated(cmd.getProjectId(), cmd.getName());
         }
@@ -96,7 +96,7 @@ public class AggregateTestEnv {
         }
 
         @Assign
-        AggProjectCreated handle(CreateProject cmd, CommandContext ctx) {
+        AggProjectCreated handle(AggCreateProject cmd, CommandContext ctx) {
             if (brokenHandler) {
                 throw new IllegalStateException(BROKEN_HANDLER);
             }

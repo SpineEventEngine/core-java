@@ -32,8 +32,8 @@ import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.ProjectLifecycle;
 import io.spine.test.aggregate.ProjectLifecycleVBuilder;
 import io.spine.test.aggregate.Status;
-import io.spine.test.aggregate.command.CreateProject;
-import io.spine.test.aggregate.command.StartProject;
+import io.spine.test.aggregate.command.AggCreateProject;
+import io.spine.test.aggregate.command.AggStartProject;
 import io.spine.test.aggregate.event.AggProjectCreated;
 import io.spine.test.aggregate.event.AggProjectStarted;
 
@@ -58,7 +58,7 @@ public class AggregateRootTestEnv {
         }
 
         @Assign
-        AggProjectCreated handle(CreateProject msg) {
+        AggProjectCreated handle(AggCreateProject msg) {
             final AggProjectCreated result = AggProjectCreated.newBuilder()
                                                               .setProjectId(msg.getProjectId())
                                                               .setName(msg.getName())
@@ -87,7 +87,7 @@ public class AggregateRootTestEnv {
         }
 
         @Assign
-        AggProjectStarted handle(StartProject msg) {
+        AggProjectStarted handle(AggStartProject msg) {
             final AggProjectStarted result = AggProjectStarted.newBuilder()
                                                         .setProjectId(msg.getProjectId())
                                                         .build();
