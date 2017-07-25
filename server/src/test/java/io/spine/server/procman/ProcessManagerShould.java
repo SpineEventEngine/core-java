@@ -48,9 +48,9 @@ import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.command.AddTask;
 import io.spine.test.procman.command.CreateProject;
 import io.spine.test.procman.command.StartProject;
-import io.spine.test.procman.event.PrmnProjectCreated;
-import io.spine.test.procman.event.PrmnProjectStarted;
-import io.spine.test.procman.event.PrmnTaskAdded;
+import io.spine.test.procman.event.PmProjectCreated;
+import io.spine.test.procman.event.PmProjectStarted;
+import io.spine.test.procman.event.PmTaskAdded;
 import io.spine.testdata.Sample;
 import io.spine.validate.AnyVBuilder;
 import org.junit.Before;
@@ -116,14 +116,14 @@ public class ProcessManagerShould {
 
     @Test
     public void dispatch_event() {
-        testDispatchEvent(Sample.messageOfType(PrmnProjectStarted.class));
+        testDispatchEvent(Sample.messageOfType(PmProjectStarted.class));
     }
 
     @Test
     public void dispatch_several_events() {
-        testDispatchEvent(Sample.messageOfType(PrmnProjectCreated.class));
-        testDispatchEvent(Sample.messageOfType(PrmnTaskAdded.class));
-        testDispatchEvent(Sample.messageOfType(PrmnProjectStarted.class));
+        testDispatchEvent(Sample.messageOfType(PmProjectCreated.class));
+        testDispatchEvent(Sample.messageOfType(PmTaskAdded.class));
+        testDispatchEvent(Sample.messageOfType(PmProjectStarted.class));
     }
 
     private void testDispatchEvent(Message event) {
@@ -163,7 +163,7 @@ public class ProcessManagerShould {
         assertEquals(1, events.size());
         final Event event = events.get(0);
         assertNotNull(event);
-        final PrmnProjectCreated message = unpack(event.getMessage());
+        final PmProjectCreated message = unpack(event.getMessage());
         assertEquals(ID, message.getProjectId());
     }
 
@@ -227,9 +227,9 @@ public class ProcessManagerShould {
         final Set<EventClass> classes =
                 ProcessManager.TypeInfo.getEventClasses(TestProcessManager.class);
         assertEquals(3, classes.size());
-        assertTrue(classes.contains(EventClass.of(PrmnProjectCreated.class)));
-        assertTrue(classes.contains(EventClass.of(PrmnTaskAdded.class)));
-        assertTrue(classes.contains(EventClass.of(PrmnProjectStarted.class)));
+        assertTrue(classes.contains(EventClass.of(PmProjectCreated.class)));
+        assertTrue(classes.contains(EventClass.of(PmTaskAdded.class)));
+        assertTrue(classes.contains(EventClass.of(PmProjectStarted.class)));
     }
 
     @Test
@@ -298,32 +298,32 @@ public class ProcessManagerShould {
         }
 
         @Subscribe
-        public void on(PrmnProjectCreated event, EventContext ignored) {
+        public void on(PmProjectCreated event, EventContext ignored) {
             getBuilder().mergeFrom(AnyPacker.pack(event));
         }
 
         @Subscribe
-        public void on(PrmnTaskAdded event, EventContext ignored) {
+        public void on(PmTaskAdded event, EventContext ignored) {
             getBuilder().mergeFrom(AnyPacker.pack(event));
         }
 
         @Subscribe
-        public void on(PrmnProjectStarted event, EventContext ignored) {
+        public void on(PmProjectStarted event, EventContext ignored) {
             getBuilder().mergeFrom(AnyPacker.pack(event));
         }
 
         @Assign
-        PrmnProjectCreated handle(CreateProject command, CommandContext ignored) {
+        PmProjectCreated handle(CreateProject command, CommandContext ignored) {
             getBuilder().mergeFrom(AnyPacker.pack(command));
-            return ((PrmnProjectCreated.Builder) Sample.builderForType(PrmnProjectCreated.class))
+            return ((PmProjectCreated.Builder) Sample.builderForType(PmProjectCreated.class))
                     .setProjectId(command.getProjectId())
                     .build();
         }
 
         @Assign
-        PrmnTaskAdded handle(AddTask command, CommandContext ignored) {
+        PmTaskAdded handle(AddTask command, CommandContext ignored) {
             getBuilder().mergeFrom(AnyPacker.pack(command));
-            return ((PrmnTaskAdded.Builder) Sample.builderForType(PrmnTaskAdded.class))
+            return ((PmTaskAdded.Builder) Sample.builderForType(PmTaskAdded.class))
                     .setProjectId(command.getProjectId())
                     .build();
         }

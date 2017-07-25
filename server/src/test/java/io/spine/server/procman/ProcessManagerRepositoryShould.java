@@ -46,9 +46,9 @@ import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.command.AddTask;
 import io.spine.test.procman.command.CreateProject;
 import io.spine.test.procman.command.StartProject;
-import io.spine.test.procman.event.PrmnProjectCreated;
-import io.spine.test.procman.event.PrmnProjectStarted;
-import io.spine.test.procman.event.PrmnTaskAdded;
+import io.spine.test.procman.event.PmProjectCreated;
+import io.spine.test.procman.event.PmProjectStarted;
+import io.spine.test.procman.event.PmTaskAdded;
 import io.spine.testdata.Sample;
 import org.junit.After;
 import org.junit.Before;
@@ -94,20 +94,20 @@ public class ProcessManagerRepositoryShould
                 .build();
     }
 
-    private static PrmnProjectStarted projectStarted() {
-        return ((PrmnProjectStarted.Builder) Sample.builderForType(PrmnProjectStarted.class))
+    private static PmProjectStarted projectStarted() {
+        return ((PmProjectStarted.Builder) Sample.builderForType(PmProjectStarted.class))
                 .setProjectId(ID)
                 .build();
     }
 
-    private static PrmnProjectCreated projectCreated() {
-        return ((PrmnProjectCreated.Builder) Sample.builderForType(PrmnProjectCreated.class))
+    private static PmProjectCreated projectCreated() {
+        return ((PmProjectCreated.Builder) Sample.builderForType(PmProjectCreated.class))
                 .setProjectId(ID)
                 .build();
     }
 
-    private static PrmnTaskAdded taskAdded() {
-        return ((PrmnTaskAdded.Builder) Sample.builderForType(PrmnTaskAdded.class))
+    private static PmTaskAdded taskAdded() {
+        return ((PmTaskAdded.Builder) Sample.builderForType(PmTaskAdded.class))
                 .setProjectId(ID)
                 .build();
     }
@@ -226,7 +226,7 @@ public class ProcessManagerRepositoryShould
 
         testDispatchCommand(addTask());
 
-        final PrmnTaskAdded message = subscriber.remembered;
+        final PmTaskAdded message = subscriber.remembered;
         assertEquals(ID, message.getProjectId());
     }
 
@@ -256,17 +256,17 @@ public class ProcessManagerRepositoryShould
     @Test
     public void return_event_classes() {
         final Set<EventClass> eventClasses = repository().getMessageClasses();
-        assertTrue(eventClasses.contains(EventClass.of(PrmnProjectCreated.class)));
-        assertTrue(eventClasses.contains(EventClass.of(PrmnTaskAdded.class)));
-        assertTrue(eventClasses.contains(EventClass.of(PrmnProjectStarted.class)));
+        assertTrue(eventClasses.contains(EventClass.of(PmProjectCreated.class)));
+        assertTrue(eventClasses.contains(EventClass.of(PmTaskAdded.class)));
+        assertTrue(eventClasses.contains(EventClass.of(PmProjectStarted.class)));
     }
 
     private static class Subscriber extends EventSubscriber {
 
-        private PrmnTaskAdded remembered;
+        private PmTaskAdded remembered;
 
         @Subscribe
-        void on(PrmnTaskAdded msg) {
+        void on(PmTaskAdded msg) {
             remembered = msg;
         }
     }

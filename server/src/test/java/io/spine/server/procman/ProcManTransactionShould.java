@@ -30,8 +30,8 @@ import io.spine.server.entity.TransactionListener;
 import io.spine.server.entity.TransactionShould;
 import io.spine.test.procman.Project;
 import io.spine.test.procman.ProjectId;
-import io.spine.test.procman.event.PrmnProjectCreated;
-import io.spine.test.procman.event.PrmnTaskAdded;
+import io.spine.test.procman.event.PmProjectCreated;
+import io.spine.test.procman.event.PmTaskAdded;
 import io.spine.validate.ConstraintViolation;
 
 import javax.annotation.Nullable;
@@ -116,14 +116,14 @@ public class ProcManTransactionShould extends TransactionShould<ProjectId,
 
     @Override
     protected Message createEventMessage() {
-        return PrmnProjectCreated.newBuilder()
+        return PmProjectCreated.newBuilder()
                                  .setProjectId(ID)
                                  .build();
     }
 
     @Override
     protected Message createEventMessageThatFailsInHandler() {
-        return PrmnTaskAdded.newBuilder()
+        return PmTaskAdded.newBuilder()
                             .setProjectId(ID)
                             .build();
     }
@@ -161,7 +161,7 @@ public class ProcManTransactionShould extends TransactionShould<ProjectId,
         }
 
         @Subscribe
-        public void event(PrmnProjectCreated event) {
+        public void event(PmProjectCreated event) {
             receivedEvents.add(event);
             final Project newState = Project.newBuilder(getState())
                                             .setId(event.getProjectId())
@@ -170,7 +170,7 @@ public class ProcManTransactionShould extends TransactionShould<ProjectId,
         }
 
         @Subscribe
-        public void event(PrmnTaskAdded event) {
+        public void event(PmTaskAdded event) {
             throw new RuntimeException("that tests the tx behaviour for process manager");
         }
 
