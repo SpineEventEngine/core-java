@@ -30,15 +30,15 @@ option java_multiple_files = true;
 
 import "spine/test/entity/project.proto";
 
-message CreateProject {
+message EntCreateProject {
     ProjectId project_id = 1;
 }
 
-message AddTask {
+message EntAddTask {
     ProjectId project_id = 1;
     Task task = 2;
 }
 
-message StartProject {
+message EntStartProject {
     ProjectId project_id = 1;
 }
