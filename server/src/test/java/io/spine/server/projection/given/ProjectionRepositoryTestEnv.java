@@ -33,9 +33,9 @@ import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.ProjectTaskNames;
 import io.spine.test.projection.ProjectTaskNamesVBuilder;
 import io.spine.test.projection.ProjectVBuilder;
-import io.spine.test.projection.event.PjnProjectCreated;
-import io.spine.test.projection.event.PjnProjectStarted;
-import io.spine.test.projection.event.PjnTaskAdded;
+import io.spine.test.projection.event.PrjProjectCreated;
+import io.spine.test.projection.event.PrjProjectStarted;
+import io.spine.test.projection.event.PrjTaskAdded;
 
 public class ProjectionRepositoryTestEnv {
 
@@ -59,12 +59,12 @@ public class ProjectionRepositoryTestEnv {
         }
 
         @Subscribe
-        public void on(PjnProjectCreated event) {
+        public void on(PrjProjectCreated event) {
             // do nothing.
         }
 
         @Subscribe
-        public void on(PjnTaskAdded event) {
+        public void on(PrjTaskAdded event) {
             // do nothing
         }
     }
@@ -74,7 +74,7 @@ public class ProjectionRepositoryTestEnv {
             extends ProjectionRepository<ProjectId, TestProjection, Project> {
 
         @Subscribe
-        public void apply(PjnProjectCreated event, EventContext eventContext) {
+        public void apply(PrjProjectCreated event, EventContext eventContext) {
             // NOP
         }
     }
@@ -114,7 +114,7 @@ public class ProjectionRepositoryTestEnv {
         }
 
         @Subscribe
-        public void on(PjnProjectCreated event) {
+        public void on(PrjProjectCreated event) {
             // Keep the event message for further inspection in tests.
             keep(event);
 
@@ -126,7 +126,7 @@ public class ProjectionRepositoryTestEnv {
         }
 
         @Subscribe
-        public void on(PjnTaskAdded event) {
+        public void on(PrjTaskAdded event) {
             keep(event);
             final Project newState = getState().toBuilder()
                                                .addTask(event.getTask())
@@ -135,14 +135,14 @@ public class ProjectionRepositoryTestEnv {
         }
 
         /**
-         * Handles the {@link PjnProjectStarted} event.
+         * Handles the {@link PrjProjectStarted} event.
          *
          * @param event   the event message
          * @param ignored this parameter is left to show that a projection subscriber
          *                can have two parameters
          */
         @Subscribe
-        public void on(PjnProjectStarted event,
+        public void on(PrjProjectStarted event,
                        @SuppressWarnings("UnusedParameters") EventContext ignored) {
             keep(event);
             final Project newState = getState().toBuilder()
@@ -167,20 +167,20 @@ public class ProjectionRepositoryTestEnv {
             // Prevent instantiation of this utility class.
         }
 
-        public static PjnProjectStarted projectStarted() {
-            return PjnProjectStarted.newBuilder()
+        public static PrjProjectStarted projectStarted() {
+            return PrjProjectStarted.newBuilder()
                                     .setProjectId(ENTITY_ID)
                                     .build();
         }
 
-        public static PjnProjectCreated projectCreated() {
-            return PjnProjectCreated.newBuilder()
+        public static PrjProjectCreated projectCreated() {
+            return PrjProjectCreated.newBuilder()
                                     .setProjectId(ENTITY_ID)
                                     .build();
         }
 
-        public static PjnTaskAdded taskAdded() {
-            return PjnTaskAdded.newBuilder()
+        public static PrjTaskAdded taskAdded() {
+            return PrjTaskAdded.newBuilder()
                                .setProjectId(ENTITY_ID)
                                .build();
         }

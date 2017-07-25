@@ -46,7 +46,7 @@ import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.ProjectVBuilder;
 import io.spine.test.projection.command.CreateProject;
-import io.spine.test.projection.event.PjnProjectCreated;
+import io.spine.test.projection.event.PrjProjectCreated;
 import io.spine.validate.StringValueVBuilder;
 
 import java.util.Collections;
@@ -78,7 +78,7 @@ class Given {
 
     static Event validEvent() {
         final Command cmd = validCommand();
-        final PjnProjectCreated eventMessage = PjnProjectCreated.newBuilder()
+        final PrjProjectCreated eventMessage = PrjProjectCreated.newBuilder()
                                                                 .setProjectId(ProjectId.newBuilder()
                                                                                        .setId("12345AD0"))
                                                                 .build();
@@ -107,12 +107,12 @@ class Given {
     static class StandTestProjectionRepository
             extends ProjectionRepository<ProjectId, StandTestProjection, Project> {
 
-        private static final EventRoute<ProjectId, PjnProjectCreated> EVENT_TARGETS_FN =
-                new EventRoute<ProjectId, PjnProjectCreated>() {
+        private static final EventRoute<ProjectId, PrjProjectCreated> EVENT_TARGETS_FN =
+                new EventRoute<ProjectId, PrjProjectCreated>() {
                     private static final long serialVersionUID = 0L;
 
                     @Override
-                    public Set<ProjectId> apply(PjnProjectCreated message, EventContext context) {
+                    public Set<ProjectId> apply(PrjProjectCreated message, EventContext context) {
                         return ImmutableSet.of(ProjectId.newBuilder()
                                                         .setId(PROJECT_UUID)
                                                         .build());
@@ -121,7 +121,7 @@ class Given {
 
         StandTestProjectionRepository() {
             super();
-            getRouting().route(PjnProjectCreated.class, EVENT_TARGETS_FN);
+            getRouting().route(PrjProjectCreated.class, EVENT_TARGETS_FN);
         }
     }
 
@@ -153,7 +153,7 @@ class Given {
         }
 
         @Apply
-        public void handle(PjnProjectCreated event) {
+        public void handle(PrjProjectCreated event) {
             // Do nothing
         }
     }
@@ -167,7 +167,7 @@ class Given {
 
         @SuppressWarnings("unused") // OK for test class.
         @Subscribe
-        public void handle(PjnProjectCreated event, EventContext context) {
+        public void handle(PrjProjectCreated event, EventContext context) {
             getBuilder().setId(event.getProjectId());
         }
     }

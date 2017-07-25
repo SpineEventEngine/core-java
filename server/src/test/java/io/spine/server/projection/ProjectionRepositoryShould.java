@@ -45,9 +45,9 @@ import io.spine.server.projection.given.ProjectionRepositoryTestEnv.TestProjecti
 import io.spine.server.storage.RecordStorage;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
-import io.spine.test.projection.event.PjnProjectCreated;
-import io.spine.test.projection.event.PjnProjectStarted;
-import io.spine.test.projection.event.PjnTaskAdded;
+import io.spine.test.projection.event.PrjProjectCreated;
+import io.spine.test.projection.event.PrjProjectStarted;
+import io.spine.test.projection.event.PrjTaskAdded;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -212,9 +212,9 @@ public class ProjectionRepositoryShould
     public void return_event_classes() {
         final Set<EventClass> eventClasses = repository().getMessageClasses();
         assertContainsAll(eventClasses,
-                          EventClass.of(PjnProjectCreated.class),
-                          EventClass.of(PjnTaskAdded.class),
-                          EventClass.of(PjnProjectStarted.class));
+                          EventClass.of(PrjProjectCreated.class),
+                          EventClass.of(PrjTaskAdded.class),
+                          EventClass.of(PrjProjectStarted.class));
     }
 
     @Test
