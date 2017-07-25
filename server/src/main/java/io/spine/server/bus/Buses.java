@@ -42,9 +42,8 @@ import static io.spine.validate.Validate.isNotDefault;
 @Internal
 public class Buses {
 
-    private Buses() {
-        // Prevent utility class instantiation.
-    }
+    /** Prevents instantiation of this utility class. */
+    private Buses() {}
 
     /**
      * Acknowledges the envelope posted.

@@ -19,7 +19,7 @@
  */
 
 /**
- * This package provides classes for working with business failures.
+ * This package provides classes for working with command rejections.
  */
 
 @ParametersAreNonnullByDefault

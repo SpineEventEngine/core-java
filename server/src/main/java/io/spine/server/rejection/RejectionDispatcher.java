@@ -24,9 +24,9 @@ import io.spine.core.RejectionEnvelope;
 import io.spine.server.bus.MulticastDispatcher;
 
 /**
- * Responsible for delivering the business failures to the corresponding subscribers.
+ * Delivers rejections to corresponding subscribers.
  *
- * @param <I> the type of entities to which deliver failures
+ * @param <I> the type of entities to which deliver rejections
  * @author Alex Tymchenko
  */
 public interface RejectionDispatcher<I>

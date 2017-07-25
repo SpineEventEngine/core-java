@@ -32,8 +32,7 @@ import javax.annotation.Nullable;
 import java.util.Set;
 
 /**
- * The abstract base for objects that can be subscribed to receive business rejections
- * from {@link RejectionBus FailureBus}.
+ * Abstract base for objects receiving rejections from {@link RejectionBus}.
  *
  * @author Alex Tymchenko
  * @author Alexander Yevsyukov

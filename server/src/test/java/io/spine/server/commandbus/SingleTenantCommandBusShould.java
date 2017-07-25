@@ -103,7 +103,7 @@ public class SingleTenantCommandBusShould extends AbstractCommandBusTestSuite {
     }
 
     @Test
-    public void propagate_failures_to_failure_bus() {
+    public void propagate_rejections_to_rejection_bus() {
         final FaultyHandler faultyHandler = new FaultyHandler(eventBus);
         commandBus.register(faultyHandler);
 
@@ -135,25 +135,25 @@ public class SingleTenantCommandBusShould extends AbstractCommandBusTestSuite {
     }
 
     /**
-     * A {@code CommandHandler}, which throws a failure upon a command.
+     * A {@code CommandHandler}, which throws a rejection upon a command.
      */
     private static class FaultyHandler extends CommandHandler {
 
-        private final InvalidProjectName failure =
+        private final InvalidProjectName rejection =
                 new InvalidProjectName(ProjectId.getDefaultInstance());
 
         private FaultyHandler(EventBus eventBus) {
             super(eventBus);
         }
 
-        @SuppressWarnings("unused")     // does nothing, but throws a failure.
+        @SuppressWarnings("unused")     // does nothing, but throws a rejection.
         @Assign
         TaskAdded handle(AddTask msg, CommandContext context) throws InvalidProjectName {
-            throw failure;
+            throw rejection;
         }
 
         private InvalidProjectName getThrowable() {
-            return failure;
+            return rejection;
         }
     }
 }

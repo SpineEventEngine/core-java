@@ -99,7 +99,7 @@ public class CommandBusBuilderShould extends BusBuilderShould<CommandBus.Builder
     }
 
     @Test
-    public void allow_to_specify_failure_bus() {
+    public void allow_to_specify_rejeciton_bus() {
         final RejectionBus expectedRejectionBus = mock(RejectionBus.class);
 
         final CommandBus.Builder builder = builder().setCommandStore(commandStore)

@@ -71,7 +71,7 @@ public class RejectionBus extends CommandOutputBus<Rejection,
     }
 
     /**
-     * Creates a new builder for the {@code FailureBus}.
+     * Creates a new builder for the {@code RejectionBus}.
      */
     public static Builder newBuilder() {
         return new Builder();
@@ -88,10 +88,10 @@ public class RejectionBus extends CommandOutputBus<Rejection,
     }
 
     /**
-     * Always returns the original {@code Failure}, as the enrichment is not supported
-     * for the business failures yet.
+     * Always returns the original {@code Rejection}, as the enrichment is not supported
+     * for rejections yet.
      *
-     * @param originalMessage the business failure to enrich
+     * @param originalMessage the rejection to enrich
      * @return the same message
      */
     @Override
@@ -101,7 +101,7 @@ public class RejectionBus extends CommandOutputBus<Rejection,
 
     @Override
     protected OutputDispatcherRegistry<RejectionClass, RejectionDispatcher<?>> createRegistry() {
-        return new FailureDispatcherRegistry();
+        return new RejectionDispatcherRegistry();
     }
 
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK for this method.
@@ -118,7 +118,7 @@ public class RejectionBus extends CommandOutputBus<Rejection,
 
     @Override
     protected DeadMessageTap<RejectionEnvelope> getDeadMessageHandler() {
-        return DeadFailureTap.INSTANCE;
+        return DeadRejectionTap.INSTANCE;
     }
 
     @Override
@@ -132,8 +132,8 @@ public class RejectionBus extends CommandOutputBus<Rejection,
      * <p>Overrides for return type covariance.
      */
     @Override
-    protected FailureDispatcherRegistry registry() {
-        return (FailureDispatcherRegistry) super.registry();
+    protected RejectionDispatcherRegistry registry() {
+        return (RejectionDispatcherRegistry) super.registry();
     }
 
     @VisibleForTesting
@@ -156,24 +156,24 @@ public class RejectionBus extends CommandOutputBus<Rejection,
     }
 
     /**
-     * Posts the business failure to this bus instance.
+     * Posts the rejection to this bus instance.
      *
      * <p>This method should be used if the callee does not need to follow the
      * acknowledgement responses. Otherwise, an
      * {@linkplain #post(Message, StreamObserver) alternative method} should be used.
      *
-     * @param rejection the business failure to deliver to the dispatchers.
+     * @param rejection the business rejection to deliver to the dispatchers.
      * @see #post(Message, StreamObserver)
      */
     public final void post(Rejection rejection) {
         post(rejection, StreamObservers.<Ack>noOpObserver());
     }
 
-    /** The {@code Builder} for {@code FailureBus}. */
+    /** The {@code Builder} for {@code RejectionBus}. */
     public static class Builder extends AbstractBuilder<RejectionEnvelope, Rejection, Builder> {
 
         /**
-         * Optional {@code DispatcherFailureDelivery} for calling the dispatchers.
+         * Optional {@code DispatcherRejectionDelivery} for calling the dispatchers.
          *
          * <p>If not set, a default value will be set by the builder.
          */
@@ -186,10 +186,10 @@ public class RejectionBus extends CommandOutputBus<Rejection,
         }
 
         /**
-         * Sets a {@code DispatcherFailureDelivery} to be used for the failure delivery
-         * to the dispatchers in the {@code FailureBus} being built.
+         * Sets a {@code DispatcherRejectionDelivery} to be used for the rejection delivery
+         * to the dispatchers in the {@code RejectionBus} being built.
          *
-         * <p>If the {@code DispatcherFailureDelivery} is not set,
+         * <p>If the {@code DispatcherRejectionDelivery} is not set,
          * {@linkplain  DispatcherRejectionDelivery#directDelivery() direct delivery} will be used.
          */
         public Builder setDispatcherRejectionDelivery(DispatcherRejectionDelivery delivery) {
@@ -220,7 +220,7 @@ public class RejectionBus extends CommandOutputBus<Rejection,
      * Generates an {@link UnhandledRejectionException} upon a dead
      * message.
      */
-    private enum DeadFailureTap implements DeadMessageTap<RejectionEnvelope> {
+    private enum DeadRejectionTap implements DeadMessageTap<RejectionEnvelope> {
         INSTANCE;
 
         @Override

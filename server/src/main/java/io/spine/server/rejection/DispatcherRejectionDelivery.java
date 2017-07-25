@@ -73,8 +73,8 @@ public abstract class DispatcherRejectionDelivery
     }
 
     /**
-     * Obtains a pre-defined instance of the {@code DispatcherFailureDelivery}, which does not
-     * postpone any rejeciton dispatching and uses
+     * Obtains a pre-defined instance of the {@code DispatcherRejectionDelivery}, which does not
+     * postpone any rejection dispatching and uses
      * {@link com.google.common.util.concurrent.MoreExecutors#directExecutor() direct executor}
      * for operation.
      *

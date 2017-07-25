@@ -25,19 +25,19 @@ import io.spine.server.outbus.OutputDispatcherRegistry;
 import java.util.Set;
 
 /**
- * The registry of objects dispatching the business failures to their subscribers.
+ * The registry of objects dispatching the rejections to their subscribers.
  *
- * <p>There can be multiple dispatchers per failure class.
+ * <p>There can be multiple dispatchers per rejection class.
  *
  * @author Alex Tymchenko
  */
-public class FailureDispatcherRegistry extends OutputDispatcherRegistry<RejectionClass,
-        RejectionDispatcher<?>> {
+public class RejectionDispatcherRegistry
+        extends OutputDispatcherRegistry<RejectionClass, RejectionDispatcher<?>> {
     /**
      * {@inheritDoc}
      *
      * Overrides to expose this method to
-     * {@linkplain RejectionBus#getDispatchers(RejectionClass) failureBus}.
+     * {@linkplain RejectionBus#getDispatchers(RejectionClass) RejectionBus}.
      */
     @Override
     protected Set<RejectionDispatcher<?>> getDispatchers(RejectionClass messageClass) {
@@ -48,7 +48,7 @@ public class FailureDispatcherRegistry extends OutputDispatcherRegistry<Rejectio
      * {@inheritDoc}
      *
      * Overrides to expose this method to
-     * {@linkplain RejectionBus#hasDispatchers(RejectionClass) failureBus}.
+     * {@linkplain RejectionBus#hasDispatchers(RejectionClass) RejectionBus}.
      */
     @Override
     protected boolean hasDispatchersFor(RejectionClass eventClass) {

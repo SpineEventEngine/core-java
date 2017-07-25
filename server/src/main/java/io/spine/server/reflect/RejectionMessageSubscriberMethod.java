@@ -28,14 +28,14 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 /**
- * A wrapper of the Failure subscriber method which receives a failure message as a single
+ * A wrapper of a rejection subscriber method which receives a rejection message as a single
  * parameter.
  *
  * <p>The signature of such a method is following:
  * <pre>
  *     {@code
  *     {@link Subscribe {@literal @}Subscribe}
- *     public void on(FailureMessage failure);
+ *     public void on(RejectionMessage rejection);
  *     }
  * </pre>
  *
@@ -56,7 +56,7 @@ final class RejectionMessageSubscriberMethod extends RejectionSubscriberMethod {
      * {@inheritDoc}
      *
      * <p>Invokes the wrapped {@link Method} upon all the passed params as follows:
-     * {@code invoke(target, failureMessage)} ignoring the Command {@linkplain Message} and
+     * {@code invoke(target, rejectionMessage)} ignoring the Command {@linkplain Message} and
      * {@link CommandContext} arguments.
      */
     @Override

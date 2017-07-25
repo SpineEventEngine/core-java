@@ -28,14 +28,14 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 /**
- * A wrapper of the Failure subscriber method aware of both the Command message and
+ * A wrapper of a rejection subscriber method aware of both the command message and
  * the {@link CommandContext}.
  *
  * <p>The signature of such a method is following:
  * <pre>
  *     {@code
  *     {@link Subscribe {@literal @}Subscribe}
- *     public void on(FailureMessage failure, CommandMessage command, CommandContext context);
+ *     public void on(RejectionMessage rejection, CommandMessage command, CommandContext context);
  *     }
  * </pre>
  *
@@ -56,7 +56,7 @@ final class CommandAwareRejectionSubscriberMethod extends RejectionSubscriberMet
      * {@inheritDoc}
      *
      * <p>Invokes the wrapped {@link Method} upon all the passed params as follows:
-     * {@code invoke(target, failureMessage, commandMessage, context)}.
+     * {@code invoke(target, rejectionMessage, commandMessage, context)}.
      */
     @Override
     protected void doInvoke(Object target, Message rejectionMessage, CommandContext context,

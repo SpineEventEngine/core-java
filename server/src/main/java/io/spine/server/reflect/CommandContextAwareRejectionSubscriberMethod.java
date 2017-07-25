@@ -28,13 +28,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 /**
- * A wrapper of the Failure subscriber method aware of the {@link CommandContext}.
+ * A wrapper of a rejection subscriber method aware of the {@link CommandContext}.
  *
  * <p>The signature of such a method is following:
  * <pre>
  *     {@code
  *     {@link Subscribe {@literal @}Subscribe}
- *     public void on(FailureMessage failure, CommandContext context);
+ *     public void on(RejectionMessage rejection, CommandContext context);
  *     }
  * </pre>
  *
@@ -55,7 +55,7 @@ final class CommandContextAwareRejectionSubscriberMethod extends RejectionSubscr
      * {@inheritDoc}
      *
      * <p>Invokes the wrapped {@link Method} upon all the passed params as follows:
-     * {@code invoke(target, failureMessage, context)} ignoring the Command
+     * {@code invoke(target, rejectionMessage, context)} ignoring the Command
      * {@linkplain Message} argument.
      */
     @Override
@@ -63,8 +63,8 @@ final class CommandContextAwareRejectionSubscriberMethod extends RejectionSubscr
                             Message rejectionMessage,
                             CommandContext context,
                             Message ignoredCommandMsg) throws IllegalArgumentException,
-                                                           IllegalAccessException,
-                                                           InvocationTargetException {
+                                                              IllegalAccessException,
+                                                              InvocationTargetException {
         getMethod().invoke(target, rejectionMessage, context);
     }
 }
