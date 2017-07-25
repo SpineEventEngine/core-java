@@ -35,7 +35,7 @@ import java.lang.annotation.Target;
  *     <li>be annotated with {@link React @React};
  *
  *     <li>accept an event message (derived from {@link com.google.protobuf.Message
- *     Message}) which is <not>generated</not> by this aggregate, as the first parameter;
+ *     Message}) which is <em>generated</em> by this aggregate, as the first parameter;
  *
  *     <li>return an event derived from {@link com.google.protobuf.Message Message}
  *     <strong>or</strong> several event messages returned as a {@link java.util.List List}.
