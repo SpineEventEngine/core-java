@@ -42,7 +42,7 @@ ext {
     // NOTE: when updating Protobuf dependency, please check that
     // `KnownTypes.addStandardProtobufTypes()` method is updated with new Message types that may be
     // introduced in the new version of Protobuf.
-    protobufVersion = '3.3.0'
+    protobufVersion = '3.3.1'
     
     gRpcVersion = '1.4.0'
     slf4JVersion = '1.7.25'
