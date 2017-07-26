@@ -31,12 +31,14 @@ import com.google.protobuf.Int64Value;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.spine.Identifier;
+import io.spine.base.ThrowableMessage;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.given.GivenCommandContext;
 import io.spine.core.given.GivenUserId;
 import io.spine.string.Stringifiers;
 import io.spine.time.Durations2;
+import io.spine.time.Time;
 import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
 import io.spine.type.TypeName;
@@ -249,5 +251,18 @@ public class CommandsShould {
                                                .toUrl();
 
         assertEquals(TypeUrl.of(StringValue.class), typeUrl);
+    }
+
+    @SuppressWarnings({
+            "NewExceptionWithoutArguments" /* No need to have a message for this test. */,
+            "SerializableInnerClassWithNonSerializableOuterClass" /* Does not refer anything. */
+    })
+    @Test
+    public void say_if_RuntimeException_was_called_by_command_rejection() {
+        assertFalse(Commands.causedByRejection(new RuntimeException()));
+        final ThrowableMessage throwableMessage = new ThrowableMessage(Time.getCurrentTime()) {
+            private static final long serialVersionUID = 0L;
+        };
+        assertTrue(Commands.causedByRejection(new IllegalStateException(throwableMessage)));
     }
 }

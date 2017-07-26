@@ -21,7 +21,6 @@ package io.spine.server.commandbus;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
-import io.spine.Environment;
 import io.spine.Identifier;
 import io.spine.annotation.Internal;
 import io.spine.base.Error;

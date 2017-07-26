@@ -23,7 +23,6 @@ package io.spine.server.rejection.given;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
 import io.spine.server.rejection.RejectionDispatcher;
-import io.spine.test.rejection.ProjectRejections;
 import io.spine.test.rejection.ProjectRejections.InvalidProjectName;
 
 import java.util.Set;
@@ -45,6 +44,11 @@ public class BareDispatcher implements RejectionDispatcher<String> {
     public Set<String> dispatch(RejectionEnvelope rejection) {
         dispatchCalled = true;
         return Identity.of(this);
+    }
+
+    @Override
+    public void onError(RejectionEnvelope envelope, RuntimeException exception) {
+        // Do nothing.
     }
 
     public boolean isDispatchCalled() {

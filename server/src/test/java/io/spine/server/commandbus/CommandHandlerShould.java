@@ -220,6 +220,11 @@ public class CommandHandlerShould {
             return Identity.of(this);
         }
 
+        @Override
+        public void onError(EventEnvelope envelope, RuntimeException exception) {
+            // Do nothing.
+        }
+
         @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK for tests.
         public List<EventEnvelope> getDispatched() {
             return dispatched;

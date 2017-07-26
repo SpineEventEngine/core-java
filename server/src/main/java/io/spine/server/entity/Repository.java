@@ -22,17 +22,23 @@ package io.spine.server.entity;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
+import com.google.common.base.Supplier;
 import com.google.common.collect.Iterators;
 import com.google.protobuf.Message;
 import io.spine.Identifier;
+import io.spine.core.MessageEnvelope;
 import io.spine.server.BoundedContext;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
+import io.spine.string.Stringifiers;
 import io.spine.type.ClassName;
 import io.spine.type.KnownTypes;
+import io.spine.type.MessageClass;
 import io.spine.type.TypeUrl;
 import io.spine.util.GenericTypeIndex;
+import io.spine.util.Logging;
+import org.slf4j.Logger;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
@@ -45,6 +51,7 @@ import static io.spine.server.entity.Repository.GenericParameter.ENTITY;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static io.spine.util.Exceptions.unsupported;
+import static java.lang.String.format;
 
 /**
  * Abstract base class for repositories.
@@ -53,6 +60,7 @@ import static io.spine.util.Exceptions.unsupported;
  * @param <E> the entity type
  * @author Alexander Yevsyukov
  */
+@SuppressWarnings("ClassWithTooManyMethods") // OK for this core class.
 public abstract class Repository<I, E extends Entity<I, ?>>
                 implements RepositoryView<I, E>, AutoCloseable {
 
@@ -98,6 +106,9 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      */
     @Nullable
     private volatile Class<I> idClass;
+
+    /** Lazily initialized logger. */
+    private final Supplier<Logger> loggerSupplier = Logging.supplyFor(getClass());
 
     /**
      * Creates the repository.
@@ -373,6 +384,28 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      */
     protected void checkNotClosed() {
         checkState(isOpen(), "The repository (%s) is closed.", getClass().getName());
+    }
+
+    /**
+     * Obtains the instance of logger associated with the class of the repository.
+     */
+    protected Logger log() {
+        return loggerSupplier.get();
+    }
+
+    /**
+     * Logs error caused by a message processing into the {@linkplain #log() repository log}.
+     *
+     * @param msgFormat the format of the message, with the first parameter being message class,
+     *                  and the second parameter is the message ID
+     * @param envelope  the envelope of the message caused the error
+     * @param exception the error
+     */
+    protected void logError(String msgFormat, MessageEnvelope envelope, RuntimeException exception) {
+        final MessageClass messageClass = envelope.getMessageClass();
+        final String messageId = Stringifiers.toString(envelope.getId());
+        final String errorMessage = format(msgFormat, messageClass, messageId);
+        log().error(errorMessage, exception);
     }
 
     /**

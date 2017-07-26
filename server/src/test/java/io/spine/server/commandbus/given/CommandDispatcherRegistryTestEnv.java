@@ -140,6 +140,11 @@ public class CommandDispatcherRegistryTestEnv {
         public Message dispatch(CommandEnvelope envelope) {
             return Empty.getDefaultInstance();
         }
+
+        @Override
+        public void onError(CommandEnvelope envelope, RuntimeException exception) {
+            // Do nothing.
+        }
     }
 
     public static class NoCommandsDispatcherRepo
@@ -158,6 +163,11 @@ public class CommandDispatcherRegistryTestEnv {
         public Message dispatch(CommandEnvelope envelope) {
             return Empty.getDefaultInstance();
         }
+
+        @Override
+        public void onError(CommandEnvelope envelope, RuntimeException exception) {
+            // Do nothing.
+        }
     }
 
     public static class CreateProjectDispatcher implements CommandDispatcher<Message> {
@@ -169,6 +179,11 @@ public class CommandDispatcherRegistryTestEnv {
         @Override
         public Message dispatch(CommandEnvelope envelope) {
             return Empty.getDefaultInstance();
+        }
+
+        @Override
+        public void onError(CommandEnvelope envelope, RuntimeException exception) {
+            // Do nothing.
         }
     }
 
@@ -183,6 +198,11 @@ public class CommandDispatcherRegistryTestEnv {
         public Message dispatch(CommandEnvelope envelope) {
             // Do nothing.
             return Empty.getDefaultInstance();
+        }
+
+        @Override
+        public void onError(CommandEnvelope envelope, RuntimeException exception) {
+            // Do nothing.
         }
     }
 

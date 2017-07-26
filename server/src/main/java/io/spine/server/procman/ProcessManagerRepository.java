@@ -69,7 +69,7 @@ public abstract class ProcessManagerRepository<I,
     /** Cached set of event classes to which process managers of this repository are subscribed. */
     @Nullable
     private Set<EventClass> eventClasses;
-
+    
     /** {@inheritDoc} */
     protected ProcessManagerRepository() {
         super(Producers.<I>fromFirstMessageField());
@@ -139,6 +139,16 @@ public abstract class ProcessManagerRepository<I,
 
         postEvents(events);
         return id;
+    }
+
+    @Override
+    public void onError(CommandEnvelope envelope, RuntimeException exception) {
+        logError("Command dispatching caused error (class: %s, id: %s)", envelope, exception);
+    }
+
+    @Override
+    public void onError(EventEnvelope envelope, RuntimeException exception) {
+        logError("Event dispatching caused error (class: %s, id: %s)", envelope, exception);
     }
 
     private ProcManTransaction<?, ?, ?> beginTransactionFor(P manager) {

@@ -53,5 +53,10 @@ public class DelegatingEventDispatcherShould {
             // Do nothing.
             return ImmutableSet.of();
         }
+
+        @Override
+        public void onError(EventEnvelope envelope, RuntimeException exception) {
+            // Do nothing.
+        }
     }
 }

@@ -63,10 +63,9 @@ abstract class AggregateMessageEndpoint<I,
     R dispatch() {
         final R targets = getTargets();
         if (targets instanceof Set) {
-            final Set<I> set = (Set<I>) targets;
-            for (I id : set) { //TODO:2017-07-21:alexander.yevsyukov: Can we run this in parallel?
-                //TODO:2017-07-21:alexander.yevsyukov: What if we dispatch events to multiple aggregates
-                // and one of them fails?
+            final Set<I> targetSet = (Set<I>) targets;
+            //TODO:2017-07-21:alexander.yevsyukov: Can we run this in parallel?
+            for (I id : targetSet) {
                 dispatchTo(id);
             }
         } else {

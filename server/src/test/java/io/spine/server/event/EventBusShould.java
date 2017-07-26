@@ -459,6 +459,11 @@ public class EventBusShould {
             return Identity.of(this);
         }
 
+        @Override
+        public void onError(EventEnvelope envelope, RuntimeException exception) {
+            // Do nothing.
+        }
+
         private boolean isDispatchCalled() {
             return dispatchCalled;
         }

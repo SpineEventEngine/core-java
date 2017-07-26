@@ -360,6 +360,11 @@ public class ProcessManagerShould {
             return Empty.getDefaultInstance();
         }
 
+        @Override
+        public void onError(CommandEnvelope envelope, RuntimeException exception) {
+            // Do nothing.
+        }
+
         @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK for tests.
         public List<CommandEnvelope> getCommands() {
             return commands;

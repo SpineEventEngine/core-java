@@ -20,6 +20,7 @@
 
 package io.spine.server.event;
 
+import com.google.common.base.Supplier;
 import com.google.protobuf.Message;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
@@ -27,9 +28,16 @@ import io.spine.core.EventEnvelope;
 import io.spine.server.bus.MessageDispatcher;
 import io.spine.server.reflect.EventSubscriberMethod;
 import io.spine.server.tenant.EventOperation;
+import io.spine.string.Stringifiers;
+import io.spine.type.MessageClass;
+import io.spine.util.Logging;
+import org.slf4j.Logger;
 
 import javax.annotation.Nullable;
 import java.util.Set;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.String.format;
 
 /**
  * The abstract base for objects that can be subscribed to receive events from {@link EventBus}.
@@ -49,6 +57,9 @@ public abstract class EventSubscriber implements EventDispatcher<String> {
     @Nullable
     private Set<EventClass> eventClasses;
 
+    /** Lazily initialized logger. */
+    private final Supplier<Logger> loggerSupplier = Logging.supplyFor(getClass());
+
     /**
      * {@inheritDoc}
      *
@@ -66,6 +77,30 @@ public abstract class EventSubscriber implements EventDispatcher<String> {
         };
         op.execute();
         return Identity.of(this);
+    }
+
+    /**
+     * Logs the error into the subscriber {@linkplain #log() log}.
+     * @param envelope  the message which caused the error
+     * @param exception the error
+     */
+    @Override
+    public void onError(EventEnvelope envelope, RuntimeException exception) {
+        checkNotNull(envelope);
+        checkNotNull(exception);
+        final MessageClass messageClass = envelope.getMessageClass();
+        final String messageId = Stringifiers.toString(envelope.getId());
+        final String errorMessage =
+                format("Error handling event subscription (class: %s id: %s).",
+                       messageClass, messageId);
+        log().error(errorMessage, exception);
+    }
+
+    /**
+     * Obtains the instance of logger associated with the class of the subscriber.
+     */
+    protected Logger log() {
+        return loggerSupplier.get();
     }
 
     @Override

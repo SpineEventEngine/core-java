@@ -50,4 +50,12 @@ public interface EventDispatcherDelegate<I> {
      * Dispatches the event.
      */
     Set<I> dispatchEvent(EventEnvelope envelope);
+
+    /**
+     * Handles an error occurred during event dispatching.
+     *
+     * @param envelope  the event which caused the error
+     * @param exception the error
+     */
+    void onError(EventEnvelope envelope, RuntimeException exception);
 }
