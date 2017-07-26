@@ -290,8 +290,8 @@ public class ProcessManagerShould {
 
     @SuppressWarnings("UnusedParameters") // OK for test class.
     private static class TestProcessManager extends ProcessManager<ProjectId,
-            Any,
-            AnyVBuilder> {
+                                                                   Any,
+                                                                   AnyVBuilder> {
 
         private TestProcessManager(ProjectId id) {
             super(id);
