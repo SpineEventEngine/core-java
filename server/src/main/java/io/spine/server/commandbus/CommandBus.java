@@ -408,7 +408,7 @@ public class CommandBus extends Bus<Command,
          * to {@code false}.
          *
          * <p>If not set explicitly, the default value of this flag is set upon the best guess,
-         * based on current {@link Environment}.
+         * based on current {@link io.spine.server.ServerEnvironment server environment}.
          */
         public Builder setThreadSpawnAllowed(boolean threadSpawnAllowed) {
             this.threadSpawnAllowed = threadSpawnAllowed;
