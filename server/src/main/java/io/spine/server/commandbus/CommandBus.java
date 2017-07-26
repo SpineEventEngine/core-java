@@ -45,6 +45,7 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.getRootCause;
+import static io.spine.core.Commands.causedByRejection;
 import static io.spine.core.Rejections.toRejection;
 import static io.spine.server.bus.Buses.acknowledge;
 import static io.spine.server.bus.Buses.reject;
@@ -201,7 +202,7 @@ public class CommandBus extends Bus<Command,
             final Throwable cause = getRootCause(e);
             commandStore.updateCommandStatus(envelope, cause, log);
 
-            if (cause instanceof ThrowableMessage) {
+            if (causedByRejection(e)) {
                 final ThrowableMessage throwableMessage = (ThrowableMessage) cause;
                 final Rejection rejection = toRejection(throwableMessage, envelope.getCommand());
                 rejectionBus().post(rejection);

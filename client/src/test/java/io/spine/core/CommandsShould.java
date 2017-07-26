@@ -49,13 +49,14 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.protobuf.Descriptors.FileDescriptor;
+import static io.spine.core.Commands.causedByRejection;
 import static io.spine.core.Commands.sameActorAndTenant;
 import static io.spine.core.given.GivenTenantId.newUuid;
 import static io.spine.protobuf.TypeConverter.toMessage;
+import static io.spine.test.TestValues.newUuidValue;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.TimeTests.Past.minutesAgo;
 import static io.spine.test.TimeTests.Past.secondsAgo;
-import static io.spine.test.TestValues.newUuidValue;
 import static io.spine.time.Durations2.seconds;
 import static io.spine.time.Time.getCurrentTime;
 import static org.junit.Assert.assertEquals;
@@ -259,10 +260,14 @@ public class CommandsShould {
     })
     @Test
     public void say_if_RuntimeException_was_called_by_command_rejection() {
-        assertFalse(Commands.causedByRejection(new RuntimeException()));
+        assertFalse(causedByRejection(new RuntimeException()));
         final ThrowableMessage throwableMessage = new ThrowableMessage(Time.getCurrentTime()) {
             private static final long serialVersionUID = 0L;
         };
-        assertTrue(Commands.causedByRejection(new IllegalStateException(throwableMessage)));
+        assertTrue(causedByRejection(new IllegalStateException(throwableMessage)));
+
+        // Check that root cause is analyzed.
+        assertTrue(causedByRejection(
+                new RuntimeException(new IllegalStateException(throwableMessage))));
     }
 }

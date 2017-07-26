@@ -22,6 +22,7 @@ package io.spine.core;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Predicate;
+import com.google.common.base.Throwables;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
@@ -212,7 +213,8 @@ public final class Commands {
     }
 
     /**
-     * Verifies if the exception has command rejection as its cause.
+     * Verifies if the exception has command rejection as its
+     * {@linkplain Throwables#getRootCause(Throwable) root cause} .
      *
      * @param exception the exception to analyze
      * @return {@code true} if the exception was created because of a command rejection thrown,
@@ -223,7 +225,8 @@ public final class Commands {
         // instead of ThrowableMessage when code generation allows customizing a custom
         // rejection types instead of `ThrowableMessage`.
         // See: https://github.com/SpineEventEngine/base/issues/20
-        final boolean result = exception.getCause() instanceof ThrowableMessage;
+        final Throwable rootCause = Throwables.getRootCause(exception);
+        final boolean result = rootCause instanceof ThrowableMessage;
         return result;
     }
 
