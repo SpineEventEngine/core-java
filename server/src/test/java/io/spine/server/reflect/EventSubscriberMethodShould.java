@@ -24,7 +24,7 @@ import com.google.common.testing.NullPointerTester;
 import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
 import io.spine.server.reflect.given.Given;
-import io.spine.test.reflect.event.ProjectCreated;
+import io.spine.test.reflect.event.RefProjectCreated;
 import org.junit.Test;
 
 import java.lang.reflect.InvocationTargetException;
@@ -52,7 +52,7 @@ public class EventSubscriberMethodShould {
         final ValidSubscriberTwoParams subscriberObject = spy(new ValidSubscriberTwoParams());
         final EventSubscriberMethod subscriber =
                 EventSubscriberMethod.from(subscriberObject.getMethod());
-        final ProjectCreated msg = Given.EventMessage.projectCreated();
+        final RefProjectCreated msg = Given.EventMessage.projectCreated();
 
         subscriber.invoke(subscriberObject, msg, EventContext.getDefaultInstance());
 
@@ -140,19 +140,19 @@ public class EventSubscriberMethodShould {
 
     private static class ValidSubscriberOneParam extends TestEventSubscriber {
         @Subscribe
-        public void handle(ProjectCreated event) {
+        public void handle(RefProjectCreated event) {
         }
     }
 
     private static class ValidSubscriberTwoParams extends TestEventSubscriber {
         @Subscribe
-        public void handle(ProjectCreated event, EventContext context) {
+        public void handle(RefProjectCreated event, EventContext context) {
         }
     }
 
     private static class ValidSubscriberButPrivate extends TestEventSubscriber {
         @Subscribe
-        private void handle(ProjectCreated event) {
+        private void handle(RefProjectCreated event) {
         }
     }
 
@@ -165,7 +165,7 @@ public class EventSubscriberMethodShould {
      */
     private static class InvalidSubscriberNoAnnotation extends TestEventSubscriber {
         @SuppressWarnings("unused")
-        public void handle(ProjectCreated event, EventContext context) {
+        public void handle(RefProjectCreated event, EventContext context) {
         }
     }
 
@@ -183,7 +183,7 @@ public class EventSubscriberMethodShould {
      */
     private static class InvalidSubscriberTooManyParams extends TestEventSubscriber {
         @Subscribe
-        public void handle(ProjectCreated event, EventContext context, Object redundant) {
+        public void handle(RefProjectCreated event, EventContext context, Object redundant) {
         }
     }
 
@@ -210,7 +210,7 @@ public class EventSubscriberMethodShould {
      */
     private static class InvalidSubscriberTwoParamsSecondInvalid extends TestEventSubscriber {
         @Subscribe
-        public void handle(ProjectCreated event, Exception invalid) {
+        public void handle(RefProjectCreated event, Exception invalid) {
         }
     }
 
@@ -219,7 +219,7 @@ public class EventSubscriberMethodShould {
      */
     private static class InvalidSubscriberNotVoid extends TestEventSubscriber {
         @Subscribe
-        public Object handle(ProjectCreated event) {
+        public Object handle(RefProjectCreated event) {
             return event;
         }
     }

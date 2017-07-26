@@ -45,7 +45,7 @@ import io.spine.server.storage.StorageFactory;
 import io.spine.test.Spy;
 import io.spine.test.bc.Project;
 import io.spine.test.bc.SecretProject;
-import io.spine.test.bc.event.ProjectCreated;
+import io.spine.test.bc.event.BcProjectCreated;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -171,7 +171,7 @@ public class BoundedContextShould {
                                                             .build();
 
         // Unsupported message.
-        final Any invalidMsg = AnyPacker.pack(ProjectCreated.getDefaultInstance());
+        final Any invalidMsg = AnyPacker.pack(BcProjectCreated.getDefaultInstance());
         final IntegrationEvent event =
                 Given.AnIntegrationEvent.projectCreated()
                                         .toBuilder()

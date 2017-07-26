@@ -22,9 +22,9 @@ package io.spine.server.reflect.given;
 
 import io.spine.test.reflect.ProjectId;
 import io.spine.test.reflect.ReflectRejections.InvalidProjectName;
-import io.spine.test.reflect.command.CreateProject;
-import io.spine.test.reflect.command.StartProject;
-import io.spine.test.reflect.event.ProjectCreated;
+import io.spine.test.reflect.command.RefCreateProject;
+import io.spine.test.reflect.command.RefStartProject;
+import io.spine.test.reflect.event.RefProjectCreated;
 
 import static io.spine.Identifier.newUuid;
 
@@ -43,17 +43,17 @@ public class Given {
     public static class EventMessage {
 
         private static final ProjectId DUMMY_PROJECT_ID = newProjectId();
-        private static final ProjectCreated PROJECT_CREATED = projectCreated(DUMMY_PROJECT_ID);
+        private static final RefProjectCreated PROJECT_CREATED = projectCreated(DUMMY_PROJECT_ID);
 
         /** Prevents instantiation of this utility class. */
         private EventMessage() {}
 
-        public static ProjectCreated projectCreated() {
+        public static RefProjectCreated projectCreated() {
             return PROJECT_CREATED;
         }
 
-        public static ProjectCreated projectCreated(ProjectId id) {
-            return ProjectCreated.newBuilder()
+        public static RefProjectCreated projectCreated(ProjectId id) {
+            return RefProjectCreated.newBuilder()
                                  .setProjectId(id)
                                  .build();
         }
@@ -64,14 +64,14 @@ public class Given {
         /** Prevents instantiation of this utility class. */
         private CommandMessage() {}
 
-        public static CreateProject createProject() {
-            return CreateProject.newBuilder()
+        public static RefCreateProject createProject() {
+            return RefCreateProject.newBuilder()
                                 .setProjectId(newProjectId())
                                 .build();
         }
 
-        public static StartProject startProject() {
-            return StartProject.newBuilder()
+        public static RefStartProject startProject() {
+            return RefStartProject.newBuilder()
                                .setProjectId(newProjectId())
                                .build();
         }

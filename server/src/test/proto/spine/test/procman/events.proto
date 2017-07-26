@@ -30,15 +30,15 @@ option java_multiple_files = true;
 
 import "spine/test/procman/project.proto";
 
-message ProjectCreated {
+message PmProjectCreated {
     ProjectId project_id = 1;
 }
 
-message TaskAdded {
+message PmTaskAdded {
     ProjectId project_id = 1;
     Task task = 2;
 }
 
-message ProjectStarted {
+message PmProjectStarted {
     ProjectId project_id = 1;
 }

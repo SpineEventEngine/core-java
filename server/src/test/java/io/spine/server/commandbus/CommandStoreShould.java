@@ -38,10 +38,10 @@ import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.tenant.TenantAwareFunction;
 import io.spine.test.TimeTests;
-import io.spine.test.command.AddTask;
-import io.spine.test.command.CreateProject;
-import io.spine.test.command.StartProject;
-import io.spine.test.command.event.ProjectCreated;
+import io.spine.test.command.CmdAddTask;
+import io.spine.test.command.CmdCreateProject;
+import io.spine.test.command.CmdStartProject;
+import io.spine.test.command.event.CmdProjectCreated;
 import org.junit.Test;
 
 import javax.annotation.Nonnull;
@@ -253,7 +253,7 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
         @Assign
         @SuppressWarnings({"unused", "ProhibitedExceptionThrown"})
             // Throwing is the purpose of this method.
-        ProjectCreated handle(CreateProject msg, CommandContext context) throws Throwable {
+        CmdProjectCreated handle(CmdCreateProject msg, CommandContext context) throws Throwable {
             throw throwable;
         }
     }
@@ -261,7 +261,7 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
     private <E extends Throwable> Command givenThrowingHandler(E throwable) {
         final CommandHandler handler = new ThrowingCreateProjectHandler(throwable);
         commandBus.register(handler);
-        final CreateProject msg = createProjectMessage();
+        final CmdCreateProject msg = createProjectMessage();
         final Command command = requestFactory.command()
                                               .create(msg);
         return command;
@@ -293,7 +293,7 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
 
         @Override
         public Set<CommandClass> getMessageClasses() {
-            return CommandClass.setOf(CreateProject.class, StartProject.class, AddTask.class);
+            return CommandClass.setOf(CmdCreateProject.class, CmdStartProject.class, CmdAddTask.class);
         }
 
         @Override

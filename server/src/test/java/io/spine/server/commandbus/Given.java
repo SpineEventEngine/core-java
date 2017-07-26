@@ -31,10 +31,10 @@ import io.spine.core.TenantId;
 import io.spine.core.UserId;
 import io.spine.core.given.GivenCommandContext;
 import io.spine.core.given.GivenUserId;
-import io.spine.test.command.AddTask;
-import io.spine.test.command.CreateProject;
+import io.spine.test.command.CmdAddTask;
+import io.spine.test.command.CmdCreateProject;
 import io.spine.test.command.ProjectId;
-import io.spine.test.command.StartProject;
+import io.spine.test.command.CmdStartProject;
 
 import static io.spine.Identifier.newUuid;
 import static io.spine.time.Time.getCurrentTime;
@@ -85,7 +85,7 @@ public class Given {
         }
 
         static Command addTask(UserId userId, ProjectId projectId, Timestamp when) {
-            final AddTask command = CommandMessage.addTask(projectId);
+            final CmdAddTask command = CommandMessage.addTask(projectId);
             return create(command, userId, when);
         }
 
@@ -100,7 +100,7 @@ public class Given {
 
         static Command createProject(Duration delay) {
 
-            final CreateProject projectMessage = CommandMessage.createProjectMessage();
+            final CmdCreateProject projectMessage = CommandMessage.createProjectMessage();
             final CommandContext commandContext = GivenCommandContext.withScheduledDelayOf(delay);
             final CommandFactory commandFactory =
                     TestActorRequestFactory.newInstance(ACommand.class)
@@ -110,9 +110,9 @@ public class Given {
         }
 
         static Command createProject(UserId userId,
-                                                     ProjectId projectId,
-                                                     Timestamp when) {
-            final CreateProject command = CommandMessage.createProjectMessage(projectId);
+                                     ProjectId projectId,
+                                     Timestamp when) {
+            final CmdCreateProject command = CommandMessage.createProjectMessage(projectId);
             return create(command, userId, when);
         }
 
@@ -121,9 +121,9 @@ public class Given {
         }
 
         static Command startProject(UserId userId,
-                                                    ProjectId projectId,
-                                                    Timestamp when) {
-            final StartProject command = CommandMessage.startProject(projectId);
+                                    ProjectId projectId,
+                                    Timestamp when) {
+            final CmdStartProject command = CommandMessage.startProject(projectId);
             return create(command, userId, when);
         }
     }
@@ -134,38 +134,38 @@ public class Given {
             // Prevent construction from outside.
         }
 
-        static AddTask addTask(String projectId) {
+        static CmdAddTask addTask(String projectId) {
             return addTask(ProjectId.newBuilder()
                                     .setId(projectId)
                                     .build());
         }
 
-        static AddTask addTask(ProjectId id) {
-            return AddTask.newBuilder()
-                          .setProjectId(id)
-                          .build();
+        static CmdAddTask addTask(ProjectId id) {
+            return CmdAddTask.newBuilder()
+                             .setProjectId(id)
+                             .build();
         }
 
-        public static CreateProject createProjectMessage() {
+        public static CmdCreateProject createProjectMessage() {
             return createProjectMessage(newProjectId());
         }
 
-        static CreateProject createProjectMessage(ProjectId id) {
-            return CreateProject.newBuilder()
-                                .setProjectId(id)
-                                .build();
+        static CmdCreateProject createProjectMessage(ProjectId id) {
+            return CmdCreateProject.newBuilder()
+                                   .setProjectId(id)
+                                   .build();
         }
 
-        static CreateProject createProjectMessage(String projectId) {
+        static CmdCreateProject createProjectMessage(String projectId) {
             return createProjectMessage(ProjectId.newBuilder()
                                                  .setId(projectId)
                                                  .build());
         }
 
-        static StartProject startProject(ProjectId id) {
-            return StartProject.newBuilder()
-                               .setProjectId(id)
-                               .build();
+        static CmdStartProject startProject(ProjectId id) {
+            return CmdStartProject.newBuilder()
+                                  .setProjectId(id)
+                                  .build();
         }
     }
 }
