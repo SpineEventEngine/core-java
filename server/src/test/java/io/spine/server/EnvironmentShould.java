@@ -20,6 +20,7 @@
 
 package io.spine.server;
 
+import io.spine.Environment;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -74,19 +75,6 @@ public class EnvironmentShould {
     @Test
     public void have_private_constructor() {
         assertHasPrivateParameterlessCtor(Environment.class);
-    }
-
-    @Test
-    public void tell_when_not_running_under_AppEngine() {
-        // Tests are not run by AppEngine by default.
-        assertFalse(environment.isAppEngine());
-    }
-
-    @Test
-    public void obtain_AppEngine_version_as_optional_string() {
-        // By default we're not running under AppEngine.
-        assertFalse(environment.appEngineVersion()
-                               .isPresent());
     }
 
     @Test

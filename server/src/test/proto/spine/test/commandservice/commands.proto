@@ -32,16 +32,16 @@ import "spine/core/event.proto";
 
 import "spine/test/commandservice/project.proto";
 
-message CreateProject {
+message CsCreateProject {
     ProjectId project_id = 1;
 }
 
-message AddTask {
+message CsAddTask {
     ProjectId project_id = 1;
     Task task = 2;
 }
 
-message StartProject {
+message CsStartProject {
     ProjectId project_id = 1;
 }
 

@@ -39,7 +39,7 @@ import java.util.concurrent.Executor;
 @SuppressWarnings("WeakerAccess")   // Part of API.
 public abstract class DispatcherEventDelivery extends CommandOutputDelivery<EventEnvelope,
                                                                             EventClass,
-                                                                            EventDispatcher> {
+                                                                            EventDispatcher<?>> {
 
     /**
      * Create a dispatcher event delivery with an {@link Executor} used for the operation.
@@ -63,7 +63,7 @@ public abstract class DispatcherEventDelivery extends CommandOutputDelivery<Even
     }
 
     @Override
-    protected Runnable getDeliveryAction(final EventDispatcher consumer,
+    protected Runnable getDeliveryAction(final EventDispatcher<?> consumer,
                                          final EventEnvelope envelope) {
         return new Runnable() {
             @Override

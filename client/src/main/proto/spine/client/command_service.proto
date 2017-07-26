@@ -32,11 +32,11 @@ option java_outer_classname = "CommandServiceProto";
 option java_generate_equals_and_hash = true;
 
 import "spine/core/command.proto";
-import "spine/core/bus.proto";
+import "spine/core/ack.proto";
 
 // A service for sending commands from clients.
 service CommandService {
 
     // Request to handle a command.
-    rpc Post(core.Command) returns (core.IsSent);
+    rpc Post(core.Command) returns (core.Ack);
 }

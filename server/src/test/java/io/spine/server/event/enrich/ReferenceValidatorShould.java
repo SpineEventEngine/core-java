@@ -23,8 +23,8 @@ package io.spine.server.event.enrich;
 import com.google.common.base.Optional;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Descriptors.FieldDescriptor;
-import io.spine.server.event.Given;
 import io.spine.server.event.enrich.ReferenceValidator.ValidationResult;
+import io.spine.server.event.enrich.given.ReferenceValidatorTestEnv.Enrichment;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.TaskAdded;
 import io.spine.test.event.enrichment.EnrichmentBoundWithFieldsSeparatedWithSpaces;
@@ -55,13 +55,14 @@ import static org.mockito.Mockito.when;
 public class ReferenceValidatorShould {
 
     private static final String USER_GOOGLE_UID_FIELD = "user_google_uid";
-    private final EventEnricher eventEnricher = Given.Enrichment.newEventEnricher();
+    private final EventEnricher eventEnricher = Enrichment.newEventEnricher();
 
     @Test
     public void initialize_with_valid_enricher() {
-        final ReferenceValidator validator = new ReferenceValidator(eventEnricher,
-                                                                    ProjectCreated.class,
-                                                                    ProjectCreatedEnrichmentAnotherPackage.class);
+        final ReferenceValidator validator =
+                new ReferenceValidator(eventEnricher,
+                                       ProjectCreated.class,
+                                       ProjectCreatedEnrichmentAnotherPackage.class);
         assertNotNull(validator);
     }
 
@@ -77,9 +78,10 @@ public class ReferenceValidatorShould {
         assertFalse(fieldMap.isEmpty());
         assertSize(1, fieldMap);
 
-        final Iterator<? extends Map.Entry<?, ? extends Collection<?>>> fieldsIterator = fieldMap.asMap()
-                                                                                                 .entrySet()
-                                                                                                 .iterator();
+        final Iterator<? extends Map.Entry<?, ? extends Collection<?>>> fieldsIterator =
+                fieldMap.asMap()
+                        .entrySet()
+                        .iterator();
         assertTrue(fieldsIterator.hasNext());
         final Map.Entry<?, ? extends Collection<?>> entry = fieldsIterator.next();
 
@@ -138,11 +140,13 @@ public class ReferenceValidatorShould {
         assertFalse(fieldMap.isEmpty());
         assertSize(1, fieldMap);
 
-        final Iterator<Map.Entry<FieldDescriptor, Collection<FieldDescriptor>>> mapIterator = fieldMap.asMap()
-                                                                                                      .entrySet()
-                                                                                                      .iterator();
+        final Iterator<Map.Entry<FieldDescriptor, Collection<FieldDescriptor>>> mapIterator =
+                fieldMap.asMap()
+                        .entrySet()
+                        .iterator();
         assertTrue(mapIterator.hasNext());
-        final Map.Entry<FieldDescriptor, Collection<FieldDescriptor>> singleEntry = mapIterator.next();
+        final Map.Entry<FieldDescriptor, Collection<FieldDescriptor>> singleEntry =
+                mapIterator.next();
         final FieldDescriptor boundField = singleEntry.getKey();
 
         final String boundFieldName = boundField.getName();

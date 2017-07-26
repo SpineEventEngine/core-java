@@ -32,10 +32,12 @@ import io.spine.core.Subscribe;
 import io.spine.server.BoundedContext;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.event.enrich.EventEnricher;
+import io.spine.server.event.given.EventBusTestEnv.GivenEvent;
 import io.spine.server.storage.StorageFactory;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.ProjectId;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.annotation.Nullable;
@@ -60,7 +62,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
-@SuppressWarnings({"ResultOfMethodCallIgnored", "ClassWithTooManyMethods", "OverlyCoupledClass"})
 public class EventBusShould {
 
     private EventBus eventBus;
@@ -153,7 +154,8 @@ public class EventBusShould {
         final EventClass eventClass = EventClass.of(ProjectCreated.class);
         assertTrue(eventBus.hasDispatchers(eventClass));
 
-        final Collection<EventDispatcher> dispatchers = eventBus.getDispatchers(eventClass);
+        final Collection<? extends EventDispatcher<?>> dispatchers =
+                eventBus.getDispatchers(eventClass);
         assertTrue(dispatchers.contains(subscriberOne));
         assertTrue(dispatchers.contains(subscriberTwo));
     }
@@ -170,7 +172,8 @@ public class EventBusShould {
 
         // Check that the 2nd subscriber with the same event subscriber method remains
         // after the 1st subscriber unregisters.
-        final Collection<EventDispatcher> subscribers = eventBus.getDispatchers(eventClass);
+        final Collection<? extends EventDispatcher<?>> subscribers =
+                eventBus.getDispatchers(eventClass);
         assertFalse(subscribers.contains(subscriberOne));
         assertTrue(subscribers.contains(subscriberTwo));
 
@@ -184,7 +187,7 @@ public class EventBusShould {
     @Test
     public void call_subscriber_when_event_posted() {
         final ProjectCreatedSubscriber subscriber = new ProjectCreatedSubscriber();
-        final Event event = Given.AnEvent.projectCreated();
+        final Event event = GivenEvent.projectCreated();
         eventBus.register(subscriber);
 
         eventBus.post(event);
@@ -210,7 +213,7 @@ public class EventBusShould {
 
         eventBus.register(dispatcher);
 
-        eventBus.post(Given.AnEvent.projectCreated());
+        eventBus.post(GivenEvent.projectCreated());
 
         assertTrue(dispatcher.isDispatchCalled());
     }
@@ -227,7 +230,7 @@ public class EventBusShould {
 
         eventBusWithPosponedExecution.register(dispatcher);
 
-        final Event event = Given.AnEvent.projectCreated();
+        final Event event = GivenEvent.projectCreated();
         eventBusWithPosponedExecution.post(event);
         assertFalse(dispatcher.isDispatchCalled());
 
@@ -241,7 +244,7 @@ public class EventBusShould {
 
         eventBusWithPosponedExecution.register(dispatcher);
 
-        final Event event = Given.AnEvent.projectCreated();
+        final Event event = GivenEvent.projectCreated();
         eventBusWithPosponedExecution.post(event);
         final Set<EventEnvelope> postponedEvents = postponedDispatcherDelivery.getPostponedEvents();
         final EventEnvelope postponedEvent = postponedEvents.iterator()
@@ -261,7 +264,7 @@ public class EventBusShould {
         eventBus.register(dispatcherTwo);
 
         eventBus.unregister(dispatcherOne);
-        final Set<EventDispatcher> dispatchers = eventBus.getDispatchers(eventClass);
+        final Set<? extends EventDispatcher<?>> dispatchers = eventBus.getDispatchers(eventClass);
 
         // Check we don't have 1st dispatcher, but have 2nd.
         assertFalse(dispatchers.contains(dispatcherOne));
@@ -272,12 +275,13 @@ public class EventBusShould {
                             .contains(dispatcherTwo));
     }
 
+    @Ignore("Resume after CommandOutputBus.doPost() can handle exceptions and return multiple statuses per consumer.")
     @Test
     public void catch_exceptions_caused_by_subscribers() {
         final FaultySubscriber faultySubscriber = new FaultySubscriber();
 
         eventBus.register(faultySubscriber);
-        eventBus.post(Given.AnEvent.projectCreated());
+        eventBus.post(GivenEvent.projectCreated());
 
         assertTrue(faultySubscriber.isMethodCalled());
     }
@@ -300,11 +304,6 @@ public class EventBusShould {
     }
 
     @Test
-    public void have_log() {
-        assertNotNull(EventBus.log());
-    }
-
-    @Test
     public void do_not_have_Enricher_by_default() {
         assertNull(eventBus.getEnricher());
     }
@@ -312,7 +311,7 @@ public class EventBusShould {
     @Test
     public void enrich_event_if_it_can_be_enriched() {
         final EventEnricher enricher = mock(EventEnricher.class);
-        final Event event = Given.AnEvent.projectCreated();
+        final Event event = GivenEvent.projectCreated();
         doReturn(true).when(enricher)
                       .canBeEnriched(any(Event.class));
         doReturn(event).when(enricher)
@@ -333,7 +332,7 @@ public class EventBusShould {
         setUp(enricher);
         eventBus.register(new ProjectCreatedSubscriber());
 
-        eventBus.post(Given.AnEvent.projectCreated());
+        eventBus.post(GivenEvent.projectCreated());
 
         verify(enricher, never()).enrich(any(Event.class));
     }
@@ -445,7 +444,7 @@ public class EventBusShould {
      * A simple dispatcher class, which only dispatch and does not have own event
      * subscribing methods.
      */
-    private static class BareDispatcher implements EventDispatcher {
+    private static class BareDispatcher implements EventDispatcher<String> {
 
         private boolean dispatchCalled = false;
 
@@ -455,8 +454,9 @@ public class EventBusShould {
         }
 
         @Override
-        public void dispatch(EventEnvelope event) {
+        public Set<String> dispatch(EventEnvelope event) {
             dispatchCalled = true;
+            return Identity.of(this);
         }
 
         private boolean isDispatchCalled() {

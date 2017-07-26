@@ -24,8 +24,8 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.base.Error;
-import io.spine.core.Failure;
-import io.spine.core.IsSent;
+import io.spine.core.Ack;
+import io.spine.core.Rejection;
 import io.spine.core.Responses;
 import io.spine.core.Status;
 
@@ -42,28 +42,27 @@ import static io.spine.validate.Validate.isNotDefault;
 @Internal
 public class Buses {
 
-    private Buses() {
-        // Prevent utility class instantiation.
-    }
+    /** Prevents instantiation of this utility class. */
+    private Buses() {}
 
     /**
      * Acknowledges the envelope posted.
      *
      * @param id the ID of the message to acknowledge
-     * @return {@code IsSent} with an {@code OK} status
+     * @return {@code Ack} with an {@code OK} status
      */
-    public static IsSent acknowledge(Message id) {
+    public static Ack acknowledge(Message id) {
         return setStatus(id, Responses.statusOk());
     }
 
     /**
-     * Creates {@code IsSent} response for the given message ID with the error status.
+     * Creates {@code Ack} response for the given message ID with the error status.
      *
      * @param id    the ID of the message to provide with the status
      * @param cause the cause of the message rejection
-     * @return the {@code IsSent} response with the given message ID
+     * @return the {@code Ack} response with the given message ID
      */
-    public static IsSent reject(Message id, Error cause) {
+    public static Ack reject(Message id, Error cause) {
         checkNotNull(cause);
         checkArgument(isNotDefault(cause));
         final Status status = Status.newBuilder()
@@ -73,29 +72,29 @@ public class Buses {
     }
 
     /**
-     * Creates {@code IsSent} response for the given message ID with the failure status.
+     * Creates {@code Ack} response for the given message ID with the rejection status.
      *
      * @param id    the ID of the message to provide with the status
      * @param cause the cause of the message rejection
-     * @return the {@code IsSent} response with the given message ID
+     * @return the {@code Ack} response with the given message ID
      */
-    public static IsSent reject(Message id, Failure cause) {
+    public static Ack reject(Message id, Rejection cause) {
         checkNotNull(cause);
         checkArgument(isNotDefault(cause));
         final Status status = Status.newBuilder()
-                                    .setFailure(cause)
+                                    .setRejection(cause)
                                     .build();
         return setStatus(id, status);
     }
 
-    private static IsSent setStatus(Message id, Status status) {
+    private static Ack setStatus(Message id, Status status) {
         checkNotNull(id);
 
         final Any packedId = pack(id);
-        final IsSent result = IsSent.newBuilder()
-                                    .setMessageId(packedId)
-                                    .setStatus(status)
-                                    .build();
+        final Ack result = Ack.newBuilder()
+                              .setMessageId(packedId)
+                              .setStatus(status)
+                              .build();
         return result;
     }
 }

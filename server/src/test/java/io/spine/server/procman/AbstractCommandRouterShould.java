@@ -99,15 +99,16 @@ public abstract class AbstractCommandRouterShould<T extends AbstractCommandRoute
 
         // Register dispatcher for `StringValue` message type.
         // Otherwise we won't be able to post.
-        commandBus.register(new CommandDispatcher() {
+        commandBus.register(new CommandDispatcher<String>() {
             @Override
             public Set<CommandClass> getMessageClasses() {
                 return CommandClass.setOf(StringValue.class);
             }
 
             @Override
-            public void dispatch(CommandEnvelope envelope) {
+            public String dispatch(CommandEnvelope envelope) {
                 // Do nothing.
+                return "Anonymous";
             }
         });
 

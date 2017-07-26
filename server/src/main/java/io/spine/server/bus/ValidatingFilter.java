@@ -21,9 +21,11 @@
 package io.spine.server.bus;
 
 import com.google.common.base.Optional;
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.Identifier;
 import io.spine.base.Error;
-import io.spine.core.IsSent;
+import io.spine.core.Ack;
 import io.spine.core.MessageEnvelope;
 import io.spine.core.MessageInvalid;
 
@@ -36,25 +38,24 @@ import static io.spine.server.bus.Buses.reject;
  *
  * @author Dmytro Dashenkov
  */
-final class ValidatingFilter<E extends MessageEnvelope<T>, T extends Message>
+final class ValidatingFilter<E extends MessageEnvelope<?, T>, T extends Message>
         extends AbstractBusFilter<E> {
 
-    private final Bus.IdConverter<E> idConverter;
     private final EnvelopeValidator<E> validator;
 
-    ValidatingFilter(Bus.IdConverter<E> idConverter, EnvelopeValidator<E> validator) {
+    ValidatingFilter(EnvelopeValidator<E> validator) {
         super();
-        this.idConverter = checkNotNull(idConverter);
         this.validator = checkNotNull(validator);
     }
 
     @Override
-    public Optional<IsSent> accept(E envelope) {
+    public Optional<Ack> accept(E envelope) {
         checkNotNull(envelope);
         final Optional<MessageInvalid> violation = validator.validate(envelope);
         if (violation.isPresent()) {
             final Error error = violation.get().asError();
-            final IsSent result = reject(idConverter.apply(envelope), error);
+            final Any packedId = Identifier.pack(envelope.getId());
+            final Ack result = reject(packedId, error);
             return Optional.of(result);
         } else {
             return Optional.absent();

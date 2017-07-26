@@ -20,12 +20,14 @@
 package io.spine.server.outbus;
 
 import com.google.common.base.Function;
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.Identifier;
 import io.spine.annotation.Internal;
+import io.spine.core.Ack;
 import io.spine.core.Event;
-import io.spine.core.Failure;
-import io.spine.core.IsSent;
 import io.spine.core.MessageEnvelope;
+import io.spine.core.Rejection;
 import io.spine.server.bus.Bus;
 import io.spine.server.bus.MessageDispatcher;
 import io.spine.server.delivery.Delivery;
@@ -47,8 +49,7 @@ import static java.lang.String.format;
  *
  * <ul>
  *     <li>{@linkplain Event events} — in case the command is handled successfully;
- *     <li>{@linkplain Failure business failures} — if the command contradicts
- *          the business rules.
+ *     <li>{@linkplain Rejection rejections} — if the command contradicts the business rules.
  * </ul>
  *
  * <p>The instances of {@code CommandOutputBus} are responsible for a delivery of such output
@@ -58,9 +59,9 @@ import static java.lang.String.format;
  */
 @Internal
 public abstract class CommandOutputBus<M extends Message,
-                                       E extends MessageEnvelope<M>,
+                                       E extends MessageEnvelope<?, M>,
                                        C extends MessageClass,
-                                       D extends MessageDispatcher<C,E>>
+                                       D extends MessageDispatcher<C, E, ?>>
                 extends Bus<M, E, C, D> {
 
     /**
@@ -119,15 +120,15 @@ public abstract class CommandOutputBus<M extends Message,
     protected abstract OutputDispatcherRegistry<C, D> createRegistry();
 
     @Override
-    protected IsSent doPost(E envelope) {
+    protected Ack doPost(E envelope) {
         final M enriched = enrich(envelope.getOuterObject());
         final E enrichedEnvelope = toEnvelope(enriched);
         final int dispatchersCalled = callDispatchers(enrichedEnvelope);
 
-        final Message id = getIdConverter().apply(envelope);
+        final Any packedId = Identifier.pack(envelope.getId());
         checkState(dispatchersCalled != 0,
                    format("Message %s has no dispatchers.", envelope.getMessage()));
-        final IsSent result = acknowledge(id);
+        final Ack result = acknowledge(packedId);
         return result;
     }
 

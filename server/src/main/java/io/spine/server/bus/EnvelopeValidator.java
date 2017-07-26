@@ -30,14 +30,14 @@ import io.spine.core.MessageInvalid;
  * @param <E> the type of the {@link MessageEnvelope} to validate
  * @author Dmytro Dashenkov
  */
-public interface EnvelopeValidator<E extends MessageEnvelope<?>> {
+public interface EnvelopeValidator<E extends MessageEnvelope<?, ?>> {
 
     /**
      * Validates the given {@link MessageEnvelope} by some specific rules.
      *
      * @param envelope the envelope to validate
      * @return {@link Optional#absent() Optional.absent()} if the envelope passes the validation or
-     *         the cause of the validation failure
+     *         the cause of the validation error
      * @see MessageInvalid for the detailed description of the returned value
      */
     Optional<MessageInvalid> validate(E envelope);

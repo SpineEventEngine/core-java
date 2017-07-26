@@ -22,6 +22,7 @@ package io.spine.server.bus;
 
 import com.google.protobuf.Message;
 import io.spine.core.MessageEnvelope;
+import io.spine.server.rejection.RejectionBusBuilderShould;
 import org.junit.Test;
 
 import java.util.Deque;
@@ -37,10 +38,10 @@ import static org.mockito.Mockito.mock;
  * @author Dmytro Dashenkov
  * @see io.spine.server.commandbus.CommandBusBuilderShould
  * @see io.spine.server.event.EventBusBuilderShould
- * @see io.spine.server.failure.FailureBusBuilderShould
+ * @see RejectionBusBuilderShould
  */
 public abstract class BusBuilderShould<B extends Bus.AbstractBuilder<E, T, ?>,
-                                       E extends MessageEnvelope<T>,
+                                       E extends MessageEnvelope<?, T>,
                                        T extends Message> {
 
     protected abstract B builder();

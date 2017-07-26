@@ -25,8 +25,8 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.spine.core.UserId;
-import io.spine.server.event.Given;
 import io.spine.server.event.enrich.EventEnricher.SameTransition;
+import io.spine.server.event.enrich.given.EventEnricherBuilderTestEnv.Enrichment;
 import io.spine.test.Tests;
 import io.spine.test.event.ProjectId;
 import org.junit.Before;
@@ -69,7 +69,7 @@ public class EventEnricherBuilderShould {
 
     @Test
     public void build_enricher_if_all_functions_registered() {
-        final EventEnricher enricher = Given.Enrichment.newEventEnricher();
+        final EventEnricher enricher = Enrichment.newEventEnricher();
 
         assertNotNull(enricher);
     }
@@ -129,8 +129,8 @@ public class EventEnricherBuilderShould {
 
     @Test
     public void allow_registering_just_some_of_expected_functions() {
-        builder.addFieldEnrichment(ProjectId.class, UserId.class, new Given.Enrichment.GetProjectOwnerId());
-        builder.addFieldEnrichment(ProjectId.class, String.class, new Given.Enrichment.GetProjectName());
+        builder.addFieldEnrichment(ProjectId.class, UserId.class, new Enrichment.GetProjectOwnerId());
+        builder.addFieldEnrichment(ProjectId.class, String.class, new Enrichment.GetProjectName());
         final EventEnricher enricher = builder.build();
         assertNotNull(enricher);
     }

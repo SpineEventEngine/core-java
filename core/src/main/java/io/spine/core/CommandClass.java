@@ -21,12 +21,15 @@
 package io.spine.core;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.type.MessageClass;
 
 import java.util.Arrays;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.core.Messages.ensureMessage;
 
 /**
  * A value object for class type references.
@@ -52,26 +55,22 @@ public final class CommandClass extends MessageClass {
     /**
      * Creates a new instance for the class of the passed command.
      *
-     * <p>If an instance of {@link Command} (which implements {@code Message}) is
-     * passed to this method, enclosing command message will be un-wrapped to
-     * determine the class of the command.
+     * <p>If an instance of {@link Command} is passed to this method, enclosing command message will
+     * be un-wrapped to determine the class of the command.
      *
-     * @param command a command for which to get the class
+     * <p>If an instance of {@link Any} is passed, it will be unpacked, and the class of the wrapped
+     * message will be used.
+     *
+     * @param commandOrMessage a command for which to get the class
      * @return new instance
      */
-    public static CommandClass of(Message command) {
-        checkNotNull(command);
-        if (command instanceof Command) {
-            final Command commandRequest = (Command) command;
-            final Message enclosed = Commands.getMessage(commandRequest);
-            return of(enclosed.getClass());
-        }
-        final CommandClass result = of(command.getClass());
-        return result;
+    public static CommandClass of(Message commandOrMessage) {
+        final Message commandMessage = ensureMessage(commandOrMessage);
+        return of(commandMessage.getClass());
     }
 
     /** Creates immutable set of {@code CommandClass} from the passed set. */
-    public static ImmutableSet<CommandClass> setOf(Iterable<Class<? extends Message>> classes) {
+    public static Set<CommandClass> setOf(Iterable<Class<? extends Message>> classes) {
         final ImmutableSet.Builder<CommandClass> builder = ImmutableSet.builder();
         for (Class<? extends Message> cls : classes) {
             builder.add(of(cls));
@@ -81,7 +80,7 @@ public final class CommandClass extends MessageClass {
 
     /** Creates immutable set of {@code CommandClass} from the passed classes. */
     @SafeVarargs
-    public static ImmutableSet<CommandClass> setOf(Class<? extends Message>... classes) {
+    public static Set<CommandClass> setOf(Class<? extends Message>... classes) {
         return setOf(Arrays.asList(classes));
     }
 }

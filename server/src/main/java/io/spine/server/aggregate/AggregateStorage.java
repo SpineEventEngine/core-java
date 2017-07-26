@@ -104,7 +104,32 @@ public abstract class AggregateStorage<I>
         }
         builder.addAllEvent(history);
 
-        return Optional.of(builder.build());
+        final AggregateStateRecord result = builder.build();
+        checkAggregateStateRecord(result);
+        return Optional.of(result);
+    }
+
+    /**
+     * Ensures that the {@link AggregateStateRecord} is valid.
+     *
+     * <p>{@link AggregateStateRecord} is considered valid when one of the following is true:
+     * <ul>
+     *     <li>{@linkplain AggregateStateRecord#getSnapshot() snapshot} is not default;
+     *     <li>{@linkplain AggregateStateRecord#getEventList() event list} is not empty.
+     * </ul>
+     *
+     * @param record the record to check
+     * @throws IllegalStateException if the {@link AggregateStateRecord} is not valid
+     */
+    private static void checkAggregateStateRecord(AggregateStateRecord record)
+            throws IllegalStateException {
+        final boolean snapshotIsNotSet = record.getSnapshot()
+                                               .equals(Snapshot.getDefaultInstance());
+        if (snapshotIsNotSet && record.getEventList()
+                                      .isEmpty()) {
+            throw new IllegalStateException("AggregateStateRecord instance should have either "
+                                                    + "snapshot or non-empty event list.");
+        }
     }
 
     /**

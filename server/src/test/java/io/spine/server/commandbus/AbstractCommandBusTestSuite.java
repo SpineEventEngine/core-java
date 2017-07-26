@@ -25,27 +25,27 @@ import com.google.protobuf.Timestamp;
 import io.spine.base.Error;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.TestActorRequestFactory;
+import io.spine.core.Ack;
 import io.spine.core.ActorContext;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandId;
 import io.spine.core.CommandValidationError;
-import io.spine.core.IsSent;
 import io.spine.core.Status;
 import io.spine.core.TenantId;
+import io.spine.grpc.MemoizingObserver;
 import io.spine.grpc.StreamObservers;
-import io.spine.grpc.StreamObservers.MemoizingObserver;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.commandstore.CommandStore;
 import io.spine.server.event.EventBus;
-import io.spine.server.failure.FailureBus;
+import io.spine.server.rejection.RejectionBus;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.tenant.TenantAwareTest;
 import io.spine.server.tenant.TenantIndex;
-import io.spine.test.command.CreateProject;
-import io.spine.test.command.event.ProjectCreated;
+import io.spine.test.command.CmdCreateProject;
+import io.spine.test.command.event.CmdProjectCreated;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -87,10 +87,10 @@ public abstract class AbstractCommandBusTestSuite {
     protected CommandStore commandStore;
     protected Log log;
     protected EventBus eventBus;
-    protected FailureBus failureBus;
+    protected RejectionBus rejectionBus;
     protected ExecutorCommandScheduler scheduler;
     protected CreateProjectHandler createProjectHandler;
-    protected MemoizingObserver<IsSent> observer;
+    protected MemoizingObserver<Ack> observer;
 
     /**
      * A public constructor for derived test cases.
@@ -109,7 +109,7 @@ public abstract class AbstractCommandBusTestSuite {
         return invalidCmd;
     }
 
-    static void checkCommandError(IsSent sendingResult,
+    static void checkCommandError(Ack sendingResult,
                                   CommandValidationError validationError,
                                   Class<? extends CommandException> exceptionClass,
                                   Command cmd) {
@@ -119,7 +119,7 @@ public abstract class AbstractCommandBusTestSuite {
                           cmd);
     }
 
-    static void checkCommandError(IsSent sendingResult,
+    static void checkCommandError(Ack sendingResult,
                                   CommandValidationError validationError,
                                   String errorType,
                                   Command cmd) {
@@ -176,13 +176,13 @@ public abstract class AbstractCommandBusTestSuite {
         commandStore = spy(new CommandStore(storageFactory, tenantIndex));
         scheduler = spy(new ExecutorCommandScheduler());
         log = spy(new Log());
-        failureBus = spy(FailureBus.newBuilder()
-                                   .build());
+        rejectionBus = spy(RejectionBus.newBuilder()
+                                       .build());
         commandBus = CommandBus.newBuilder()
                                .setMultitenant(this.multitenant)
                                .setCommandStore(commandStore)
                                .setCommandScheduler(scheduler)
-                               .setFailureBus(failureBus)
+                               .setRejectionBus(rejectionBus)
                                .setThreadSpawnAllowed(false)
                                .setLog(log)
                                .setAutoReschedule(false)
@@ -217,7 +217,7 @@ public abstract class AbstractCommandBusTestSuite {
         commandBus.register(createProjectHandler);
 
         final CommandBus spy = spy(commandBus);
-        spy.post(commands, StreamObservers.<IsSent>memoizingObserver());
+        spy.post(commands, StreamObservers.<Ack>memoizingObserver());
 
         @SuppressWarnings("unchecked")
         final ArgumentCaptor<Iterable<Command>> storingCaptor = forClass(Iterable.class);
@@ -268,9 +268,9 @@ public abstract class AbstractCommandBusTestSuite {
         }
 
         @Assign
-        ProjectCreated handle(CreateProject command, CommandContext ctx) {
+        CmdProjectCreated handle(CmdCreateProject command, CommandContext ctx) {
             handlerInvoked = true;
-            return ProjectCreated.getDefaultInstance();
+            return CmdProjectCreated.getDefaultInstance();
         }
 
         boolean wasHandlerInvoked() {

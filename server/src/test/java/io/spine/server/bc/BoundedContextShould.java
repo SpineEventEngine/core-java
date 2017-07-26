@@ -22,9 +22,9 @@ package io.spine.server.bc;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import io.spine.core.IsSent;
+import io.spine.core.Ack;
 import io.spine.core.Responses;
-import io.spine.grpc.StreamObservers.MemoizingObserver;
+import io.spine.grpc.MemoizingObserver;
 import io.spine.option.EntityOption;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
@@ -45,7 +45,7 @@ import io.spine.server.storage.StorageFactory;
 import io.spine.test.Spy;
 import io.spine.test.bc.Project;
 import io.spine.test.bc.SecretProject;
-import io.spine.test.bc.event.ProjectCreated;
+import io.spine.test.bc.event.BcProjectCreated;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -112,8 +112,8 @@ public class BoundedContextShould {
     }
 
     @Test
-    public void return_FailureBus() {
-        assertNotNull(boundedContext.getFailureBus());
+    public void return_RejectionBus() {
+        assertNotNull(boundedContext.getRejectionBus());
     }
 
     @Test
@@ -154,7 +154,7 @@ public class BoundedContextShould {
     @Test
     public void notify_integration_event_subscriber() {
         registerAll();
-        final MemoizingObserver<IsSent> observer = memoizingObserver();
+        final MemoizingObserver<Ack> observer = memoizingObserver();
         final IntegrationEvent event = Given.AnIntegrationEvent.projectCreated();
         final Message msg = unpack(event.getMessage());
 
@@ -171,14 +171,14 @@ public class BoundedContextShould {
                                                             .build();
 
         // Unsupported message.
-        final Any invalidMsg = AnyPacker.pack(ProjectCreated.getDefaultInstance());
+        final Any invalidMsg = AnyPacker.pack(BcProjectCreated.getDefaultInstance());
         final IntegrationEvent event =
                 Given.AnIntegrationEvent.projectCreated()
                                         .toBuilder()
                                         .setMessage(invalidMsg)
                                         .build();
 
-        final MemoizingObserver<IsSent> observer = memoizingObserver();
+        final MemoizingObserver<Ack> observer = memoizingObserver();
         boundedContext.notify(event, observer);
 
         assertEquals(ERROR, observer.firstResponse().getStatus().getStatusCase());

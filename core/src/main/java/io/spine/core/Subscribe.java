@@ -20,6 +20,7 @@
 
 package io.spine.core;
 
+import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -28,7 +29,7 @@ import java.lang.annotation.Target;
 /**
  * Marks a method as a subscriber for the command output.
  *
- * <p>Use it to subscribe to either events or business failures
+ * <p>Use it to subscribe to either events or business rejections
  *
  * <h2>Subscribing to Events</h2>
  *
@@ -43,14 +44,14 @@ import java.lang.annotation.Target;
  *          as the second parameter.
  * </ul>
  *
- * <h2>Subscribing to Failures</h2>
+ * <h2>Subscribing to Rejections</h2>
  *
- * <p>A failure subscriber method:
+ * <p>A rejection subscriber method:
  * <ul>
  *     <li>is annotated with {@link Subscribe};
  *     <li>is {@code public};
  *     <li>returns {@code void};
- *     <li>accepts a failure derived from {@link com.google.protobuf.Message Message}
+ *     <li>accepts a rejection message derived from {@link com.google.protobuf.Message Message}
  *          as the first parameter;
  *     <li>(optional) accepts a command derived from {@link com.google.protobuf.Message Message}
  *          as the second parameter;
@@ -60,17 +61,17 @@ import java.lang.annotation.Target;
  *
  * <p>Therefore, if the subscriber method specifies both the command message and
  * the command context, it must have the parameters exactly is that order, i.e.
- * {@code (FailureMessage, CommandMessage, CommandContext)}. Otherwise, an exception may be thrown
+ * {@code (RejectionMessage, CommandMessage, CommandContext)}. Otherwise, an exception may be thrown
  * at runtime.
  *
- * <p>The type of the command argument, if specified, acts as a filter, i.e.
- * the subscriber receives the failure if:
+ * <p>The type of the command argument, if specified, acts as a filter, i.e. the subscriber receives
+ * the rejection if:
  * <ul>
- *     <li>the failure type matches the first argument type;
- *     <li>the command, which processing caused the failure, has the same type as
- *          the command message argument if it is present;
- *     <li>if the command message argument is absent, any failure of a matching type is received by
- *          the subscriber.
+ *     <li>the rejection type matches the first argument type;
+ *     <li>the command, which processing caused the rejection, has the same type as
+ *         the command message argument if it is present;
+ *     <li>if the command message argument is absent, any rejection of a matching type is received
+ *         by the subscriber.
  * </ul>
  *
  * <p>If the annotation is applied to a method which doesn't satisfy any of these requirements,
@@ -78,8 +79,16 @@ import java.lang.annotation.Target;
  * delivery.
  *
  * @author Alexander Yevsyukov
+ * @author Alex Tymchenko
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
+@Documented
 public @interface Subscribe {
+
+    /**
+     * When {@code true}, the annotated method of receives an event generated from outside of the
+     * Bounded Context to which the annotated method's class belongs.
+     */
+    boolean external() default false;
 }

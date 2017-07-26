@@ -20,7 +20,7 @@
 
 package io.spine.server.event.enrich;
 
-import io.spine.server.event.Given;
+import io.spine.server.event.enrich.given.EventMessageEnricherTestEnv.Enrichment;
 import io.spine.test.event.ProjectCreated;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,7 +37,7 @@ public class EventMessageEnricherShould {
 
     @Before
     public void setUp() {
-        final EventEnricher eventEnricher = Given.Enrichment.newEventEnricher();
+        final EventEnricher eventEnricher = Enrichment.newEventEnricher();
         this.enricher = EventMessageEnricher.newInstance(
                 eventEnricher,
                 ProjectCreated.class,

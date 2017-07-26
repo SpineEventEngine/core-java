@@ -26,19 +26,19 @@ import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Experimental;
 import io.spine.annotation.Internal;
+import io.spine.core.Ack;
 import io.spine.core.Event;
-import io.spine.core.IsSent;
 import io.spine.option.EntityOption.Visibility;
-import io.spine.server.command.EventFactory;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandstore.CommandStore;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.Repository;
 import io.spine.server.entity.VisibilityGuard;
 import io.spine.server.event.EventBus;
-import io.spine.server.failure.FailureBus;
+import io.spine.server.event.EventFactory;
 import io.spine.server.integration.IntegrationEvent;
 import io.spine.server.integration.grpc.IntegrationEventSubscriberGrpc;
+import io.spine.server.rejection.RejectionBus;
 import io.spine.server.stand.Stand;
 import io.spine.server.stand.StandStorage;
 import io.spine.server.storage.StorageFactory;
@@ -237,7 +237,7 @@ public final class BoundedContext
      */
     @Experimental
     @Override
-    public void notify(IntegrationEvent integrationEvent, StreamObserver<IsSent> observer) {
+    public void notify(IntegrationEvent integrationEvent, StreamObserver<Ack> observer) {
         final Event event = EventFactory.toEvent(integrationEvent);
         eventBus.post(event, observer);
     }
@@ -252,9 +252,9 @@ public final class BoundedContext
         return this.eventBus;
     }
 
-    /** Obtains instance of {@link FailureBus} of this {@code BoundedContext}. */
-    public FailureBus getFailureBus() {
-        return this.commandBus.failureBus();
+    /** Obtains instance of {@link RejectionBus} of this {@code BoundedContext}. */
+    public RejectionBus getRejectionBus() {
+        return this.commandBus.rejectionBus();
     }
 
     /** Obtains instance of {@link Stand} of this {@code BoundedContext}. */

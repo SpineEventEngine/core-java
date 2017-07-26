@@ -246,7 +246,7 @@ public abstract class Transaction<I,
      * Applies all the outstanding modifications to the enclosed entity.
      *
      * @throws InvalidEntityStateException in case the new entity state is not valid
-     * @throws IllegalStateException       in case of a generic failure
+     * @throws IllegalStateException       in case of a generic error
      */
     protected void commit() throws InvalidEntityStateException, IllegalStateException {
 
@@ -314,8 +314,7 @@ public abstract class Transaction<I,
      * @see Phase#apply(Message, EventContext)
      */
     @SuppressWarnings("OverlyBroadCatchBlock")  // to `rollback(..)` in case of any exception.
-    Transaction<I, E, S, B> apply(Message eventMessage,
-                                  EventContext context) {
+    Transaction<I, E, S, B> apply(Message eventMessage, EventContext context) {
         final Phase<I, E, S, B> phase = new Phase<>(this, eventMessage, context);
 
         Phase<I, E, S, B> appliedPhase = null;

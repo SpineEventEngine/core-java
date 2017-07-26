@@ -21,22 +21,26 @@ package io.spine.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.grpc.Internal;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
+import io.spine.core.EventClass;
 import io.spine.core.EventContext;
+import io.spine.core.EventEnvelope;
+import io.spine.core.MessageEnvelope;
 import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.command.CommandHandlingEntity;
-import io.spine.server.command.EventFactory;
+import io.spine.server.event.EventFactory;
 import io.spine.server.reflect.CommandHandlerMethod;
 import io.spine.server.reflect.EventApplierMethod;
+import io.spine.server.reflect.EventReactorMethod;
 import io.spine.validate.ValidatingBuilder;
 
 import javax.annotation.CheckReturnValue;
@@ -47,7 +51,7 @@ import java.util.Set;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static io.spine.core.Events.getMessage;
-import static io.spine.server.reflect.EventApplierMethod.forEventMessage;
+import static io.spine.server.reflect.EventApplierMethod.getMethod;
 import static io.spine.time.Time.getCurrentTime;
 import static io.spine.validate.Validate.isNotDefault;
 
@@ -154,9 +158,25 @@ public abstract class Aggregate<I,
         return super.getBuilder();
     }
 
-    @Override               // Overridden to expose this method to `AggregateCommandEndpoint`.
-    protected List<? extends Message> dispatchCommand(CommandEnvelope envelope) {
-        return super.dispatchCommand(envelope);
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Overrides to expose the method to the package.
+     */
+    @Override
+    protected List<? extends Message> dispatchCommand(CommandEnvelope cmd) {
+        return super.dispatchCommand(cmd);
+    }
+
+    /**
+     * Dispatches the event on which the aggreagate reacts.
+     *
+     * @param event the envelope with the event to dispatch
+     * @return a list with event messages that the aggregate produces in reaction to the event or
+     * an empty list if the aggregate state does not change in reaction to the event
+     */
+    protected List<? extends Message> dispatchEvent(EventEnvelope event) {
+        return EventReactorMethod.invokeFor(this, event.getMessage(), event.getEventContext());
     }
 
     /**
@@ -166,7 +186,7 @@ public abstract class Aggregate<I,
      * @throws InvocationTargetException if an exception was thrown during the method invocation
      */
     void invokeApplier(Message eventMessage) throws InvocationTargetException {
-        final EventApplierMethod method = forEventMessage(getClass(), eventMessage);
+        final EventApplierMethod method = getMethod(getClass(), eventMessage);
         method.invoke(this, eventMessage);
     }
 
@@ -177,7 +197,7 @@ public abstract class Aggregate<I,
      * a {@code Snapshot}) loaded by a repository and passed to the aggregate so that
      * it restores its state.
      *
-     * @param aggregateStateRecord the events to play
+     * @param aggregateStateRecord the aggregate state with events to play
      * @throws IllegalStateException if applying events caused an exception, which is set as
      *                               the {@code cause} for the thrown instance
      */
@@ -194,40 +214,33 @@ public abstract class Aggregate<I,
     /**
      * Applies event messages.
      *
-     * @param eventMessages the event message to apply
-     * @param envelope      the envelope of the command which caused the events
-     */
-    void apply(Iterable<? extends Message> eventMessages, CommandEnvelope envelope) {
-        applyMessages(eventMessages, envelope);
-    }
-
-    /**
-     * Applies the passed event message or {@code Event} to the aggregate.
-     *
      * @param eventMessages the event messages or events to apply
-     * @param envelope      the envelope of the command which generated the events
+     * @param origin        the envelope of a message which caused the events
      * @see #ensureEventMessage(Message)
      */
-    private void applyMessages(Iterable<? extends Message> eventMessages,
-                               CommandEnvelope envelope) {
+    void apply(Iterable<? extends Message> eventMessages, MessageEnvelope origin) {
         final List<? extends Message> messages = newArrayList(eventMessages);
-        final EventFactory eventFactory = createEventFactory(envelope, messages.size());
+        final EventFactory eventFactory =
+                EventFactory.on(origin, getProducerId(), messages.size());
 
         final List<Event> events = newArrayListWithCapacity(messages.size());
 
         Version projectedEventVersion = getVersion();
 
         for (Message eventOrMessage : messages) {
-
-            // Applying each message would increment the entity version.
-            // Therefore we should simulate this behaviour.
+            /* Applying each message would increment the entity version.
+               Therefore, we should simulate this behaviour. */
             projectedEventVersion = Versions.increment(projectedEventVersion);
             final Message eventMessage = ensureEventMessage(eventOrMessage);
 
             final Event event;
             if (eventOrMessage instanceof Event) {
+                /* If we get instances of Event, it means we are dealing with an import command,
+                   which contains these events in the body. So we deal with a command envelope.
+                */
+                final CommandEnvelope ce = (CommandEnvelope)origin;
                 event = importEvent((Event) eventOrMessage,
-                                    envelope.getCommandContext(),
+                                    ce.getCommandContext(),
                                     projectedEventVersion);
             } else {
                 event = eventFactory.createEvent(eventMessage, projectedEventVersion);
@@ -255,16 +268,6 @@ public abstract class Aggregate<I,
         final Event result = event.toBuilder()
                                   .setContext(eventContext)
                                   .build();
-        return result;
-    }
-
-    private EventFactory createEventFactory(CommandEnvelope envelope, int eventCount) {
-        final EventFactory result = EventFactory.newBuilder()
-                                                .setCommandId(envelope.getId())
-                                                .setProducerId(getProducerId())
-                                                .setMaxEventCount(eventCount)
-                                                .setCommandContext(envelope.getCommandContext())
-                                                .build();
         return result;
     }
 
@@ -320,6 +323,15 @@ public abstract class Aggregate<I,
     }
 
     /**
+     * Obtains the number of uncommitted events.
+     */
+    @Internal
+    @VisibleForTesting
+    protected int uncommittedEventsCount() {
+        return uncommittedEvents.size();
+    }
+
+    /**
      * Returns and clears all the events that were uncommitted before the call of this method.
      *
      * @return the list of events
@@ -328,6 +340,15 @@ public abstract class Aggregate<I,
         final List<Event> result = ImmutableList.copyOf(uncommittedEvents);
         uncommittedEvents.clear();
         return result;
+    }
+
+    /**
+     * Instructs to modify the state of an aggregate only within an event applier method.
+     */
+    @Override
+    protected String getMissingTxMessage() {
+        return "Modification of aggregate state or its lifecycle flags is not available this way." +
+                " Make sure to modify those only from an event applier method.";
     }
 
     /**
@@ -366,7 +387,11 @@ public abstract class Aggregate<I,
         }
 
         static Set<CommandClass> getCommandClasses(Class<? extends Aggregate> aggregateClass) {
-            return ImmutableSet.copyOf(CommandHandlerMethod.getCommandClasses(aggregateClass));
+            return CommandHandlerMethod.inspect(aggregateClass);
+        }
+
+        static Set<EventClass> getReactedEventClasses(Class<? extends Aggregate> aggregateClass) {
+            return EventReactorMethod.inspect(aggregateClass);
         }
     }
 }

@@ -22,7 +22,7 @@ package io.spine.server.bus;
 
 import com.google.common.base.Optional;
 import io.spine.annotation.SPI;
-import io.spine.core.IsSent;
+import io.spine.core.Ack;
 import io.spine.core.MessageEnvelope;
 
 /**
@@ -33,7 +33,7 @@ import io.spine.core.MessageEnvelope;
  * @author Dmytro Dashenkov
  */
 @SPI
-public interface BusFilter<E extends MessageEnvelope<?>> extends AutoCloseable {
+public interface BusFilter<E extends MessageEnvelope<?, ?>> extends AutoCloseable {
 
     /**
      * Accepts or rejects a passed message.
@@ -49,7 +49,7 @@ public interface BusFilter<E extends MessageEnvelope<?>> extends AutoCloseable {
      *
      * @param envelope the envelope with the message to filter
      * @return {@code Optional.absent()} if the message passes the filter,
-     *         {@linkplain IsSent posting result} with either status otherwise
+     *         {@linkplain Ack posting result} with either status otherwise
      */
-    Optional<IsSent> accept(E envelope);
+    Optional<Ack> accept(E envelope);
 }

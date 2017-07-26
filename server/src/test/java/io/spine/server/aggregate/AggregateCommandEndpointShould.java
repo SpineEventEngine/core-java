@@ -30,15 +30,15 @@ import io.spine.server.aggregate.given.AggregateCommandEndpointTestEnv.ProjectAg
 import io.spine.server.aggregate.given.AggregateCommandEndpointTestEnv.ProjectAggregateRepository;
 import io.spine.server.event.EventSubscriber;
 import io.spine.test.aggregate.ProjectId;
-import io.spine.test.aggregate.command.CreateProject;
-import io.spine.test.aggregate.event.ProjectCreated;
+import io.spine.test.aggregate.command.AggCreateProject;
+import io.spine.test.aggregate.event.AggProjectCreated;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import static io.spine.server.aggregate.Given.ACommand.addTask;
-import static io.spine.server.aggregate.Given.ACommand.createProject;
-import static io.spine.server.aggregate.Given.ACommand.startProject;
+import static io.spine.server.aggregate.given.Given.ACommand.addTask;
+import static io.spine.server.aggregate.given.Given.ACommand.createProject;
+import static io.spine.server.aggregate.given.Given.ACommand.startProject;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -80,14 +80,14 @@ public class AggregateCommandEndpointShould {
 
         repository.dispatch(cmd);
 
-        final ProjectCreated msg = subscriber.remembered;
+        final AggProjectCreated msg = subscriber.remembered;
         assertEquals(projectId, msg.getProjectId());
     }
 
     @Test
     public void store_aggregate_on_command_dispatching() {
         final CommandEnvelope cmd = CommandEnvelope.of(createProject(projectId));
-        final CreateProject msg = (CreateProject) cmd.getMessage();
+        final AggCreateProject msg = (AggCreateProject) cmd.getMessage();
 
         repository.dispatch(cmd);
 
@@ -125,10 +125,10 @@ public class AggregateCommandEndpointShould {
 
     private static class Subscriber extends EventSubscriber {
 
-        private ProjectCreated remembered;
+        private AggProjectCreated remembered;
 
         @Subscribe
-        void on(ProjectCreated msg) {
+        void on(AggProjectCreated msg) {
             remembered = msg;
         }
     }

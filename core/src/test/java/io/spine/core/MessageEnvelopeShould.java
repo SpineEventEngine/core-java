@@ -37,7 +37,7 @@ import static org.junit.Assert.assertNotNull;
  * @author Dmytro Dashenkov
  */
 public abstract class MessageEnvelopeShould<O extends Message,
-                                            E extends MessageEnvelope<O>,
+                                            E extends MessageEnvelope<?, O>,
                                             C extends MessageClass> {
 
     protected abstract O outerObject();

@@ -31,7 +31,8 @@ option java_package = "io.spine.change";
 
 import "google/protobuf/any.proto";
 
-// The failure to handle a command because an entity contains a value different than expected in a command.
+// Attributes for a command rejection because an entity contains a value different than
+// expected in the command which rejects the value change.
 message ValueMismatch {
 
     option (required_field) = "expected|actual";
@@ -51,6 +52,6 @@ message ValueMismatch {
     // The value which a command could have set if expected value was discovered in the entity.
     google.protobuf.Any new_value = 3;
 
-    // The version of the entity which generated the failure.
+    // The version of the entity which generated the rejection.
     int32 version = 4;
 }

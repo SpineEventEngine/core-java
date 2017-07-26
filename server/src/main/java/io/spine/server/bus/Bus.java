@@ -24,11 +24,11 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
-import io.spine.core.IsSent;
+import io.spine.core.Ack;
 import io.spine.core.MessageEnvelope;
+import io.spine.core.Rejection;
 import io.spine.type.MessageClass;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Deque;
@@ -53,9 +53,9 @@ import static java.util.Collections.singleton;
  * @author Dmytro Dashenkov
  */
 public abstract class Bus<T extends Message,
-                          E extends MessageEnvelope<T>,
+                          E extends MessageEnvelope<?, T>,
                           C extends MessageClass,
-                          D extends MessageDispatcher<C, E>> implements AutoCloseable {
+                          D extends MessageDispatcher<C, E, ?>> implements AutoCloseable {
 
     private final Function<T, E> messageConverter = new MessageToEnvelope();
 
@@ -100,7 +100,7 @@ public abstract class Bus<T extends Message,
      * @param observer the observer to receive outcome of the operation
      * @see #post(Iterable, StreamObserver) for posing multiple messages at once
      */
-    public final void post(T message, StreamObserver<IsSent> observer) {
+    public final void post(T message, StreamObserver<Ack> observer) {
         checkNotNull(message);
         checkNotNull(observer);
         checkArgument(isNotDefault(message));
@@ -115,27 +115,27 @@ public abstract class Bus<T extends Message,
      * of the call. The {@link StreamObserver#onNext StreamObserver.onNext()} is called for each
      * message posted to the bus.
      *
-     * <p>In case the message is accepted by the bus, {@linkplain IsSent IsSent} with the
+     * <p>In case the message is accepted by the bus, {@link Ack} with the
      * {@link io.spine.core.Status.StatusCase#OK OK} status is passed to the observer.
      *
      * <p>If the message cannot be sent due to some issues, a corresponding
-     * {@link io.spine.base.Error Error} status is passed in {@code IsSent} instance.
+     * {@link io.spine.base.Error Error} status is passed in {@code Ack} instance.
      *
      * <p>Depending on the underlying {@link MessageDispatcher}, a message which causes a business
-     * {@link io.spine.core.Failure} may result ether a {@link io.spine.core.Failure} status or
-     * an {@link io.spine.core.Status.StatusCase#OK OK} status {@link IsSent} instance. Usually,
-     * the {@link io.spine.core.Failure} status may only pop up if the {@link MessageDispatcher}
-     * processes the message sequentially and throws the failure (wrapped in a
+     * {@link Rejection} may result ether a {@link Rejection} status or
+     * an {@link io.spine.core.Status.StatusCase#OK OK} status {@link Ack} instance. Usually,
+     * the {@link Rejection} status may only pop up if the {@link MessageDispatcher}
+     * processes the message sequentially and throws the rejection (wrapped in a
      * the {@linkplain io.spine.base.ThrowableMessage ThrowableMessages}) instead of handling them.
      * Otherwise, the {@code OK} status should be expected.
      *
      * <p>Note that {@linkplain StreamObserver#onError StreamObserver.onError()} is never called
-     * for the passed observer, since errors are propagated as statuses of {@code IsSent} response.
+     * for the passed observer, since errors are propagated as statuses of {@code Ack} response.
      *
      * @param messages the messages to post
      * @param observer the observer to receive outcome of the operation
      */
-    public final void post(Iterable<T> messages, StreamObserver<IsSent> observer) {
+    public final void post(Iterable<T> messages, StreamObserver<Ack> observer) {
         checkNotNull(messages);
         checkNotNull(observer);
 
@@ -196,11 +196,9 @@ public abstract class Bus<T extends Message,
     private BusFilter<E> filterChain() {
         if (filterChain == null) {
             final Deque<BusFilter<E>> filters = createFilterChain();
-            final BusFilter<E> deadMsgFilter = new DeadMessageFilter<>(getIdConverter(),
-                                                                       getDeadMessageHandler(),
+            final BusFilter<E> deadMsgFilter = new DeadMessageFilter<>(getDeadMessageHandler(),
                                                                        registry());
-            final BusFilter<E> validatingFilter = new ValidatingFilter<>(getIdConverter(),
-                                                                         getValidator());
+            final BusFilter<E> validatingFilter = new ValidatingFilter<>(getValidator());
             filters.push(deadMsgFilter);
             filters.push(validatingFilter);
             filterChain = new FilterChain<>(filters);
@@ -220,16 +218,9 @@ public abstract class Bus<T extends Message,
      * <p>This method should be invoked only once when initializing
      * the {@linkplain #filterChain() filter chain} of this bus.
      *
-     * @return a dequeue of the bus custom filters
+     * @return a deque of the bus custom filters
      */
     protected abstract Deque<BusFilter<E>> createFilterChain();
-
-    /**
-     * Obtains the {@link IdConverter} for this type of {@code Bus}.
-     *
-     * @return a function converting a {@link MessageEnvelope} to an ID
-     */
-    protected abstract IdConverter<E> getIdConverter();
 
     /**
      * Filters the given messages.
@@ -248,12 +239,12 @@ public abstract class Bus<T extends Message,
      * @return the message itself if it passes the filtering or
      * {@link Optional#absent() Optional.absent()} otherwise
      */
-    private Iterable<T> filter(Iterable<T> messages, StreamObserver<IsSent> observer) {
+    private Iterable<T> filter(Iterable<T> messages, StreamObserver<Ack> observer) {
         checkNotNull(messages);
         checkNotNull(observer);
         final Collection<T> result = newLinkedList();
         for (T message : messages) {
-            final Optional<IsSent> response = filter(toEnvelope(message));
+            final Optional<Ack> response = filter(toEnvelope(message));
             if (response.isPresent()) {
                 observer.onNext(response.get());
             } else {
@@ -277,8 +268,8 @@ public abstract class Bus<T extends Message,
      * @return the result of message processing by this bus if any, or
      * {@link Optional#absent() Optional.absent()} otherwise
      */
-    private Optional<IsSent> filter(E message) {
-        final Optional<IsSent> filterOutput = filterChain().accept(message);
+    private Optional<Ack> filter(E message) {
+        final Optional<Ack> filterOutput = filterChain().accept(message);
         return filterOutput;
     }
 
@@ -302,7 +293,7 @@ public abstract class Bus<T extends Message,
      *         <ul>
      *             <li>{@link io.spine.core.Status.StatusCase#OK OK} status if the message has been
      *                 passed to the dispatcher;
-     *             <li>{@link io.spine.core.Failure Failure} status, if a {@code Failure} has
+     *             <li>{@link Rejection} status, if a {@code Rejection} has
      *                 happened during the message handling (if applicable);
      *             <li>{@link io.spine.base.Error Error} status if a {@link Throwable}, which is not
      *                 a {@link io.spine.base.ThrowableMessage ThrowableMessage}, has been thrown
@@ -310,7 +301,7 @@ public abstract class Bus<T extends Message,
      *         </ul>
      * @see #post(Message, StreamObserver) for the public API
      */
-    protected abstract IsSent doPost(E envelope);
+    protected abstract Ack doPost(E envelope);
 
     /**
      * Posts each of the given envelopes into the bus and notifies the given observer.
@@ -319,9 +310,9 @@ public abstract class Bus<T extends Message,
      * @param observer  the observer to be notified of the operation result
      * @see #doPost(MessageEnvelope)
      */
-    private void doPost(Iterable<E> envelopes, StreamObserver<IsSent> observer) {
+    private void doPost(Iterable<E> envelopes, StreamObserver<Ack> observer) {
         for (E message : envelopes) {
-            final IsSent result = doPost(message);
+            final Ack result = doPost(message);
             observer.onNext(result);
         }
     }
@@ -348,7 +339,7 @@ public abstract class Bus<T extends Message,
      * @param <T> the type of {@link Message} posted by the bus
      * @param <B> the own type of the builder
      */
-    public abstract static class AbstractBuilder<E extends MessageEnvelope<T>,
+    public abstract static class AbstractBuilder<E extends MessageEnvelope<?, T>,
                                                  T extends Message,
                                                  B extends AbstractBuilder<E, T, B>> {
 
@@ -422,20 +413,5 @@ public abstract class Bus<T extends Message,
             final E result = toEnvelope(message);
             return result;
         }
-    }
-
-    /**
-     * The function which receives a {@link MessageEnvelope} as a parameter and returns the ID of
-     * the message enclosed in that parameter.
-     *
-     * @param <E> the type of the envelope
-     */
-    public interface IdConverter<E extends MessageEnvelope<?>> extends Function<E, Message> {
-
-        @SuppressWarnings({"AbstractMethodOverridesAbstractMethod", "NullableProblems"})
-            // Changes nullability contract.
-        @Nonnull
-        @Override
-        Message apply(@Nullable E input);
     }
 }

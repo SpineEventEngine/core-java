@@ -33,16 +33,14 @@ import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.reflect.CommandHandlerMethod;
 import io.spine.server.reflect.EventSubscriberMethod;
-import io.spine.util.Exceptions;
 import io.spine.validate.ValidatingBuilder;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static io.spine.server.reflect.EventSubscriberMethod.forMessage;
+import static io.spine.server.reflect.EventSubscriberMethod.getMethod;
 
 /**
  * A central processing unit used to maintain the state of the business process and determine
@@ -107,13 +105,13 @@ public abstract class ProcessManager<I,
      * Dispatches the command to the handler method and transforms the output
      * into a list of events.
      *
-     * @param envelope the envelop with the command to dispatch
+     * @param cmd the envelope with the command to dispatch
      * @return the list of events generated as the result of handling the command.
      */
     @Override
-    protected List<Event> dispatchCommand(CommandEnvelope envelope) {
-        final List<? extends Message> messages = super.dispatchCommand(envelope);
-        final List<Event> result = toEvents(messages, envelope);
+    protected List<Event> dispatchCommand(CommandEnvelope cmd) {
+        final List<? extends Message> messages = super.dispatchCommand(cmd);
+        final List<Event> result = toEvents(messages, cmd);
         return result;
     }
 
@@ -138,17 +136,12 @@ public abstract class ProcessManager<I,
      * @param eventMessage the event to be handled by the process manager
      * @param context of the event
      */
-    void dispatchEvent(Message eventMessage,
-                       EventContext context)  {
+    void dispatchEvent(Message eventMessage, EventContext context)  {
         checkNotNull(context);
         checkNotNull(eventMessage);
 
-        final EventSubscriberMethod method = forMessage(getClass(), eventMessage);
-        try {
-            method.invoke(this, eventMessage, context);
-        } catch (InvocationTargetException e) {
-            throw Exceptions.illegalStateWithCauseOf(e);
-        }
+        final EventSubscriberMethod method = getMethod(getClass(), eventMessage);
+        method.invoke(this, eventMessage, context);
     }
 
     /**
@@ -235,6 +228,12 @@ public abstract class ProcessManager<I,
         return commandBus;
     }
 
+    @Override
+    protected String getMissingTxMessage() {
+        return "ProcessManager modification is not available this way. Please modify the state from" +
+                " a command handling or event subscribing method.";
+    }
+
     /**
      * Provides type information for process manager classes.
      */
@@ -251,7 +250,7 @@ public abstract class ProcessManager<I,
          * @return immutable set of command classes or an empty set if no commands are handled
          */
         static Set<CommandClass> getCommandClasses(Class<? extends ProcessManager> pmClass) {
-            return ImmutableSet.copyOf(CommandHandlerMethod.getCommandClasses(pmClass));
+            return ImmutableSet.copyOf(CommandHandlerMethod.inspect(pmClass));
         }
 
         /**
@@ -261,7 +260,7 @@ public abstract class ProcessManager<I,
          * @return immutable set of event classes or an empty set if no events are handled
          */
         static Set<EventClass> getEventClasses(Class<? extends ProcessManager> pmClass) {
-            return EventSubscriberMethod.getEventClasses(pmClass);
+            return EventSubscriberMethod.inspect(pmClass);
         }
     }
 }

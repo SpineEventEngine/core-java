@@ -21,8 +21,8 @@
 package io.spine.server.entity;
 
 import com.google.protobuf.StringValue;
-import io.spine.server.entity.failure.CannotModifyArchivedEntity;
-import io.spine.server.entity.failure.CannotModifyDeletedEntity;
+import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
+import io.spine.server.entity.rejection.CannotModifyDeletedEntity;
 import org.junit.Before;
 import org.junit.Test;
 

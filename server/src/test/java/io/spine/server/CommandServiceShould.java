@@ -24,12 +24,12 @@ import com.google.common.collect.Sets;
 import com.google.protobuf.StringValue;
 import io.spine.base.Error;
 import io.spine.client.TestActorRequestFactory;
+import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandId;
 import io.spine.core.CommandValidationError;
-import io.spine.core.IsSent;
 import io.spine.core.Status;
-import io.spine.grpc.StreamObservers.MemoizingObserver;
+import io.spine.grpc.MemoizingObserver;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.transport.GrpcContainer;
 import org.junit.After;
@@ -57,7 +57,7 @@ public class CommandServiceShould {
     private BoundedContext projectsContext;
 
     private BoundedContext customersContext;
-    private final MemoizingObserver<IsSent> responseObserver = memoizingObserver();
+    private final MemoizingObserver<Ack> responseObserver = memoizingObserver();
 
     @Before
     public void setUp() {
@@ -115,12 +115,12 @@ public class CommandServiceShould {
     }
 
     private void verifyPostsCommand(Command cmd) {
-        final MemoizingObserver<IsSent> observer = memoizingObserver();
+        final MemoizingObserver<Ack> observer = memoizingObserver();
         service.post(cmd, observer);
 
         assertNull(observer.getError());
         assertTrue(observer.isCompleted());
-        final IsSent acked = observer.firstResponse();
+        final Ack acked = observer.firstResponse();
         final CommandId id = AnyPacker.unpack(acked.getMessageId());
         assertEquals(cmd.getId(), id);
     }
@@ -134,7 +134,7 @@ public class CommandServiceShould {
         service.post(unsupportedCmd, responseObserver);
 
         assertTrue(responseObserver.isCompleted());
-        final IsSent result = responseObserver.firstResponse();
+        final Ack result = responseObserver.firstResponse();
         assertNotNull(result);
         assertTrue(isNotDefault(result));
         final Status status = result.getStatus();

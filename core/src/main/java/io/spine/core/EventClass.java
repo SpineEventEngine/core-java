@@ -21,12 +21,15 @@
 package io.spine.core;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.type.MessageClass;
 
+import java.util.Arrays;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.core.Messages.ensureMessage;
 
 /**
  * A value object holding a class of events.
@@ -52,25 +55,22 @@ public final class EventClass extends MessageClass {
     /**
      * Creates a new instance of the event class by passed event instance.
      *
-     * <p>If an instance of {@link Event} (which implements {@code Message}) is passed to
-     * this method, enclosing event message will be un-wrapped to determine the class of the event.
+     * <p>If an instance of {@link Event} is passed to this method, enclosing event message will be
+     * un-wrapped to determine the class of the event.
      *
-     * @param event an event instance
+     * <p>If an instance of {@link Any} is passed, it will be unpacked, and the class of the wrapped
+     * message will be used.
+     *
+     * @param eventOrMessage an event message, or {@link Any}, {@link Event}
      * @return new instance
      */
-    public static EventClass of(Message event) {
-        final Message message = checkNotNull(event);
-        if (message instanceof Event) {
-            final Event eventRecord = (Event) event;
-            final Message enclosed = Events.getMessage(eventRecord);
-            return of(enclosed.getClass());
-        }
-        final EventClass result = of(message.getClass());
-        return result;
+    public static EventClass of(Message eventOrMessage) {
+        final Message eventMessage = ensureMessage(eventOrMessage);
+        return of(eventMessage.getClass());
     }
 
     /** Creates immutable set of {@code EventClass} from the passed set. */
-    public static ImmutableSet<EventClass> setOf(Set<Class<? extends Message>> classes) {
+    public static Set<EventClass> setOf(Iterable<Class<? extends Message>> classes) {
         final ImmutableSet.Builder<EventClass> builder = ImmutableSet.builder();
         for (Class<? extends Message> cls : classes) {
             builder.add(of(cls));
@@ -80,11 +80,7 @@ public final class EventClass extends MessageClass {
 
     /** Creates immutable set of {@code EventClass} from the passed classes. */
     @SafeVarargs
-    public static ImmutableSet<EventClass> setOf(Class<? extends Message>... classes) {
-        final ImmutableSet.Builder<EventClass> builder = ImmutableSet.builder();
-        for (Class<? extends Message> cls : classes) {
-            builder.add(of(cls));
-        }
-        return builder.build();
+    public static Set<EventClass> setOf(Class<? extends Message>... classes) {
+        return setOf(Arrays.asList(classes));
     }
 }

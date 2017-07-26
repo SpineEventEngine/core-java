@@ -226,7 +226,9 @@ public class SubscriptionServiceShould {
 
         final VersionableEntity entity = mockEntity(projectId, projectState, version);
         boundedContext.getStand()
-                      .post(entity, requestFactory.createCommandContext());
+                      .post(requestFactory.createCommandContext()
+                                          .getActorContext()
+                                          .getTenantId(), entity);
 
         // isCompleted set to false since we don't expect activationObserver::onCompleted to be called.
         activationObserver.verifyState(false);
@@ -294,7 +296,9 @@ public class SubscriptionServiceShould {
         final int version = 1;
         final VersionableEntity entity = mockEntity(projectId, projectState, version);
         boundedContext.getStand()
-                      .post(entity, requestFactory.createCommandContext());
+                      .post(requestFactory.createCommandContext()
+                                          .getActorContext()
+                                          .getTenantId(), entity);
 
         // The update must not be handled by the observer
         verify(activateSubscription, never()).onNext(any(SubscriptionUpdate.class));
@@ -316,12 +320,12 @@ public class SubscriptionServiceShould {
                 new MemoizeStreamObserver<>();
         subscriptionService.subscribe(topic, subscriptionObserver);
 
-        final String failureMessage = "Execution breaking exception";
+        final String rejectionMessage = "Execution breaking exception";
         final MemoizeStreamObserver<Response> observer = new MemoizeStreamObserver<Response>() {
             @Override
             public void onNext(Response value) {
                 super.onNext(value);
-                throw new RuntimeException(failureMessage);
+                throw new RuntimeException(rejectionMessage);
             }
         };
         subscriptionService.cancel(subscriptionObserver.streamFlowValue, observer);
@@ -329,7 +333,7 @@ public class SubscriptionServiceShould {
         assertFalse(observer.isCompleted);
         assertNotNull(observer.throwable);
         assertInstanceOf(RuntimeException.class, observer.throwable);
-        assertEquals(observer.throwable.getMessage(), failureMessage);
+        assertEquals(observer.throwable.getMessage(), rejectionMessage);
     }
 
     private static BoundedContext setupBoundedContextWithProjectAggregateRepo() {

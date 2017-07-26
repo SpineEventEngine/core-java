@@ -26,14 +26,15 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import io.spine.core.Event;
+import io.spine.server.aggregate.given.Given;
 import io.spine.server.command.TestEventFactory;
-import io.spine.server.event.Given.EventMessage;
 import io.spine.server.storage.AbstractStorageShould;
 import io.spine.test.Tests;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.ProjectVBuilder;
 import io.spine.testdata.Sample;
+import io.spine.time.Time;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -277,7 +278,7 @@ public abstract class AggregateStorageShould
 
     private static Event generateEvent() {
         final TestEventFactory eventFactory = newInstance(AggregateStorageShould.class);
-        final Event result = eventFactory.createEvent(EventMessage.projectCreated());
+        final Event result = eventFactory.createEvent(Time.getCurrentTime());
         return result;
     }
 

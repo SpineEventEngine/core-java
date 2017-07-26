@@ -25,13 +25,13 @@ import io.spine.client.QueryResponse;
 import io.spine.core.EventContext;
 import io.spine.core.Responses;
 import io.spine.core.Subscribe;
+import io.spine.grpc.MemoizingObserver;
 import io.spine.grpc.StreamObservers;
-import io.spine.grpc.StreamObservers.MemoizingObserver;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.stand.Stand;
 import io.spine.test.Spy;
-import io.spine.test.bc.event.ProjectCreated;
+import io.spine.test.bc.event.BcProjectCreated;
 import io.spine.test.commandservice.ProjectId;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectVBuilder;
@@ -193,7 +193,7 @@ public class QueryServiceShould {
 
         @SuppressWarnings("UnusedParameters") // OK for test method.
         @Subscribe
-        public void on(ProjectCreated event, EventContext context) {
+        public void on(BcProjectCreated event, EventContext context) {
             // Do nothing.
         }
     }

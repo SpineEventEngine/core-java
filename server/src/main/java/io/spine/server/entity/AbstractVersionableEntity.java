@@ -25,8 +25,8 @@ import com.google.protobuf.Timestamp;
 import io.spine.Identifier;
 import io.spine.core.Version;
 import io.spine.core.Versions;
-import io.spine.server.entity.failure.CannotModifyArchivedEntity;
-import io.spine.server.entity.failure.CannotModifyDeletedEntity;
+import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
+import io.spine.server.entity.rejection.CannotModifyDeletedEntity;
 
 import javax.annotation.CheckReturnValue;
 import java.util.Objects;

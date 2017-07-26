@@ -20,12 +20,11 @@
 
 package io.spine.server.entity;
 
-import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
-import io.spine.server.entity.idfunc.EventTargetsFunction;
-import io.spine.server.entity.idfunc.Producers;
+import io.spine.server.route.EventRoute;
+import io.spine.server.route.EventRouting;
 import io.spine.server.tenant.EventOperation;
 
 import javax.annotation.CheckReturnValue;
@@ -45,24 +44,24 @@ public abstract class EventDispatchingRepository<I,
         extends DefaultRecordBasedRepository<I, E, S>
         implements EntityEventDispatcher<I> {
 
-    private final CompositeEventTargetsFunction<I> idSetFunctions;
+    private final EventRouting<I> routing;
 
     /**
      * Creates new repository instance.
      *
-     * @param defaultFunction the default function for getting an target entity IDs
+     * @param defaultFunction the default function for getting target entity IDs
      */
-    protected EventDispatchingRepository(EventTargetsFunction<I, Message> defaultFunction) {
+    protected EventDispatchingRepository(EventRoute<I, Message> defaultFunction) {
         super();
-        this.idSetFunctions = new CompositeEventTargetsFunction<>(defaultFunction);
+        this.routing = EventRouting.withDefault(defaultFunction);
     }
 
     /**
-     * Obtains the {@link EventTargetsFunction} used by the repository for calculating identifiers
+     * Obtains the {@link EventRouting} schema used by the repository for calculating identifiers
      * of event targets.
      */
-    protected EventTargetsFunction<I, Message> getIdSetFunction() {
-        return idSetFunctions;
+    protected final EventRouting<I> getRouting() {
+        return routing;
     }
 
     /**
@@ -78,50 +77,10 @@ public abstract class EventDispatchingRepository<I,
                            .register(this);
     }
 
-    /**
-     * Adds {@code IdSetFunction} for the repository.
-     *
-     * <p>Typical usage for this method would be in a constructor of a {@code ProjectionRepository}
-     * (derived from this class) to provide mapping between events to projection identifiers.
-     *
-     * <p>Such a mapping may be required when...
-     * <ul>
-     *     <li>An event should be matched to more than one projection.
-     *     <li>The type of an event producer ID (stored in {@code EventContext})
-     *     differs from {@code <I>}.
-     * </ul>
-     *
-     * <p>If there is no function for the class of the passed event message,
-     * the repository will use the event producer ID from an {@code EventContext} passed
-     * with the event message.
-     *
-     * @param func the function instance
-     * @param <M> the type of the event message handled by the function
-     */
-    public <M extends Message> void addIdSetFunction(Class<M> eventClass,
-                                                     EventTargetsFunction<I, M> func) {
-        idSetFunctions.put(eventClass, func);
-    }
-
-    /**
-     * Removes {@code IdSetFunction} from the repository.
-     *
-     * @param eventClass the class of the event message
-     * @param <M> the type of the event message handled by the function we want to remove
-     */
-    public <M extends Message> void removeIdSetFunction(Class<M> eventClass) {
-        idSetFunctions.remove(eventClass);
-    }
-
-    public <M extends Message>
-           Optional<EventTargetsFunction<I, M>> getIdSetFunction(Class<M> eventClass) {
-        return idSetFunctions.get(eventClass);
-    }
-
     @Override
     @CheckReturnValue
-    public Set<I> getTargetIds(EventEnvelope envelope) {
-        return idSetFunctions.apply(envelope.getMessage(), envelope.getEventContext());
+    public final Set<I> getTargets(EventEnvelope envelope) {
+        return getRouting().apply(envelope.getMessage(), envelope.getEventContext());
     }
 
     /**
@@ -130,10 +89,10 @@ public abstract class EventDispatchingRepository<I,
      * @param envelope the event envelope to dispatch
      */
     @Override
-    public void dispatch(EventEnvelope envelope) {
+    public Set<I> dispatch(EventEnvelope envelope) {
         final Message eventMessage = envelope.getMessage();
         final EventContext context = envelope.getEventContext();
-        final Set<I> ids = getTargetIds(envelope);
+        final Set<I> ids = getTargets(envelope);
         final EventOperation op = new EventOperation(envelope.getOuterObject()) {
             @Override
             public void run() {
@@ -143,29 +102,15 @@ public abstract class EventDispatchingRepository<I,
             }
         };
         op.execute();
+        return ids;
     }
 
     /**
      * Dispatches the event to an entity with the passed ID.
      *
-     * @param id the ID of the entity
+     * @param id           the ID of the entity
      * @param eventMessage the event message
-     * @param context the event context
+     * @param context      the event context
      */
     protected abstract void dispatchToEntity(I id, Message eventMessage, EventContext context);
-
-    /**
-     * Obtains default {@code IdSetFunction} that retrieves an event producer
-     * from the event context.
-     *
-     * @param <I> the type of the event producer
-     * @return {@code IdSetFunction} instance that returns a set with a single element
-     */
-    protected static <I> EventTargetsFunction<I, Message> producerFromContext() {
-        return Producers.fromContext();
-    }
-
-    protected static <I> EventTargetsFunction<I, Message> producerFromFirstMessageField() {
-        return Producers.fromFirstMessageField();
-    }
 }
