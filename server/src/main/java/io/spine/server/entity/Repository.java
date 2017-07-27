@@ -396,12 +396,18 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     /**
      * Logs error caused by a message processing into the {@linkplain #log() repository log}.
      *
-     * @param msgFormat the format of the message, with the first parameter being message class,
-     *                  and the second parameter is the message ID
+     * <p>The formatted message has the following parameters:
+     * <ol>
+     *     <li>The name of the message class.
+     *     <li>The message ID.
+     * </ol>
+     * @param msgFormat the format of the message
      * @param envelope  the envelope of the message caused the error
      * @param exception the error
      */
-    protected void logError(String msgFormat, MessageEnvelope envelope, RuntimeException exception) {
+    protected void logError(String msgFormat,
+                            MessageEnvelope envelope,
+                            RuntimeException exception) {
         final MessageClass messageClass = envelope.getMessageClass();
         final String messageId = Stringifiers.toString(envelope.getId());
         final String errorMessage = format(msgFormat, messageClass, messageId);
