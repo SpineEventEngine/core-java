@@ -127,8 +127,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
                       .register(this);
 
         // If there are any events on which aggregates react, register via delegating dispatcher.
-        final DelegatingEventDispatcher<I> delegatingDispatcher = DelegatingEventDispatcher.of(
-                this);
+        final DelegatingEventDispatcher<I> delegatingDispatcher;
+        delegatingDispatcher = DelegatingEventDispatcher.of(this);
         if (!delegatingDispatcher.getMessageClasses()
                                  .isEmpty()) {
             boundedContext.getEventBus()
