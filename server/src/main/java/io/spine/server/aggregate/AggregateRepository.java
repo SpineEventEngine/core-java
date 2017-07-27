@@ -56,6 +56,7 @@ import static io.spine.core.Commands.causedByRejection;
 import static io.spine.server.entity.AbstractEntity.createEntity;
 import static io.spine.server.entity.AbstractEntity.getConstructor;
 import static io.spine.server.entity.EntityWithLifecycle.Predicates.isEntityVisible;
+import static io.spine.server.route.EventRouting.withDefault;
 
 /**
  * The repository which manages instances of {@code Aggregate}s.
@@ -90,8 +91,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     private final CommandRouting<I> commandRouting = CommandRouting.newInstance();
 
     /** The routing schema for events to which aggregates react. */
-    private final EventRouting<I> eventRouting =
-            EventRouting.withDefault(Producers.<I>fromContext());
+    private final EventRouting<I> eventRouting = withDefault(Producers.<I>fromContext());
 
     /** The number of events to store between snapshots. */
     private int snapshotTrigger = DEFAULT_SNAPSHOT_TRIGGER;
