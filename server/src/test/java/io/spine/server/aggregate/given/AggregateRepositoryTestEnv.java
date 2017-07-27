@@ -63,7 +63,7 @@ import io.spine.validate.StringValueVBuilder;
 import javax.annotation.Nullable;
 import java.util.Set;
 
-import static io.spine.server.aggregate.AggregateCommandDispatcher.dispatch;
+import static io.spine.server.aggregate.AggregateMessageDispatcher.dispatchCommand;
 
 /**
  * @author Alexander Yevsyukov
@@ -112,9 +112,9 @@ public class AggregateRepositoryTestEnv {
                             .setProjectId(id)
                             .build();
 
-            dispatch(aggregate, env(createProject));
-            dispatch(aggregate, env(addTask));
-            dispatch(aggregate, env(startProject));
+            dispatchCommand(aggregate, env(createProject));
+            dispatchCommand(aggregate, env(addTask));
+            dispatchCommand(aggregate, env(startProject));
 
             return aggregate;
         }

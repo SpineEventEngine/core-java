@@ -22,6 +22,7 @@ package io.spine.server.aggregate;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import io.spine.core.CommandEnvelope;
+import io.spine.core.EventEnvelope;
 
 import java.util.List;
 
@@ -33,9 +34,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alex Tymchenko
  */
 @VisibleForTesting
-public class AggregateCommandDispatcher {
+public class AggregateMessageDispatcher {
 
-    private AggregateCommandDispatcher() {
+    private AggregateMessageDispatcher() {
         // Prevent instantiation of this utility class.
     }
 
@@ -45,12 +46,32 @@ public class AggregateCommandDispatcher {
      *
      * @return the list of {@code Event} messages.
      */
-    public static List<? extends Message> dispatch(Aggregate<?, ?, ?> aggregate,
-                                                   CommandEnvelope envelope) {
+    public static List<? extends Message> dispatchCommand(Aggregate<?, ?, ?> aggregate,
+                                                          CommandEnvelope envelope) {
         checkNotNull(aggregate);
         checkNotNull(envelope);
 
         final List<? extends Message> eventMessages = aggregate.dispatchCommand(envelope);
+
+        final AggregateTransaction tx = AggregateTransaction.start(aggregate);
+        aggregate.apply(eventMessages, envelope);
+        tx.commit();
+
+        return eventMessages;
+    }
+
+    /**
+     * Dispatches the {@linkplain EventEnvelope event envelope} and applies the resulting events
+     * to the given {@code Aggregate}.
+     *
+     * @return the list of {@code Event} messages.
+     */
+    public static List<? extends Message> dispatchEvent(Aggregate<?, ?, ?> aggregate,
+                                                        EventEnvelope envelope) {
+        checkNotNull(aggregate);
+        checkNotNull(envelope);
+
+        final List<? extends Message> eventMessages = aggregate.dispatchEvent(envelope);
 
         final AggregateTransaction tx = AggregateTransaction.start(aggregate);
         aggregate.apply(eventMessages, envelope);

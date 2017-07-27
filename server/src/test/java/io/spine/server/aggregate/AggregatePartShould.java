@@ -46,7 +46,6 @@ import java.lang.reflect.Constructor;
 import java.util.List;
 
 import static io.spine.Identifier.newUuid;
-import static io.spine.server.aggregate.AggregateCommandDispatcher.dispatch;
 import static io.spine.server.aggregate.AggregatePart.create;
 import static io.spine.server.aggregate.AggregatePart.getConstructor;
 import static io.spine.server.entity.given.Given.aggregatePartOfClass;
@@ -194,6 +193,6 @@ public class AggregatePartShould {
                         .setProjectId(ProjectId.newBuilder()
                                                .setId("agg-part-ID"))
                         .build();
-        dispatch(taskPart, env(addTask));
+        AggregateMessageDispatcher.dispatchCommand(taskPart, env(addTask));
     }
 }
