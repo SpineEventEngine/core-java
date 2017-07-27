@@ -32,17 +32,17 @@ import "spine/core/event.proto";
 
 import "spine/test/aggregate/project.proto";
 
-message CreateProject {
+message AggCreateProject {
     ProjectId project_id = 1;
     string name = 2;
 }
 
-message AddTask {
+message AggAddTask {
     ProjectId project_id = 1;
     Task task = 2;
 }
 
-message StartProject {
+message AggStartProject {
     ProjectId project_id = 1;
 }
 

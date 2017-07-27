@@ -48,14 +48,14 @@ import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.ProjectVBuilder;
 import io.spine.test.aggregate.Status;
-import io.spine.test.aggregate.command.AddTask;
-import io.spine.test.aggregate.command.CreateProject;
-import io.spine.test.aggregate.command.StartProject;
-import io.spine.test.aggregate.event.ProjectArchived;
-import io.spine.test.aggregate.event.ProjectCreated;
-import io.spine.test.aggregate.event.ProjectDeleted;
-import io.spine.test.aggregate.event.ProjectStarted;
-import io.spine.test.aggregate.event.TaskAdded;
+import io.spine.test.aggregate.command.AggAddTask;
+import io.spine.test.aggregate.command.AggCreateProject;
+import io.spine.test.aggregate.command.AggStartProject;
+import io.spine.test.aggregate.event.AggProjectArchived;
+import io.spine.test.aggregate.event.AggProjectCreated;
+import io.spine.test.aggregate.event.AggProjectDeleted;
+import io.spine.test.aggregate.event.AggProjectStarted;
+import io.spine.test.aggregate.event.AggTaskAdded;
 import io.spine.testdata.Sample;
 import io.spine.time.Time;
 import io.spine.validate.StringValueVBuilder;
@@ -99,16 +99,16 @@ public class AggregateRepositoryTestEnv {
                                                     .withId(id)
                                                     .build();
 
-            final CreateProject createProject =
-                    ((CreateProject.Builder) Sample.builderForType(CreateProject.class))
+            final AggCreateProject createProject =
+                    ((AggCreateProject.Builder) Sample.builderForType(AggCreateProject.class))
                             .setProjectId(id)
                             .build();
-            final AddTask addTask =
-                    ((AddTask.Builder) Sample.builderForType(AddTask.class))
+            final AggAddTask addTask =
+                    ((AggAddTask.Builder) Sample.builderForType(AggAddTask.class))
                             .setProjectId(id)
                             .build();
-            final StartProject startProject =
-                    ((StartProject.Builder) Sample.builderForType(StartProject.class))
+            final AggStartProject startProject =
+                    ((AggStartProject.Builder) Sample.builderForType(AggStartProject.class))
                             .setProjectId(id)
                             .build();
 
@@ -138,76 +138,76 @@ public class AggregateRepositoryTestEnv {
         }
 
         @Assign
-        ProjectCreated handle(CreateProject msg) {
-            return ProjectCreated.newBuilder()
-                                 .setProjectId(msg.getProjectId())
-                                 .setName(msg.getName())
-                                 .build();
+        AggProjectCreated handle(AggCreateProject msg) {
+            return AggProjectCreated.newBuilder()
+                                    .setProjectId(msg.getProjectId())
+                                    .setName(msg.getName())
+                                    .build();
         }
 
         @Apply
-        private void apply(ProjectCreated event) {
+        private void apply(AggProjectCreated event) {
             getBuilder().setId(event.getProjectId())
                         .setName(event.getName());
         }
 
         @Assign
-        TaskAdded handle(AddTask msg) {
-            return TaskAdded.newBuilder()
-                            .setProjectId(msg.getProjectId())
-                            .setTask(msg.getTask())
-                            .build();
+        AggTaskAdded handle(AggAddTask msg) {
+            return AggTaskAdded.newBuilder()
+                               .setProjectId(msg.getProjectId())
+                               .setTask(msg.getTask())
+                               .build();
         }
 
         @Apply
-        private void apply(TaskAdded event) {
+        private void apply(AggTaskAdded event) {
             getBuilder().setId(event.getProjectId())
                         .addTask(event.getTask());
         }
 
         @Assign
-        ProjectStarted handle(StartProject msg) {
-            return ProjectStarted.newBuilder()
-                                 .setProjectId(msg.getProjectId())
-                                 .build();
+        AggProjectStarted handle(AggStartProject msg) {
+            return AggProjectStarted.newBuilder()
+                                    .setProjectId(msg.getProjectId())
+                                    .build();
         }
 
         @Apply
-        private void apply(ProjectStarted event) {
+        private void apply(AggProjectStarted event) {
             getBuilder().setStatus(Status.STARTED);
         }
 
         /**
-         * Emits {@link ProjectArchived} if the event is from the parent project.
+         * Emits {@link AggProjectArchived} if the event is from the parent project.
          * Otherwise returns empty iterable.
          */
         @React
-        private Iterable<ProjectArchived> on(ProjectArchived event) {
+        private Iterable<AggProjectArchived> on(AggProjectArchived event) {
             if (event.getChildProjectIdList()
                      .contains(getId())) {
-                return ImmutableList.of(ProjectArchived.newBuilder()
-                                                       .setProjectId(getId())
-                                                       .build());
+                return ImmutableList.of(AggProjectArchived.newBuilder()
+                                                          .setProjectId(getId())
+                                                          .build());
             }
             return nothing();
         }
 
         @Apply
-        private void apply(ProjectArchived event) {
+        private void apply(AggProjectArchived event) {
             setArchived(true);
         }
 
         /**
-         * Emits {@link ProjectDeleted} if the event is from the parent project.
+         * Emits {@link AggProjectDeleted} if the event is from the parent project.
          * Otherwise returns empty iterable.
          */
         @React
-        private Iterable<ProjectDeleted> on(ProjectDeleted event) {
+        private Iterable<AggProjectDeleted> on(AggProjectDeleted event) {
             if (event.getChildProjectIdList()
                      .contains(getId())) {
-                return ImmutableList.of(ProjectDeleted.newBuilder()
-                                                      .setProjectId(getId())
-                                                      .build());
+                return ImmutableList.of(AggProjectDeleted.newBuilder()
+                                                         .setProjectId(getId())
+                                                         .build());
             }
             return nothing();
         }
@@ -246,21 +246,23 @@ public class AggregateRepositoryTestEnv {
         public ProjectAggregateRepository() {
             super();
             getEventRouting()
-                    .route(ProjectArchived.class,
-                           new EventRoute<ProjectId, ProjectArchived>() {
+                    .route(AggProjectArchived.class,
+                           new EventRoute<ProjectId, AggProjectArchived>() {
                                private static final long serialVersionUID = 0L;
 
                                @Override
-                               public Set<ProjectId> apply(ProjectArchived msg, EventContext ctx) {
+                               public Set<ProjectId> apply(AggProjectArchived msg,
+                                                           EventContext ctx) {
                                    return ImmutableSet.copyOf(msg.getChildProjectIdList());
                                }
                            })
-                    .route(ProjectDeleted.class,
-                           new EventRoute<ProjectId, ProjectDeleted>() {
+                    .route(AggProjectDeleted.class,
+                           new EventRoute<ProjectId, AggProjectDeleted>() {
                                private static final long serialVersionUID = 0L;
 
                                @Override
-                               public Set<ProjectId> apply(ProjectDeleted msg, EventContext ctx) {
+                               public Set<ProjectId> apply(AggProjectDeleted msg,
+                                                           EventContext ctx) {
                                    return ImmutableSet.copyOf(msg.getChildProjectIdList());
                                }
                            });

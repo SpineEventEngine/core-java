@@ -21,10 +21,10 @@
 package io.spine.server.storage;
 
 import io.spine.test.storage.ProjectId;
-import io.spine.test.storage.command.AddTask;
-import io.spine.test.storage.command.CreateProject;
-import io.spine.test.storage.command.StartProject;
-import io.spine.test.storage.event.ProjectCreated;
+import io.spine.test.storage.command.StgAddTask;
+import io.spine.test.storage.command.StgCreateProject;
+import io.spine.test.storage.command.StgStartProject;
+import io.spine.test.storage.event.StgProjectCreated;
 
 import static io.spine.Identifier.newUuid;
 
@@ -46,10 +46,10 @@ public class Given {
         private EventMessage() {
         }
 
-        public static ProjectCreated projectCreated(ProjectId id) {
-            return ProjectCreated.newBuilder()
-                                 .setProjectId(id)
-                                 .build();
+        public static StgProjectCreated projectCreated(ProjectId id) {
+            return StgProjectCreated.newBuilder()
+                                    .setProjectId(id)
+                                    .build();
         }
     }
 
@@ -58,26 +58,26 @@ public class Given {
         private CommandMessage() {
         }
 
-        public static CreateProject createProject() {
-            return CreateProject.newBuilder()
+        public static StgCreateProject createProject() {
+            return StgCreateProject.newBuilder()
                                 .setProjectId(newProjectId())
                                 .build();
         }
 
-        public static CreateProject createProject(ProjectId id) {
-            return CreateProject.newBuilder()
+        public static StgCreateProject createProject(ProjectId id) {
+            return StgCreateProject.newBuilder()
                                 .setProjectId(id)
                                 .build();
         }
 
-        public static AddTask addTask(ProjectId id) {
-            return AddTask.newBuilder()
+        public static StgAddTask addTask(ProjectId id) {
+            return StgAddTask.newBuilder()
                           .setProjectId(id)
                           .build();
         }
 
-        public static StartProject startProject(ProjectId id) {
-            return StartProject.newBuilder()
+        public static StgStartProject startProject(ProjectId id) {
+            return StgStartProject.newBuilder()
                                .setProjectId(id)
                                .build();
         }

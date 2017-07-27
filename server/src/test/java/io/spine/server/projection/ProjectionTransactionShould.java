@@ -30,8 +30,8 @@ import io.spine.server.entity.TransactionListener;
 import io.spine.server.entity.TransactionShould;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
-import io.spine.test.projection.event.ProjectCreated;
-import io.spine.test.projection.event.TaskAdded;
+import io.spine.test.projection.event.PrjProjectCreated;
+import io.spine.test.projection.event.PrjTaskAdded;
 import io.spine.validate.ConstraintViolation;
 
 import javax.annotation.Nullable;
@@ -120,14 +120,14 @@ public class ProjectionTransactionShould
 
     @Override
     protected Message createEventMessage() {
-        return ProjectCreated.newBuilder()
+        return PrjProjectCreated.newBuilder()
                              .setProjectId(ID)
                              .build();
     }
 
     @Override
     protected Message createEventMessageThatFailsInHandler() {
-        return TaskAdded.newBuilder()
+        return PrjTaskAdded.newBuilder()
                         .setProjectId(ID)
                         .build();
     }
@@ -165,7 +165,7 @@ public class ProjectionTransactionShould
         }
 
         @Subscribe
-        public void event(ProjectCreated event) {
+        public void event(PrjProjectCreated event) {
             receivedEvents.add(event);
             final Project newState = Project.newBuilder(getState())
                                             .setId(event.getProjectId())
@@ -174,7 +174,7 @@ public class ProjectionTransactionShould
         }
 
         @Subscribe
-        public void event(TaskAdded event) {
+        public void event(PrjTaskAdded event) {
             throw new RuntimeException("that tests the projection tx behaviour");
         }
 

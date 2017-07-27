@@ -34,9 +34,9 @@ import io.spine.server.commandbus.given.CommandDispatcherRegistryTestEnv.EmptyDi
 import io.spine.server.commandbus.given.CommandDispatcherRegistryTestEnv.NoCommandsDispatcherRepo;
 import io.spine.server.event.EventBus;
 import io.spine.server.procman.ProcessManagerRepository;
-import io.spine.test.command.AddTask;
-import io.spine.test.command.CreateProject;
-import io.spine.test.command.StartProject;
+import io.spine.test.command.CmdAddTask;
+import io.spine.test.command.CmdCreateProject;
+import io.spine.test.command.CmdStartProject;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -106,14 +106,14 @@ public class CommandDispatcherRegistryShould {
 
     @Test
     public void state_that_no_commands_are_supported_if_nothing_registered() {
-        assertNotSupported(CreateProject.class, AddTask.class, StartProject.class);
+        assertNotSupported(CmdCreateProject.class, CmdAddTask.class, CmdStartProject.class);
     }
 
     @Test
     public void register_command_dispatcher() {
         registry.register(new AllCommandDispatcher());
 
-        assertSupported(CreateProject.class, AddTask.class, StartProject.class);
+        assertSupported(CmdCreateProject.class, CmdAddTask.class, CmdStartProject.class);
     }
 
     @Test
@@ -123,14 +123,14 @@ public class CommandDispatcherRegistryShould {
         registry.register(dispatcher);
         registry.unregister(dispatcher);
 
-        assertNotSupported(CreateProject.class, AddTask.class, StartProject.class);
+        assertNotSupported(CmdCreateProject.class, CmdAddTask.class, CmdStartProject.class);
     }
 
     @Test
     public void register_command_handler() {
         registry.register(new AllCommandHandler(eventBus));
 
-        assertSupported(CreateProject.class, AddTask.class, StartProject.class);
+        assertSupported(CmdCreateProject.class, CmdAddTask.class, CmdStartProject.class);
     }
 
     @Test
@@ -140,7 +140,7 @@ public class CommandDispatcherRegistryShould {
         registry.register(handler);
         registry.unregister(handler);
 
-        assertNotSupported(CreateProject.class, AddTask.class, StartProject.class);
+        assertNotSupported(CmdCreateProject.class, CmdAddTask.class, CmdStartProject.class);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -190,7 +190,7 @@ public class CommandDispatcherRegistryShould {
         final CommandHandler handler = new CreateProjectHandler(eventBus);
         registry.register(handler);
         registry.unregister(handler);
-        assertNotSupported(CreateProject.class);
+        assertNotSupported(CmdCreateProject.class);
     }
 
     @Test
@@ -198,6 +198,6 @@ public class CommandDispatcherRegistryShould {
         registry.register(new CreateProjectHandler(eventBus));
         registry.register(new AddTaskDispatcher());
 
-        assertSupported(CreateProject.class, AddTask.class);
+        assertSupported(CmdCreateProject.class, CmdAddTask.class);
     }
 }

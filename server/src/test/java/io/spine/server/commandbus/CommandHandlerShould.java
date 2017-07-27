@@ -36,12 +36,12 @@ import io.spine.server.command.CommandHandler;
 import io.spine.server.command.CommandHistory;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
-import io.spine.test.command.AddTask;
-import io.spine.test.command.CreateProject;
-import io.spine.test.command.StartProject;
-import io.spine.test.command.event.ProjectCreated;
-import io.spine.test.command.event.ProjectStarted;
-import io.spine.test.command.event.TaskAdded;
+import io.spine.test.command.CmdAddTask;
+import io.spine.test.command.CmdCreateProject;
+import io.spine.test.command.CmdStartProject;
+import io.spine.test.command.event.CmdProjectCreated;
+import io.spine.test.command.event.CmdProjectStarted;
+import io.spine.test.command.event.CmdTaskAdded;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -180,26 +180,26 @@ public class CommandHandlerShould {
         }
 
         @Assign
-        ProjectCreated handle(CreateProject msg, CommandContext context) {
+        CmdProjectCreated handle(CmdCreateProject msg, CommandContext context) {
             commandsHandled.add(msg, context);
-            return ProjectCreated.getDefaultInstance();
+            return CmdProjectCreated.getDefaultInstance();
         }
 
         @Assign
-        TaskAdded handle(AddTask msg, CommandContext context) {
+        CmdTaskAdded handle(CmdAddTask msg, CommandContext context) {
             commandsHandled.add(msg, context);
-            return TaskAdded.getDefaultInstance();
+            return CmdTaskAdded.getDefaultInstance();
         }
 
         @Assign
-        List<Message> handle(StartProject msg, CommandContext context) {
+        List<Message> handle(CmdStartProject msg, CommandContext context) {
             commandsHandled.add(msg, context);
             return eventsOnStartProjectCmd;
         }
 
         private ImmutableList<Message> createEventsOnStartProjectCmd() {
             final ImmutableList.Builder<Message> builder = ImmutableList.builder();
-            builder.add(ProjectStarted.getDefaultInstance(), StringValue.getDefaultInstance());
+            builder.add(CmdProjectStarted.getDefaultInstance(), StringValue.getDefaultInstance());
             return builder.build();
         }
     }
@@ -210,7 +210,7 @@ public class CommandHandlerShould {
 
         @Override
         public Set<EventClass> getMessageClasses() {
-            return ImmutableSet.of(EventClass.of(ProjectStarted.class),
+            return ImmutableSet.of(EventClass.of(CmdProjectStarted.class),
                                    EventClass.of(StringValue.class));
         }
 

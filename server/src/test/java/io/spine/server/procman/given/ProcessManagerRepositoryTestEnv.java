@@ -35,12 +35,12 @@ import io.spine.test.procman.Project;
 import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.ProjectVBuilder;
 import io.spine.test.procman.Task;
-import io.spine.test.procman.command.AddTask;
-import io.spine.test.procman.command.CreateProject;
-import io.spine.test.procman.command.StartProject;
-import io.spine.test.procman.event.ProjectCreated;
-import io.spine.test.procman.event.ProjectStarted;
-import io.spine.test.procman.event.TaskAdded;
+import io.spine.test.procman.command.PmAddTask;
+import io.spine.test.procman.command.PmCreateProject;
+import io.spine.test.procman.command.PmStartProject;
+import io.spine.test.procman.event.PmProjectCreated;
+import io.spine.test.procman.event.PmProjectStarted;
+import io.spine.test.procman.event.PmTaskAdded;
 import io.spine.testdata.Sample;
 
 public class ProcessManagerRepositoryTestEnv {
@@ -84,7 +84,7 @@ public class ProcessManagerRepositoryTestEnv {
         @SuppressWarnings("UnusedParameters")
             /* The parameter left to show that a projection subscriber can have two parameters. */
         @Subscribe
-        public void on(ProjectCreated event, EventContext ignored) {
+        public void on(PmProjectCreated event, EventContext ignored) {
             // Keep the event message for further inspection in tests.
             keep(event);
 
@@ -100,7 +100,7 @@ public class ProcessManagerRepositoryTestEnv {
         }
 
         @Subscribe
-        public void on(TaskAdded event) {
+        public void on(PmTaskAdded event) {
             keep(event);
 
             final Task task = event.getTask();
@@ -115,7 +115,7 @@ public class ProcessManagerRepositoryTestEnv {
         }
 
         @Subscribe
-        public void on(ProjectStarted event) {
+        public void on(PmProjectStarted event) {
             keep(event);
 
             handleProjectStarted();
@@ -131,12 +131,12 @@ public class ProcessManagerRepositoryTestEnv {
         @SuppressWarnings("UnusedParameters")
             /* The parameter left to show that a command subscriber can have two parameters. */
         @Assign
-        ProjectCreated handle(CreateProject command, CommandContext ignored) {
+        PmProjectCreated handle(PmCreateProject command, CommandContext ignored) {
             keep(command);
 
             handleProjectCreated(command.getProjectId());
-            final ProjectCreated event = ((ProjectCreated.Builder) Sample.builderForType(
-                    ProjectCreated.class))
+            final PmProjectCreated event = ((PmProjectCreated.Builder) Sample.builderForType(
+                    PmProjectCreated.class))
                     .setProjectId(command.getProjectId())
                     .build();
             return event;
@@ -145,22 +145,22 @@ public class ProcessManagerRepositoryTestEnv {
         @SuppressWarnings("UnusedParameters")
             /* The parameter left to show that a command subscriber can have two parameters. */
         @Assign
-        TaskAdded handle(AddTask command, CommandContext ignored) {
+        PmTaskAdded handle(PmAddTask command, CommandContext ignored) {
             keep(command);
 
             handleTaskAdded(command.getTask());
-            final TaskAdded event = ((TaskAdded.Builder) Sample.builderForType(TaskAdded.class))
+            final PmTaskAdded event = ((PmTaskAdded.Builder) Sample.builderForType(PmTaskAdded.class))
                     .setProjectId(command.getProjectId())
                     .build();
             return event;
         }
 
         @Assign
-        CommandRouted handle(StartProject command, CommandContext context) {
+        CommandRouted handle(PmStartProject command, CommandContext context) {
             keep(command);
 
             handleProjectStarted();
-            final Message addTask = ((AddTask.Builder) Sample.builderForType(AddTask.class))
+            final Message addTask = ((PmAddTask.Builder) Sample.builderForType(PmAddTask.class))
                     .setProjectId(command.getProjectId())
                     .build();
             return newRouterFor(command, context)

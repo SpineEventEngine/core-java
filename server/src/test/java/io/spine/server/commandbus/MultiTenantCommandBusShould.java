@@ -33,8 +33,8 @@ import io.spine.core.MessageEnvelope;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.rejection.RejectionBus;
-import io.spine.test.command.AddTask;
-import io.spine.test.command.CreateProject;
+import io.spine.test.command.CmdAddTask;
+import io.spine.test.command.CmdCreateProject;
 import org.junit.Test;
 
 import java.util.Set;
@@ -262,8 +262,8 @@ public class MultiTenantCommandBusShould extends AbstractCommandBusTestSuite {
 
         final Set<CommandClass> cmdClasses = commandBus.getRegisteredCommandClasses();
 
-        assertTrue(cmdClasses.contains(CommandClass.of(CreateProject.class)));
-        assertTrue(cmdClasses.contains(CommandClass.of(AddTask.class)));
+        assertTrue(cmdClasses.contains(CommandClass.of(CmdCreateProject.class)));
+        assertTrue(cmdClasses.contains(CommandClass.of(CmdAddTask.class)));
     }
 
     /*
@@ -281,7 +281,7 @@ public class MultiTenantCommandBusShould extends AbstractCommandBusTestSuite {
 
         @Override
         public Set<CommandClass> getMessageClasses() {
-            return CommandClass.setOf(AddTask.class);
+            return CommandClass.setOf(CmdAddTask.class);
         }
 
         @Override

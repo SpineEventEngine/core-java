@@ -33,10 +33,10 @@ import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.event.EventBus;
-import io.spine.test.command.AddTask;
-import io.spine.test.command.event.TaskAdded;
-import io.spine.test.rejection.InvalidProjectName;
-import io.spine.test.rejection.ProjectId;
+import io.spine.test.command.CmdAddTask;
+import io.spine.test.command.event.CmdTaskAdded;
+import io.spine.test.reflect.InvalidProjectName;
+import io.spine.test.reflect.ProjectId;
 import org.junit.Test;
 
 import static io.spine.core.CommandValidationError.INVALID_COMMAND;
@@ -148,7 +148,7 @@ public class SingleTenantCommandBusShould extends AbstractCommandBusTestSuite {
 
         @SuppressWarnings("unused")     // does nothing, but throws a rejection.
         @Assign
-        TaskAdded handle(AddTask msg, CommandContext context) throws InvalidProjectName {
+        CmdTaskAdded handle(CmdAddTask msg, CommandContext context) throws InvalidProjectName {
             throw rejection;
         }
 

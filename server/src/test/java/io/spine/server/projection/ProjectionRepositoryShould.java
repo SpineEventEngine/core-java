@@ -46,9 +46,9 @@ import io.spine.server.projection.given.ProjectionRepositoryTestEnv.TestProjecti
 import io.spine.server.storage.RecordStorage;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
-import io.spine.test.projection.event.ProjectCreated;
-import io.spine.test.projection.event.ProjectStarted;
-import io.spine.test.projection.event.TaskAdded;
+import io.spine.test.projection.event.PrjProjectCreated;
+import io.spine.test.projection.event.PrjProjectStarted;
+import io.spine.test.projection.event.PrjTaskAdded;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -224,9 +224,9 @@ public class ProjectionRepositoryShould
     public void return_event_classes() {
         final Set<EventClass> eventClasses = repository().getMessageClasses();
         assertContainsAll(eventClasses,
-                          EventClass.of(ProjectCreated.class),
-                          EventClass.of(TaskAdded.class),
-                          EventClass.of(ProjectStarted.class));
+                          EventClass.of(PrjProjectCreated.class),
+                          EventClass.of(PrjTaskAdded.class),
+                          EventClass.of(PrjProjectStarted.class));
     }
 
     @Test
@@ -247,7 +247,8 @@ public class ProjectionRepositoryShould
         final NoOpTaskNamesRepository repo = new NoOpTaskNamesRepository();
         boundedContext.register(repo);
 
-        assertFalse(repo.loadAll().hasNext());
+        assertFalse(repo.loadAll()
+                        .hasNext());
 
         final Event event = createEvent(tenantId(),
                                         GivenEventMessage.projectCreated(),
