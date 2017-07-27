@@ -89,7 +89,7 @@ public abstract class EventDispatchingRepository<I,
      * @param envelope the event envelope to dispatch
      */
     @Override
-    public Set<I> dispatch(EventEnvelope envelope) {
+    public Set<I> dispatch(final EventEnvelope envelope) {
         final Message eventMessage = envelope.getMessage();
         final EventContext context = envelope.getEventContext();
         final Set<I> ids = getTargets(envelope);
@@ -97,7 +97,12 @@ public abstract class EventDispatchingRepository<I,
             @Override
             public void run() {
                 for (I id : ids) {
-                    dispatchToEntity(id, eventMessage, context);
+                    try {
+                        dispatchToEntity(id, eventMessage, context);
+                    } catch (RuntimeException exception) {
+                        onError(envelope, exception);
+                        // Do not re-throw the error to allow other entities to consume the event.
+                    }
                 }
             }
         };

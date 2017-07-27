@@ -22,6 +22,7 @@ package io.spine.server.aggregate;
 
 import com.google.common.base.Predicates;
 import com.google.common.collect.Lists;
+import com.google.protobuf.FloatValue;
 import com.google.protobuf.UInt32Value;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Ack;
@@ -29,6 +30,7 @@ import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
+import io.spine.core.EventEnvelope;
 import io.spine.core.MessageEnvelope;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
@@ -315,6 +317,36 @@ public class AggregateRepositoryShould {
         assertNotNull(lastErrorEnvelope);
         assertTrue(lastErrorEnvelope instanceof CommandEnvelope);
         assertEquals(ce.getMessage(), lastErrorEnvelope.getMessage());
+    }
+
+    @Test
+    public void log_error_when_event_reaction_fails() {
+        final FailingAggregateRepository repository = new FailingAggregateRepository();
+        boundedContext.register(repository);
+
+        final TestEventFactory factory = TestEventFactory.newInstance(getClass());
+        final EventEnvelope envelope =
+                EventEnvelope.of(factory.createEvent(FloatValue.newBuilder()
+                                                               .setValue(-412.0f)
+                                                               .build()));
+
+        boundedContext.getEventBus()
+                      .post(envelope.getOuterObject());
+
+        assertTrue(repository.isErrorLogged());
+        final RuntimeException lastException = repository.getLastException();
+        assertTrue(lastException instanceof HandlerMethodFailedException);
+
+        final HandlerMethodFailedException methodFailedException =
+                (HandlerMethodFailedException) lastException;
+
+        assertEquals(envelope.getMessage(), methodFailedException.getDispatchedMessage());
+        assertEquals(envelope.getEventContext(), methodFailedException.getMessageContext());
+
+        final MessageEnvelope lastErrorEnvelope = repository.getLastErrorEnvelope();
+        assertNotNull(lastErrorEnvelope);
+        assertTrue(lastErrorEnvelope instanceof EventEnvelope);
+        assertEquals(envelope.getMessage(), lastErrorEnvelope.getMessage());
     }
 
     /*

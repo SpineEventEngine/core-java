@@ -20,6 +20,7 @@
 
 package io.spine.server.aggregate;
 
+import com.google.common.collect.Sets;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.core.MessageEnvelope;
@@ -56,22 +57,32 @@ abstract class AggregateMessageEndpoint<I,
     abstract TenantAwareFunction0<R> createOperation();
 
     /**
-     * {@linkplain #getTargets() Selects} one or more message targets and {@linkplain #dispatchTo(I)
-     * dispatches} the message to them.
+     * {@linkplain #getTargets() Selects} one or more message targets and
+     * {@linkplain #dispatchToOne(I) dispatches} the message to them.
      */
     @SuppressWarnings("unchecked")
     R dispatch() {
         final R targets = getTargets();
         if (targets instanceof Set) {
-            final Set<I> targetSet = (Set<I>) targets;
-            //TODO:2017-07-21:alexander.yevsyukov: Can we run this in parallel?
-            for (I id : targetSet) {
-                dispatchTo(id);
-            }
-        } else {
-            dispatchTo((I)targets);
+            final Set<I> handlingAggregates = Sets.newHashSet((Set<I>) targets);
+            dispatchToMany(handlingAggregates);
+            return (R)handlingAggregates;
         }
+        dispatchToOne((I)targets);
         return targets;
+    }
+
+    //TODO:2017-07-21:alexander.yevsyukov: Can we run this in parallel?
+    private void dispatchToMany(Set<I> handlingAggregates) {
+        for (I id : handlingAggregates) {
+            try {
+                dispatchToOne(id);
+            } catch (RuntimeException exception) {
+                // Exclude the failing aggregate from the set of those who handled the event.
+                handlingAggregates.remove(id);
+                // Do not rethrow to allow others to handle. The error is already logged.
+            }
+        }
     }
 
     /**
@@ -79,7 +90,7 @@ abstract class AggregateMessageEndpoint<I,
      *
      * @param aggregateId the ID of the aggreagate to which dispatch the message
      */
-    private void dispatchTo(I aggregateId) {
+    private void dispatchToOne(I aggregateId) {
         final A aggregate = repository().loadOrCreate(aggregateId);
 
         final LifecycleFlags statusBefore = aggregate.getLifecycleFlags();

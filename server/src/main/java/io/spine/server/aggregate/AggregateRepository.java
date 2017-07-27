@@ -282,12 +282,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     public Set<I> dispatchEvent(EventEnvelope envelope) {
         checkNotNull(envelope);
-        try {
-            return AggregateEventEndpoint.handle(this, envelope);
-        } catch (RuntimeException e) {
-            onError(envelope, e);
-            throw e;
-        }
+        return AggregateEventEndpoint.handle(this, envelope);
     }
 
     @Override

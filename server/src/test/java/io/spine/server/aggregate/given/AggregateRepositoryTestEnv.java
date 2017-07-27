@@ -24,6 +24,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.protobuf.FloatValue;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
@@ -290,6 +291,12 @@ public class AggregateRepositoryTestEnv {
             super(id);
         }
 
+        @SuppressWarnings("NumericCastThatLosesPrecision") // Int. part as ID.
+        static long toId(FloatValue message) {
+            final float floatValue = message.getValue();
+            return (long) Math.abs(floatValue);
+        }
+
         @Assign
         Timestamp on(UInt32Value value) {
             if (value.getValue() < 0) {
@@ -305,6 +312,19 @@ public class AggregateRepositoryTestEnv {
                                           + Timestamps.toString(timestamp));
         }
 
+        @React
+        Timestamp on(FloatValue value) {
+            final float floatValue = value.getValue();
+            if (floatValue < 0) {
+                final long longValue = toId(value);
+                // Complain only if the passed value represents ID of this aggregate.
+                // This would allow other aggregates react on this message.
+                if (longValue == getId()) {
+                    throw new IllegalArgumentException("Negative floating point value passed");
+                }
+            }
+            return Time.getCurrentTime();
+        }
     }
 
     public static class FailingAggregateRepository
@@ -334,9 +354,26 @@ public class AggregateRepositoryTestEnv {
                         }
                     }
             );
+
+            getEventRouting().replaceDefault(
+                    new EventRoute<Long, Message>() {
+                        private static final long serialVersionUID = 0L;
+
+                        /**
+                         * Returns several entity identifiers to check error isolation.
+                         * @see FailingAggregate#on(FloatValue)
+                         */
+                        @Override
+                        public Set<Long> apply(Message message, EventContext context) {
+                            if (message instanceof FloatValue) {
+                                final long absValue = FailingAggregate.toId((FloatValue) message);
+                                return ImmutableSet.of(absValue, absValue + 100, absValue + 200);
+                            }
+                            return ImmutableSet.of(1L, 2L);
+                        }
+                    });
         }
 
-        @SuppressWarnings("RedundantMethodOverride")
         @Override
         protected void logError(String msgFormat,
                                 MessageEnvelope envelope,
