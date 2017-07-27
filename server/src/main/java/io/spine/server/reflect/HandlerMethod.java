@@ -37,7 +37,6 @@ import java.util.Objects;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
@@ -169,17 +168,18 @@ abstract class HandlerMethod<C extends Message> {
         return paramCount;
     }
 
+    //TODO:2017-07-27:alexander.yevsyukov: Migrate to Messages.ensureMessage() form newer version from `base`.
     /**
      * Ensures that the passed instance of {@code Message} is not an {@code Any},
      * and unwraps the message if {@code Any} is passed.
+     *
+     * <p>This method is useful when the calling code passes a
+     * {@linkplain io.spine.core.Command#getMessage() command message} or
+     * {@link import io.spine.core.Event#getMessage() event message} without unwrapping.
      */
     protected static Message ensureMessage(Message msgOrAny) {
         Message commandMessage;
         if (msgOrAny instanceof Any) {
-            /* It looks that we're getting the result of `command.getMessage()` or
-               `event.getMessage()` because the calling code did not bother to unwrap it.
-               Extract the wrapped message (instead of treating this as an error).
-               There may be occasions of such a call especially from tests code. */
             final Any any = (Any) msgOrAny;
             commandMessage = AnyPacker.unpack(any);
         } else {
@@ -232,8 +232,24 @@ abstract class HandlerMethod<C extends Message> {
             final R result = (R)returnedValue;
             return result;
         } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
-            throw illegalStateWithCauseOf(e);
+            throw whyFailed(target, message, context, e);
         }
+    }
+
+    /**
+     * Creates an exception containing information on the failure of the handler method invocation.
+     *
+     * @param target  the object which method was invoked
+     * @param message the message dispatched to the object
+     * @param context the context of the message
+     * @param cause   exception instance thrown by the invoked method
+     * @return the exception to be re-thrown
+     */
+    protected HandlerMethodFailedException whyFailed(Object target,
+                                                     Message message,
+                                                     C context,
+                                                     Exception cause) {
+        return new HandlerMethodFailedException(target, message, context, cause);
     }
 
     /**

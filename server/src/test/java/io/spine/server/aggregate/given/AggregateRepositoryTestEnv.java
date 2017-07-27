@@ -25,9 +25,15 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
+import com.google.protobuf.StringValue;
+import com.google.protobuf.Timestamp;
+import com.google.protobuf.UInt32Value;
+import com.google.protobuf.util.Timestamps;
 import io.spine.client.TestActorRequestFactory;
+import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.EventContext;
+import io.spine.core.MessageEnvelope;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.AggregateRepositoryShould;
@@ -35,6 +41,7 @@ import io.spine.server.aggregate.Apply;
 import io.spine.server.aggregate.React;
 import io.spine.server.command.Assign;
 import io.spine.server.entity.given.Given;
+import io.spine.server.route.CommandRoute;
 import io.spine.server.route.EventRoute;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
@@ -49,7 +56,10 @@ import io.spine.test.aggregate.event.ProjectDeleted;
 import io.spine.test.aggregate.event.ProjectStarted;
 import io.spine.test.aggregate.event.TaskAdded;
 import io.spine.testdata.Sample;
+import io.spine.time.Time;
+import io.spine.validate.StringValueVBuilder;
 
+import javax.annotation.Nullable;
 import java.util.Set;
 
 import static io.spine.server.aggregate.AggregateCommandDispatcher.dispatch;
@@ -261,6 +271,94 @@ public class AggregateRepositoryTestEnv {
                 return Optional.absent();
             }
             return super.find(id);
+        }
+    }
+
+    /**
+     * The aggregate which throws {@link IllegalArgumentException} in response to negative numbers.
+     *
+     * <p>Normally aggregates should reject commands via command rejections. This class is test
+     * environment for testing of now
+     * {@linkplain AggregateRepository#logError(String, MessageEnvelope, RuntimeException) logs
+     * errors}.
+     *
+     * @see FailingAggregateRepository
+     */
+    public static class FailingAggregate extends Aggregate<Long, StringValue, StringValueVBuilder> {
+
+        private FailingAggregate(Long id) {
+            super(id);
+        }
+
+        @Assign
+        Timestamp on(UInt32Value value) {
+            if (value.getValue() < 0) {
+                throw new IllegalArgumentException("Negative value passed");
+            }
+            return Time.getCurrentTime();
+        }
+
+        @Apply
+        void apply(Timestamp timestamp) {
+            getBuilder().setValue(getState().getValue()
+                                          + System.lineSeparator()
+                                          + Timestamps.toString(timestamp));
+        }
+
+    }
+
+    public static class FailingAggregateRepository
+            extends AggregateRepository<Long, FailingAggregate> {
+
+        private boolean errorLogged;
+        @Nullable
+        private MessageEnvelope lastErrorEnvelope;
+        @Nullable
+        private RuntimeException lastException;
+
+        @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
+        public FailingAggregateRepository() {
+            super();
+            getCommandRouting().replaceDefault(
+                    // Simplistic routing function that takes absolute value as ID.
+                    new CommandRoute<Long, Message>() {
+                        private static final long serialVersionUID = 0L;
+
+                        @Override
+                        public Long apply(Message message, CommandContext context) {
+                            if (message instanceof UInt32Value) {
+                                UInt32Value uInt32Value = (UInt32Value) message;
+                                return (long) Math.abs(uInt32Value.getValue());
+                            }
+                            return 0L;
+                        }
+                    }
+            );
+        }
+
+        @SuppressWarnings("RedundantMethodOverride")
+        @Override
+        protected void logError(String msgFormat,
+                                MessageEnvelope envelope,
+                                RuntimeException exception) {
+            super.logError(msgFormat, envelope, exception);
+            errorLogged = true;
+            lastErrorEnvelope = envelope;
+            lastException = exception;
+        }
+
+        public boolean isErrorLogged() {
+            return errorLogged;
+        }
+
+        @Nullable
+        public MessageEnvelope getLastErrorEnvelope() {
+            return lastErrorEnvelope;
+        }
+
+        @Nullable
+        public RuntimeException getLastException() {
+            return lastException;
         }
     }
 }

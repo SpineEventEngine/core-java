@@ -22,14 +22,22 @@ package io.spine.server.aggregate;
 
 import com.google.common.base.Predicates;
 import com.google.common.collect.Lists;
+import com.google.protobuf.UInt32Value;
+import io.spine.client.TestActorRequestFactory;
+import io.spine.core.Ack;
 import io.spine.core.CommandClass;
+import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
+import io.spine.core.MessageEnvelope;
+import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
+import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.FailingAggregateRepository;
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.GivenAggregate;
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.ProjectAggregate;
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.ProjectAggregateRepository;
 import io.spine.server.command.TestEventFactory;
+import io.spine.server.reflect.HandlerMethodFailedException;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
@@ -48,6 +56,7 @@ import static io.spine.validate.Validate.isDefault;
 import static io.spine.validate.Validate.isNotDefault;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -76,6 +85,7 @@ public class AggregateRepositoryShould {
     @After
     public void tearDown() throws Exception {
         repository.close();
+        boundedContext.close();
     }
 
     @Test
@@ -274,9 +284,43 @@ public class AggregateRepositoryShould {
                              .isPresent());
     }
 
+    @Test
+    public void log_error_when_command_dispatching_fails() {
+        final FailingAggregateRepository repository = new FailingAggregateRepository();
+        boundedContext.register(repository);
+
+        final TestActorRequestFactory requestFactory =
+                TestActorRequestFactory.newInstance(getClass());
+
+        // Passing negative value to `FailingAggregate` should cause exception.
+        final CommandEnvelope ce = CommandEnvelope.of(
+                requestFactory.createCommand(UInt32Value.newBuilder()
+                                                        .setValue(-100)
+                                                        .build()));
+
+        boundedContext.getCommandBus()
+                      .post(ce.getCommand(), StreamObservers.<Ack>noOpObserver());
+
+        assertTrue(repository.isErrorLogged());
+        final RuntimeException lastException = repository.getLastException();
+        assertTrue(lastException instanceof HandlerMethodFailedException);
+
+        final HandlerMethodFailedException methodFailedException =
+                (HandlerMethodFailedException) lastException;
+
+        assertEquals(ce.getMessage(), methodFailedException.getDispatchedMessage());
+        assertEquals(ce.getCommandContext(), methodFailedException.getMessageContext());
+
+        final MessageEnvelope lastErrorEnvelope = repository.getLastErrorEnvelope();
+        assertNotNull(lastErrorEnvelope);
+        assertTrue(lastErrorEnvelope instanceof CommandEnvelope);
+        assertEquals(ce.getMessage(), lastErrorEnvelope.getMessage());
+    }
+
     /*
-     * Test environment methods that use internals of this test suite.
-     ******************************************************************/
+     * Test environment methods that use internals of this test suite
+     * (and because of that are not moved to the test environment outside of this class).
+     **************************************************************************************/
 
     private ProjectAggregate givenStoredAggregate() {
         final ProjectId id = Sample.messageOfType(ProjectId.class);

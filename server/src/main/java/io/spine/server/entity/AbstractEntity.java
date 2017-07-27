@@ -147,6 +147,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
         checkNotNull(idClass);
 
         try {
+            @SuppressWarnings("JavaReflectionMemberAccess") // Required in the Entity definition.
             final Constructor<E> result = entityClass.getDeclaredConstructor(idClass);
             result.setAccessible(true);
             return result;
