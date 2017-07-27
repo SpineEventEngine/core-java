@@ -23,6 +23,7 @@ package io.spine.server.entity;
 import com.google.common.base.MoreObjects;
 import com.google.protobuf.Message;
 import io.spine.protobuf.Messages;
+import io.spine.string.Stringifiers;
 import io.spine.validate.ConstraintViolation;
 import io.spine.validate.MessageValidator;
 
@@ -233,8 +234,9 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
 
     @Override
     public String toString() {
+        final String idString = Stringifiers.toString(id);
         return MoreObjects.toStringHelper(this)
-                          .add("id", id)
+                          .add("id", idString)
                           .toString();
     }
 
