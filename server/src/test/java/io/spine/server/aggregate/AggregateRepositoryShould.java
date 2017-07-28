@@ -79,7 +79,7 @@ public class AggregateRepositoryShould {
     @Before
     public void setUp() {
         boundedContext = BoundedContext.newBuilder()
-                                                            .build();
+                                       .build();
         repository = new ProjectAggregateRepository();
         boundedContext.register(repository);
         repositorySpy = spy(repository);
@@ -243,8 +243,8 @@ public class AggregateRepositoryShould {
         };
         op.execute();
 
-        final Iterator<ProjectAggregate> iterator = repository.iterator(
-                Predicates.<ProjectAggregate>alwaysTrue());
+        final Iterator<ProjectAggregate> iterator =
+                repository.iterator(Predicates.<ProjectAggregate>alwaysTrue());
 
         // This should iterate through all and fail.
         Lists.newArrayList(iterator);
@@ -281,8 +281,8 @@ public class AggregateRepositoryShould {
         assertFalse(repository.find(child.getId())
                               .isPresent());
 
-        // The parent should not be archived since the dispatch route uses only child aggregates
-        // from the `ProjectArchived` event.
+        // The parent should not be archived since the dispatch route uses only
+        // child aggregates from the `ProjectArchived` event.
         assertTrue(repository.find(parent.getId())
                              .isPresent());
     }
@@ -369,6 +369,7 @@ public class AggregateRepositoryShould {
 
         assertFalse(repository.isErrorLogged());
     }
+
     /*
      * Test environment methods that use internals of this test suite
      * (and because of that are not moved to the test environment outside of this class).
