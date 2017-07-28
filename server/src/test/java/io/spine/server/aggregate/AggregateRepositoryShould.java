@@ -326,11 +326,12 @@ public class AggregateRepositoryShould {
         boundedContext.register(repository);
 
         final TestEventFactory factory = TestEventFactory.newInstance(getClass());
+
+        // Passing negative float value should cause an exception.
         final EventEnvelope envelope =
                 EventEnvelope.of(factory.createEvent(FloatValue.newBuilder()
                                                                .setValue(-412.0f)
                                                                .build()));
-
         boundedContext.getEventBus()
                       .post(envelope.getOuterObject());
 
@@ -358,12 +359,11 @@ public class AggregateRepositoryShould {
         final TestActorRequestFactory requestFactory =
                 TestActorRequestFactory.newInstance(getClass());
 
-        // Passing negative value to `FailingAggregate` should cause exception.
+        // Passing negative long value to `FailingAggregate` should cause a rejection.
         final CommandEnvelope ce = CommandEnvelope.of(
                 requestFactory.createCommand(UInt64Value.newBuilder()
                                                         .setValue(-100_000_000L)
                                                         .build()));
-
         boundedContext.getCommandBus()
                       .post(ce.getCommand(), StreamObservers.<Ack>noOpObserver());
 
