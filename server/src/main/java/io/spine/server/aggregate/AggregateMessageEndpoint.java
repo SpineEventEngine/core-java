@@ -20,7 +20,7 @@
 
 package io.spine.server.aggregate;
 
-import com.google.common.collect.Sets;
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.core.MessageEnvelope;
@@ -64,25 +64,32 @@ abstract class AggregateMessageEndpoint<I,
     R dispatch() {
         final R targets = getTargets();
         if (targets instanceof Set) {
-            final Set<I> handlingAggregates = Sets.newHashSet((Set<I>) targets);
-            dispatchToMany(handlingAggregates);
-            return (R)handlingAggregates;
+            final Set<I> handlingAggregates = (Set<I>) targets;
+            return (R)(dispatchToMany(handlingAggregates));
         }
         dispatchToOne((I)targets);
         return targets;
     }
 
-    //TODO:2017-07-21:alexander.yevsyukov: Can we run this in parallel?
-    private void dispatchToMany(Set<I> handlingAggregates) {
-        for (I id : handlingAggregates) {
+    /**
+     * Dispatches the message to multiple aggregates.
+     *
+     * @param targets the set of aggregate IDs to which dispatch the message
+     * @return the set of aggregate IDs to which the message was successfully dispatched
+     */
+    private Set<I> dispatchToMany(Set<I> targets) {
+        final ImmutableSet.Builder<I> result = ImmutableSet.builder();
+        //TODO:2017-07-21:alexander.yevsyukov: Can we run this in parallel?
+        for (I id : targets) {
             try {
                 dispatchToOne(id);
+                result.add(id);
             } catch (RuntimeException exception) {
-                // Exclude the failing aggregate from the set of those who handled the event.
-                handlingAggregates.remove(id);
-                // Do not rethrow to allow others to handle. The error is already logged.
+                // Do not rethrow to allow others to handle.
+                // The error is already logged.
             }
         }
+        return result.build();
     }
 
     /**
