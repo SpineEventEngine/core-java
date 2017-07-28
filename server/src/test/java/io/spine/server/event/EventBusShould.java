@@ -37,7 +37,6 @@ import io.spine.server.storage.StorageFactory;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.ProjectId;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.annotation.Nullable;
@@ -275,17 +274,6 @@ public class EventBusShould {
                             .contains(dispatcherTwo));
     }
 
-    @Ignore("Resume after CommandOutputBus.doPost() can handle exceptions and return multiple statuses per consumer.")
-    @Test
-    public void catch_exceptions_caused_by_subscribers() {
-        final FaultySubscriber faultySubscriber = new FaultySubscriber();
-
-        eventBus.register(faultySubscriber);
-        eventBus.post(GivenEvent.projectCreated());
-
-        assertTrue(faultySubscriber.isMethodCalled());
-    }
-
     @Test
     public void unregister_registries_on_close() throws Exception {
         final EventStore eventStore = spy(mock(EventStore.class));
@@ -418,25 +406,6 @@ public class EventBusShould {
 
         public EventContext getEventContext() {
             return eventContext;
-        }
-    }
-
-    /** The subscriber which throws exception from the subscriber method. */
-    private static class FaultySubscriber extends EventSubscriber {
-
-        private boolean methodCalled = false;
-
-        @SuppressWarnings("unused") // It's fine for a faulty subscriber.
-        @Subscribe
-        public void on(ProjectCreated event, EventContext context) {
-            methodCalled = true;
-            throw new UnsupportedOperationException(
-                    "What did you expect from " +
-                    FaultySubscriber.class.getSimpleName() + '?');
-        }
-
-        private boolean isMethodCalled() {
-            return this.methodCalled;
         }
     }
 

@@ -21,6 +21,7 @@
 package io.spine.server.event;
 
 import com.google.common.base.Supplier;
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
@@ -65,7 +66,7 @@ public abstract class EventSubscriber implements EventDispatcher<String> {
      *
      * @param envelope the envelope with the message
      * @return a one element set with the result of {@link #toString()}
-     * as the identify of the subscriber
+     * as the identify of the subscriber, or empty set if dispatching failed
      */
     @Override
     public Set<String> dispatch(final EventEnvelope envelope) {
@@ -75,7 +76,12 @@ public abstract class EventSubscriber implements EventDispatcher<String> {
                 handle(envelope.getMessage(), envelope.getEventContext());
             }
         };
-        op.execute();
+        try {
+            op.execute();
+        } catch (RuntimeException exception) {
+            onError(envelope, exception);
+            return ImmutableSet.of();
+        }
         return Identity.of(this);
     }
 
