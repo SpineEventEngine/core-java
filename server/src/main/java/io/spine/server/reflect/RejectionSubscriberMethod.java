@@ -196,9 +196,41 @@ public abstract class RejectionSubscriberMethod extends HandlerMethod<CommandCon
         @Override
         public RejectionSubscriberMethod create(Method method) {
             final Class[] paramTypes = method.getParameterTypes();
-            final MethodWrapper wrapper = MethodWrapper.forParams(paramTypes);
+            final MethodWrapper wrapper = forParams(paramTypes);
             final RejectionSubscriberMethod result = wrapper.apply(method);
             return result;
+        }
+
+        /**
+         * Retrieves the wrapper implementation for the given set of parameters of a rejection
+         * subscriber method
+         *
+         * @param paramTypes the parameter types of the rejection subscriber method
+         * @return the corresponding instance of {@code MethodWrapper}
+         */
+        private static MethodWrapper forParams(Class[] paramTypes) {
+            checkNotNull(paramTypes);
+            final int paramCount = paramTypes.length;
+            final MethodWrapper methodWrapper;
+            switch (paramCount) {
+                case 1:
+                    methodWrapper = MethodWrapper.REJECTION_MESSAGE_AWARE;
+                    break;
+                case 2:
+                    final Class<?> secondParamType = paramTypes[1];
+                    methodWrapper = secondParamType == CommandContext.class
+                            ? MethodWrapper.COMMAND_CONTEXT_AWARE
+                            : MethodWrapper.COMMAND_MESSAGE_AWARE;
+                    break;
+                case 3:
+                    methodWrapper = MethodWrapper.COMMAND_AWARE;
+                    break;
+                default:
+                    throw new IllegalArgumentException(
+                            format("Invalid Rejection handler method parameter count: %s.",
+                                   paramCount));
+            }
+            return methodWrapper;
         }
 
         @Override
@@ -225,6 +257,7 @@ public abstract class RejectionSubscriberMethod extends HandlerMethod<CommandCon
         }
     }
 
+    //TODO:2017-07-28:alexander.yevsyukov: Transform this into Kind enum and eliminate hierarchy.
     /**
      * A {@link Function} wrapping the given {@link Method} into a corresponding
      * {@code RejectionSubscriberMethod}.
@@ -274,38 +307,6 @@ public abstract class RejectionSubscriberMethod extends HandlerMethod<CommandCon
                 return new CommandAwareRejectionSubscriberMethod(method);
             }
         };
-
-        /**
-         * Retrieves the wrapper implementation for the given set of parameters of a rejection
-         * subscriber method
-         *
-         * @param paramTypes the parameter types of the rejection subscriber method
-         * @return the corresponding instance of {@code MethodWrapper}
-         */
-        private static MethodWrapper forParams(Class[] paramTypes) {
-            checkNotNull(paramTypes);
-            final int paramCount = paramTypes.length;
-            final MethodWrapper methodWrapper;
-            switch (paramCount) {
-                case 1:
-                    methodWrapper = REJECTION_MESSAGE_AWARE;
-                    break;
-                case 2:
-                    final Class<?> secondParamType = paramTypes[1];
-                    methodWrapper = secondParamType == CommandContext.class
-                                    ? COMMAND_CONTEXT_AWARE
-                                    : COMMAND_MESSAGE_AWARE;
-                    break;
-                case 3:
-                    methodWrapper = COMMAND_AWARE;
-                    break;
-                default:
-                    throw new IllegalArgumentException(
-                            format("Invalid Rejection handler method parameter count: %s.",
-                                   paramCount));
-            }
-            return methodWrapper;
-        }
 
         @Override
         public RejectionSubscriberMethod apply(@Nullable Method method) {
