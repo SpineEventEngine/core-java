@@ -29,6 +29,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.UInt32Value;
+import com.google.protobuf.UInt64Value;
 import com.google.protobuf.util.Timestamps;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.CommandContext;
@@ -42,8 +43,10 @@ import io.spine.server.aggregate.Apply;
 import io.spine.server.aggregate.React;
 import io.spine.server.command.Assign;
 import io.spine.server.entity.given.Given;
+import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
 import io.spine.server.route.CommandRoute;
 import io.spine.server.route.EventRoute;
+import io.spine.string.Stringifiers;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.ProjectVBuilder;
@@ -303,6 +306,15 @@ public class AggregateRepositoryTestEnv {
         Timestamp on(UInt32Value value) {
             if (value.getValue() < 0) {
                 throw new IllegalArgumentException("Negative value passed");
+            }
+            return Time.getCurrentTime();
+        }
+
+        /** Rejects a negative value via command rejection. */
+        @Assign
+        Timestamp on(UInt64Value value) throws CannotModifyArchivedEntity {
+            if (value.getValue() < 0) {
+                throw new CannotModifyArchivedEntity(Stringifiers.toString(getId()));
             }
             return Time.getCurrentTime();
         }

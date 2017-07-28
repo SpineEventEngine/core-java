@@ -24,6 +24,7 @@ import com.google.common.base.Predicates;
 import com.google.common.collect.Lists;
 import com.google.protobuf.FloatValue;
 import com.google.protobuf.UInt32Value;
+import com.google.protobuf.UInt64Value;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Ack;
 import io.spine.core.CommandClass;
@@ -349,6 +350,25 @@ public class AggregateRepositoryShould {
         assertEquals(envelope.getMessage(), lastErrorEnvelope.getMessage());
     }
 
+    @Test
+    public void not_pass_command_rejection_to_onError() {
+        final FailingAggregateRepository repository = new FailingAggregateRepository();
+        boundedContext.register(repository);
+
+        final TestActorRequestFactory requestFactory =
+                TestActorRequestFactory.newInstance(getClass());
+
+        // Passing negative value to `FailingAggregate` should cause exception.
+        final CommandEnvelope ce = CommandEnvelope.of(
+                requestFactory.createCommand(UInt64Value.newBuilder()
+                                                        .setValue(-100_000_000L)
+                                                        .build()));
+
+        boundedContext.getCommandBus()
+                      .post(ce.getCommand(), StreamObservers.<Ack>noOpObserver());
+
+        assertFalse(repository.isErrorLogged());
+    }
     /*
      * Test environment methods that use internals of this test suite
      * (and because of that are not moved to the test environment outside of this class).
