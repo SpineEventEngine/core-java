@@ -36,6 +36,8 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.throwIfUnchecked;
+import static io.spine.util.Exceptions.newIllegalArgumentException;
+import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.lang.String.format;
 
 /**
@@ -43,12 +45,15 @@ import static java.lang.String.format;
  *
  * @author Alex Tymchenko
  * @author Dmytro Dashenkov
+ * @author Alexander Yevsyukov
  */
 @Internal
 public abstract class RejectionSubscriberMethod extends HandlerMethod<CommandContext> {
 
     /** The instance of the predicate to filter rejection subscriber methods of a class. */
     private static final MethodPredicate PREDICATE = new FilterPredicate();
+
+    private final Kind kind;
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
@@ -57,6 +62,7 @@ public abstract class RejectionSubscriberMethod extends HandlerMethod<CommandCon
      */
     RejectionSubscriberMethod(Method method) {
         super(method);
+        this.kind = getKind(method);
     }
 
     /**
@@ -88,6 +94,27 @@ public abstract class RejectionSubscriberMethod extends HandlerMethod<CommandCon
         } catch (IllegalArgumentException | IllegalAccessException e) {
             throwIfUnchecked(e);
             throw new IllegalStateException(e);
+        }
+    }
+
+    @Override
+    public <R> R invoke(Object target, Message message, CommandContext context) {
+        if (kind == Kind.COMMAND_AWARE) {
+            throw newIllegalStateException("Wrong method called for %s", kind);
+        }
+        return super.invoke(target, message, context);
+    }
+
+    //TODO:2017-07-28:alexander.yevsyukov: Have method with more params.
+
+    public void invokeExtended(Object target,
+                               Message rejectionMessage,
+                               CommandContext context,
+                               Message commandMessage) {
+        try {
+            getMethod().invoke(target, rejectionMessage, commandMessage, context);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            throw whyFailed(target, rejectionMessage, context, e);
         }
     }
 
@@ -183,6 +210,27 @@ public abstract class RejectionSubscriberMethod extends HandlerMethod<CommandCon
         return PREDICATE;
     }
 
+    private static Kind getKind(Method method) {
+        final Class[] paramTypes = method.getParameterTypes();
+        final int paramCount = paramTypes.length;
+
+        switch (paramCount) {
+            case 1:
+                return Kind.REJECTION_MESSAGE_AWARE;
+            case 2:
+                final Class<?> secondParamType = paramTypes[1];
+                return  secondParamType == CommandContext.class
+                        ? Kind.COMMAND_CONTEXT_AWARE
+                        : Kind.COMMAND_MESSAGE_AWARE;
+            case 3:
+                return Kind.COMMAND_AWARE;
+            default:
+                throw newIllegalArgumentException(
+                        "Invalid Rejection handler method parameter count: %s.", paramCount);
+        }
+
+    }
+
     /**
      * The factory for filtering methods that match {@code RejectionSubscriberMethod} specification.
      */
@@ -255,6 +303,57 @@ public abstract class RejectionSubscriberMethod extends HandlerMethod<CommandCon
         private static Factory getInstance() {
             return Singleton.INSTANCE.value;
         }
+    }
+
+    private enum Kind {
+
+        /**
+         * A wrapper of a rejection subscriber method which receives a rejection message as a single
+         * parameter.
+         *
+         * <p>The signature of such a method is following:
+         * <pre>
+         *     {@code
+         *     {@link Subscribe {@literal @}Subscribe}
+         *     public void on(RejectionMessage rejection);
+         *     }
+         * </pre>
+         */
+        REJECTION_MESSAGE_AWARE,
+
+        /**
+         * A rejection subscriber method aware of the {@link CommandContext}.
+         *
+         * <p>The signature of such a method is following:
+         * <pre>
+         * {@literal @}Subscribe
+         * public void on(RejectionMessage rejection, CommandContext context);
+         * </pre>
+         */
+        COMMAND_CONTEXT_AWARE,
+
+        /**
+         * A rejection subscriber method aware of the command message.
+         *
+         * <p>The signature of such a method is following:
+         * <pre>
+         * {@literal @}Subscribe
+         * public void on(RejectionMessage rejection, CommandMessage command);
+         * </pre>
+         */
+        COMMAND_MESSAGE_AWARE,
+
+        /**
+         * A rejection subscriber method aware of both the command message and
+         * the {@link CommandContext}.
+         *
+         * <p>The signature of such a method is following:
+         * <pre>
+         * {@literal @}Subscribe
+         * public void on(RejectionMessage rejection, CommandMessage command, CommandContext context);
+         * </pre>
+         */
+        COMMAND_AWARE;
     }
 
     //TODO:2017-07-28:alexander.yevsyukov: Transform this into Kind enum and eliminate hierarchy.

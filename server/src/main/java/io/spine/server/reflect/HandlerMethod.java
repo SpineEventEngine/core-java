@@ -21,9 +21,7 @@ package io.spine.server.reflect;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import io.spine.protobuf.AnyPacker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -166,26 +164,6 @@ abstract class HandlerMethod<C extends Message> {
     /** Returns the count of the method parameters. */
     protected int getParamCount() {
         return paramCount;
-    }
-
-    //TODO:2017-07-27:alexander.yevsyukov: Migrate to Messages.ensureMessage() form newer version from `base`.
-    /**
-     * Ensures that the passed instance of {@code Message} is not an {@code Any},
-     * and unwraps the message if {@code Any} is passed.
-     *
-     * <p>This method is useful when the calling code passes a
-     * {@linkplain io.spine.core.Command#getMessage() command message} or
-     * {@link import io.spine.core.Event#getMessage() event message} without unwrapping.
-     */
-    protected static Message ensureMessage(Message msgOrAny) {
-        Message commandMessage;
-        if (msgOrAny instanceof Any) {
-            final Any any = (Any) msgOrAny;
-            commandMessage = AnyPacker.unpack(any);
-        } else {
-            commandMessage = msgOrAny;
-        }
-        return commandMessage;
     }
 
     /**
