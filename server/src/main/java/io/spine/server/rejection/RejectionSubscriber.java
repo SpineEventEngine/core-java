@@ -20,7 +20,6 @@
 package io.spine.server.rejection;
 
 import com.google.common.base.Supplier;
-import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
@@ -102,8 +101,7 @@ public class RejectionSubscriber implements RejectionDispatcher<String> {
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // as we return an immutable collection.
     public Set<RejectionClass> getMessageClasses() {
         if (rejectionClasses == null) {
-            rejectionClasses = ImmutableSet.copyOf(
-                    RejectionSubscriberMethod.getRejectionClasses(getClass()));
+            rejectionClasses = RejectionSubscriberMethod.inspect(getClass());
         }
         return rejectionClasses;
     }

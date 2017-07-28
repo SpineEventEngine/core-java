@@ -168,7 +168,7 @@ public abstract class RejectionSubscriberMethod extends HandlerMethod<CommandCon
     }
 
     @CheckReturnValue
-    public static Set<RejectionClass> getRejectionClasses(Class<?> cls) {
+    public static Set<RejectionClass> inspect(Class<?> cls) {
         checkNotNull(cls);
         final Set<RejectionClass> result = RejectionClass.setOf(inspect(cls, predicate()));
         return result;
