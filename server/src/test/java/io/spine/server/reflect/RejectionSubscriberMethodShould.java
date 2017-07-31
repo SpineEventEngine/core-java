@@ -21,6 +21,7 @@ package io.spine.server.reflect;
 
 import com.google.common.testing.NullPointerTester;
 import io.spine.core.CommandContext;
+import io.spine.core.RejectionEnvelope;
 import io.spine.server.reflect.given.Given;
 import io.spine.server.reflect.given.RejectionSubscriberMethodTestEnv.InvalidSubscriberNoAnnotation;
 import io.spine.server.reflect.given.RejectionSubscriberMethodTestEnv.InvalidSubscriberNoParams;
@@ -32,6 +33,8 @@ import io.spine.server.reflect.given.RejectionSubscriberMethodTestEnv.InvalidSub
 import io.spine.server.reflect.given.RejectionSubscriberMethodTestEnv.ValidSubscriberButPrivate;
 import io.spine.server.reflect.given.RejectionSubscriberMethodTestEnv.ValidSubscriberThreeParams;
 import io.spine.server.reflect.given.RejectionSubscriberMethodTestEnv.ValidSubscriberTwoParams;
+import io.spine.server.rejection.given.FaultySubscriber;
+import io.spine.server.rejection.given.VerifiableSubscriber;
 import io.spine.test.reflect.ReflectRejections.InvalidProjectName;
 import io.spine.test.rejection.command.UpdateProjectName;
 import org.junit.Test;
@@ -39,7 +42,9 @@ import org.junit.Test;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import static io.spine.server.rejection.given.Given.invalidProjectNameRejection;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -71,6 +76,15 @@ public class RejectionSubscriberMethodShould {
         verify(subscriberObject, times(1))
                 .handle(msg, UpdateProjectName.getDefaultInstance(),
                         CommandContext.getDefaultInstance());
+    }
+
+    @Test
+    public void catch_exceptions_caused_by_subscribers() {
+        final VerifiableSubscriber faultySubscriber = new FaultySubscriber();
+
+        faultySubscriber.dispatch(RejectionEnvelope.of(invalidProjectNameRejection()));
+
+        assertTrue(faultySubscriber.isMethodCalled());
     }
 
     @Test

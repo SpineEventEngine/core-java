@@ -34,7 +34,6 @@ import java.lang.reflect.Modifier;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Throwables.throwIfUnchecked;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static io.spine.util.Exceptions.unsupported;
 import static java.lang.String.format;
@@ -97,16 +96,11 @@ public class RejectionSubscriberMethod extends HandlerMethod<CommandContext> {
      * @param rejectionMessage the rejection message to handle
      * @param commandMessage   the command message
      * @param context          the context of the command
-     * @throws InvocationTargetException if the wrapped method throws any {@link Throwable} that
-     *                                   is not an {@link Error}.
-     *                                   {@code Error} instances are propagated as-is.
      */
     public void invoke(Object target,
                        Message rejectionMessage,
                        Message commandMessage,
-                       CommandContext context) throws InvocationTargetException {
-        //TODO:2017-07-31:alexander.yevsyukov: Avoid throwign ITE
-
+                       CommandContext context) {
         checkNotNull(rejectionMessage);
         checkNotNull(commandMessage);
         checkNotNull(context);
@@ -126,9 +120,8 @@ public class RejectionSubscriberMethod extends HandlerMethod<CommandContext> {
                     method.invoke(target, rejectionMessage, commandMessage, context);
                     break;
             }
-        } catch (IllegalArgumentException | IllegalAccessException e) {
-            throwIfUnchecked(e);
-            throw new IllegalStateException(e);
+        } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
+            throw whyFailed(target, rejectionMessage, context, e);
         }
     }
 
@@ -156,15 +149,9 @@ public class RejectionSubscriberMethod extends HandlerMethod<CommandContext> {
         checkNotNull(commandMessage);
         checkNotNull(context);
 
-        try {
-            final RejectionSubscriberMethod method = getMethod(target.getClass(),
-                                                               rejectionMessage, commandMessage);
-            method.invoke(target, rejectionMessage, commandMessage, context);
-        } catch (InvocationTargetException e) {
-            log().error("Exception handling a rejection. " +
-                                "Rejection message: {}, context: {}, cause: {}",
-                        rejectionMessage, context, e.getCause());
-        }
+        final RejectionSubscriberMethod method = getMethod(target.getClass(),
+                                                           rejectionMessage, commandMessage);
+        method.invoke(target, rejectionMessage, commandMessage, context);
     }
 
     /**
@@ -312,7 +299,7 @@ public class RejectionSubscriberMethod extends HandlerMethod<CommandContext> {
          * where {@code RejectionMessage} is a specific generated rejection message class, and
          * {@code CommandMessage} is a specific generated command message class.
          */
-        COMMAND_AWARE;
+        COMMAND_AWARE
     }
 
     /**

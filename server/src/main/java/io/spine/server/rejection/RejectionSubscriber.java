@@ -20,6 +20,7 @@
 package io.spine.server.rejection;
 
 import com.google.common.base.Supplier;
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
@@ -56,6 +57,13 @@ public class RejectionSubscriber implements RejectionDispatcher<String> {
     /** Lazily initialized logger. */
     private final Supplier<Logger> loggerSupplier = Logging.supplyFor(getClass());
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param envelope the envelope with the message
+     * @return a one element set with the result of {@link #toString()}
+     * as the identify of the subscriber, or empty set if dispatching failed
+     */
     @Override
     public Set<String> dispatch(final RejectionEnvelope envelope) {
         final Command originCommand = envelope.getOuterObject()
@@ -70,7 +78,12 @@ public class RejectionSubscriber implements RejectionDispatcher<String> {
                        envelope.getCommandContext());
             }
         };
-        op.execute();
+        try {
+            op.execute();
+        } catch (RuntimeException e) {
+            onError(envelope, e);
+            return ImmutableSet.of();
+        }
         return Identity.of(this);
     }
 

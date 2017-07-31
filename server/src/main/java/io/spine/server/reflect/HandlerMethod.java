@@ -221,7 +221,7 @@ abstract class HandlerMethod<C extends Message> {
      * @param message the message dispatched to the object
      * @param context the context of the message
      * @param cause   exception instance thrown by the invoked method
-     * @return the exception to be re-thrown
+     * @return the exception thrown during the invocation
      */
     protected HandlerMethodFailedException whyFailed(Object target,
                                                      Message message,
