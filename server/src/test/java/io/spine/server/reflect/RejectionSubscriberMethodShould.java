@@ -61,7 +61,7 @@ public class RejectionSubscriberMethodShould {
     public void invoke_subscriber_method() throws InvocationTargetException {
         final ValidSubscriberThreeParams subscriberObject = spy(new ValidSubscriberThreeParams());
         final RejectionSubscriberMethod subscriber =
-                new CommandAwareRejectionSubscriberMethod(subscriberObject.getMethod());
+                new RejectionSubscriberMethod(subscriberObject.getMethod());
         final InvalidProjectName msg = Given.RejectionMessage.invalidProjectName();
 
         subscriber.invoke(subscriberObject, msg,
