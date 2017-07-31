@@ -129,6 +129,13 @@ public class RejectionSubscriberMethodShould {
         assertIsRejectionSubscriber(subscriber, false);
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void throw_exception_on_attempt_to_create_instance_for_a_method_with_too_many_params() {
+        final Method illegalMethod = new InvalidSubscriberTooManyParams().getMethod();
+
+        new RejectionSubscriberMethod(illegalMethod);
+    }
+
     @Test
     public void consider_subscriber_with_one_invalid_param_invalid() {
         final Method subscriber = new InvalidSubscriberOneNotMsgParam().getMethod();
