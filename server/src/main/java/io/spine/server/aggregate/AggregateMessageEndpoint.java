@@ -79,7 +79,6 @@ abstract class AggregateMessageEndpoint<I,
      */
     private Set<I> dispatchToMany(Set<I> targets) {
         final ImmutableSet.Builder<I> result = ImmutableSet.builder();
-        //TODO:2017-07-21:alexander.yevsyukov: Can we run this in parallel?
         for (I id : targets) {
             try {
                 dispatchToOne(id);

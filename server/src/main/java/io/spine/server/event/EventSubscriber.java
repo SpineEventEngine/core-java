@@ -87,6 +87,7 @@ public abstract class EventSubscriber implements EventDispatcher<String> {
 
     /**
      * Logs the error into the subscriber {@linkplain #log() log}.
+     *
      * @param envelope  the message which caused the error
      * @param exception the error
      */
