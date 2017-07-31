@@ -54,4 +54,12 @@ public interface MessageDispatcher<C extends MessageClass, E extends MessageEnve
      * @return ID(s) of entities to which the message was dispatched
      */
     R dispatch(E envelope);
+
+    /**
+     * Handles an error occurred during dispatching a message.
+     *
+     * @param envelope  the message which caused the error
+     * @param exception the error
+     */
+    void onError(E envelope, RuntimeException exception);
 }

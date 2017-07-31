@@ -63,4 +63,12 @@ public interface CommandDispatcherDelegate<I> {
     Set<CommandClass> getCommandClasses();
 
     I dispatchCommand(CommandEnvelope envelope);
+
+    /**
+     * Handles an error occurred during command dispatching.
+     *
+     * @param envelope  the event which caused the error
+     * @param exception the error
+     */
+    void onError(CommandEnvelope envelope, RuntimeException exception);
 }

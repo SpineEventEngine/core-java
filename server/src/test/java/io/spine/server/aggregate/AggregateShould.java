@@ -48,8 +48,8 @@ import io.spine.test.aggregate.ProjectVBuilder;
 import io.spine.test.aggregate.Status;
 import io.spine.test.aggregate.command.AggAddTask;
 import io.spine.test.aggregate.command.AggCreateProject;
-import io.spine.test.aggregate.command.ImportEvents;
 import io.spine.test.aggregate.command.AggStartProject;
+import io.spine.test.aggregate.command.ImportEvents;
 import io.spine.test.aggregate.event.AggProjectCreated;
 import io.spine.test.aggregate.event.AggProjectStarted;
 import io.spine.test.aggregate.event.AggTaskAdded;
@@ -69,7 +69,7 @@ import static com.google.common.collect.Collections2.transform;
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.core.given.GivenVersion.withNumber;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.server.aggregate.AggregateCommandDispatcher.dispatch;
+import static io.spine.server.aggregate.AggregateMessageDispatcher.dispatchCommand;
 import static io.spine.server.aggregate.given.Given.EventMessage.projectCreated;
 import static io.spine.server.aggregate.given.Given.EventMessage.projectStarted;
 import static io.spine.server.aggregate.given.Given.EventMessage.taskAdded;
@@ -164,7 +164,7 @@ public class AggregateShould {
 
     @Test
     public void handle_one_command_and_apply_appropriate_event() {
-        dispatch(aggregate, env(createProject));
+        dispatchCommand(aggregate, env(createProject));
 
         assertTrue(aggregate.isCreateProjectCommandHandled);
         assertTrue(aggregate.isProjectCreatedEventApplied);
@@ -174,14 +174,14 @@ public class AggregateShould {
     public void advances_the_version_by_one_upon_handling_command_with_one_event() {
         final int version = aggregate.versionNumber();
 
-        dispatch(aggregate, env(createProject));
+        dispatchCommand(aggregate, env(createProject));
 
         assertEquals(version + 1, aggregate.versionNumber());
     }
 
     @Test
     public void write_its_version_into_event_context() {
-        dispatch(aggregate, env(createProject));
+        dispatchCommand(aggregate, env(createProject));
 
         // Get the first event since the command handler produces only one event message.
         final Event event = aggregate.getUncommittedEvents()
@@ -193,7 +193,7 @@ public class AggregateShould {
 
     @Test
     public void handle_only_dispatched_command() {
-        dispatch(aggregate, env(createProject));
+        dispatchCommand(aggregate, env(createProject));
 
         assertTrue(aggregate.isCreateProjectCommandHandled);
         assertTrue(aggregate.isProjectCreatedEventApplied);
@@ -207,15 +207,15 @@ public class AggregateShould {
 
     @Test
     public void invoke_applier_after_command_handler() {
-        dispatch(aggregate, env(createProject));
+        dispatchCommand(aggregate, env(createProject));
         assertTrue(aggregate.isCreateProjectCommandHandled);
         assertTrue(aggregate.isProjectCreatedEventApplied);
 
-        dispatch(aggregate, env(addTask));
+        dispatchCommand(aggregate, env(addTask));
         assertTrue(aggregate.isAddTaskCommandHandled);
         assertTrue(aggregate.isTaskAddedEventApplied);
 
-        dispatch(aggregate, env(startProject));
+        dispatchCommand(aggregate, env(startProject));
         assertTrue(aggregate.isStartProjectCommandHandled);
         assertTrue(aggregate.isProjectStartedEventApplied);
     }
@@ -224,7 +224,7 @@ public class AggregateShould {
     public void throw_exception_if_missing_command_handler() {
         final AggregateWithMissingApplier aggregate = new AggregateWithMissingApplier(ID);
 
-        dispatch(aggregate, env(addTask));
+        dispatchCommand(aggregate, env(addTask));
     }
 
     @Test(expected = IllegalStateException.class)
@@ -232,7 +232,7 @@ public class AggregateShould {
         final AggregateWithMissingApplier aggregate =
                 new AggregateWithMissingApplier(ID);
         try {
-            dispatch(aggregate, env(createProject));
+            dispatchCommand(aggregate, env(createProject));
         } catch (IllegalStateException e) { // expected exception
             assertTrue(aggregate.isCreateProjectCommandHandled());
             throw e;
@@ -260,7 +260,7 @@ public class AggregateShould {
 
     @Test
     public void update_state_when_the_command_is_handled() {
-        dispatch(aggregate, env(createProject));
+        dispatchCommand(aggregate, env(createProject));
 
         final Project state = aggregate.getState();
 
@@ -270,11 +270,11 @@ public class AggregateShould {
 
     @Test
     public void return_current_state_after_several_dispatches() {
-        dispatch(aggregate, env(createProject));
+        dispatchCommand(aggregate, env(createProject));
         assertEquals(Status.CREATED, aggregate.getState()
                                               .getStatus());
 
-        dispatch(aggregate, env(startProject));
+        dispatchCommand(aggregate, env(startProject));
         assertEquals(Status.STARTED, aggregate.getState()
                                               .getStatus());
     }
@@ -291,7 +291,7 @@ public class AggregateShould {
             final Timestamp frozenTime = Time.getCurrentTime();
             Time.setProvider(new TimeTests.FrozenMadHatterParty(frozenTime));
 
-            dispatch(aggregate, env(createProject));
+            dispatchCommand(aggregate, env(createProject));
 
             assertEquals(frozenTime, aggregate.whenModified());
         } finally {
@@ -303,9 +303,9 @@ public class AggregateShould {
     public void advance_version_on_command_handled() {
         final int version = aggregate.versionNumber();
 
-        dispatch(aggregate, env(createProject));
-        dispatch(aggregate, env(startProject));
-        dispatch(aggregate, env(addTask));
+        dispatchCommand(aggregate, env(createProject));
+        dispatchCommand(aggregate, env(startProject));
+        dispatchCommand(aggregate, env(addTask));
 
         assertEquals(version + 3, aggregate.versionNumber());
     }
@@ -329,7 +329,7 @@ public class AggregateShould {
 
     @Test
     public void restore_snapshot_during_play() {
-        dispatch(aggregate, env(createProject));
+        dispatchCommand(aggregate, env(createProject));
 
         final Snapshot snapshot = aggregate.toSnapshot();
 
@@ -398,7 +398,7 @@ public class AggregateShould {
     @Test
     public void transform_current_state_to_snapshot_event() {
 
-        dispatch(aggregate, env(createProject));
+        dispatchCommand(aggregate, env(createProject));
 
         final Snapshot snapshot = aggregate.toSnapshot();
         final Project state = unpack(snapshot.getState());
@@ -410,7 +410,7 @@ public class AggregateShould {
     @Test
     public void restore_state_from_snapshot() {
 
-        dispatch(aggregate, env(createProject));
+        dispatchCommand(aggregate, env(createProject));
 
         final Snapshot snapshotNewProject = aggregate.toSnapshot();
 
@@ -480,7 +480,7 @@ public class AggregateShould {
 
         final Command command = Given.ACommand.createProject();
         try {
-            dispatch(faultyAggregate, env(command.getMessage()));
+            dispatchCommand(faultyAggregate, env(command.getMessage()));
             failNotThrows();
         } catch (RuntimeException e) {
             @SuppressWarnings("ThrowableResultOfMethodCallIgnored") // We need it for checking.
@@ -497,7 +497,7 @@ public class AggregateShould {
 
         final Command command = Given.ACommand.createProject();
         try {
-            dispatch(faultyAggregate, env(command.getMessage()));
+            dispatchCommand(faultyAggregate, env(command.getMessage()));
             failNotThrows();
         } catch (RuntimeException e) {
             @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
@@ -668,7 +668,7 @@ public class AggregateShould {
         private void dispatchCommands(Command... commands) {
             for (Command cmd : commands) {
                 final Message commandMessage = Commands.getMessage(cmd);
-                dispatch(this, env(commandMessage));
+                AggregateMessageDispatcher.dispatchCommand(this, env(commandMessage));
             }
         }
     }

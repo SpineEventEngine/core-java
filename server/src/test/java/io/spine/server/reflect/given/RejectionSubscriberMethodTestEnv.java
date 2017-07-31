@@ -141,6 +141,5 @@ public class RejectionSubscriberMethodTestEnv {
         public Object handle(InvalidProjectName rejection, UpdateProjectName command) {
             return rejection;
         }
-
     }
 }

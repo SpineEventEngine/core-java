@@ -18,40 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.rejection.given;
+@ParametersAreNonnullByDefault
+package io.spine.server.projection.given;
 
-import io.spine.core.RejectionClass;
-import io.spine.core.RejectionEnvelope;
-import io.spine.server.rejection.RejectionDispatcher;
-import io.spine.test.rejection.ProjectRejections.InvalidProjectName;
-
-import java.util.Set;
-
-/**
- * A simple dispatcher class, which only dispatch and does not have own rejection subscribing
- * methods.
- */
-public class BareDispatcher implements RejectionDispatcher<String> {
-
-    private boolean dispatchCalled = false;
-
-    @Override
-    public Set<RejectionClass> getMessageClasses() {
-        return RejectionClass.setOf(InvalidProjectName.class);
-    }
-
-    @Override
-    public Set<String> dispatch(RejectionEnvelope rejection) {
-        dispatchCalled = true;
-        return Identity.of(this);
-    }
-
-    @Override
-    public void onError(RejectionEnvelope envelope, RuntimeException exception) {
-        // Do nothing.
-    }
-
-    public boolean isDispatchCalled() {
-        return dispatchCalled;
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

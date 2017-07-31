@@ -29,6 +29,7 @@ import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
+import io.spine.core.Events;
 import io.spine.core.TenantId;
 import io.spine.core.Version;
 import io.spine.core.Versions;
@@ -199,13 +200,24 @@ public class ProjectionRepositoryShould
         }
     }
 
-    @Test(expected = RuntimeException.class)
-    public void throw_exception_if_dispatch_unknown_event() {
+    @Test
+    public void log_error_if_dispatch_unknown_event() {
         final StringValue unknownEventMessage = StringValue.getDefaultInstance();
 
         final Event event = GivenEvent.withMessage(unknownEventMessage);
 
         repository().dispatch(EventEnvelope.of(event));
+
+        TestProjectionRepository testRepo = (TestProjectionRepository)repository();
+
+        assertTrue(testRepo.getLastErrorEnvelope() instanceof EventEnvelope);
+        assertEquals(Events.getMessage(event), testRepo.getLastErrorEnvelope()
+                                                       .getMessage());
+        assertEquals(event, testRepo.getLastErrorEnvelope().getOuterObject());
+
+        // It must be "illegal argument type" since projections of this repository
+        // do not handle such events.
+        assertTrue(testRepo.getLastException() instanceof IllegalArgumentException);
     }
 
     @Test

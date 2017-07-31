@@ -63,7 +63,12 @@ class AggregateEventEndpoint<I, A extends Aggregate<I, ?, ?>>
 
     @Override
     List<? extends Message> dispatchEnvelope(A aggregate, EventEnvelope envelope) {
-        return aggregate.dispatchEvent(envelope);
+        try {
+            return aggregate.dispatchEvent(envelope);
+        } catch (RuntimeException exception) {
+            repository().onError(envelope, exception);
+            throw exception;
+        }
     }
 
     /**

@@ -21,9 +21,7 @@ package io.spine.server.reflect;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import io.spine.protobuf.AnyPacker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +35,6 @@ import java.util.Objects;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
@@ -170,25 +167,6 @@ abstract class HandlerMethod<C extends Message> {
     }
 
     /**
-     * Ensures that the passed instance of {@code Message} is not an {@code Any},
-     * and unwraps the message if {@code Any} is passed.
-     */
-    protected static Message ensureMessage(Message msgOrAny) {
-        Message commandMessage;
-        if (msgOrAny instanceof Any) {
-            /* It looks that we're getting the result of `command.getMessage()` or
-               `event.getMessage()` because the calling code did not bother to unwrap it.
-               Extract the wrapped message (instead of treating this as an error).
-               There may be occasions of such a call especially from tests code. */
-            final Any any = (Any) msgOrAny;
-            commandMessage = AnyPacker.unpack(any);
-        } else {
-            commandMessage = msgOrAny;
-        }
-        return commandMessage;
-    }
-
-    /**
      * Casts a handling result to a list of event messages.
      *
      * @param output the command handler method return value.
@@ -216,28 +194,40 @@ abstract class HandlerMethod<C extends Message> {
      *
      * @param <R>     the type of the expected handler invocation result
      * @param target  the target object on which call the method
-     * @param message the message to handle   @return the result of message handling
+     * @param message the message to handle
      * @param context the context of the message
+     * @return the result of message handling
      */
     public <R> R invoke(Object target, Message message, C context) {
         checkNotNull(message);
         checkNotNull(context);
         try {
             final int paramCount = getParamCount();
-            if (paramCount == 1) {
-                @SuppressWarnings("unchecked")
-                // it is assumed that the method returns the result of this type
-                final R result = (R) method.invoke(target, message);
-                return result;
-            } else {
-                @SuppressWarnings("unchecked")
-                // it is assumed that the method returns the result of this type
-                final R result = (R) method.invoke(target, message, context);
-                return result;
-            }
+            final Object returnedValue = (paramCount == 1)
+                    ? method.invoke(target, message)
+                    : method.invoke(target, message, context);
+            @SuppressWarnings("unchecked") // It is assumed that the method returns this type.
+            final R result = (R)returnedValue;
+            return result;
         } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
-            throw illegalStateWithCauseOf(e);
+            throw whyFailed(target, message, context, e);
         }
+    }
+
+    /**
+     * Creates an exception containing information on the failure of the handler method invocation.
+     *
+     * @param target  the object which method was invoked
+     * @param message the message dispatched to the object
+     * @param context the context of the message
+     * @param cause   exception instance thrown by the invoked method
+     * @return the exception thrown during the invocation
+     */
+    protected HandlerMethodFailedException whyFailed(Object target,
+                                                     Message message,
+                                                     C context,
+                                                     Exception cause) {
+        return new HandlerMethodFailedException(target, message, context, cause);
     }
 
     /**

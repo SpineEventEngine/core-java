@@ -30,6 +30,7 @@ import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.Version;
+import io.spine.protobuf.Messages;
 import io.spine.server.command.Assign;
 import io.spine.server.event.EventFactory;
 
@@ -112,7 +113,7 @@ public final class CommandHandlerMethod extends HandlerMethod<CommandContext> {
         checkNotNull(target);
         checkNotNull(command);
         checkNotNull(context);
-        final Message commandMessage = ensureMessage(command);
+        final Message commandMessage = Messages.ensureMessage(command);
 
         final CommandHandlerMethod method = getMethod(target.getClass(), commandMessage);
         final List<? extends Message> eventMessages =

@@ -300,5 +300,10 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
         public Message dispatch(CommandEnvelope envelope) {
             throw exception;
         }
+
+        @Override
+        public void onError(CommandEnvelope envelope, RuntimeException exception) {
+            // Do nothing.
+        }
     }
 }

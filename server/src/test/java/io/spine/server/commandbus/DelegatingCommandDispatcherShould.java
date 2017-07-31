@@ -18,13 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event;
+package io.spine.server.commandbus;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.testing.NullPointerTester;
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
-import io.spine.server.command.TestEventFactory;
+import io.spine.client.TestActorRequestFactory;
+import io.spine.core.CommandClass;
+import io.spine.core.CommandEnvelope;
 import org.junit.Test;
 
 import java.util.Set;
@@ -32,54 +31,45 @@ import java.util.Set;
 import static io.spine.test.TestValues.newUuidValue;
 import static org.junit.Assert.assertTrue;
 
-/**
- * @author Alexander Yevsyukov
- */
-public class DelegatingEventDispatcherShould {
+public class DelegatingCommandDispatcherShould {
 
     @Test
-    public void pass_null_tolerance_test() {
-        new NullPointerTester()
-                .setDefault(EventDispatcherDelegate.class, new EmptyEventDispatcherDelegate())
-                .testAllPublicStaticMethods(DelegatingEventDispatcher.class);
-    }
+    public void delegate_onError() throws Exception {
+        final EmptyCommandDispatcherDelegate delegate = new EmptyCommandDispatcherDelegate();
 
-    @Test
-    public void delegate_onError() {
-        final EmptyEventDispatcherDelegate delegate = new EmptyEventDispatcherDelegate();
-        final DelegatingEventDispatcher<String> delegatingDispatcher =
-                DelegatingEventDispatcher.of(delegate);
+        final DelegatingCommandDispatcher<String> delegatingDispatcher =
+                DelegatingCommandDispatcher.of(delegate);
 
-        final TestEventFactory factory = TestEventFactory.newInstance(getClass());
-        EventEnvelope envelope = EventEnvelope.of(factory.createEvent(newUuidValue()));
+        final CommandEnvelope commandEnvelope = CommandEnvelope.of(
+                TestActorRequestFactory.newInstance(getClass()).createCommand(newUuidValue())
+        );
 
-        delegatingDispatcher.onError(envelope, new RuntimeException("test delegating onError"));
+        delegatingDispatcher.onError(commandEnvelope, new RuntimeException(getClass().getName()));
 
         assertTrue(delegate.onErrorCalled());
     }
 
-    private static final class EmptyEventDispatcherDelegate
-            implements EventDispatcherDelegate<String> {
+    private static final class EmptyCommandDispatcherDelegate
+            implements CommandDispatcherDelegate<String> {
 
         private boolean onErrorCalled;
 
         @Override
-        public Set<EventClass> getEventClasses() {
+        public Set<CommandClass> getCommandClasses() {
             return ImmutableSet.of();
         }
 
         @Override
-        public Set<String> dispatchEvent(EventEnvelope envelope) {
-            // Do nothing.
-            return ImmutableSet.of();
+        public String dispatchCommand(CommandEnvelope envelope) {
+            return getClass().getName();
         }
 
         @Override
-        public void onError(EventEnvelope envelope, RuntimeException exception) {
+        public void onError(CommandEnvelope envelope, RuntimeException exception) {
             onErrorCalled = true;
         }
 
-        private boolean onErrorCalled() {
+        boolean onErrorCalled() {
             return onErrorCalled;
         }
     }

@@ -60,8 +60,10 @@ import static org.mockito.Mockito.verify;
 /**
  * @author Alex Tymchenko
  */
-@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass", "InstanceVariableNamingConvention"})
-    // OK as for the test class for one of the primary framework features
+@SuppressWarnings({"ClassWithTooManyMethods",
+        "OverlyCoupledClass",
+        "InstanceVariableNamingConvention"})
+// OK as for the test class for one of the primary framework features
 public class RejectionBusShould {
 
     private RejectionBus rejectionBus;

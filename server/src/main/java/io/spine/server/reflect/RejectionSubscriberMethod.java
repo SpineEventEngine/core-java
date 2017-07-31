@@ -19,7 +19,7 @@
  */
 package io.spine.server.reflect;
 
-import com.google.common.base.Function;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Predicate;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
@@ -28,14 +28,14 @@ import io.spine.core.RejectionClass;
 import io.spine.core.Subscribe;
 
 import javax.annotation.CheckReturnValue;
-import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Throwables.throwIfUnchecked;
+import static io.spine.util.Exceptions.newIllegalArgumentException;
+import static io.spine.util.Exceptions.unsupported;
 import static java.lang.String.format;
 
 /**
@@ -43,20 +43,45 @@ import static java.lang.String.format;
  *
  * @author Alex Tymchenko
  * @author Dmytro Dashenkov
+ * @author Alexander Yevsyukov
  */
 @Internal
-public abstract class RejectionSubscriberMethod extends HandlerMethod<CommandContext> {
+public class RejectionSubscriberMethod extends HandlerMethod<CommandContext> {
 
     /** The instance of the predicate to filter rejection subscriber methods of a class. */
     private static final MethodPredicate PREDICATE = new FilterPredicate();
+
+    /** Determines the number of parameters and their types. */
+    private final Kind kind;
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
      *
      * @param method subscriber method
      */
+    @VisibleForTesting
     RejectionSubscriberMethod(Method method) {
         super(method);
+        this.kind = getKind(method);
+    }
+
+    private static Kind getKind(Method method) {
+        final Class[] paramTypes = method.getParameterTypes();
+        final int paramCount = paramTypes.length;
+        switch (paramCount) {
+            case 1:
+                return Kind.REJECTION_MESSAGE_AWARE;
+            case 2:
+                final Class<?> secondParamType = paramTypes[1];
+                return  secondParamType == CommandContext.class
+                        ? Kind.COMMAND_CONTEXT_AWARE
+                        : Kind.COMMAND_MESSAGE_AWARE;
+            case 3:
+                return Kind.COMMAND_AWARE;
+            default:
+                throw newIllegalArgumentException(
+                        "Invalid Rejection handler method parameter count: %s.", paramCount);
+        }
     }
 
     /**
@@ -71,45 +96,48 @@ public abstract class RejectionSubscriberMethod extends HandlerMethod<CommandCon
      * @param rejectionMessage the rejection message to handle
      * @param commandMessage   the command message
      * @param context          the context of the command
-     * @throws InvocationTargetException if the wrapped method throws any {@link Throwable} that
-     *                                   is not an {@link Error}.
-     *                                   {@code Error} instances are propagated as-is.
      */
     public void invoke(Object target,
                        Message rejectionMessage,
                        Message commandMessage,
-                       CommandContext context)
-            throws InvocationTargetException {
+                       CommandContext context) {
         checkNotNull(rejectionMessage);
         checkNotNull(commandMessage);
         checkNotNull(context);
         try {
-            doInvoke(target, rejectionMessage, context, commandMessage);
-        } catch (IllegalArgumentException | IllegalAccessException e) {
-            throwIfUnchecked(e);
-            throw new IllegalStateException(e);
+            final Method method = getMethod();
+            switch (kind) {
+                case REJECTION_MESSAGE_AWARE:
+                    method.invoke(target, rejectionMessage);
+                    break;
+                case COMMAND_CONTEXT_AWARE:
+                    method.invoke(target, rejectionMessage, context);
+                    break;
+                case COMMAND_MESSAGE_AWARE:
+                    method.invoke(target, rejectionMessage, commandMessage);
+                    break;
+                case COMMAND_AWARE:
+                    method.invoke(target, rejectionMessage, commandMessage, context);
+                    break;
+                default:
+                    throw unsupported("Unsupported method kind encountered %s", kind.name());
+            }
+        } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
+            throw whyFailed(target, rejectionMessage, context, e);
         }
     }
 
     /**
-     * Invokes the underlying {@link Method} with the specified set of params.
+     * Always throws {@link UnsupportedOperationException}.
+     * Call {@link #invoke(Object, Message, Message, CommandContext)} instead.
      *
-     * <p>Depending on the implementation, some parameters may be omitted.
-     *
-     * @param target           the invocation target
-     * @param rejectionMessage the rejection message parameter of the handler method
-     * @param context          the {@link CommandContext} parameter of the handler method
-     * @param commandMessage   the command message parameter of the handler method
-     * @throws IllegalArgumentException  if thrown by the handler method invocation
-     * @throws IllegalAccessException    if thrown by the handler method invocation
-     * @throws InvocationTargetException if thrown by the handler method invocation
+     * @return nothing ever
+     * @throws IllegalStateException always
      */
-    protected abstract void doInvoke(Object target,
-                                     Message rejectionMessage,
-                                     CommandContext context,
-                                     Message commandMessage) throws IllegalArgumentException,
-                                                                    IllegalAccessException,
-                                                                    InvocationTargetException;
+    @Override
+    public <R> R invoke(Object target, Message message, CommandContext context) {
+        throw unsupported("Call invoke(Object, Message, Message, CommandContext) instead.");
+    }
 
     /**
      * Invokes the subscriber method in the passed object.
@@ -123,15 +151,9 @@ public abstract class RejectionSubscriberMethod extends HandlerMethod<CommandCon
         checkNotNull(commandMessage);
         checkNotNull(context);
 
-        try {
-            final RejectionSubscriberMethod method = getMethod(target.getClass(),
-                                                               rejectionMessage, commandMessage);
-            method.invoke(target, rejectionMessage, commandMessage, context);
-        } catch (InvocationTargetException e) {
-            log().error("Exception handling a rejection. " +
-                                "Rejection message: {}, context: {}, cause: {}",
-                        rejectionMessage, context, e.getCause());
-        }
+        final RejectionSubscriberMethod method = getMethod(target.getClass(),
+                                                           rejectionMessage, commandMessage);
+        method.invoke(target, rejectionMessage, commandMessage, context);
     }
 
     /**
@@ -168,7 +190,7 @@ public abstract class RejectionSubscriberMethod extends HandlerMethod<CommandCon
     }
 
     @CheckReturnValue
-    public static Set<RejectionClass> getRejectionClasses(Class<?> cls) {
+    public static Set<RejectionClass> inspect(Class<?> cls) {
         checkNotNull(cls);
         final Set<RejectionClass> result = RejectionClass.setOf(inspect(cls, predicate()));
         return result;
@@ -195,9 +217,7 @@ public abstract class RejectionSubscriberMethod extends HandlerMethod<CommandCon
 
         @Override
         public RejectionSubscriberMethod create(Method method) {
-            final Class[] paramTypes = method.getParameterTypes();
-            final MethodWrapper wrapper = MethodWrapper.forParams(paramTypes);
-            final RejectionSubscriberMethod result = wrapper.apply(method);
+            final RejectionSubscriberMethod result = new RejectionSubscriberMethod(method);
             return result;
         }
 
@@ -226,94 +246,62 @@ public abstract class RejectionSubscriberMethod extends HandlerMethod<CommandCon
     }
 
     /**
-     * A {@link Function} wrapping the given {@link Method} into a corresponding
-     * {@code RejectionSubscriberMethod}.
+     * The kind of the method signature, which is determined by the number of parameters and
+     * their types.
      */
-    private enum MethodWrapper implements Function<Method, RejectionSubscriberMethod> {
+    private enum Kind {
 
         /**
-         * Wraps the given {@link Method} with an instance of
-         * {@link RejectionMessageSubscriberMethod}.
-         */
-        REJECTION_MESSAGE_AWARE {
-            @Override
-            RejectionSubscriberMethod wrap(Method method) {
-                return new RejectionMessageSubscriberMethod(method);
-            }
-        },
-
-        /**
-         * Wraps the given {@link Method} with an instance of
-         * {@link CommandContextAwareRejectionSubscriberMethod}.
-         */
-        COMMAND_CONTEXT_AWARE {
-            @Override
-            RejectionSubscriberMethod wrap(Method method) {
-                return new CommandContextAwareRejectionSubscriberMethod(method);
-            }
-        },
-
-        /**
-         * Wraps the given {@link Method} with an instance of
-         * {@link CommandMessageAwareRejectionSubscriberMethod}.
-         */
-        COMMAND_MESSAGE_AWARE {
-            @Override
-            RejectionSubscriberMethod wrap(Method method) {
-                return new CommandMessageAwareRejectionSubscriberMethod(method);
-            }
-        },
-
-        /**
-         * Wraps the given {@link Method} with an instance of
-         * {@link CommandAwareRejectionSubscriberMethod}.
-         */
-        COMMAND_AWARE {
-            @Override
-            RejectionSubscriberMethod wrap(Method method) {
-                return new CommandAwareRejectionSubscriberMethod(method);
-            }
-        };
-
-        /**
-         * Retrieves the wrapper implementation for the given set of parameters of a rejection
-         * subscriber method
+         * A wrapper of a rejection subscriber method which receives a rejection message
+         * as a single parameter.
          *
-         * @param paramTypes the parameter types of the rejection subscriber method
-         * @return the corresponding instance of {@code MethodWrapper}
+         * <p>The signature of such a method is following:
+         * <pre>
+         * {@literal @}Subscribe
+         * public void on(RejectionMessage rejection);
+         * </pre>
+         * where {@code RejectionMessage} is a specific generated rejection message class.
          */
-        private static MethodWrapper forParams(Class[] paramTypes) {
-            checkNotNull(paramTypes);
-            final int paramCount = paramTypes.length;
-            final MethodWrapper methodWrapper;
-            switch (paramCount) {
-                case 1:
-                    methodWrapper = REJECTION_MESSAGE_AWARE;
-                    break;
-                case 2:
-                    final Class<?> secondParamType = paramTypes[1];
-                    methodWrapper = secondParamType == CommandContext.class
-                                    ? COMMAND_CONTEXT_AWARE
-                                    : COMMAND_MESSAGE_AWARE;
-                    break;
-                case 3:
-                    methodWrapper = COMMAND_AWARE;
-                    break;
-                default:
-                    throw new IllegalArgumentException(
-                            format("Invalid Rejection handler method parameter count: %s.",
-                                   paramCount));
-            }
-            return methodWrapper;
-        }
+        REJECTION_MESSAGE_AWARE,
 
-        @Override
-        public RejectionSubscriberMethod apply(@Nullable Method method) {
-            checkNotNull(method);
-            return wrap(method);
-        }
+        /**
+         * A rejection subscriber method aware of the {@link CommandContext}.
+         *
+         * <p>The signature of such a method is following:
+         * <pre>
+         * {@literal @}Subscribe
+         * public void on(RejectionMessage rejection, CommandContext context);
+         * </pre>
+         * where {@code RejectionMessage} is a specific generated rejection message class.
+         */
+        COMMAND_CONTEXT_AWARE,
 
-        abstract RejectionSubscriberMethod wrap(Method method);
+        /**
+         * A rejection subscriber method aware of the command message.
+         *
+         * <p>The signature of such a method is following:
+         * <pre>
+         * {@literal @}Subscribe
+         * public void on(RejectionMessage rejection, CommandMessage command);
+         * </pre>
+         * where {@code RejectionMessage} is a specific generated rejection message class, and
+         * {@code CommandMessage} is a specific generated command message class.
+         */
+        COMMAND_MESSAGE_AWARE,
+
+        /**
+         * A rejection subscriber method aware of both the command message and
+         * the {@link CommandContext}.
+         *
+         * <p>The signature of such a method is following:
+         * <pre>
+         * {@literal @}Subscribe
+         * public void on(RejectionMessage rejection, CommandMessage command, CommandContext context);
+         * </pre>
+         * where {@code RejectionMessage} is a specific generated rejection message class, and
+         * {@code CommandMessage} is a specific generated command message class.
+         */
+        COMMAND_AWARE
     }
 
     /**

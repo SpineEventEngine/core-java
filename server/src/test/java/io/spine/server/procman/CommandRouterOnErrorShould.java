@@ -70,6 +70,11 @@ public class CommandRouterOnErrorShould extends AbstractCommandRouterShould<Comm
             public Message dispatch(CommandEnvelope envelope) {
                 throw new IllegalStateException("I am faulty!");
             }
+
+            @Override
+            public void onError(CommandEnvelope envelope, RuntimeException exception) {
+                // Do nothing.
+            }
         });
 
         final StringValue sourceMessage = toMessage(getClass().getSimpleName());
