@@ -119,6 +119,8 @@ public class RejectionSubscriberMethod extends HandlerMethod<CommandContext> {
                 case COMMAND_AWARE:
                     method.invoke(target, rejectionMessage, commandMessage, context);
                     break;
+                default:
+                    throw unsupported("Unsupported method kind encountered %s", kind.name());
             }
         } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
             throw whyFailed(target, rejectionMessage, context, e);
