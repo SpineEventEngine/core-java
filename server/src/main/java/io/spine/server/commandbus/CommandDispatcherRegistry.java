@@ -74,7 +74,8 @@ class CommandDispatcherRegistry extends DispatcherRegistry<CommandClass, Command
      *                               that already has a registered dispatcher
      */
     @Override
-    protected void checkDispatcher(CommandDispatcher<?> dispatcher) throws IllegalArgumentException {
+    protected void checkDispatcher(CommandDispatcher<?> dispatcher)
+            throws IllegalArgumentException {
         super.checkDispatcher(dispatcher);
         checkNotAlreadyRegistered(dispatcher);
     }

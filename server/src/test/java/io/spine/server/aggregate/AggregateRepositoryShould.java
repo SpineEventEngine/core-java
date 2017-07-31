@@ -35,6 +35,7 @@ import io.spine.core.EventEnvelope;
 import io.spine.core.MessageEnvelope;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
+import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.AnemicAggregateRepository;
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.FailingAggregateRepository;
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.GivenAggregate;
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.ProjectAggregate;
@@ -368,6 +369,11 @@ public class AggregateRepositoryShould {
                       .post(ce.getCommand(), StreamObservers.<Ack>noOpObserver());
 
         assertFalse(repository.isErrorLogged());
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void now_allow_anemic_aggregates() {
+        boundedContext.register(new AnemicAggregateRepository());
     }
 
     /*

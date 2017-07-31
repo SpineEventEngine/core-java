@@ -57,6 +57,7 @@ import static io.spine.server.entity.AbstractEntity.createEntity;
 import static io.spine.server.entity.AbstractEntity.getConstructor;
 import static io.spine.server.entity.EntityWithLifecycle.Predicates.isEntityVisible;
 import static io.spine.server.route.EventRouting.withDefault;
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * The repository which manages instances of {@code Aggregate}s.
@@ -116,21 +117,32 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * {@inheritDoc}
      *
      * <p>{@linkplain io.spine.server.commandbus.CommandBus#register(
-     *io.spine.server.bus.MessageDispatcher) Registers} itself with the {@code CommandBus} of the
+     * io.spine.server.bus.MessageDispatcher) Registers} itself with the {@code CommandBus} of the
      * parent {@code BoundedContext}.
      */
     @Override
     public void onRegistered() {
         super.onRegistered();
         final BoundedContext boundedContext = getBoundedContext();
-        boundedContext.getCommandBus()
-                      .register(this);
 
-        // If there are any events on which aggregates react, register via delegating dispatcher.
+        final Set<CommandClass> commandClasses = getMessageClasses();
+
         final DelegatingEventDispatcher<I> delegatingDispatcher;
         delegatingDispatcher = DelegatingEventDispatcher.of(this);
-        if (!delegatingDispatcher.getMessageClasses()
-                                 .isEmpty()) {
+        final Set<EventClass> eventClasses = delegatingDispatcher.getMessageClasses();
+
+        if (commandClasses.isEmpty() && eventClasses.isEmpty()) {
+            throw newIllegalStateException(
+                    "Aggregates of the repository %s neither handle commands" +
+                            " nor react on events.", this);
+        }
+
+        if (!commandClasses.isEmpty()) {
+            boundedContext.getCommandBus()
+                          .register(this);
+        }
+
+        if (!eventClasses.isEmpty()) {
             boundedContext.getEventBus()
                           .register(delegatingDispatcher);
         }

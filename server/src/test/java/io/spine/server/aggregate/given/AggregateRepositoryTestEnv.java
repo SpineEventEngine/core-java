@@ -24,6 +24,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.protobuf.BoolValue;
 import com.google.protobuf.FloatValue;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
@@ -61,6 +62,7 @@ import io.spine.test.aggregate.event.AggProjectStarted;
 import io.spine.test.aggregate.event.AggTaskAdded;
 import io.spine.testdata.Sample;
 import io.spine.time.Time;
+import io.spine.validate.BoolValueVBuilder;
 import io.spine.validate.StringValueVBuilder;
 
 import javax.annotation.Nullable;
@@ -411,5 +413,15 @@ public class AggregateRepositoryTestEnv {
         public RuntimeException getLastException() {
             return lastException;
         }
+    }
+
+    public static class AnemicAggregate extends Aggregate<Integer, BoolValue, BoolValueVBuilder> {
+        private AnemicAggregate(Integer id) {
+            super(id);
+        }
+    }
+
+    public static class AnemicAggregateRepository
+            extends AggregateRepository<Integer, AnemicAggregate> {
     }
 }
