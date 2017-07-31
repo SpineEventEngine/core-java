@@ -61,8 +61,8 @@ public class RejectionSubscriber implements RejectionDispatcher<String> {
      * {@inheritDoc}
      *
      * @param envelope the envelope with the message
-     * @return a one element set with the result of {@link #toString()}
-     * as the identify of the subscriber, or empty set if dispatching failed
+     * @return a one element set with the result of {@link #toString()} as the identity of
+     * the subscriber, or empty set if dispatching failed
      */
     @Override
     public Set<String> dispatch(final RejectionEnvelope envelope) {
@@ -89,6 +89,7 @@ public class RejectionSubscriber implements RejectionDispatcher<String> {
 
     /**
      * Logs the error into the subscriber {@linkplain #log() log}.
+     * 
      * @param envelope  the message which caused the error
      * @param exception the error
      */
