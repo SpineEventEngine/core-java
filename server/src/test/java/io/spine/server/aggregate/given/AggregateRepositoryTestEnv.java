@@ -415,13 +415,86 @@ public class AggregateRepositoryTestEnv {
         }
     }
 
+    /**
+     * An aggregate class which neither handle commands nor react on events.
+     */
     public static class AnemicAggregate extends Aggregate<Integer, BoolValue, BoolValueVBuilder> {
         private AnemicAggregate(Integer id) {
             super(id);
         }
     }
 
+    /**
+     * The repository of {@link AnemicAggregate}.
+     */
     public static class AnemicAggregateRepository
             extends AggregateRepository<Integer, AnemicAggregate> {
+    }
+
+    /**
+     * An aggregate class that reacts only on events and does not handle commands.
+     */
+    public static class ReactingAggregate
+            extends Aggregate<ProjectId, StringValue, StringValueVBuilder> {
+
+        private ReactingAggregate(ProjectId id) {
+            super(id);
+        }
+
+        /**
+         * Emits {@link AggProjectArchived} if the event is from the parent project.
+         * Otherwise returns empty iterable.
+         */
+        @React
+        private Iterable<AggProjectArchived> on(AggProjectArchived event) {
+            if (event.getChildProjectIdList()
+                     .contains(getId())) {
+                return ImmutableList.of(AggProjectArchived.newBuilder()
+                                                          .setProjectId(getId())
+                                                          .build());
+            }
+            return nothing();
+        }
+
+        /**
+         * Emits {@link AggProjectDeleted} if the event is from the parent project.
+         * Otherwise returns empty iterable.
+         */
+        @React
+        private Iterable<AggProjectDeleted> on(AggProjectDeleted event) {
+            if (event.getChildProjectIdList()
+                     .contains(getId())) {
+                return ImmutableList.of(AggProjectDeleted.newBuilder()
+                                                         .setProjectId(getId())
+                                                         .build());
+            }
+            return nothing();
+        }
+
+        private static <M> Iterable<M> nothing() {
+            return ImmutableList.of();
+        }
+
+        @Apply
+        private void apply(AggProjectArchived event) {
+            setArchived(true);
+        }
+
+        @Apply
+        private void apply(AggProjectDeleted event) {
+            setDeleted(true);
+        }
+    }
+
+    /**
+     * The repository of {@link ReactingAggregate}.
+     */
+    public static class ReactingRepository
+            extends AggregateRepository<ProjectId, ReactingAggregate> {
+
+        public void createAndStore(ProjectId id) {
+            ReactingAggregate newAggregate = new ReactingAggregate(id);
+            store(newAggregate);
+        }
     }
 }
