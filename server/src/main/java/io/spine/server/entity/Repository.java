@@ -401,6 +401,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      *     <li>The name of the message class.
      *     <li>The message ID.
      * </ol>
+     *
      * @param msgFormat the format of the message
      * @param envelope  the envelope of the message caused the error
      * @param exception the error

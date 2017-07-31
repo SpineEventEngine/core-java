@@ -33,6 +33,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class HandlerMethodFailedException extends RuntimeException {
 
     private static final long serialVersionUID = 0L;
+    
     private final String target;
     private final GeneratedMessageV3 dispatchedMessage;
     private final GeneratedMessageV3 messageContext;
