@@ -31,7 +31,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * <p>A state of an entity is defined as a Protobuf message.
  *
- * <p>Implementing classes must have one-argument constructor which accept the ID of the entity.
+ * <p>Implementing classes must have single constructor which accepts the ID of the entity.
  *
  * @param <I> the type of entity identifier
  * @param <S> the type of entity state
