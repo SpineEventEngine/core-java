@@ -224,6 +224,7 @@ public class AggregateShould {
     public void throw_exception_if_missing_command_handler() {
         final AggregateWithMissingApplier aggregate = new AggregateWithMissingApplier(ID);
 
+        // Pass a command for which the target aggregate does not have a handling method.
         dispatchCommand(aggregate, env(addTask));
     }
 
@@ -245,10 +246,15 @@ public class AggregateShould {
                 Aggregate.TypeInfo.getCommandClasses(TestAggregate.class);
 
         assertTrue(commandClasses.size() == 4);
-        assertTrue(commandClasses.contains(CommandClass.of(AggCreateProject.class)));
-        assertTrue(commandClasses.contains(CommandClass.of(AggAddTask.class)));
-        assertTrue(commandClasses.contains(CommandClass.of(AggStartProject.class)));
-        assertTrue(commandClasses.contains(CommandClass.of(ImportEvents.class)));
+        assertContains(commandClasses, AggCreateProject.class);
+        assertContains(commandClasses, AggAddTask.class);
+        assertContains(commandClasses, AggStartProject.class);
+        assertContains(commandClasses, ImportEvents.class);
+    }
+
+    private static void assertContains(Collection<CommandClass> commandClasses,
+                                       Class<? extends Message> cls) {
+        assertTrue(commandClasses.contains(CommandClass.of(cls)));
     }
 
     @Test

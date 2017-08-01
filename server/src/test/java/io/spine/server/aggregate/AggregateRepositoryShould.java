@@ -25,6 +25,7 @@ import com.google.common.collect.Lists;
 import com.google.protobuf.FloatValue;
 import com.google.protobuf.UInt32Value;
 import com.google.protobuf.UInt64Value;
+import io.spine.Identifier;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Ack;
 import io.spine.core.CommandClass;
@@ -35,10 +36,12 @@ import io.spine.core.EventEnvelope;
 import io.spine.core.MessageEnvelope;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
+import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.AnemicAggregateRepository;
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.FailingAggregateRepository;
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.GivenAggregate;
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.ProjectAggregate;
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.ProjectAggregateRepository;
+import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.ReactingRepository;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.reflect.HandlerMethodFailedException;
 import io.spine.server.tenant.TenantAwareOperation;
@@ -370,6 +373,41 @@ public class AggregateRepositoryShould {
         assertFalse(repository.isErrorLogged());
     }
 
+    @Test(expected = IllegalStateException.class)
+    public void now_allow_anemic_aggregates() {
+        boundedContext.register(new AnemicAggregateRepository());
+    }
+
+    @Test
+    public void allow_reacting_aggregates() {
+        final ReactingRepository repository = new ReactingRepository();
+        boundedContext.register(repository);
+
+        final ProjectId parentId = givenAggregateId("parent");
+        final ProjectId childId = givenAggregateId("child");
+
+        // Create event factory for which producer ID would be the `childId`.
+        // This will allow dispatching the event correctly.
+        final TestEventFactory factory = TestEventFactory.newInstance(Identifier.pack(childId),
+                                                                      getClass());
+        final AggProjectArchived msg = AggProjectArchived.newBuilder()
+                                                         .setProjectId(parentId)
+                                                         .addChildProjectId(childId)
+                                                         .build();
+        final Event event = factory.createEvent(msg);
+
+        repository.createAndStore(childId);
+
+        // See that the aggregate can find the aggregate.
+        assertTrue(repository.find(childId).isPresent());
+
+        // Posting this event should archive the aggregate.
+        boundedContext.getEventBus()
+                      .post(event);
+
+        assertFalse(repository.find(childId).isPresent());
+    }
+
     /*
      * Test environment methods that use internals of this test suite
      * (and because of that are not moved to the test environment outside of this class).
@@ -384,11 +422,15 @@ public class AggregateRepositoryShould {
     }
 
     private void givenStoredAggregateWithId(String id) {
-        final ProjectId projectId = ProjectId.newBuilder()
-                                             .setId(id)
-                                             .build();
+        final ProjectId projectId = givenAggregateId(id);
         final ProjectAggregate aggregate = GivenAggregate.withUncommittedEvents(projectId);
 
         repository.store(aggregate);
+    }
+
+    private static ProjectId givenAggregateId(String id) {
+        return ProjectId.newBuilder()
+                        .setId(id)
+                        .build();
     }
 }
