@@ -26,7 +26,7 @@ import io.spine.server.bus.MulticastDispatcher;
 /**
  * Delivers rejections to corresponding subscribers.
  *
- * @param <I> the type of entities to which deliver rejections
+ * @param <I> the type of IDs of entities to which deliver rejections
  * @author Alex Tymchenko
  */
 public interface RejectionDispatcher<I>

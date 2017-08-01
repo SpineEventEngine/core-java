@@ -53,8 +53,8 @@ import java.util.Set;
  * {@linkplain CommandClass command classes}, which does not interfere with the
  * {@code MessageDispatcher} API.
  *
- * @author Alex Tymchenko
  * @param <I> the type of IDs of entities that handle the commands dispatched by the delegate
+ * @author Alex Tymchenko
  * @see DelegatingCommandDispatcher
  */
 @Internal
