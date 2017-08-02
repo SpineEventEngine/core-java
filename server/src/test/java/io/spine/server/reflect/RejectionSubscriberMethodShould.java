@@ -45,6 +45,7 @@ import java.lang.reflect.Method;
 import static io.spine.server.rejection.given.Given.invalidProjectNameRejection;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -55,10 +56,12 @@ import static org.mockito.Mockito.verify;
 @SuppressWarnings("unused")     // some of tests address just the fact of method declaration.
 public class RejectionSubscriberMethodShould {
 
+    private static final CommandContext emptyContext = CommandContext.getDefaultInstance();
+
     @Test
     public void pass_null_tolerance_check() {
         new NullPointerTester()
-                .setDefault(CommandContext.class, CommandContext.getDefaultInstance())
+                .setDefault(CommandContext.class, emptyContext)
                 .testAllPublicStaticMethods(RejectionSubscriberMethod.class);
     }
 
@@ -69,13 +72,27 @@ public class RejectionSubscriberMethodShould {
                 new RejectionSubscriberMethod(subscriberObject.getMethod());
         final InvalidProjectName msg = Given.RejectionMessage.invalidProjectName();
 
-        subscriber.invoke(subscriberObject, msg,
+        subscriber.invoke(subscriberObject,
+                          msg,
                           UpdateProjectName.getDefaultInstance(),
-                          CommandContext.getDefaultInstance());
+                          emptyContext);
 
         verify(subscriberObject, times(1))
-                .handle(msg, UpdateProjectName.getDefaultInstance(),
-                        CommandContext.getDefaultInstance());
+                .handle(msg, UpdateProjectName.getDefaultInstance(), emptyContext);
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void not_allow_invoking_inherited_invoke_method() {
+        final ValidSubscriberThreeParams subscriberObject = new ValidSubscriberThreeParams();
+        final RejectionSubscriberMethod subscriber =
+                new RejectionSubscriberMethod(subscriberObject.getMethod());
+
+        final InvalidProjectName msg = Given.RejectionMessage.invalidProjectName();
+
+        // This should fail.
+        subscriber.invoke(subscriberObject, msg, emptyContext);
+        
+        fail("Exception not thrown");
     }
 
     @Test
