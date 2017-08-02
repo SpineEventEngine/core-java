@@ -36,9 +36,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @VisibleForTesting
 public class ProcessManagerDispatcher {
 
-    private ProcessManagerDispatcher() {
-        // Prevent this utility class from instantiation.
-    }
+    /** Prevents this utility class from instantiation. */
+    private ProcessManagerDispatcher() {}
 
     /**
      * Dispatches the {@linkplain CommandEnvelope Command envelope}
