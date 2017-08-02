@@ -46,8 +46,14 @@ import static java.lang.String.format;
  */
 public abstract class AbstractEntity<I, S extends Message> implements Entity<I, S> {
 
+    /** The ID of the entity. */
     private final I id;
 
+    /** Cached version of string ID. */
+    @Nullable
+    private volatile String stringId;
+
+    /** The state of the entity. */
     @Nullable
     private volatile S state;
 
@@ -232,11 +238,33 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
         }
     }
 
+    /**
+     * Obtains ID of the entity in the {@linkplain Stringifiers#toString(Object) string form}.
+     *
+     * <p>Subsequent calls to the method returns a cached instance of the string, which minimizes
+     * the performance impact of repeated calls.
+     *
+     * @return string form of the entity ID
+     */
+    @SuppressWarnings("SynchronizeOnThis") // See Effective Java 2nd Ed. Item #71.
+    public String stringId() {
+        String result = stringId;
+        if (result == null) {
+            synchronized (this) {
+                result = stringId;
+                if (result == null) {
+                    stringId = Stringifiers.toString(getId());
+                    result = stringId;
+                }
+            }
+        }
+        return result;
+    }
+
     @Override
     public String toString() {
-        final String idString = Stringifiers.toString(id);
         return MoreObjects.toStringHelper(this)
-                          .add("id", idString)
+                          .add("id", stringId())
                           .toString();
     }
 
