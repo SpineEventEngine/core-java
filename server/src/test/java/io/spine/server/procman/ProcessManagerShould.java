@@ -21,29 +21,25 @@
 package io.spine.server.procman;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.Empty;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.Identifier;
 import io.spine.client.TestActorRequestFactory;
-import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
-import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Events;
-import io.spine.core.Subscribe;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
-import io.spine.server.command.Assign;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.commandbus.CommandBus;
-import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.commandstore.CommandStore;
 import io.spine.server.entity.given.Given;
+import io.spine.server.procman.given.ProcessManagerTestEnv.AddTaskDispatcher;
+import io.spine.server.procman.given.ProcessManagerTestEnv.TestProcessManager;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantAwareTest;
 import io.spine.server.tenant.TenantIndex;
@@ -55,11 +51,9 @@ import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.event.PmTaskAdded;
 import io.spine.testdata.Sample;
-import io.spine.validate.AnyVBuilder;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -78,6 +72,11 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 
+/**
+ * @author Alexander Litus
+ * @author Dmytro Dashenkov
+ * @author Alexander Yevsyukov
+ */
 @SuppressWarnings("OverlyCoupledClass")
 public class ProcessManagerShould {
 
@@ -145,7 +144,7 @@ public class ProcessManagerShould {
     @Test
     public void dispatch_several_commands() {
         commandBus.register(new AddTaskDispatcher());
-        processManager.setCommandBus(commandBus);
+        processManager.injectCommandBus(commandBus);
 
         testDispatchCommand(createProject());
         testDispatchCommand(addTask());
@@ -183,7 +182,7 @@ public class ProcessManagerShould {
         // Add dispatcher for the routed command. Otherwise the command would reject the command.
         final AddTaskDispatcher dispatcher = new AddTaskDispatcher();
         commandBus.register(dispatcher);
-        processManager.setCommandBus(commandBus);
+        processManager.injectCommandBus(commandBus);
 
         final List<Event> events = testDispatchCommand(startProject());
 
@@ -244,7 +243,7 @@ public class ProcessManagerShould {
         final StringValue commandMessage = toMessage("create_iterating_router");
         final CommandContext commandContext = requestFactory.createCommandContext();
 
-        processManager.setCommandBus(mock(CommandBus.class));
+        processManager.injectCommandBus(mock(CommandBus.class));
 
         final IteratingCommandRouter router
                 = processManager.newIteratingRouterFor(commandMessage,
@@ -267,7 +266,7 @@ public class ProcessManagerShould {
         final StringValue commandMessage = toMessage("create_router");
         final CommandContext commandContext = requestFactory.createCommandContext();
 
-        processManager.setCommandBus(mock(CommandBus.class));
+        processManager.injectCommandBus(mock(CommandBus.class));
 
         final CommandRouter router = processManager.newRouterFor(commandMessage, commandContext);
         assertNotNull(router);
@@ -295,88 +294,8 @@ public class ProcessManagerShould {
                 .build();
     }
 
-    @SuppressWarnings("UnusedParameters") // OK for test class.
-    private static class TestProcessManager extends ProcessManager<ProjectId,
-                                                                   Any,
-                                                                   AnyVBuilder> {
-
-        private TestProcessManager(ProjectId id) {
-            super(id);
-        }
-
-        @Subscribe
-        public void on(PmProjectCreated event, EventContext ignored) {
-            getBuilder().mergeFrom(AnyPacker.pack(event));
-        }
-
-        @Subscribe
-        public void on(PmTaskAdded event, EventContext ignored) {
-            getBuilder().mergeFrom(AnyPacker.pack(event));
-        }
-
-        @Subscribe
-        public void on(PmProjectStarted event, EventContext ignored) {
-            getBuilder().mergeFrom(AnyPacker.pack(event));
-        }
-
-        @Assign
-        PmProjectCreated handle(PmCreateProject command, CommandContext ignored) {
-            getBuilder().mergeFrom(AnyPacker.pack(command));
-            return ((PmProjectCreated.Builder) Sample.builderForType(PmProjectCreated.class))
-                    .setProjectId(command.getProjectId())
-                    .build();
-        }
-
-        @Assign
-        PmTaskAdded handle(PmAddTask command, CommandContext ignored) {
-            getBuilder().mergeFrom(AnyPacker.pack(command));
-            return ((PmTaskAdded.Builder) Sample.builderForType(PmTaskAdded.class))
-                    .setProjectId(command.getProjectId())
-                    .build();
-        }
-
-        @Assign
-        CommandRouted handle(PmStartProject command, CommandContext context) {
-            getBuilder().mergeFrom(AnyPacker.pack(command));
-
-            final Message addTask = ((PmAddTask.Builder) Sample.builderForType(PmAddTask.class))
-                    .setProjectId(command.getProjectId())
-                    .build();
-            final CommandRouted route = newRouterFor(command, context)
-                    .add(addTask)
-                    .routeAll();
-            return route;
-        }
-    }
-
     @Test
     public void have_TypeInfo_utility_class() {
         assertHasPrivateParameterlessCtor(ProcessManager.TypeInfo.class);
-    }
-
-    private static class AddTaskDispatcher implements CommandDispatcher<Message> {
-
-        private final List<CommandEnvelope> commands = new LinkedList<>();
-
-        @Override
-        public Set<CommandClass> getMessageClasses() {
-            return CommandClass.setOf(PmAddTask.class);
-        }
-
-        @Override
-        public Message dispatch(CommandEnvelope envelope) {
-            commands.add(envelope);
-            return Empty.getDefaultInstance();
-        }
-
-        @Override
-        public void onError(CommandEnvelope envelope, RuntimeException exception) {
-            // Do nothing.
-        }
-
-        @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK for tests.
-        public List<CommandEnvelope> getCommands() {
-            return commands;
-        }
     }
 }
