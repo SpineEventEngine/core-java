@@ -22,12 +22,15 @@ package io.spine.server.procman;
 
 import com.google.common.testing.NullPointerTester;
 import io.spine.client.TestActorRequestFactory;
+import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.EventEnvelope;
+import io.spine.core.RejectionEnvelope;
 import io.spine.server.command.TestEventFactory;
 import io.spine.test.Tests;
 import org.junit.Test;
 
+import static io.spine.core.Rejections.createRejection;
 import static io.spine.test.TestValues.newUuidValue;
 import static org.mockito.Mockito.mock;
 
@@ -47,12 +50,14 @@ public class ProcessManagerDispatcherShould {
                 TestActorRequestFactory.newInstance(getClass());
         TestEventFactory eventFactory = TestEventFactory.newInstance(getClass());
 
+        final Command command = requestFactory.createCommand(newUuidValue());
         new NullPointerTester()
                 .setDefault(CommandEnvelope.class,
-                            CommandEnvelope.of(requestFactory.command()
-                                                             .create(newUuidValue())))
+                            CommandEnvelope.of(command))
                 .setDefault(EventEnvelope.class,
                             EventEnvelope.of(eventFactory.createEvent(newUuidValue())))
+                .setDefault(RejectionEnvelope.class,
+                            RejectionEnvelope.of(createRejection(newUuidValue(), command)))
                 .setDefault(ProcessManager.class, mock(ProcessManager.class))
                 .testAllPublicStaticMethods(ProcessManagerDispatcher.class);
     }

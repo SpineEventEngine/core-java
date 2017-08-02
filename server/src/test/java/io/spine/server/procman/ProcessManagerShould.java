@@ -26,18 +26,21 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.Identifier;
 import io.spine.client.TestActorRequestFactory;
+import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Events;
+import io.spine.core.RejectionEnvelope;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandstore.CommandStore;
 import io.spine.server.entity.given.Given;
+import io.spine.server.entity.rejection.Rejections.EntityAlreadyArchived;
 import io.spine.server.procman.given.ProcessManagerTestEnv.AddTaskDispatcher;
 import io.spine.server.procman.given.ProcessManagerTestEnv.TestProcessManager;
 import io.spine.server.storage.StorageFactory;
@@ -59,10 +62,12 @@ import java.util.List;
 import java.util.Set;
 
 import static io.spine.core.Commands.getMessage;
+import static io.spine.core.Rejections.createRejection;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.server.procman.ProcessManagerDispatcher.dispatch;
+import static io.spine.test.TestValues.newUuidValue;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Verify.assertSize;
 import static org.hamcrest.Matchers.instanceOf;
@@ -235,6 +240,25 @@ public class ProcessManagerShould {
         assertContains(classes, PmProjectCreated.class);
         assertContains(classes, PmTaskAdded.class);
         assertContains(classes, PmProjectStarted.class);
+    }
+
+    @Test
+    public void dispatch_rejection() {
+        final EntityAlreadyArchived rejectionMessage =
+                EntityAlreadyArchived.newBuilder()
+                                     .setEntityId(getClass().getName())
+                                     .build();
+
+        final Command command = requestFactory.command()
+                                              .create(newUuidValue());
+        final RejectionEnvelope rejection = RejectionEnvelope.of(
+                createRejection(rejectionMessage, command)
+        );
+
+        dispatch(processManager, rejection);
+
+        assertEquals(rejection.getOuterObject()
+                              .getMessage(), processManager.getState());
     }
 
     private static void assertContains(Collection<EventClass> eventClasses,

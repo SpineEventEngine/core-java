@@ -23,6 +23,7 @@ import com.google.common.annotations.VisibleForTesting;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
+import io.spine.core.RejectionEnvelope;
 
 import java.util.List;
 
@@ -40,32 +41,42 @@ public class ProcessManagerDispatcher {
     private ProcessManagerDispatcher() {}
 
     /**
-     * Dispatches the {@linkplain CommandEnvelope Command envelope}
-     * to the given {@code ProcessManager}.
+     * Dispatches the {@linkplain CommandEnvelope command} to the given {@code ProcessManager}.
      *
      * @return the list of {@linkplain Event events}, being the command output.
      */
-    public static List<Event> dispatch(ProcessManager<?, ?, ?> processManager,
-                                       CommandEnvelope command) {
-        checkNotNull(processManager);
+    public static List<Event> dispatch(ProcessManager<?, ?, ?> pm, CommandEnvelope command) {
+        checkNotNull(pm);
         checkNotNull(command);
 
-        final ProcManTransaction<?, ?, ?> tx = ProcManTransaction.start(processManager);
-        final List<Event> eventMessages = processManager.dispatchCommand(command);
+        final ProcManTransaction<?, ?, ?> tx = ProcManTransaction.start(pm);
+        final List<Event> eventMessages = pm.dispatchCommand(command);
         tx.commit();
 
         return eventMessages;
     }
 
     /**
-     * Dispatches the {@code Event} to the given {@code ProcessManager}.
+     * Dispatches an {@linkplain EventEnvelope event} to the given {@code ProcessManager}.
      */
-    public static void dispatch(ProcessManager<?, ?, ?> processManager, EventEnvelope event) {
-        checkNotNull(processManager);
+    public static void dispatch(ProcessManager<?, ?, ?> pm, EventEnvelope event) {
+        checkNotNull(pm);
         checkNotNull(event);
 
-        final ProcManTransaction<?, ?, ?> tx = ProcManTransaction.start(processManager);
-        processManager.dispatchEvent(event);
+        final ProcManTransaction<?, ?, ?> tx = ProcManTransaction.start(pm);
+        pm.dispatchEvent(event);
+        tx.commit();
+    }
+
+    /**
+     * Dispatches a {@linkplain RejectionEnvelope rejection} to the given {@code ProcessManager}.
+     */
+    public static void dispatch(ProcessManager<?, ?, ?> pm, RejectionEnvelope rejection) {
+        checkNotNull(pm);
+        checkNotNull(rejection);
+
+        final ProcManTransaction<?, ?, ?> tx = ProcManTransaction.start(pm);
+        pm.dispatchRejection(rejection);
         tx.commit();
     }
 }
