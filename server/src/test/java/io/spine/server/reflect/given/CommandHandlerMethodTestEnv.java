@@ -21,15 +21,20 @@
 package io.spine.server.reflect.given;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.Identifier;
 import io.spine.core.CommandContext;
 import io.spine.server.BoundedContext;
+import io.spine.server.aggregate.Aggregate;
+import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.entity.rejection.EntityAlreadyArchived;
+import io.spine.test.reflect.ProjectId;
 import io.spine.test.reflect.command.RefCreateProject;
 import io.spine.test.reflect.event.RefProjectCreated;
+import io.spine.validate.EmptyVBuilder;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -140,10 +145,32 @@ public class CommandHandlerMethodTestEnv {
         }
     }
 
+    /**
+     * A command handler which always rejects the passed command.
+     */
     public static class RejectingHandler extends TestCommandHandler {
         @Assign
         RefProjectCreated handleTest(RefCreateProject cmd) throws EntityAlreadyArchived {
             throw new EntityAlreadyArchived(Identifier.toString(cmd.getProjectId()));
+        }
+    }
+
+    /**
+     * An aggregate which always rejects the passed command.
+     */
+    public static class RejectingAggregate extends Aggregate<ProjectId, Empty, EmptyVBuilder> {
+        public RejectingAggregate(ProjectId id) {
+            super(id);
+        }
+
+        @Assign
+        RefProjectCreated on(RefCreateProject cmd) throws EntityAlreadyArchived {
+            throw new EntityAlreadyArchived(Identifier.toString(cmd.getProjectId()));
+        }
+
+        @Apply
+        void event(RefProjectCreated evt) {
+            // Do nothing.
         }
     }
 
