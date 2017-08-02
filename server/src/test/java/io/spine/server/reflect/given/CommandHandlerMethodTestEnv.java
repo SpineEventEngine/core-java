@@ -22,10 +22,12 @@ package io.spine.server.reflect.given;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
+import io.spine.Identifier;
 import io.spine.core.CommandContext;
 import io.spine.server.BoundedContext;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandler;
+import io.spine.server.entity.rejection.EntityAlreadyArchived;
 import io.spine.test.reflect.command.RefCreateProject;
 import io.spine.test.reflect.event.RefProjectCreated;
 
@@ -34,6 +36,7 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.server.reflect.given.Given.EventMessage.projectCreated;
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 public class CommandHandlerMethodTestEnv {
 
@@ -137,6 +140,13 @@ public class CommandHandlerMethodTestEnv {
         }
     }
 
+    public static class RejectingHandler extends TestCommandHandler {
+        @Assign
+        RefProjectCreated handleTest(RefCreateProject cmd) throws EntityAlreadyArchived {
+            throw new EntityAlreadyArchived(Identifier.toString(cmd.getProjectId()));
+        }
+    }
+
     /**
      * Abstract base for test environment command handlers.
      */
@@ -159,7 +169,8 @@ public class CommandHandlerMethodTestEnv {
                     return method;
                 }
             }
-            throw new RuntimeException("No command handler method found: " + HANDLER_METHOD_NAME);
+            throw newIllegalStateException("No command handler method found: %s",
+                                           HANDLER_METHOD_NAME);
         }
     }
 }

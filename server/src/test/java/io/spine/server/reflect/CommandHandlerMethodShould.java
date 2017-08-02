@@ -23,9 +23,12 @@ package io.spine.server.reflect;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.Identifier;
+import io.spine.base.ThrowableMessage;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
+import io.spine.server.command.CommandHandler;
 import io.spine.server.reflect.given.CommandHandlerMethodTestEnv.InvalidHandlerNoAnnotation;
 import io.spine.server.reflect.given.CommandHandlerMethodTestEnv.InvalidHandlerNoParams;
 import io.spine.server.reflect.given.CommandHandlerMethodTestEnv.InvalidHandlerOneNotMsgParam;
@@ -33,6 +36,7 @@ import io.spine.server.reflect.given.CommandHandlerMethodTestEnv.InvalidHandlerR
 import io.spine.server.reflect.given.CommandHandlerMethodTestEnv.InvalidHandlerTooManyParams;
 import io.spine.server.reflect.given.CommandHandlerMethodTestEnv.InvalidHandlerTwoParamsFirstInvalid;
 import io.spine.server.reflect.given.CommandHandlerMethodTestEnv.InvalidHandlerTwoParamsSecondInvalid;
+import io.spine.server.reflect.given.CommandHandlerMethodTestEnv.RejectingHandler;
 import io.spine.server.reflect.given.CommandHandlerMethodTestEnv.ValidHandlerButPrivate;
 import io.spine.server.reflect.given.CommandHandlerMethodTestEnv.ValidHandlerOneParam;
 import io.spine.server.reflect.given.CommandHandlerMethodTestEnv.ValidHandlerOneParamReturnsList;
@@ -45,12 +49,14 @@ import org.junit.Test;
 import java.lang.reflect.Method;
 import java.util.List;
 
+import static com.google.common.base.Throwables.getRootCause;
 import static io.spine.server.reflect.CommandHandlerMethod.from;
 import static io.spine.server.reflect.CommandHandlerMethod.predicate;
 import static io.spine.server.reflect.given.Given.CommandMessage.createProject;
 import static io.spine.server.reflect.given.Given.CommandMessage.startProject;
 import static io.spine.test.TestValues.newUuidValue;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -200,5 +206,25 @@ public class CommandHandlerMethodShould {
         CommandHandlerMethod.invokeFor(handler,
                                        startProject(),
                                        CommandContext.getDefaultInstance());
+    }
+
+    @Test
+    public void set_producer_ID_if_command_handler() {
+        final CommandHandler handler = new RejectingHandler();
+
+        try {
+            CommandHandlerMethod.invokeFor(handler,
+                                           createProject(),
+                                           CommandContext.getDefaultInstance());
+        } catch (HandlerMethodFailedException e) {
+            final Throwable cause = getRootCause(e);
+
+            assertTrue(cause instanceof ThrowableMessage);
+            final ThrowableMessage thrown = (ThrowableMessage)cause;
+
+            assertTrue(thrown.producerId().isPresent());
+            assertEquals(handler.getId(), Identifier.unpack(thrown.producerId()
+                                                                  .get()));
+        }
     }
 }
