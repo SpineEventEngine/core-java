@@ -70,7 +70,7 @@ public class RejectionProducers {
         @Override
         public Set<I> apply(Message message, RejectionContext context) {
             final I id = Rejections.getProducer(context);
-            return null;
+            return ImmutableSet.of(id);
         }
 
         @Override

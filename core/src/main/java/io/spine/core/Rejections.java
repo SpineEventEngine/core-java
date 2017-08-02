@@ -30,6 +30,7 @@ import io.spine.base.ThrowableMessage;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
+import static java.lang.String.format;
 
 /**
  * Utility class for working with rejections.
@@ -41,22 +42,21 @@ public final class Rejections {
     @VisibleForTesting
     static final String REJECTION_ID_FORMAT = "%s-reject";
 
-    private Rejections() {
-        // Prevent instantiation of this utility class.
-    }
+    /** Prevents instantiation of this utility class. */
+    private Rejections() {}
 
     /**
      * Converts this {@code ThrowableMessage} into {@link Rejection}.
      *
      * @param command the command which caused the rejection
      */
-    public static Rejection toRejection(ThrowableMessage message, Command command) {
-        checkNotNull(message);
+    public static Rejection toRejection(ThrowableMessage throwable, Command command) {
+        checkNotNull(throwable);
         checkNotNull(command);
 
-        final Message state = message.getMessageThrown();
-        final Any packedState = pack(state);
-        final RejectionContext context = createContext(message, command);
+        final Message rejectionMessage = throwable.getMessageThrown();
+        final Any packedState = pack(rejectionMessage);
+        final RejectionContext context = createContext(throwable, command);
         final RejectionId id = generateId(command.getId());
         return Rejection.newBuilder()
                         .setId(id)
@@ -72,34 +72,6 @@ public final class Rejections {
                                .setStacktrace(stacktrace)
                                .setCommand(command)
                                .build();
-    }
-
-    /**
-     * Generates a {@code RejectionId} based upon a {@linkplain CommandId command ID} in a format:
-     *
-     * <pre>{@code <commandId>-reject}</pre>
-     *
-     * @param id the identifier of the {@linkplain Command command}, which processing caused the
-     *           rejection
-     **/
-    public static RejectionId generateId(CommandId id) {
-        final String idValue = String.format(REJECTION_ID_FORMAT, id.getUuid());
-        return RejectionId.newBuilder()
-                          .setValue(idValue)
-                          .build();
-    }
-
-    /**
-     * Extracts the message from the passed {@code Rejection} instance.
-     *
-     * @param rejection a rejection to extract a message from
-     * @param <M>       a type of the rejection message
-     * @return an unpacked message
-     */
-    public static <M extends Message> M getMessage(Rejection rejection) {
-        checkNotNull(rejection);
-        final M result = unpack(rejection.getMessage());
-        return result;
     }
 
     /**
@@ -121,6 +93,34 @@ public final class Rejections {
                                           .setMessage(packedMessage)
                                           .setContext(context)
                                           .build();
+        return result;
+    }
+
+    /**
+     * Generates a {@code RejectionId} based upon a {@linkplain CommandId command ID} in a format:
+     *
+     * <pre>{@code <commandId>-reject}</pre>
+     *
+     * @param id the identifier of the {@linkplain Command command}, which processing caused the
+     *           rejection
+     **/
+    public static RejectionId generateId(CommandId id) {
+        final String idValue = format(REJECTION_ID_FORMAT, id.getUuid());
+        return RejectionId.newBuilder()
+                          .setValue(idValue)
+                          .build();
+    }
+
+    /**
+     * Extracts the message from the passed {@code Rejection} instance.
+     *
+     * @param rejection a rejection to extract a message from
+     * @param <M>       a type of the rejection message
+     * @return an unpacked message
+     */
+    public static <M extends Message> M getMessage(Rejection rejection) {
+        checkNotNull(rejection);
+        final M result = unpack(rejection.getMessage());
         return result;
     }
 

@@ -27,9 +27,8 @@ import io.spine.core.CommandContext;
 import io.spine.core.Rejection;
 import io.spine.core.Rejections;
 import io.spine.core.Subscribe;
-import io.spine.server.rejection.RejectionBusShould;
 import io.spine.server.rejection.RejectionSubscriber;
-import io.spine.test.rejection.ProjectRejections;
+import io.spine.test.rejection.ProjectRejections.InvalidProjectName;
 import io.spine.test.rejection.command.UpdateProjectName;
 
 public class InvalidProjectNameSubscriber extends RejectionSubscriber {
@@ -37,7 +36,7 @@ public class InvalidProjectNameSubscriber extends RejectionSubscriber {
     private Rejection rejectionHandled;
 
     @Subscribe
-    public void on(ProjectRejections.InvalidProjectName rejection,
+    public void on(InvalidProjectName rejection,
                    UpdateProjectName commandMessage,
                    CommandContext context) {
         final CommandFactory commandFactory =

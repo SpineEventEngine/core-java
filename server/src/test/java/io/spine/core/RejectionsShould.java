@@ -22,16 +22,19 @@ package io.spine.core;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.GeneratedMessageV3;
-import com.google.protobuf.StringValue;
 import com.google.protobuf.util.Timestamps;
 import io.spine.base.ThrowableMessage;
+import io.spine.client.TestActorRequestFactory;
 import io.spine.protobuf.AnyPacker;
-import io.spine.test.TestValues;
+import io.spine.time.Time;
+import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static io.spine.core.Rejections.toRejection;
 import static io.spine.test.TestValues.newUuidValue;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static java.lang.String.format;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -40,6 +43,22 @@ import static org.junit.Assert.assertTrue;
  * @author Alexander Yevsyukov
  */
 public class RejectionsShould {
+
+    private final TestActorRequestFactory requestFactory =
+            TestActorRequestFactory.newInstance(getClass());
+
+    private GeneratedMessageV3 rejectionMessage;
+    private Command command;
+
+    private Rejection rejection;
+    @Before
+    public void setUp() {
+        rejectionMessage = newUuidValue();
+        command = requestFactory.createCommand(Time.getCurrentTime());
+
+        TestThrowableMessage throwableMessage = new TestThrowableMessage(rejectionMessage);
+        rejection = toRejection(throwableMessage, command);
+    }
 
     @Test
     public void have_utility_ctor() {
@@ -60,33 +79,27 @@ public class RejectionsShould {
         final CommandId commandId = Commands.generateId();
         final RejectionId actual = Rejections.generateId(commandId);
 
-        final String expected = String.format(Rejections.REJECTION_ID_FORMAT, commandId.getUuid());
+        final String expected = format(Rejections.REJECTION_ID_FORMAT, commandId.getUuid());
         assertEquals(expected, actual.getValue());
     }
 
-
     @Test
     public void convert_throwable_message_to_rejection_message() {
-        final StringValue rejectionState = TestValues.newUuidValue();
-        final CommandContext context = CommandContext.newBuilder()
-                                                   .build();
-        final Command command = Command.newBuilder()
-                                     .setMessage(AnyPacker.pack(newUuidValue()))
-                                     .setContext(context)
-                                     .build();
+        assertEquals(rejectionMessage, AnyPacker.unpack(rejection.getMessage()));
+        assertFalse(rejection.getContext()
+                             .getStacktrace()
+                             .isEmpty());
+        assertTrue(Timestamps.isValid(rejection.getContext()
+                                               .getTimestamp()));
+        final Command commandFromContext = rejection.getContext()
+                                                    .getCommand();
+        assertEquals(command, commandFromContext);
+    }
 
-        final TestThrowableMessage throwableMessage = new TestThrowableMessage(rejectionState);
-        final Rejection rejectionWrapper = toRejection(throwableMessage, command);
-
-        assertEquals(rejectionState, AnyPacker.unpack(rejectionWrapper.getMessage()));
-        assertFalse(rejectionWrapper.getContext()
-                                    .getStacktrace()
-                                    .isEmpty());
-        assertTrue(Timestamps.isValid(rejectionWrapper.getContext()
-                                                      .getTimestamp()));
-        final Command wrappedCommand = rejectionWrapper.getContext()
-                                                       .getCommand();
-        assertEquals(command, wrappedCommand);
+    @Ignore("Resume when population of producer_id is fixed via ThrowableMessage.initProducer()")
+    @Test
+    public void obtain_rejection_producer() {
+        assertEquals(getClass().getName(), Rejections.getProducer(rejection.getContext()));
     }
 
     /**
