@@ -109,7 +109,8 @@ public abstract class ProcessManagerRepository<I,
         final DelegatingCommandDispatcher<I> commandDispatcher =
                 DelegatingCommandDispatcher.of(this);
 
-        if (!commandDispatcher.getMessageClasses().isEmpty()) {
+        if (!commandDispatcher.getMessageClasses()
+                              .isEmpty()) {
             boundedContext.getCommandBus()
                           .register(commandDispatcher);
         }
