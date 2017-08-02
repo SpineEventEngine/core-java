@@ -20,6 +20,7 @@
 
 package io.spine.server.route;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.core.RejectionContext;
@@ -69,8 +70,11 @@ public class RejectionProducers {
 
         @Override
         public Set<I> apply(Message message, RejectionContext context) {
-            final I id = Rejections.getProducer(context);
-            return ImmutableSet.of(id);
+            final Optional<I> id = Rejections.getProducer(context);
+            if (!id.isPresent()) {
+                return ImmutableSet.of();
+            }
+            return ImmutableSet.of(id.get());
         }
 
         @Override

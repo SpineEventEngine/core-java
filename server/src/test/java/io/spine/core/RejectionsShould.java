@@ -23,12 +23,12 @@ package io.spine.core;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.util.Timestamps;
+import io.spine.Identifier;
 import io.spine.base.ThrowableMessage;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.protobuf.AnyPacker;
 import io.spine.time.Time;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static io.spine.core.Rejections.toRejection;
@@ -56,7 +56,9 @@ public class RejectionsShould {
         rejectionMessage = newUuidValue();
         command = requestFactory.createCommand(Time.getCurrentTime());
 
-        TestThrowableMessage throwableMessage = new TestThrowableMessage(rejectionMessage);
+        TestThrowableMessage throwableMessage = (TestThrowableMessage)
+                new TestThrowableMessage(rejectionMessage)
+                        .initProducer(Identifier.pack(getClass().getName()));
         rejection = toRejection(throwableMessage, command);
     }
 
@@ -96,10 +98,10 @@ public class RejectionsShould {
         assertEquals(command, commandFromContext);
     }
 
-    @Ignore("Resume when population of producer_id is fixed via ThrowableMessage.initProducer()")
     @Test
     public void obtain_rejection_producer() {
-        assertEquals(getClass().getName(), Rejections.getProducer(rejection.getContext()));
+        assertEquals(getClass().getName(), Rejections.getProducer(rejection.getContext())
+                                                     .get());
     }
 
     /**

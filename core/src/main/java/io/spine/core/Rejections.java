@@ -21,6 +21,7 @@
 package io.spine.core;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
@@ -58,20 +59,26 @@ public final class Rejections {
         final Any packedState = pack(rejectionMessage);
         final RejectionContext context = createContext(throwable, command);
         final RejectionId id = generateId(command.getId());
-        return Rejection.newBuilder()
-                        .setId(id)
-                        .setMessage(packedState)
-                        .setContext(context)
-                        .build();
+        final Rejection.Builder builder = Rejection.newBuilder()
+                                                   .setId(id)
+                                                   .setMessage(packedState)
+                                                   .setContext(context);
+        return builder.build();
     }
 
     private static RejectionContext createContext(ThrowableMessage message, Command command) {
         final String stacktrace = Throwables.getStackTraceAsString(message);
-        return RejectionContext.newBuilder()
-                               .setTimestamp(message.getTimestamp())
-                               .setStacktrace(stacktrace)
-                               .setCommand(command)
-                               .build();
+        final RejectionContext.Builder builder =
+                RejectionContext.newBuilder()
+                                .setTimestamp(message.getTimestamp())
+                                .setStacktrace(stacktrace)
+                                .setCommand(command);
+
+        final Optional<Any> optional = message.producerId();
+        if (optional.isPresent()) {
+            builder.setProducerId(optional.get());
+        }
+        return builder.build();
     }
 
     /**
@@ -132,10 +139,13 @@ public final class Rejections {
      * @param <I>     the type of the producer ID
      * @return the producer ID
      */
-    public static <I> I getProducer(RejectionContext context) {
+    public static <I> Optional<I> getProducer(RejectionContext context) {
         checkNotNull(context);
-
-        final I id = Identifier.unpack(context.getProducerId());
-        return id;
+        final Any producerId = context.getProducerId();
+        if (Any.getDefaultInstance().equals(producerId)) {
+            return Optional.absent();
+        }
+        final I id = Identifier.unpack(producerId);
+        return Optional.of(id);
     }
 }
