@@ -31,6 +31,7 @@ import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
+import io.spine.core.RejectionClass;
 import io.spine.core.Subscribe;
 import io.spine.core.TenantId;
 import io.spine.core.given.GivenEvent;
@@ -38,6 +39,8 @@ import io.spine.server.BoundedContext;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.RecordBasedRepositoryShould;
 import io.spine.server.entity.given.Given;
+import io.spine.server.entity.rejection.Rejections.EntityAlreadyArchived;
+import io.spine.server.entity.rejection.Rejections.EntityAlreadyDeleted;
 import io.spine.server.event.EventSubscriber;
 import io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.TestProcessManager;
 import io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.TestProcessManagerRepository;
@@ -62,6 +65,7 @@ import java.util.Set;
 import static io.spine.Identifier.newUuid;
 import static io.spine.server.TestCommandClasses.assertContains;
 import static io.spine.server.TestEventClasses.assertContains;
+import static io.spine.server.TestRejectionClasses.assertContains;
 import static io.spine.server.procman.ProcessManagerRepositoryShould.GivenCommandMessage.ID;
 import static io.spine.server.procman.ProcessManagerRepositoryShould.GivenCommandMessage.addTask;
 import static io.spine.server.procman.ProcessManagerRepositoryShould.GivenCommandMessage.createProject;
@@ -278,6 +282,14 @@ public class ProcessManagerRepositoryShould
 
         assertContains(eventClasses,
                        PmProjectCreated.class, PmTaskAdded.class, PmProjectStarted.class);
+    }
+
+    @Test
+    public void return_rejection_classes() {
+        final Set<RejectionClass> rejectionClasses = repository().getRejectionClasses();
+
+        assertContains(rejectionClasses,
+                       EntityAlreadyArchived.class, EntityAlreadyDeleted.class);
     }
 
     /**

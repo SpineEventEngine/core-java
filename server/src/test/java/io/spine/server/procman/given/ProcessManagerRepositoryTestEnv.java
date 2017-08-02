@@ -28,6 +28,8 @@ import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
 import io.spine.server.command.Assign;
 import io.spine.server.entity.TestEntityWithStringColumn;
+import io.spine.server.entity.rejection.Rejections.EntityAlreadyArchived;
+import io.spine.server.entity.rejection.Rejections.EntityAlreadyDeleted;
 import io.spine.server.procman.CommandRouted;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
@@ -71,8 +73,8 @@ public class ProcessManagerRepositoryTestEnv {
             super(id);
         }
 
-        public static boolean processed(Message eventMessage) {
-            final boolean result = messagesDelivered.containsValue(eventMessage);
+        public static boolean processed(Message message) {
+            final boolean result = messagesDelivered.containsValue(message);
             return result;
         }
 
@@ -80,13 +82,13 @@ public class ProcessManagerRepositoryTestEnv {
             messagesDelivered.clear();
         }
 
+        /** Keeps the event message for further inspection in tests. */
         private void keep(Message commandOrEventMsg) {
             messagesDelivered.put(getState().getId(), commandOrEventMsg);
         }
 
         @Subscribe
         public void on(PmProjectCreated event, EventContext ignored) {
-            // Keep the event message for further inspection in tests.
             keep(event);
 
             handleProjectCreated(event.getProjectId());
@@ -129,8 +131,6 @@ public class ProcessManagerRepositoryTestEnv {
             getBuilder().mergeFrom(newState);
         }
 
-        @SuppressWarnings("UnusedParameters")
-            /* The parameter left to show that a command subscriber can have two parameters. */
         @Assign
         PmProjectCreated handle(PmCreateProject command, CommandContext ignored) {
             keep(command);
@@ -143,8 +143,6 @@ public class ProcessManagerRepositoryTestEnv {
             return event;
         }
 
-        @SuppressWarnings("UnusedParameters")
-            /* The parameter left to show that a command subscriber can have two parameters. */
         @Assign
         PmTaskAdded handle(PmAddTask command, CommandContext ignored) {
             keep(command);
@@ -169,6 +167,16 @@ public class ProcessManagerRepositoryTestEnv {
             return newRouterFor(command, context)
                     .add(addTask)
                     .routeAll();
+        }
+
+        @Subscribe
+        void on(EntityAlreadyArchived rejection) {
+            keep(rejection);
+        }
+
+        @Subscribe
+        void on(EntityAlreadyDeleted rejection) {
+            keep(rejection);
         }
 
         @Override
