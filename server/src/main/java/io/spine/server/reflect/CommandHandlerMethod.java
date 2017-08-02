@@ -141,9 +141,7 @@ public final class CommandHandlerMethod extends HandlerMethod<CommandContext> {
         return Lists.transform(eventMessages, new Function<Message, Event>() {
             @Override
             public Event apply(@Nullable Message eventMessage) {
-                if (eventMessage == null) {
-                    return Event.getDefaultInstance();
-                }
+                checkNotNull(eventMessage);
                 final Event result = eventFactory.createEvent(eventMessage, version);
                 return result;
             }
