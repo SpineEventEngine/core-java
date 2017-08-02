@@ -54,13 +54,14 @@ import io.spine.testdata.Sample;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
 import static io.spine.core.Commands.getMessage;
+import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.TypeConverter.toMessage;
-import static io.spine.server.procman.ProcManTransaction.start;
 import static io.spine.server.procman.ProcessManagerDispatcher.dispatch;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Verify.assertSize;
@@ -133,7 +134,7 @@ public class ProcessManagerShould {
     private void testDispatchEvent(Message eventMessage) {
         final Event event = eventFactory.createEvent(eventMessage);
         dispatch(processManager, EventEnvelope.of(event));
-        assertEquals(AnyPacker.pack(eventMessage), processManager.getState());
+        assertEquals(pack(eventMessage), processManager.getState());
     }
 
     @Test
@@ -154,10 +155,8 @@ public class ProcessManagerShould {
     private List<Event> testDispatchCommand(Message commandMsg) {
         final CommandEnvelope envelope = CommandEnvelope.of(requestFactory.command()
                                                                           .create(commandMsg));
-        final ProcManTransaction<?, ?, ?> tx = start(processManager);
-        final List<Event> events = processManager.dispatchCommand(envelope);
-        tx.commit();
-        assertEquals(AnyPacker.pack(commandMsg), processManager.getState());
+        final List<Event> events = dispatch(processManager, envelope);
+        assertEquals(pack(commandMsg), processManager.getState());
         return events;
     }
 
@@ -233,9 +232,14 @@ public class ProcessManagerShould {
         final Set<EventClass> classes =
                 ProcessManager.TypeInfo.getEventClasses(TestProcessManager.class);
         assertEquals(3, classes.size());
-        assertTrue(classes.contains(EventClass.of(PmProjectCreated.class)));
-        assertTrue(classes.contains(EventClass.of(PmTaskAdded.class)));
-        assertTrue(classes.contains(EventClass.of(PmProjectStarted.class)));
+        assertContains(classes, PmProjectCreated.class);
+        assertContains(classes, PmTaskAdded.class);
+        assertContains(classes, PmProjectStarted.class);
+    }
+
+    private static void assertContains(Collection<EventClass> eventClasses,
+                                       Class<? extends Message> eventClass) {
+        assertTrue(eventClasses.contains(EventClass.of(eventClass)));
     }
 
     @Test

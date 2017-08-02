@@ -40,11 +40,29 @@ import static java.lang.String.format;
  */
 public final class Rejections {
 
+    /** The name suffix for an outer class of generated rejection classes. */
+    public static final String OUTER_CLASS_SUFFIX = "Rejections";
+
+    /** The format string for ID of a {@link Rejection}. */
     @VisibleForTesting
     static final String REJECTION_ID_FORMAT = "%s-reject";
 
     /** Prevents instantiation of this utility class. */
     private Rejections() {}
+
+    /**
+     * Tells weather the passed message class represents a rejection message.
+     */
+    public static boolean isRejection(Class<? extends Message> messageClass) {
+        checkNotNull(messageClass);
+        final Class<?> enclosingClass = messageClass.getEnclosingClass();
+        if (enclosingClass == null) {
+            return false; // Rejection messages are generated as inner static classes.
+        }
+        final boolean hasCorrectSuffix = enclosingClass.getName()
+                                                       .endsWith(OUTER_CLASS_SUFFIX);
+        return hasCorrectSuffix;
+    }
 
     /**
      * Converts this {@code ThrowableMessage} into {@link Rejection}.

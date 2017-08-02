@@ -23,6 +23,7 @@ package io.spine.core;
 import com.google.common.base.Optional;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.GeneratedMessageV3;
+import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.spine.Identifier;
 import io.spine.base.ThrowableMessage;
@@ -33,6 +34,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static io.spine.core.Rejections.getProducer;
+import static io.spine.core.Rejections.isRejection;
 import static io.spine.core.Rejections.toRejection;
 import static io.spine.test.TestValues.newUuidValue;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
@@ -67,6 +69,14 @@ public class RejectionsShould {
     @Test
     public void have_utility_ctor() {
         assertHasPrivateParameterlessCtor(Rejections.class);
+    }
+
+    @Test
+    public void filter_rejection_classes() {
+        assertTrue(
+                isRejection(io.spine.server.entity.rejection.Rejections.EntityAlreadyArchived.class)
+        );
+        assertFalse(isRejection(Timestamp.class));
     }
 
     @Test

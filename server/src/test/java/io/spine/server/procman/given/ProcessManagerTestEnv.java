@@ -28,10 +28,10 @@ import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
-import io.spine.protobuf.AnyPacker;
 import io.spine.server.command.Assign;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
+import io.spine.server.entity.rejection.Rejections.EntityAlreadyArchived;
 import io.spine.server.procman.CommandRouted;
 import io.spine.server.procman.ProcessManager;
 import io.spine.test.procman.ProjectId;
@@ -50,6 +50,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 
 /**
@@ -60,10 +61,11 @@ public class ProcessManagerTestEnv {
     /** Prevents instantiation on this utility class. */
     private ProcessManagerTestEnv() {}
 
-    @SuppressWarnings("UnusedParameters") // OK for test class.
-    public static class TestProcessManager extends ProcessManager<ProjectId,
-                                                                   Any,
-                                                                   AnyVBuilder> {
+    /**
+     * A test Process Manager which remembers past message as its state.
+     */
+    public static class TestProcessManager
+            extends ProcessManager<ProjectId, Any, AnyVBuilder> {
 
         public TestProcessManager(ProjectId id) {
             super(id);
@@ -71,7 +73,8 @@ public class ProcessManagerTestEnv {
 
         /**
          * Injects the passed CommandBus instance via Reflection since
-         * {@link #setCommandBus(CommandBus)} is package-private.
+         * {@link #setCommandBus(CommandBus)} is package-private and this
+         * test environment class is outside of the parent's class package.
          */
         public void injectCommandBus(CommandBus commandBus) {
             try {
@@ -86,22 +89,22 @@ public class ProcessManagerTestEnv {
 
         @Subscribe
         public void on(PmProjectCreated event, EventContext ignored) {
-            getBuilder().mergeFrom(AnyPacker.pack(event));
+            getBuilder().mergeFrom(pack(event));
         }
 
         @Subscribe
         public void on(PmTaskAdded event, EventContext ignored) {
-            getBuilder().mergeFrom(AnyPacker.pack(event));
+            getBuilder().mergeFrom(pack(event));
         }
 
         @Subscribe
         public void on(PmProjectStarted event, EventContext ignored) {
-            getBuilder().mergeFrom(AnyPacker.pack(event));
+            getBuilder().mergeFrom(pack(event));
         }
 
         @Assign
         PmProjectCreated handle(PmCreateProject command, CommandContext ignored) {
-            getBuilder().mergeFrom(AnyPacker.pack(command));
+            getBuilder().mergeFrom(pack(command));
             return ((PmProjectCreated.Builder) Sample.builderForType(PmProjectCreated.class))
                     .setProjectId(command.getProjectId())
                     .build();
@@ -109,7 +112,7 @@ public class ProcessManagerTestEnv {
 
         @Assign
         PmTaskAdded handle(PmAddTask command, CommandContext ignored) {
-            getBuilder().mergeFrom(AnyPacker.pack(command));
+            getBuilder().mergeFrom(pack(command));
             return ((PmTaskAdded.Builder) Sample.builderForType(PmTaskAdded.class))
                     .setProjectId(command.getProjectId())
                     .build();
@@ -117,7 +120,7 @@ public class ProcessManagerTestEnv {
 
         @Assign
         CommandRouted handle(PmStartProject command, CommandContext context) {
-            getBuilder().mergeFrom(AnyPacker.pack(command));
+            getBuilder().mergeFrom(pack(command));
 
             final Message addTask = ((PmAddTask.Builder) Sample.builderForType(PmAddTask.class))
                     .setProjectId(command.getProjectId())
@@ -126,6 +129,11 @@ public class ProcessManagerTestEnv {
                     .add(addTask)
                     .routeAll();
             return route;
+        }
+
+        @Subscribe
+        void on(EntityAlreadyArchived rejection) {
+            getBuilder().mergeFrom(pack(rejection));
         }
     }
 

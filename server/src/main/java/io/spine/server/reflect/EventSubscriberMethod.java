@@ -32,6 +32,7 @@ import java.lang.reflect.Modifier;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.core.Rejections.isRejection;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -149,6 +150,23 @@ public final class EventSubscriberMethod extends HandlerMethod<EventContext> {
 
         private FilterPredicate() {
             super(Subscribe.class, EventContext.class);
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * <p>Filters out methods that accept rejection messages as the first parameter.
+         */
+        @Override
+        protected boolean verifyParams(Method method) {
+            if (super.verifyParams(method)) {
+                @SuppressWarnings("unchecked") // The case is safe since super returned `true`.
+                final Class<? extends Message> firstParameter =
+                        (Class<? extends Message>) method.getParameterTypes()[0];
+                final boolean isRejection = isRejection(firstParameter);
+                return !isRejection;
+            }
+            return false;
         }
 
         @Override
