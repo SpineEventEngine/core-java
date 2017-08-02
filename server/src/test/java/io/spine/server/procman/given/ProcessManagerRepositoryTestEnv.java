@@ -45,8 +45,8 @@ import io.spine.testdata.Sample;
 
 public class ProcessManagerRepositoryTestEnv {
 
-    private ProcessManagerRepositoryTestEnv() {
-    }
+    /** Prevents instantiation of this utility class. */
+    private ProcessManagerRepositoryTestEnv() {}
 
     public static class TestProcessManagerRepository
             extends ProcessManagerRepository<ProjectId, TestProcessManager, Project> {
@@ -56,7 +56,10 @@ public class ProcessManagerRepositoryTestEnv {
         }
     }
 
-    @SuppressWarnings("OverlyCoupledClass")
+    @SuppressWarnings({
+            "OverlyCoupledClass",
+            "UnusedParameters" /* The parameter left to show that a projection subscriber can have
+                                two parameters. */})
     public static class TestProcessManager
             extends ProcessManager<ProjectId, Project, ProjectVBuilder>
             implements TestEntityWithStringColumn {
@@ -81,8 +84,6 @@ public class ProcessManagerRepositoryTestEnv {
             messagesDelivered.put(getState().getId(), commandOrEventMsg);
         }
 
-        @SuppressWarnings("UnusedParameters")
-            /* The parameter left to show that a projection subscriber can have two parameters. */
         @Subscribe
         public void on(PmProjectCreated event, EventContext ignored) {
             // Keep the event message for further inspection in tests.
@@ -135,10 +136,10 @@ public class ProcessManagerRepositoryTestEnv {
             keep(command);
 
             handleProjectCreated(command.getProjectId());
-            final PmProjectCreated event = ((PmProjectCreated.Builder) Sample.builderForType(
-                    PmProjectCreated.class))
-                    .setProjectId(command.getProjectId())
-                    .build();
+            final PmProjectCreated event = ((PmProjectCreated.Builder)
+                    Sample.builderForType(PmProjectCreated.class))
+                          .setProjectId(command.getProjectId())
+                          .build();
             return event;
         }
 
@@ -149,9 +150,10 @@ public class ProcessManagerRepositoryTestEnv {
             keep(command);
 
             handleTaskAdded(command.getTask());
-            final PmTaskAdded event = ((PmTaskAdded.Builder) Sample.builderForType(PmTaskAdded.class))
-                    .setProjectId(command.getProjectId())
-                    .build();
+            final PmTaskAdded event = ((PmTaskAdded.Builder)
+                    Sample.builderForType(PmTaskAdded.class))
+                          .setProjectId(command.getProjectId())
+                          .build();
             return event;
         }
 
@@ -160,9 +162,10 @@ public class ProcessManagerRepositoryTestEnv {
             keep(command);
 
             handleProjectStarted();
-            final Message addTask = ((PmAddTask.Builder) Sample.builderForType(PmAddTask.class))
-                    .setProjectId(command.getProjectId())
-                    .build();
+            final Message addTask = ((PmAddTask.Builder)
+                    Sample.builderForType(PmAddTask.class))
+                          .setProjectId(command.getProjectId())
+                          .build();
             return newRouterFor(command, context)
                     .add(addTask)
                     .routeAll();

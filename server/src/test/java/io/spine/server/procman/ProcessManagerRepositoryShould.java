@@ -54,11 +54,14 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Set;
 
 import static io.spine.Identifier.newUuid;
+import static io.spine.server.TestCommandClasses.assertContains;
+import static io.spine.server.TestEventClasses.assertContains;
 import static io.spine.server.procman.ProcessManagerRepositoryShould.GivenCommandMessage.ID;
 import static io.spine.server.procman.ProcessManagerRepositoryShould.GivenCommandMessage.addTask;
 import static io.spine.server.procman.ProcessManagerRepositoryShould.GivenCommandMessage.createProject;
@@ -68,6 +71,7 @@ import static io.spine.server.procman.ProcessManagerRepositoryShould.GivenComman
 import static io.spine.server.procman.ProcessManagerRepositoryShould.GivenCommandMessage.taskAdded;
 import static java.lang.String.format;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -79,6 +83,11 @@ public class ProcessManagerRepositoryShould
         ProjectId,
         Project> {
 
+    private final TestActorRequestFactory requestFactory =
+            TestActorRequestFactory.newInstance(getClass(),
+                                                TenantId.newBuilder()
+                                                        .setValue(newUuid())
+                                                        .build());
     private BoundedContext boundedContext;
 
     public static class GivenCommandMessage {
@@ -155,8 +164,9 @@ public class ProcessManagerRepositoryShould
         return procmans;
     }
 
-    // Tests
-    //----------------------------
+    /*
+     * Tests
+     *************/
 
     @Override
     protected ProjectId createId(int value) {
@@ -219,14 +229,8 @@ public class ProcessManagerRepositoryShould
     }
 
     private void testDispatchCommand(Message cmdMsg) throws InvocationTargetException {
-        final TenantId generatedTenantId = TenantId.newBuilder()
-                                                   .setValue(newUuid())
-                                                   .build();
-        final Command cmd =
-                TestActorRequestFactory.newInstance(ProcessManagerRepositoryShould.class,
-                                                    generatedTenantId)
-                                       .command()
-                                       .create(cmdMsg);
+        final Command cmd = requestFactory.command()
+                                          .create(cmdMsg);
 
         repository().dispatchCommand(CommandEnvelope.of(cmd));
         assertTrue(TestProcessManager.processed(cmdMsg));
@@ -234,20 +238,21 @@ public class ProcessManagerRepositoryShould
 
     @Test
     public void dispatch_command_and_post_events() throws InvocationTargetException {
-        final Subscriber subscriber = new Subscriber();
+        final RememberingSubscriber subscriber = new RememberingSubscriber();
         boundedContext.getEventBus()
                       .register(subscriber);
 
         testDispatchCommand(addTask());
 
         final PmTaskAdded message = subscriber.remembered;
+        assertNotNull(message);
         assertEquals(ID, message.getProjectId());
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void throw_exception_if_dispatch_unknown_command() throws InvocationTargetException {
-        final TestActorRequestFactory factory = TestActorRequestFactory.newInstance(getClass());
-        final Command unknownCommand = factory.createCommand(Int32Value.getDefaultInstance());
+    public void throw_exception_if_dispatch_unknown_command() {
+        final Command unknownCommand =
+                requestFactory.createCommand(Int32Value.getDefaultInstance());
         final CommandEnvelope request = CommandEnvelope.of(unknownCommand);
         repository().dispatchCommand(request);
     }
@@ -262,21 +267,25 @@ public class ProcessManagerRepositoryShould
     @Test
     public void return_command_classes() {
         final Set<CommandClass> commandClasses = repository().getCommandClasses();
-        assertTrue(commandClasses.contains(CommandClass.of(PmCreateProject.class)));
-        assertTrue(commandClasses.contains(CommandClass.of(PmAddTask.class)));
-        assertTrue(commandClasses.contains(CommandClass.of(PmStartProject.class)));
+
+        assertContains(commandClasses,
+                       PmCreateProject.class, PmCreateProject.class, PmStartProject.class);
     }
 
     @Test
     public void return_event_classes() {
         final Set<EventClass> eventClasses = repository().getMessageClasses();
-        assertTrue(eventClasses.contains(EventClass.of(PmProjectCreated.class)));
-        assertTrue(eventClasses.contains(EventClass.of(PmTaskAdded.class)));
-        assertTrue(eventClasses.contains(EventClass.of(PmProjectStarted.class)));
+
+        assertContains(eventClasses,
+                       PmProjectCreated.class, PmTaskAdded.class, PmProjectStarted.class);
     }
 
-    private static class Subscriber extends EventSubscriber {
+    /**
+     * Helper event subscriber which remembers an event message.
+     */
+    private static class RememberingSubscriber extends EventSubscriber {
 
+        @Nullable
         private PmTaskAdded remembered;
 
         @Subscribe
