@@ -33,12 +33,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * A routing schema used by an {@link io.spine.server.event.EventDispatcher EventDispatcher} for
  * delivering events.
  *
- * <p>A routing schema consists of a default route and custom routes per event class. When
- * calculating a set of event targets, {@code EventRouting} would see if there is a custom route
- * set for the type of the event. If not found, the default route will be
+ * <p>A routing schema consists of a default route and custom routes per event class.
+ * When calculating a set of event targets, {@code EventRouting} would see if there is
+ * a custom route set for the type of the event. If not found, the default route will be
  * {@linkplain EventRoute#apply(Message, Message) applied}.
  *
- * @param <I> the type of the entity IDs of this repository
+ * @param <I> the type of the entity IDs to which events are routed
  * @author Alexander Yevsyukov
  */
 public final class EventRouting<I> extends MessageRouting<EventContext, EventClass, Set<I>>
@@ -47,9 +47,10 @@ public final class EventRouting<I> extends MessageRouting<EventContext, EventCla
     private static final long serialVersionUID = 0L;
 
     /**
-     * Creates new instance with the passed default function.
+     * Creates new instance with the passed default route.
      *
-     * @param defaultRoute the function which used when there is no matching entry in the map
+     * @param defaultRoute
+     *        the route to use if a custom one is not {@linkplain #route(Class, EventRoute) set}
      */
     private EventRouting(EventRoute<I, Message> defaultRoute) {
         super(defaultRoute);

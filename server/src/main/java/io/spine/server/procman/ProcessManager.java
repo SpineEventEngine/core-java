@@ -147,7 +147,7 @@ public abstract class ProcessManager<I,
     }
 
     /**
-     * Dispatched a rejection to the subscribing method of the process manager.
+     * Dispatches a rejection to the subscribing method of the process manager.
      *
      * @param rejection the envelope with the rejection
      */

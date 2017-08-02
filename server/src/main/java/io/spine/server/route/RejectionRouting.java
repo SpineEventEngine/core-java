@@ -29,6 +29,18 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+/**
+ * A routing schema used by a {@link io.spine.server.rejection.RejectionDispatcher
+ * RejectionDispatcher} for delivering rejections.
+ *
+ * <p>A routing schema consists of a default route and custom routes per rejection class.
+ * When calculating a set of rejection targets, {@code RejectionRouting} would see if there
+ * is a custom route set for the type of the rejection. If not found, the default route will be
+ * {@linkplain RejectionRoute#apply(Message, Message) applied}.
+ *
+ * @param <I> the type of the entity IDs to which rejections are routed
+ * @author Alexander Yevsyukov
+ */
 public final class RejectionRouting<I>
         extends MessageRouting<RejectionContext, RejectionClass, Set<I>>
         implements RejectionRoute<I, Message> {
@@ -39,6 +51,12 @@ public final class RejectionRouting<I>
         super(defaultRoute);
     }
 
+    /**
+     * Creates new instance with the passed default route.
+     *
+     * @param defaultRoute
+     *        the route to use if a custom one is not {@linkplain #route(Class, RejectionRoute) set}
+     */
     public static <I> RejectionRouting<I> withDefault(RejectionRoute<I, Message> defaultRoute) {
         checkNotNull(defaultRoute);
         return new RejectionRouting<>(defaultRoute);
