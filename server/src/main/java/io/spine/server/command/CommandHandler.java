@@ -110,7 +110,7 @@ public abstract class CommandHandler implements CommandDispatcher<String> {
      *
      * @return the string with the handler identity
      */
-    protected String getId() {
+    public String getId() {
         return toString();
     }
 

@@ -21,10 +21,13 @@
 package io.spine.server.reflect;
 
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.Identifier;
+import io.spine.base.ThrowableMessage;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
@@ -32,6 +35,8 @@ import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.protobuf.Messages;
 import io.spine.server.command.Assign;
+import io.spine.server.command.CommandHandler;
+import io.spine.server.entity.Entity;
 import io.spine.server.event.EventFactory;
 
 import javax.annotation.CheckReturnValue;
@@ -41,6 +46,7 @@ import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Throwables.getRootCause;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -161,6 +167,53 @@ public final class CommandHandlerMethod extends HandlerMethod<CommandContext> {
         // The list of event messages is the return type expected.
         @SuppressWarnings("unchecked") final R result = (R) events;
         return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>{@linkplain ThrowableMessage#initProducer(Any) Initializes} producer ID if the exception
+     * was caused by a thrown rejection.
+     */
+    @Override
+    protected HandlerMethodFailedException whyFailed(Object target,
+                                                     Message message,
+                                                     CommandContext context,
+                                                     Exception cause) {
+        final HandlerMethodFailedException exception =
+                super.whyFailed(target, message, context, cause);
+
+        final Throwable rootCause = getRootCause(exception);
+        if (rootCause instanceof ThrowableMessage) {
+            final ThrowableMessage thrownMessage = (ThrowableMessage)rootCause;
+
+            final Optional<Any> producerId = idOf(target);
+
+            if (producerId.isPresent()) {
+                thrownMessage.initProducer(producerId.get());
+            }
+        }
+
+        return exception;
+    }
+
+    /**
+     * Obtains ID of the passed object by attempting to cast it to {@link Entity} or
+     * {@link CommandHandler}.
+     *
+     * @return packed ID or empty optional if the object is of type for which we cannot get ID
+     */
+    @SuppressWarnings("ChainOfInstanceofChecks")
+    private static Optional<Any> idOf(Object target) {
+        final Any producerId;
+        if (target instanceof Entity) {
+            producerId = Identifier.pack(((Entity) target).getId());
+        } else if (target instanceof CommandHandler) {
+            producerId = Identifier.pack(((CommandHandler) target).getId());
+        } else {
+            return Optional.absent();
+        }
+        return Optional.of(producerId);
     }
 
     /**
