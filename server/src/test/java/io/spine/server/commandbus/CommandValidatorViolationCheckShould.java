@@ -25,6 +25,7 @@ import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
+import io.spine.core.CommandId;
 import io.spine.protobuf.AnyPacker;
 import io.spine.test.command.CmdCreateProject;
 import io.spine.time.Time;
@@ -51,6 +52,18 @@ public class CommandValidatorViolationCheckShould {
         final List<ConstraintViolation> violations = inspect(CommandEnvelope.of(cmd));
 
         assertEquals(0, violations.size());
+    }
+
+    @Test
+    public void not_allow_commands_without_IDs() {
+        final Command cmd = Given.ACommand.createProject();
+        final Command unidentifiableCommand = cmd.toBuilder()
+                                                 .setId(CommandId.getDefaultInstance())
+                                                 .build();
+        final List<ConstraintViolation> violations =
+                inspect(CommandEnvelope.of(unidentifiableCommand));
+
+        assertEquals(1, violations.size());
     }
 
     @Test
