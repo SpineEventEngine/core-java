@@ -20,6 +20,10 @@
 
 package io.spine.server.reflect.given;
 
+import io.spine.server.command.Assign;
+import io.spine.test.event.ProjectCreated;
+import io.spine.test.event.command.CreateProject;
+
 /**
  * @author Alexander Yevsyukov
  */
@@ -28,5 +32,16 @@ public class MethodMapTestEnv {
     /** Prevents instantiation on this utility class. */
     private MethodMapTestEnv() {}
 
+    public static class HandlerWithDuplicatingMethods {
 
+        @Assign
+        public ProjectCreated on(CreateProject cmd) {
+            return ProjectCreated.getDefaultInstance();
+        }
+
+        @Assign
+        public ProjectCreated handle(CreateProject cmd) {
+            return ProjectCreated.getDefaultInstance();
+        }
+    }
 }

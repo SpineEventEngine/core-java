@@ -20,6 +20,7 @@
 
 package io.spine.server.reflect;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
@@ -148,7 +149,8 @@ public final class CommandHandlerMethod extends HandlerMethod<CommandContext> {
         });
     }
 
-    private static HandlerMethod.Factory<CommandHandlerMethod> factory() {
+    @VisibleForTesting
+    static HandlerMethod.Factory<CommandHandlerMethod> factory() {
         return Factory.getInstance();
     }
 

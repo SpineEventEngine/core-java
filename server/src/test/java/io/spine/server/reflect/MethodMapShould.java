@@ -20,6 +20,14 @@
 
 package io.spine.server.reflect;
 
+import io.spine.server.reflect.given.MethodMapTestEnv;
+import org.junit.Test;
+
 public class MethodMapShould {
 
+    @Test(expected = DuplicateHandlerMethodException.class)
+    public void not_allow_duplicated_handlers_in_one_class() {
+        MethodMap.create(MethodMapTestEnv.HandlerWithDuplicatingMethods.class,
+                         CommandHandlerMethod.factory());
+    }
 }
