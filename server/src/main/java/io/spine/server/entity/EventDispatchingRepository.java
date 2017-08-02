@@ -20,12 +20,14 @@
 
 package io.spine.server.entity;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.core.EventEnvelope;
+import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
 import io.spine.server.route.EventRoute;
 import io.spine.server.route.EventRouting;
-import io.spine.server.tenant.EventOperation;
+import io.spine.server.tenant.TenantAwareFunction0;
 
 import javax.annotation.CheckReturnValue;
 import java.util.Set;
@@ -95,25 +97,32 @@ public abstract class EventDispatchingRepository<I,
      * Dispatches the passed event envelope to entities.
      *
      * @param envelope the event envelope to dispatch
+     * @return the set of IDs of entities that consumed the event
      */
     @Override
     public Set<I> dispatch(final EventEnvelope envelope) {
         final Set<I> targets = getTargets(envelope);
-        final EventOperation op = new EventOperation(envelope.getOuterObject()) {
+        final TenantId tenantId = envelope.getActorContext()
+                                          .getTenantId();
+        // Since dispatching involves stored data, perform in the context of the tenant.
+        final TenantAwareFunction0<Set<I>> op = new TenantAwareFunction0<Set<I>>(tenantId) {
             @Override
-            public void run() {
+            public Set<I> apply() {
+                final ImmutableSet.Builder<I> consumed = ImmutableSet.builder();
                 for (I id : targets) {
                     try {
                         dispatchToEntity(id, envelope);
+                        consumed.add(id);
                     } catch (RuntimeException exception) {
                         onError(envelope, exception);
-                        // Do not re-throw the error to allow other entities to consume the event.
+                        // Do not re-throw letting other subscribers to consume the event.
                     }
                 }
+                return consumed.build();
             }
         };
-        op.execute();
-        return targets;
+        final Set<I> consumed = op.execute();
+        return consumed;
     }
 
     /**

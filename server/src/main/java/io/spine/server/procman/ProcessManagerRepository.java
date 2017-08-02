@@ -32,6 +32,7 @@ import io.spine.core.Rejection;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionContext;
 import io.spine.core.RejectionEnvelope;
+import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.commandbus.CommandBus;
@@ -225,8 +226,11 @@ public abstract class ProcessManagerRepository<I,
         final Rejection rejection = envelope.getOuterObject();
         final RejectionContext context = rejection.getContext();
         final Set<I> targets = getRejectionRouting().apply(rejectionMessage, context);
-
-        TenantAwareFunction0<Set<I>> op = new TenantAwareFunction0<Set<I>>() {
+        final TenantId tenantId = context.getCommand()
+                                         .getContext()
+                                         .getActorContext()
+                                         .getTenantId();
+        final TenantAwareFunction0<Set<I>> op = new TenantAwareFunction0<Set<I>>(tenantId) {
             @Override
             public Set<I> apply() {
                 final ImmutableSet.Builder<I> consumed = ImmutableSet.builder();
