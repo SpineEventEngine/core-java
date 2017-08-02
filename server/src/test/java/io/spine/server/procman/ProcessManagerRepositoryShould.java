@@ -24,6 +24,7 @@ import com.google.common.collect.Lists;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
+import io.spine.Identifier;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;
 import io.spine.core.CommandClass;
@@ -31,7 +32,9 @@ import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
+import io.spine.core.Rejection;
 import io.spine.core.RejectionClass;
+import io.spine.core.RejectionEnvelope;
 import io.spine.core.Subscribe;
 import io.spine.core.TenantId;
 import io.spine.core.given.GivenEvent;
@@ -63,6 +66,7 @@ import java.util.List;
 import java.util.Set;
 
 import static io.spine.Identifier.newUuid;
+import static io.spine.core.Rejections.createRejection;
 import static io.spine.server.TestCommandClasses.assertContains;
 import static io.spine.server.TestEventClasses.assertContains;
 import static io.spine.server.TestRejectionClasses.assertContains;
@@ -73,6 +77,7 @@ import static io.spine.server.procman.ProcessManagerRepositoryShould.GivenComman
 import static io.spine.server.procman.ProcessManagerRepositoryShould.GivenCommandMessage.projectStarted;
 import static io.spine.server.procman.ProcessManagerRepositoryShould.GivenCommandMessage.startProject;
 import static io.spine.server.procman.ProcessManagerRepositoryShould.GivenCommandMessage.taskAdded;
+import static io.spine.test.TestValues.newUuidValue;
 import static java.lang.String.format;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -290,6 +295,30 @@ public class ProcessManagerRepositoryShould
 
         assertContains(rejectionClasses,
                        EntityAlreadyArchived.class, EntityAlreadyDeleted.class);
+    }
+
+    @Test
+    public void dispatch_rejection() {
+        final CommandEnvelope ce = CommandEnvelope.of(requestFactory.createCommand(newUuidValue()));
+        final EntityAlreadyArchived rejectionMessage =
+                EntityAlreadyArchived.newBuilder()
+                                     .setEntityId(newUuid())
+                                     .build();
+        final Rejection rejection = createRejection(rejectionMessage,
+                                                    ce.getCommand());
+        final ProjectId id = GivenCommandMessage.ID;
+        final Rejection.Builder builder =
+                rejection.toBuilder()
+                         .setContext(rejection.getContext()
+                                              .toBuilder()
+                                              .setProducerId(Identifier.pack(id)));
+        final RejectionEnvelope re = RejectionEnvelope.of(builder.build());
+
+        final Set<?> delivered = repository().dispatchRejection(re);
+
+        assertTrue(delivered.contains(id));
+
+        assertTrue(TestProcessManager.processed(rejectionMessage));
     }
 
     /**
