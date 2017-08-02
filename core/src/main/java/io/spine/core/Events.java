@@ -126,14 +126,13 @@ public final class Events {
      * {@code <I>} type.
      *
      * @param context the event context to to get the event producer ID
-     * @param <I>     the type of the producer ID wrapped in the passed {@code EventContext}
+     * @param <I>     the type of the producer ID
      * @return the producer ID
      */
     public static <I> I getProducer(EventContext context) {
         checkNotNull(context);
         final I id = Identifier.unpack(context.getProducerId());
         return id;
-
     }
 
     /**

@@ -20,14 +20,19 @@
 
 package io.spine.server.procman;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
-import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
+import io.spine.core.Rejection;
+import io.spine.core.RejectionClass;
+import io.spine.core.RejectionContext;
+import io.spine.core.RejectionEnvelope;
+import io.spine.server.BoundedContext;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
@@ -35,8 +40,13 @@ import io.spine.server.commandbus.CommandDispatcherDelegate;
 import io.spine.server.commandbus.DelegatingCommandDispatcher;
 import io.spine.server.entity.EventDispatchingRepository;
 import io.spine.server.event.EventBus;
+import io.spine.server.rejection.DelegatingRejectionDispatcher;
+import io.spine.server.rejection.RejectionDispatcherDelegate;
 import io.spine.server.route.CommandRouting;
-import io.spine.server.route.Producers;
+import io.spine.server.route.EventProducers;
+import io.spine.server.route.RejectionProducers;
+import io.spine.server.route.RejectionRouting;
+import io.spine.server.tenant.TenantAwareFunction0;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
@@ -57,7 +67,8 @@ public abstract class ProcessManagerRepository<I,
                                                P extends ProcessManager<I, S, ?>,
                                                S extends Message>
                 extends EventDispatchingRepository<I, P, S>
-                implements CommandDispatcherDelegate<I> {
+                implements CommandDispatcherDelegate<I>,
+                           RejectionDispatcherDelegate<I> {
 
     /** The command routing schema used by this repository. */
     private final CommandRouting<I> commandRouting = CommandRouting.newInstance();
@@ -69,10 +80,18 @@ public abstract class ProcessManagerRepository<I,
     /** Cached set of event classes to which process managers of this repository are subscribed. */
     @Nullable
     private Set<EventClass> eventClasses;
-    
+
+    /** Cached set of rejection classes to which process managers are subscribed. */
+    @Nullable
+    private Set<RejectionClass> rejectionClasses;
+
+    /** The rejection routing schema used by this repository. */
+    private final RejectionRouting<I> rejectionRouting =
+            RejectionRouting.withDefault(RejectionProducers.<I>fromContext());
+
     /** {@inheritDoc} */
     protected ProcessManagerRepository() {
-        super(Producers.<I>fromFirstMessageField());
+        super(EventProducers.<I>fromFirstMessageField());
     }
 
     /**
@@ -84,19 +103,41 @@ public abstract class ProcessManagerRepository<I,
     @Override
     public void onRegistered() {
         super.onRegistered();
-        getBoundedContext().getCommandBus()
-                           .register(DelegatingCommandDispatcher.of(this));
-    }
+        final BoundedContext boundedContext = getBoundedContext();
 
-    @Override
-    @SuppressWarnings("ReturnOfCollectionOrArrayField") // it is immutable
-    public Set<CommandClass> getCommandClasses() {
-        if (commandClasses == null) {
-            commandClasses = ProcessManager.TypeInfo.getCommandClasses(getEntityClass());
+        final DelegatingCommandDispatcher<I> commandDispatcher =
+                DelegatingCommandDispatcher.of(this);
+
+        if (!commandDispatcher.getMessageClasses().isEmpty()) {
+            boundedContext.getCommandBus()
+                          .register(commandDispatcher);
         }
-        return commandClasses;
+
+        final DelegatingRejectionDispatcher<I> rejectionDispatcher =
+                DelegatingRejectionDispatcher.of(this);
+        if (!rejectionDispatcher.getMessageClasses()
+                                .isEmpty()) {
+            boundedContext.getRejectionBus()
+                          .register(rejectionDispatcher);
+        }
     }
 
+    /**
+     * Registers itself as {@link io.spine.server.event.EventDispatcher EventDispatcher} if
+     * process managers of this repository are subscribed at least to one event.
+     */
+    @Override
+    protected void registerAsEventDispatcher() {
+        if (!getMessageClasses().isEmpty()) {
+            super.registerAsEventDispatcher();
+        }
+    }
+
+    /**
+     * Obtains a set of event classes on which process managers of this repository are subscribed.
+     *
+     * @return a set of event classes or empty set if process managers do not subscribe to events
+     */
     @Override
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // it is immutable
     public Set<EventClass> getMessageClasses() {
@@ -108,10 +149,47 @@ public abstract class ProcessManagerRepository<I,
     }
 
     /**
+     * Obtains a set of classes of commands handled by process managers of this repository.
+     *
+     * @return a set of command classes or empty set if process managers do not handle commands
+     */
+    @Override
+    @SuppressWarnings("ReturnOfCollectionOrArrayField") // it is immutable
+    public Set<CommandClass> getCommandClasses() {
+        if (commandClasses == null) {
+            commandClasses = ProcessManager.TypeInfo.getCommandClasses(getEntityClass());
+        }
+        return commandClasses;
+    }
+
+    /**
+     * Obtains a set of rejection classes on which process managers of
+     * this repository are subscribed.
+     *
+     * @return a set of event classes or empty set if process managers
+     * are not subscribed to rejections
+     */
+    @Override
+    @SuppressWarnings("ReturnOfCollectionOrArrayField") // it is immutable
+    public Set<RejectionClass> getRejectionClasses() {
+        if (rejectionClasses == null) {
+            rejectionClasses = ProcessManager.TypeInfo.getRejectionClasses(getEntityClass());
+        }
+        return rejectionClasses;
+    }
+
+    /**
      * Obtains command routing schema used by this repository.
      */
     protected final CommandRouting<I> getCommandRouting() {
         return commandRouting;
+    }
+
+    /**
+     * Obtains rejection routing schema used by this repository.
+     */
+    protected final RejectionRouting<I> getRejectionRouting() {
+        return rejectionRouting;
     }
 
     /**
@@ -142,13 +220,41 @@ public abstract class ProcessManagerRepository<I,
     }
 
     @Override
+    public Set<I> dispatchRejection(final RejectionEnvelope envelope) {
+        final Message rejectionMessage = envelope.getMessage();
+        final Rejection rejection = envelope.getOuterObject();
+        final RejectionContext context = rejection.getContext();
+        final Set<I> targets = getRejectionRouting().apply(rejectionMessage, context);
+
+        TenantAwareFunction0<Set<I>> op = new TenantAwareFunction0<Set<I>>() {
+            @Override
+            public Set<I> apply() {
+                final ImmutableSet.Builder<I> consumed = ImmutableSet.builder();
+                for (I id : targets) {
+                    try {
+                        ProcessManager<I, ?, ?> processManager = findOrCreate(id);
+                        processManager.dispatchRejection(envelope);
+                        consumed.add(id);
+                    } catch (RuntimeException exception) {
+                        onError(envelope, exception);
+                        // Do not re-throw letting other subscribers to consume the rejection.
+                    }
+                }
+                return consumed.build();
+            }
+        };
+        final Set<I> consumed = op.execute();
+        return consumed;
+    }
+
+    @Override
     public void onError(CommandEnvelope envelope, RuntimeException exception) {
         logError("Command dispatching caused error (class: %s, id: %s)", envelope, exception);
     }
 
     @Override
-    public void onError(EventEnvelope envelope, RuntimeException exception) {
-        logError("Event dispatching caused error (class: %s, id: %s)", envelope, exception);
+    public void onError(RejectionEnvelope envelope, RuntimeException exception) {
+        logError("Rejection dispatching caused error (class: %s, id: %s", envelope, exception);
     }
 
     private ProcManTransaction<?, ?, ?> beginTransactionFor(P manager) {
@@ -174,7 +280,7 @@ public abstract class ProcessManagerRepository<I,
      * @param event the event to dispatch
      * @throws IllegalArgumentException if events of this type are not handled by
      *                                  this process manager
-     * @see ProcessManager#dispatchEvent(Message, EventContext)
+     * @see ProcessManager#dispatchEvent(EventEnvelope)
      */
     @Override
     public Set<I> dispatch(EventEnvelope event) throws IllegalArgumentException {
@@ -183,10 +289,10 @@ public abstract class ProcessManagerRepository<I,
     }
 
     @Override
-    protected void dispatchToEntity(I id, Message eventMessage, EventContext context) {
+    protected void dispatchToEntity(I id, EventEnvelope event) {
         final P manager = findOrCreate(id);
         final ProcManTransaction<?, ?, ?> transaction = beginTransactionFor(manager);
-        manager.dispatchEvent(eventMessage, context);
+        manager.dispatchEvent(event);
         transaction.commit();
         store(manager);
     }

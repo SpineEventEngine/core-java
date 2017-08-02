@@ -21,38 +21,14 @@
 package io.spine.server.route;
 
 import com.google.protobuf.Message;
-import io.spine.test.Tests;
-import org.junit.Test;
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
+import io.spine.core.RejectionContext;
 
 /**
+ * Obtains a set of entity IDs for which to deliver a rejection.
+ *
+ * @param <I> the type of entity IDs
+ * @param <M> the type of rejection messages from which to get IDs
  * @author Alexander Yevsyukov
  */
-public class ProducersShould {
-
-    @Test
-    public void have_utility_ctor() {
-        Tests.assertHasPrivateParameterlessCtor(Producers.class);
-    }
-
-    @Test
-    public void create_function_for_taking_id_fromContext() {
-        final EventRoute<Object, Message> fn = Producers.fromContext();
-        assertFunction(fn);
-    }
-
-    @Test
-    public void create_function_for_getting_id_fromFirstMessageField() {
-        final EventRoute<Object, Message> fn = Producers.fromFirstMessageField();
-        assertFunction(fn);
-    }
-
-    private static void assertFunction(EventRoute<Object, Message> fn) {
-        assertNotNull(fn);
-
-        // Check that custom toString() is provided.
-        assertFalse(fn.toString().contains(EventRoute.class.getSimpleName()));
-    }
+public interface RejectionRoute<I, M extends Message> extends Multicast<I, M, RejectionContext> {
 }

@@ -57,8 +57,8 @@ public class DelegatingRejectionDispatcherShould {
         final Command command = requestFactory.createCommand(newUuidValue());
         final Message rejectionMessage =
                 EntityAlreadyDeleted.newBuilder()
-                                               .setEntityId(getClass().getName())
-                                               .build();
+                                    .setEntityId(getClass().getName())
+                                    .build();
         final Rejection rejection = Rejections.createRejection(rejectionMessage, command);
         rejectionEnvelope = RejectionEnvelope.of(rejection);
     }

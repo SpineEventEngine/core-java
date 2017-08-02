@@ -25,6 +25,7 @@ import com.google.protobuf.Empty;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
+import io.spine.Identifier;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
@@ -32,11 +33,13 @@ import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
+import io.spine.core.EventEnvelope;
 import io.spine.core.Events;
 import io.spine.core.Subscribe;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.command.Assign;
+import io.spine.server.command.TestEventFactory;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.commandstore.CommandStore;
@@ -79,7 +82,9 @@ import static org.mockito.Mockito.spy;
 public class ProcessManagerShould {
 
     private static final ProjectId ID = Sample.messageOfType(ProjectId.class);
-    private static final EventContext EVENT_CONTEXT = EventContext.getDefaultInstance();
+
+    private final TestEventFactory eventFactory =
+            TestEventFactory.newInstance(Identifier.pack(ID), getClass());
 
     private final TestActorRequestFactory requestFactory =
             TestActorRequestFactory.newInstance(getClass());
@@ -126,9 +131,10 @@ public class ProcessManagerShould {
         testDispatchEvent(Sample.messageOfType(PmProjectStarted.class));
     }
 
-    private void testDispatchEvent(Message event) {
-        dispatch(processManager, event, EVENT_CONTEXT);
-        assertEquals(AnyPacker.pack(event), processManager.getState());
+    private void testDispatchEvent(Message eventMessage) {
+        final Event event = eventFactory.createEvent(eventMessage);
+        dispatch(processManager, EventEnvelope.of(event));
+        assertEquals(AnyPacker.pack(eventMessage), processManager.getState());
     }
 
     @Test
@@ -219,7 +225,8 @@ public class ProcessManagerShould {
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_dispatch_unknown_event() {
         final StringValue unknownEvent = StringValue.getDefaultInstance();
-        dispatch(processManager, unknownEvent, EVENT_CONTEXT);
+        final EventEnvelope envelope = EventEnvelope.of(eventFactory.createEvent(unknownEvent));
+        dispatch(processManager, envelope);
     }
 
     @Test

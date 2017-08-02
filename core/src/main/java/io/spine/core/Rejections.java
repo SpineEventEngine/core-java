@@ -24,6 +24,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Throwables;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.Identifier;
 import io.spine.base.ThrowableMessage;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -121,5 +122,20 @@ public final class Rejections {
                                           .setContext(context)
                                           .build();
         return result;
+    }
+
+    /**
+     * Obtains rejection producer ID from the passed {@code RejectionContext} and casts it to the
+     * {@code <I>} type.
+     *
+     * @param context the rejection context to to get the producer ID
+     * @param <I>     the type of the producer ID
+     * @return the producer ID
+     */
+    public static <I> I getProducer(RejectionContext context) {
+        checkNotNull(context);
+
+        final I id = Identifier.unpack(context.getProducerId());
+        return id;
     }
 }

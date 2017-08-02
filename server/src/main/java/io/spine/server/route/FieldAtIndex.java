@@ -21,17 +21,17 @@
 package io.spine.server.route;
 
 import com.google.protobuf.Message;
-import io.spine.Identifier;
 import io.spine.protobuf.MessageField;
+import io.spine.protobuf.MessageFieldException;
 
 /**
- * Obtains an entity ID based on an event/command message, context and message field index.
- *
- * <p>An entity ID field name must end with the {@link Identifier#ID_PROPERTY_SUFFIX}.
+ * Obtains an entity ID based on an event/command message.
  *
  * @param <I> the type of entity IDs
  * @param <M> the type of messages to get IDs from
  * @param <C> the type of the message context
+ * @author Alexander Litus
+ * @author Alexander Yevsyukov
  */
 abstract class FieldAtIndex<I, M extends Message, C extends Message> implements Unicast<I, M, C> {
 
@@ -50,12 +50,11 @@ abstract class FieldAtIndex<I, M extends Message, C extends Message> implements 
     /**
      * {@inheritDoc}
      *
-     * @throws MissingEntityIdException if the field name does not end with
-     *          the {@link Identifier#ID_PROPERTY_SUFFIX}.
-     * @throws ClassCastException if the field type is invalid
+     * @throws MessageFieldException if there is no field with required index
+     * @throws ClassCastException if the field type is not of the required type
      */
     @Override
-    public I apply(M message, C context) throws MissingEntityIdException {
+    public I apply(M message, C ignored) throws MessageFieldException {
         @SuppressWarnings("unchecked") // we expect that the field is of this type
         final I id = (I) idField.getValue(message);
         return id;
@@ -71,17 +70,13 @@ abstract class FieldAtIndex<I, M extends Message, C extends Message> implements 
         }
 
         @Override
-        protected MissingEntityIdException createUnavailableFieldException(Message message,
-                                                                           String fieldName) {
-            final String messageClass = message.getClass()
-                                               .getName();
-            return new MissingEntityIdException(messageClass, fieldName, getIndex());
+        protected MessageFieldException createUnavailableFieldException(Message message) {
+            return new MessageFieldException(message, "There's no field with index %d", getIndex());
         }
 
         @Override
         protected boolean isFieldAvailable(Message message) {
-            final String fieldName = MessageField.getFieldName(message, getIndex());
-            final boolean result = fieldName.endsWith(Identifier.ID_PROPERTY_SUFFIX);
+            final boolean result = MessageField.getFieldCount(message) > getIndex();
             return result;
         }
     }

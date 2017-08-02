@@ -20,11 +20,9 @@
 package io.spine.server.procman;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.protobuf.Message;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
-import io.spine.core.EventContext;
-import io.spine.protobuf.AnyPacker;
+import io.spine.core.EventEnvelope;
 
 import java.util.List;
 
@@ -49,12 +47,12 @@ public class ProcessManagerDispatcher {
      * @return the list of {@linkplain Event events}, being the command output.
      */
     public static List<Event> dispatch(ProcessManager<?, ?, ?> processManager,
-                                       CommandEnvelope envelope) {
+                                       CommandEnvelope command) {
         checkNotNull(processManager);
-        checkNotNull(envelope);
+        checkNotNull(command);
 
         final ProcManTransaction<?, ?, ?> tx = ProcManTransaction.start(processManager);
-        final List<Event> eventMessages = processManager.dispatchCommand(envelope);
+        final List<Event> eventMessages = processManager.dispatchCommand(command);
         tx.commit();
 
         return eventMessages;
@@ -63,28 +61,12 @@ public class ProcessManagerDispatcher {
     /**
      * Dispatches the {@code Event} to the given {@code ProcessManager}.
      */
-    public static void dispatch(ProcessManager<?, ?, ?> processManager,
-                                Event event) {
+    public static void dispatch(ProcessManager<?, ?, ?> processManager, EventEnvelope event) {
         checkNotNull(processManager);
         checkNotNull(event);
 
-        final Message unpackedMessage = AnyPacker.unpack(event.getMessage());
-        dispatch(processManager, unpackedMessage, event.getContext());
-    }
-
-    /**
-     * Dispatches the passed {@code Event} message along with its context
-     * to the given {@code ProcessManager}.
-     */
-    public static void dispatch(ProcessManager<?, ?, ?> processManager,
-                                Message eventMessage,
-                                EventContext eventContext) {
-        checkNotNull(processManager);
-        checkNotNull(eventMessage);
-        checkNotNull(eventContext);
-
         final ProcManTransaction<?, ?, ?> tx = ProcManTransaction.start(processManager);
-        processManager.dispatchEvent(eventMessage, eventContext);
+        processManager.dispatchEvent(event);
         tx.commit();
     }
 }

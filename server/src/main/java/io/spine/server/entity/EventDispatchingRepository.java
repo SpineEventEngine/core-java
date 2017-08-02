@@ -21,8 +21,8 @@
 package io.spine.server.entity;
 
 import com.google.protobuf.Message;
-import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
+import io.spine.server.BoundedContext;
 import io.spine.server.route.EventRoute;
 import io.spine.server.route.EventRouting;
 import io.spine.server.tenant.EventOperation;
@@ -44,7 +44,7 @@ public abstract class EventDispatchingRepository<I,
         extends DefaultRecordBasedRepository<I, E, S>
         implements EntityEventDispatcher<I> {
 
-    private final EventRouting<I> routing;
+    private final EventRouting<I> eventRouting;
 
     /**
      * Creates new repository instance.
@@ -53,15 +53,15 @@ public abstract class EventDispatchingRepository<I,
      */
     protected EventDispatchingRepository(EventRoute<I, Message> defaultFunction) {
         super();
-        this.routing = EventRouting.withDefault(defaultFunction);
+        this.eventRouting = EventRouting.withDefault(defaultFunction);
     }
 
     /**
      * Obtains the {@link EventRouting} schema used by the repository for calculating identifiers
      * of event targets.
      */
-    protected final EventRouting<I> getRouting() {
-        return routing;
+    protected final EventRouting<I> getEventRouting() {
+        return eventRouting;
     }
 
     /**
@@ -73,6 +73,14 @@ public abstract class EventDispatchingRepository<I,
     @Override
     public void onRegistered() {
         super.onRegistered();
+        registerAsEventDispatcher();
+    }
+
+    /**
+     * Register itself as {@link io.spine.server.event.EventDispatcher EventDispatcher} in
+     * the {@linkplain BoundedContext#getEventBus() EventBus}.
+     */
+    protected void registerAsEventDispatcher() {
         getBoundedContext().getEventBus()
                            .register(this);
     }
@@ -80,7 +88,7 @@ public abstract class EventDispatchingRepository<I,
     @Override
     @CheckReturnValue
     public final Set<I> getTargets(EventEnvelope envelope) {
-        return getRouting().apply(envelope.getMessage(), envelope.getEventContext());
+        return getEventRouting().apply(envelope.getMessage(), envelope.getEventContext());
     }
 
     /**
@@ -90,15 +98,13 @@ public abstract class EventDispatchingRepository<I,
      */
     @Override
     public Set<I> dispatch(final EventEnvelope envelope) {
-        final Message eventMessage = envelope.getMessage();
-        final EventContext context = envelope.getEventContext();
-        final Set<I> ids = getTargets(envelope);
+        final Set<I> targets = getTargets(envelope);
         final EventOperation op = new EventOperation(envelope.getOuterObject()) {
             @Override
             public void run() {
-                for (I id : ids) {
+                for (I id : targets) {
                     try {
-                        dispatchToEntity(id, eventMessage, context);
+                        dispatchToEntity(id, envelope);
                     } catch (RuntimeException exception) {
                         onError(envelope, exception);
                         // Do not re-throw the error to allow other entities to consume the event.
@@ -107,7 +113,7 @@ public abstract class EventDispatchingRepository<I,
             }
         };
         op.execute();
-        return ids;
+        return targets;
     }
 
     /**
@@ -124,9 +130,8 @@ public abstract class EventDispatchingRepository<I,
     /**
      * Dispatches the event to an entity with the passed ID.
      *
-     * @param id           the ID of the entity
-     * @param eventMessage the event message
-     * @param context      the event context
+     * @param id    the ID of the entity
+     * @param event the envelope with the event
      */
-    protected abstract void dispatchToEntity(I id, Message eventMessage, EventContext context);
+    protected abstract void dispatchToEntity(I id, EventEnvelope event);
 }

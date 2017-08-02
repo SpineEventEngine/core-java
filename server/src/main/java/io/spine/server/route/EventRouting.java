@@ -69,6 +69,8 @@ public final class EventRouting<I> extends MessageRouting<EventContext, EventCla
 
     /**
      * {@inheritDoc}
+     *
+     * <p>Overrides for return type covariance.
      */
     @Override
     public final EventRoute<I, Message> getDefault() {
