@@ -21,9 +21,7 @@
 package io.spine.server.reflect;
 
 import com.google.common.base.Predicate;
-import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.protobuf.Message;
 
@@ -100,30 +98,9 @@ class MethodMap<H extends HandlerMethod> {
         return result;
     }
 
-    /** Returns {@code true} if the map is empty, {@code false} otherwise. */
-    @CheckReturnValue
-    public boolean isEmpty() {
-        return map.isEmpty();
-    }
-
-    @CheckReturnValue
-    public ImmutableSet<Class<? extends Message>> keySet() {
-        return map.keySet();
-    }
-
-    @CheckReturnValue
-    public ImmutableSet<Map.Entry<Class<? extends Message>, H>> entrySet() {
-        return map.entrySet();
-    }
-
-    @CheckReturnValue
-    public ImmutableCollection<H> values() {
-        return map.values();
-    }
-
     @CheckReturnValue
     @Nullable
-    public H get(Class<? extends Message> messageClass) {
+    H get(Class<? extends Message> messageClass) {
         return map.get(checkNotNull(messageClass));
     }
 }
