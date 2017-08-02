@@ -20,6 +20,7 @@
 
 package io.spine.core;
 
+import com.google.common.base.Optional;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.util.Timestamps;
@@ -31,6 +32,7 @@ import io.spine.time.Time;
 import org.junit.Before;
 import org.junit.Test;
 
+import static io.spine.core.Rejections.getProducer;
 import static io.spine.core.Rejections.toRejection;
 import static io.spine.test.TestValues.newUuidValue;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
@@ -99,9 +101,17 @@ public class RejectionsShould {
     }
 
     @Test
-    public void obtain_rejection_producer() {
-        assertEquals(getClass().getName(), Rejections.getProducer(rejection.getContext())
-                                                     .get());
+    public void obtain_rejection_producer_if_set() {
+        // We initialized producer ID as the name of this test class in setUp().
+        final Optional<Object> producer = Rejections.getProducer(rejection.getContext());
+        assertEquals(getClass().getName(), producer.get());
+    }
+
+    @Test
+    public void return_empty_optional_if_producer_not_set() {
+        final TestThrowableMessage freshThrowable = new TestThrowableMessage(rejectionMessage);
+        final Rejection freshRejection = toRejection(freshThrowable, command);
+        assertFalse(getProducer(freshRejection.getContext()).isPresent());
     }
 
     /**
