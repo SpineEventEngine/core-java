@@ -59,6 +59,13 @@ import java.util.List;
 import java.util.Set;
 
 import static io.spine.Identifier.newUuid;
+import static io.spine.server.procman.ProcessManagerRepositoryShould.GivenCommandMessage.ID;
+import static io.spine.server.procman.ProcessManagerRepositoryShould.GivenCommandMessage.addTask;
+import static io.spine.server.procman.ProcessManagerRepositoryShould.GivenCommandMessage.createProject;
+import static io.spine.server.procman.ProcessManagerRepositoryShould.GivenCommandMessage.projectCreated;
+import static io.spine.server.procman.ProcessManagerRepositoryShould.GivenCommandMessage.projectStarted;
+import static io.spine.server.procman.ProcessManagerRepositoryShould.GivenCommandMessage.startProject;
+import static io.spine.server.procman.ProcessManagerRepositoryShould.GivenCommandMessage.taskAdded;
 import static java.lang.String.format;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -72,44 +79,51 @@ public class ProcessManagerRepositoryShould
         ProjectId,
         Project> {
 
-    private static final ProjectId ID = Sample.messageOfType(ProjectId.class);
-
     private BoundedContext boundedContext;
 
-    private static PmCreateProject createProject() {
-        return ((PmCreateProject.Builder) Sample.builderForType(PmCreateProject.class))
-                .setProjectId(ID)
-                .build();
-    }
+    public static class GivenCommandMessage {
 
-    private static PmStartProject startProject() {
-        return ((PmStartProject.Builder) Sample.builderForType(PmStartProject.class))
-                .setProjectId(ID)
-                .build();
-    }
+        public static final ProjectId ID = Sample.messageOfType(ProjectId.class);
 
-    private static PmAddTask addTask() {
-        return ((PmAddTask.Builder) Sample.builderForType(PmAddTask.class))
-                .setProjectId(ID)
-                .build();
-    }
+        /** Prevents instantiation on this utility class. */
+        private GivenCommandMessage() {
+        }
 
-    private static PmProjectStarted projectStarted() {
-        return ((PmProjectStarted.Builder) Sample.builderForType(PmProjectStarted.class))
-                .setProjectId(ID)
-                .build();
-    }
+        public static PmCreateProject createProject() {
+            return ((PmCreateProject.Builder) Sample.builderForType(PmCreateProject.class))
+                    .setProjectId(ID)
+                    .build();
+        }
 
-    private static PmProjectCreated projectCreated() {
-        return ((PmProjectCreated.Builder) Sample.builderForType(PmProjectCreated.class))
-                .setProjectId(ID)
-                .build();
-    }
+        public static PmStartProject startProject() {
+            return ((PmStartProject.Builder) Sample.builderForType(PmStartProject.class))
+                    .setProjectId(ID)
+                    .build();
+        }
 
-    private static PmTaskAdded taskAdded() {
-        return ((PmTaskAdded.Builder) Sample.builderForType(PmTaskAdded.class))
-                .setProjectId(ID)
-                .build();
+        public static PmAddTask addTask() {
+            return ((PmAddTask.Builder) Sample.builderForType(PmAddTask.class))
+                    .setProjectId(ID)
+                    .build();
+        }
+
+        public static PmProjectStarted projectStarted() {
+            return ((PmProjectStarted.Builder) Sample.builderForType(PmProjectStarted.class))
+                    .setProjectId(ID)
+                    .build();
+        }
+
+        public static PmProjectCreated projectCreated() {
+            return ((PmProjectCreated.Builder) Sample.builderForType(PmProjectCreated.class))
+                    .setProjectId(ID)
+                    .build();
+        }
+
+        public static PmTaskAdded taskAdded() {
+            return ((PmTaskAdded.Builder) Sample.builderForType(PmTaskAdded.class))
+                    .setProjectId(ID)
+                    .build();
+        }
     }
 
     @Override

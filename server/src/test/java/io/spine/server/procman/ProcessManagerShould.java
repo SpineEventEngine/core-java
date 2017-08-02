@@ -57,7 +57,6 @@ import io.spine.testdata.Sample;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -66,6 +65,7 @@ import static io.spine.core.Rejections.createRejection;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.TypeConverter.toMessage;
+import static io.spine.server.TestEventClasses.assertContains;
 import static io.spine.server.procman.ProcessManagerDispatcher.dispatch;
 import static io.spine.test.TestValues.newUuidValue;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
@@ -74,7 +74,6 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 
@@ -236,10 +235,10 @@ public class ProcessManagerShould {
     public void return_handled_event_classes() {
         final Set<EventClass> classes =
                 ProcessManager.TypeInfo.getEventClasses(TestProcessManager.class);
+
         assertEquals(3, classes.size());
-        assertContains(classes, PmProjectCreated.class);
-        assertContains(classes, PmTaskAdded.class);
-        assertContains(classes, PmProjectStarted.class);
+        assertContains(classes,
+                       PmProjectCreated.class, PmTaskAdded.class, PmProjectStarted.class);
     }
 
     @Test
@@ -259,11 +258,6 @@ public class ProcessManagerShould {
 
         assertEquals(rejection.getOuterObject()
                               .getMessage(), processManager.getState());
-    }
-
-    private static void assertContains(Collection<EventClass> eventClasses,
-                                       Class<? extends Message> eventClass) {
-        assertTrue(eventClasses.contains(EventClass.of(eventClass)));
     }
 
     @Test

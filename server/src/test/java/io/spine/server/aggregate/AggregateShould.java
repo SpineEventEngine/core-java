@@ -21,7 +21,6 @@
 package io.spine.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
@@ -59,16 +58,16 @@ import io.spine.validate.ConstraintViolation;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.annotation.Nullable;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Throwables.getRootCause;
-import static com.google.common.collect.Collections2.transform;
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.core.given.GivenVersion.withNumber;
 import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.server.TestCommandClasses.assertContains;
+import static io.spine.server.TestEventClasses.assertContains;
+import static io.spine.server.TestEventClasses.getEventClasses;
 import static io.spine.server.aggregate.AggregateMessageDispatcher.dispatchCommand;
 import static io.spine.server.aggregate.given.Given.EventMessage.projectCreated;
 import static io.spine.server.aggregate.given.Given.EventMessage.projectStarted;
@@ -122,25 +121,6 @@ public class AggregateShould {
 
     private static void failNotThrows() {
         fail("Should have thrown RuntimeException.");
-    }
-
-    private static Collection<Class<? extends Message>> eventsToClasses(Collection<Event> events) {
-        return transform(events, new Function<Event, Class<? extends Message>>() {
-            @Nullable // return null because an exception won't be propagated in this case
-            @Override
-            public Class<? extends Message> apply(@Nullable Event record) {
-                if (record == null) {
-                    return null;
-                }
-                return unpack(record.getMessage()).getClass();
-            }
-        });
-    }
-
-    private static void assertContains(Collection<Class<? extends Message>> actualClasses,
-                                       Class... expectedClasses) {
-        assertTrue(actualClasses.containsAll(newArrayList(expectedClasses)));
-        assertEquals(expectedClasses.length, actualClasses.size());
     }
 
     private static Event event(Message eventMessage, int versionNumber) {
@@ -246,15 +226,12 @@ public class AggregateShould {
                 Aggregate.TypeInfo.getCommandClasses(TestAggregate.class);
 
         assertTrue(commandClasses.size() == 4);
-        assertContains(commandClasses, AggCreateProject.class);
-        assertContains(commandClasses, AggAddTask.class);
-        assertContains(commandClasses, AggStartProject.class);
-        assertContains(commandClasses, ImportEvents.class);
-    }
 
-    private static void assertContains(Collection<CommandClass> commandClasses,
-                                       Class<? extends Message> cls) {
-        assertTrue(commandClasses.contains(CommandClass.of(cls)));
+        assertContains(commandClasses,
+                       AggCreateProject.class,
+                       AggAddTask.class,
+                       AggStartProject.class,
+                       ImportEvents.class);
     }
 
     @Test
@@ -365,7 +342,7 @@ public class AggregateShould {
 
         final List<Event> events = aggregate.getUncommittedEvents();
 
-        assertContains(eventsToClasses(events),
+        assertContains(getEventClasses(events),
                        AggProjectCreated.class, AggTaskAdded.class, AggProjectStarted.class);
     }
 
@@ -384,7 +361,7 @@ public class AggregateShould {
 
         final List<Event> events = aggregate.commitEvents();
 
-        assertContains(eventsToClasses(events),
+        assertContains(getEventClasses(events),
                        AggProjectCreated.class, AggTaskAdded.class, AggProjectStarted.class);
     }
 
