@@ -24,8 +24,8 @@ import com.google.common.base.Predicate;
 import com.google.protobuf.Message;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
+import io.spine.core.React;
 import io.spine.protobuf.Messages;
-import io.spine.server.aggregate.React;
 
 import javax.annotation.CheckReturnValue;
 import java.lang.reflect.Method;
@@ -71,8 +71,9 @@ public final class EventReactorMethod extends HandlerMethod<EventContext> {
 
     private static EventReactorMethod getMethod(Class<?> cls, Message eventMessage) {
         final Class<? extends Message> eventClass = eventMessage.getClass();
-        final EventReactorMethod method = MethodRegistry.getInstance()
-                                                        .get(cls, eventClass, factory());
+        final HandlerMethod.Factory<EventReactorMethod> factory = factory();
+        final MethodRegistry registry = MethodRegistry.getInstance();
+        final EventReactorMethod method = registry.get(cls, eventClass, factory);
         if (method == null) {
             throw newIllegalStateException("The class %s does not react to events of class %s.",
                                            cls.getName(), eventClass.getName());
@@ -164,6 +165,16 @@ public final class EventReactorMethod extends HandlerMethod<EventContext> {
             super(React.class, EventContext.class);
         }
 
+        @Override
+        protected boolean verifyReturnType(Method method) {
+            final boolean returnsMessageOrIterable = returnsMessageOrIterable(method);
+            if (returnsMessageOrIterable) {
+                checkOutputMessageType(method);
+                return true;
+            }
+            return false;
+        }
+
         /**
          * Ensures that the method does not return the same class of message as one that passed
          * as the first method parameter.
@@ -195,16 +206,6 @@ public final class EventReactorMethod extends HandlerMethod<EventContext> {
                         "React method cannot return the same event message {}",
                         firstParamType.getName());
             }
-        }
-
-        @Override
-        protected boolean verifyReturnType(Method method) {
-            final boolean returnsMessageOrIterable = returnsMessageOrIterable(method);
-            if (returnsMessageOrIterable) {
-                checkOutputMessageType(method);
-                return true;
-            }
-            return false;
         }
     }
 }

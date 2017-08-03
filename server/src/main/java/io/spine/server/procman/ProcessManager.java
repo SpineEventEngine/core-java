@@ -36,7 +36,6 @@ import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.reflect.CommandHandlerMethod;
 import io.spine.server.reflect.EventReactorMethod;
-import io.spine.server.reflect.EventSubscriberMethod;
 import io.spine.server.reflect.HandlerMethod;
 import io.spine.server.reflect.RejectionSubscriberMethod;
 import io.spine.validate.ValidatingBuilder;
@@ -46,7 +45,6 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static io.spine.server.reflect.EventSubscriberMethod.getMethod;
 
 /**
  * A central processing unit used to maintain the state of the business process and determine
@@ -133,26 +131,14 @@ public abstract class ProcessManager<I,
     }
 
     /**
-     * Dispatches an event to the event subscriber method of the process manager.
-     *
-     * @param event the envelope with the event
-     */
-    void dispatchEvent(EventEnvelope event)  {
-        checkNotNull(event);
-
-        final Message eventMessage = event.getMessage();
-        final EventSubscriberMethod method = getMethod(getClass(), eventMessage);
-        method.invoke(this, eventMessage, event.getEventContext());
-    }
-
-    /**
      * Dispatches an event to the event reactor method of the process manager.
      *
      * @param  event the envelope with the event
      * @return a list of produced events or an empty list if the process manager does not
      *         produce new events because of the passed event
      */
-    List<? extends Message> reactOn(EventEnvelope event) {
+    List<Event> dispatchEvent(EventEnvelope event)  {
+        checkNotNull(event);
         final List<? extends Message> eventMessages =
                 EventReactorMethod.invokeFor(this, event.getMessage(), event.getEventContext());
         final List<Event> events = toEvents(eventMessages, event);
@@ -260,7 +246,7 @@ public abstract class ProcessManager<I,
     @Override
     protected String getMissingTxMessage() {
         return "ProcessManager modification is not available this way. Please modify the state from" +
-                " a command handling or event subscribing method.";
+                " a command handling or event reacting method.";
     }
 
     /**
@@ -283,13 +269,13 @@ public abstract class ProcessManager<I,
         }
 
         /**
-         * Returns the set of event classes handled by the process manager.
+         * Returns the set of event classes on which the process manager reacts.
          *
          * @param pmClass the process manager class to inspect
          * @return immutable set of event classes or an empty set if no events are handled
          */
         static Set<EventClass> getEventClasses(Class<? extends ProcessManager> pmClass) {
-            return EventSubscriberMethod.inspect(pmClass);
+            return EventReactorMethod.inspect(pmClass);
         }
 
         /**
@@ -301,6 +287,7 @@ public abstract class ProcessManager<I,
          * to rejections
          */
         static Set<RejectionClass> getRejectionClasses(Class<? extends ProcessManager> pmClass) {
+            //TODO:2017-08-03:alexander.yevsyukov: Use RejectionReactorMethod here.
             return ImmutableSet.copyOf(RejectionSubscriberMethod.inspect(pmClass));
         }
     }

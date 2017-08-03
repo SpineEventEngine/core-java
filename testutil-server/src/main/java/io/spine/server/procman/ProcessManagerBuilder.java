@@ -56,6 +56,6 @@ public class ProcessManagerBuilder<P extends ProcessManager<I, S, B>,
 
     @Override
     protected void setState(P result, S state, Version version) {
-        ProcManTransaction.startWith(result, state, version).commit();
+        PmTransaction.startWith(result, state, version).commit();
     }
 }

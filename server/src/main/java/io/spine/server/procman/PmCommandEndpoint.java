@@ -20,7 +20,6 @@
 
 package io.spine.server.procman;
 
-import com.google.protobuf.Message;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 
@@ -49,19 +48,7 @@ class PmCommandEndpoint<I, P extends ProcessManager<I, ?, ?>>
     }
 
     @Override
-    protected void dispatchToOne(I id) {
-        final ProcessManagerRepository<I, P, ?> repository = repository();
-        final P manager = repository.findOrCreate(id);
-
-        final ProcManTransaction<?, ?, ?> tx = repository.beginTransactionFor(manager);
-        final List<Event> events = manager.dispatchCommand(envelope());
-        tx.commit();
-        store(manager);
-        repository.postEvents(events);
-    }
-
-    @Override
-    protected List<? extends Message> doDispatch(P processManager, CommandEnvelope command) {
+    protected List<Event> doDispatch(P processManager, CommandEnvelope command) {
         return processManager.dispatchCommand(command);
     }
 

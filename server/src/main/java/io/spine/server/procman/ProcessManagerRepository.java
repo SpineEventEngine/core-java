@@ -40,6 +40,7 @@ import io.spine.server.rejection.DelegatingRejectionDispatcher;
 import io.spine.server.rejection.RejectionDispatcherDelegate;
 import io.spine.server.route.CommandRouting;
 import io.spine.server.route.EventProducers;
+import io.spine.server.route.EventRouting;
 import io.spine.server.route.RejectionProducers;
 import io.spine.server.route.RejectionRouting;
 import io.spine.server.tenant.TenantAwareFunction0;
@@ -213,9 +214,9 @@ public abstract class ProcessManagerRepository<I,
      * @see ProcessManager#dispatchEvent(EventEnvelope)
      */
     @Override
-    public Set<I> dispatch(EventEnvelope event) throws IllegalArgumentException {
-        //TODO:2017-08-03:alexander.yevsyukov: Use endpoint for reacting methods
-        return super.dispatch(event);
+    public Set<I> dispatch(EventEnvelope event) {
+        Set<I> result = PmEventEndpoint.handle(this, event);
+        return result;
     }
 
     /**
@@ -253,7 +254,7 @@ public abstract class ProcessManagerRepository<I,
     @Override
     protected void dispatchToEntity(I id, EventEnvelope event) {
         final P manager = findOrCreate(id);
-        final ProcManTransaction<?, ?, ?> transaction = beginTransactionFor(manager);
+        final PmTransaction<?, ?, ?> transaction = beginTransactionFor(manager);
         manager.dispatchEvent(event);
         transaction.commit();
         store(manager);
@@ -269,8 +270,8 @@ public abstract class ProcessManagerRepository<I,
         logError("Rejection dispatching caused error (class: %s, id: %s", envelope, exception);
     }
 
-    ProcManTransaction<?, ?, ?> beginTransactionFor(P manager) {
-        return ProcManTransaction.start((ProcessManager<?, ?, ?>) manager);
+    PmTransaction<?, ?, ?> beginTransactionFor(P manager) {
+        return PmTransaction.start((ProcessManager<?, ?, ?>) manager);
     }
 
     /**
@@ -303,10 +304,8 @@ public abstract class ProcessManagerRepository<I,
         return result;
     }
 
-    private void checkEventClass(EventClass eventClass) throws IllegalArgumentException {
-        final Set<EventClass> classes = getMessageClasses();
-        if (!classes.contains(eventClass)) {
-            throw Error.unexpectedEventEncountered(eventClass);
-        }
+    /** Open access to the event routing to the package. */
+    EventRouting<I> eventRouting() {
+        return getEventRouting();
     }
 }

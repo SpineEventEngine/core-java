@@ -22,6 +22,7 @@ package io.spine.server.aggregate;
 
 import com.google.protobuf.Message;
 import io.spine.core.EventEnvelope;
+import io.spine.core.React;
 
 import java.util.List;
 import java.util.Set;

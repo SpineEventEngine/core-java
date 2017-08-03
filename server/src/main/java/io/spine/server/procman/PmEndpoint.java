@@ -21,8 +21,11 @@
 package io.spine.server.procman;
 
 import io.spine.core.ActorMessageEnvelope;
+import io.spine.core.Event;
 import io.spine.server.entity.EntityMessageEndpoint;
 import io.spine.server.entity.Repository;
+
+import java.util.List;
 
 /**
  * Common base message for endpoints of Process Managers.
@@ -58,5 +61,18 @@ abstract class PmEndpoint<I,
     @Override
     protected ProcessManagerRepository<I, P, ?> repository() {
         return (ProcessManagerRepository<I, P, ?>) super.repository();
+    }
+
+    @Override
+    protected void dispatchToOne(I id) {
+        final ProcessManagerRepository<I, P, ?> repository = repository();
+        final P manager = repository.findOrCreate(id);
+
+        final PmTransaction<?, ?, ?> tx = repository.beginTransactionFor(manager);
+        @SuppressWarnings("unchecked") // all PM handlers return events.
+        final List<Event> events = (List<Event>) doDispatch(manager, envelope());
+        tx.commit();
+        store(manager);
+        repository.postEvents(events);
     }
 }

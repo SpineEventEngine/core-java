@@ -139,7 +139,7 @@ public abstract class EntityMessageEndpoint<I,
      * Allows derived classes to handle empty list of uncommitted events returned by
      * the aggregate in response to the message.
      */
-    protected abstract void onEmptyResult(E aggregate, M envelope);
+    protected abstract void onEmptyResult(E entity, M envelope);
 
     /**
      * Processes the exception thrown during dispatching the message.

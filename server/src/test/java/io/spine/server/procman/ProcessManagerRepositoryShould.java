@@ -45,17 +45,16 @@ import io.spine.server.entity.given.Given;
 import io.spine.server.entity.rejection.Rejections.EntityAlreadyArchived;
 import io.spine.server.entity.rejection.Rejections.EntityAlreadyDeleted;
 import io.spine.server.event.EventSubscriber;
+import io.spine.server.procman.given.ProcessManagerRepositoryTestEnv;
 import io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.TestProcessManager;
 import io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.TestProcessManagerRepository;
 import io.spine.test.procman.Project;
 import io.spine.test.procman.ProjectId;
-import io.spine.test.procman.command.PmAddTask;
 import io.spine.test.procman.command.PmCreateProject;
 import io.spine.test.procman.command.PmStartProject;
 import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.event.PmTaskAdded;
-import io.spine.testdata.Sample;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -70,13 +69,13 @@ import static io.spine.core.Rejections.createRejection;
 import static io.spine.server.TestCommandClasses.assertContains;
 import static io.spine.server.TestEventClasses.assertContains;
 import static io.spine.server.TestRejectionClasses.assertContains;
-import static io.spine.server.procman.ProcessManagerRepositoryShould.GivenCommandMessage.ID;
-import static io.spine.server.procman.ProcessManagerRepositoryShould.GivenCommandMessage.addTask;
-import static io.spine.server.procman.ProcessManagerRepositoryShould.GivenCommandMessage.createProject;
-import static io.spine.server.procman.ProcessManagerRepositoryShould.GivenCommandMessage.projectCreated;
-import static io.spine.server.procman.ProcessManagerRepositoryShould.GivenCommandMessage.projectStarted;
-import static io.spine.server.procman.ProcessManagerRepositoryShould.GivenCommandMessage.startProject;
-import static io.spine.server.procman.ProcessManagerRepositoryShould.GivenCommandMessage.taskAdded;
+import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.ID;
+import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.addTask;
+import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.createProject;
+import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.projectCreated;
+import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.projectStarted;
+import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.startProject;
+import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.taskAdded;
 import static io.spine.test.TestValues.newUuidValue;
 import static java.lang.String.format;
 import static org.junit.Assert.assertEquals;
@@ -98,51 +97,6 @@ public class ProcessManagerRepositoryShould
                                                         .setValue(newUuid())
                                                         .build());
     private BoundedContext boundedContext;
-
-    public static class GivenCommandMessage {
-
-        public static final ProjectId ID = Sample.messageOfType(ProjectId.class);
-
-        /** Prevents instantiation on this utility class. */
-        private GivenCommandMessage() {
-        }
-
-        public static PmCreateProject createProject() {
-            return ((PmCreateProject.Builder) Sample.builderForType(PmCreateProject.class))
-                    .setProjectId(ID)
-                    .build();
-        }
-
-        public static PmStartProject startProject() {
-            return ((PmStartProject.Builder) Sample.builderForType(PmStartProject.class))
-                    .setProjectId(ID)
-                    .build();
-        }
-
-        public static PmAddTask addTask() {
-            return ((PmAddTask.Builder) Sample.builderForType(PmAddTask.class))
-                    .setProjectId(ID)
-                    .build();
-        }
-
-        public static PmProjectStarted projectStarted() {
-            return ((PmProjectStarted.Builder) Sample.builderForType(PmProjectStarted.class))
-                    .setProjectId(ID)
-                    .build();
-        }
-
-        public static PmProjectCreated projectCreated() {
-            return ((PmProjectCreated.Builder) Sample.builderForType(PmProjectCreated.class))
-                    .setProjectId(ID)
-                    .build();
-        }
-
-        public static PmTaskAdded taskAdded() {
-            return ((PmTaskAdded.Builder) Sample.builderForType(PmTaskAdded.class))
-                    .setProjectId(ID)
-                    .build();
-        }
-    }
 
     @Override
     protected RecordBasedRepository<ProjectId, TestProcessManager, Project> createRepository() {
@@ -306,7 +260,7 @@ public class ProcessManagerRepositoryShould
                                      .build();
         final Rejection rejection = createRejection(rejectionMessage,
                                                     ce.getCommand());
-        final ProjectId id = GivenCommandMessage.ID;
+        final ProjectId id = ProcessManagerRepositoryTestEnv.GivenCommandMessage.ID;
         final Rejection.Builder builder =
                 rejection.toBuilder()
                          .setContext(rejection.getContext()

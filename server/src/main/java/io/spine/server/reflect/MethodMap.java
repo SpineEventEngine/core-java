@@ -31,6 +31,7 @@ import java.lang.reflect.Method;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.server.reflect.HandlerMethod.getFirstParamType;
 
 /**
  * A map for storing methods handling messages.
@@ -70,8 +71,10 @@ class MethodMap<H extends HandlerMethod> {
     /**
      * Returns a map of the {@link HandlerMethod} objects to the corresponding message class.
      *
-     * @param  declaringClass the class that declares methods to scan
-     * @param  filter         the predicate that defines rules for subscriber scanning
+     * @param  declaringClass
+     *         the class that declares methods to scan
+     * @param  filter
+     *         the predicate that defines rules for subscriber scanning
      * @return the map of message subscribers
      * @throws DuplicateHandlerMethodException
      *         if there are more than one handler for the same message class are encountered
@@ -79,10 +82,10 @@ class MethodMap<H extends HandlerMethod> {
     private static Map<Class<? extends Message>, Method> scan(Class<?> declaringClass,
                                                               Predicate<Method> filter) {
         final Map<Class<? extends Message>, Method> tempMap = Maps.newHashMap();
-        for (Method method : declaringClass.getDeclaredMethods()) {
+        final Method[] declaredMethods = declaringClass.getDeclaredMethods();
+        for (Method method : declaredMethods) {
             if (filter.apply(method)) {
-                final Class<? extends Message> messageClass =
-                        HandlerMethod.getFirstParamType(method);
+                final Class<? extends Message> messageClass = getFirstParamType(method);
                 if (tempMap.containsKey(messageClass)) {
                     final Method alreadyPresent = tempMap.get(messageClass);
                     throw new DuplicateHandlerMethodException(

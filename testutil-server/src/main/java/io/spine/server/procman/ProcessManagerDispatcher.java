@@ -49,7 +49,7 @@ public class ProcessManagerDispatcher {
         checkNotNull(pm);
         checkNotNull(command);
 
-        final ProcManTransaction<?, ?, ?> tx = ProcManTransaction.start(pm);
+        final PmTransaction<?, ?, ?> tx = PmTransaction.start(pm);
         final List<Event> eventMessages = pm.dispatchCommand(command);
         tx.commit();
 
@@ -63,7 +63,7 @@ public class ProcessManagerDispatcher {
         checkNotNull(pm);
         checkNotNull(event);
 
-        final ProcManTransaction<?, ?, ?> tx = ProcManTransaction.start(pm);
+        final PmTransaction<?, ?, ?> tx = PmTransaction.start(pm);
         pm.dispatchEvent(event);
         tx.commit();
     }
@@ -75,7 +75,7 @@ public class ProcessManagerDispatcher {
         checkNotNull(pm);
         checkNotNull(rejection);
 
-        final ProcManTransaction<?, ?, ?> tx = ProcManTransaction.start(pm);
+        final PmTransaction<?, ?, ?> tx = PmTransaction.start(pm);
         pm.dispatchRejection(rejection);
         tx.commit();
     }
