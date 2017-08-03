@@ -41,14 +41,14 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
     extends AggregateMessageEndpoint<I, A, CommandEnvelope, I> {
 
-    private AggregateCommandEndpoint(AggregateRepository<I, A> repo, CommandEnvelope envelope) {
-        super(repo, envelope);
+    private AggregateCommandEndpoint(AggregateRepository<I, A> repo, CommandEnvelope command) {
+        super(repo, command);
     }
 
     static <I, A extends Aggregate<I, ?, ?>>
-    I handle(AggregateRepository<I, A> repository, CommandEnvelope envelope) {
+    I handle(AggregateRepository<I, A> repository, CommandEnvelope command) {
         final AggregateCommandEndpoint<I, A> endpoint =
-                new AggregateCommandEndpoint<>(repository, envelope);
+                new AggregateCommandEndpoint<>(repository, command);
 
         return endpoint.handle();
     }
@@ -56,6 +56,22 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
     @Override
     protected List<? extends Message> dispatchEnvelope(A aggregate, CommandEnvelope envelope) {
         return aggregate.dispatchCommand(envelope);
+    }
+
+    /**
+     * Returns ID of the aggregate that is responsible for handling the command.
+     */
+    @Override
+    protected I getTargets() {
+        final CommandEnvelope envelope = envelope();
+        final I id = repository().getCommandRouting()
+                                 .apply(envelope.getMessage(), envelope.getCommandContext());
+        return id;
+    }
+
+    @Override
+    protected void onError(CommandEnvelope envelope, RuntimeException exception) {
+        repository().onError(envelope, exception);
     }
 
     /**
@@ -74,21 +90,5 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
                 Stringifiers.toString(aggregate.getId()),
                 envelope.getMessageClass(),
                 Stringifiers.toString(envelope.getId()));
-    }
-
-    @Override
-    protected void onError(CommandEnvelope envelope, RuntimeException exception) {
-        repository().onError(envelope, exception);
-    }
-
-    /**
-     * Returns ID of the aggregate that is responsible for handling the command.
-     */
-    @Override
-    protected I getTargets() {
-        final CommandEnvelope envelope = envelope();
-        final I id = repository().getCommandRouting()
-                                 .apply(envelope.getMessage(), envelope.getCommandContext());
-        return id;
     }
 }

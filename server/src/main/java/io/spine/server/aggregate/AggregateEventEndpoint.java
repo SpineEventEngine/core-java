@@ -41,14 +41,14 @@ import java.util.Set;
 class AggregateEventEndpoint<I, A extends Aggregate<I, ?, ?>>
         extends AggregateMessageEndpoint<I, A, EventEnvelope, Set<I>>{
 
-    private AggregateEventEndpoint(AggregateRepository<I, A> repo, EventEnvelope envelope) {
-        super(repo, envelope);
+    private AggregateEventEndpoint(AggregateRepository<I, A> repo, EventEnvelope event) {
+        super(repo, event);
     }
 
     static <I, A extends Aggregate<I, ?, ?>>
-    Set<I> handle(AggregateRepository<I, A> repository, EventEnvelope envelope) {
+    Set<I> handle(AggregateRepository<I, A> repository, EventEnvelope event) {
         final AggregateEventEndpoint<I, A> endpoint =
-                new AggregateEventEndpoint<>(repository, envelope);
+                new AggregateEventEndpoint<>(repository, event);
 
         return endpoint.handle();
     }

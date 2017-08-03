@@ -64,30 +64,34 @@ public abstract class EntityMessageEndpoint<I,
      */
     public final R handle() {
         final TenantId tenantId = envelope().getTenantId();
-        final TenantAwareFunction0<R> operation = createOperation(tenantId);
+        final TenantAwareFunction0<R> operation = new Operation(tenantId);
         final R result = operation.execute();
         return result;
+    }
+
+    /**
+     * {@linkplain #getTargets() Selects} one or more message targets and
+     * {@linkplain #dispatchToOne(I) dispatches} the message to them.
+     */
+    @SuppressWarnings("unchecked")
+    private R dispatch() {
+        final R targets = getTargets();
+        if (targets instanceof Set) {
+            final Set<I> handlingAggregates = (Set<I>) targets;
+            return (R)(dispatchToMany(handlingAggregates));
+        }
+        try {
+            dispatchToOne((I)targets);
+        } catch (RuntimeException exception) {
+            onError(envelope(), exception);
+        }
+        return targets;
     }
 
     /**
      * Obtains IDs of aggregates to which the endpoint delivers the message.
      */
     protected abstract R getTargets();
-
-    /**
-     * Creates a tenant-aware operation based on the message this endpoint processes.
-     *
-     * @param tenantId the ID of the tenant in which context to perform the operation
-     */
-    private TenantAwareFunction0<R> createOperation(TenantId tenantId) {
-        return new Operation(tenantId);
-    }
-
-    /**
-     * Allows derived classes to handle empty list of uncommitted events returned by
-     * the aggregate in response to the message.
-     */
-    protected abstract void onEmptyResult(E aggregate, M envelope);
 
     /**
      * Dispatches the message to the entity with the passed ID, providing transactional work
@@ -101,6 +105,12 @@ public abstract class EntityMessageEndpoint<I,
      * Invokes entity-specific method for dispatching the message.
      */
     protected abstract List<? extends Message> dispatchEnvelope(E entity, M envelope);
+
+    /**
+     * Allows derived classes to handle empty list of uncommitted events returned by
+     * the aggregate in response to the message.
+     */
+    protected abstract void onEmptyResult(E aggregate, M envelope);
 
     /**
      * Processes the exception thrown during dispatching the message.
@@ -121,30 +131,9 @@ public abstract class EntityMessageEndpoint<I,
                 result.add(id);
             } catch (RuntimeException exception) {
                 onError(envelope(), exception);
-                // Do not rethrow to allow others to handle.
-                // The error is already logged.
             }
         }
         return result.build();
-    }
-
-    /**
-     * {@linkplain #getTargets() Selects} one or more message targets and
-     * {@linkplain #dispatchToOne(I) dispatches} the message to them.
-     */
-    @SuppressWarnings("unchecked")
-    protected final R dispatch() {
-        final R targets = getTargets();
-        if (targets instanceof Set) {
-            final Set<I> handlingAggregates = (Set<I>) targets;
-            return (R)(dispatchToMany(handlingAggregates));
-        }
-        try {
-            dispatchToOne((I)targets);
-        } catch (RuntimeException exception) {
-            onError(envelope(), exception);
-        }
-        return targets;
     }
 
     /**
