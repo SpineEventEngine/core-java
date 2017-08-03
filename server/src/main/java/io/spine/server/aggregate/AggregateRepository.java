@@ -316,11 +316,11 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     /**
      * Posts passed events to {@link EventBus}.
      */
-    void postEvents(Iterable<Event> events) {
+    private void postEvents(Iterable<Event> events) {
         getEventBus().post(events);
     }
 
-    void updateStand(TenantId tenantId, A aggregate) {
+    private void updateStand(TenantId tenantId, A aggregate) {
         getStand().post(tenantId, aggregate);
     }
 

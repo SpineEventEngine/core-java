@@ -54,7 +54,7 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
-    protected List<? extends Message> dispatchEnvelope(A aggregate, CommandEnvelope envelope) {
+    protected List<? extends Message> doDispatch(A aggregate, CommandEnvelope envelope) {
         return aggregate.dispatchCommand(envelope);
     }
 
@@ -80,15 +80,14 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
      * @throws IllegalStateException always
      */
     @Override
-    protected void onEmptyResult(A aggregate, CommandEnvelope envelope)
-            throws IllegalStateException {
+    protected void onEmptyResult(A aggregate, CommandEnvelope cmd) throws IllegalStateException {
         throw newIllegalStateException(
                 "The aggregate (class: %s, id: %s) produced empty response for " +
                         "command (class: %s, id: %s).",
                 aggregate.getClass()
                          .getName(),
                 Stringifiers.toString(aggregate.getId()),
-                envelope.getMessageClass(),
-                Stringifiers.toString(envelope.getId()));
+                cmd.getMessageClass(),
+                Stringifiers.toString(cmd.getId()));
     }
 }

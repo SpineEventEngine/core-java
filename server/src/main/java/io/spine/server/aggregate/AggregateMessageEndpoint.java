@@ -43,11 +43,8 @@ abstract class AggregateMessageEndpoint<I,
                                         M extends ActorMessageEnvelope<?, ?>, R>
         extends EntityMessageEndpoint<I, A, M, R> {
     
-    private final AggregateRepository<I, A> repository;
-
     AggregateMessageEndpoint(AggregateRepository<I, A> repository, M envelope) {
         super(repository, envelope);
-        this.repository = repository;
     }
 
     /**
@@ -60,7 +57,7 @@ abstract class AggregateMessageEndpoint<I,
         final A aggregate = repository().loadOrCreate(aggregateId);
         final LifecycleFlags flagsBefore = aggregate.getLifecycleFlags();
 
-        final List<? extends Message> eventMessages = dispatchEnvelope(aggregate, envelope());
+        final List<? extends Message> eventMessages = doDispatch(aggregate, envelope());
         final AggregateTransaction tx = AggregateTransaction.start(aggregate);
         aggregate.apply(eventMessages, envelope());
         tx.commit();
@@ -74,18 +71,15 @@ abstract class AggregateMessageEndpoint<I,
         store(aggregate);
     }
 
-    /**
-     * Stores the aggregate if it has uncommitted events.
-     *
-     * @param aggregate the aggregate to store
-     */
-    private void store(A aggregate) {
+    @Override
+    protected void onModified(A entity) {
+        repository().onModifiedAggregate(envelope().getTenantId(), entity);
+    }
+
+    @Override
+    protected boolean isModified(A aggregate) {
         final List<Event> events = aggregate.getUncommittedEvents();
-        if (!events.isEmpty()) {
-            repository.onModifiedAggregate(envelope().getTenantId(), aggregate);
-        } else {
-            onEmptyResult(aggregate, envelope());
-        }
+        return !events.isEmpty();
     }
 
     @Override
@@ -94,6 +88,6 @@ abstract class AggregateMessageEndpoint<I,
     }
 
     private AggregateStorage<I> storage() {
-        return repository.aggregateStorage();
+        return repository().aggregateStorage();
     }
 }

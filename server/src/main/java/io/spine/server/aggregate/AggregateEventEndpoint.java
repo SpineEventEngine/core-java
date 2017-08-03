@@ -54,7 +54,7 @@ class AggregateEventEndpoint<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
-    protected List<? extends Message> dispatchEnvelope(A aggregate, EventEnvelope envelope) {
+    protected List<? extends Message> doDispatch(A aggregate, EventEnvelope envelope) {
         return aggregate.reactOn(envelope);
     }
 

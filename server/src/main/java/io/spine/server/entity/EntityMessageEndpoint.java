@@ -104,7 +104,31 @@ public abstract class EntityMessageEndpoint<I,
     /**
      * Invokes entity-specific method for dispatching the message.
      */
-    protected abstract List<? extends Message> dispatchEnvelope(E entity, M envelope);
+    protected abstract List<? extends Message> doDispatch(E entity, M envelope);
+
+    /**
+     * Stores the entity if it was modified during message dispatching.
+     *
+     * @param entity the entity to store
+     */
+    protected final void store(E entity) {
+        final boolean isModified = isModified(entity);
+        if (isModified) {
+            onModified(entity);
+        } else {
+            onEmptyResult(entity, envelope());
+        }
+    }
+
+    /**
+     * Verifies weather the entity was modified during the message dispatching.
+     */
+    protected abstract boolean isModified(E entity);
+
+    /**
+     * Callback to perform operations if the entity was modified during message dispatching.
+     */
+    protected abstract void onModified(E entity);
 
     /**
      * Allows derived classes to handle empty list of uncommitted events returned by
