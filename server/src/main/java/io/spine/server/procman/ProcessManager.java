@@ -37,7 +37,7 @@ import io.spine.server.commandbus.CommandBus;
 import io.spine.server.reflect.CommandHandlerMethod;
 import io.spine.server.reflect.EventReactorMethod;
 import io.spine.server.reflect.HandlerMethod;
-import io.spine.server.reflect.RejectionSubscriberMethod;
+import io.spine.server.reflect.RejectionReactorMethod;
 import io.spine.validate.ValidatingBuilder;
 
 import java.util.List;
@@ -154,8 +154,8 @@ public abstract class ProcessManager<I,
         checkNotNull(rejection);
         final Message rejectionMessage = rejection.getMessage();
         final Message commandMessage = rejection.getCommandMessage();
-        final RejectionSubscriberMethod method =
-                RejectionSubscriberMethod.getMethod(getClass(), rejectionMessage, commandMessage);
+        final RejectionReactorMethod method =
+                RejectionReactorMethod.getMethod(getClass(), rejectionMessage, commandMessage);
         method.invoke(this, rejectionMessage, commandMessage, rejection.getCommandContext());
     }
 
@@ -288,7 +288,7 @@ public abstract class ProcessManager<I,
          */
         static Set<RejectionClass> getRejectionClasses(Class<? extends ProcessManager> pmClass) {
             //TODO:2017-08-03:alexander.yevsyukov: Use RejectionReactorMethod here.
-            return ImmutableSet.copyOf(RejectionSubscriberMethod.inspect(pmClass));
+            return ImmutableSet.copyOf(RejectionReactorMethod.inspect(pmClass));
         }
     }
 }

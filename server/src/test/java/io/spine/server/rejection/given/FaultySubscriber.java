@@ -20,9 +20,10 @@
 
 package io.spine.server.rejection.given;
 
+import com.google.protobuf.Empty;
 import io.spine.core.CommandContext;
+import io.spine.core.React;
 import io.spine.core.Rejection;
-import io.spine.core.Subscribe;
 import io.spine.test.rejection.ProjectRejections;
 
 import static org.junit.Assert.fail;
@@ -31,8 +32,8 @@ import static org.junit.Assert.fail;
 public class FaultySubscriber extends VerifiableSubscriber {
 
     @SuppressWarnings("unused") // It's fine for a faulty subscriber.
-    @Subscribe
-    public void on(ProjectRejections.InvalidProjectName rejection, CommandContext context) {
+    @React
+    public Empty on(ProjectRejections.InvalidProjectName rejection, CommandContext context) {
         triggerCall();
         throw new UnsupportedOperationException(
                 "Faulty subscriber should have failed: " +

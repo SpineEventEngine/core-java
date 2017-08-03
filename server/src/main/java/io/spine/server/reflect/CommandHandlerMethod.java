@@ -236,7 +236,8 @@ public final class CommandHandlerMethod extends HandlerMethod<CommandContext> {
 
         @Override
         protected boolean verifyReturnType(Method method) {
-            return returnsMessageOrList(method);
+            final boolean result = returnsMessageOrIterable(method);
+            return result;
         }
     }
 }
