@@ -27,7 +27,7 @@ import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.EventContext;
-import io.spine.core.Subscribe;
+import io.spine.core.React;
 import io.spine.server.command.Assign;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
@@ -87,20 +87,9 @@ public class ProcessManagerTestEnv {
             }
         }
 
-        @Subscribe
-        public void on(PmProjectCreated event, EventContext ignored) {
-            getBuilder().mergeFrom(pack(event));
-        }
-
-        @Subscribe
-        public void on(PmTaskAdded event, EventContext ignored) {
-            getBuilder().mergeFrom(pack(event));
-        }
-
-        @Subscribe
-        public void on(PmProjectStarted event, EventContext ignored) {
-            getBuilder().mergeFrom(pack(event));
-        }
+        /*
+         * Handled commands
+         ********************/
 
         @Assign
         PmProjectCreated handle(PmCreateProject command, CommandContext ignored) {
@@ -131,12 +120,44 @@ public class ProcessManagerTestEnv {
             return route;
         }
 
-        @Subscribe
-        void on(EntityAlreadyArchived rejection) {
+        /*
+         * Reactions on events
+         ************************/
+
+        @React
+        public Empty on(PmProjectCreated event, EventContext ignored) {
+            getBuilder().mergeFrom(pack(event));
+            return Empty.getDefaultInstance();
+        }
+
+        @React
+        public Empty on(PmTaskAdded event, EventContext ignored) {
+            getBuilder().mergeFrom(pack(event));
+            return Empty.getDefaultInstance();
+        }
+
+        @React
+        public Empty on(PmProjectStarted event, EventContext ignored) {
+            getBuilder().mergeFrom(pack(event));
+            return Empty.getDefaultInstance();
+        }
+
+
+        /*
+         * Reactions on rejections
+         **************************/
+
+        @React
+        Empty on(EntityAlreadyArchived rejection) {
             getBuilder().mergeFrom(pack(rejection));
+            return Empty.getDefaultInstance();
         }
     }
 
+    /**
+     * Helper dispatcher class to verify that the Process Manager routes
+     * the {@link PmAddTask} command.
+     */
     public static class AddTaskDispatcher implements CommandDispatcher<Message> {
 
         private final List<CommandEnvelope> commands = new LinkedList<>();

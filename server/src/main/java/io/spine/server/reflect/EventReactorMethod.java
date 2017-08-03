@@ -159,10 +159,10 @@ public final class EventReactorMethod extends HandlerMethod<EventContext> {
     /**
      * The predicate that filters event reactor methods.
      */
-    private static class FilterPredicate extends HandlerMethodPredicate<EventContext> {
+    private static class FilterPredicate extends EventMethodPredicate {
 
         private FilterPredicate() {
-            super(React.class, EventContext.class);
+            super(React.class);
         }
 
         @Override

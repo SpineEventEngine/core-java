@@ -218,8 +218,7 @@ public class ProcessManagerShould {
         final Int32Value unknownCommand = Int32Value.getDefaultInstance();
 
         final CommandEnvelope envelope = CommandEnvelope.of(
-                requestFactory.command()
-                              .create(unknownCommand)
+                requestFactory.createCommand(unknownCommand)
         );
         processManager.dispatchCommand(envelope);
     }
@@ -232,7 +231,7 @@ public class ProcessManagerShould {
     }
 
     @Test
-    public void return_handled_event_classes() {
+    public void return_reacted_event_classes() {
         final Set<EventClass> classes =
                 ProcessManager.TypeInfo.getEventClasses(TestProcessManager.class);
 
