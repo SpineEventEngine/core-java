@@ -199,7 +199,7 @@ public abstract class ProcessManagerRepository<I,
      */
     @Override
     public I dispatchCommand(final CommandEnvelope command) {
-        final I result = ProcessManagerCommandEndpoint.handle(this, command);
+        final I result = PmCommandEndpoint.handle(this, command);
         return result;
     }
 
@@ -210,13 +210,11 @@ public abstract class ProcessManagerRepository<I,
      * and stored after it handles the passed event.
      *
      * @param event the event to dispatch
-     * @throws IllegalArgumentException if events of this type are not handled by
-     *                                  this process manager
      * @see ProcessManager#dispatchEvent(EventEnvelope)
      */
     @Override
     public Set<I> dispatch(EventEnvelope event) throws IllegalArgumentException {
-        checkEventClass(event.getMessageClass());
+        //TODO:2017-08-03:alexander.yevsyukov: Use endpoint for reacting methods
         return super.dispatch(event);
     }
 

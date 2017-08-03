@@ -23,22 +23,19 @@ package io.spine.server.procman;
 import com.google.protobuf.Message;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
-import io.spine.server.entity.EntityMessageEndpoint;
 
 import java.util.List;
 
-class ProcessManagerCommandEndpoint<I, P extends ProcessManager<I, ?, ?>>
-        extends EntityMessageEndpoint<I, P, CommandEnvelope, I> {
+class PmCommandEndpoint<I, P extends ProcessManager<I, ?, ?>>
+        extends PmEndpoint<I, P, CommandEnvelope, I> {
 
-    private ProcessManagerCommandEndpoint(ProcessManagerRepository<I, P, ?> repository,
-                                          CommandEnvelope envelope) {
-        super(repository, envelope);
+    private PmCommandEndpoint(ProcessManagerRepository<I, P, ?> repository, CommandEnvelope cmd) {
+        super(repository, cmd);
     }
 
     static <I, P extends ProcessManager<I, ?, ?>>
     I handle (ProcessManagerRepository<I, P, ?> repository, CommandEnvelope cmd) {
-        final ProcessManagerCommandEndpoint<I, P> endpoint =
-                new ProcessManagerCommandEndpoint<>(repository, cmd);
+        final PmCommandEndpoint<I, P> endpoint = new PmCommandEndpoint<>(repository, cmd);
         final I result = endpoint.handle();
         return result;
     }
@@ -69,17 +66,6 @@ class ProcessManagerCommandEndpoint<I, P extends ProcessManager<I, ?, ?>>
     }
 
     @Override
-    protected boolean isModified(P processManager) {
-        final boolean result = processManager.isChanged();
-        return result;
-    }
-
-    @Override
-    protected void onModified(P processManager) {
-        repository().store(processManager);
-    }
-
-    @Override
     protected void onError(CommandEnvelope envelope, RuntimeException exception) {
         repository().onError(envelope, exception);
         throw exception;
@@ -98,10 +84,5 @@ class ProcessManagerCommandEndpoint<I, P extends ProcessManager<I, ?, ?>>
                 "The process manager (class: %s, id: %s) produced " +
                         "empty response for the command (class: %s, id: %s).";
         onUnhandledCommand(processManager, cmd, format);
-    }
-
-    @Override
-    protected ProcessManagerRepository<I, P, ?> repository() {
-        return (ProcessManagerRepository<I, P, ?>) super.repository();
     }
 }
