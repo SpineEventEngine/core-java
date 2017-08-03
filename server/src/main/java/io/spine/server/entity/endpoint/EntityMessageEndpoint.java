@@ -72,6 +72,9 @@ public abstract class EntityMessageEndpoint<I,
      */
     protected abstract List<? extends Message> dispatchEnvelope(E entity, M envelope);
 
+    /**
+     * Processes the exception thrown during dispatching the message.
+     */
     protected abstract void onError(M envelope, RuntimeException exception);
 
     /**
@@ -106,7 +109,11 @@ public abstract class EntityMessageEndpoint<I,
             final Set<I> handlingAggregates = (Set<I>) targets;
             return (R)(dispatchToMany(handlingAggregates));
         }
-        dispatchToOne((I)targets);
+        try {
+            dispatchToOne((I)targets);
+        } catch (RuntimeException exception) {
+            onError(envelope(), exception);
+        }
         return targets;
     }
 

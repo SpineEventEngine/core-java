@@ -38,8 +38,8 @@ import io.spine.server.event.DelegatingEventDispatcher;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcherDelegate;
 import io.spine.server.route.CommandRouting;
-import io.spine.server.route.EventRouting;
 import io.spine.server.route.EventProducers;
+import io.spine.server.route.EventRouting;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
@@ -264,7 +264,10 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     /**
-     * Logs the passed error in the log associated with the class of the repository.
+     * Logs the passed exception in the log associated with the class of the repository.
+     *
+     * <p>The exception is logged only if the root cause of it is not a
+     * {@linkplain io.spine.base.ThrowableMessage rejection} thrown by a command handling method.
      * 
      * @param envelope  the command which caused the error
      * @param exception the error occurred during processing of the command
@@ -273,7 +276,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     public void onError(CommandEnvelope envelope, RuntimeException exception) {
         checkNotNull(envelope);
         checkNotNull(exception);
-        logError("Error dispatching command (class: %s id: %s).", envelope, exception);
+        if (!causedByRejection(exception)) {
+            logError("Error dispatching command (class: %s id: %s).", envelope, exception);
+        }
     }
 
     @Override
