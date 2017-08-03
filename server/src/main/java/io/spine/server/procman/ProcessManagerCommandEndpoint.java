@@ -66,13 +66,23 @@ public class ProcessManagerCommandEndpoint<I>
     }
 
     @Override
-    protected void onEmptyResult(ProcessManager<I, ?, ?> aggregate, CommandEnvelope envelope) {
-        //TODO:2017-08-03:alexander.yevsyukov: Implement
-    }
-
-    @Override
     protected void onError(CommandEnvelope envelope, RuntimeException exception) {
         repository().onError(envelope, exception);
+    }
+
+    /**
+     * Throws {@link IllegalStateException} with the message containing details of
+     * the process manager and the command in response to which empty set of event messages
+     * was generated.
+     * @throws IllegalStateException always
+     */
+    @Override
+    protected void onEmptyResult(ProcessManager<I, ?, ?> pm, CommandEnvelope cmd)
+            throws IllegalStateException {
+        final String format =
+                "The process manager (class: %s, id: %s) produced " +
+                        "empty response for the command (class: %s, id: %s).";
+        onUnhandledCommand(pm, cmd, format);
     }
 
     @Override

@@ -24,11 +24,16 @@ import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.ActorMessageEnvelope;
+import io.spine.core.CommandClass;
+import io.spine.core.CommandEnvelope;
 import io.spine.core.TenantId;
 import io.spine.server.tenant.TenantAwareFunction0;
+import io.spine.string.Stringifiers;
 
 import java.util.List;
 import java.util.Set;
+
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * Abstract base for endpoints handling messages sent to entities.
@@ -172,6 +177,28 @@ public abstract class EntityMessageEndpoint<I,
      */
     protected Repository<I, E> repository() {
         return repository;
+    }
+
+    /**
+     * Throws {@link IllegalStateException} with the diagnostics message on the unhandled command.
+     *
+     * @param  entity the entity which failed to handle the command
+     * @param  cmd    the envelope with the command
+     * @param  format the format string with the following parameters
+     *                <ol>
+     *                   <li>the name of the entity class
+     *                   <li>the ID of the entity
+     *                   <li>the name of the command class
+     *                   <li>the ID of the command
+     *                </ol>
+     * @throws IllegalStateException always
+     */
+    protected void onUnhandledCommand(Entity<R, ?> entity, CommandEnvelope cmd, String format) {
+        final String entityId = Stringifiers.toString(entity.getId());
+        final String entityClass = entity.getClass().getName();
+        final String commandId = Stringifiers.toString(cmd.getId());
+        final CommandClass commandClass = cmd.getMessageClass();
+        throw newIllegalStateException(format, entityClass, entityId, commandClass, commandId);
     }
 
     /**

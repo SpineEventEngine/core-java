@@ -22,11 +22,8 @@ package io.spine.server.aggregate;
 
 import com.google.protobuf.Message;
 import io.spine.core.CommandEnvelope;
-import io.spine.string.Stringifiers;
 
 import java.util.List;
-
-import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * Dispatches commands to aggregates of the associated {@code AggregateRepository}.
@@ -80,14 +77,10 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
      * @throws IllegalStateException always
      */
     @Override
-    protected void onEmptyResult(A aggregate, CommandEnvelope cmd) throws IllegalStateException {
-        throw newIllegalStateException(
-                "The aggregate (class: %s, id: %s) produced empty response for " +
-                        "command (class: %s, id: %s).",
-                aggregate.getClass()
-                         .getName(),
-                Stringifiers.toString(aggregate.getId()),
-                cmd.getMessageClass(),
-                Stringifiers.toString(cmd.getId()));
+    protected void onEmptyResult(A aggregate, CommandEnvelope cmd)
+            throws IllegalStateException {
+        final String format = "The aggregate (class: %s, id: %s) produced empty response" +
+                " for the command (class: %s, id: %s).";
+        onUnhandledCommand(aggregate, cmd, format);
     }
 }
