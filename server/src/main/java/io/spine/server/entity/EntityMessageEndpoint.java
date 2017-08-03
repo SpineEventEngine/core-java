@@ -18,24 +18,37 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity.endpoint;
+package io.spine.server.entity;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
+import io.spine.annotation.Internal;
 import io.spine.core.ActorMessageEnvelope;
-import io.spine.server.entity.Entity;
-import io.spine.server.entity.Repository;
 import io.spine.server.tenant.TenantAwareFunction0;
 
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Abstract base for endpoints handling messages sent to entities.
+ * 
+ * @param <I> the type of entity IDs
+ * @param <E> the type of entities
+ * @param <M> the type of message envelopes
+ * @param <R> the type of the dispatch result, can be {@code <I>} for unicast dispatching, or
+ *            {@code Set<I>} for multicast
+ * @author Alexander Yevsyukov
+ */
+@Internal
 public abstract class EntityMessageEndpoint<I,
                                             E extends Entity<I, ?>,
                                             M extends ActorMessageEnvelope<?, ?>,
                                             R> {
 
+    /** The repository which created this endpoint. */
     private final Repository<I, E> repository;
+
+    /** The message which needs to handled. */
     private final M envelope;
 
     protected EntityMessageEndpoint(Repository<I, E> repository, M envelope) {
