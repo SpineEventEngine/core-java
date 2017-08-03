@@ -21,13 +21,10 @@ package io.spine.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
-import com.google.protobuf.Message;
 import io.spine.core.CommandClass;
-import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
-import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
@@ -309,21 +306,11 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         return commandRouting;
     }
 
-    I getCommandTarget(Message commandMessage, CommandContext commandContext) {
-        final I id = getCommandRouting().apply(commandMessage, commandContext);
-        return id;
-    }
-
     /**
      * Obtains event routing instance used by this repository.
      */
     protected final EventRouting<I> getEventRouting() {
         return eventRouting;
-    }
-
-    Set<I> getEventTargets(Message eventMessage, EventContext eventContext) {
-        final Set<I> ids = getEventRouting().apply(eventMessage, eventContext);
-        return ids;
     }
 
     /**

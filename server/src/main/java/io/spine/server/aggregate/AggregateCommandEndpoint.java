@@ -82,14 +82,13 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
     }
 
     /**
-     * Returns immutable set containing ID of the aggregate that is responsible for
-     * handling the command.
+     * Returns ID of the aggregate that is responsible for handling the command.
      */
     @Override
     protected I getTargets() {
         final CommandEnvelope envelope = envelope();
-        final I commandTarget = repository().getCommandTarget(envelope.getMessage(),
-                                                              envelope.getCommandContext());
-        return commandTarget;
+        final I id = repository().getCommandRouting()
+                                 .apply(envelope.getMessage(), envelope.getCommandContext());
+        return id;
     }
 }
