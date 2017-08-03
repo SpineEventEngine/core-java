@@ -53,7 +53,7 @@ abstract class AggregateMessageEndpoint<I,
     /**
      * Dispatched the message to the aggregate with the passed ID.
      *
-     * @param aggregateId the ID of the aggreagate to which dispatch the message
+     * @param aggregateId the ID of the aggregate to which dispatch the message
      */
     @Override
     protected void dispatchToOne(I aggregateId) {
