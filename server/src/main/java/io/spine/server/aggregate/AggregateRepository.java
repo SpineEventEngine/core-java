@@ -253,14 +253,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     public I dispatch(final CommandEnvelope envelope) {
         checkNotNull(envelope);
-        try {
-            return AggregateCommandEndpoint.handle(this, envelope);
-        } catch (RuntimeException e) {
-            if (!causedByRejection(e)) {
-                onError(envelope, e);
-            }
-            throw e;
-        }
+        return AggregateCommandEndpoint.handle(this, envelope);
     }
 
     /**
