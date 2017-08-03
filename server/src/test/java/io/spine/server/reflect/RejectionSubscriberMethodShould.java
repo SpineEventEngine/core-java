@@ -20,6 +20,7 @@
 package io.spine.server.reflect;
 
 import com.google.common.testing.NullPointerTester;
+import com.google.protobuf.Any;
 import io.spine.core.CommandContext;
 import io.spine.core.RejectionEnvelope;
 import io.spine.server.reflect.given.Given;
@@ -61,6 +62,7 @@ public class RejectionSubscriberMethodShould {
     @Test
     public void pass_null_tolerance_check() {
         new NullPointerTester()
+                .setDefault(Any.class, Any.getDefaultInstance())
                 .setDefault(CommandContext.class, emptyContext)
                 .testAllPublicStaticMethods(RejectionSubscriberMethod.class);
     }

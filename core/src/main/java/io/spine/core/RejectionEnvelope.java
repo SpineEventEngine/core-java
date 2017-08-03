@@ -69,6 +69,10 @@ public class RejectionEnvelope extends AbstractMessageEnvelope<RejectionId, Reje
         return getOuterObject().getId();
     }
 
+    public TenantId getTenantId() {
+        return getActorContext().getTenantId();
+    }
+
     @Override
     public Message getMessage() {
         return rejectionMessage;
@@ -82,6 +86,10 @@ public class RejectionEnvelope extends AbstractMessageEnvelope<RejectionId, Reje
     @Override
     public ActorContext getActorContext() {
         return getCommandContext().getActorContext();
+    }
+
+    public RejectionContext getRejectionContext() {
+        return getOuterObject().getContext();
     }
 
     /**

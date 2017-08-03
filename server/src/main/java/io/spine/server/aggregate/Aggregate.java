@@ -168,13 +168,13 @@ public abstract class Aggregate<I,
     }
 
     /**
-     * Dispatches the event on which the aggreagate reacts.
+     * Dispatches the event on which the aggregate reacts.
      *
      * @param event the envelope with the event to dispatch
      * @return a list with event messages that the aggregate produces in reaction to the event or
      * an empty list if the aggregate state does not change in reaction to the event
      */
-    protected List<? extends Message> dispatchEvent(EventEnvelope event) {
+    List<? extends Message> reactOn(EventEnvelope event) {
         return EventReactorMethod.invokeFor(this, event.getMessage(), event.getEventContext());
     }
 

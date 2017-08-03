@@ -71,7 +71,7 @@ public class AggregateMessageDispatcher {
         checkNotNull(aggregate);
         checkNotNull(envelope);
 
-        final List<? extends Message> eventMessages = aggregate.dispatchEvent(envelope);
+        final List<? extends Message> eventMessages = aggregate.reactOn(envelope);
 
         final AggregateTransaction tx = AggregateTransaction.start(aggregate);
         aggregate.apply(eventMessages, envelope);

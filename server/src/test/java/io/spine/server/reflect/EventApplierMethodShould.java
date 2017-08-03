@@ -21,7 +21,9 @@
 package io.spine.server.reflect;
 
 import com.google.common.testing.NullPointerTester;
+import com.google.protobuf.Any;
 import com.google.protobuf.StringValue;
+import io.spine.core.CommandContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.test.reflect.event.RefProjectCreated;
@@ -44,6 +46,8 @@ public class EventApplierMethodShould {
     @Test
     public void pass_null_tolerance_check() {
         new NullPointerTester()
+                .setDefault(CommandContext.class, CommandContext.getDefaultInstance())
+                .setDefault(Any.class, Any.getDefaultInstance())
                 .testAllPublicStaticMethods(EventApplierMethod.class);
     }
 

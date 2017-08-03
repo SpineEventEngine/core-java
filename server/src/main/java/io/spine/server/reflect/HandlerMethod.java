@@ -19,9 +19,16 @@
  */
 package io.spine.server.reflect;
 
+import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.core.Event;
+import io.spine.core.MessageEnvelope;
+import io.spine.core.Version;
+import io.spine.server.event.EventFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +56,7 @@ import static java.util.Collections.singletonList;
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
-abstract class HandlerMethod<C extends Message> {
+public abstract class HandlerMethod<C extends Message> {
 
     /** The method to be called. */
     private final Method method;
@@ -138,6 +145,27 @@ abstract class HandlerMethod<C extends Message> {
     /** The common logger used by message handling method classes. */
     protected static Logger log() {
         return LogSingleton.INSTANCE.value;
+    }
+
+    public static List<Event> toEvents(final Any producerId,
+                                       @Nullable final Version version,
+                                       final List<? extends Message> eventMessages,
+                                       final MessageEnvelope origin) {
+        checkNotNull(producerId);
+        checkNotNull(eventMessages);
+        checkNotNull(origin);
+
+        final EventFactory eventFactory =
+                EventFactory.on(origin, producerId, eventMessages.size());
+
+        return Lists.transform(eventMessages, new Function<Message, Event>() {
+            @Override
+            public Event apply(@Nullable Message eventMessage) {
+                checkNotNull(eventMessage);
+                final Event result = eventFactory.createEvent(eventMessage, version);
+                return result;
+            }
+        });
     }
 
     /** Returns the handling method. */

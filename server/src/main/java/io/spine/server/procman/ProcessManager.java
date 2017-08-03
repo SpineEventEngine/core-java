@@ -29,12 +29,15 @@ import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
+import io.spine.core.MessageEnvelope;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.reflect.CommandHandlerMethod;
+import io.spine.server.reflect.EventReactorMethod;
 import io.spine.server.reflect.EventSubscriberMethod;
+import io.spine.server.reflect.HandlerMethod;
 import io.spine.server.reflect.RejectionSubscriberMethod;
 import io.spine.validate.ValidatingBuilder;
 
@@ -121,16 +124,12 @@ public abstract class ProcessManager<I,
     /**
      * Transforms the passed list of event messages into the list of events.
      *
-     * @param eventMessages event messages for which generate events
-     * @param envelope the context of the command which generated the event messages
+     * @param  eventMessages event messages for which generate events
+     * @param  origin        the envelope with the origin of events
      * @return list of events
      */
-    private List<Event> toEvents(List<? extends Message> eventMessages,
-                                 final CommandEnvelope envelope) {
-        return CommandHandlerMethod.toEvents(getProducerId(),
-                                             getVersion(),
-                                             eventMessages,
-                                             envelope);
+    private List<Event> toEvents(List<? extends Message> eventMessages, MessageEnvelope origin) {
+        return HandlerMethod.toEvents(getProducerId(), getVersion(), eventMessages, origin);
     }
 
     /**
@@ -144,6 +143,20 @@ public abstract class ProcessManager<I,
         final Message eventMessage = event.getMessage();
         final EventSubscriberMethod method = getMethod(getClass(), eventMessage);
         method.invoke(this, eventMessage, event.getEventContext());
+    }
+
+    /**
+     * Dispatches an event to the event reactor method of the process manager.
+     *
+     * @param  event the envelope with the event
+     * @return a list of produced events or an empty list if the process manager does not
+     *         produce new events because of the passed event
+     */
+    List<? extends Message> reactOn(EventEnvelope event) {
+        final List<? extends Message> eventMessages =
+                EventReactorMethod.invokeFor(this, event.getMessage(), event.getEventContext());
+        final List<Event> events = toEvents(eventMessages, event);
+        return events;
     }
 
     /**

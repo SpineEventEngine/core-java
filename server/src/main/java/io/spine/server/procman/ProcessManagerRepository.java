@@ -23,20 +23,15 @@ package io.spine.server.procman;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.core.CommandClass;
-import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
-import io.spine.core.Rejection;
 import io.spine.core.RejectionClass;
-import io.spine.core.RejectionContext;
 import io.spine.core.RejectionEnvelope;
-import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.commandbus.CommandBus;
-import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.commandbus.CommandDispatcherDelegate;
 import io.spine.server.commandbus.DelegatingCommandDispatcher;
 import io.spine.server.entity.EventDispatchingRepository;
@@ -200,54 +195,59 @@ public abstract class ProcessManagerRepository<I,
      * <p>If there is no stored process manager with such an ID,
      * a new process manager is created and stored after it handles the passed command.
      *
-     * @param envelope a request to dispatch
+     * @param command a request to dispatch
      * @see CommandHandlingEntity#dispatchCommand(CommandEnvelope)
      */
     @Override
-    public I dispatchCommand(CommandEnvelope envelope) {
-        final Message commandMessage = envelope.getMessage();
-        final CommandContext context = envelope.getCommandContext();
-        final CommandClass commandClass = envelope.getMessageClass();
-        checkCommandClass(commandClass);
-        final I id = getCommandRouting().apply(commandMessage, context);
-        final P manager = findOrCreate(id);
+    public I dispatchCommand(final CommandEnvelope command) {
+        final I id = getCommandRouting().apply(command.getMessage(), command.getCommandContext());
 
-        final ProcManTransaction<?, ?, ?> tx = beginTransactionFor(manager);
-        final List<Event> events = manager.dispatchCommand(envelope);
-        store(manager);
-        tx.commit();
+        final TenantAwareFunction0<List<Event>> op =
+                new TenantAwareFunction0<List<Event>>(command.getTenantId()) {
+                    @Override
+                    public List<Event> apply() {
+                        final P manager = findOrCreate(id);
 
+                        final ProcManTransaction<?, ?, ?> tx = beginTransactionFor(manager);
+                        final List<Event> events = manager.dispatchCommand(command);
+                        store(manager);
+                        tx.commit();
+                        return events;
+                    }
+                };
+        final List<Event> events = op.execute();
         postEvents(events);
         return id;
     }
 
+    /**
+     * Dispatches the rejection to one or more subscribing process managers.
+     *
+     * @param rejection the rejection to dispatch
+     * @return IDs of process managers who successfully consumed the rejection
+     */
     @Override
-    public Set<I> dispatchRejection(final RejectionEnvelope envelope) {
-        final Message rejectionMessage = envelope.getMessage();
-        final Rejection rejection = envelope.getOuterObject();
-        final RejectionContext context = rejection.getContext();
-        final Set<I> targets = getRejectionRouting().apply(rejectionMessage, context);
-        final TenantId tenantId = context.getCommand()
-                                         .getContext()
-                                         .getActorContext()
-                                         .getTenantId();
-        final TenantAwareFunction0<Set<I>> op = new TenantAwareFunction0<Set<I>>(tenantId) {
-            @Override
-            public Set<I> apply() {
-                final ImmutableSet.Builder<I> consumed = ImmutableSet.builder();
-                for (I id : targets) {
-                    try {
-                        ProcessManager<I, ?, ?> processManager = findOrCreate(id);
-                        processManager.dispatchRejection(envelope);
-                        consumed.add(id);
-                    } catch (RuntimeException exception) {
-                        onError(envelope, exception);
-                        // Do not re-throw letting other subscribers to consume the rejection.
+    public Set<I> dispatchRejection(final RejectionEnvelope rejection) {
+        final Set<I> targets = getRejectionRouting().apply(rejection.getMessage(),
+                                                           rejection.getRejectionContext());
+        final TenantAwareFunction0<Set<I>> op =
+                new TenantAwareFunction0<Set<I>>(rejection.getTenantId()) {
+                    @Override
+                    public Set<I> apply() {
+                        final ImmutableSet.Builder<I> consumed = ImmutableSet.builder();
+                        for (I id : targets) {
+                            try {
+                                ProcessManager<I, ?, ?> processManager = findOrCreate(id);
+                                processManager.dispatchRejection(rejection);
+                                consumed.add(id);
+                            } catch (RuntimeException exception) {
+                                onError(rejection, exception);
+                                // Do not re-throw: let other subscribers to consume the rejection.
+                            }
+                        }
+                        return consumed.build();
                     }
-                }
-                return consumed.build();
-            }
-        };
+                };
         final Set<I> consumed = op.execute();
         return consumed;
     }
@@ -320,13 +320,6 @@ public abstract class ProcessManagerRepository<I,
         final CommandBus commandBus = getBoundedContext().getCommandBus();
         result.setCommandBus(commandBus);
         return result;
-    }
-
-    private void checkCommandClass(CommandClass commandClass) throws IllegalArgumentException {
-        final Set<CommandClass> classes = getCommandClasses();
-        if (!classes.contains(commandClass)) {
-            throw CommandDispatcher.Error.unexpectedCommandEncountered(commandClass);
-        }
     }
 
     private void checkEventClass(EventClass eventClass) throws IllegalArgumentException {
