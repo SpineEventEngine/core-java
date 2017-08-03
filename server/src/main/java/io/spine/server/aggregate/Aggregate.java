@@ -44,7 +44,6 @@ import io.spine.server.reflect.EventReactorMethod;
 import io.spine.validate.ValidatingBuilder;
 
 import javax.annotation.CheckReturnValue;
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Set;
 
@@ -183,9 +182,8 @@ public abstract class Aggregate<I,
      * Invokes applier method for the passed event message.
      *
      * @param eventMessage the event message to apply
-     * @throws InvocationTargetException if an exception was thrown during the method invocation
      */
-    void invokeApplier(Message eventMessage) throws InvocationTargetException {
+    void invokeApplier(Message eventMessage) {
         final EventApplierMethod method = getMethod(getClass(), eventMessage);
         method.invoke(this, eventMessage);
     }

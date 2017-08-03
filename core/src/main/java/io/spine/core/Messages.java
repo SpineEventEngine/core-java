@@ -46,7 +46,8 @@ class Messages {
         final Message input = checkNotNull(outerOrMessage);
         Message msg;
 
-        //TODO:2017-07-19:alexander.yevsyukov: Replace this with default MessageClass behaviour in Java 8.
+        //TODO:2017-07-19:alexander.yevsyukov: Replace this with default MessageClass behaviour
+        // in Java 8.
         if (input instanceof Command) {
             msg = Commands.getMessage((Command) outerOrMessage);
         } else if (input instanceof Event) {

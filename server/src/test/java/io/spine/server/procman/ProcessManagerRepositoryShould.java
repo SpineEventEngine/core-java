@@ -24,6 +24,7 @@ import com.google.common.collect.Lists;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
+import io.spine.Identifier;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;
 import io.spine.core.CommandClass;
@@ -31,6 +32,9 @@ import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
+import io.spine.core.Rejection;
+import io.spine.core.RejectionClass;
+import io.spine.core.RejectionEnvelope;
 import io.spine.core.Subscribe;
 import io.spine.core.TenantId;
 import io.spine.core.given.GivenEvent;
@@ -38,6 +42,8 @@ import io.spine.server.BoundedContext;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.RecordBasedRepositoryShould;
 import io.spine.server.entity.given.Given;
+import io.spine.server.entity.rejection.Rejections.EntityAlreadyArchived;
+import io.spine.server.entity.rejection.Rejections.EntityAlreadyDeleted;
 import io.spine.server.event.EventSubscriber;
 import io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.TestProcessManager;
 import io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.TestProcessManagerRepository;
@@ -54,13 +60,27 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Set;
 
 import static io.spine.Identifier.newUuid;
+import static io.spine.core.Rejections.createRejection;
+import static io.spine.server.TestCommandClasses.assertContains;
+import static io.spine.server.TestEventClasses.assertContains;
+import static io.spine.server.TestRejectionClasses.assertContains;
+import static io.spine.server.procman.ProcessManagerRepositoryShould.GivenCommandMessage.ID;
+import static io.spine.server.procman.ProcessManagerRepositoryShould.GivenCommandMessage.addTask;
+import static io.spine.server.procman.ProcessManagerRepositoryShould.GivenCommandMessage.createProject;
+import static io.spine.server.procman.ProcessManagerRepositoryShould.GivenCommandMessage.projectCreated;
+import static io.spine.server.procman.ProcessManagerRepositoryShould.GivenCommandMessage.projectStarted;
+import static io.spine.server.procman.ProcessManagerRepositoryShould.GivenCommandMessage.startProject;
+import static io.spine.server.procman.ProcessManagerRepositoryShould.GivenCommandMessage.taskAdded;
+import static io.spine.test.TestValues.newUuidValue;
 import static java.lang.String.format;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -72,44 +92,56 @@ public class ProcessManagerRepositoryShould
         ProjectId,
         Project> {
 
-    private static final ProjectId ID = Sample.messageOfType(ProjectId.class);
-
+    private final TestActorRequestFactory requestFactory =
+            TestActorRequestFactory.newInstance(getClass(),
+                                                TenantId.newBuilder()
+                                                        .setValue(newUuid())
+                                                        .build());
     private BoundedContext boundedContext;
 
-    private static PmCreateProject createProject() {
-        return ((PmCreateProject.Builder) Sample.builderForType(PmCreateProject.class))
-                .setProjectId(ID)
-                .build();
-    }
+    public static class GivenCommandMessage {
 
-    private static PmStartProject startProject() {
-        return ((PmStartProject.Builder) Sample.builderForType(PmStartProject.class))
-                .setProjectId(ID)
-                .build();
-    }
+        public static final ProjectId ID = Sample.messageOfType(ProjectId.class);
 
-    private static PmAddTask addTask() {
-        return ((PmAddTask.Builder) Sample.builderForType(PmAddTask.class))
-                .setProjectId(ID)
-                .build();
-    }
+        /** Prevents instantiation on this utility class. */
+        private GivenCommandMessage() {
+        }
 
-    private static PmProjectStarted projectStarted() {
-        return ((PmProjectStarted.Builder) Sample.builderForType(PmProjectStarted.class))
-                .setProjectId(ID)
-                .build();
-    }
+        public static PmCreateProject createProject() {
+            return ((PmCreateProject.Builder) Sample.builderForType(PmCreateProject.class))
+                    .setProjectId(ID)
+                    .build();
+        }
 
-    private static PmProjectCreated projectCreated() {
-        return ((PmProjectCreated.Builder) Sample.builderForType(PmProjectCreated.class))
-                .setProjectId(ID)
-                .build();
-    }
+        public static PmStartProject startProject() {
+            return ((PmStartProject.Builder) Sample.builderForType(PmStartProject.class))
+                    .setProjectId(ID)
+                    .build();
+        }
 
-    private static PmTaskAdded taskAdded() {
-        return ((PmTaskAdded.Builder) Sample.builderForType(PmTaskAdded.class))
-                .setProjectId(ID)
-                .build();
+        public static PmAddTask addTask() {
+            return ((PmAddTask.Builder) Sample.builderForType(PmAddTask.class))
+                    .setProjectId(ID)
+                    .build();
+        }
+
+        public static PmProjectStarted projectStarted() {
+            return ((PmProjectStarted.Builder) Sample.builderForType(PmProjectStarted.class))
+                    .setProjectId(ID)
+                    .build();
+        }
+
+        public static PmProjectCreated projectCreated() {
+            return ((PmProjectCreated.Builder) Sample.builderForType(PmProjectCreated.class))
+                    .setProjectId(ID)
+                    .build();
+        }
+
+        public static PmTaskAdded taskAdded() {
+            return ((PmTaskAdded.Builder) Sample.builderForType(PmTaskAdded.class))
+                    .setProjectId(ID)
+                    .build();
+        }
     }
 
     @Override
@@ -141,8 +173,9 @@ public class ProcessManagerRepositoryShould
         return procmans;
     }
 
-    // Tests
-    //----------------------------
+    /*
+     * Tests
+     *************/
 
     @Override
     protected ProjectId createId(int value) {
@@ -205,14 +238,8 @@ public class ProcessManagerRepositoryShould
     }
 
     private void testDispatchCommand(Message cmdMsg) throws InvocationTargetException {
-        final TenantId generatedTenantId = TenantId.newBuilder()
-                                                   .setValue(newUuid())
-                                                   .build();
-        final Command cmd =
-                TestActorRequestFactory.newInstance(ProcessManagerRepositoryShould.class,
-                                                    generatedTenantId)
-                                       .command()
-                                       .create(cmdMsg);
+        final Command cmd = requestFactory.command()
+                                          .create(cmdMsg);
 
         repository().dispatchCommand(CommandEnvelope.of(cmd));
         assertTrue(TestProcessManager.processed(cmdMsg));
@@ -220,20 +247,21 @@ public class ProcessManagerRepositoryShould
 
     @Test
     public void dispatch_command_and_post_events() throws InvocationTargetException {
-        final Subscriber subscriber = new Subscriber();
+        final RememberingSubscriber subscriber = new RememberingSubscriber();
         boundedContext.getEventBus()
                       .register(subscriber);
 
         testDispatchCommand(addTask());
 
         final PmTaskAdded message = subscriber.remembered;
+        assertNotNull(message);
         assertEquals(ID, message.getProjectId());
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void throw_exception_if_dispatch_unknown_command() throws InvocationTargetException {
-        final TestActorRequestFactory factory = TestActorRequestFactory.newInstance(getClass());
-        final Command unknownCommand = factory.createCommand(Int32Value.getDefaultInstance());
+    public void throw_exception_if_dispatch_unknown_command() {
+        final Command unknownCommand =
+                requestFactory.createCommand(Int32Value.getDefaultInstance());
         final CommandEnvelope request = CommandEnvelope.of(unknownCommand);
         repository().dispatchCommand(request);
     }
@@ -248,21 +276,57 @@ public class ProcessManagerRepositoryShould
     @Test
     public void return_command_classes() {
         final Set<CommandClass> commandClasses = repository().getCommandClasses();
-        assertTrue(commandClasses.contains(CommandClass.of(PmCreateProject.class)));
-        assertTrue(commandClasses.contains(CommandClass.of(PmAddTask.class)));
-        assertTrue(commandClasses.contains(CommandClass.of(PmStartProject.class)));
+
+        assertContains(commandClasses,
+                       PmCreateProject.class, PmCreateProject.class, PmStartProject.class);
     }
 
     @Test
     public void return_event_classes() {
         final Set<EventClass> eventClasses = repository().getMessageClasses();
-        assertTrue(eventClasses.contains(EventClass.of(PmProjectCreated.class)));
-        assertTrue(eventClasses.contains(EventClass.of(PmTaskAdded.class)));
-        assertTrue(eventClasses.contains(EventClass.of(PmProjectStarted.class)));
+
+        assertContains(eventClasses,
+                       PmProjectCreated.class, PmTaskAdded.class, PmProjectStarted.class);
     }
 
-    private static class Subscriber extends EventSubscriber {
+    @Test
+    public void return_rejection_classes() {
+        final Set<RejectionClass> rejectionClasses = repository().getRejectionClasses();
 
+        assertContains(rejectionClasses,
+                       EntityAlreadyArchived.class, EntityAlreadyDeleted.class);
+    }
+
+    @Test
+    public void dispatch_rejection() {
+        final CommandEnvelope ce = CommandEnvelope.of(requestFactory.createCommand(newUuidValue()));
+        final EntityAlreadyArchived rejectionMessage =
+                EntityAlreadyArchived.newBuilder()
+                                     .setEntityId(newUuid())
+                                     .build();
+        final Rejection rejection = createRejection(rejectionMessage,
+                                                    ce.getCommand());
+        final ProjectId id = GivenCommandMessage.ID;
+        final Rejection.Builder builder =
+                rejection.toBuilder()
+                         .setContext(rejection.getContext()
+                                              .toBuilder()
+                                              .setProducerId(Identifier.pack(id)));
+        final RejectionEnvelope re = RejectionEnvelope.of(builder.build());
+
+        final Set<?> delivered = repository().dispatchRejection(re);
+
+        assertTrue(delivered.contains(id));
+
+        assertTrue(TestProcessManager.processed(rejectionMessage));
+    }
+
+    /**
+     * Helper event subscriber which remembers an event message.
+     */
+    private static class RememberingSubscriber extends EventSubscriber {
+
+        @Nullable
         private PmTaskAdded remembered;
 
         @Subscribe

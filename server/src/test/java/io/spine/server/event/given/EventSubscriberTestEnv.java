@@ -30,6 +30,9 @@ import io.spine.server.event.EventSubscriber;
 
 import javax.annotation.Nullable;
 
+/**
+ * @author Alexander Yevsyukov
+ */
 public class EventSubscriberTestEnv {
 
     /** Prevents instantiation on this utility class. */

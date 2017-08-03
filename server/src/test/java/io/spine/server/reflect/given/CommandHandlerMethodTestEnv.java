@@ -21,19 +21,27 @@
 package io.spine.server.reflect.given;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
+import io.spine.Identifier;
 import io.spine.core.CommandContext;
 import io.spine.server.BoundedContext;
+import io.spine.server.aggregate.Aggregate;
+import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandler;
+import io.spine.server.entity.rejection.EntityAlreadyArchived;
+import io.spine.test.reflect.ProjectId;
 import io.spine.test.reflect.command.RefCreateProject;
 import io.spine.test.reflect.event.RefProjectCreated;
+import io.spine.validate.EmptyVBuilder;
 
 import java.lang.reflect.Method;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.server.reflect.given.Given.EventMessage.projectCreated;
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 public class CommandHandlerMethodTestEnv {
 
@@ -138,6 +146,35 @@ public class CommandHandlerMethodTestEnv {
     }
 
     /**
+     * A command handler which always rejects the passed command.
+     */
+    public static class RejectingHandler extends TestCommandHandler {
+        @Assign
+        RefProjectCreated handleTest(RefCreateProject cmd) throws EntityAlreadyArchived {
+            throw new EntityAlreadyArchived(Identifier.toString(cmd.getProjectId()));
+        }
+    }
+
+    /**
+     * An aggregate which always rejects the passed command.
+     */
+    public static class RejectingAggregate extends Aggregate<ProjectId, Empty, EmptyVBuilder> {
+        public RejectingAggregate(ProjectId id) {
+            super(id);
+        }
+
+        @Assign
+        RefProjectCreated on(RefCreateProject cmd) throws EntityAlreadyArchived {
+            throw new EntityAlreadyArchived(Identifier.toString(cmd.getProjectId()));
+        }
+
+        @Apply
+        void event(RefProjectCreated evt) {
+            // Do nothing.
+        }
+    }
+
+    /**
      * Abstract base for test environment command handlers.
      */
     public abstract static class TestCommandHandler extends CommandHandler {
@@ -159,7 +196,8 @@ public class CommandHandlerMethodTestEnv {
                     return method;
                 }
             }
-            throw new RuntimeException("No command handler method found: " + HANDLER_METHOD_NAME);
+            throw newIllegalStateException("No command handler method found: %s",
+                                           HANDLER_METHOD_NAME);
         }
     }
 }

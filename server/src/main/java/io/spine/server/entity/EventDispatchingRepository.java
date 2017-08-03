@@ -20,12 +20,14 @@
 
 package io.spine.server.entity;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
-import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
+import io.spine.core.TenantId;
+import io.spine.server.BoundedContext;
 import io.spine.server.route.EventRoute;
 import io.spine.server.route.EventRouting;
-import io.spine.server.tenant.EventOperation;
+import io.spine.server.tenant.TenantAwareFunction0;
 
 import javax.annotation.CheckReturnValue;
 import java.util.Set;
@@ -44,7 +46,7 @@ public abstract class EventDispatchingRepository<I,
         extends DefaultRecordBasedRepository<I, E, S>
         implements EntityEventDispatcher<I> {
 
-    private final EventRouting<I> routing;
+    private final EventRouting<I> eventRouting;
 
     /**
      * Creates new repository instance.
@@ -53,15 +55,15 @@ public abstract class EventDispatchingRepository<I,
      */
     protected EventDispatchingRepository(EventRoute<I, Message> defaultFunction) {
         super();
-        this.routing = EventRouting.withDefault(defaultFunction);
+        this.eventRouting = EventRouting.withDefault(defaultFunction);
     }
 
     /**
      * Obtains the {@link EventRouting} schema used by the repository for calculating identifiers
      * of event targets.
      */
-    protected final EventRouting<I> getRouting() {
-        return routing;
+    protected final EventRouting<I> getEventRouting() {
+        return eventRouting;
     }
 
     /**
@@ -73,6 +75,14 @@ public abstract class EventDispatchingRepository<I,
     @Override
     public void onRegistered() {
         super.onRegistered();
+        registerAsEventDispatcher();
+    }
+
+    /**
+     * Register itself as {@link io.spine.server.event.EventDispatcher EventDispatcher} in
+     * the {@linkplain BoundedContext#getEventBus() EventBus}.
+     */
+    protected void registerAsEventDispatcher() {
         getBoundedContext().getEventBus()
                            .register(this);
     }
@@ -80,34 +90,39 @@ public abstract class EventDispatchingRepository<I,
     @Override
     @CheckReturnValue
     public final Set<I> getTargets(EventEnvelope envelope) {
-        return getRouting().apply(envelope.getMessage(), envelope.getEventContext());
+        return getEventRouting().apply(envelope.getMessage(), envelope.getEventContext());
     }
 
     /**
      * Dispatches the passed event envelope to entities.
      *
      * @param envelope the event envelope to dispatch
+     * @return the set of IDs of entities that consumed the event
      */
     @Override
     public Set<I> dispatch(final EventEnvelope envelope) {
-        final Message eventMessage = envelope.getMessage();
-        final EventContext context = envelope.getEventContext();
-        final Set<I> ids = getTargets(envelope);
-        final EventOperation op = new EventOperation(envelope.getOuterObject()) {
+        final Set<I> targets = getTargets(envelope);
+        final TenantId tenantId = envelope.getActorContext()
+                                          .getTenantId();
+        // Since dispatching involves stored data, perform in the context of the tenant.
+        final TenantAwareFunction0<Set<I>> op = new TenantAwareFunction0<Set<I>>(tenantId) {
             @Override
-            public void run() {
-                for (I id : ids) {
+            public Set<I> apply() {
+                final ImmutableSet.Builder<I> consumed = ImmutableSet.builder();
+                for (I id : targets) {
                     try {
-                        dispatchToEntity(id, eventMessage, context);
+                        dispatchToEntity(id, envelope);
+                        consumed.add(id);
                     } catch (RuntimeException exception) {
                         onError(envelope, exception);
-                        // Do not re-throw the error to allow other entities to consume the event.
+                        // Do not re-throw letting other subscribers to consume the event.
                     }
                 }
+                return consumed.build();
             }
         };
-        op.execute();
-        return ids;
+        final Set<I> consumed = op.execute();
+        return consumed;
     }
 
     /**
@@ -124,9 +139,8 @@ public abstract class EventDispatchingRepository<I,
     /**
      * Dispatches the event to an entity with the passed ID.
      *
-     * @param id           the ID of the entity
-     * @param eventMessage the event message
-     * @param context      the event context
+     * @param id    the ID of the entity
+     * @param event the envelope with the event
      */
-    protected abstract void dispatchToEntity(I id, Message eventMessage, EventContext context);
+    protected abstract void dispatchToEntity(I id, EventEnvelope event);
 }

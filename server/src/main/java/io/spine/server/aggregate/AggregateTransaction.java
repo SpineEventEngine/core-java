@@ -22,13 +22,11 @@ package io.spine.server.aggregate;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import io.spine.core.EventContext;
+import io.spine.core.EventEnvelope;
 import io.spine.core.Version;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionListener;
 import io.spine.validate.ValidatingBuilder;
-
-import javax.annotation.Nullable;
-import java.lang.reflect.InvocationTargetException;
 
 /**
  * A transaction, within which {@linkplain Aggregate Aggregate instances} are modified.
@@ -66,10 +64,8 @@ class AggregateTransaction<I,
      * does not operate with {@linkplain EventContext event context}, this parameter is ignored.
      */
     @Override
-    protected void dispatch(Aggregate aggregate,
-                            Message eventMessage,
-                            @Nullable EventContext ignored) throws InvocationTargetException {
-        aggregate.invokeApplier(eventMessage);
+    protected void dispatch(Aggregate aggregate, EventEnvelope event) {
+        aggregate.invokeApplier(event.getMessage());
     }
 
     /**

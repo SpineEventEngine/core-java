@@ -56,7 +56,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static io.spine.validate.Validate.checkNameNotEmptyOrBlank;
-import static java.lang.String.format;
 
 /**
  * A facade for configuration and entry point for handling commands.
@@ -412,11 +411,10 @@ public final class BoundedContext
             final StorageFactory storageFactory = storageFactorySupplier.get();
 
             if (storageFactory == null) {
-                final String errMsg = format(
+                throw newIllegalStateException(
                         "Supplier of StorageFactory (%s) returned null instance",
                         storageFactorySupplier
                 );
-                throw new IllegalStateException(errMsg);
             }
             return storageFactory;
         }

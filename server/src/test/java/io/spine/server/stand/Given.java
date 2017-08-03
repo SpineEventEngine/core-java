@@ -121,7 +121,7 @@ class Given {
 
         StandTestProjectionRepository() {
             super();
-            getRouting().route(PrjProjectCreated.class, EVENT_TARGETS_FN);
+            getEventRouting().route(PrjProjectCreated.class, EVENT_TARGETS_FN);
         }
     }
 

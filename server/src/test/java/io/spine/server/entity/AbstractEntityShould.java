@@ -31,6 +31,8 @@ import java.lang.reflect.Modifier;
 
 import static io.spine.server.entity.AbstractEntity.getConstructor;
 import static io.spine.test.Verify.assertSize;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -93,6 +95,14 @@ public class AbstractEntityShould {
         final AnEntity entity = new AnEntity(0L);
         assertTrue(entity.checkEntityState(StringValue.getDefaultInstance())
                          .isEmpty());
+    }
+
+    @Test
+    public void return_sting_ID() {
+        final AnEntity entity = new AnEntity(1_234_567L);
+
+        assertEquals("1234567", entity.stringId());
+        assertSame(entity.stringId(), entity.stringId());
     }
 
     private static class AnEntity extends AbstractEntity<Long, StringValue> {

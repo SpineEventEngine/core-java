@@ -28,11 +28,14 @@ import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
-import io.spine.core.EventContext;
+import io.spine.core.EventEnvelope;
+import io.spine.core.RejectionClass;
+import io.spine.core.RejectionEnvelope;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.reflect.CommandHandlerMethod;
 import io.spine.server.reflect.EventSubscriberMethod;
+import io.spine.server.reflect.RejectionSubscriberMethod;
 import io.spine.validate.ValidatingBuilder;
 
 import java.util.List;
@@ -133,15 +136,28 @@ public abstract class ProcessManager<I,
     /**
      * Dispatches an event to the event subscriber method of the process manager.
      *
-     * @param eventMessage the event to be handled by the process manager
-     * @param context of the event
+     * @param event the envelope with the event
      */
-    void dispatchEvent(Message eventMessage, EventContext context)  {
-        checkNotNull(context);
-        checkNotNull(eventMessage);
+    void dispatchEvent(EventEnvelope event)  {
+        checkNotNull(event);
 
+        final Message eventMessage = event.getMessage();
         final EventSubscriberMethod method = getMethod(getClass(), eventMessage);
-        method.invoke(this, eventMessage, context);
+        method.invoke(this, eventMessage, event.getEventContext());
+    }
+
+    /**
+     * Dispatches a rejection to the subscribing method of the process manager.
+     *
+     * @param rejection the envelope with the rejection
+     */
+    void dispatchRejection(RejectionEnvelope rejection) {
+        checkNotNull(rejection);
+        final Message rejectionMessage = rejection.getMessage();
+        final Message commandMessage = rejection.getCommandMessage();
+        final RejectionSubscriberMethod method =
+                RejectionSubscriberMethod.getMethod(getClass(), rejectionMessage, commandMessage);
+        method.invoke(this, rejectionMessage, commandMessage, rejection.getCommandContext());
     }
 
     /**
@@ -261,6 +277,18 @@ public abstract class ProcessManager<I,
          */
         static Set<EventClass> getEventClasses(Class<? extends ProcessManager> pmClass) {
             return EventSubscriberMethod.inspect(pmClass);
+        }
+
+        /**
+         * Obtains the set of rejection classes to which process managers of the passed class are
+         * subscribed.
+         *
+         * @param pmClass the process manager class to inspect
+         * @return immutable set of rejection classes or an empty set if the class is not subscribed
+         * to rejections
+         */
+        static Set<RejectionClass> getRejectionClasses(Class<? extends ProcessManager> pmClass) {
+            return ImmutableSet.copyOf(RejectionSubscriberMethod.inspect(pmClass));
         }
     }
 }

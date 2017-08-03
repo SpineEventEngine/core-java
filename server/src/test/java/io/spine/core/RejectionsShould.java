@@ -20,18 +20,25 @@
 
 package io.spine.core;
 
+import com.google.common.base.Optional;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.GeneratedMessageV3;
-import com.google.protobuf.StringValue;
+import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
+import io.spine.Identifier;
 import io.spine.base.ThrowableMessage;
+import io.spine.client.TestActorRequestFactory;
 import io.spine.protobuf.AnyPacker;
-import io.spine.test.TestValues;
+import io.spine.time.Time;
+import org.junit.Before;
 import org.junit.Test;
 
+import static io.spine.core.Rejections.getProducer;
+import static io.spine.core.Rejections.isRejection;
 import static io.spine.core.Rejections.toRejection;
 import static io.spine.test.TestValues.newUuidValue;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static java.lang.String.format;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -41,9 +48,35 @@ import static org.junit.Assert.assertTrue;
  */
 public class RejectionsShould {
 
+    private final TestActorRequestFactory requestFactory =
+            TestActorRequestFactory.newInstance(getClass());
+
+    private GeneratedMessageV3 rejectionMessage;
+    private Command command;
+
+    private Rejection rejection;
+    @Before
+    public void setUp() {
+        rejectionMessage = newUuidValue();
+        command = requestFactory.createCommand(Time.getCurrentTime());
+
+        TestThrowableMessage throwableMessage = (TestThrowableMessage)
+                new TestThrowableMessage(rejectionMessage)
+                        .initProducer(Identifier.pack(getClass().getName()));
+        rejection = toRejection(throwableMessage, command);
+    }
+
     @Test
     public void have_utility_ctor() {
         assertHasPrivateParameterlessCtor(Rejections.class);
+    }
+
+    @Test
+    public void filter_rejection_classes() {
+        assertTrue(
+                isRejection(io.spine.server.entity.rejection.Rejections.EntityAlreadyArchived.class)
+        );
+        assertFalse(isRejection(Timestamp.class));
     }
 
     @Test
@@ -60,33 +93,35 @@ public class RejectionsShould {
         final CommandId commandId = Commands.generateId();
         final RejectionId actual = Rejections.generateId(commandId);
 
-        final String expected = String.format(Rejections.REJECTION_ID_FORMAT, commandId.getUuid());
+        final String expected = format(Rejections.REJECTION_ID_FORMAT, commandId.getUuid());
         assertEquals(expected, actual.getValue());
     }
 
-
     @Test
     public void convert_throwable_message_to_rejection_message() {
-        final StringValue rejectionState = TestValues.newUuidValue();
-        final CommandContext context = CommandContext.newBuilder()
-                                                   .build();
-        final Command command = Command.newBuilder()
-                                     .setMessage(AnyPacker.pack(newUuidValue()))
-                                     .setContext(context)
-                                     .build();
+        assertEquals(rejectionMessage, AnyPacker.unpack(rejection.getMessage()));
+        assertFalse(rejection.getContext()
+                             .getStacktrace()
+                             .isEmpty());
+        assertTrue(Timestamps.isValid(rejection.getContext()
+                                               .getTimestamp()));
+        final Command commandFromContext = rejection.getContext()
+                                                    .getCommand();
+        assertEquals(command, commandFromContext);
+    }
 
-        final TestThrowableMessage throwableMessage = new TestThrowableMessage(rejectionState);
-        final Rejection rejectionWrapper = toRejection(throwableMessage, command);
+    @Test
+    public void obtain_rejection_producer_if_set() {
+        // We initialized producer ID as the name of this test class in setUp().
+        final Optional<Object> producer = Rejections.getProducer(rejection.getContext());
+        assertEquals(getClass().getName(), producer.get());
+    }
 
-        assertEquals(rejectionState, AnyPacker.unpack(rejectionWrapper.getMessage()));
-        assertFalse(rejectionWrapper.getContext()
-                                    .getStacktrace()
-                                    .isEmpty());
-        assertTrue(Timestamps.isValid(rejectionWrapper.getContext()
-                                                      .getTimestamp()));
-        final Command wrappedCommand = rejectionWrapper.getContext()
-                                                       .getCommand();
-        assertEquals(command, wrappedCommand);
+    @Test
+    public void return_empty_optional_if_producer_not_set() {
+        final TestThrowableMessage freshThrowable = new TestThrowableMessage(rejectionMessage);
+        final Rejection freshRejection = toRejection(freshThrowable, command);
+        assertFalse(getProducer(freshRejection.getContext()).isPresent());
     }
 
     /**

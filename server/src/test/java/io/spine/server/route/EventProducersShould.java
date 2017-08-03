@@ -21,14 +21,38 @@
 package io.spine.server.route;
 
 import com.google.protobuf.Message;
-import io.spine.core.EventContext;
+import io.spine.test.Tests;
+import org.junit.Test;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 
 /**
- * Obtains a set of entity IDs for which to deliver an event.
- *
- * @param <I> the type of entity IDs
- * @param <M> the type of event messages to get IDs from
  * @author Alexander Yevsyukov
  */
-public interface EventRoute<I, M extends Message> extends Multicast<I, M, EventContext> {
+public class EventProducersShould {
+
+    @Test
+    public void have_utility_ctor() {
+        Tests.assertHasPrivateParameterlessCtor(EventProducers.class);
+    }
+
+    @Test
+    public void create_function_for_taking_id_fromContext() {
+        final EventRoute<Object, Message> fn = EventProducers.fromContext();
+        assertFunction(fn);
+    }
+
+    @Test
+    public void create_function_for_getting_id_fromFirstMessageField() {
+        final EventRoute<Object, Message> fn = EventProducers.fromFirstMessageField();
+        assertFunction(fn);
+    }
+
+    private static void assertFunction(EventRoute<Object, Message> fn) {
+        assertNotNull(fn);
+
+        // Check that custom toString() is provided.
+        assertFalse(fn.toString().contains(EventRoute.class.getSimpleName()));
+    }
 }

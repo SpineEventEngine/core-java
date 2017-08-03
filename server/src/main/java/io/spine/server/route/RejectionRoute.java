@@ -17,18 +17,18 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.rejection;
 
-import io.spine.core.RejectionClass;
-import io.spine.core.RejectionEnvelope;
-import io.spine.server.bus.MulticastDispatcher;
+package io.spine.server.route;
+
+import com.google.protobuf.Message;
+import io.spine.core.RejectionContext;
 
 /**
- * Delivers rejections to corresponding subscribers.
+ * Obtains a set of entity IDs for which to deliver a rejection.
  *
- * @param <I> the type of IDs of entities to which deliver rejections
- * @author Alex Tymchenko
+ * @param <I> the type of entity IDs
+ * @param <M> the type of rejection messages from which to get IDs
+ * @author Alexander Yevsyukov
  */
-public interface RejectionDispatcher<I>
-        extends MulticastDispatcher<RejectionClass, RejectionEnvelope, I> {
+public interface RejectionRoute<I, M extends Message> extends Multicast<I, M, RejectionContext> {
 }

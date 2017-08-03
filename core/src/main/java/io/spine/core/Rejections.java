@@ -21,14 +21,17 @@
 package io.spine.core;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.Identifier;
 import io.spine.base.ThrowableMessage;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
+import static java.lang.String.format;
 
 /**
  * Utility class for working with rejections.
@@ -37,11 +40,28 @@ import static io.spine.protobuf.AnyPacker.unpack;
  */
 public final class Rejections {
 
+    /** The name suffix for an outer class of generated rejection classes. */
+    public static final String OUTER_CLASS_SUFFIX = "Rejections";
+
+    /** The format string for ID of a {@link Rejection}. */
     @VisibleForTesting
     static final String REJECTION_ID_FORMAT = "%s-reject";
 
-    private Rejections() {
-        // Prevent instantiation of this utility class.
+    /** Prevents instantiation of this utility class. */
+    private Rejections() {}
+
+    /**
+     * Tells weather the passed message class represents a rejection message.
+     */
+    public static boolean isRejection(Class<? extends Message> messageClass) {
+        checkNotNull(messageClass);
+        final Class<?> enclosingClass = messageClass.getEnclosingClass();
+        if (enclosingClass == null) {
+            return false; // Rejection messages are generated as inner static classes.
+        }
+        final boolean hasCorrectSuffix = enclosingClass.getName()
+                                                       .endsWith(OUTER_CLASS_SUFFIX);
+        return hasCorrectSuffix;
     }
 
     /**
@@ -49,56 +69,34 @@ public final class Rejections {
      *
      * @param command the command which caused the rejection
      */
-    public static Rejection toRejection(ThrowableMessage message, Command command) {
-        checkNotNull(message);
+    public static Rejection toRejection(ThrowableMessage throwable, Command command) {
+        checkNotNull(throwable);
         checkNotNull(command);
 
-        final Message state = message.getMessageThrown();
-        final Any packedState = pack(state);
-        final RejectionContext context = createContext(message, command);
+        final Message rejectionMessage = throwable.getMessageThrown();
+        final Any packedState = pack(rejectionMessage);
+        final RejectionContext context = createContext(throwable, command);
         final RejectionId id = generateId(command.getId());
-        return Rejection.newBuilder()
-                        .setId(id)
-                        .setMessage(packedState)
-                        .setContext(context)
-                        .build();
+        final Rejection.Builder builder = Rejection.newBuilder()
+                                                   .setId(id)
+                                                   .setMessage(packedState)
+                                                   .setContext(context);
+        return builder.build();
     }
 
     private static RejectionContext createContext(ThrowableMessage message, Command command) {
         final String stacktrace = Throwables.getStackTraceAsString(message);
-        return RejectionContext.newBuilder()
-                               .setTimestamp(message.getTimestamp())
-                               .setStacktrace(stacktrace)
-                               .setCommand(command)
-                               .build();
-    }
+        final RejectionContext.Builder builder =
+                RejectionContext.newBuilder()
+                                .setTimestamp(message.getTimestamp())
+                                .setStacktrace(stacktrace)
+                                .setCommand(command);
 
-    /**
-     * Generates a {@code RejectionId} based upon a {@linkplain CommandId command ID} in a format:
-     *
-     * <pre>{@code <commandId>-reject}</pre>
-     *
-     * @param id the identifier of the {@linkplain Command command}, which processing caused the
-     *           rejection
-     **/
-    public static RejectionId generateId(CommandId id) {
-        final String idValue = String.format(REJECTION_ID_FORMAT, id.getUuid());
-        return RejectionId.newBuilder()
-                          .setValue(idValue)
-                          .build();
-    }
-
-    /**
-     * Extracts the message from the passed {@code Rejection} instance.
-     *
-     * @param rejection a rejection to extract a message from
-     * @param <M>       a type of the rejection message
-     * @return an unpacked message
-     */
-    public static <M extends Message> M getMessage(Rejection rejection) {
-        checkNotNull(rejection);
-        final M result = unpack(rejection.getMessage());
-        return result;
+        final Optional<Any> optional = message.producerId();
+        if (optional.isPresent()) {
+            builder.setProducerId(optional.get());
+        }
+        return builder.build();
     }
 
     /**
@@ -121,5 +119,51 @@ public final class Rejections {
                                           .setContext(context)
                                           .build();
         return result;
+    }
+
+    /**
+     * Generates a {@code RejectionId} based upon a {@linkplain CommandId command ID} in a format:
+     *
+     * <pre>{@code <commandId>-reject}</pre>
+     *
+     * @param id the identifier of the {@linkplain Command command}, which processing caused the
+     *           rejection
+     **/
+    public static RejectionId generateId(CommandId id) {
+        final String idValue = format(REJECTION_ID_FORMAT, id.getUuid());
+        return RejectionId.newBuilder()
+                          .setValue(idValue)
+                          .build();
+    }
+
+    /**
+     * Extracts the message from the passed {@code Rejection} instance.
+     *
+     * @param rejection a rejection to extract a message from
+     * @param <M>       a type of the rejection message
+     * @return an unpacked message
+     */
+    public static <M extends Message> M getMessage(Rejection rejection) {
+        checkNotNull(rejection);
+        final M result = unpack(rejection.getMessage());
+        return result;
+    }
+
+    /**
+     * Obtains rejection producer ID from the passed {@code RejectionContext} and casts it to the
+     * {@code <I>} type.
+     *
+     * @param context the rejection context to to get the producer ID
+     * @param <I>     the type of the producer ID
+     * @return the producer ID
+     */
+    public static <I> Optional<I> getProducer(RejectionContext context) {
+        checkNotNull(context);
+        final Any producerId = context.getProducerId();
+        if (Any.getDefaultInstance().equals(producerId)) {
+            return Optional.absent();
+        }
+        final I id = Identifier.unpack(producerId);
+        return Optional.of(id);
     }
 }

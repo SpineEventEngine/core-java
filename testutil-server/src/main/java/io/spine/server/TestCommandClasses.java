@@ -17,18 +17,32 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.rejection;
 
-import io.spine.core.RejectionClass;
-import io.spine.core.RejectionEnvelope;
-import io.spine.server.bus.MulticastDispatcher;
+package io.spine.server;
+
+import com.google.protobuf.Message;
+import io.spine.core.CommandClass;
+
+import java.util.Collection;
+
+import static org.junit.Assert.assertTrue;
 
 /**
- * Delivers rejections to corresponding subscribers.
+ * Utilities for testing command classes.
  *
- * @param <I> the type of IDs of entities to which deliver rejections
- * @author Alex Tymchenko
+ * @author Alexander Yevsyukov
  */
-public interface RejectionDispatcher<I>
-        extends MulticastDispatcher<RejectionClass, RejectionEnvelope, I> {
+public class TestCommandClasses {
+
+    /** Prevents instantiation on this utility class. */
+    private TestCommandClasses() {
+    }
+
+    @SafeVarargs
+    public static void assertContains(Collection<CommandClass> expected,
+                                      Class<? extends Message>... commandClass) {
+        for (Class<? extends Message> cls : commandClass) {
+            assertTrue(expected.contains(CommandClass.of(cls)));
+        }
+    }
 }

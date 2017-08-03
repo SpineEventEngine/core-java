@@ -23,6 +23,7 @@ package io.spine.server.route;
 import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import io.spine.core.CommandContext;
+import io.spine.protobuf.MessageFieldException;
 
 /**
  * Obtains a command target entity ID based on a command message and context.
@@ -61,7 +62,7 @@ public class DefaultCommandRoute<I> extends FieldAtIndex<I, Message, CommandCont
             final DefaultCommandRoute<I> function = newInstance();
             final I id = function.apply(commandMessage, CommandContext.getDefaultInstance());
             return Optional.of(id);
-        } catch (MissingEntityIdException | ClassCastException ignored) {
+        } catch (MessageFieldException | ClassCastException ignored) {
             return Optional.absent();
         }
     }

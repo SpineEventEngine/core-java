@@ -18,45 +18,45 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event;
+package io.spine.server.rejection;
 
 import io.spine.annotation.Internal;
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
+import io.spine.core.RejectionClass;
+import io.spine.core.RejectionEnvelope;
 
 import java.util.Set;
 
 /**
- * A common interface for objects which need to dispatch {@linkplain io.spine.core.Event events},
- * but are unable to implement {@link io.spine.server.event.EventDispatcher EventDispatcher}.
+ * A common interface for objects which need to dispatch {@linkplain io.spine.core.Rejection
+ * rejections} but are unable to implement {@link RejectionDispatcher RejectionDispatcher}.
  *
- * <p>This interface defines own contract (instead of extending {@link
- * io.spine.server.bus.MessageDispatcher MessageDispatcher} to allow classes that dispatch
- * messages other than events (by implementing {@link io.spine.server.bus.MessageDispatcher
- * MessageDispatcher}), and dispatch events by implementing this interface.
+ * <p>This interface defines own contract (instead of extending
+ * {@linkplain io.spine.server.bus.MessageDispatcher MessageDispatcher} to allow classes that
+ * dispatch messages other than rejections (by implementing
+ * {@link io.spine.server.bus.MessageDispatcher MessageDispatcher}),
  *
- * @param <I> the type of IDs of entities subscribed to events
+ * @param <I> the type of IDs of entities to which dispatch rejections
  * @author Alexander Yevsyukov
- * @see DelegatingEventDispatcher
+ * @see DelegatingRejectionDispatcher
  */
 @Internal
-public interface EventDispatcherDelegate<I> {
+public interface RejectionDispatcherDelegate<I> {
 
     /**
-     * Obtains event classes dispatched by this delegate.
+     * Obtains rejection classes dispatched by this delegate.
      */
-    Set<EventClass> getEventClasses();
+    Set<RejectionClass> getRejectionClasses();
 
     /**
-     * Dispatches the event.
+     * Dispatches the rejection.
      */
-    Set<I> dispatchEvent(EventEnvelope envelope);
+    Set<I> dispatchRejection(RejectionEnvelope envelope);
 
     /**
-     * Handles an error occurred during event dispatching.
+     * Handles an error occurred during rejection dispatching.
      *
-     * @param envelope  the event which caused the error
+     * @param envelope  the rejection which caused the error
      * @param exception the error
      */
-    void onError(EventEnvelope envelope, RuntimeException exception);
+    void onError(RejectionEnvelope envelope, RuntimeException exception);
 }

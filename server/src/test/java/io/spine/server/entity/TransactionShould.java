@@ -22,6 +22,7 @@ package io.spine.server.entity;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
+import io.spine.core.EventEnvelope;
 import io.spine.core.Version;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.entity.Transaction.Phase;
@@ -339,7 +340,7 @@ public abstract class TransactionShould<I,
 
 
     private void applyEvent(Transaction<I, E, S, B> tx, Event event) {
-        tx.apply(unpack(event.getMessage()), event.getContext());
+        tx.apply(EventEnvelope.of(event));
     }
 
     private Event createEvent(Message eventMessage) {

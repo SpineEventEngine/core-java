@@ -39,7 +39,7 @@ import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcherDelegate;
 import io.spine.server.route.CommandRouting;
 import io.spine.server.route.EventRouting;
-import io.spine.server.route.Producers;
+import io.spine.server.route.EventProducers;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
@@ -92,7 +92,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     private final CommandRouting<I> commandRouting = CommandRouting.newInstance();
 
     /** The routing schema for events to which aggregates react. */
-    private final EventRouting<I> eventRouting = withDefault(Producers.<I>fromContext());
+    private final EventRouting<I> eventRouting = withDefault(EventProducers.<I>fromContext());
 
     /** The number of events to store between snapshots. */
     private int snapshotTrigger = DEFAULT_SNAPSHOT_TRIGGER;

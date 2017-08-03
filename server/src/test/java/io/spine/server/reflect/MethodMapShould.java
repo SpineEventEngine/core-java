@@ -17,18 +17,17 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.rejection;
 
-import io.spine.core.RejectionClass;
-import io.spine.core.RejectionEnvelope;
-import io.spine.server.bus.MulticastDispatcher;
+package io.spine.server.reflect;
 
-/**
- * Delivers rejections to corresponding subscribers.
- *
- * @param <I> the type of IDs of entities to which deliver rejections
- * @author Alex Tymchenko
- */
-public interface RejectionDispatcher<I>
-        extends MulticastDispatcher<RejectionClass, RejectionEnvelope, I> {
+import io.spine.server.reflect.given.MethodMapTestEnv;
+import org.junit.Test;
+
+public class MethodMapShould {
+
+    @Test(expected = DuplicateHandlerMethodException.class)
+    public void not_allow_duplicated_handlers_in_one_class() {
+        MethodMap.create(MethodMapTestEnv.HandlerWithDuplicatingMethods.class,
+                         CommandHandlerMethod.factory());
+    }
 }

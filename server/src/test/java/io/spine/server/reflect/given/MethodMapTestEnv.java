@@ -17,18 +17,31 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.rejection;
 
-import io.spine.core.RejectionClass;
-import io.spine.core.RejectionEnvelope;
-import io.spine.server.bus.MulticastDispatcher;
+package io.spine.server.reflect.given;
+
+import io.spine.server.command.Assign;
+import io.spine.test.event.ProjectCreated;
+import io.spine.test.event.command.CreateProject;
 
 /**
- * Delivers rejections to corresponding subscribers.
- *
- * @param <I> the type of IDs of entities to which deliver rejections
- * @author Alex Tymchenko
+ * @author Alexander Yevsyukov
  */
-public interface RejectionDispatcher<I>
-        extends MulticastDispatcher<RejectionClass, RejectionEnvelope, I> {
+public class MethodMapTestEnv {
+
+    /** Prevents instantiation on this utility class. */
+    private MethodMapTestEnv() {}
+
+    public static class HandlerWithDuplicatingMethods {
+
+        @Assign
+        public ProjectCreated on(CreateProject cmd) {
+            return ProjectCreated.getDefaultInstance();
+        }
+
+        @Assign
+        public ProjectCreated handle(CreateProject cmd) {
+            return ProjectCreated.getDefaultInstance();
+        }
+    }
 }

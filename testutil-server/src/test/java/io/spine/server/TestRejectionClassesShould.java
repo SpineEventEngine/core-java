@@ -18,41 +18,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.route;
+package io.spine.server;
 
-import com.google.protobuf.Message;
 import io.spine.test.Tests;
 import org.junit.Test;
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Alexander Yevsyukov
  */
-public class ProducersShould {
+public class TestRejectionClassesShould {
 
     @Test
     public void have_utility_ctor() {
-        Tests.assertHasPrivateParameterlessCtor(Producers.class);
-    }
-
-    @Test
-    public void create_function_for_taking_id_fromContext() {
-        final EventRoute<Object, Message> fn = Producers.fromContext();
-        assertFunction(fn);
-    }
-
-    @Test
-    public void create_function_for_getting_id_fromFirstMessageField() {
-        final EventRoute<Object, Message> fn = Producers.fromFirstMessageField();
-        assertFunction(fn);
-    }
-
-    private static void assertFunction(EventRoute<Object, Message> fn) {
-        assertNotNull(fn);
-
-        // Check that custom toString() is provided.
-        assertFalse(fn.toString().contains(EventRoute.class.getSimpleName()));
+        Tests.assertHasPrivateParameterlessCtor(TestRejectionClasses.class);
     }
 }
