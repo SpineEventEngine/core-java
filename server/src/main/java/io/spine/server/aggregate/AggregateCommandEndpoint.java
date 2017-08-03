@@ -21,9 +21,7 @@
 package io.spine.server.aggregate;
 
 import com.google.protobuf.Message;
-import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
-import io.spine.server.tenant.TenantAwareFunction0;
 import io.spine.string.Stringifiers;
 
 import java.util.List;
@@ -49,11 +47,10 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
 
     static <I, A extends Aggregate<I, ?, ?>>
     I handle(AggregateRepository<I, A> repository, CommandEnvelope envelope) {
-        final AggregateCommandEndpoint<I, A> commandEndpoint =
+        final AggregateCommandEndpoint<I, A> endpoint =
                 new AggregateCommandEndpoint<>(repository, envelope);
 
-        final TenantAwareFunction0<I> operation = commandEndpoint.createOperation();
-        return operation.execute();
+        return endpoint.handle();
     }
 
     @Override
@@ -84,11 +81,6 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
         repository().onError(envelope, exception);
     }
 
-    @Override
-    protected TenantAwareFunction0<I> createOperation() {
-        return new Operation(envelope().getCommand());
-    }
-
     /**
      * Returns immutable set containing ID of the aggregate that is responsible for
      * handling the command.
@@ -99,22 +91,5 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
         final I commandTarget = repository().getCommandTarget(envelope.getMessage(),
                                                               envelope.getCommandContext());
         return commandTarget;
-    }
-
-    /**
-     * The operation executed under the command's tenant.
-     */
-    private class Operation extends TenantAwareFunction0<I> {
-
-        private Operation(Command command) {
-            super(command.getContext()
-                         .getActorContext()
-                         .getTenantId());
-        }
-
-        @Override
-        public I apply() {
-            return dispatch();
-        }
     }
 }

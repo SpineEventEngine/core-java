@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.ActorMessageEnvelope;
+import io.spine.core.TenantId;
 import io.spine.server.tenant.TenantAwareFunction0;
 
 import java.util.List;
@@ -57,14 +58,30 @@ public abstract class EntityMessageEndpoint<I,
     }
 
     /**
+     * Handles the message processing.
+     *
+     * @return the result of the message processing
+     */
+    public final R handle() {
+        final TenantId tenantId = envelope().getTenantId();
+        final TenantAwareFunction0<R> operation = createOperation(tenantId);
+        final R result = operation.execute();
+        return result;
+    }
+
+    /**
      * Obtains IDs of aggregates to which the endpoint delivers the message.
      */
     protected abstract R getTargets();
 
     /**
      * Creates a tenant-aware operation based on the message this endpoint processes.
+     *
+     * @param tenantId the ID of the tenant in which context to perform the operation
      */
-    protected abstract TenantAwareFunction0<R> createOperation();
+    private TenantAwareFunction0<R> createOperation(TenantId tenantId) {
+        return new Operation(tenantId);
+    }
 
     /**
      * Allows derived classes to handle empty list of uncommitted events returned by
@@ -116,7 +133,7 @@ public abstract class EntityMessageEndpoint<I,
      * {@linkplain #dispatchToOne(I) dispatches} the message to them.
      */
     @SuppressWarnings("unchecked")
-    protected R dispatch() {
+    protected final R dispatch() {
         final R targets = getTargets();
         if (targets instanceof Set) {
             final Set<I> handlingAggregates = (Set<I>) targets;
@@ -133,7 +150,7 @@ public abstract class EntityMessageEndpoint<I,
     /**
      * Obtains the envelope of the message processed by this endpoint.
      */
-    protected M envelope() {
+    protected final M envelope() {
         return envelope;
     }
 
@@ -142,5 +159,20 @@ public abstract class EntityMessageEndpoint<I,
      */
     protected Repository<I, E> repository() {
         return repository;
+    }
+
+    /**
+     * The operation executed under the tenant context in which the message was created.
+     */
+    private class Operation extends TenantAwareFunction0<R> {
+
+        private Operation(TenantId tenantId) {
+            super(tenantId);
+        }
+
+        @Override
+        public R apply() {
+            return dispatch();
+        }
     }
 }

@@ -21,9 +21,7 @@
 package io.spine.server.aggregate;
 
 import com.google.protobuf.Message;
-import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
-import io.spine.server.tenant.TenantAwareFunction0;
 
 import java.util.List;
 import java.util.Set;
@@ -52,13 +50,7 @@ class AggregateEventEndpoint<I, A extends Aggregate<I, ?, ?>>
         final AggregateEventEndpoint<I, A> endpoint =
                 new AggregateEventEndpoint<>(repository, envelope);
 
-        final TenantAwareFunction0<Set<I>> operation = endpoint.createOperation();
-        return operation.execute();
-    }
-
-    @Override
-    protected TenantAwareFunction0<Set<I>> createOperation() {
-        return new Operation(envelope().getOuterObject());
+        return endpoint.handle();
     }
 
     @Override
@@ -86,23 +78,5 @@ class AggregateEventEndpoint<I, A extends Aggregate<I, ?, ?>>
     protected Set<I> getTargets() {
         final EventEnvelope env = envelope();
         return repository().getEventTargets(env.getMessage(), env.getEventContext());
-    }
-
-    /**
-     * The operation executed under the event's tenant.
-     */
-    private class Operation extends TenantAwareFunction0<Set<I>> {
-
-        private Operation(Event event) {
-            super(event.getContext()
-                       .getCommandContext()
-                       .getActorContext()
-                       .getTenantId());
-        }
-
-        @Override
-        public Set<I> apply() {
-            return dispatch();
-        }
     }
 }

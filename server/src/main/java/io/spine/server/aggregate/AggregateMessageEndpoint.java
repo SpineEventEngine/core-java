@@ -58,21 +58,17 @@ abstract class AggregateMessageEndpoint<I,
     @Override
     protected void dispatchToOne(I aggregateId) {
         final A aggregate = repository().loadOrCreate(aggregateId);
-
-        final LifecycleFlags statusBefore = aggregate.getLifecycleFlags();
+        final LifecycleFlags flagsBefore = aggregate.getLifecycleFlags();
 
         final List<? extends Message> eventMessages = dispatchEnvelope(aggregate, envelope());
-
         final AggregateTransaction tx = AggregateTransaction.start(aggregate);
-
         aggregate.apply(eventMessages, envelope());
-
         tx.commit();
 
-        // Update status only if the message was handled successfully.
-        final LifecycleFlags statusAfter = aggregate.getLifecycleFlags();
-        if (statusAfter != null && !statusBefore.equals(statusAfter)) {
-            storage().writeLifecycleFlags(aggregateId, statusAfter);
+        // Update lifecycle flags only if the message was handled successfully and flags changed.
+        final LifecycleFlags flagsAfter = aggregate.getLifecycleFlags();
+        if (flagsAfter != null && !flagsBefore.equals(flagsAfter)) {
+            storage().writeLifecycleFlags(aggregateId, flagsAfter);
         }
 
         store(aggregate);
