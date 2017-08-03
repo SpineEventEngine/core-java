@@ -46,7 +46,6 @@ import io.spine.server.tenant.TenantAwareFunction0;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -200,24 +199,8 @@ public abstract class ProcessManagerRepository<I,
      */
     @Override
     public I dispatchCommand(final CommandEnvelope command) {
-        final I id = getCommandRouting().apply(command.getMessage(), command.getCommandContext());
-
-        final TenantAwareFunction0<List<Event>> op =
-                new TenantAwareFunction0<List<Event>>(command.getTenantId()) {
-                    @Override
-                    public List<Event> apply() {
-                        final P manager = findOrCreate(id);
-
-                        final ProcManTransaction<?, ?, ?> tx = beginTransactionFor(manager);
-                        final List<Event> events = manager.dispatchCommand(command);
-                        store(manager);
-                        tx.commit();
-                        return events;
-                    }
-                };
-        final List<Event> events = op.execute();
-        postEvents(events);
-        return id;
+        final I result = ProcessManagerCommandEndpoint.handle(this, command);
+        return result;
     }
 
     /**
@@ -288,14 +271,14 @@ public abstract class ProcessManagerRepository<I,
         logError("Rejection dispatching caused error (class: %s, id: %s", envelope, exception);
     }
 
-    private ProcManTransaction<?, ?, ?> beginTransactionFor(P manager) {
+    ProcManTransaction<?, ?, ?> beginTransactionFor(P manager) {
         return ProcManTransaction.start((ProcessManager<?, ?, ?>) manager);
     }
 
     /**
      * Posts passed events to {@link EventBus}.
      */
-    private void postEvents(Iterable<Event> events) {
+    void postEvents(Iterable<Event> events) {
         final EventBus eventBus = getBoundedContext().getEventBus();
         for (Event event : events) {
             eventBus.post(event);

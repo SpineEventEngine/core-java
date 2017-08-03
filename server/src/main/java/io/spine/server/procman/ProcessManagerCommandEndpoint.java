@@ -22,17 +22,25 @@ package io.spine.server.procman;
 
 import com.google.protobuf.Message;
 import io.spine.core.CommandEnvelope;
+import io.spine.core.Event;
 import io.spine.server.entity.EntityMessageEndpoint;
 
 import java.util.List;
 
-public class ProcessManagerCommandEndpoint<I>
-        extends EntityMessageEndpoint<I, ProcessManager<I, ?, ?>, CommandEnvelope, I> {
+class ProcessManagerCommandEndpoint<I, P extends ProcessManager<I, ?, ?>>
+        extends EntityMessageEndpoint<I, P, CommandEnvelope, I> {
 
-    protected ProcessManagerCommandEndpoint(
-            ProcessManagerRepository<I, ProcessManager<I, ?, ?>, ?> repository,
-            CommandEnvelope envelope) {
+    private ProcessManagerCommandEndpoint(ProcessManagerRepository<I, P, ?> repository,
+                                          CommandEnvelope envelope) {
         super(repository, envelope);
+    }
+
+    static <I, P extends ProcessManager<I, ?, ?>>
+    I handle (ProcessManagerRepository<I, P, ?> repository, CommandEnvelope cmd) {
+        final ProcessManagerCommandEndpoint<I, P> endpoint =
+                new ProcessManagerCommandEndpoint<>(repository, cmd);
+        final I result = endpoint.handle();
+        return result;
     }
 
     @Override
@@ -44,30 +52,37 @@ public class ProcessManagerCommandEndpoint<I>
     }
 
     @Override
-    protected void dispatchToOne(I entityId) {
-        //TODO:2017-08-03:alexander.yevsyukov: Implement
+    protected void dispatchToOne(I id) {
+        final ProcessManagerRepository<I, P, ?> repository = repository();
+        final P manager = repository.findOrCreate(id);
+
+        final ProcManTransaction<?, ?, ?> tx = repository.beginTransactionFor(manager);
+        final List<Event> events = manager.dispatchCommand(envelope());
+        tx.commit();
+        store(manager);
+        repository.postEvents(events);
     }
 
     @Override
-    protected List<? extends Message> doDispatch(ProcessManager<I, ?, ?> processManager,
-                                                 CommandEnvelope command) {
+    protected List<? extends Message> doDispatch(P processManager, CommandEnvelope command) {
         return processManager.dispatchCommand(command);
     }
 
     @Override
-    protected boolean isModified(ProcessManager<I, ?, ?> entity) {
-        //TODO:2017-08-03:alexander.yevsyukov: Implement
-        return false;
+    protected boolean isModified(P processManager) {
+        final boolean result = processManager.isChanged();
+        return result;
     }
 
     @Override
-    protected void onModified(ProcessManager<I, ?, ?> entity) {
-        //TODO:2017-08-03:alexander.yevsyukov: Implement
+    protected void onModified(P processManager) {
+        repository().store(processManager);
     }
 
     @Override
     protected void onError(CommandEnvelope envelope, RuntimeException exception) {
         repository().onError(envelope, exception);
+        throw exception;
     }
 
     /**
@@ -77,16 +92,16 @@ public class ProcessManagerCommandEndpoint<I>
      * @throws IllegalStateException always
      */
     @Override
-    protected void onEmptyResult(ProcessManager<I, ?, ?> pm, CommandEnvelope cmd)
+    protected void onEmptyResult(P processManager, CommandEnvelope cmd)
             throws IllegalStateException {
         final String format =
                 "The process manager (class: %s, id: %s) produced " +
                         "empty response for the command (class: %s, id: %s).";
-        onUnhandledCommand(pm, cmd, format);
+        onUnhandledCommand(processManager, cmd, format);
     }
 
     @Override
-    protected ProcessManagerRepository<I, ProcessManager<I, ?, ?>, ?> repository() {
-        return (ProcessManagerRepository<I, ProcessManager<I, ?, ?>, ?>) super.repository();
+    protected ProcessManagerRepository<I, P, ?> repository() {
+        return (ProcessManagerRepository<I, P, ?>) super.repository();
     }
 }

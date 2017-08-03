@@ -58,7 +58,7 @@ abstract class AggregateMessageEndpoint<I,
         final LifecycleFlags flagsBefore = aggregate.getLifecycleFlags();
 
         final List<? extends Message> eventMessages = doDispatch(aggregate, envelope());
-        final AggregateTransaction tx = AggregateTransaction.start(aggregate);
+        final AggregateTransaction tx = startTransaction(aggregate);
         aggregate.apply(eventMessages, envelope());
         tx.commit();
 
@@ -69,6 +69,10 @@ abstract class AggregateMessageEndpoint<I,
         }
 
         store(aggregate);
+    }
+
+    protected AggregateTransaction startTransaction(A aggregate) {
+        return AggregateTransaction.start(aggregate);
     }
 
     @Override
