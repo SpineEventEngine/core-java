@@ -221,6 +221,23 @@ public abstract class ProcessManagerRepository<I,
     }
 
     /**
+     * Dispatches the event to a corresponding process manager.
+     *
+     * <p>If there is no stored process manager with such an ID, a new process manager is created
+     * and stored after it handles the passed event.
+     *
+     * @param event the event to dispatch
+     * @throws IllegalArgumentException if events of this type are not handled by
+     *                                  this process manager
+     * @see ProcessManager#dispatchEvent(EventEnvelope)
+     */
+    @Override
+    public Set<I> dispatch(EventEnvelope event) throws IllegalArgumentException {
+        checkEventClass(event.getMessageClass());
+        return super.dispatch(event);
+    }
+
+    /**
      * Dispatches the rejection to one or more subscribing process managers.
      *
      * @param rejection the rejection to dispatch
@@ -253,6 +270,15 @@ public abstract class ProcessManagerRepository<I,
     }
 
     @Override
+    protected void dispatchToEntity(I id, EventEnvelope event) {
+        final P manager = findOrCreate(id);
+        final ProcManTransaction<?, ?, ?> transaction = beginTransactionFor(manager);
+        manager.dispatchEvent(event);
+        transaction.commit();
+        store(manager);
+    }
+
+    @Override
     public void onError(CommandEnvelope envelope, RuntimeException exception) {
         logError("Command dispatching caused error (class: %s, id: %s)", envelope, exception);
     }
@@ -274,32 +300,6 @@ public abstract class ProcessManagerRepository<I,
         for (Event event : events) {
             eventBus.post(event);
         }
-    }
-
-    /**
-     * Dispatches the event to a corresponding process manager.
-     *
-     * <p>If there is no stored process manager with such an ID, a new process manager is created
-     * and stored after it handles the passed event.
-     *
-     * @param event the event to dispatch
-     * @throws IllegalArgumentException if events of this type are not handled by
-     *                                  this process manager
-     * @see ProcessManager#dispatchEvent(EventEnvelope)
-     */
-    @Override
-    public Set<I> dispatch(EventEnvelope event) throws IllegalArgumentException {
-        checkEventClass(event.getMessageClass());
-        return super.dispatch(event);
-    }
-
-    @Override
-    protected void dispatchToEntity(I id, EventEnvelope event) {
-        final P manager = findOrCreate(id);
-        final ProcManTransaction<?, ?, ?> transaction = beginTransactionFor(manager);
-        manager.dispatchEvent(event);
-        transaction.commit();
-        store(manager);
     }
 
     /**

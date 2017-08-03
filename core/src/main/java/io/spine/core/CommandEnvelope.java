@@ -30,7 +30,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alexander Yevsyukov
  */
-public final class CommandEnvelope extends AbstractMessageEnvelope<CommandId, Command> {
+public final class CommandEnvelope extends AbstractMessageEnvelope<CommandId, Command>
+        implements ActorMessageEnvelope<CommandId, Command>{
 
     // The below fields are calculated from the command.
 
@@ -68,6 +69,7 @@ public final class CommandEnvelope extends AbstractMessageEnvelope<CommandId, Co
     /**
      * Obtains the tenant ID of the command.
      */
+    @Override
     public TenantId getTenantId() {
         return Commands.getTenantId(getCommand());
     }

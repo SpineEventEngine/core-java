@@ -22,8 +22,8 @@ package io.spine.server.aggregate;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
+import io.spine.core.ActorMessageEnvelope;
 import io.spine.core.Event;
-import io.spine.core.MessageEnvelope;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.tenant.TenantAwareFunction0;
 
@@ -42,7 +42,7 @@ import java.util.Set;
  */
 abstract class AggregateMessageEndpoint<I,
                                         A extends Aggregate<I, ?, ?>,
-                                        E extends MessageEnvelope<?, ?>, R> {
+                                        E extends ActorMessageEnvelope<?, ?>, R> {
     private final AggregateRepository<I, A> repository;
     private final E envelope;
 
@@ -128,8 +128,7 @@ abstract class AggregateMessageEndpoint<I,
     private void store(A aggregate) {
         final List<Event> events = aggregate.getUncommittedEvents();
         if (!events.isEmpty()) {
-            repository.onModifiedAggregate(envelope.getActorContext()
-                                                   .getTenantId(), aggregate);
+            repository.onModifiedAggregate(envelope.getTenantId(), aggregate);
         } else {
             onEmptyResult(aggregate, envelope);
         }

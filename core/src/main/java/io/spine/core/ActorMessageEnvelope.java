@@ -21,43 +21,23 @@
 package io.spine.core;
 
 import com.google.protobuf.Message;
-import io.spine.type.MessageClass;
 
 /**
- * A common interface for obtaining messages from wrapping objects.
+ * A common interface for messages sent by an actor.
  *
  * @param <I> the the of the message id
  * @param <T> the type of the object that wraps a message
- * @author Alex Tymchenko
  * @author Alexander Yevsyukov
  */
-public interface MessageEnvelope<I extends Message, T> {
+public interface ActorMessageEnvelope<I extends Message, T> extends MessageEnvelope<I, T> {
 
     /**
-     * The ID of the message.
+     * Obtains ID of the tenant in which context the actor works.
      */
-    I getId();
+    TenantId getTenantId();
 
     /**
-     * Obtains the object which contains the message of interest.
+     * Obtains an actor context for the wrapped message.
      */
-    T getOuterObject();
-
-    /**
-     * Obtains the message.
-     */
-    Message getMessage();
-
-    /**
-     * Obtains the message class.
-     */
-    MessageClass getMessageClass();
-
-    /**
-     * Sets the context of the enclosed message into as the origin in the context of an event
-     * to be build.
-     *
-     * @param builder event context builder into which set the event origin context
-     */
-    void setOriginContext(EventContext.Builder builder);
+    ActorContext getActorContext();
 }

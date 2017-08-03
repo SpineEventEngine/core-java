@@ -102,8 +102,7 @@ public abstract class EventDispatchingRepository<I,
     @Override
     public Set<I> dispatch(final EventEnvelope envelope) {
         final Set<I> targets = getTargets(envelope);
-        final TenantId tenantId = envelope.getActorContext()
-                                          .getTenantId();
+        final TenantId tenantId = envelope.getTenantId();
         // Since dispatching involves stored data, perform in the context of the tenant.
         final TenantAwareFunction0<Set<I>> op = new TenantAwareFunction0<Set<I>>(tenantId) {
             @Override
