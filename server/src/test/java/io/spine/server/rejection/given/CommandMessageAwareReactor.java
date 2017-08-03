@@ -20,27 +20,32 @@
 
 package io.spine.server.rejection.given;
 
-import io.spine.core.CommandContext;
+import com.google.protobuf.Empty;
+import io.spine.core.Commands;
+import io.spine.core.React;
 import io.spine.core.Rejection;
-import io.spine.core.Subscribe;
 import io.spine.test.rejection.ProjectRejections;
 import io.spine.test.rejection.command.RemoveOwner;
 
-import static org.junit.Assert.fail;
+import static io.spine.core.Rejections.getMessage;
+import static org.junit.Assert.assertEquals;
 
-public class InvalidOrderSubscriber extends VerifiableSubscriber {
+public class CommandMessageAwareReactor extends VerifiableReactor {
 
-    @SuppressWarnings("unused") // The method should never be invoked, so the params are unused.
-    @Subscribe
-    public void on(ProjectRejections.MissingOwner rejection,
-                   CommandContext context,
-                   RemoveOwner command) {
+    private ProjectRejections.MissingOwner rejection;
+    private RemoveOwner command;
+
+    @React
+    public Empty on(ProjectRejections.MissingOwner rejection, RemoveOwner command) {
         triggerCall();
-        fail("InvalidOrderSubscriber invoked the handler method");
+        this.rejection = rejection;
+        this.command = command;
+        return Empty.getDefaultInstance();
     }
 
     @Override
     public void verifyGot(Rejection rejection) {
-        fail("InvalidOrderSubscriber");
+        assertEquals(getMessage(rejection), this.rejection);
+        assertEquals(Commands.getMessage(rejection.getContext().getCommand()), command);
     }
 }

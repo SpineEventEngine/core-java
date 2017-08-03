@@ -20,33 +20,31 @@
 
 package io.spine.server.rejection.given;
 
-import io.spine.client.CommandFactory;
-import io.spine.client.TestActorRequestFactory;
-import io.spine.core.Command;
+import com.google.protobuf.Empty;
 import io.spine.core.CommandContext;
+import io.spine.core.React;
 import io.spine.core.Rejection;
-import io.spine.core.Rejections;
-import io.spine.core.Subscribe;
-import io.spine.server.rejection.RejectionSubscriber;
-import io.spine.test.rejection.ProjectRejections.InvalidProjectName;
-import io.spine.test.rejection.command.UpdateProjectName;
+import io.spine.test.rejection.ProjectRejections;
 
-public class InvalidProjectNameSubscriber extends RejectionSubscriber {
+import static io.spine.core.Rejections.getMessage;
+import static org.junit.Assert.assertEquals;
 
-    private Rejection rejectionHandled;
+public class ContextAwareReactor extends VerifiableReactor {
 
-    @Subscribe
-    public void on(InvalidProjectName rejection,
-                   UpdateProjectName commandMessage,
-                   CommandContext context) {
-        final CommandFactory commandFactory =
-                TestActorRequestFactory.newInstance(InvalidProjectNameSubscriber.class)
-                                       .command();
-        final Command command = commandFactory.createWithContext(commandMessage, context);
-        this.rejectionHandled = Rejections.createRejection(rejection, command);
+    private ProjectRejections.MissingOwner rejection;
+    private CommandContext context;
+
+    @React
+    public Empty on(ProjectRejections.MissingOwner rejection, CommandContext context) {
+        triggerCall();
+        this.rejection = rejection;
+        this.context = context;
+        return Empty.getDefaultInstance();
     }
 
-    public Rejection getRejectionHandled() {
-        return rejectionHandled;
+    @Override
+    public void verifyGot(Rejection rejection) {
+        assertEquals(getMessage(rejection), this.rejection);
+        assertEquals(rejection.getContext().getCommand().getContext(), context);
     }
 }

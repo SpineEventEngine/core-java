@@ -34,8 +34,8 @@ import io.spine.server.reflect.given.RejectionReactorMethodTestEnv.InvalidTwoPar
 import io.spine.server.reflect.given.RejectionReactorMethodTestEnv.ValidButPrivate;
 import io.spine.server.reflect.given.RejectionReactorMethodTestEnv.ValidThreeParams;
 import io.spine.server.reflect.given.RejectionReactorMethodTestEnv.ValidTwoParams;
-import io.spine.server.rejection.given.FaultySubscriber;
-import io.spine.server.rejection.given.VerifiableSubscriber;
+import io.spine.server.rejection.given.FaultyReactor;
+import io.spine.server.rejection.given.VerifiableReactor;
 import io.spine.test.reflect.ReflectRejections.InvalidProjectName;
 import io.spine.test.rejection.command.UpdateProjectName;
 import org.junit.Test;
@@ -99,7 +99,7 @@ public class RejectionReactorMethodShould {
 
     @Test
     public void catch_exceptions_caused_by_subscribers() {
-        final VerifiableSubscriber faultySubscriber = new FaultySubscriber();
+        final VerifiableReactor faultySubscriber = new FaultyReactor();
 
         faultySubscriber.dispatch(RejectionEnvelope.of(invalidProjectNameRejection()));
 

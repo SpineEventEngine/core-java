@@ -21,27 +21,26 @@
 package io.spine.server.rejection.given;
 
 import com.google.protobuf.Empty;
-import io.spine.core.CommandContext;
 import io.spine.core.React;
 import io.spine.core.Rejection;
 import io.spine.test.rejection.ProjectRejections;
 
-import static org.junit.Assert.fail;
+import static io.spine.core.Rejections.getMessage;
+import static org.junit.Assert.assertEquals;
 
-/** The subscriber which throws exception from the subscriber method. */
-public class FaultySubscriber extends VerifiableSubscriber {
+public class RejectionMessageReactor extends VerifiableReactor {
 
-    @SuppressWarnings("unused") // It's fine for a faulty subscriber.
+    private ProjectRejections.MissingOwner rejection;
+
     @React
-    public Empty on(ProjectRejections.InvalidProjectName rejection, CommandContext context) {
+    public Empty on(ProjectRejections.MissingOwner rejection) {
         triggerCall();
-        throw new UnsupportedOperationException(
-                "Faulty subscriber should have failed: " +
-                        FaultySubscriber.class.getSimpleName());
+        this.rejection = rejection;
+        return Empty.getDefaultInstance();
     }
 
     @Override
-    public void verifyGot(Rejection ignored) {
-        fail("FaultySubscriber");
+    public void verifyGot(Rejection rejection) {
+        assertEquals(getMessage(rejection), this.rejection);
     }
 }

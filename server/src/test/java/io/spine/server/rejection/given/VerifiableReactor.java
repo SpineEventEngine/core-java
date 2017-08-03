@@ -21,9 +21,9 @@
 package io.spine.server.rejection.given;
 
 import io.spine.core.Rejection;
-import io.spine.server.rejection.RejectionSubscriber;
+import io.spine.server.rejection.RejectionReactor;
 
-public abstract class VerifiableSubscriber extends RejectionSubscriber {
+public abstract class VerifiableReactor extends RejectionReactor {
 
     private boolean methodCalled = false;
 

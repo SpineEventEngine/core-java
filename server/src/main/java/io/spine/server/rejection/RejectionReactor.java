@@ -46,7 +46,7 @@ import static java.lang.String.format;
  * @author Alexander Yevsyukov
  * @see RejectionBus#register(io.spine.server.bus.MessageDispatcher)
  */
-public class RejectionSubscriber implements RejectionDispatcher<String> {
+public class RejectionReactor implements RejectionDispatcher<String> {
 
     /**
      * Cached set of the rejection classes this subscriber is subscribed to.
