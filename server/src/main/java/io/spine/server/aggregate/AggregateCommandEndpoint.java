@@ -57,7 +57,7 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
-    List<? extends Message> dispatchEnvelope(A aggregate, CommandEnvelope envelope) {
+    protected List<? extends Message> dispatchEnvelope(A aggregate, CommandEnvelope envelope) {
         return aggregate.dispatchCommand(envelope);
     }
 
@@ -67,7 +67,8 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
      * @throws IllegalStateException always
      */
     @Override
-    void onEmptyResult(A aggregate, CommandEnvelope envelope) throws IllegalStateException {
+    protected void onEmptyResult(A aggregate, CommandEnvelope envelope)
+            throws IllegalStateException {
         throw newIllegalStateException(
                 "The aggregate (class: %s, id: %s) produced empty response for " +
                         "command (class: %s, id: %s).",
@@ -79,7 +80,12 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
-    TenantAwareFunction0<I> createOperation() {
+    protected void onError(CommandEnvelope envelope, RuntimeException exception) {
+        repository().onError(envelope, exception);
+    }
+
+    @Override
+    protected TenantAwareFunction0<I> createOperation() {
         return new Operation(envelope().getCommand());
     }
 
@@ -88,7 +94,7 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
      * handling the command.
      */
     @Override
-    I getTargets() {
+    protected I getTargets() {
         final CommandEnvelope envelope = envelope();
         final I commandTarget = repository().getCommandTarget(envelope.getMessage(),
                                                               envelope.getCommandContext());

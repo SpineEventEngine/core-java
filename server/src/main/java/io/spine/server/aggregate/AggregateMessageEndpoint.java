@@ -20,75 +20,34 @@
 
 package io.spine.server.aggregate;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.core.ActorMessageEnvelope;
 import io.spine.core.Event;
 import io.spine.server.entity.LifecycleFlags;
-import io.spine.server.tenant.TenantAwareFunction0;
+import io.spine.server.entity.endpoint.EntityMessageEndpoint;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * Abstract base for endpoints handling messages sent to aggregates.
  *
  * @param <I> the type of aggregate IDs
  * @param <A> the type of aggregates
- * @param <E> the type of message envelopes
+ * @param <M> the type of message envelopes
  * @param <R> the type of the dispatch result, can be {@code <I>} for unicast dispatching, or
  *            {@code Set<I>} for multicast
  * @author Alexander Yevsyukov
  */
 abstract class AggregateMessageEndpoint<I,
                                         A extends Aggregate<I, ?, ?>,
-                                        E extends ActorMessageEnvelope<?, ?>, R> {
+                                        M extends ActorMessageEnvelope<?, ?>, R>
+        extends EntityMessageEndpoint<I, A, M, R> {
+    
     private final AggregateRepository<I, A> repository;
-    private final E envelope;
 
-    AggregateMessageEndpoint(AggregateRepository<I, A> repository, E envelope) {
+    AggregateMessageEndpoint(AggregateRepository<I, A> repository, M envelope) {
+        super(repository, envelope);
         this.repository = repository;
-        this.envelope = envelope;
-    }
-
-    /**
-     * Creates a tenant-aware operation based on the message this endpoint processes.
-     */
-    abstract TenantAwareFunction0<R> createOperation();
-
-    /**
-     * {@linkplain #getTargets() Selects} one or more message targets and
-     * {@linkplain #dispatchToOne(I) dispatches} the message to them.
-     */
-    @SuppressWarnings("unchecked")
-    R dispatch() {
-        final R targets = getTargets();
-        if (targets instanceof Set) {
-            final Set<I> handlingAggregates = (Set<I>) targets;
-            return (R)(dispatchToMany(handlingAggregates));
-        }
-        dispatchToOne((I)targets);
-        return targets;
-    }
-
-    /**
-     * Dispatches the message to multiple aggregates.
-     *
-     * @param targets the set of aggregate IDs to which dispatch the message
-     * @return the set of aggregate IDs to which the message was successfully dispatched
-     */
-    private Set<I> dispatchToMany(Set<I> targets) {
-        final ImmutableSet.Builder<I> result = ImmutableSet.builder();
-        for (I id : targets) {
-            try {
-                dispatchToOne(id);
-                result.add(id);
-            } catch (RuntimeException exception) {
-                // Do not rethrow to allow others to handle.
-                // The error is already logged.
-            }
-        }
-        return result.build();
     }
 
     /**
@@ -96,16 +55,17 @@ abstract class AggregateMessageEndpoint<I,
      *
      * @param aggregateId the ID of the aggreagate to which dispatch the message
      */
-    private void dispatchToOne(I aggregateId) {
+    @Override
+    protected void dispatchToOne(I aggregateId) {
         final A aggregate = repository().loadOrCreate(aggregateId);
 
         final LifecycleFlags statusBefore = aggregate.getLifecycleFlags();
 
-        final List<? extends Message> eventMessages = dispatchEnvelope(aggregate, envelope);
+        final List<? extends Message> eventMessages = dispatchEnvelope(aggregate, envelope());
 
         final AggregateTransaction tx = AggregateTransaction.start(aggregate);
 
-        aggregate.apply(eventMessages, envelope);
+        aggregate.apply(eventMessages, envelope());
 
         tx.commit();
 
@@ -118,8 +78,6 @@ abstract class AggregateMessageEndpoint<I,
         store(aggregate);
     }
 
-    abstract List<? extends Message> dispatchEnvelope(A aggregate, E envelope);
-
     /**
      * Stores the aggregate if it has uncommitted events.
      *
@@ -128,32 +86,15 @@ abstract class AggregateMessageEndpoint<I,
     private void store(A aggregate) {
         final List<Event> events = aggregate.getUncommittedEvents();
         if (!events.isEmpty()) {
-            repository.onModifiedAggregate(envelope.getTenantId(), aggregate);
+            repository.onModifiedAggregate(envelope().getTenantId(), aggregate);
         } else {
-            onEmptyResult(aggregate, envelope);
+            onEmptyResult(aggregate, envelope());
         }
     }
 
-    /**
-     * Allows derived classes to handle empty list of uncommitted events returned by the aggregate
-     * in response to the message.
-     */
-    abstract void onEmptyResult(A aggregate, E envelope);
-
-    /**
-     * Obtains IDs of aggregates to which the endpoint delivers the message.
-     */
-    abstract R getTargets();
-
-    /**
-     * Obtains the envelope of the message processed by this endpoint.
-     */
-    E envelope() {
-        return envelope;
-    }
-
-    AggregateRepository<I, A> repository() {
-        return repository;
+    @Override
+    protected AggregateRepository<I, A> repository() {
+        return (AggregateRepository<I, A>)super.repository();
     }
 
     private AggregateStorage<I> storage() {

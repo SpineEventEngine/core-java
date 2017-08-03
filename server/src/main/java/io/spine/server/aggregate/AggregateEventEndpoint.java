@@ -57,25 +57,25 @@ class AggregateEventEndpoint<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
-    TenantAwareFunction0<Set<I>> createOperation() {
+    protected TenantAwareFunction0<Set<I>> createOperation() {
         return new Operation(envelope().getOuterObject());
     }
 
     @Override
-    List<? extends Message> dispatchEnvelope(A aggregate, EventEnvelope envelope) {
-        try {
-            return aggregate.reactOn(envelope);
-        } catch (RuntimeException exception) {
-            repository().onError(envelope, exception);
-            throw exception;
-        }
+    protected List<? extends Message> dispatchEnvelope(A aggregate, EventEnvelope envelope) {
+        return aggregate.reactOn(envelope);
+    }
+
+    @Override
+    protected void onError(EventEnvelope envelope, RuntimeException exception) {
+        repository().onError(envelope, exception);
     }
 
     /**
      * Does nothing since an aggregate is not required to produce events in reaction to an event.
      */
     @Override
-    void onEmptyResult(A aggregate, EventEnvelope envelope) {
+    protected void onEmptyResult(A aggregate, EventEnvelope envelope) {
         // Do nothing.
     }
 
@@ -83,7 +83,7 @@ class AggregateEventEndpoint<I, A extends Aggregate<I, ?, ?>>
      * Obtains IDs of aggregates that react on the event processed by this endpoint.
      */
     @Override
-    Set<I> getTargets() {
+    protected Set<I> getTargets() {
         final EventEnvelope env = envelope();
         return repository().getEventTargets(env.getMessage(), env.getEventContext());
     }
