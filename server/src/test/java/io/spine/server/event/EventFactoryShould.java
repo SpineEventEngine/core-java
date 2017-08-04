@@ -46,7 +46,7 @@ public class EventFactoryShould {
     @Before
     public void setUp() {
         producerId = pack(newUuidValue());
-        origin = requestFactory.generateAndWrap();
+        origin = requestFactory.generateEnvelope();
     }
 
     @Test(expected = NullPointerException.class)

@@ -46,7 +46,6 @@ import java.util.List;
 import java.util.Queue;
 
 import static io.spine.Identifier.newUuid;
-import static io.spine.test.TestValues.newUuidValue;
 import static io.spine.test.Tests.nullRef;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -183,9 +182,7 @@ public class CommandHandlerShould {
     }
 
     private CommandEnvelope givenCommandEnvelope() {
-        return CommandEnvelope.of(
-                TestActorRequestFactory.newInstance(getClass()).createCommand(newUuidValue())
-        );
+        return TestActorRequestFactory.newInstance(getClass()).generateEnvelope();
     }
 
     @Test

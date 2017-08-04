@@ -36,7 +36,6 @@ import org.junit.Test;
 
 import java.util.Set;
 
-import static io.spine.test.TestValues.newUuidValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -54,7 +53,7 @@ public class DelegatingRejectionDispatcherShould {
         delegate = new EmptyRejectionDispatcherDelegate();
         delegatingDispatcher = DelegatingRejectionDispatcher.of(delegate);
 
-        final Command command = requestFactory.createCommand(newUuidValue());
+        final Command command = requestFactory.generateCommand();
         final Message rejectionMessage =
                 EntityAlreadyDeleted.newBuilder()
                                     .setEntityId(getClass().getName())

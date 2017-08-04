@@ -67,7 +67,6 @@ import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.server.TestEventClasses.assertContains;
 import static io.spine.server.procman.ProcessManagerDispatcher.dispatch;
-import static io.spine.test.TestValues.newUuidValue;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Verify.assertSize;
 import static org.hamcrest.Matchers.instanceOf;
@@ -247,8 +246,7 @@ public class ProcessManagerShould {
                                      .setEntityId(getClass().getName())
                                      .build();
 
-        final Command command = requestFactory.command()
-                                              .create(newUuidValue());
+        final Command command = requestFactory.generateCommand();
         final RejectionEnvelope rejection = RejectionEnvelope.of(
                 createRejection(rejectionMessage, command)
         );

@@ -50,7 +50,7 @@ public class ProcessManagerDispatcherShould {
                 TestActorRequestFactory.newInstance(getClass());
         TestEventFactory eventFactory = TestEventFactory.newInstance(getClass());
 
-        final Command command = requestFactory.createCommand(newUuidValue());
+        final Command command = requestFactory.generateCommand();
         new NullPointerTester()
                 .setDefault(CommandEnvelope.class,
                             CommandEnvelope.of(command))

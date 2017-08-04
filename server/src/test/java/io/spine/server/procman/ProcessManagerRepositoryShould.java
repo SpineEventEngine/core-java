@@ -75,7 +75,6 @@ import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.Give
 import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.projectStarted;
 import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.startProject;
 import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.taskAdded;
-import static io.spine.test.TestValues.newUuidValue;
 import static java.lang.String.format;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -245,7 +244,7 @@ public class ProcessManagerRepositoryShould
 
     @Test
     public void dispatch_rejection() {
-        final CommandEnvelope ce = CommandEnvelope.of(requestFactory.createCommand(newUuidValue()));
+        final CommandEnvelope ce = requestFactory.generateEnvelope();
         final EntityAlreadyArchived rejectionMessage =
                 EntityAlreadyArchived.newBuilder()
                                      .setEntityId(newUuid())

@@ -27,7 +27,6 @@ import io.spine.core.CommandEnvelope;
 import io.spine.core.MessageEnvelopeShould;
 import org.junit.Test;
 
-import static io.spine.test.TestValues.newUuidValue;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -49,7 +48,7 @@ public class CommandEnvelopeShould extends MessageEnvelopeShould<Command,
 
     @Override
     protected Command outerObject() {
-        return requestFactory.command().create(newUuidValue());
+        return requestFactory.generateCommand();
     }
 
     @Override

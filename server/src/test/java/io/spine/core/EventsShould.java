@@ -80,7 +80,7 @@ public class EventsShould {
     public void setUp() {
         final TestActorRequestFactory requestFactory =
                 TestActorRequestFactory.newInstance(getClass());
-        final CommandEnvelope cmd = requestFactory.generateAndWrap();
+        final CommandEnvelope cmd = requestFactory.generateEnvelope();
         final StringValue producerId = toMessage(getClass().getSimpleName());
         EventFactory eventFactory = EventFactory.on(cmd, Identifier.pack(producerId));
         event = eventFactory.createEvent(Time.getCurrentTime(),
@@ -185,7 +185,7 @@ public class EventsShould {
 
     @Test
     public void obtain_type_name_of_event() {
-        final CommandEnvelope command = requestFactory.generateAndWrap();
+        final CommandEnvelope command = requestFactory.generateEnvelope();
         final StringValue producerId = toMessage(getClass().getSimpleName());
         final EventFactory ef = EventFactory.on(command, Identifier.pack(producerId));
         final Event event = ef.createEvent(Time.getCurrentTime(), Tests.<Version>nullRef());

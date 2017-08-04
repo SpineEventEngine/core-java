@@ -22,7 +22,6 @@ package io.spine.server.reflect;
 
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.CommandEnvelope;
-import io.spine.test.TestValues;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -39,7 +38,7 @@ public class HandlerMethodFailedExceptionTest {
     private Exception cause;
     @Before
     public void setUp() {
-        commandEnvelope = CommandEnvelope.of(factory.createCommand(TestValues.newUuidValue()));
+        commandEnvelope = factory.generateEnvelope();
         cause = new IllegalStateException(newUuid());
 
         exception = new HandlerMethodFailedException(this, commandEnvelope.getMessage(),
