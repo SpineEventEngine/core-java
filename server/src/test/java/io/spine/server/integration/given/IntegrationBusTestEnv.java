@@ -32,6 +32,7 @@ import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.test.integration.ProjectId;
 import io.spine.test.integration.event.ItgProjectCreated;
+import io.spine.test.integration.event.ItgProjectStarted;
 import io.spine.validate.StringValueVBuilder;
 
 import static io.spine.protobuf.AnyPacker.pack;
@@ -46,7 +47,7 @@ public class IntegrationBusTestEnv {
         // Prevent instantiation of this utility class.
     }
 
-    public static BoundedContext contextWithExternalRepoSubscriber(TransportFactory transportFactory) {
+    public static BoundedContext contextWithExtEntitySubscriber(TransportFactory transportFactory) {
         final BoundedContext boundedContext = contextWithTransport(transportFactory);
         boundedContext.register(new ProjectDetailsRepository());
         return boundedContext;
@@ -54,10 +55,13 @@ public class IntegrationBusTestEnv {
 
     public static BoundedContext contextWithExternalSubscriber(TransportFactory transportFactory) {
         final BoundedContext boundedContext = contextWithTransport(transportFactory);
-        boundedContext.getIntegrationBus().register(new ExternalSubscriber());
+        final ExternalSubscriber eventSubscriber = new ExternalSubscriber();
+        boundedContext.getIntegrationBus()
+                      .register(eventSubscriber);
+        boundedContext.getEventBus()
+                      .register(eventSubscriber);
         return boundedContext;
     }
-
 
     public static BoundedContext contextWithTransport(TransportFactory transportFactory) {
         final IntegrationBus.Builder builder = IntegrationBus.newBuilder()
@@ -69,9 +73,7 @@ public class IntegrationBusTestEnv {
     }
 
     public static Event projectCreated() {
-        final ProjectId projectId = ProjectId.newBuilder()
-                                             .setId(Identifier.newUuid())
-                                             .build();
+        final ProjectId projectId = projectId();
         final TestEventFactory eventFactory = newInstance(pack(projectId),
                                                           IntegrationBusTestEnv.class);
         return eventFactory.createEvent(ItgProjectCreated.newBuilder()
@@ -80,11 +82,29 @@ public class IntegrationBusTestEnv {
         );
     }
 
+    public static Event projectStarted() {
+        final ProjectId projectId = projectId();
+        final TestEventFactory eventFactory = newInstance(pack(projectId),
+                                                          IntegrationBusTestEnv.class);
+        return eventFactory.createEvent(ItgProjectStarted.newBuilder()
+                                                         .setProjectId(projectId)
+                                                         .build()
+        );
+    }
+
+    private static ProjectId projectId() {
+        return ProjectId.newBuilder()
+                        .setId(Identifier.newUuid())
+                        .build();
+    }
+
     @SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod")  // OK to preserve the state.
     public static class ProjectDetails
             extends Projection<ProjectId, StringValue, StringValueVBuilder> {
 
-        private static ItgProjectCreated eventCaught = null;
+        private static ItgProjectCreated externalEvent = null;
+
+        private static ItgProjectStarted domesticEvent = null;
 
         /**
          * Creates a new instance.
@@ -98,11 +118,20 @@ public class IntegrationBusTestEnv {
 
         @Subscribe(external = true)
         public void on(ItgProjectCreated event) {
-            eventCaught = event;
+            externalEvent = event;
         }
 
-        public static ItgProjectCreated getEventCaught() {
-            return eventCaught;
+        @Subscribe()
+        public void on(ItgProjectStarted event) {
+            domesticEvent = event;
+        }
+
+        public static ItgProjectCreated getExternalEvent() {
+            return externalEvent;
+        }
+
+        public static ItgProjectStarted getDomesticEvent() {
+            return domesticEvent;
         }
     }
 
@@ -110,19 +139,29 @@ public class IntegrationBusTestEnv {
             extends ProjectionRepository<ProjectId, ProjectDetails, StringValue> {
     }
 
-
     @SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod")  // OK to preserve the state.
     public static class ExternalSubscriber extends EventSubscriber {
 
         private static ItgProjectCreated externalEvent = null;
+
+        private static ItgProjectStarted domesticEvent = null;
 
         @Subscribe(external = true)
         void on(ItgProjectCreated msg) {
             externalEvent = msg;
         }
 
+        @Subscribe
+        void on(ItgProjectStarted msg) {
+            domesticEvent = msg;
+        }
+
         public static ItgProjectCreated getExternalEvent() {
             return externalEvent;
+        }
+
+        public static ItgProjectStarted getDomesticEvent() {
+            return domesticEvent;
         }
     }
 }
