@@ -27,6 +27,8 @@ import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.core.React;
+import io.spine.core.RejectionClass;
+import io.spine.core.RejectionEnvelope;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandDispatcher;
@@ -35,9 +37,13 @@ import io.spine.server.entity.Repository;
 import io.spine.server.event.DelegatingEventDispatcher;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcherDelegate;
+import io.spine.server.rejection.DelegatingRejectionDispatcher;
+import io.spine.server.rejection.RejectionDispatcherDelegate;
 import io.spine.server.route.CommandRouting;
 import io.spine.server.route.EventProducers;
 import io.spine.server.route.EventRouting;
+import io.spine.server.route.RejectionProducers;
+import io.spine.server.route.RejectionRouting;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
@@ -54,7 +60,6 @@ import static io.spine.core.Commands.causedByRejection;
 import static io.spine.server.entity.AbstractEntity.createEntity;
 import static io.spine.server.entity.AbstractEntity.getConstructor;
 import static io.spine.server.entity.EntityWithLifecycle.Predicates.isEntityVisible;
-import static io.spine.server.route.EventRouting.withDefault;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -81,7 +86,9 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  */
 public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         extends Repository<I, A>
-        implements CommandDispatcher<I>, EventDispatcherDelegate<I> {
+        implements CommandDispatcher<I>,
+                   EventDispatcherDelegate<I>,
+                   RejectionDispatcherDelegate<I> {
 
     /** The default number of events to be stored before a next snapshot is made. */
     static final int DEFAULT_SNAPSHOT_TRIGGER = 100;
@@ -90,7 +97,12 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     private final CommandRouting<I> commandRouting = CommandRouting.newInstance();
 
     /** The routing schema for events to which aggregates react. */
-    private final EventRouting<I> eventRouting = withDefault(EventProducers.<I>fromContext());
+    private final EventRouting<I> eventRouting =
+            EventRouting.withDefault(EventProducers.<I>fromContext());
+
+    /** The routing schema for rejections to which aggregates react. */
+    private final RejectionRouting<I> rejectionRouting =
+            RejectionRouting.withDefault(RejectionProducers.<I>fromContext());
 
     /** The number of events to store between snapshots. */
     private int snapshotTrigger = DEFAULT_SNAPSHOT_TRIGGER;
@@ -102,9 +114,13 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Nullable
     private Set<CommandClass> commandClasses;
 
-    /** The set of event classes to which aggregates of this repository {@linkplain React react}. */
+    /** The set of event classes on which aggregates {@linkplain React react}. */
     @Nullable
     private Set<EventClass> reactedEventClasses;
+
+    /** The set of rejection classes on which aggregates {@linkplain React react}. */
+    @Nullable
+    private Set<RejectionClass> reactedRejectionClasses;
 
     /** Creates a new instance. */
     protected AggregateRepository() {
@@ -125,14 +141,18 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
         final Set<CommandClass> commandClasses = getMessageClasses();
 
-        final DelegatingEventDispatcher<I> delegatingDispatcher;
-        delegatingDispatcher = DelegatingEventDispatcher.of(this);
-        final Set<EventClass> eventClasses = delegatingDispatcher.getMessageClasses();
+        final DelegatingEventDispatcher<I> eventDispatcher;
+        eventDispatcher = DelegatingEventDispatcher.of(this);
+        final Set<EventClass> eventClasses = eventDispatcher.getMessageClasses();
 
-        if (commandClasses.isEmpty() && eventClasses.isEmpty()) {
+        final DelegatingRejectionDispatcher<I> rejectionDispatcher;
+        rejectionDispatcher = DelegatingRejectionDispatcher.of(this);
+        final Set<RejectionClass> rejectionClasses = rejectionDispatcher.getMessageClasses();
+
+        if (commandClasses.isEmpty() && eventClasses.isEmpty() && rejectionClasses.isEmpty()) {
             throw newIllegalStateException(
                     "Aggregates of the repository %s neither handle commands" +
-                            " nor react on events.", this);
+                            " nor react on events or rejections.", this);
         }
 
         if (!commandClasses.isEmpty()) {
@@ -142,7 +162,12 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
         if (!eventClasses.isEmpty()) {
             boundedContext.getEventBus()
-                          .register(delegatingDispatcher);
+                          .register(eventDispatcher);
+        }
+
+        if (!rejectionClasses.isEmpty()) {
+            boundedContext.getRejectionBus()
+                          .register(rejectionDispatcher);
         }
     }
 
@@ -300,6 +325,29 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         logError("Error reacting on event (class: %s id: %s).", envelope, exception);
     }
 
+    @Override
+    @SuppressWarnings("ReturnOfCollectionOrArrayField") // We return immutable impl.
+    public Set<RejectionClass> getRejectionClasses() {
+        if (reactedRejectionClasses == null) {
+            reactedRejectionClasses =
+                    Aggregate.TypeInfo.getReactedRejectionClasses(getAggregateClass());
+        }
+        return reactedRejectionClasses;
+    }
+
+    @Override
+    public Set<I> dispatchRejection(RejectionEnvelope envelope) {
+        checkNotNull(envelope);
+        return AggregateRejectionEndpoint.handle(this, envelope);
+    }
+
+    @Override
+    public void onError(RejectionEnvelope envelope, RuntimeException exception) {
+        checkNotNull(envelope);
+        checkNotNull(exception);
+        logError("Error reacting on rejection (class %s, id: %s)", envelope, exception);
+    }
+
     /**
      * Obtains command routing instance used by this repository.
      */
@@ -312,6 +360,13 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     protected final EventRouting<I> getEventRouting() {
         return eventRouting;
+    }
+
+    /**
+     * Obtains rejection routing instance used by this repository.
+     */
+    protected final RejectionRouting<I> getRejectionRouting() {
+        return rejectionRouting;
     }
 
     /**
@@ -358,7 +413,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     /**
      * Loads or creates an aggregate by the passed ID.
      *
-     * @param id the ID of the aggregate
+     * @param  id the ID of the aggregate
      * @return loaded or created aggregate instance
      */
     @VisibleForTesting
@@ -398,10 +453,10 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * <p>If the aggregate has at least one {@linkplain LifecycleFlags lifecycle flag} set
      * {@code Optional.absent()} is returned.
      *
-     * @param id the ID of the aggregate to load
+     * @param  id the ID of the aggregate to load
      * @return the loaded object
-     * @throws IllegalStateException if the repository wasn't configured
-     *                               prior to calling this method
+     * @throws IllegalStateException
+     *         if the repository wasn't configured prior to calling this method
      * @see AggregateStateRecord
      */
     @Override

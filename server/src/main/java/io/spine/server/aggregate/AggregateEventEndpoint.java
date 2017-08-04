@@ -40,7 +40,7 @@ import java.util.Set;
  * @see React
  */
 class AggregateEventEndpoint<I, A extends Aggregate<I, ?, ?>>
-        extends AggregateMessageEndpoint<I, A, EventEnvelope, Set<I>>{
+        extends AggregateMessageEndpoint<I, A, EventEnvelope, Set<I>> {
 
     private AggregateEventEndpoint(AggregateRepository<I, A> repo, EventEnvelope event) {
         super(repo, event);

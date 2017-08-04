@@ -33,6 +33,7 @@ import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.core.MessageEnvelope;
+import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
 import io.spine.core.Version;
 import io.spine.core.Versions;
@@ -399,16 +400,19 @@ public abstract class Aggregate<I,
      */
     static class TypeInfo {
 
-        private TypeInfo() {
-            // Prevent construction of this utility class.
+        /** Prevents instantiation of this utility class. */
+        private TypeInfo() {}
+
+        static Set<CommandClass> getCommandClasses(Class<? extends Aggregate> cls) {
+            return CommandHandlerMethod.inspect(cls);
         }
 
-        static Set<CommandClass> getCommandClasses(Class<? extends Aggregate> aggregateClass) {
-            return CommandHandlerMethod.inspect(aggregateClass);
+        static Set<EventClass> getReactedEventClasses(Class<? extends Aggregate> cls) {
+            return EventReactorMethod.inspect(cls);
         }
 
-        static Set<EventClass> getReactedEventClasses(Class<? extends Aggregate> aggregateClass) {
-            return EventReactorMethod.inspect(aggregateClass);
+        static Set<RejectionClass> getReactedRejectionClasses(Class<? extends Aggregate> cls) {
+            return RejectionReactorMethod.inspect(cls);
         }
     }
 }
