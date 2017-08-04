@@ -24,13 +24,13 @@ import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.EventContext;
+import io.spine.core.EventEnvelope;
 import io.spine.core.Version;
 import io.spine.server.entity.TransactionListener.SilentWitness;
 import io.spine.validate.AbstractValidatingBuilder;
 import io.spine.validate.ValidatingBuilder;
 import io.spine.validate.ValidationException;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -206,13 +206,10 @@ public abstract class Transaction<I,
      *
      * <p>This operation is always performed in scope of an active transaction.
      *
-     * @param entity       the target entity
-     * @param eventMessage the event message
-     * @param context      the event context
-     * @throws InvocationTargetException if case of any issues while dispatching
+     * @param entity  the target entity
+     * @param event   the event to dispatch
      */
-    protected abstract void dispatch(E entity, Message eventMessage, EventContext context)
-            throws InvocationTargetException;
+    protected abstract void dispatch(E entity, EventEnvelope event);
 
     /**
      * Allows to understand whether this transaction is active.
@@ -246,7 +243,7 @@ public abstract class Transaction<I,
      * Applies all the outstanding modifications to the enclosed entity.
      *
      * @throws InvalidEntityStateException in case the new entity state is not valid
-     * @throws IllegalStateException       in case of a generic failure
+     * @throws IllegalStateException       in case of a generic error
      */
     protected void commit() throws InvalidEntityStateException, IllegalStateException {
 
@@ -302,20 +299,19 @@ public abstract class Transaction<I,
     }
 
     /**
-     * Creates a new {@linkplain Phase transaction phase} for the given
-     * {@code eventMessage} and {@code context} and propagates the phase.
+     * Creates a new {@linkplain Phase transaction phase} for the given event
+     * and propagates the phase.
      *
      * <p>If case of an exception, the {@linkplain #rollback(Throwable) transaction rollback}
      * is performed.
      *
-     * @param eventMessage the message of an event to apply
-     * @param context      the context of an event to apply
-     * @return this instance of transaction
-     * @see Phase#apply(Message, EventContext)
+     * @param event the envelope with the event
+     * @return this instance of the transaction
+     * @see Transaction#apply(EventEnvelope)
      */
     @SuppressWarnings("OverlyBroadCatchBlock")  // to `rollback(..)` in case of any exception.
-    Transaction<I, E, S, B> apply(Message eventMessage, EventContext context) {
-        final Phase<I, E, S, B> phase = new Phase<>(this, eventMessage, context);
+    Transaction<I, E, S, B> apply(EventEnvelope event) {
+        final Phase<I, E, S, B> phase = new Phase<>(this, event);
 
         Phase<I, E, S, B> appliedPhase = null;
         try {
@@ -465,16 +461,13 @@ public abstract class Transaction<I,
                                  B extends ValidatingBuilder<S, ? extends Message.Builder>> {
 
         private final Transaction<I, E, S, B> underlyingTransaction;
-        private final Message eventMessage;
-        private final EventContext context;
+        private final EventEnvelope event;
 
         private boolean successful = false;
 
-        private Phase(Transaction<I, E, S, B> transaction, Message eventMessage,
-                      EventContext context) {
+        private Phase(Transaction<I, E, S, B> transaction, EventEnvelope event) {
             this.underlyingTransaction = transaction;
-            this.eventMessage = eventMessage;
-            this.context = context;
+            this.event = event;
         }
 
         /**
@@ -482,13 +475,10 @@ public abstract class Transaction<I,
          * current entity version for this transaction. Also marks the current phase as successful.
          *
          * @return this instance of {@code Phase}
-         * @throws InvocationTargetException if the event listener invocation encountered an error
          */
-        private Phase<I, E, S, B> propagate() throws InvocationTargetException {
-            underlyingTransaction.dispatch(underlyingTransaction.getEntity(),
-                                           eventMessage,
-                                           context);
-            underlyingTransaction.advanceVersion(context.getVersion());
+        private Phase<I, E, S, B> propagate() {
+            underlyingTransaction.dispatch(underlyingTransaction.getEntity(), event);
+            underlyingTransaction.advanceVersion(getContext().getVersion());
             markSuccessful();
             return this;
         }
@@ -502,11 +492,11 @@ public abstract class Transaction<I,
         }
 
         protected Message getEventMessage() {
-            return eventMessage;
+            return event.getMessage();
         }
 
         protected EventContext getContext() {
-            return context;
+            return event.getEventContext();
         }
     }
 }

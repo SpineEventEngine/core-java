@@ -30,8 +30,8 @@ import io.spine.server.entity.TransactionListener;
 import io.spine.server.entity.TransactionShould;
 import io.spine.test.procman.Project;
 import io.spine.test.procman.ProjectId;
-import io.spine.test.procman.event.ProjectCreated;
-import io.spine.test.procman.event.TaskAdded;
+import io.spine.test.procman.event.PmProjectCreated;
+import io.spine.test.procman.event.PmTaskAdded;
 import io.spine.validate.ConstraintViolation;
 
 import javax.annotation.Nullable;
@@ -55,9 +55,9 @@ public class ProcManTransactionShould extends TransactionShould<ProjectId,
 
     @Override
     protected Transaction<ProjectId,
-                ProcessManager<ProjectId, Project, PatchedProjectBuilder>,
-                Project,
-                PatchedProjectBuilder>
+            ProcessManager<ProjectId, Project, PatchedProjectBuilder>,
+            Project,
+            PatchedProjectBuilder>
     createTx(ProcessManager<ProjectId, Project, PatchedProjectBuilder> entity) {
         return new ProcManTransaction<>(entity);
     }
@@ -74,13 +74,13 @@ public class ProcManTransactionShould extends TransactionShould<ProjectId,
 
     @Override
     protected Transaction<ProjectId, ProcessManager<ProjectId, Project, PatchedProjectBuilder>,
-                          Project, PatchedProjectBuilder>
+            Project, PatchedProjectBuilder>
     createTxWithListener(ProcessManager<ProjectId, Project, PatchedProjectBuilder> entity,
                          TransactionListener<ProjectId,
-                                             ProcessManager<ProjectId,
-                                                            Project,
-                                                            PatchedProjectBuilder>,
-                                             Project, PatchedProjectBuilder> listener) {
+                                 ProcessManager<ProjectId,
+                                         Project,
+                                         PatchedProjectBuilder>,
+                                 Project, PatchedProjectBuilder> listener) {
         return new ProcManTransaction<>(entity, listener);
     }
 
@@ -116,23 +116,24 @@ public class ProcManTransactionShould extends TransactionShould<ProjectId,
 
     @Override
     protected Message createEventMessage() {
-        return ProjectCreated.newBuilder()
-                             .setProjectId(ID)
-                             .build();
+        return PmProjectCreated.newBuilder()
+                                 .setProjectId(ID)
+                                 .build();
     }
 
     @Override
     protected Message createEventMessageThatFailsInHandler() {
-        return TaskAdded.newBuilder()
-                        .setProjectId(ID)
-                        .build();
+        return PmTaskAdded.newBuilder()
+                            .setProjectId(ID)
+                            .build();
     }
 
     @Override
     protected void breakEntityValidation(
             ProcessManager<ProjectId, Project, PatchedProjectBuilder> entity,
             RuntimeException toThrow) {
-        entity.getBuilder().setShouldThrow(toThrow);
+        entity.getBuilder()
+              .setShouldThrow(toThrow);
     }
 
     @SuppressWarnings({"MethodMayBeStatic", "unused"})  // Methods accessed via reflection.
@@ -153,14 +154,14 @@ public class ProcManTransactionShould extends TransactionShould<ProjectId,
 
         @Override
         protected List<ConstraintViolation> checkEntityState(Project newState) {
-            if(violations != null) {
+            if (violations != null) {
                 return ImmutableList.copyOf(violations);
             }
             return super.checkEntityState(newState);
         }
 
         @Subscribe
-        public void event(ProjectCreated event) {
+        public void event(PmProjectCreated event) {
             receivedEvents.add(event);
             final Project newState = Project.newBuilder(getState())
                                             .setId(event.getProjectId())
@@ -169,7 +170,7 @@ public class ProcManTransactionShould extends TransactionShould<ProjectId,
         }
 
         @Subscribe
-        public void event(TaskAdded event) {
+        public void event(PmTaskAdded event) {
             throw new RuntimeException("that tests the tx behaviour for process manager");
         }
 

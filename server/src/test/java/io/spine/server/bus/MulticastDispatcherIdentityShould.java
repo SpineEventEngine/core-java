@@ -66,6 +66,11 @@ public class MulticastDispatcherIdentityShould {
         }
 
         @Override
+        public void onError(MessageEnvelope envelope, RuntimeException exception) {
+            // Do nothing.
+        }
+
+        @Override
         public String toString() {
             return ID;
         }

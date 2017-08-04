@@ -24,10 +24,19 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.protobuf.BoolValue;
+import com.google.protobuf.FloatValue;
 import com.google.protobuf.Message;
+import com.google.protobuf.StringValue;
+import com.google.protobuf.Timestamp;
+import com.google.protobuf.UInt32Value;
+import com.google.protobuf.UInt64Value;
+import com.google.protobuf.util.Timestamps;
 import io.spine.client.TestActorRequestFactory;
+import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.EventContext;
+import io.spine.core.MessageEnvelope;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.AggregateRepositoryShould;
@@ -35,24 +44,31 @@ import io.spine.server.aggregate.Apply;
 import io.spine.server.aggregate.React;
 import io.spine.server.command.Assign;
 import io.spine.server.entity.given.Given;
+import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
+import io.spine.server.route.CommandRoute;
 import io.spine.server.route.EventRoute;
+import io.spine.string.Stringifiers;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.ProjectVBuilder;
 import io.spine.test.aggregate.Status;
-import io.spine.test.aggregate.command.AddTask;
-import io.spine.test.aggregate.command.CreateProject;
-import io.spine.test.aggregate.command.StartProject;
-import io.spine.test.aggregate.event.ProjectArchived;
-import io.spine.test.aggregate.event.ProjectCreated;
-import io.spine.test.aggregate.event.ProjectDeleted;
-import io.spine.test.aggregate.event.ProjectStarted;
-import io.spine.test.aggregate.event.TaskAdded;
+import io.spine.test.aggregate.command.AggAddTask;
+import io.spine.test.aggregate.command.AggCreateProject;
+import io.spine.test.aggregate.command.AggStartProject;
+import io.spine.test.aggregate.event.AggProjectArchived;
+import io.spine.test.aggregate.event.AggProjectCreated;
+import io.spine.test.aggregate.event.AggProjectDeleted;
+import io.spine.test.aggregate.event.AggProjectStarted;
+import io.spine.test.aggregate.event.AggTaskAdded;
 import io.spine.testdata.Sample;
+import io.spine.time.Time;
+import io.spine.validate.BoolValueVBuilder;
+import io.spine.validate.StringValueVBuilder;
 
+import javax.annotation.Nullable;
 import java.util.Set;
 
-import static io.spine.server.aggregate.AggregateCommandDispatcher.dispatch;
+import static io.spine.server.aggregate.AggregateMessageDispatcher.dispatchCommand;
 
 /**
  * @author Alexander Yevsyukov
@@ -88,22 +104,22 @@ public class AggregateRepositoryTestEnv {
                                                     .withId(id)
                                                     .build();
 
-            final CreateProject createProject =
-                    ((CreateProject.Builder) Sample.builderForType(CreateProject.class))
+            final AggCreateProject createProject =
+                    ((AggCreateProject.Builder) Sample.builderForType(AggCreateProject.class))
                             .setProjectId(id)
                             .build();
-            final AddTask addTask =
-                    ((AddTask.Builder) Sample.builderForType(AddTask.class))
+            final AggAddTask addTask =
+                    ((AggAddTask.Builder) Sample.builderForType(AggAddTask.class))
                             .setProjectId(id)
                             .build();
-            final StartProject startProject =
-                    ((StartProject.Builder) Sample.builderForType(StartProject.class))
+            final AggStartProject startProject =
+                    ((AggStartProject.Builder) Sample.builderForType(AggStartProject.class))
                             .setProjectId(id)
                             .build();
 
-            dispatch(aggregate, env(createProject));
-            dispatch(aggregate, env(addTask));
-            dispatch(aggregate, env(startProject));
+            dispatchCommand(aggregate, env(createProject));
+            dispatchCommand(aggregate, env(addTask));
+            dispatchCommand(aggregate, env(startProject));
 
             return aggregate;
         }
@@ -127,76 +143,76 @@ public class AggregateRepositoryTestEnv {
         }
 
         @Assign
-        ProjectCreated handle(CreateProject msg) {
-            return ProjectCreated.newBuilder()
-                                 .setProjectId(msg.getProjectId())
-                                 .setName(msg.getName())
-                                 .build();
+        AggProjectCreated handle(AggCreateProject msg) {
+            return AggProjectCreated.newBuilder()
+                                    .setProjectId(msg.getProjectId())
+                                    .setName(msg.getName())
+                                    .build();
         }
 
         @Apply
-        private void apply(ProjectCreated event) {
+        private void apply(AggProjectCreated event) {
             getBuilder().setId(event.getProjectId())
                         .setName(event.getName());
         }
 
         @Assign
-        TaskAdded handle(AddTask msg) {
-            return TaskAdded.newBuilder()
-                            .setProjectId(msg.getProjectId())
-                            .setTask(msg.getTask())
-                            .build();
+        AggTaskAdded handle(AggAddTask msg) {
+            return AggTaskAdded.newBuilder()
+                               .setProjectId(msg.getProjectId())
+                               .setTask(msg.getTask())
+                               .build();
         }
 
         @Apply
-        private void apply(TaskAdded event) {
+        private void apply(AggTaskAdded event) {
             getBuilder().setId(event.getProjectId())
                         .addTask(event.getTask());
         }
 
         @Assign
-        ProjectStarted handle(StartProject msg) {
-            return ProjectStarted.newBuilder()
-                                 .setProjectId(msg.getProjectId())
-                                 .build();
+        AggProjectStarted handle(AggStartProject msg) {
+            return AggProjectStarted.newBuilder()
+                                    .setProjectId(msg.getProjectId())
+                                    .build();
         }
 
         @Apply
-        private void apply(ProjectStarted event) {
+        private void apply(AggProjectStarted event) {
             getBuilder().setStatus(Status.STARTED);
         }
 
         /**
-         * Emits {@link ProjectArchived} if the event is from the parent project.
+         * Emits {@link AggProjectArchived} if the event is from the parent project.
          * Otherwise returns empty iterable.
          */
         @React
-        private Iterable<ProjectArchived> on(ProjectArchived event) {
+        private Iterable<AggProjectArchived> on(AggProjectArchived event) {
             if (event.getChildProjectIdList()
                      .contains(getId())) {
-                return ImmutableList.of(ProjectArchived.newBuilder()
-                                                       .setProjectId(getId())
-                                                       .build());
+                return ImmutableList.of(AggProjectArchived.newBuilder()
+                                                          .setProjectId(getId())
+                                                          .build());
             }
             return nothing();
         }
 
         @Apply
-        private void apply(ProjectArchived event) {
+        private void apply(AggProjectArchived event) {
             setArchived(true);
         }
 
         /**
-         * Emits {@link ProjectDeleted} if the event is from the parent project.
+         * Emits {@link AggProjectDeleted} if the event is from the parent project.
          * Otherwise returns empty iterable.
          */
         @React
-        private Iterable<ProjectDeleted> on(ProjectDeleted event) {
+        private Iterable<AggProjectDeleted> on(AggProjectDeleted event) {
             if (event.getChildProjectIdList()
                      .contains(getId())) {
-                return ImmutableList.of(ProjectDeleted.newBuilder()
-                                                      .setProjectId(getId())
-                                                      .build());
+                return ImmutableList.of(AggProjectDeleted.newBuilder()
+                                                         .setProjectId(getId())
+                                                         .build());
             }
             return nothing();
         }
@@ -235,21 +251,23 @@ public class AggregateRepositoryTestEnv {
         public ProjectAggregateRepository() {
             super();
             getEventRouting()
-                    .route(ProjectArchived.class,
-                           new EventRoute<ProjectId, ProjectArchived>() {
+                    .route(AggProjectArchived.class,
+                           new EventRoute<ProjectId, AggProjectArchived>() {
                                private static final long serialVersionUID = 0L;
 
                                @Override
-                               public Set<ProjectId> apply(ProjectArchived msg, EventContext ctx) {
+                               public Set<ProjectId> apply(AggProjectArchived msg,
+                                                           EventContext ctx) {
                                    return ImmutableSet.copyOf(msg.getChildProjectIdList());
                                }
                            })
-                    .route(ProjectDeleted.class,
-                           new EventRoute<ProjectId, ProjectDeleted>() {
+                    .route(AggProjectDeleted.class,
+                           new EventRoute<ProjectId, AggProjectDeleted>() {
                                private static final long serialVersionUID = 0L;
 
                                @Override
-                               public Set<ProjectId> apply(ProjectDeleted msg, EventContext ctx) {
+                               public Set<ProjectId> apply(AggProjectDeleted msg,
+                                                           EventContext ctx) {
                                    return ImmutableSet.copyOf(msg.getChildProjectIdList());
                                }
                            });
@@ -261,6 +279,222 @@ public class AggregateRepositoryTestEnv {
                 return Optional.absent();
             }
             return super.find(id);
+        }
+    }
+
+    /**
+     * The aggregate which throws {@link IllegalArgumentException} in response to negative numbers.
+     *
+     * <p>Normally aggregates should reject commands via command rejections. This class is test
+     * environment for testing of now
+     * {@linkplain AggregateRepository#logError(String, MessageEnvelope, RuntimeException) logs
+     * errors}.
+     *
+     * @see FailingAggregateRepository
+     */
+    public static class FailingAggregate extends Aggregate<Long, StringValue, StringValueVBuilder> {
+
+        private FailingAggregate(Long id) {
+            super(id);
+        }
+
+        @SuppressWarnings("NumericCastThatLosesPrecision") // Int. part as ID.
+        static long toId(FloatValue message) {
+            final float floatValue = message.getValue();
+            return (long) Math.abs(floatValue);
+        }
+
+        @Assign
+        Timestamp on(UInt32Value value) {
+            if (value.getValue() < 0) {
+                throw new IllegalArgumentException("Negative value passed");
+            }
+            return Time.getCurrentTime();
+        }
+
+        /** Rejects a negative value via command rejection. */
+        @Assign
+        Timestamp on(UInt64Value value) throws CannotModifyArchivedEntity {
+            if (value.getValue() < 0) {
+                throw new CannotModifyArchivedEntity(Stringifiers.toString(getId()));
+            }
+            return Time.getCurrentTime();
+        }
+
+        @Apply
+        void apply(Timestamp timestamp) {
+            getBuilder().setValue(getState().getValue()
+                                          + System.lineSeparator()
+                                          + Timestamps.toString(timestamp));
+        }
+
+        @React
+        Timestamp on(FloatValue value) {
+            final float floatValue = value.getValue();
+            if (floatValue < 0) {
+                final long longValue = toId(value);
+                // Complain only if the passed value represents ID of this aggregate.
+                // This would allow other aggregates react on this message.
+                if (longValue == getId()) {
+                    throw new IllegalArgumentException("Negative floating point value passed");
+                }
+            }
+            return Time.getCurrentTime();
+        }
+    }
+
+    public static class FailingAggregateRepository
+            extends AggregateRepository<Long, FailingAggregate> {
+
+        private boolean errorLogged;
+        @Nullable
+        private MessageEnvelope lastErrorEnvelope;
+        @Nullable
+        private RuntimeException lastException;
+
+        @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
+        public FailingAggregateRepository() {
+            super();
+            getCommandRouting().replaceDefault(
+                    // Simplistic routing function that takes absolute value as ID.
+                    new CommandRoute<Long, Message>() {
+                        private static final long serialVersionUID = 0L;
+
+                        @Override
+                        public Long apply(Message message, CommandContext context) {
+                            if (message instanceof UInt32Value) {
+                                UInt32Value uInt32Value = (UInt32Value) message;
+                                return (long) Math.abs(uInt32Value.getValue());
+                            }
+                            return 0L;
+                        }
+                    }
+            );
+
+            getEventRouting().replaceDefault(
+                    new EventRoute<Long, Message>() {
+                        private static final long serialVersionUID = 0L;
+
+                        /**
+                         * Returns several entity identifiers to check error isolation.
+                         * @see FailingAggregate#on(FloatValue)
+                         */
+                        @Override
+                        public Set<Long> apply(Message message, EventContext context) {
+                            if (message instanceof FloatValue) {
+                                final long absValue = FailingAggregate.toId((FloatValue) message);
+                                return ImmutableSet.of(absValue, absValue + 100, absValue + 200);
+                            }
+                            return ImmutableSet.of(1L, 2L);
+                        }
+                    });
+        }
+
+        @Override
+        protected void logError(String msgFormat,
+                                MessageEnvelope envelope,
+                                RuntimeException exception) {
+            super.logError(msgFormat, envelope, exception);
+            errorLogged = true;
+            lastErrorEnvelope = envelope;
+            lastException = exception;
+        }
+
+        public boolean isErrorLogged() {
+            return errorLogged;
+        }
+
+        @Nullable
+        public MessageEnvelope getLastErrorEnvelope() {
+            return lastErrorEnvelope;
+        }
+
+        @Nullable
+        public RuntimeException getLastException() {
+            return lastException;
+        }
+    }
+
+    /**
+     * An aggregate class which neither handle commands nor react on events.
+     */
+    public static class AnemicAggregate extends Aggregate<Integer, BoolValue, BoolValueVBuilder> {
+        private AnemicAggregate(Integer id) {
+            super(id);
+        }
+    }
+
+    /**
+     * The repository of {@link AnemicAggregate}.
+     */
+    public static class AnemicAggregateRepository
+            extends AggregateRepository<Integer, AnemicAggregate> {
+    }
+
+    /**
+     * An aggregate class that reacts only on events and does not handle commands.
+     */
+    public static class ReactingAggregate
+            extends Aggregate<ProjectId, StringValue, StringValueVBuilder> {
+
+        private ReactingAggregate(ProjectId id) {
+            super(id);
+        }
+
+        /**
+         * Emits {@link AggProjectArchived} if the event is from the parent project.
+         * Otherwise returns empty iterable.
+         */
+        @React
+        private Iterable<AggProjectArchived> on(AggProjectArchived event) {
+            if (event.getChildProjectIdList()
+                     .contains(getId())) {
+                return ImmutableList.of(AggProjectArchived.newBuilder()
+                                                          .setProjectId(getId())
+                                                          .build());
+            }
+            return nothing();
+        }
+
+        /**
+         * Emits {@link AggProjectDeleted} if the event is from the parent project.
+         * Otherwise returns empty iterable.
+         */
+        @React
+        private Iterable<AggProjectDeleted> on(AggProjectDeleted event) {
+            if (event.getChildProjectIdList()
+                     .contains(getId())) {
+                return ImmutableList.of(AggProjectDeleted.newBuilder()
+                                                         .setProjectId(getId())
+                                                         .build());
+            }
+            return nothing();
+        }
+
+        private static <M> Iterable<M> nothing() {
+            return ImmutableList.of();
+        }
+
+        @Apply
+        private void apply(AggProjectArchived event) {
+            setArchived(true);
+        }
+
+        @Apply
+        private void apply(AggProjectDeleted event) {
+            setDeleted(true);
+        }
+    }
+
+    /**
+     * The repository of {@link ReactingAggregate}.
+     */
+    public static class ReactingRepository
+            extends AggregateRepository<ProjectId, ReactingAggregate> {
+
+        public void createAndStore(ProjectId id) {
+            ReactingAggregate newAggregate = new ReactingAggregate(id);
+            store(newAggregate);
         }
     }
 }

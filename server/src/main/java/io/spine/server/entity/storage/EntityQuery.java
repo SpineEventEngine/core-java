@@ -30,6 +30,7 @@ import io.spine.server.entity.EntityWithLifecycle;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -105,10 +106,10 @@ public final class EntityQuery<I> implements Serializable {
     }
 
     /**
-     * @return a set of accepted ID values
+     * @return an immutable set of accepted ID values
      */
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // Immutable structure
-    public ImmutableSet<I> getIds() {
+    public Set<I> getIds() {
         return ids;
     }
 
@@ -141,7 +142,8 @@ public final class EntityQuery<I> implements Serializable {
      */
     @Internal
     public EntityQuery<I> withLifecycleFlags(Class<? extends EntityWithLifecycle<I, ?>> cls) {
-        checkState(!isLifecycleAttributesSet(), "The query overrides Lifecycle Flags default values.");
+        checkState(!isLifecycleAttributesSet(),
+                   "The query overrides Lifecycle Flags default values.");
         final Column archivedColumn = findColumn(cls, archived.name());
         final Column deletedColumn = findColumn(cls, deleted.name());
         final CompositeQueryParameter lifecycleParameter = CompositeQueryParameter.from(

@@ -22,10 +22,12 @@ package io.spine.core;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Predicate;
+import com.google.common.base.Throwables;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.Identifier;
+import io.spine.base.ThrowableMessage;
 import io.spine.protobuf.AnyPacker;
 import io.spine.string.Stringifier;
 import io.spine.string.StringifierRegistry;
@@ -208,6 +210,24 @@ public final class Commands {
         final String idStr = Identifier.toString(id);
         checkArgument(!idStr.equals(EMPTY_ID), "Command ID must not be an empty string.");
         return id;
+    }
+
+    /**
+     * Verifies if the exception has command rejection as its
+     * {@linkplain Throwables#getRootCause(Throwable) root cause} .
+     *
+     * @param exception the exception to analyze
+     * @return {@code true} if the exception was created because of a command rejection thrown,
+     *         {@code false} otherwise
+     */
+    public static boolean causedByRejection(RuntimeException exception) {
+        //TODO:2017-07-26:alexander.yevsyukov: Check against CommandRejected
+        // instead of ThrowableMessage when code generation allows customizing a custom
+        // rejection types instead of `ThrowableMessage`.
+        // See: https://github.com/SpineEventEngine/base/issues/20
+        final Throwable rootCause = Throwables.getRootCause(exception);
+        final boolean result = rootCause instanceof ThrowableMessage;
+        return result;
     }
 
     /**

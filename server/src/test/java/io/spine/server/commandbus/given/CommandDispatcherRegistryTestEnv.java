@@ -36,16 +36,16 @@ import io.spine.server.entity.TestEntityWithStringColumn;
 import io.spine.server.event.EventBus;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
-import io.spine.test.command.AddTask;
-import io.spine.test.command.CreateProject;
+import io.spine.test.command.CmdAddTask;
+import io.spine.test.command.CmdCreateProject;
 import io.spine.test.command.Project;
 import io.spine.test.command.ProjectId;
 import io.spine.test.command.ProjectVBuilder;
-import io.spine.test.command.StartProject;
+import io.spine.test.command.CmdStartProject;
 import io.spine.test.command.Task;
-import io.spine.test.command.event.ProjectCreated;
-import io.spine.test.command.event.ProjectStarted;
-import io.spine.test.command.event.TaskAdded;
+import io.spine.test.command.event.CmdProjectCreated;
+import io.spine.test.command.event.CmdProjectStarted;
+import io.spine.test.command.event.CmdTaskAdded;
 
 import java.util.Collections;
 import java.util.Set;
@@ -80,7 +80,7 @@ public class CommandDispatcherRegistryTestEnv {
         }
 
         @Subscribe
-        public void on(ProjectCreated event) {
+        public void on(CmdProjectCreated event) {
             // Keep the event message for further inspection in tests.
             keep(event);
 
@@ -96,7 +96,7 @@ public class CommandDispatcherRegistryTestEnv {
         }
 
         @Subscribe
-        public void on(TaskAdded event) {
+        public void on(CmdTaskAdded event) {
             keep(event);
 
             final Task task = event.getTask();
@@ -111,7 +111,7 @@ public class CommandDispatcherRegistryTestEnv {
         }
 
         @Subscribe
-        public void on(ProjectStarted event) {
+        public void on(CmdProjectStarted event) {
             keep(event);
 
             handleProjectStarted();
@@ -140,6 +140,11 @@ public class CommandDispatcherRegistryTestEnv {
         public Message dispatch(CommandEnvelope envelope) {
             return Empty.getDefaultInstance();
         }
+
+        @Override
+        public void onError(CommandEnvelope envelope, RuntimeException exception) {
+            // Do nothing.
+        }
     }
 
     public static class NoCommandsDispatcherRepo
@@ -149,26 +154,36 @@ public class CommandDispatcherRegistryTestEnv {
     public static class AllCommandDispatcher implements CommandDispatcher<Message> {
         @Override
         public Set<CommandClass> getMessageClasses() {
-            return CommandClass.setOf(CreateProject.class,
-                                      StartProject.class,
-                                      AddTask.class);
+            return CommandClass.setOf(CmdCreateProject.class,
+                                      CmdStartProject.class,
+                                      CmdAddTask.class);
         }
 
         @Override
         public Message dispatch(CommandEnvelope envelope) {
             return Empty.getDefaultInstance();
+        }
+
+        @Override
+        public void onError(CommandEnvelope envelope, RuntimeException exception) {
+            // Do nothing.
         }
     }
 
     public static class CreateProjectDispatcher implements CommandDispatcher<Message> {
         @Override
         public Set<CommandClass> getMessageClasses() {
-            return CommandClass.setOf(CreateProject.class);
+            return CommandClass.setOf(CmdCreateProject.class);
         }
 
         @Override
         public Message dispatch(CommandEnvelope envelope) {
             return Empty.getDefaultInstance();
+        }
+
+        @Override
+        public void onError(CommandEnvelope envelope, RuntimeException exception) {
+            // Do nothing.
         }
     }
 
@@ -176,13 +191,18 @@ public class CommandDispatcherRegistryTestEnv {
 
         @Override
         public Set<CommandClass> getMessageClasses() {
-            return CommandClass.setOf(AddTask.class);
+            return CommandClass.setOf(CmdAddTask.class);
         }
 
         @Override
         public Message dispatch(CommandEnvelope envelope) {
             // Do nothing.
             return Empty.getDefaultInstance();
+        }
+
+        @Override
+        public void onError(CommandEnvelope envelope, RuntimeException exception) {
+            // Do nothing.
         }
     }
 
@@ -197,8 +217,8 @@ public class CommandDispatcherRegistryTestEnv {
         }
 
         @Assign
-        ProjectCreated handle(CreateProject command, CommandContext ctx) {
-            return ProjectCreated.getDefaultInstance();
+        CmdProjectCreated handle(CmdCreateProject command, CommandContext ctx) {
+            return CmdProjectCreated.getDefaultInstance();
         }
     }
 
@@ -209,18 +229,18 @@ public class CommandDispatcherRegistryTestEnv {
         }
 
         @Assign
-        ProjectCreated handle(CreateProject command, CommandContext ctx) {
-            return ProjectCreated.getDefaultInstance();
+        CmdProjectCreated handle(CmdCreateProject command, CommandContext ctx) {
+            return CmdProjectCreated.getDefaultInstance();
         }
 
         @Assign
-        TaskAdded handle(AddTask command) {
-            return TaskAdded.getDefaultInstance();
+        CmdTaskAdded handle(CmdAddTask command) {
+            return CmdTaskAdded.getDefaultInstance();
         }
 
         @Assign
-        ProjectStarted handle(StartProject command) {
-            return ProjectStarted.getDefaultInstance();
+        CmdProjectStarted handle(CmdStartProject command) {
+            return CmdProjectStarted.getDefaultInstance();
         }
     }
 

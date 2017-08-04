@@ -22,8 +22,19 @@ package io.spine.server.reflect;
 
 import com.google.common.testing.NullPointerTester;
 import io.spine.core.EventContext;
-import io.spine.core.Subscribe;
-import io.spine.test.reflect.event.ProjectCreated;
+import io.spine.server.reflect.given.EventSubscriberMethodTestEnv.ARejectionSubscriber;
+import io.spine.server.reflect.given.EventSubscriberMethodTestEnv.InvalidNoAnnotation;
+import io.spine.server.reflect.given.EventSubscriberMethodTestEnv.InvalidNoParams;
+import io.spine.server.reflect.given.EventSubscriberMethodTestEnv.InvalidNotVoid;
+import io.spine.server.reflect.given.EventSubscriberMethodTestEnv.InvalidOneNotMsgParam;
+import io.spine.server.reflect.given.EventSubscriberMethodTestEnv.InvalidTooManyParams;
+import io.spine.server.reflect.given.EventSubscriberMethodTestEnv.InvalidTwoParamsFirstInvalid;
+import io.spine.server.reflect.given.EventSubscriberMethodTestEnv.InvalidTwoParamsSecondInvalid;
+import io.spine.server.reflect.given.EventSubscriberMethodTestEnv.ValidButPrivate;
+import io.spine.server.reflect.given.EventSubscriberMethodTestEnv.ValidOneParam;
+import io.spine.server.reflect.given.EventSubscriberMethodTestEnv.ValidTwoParams;
+import io.spine.server.reflect.given.Given;
+import io.spine.test.reflect.event.RefProjectCreated;
 import org.junit.Test;
 
 import java.lang.reflect.InvocationTargetException;
@@ -37,7 +48,6 @@ import static org.mockito.Mockito.verify;
 /**
  * @author Alexander Litus
  */
-@SuppressWarnings("unused") // OK as we have some
 public class EventSubscriberMethodShould {
 
     @Test
@@ -49,10 +59,11 @@ public class EventSubscriberMethodShould {
     
     @Test
     public void invoke_subscriber_method() throws InvocationTargetException {
-        final ValidSubscriberTwoParams subscriberObject = spy(new ValidSubscriberTwoParams());
+        final ValidTwoParams subscriberObject;
+        subscriberObject = spy(new ValidTwoParams());
         final EventSubscriberMethod subscriber =
                 EventSubscriberMethod.from(subscriberObject.getMethod());
-        final ProjectCreated msg = Given.EventMessage.projectCreated();
+        final RefProjectCreated msg = Given.EventMessage.projectCreated();
 
         subscriber.invoke(subscriberObject, msg, EventContext.getDefaultInstance());
 
@@ -62,188 +73,83 @@ public class EventSubscriberMethodShould {
 
     @Test
     public void consider_subscriber_with_one_msg_param_valid() {
-        final Method subscriber = new ValidSubscriberOneParam().getMethod();
+        final Method subscriber = new ValidOneParam().getMethod();
 
         assertIsEventSubscriber(subscriber, true);
     }
 
     @Test
     public void consider_subscriber_with_msg_and_context_params_valid() {
-        final Method subscriber = new ValidSubscriberTwoParams().getMethod();
+        final Method subscriber = new ValidTwoParams().getMethod();
 
         assertIsEventSubscriber(subscriber, true);
     }
 
     @Test
     public void consider_not_public_subscriber_valid() {
-        final Method method = new ValidSubscriberButPrivate().getMethod();
+        final Method method = new ValidButPrivate().getMethod();
 
         assertIsEventSubscriber(method, true);
     }
 
     @Test
     public void consider_not_annotated_subscriber_invalid() {
-        final Method subscriber = new InvalidSubscriberNoAnnotation().getMethod();
+        final Method subscriber = new InvalidNoAnnotation().getMethod();
 
         assertIsEventSubscriber(subscriber, false);
     }
 
     @Test
     public void consider_subscriber_without_params_invalid() {
-        final Method subscriber = new InvalidSubscriberNoParams().getMethod();
+        final Method subscriber = new InvalidNoParams().getMethod();
 
         assertIsEventSubscriber(subscriber, false);
     }
 
     @Test
     public void consider_subscriber_with_too_many_params_invalid() {
-        final Method subscriber = new InvalidSubscriberTooManyParams().getMethod();
+        final Method subscriber = new InvalidTooManyParams().getMethod();
 
         assertIsEventSubscriber(subscriber, false);
     }
 
     @Test
     public void consider_subscriber_with_one_invalid_param_invalid() {
-        final Method subscriber = new InvalidSubscriberOneNotMsgParam().getMethod();
+        final Method subscriber = new InvalidOneNotMsgParam().getMethod();
 
         assertIsEventSubscriber(subscriber, false);
     }
 
     @Test
     public void consider_subscriber_with_first_not_message_param_invalid() {
-        final Method subscriber = new InvalidSubscriberTwoParamsFirstInvalid().getMethod();
+        final Method subscriber = new InvalidTwoParamsFirstInvalid().getMethod();
 
         assertIsEventSubscriber(subscriber, false);
     }
 
     @Test
     public void consider_subscriber_with_second_not_context_param_invalid() {
-        final Method subscriber = new InvalidSubscriberTwoParamsSecondInvalid().getMethod();
+        final Method subscriber = new InvalidTwoParamsSecondInvalid().getMethod();
 
         assertIsEventSubscriber(subscriber, false);
     }
 
     @Test
     public void consider_not_void_subscriber_invalid() {
-        final Method subscriber = new InvalidSubscriberNotVoid().getMethod();
+        final Method subscriber = new InvalidNotVoid().getMethod();
 
         assertIsEventSubscriber(subscriber, false);
     }
 
+    @Test
+    public void filter_out_rejection_subscribers() {
+        final Method rejectionSubscriber = new ARejectionSubscriber().getMethod();
+
+        assertIsEventSubscriber(rejectionSubscriber, false);
+    }
+
     private static void assertIsEventSubscriber(Method subscriber, boolean isSubscriber) {
-        assertEquals(isSubscriber, EventSubscriberMethod.domesticSubscribers().apply(subscriber));
-    }
-
-    /*
-     * Valid subscribers
-     */
-
-    private static class ValidSubscriberOneParam extends TestEventSubscriber {
-        @Subscribe
-        public void handle(ProjectCreated event) {
-        }
-    }
-
-    private static class ValidSubscriberTwoParams extends TestEventSubscriber {
-        @Subscribe
-        public void handle(ProjectCreated event, EventContext context) {
-        }
-    }
-
-    private static class ValidSubscriberButPrivate extends TestEventSubscriber {
-        @Subscribe
-        private void handle(ProjectCreated event) {
-        }
-    }
-
-    /*
-     * Invalid subscribers
-     */
-
-    /**
-     * The subscriber with a method which is not annotated.
-     */
-    private static class InvalidSubscriberNoAnnotation extends TestEventSubscriber {
-        @SuppressWarnings("unused")
-        public void handle(ProjectCreated event, EventContext context) {
-        }
-    }
-
-    /**
-     * The subscriber with a method which does not have parameters.
-     */
-    private static class InvalidSubscriberNoParams extends TestEventSubscriber {
-        @Subscribe
-        public void handle() {
-        }
-    }
-
-    /**
-     * The subscriber which has too many parameters.
-     */
-    private static class InvalidSubscriberTooManyParams extends TestEventSubscriber {
-        @Subscribe
-        public void handle(ProjectCreated event, EventContext context, Object redundant) {
-        }
-    }
-
-    /**
-     * The subscriber which has invalid single argument.
-     */
-    private static class InvalidSubscriberOneNotMsgParam extends TestEventSubscriber {
-        @Subscribe
-        public void handle(Exception invalid) {
-        }
-    }
-
-    /**
-     * The subscriber with a method with first invalid parameter.
-     */
-    private static class InvalidSubscriberTwoParamsFirstInvalid extends TestEventSubscriber {
-        @Subscribe
-        public void handle(Exception invalid, EventContext context) {
-        }
-    }
-
-    /**
-     * The subscriber which has invalid second parameter.
-     */
-    private static class InvalidSubscriberTwoParamsSecondInvalid extends TestEventSubscriber {
-        @Subscribe
-        public void handle(ProjectCreated event, Exception invalid) {
-        }
-    }
-
-    /**
-     * The class with event subscriber that returns {@code Object} instead of {@code void}.
-     */
-    private static class InvalidSubscriberNotVoid extends TestEventSubscriber {
-        @Subscribe
-        public Object handle(ProjectCreated event) {
-            return event;
-        }
-    }
-
-    /**
-     * The abstract base for test subscriber classes.
-     *
-     * <p>The purpose of this class is to obtain a reference to a
-     * {@linkplain #HANDLER_METHOD_NAME single subscriber method}.
-     * This reference will be later used for assertions.
-     */
-    private abstract static class TestEventSubscriber {
-
-        @SuppressWarnings("DuplicateStringLiteralInspection")
-        private static final String HANDLER_METHOD_NAME = "handle";
-
-        Method getMethod() {
-            final Method[] methods = getClass().getDeclaredMethods();
-            for (Method method : methods) {
-                if (method.getName().equals(HANDLER_METHOD_NAME)) {
-                    return method;
-                }
-            }
-            throw new RuntimeException("No subscriber method found: " + HANDLER_METHOD_NAME);
-        }
+        assertEquals(isSubscriber, EventSubscriberMethod.domesticSubscribers()
+                                                        .apply(subscriber));
     }
 }

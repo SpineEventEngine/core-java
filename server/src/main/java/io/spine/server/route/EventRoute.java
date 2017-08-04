@@ -24,10 +24,10 @@ import com.google.protobuf.Message;
 import io.spine.core.EventContext;
 
 /**
- * Obtains a set of entity IDs for which to deliver the message.
+ * Obtains a set of entity IDs for which to deliver an event.
  *
  * @param <I> the type of entity IDs
- * @param <M> the type of messages to get IDs from
+ * @param <M> the type of event messages to get IDs from
  * @author Alexander Yevsyukov
  */
 public interface EventRoute<I, M extends Message> extends Multicast<I, M, EventContext> {

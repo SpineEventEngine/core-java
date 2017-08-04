@@ -24,7 +24,6 @@ import com.google.common.base.Function;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Descriptors.Descriptor;
 import io.spine.option.OptionsProto;
 import io.spine.type.KnownTypes;
@@ -84,7 +83,7 @@ class EventEnrichmentsMap {
     }
 
     private static ImmutableMultimap<String, String> buildEnrichmentsMap() {
-        final ImmutableSet<Properties> propertiesSet = loadAllProperties(PROPS_FILE_PATH);
+        final Set<Properties> propertiesSet = loadAllProperties(PROPS_FILE_PATH);
         final Builder builder = new Builder(propertiesSet);
         final ImmutableMultimap<String, String> result = builder.build();
         return result;

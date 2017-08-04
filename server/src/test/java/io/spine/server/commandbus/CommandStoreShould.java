@@ -38,10 +38,10 @@ import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.tenant.TenantAwareFunction;
 import io.spine.test.TimeTests;
-import io.spine.test.command.AddTask;
-import io.spine.test.command.CreateProject;
-import io.spine.test.command.StartProject;
-import io.spine.test.command.event.ProjectCreated;
+import io.spine.test.command.CmdAddTask;
+import io.spine.test.command.CmdCreateProject;
+import io.spine.test.command.CmdStartProject;
+import io.spine.test.command.event.CmdProjectCreated;
 import org.junit.Test;
 
 import javax.annotation.Nonnull;
@@ -52,7 +52,7 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.core.Commands.getMessage;
-import static io.spine.core.Failures.toFailure;
+import static io.spine.core.Rejections.toRejection;
 import static io.spine.server.commandbus.Given.ACommand.addTask;
 import static io.spine.server.commandbus.Given.ACommand.createProject;
 import static io.spine.server.commandbus.Given.ACommand.startProject;
@@ -106,27 +106,28 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
     }
 
     @Test
-    public void set_command_status_to_failure_when_handler_throws_failure() {
-        final TestFailure failure = new TestFailure();
-        final Command command = givenThrowingHandler(failure);
+    public void set_command_status_to_rejection_when_handler_throws_rejection() {
+        final TestRejection rejection = new TestRejection();
+        final Command command = givenThrowingHandler(rejection);
         final CommandId commandId = command.getId();
         final Message commandMessage = getMessage(command);
 
         commandBus.post(command, observer);
 
         // Check that the logging was called.
-        verify(log).failureHandling(eq(failure), eq(commandMessage), eq(commandId));
+        verify(log).rejectedWith(eq(rejection), eq(commandMessage), eq(commandId));
 
         // Check that the status has the correct code,
-        // and the failure matches the thrown failure.
+        // and the rejection matches the thrown rejection.
         final TenantId tenantId = command.getContext()
                                          .getActorContext()
                                          .getTenantId();
         final ProcessingStatus status = getStatus(commandId, tenantId);
 
-        assertEquals(CommandStatus.FAILURE, status.getCode());
-        assertEquals(toFailure(failure, command).getMessage(),
-                     status.getFailure().getMessage());
+        assertEquals(CommandStatus.REJECTED, status.getCode());
+        assertEquals(toRejection(rejection, command).getMessage(),
+                     status.getRejection()
+                           .getMessage());
     }
 
     private ProcessingStatus getStatus(CommandId commandId, final TenantId tenantId) {
@@ -189,7 +190,7 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
 
     @Test
     public void set_command_status_to_error_when_handler_throws_unknown_Throwable()
-            throws TestFailure, TestThrowable {
+            throws TestRejection, TestThrowable {
         final Throwable throwable = new TestThrowable("Unexpected Throwable");
         final Command command = givenThrowingHandler(throwable);
         final CommandEnvelope envelope = CommandEnvelope.of(command);
@@ -235,7 +236,7 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
     /**
      * A stub handler that throws passed `Throwable` in the command handler method.
      *
-     * @see #set_command_status_to_failure_when_handler_throws_failure
+     * @see #set_command_status_to_rejection_when_handler_throws_rejection()
      * @see #set_command_status_to_error_when_handler_throws_exception
      * @see #set_command_status_to_error_when_handler_throws_unknown_Throwable
      */
@@ -252,7 +253,7 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
         @Assign
         @SuppressWarnings({"unused", "ProhibitedExceptionThrown"})
             // Throwing is the purpose of this method.
-        ProjectCreated handle(CreateProject msg, CommandContext context) throws Throwable {
+        CmdProjectCreated handle(CmdCreateProject msg, CommandContext context) throws Throwable {
             throw throwable;
         }
     }
@@ -260,7 +261,7 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
     private <E extends Throwable> Command givenThrowingHandler(E throwable) {
         final CommandHandler handler = new ThrowingCreateProjectHandler(throwable);
         commandBus.register(handler);
-        final CreateProject msg = createProjectMessage();
+        final CmdCreateProject msg = createProjectMessage();
         final Command command = requestFactory.command()
                                               .create(msg);
         return command;
@@ -270,11 +271,11 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
      * Throwables
      ********************/
 
-    private static class TestFailure extends ThrowableMessage {
+    private static class TestRejection extends ThrowableMessage {
         private static final long serialVersionUID = 0L;
 
-        private TestFailure() {
-            super(TypeConverter.<String, StringValue>toMessage(TestFailure.class.getName()));
+        private TestRejection() {
+            super(TypeConverter.<String, StringValue>toMessage(TestRejection.class.getName()));
         }
     }
 
@@ -292,12 +293,17 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
 
         @Override
         public Set<CommandClass> getMessageClasses() {
-            return CommandClass.setOf(CreateProject.class, StartProject.class, AddTask.class);
+            return CommandClass.setOf(CmdCreateProject.class, CmdStartProject.class, CmdAddTask.class);
         }
 
         @Override
         public Message dispatch(CommandEnvelope envelope) {
             throw exception;
+        }
+
+        @Override
+        public void onError(CommandEnvelope envelope, RuntimeException exception) {
+            // Do nothing.
         }
     }
 }

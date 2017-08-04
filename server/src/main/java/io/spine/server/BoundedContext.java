@@ -36,10 +36,10 @@ import io.spine.server.entity.Repository;
 import io.spine.server.entity.VisibilityGuard;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventFactory;
-import io.spine.server.failure.FailureBus;
 import io.spine.server.integration.IntegrationBus;
 import io.spine.server.integration.IntegrationEvent;
 import io.spine.server.integration.grpc.IntegrationEventSubscriberGrpc;
+import io.spine.server.rejection.RejectionBus;
 import io.spine.server.stand.Stand;
 import io.spine.server.stand.StandStorage;
 import io.spine.server.storage.StorageFactory;
@@ -57,7 +57,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static io.spine.validate.Validate.checkNameNotEmptyOrBlank;
-import static java.lang.String.format;
 
 /**
  * A facade for configuration and entry point for handling commands.
@@ -262,15 +261,14 @@ public final class BoundedContext
         return this.eventBus;
     }
 
+    /** Obtains instance of {@link RejectionBus} of this {@code BoundedContext}. */
+    public RejectionBus getRejectionBus() {
+        return this.commandBus.rejectionBus();
+    }
+
     /** Obtains instance of {@link IntegrationBus} of this {@code BoundedContext}. */
     public IntegrationBus getIntegrationBus() {
         return this.integrationBus;
-    }
-
-
-    /** Obtains instance of {@link FailureBus} of this {@code BoundedContext}. */
-    public FailureBus getFailureBus() {
-        return this.commandBus.failureBus();
     }
 
     /** Obtains instance of {@link Stand} of this {@code BoundedContext}. */
@@ -439,11 +437,10 @@ public final class BoundedContext
             final StorageFactory storageFactory = storageFactorySupplier.get();
 
             if (storageFactory == null) {
-                final String errMsg = format(
+                throw newIllegalStateException(
                         "Supplier of StorageFactory (%s) returned null instance",
                         storageFactorySupplier
                 );
-                throw new IllegalStateException(errMsg);
             }
             return storageFactory;
         }

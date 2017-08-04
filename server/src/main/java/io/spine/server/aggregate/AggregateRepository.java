@@ -39,7 +39,7 @@ import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcherDelegate;
 import io.spine.server.route.CommandRouting;
 import io.spine.server.route.EventRouting;
-import io.spine.server.route.Producers;
+import io.spine.server.route.EventProducers;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
@@ -51,9 +51,13 @@ import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.core.Commands.causedByRejection;
 import static io.spine.server.entity.AbstractEntity.createEntity;
 import static io.spine.server.entity.AbstractEntity.getConstructor;
 import static io.spine.server.entity.EntityWithLifecycle.Predicates.isEntityVisible;
+import static io.spine.server.route.EventRouting.withDefault;
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * The repository which manages instances of {@code Aggregate}s.
@@ -78,11 +82,17 @@ import static io.spine.server.entity.EntityWithLifecycle.Predicates.isEntityVisi
  * @author Alexander Yevsyukov
  */
 public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
-                extends Repository<I, A>
-                implements CommandDispatcher<I>, EventDispatcherDelegate<I> {
+        extends Repository<I, A>
+        implements CommandDispatcher<I>, EventDispatcherDelegate<I> {
 
     /** The default number of events to be stored before a next snapshot is made. */
     static final int DEFAULT_SNAPSHOT_TRIGGER = 100;
+
+    /** The routing schema for commands handled by the aggregates. */
+    private final CommandRouting<I> commandRouting = CommandRouting.newInstance();
+
+    /** The routing schema for events to which aggregates react. */
+    private final EventRouting<I> eventRouting = withDefault(EventProducers.<I>fromContext());
 
     /** The number of events to store between snapshots. */
     private int snapshotTrigger = DEFAULT_SNAPSHOT_TRIGGER;
@@ -94,16 +104,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Nullable
     private Set<CommandClass> commandClasses;
 
-    /** The routing schema for commands handled by the aggregates. */
-    private final CommandRouting<I> commandRouting = CommandRouting.newInstance();
-
     /** The set of event classes to which aggregates of this repository {@linkplain React react}. */
     @Nullable
     private Set<EventClass> reactedEventClasses;
-
-    /** The routing schema for events to which aggregates react. */
-    private final EventRouting<I> eventRouting =
-            EventRouting.withDefault(Producers.<I>fromContext());
 
     /** Creates a new instance. */
     protected AggregateRepository() {
@@ -121,16 +124,74 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     public void onRegistered() {
         super.onRegistered();
         final BoundedContext boundedContext = getBoundedContext();
-        boundedContext.getCommandBus()
-                      .register(this);
 
-        // If there are any events on which aggregates react, register via delegating dispatcher.
-        final DelegatingEventDispatcher<I> delegatingDispatcher = DelegatingEventDispatcher.of(this);
-        if (!delegatingDispatcher.getMessageClasses()
-                                 .isEmpty()) {
+        final Set<CommandClass> commandClasses = getMessageClasses();
+
+        final DelegatingEventDispatcher<I> delegatingDispatcher;
+        delegatingDispatcher = DelegatingEventDispatcher.of(this);
+        final Set<EventClass> eventClasses = delegatingDispatcher.getMessageClasses();
+
+        if (commandClasses.isEmpty() && eventClasses.isEmpty()) {
+            throw newIllegalStateException(
+                    "Aggregates of the repository %s neither handle commands" +
+                            " nor react on events.", this);
+        }
+
+        if (!commandClasses.isEmpty()) {
+            boundedContext.getCommandBus()
+                          .register(this);
+        }
+
+        if (!eventClasses.isEmpty()) {
             boundedContext.getEventBus()
                           .register(delegatingDispatcher);
         }
+    }
+
+    @Override
+    public A create(I id) {
+        return createEntity(getEntityConstructor(), id);
+    }
+
+    /**
+     * Stores the passed aggregate and commits its uncommitted events.
+     *
+     * @param aggregate an instance to store
+     */
+    @Override
+    protected void store(A aggregate) {
+        final I id = aggregate.getId();
+        final int snapshotTrigger = getSnapshotTrigger();
+        final AggregateStorage<I> storage = aggregateStorage();
+        int eventCount = storage.readEventCountAfterLastSnapshot(id);
+        final Iterable<Event> uncommittedEvents = aggregate.getUncommittedEvents();
+        for (Event event : uncommittedEvents) {
+            storage.writeEvent(id, event);
+            ++eventCount;
+            if (eventCount >= snapshotTrigger) {
+                final Snapshot snapshot = aggregate.toSnapshot();
+                storage.writeSnapshot(id, snapshot);
+                eventCount = 0;
+            }
+        }
+        aggregate.commitEvents();
+        storage.writeEventCountAfterLastSnapshot(id, eventCount);
+
+        if (aggregate.lifecycleFlagsChanged()) {
+            storage.writeLifecycleFlags(aggregate.getId(), aggregate.getLifecycleFlags());
+        }
+    }
+
+    /**
+     * Creates aggregate storage for the repository.
+     *
+     * @param factory the factory to create the storage
+     * @return new storage
+     */
+    @Override
+    protected Storage<I, ?> createStorage(StorageFactory factory) {
+        final Storage<I, ?> result = factory.createAggregateStorage(getAggregateClass());
+        return result;
     }
 
     /**
@@ -156,11 +217,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         return result;
     }
 
-    @Override
-    public A create(I id) {
-        return createEntity(getEntityConstructor(), id);
-    }
-
     /**
      * Returns the class of aggregates managed by this repository.
      *
@@ -184,6 +240,42 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         return commandClasses;
     }
 
+    /**
+     * Dispatches the passed command to an aggregate.
+     *
+     * <p>The aggregate ID is obtained from the passed command.
+     *
+     * <p>The repository loads the aggregate by this ID, or creates a new aggregate
+     * if there is no aggregate with such ID.
+     *
+     * @param envelope the envelope of the command to dispatch
+     */
+    @Override
+    public I dispatch(final CommandEnvelope envelope) {
+        checkNotNull(envelope);
+        try {
+            return AggregateCommandEndpoint.handle(this, envelope);
+        } catch (RuntimeException e) {
+            if (!causedByRejection(e)) {
+                onError(envelope, e);
+            }
+            throw e;
+        }
+    }
+
+    /**
+     * Logs the passed error in the log associated with the class of the repository.
+     * 
+     * @param envelope  the command which caused the error
+     * @param exception the error occurred during processing of the command
+     */
+    @Override
+    public void onError(CommandEnvelope envelope, RuntimeException exception) {
+        checkNotNull(envelope);
+        checkNotNull(exception);
+        logError("Error dispatching command (class: %s id: %s).", envelope, exception);
+    }
+
     @Override
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // We return immutable impl.
     public Set<EventClass> getEventClasses() {
@@ -191,6 +283,25 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
             reactedEventClasses = Aggregate.TypeInfo.getReactedEventClasses(getAggregateClass());
         }
         return reactedEventClasses;
+    }
+
+    /**
+     * Dispatches event to one or more aggregates reacting on the event.
+     *
+     * @param envelope the event
+     * @return identifiers of aggregates that reacted on the event
+     */
+    @Override
+    public Set<I> dispatchEvent(EventEnvelope envelope) {
+        checkNotNull(envelope);
+        return AggregateEventEndpoint.handle(this, envelope);
+    }
+
+    @Override
+    public void onError(EventEnvelope envelope, RuntimeException exception) {
+        checkNotNull(envelope);
+        checkNotNull(exception);
+        logError("Error reacting on event (class: %s id: %s).", envelope, exception);
     }
 
     /**
@@ -215,26 +326,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     Set<I> getEventTargets(Message eventMessage, EventContext eventContext) {
         final Set<I> ids = getEventRouting().apply(eventMessage, eventContext);
         return ids;
-    }
-
-    /**
-     * Dispatches the passed command to an aggregate.
-     *
-     * <p>The aggregate ID is obtained from the passed command.
-     *
-     * <p>The repository loads the aggregate by this ID, or creates a new aggregate
-     * if there is no aggregate with such ID.
-     *
-     * @param envelope the envelope of the command to dispatch
-     */
-    @Override
-    public I dispatch(final CommandEnvelope envelope) {
-        return AggregateCommandEndpoint.handle(this, envelope);
-    }
-
-    @Override
-    public Set<I> dispatchEvent(EventEnvelope envelope) {
-        return AggregateEventEndpoint.handle(this, envelope);
     }
 
     /**
@@ -300,35 +391,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     /**
-     * Stores the passed aggregate and commits its uncommitted events.
-     *
-     * @param aggregate an instance to store
-     */
-    @Override
-    protected void store(A aggregate) {
-        final I id = aggregate.getId();
-        final int snapshotTrigger = getSnapshotTrigger();
-        final AggregateStorage<I> storage = aggregateStorage();
-        int eventCount = storage.readEventCountAfterLastSnapshot(id);
-        final Iterable<Event> uncommittedEvents = aggregate.getUncommittedEvents();
-        for (Event event : uncommittedEvents) {
-            storage.writeEvent(id, event);
-            ++eventCount;
-            if (eventCount >= snapshotTrigger) {
-                final Snapshot snapshot = aggregate.toSnapshot();
-                storage.writeSnapshot(id, snapshot);
-                eventCount = 0;
-            }
-        }
-        aggregate.commitEvents();
-        storage.writeEventCountAfterLastSnapshot(id, eventCount);
-
-        if (aggregate.lifecycleFlagsChanged()) {
-            storage.writeLifecycleFlags(aggregate.getId(), aggregate.getLifecycleFlags());
-        }
-    }
-
-    /**
      * Invoked by an endpoint after a message was dispatched to the aggregate.
      *
      * @param tenantId  the tenant associated with the processed message
@@ -369,12 +431,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
         A result = loadOrCreate(id);
         return Optional.of(result);
-    }
-
-    @Override
-    protected Storage<I, ?> createStorage(StorageFactory factory) {
-        final Storage<I, ?> result = factory.createAggregateStorage(getAggregateClass());
-        return result;
     }
 
     /** The EventBus to which we post events produced by aggregates. */

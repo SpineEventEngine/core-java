@@ -23,93 +23,113 @@ package io.spine.server.reflect;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.Identifier;
+import io.spine.base.ThrowableMessage;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
-import io.spine.server.BoundedContext;
-import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandler;
-import io.spine.server.event.EventBus;
-import io.spine.test.reflect.command.CreateProject;
-import io.spine.test.reflect.event.ProjectCreated;
-import org.junit.Before;
+import io.spine.server.entity.Entity;
+import io.spine.server.reflect.given.CommandHandlerMethodTestEnv.InvalidHandlerNoAnnotation;
+import io.spine.server.reflect.given.CommandHandlerMethodTestEnv.InvalidHandlerNoParams;
+import io.spine.server.reflect.given.CommandHandlerMethodTestEnv.InvalidHandlerOneNotMsgParam;
+import io.spine.server.reflect.given.CommandHandlerMethodTestEnv.InvalidHandlerReturnsVoid;
+import io.spine.server.reflect.given.CommandHandlerMethodTestEnv.InvalidHandlerTooManyParams;
+import io.spine.server.reflect.given.CommandHandlerMethodTestEnv.InvalidHandlerTwoParamsFirstInvalid;
+import io.spine.server.reflect.given.CommandHandlerMethodTestEnv.InvalidHandlerTwoParamsSecondInvalid;
+import io.spine.server.reflect.given.CommandHandlerMethodTestEnv.RejectingAggregate;
+import io.spine.server.reflect.given.CommandHandlerMethodTestEnv.RejectingHandler;
+import io.spine.server.reflect.given.CommandHandlerMethodTestEnv.ValidHandlerButPrivate;
+import io.spine.server.reflect.given.CommandHandlerMethodTestEnv.ValidHandlerOneParam;
+import io.spine.server.reflect.given.CommandHandlerMethodTestEnv.ValidHandlerOneParamReturnsList;
+import io.spine.server.reflect.given.CommandHandlerMethodTestEnv.ValidHandlerTwoParams;
+import io.spine.server.reflect.given.CommandHandlerMethodTestEnv.ValidHandlerTwoParamsReturnsList;
+import io.spine.test.reflect.ProjectId;
+import io.spine.test.reflect.command.RefCreateProject;
+import io.spine.test.reflect.event.RefProjectCreated;
 import org.junit.Test;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 
-import static com.google.common.collect.Lists.newLinkedList;
+import static com.google.common.base.Throwables.getRootCause;
 import static io.spine.server.reflect.CommandHandlerMethod.from;
+import static io.spine.server.reflect.CommandHandlerMethod.invokeFor;
 import static io.spine.server.reflect.CommandHandlerMethod.predicate;
-import static io.spine.server.reflect.Given.CommandMessage.createProject;
-import static io.spine.server.reflect.Given.CommandMessage.startProject;
-import static io.spine.server.reflect.Given.EventMessage.projectCreated;
+import static io.spine.server.reflect.given.Given.CommandMessage.createProject;
+import static io.spine.server.reflect.given.Given.CommandMessage.startProject;
 import static io.spine.test.TestValues.newUuidValue;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 /**
  * @author Alexander Litus
+ * @author Alexander Yevsyukov
  */
 public class CommandHandlerMethodShould {
 
     private static final TestActorRequestFactory requestFactory =
             TestActorRequestFactory.newInstance(CommandHandlerMethodShould.class);
 
-    private static final CommandContext defCmdCtx = CommandContext.getDefaultInstance();
+    private static final CommandContext emptyContext = CommandContext.getDefaultInstance();
 
-    private EventBus eventBus;
+    private static void assertIsCommandHandler(Method handler, boolean isHandler) {
+        assertEquals(isHandler, predicate().apply(handler));
+    }
 
-    @Before
-    public void setUp() {
-        final BoundedContext bc = BoundedContext.newBuilder()
-                                                .setMultitenant(true)
-                                                .build();
-        eventBus = EventBus.newBuilder()
-                           .setStorageFactory(bc.getStorageFactory())
-                           .build();
+    private static void assertCauseAndId(HandlerMethodFailedException e, Object handlerId) {
+        final Throwable cause = getRootCause(e);
+
+        assertTrue(cause instanceof ThrowableMessage);
+        final ThrowableMessage thrown = (ThrowableMessage) cause;
+
+        assertTrue(thrown.producerId()
+                         .isPresent());
+        assertEquals(handlerId, Identifier.unpack(thrown.producerId()
+                                                        .get()));
     }
 
     @Test
     public void pass_null_tolerance_check() {
         new NullPointerTester()
-                .setDefault(CommandEnvelope.class, CommandEnvelope.of(
-                        requestFactory.command().create(newUuidValue())))
-                .setDefault(CommandContext.class, defCmdCtx)
+                .setDefault(CommandEnvelope.class,
+                            CommandEnvelope.of(requestFactory.command()
+                                                             .create(newUuidValue())))
+                .setDefault(CommandContext.class, emptyContext)
                 .setDefault(Any.class, Any.getDefaultInstance())
                 .testAllPublicStaticMethods(CommandHandlerMethod.class);
     }
 
     @Test
-    public void invoke_handler_method_which_returns_one_message() throws InvocationTargetException {
+    public void invoke_handler_method_which_returns_one_message() {
         final ValidHandlerTwoParams handlerObject = spy(new ValidHandlerTwoParams());
         final CommandHandlerMethod handler = from(handlerObject.getHandler());
-        final CreateProject cmd = createProject();
+        final RefCreateProject cmd = createProject();
 
-        final List<? extends Message> events = handler.invoke(handlerObject, cmd, defCmdCtx);
+        final List<? extends Message> events = handler.invoke(handlerObject, cmd, emptyContext);
 
         verify(handlerObject, times(1))
-                .handleTest(cmd, defCmdCtx);
+                .handleTest(cmd, emptyContext);
         assertEquals(1, events.size());
-        final ProjectCreated event = (ProjectCreated) events.get(0);
+        final RefProjectCreated event = (RefProjectCreated) events.get(0);
         assertEquals(cmd.getProjectId(), event.getProjectId());
     }
 
     @Test
-    public void invoke_handler_method_and_return_message_list() throws InvocationTargetException {
+    public void invoke_handler_method_and_return_message_list() {
         final ValidHandlerOneParamReturnsList handlerObject =
                 spy(new ValidHandlerOneParamReturnsList());
         final CommandHandlerMethod handler = from(handlerObject.getHandler());
-        final CreateProject cmd = createProject();
+        final RefCreateProject cmd = createProject();
 
-        final List<? extends Message> events = handler.invoke(handlerObject, cmd, defCmdCtx);
+        final List<? extends Message> events = handler.invoke(handlerObject, cmd, emptyContext);
 
         verify(handlerObject, times(1)).handleTest(cmd);
         assertEquals(1, events.size());
-        final ProjectCreated event = (ProjectCreated) events.get(0);
+        final RefProjectCreated event = (RefProjectCreated) events.get(0);
         assertEquals(cmd.getProjectId(), event.getProjectId());
     }
 
@@ -197,136 +217,30 @@ public class CommandHandlerMethodShould {
         assertIsCommandHandler(handler, false);
     }
 
-    private static void assertIsCommandHandler(Method handler, boolean isHandler) {
-        assertEquals(isHandler, predicate().apply(handler));
-    }
-
     @Test(expected = IllegalStateException.class)
     public void throw_ISE_for_not_handled_command_type() {
         final Object handler = new ValidHandlerOneParam();
-        CommandHandlerMethod.invokeFor(handler,
-                                       startProject(),
-                                       CommandContext.getDefaultInstance());
+        invokeFor(handler, startProject(), emptyContext);
     }
 
-    /*
-     * Valid handlers
-     */
-
-    private class ValidHandlerOneParam extends TestCommandHandler {
-        @Assign
-        @SuppressWarnings("unused")
-        ProjectCreated handleTest(CreateProject cmd) {
-            return projectCreated(cmd.getProjectId());
+    @Test
+    public void set_producer_ID_if_command_handler() {
+        final CommandHandler handler = new RejectingHandler();
+        try {
+            invokeFor(handler, createProject(), emptyContext);
+        } catch (HandlerMethodFailedException e) {
+            assertCauseAndId(e, handler.getId());
         }
     }
 
-    private class ValidHandlerOneParamReturnsList extends TestCommandHandler {
-        @SuppressWarnings("UnusedReturnValue")
-        @Assign
-        List<Message> handleTest(CreateProject cmd) {
-            final List<Message> result = newLinkedList();
-            result.add(projectCreated(cmd.getProjectId()));
-            return result;
-        }
-    }
-
-    @SuppressWarnings("UnusedReturnValue")
-    private class ValidHandlerTwoParams extends TestCommandHandler {
-        @Assign
-        @SuppressWarnings("unused")
-        ProjectCreated handleTest(CreateProject cmd, CommandContext context) {
-            return projectCreated(cmd.getProjectId());
-        }
-    }
-
-    private class ValidHandlerTwoParamsReturnsList extends TestCommandHandler {
-        @Assign
-        @SuppressWarnings("unused")
-        List<Message> handleTest(CreateProject cmd, CommandContext context) {
-            final List<Message> result = newLinkedList();
-            result.add(projectCreated(cmd.getProjectId()));
-            return result;
-        }
-    }
-
-    private class ValidHandlerButPrivate extends TestCommandHandler {
-        @Assign
-        private ProjectCreated handleTest(CreateProject cmd) {
-            return projectCreated(cmd.getProjectId());
-        }
-    }
-
-    /*
-     * Invalid handlers
-     */
-
-    @SuppressWarnings("unused")
-        // because the method is not annotated, which is the purpose of this test class.
-    private class InvalidHandlerNoAnnotation extends TestCommandHandler {
-        public ProjectCreated handleTest(CreateProject cmd, CommandContext context) {
-            return projectCreated(cmd.getProjectId());
-        }
-    }
-
-    private class InvalidHandlerNoParams extends TestCommandHandler {
-        @Assign
-        ProjectCreated handleTest() {
-            return ProjectCreated.getDefaultInstance();
-        }
-    }
-
-    private class InvalidHandlerTooManyParams extends TestCommandHandler {
-        @Assign
-        ProjectCreated handleTest(CreateProject cmd, CommandContext context, Object redundant) {
-            return projectCreated(cmd.getProjectId());
-        }
-    }
-
-    private class InvalidHandlerOneNotMsgParam extends TestCommandHandler {
-        @Assign
-        ProjectCreated handleTest(Exception invalid) {
-            return ProjectCreated.getDefaultInstance();
-        }
-    }
-
-    private class InvalidHandlerTwoParamsFirstInvalid extends TestCommandHandler {
-        @Assign
-        ProjectCreated handleTest(Exception invalid, CommandContext context) {
-            return ProjectCreated.getDefaultInstance();
-        }
-    }
-
-    private class InvalidHandlerTwoParamsSecondInvalid extends TestCommandHandler {
-        @Assign
-        ProjectCreated handleTest(CreateProject cmd, Exception invalid) {
-            return projectCreated(cmd.getProjectId());
-        }
-    }
-
-    private class InvalidHandlerReturnsVoid extends TestCommandHandler {
-        @Assign
-        void handleTest(CreateProject cmd, CommandContext context) {
-        }
-    }
-
-    private abstract class TestCommandHandler extends CommandHandler {
-
-        private static final String HANDLER_METHOD_NAME = "handleTest";
-
-        protected TestCommandHandler() {
-            super(eventBus);
-        }
-
-        public Method getHandler() {
-            final Method[] methods = getClass().getDeclaredMethods();
-            for (Method method : methods) {
-                if (method.getName()
-                          .equals(HANDLER_METHOD_NAME)) {
-                    return method;
-                }
-            }
-            throw new RuntimeException("No command handler method found: " + HANDLER_METHOD_NAME);
+    @Test
+    public void set_producer_ID_if_entity() {
+        final RefCreateProject commandMessage = createProject();
+        final Entity<ProjectId, ?> entity = new RejectingAggregate(commandMessage.getProjectId());
+        try {
+            invokeFor(entity, commandMessage, emptyContext);
+        } catch (HandlerMethodFailedException e) {
+            assertCauseAndId(e, entity.getId());
         }
     }
 }

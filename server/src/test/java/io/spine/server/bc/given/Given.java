@@ -26,9 +26,9 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.server.integration.IntegrationEvent;
 import io.spine.server.integration.IntegrationEventContext;
 import io.spine.test.bc.ProjectId;
-import io.spine.test.bc.event.ProjectCreated;
-import io.spine.test.bc.event.ProjectStarted;
-import io.spine.test.bc.event.TaskAdded;
+import io.spine.test.bc.event.BcProjectCreated;
+import io.spine.test.bc.event.BcProjectStarted;
+import io.spine.test.bc.event.BcTaskAdded;
 
 import static io.spine.Identifier.newUuid;
 import static io.spine.protobuf.AnyPacker.pack;
@@ -56,20 +56,20 @@ public class Given {
         private EventMessage() {
         }
 
-        public static ProjectCreated projectCreated(ProjectId id) {
-            return ProjectCreated.newBuilder()
-                                 .setProjectId(id)
-                                 .build();
+        public static BcProjectCreated projectCreated(ProjectId id) {
+            return BcProjectCreated.newBuilder()
+                                   .setProjectId(id)
+                                   .build();
         }
 
-        public static TaskAdded taskAdded(ProjectId id) {
-            return TaskAdded.newBuilder()
+        public static BcTaskAdded taskAdded(ProjectId id) {
+            return BcTaskAdded.newBuilder()
                             .setProjectId(id)
                             .build();
         }
 
-        public static ProjectStarted projectStarted(ProjectId id) {
-            return ProjectStarted.newBuilder()
+        public static BcProjectStarted projectStarted(ProjectId id) {
+            return BcProjectStarted.newBuilder()
                                  .setProjectId(id)
                                  .build();
         }
@@ -94,7 +94,7 @@ public class Given {
 
         public static IntegrationEvent projectCreated(ProjectId projectId,
                                                       IntegrationEventContext eventContext) {
-            final ProjectCreated event = EventMessage.projectCreated(projectId);
+            final BcProjectCreated event = EventMessage.projectCreated(projectId);
             final IntegrationEvent.Builder builder =
                     IntegrationEvent.newBuilder()
                                     .setContext(eventContext)

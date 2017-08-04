@@ -25,8 +25,9 @@ import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
+import io.spine.core.CommandId;
 import io.spine.protobuf.AnyPacker;
-import io.spine.test.command.CreateProject;
+import io.spine.test.command.CmdCreateProject;
 import io.spine.time.Time;
 import io.spine.validate.ConstraintViolation;
 import org.junit.Test;
@@ -54,8 +55,20 @@ public class CommandValidatorViolationCheckShould {
     }
 
     @Test
+    public void not_allow_commands_without_IDs() {
+        final Command cmd = Given.ACommand.createProject();
+        final Command unidentifiableCommand = cmd.toBuilder()
+                                                 .setId(CommandId.getDefaultInstance())
+                                                 .build();
+        final List<ConstraintViolation> violations =
+                inspect(CommandEnvelope.of(unidentifiableCommand));
+
+        assertEquals(1, violations.size());
+    }
+
+    @Test
     public void validate_command_and_return_violations_if_message_is_NOT_valid() {
-        final Any invalidMessagePacked = AnyPacker.pack(CreateProject.getDefaultInstance());
+        final Any invalidMessagePacked = AnyPacker.pack(CmdCreateProject.getDefaultInstance());
         final Command commandWithEmptyMessage = Command.newBuilder()
                                                        .setId(generateId())
                                                        .setMessage(invalidMessagePacked)

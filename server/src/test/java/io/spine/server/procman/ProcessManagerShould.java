@@ -21,65 +21,74 @@
 package io.spine.server.procman;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.Empty;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
+import io.spine.Identifier;
 import io.spine.client.TestActorRequestFactory;
-import io.spine.core.CommandClass;
+import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
-import io.spine.core.EventContext;
+import io.spine.core.EventEnvelope;
 import io.spine.core.Events;
-import io.spine.core.Subscribe;
+import io.spine.core.RejectionEnvelope;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
-import io.spine.server.command.Assign;
+import io.spine.server.command.TestEventFactory;
 import io.spine.server.commandbus.CommandBus;
-import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.commandstore.CommandStore;
 import io.spine.server.entity.given.Given;
+import io.spine.server.entity.rejection.Rejections.EntityAlreadyArchived;
+import io.spine.server.procman.given.ProcessManagerTestEnv.AddTaskDispatcher;
+import io.spine.server.procman.given.ProcessManagerTestEnv.TestProcessManager;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantAwareTest;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.test.procman.ProjectId;
-import io.spine.test.procman.command.AddTask;
-import io.spine.test.procman.command.CreateProject;
-import io.spine.test.procman.command.StartProject;
-import io.spine.test.procman.event.ProjectCreated;
-import io.spine.test.procman.event.ProjectStarted;
-import io.spine.test.procman.event.TaskAdded;
+import io.spine.test.procman.command.PmAddTask;
+import io.spine.test.procman.command.PmCreateProject;
+import io.spine.test.procman.command.PmStartProject;
+import io.spine.test.procman.event.PmProjectCreated;
+import io.spine.test.procman.event.PmProjectStarted;
+import io.spine.test.procman.event.PmTaskAdded;
 import io.spine.testdata.Sample;
-import io.spine.validate.AnyVBuilder;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
 import static io.spine.core.Commands.getMessage;
+import static io.spine.core.Rejections.createRejection;
+import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.TypeConverter.toMessage;
-import static io.spine.server.procman.ProcManTransaction.start;
+import static io.spine.server.TestEventClasses.assertContains;
 import static io.spine.server.procman.ProcessManagerDispatcher.dispatch;
+import static io.spine.test.TestValues.newUuidValue;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Verify.assertSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 
+/**
+ * @author Alexander Litus
+ * @author Dmytro Dashenkov
+ * @author Alexander Yevsyukov
+ */
 @SuppressWarnings("OverlyCoupledClass")
 public class ProcessManagerShould {
 
     private static final ProjectId ID = Sample.messageOfType(ProjectId.class);
-    private static final EventContext EVENT_CONTEXT = EventContext.getDefaultInstance();
+
+    private final TestEventFactory eventFactory =
+            TestEventFactory.newInstance(Identifier.pack(ID), getClass());
 
     private final TestActorRequestFactory requestFactory =
             TestActorRequestFactory.newInstance(getClass());
@@ -116,19 +125,20 @@ public class ProcessManagerShould {
 
     @Test
     public void dispatch_event() {
-        testDispatchEvent(Sample.messageOfType(ProjectStarted.class));
+        testDispatchEvent(Sample.messageOfType(PmProjectStarted.class));
     }
 
     @Test
     public void dispatch_several_events() {
-        testDispatchEvent(Sample.messageOfType(ProjectCreated.class));
-        testDispatchEvent(Sample.messageOfType(TaskAdded.class));
-        testDispatchEvent(Sample.messageOfType(ProjectStarted.class));
+        testDispatchEvent(Sample.messageOfType(PmProjectCreated.class));
+        testDispatchEvent(Sample.messageOfType(PmTaskAdded.class));
+        testDispatchEvent(Sample.messageOfType(PmProjectStarted.class));
     }
 
-    private void testDispatchEvent(Message event) {
-        dispatch(processManager, event, EVENT_CONTEXT);
-        assertEquals(AnyPacker.pack(event), processManager.getState());
+    private void testDispatchEvent(Message eventMessage) {
+        final Event event = eventFactory.createEvent(eventMessage);
+        dispatch(processManager, EventEnvelope.of(event));
+        assertEquals(pack(eventMessage), processManager.getState());
     }
 
     @Test
@@ -139,7 +149,7 @@ public class ProcessManagerShould {
     @Test
     public void dispatch_several_commands() {
         commandBus.register(new AddTaskDispatcher());
-        processManager.setCommandBus(commandBus);
+        processManager.injectCommandBus(commandBus);
 
         testDispatchCommand(createProject());
         testDispatchCommand(addTask());
@@ -149,10 +159,8 @@ public class ProcessManagerShould {
     private List<Event> testDispatchCommand(Message commandMsg) {
         final CommandEnvelope envelope = CommandEnvelope.of(requestFactory.command()
                                                                           .create(commandMsg));
-        final ProcManTransaction<?, ?, ?> tx = start(processManager);
-        final List<Event> events = processManager.dispatchCommand(envelope);
-        tx.commit();
-        assertEquals(AnyPacker.pack(commandMsg), processManager.getState());
+        final List<Event> events = dispatch(processManager, envelope);
+        assertEquals(pack(commandMsg), processManager.getState());
         return events;
     }
 
@@ -163,21 +171,21 @@ public class ProcessManagerShould {
         assertEquals(1, events.size());
         final Event event = events.get(0);
         assertNotNull(event);
-        final ProjectCreated message = unpack(event.getMessage());
+        final PmProjectCreated message = unpack(event.getMessage());
         assertEquals(ID, message.getProjectId());
     }
 
     /**
      * Tests command routing.
      *
-     * @see TestProcessManager#handle(StartProject, CommandContext)
+     * @see TestProcessManager#handle(PmStartProject, CommandContext)
      */
     @Test
     public void route_commands() {
         // Add dispatcher for the routed command. Otherwise the command would reject the command.
         final AddTaskDispatcher dispatcher = new AddTaskDispatcher();
         commandBus.register(dispatcher);
-        processManager.setCommandBus(commandBus);
+        processManager.injectCommandBus(commandBus);
 
         final List<Event> events = testDispatchCommand(startProject());
 
@@ -197,10 +205,11 @@ public class ProcessManagerShould {
         final CommandRouted commandRouted = (CommandRouted) message;
 
         // The source of the command is StartProject.
-        assertThat(getMessage(commandRouted.getSource()), instanceOf(StartProject.class));
+        assertThat(getMessage(commandRouted.getSource()), instanceOf(PmStartProject.class));
         final List<CommandEnvelope> dispatchedCommands = dispatcher.getCommands();
         assertSize(1, dispatchedCommands);
-        final CommandEnvelope dispatchedCommand = dispatcher.getCommands().get(0);
+        final CommandEnvelope dispatchedCommand = dispatcher.getCommands()
+                                                            .get(0);
         assertEquals(commandRouted.getProduced(0), dispatchedCommand.getCommand());
     }
 
@@ -209,7 +218,8 @@ public class ProcessManagerShould {
         final Int32Value unknownCommand = Int32Value.getDefaultInstance();
 
         final CommandEnvelope envelope = CommandEnvelope.of(
-                requestFactory.command().create(unknownCommand)
+                requestFactory.command()
+                              .create(unknownCommand)
         );
         processManager.dispatchCommand(envelope);
     }
@@ -217,17 +227,37 @@ public class ProcessManagerShould {
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_dispatch_unknown_event() {
         final StringValue unknownEvent = StringValue.getDefaultInstance();
-        dispatch(processManager, unknownEvent, EVENT_CONTEXT);
+        final EventEnvelope envelope = EventEnvelope.of(eventFactory.createEvent(unknownEvent));
+        dispatch(processManager, envelope);
     }
 
     @Test
     public void return_handled_event_classes() {
         final Set<EventClass> classes =
                 ProcessManager.TypeInfo.getEventClasses(TestProcessManager.class);
+
         assertEquals(3, classes.size());
-        assertTrue(classes.contains(EventClass.of(ProjectCreated.class)));
-        assertTrue(classes.contains(EventClass.of(TaskAdded.class)));
-        assertTrue(classes.contains(EventClass.of(ProjectStarted.class)));
+        assertContains(classes,
+                       PmProjectCreated.class, PmTaskAdded.class, PmProjectStarted.class);
+    }
+
+    @Test
+    public void dispatch_rejection() {
+        final EntityAlreadyArchived rejectionMessage =
+                EntityAlreadyArchived.newBuilder()
+                                     .setEntityId(getClass().getName())
+                                     .build();
+
+        final Command command = requestFactory.command()
+                                              .create(newUuidValue());
+        final RejectionEnvelope rejection = RejectionEnvelope.of(
+                createRejection(rejectionMessage, command)
+        );
+
+        dispatch(processManager, rejection);
+
+        assertEquals(rejection.getOuterObject()
+                              .getMessage(), processManager.getState());
     }
 
     @Test
@@ -235,7 +265,7 @@ public class ProcessManagerShould {
         final StringValue commandMessage = toMessage("create_iterating_router");
         final CommandContext commandContext = requestFactory.createCommandContext();
 
-        processManager.setCommandBus(mock(CommandBus.class));
+        processManager.injectCommandBus(mock(CommandBus.class));
 
         final IteratingCommandRouter router
                 = processManager.newIteratingRouterFor(commandMessage,
@@ -258,7 +288,7 @@ public class ProcessManagerShould {
         final StringValue commandMessage = toMessage("create_router");
         final CommandContext commandContext = requestFactory.createCommandContext();
 
-        processManager.setCommandBus(mock(CommandBus.class));
+        processManager.injectCommandBus(mock(CommandBus.class));
 
         final CommandRouter router = processManager.newRouterFor(commandMessage, commandContext);
         assertNotNull(router);
@@ -268,101 +298,26 @@ public class ProcessManagerShould {
                                            .getContext());
     }
 
-    private static CreateProject createProject() {
-        return ((CreateProject.Builder) Sample.builderForType(CreateProject.class))
+    private static PmCreateProject createProject() {
+        return ((PmCreateProject.Builder) Sample.builderForType(PmCreateProject.class))
                 .setProjectId(ID)
                 .build();
     }
 
-    private static StartProject startProject() {
-        return ((StartProject.Builder) Sample.builderForType(StartProject.class))
+    private static PmStartProject startProject() {
+        return ((PmStartProject.Builder) Sample.builderForType(PmStartProject.class))
                 .setProjectId(ID)
                 .build();
     }
 
-    private static AddTask addTask() {
-        return ((AddTask.Builder) Sample.builderForType(AddTask.class))
+    private static PmAddTask addTask() {
+        return ((PmAddTask.Builder) Sample.builderForType(PmAddTask.class))
                 .setProjectId(ID)
                 .build();
-    }
-
-    @SuppressWarnings("UnusedParameters") // OK for test class.
-    private static class TestProcessManager extends ProcessManager<ProjectId,
-                                                                   Any,
-                                                                   AnyVBuilder> {
-
-        private TestProcessManager(ProjectId id) {
-            super(id);
-        }
-
-        @Subscribe
-        public void on(ProjectCreated event, EventContext ignored) {
-            getBuilder().mergeFrom(AnyPacker.pack(event));
-        }
-
-        @Subscribe
-        public void on(TaskAdded event, EventContext ignored) {
-            getBuilder().mergeFrom(AnyPacker.pack(event));
-        }
-
-        @Subscribe
-        public void on(ProjectStarted event, EventContext ignored) {
-            getBuilder().mergeFrom(AnyPacker.pack(event));
-        }
-
-        @Assign
-        ProjectCreated handle(CreateProject command, CommandContext ignored) {
-            getBuilder().mergeFrom(AnyPacker.pack(command));
-            return ((ProjectCreated.Builder) Sample.builderForType(ProjectCreated.class))
-                    .setProjectId(command.getProjectId())
-                    .build();
-        }
-
-        @Assign
-        TaskAdded handle(AddTask command, CommandContext ignored) {
-            getBuilder().mergeFrom(AnyPacker.pack(command));
-            return ((TaskAdded.Builder) Sample.builderForType(TaskAdded.class))
-                    .setProjectId(command.getProjectId())
-                    .build();
-        }
-
-        @Assign
-        CommandRouted handle(StartProject command, CommandContext context) {
-            getBuilder().mergeFrom(AnyPacker.pack(command));
-
-            final Message addTask = ((AddTask.Builder) Sample.builderForType(AddTask.class))
-                    .setProjectId(command.getProjectId())
-                    .build();
-            final CommandRouted route = newRouterFor(command, context)
-                    .add(addTask)
-                    .routeAll();
-            return route;
-        }
     }
 
     @Test
     public void have_TypeInfo_utility_class() {
         assertHasPrivateParameterlessCtor(ProcessManager.TypeInfo.class);
-    }
-
-    private static class AddTaskDispatcher implements CommandDispatcher<Message> {
-
-        private final List<CommandEnvelope> commands = new LinkedList<>();
-
-        @Override
-        public Set<CommandClass> getMessageClasses() {
-            return CommandClass.setOf(AddTask.class);
-        }
-
-        @Override
-        public Message dispatch(CommandEnvelope envelope) {
-            commands.add(envelope);
-            return Empty.getDefaultInstance();
-        }
-
-        @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK for tests.
-        public List<CommandEnvelope> getCommands() {
-            return commands;
-        }
     }
 }

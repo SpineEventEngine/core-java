@@ -23,7 +23,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.Event;
-import io.spine.core.EventContext;
+import io.spine.core.EventEnvelope;
 import io.spine.core.Version;
 import io.spine.util.GenericTypeIndex;
 import io.spine.validate.ValidatingBuilder;
@@ -33,7 +33,6 @@ import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static io.spine.core.Events.getMessage;
 import static io.spine.server.entity.EventPlayingEntity.GenericParameter.STATE_BUILDER;
 
 /**
@@ -148,9 +147,8 @@ public abstract class EventPlayingEntity <I,
     protected void play(Iterable<Event> events) {
         final Transaction<I, ? extends EventPlayingEntity<I, S, B>, S, B> tx = tx();
         for (Event event : events) {
-            final Message message = getMessage(event);
-            final EventContext context = event.getContext();
-            tx.apply(message, context);
+            final EventEnvelope eventEnvelope = EventEnvelope.of(event);
+            tx.apply(eventEnvelope);
         }
     }
 

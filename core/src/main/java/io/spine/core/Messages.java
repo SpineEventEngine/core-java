@@ -46,13 +46,14 @@ class Messages {
         final Message input = checkNotNull(outerOrMessage);
         Message msg;
 
-        //TODO:2017-07-19:alexander.yevsyukov: Replace this with default MessageClass behaviour in Java 8.
+        //TODO:2017-07-19:alexander.yevsyukov: Replace this with default MessageClass behaviour
+        // in Java 8.
         if (input instanceof Command) {
             msg = Commands.getMessage((Command) outerOrMessage);
         } else if (input instanceof Event) {
             msg = Events.getMessage((Event) outerOrMessage);
-        } else if (input instanceof Failure) {
-            msg = Failures.getMessage((Failure) outerOrMessage);
+        } else if (input instanceof Rejection) {
+            msg = Rejections.getMessage((Rejection) outerOrMessage);
         } else if (input instanceof Any) {
             msg = AnyPacker.unpack((Any) outerOrMessage);
         } else {

@@ -21,9 +21,10 @@
 package io.spine.server.entity;
 
 import com.google.common.base.Optional;
+import com.google.protobuf.Empty;
 import com.google.protobuf.StringValue;
 import io.spine.server.route.DefaultCommandRoute;
-import io.spine.test.entity.command.CreateProject;
+import io.spine.test.entity.command.EntCreateProject;
 import io.spine.testdata.Sample;
 import org.junit.Test;
 
@@ -38,7 +39,7 @@ public class DefaultCommandRouteShould {
 
     @Test
     public void return_empty_Optional_if_fail_to_get_ID_from_command_message_without_ID_field() {
-        final Optional id = DefaultCommandRoute.asOptional(StringValue.getDefaultInstance());
+        final Optional id = DefaultCommandRoute.asOptional(Empty.getDefaultInstance());
 
         assertFalse(id.isPresent());
     }
@@ -46,7 +47,7 @@ public class DefaultCommandRouteShould {
     @SuppressWarnings("OptionalGetWithoutIsPresent") // We call isPresent() in assertion.
     @Test
     public void get_ID_from_command_message() {
-        final CreateProject msg = Sample.messageOfType(CreateProject.class);
+        final EntCreateProject msg = Sample.messageOfType(EntCreateProject.class);
 
         final Optional id = DefaultCommandRoute.asOptional(msg);
 

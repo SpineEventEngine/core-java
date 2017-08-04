@@ -20,6 +20,7 @@
 
 package io.spine.server.aggregate;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.core.MessageEnvelope;
@@ -56,23 +57,38 @@ abstract class AggregateMessageEndpoint<I,
     abstract TenantAwareFunction0<R> createOperation();
 
     /**
-     * {@linkplain #getTargets() Selects} one or more message targets and {@linkplain #dispatchTo(I)
-     * dispatches} the message to them.
+     * {@linkplain #getTargets() Selects} one or more message targets and
+     * {@linkplain #dispatchToOne(I) dispatches} the message to them.
      */
     @SuppressWarnings("unchecked")
     R dispatch() {
         final R targets = getTargets();
         if (targets instanceof Set) {
-            final Set<I> set = (Set<I>) targets;
-            for (I id : set) { //TODO:2017-07-21:alexander.yevsyukov: Can we run this in parallel?
-                //TODO:2017-07-21:alexander.yevsyukov: What if we dispatch events to multiple aggregates
-                // and one of them fails?
-                dispatchTo(id);
-            }
-        } else {
-            dispatchTo((I)targets);
+            final Set<I> handlingAggregates = (Set<I>) targets;
+            return (R)(dispatchToMany(handlingAggregates));
         }
+        dispatchToOne((I)targets);
         return targets;
+    }
+
+    /**
+     * Dispatches the message to multiple aggregates.
+     *
+     * @param targets the set of aggregate IDs to which dispatch the message
+     * @return the set of aggregate IDs to which the message was successfully dispatched
+     */
+    private Set<I> dispatchToMany(Set<I> targets) {
+        final ImmutableSet.Builder<I> result = ImmutableSet.builder();
+        for (I id : targets) {
+            try {
+                dispatchToOne(id);
+                result.add(id);
+            } catch (RuntimeException exception) {
+                // Do not rethrow to allow others to handle.
+                // The error is already logged.
+            }
+        }
+        return result.build();
     }
 
     /**
@@ -80,7 +96,7 @@ abstract class AggregateMessageEndpoint<I,
      *
      * @param aggregateId the ID of the aggreagate to which dispatch the message
      */
-    private void dispatchTo(I aggregateId) {
+    private void dispatchToOne(I aggregateId) {
         final A aggregate = repository().loadOrCreate(aggregateId);
 
         final LifecycleFlags statusBefore = aggregate.getLifecycleFlags();

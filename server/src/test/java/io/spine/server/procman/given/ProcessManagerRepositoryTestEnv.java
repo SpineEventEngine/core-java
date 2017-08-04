@@ -28,6 +28,8 @@ import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
 import io.spine.server.command.Assign;
 import io.spine.server.entity.TestEntityWithStringColumn;
+import io.spine.server.entity.rejection.Rejections.EntityAlreadyArchived;
+import io.spine.server.entity.rejection.Rejections.EntityAlreadyDeleted;
 import io.spine.server.procman.CommandRouted;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
@@ -35,18 +37,18 @@ import io.spine.test.procman.Project;
 import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.ProjectVBuilder;
 import io.spine.test.procman.Task;
-import io.spine.test.procman.command.AddTask;
-import io.spine.test.procman.command.CreateProject;
-import io.spine.test.procman.command.StartProject;
-import io.spine.test.procman.event.ProjectCreated;
-import io.spine.test.procman.event.ProjectStarted;
-import io.spine.test.procman.event.TaskAdded;
+import io.spine.test.procman.command.PmAddTask;
+import io.spine.test.procman.command.PmCreateProject;
+import io.spine.test.procman.command.PmStartProject;
+import io.spine.test.procman.event.PmProjectCreated;
+import io.spine.test.procman.event.PmProjectStarted;
+import io.spine.test.procman.event.PmTaskAdded;
 import io.spine.testdata.Sample;
 
 public class ProcessManagerRepositoryTestEnv {
 
-    private ProcessManagerRepositoryTestEnv() {
-    }
+    /** Prevents instantiation of this utility class. */
+    private ProcessManagerRepositoryTestEnv() {}
 
     public static class TestProcessManagerRepository
             extends ProcessManagerRepository<ProjectId, TestProcessManager, Project> {
@@ -56,7 +58,10 @@ public class ProcessManagerRepositoryTestEnv {
         }
     }
 
-    @SuppressWarnings("OverlyCoupledClass")
+    @SuppressWarnings({
+            "OverlyCoupledClass",
+            "UnusedParameters" /* The parameter left to show that a projection subscriber can have
+                                two parameters. */})
     public static class TestProcessManager
             extends ProcessManager<ProjectId, Project, ProjectVBuilder>
             implements TestEntityWithStringColumn {
@@ -68,8 +73,8 @@ public class ProcessManagerRepositoryTestEnv {
             super(id);
         }
 
-        public static boolean processed(Message eventMessage) {
-            final boolean result = messagesDelivered.containsValue(eventMessage);
+        public static boolean processed(Message message) {
+            final boolean result = messagesDelivered.containsValue(message);
             return result;
         }
 
@@ -77,15 +82,13 @@ public class ProcessManagerRepositoryTestEnv {
             messagesDelivered.clear();
         }
 
+        /** Keeps the event message for further inspection in tests. */
         private void keep(Message commandOrEventMsg) {
             messagesDelivered.put(getState().getId(), commandOrEventMsg);
         }
 
-        @SuppressWarnings("UnusedParameters")
-            /* The parameter left to show that a projection subscriber can have two parameters. */
         @Subscribe
-        public void on(ProjectCreated event, EventContext ignored) {
-            // Keep the event message for further inspection in tests.
+        public void on(PmProjectCreated event, EventContext ignored) {
             keep(event);
 
             handleProjectCreated(event.getProjectId());
@@ -100,7 +103,7 @@ public class ProcessManagerRepositoryTestEnv {
         }
 
         @Subscribe
-        public void on(TaskAdded event) {
+        public void on(PmTaskAdded event) {
             keep(event);
 
             final Task task = event.getTask();
@@ -115,7 +118,7 @@ public class ProcessManagerRepositoryTestEnv {
         }
 
         @Subscribe
-        public void on(ProjectStarted event) {
+        public void on(PmProjectStarted event) {
             keep(event);
 
             handleProjectStarted();
@@ -128,44 +131,52 @@ public class ProcessManagerRepositoryTestEnv {
             getBuilder().mergeFrom(newState);
         }
 
-        @SuppressWarnings("UnusedParameters")
-            /* The parameter left to show that a command subscriber can have two parameters. */
         @Assign
-        ProjectCreated handle(CreateProject command, CommandContext ignored) {
+        PmProjectCreated handle(PmCreateProject command, CommandContext ignored) {
             keep(command);
 
             handleProjectCreated(command.getProjectId());
-            final ProjectCreated event = ((ProjectCreated.Builder) Sample.builderForType(
-                    ProjectCreated.class))
-                    .setProjectId(command.getProjectId())
-                    .build();
+            final PmProjectCreated event = ((PmProjectCreated.Builder)
+                    Sample.builderForType(PmProjectCreated.class))
+                          .setProjectId(command.getProjectId())
+                          .build();
             return event;
         }
 
-        @SuppressWarnings("UnusedParameters")
-            /* The parameter left to show that a command subscriber can have two parameters. */
         @Assign
-        TaskAdded handle(AddTask command, CommandContext ignored) {
+        PmTaskAdded handle(PmAddTask command, CommandContext ignored) {
             keep(command);
 
             handleTaskAdded(command.getTask());
-            final TaskAdded event = ((TaskAdded.Builder) Sample.builderForType(TaskAdded.class))
-                    .setProjectId(command.getProjectId())
-                    .build();
+            final PmTaskAdded event = ((PmTaskAdded.Builder)
+                    Sample.builderForType(PmTaskAdded.class))
+                          .setProjectId(command.getProjectId())
+                          .build();
             return event;
         }
 
         @Assign
-        CommandRouted handle(StartProject command, CommandContext context) {
+        CommandRouted handle(PmStartProject command, CommandContext context) {
             keep(command);
 
             handleProjectStarted();
-            final Message addTask = ((AddTask.Builder) Sample.builderForType(AddTask.class))
-                    .setProjectId(command.getProjectId())
-                    .build();
+            final Message addTask = ((PmAddTask.Builder)
+                    Sample.builderForType(PmAddTask.class))
+                          .setProjectId(command.getProjectId())
+                          .build();
             return newRouterFor(command, context)
                     .add(addTask)
                     .routeAll();
+        }
+
+        @Subscribe
+        void on(EntityAlreadyArchived rejection) {
+            keep(rejection);
+        }
+
+        @Subscribe
+        void on(EntityAlreadyDeleted rejection) {
+            keep(rejection);
         }
 
         @Override

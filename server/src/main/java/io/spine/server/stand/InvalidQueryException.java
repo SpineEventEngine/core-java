@@ -24,7 +24,7 @@ import io.spine.client.Query;
 
 /**
  * An exception thrown if the {@linkplain Query} instance
- * cannot be submitted to {@linkplain Stand} due to a technical error, such as validation failure.
+ * cannot be submitted to {@linkplain Stand} due to a technical error, such as validation error.
  *
  * @author Alex Tymchenko
  */

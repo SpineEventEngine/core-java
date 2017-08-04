@@ -48,7 +48,8 @@ public interface MulticastDispatcher <C extends MessageClass, E extends MessageE
          * Returns immutable set with one element with the identity of the multicast dispatcher
          * that dispatches messages to itself.
          *
-         * <p>The identity obtained as the result of {@link MulticastDispatcher#toString()}.
+         * <p>The identity obtained as the result of {@link Object#toString()
+         * MulticastDispatcher#toString()}.
          *
          * @param self the instance of the dispatcher
          * @return immutable set with the dispatcher identity

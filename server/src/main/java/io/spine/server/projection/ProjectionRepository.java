@@ -28,6 +28,7 @@ import io.spine.annotation.Internal;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
+import io.spine.core.EventEnvelope;
 import io.spine.core.Events;
 import io.spine.core.ExternalMessageEnvelope;
 import io.spine.server.BoundedContext;
@@ -36,6 +37,7 @@ import io.spine.server.entity.EventDispatchingRepository;
 import io.spine.server.event.EventFilter;
 import io.spine.server.event.EventStore;
 import io.spine.server.event.EventStreamQuery;
+import io.spine.server.route.EventProducers;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.route.EventRouting;
 import io.spine.server.route.Producers;
@@ -67,24 +69,13 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      * Creates a new {@code ProjectionRepository}.
      */
     protected ProjectionRepository() {
-        super(Producers.<I>fromContext());
+        super(EventProducers.<I>fromContext());
     }
 
     /** Obtains {@link EventStore} from which to get events during catch-up. */
     EventStore getEventStore() {
         return getBoundedContext().getEventBus()
                                   .getEventStore();
-    }
-
-    /**
-     * Exposes {@linkplain #getRouting() routing} to the package.
-     *
-     * <p>{@link EventDispatchingRepository#getRouting()} is {@code final} to restrict routing
-     * customization only via adding custom entries.
-     */
-    @VisibleForTesting
-    EventRouting<I> routing() {
-        return getRouting();
     }
 
     /**
@@ -205,11 +196,12 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      * @see Projection#handle(Message, EventContext)
      */
     @Override
-    protected void dispatchToEntity(I id, Message eventMessage, EventContext context) {
+    protected void dispatchToEntity(I id, EventEnvelope event) {
         final P projection = findOrCreate(id);
         final ProjectionTransaction<I, ?, ?> tx =
                 ProjectionTransaction.start((Projection<I, ?, ?>) projection);
-        projection.handle(eventMessage, context);
+        final EventContext context = event.getEventContext();
+        projection.handle(event.getMessage(), context);
         tx.commit();
 
         if (projection.isChanged()) {

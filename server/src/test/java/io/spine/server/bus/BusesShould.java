@@ -24,7 +24,7 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.Error;
-import io.spine.core.Failure;
+import io.spine.core.Rejection;
 import org.junit.Test;
 
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
@@ -46,9 +46,9 @@ public class BusesShould {
                 .setDefault(Error.class, Error.newBuilder()
                                               .setCode(1)
                                               .build())
-                .setDefault(Failure.class, Failure.newBuilder()
-                                                  .setMessage(Any.getDefaultInstance())
-                                                  .build())
+                .setDefault(Rejection.class, Rejection.newBuilder()
+                                                      .setMessage(Any.getDefaultInstance())
+                                                      .build())
                 .testAllPublicStaticMethods(Buses.class);
     }
 }

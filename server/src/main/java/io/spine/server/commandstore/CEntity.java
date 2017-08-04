@@ -24,14 +24,14 @@ import io.spine.base.Error;
 import io.spine.core.Command;
 import io.spine.core.CommandId;
 import io.spine.core.CommandStatus;
-import io.spine.core.Failure;
+import io.spine.core.Rejection;
 import io.spine.server.commandbus.CommandRecord;
 import io.spine.server.entity.AbstractEntity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.core.CommandStatus.ERROR;
-import static io.spine.core.CommandStatus.FAILURE;
 import static io.spine.core.CommandStatus.OK;
+import static io.spine.core.CommandStatus.REJECTED;
 
 /**
  * An entity for storing a command and its processing status.
@@ -104,11 +104,11 @@ class CEntity extends AbstractEntity<CommandId, CommandRecord> {
         updateState(record);
     }
 
-    void setToFailure(Failure failure) {
+    void setToRejected(Rejection rejection) {
         final CommandRecord.Builder builder = getState().toBuilder();
         builder.getStatusBuilder()
-               .setCode(FAILURE)
-               .setFailure(failure);
+               .setCode(REJECTED)
+               .setRejection(rejection);
         final CommandRecord record = builder.build();
         updateState(record);
     }

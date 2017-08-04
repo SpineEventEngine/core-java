@@ -32,10 +32,10 @@ import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.ProjectLifecycle;
 import io.spine.test.aggregate.ProjectLifecycleVBuilder;
 import io.spine.test.aggregate.Status;
-import io.spine.test.aggregate.command.CreateProject;
-import io.spine.test.aggregate.command.StartProject;
-import io.spine.test.aggregate.event.ProjectCreated;
-import io.spine.test.aggregate.event.ProjectStarted;
+import io.spine.test.aggregate.command.AggCreateProject;
+import io.spine.test.aggregate.command.AggStartProject;
+import io.spine.test.aggregate.event.AggProjectCreated;
+import io.spine.test.aggregate.event.AggProjectStarted;
 
 public class AggregateRootTestEnv {
 
@@ -58,16 +58,16 @@ public class AggregateRootTestEnv {
         }
 
         @Assign
-        ProjectCreated handle(CreateProject msg) {
-            final ProjectCreated result = ProjectCreated.newBuilder()
-                                                        .setProjectId(msg.getProjectId())
-                                                        .setName(msg.getName())
-                                                        .build();
+        AggProjectCreated handle(AggCreateProject msg) {
+            final AggProjectCreated result = AggProjectCreated.newBuilder()
+                                                              .setProjectId(msg.getProjectId())
+                                                              .setName(msg.getName())
+                                                              .build();
             return result;
         }
 
         @Apply
-        private void apply(ProjectCreated event) {
+        private void apply(AggProjectCreated event) {
             getBuilder().setId(event.getProjectId())
                         .setName(event.getName());
         }
@@ -87,15 +87,15 @@ public class AggregateRootTestEnv {
         }
 
         @Assign
-        ProjectStarted handle(StartProject msg) {
-            final ProjectStarted result = ProjectStarted.newBuilder()
+        AggProjectStarted handle(AggStartProject msg) {
+            final AggProjectStarted result = AggProjectStarted.newBuilder()
                                                         .setProjectId(msg.getProjectId())
                                                         .build();
             return result;
         }
 
         @Apply
-        private void apply(ProjectStarted event) {
+        private void apply(AggProjectStarted event) {
             getBuilder().setStatus(Status.STARTED);
         }
     }

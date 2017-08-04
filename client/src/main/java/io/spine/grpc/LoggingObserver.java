@@ -21,10 +21,11 @@
 package io.spine.grpc;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Supplier;
 import io.grpc.Internal;
 import io.grpc.stub.StreamObserver;
-import io.spine.Environment;
 import io.spine.string.Stringifiers;
+import io.spine.util.Logging;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,16 +49,12 @@ public final class LoggingObserver<V> implements StreamObserver<V> {
     private static final String ON_COMPLETED = "onCompleted()";
     private static final Object[] emptyParam = {};
 
-    private final Class<?> parentClass;
     private final Level level;
-
-    /** The lazily initialized logger. */
-    @Nullable
-    private volatile Logger logger;
+    private final Supplier<Logger> loggerSupplier;
 
     private LoggingObserver(Class<?> parentClass, Level level) {
-        this.parentClass = parentClass;
         this.level = level;
+        this.loggerSupplier = Logging.supplyFor(parentClass);
     }
 
     /**
@@ -126,21 +123,9 @@ public final class LoggingObserver<V> implements StreamObserver<V> {
     /**
      * Obtains logger instance. Lazily creates logger if it's not created yet.
      */
-    @SuppressWarnings("SynchronizeOnThis") // See “Effective Java 2nd Edition”, Item #71.
     @VisibleForTesting
     Logger log() {
-        Logger result = logger;
-        if (result == null) {
-            synchronized (this) {
-                result = logger;
-                if (result == null) {
-                    logger = Environment.getInstance()
-                                        .getLogger(parentClass);
-                    result = logger;
-                }
-            }
-        }
-        return result;
+        return loggerSupplier.get();
     }
 
     /**

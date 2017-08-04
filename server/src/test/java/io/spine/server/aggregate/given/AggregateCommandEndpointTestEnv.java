@@ -30,12 +30,12 @@ import io.spine.server.command.CommandHistory;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.ProjectVBuilder;
-import io.spine.test.aggregate.command.AddTask;
-import io.spine.test.aggregate.command.CreateProject;
-import io.spine.test.aggregate.command.StartProject;
-import io.spine.test.aggregate.event.ProjectCreated;
-import io.spine.test.aggregate.event.ProjectStarted;
-import io.spine.test.aggregate.event.TaskAdded;
+import io.spine.test.aggregate.command.AggAddTask;
+import io.spine.test.aggregate.command.AggCreateProject;
+import io.spine.test.aggregate.command.AggStartProject;
+import io.spine.test.aggregate.event.AggProjectCreated;
+import io.spine.test.aggregate.event.AggProjectStarted;
+import io.spine.test.aggregate.event.AggTaskAdded;
 
 /**
  * @author Alexander Yevsyukov
@@ -65,43 +65,43 @@ public class AggregateCommandEndpointTestEnv {
         }
 
         @Assign
-        ProjectCreated handle(CreateProject msg, CommandContext context) {
+        AggProjectCreated handle(AggCreateProject msg, CommandContext context) {
             commandsHandled.add(msg, context);
-            return ProjectCreated.newBuilder()
+            return AggProjectCreated.newBuilder()
                                  .setProjectId(msg.getProjectId())
                                  .setName(msg.getName())
                                  .build();
         }
 
         @Apply
-        private void apply(ProjectCreated event) {
+        private void apply(AggProjectCreated event) {
             getBuilder().setId(event.getProjectId())
                         .setName(event.getName());
         }
 
         @Assign
-        TaskAdded handle(AddTask msg, CommandContext context) {
+        AggTaskAdded handle(AggAddTask msg, CommandContext context) {
             commandsHandled.add(msg, context);
-            return TaskAdded.newBuilder()
+            return AggTaskAdded.newBuilder()
                             .setProjectId(msg.getProjectId())
                             .build();
         }
 
         @Apply
-        private void apply(TaskAdded event) {
+        private void apply(AggTaskAdded event) {
             getBuilder().setId(event.getProjectId());
         }
 
         @Assign
-        ProjectStarted handle(StartProject msg, CommandContext context) {
+        AggProjectStarted handle(AggStartProject msg, CommandContext context) {
             commandsHandled.add(msg, context);
-            return ProjectStarted.newBuilder()
+            return AggProjectStarted.newBuilder()
                                  .setProjectId(msg.getProjectId())
                                  .build();
         }
 
         @Apply
-        private void apply(ProjectStarted event) {
+        private void apply(AggProjectStarted event) {
         }
     }
 

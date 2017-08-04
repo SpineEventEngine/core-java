@@ -37,6 +37,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.core.Rejections.isRejection;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -139,7 +140,7 @@ public final class EventSubscriberMethod extends HandlerMethod<EventContext> {
     @CheckReturnValue
     public static Set<EventClass> inspect(Class<?> cls) {
         checkNotNull(cls);
-        final ImmutableSet<EventClass> result =
+        final Set<EventClass> result =
                 EventClass.setOf(inspect(cls, domesticSubscribers()));
         return result;
     }
@@ -147,10 +148,12 @@ public final class EventSubscriberMethod extends HandlerMethod<EventContext> {
     @CheckReturnValue
     public static Set<EventClass> inspectExternal(Class<?> cls) {
         checkNotNull(cls);
-        final ImmutableSet<EventClass> result =
+        checkNotNull(cls);
+        final Set<EventClass> result =
                 EventClass.setOf(inspect(cls, externalSubscribers()));
         return result;
     }
+
 
     /** Returns the factory for filtering and creating event subscriber methods. */
     private static HandlerMethod.Factory<EventSubscriberMethod> factory() {
@@ -216,6 +219,23 @@ public final class EventSubscriberMethod extends HandlerMethod<EventContext> {
         private FilterPredicate(boolean externalOnly) {
             super(Subscribe.class, EventContext.class);
             this.externalOnly = externalOnly;
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * <p>Filters out methods that accept rejection messages as the first parameter.
+         */
+        @Override
+        protected boolean verifyParams(Method method) {
+            if (super.verifyParams(method)) {
+                @SuppressWarnings("unchecked") // The case is safe since super returned `true`.
+                final Class<? extends Message> firstParameter =
+                        (Class<? extends Message>) method.getParameterTypes()[0];
+                final boolean isRejection = isRejection(firstParameter);
+                return !isRejection;
+            }
+            return false;
         }
 
         @Override

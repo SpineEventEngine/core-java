@@ -22,6 +22,7 @@ package io.spine.server.entity;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.core.Event;
+import io.spine.core.EventEnvelope;
 import io.spine.core.Version;
 import io.spine.server.command.TestEventFactory;
 import io.spine.validate.StringValueVBuilder;
@@ -29,9 +30,8 @@ import io.spine.validate.ValidatingBuilder;
 import org.junit.Test;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.TestValues.newUuidValue;
+import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -177,9 +177,7 @@ public class EventPlayingEntityShould {
     }
 
     private static void verifyEventApplied(Transaction txMock, Event event) {
-        final Message actualMessage = unpack(event.getMessage());
-        verify(txMock).apply(eq(actualMessage),
-                             eq(event.getContext()));
+        verify(txMock).apply(eq(EventEnvelope.of(event)));
     }
 
     @Test

@@ -21,39 +21,36 @@
 package io.spine.server.commandbus;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Queues;
+import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Message;
-import com.google.protobuf.StringValue;
+import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;
-import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
-import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Events;
 import io.spine.server.BoundedContext;
-import io.spine.server.command.Assign;
-import io.spine.server.command.CommandHandler;
-import io.spine.server.command.CommandHistory;
 import io.spine.server.event.EventBus;
-import io.spine.server.event.EventDispatcher;
-import io.spine.test.command.AddTask;
-import io.spine.test.command.CreateProject;
-import io.spine.test.command.StartProject;
-import io.spine.test.command.event.ProjectCreated;
-import io.spine.test.command.event.ProjectStarted;
-import io.spine.test.command.event.TaskAdded;
+import io.spine.server.reflect.given.CommandHandlerTestEnv.EventCatcher;
+import io.spine.server.reflect.given.CommandHandlerTestEnv.TestCommandHandler;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.event.EventRecodingLogger;
+import org.slf4j.event.Level;
+import org.slf4j.event.SubstituteLoggingEvent;
+import org.slf4j.helpers.SubstituteLogger;
 
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
+import java.util.Queue;
 
 import static io.spine.Identifier.newUuid;
+import static io.spine.test.TestValues.newUuidValue;
 import static io.spine.test.Tests.nullRef;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -72,7 +69,7 @@ public class CommandHandlerShould {
                                                             .build();
         commandBus = boundedContext.getCommandBus();
         eventBus = boundedContext.getEventBus();
-        handler = new TestCommandHandler();
+        handler = new TestCommandHandler(eventBus);
 
         commandBus.register(handler);
     }
@@ -127,7 +124,7 @@ public class CommandHandlerShould {
 
     @Test
     public void assure_same_handlers_are_equal() {
-        final TestCommandHandler same = new TestCommandHandler();
+        final TestCommandHandler same = new TestCommandHandler(eventBus);
 
         assertTrue(handler.equals(same));
     }
@@ -154,75 +151,47 @@ public class CommandHandlerShould {
         handler.assertHandled(cmd);
     }
 
-    @SuppressWarnings({"OverloadedMethodsWithSameNumberOfParameters", "ReturnOfCollectionOrArrayField"})
-    private class TestCommandHandler extends CommandHandler {
-
-        private final ImmutableList<Message> eventsOnStartProjectCmd =
-                createEventsOnStartProjectCmd();
-
-        private final CommandHistory commandsHandled = new CommandHistory();
-
-        private TestCommandHandler() {
-            super(eventBus);
-        }
-
-        private void assertHandled(Command expected) {
-            commandsHandled.assertHandled(expected);
-        }
-
-        private void handle(Command cmd) {
-            final CommandEnvelope commandEnvelope = CommandEnvelope.of(cmd);
-            dispatch(commandEnvelope);
-        }
-
-        private ImmutableList<Message> getEventsOnStartProjectCmd() {
-            return eventsOnStartProjectCmd;
-        }
-
-        @Assign
-        ProjectCreated handle(CreateProject msg, CommandContext context) {
-            commandsHandled.add(msg, context);
-            return ProjectCreated.getDefaultInstance();
-        }
-
-        @Assign
-        TaskAdded handle(AddTask msg, CommandContext context) {
-            commandsHandled.add(msg, context);
-            return TaskAdded.getDefaultInstance();
-        }
-
-        @Assign
-        List<Message> handle(StartProject msg, CommandContext context) {
-            commandsHandled.add(msg, context);
-            return eventsOnStartProjectCmd;
-        }
-
-        private ImmutableList<Message> createEventsOnStartProjectCmd() {
-            final ImmutableList.Builder<Message> builder = ImmutableList.builder();
-            builder.add(ProjectStarted.getDefaultInstance(), StringValue.getDefaultInstance());
-            return builder.build();
-        }
+    @Test
+    public void have_class_specific_logger() {
+        final Logger logger = handler.log();
+        assertNotNull(logger);
+        assertEquals(logger.getName(), handler.getClass()
+                                              .getName());
     }
 
-    private static class EventCatcher implements EventDispatcher<String> {
+    @Test
+    public void log_errors() {
+        final CommandEnvelope commandEnvelope = givenCommandEnvelope();
 
-        private final List<EventEnvelope> dispatched = new LinkedList<>();
+        // Since we're in the tests mode `Environment` returns `SubstituteLogger` instance.
+        final SubstituteLogger log = (SubstituteLogger) handler.log();
 
-        @Override
-        public Set<EventClass> getMessageClasses() {
-            return ImmutableSet.of(EventClass.of(ProjectStarted.class),
-                                   EventClass.of(StringValue.class));
-        }
+        // Restrict the queue size only to the number of calls we want to make.
+        final Queue<SubstituteLoggingEvent> queue = Queues.newArrayBlockingQueue(1);
+        log.setDelegate(new EventRecodingLogger(log, queue));
 
-        @Override
-        public Set<String> dispatch(EventEnvelope envelope) {
-            dispatched.add(envelope);
-            return Identity.of(this);
-        }
+        SubstituteLoggingEvent loggingEvent;
 
-        @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK for tests.
-        public List<EventEnvelope> getDispatched() {
-            return dispatched;
-        }
+        final RuntimeException exception = new RuntimeException("log_errors");
+        handler.onError(commandEnvelope, exception);
+
+        loggingEvent = queue.poll();
+
+        assertEquals(Level.ERROR, loggingEvent.getLevel());
+        assertEquals(commandEnvelope, handler.getLastErrorEnvelope());
+        assertEquals(exception, handler.getLastException());
+    }
+
+    private CommandEnvelope givenCommandEnvelope() {
+        return CommandEnvelope.of(
+                TestActorRequestFactory.newInstance(getClass()).createCommand(newUuidValue())
+        );
+    }
+
+    @Test
+    public void pass_null_tolerance_check() {
+        new NullPointerTester()
+                .setDefault(CommandEnvelope.class, givenCommandEnvelope())
+                .testAllPublicInstanceMethods(handler);
     }
 }

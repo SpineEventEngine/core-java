@@ -40,12 +40,12 @@ import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.commandstore.CommandStore;
 import io.spine.server.event.EventBus;
-import io.spine.server.failure.FailureBus;
+import io.spine.server.rejection.RejectionBus;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.tenant.TenantAwareTest;
 import io.spine.server.tenant.TenantIndex;
-import io.spine.test.command.CreateProject;
-import io.spine.test.command.event.ProjectCreated;
+import io.spine.test.command.CmdCreateProject;
+import io.spine.test.command.event.CmdProjectCreated;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -87,7 +87,7 @@ public abstract class AbstractCommandBusTestSuite {
     protected CommandStore commandStore;
     protected Log log;
     protected EventBus eventBus;
-    protected FailureBus failureBus;
+    protected RejectionBus rejectionBus;
     protected ExecutorCommandScheduler scheduler;
     protected CreateProjectHandler createProjectHandler;
     protected MemoizingObserver<Ack> observer;
@@ -176,13 +176,13 @@ public abstract class AbstractCommandBusTestSuite {
         commandStore = spy(new CommandStore(storageFactory, tenantIndex));
         scheduler = spy(new ExecutorCommandScheduler());
         log = spy(new Log());
-        failureBus = spy(FailureBus.newBuilder()
-                                   .build());
+        rejectionBus = spy(RejectionBus.newBuilder()
+                                       .build());
         commandBus = CommandBus.newBuilder()
                                .setMultitenant(this.multitenant)
                                .setCommandStore(commandStore)
                                .setCommandScheduler(scheduler)
-                               .setFailureBus(failureBus)
+                               .setRejectionBus(rejectionBus)
                                .setThreadSpawnAllowed(false)
                                .setLog(log)
                                .setAutoReschedule(false)
@@ -268,9 +268,9 @@ public abstract class AbstractCommandBusTestSuite {
         }
 
         @Assign
-        ProjectCreated handle(CreateProject command, CommandContext ctx) {
+        CmdProjectCreated handle(CmdCreateProject command, CommandContext ctx) {
             handlerInvoked = true;
-            return ProjectCreated.getDefaultInstance();
+            return CmdProjectCreated.getDefaultInstance();
         }
 
         boolean wasHandlerInvoked() {

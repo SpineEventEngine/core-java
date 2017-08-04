@@ -30,11 +30,12 @@ import java.util.Set;
  * A common interface for objects which need to dispatch {@linkplain io.spine.core.Event events},
  * but are unable to implement {@link io.spine.server.event.EventDispatcher EventDispatcher}.
  *
- * <p>This interface defines own contract (instead of extending {@linkplain
+ * <p>This interface defines own contract (instead of extending {@link
  * io.spine.server.bus.MessageDispatcher MessageDispatcher} to allow classes that dispatch
- * messages other than events (by implementing {@linkplain io.spine.server.bus.MessageDispatcher
+ * messages other than events (by implementing {@link io.spine.server.bus.MessageDispatcher
  * MessageDispatcher}), and dispatch events by implementing this interface.
  *
+ * @param <I> the type of IDs of entities subscribed to events
  * @author Alexander Yevsyukov
  * @see DelegatingEventDispatcher
  */
@@ -50,4 +51,12 @@ public interface EventDispatcherDelegate<I> {
      * Dispatches the event.
      */
     Set<I> dispatchEvent(EventEnvelope envelope);
+
+    /**
+     * Handles an error occurred during event dispatching.
+     *
+     * @param envelope  the event which caused the error
+     * @param exception the error
+     */
+    void onError(EventEnvelope envelope, RuntimeException exception);
 }

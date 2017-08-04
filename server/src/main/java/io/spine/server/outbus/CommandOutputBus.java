@@ -25,8 +25,8 @@ import io.spine.Identifier;
 import io.spine.annotation.Internal;
 import io.spine.core.Ack;
 import io.spine.core.Event;
-import io.spine.core.Failure;
 import io.spine.core.MessageEnvelope;
+import io.spine.core.Rejection;
 import io.spine.server.bus.MessageDispatcher;
 import io.spine.server.bus.MulticastBus;
 import io.spine.server.delivery.MulticastDelivery;
@@ -43,8 +43,7 @@ import static java.lang.String.format;
  *
  * <ul>
  *     <li>{@linkplain Event events} — in case the command is handled successfully;
- *     <li>{@linkplain Failure business failures} — if the command contradicts
- *          the business rules.
+ *     <li>{@linkplain Rejection rejections} — if the command contradicts the business rules.
  * </ul>
  *
  * <p>The instances of {@code CommandOutputBus} are responsible for a delivery of such output

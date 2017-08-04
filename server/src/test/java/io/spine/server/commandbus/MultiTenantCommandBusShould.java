@@ -32,9 +32,9 @@ import io.spine.core.CommandValidationError;
 import io.spine.core.MessageEnvelope;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.command.CommandHandler;
-import io.spine.server.failure.FailureBus;
-import io.spine.test.command.AddTask;
-import io.spine.test.command.CreateProject;
+import io.spine.server.rejection.RejectionBus;
+import io.spine.test.command.CmdAddTask;
+import io.spine.test.command.CmdCreateProject;
 import org.junit.Test;
 
 import java.util.Set;
@@ -59,16 +59,16 @@ public class MultiTenantCommandBusShould extends AbstractCommandBusTestSuite {
     }
 
     @Test
-    public void allow_to_specify_failure_bus_via_builder() {
-        final FailureBus expectedFailureBus = mock(FailureBus.class);
+    public void allow_to_specify_rejection_bus_via_builder() {
+        final RejectionBus expectedRejectionBus = mock(RejectionBus.class);
         final CommandBus commandBus = CommandBus.newBuilder()
                                                 .setCommandStore(commandStore)
-                                                .setFailureBus(expectedFailureBus)
+                                                .setRejectionBus(expectedRejectionBus)
                                                 .build();
         assertNotNull(commandBus);
 
-        final FailureBus actualFailureBus = commandBus.failureBus();
-        assertEquals(expectedFailureBus, actualFailureBus);
+        final RejectionBus actualRejectionBus = commandBus.rejectionBus();
+        assertEquals(expectedRejectionBus, actualRejectionBus);
     }
 
     @Test
@@ -77,11 +77,11 @@ public class MultiTenantCommandBusShould extends AbstractCommandBusTestSuite {
     }
 
     @Test
-    public void have_failure_bus_if_no_custom_set() {
+    public void have_rejection_bus_if_no_custom_set() {
         final CommandBus bus = CommandBus.newBuilder()
                                            .setCommandStore(commandStore)
                                            .build();
-        assertNotNull(bus.failureBus());
+        assertNotNull(bus.rejectionBus());
     }
 
     @Test
@@ -92,10 +92,10 @@ public class MultiTenantCommandBusShould extends AbstractCommandBusTestSuite {
     }
 
     @Test
-    public void close_FailureBus_when_closed() throws Exception {
+    public void close_RejectionBus_when_closed() throws Exception {
         commandBus.close();
 
-        verify(failureBus).close();
+        verify(rejectionBus).close();
     }
 
     @Test
@@ -262,8 +262,8 @@ public class MultiTenantCommandBusShould extends AbstractCommandBusTestSuite {
 
         final Set<CommandClass> cmdClasses = commandBus.getRegisteredCommandClasses();
 
-        assertTrue(cmdClasses.contains(CommandClass.of(CreateProject.class)));
-        assertTrue(cmdClasses.contains(CommandClass.of(AddTask.class)));
+        assertTrue(cmdClasses.contains(CommandClass.of(CmdCreateProject.class)));
+        assertTrue(cmdClasses.contains(CommandClass.of(CmdAddTask.class)));
     }
 
     /*
@@ -281,13 +281,18 @@ public class MultiTenantCommandBusShould extends AbstractCommandBusTestSuite {
 
         @Override
         public Set<CommandClass> getMessageClasses() {
-            return CommandClass.setOf(AddTask.class);
+            return CommandClass.setOf(CmdAddTask.class);
         }
 
         @Override
         public Message dispatch(CommandEnvelope envelope) {
             dispatcherInvoked = true;
             return Empty.getDefaultInstance();
+        }
+
+        @Override
+        public void onError(CommandEnvelope envelope, RuntimeException exception) {
+            // Do nothing.
         }
 
         public boolean wasDispatcherInvoked() {

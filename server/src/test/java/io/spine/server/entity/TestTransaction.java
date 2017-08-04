@@ -19,9 +19,8 @@
  */
 package io.spine.server.entity;
 
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import io.spine.core.EventContext;
+import io.spine.core.EventEnvelope;
 import io.spine.core.Version;
 
 /**
@@ -57,9 +56,7 @@ public class TestTransaction {
         final TestTx tx = new TestTx(entity) {
 
             @Override
-            protected void dispatch(EventPlayingEntity entity,
-                                    Message eventMessage,
-                                    EventContext context) {
+            protected void dispatch(EventPlayingEntity entity, EventEnvelope event) {
                 entity.setArchived(true);
             }
         };
@@ -78,9 +75,7 @@ public class TestTransaction {
         final TestTx tx = new TestTx(entity) {
 
             @Override
-            protected void dispatch(EventPlayingEntity entity,
-                                    Message eventMessage,
-                                    EventContext context) {
+            protected void dispatch(EventPlayingEntity entity, EventEnvelope event) {
                 entity.setDeleted(true);
             }
         };
@@ -101,13 +96,12 @@ public class TestTransaction {
         }
 
         @Override
-        protected void dispatch(EventPlayingEntity entity, Message eventMessage,
-                                EventContext context) {
+        protected void dispatch(EventPlayingEntity entity, EventEnvelope event) {
             // NoOp by default
         }
 
         private void dispatchForTest() {
-            dispatch(getEntity(), Any.getDefaultInstance(), EventContext.getDefaultInstance());
+            dispatch(getEntity(), null);
         }
     }
 }

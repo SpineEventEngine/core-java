@@ -21,9 +21,7 @@
 package io.spine.server.reflect;
 
 import com.google.common.base.Predicate;
-import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.protobuf.Message;
 
@@ -100,9 +98,9 @@ class MethodMap<H extends HandlerMethod> {
     /**
      * Creates a new method map for the passed class using the passed factory.
      *
-     * @param clazz the class to inspect
+     * @param clazz   the class to inspect
      * @param factory the factory for handler methods
-     * @param <H> the type of the handler methods
+     * @param <H>     the type of the handler methods
      * @return new method map
      */
     public static <H extends HandlerMethod> MethodMap<H> create(Class<?> clazz,
@@ -113,11 +111,11 @@ class MethodMap<H extends HandlerMethod> {
     /**
      * Returns a map of the {@link HandlerMethod} objects to the corresponding message class.
      *
-     * @param declaringClass the class that declares methods to scan
-     * @param filter         the predicate that defines rules for subscriber scanning
+     * @param  declaringClass the class that declares methods to scan
+     * @param  filter         the predicate that defines rules for subscriber scanning
      * @return the map of message subscribers
-     * @throws DuplicateHandlerMethodException if there are more than one handler for
-     *                                         the same message class are encountered
+     * @throws DuplicateHandlerMethodException
+     *         if there are more than one handler for the same message class are encountered
      */
     private static Map<Class<? extends Message>, Method> scan(Class<?> declaringClass,
                                                               Predicate<Method> filter) {
