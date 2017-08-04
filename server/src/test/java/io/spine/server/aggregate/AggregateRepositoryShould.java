@@ -44,6 +44,7 @@ import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.FailingAggrega
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.GivenAggregate;
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.ProjectAggregate;
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.ProjectAggregateRepository;
+import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.ReactingAggregate;
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.ReactingRepository;
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.RejectingRepository;
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.RejectionReactingAggregate;
@@ -52,7 +53,6 @@ import io.spine.server.command.TestEventFactory;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.reflect.HandlerMethodFailedException;
 import io.spine.server.tenant.TenantAwareOperation;
-import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggCreateProjectWithChildren;
 import io.spine.test.aggregate.command.AggStartProjectWithChildren;
@@ -67,7 +67,6 @@ import java.util.Iterator;
 import java.util.Set;
 
 import static io.spine.core.given.GivenTenantId.newUuid;
-import static io.spine.validate.Validate.isDefault;
 import static io.spine.validate.Validate.isNotDefault;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -116,12 +115,10 @@ public class AggregateRepositoryShould {
     }
 
     @Test
-    public void create_aggregate_with_default_state_if_no_aggregate_found() {
-        final ProjectAggregate aggregate = repository.find(Sample.messageOfType(ProjectId.class))
-                                                     .get();
-        final Project state = aggregate.getState();
-
-        assertTrue(isDefault(state));
+    public void do_not_create_new_aggregates_on_find() {
+        final ProjectId newId = Sample.messageOfType(ProjectId.class);
+        final Optional<ProjectAggregate> optional = repository.find(newId);
+        assertFalse(optional.isPresent());
     }
 
     @Test
@@ -408,19 +405,22 @@ public class AggregateRepositoryShould {
                                                          .build();
         final Event event = factory.createEvent(msg);
 
-        repository.createAndStore(childId);
-
-        // See that the aggregate can find the aggregate.
-        assertTrue(repository.find(childId).isPresent());
-
         // Posting this event should archive the aggregate.
         boundedContext.getEventBus()
                       .post(event);
 
         // Check that the aggregate marked itself as `archived`, and therefore became invisible
         // to regular queries.
-        assertFalse(repository.find(childId)
-                              .isPresent());
+        final Optional<ReactingAggregate> optional = repository.find(childId);
+
+        // The aggregate was created because of dispatching.
+        assertTrue(optional.isPresent());
+
+        // The proper method was called, which we check by the state the aggregate got.
+        assertEquals(ReactingAggregate.PROJECT_ARCHIVED,
+                     optional.get()
+                             .getState()
+                             .getValue());
     }
 
     @Test

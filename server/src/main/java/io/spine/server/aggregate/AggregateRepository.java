@@ -457,16 +457,16 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     /**
-     * Loads the aggregate by the passed ID.
+     * Loads an aggregate by the passed ID.
      *
-     * <p>If the aggregate is not available in the repository this method
-     * returns a newly created aggregate.
-     *
-     * <p>If the aggregate has at least one {@linkplain LifecycleFlags lifecycle flag} set
-     * {@code Optional.absent()} is returned.
+     * <p>The method returns {@link Optional#absent()} if:
+     * <ul>
+     *     <li>there are no events stored for the aggregate with the passed ID, or
+     *     <li>the aggregate has at least one {@linkplain LifecycleFlags lifecycle flag} set.
+     * </ul>
      *
      * @param  id the ID of the aggregate to load
-     * @return the loaded object
+     * @return the loaded object or {@link Optional#absent()}
      * @throws IllegalStateException
      *         if the storage of the repository is not {@linkplain #initStorage(StorageFactory)
      *         initialized} prior to this call
@@ -482,9 +482,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
                 return Optional.absent();
             }
         }
-
-        A result = loadOrCreate(id);
-        return Optional.of(result);
+        final Optional<A> result = load(id);
+        return result;
     }
 
     /** The EventBus to which we post events produced by aggregates. */

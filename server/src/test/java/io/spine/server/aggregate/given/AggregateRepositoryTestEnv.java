@@ -449,7 +449,11 @@ public class AggregateRepositoryTestEnv {
     /**
      * An aggregate class that reacts only on events and does not handle commands.
      */
-    static class ReactingAggregate extends Aggregate<ProjectId, StringValue, StringValueVBuilder> {
+    public static class ReactingAggregate
+            extends Aggregate<ProjectId, StringValue, StringValueVBuilder> {
+
+        public static final String PROJECT_ARCHIVED = "PROJECT_ARCHIVED";
+        public static final String PROJECT_DELETED = "PROJECT_DELETED";
 
         private ReactingAggregate(ProjectId id) {
             super(id);
@@ -487,12 +491,12 @@ public class AggregateRepositoryTestEnv {
 
         @Apply
         private void apply(AggProjectArchived event) {
-            setArchived(true);
+            getBuilder().setValue(PROJECT_ARCHIVED);
         }
 
         @Apply
         private void apply(AggProjectDeleted event) {
-            setDeleted(true);
+            getBuilder().setValue(PROJECT_DELETED);
         }
     }
 
