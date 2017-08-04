@@ -66,6 +66,8 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
     @Override
     protected void onError(CommandEnvelope envelope, RuntimeException exception) {
         repository().onError(envelope, exception);
+        // Re-throw exception so that unhandled command gets proper status.
+        throw exception;
     }
 
     /**

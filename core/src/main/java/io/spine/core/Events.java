@@ -19,6 +19,7 @@
  */
 package io.spine.core;
 
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
@@ -62,9 +63,8 @@ public final class Events {
                            .register(idStringifier(), EventId.class);
     }
 
-    private Events() {
-        // Prevent instantiation of this utility class.
-    }
+    /** Prevents instantiation of this utility class. */
+    private Events() {}
 
     /**
      * Sorts the given event record list by the event timestamps.
@@ -176,6 +176,18 @@ public final class Events {
                                      .getActorContext()
                                      .getTenantId();
         return result;
+    }
+
+    /**
+     * Creates an empty {@link Iterable} over the messages of the type {@code <M>}.
+     *
+     * <p>This method is useful for returning empty result from reacting methods.
+     *
+     * @param <M> the type of messages
+     * @return empty {@link Iterable}
+     */
+    public static <M> Iterable<M> nothing() {
+        return ImmutableList.of();
     }
 
     /**
