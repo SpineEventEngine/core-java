@@ -25,6 +25,13 @@ import io.spine.core.Event;
 
 import java.util.List;
 
+/**
+ * Dispatches command to process managers.
+ *
+ * @param <I> the type of process manager IDs
+ * @param <P> the type of process managers
+ * @author Alexander Yevsyukov
+ */
 class PmCommandEndpoint<I, P extends ProcessManager<I, ?, ?>>
         extends PmEndpoint<I, P, CommandEnvelope, I> {
 
