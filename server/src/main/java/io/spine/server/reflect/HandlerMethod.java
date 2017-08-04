@@ -21,9 +21,11 @@ package io.spine.server.reflect;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
+import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.core.MessageEnvelope;
@@ -69,7 +71,7 @@ public abstract class HandlerMethod<C extends Message> {
      *
      * @param method subscriber method
      */
-    protected HandlerMethod(Method method) {
+    HandlerMethod(Method method) {
         this.method = checkNotNull(method);
         this.paramCount = method.getParameterTypes().length;
         method.setAccessible(true);
@@ -98,7 +100,7 @@ public abstract class HandlerMethod<C extends Message> {
     /**
      * Returns {@code true} if the method has package-private access, {@code false} otherwise.
      */
-    protected static boolean isPackagePrivate(Method method) {
+    static boolean isPackagePrivate(Method method) {
         final int modifiers = method.getModifiers();
         final boolean result =
                 !(Modifier.isPublic(modifiers)
@@ -110,7 +112,7 @@ public abstract class HandlerMethod<C extends Message> {
     /**
      * Logs a message at the WARN level according to the specified format and method.
      */
-    protected static void warnOnWrongModifier(String messageFormat, Method method) {
+    static void warnOnWrongModifier(String messageFormat, Method method) {
         log().warn(messageFormat, getFullMethodName(method));
     }
 
@@ -201,20 +203,34 @@ public abstract class HandlerMethod<C extends Message> {
      *               Could be a {@link Message}, a list of messages, or {@code null}.
      * @return the list of event messages or an empty list if {@code null} is passed
      */
-    protected static <R> List<? extends Message> toList(@Nullable R output) {
+    @SuppressWarnings({"unchecked", "ChainOfInstanceofChecks"})
+    static <R> List<? extends Message> toList(@Nullable R output) {
         if (output == null) {
             return emptyList();
         }
+
+        // Allow reacting methods to return `Empty` instead of empty `List`. Do not store such
+        // events. Command Handling methods will not be able to use this trick because we check
+        // for non-empty result of such methods.
+        if (output instanceof Empty) {
+            return emptyList();
+        }
+
         if (output instanceof List) {
             // Cast to the list of messages as it is the one of the return types
             // we expect by methods we call.
-            @SuppressWarnings("unchecked") final List<? extends Message> result = (List<? extends Message>) output;
-            return result;
-        } else {
-            // Another type of result is single event message (as Message).
-            final List<Message> result = singletonList((Message) output);
+            final List<? extends Message> result = (List<? extends Message>) output;
             return result;
         }
+
+        // If it's not a list it could be another `Iterable`.
+        if (output instanceof Iterable) {
+            return ImmutableList.copyOf((Iterable<? extends Message>)output);
+        }
+
+        // Another type of result is single event message (as Message).
+        final List<Message> result = singletonList((Message) output);
+        return result;
     }
 
     /**
@@ -311,7 +327,7 @@ public abstract class HandlerMethod<C extends Message> {
      *
      * @param <H> the type of the handler method objects to create
      */
-    public interface Factory<H extends HandlerMethod> {
+    interface Factory<H extends HandlerMethod> {
 
         /** Returns the class of the method wrapper. */
         Class<H> getMethodClass();

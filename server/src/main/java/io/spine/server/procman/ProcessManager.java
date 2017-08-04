@@ -287,7 +287,6 @@ public abstract class ProcessManager<I,
          * to rejections
          */
         static Set<RejectionClass> getRejectionClasses(Class<? extends ProcessManager> pmClass) {
-            //TODO:2017-08-03:alexander.yevsyukov: Use RejectionReactorMethod here.
             return ImmutableSet.copyOf(RejectionReactorMethod.inspect(pmClass));
         }
     }
