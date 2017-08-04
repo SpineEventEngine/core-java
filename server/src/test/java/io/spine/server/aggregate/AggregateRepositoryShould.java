@@ -379,7 +379,7 @@ public class AggregateRepositoryShould {
     }
 
     @Test
-    public void allow_reacting_aggregates() {
+    public void allow_aggregates_react_on_events() {
         final ReactingRepository repository = new ReactingRepository();
         boundedContext.register(repository);
 
@@ -405,7 +405,18 @@ public class AggregateRepositoryShould {
         boundedContext.getEventBus()
                       .post(event);
 
-        assertFalse(repository.find(childId).isPresent());
+        // Check that the aggregate marked itself as `archived`, and therefore became invisible
+        // to regular queries.
+        assertFalse(repository.find(childId)
+                              .isPresent());
+    }
+
+    @Test
+    public void allow_aggregates_react_on_rejections() {
+        final ReactingRepository repository = new ReactingRepository();
+        boundedContext.register(repository);
+
+        //TODO:2017-08-04:alexander.yevsyukov: Implement
     }
 
     /*

@@ -24,8 +24,8 @@ import com.google.common.base.Predicate;
 import com.google.protobuf.Message;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
+import io.spine.core.Events;
 import io.spine.core.React;
-import io.spine.protobuf.Messages;
 
 import javax.annotation.CheckReturnValue;
 import java.lang.reflect.Method;
@@ -64,7 +64,7 @@ public final class EventReactorMethod extends HandlerMethod<EventContext> {
         checkNotNull(target);
         checkNotNull(event);
         checkNotNull(context);
-        final Message eventMessage = Messages.ensureMessage(event);
+        final Message eventMessage = Events.ensureMessage(event);
         final EventReactorMethod method = getMethod(target.getClass(), eventMessage);
         return method.invoke(target, eventMessage, context);
     }

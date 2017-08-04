@@ -107,6 +107,18 @@ public final class Events {
     }
 
     /**
+     * Extracts an event message if the passed instance is an {@link Event} object or {@link Any},
+     * otherwise returns the passed message.
+     */
+    public static Message ensureMessage(Message eventOrMessage) {
+        checkNotNull(eventOrMessage);
+        if (eventOrMessage instanceof Event) {
+            return getMessage((Event) eventOrMessage);
+        }
+        return io.spine.protobuf.Messages.ensureMessage(eventOrMessage);
+    }
+
+    /**
      * Obtains the actor user ID from the passed {@code EventContext}.
      *
      * <p>The 'actor' is the user who sent the command, which generated the event which context is

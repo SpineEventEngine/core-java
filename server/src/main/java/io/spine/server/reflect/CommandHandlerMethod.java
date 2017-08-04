@@ -29,7 +29,7 @@ import io.spine.Identifier;
 import io.spine.base.ThrowableMessage;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
-import io.spine.protobuf.Messages;
+import io.spine.core.Commands;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.entity.Entity;
@@ -113,7 +113,7 @@ public final class CommandHandlerMethod extends HandlerMethod<CommandContext> {
         checkNotNull(target);
         checkNotNull(command);
         checkNotNull(context);
-        final Message commandMessage = Messages.ensureMessage(command);
+        final Message commandMessage = Commands.ensureMessage(command);
 
         final CommandHandlerMethod method = getMethod(target.getClass(), commandMessage);
         final List<? extends Message> eventMessages =

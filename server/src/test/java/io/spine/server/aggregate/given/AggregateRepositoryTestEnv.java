@@ -45,6 +45,7 @@ import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.entity.given.Given;
 import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
+import io.spine.server.entity.rejection.EntityAlreadyArchived;
 import io.spine.server.route.CommandRoute;
 import io.spine.server.route.EventRoute;
 import io.spine.string.Stringifiers;
@@ -89,11 +90,15 @@ public class AggregateRepositoryTestEnv {
                                          .create(commandMessage));
     }
 
+    public static <M> Iterable<M> nothing() {
+        return ImmutableList.of();
+    }
+
+    /** Utility factory for test aggregates. */
     public static class GivenAggregate {
 
-        private GivenAggregate() {
-            // Prevent instantiation of this utility class.
-        }
+        /** Prevents instantiation of this utility class. */
+        private GivenAggregate() {}
 
         public static ProjectAggregate withUncommittedEvents() {
             return withUncommittedEvents(Sample.messageOfType(ProjectId.class));
@@ -125,16 +130,14 @@ public class AggregateRepositoryTestEnv {
         }
     }
 
+    /**
+     * The main aggregate class for positive scenarios tests.
+     */
     public static class ProjectAggregate
             extends Aggregate<ProjectId, Project, ProjectVBuilder> {
 
         private ProjectAggregate(ProjectId id) {
             super(id);
-        }
-
-        //TODO:2017-07-19:alexander.yevsyukov: Return Optional.absent() instead.
-        private static <M> Iterable<M> nothing() {
-            return ImmutableList.of();
         }
 
         @Override
@@ -240,6 +243,9 @@ public class AggregateRepositoryTestEnv {
         }
     }
 
+    /**
+     * The repository of positive scenarios {@linkplain ProjectAggregate  aggregates}.
+     */
     @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
     public static class ProjectAggregateRepository
             extends AggregateRepository<ProjectId, ProjectAggregate> {
@@ -292,7 +298,7 @@ public class AggregateRepositoryTestEnv {
      *
      * @see FailingAggregateRepository
      */
-    public static class FailingAggregate extends Aggregate<Long, StringValue, StringValueVBuilder> {
+    static class FailingAggregate extends Aggregate<Long, StringValue, StringValueVBuilder> {
 
         private FailingAggregate(Long id) {
             super(id);
@@ -418,7 +424,7 @@ public class AggregateRepositoryTestEnv {
     /**
      * An aggregate class which neither handle commands nor react on events or rejections.
      */
-    public static class AnemicAggregate extends Aggregate<Integer, BoolValue, BoolValueVBuilder> {
+    static class AnemicAggregate extends Aggregate<Integer, BoolValue, BoolValueVBuilder> {
         private AnemicAggregate(Integer id) {
             super(id);
         }
@@ -434,8 +440,7 @@ public class AggregateRepositoryTestEnv {
     /**
      * An aggregate class that reacts only on events and does not handle commands.
      */
-    public static class ReactingAggregate
-            extends Aggregate<ProjectId, StringValue, StringValueVBuilder> {
+    static class ReactingAggregate extends Aggregate<ProjectId, StringValue, StringValueVBuilder> {
 
         private ReactingAggregate(ProjectId id) {
             super(id);
@@ -471,10 +476,6 @@ public class AggregateRepositoryTestEnv {
             return nothing();
         }
 
-        private static <M> Iterable<M> nothing() {
-            return ImmutableList.of();
-        }
-
         @Apply
         private void apply(AggProjectArchived event) {
             setArchived(true);
@@ -495,6 +496,24 @@ public class AggregateRepositoryTestEnv {
         public void createAndStore(ProjectId id) {
             ReactingAggregate newAggregate = new ReactingAggregate(id);
             store(newAggregate);
+        }
+    }
+
+    /**
+     * An aggregate class that reacts only on rejections, and neither handles commands, nor
+     * reacts on events.
+     */
+    static class RejectionReactingAggregate
+            extends Aggregate<ProjectId, StringValue, StringValueVBuilder> {
+
+        private RejectionReactingAggregate(ProjectId id) {
+            super(id);
+        }
+
+        @React
+        private Iterable<AggProjectArchived> on(EntityAlreadyArchived rejection) {
+
+            return ImmutableSet.of();
         }
     }
 }
