@@ -30,9 +30,6 @@ import java.util.Set;
 /**
  * Dispatches events to aggregates of the associated {@code AggregateRepository}.
  *
- * <p>Loading and storing an aggregate is a tenant-sensitive operation,
- * which depends on the tenant ID of the command we dispatch.
- *
  * @param <I> the type of the aggregate IDs
  * @param <A> the type of the aggregates
  *

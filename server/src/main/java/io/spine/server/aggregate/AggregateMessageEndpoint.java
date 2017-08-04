@@ -34,7 +34,7 @@ import java.util.List;
  * @param <I> the type of aggregate IDs
  * @param <A> the type of aggregates
  * @param <M> the type of message envelopes
- * @param <R> the type of the dispatch result, can be {@code <I>} for unicast dispatching, or
+ * @param <R> the type of the dispatch result, which is {@code <I>} for unicast dispatching, and
  *            {@code Set<I>} for multicast
  * @author Alexander Yevsyukov
  */

@@ -26,6 +26,13 @@ import io.spine.core.RejectionEnvelope;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Dispatches rejections to aggregates of the associated {@link AggregateRepository}.
+ *
+ * @param <I> the type of aggregate IDs
+ * @param <A> the type of aggregates
+ * @author Alexander Yevsyukov
+ */
 class AggregateRejectionEndpoint<I, A extends Aggregate<I, ?, ?>>
         extends AggregateMessageEndpoint<I, A, RejectionEnvelope, Set<I>> {
 

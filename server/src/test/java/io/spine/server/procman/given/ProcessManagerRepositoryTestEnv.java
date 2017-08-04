@@ -200,8 +200,7 @@ public class ProcessManagerRepositoryTestEnv {
         public static final ProjectId ID = Sample.messageOfType(ProjectId.class);
 
         /** Prevents instantiation on this utility class. */
-        private GivenCommandMessage() {
-        }
+        private GivenCommandMessage() {}
 
         public static PmCreateProject createProject() {
             return ((PmCreateProject.Builder) Sample.builderForType(PmCreateProject.class))

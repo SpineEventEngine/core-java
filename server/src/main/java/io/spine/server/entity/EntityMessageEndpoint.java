@@ -37,11 +37,15 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * Abstract base for endpoints handling messages sent to entities.
- * 
+ *
+ * <p>Loading and storing an entity is a tenant-sensitive operation,
+ * which must be performed under the context of the tenant ID in which
+ * the message we dispatch was originated.
+ *
  * @param <I> the type of entity IDs
  * @param <E> the type of entities
  * @param <M> the type of message envelopes
- * @param <R> the type of the dispatch result, can be {@code <I>} for unicast dispatching, or
+ * @param <R> the type of the dispatch result, which is {@code <I>} for unicast dispatching, and
  *            {@code Set<I>} for multicast
  * @author Alexander Yevsyukov
  */

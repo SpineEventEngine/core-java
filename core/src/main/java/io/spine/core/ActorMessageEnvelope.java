@@ -25,7 +25,7 @@ import com.google.protobuf.Message;
 /**
  * A common interface for messages sent by an actor.
  *
- * @param <I> the the of the message id
+ * @param <I> the type of the message ID
  * @param <T> the type of the object that wraps a message
  * @author Alexander Yevsyukov
  */
