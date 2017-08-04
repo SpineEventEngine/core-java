@@ -32,10 +32,10 @@ import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.core.ExternalMessageEnvelope;
-import io.spine.core.Failure;
-import io.spine.core.FailureClass;
-import io.spine.core.FailureEnvelope;
 import io.spine.core.MessageInvalid;
+import io.spine.core.Rejection;
+import io.spine.core.RejectionClass;
+import io.spine.core.RejectionEnvelope;
 import io.spine.grpc.StreamObservers;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.bus.Bus;
@@ -48,14 +48,14 @@ import io.spine.server.delivery.MulticastDelivery;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.event.EventSubscriber;
-import io.spine.server.failure.FailureBus;
-import io.spine.server.failure.FailureDispatcher;
-import io.spine.server.failure.FailureSubscriber;
 import io.spine.server.integration.TransportFactory.Publisher;
 import io.spine.server.integration.TransportFactory.PublisherHub;
 import io.spine.server.integration.TransportFactory.Subscriber;
 import io.spine.server.integration.TransportFactory.SubscriberHub;
 import io.spine.server.integration.local.LocalTransportFactory;
+import io.spine.server.rejection.RejectionBus;
+import io.spine.server.rejection.RejectionDispatcher;
+import io.spine.server.rejection.RejectionSubscriber;
 import io.spine.type.KnownTypes;
 import io.spine.type.MessageClass;
 import io.spine.type.TypeUrl;
@@ -70,7 +70,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.core.EventClass.asEventClass;
-import static io.spine.core.FailureClass.asFailureClass;
+import static io.spine.core.RejectionClass.asRejectionClass;
 import static io.spine.server.bus.Buses.acknowledge;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.lang.String.format;
@@ -93,14 +93,14 @@ public class IntegrationBus extends MulticastBus<Message,
      * sent to another bounded context for a postponed handling.
      */
     private final EventBus eventBus;
-    private final FailureBus failureBus;
+    private final RejectionBus rejectionBus;
     private final SubscriberHub subscriberHub;
     private final PublisherHub publisherHub;
 
     private IntegrationBus(Builder builder) {
         super(builder.getDelivery());
         this.eventBus = builder.eventBus;
-        this.failureBus = builder.failureBus;
+        this.rejectionBus = builder.rejectionBus;
         this.subscriberHub = new SubscriberHub(builder.transportFactory);
         this.publisherHub = new PublisherHub(builder.transportFactory);
 
@@ -359,23 +359,23 @@ public class IntegrationBus extends MulticastBus<Message,
                     asMessageClasses(typeUrlsList, asEventClass());
             eventBus.register(newEventDispatcher(eventClasses));
 
-            final Iterable<FailureClass> failureClasses =
-                    asMessageClasses(typeUrlsList, asFailureClass());
-            failureBus.register(newFailureDispatcher(failureClasses));
+            final Iterable<RejectionClass> rejectionClasses =
+                    asMessageClasses(typeUrlsList, asRejectionClass());
+            rejectionBus.register(newRejectionDispatcher(rejectionClasses));
         }
 
-        private FailureDispatcher newFailureDispatcher(
-                final Iterable<FailureClass> failureClasses) {
-            return new FailureSubscriber() {
+        private RejectionDispatcher<String> newRejectionDispatcher(
+                final Iterable<RejectionClass> rejectionClasses) {
+            return new RejectionSubscriber() {
                 @Override
-                public Set<FailureClass> getMessageClasses() {
-                    return ImmutableSet.copyOf(failureClasses);
+                public Set<RejectionClass> getMessageClasses() {
+                    return ImmutableSet.copyOf(rejectionClasses);
                 }
 
                 @Override
-                public Set<String> dispatch(FailureEnvelope envelope) {
-                    final Failure failure = envelope.getOuterObject();
-                    final IntegrationMessage message = IntegrationMessages.of(failure);
+                public Set<String> dispatch(RejectionEnvelope envelope) {
+                    final Rejection rejection = envelope.getOuterObject();
+                    final IntegrationMessage message = IntegrationMessages.of(rejection);
                     final IntegrationMessageClass messageClass = IntegrationMessageClass.of(
                             envelope.getMessageClass());
                     final Publisher channel = publisherHub.get(messageClass);
@@ -420,7 +420,7 @@ public class IntegrationBus extends MulticastBus<Message,
 
         private LocalDelivery delivery;
         private EventBus eventBus;
-        private FailureBus failureBus;
+        private RejectionBus rejectionBus;
         private TransportFactory transportFactory;
 
         public Optional<EventBus> getEventBus() {
@@ -432,12 +432,12 @@ public class IntegrationBus extends MulticastBus<Message,
             return self();
         }
 
-        public Optional<FailureBus> getFailureBus() {
-            return Optional.fromNullable(failureBus);
+        public Optional<RejectionBus> getRejectionBus() {
+            return Optional.fromNullable(rejectionBus);
         }
 
-        public Builder setFailureBus(FailureBus failureBus) {
-            this.failureBus = checkNotNull(failureBus);
+        public Builder setRejectionBus(RejectionBus rejectionBus) {
+            this.rejectionBus = checkNotNull(rejectionBus);
             return self();
         }
 
@@ -459,8 +459,8 @@ public class IntegrationBus extends MulticastBus<Message,
 
             checkState(eventBus != null,
                        "`eventBus` must be set for integration bus.");
-            checkState(failureBus != null,
-                       "`failureBus` must be set for integration bus.");
+            checkState(rejectionBus != null,
+                       "`rejectionBus` must be set for integration bus.");
 
             if(transportFactory == null) {
                 transportFactory = initTransportFactory();

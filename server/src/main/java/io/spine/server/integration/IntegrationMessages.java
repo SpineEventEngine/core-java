@@ -24,9 +24,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.Identifier;
 import io.spine.core.Event;
-import io.spine.core.EventId;
-import io.spine.core.Failure;
-import io.spine.core.FailureId;
+import io.spine.core.Rejection;
 import io.spine.protobuf.AnyPacker;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -48,10 +46,10 @@ class IntegrationMessages {
         return result;
     }
 
-    static IntegrationMessage of(Failure failure) {
-        checkNotNull(failure);
+    static IntegrationMessage of(Rejection rejection) {
+        checkNotNull(rejection);
 
-        final IntegrationMessage result = of(failure.getId(), failure);
+        final IntegrationMessage result = of(rejection.getId(), rejection);
         return result;
     }
 

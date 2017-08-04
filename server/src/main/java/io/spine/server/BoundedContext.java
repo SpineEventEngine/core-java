@@ -109,7 +109,7 @@ public final class BoundedContext
          * of {@code EventBus} and {@code FailureBus}.
          */
         this.integrationBus = builder.integrationBus.setEventBus(this.eventBus)
-                                                    .setFailureBus(this.commandBus.failureBus())
+                                                    .setRejectionBus(this.commandBus.rejectionBus())
                                                     .build();
     }
 

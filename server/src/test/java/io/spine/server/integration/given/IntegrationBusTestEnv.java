@@ -32,7 +32,7 @@ import io.spine.server.integration.TransportFactory;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.test.integration.ProjectId;
-import io.spine.test.integration.event.ProjectCreated;
+import io.spine.test.integration.event.ItgProjectCreated;
 import io.spine.validate.StringValueVBuilder;
 
 import static io.spine.server.command.TestEventFactory.newInstance;
@@ -63,16 +63,16 @@ public class IntegrationBusTestEnv {
                                              .build();
         final TestEventFactory eventFactory = newInstance(AnyPacker.pack(projectId),
                                                           IntegrationBusTestEnv.class);
-        return eventFactory.createEvent(ProjectCreated.newBuilder()
-                                                      .setProjectId(projectId)
-                                                      .build()
+        return eventFactory.createEvent(ItgProjectCreated.newBuilder()
+                                                         .setProjectId(projectId)
+                                                         .build()
         );
     }
 
     public static class ProjectDetails
             extends Projection<ProjectId, StringValue, StringValueVBuilder> {
 
-        private static ProjectCreated eventCaught = null;
+        private static ItgProjectCreated eventCaught = null;
 
         /**
          * Creates a new instance.
@@ -85,11 +85,11 @@ public class IntegrationBusTestEnv {
         }
 
         @Subscribe(external = true)
-        public void on(ProjectCreated event) {
+        public void on(ItgProjectCreated event) {
             eventCaught = event;
         }
 
-        public static ProjectCreated getEventCaught() {
+        public static ItgProjectCreated getEventCaught() {
             return eventCaught;
         }
     }
@@ -100,14 +100,14 @@ public class IntegrationBusTestEnv {
 
     public static class ExternalSubscriber extends EventSubscriber {
 
-        private static ProjectCreated externalEvent = null;
+        private static ItgProjectCreated externalEvent = null;
 
         @Subscribe(external = true)
-        void on(ProjectCreated msg) {
+        void on(ItgProjectCreated msg) {
             externalEvent = msg;
         }
 
-        public static ProjectCreated getExternalEvent() {
+        public static ItgProjectCreated getExternalEvent() {
             return externalEvent;
         }
     }

@@ -37,10 +37,8 @@ import io.spine.server.entity.EventDispatchingRepository;
 import io.spine.server.event.EventFilter;
 import io.spine.server.event.EventStore;
 import io.spine.server.event.EventStreamQuery;
-import io.spine.server.route.EventProducers;
 import io.spine.server.integration.ExternalMessageDispatcher;
-import io.spine.server.route.EventRouting;
-import io.spine.server.route.Producers;
+import io.spine.server.route.EventProducers;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
@@ -50,6 +48,8 @@ import io.spine.type.TypeName;
 
 import javax.annotation.Nullable;
 import java.util.Set;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Abstract base for repositories managing {@link Projection}s.
@@ -262,17 +262,26 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
             final Event event = (Event) envelope.getOuterObject();
             final Message eventMessage = Events.getMessage(event);
             final EventContext context = event.getContext();
-            final Set<I> ids = getRouting().apply(eventMessage, context);
+            final Set<I> ids = getEventRouting().apply(eventMessage, context);
             final EventOperation op = new EventOperation(event) {
                 @Override
                 public void run() {
                     for (I id : ids) {
-                        dispatchToEntity(id, eventMessage, context);
+                        dispatchToEntity(id, EventEnvelope.of(event));
                     }
                 }
             };
             op.execute();
             return ids;
+        }
+
+        @Override
+        public void onError(ExternalMessageEnvelope envelope, RuntimeException exception) {
+
+            checkNotNull(envelope);
+            checkNotNull(exception);
+            logError("Error dispatching external event to projection (class: %s, id: %s",
+                     envelope, exception);
         }
     }
 }

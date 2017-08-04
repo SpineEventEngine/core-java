@@ -182,6 +182,11 @@ public abstract class EventDispatchingRepository<I,
             public Set<I> dispatch(ExternalMessageEnvelope envelope) {
                 return Collections.emptySet();
             }
+
+            @Override
+            public void onError(ExternalMessageEnvelope envelope, RuntimeException exception) {
+                logError("Error dispatching external event (class: %s, id: %s", envelope, exception);
+            }
         };
     }
 }

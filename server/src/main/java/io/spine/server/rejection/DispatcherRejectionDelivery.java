@@ -24,7 +24,7 @@ import io.spine.annotation.SPI;
 import io.spine.core.Rejection;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
-import io.spine.server.outbus.CommandOutputDelivery;
+import io.spine.server.delivery.MulticastDelivery;
 
 import java.util.concurrent.Executor;
 
@@ -44,7 +44,7 @@ public abstract class DispatcherRejectionDelivery
      * Create a dispatcher rejection delivery with an {@link Executor} used for the operation.
      *
      * @param delegate the instance of {@code Executor} used to dispatch business rejections.
-     * @see CommandOutputDelivery#CommandOutputDelivery(Executor)
+     * @see MulticastDelivery#MulticastDelivery(Executor)
      */
     protected DispatcherRejectionDelivery(Executor delegate) {
         super(delegate);
