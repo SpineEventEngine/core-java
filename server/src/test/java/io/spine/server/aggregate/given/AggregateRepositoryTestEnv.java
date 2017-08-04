@@ -416,7 +416,7 @@ public class AggregateRepositoryTestEnv {
     }
 
     /**
-     * An aggregate class which neither handle commands nor react on events.
+     * An aggregate class which neither handle commands nor react on events or rejections.
      */
     public static class AnemicAggregate extends Aggregate<Integer, BoolValue, BoolValueVBuilder> {
         private AnemicAggregate(Integer id) {
