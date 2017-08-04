@@ -23,6 +23,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.EventEnvelope;
+import io.spine.core.MessageEnvelope;
+import io.spine.core.RejectionEnvelope;
 
 import java.util.List;
 
@@ -44,19 +46,13 @@ public class AggregateMessageDispatcher {
      * Dispatches the {@linkplain CommandEnvelope command envelope} and applies the resulting events
      * to the given {@code Aggregate}.
      *
-     * @return the list of {@code Event} messages.
+     * @return the list of event messages.
      */
     public static List<? extends Message> dispatchCommand(Aggregate<?, ?, ?> aggregate,
                                                           CommandEnvelope envelope) {
-        checkNotNull(aggregate);
         checkNotNull(envelope);
-
         final List<? extends Message> eventMessages = aggregate.dispatchCommand(envelope);
-
-        final AggregateTransaction tx = AggregateTransaction.start(aggregate);
-        aggregate.apply(eventMessages, envelope);
-        tx.commit();
-
+        apply(aggregate, eventMessages, envelope);
         return eventMessages;
     }
 
@@ -64,19 +60,36 @@ public class AggregateMessageDispatcher {
      * Dispatches the {@linkplain EventEnvelope event envelope} and applies the resulting events
      * to the given {@code Aggregate}.
      *
-     * @return the list of {@code Event} messages.
+     * @return the list of event messages.
      */
     public static List<? extends Message> dispatchEvent(Aggregate<?, ?, ?> aggregate,
                                                         EventEnvelope envelope) {
-        checkNotNull(aggregate);
+        checkNotNull(envelope);
+        final List<? extends Message> eventMessages = aggregate.reactOn(envelope);
+        apply(aggregate, eventMessages, envelope);
+        return eventMessages;
+    }
+
+    /**
+     * Dispatches the {@linkplain RejectionEnvelope rejection envelope} and applies the
+     * resulting events to the given {@code Aggregate}.
+     *
+     * @return the list of event messages.
+     */
+    public static List<? extends Message> dispatchRejection(Aggregate<?, ?, ?> aggregate,
+                                                            RejectionEnvelope envelope) {
         checkNotNull(envelope);
 
         final List<? extends Message> eventMessages = aggregate.reactOn(envelope);
+        apply(aggregate, eventMessages, envelope);
+        return eventMessages;
+    }
 
+    private static void apply(Aggregate<?, ?, ?> aggregate,
+                              List<? extends Message> eventMessages,
+                              MessageEnvelope envelope) {
         final AggregateTransaction tx = AggregateTransaction.start(aggregate);
         aggregate.apply(eventMessages, envelope);
         tx.commit();
-
-        return eventMessages;
     }
 }

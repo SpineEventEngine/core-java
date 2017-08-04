@@ -204,7 +204,7 @@ public abstract class HandlerMethod<C extends Message> {
      * @return the list of event messages or an empty list if {@code null} is passed
      */
     @SuppressWarnings({"unchecked", "ChainOfInstanceofChecks"})
-    static <R> List<? extends Message> toList(@Nullable R output) {
+    static List<? extends Message> toList(@Nullable Object output) {
         if (output == null) {
             return emptyList();
         }
