@@ -22,7 +22,7 @@ package io.spine.server.reflect.given;
 
 import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
-import io.spine.server.entity.rejection.Rejections.EntityAlreadyArchived;
+import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived;
 import io.spine.test.reflect.event.RefProjectCreated;
 
 import java.lang.reflect.Method;

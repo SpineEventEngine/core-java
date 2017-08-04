@@ -30,8 +30,8 @@ import io.spine.core.Rejection;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
 import io.spine.core.Rejections;
-import io.spine.server.entity.rejection.Rejections.EntityAlreadyArchived;
-import io.spine.server.entity.rejection.Rejections.EntityAlreadyDeleted;
+import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived;
+import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyDeleted;
 import org.junit.Before;
 import org.junit.Test;
 
