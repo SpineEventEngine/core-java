@@ -149,14 +149,20 @@ public abstract class ProcessManager<I,
      * Dispatches a rejection to the subscribing method of the process manager.
      *
      * @param rejection the envelope with the rejection
+     * @return a list of produced events or an empty list if the process manager does not
+     *         produce new events because of the passed event
      */
-    void dispatchRejection(RejectionEnvelope rejection) {
+    List<Event> dispatchRejection(RejectionEnvelope rejection) {
         checkNotNull(rejection);
         final Message rejectionMessage = rejection.getMessage();
         final Message commandMessage = rejection.getCommandMessage();
         final RejectionReactorMethod method =
                 RejectionReactorMethod.getMethod(getClass(), rejectionMessage, commandMessage);
+
+        final List<? extends Message> eventMessages =
         method.invoke(this, rejectionMessage, commandMessage, rejection.getCommandContext());
+        final List<Event> events = toEvents(eventMessages, rejection);
+        return events;
     }
 
     /**

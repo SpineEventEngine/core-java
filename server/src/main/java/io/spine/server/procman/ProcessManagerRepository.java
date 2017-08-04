@@ -20,7 +20,6 @@
 
 package io.spine.server.procman;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
@@ -43,7 +42,6 @@ import io.spine.server.route.EventProducers;
 import io.spine.server.route.EventRouting;
 import io.spine.server.route.RejectionProducers;
 import io.spine.server.route.RejectionRouting;
-import io.spine.server.tenant.TenantAwareFunction0;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
@@ -227,28 +225,7 @@ public abstract class ProcessManagerRepository<I,
      */
     @Override
     public Set<I> dispatchRejection(final RejectionEnvelope rejection) {
-        final Set<I> targets = getRejectionRouting().apply(rejection.getMessage(),
-                                                           rejection.getRejectionContext());
-        final TenantAwareFunction0<Set<I>> op =
-                new TenantAwareFunction0<Set<I>>(rejection.getTenantId()) {
-                    @Override
-                    public Set<I> apply() {
-                        final ImmutableSet.Builder<I> consumed = ImmutableSet.builder();
-                        for (I id : targets) {
-                            try {
-                                ProcessManager<I, ?, ?> processManager = findOrCreate(id);
-                                processManager.dispatchRejection(rejection);
-                                consumed.add(id);
-                            } catch (RuntimeException exception) {
-                                onError(rejection, exception);
-                                // Do not re-throw: let other subscribers to consume the rejection.
-                            }
-                        }
-                        return consumed.build();
-                    }
-                };
-        final Set<I> consumed = op.execute();
-        return consumed;
+        return PmRejectionEndpoint.handle(this, rejection);
     }
 
     @Override
