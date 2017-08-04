@@ -17,52 +17,32 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-package io.spine.core;
+package io.spine.server.integration;
 
 import com.google.protobuf.Message;
-
-import java.util.Objects;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+import io.spine.annotation.Internal;
+import io.spine.type.MessageClass;
 
 /**
- * Abstract base for classes implementing {@link MessageEnvelope}.
- *
- * @param <I> the class of the message ID
- * @param <T> the type of the object that wraps a message
- * @author Alexander Yevsyukov
  * @author Alex Tymchenko
  */
-public abstract class AbstractMessageEnvelope<I extends Message, T>
-        implements MessageEnvelope<I, T> {
-
-    private final T object;
-
-    public AbstractMessageEnvelope(T object) {
-        checkNotNull(object);
-        this.object = object;
+@Internal
+public class IntegrationMessageClass extends MessageClass {
+    private IntegrationMessageClass(Class<? extends Message> value) {
+        super(value);
     }
 
-    @Override
-    public T getOuterObject() {
-        return object;
+    static IntegrationMessageClass of(IntegrationMessage message) {
+        //TODO:2017-07-24:alex.tymchenko: implement properly
+        final MessageClass messageClass = new MessageClass(message.getClass()) {};
+        return of(messageClass);
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(object);
+    public static IntegrationMessageClass of(MessageClass messageClass) {
+        return new IntegrationMessageClass(messageClass.value());
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null || getClass() != obj.getClass()) {
-            return false;
-        }
-        final AbstractMessageEnvelope other = (AbstractMessageEnvelope) obj;
-        return Objects.equals(this.object, other.object);
+    static IntegrationMessageClass of(Class<? extends Message> clz) {
+        return new IntegrationMessageClass(clz);
     }
 }

@@ -19,33 +19,96 @@
  */
 package io.spine.server.integration;
 
+import com.google.common.base.Function;
+import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableSet;
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import com.google.protobuf.StringValue;
+import io.grpc.stub.StreamObserver;
+import io.spine.Identifier;
 import io.spine.core.Ack;
+import io.spine.core.Event;
+import io.spine.core.EventClass;
+import io.spine.core.EventEnvelope;
 import io.spine.core.ExternalMessageEnvelope;
+import io.spine.core.Failure;
+import io.spine.core.FailureClass;
+import io.spine.core.FailureEnvelope;
+import io.spine.core.MessageInvalid;
+import io.spine.grpc.StreamObservers;
+import io.spine.protobuf.AnyPacker;
 import io.spine.server.bus.Bus;
 import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.DeadMessageTap;
 import io.spine.server.bus.DispatcherRegistry;
 import io.spine.server.bus.EnvelopeValidator;
+import io.spine.server.bus.MulticastBus;
+import io.spine.server.delivery.MulticastDelivery;
+import io.spine.server.event.EventBus;
+import io.spine.server.event.EventDispatcher;
+import io.spine.server.event.EventSubscriber;
+import io.spine.server.failure.FailureBus;
+import io.spine.server.failure.FailureDispatcher;
+import io.spine.server.failure.FailureSubscriber;
+import io.spine.server.integration.TransportFactory.Publisher;
+import io.spine.server.integration.TransportFactory.PublisherHub;
+import io.spine.server.integration.TransportFactory.Subscriber;
+import io.spine.server.integration.TransportFactory.SubscriberHub;
+import io.spine.server.integration.local.LocalTransportFactory;
+import io.spine.type.KnownTypes;
 import io.spine.type.MessageClass;
+import io.spine.type.TypeUrl;
+import io.spine.util.Exceptions;
 
+import javax.annotation.Nullable;
 import java.util.Deque;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Lists.newLinkedList;
+import static io.spine.core.EventClass.asEventClass;
+import static io.spine.core.FailureClass.asFailureClass;
+import static io.spine.server.bus.Buses.acknowledge;
+import static io.spine.util.Exceptions.newIllegalStateException;
+import static java.lang.String.format;
 
 /**
  * Dispatches external messages from and to the current bounded context.
  *
  * @author Alex Tymchenko
  */
-public class IntegrationBus extends Bus<Message,
-                                        ExternalMessageEnvelope,
-                                        MessageClass,
-                                        ExternalMessageDispatcher<?>> {
+public class IntegrationBus extends MulticastBus<Message,
+                                                 ExternalMessageEnvelope,
+                                                 MessageClass,
+                                                 ExternalMessageDispatcher<?>> {
+
+    /**
+     * Buses that act inside the bounded context, e.g. {@code EventBus}, and which allow
+     * dispatching their events to other bounded contexts.
+     *
+     * <p>{@code CommandBus} does <em>not</em> allow such a dispatching, as commands cannot be
+     * sent to another bounded context for a postponed handling.
+     */
+    private final EventBus eventBus;
+    private final FailureBus failureBus;
+    private final SubscriberHub subscriberHub;
+    private final PublisherHub publisherHub;
 
     private IntegrationBus(Builder builder) {
-        super();
+        super(builder.getDelivery());
+        this.eventBus = builder.eventBus;
+        this.failureBus = builder.failureBus;
+        this.subscriberHub = new SubscriberHub(builder.transportFactory);
+        this.publisherHub = new PublisherHub(builder.transportFactory);
+
+        /*
+         * React upon {@code RequestedMessageTypes} message arrival.
+         */
+        subscriberHub.get(IntegrationMessageClass.of(RequestedMessageTypes.class))
+                     .addObserver(new ConfigurationChangeObserver());
     }
 
     public static Builder newBuilder() {
@@ -64,7 +127,7 @@ public class IntegrationBus extends Bus<Message,
 
     @Override
     protected EnvelopeValidator<ExternalMessageEnvelope> getValidator() {
-        return null;
+        return LocalValidator.INSTANCE;
     }
 
     @Override
@@ -72,38 +135,153 @@ public class IntegrationBus extends Bus<Message,
         return newLinkedList();
     }
 
-
     @Override
     protected ExternalMessageEnvelope toEnvelope(Message message) {
-        return null;
+        if(message instanceof Event) {
+            return ExternalMessageEnvelope.of((Event)message);
+        }
+        throw Exceptions.newIllegalArgumentException("The message of %s type isn't supported",
+                                                     message.getClass());
     }
 
     @Override
     protected Ack doPost(ExternalMessageEnvelope envelope) {
-        return null;
+        final int dispatchersCalled = callDispatchers(envelope);
+
+        final Any packedId = Identifier.pack(envelope.getId());
+        checkState(dispatchersCalled != 0,
+                   format("External message %s has no local dispatchers.", envelope.getMessage()));
+        final Ack result = acknowledge(packedId);
+        return result;
     }
 
     @Override
     protected void store(Iterable<Message> messages) {
+        // we don't store the incoming messages yet.
+    }
+
+    /**
+     * Register a local dispatcher, which is subscribed to {@code external} messages.
+     *
+     * @param dispatcher the dispatcher to register
+     */
+    @Override
+    public void register(ExternalMessageDispatcher<?> dispatcher) {
+        super.register(dispatcher);
+
+        // Remember the message types, that we have been subscribed before.
+        final Set<IntegrationMessageClass> requestedBefore = subscriberHub.keys();
+
+        // Subscribe to incoming messages of requested types.
+        subscribeToIncoming(dispatcher);
+
+        final Set<IntegrationMessageClass> currentlyRequested = subscriberHub.keys();
+        if (!currentlyRequested.equals(requestedBefore)) {
+            // Notify others that the requested message set has been changed.
+
+            final RequestedMessageTypes.Builder resultBuilder = RequestedMessageTypes.newBuilder();
+            for (IntegrationMessageClass messageClass : currentlyRequested) {
+                final TypeUrl typeUrl = KnownTypes.getTypeUrl(messageClass.getClassName());
+                resultBuilder.addTypeUrls(typeUrl.value());
+            }
+            final RequestedMessageTypes result = resultBuilder.build();
+            final IntegrationMessage integrationMessage = IntegrationMessages.of(result);
+            final IntegrationMessageClass channelId = IntegrationMessageClass.of(result.getClass());
+            publisherHub.get(channelId)
+                        .publish(newId(), integrationMessage);
+        }
+    }
+
+    private void subscribeToIncoming(ExternalMessageDispatcher<?> dispatcher) {
+        final Set<MessageClass> messageClasses = dispatcher.getMessageClasses();
+
+        final IntegrationBus integrationBus = this;
+        final Iterable<IntegrationMessageClass> transformed = transform(
+                messageClasses, new Function<MessageClass, IntegrationMessageClass>() {
+                    @Override
+                    public IntegrationMessageClass apply(@Nullable MessageClass input) {
+                        checkNotNull(input);
+                        return IntegrationMessageClass.of(input);
+                    }
+                });
+        for (final IntegrationMessageClass imClass : transformed) {
+            final Subscriber subscriber = subscriberHub.get(imClass);
+            subscriber.addObserver(new ChannelObserver<IntegrationMessage>(imClass.value()) {
+                @Override
+                public void onNext(IntegrationMessage value) {
+                    final Message unpackedMessage = AnyPacker.unpack(value.getOriginalMessage());
+                    integrationBus.post(unpackedMessage, StreamObservers.<Ack>noOpObserver());
+                }
+            });
+        }
+    }
+
+    private static Any newId() {
+        final StringValue stringId = StringValue.newBuilder()
+                                             .setValue(Identifier.newUuid())
+                                             .build();
+        final Any result = AnyPacker.pack(stringId);
+        return result;
     }
 
     @Override
-    public void register(ExternalMessageDispatcher dispatcher) {
-        
-        super.register(dispatcher);
+    public String toString() {
+        //TODO:2017-07-24:alex.tymchenko: add more attributes.
+        return "Integration bus";
     }
 
-    public static class Builder
-            extends Bus.AbstractBuilder<ExternalMessageEnvelope, Message, Builder> {
+    private static <M extends MessageClass>
+    Iterable<M> asMessageClasses(Iterable<String> rawTypeUrls,
+                                 final Function<Class<? extends Message>, M> transformFn) {
+        return transform(rawTypeUrls,
+                         new Function<String, M>() {
+                             @Override
+                             public M apply(@Nullable String typeUrlString) {
+                                 checkNotNull(typeUrlString);
+
+                                 final TypeUrl typeUrl = TypeUrl.parse(typeUrlString);
+                                 final Class<Message> javaClass = typeUrl.getJavaClass();
+                                 final M result = transformFn.apply(javaClass);
+                                 return result;
+                             }
+                         });
+    }
+
+    /**
+     * Delivers the messages from external sources to the local subscribers
+     * of {@code external} messages in this bounded context.
+     */
+    static class LocalDelivery extends MulticastDelivery<ExternalMessageEnvelope,
+                                                         MessageClass,
+                                                         ExternalMessageDispatcher<?>> {
 
         @Override
-        public IntegrationBus build() {
-            return new IntegrationBus(this);
+        protected boolean shouldPostponeDelivery(ExternalMessageEnvelope deliverable,
+                                                 ExternalMessageDispatcher<?> consumer) {
+            return false;
         }
 
         @Override
-        protected Builder self() {
-            return this;
+        protected Runnable getDeliveryAction(final ExternalMessageDispatcher<?> consumer,
+                                             final ExternalMessageEnvelope deliverable) {
+            return new Runnable() {
+                @Override
+                public void run() {
+                    consumer.dispatch(deliverable);
+                }
+            };
+        }
+    }
+
+    /**
+     * A validator of the incoming external messages to use in {@code IntegrationBus}.
+     */
+    private enum LocalValidator implements EnvelopeValidator<ExternalMessageEnvelope> {
+        INSTANCE;
+
+        @Override
+        public Optional<MessageInvalid> validate(ExternalMessageEnvelope envelope) {
+            return Optional.absent();
         }
     }
 
@@ -135,6 +313,172 @@ public class IntegrationBus extends Bus<Message,
             final UnsupportedExternalMessageException exception =
                     new UnsupportedExternalMessageException(message);
             return exception;
+        }
+    }
+
+    private abstract static class ChannelObserver<M> implements StreamObserver<M> {
+
+        private final Class<? extends Message> messageClass;
+
+        protected ChannelObserver(Class<? extends Message> messageClass) {
+            this.messageClass = messageClass;
+        }
+
+        @Override
+        public void onError(Throwable t) {
+            throw newIllegalStateException("Error caught when observing the incoming " +
+                                                   "messages of type %s", messageClass);
+
+        }
+
+        @Override
+        public void onCompleted() {
+            throw newIllegalStateException("Unexpected 'onCompleted' when observing " +
+                                                   "the incoming messages of type %s",
+                                           messageClass);
+        }
+    }
+
+    private class ConfigurationChangeObserver extends ChannelObserver<IntegrationMessage> {
+
+        private ConfigurationChangeObserver() {
+            super(RequestedMessageTypes.class);
+        }
+
+        @Override
+        public void onNext(IntegrationMessage value) {
+            final RequestedMessageTypes message = AnyPacker.unpack(value.getOriginalMessage());
+
+            final Iterable<String> typeUrlsList = message.getTypeUrlsList();
+
+            subscribeToLocalBuses(typeUrlsList);
+        }
+
+        private void subscribeToLocalBuses(Iterable<String> typeUrlsList) {
+            final Iterable<EventClass> eventClasses =
+                    asMessageClasses(typeUrlsList, asEventClass());
+            eventBus.register(newEventDispatcher(eventClasses));
+
+            final Iterable<FailureClass> failureClasses =
+                    asMessageClasses(typeUrlsList, asFailureClass());
+            failureBus.register(newFailureDispatcher(failureClasses));
+        }
+
+        private FailureDispatcher newFailureDispatcher(
+                final Iterable<FailureClass> failureClasses) {
+            return new FailureSubscriber() {
+                @Override
+                public Set<FailureClass> getMessageClasses() {
+                    return ImmutableSet.copyOf(failureClasses);
+                }
+
+                @Override
+                public Set<String> dispatch(FailureEnvelope envelope) {
+                    final Failure failure = envelope.getOuterObject();
+                    final IntegrationMessage message = IntegrationMessages.of(failure);
+                    final IntegrationMessageClass messageClass = IntegrationMessageClass.of(
+                            envelope.getMessageClass());
+                    final Publisher channel = publisherHub.get(messageClass);
+                    channel.publish(AnyPacker.pack(envelope.getId()), message);
+                    return ImmutableSet.of(channel.toString());
+                }
+            };
+        }
+
+        private EventDispatcher newEventDispatcher(final Iterable<EventClass> eventClasses) {
+            return new EventSubscriber() {
+                @Override
+                public Set<EventClass> getMessageClasses() {
+                    return ImmutableSet.copyOf(eventClasses);
+                }
+
+                @Override
+                public Set<String> dispatch(EventEnvelope envelope) {
+                    final Event event = envelope.getOuterObject();
+                    final IntegrationMessage msg = IntegrationMessages.of(event);
+                    final IntegrationMessageClass messageClass = IntegrationMessageClass.of(
+                            envelope.getMessageClass());
+                    final Publisher channel = publisherHub.get(messageClass);
+                    channel.publish(AnyPacker.pack(envelope.getId()), msg);
+
+                    return ImmutableSet.of(channel.toString());
+                }
+            };
+        }
+
+        @Override
+        public String toString() {
+            return "Integration bus observer of `RequestedMessageTypes` document message.";
+        }
+    }
+
+    /**
+     * A {@code Builder} for {@code IntegrationBus} instances.
+     */
+    public static class Builder
+            extends Bus.AbstractBuilder<ExternalMessageEnvelope, Message, Builder> {
+
+        private LocalDelivery delivery;
+        private EventBus eventBus;
+        private FailureBus failureBus;
+        private TransportFactory transportFactory;
+
+        public Optional<EventBus> getEventBus() {
+            return Optional.fromNullable(eventBus);
+        }
+
+        public Builder setEventBus(EventBus eventBus) {
+            this.eventBus = checkNotNull(eventBus);
+            return self();
+        }
+
+        public Optional<FailureBus> getFailureBus() {
+            return Optional.fromNullable(failureBus);
+        }
+
+        public Builder setFailureBus(FailureBus failureBus) {
+            this.failureBus = checkNotNull(failureBus);
+            return self();
+        }
+
+        public Builder setTransportFactory(TransportFactory transportFactory) {
+            this.transportFactory = checkNotNull(transportFactory);
+            return self();
+        }
+
+        public Optional<TransportFactory> getTransportFactory() {
+            return Optional.fromNullable(transportFactory);
+        }
+
+        private LocalDelivery getDelivery() {
+            return delivery;
+        }
+
+        @Override
+        public IntegrationBus build() {
+
+            checkState(eventBus != null,
+                       "`eventBus` must be set for integration bus.");
+            checkState(failureBus != null,
+                       "`failureBus` must be set for integration bus.");
+
+            if(transportFactory == null) {
+                transportFactory = initTransportFactory();
+            }
+
+            this.delivery = new LocalDelivery();
+
+
+            return new IntegrationBus(this);
+        }
+
+        private static TransportFactory initTransportFactory() {
+            return LocalTransportFactory.newInstance();
+        }
+
+        @Override
+        protected Builder self() {
+            return this;
         }
     }
 }

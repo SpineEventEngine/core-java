@@ -24,6 +24,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.server.aggregate.AggregatePart;
 import io.spine.test.entity.number.NaturalNumber;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.lang.reflect.Method;

@@ -40,7 +40,7 @@ public class ExternalMessageEnvelope extends AbstractMessageEnvelope<Message, Me
         super(event);
 
         this.id = event.getId();
-        this.message = event.getMessage();
+        this.message = Events.getMessage(event);
         this.messageClass = EventClass.of(event);
         this.actorContext = event.getContext().getCommandContext().getActorContext();
     }

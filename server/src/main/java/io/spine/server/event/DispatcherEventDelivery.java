@@ -24,7 +24,7 @@ import io.spine.annotation.SPI;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
-import io.spine.server.outbus.MulticastDelivery;
+import io.spine.server.delivery.MulticastDelivery;
 
 import java.util.concurrent.Executor;
 

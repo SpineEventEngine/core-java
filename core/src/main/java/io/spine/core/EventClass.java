@@ -20,11 +20,13 @@
 
 package io.spine.core;
 
+import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.type.MessageClass;
 
+import javax.annotation.Nullable;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -85,5 +87,16 @@ public final class EventClass extends MessageClass {
             builder.add(of(cls));
         }
         return builder.build();
+    }
+
+    public static Function<Class<? extends Message>, EventClass> asEventClass() {
+        return new Function<Class<? extends Message>, EventClass>() {
+            @Override
+            public EventClass apply(
+                    @Nullable Class<? extends Message> input) {
+                checkNotNull(input);
+                return of(input);
+            }
+        };
     }
 }

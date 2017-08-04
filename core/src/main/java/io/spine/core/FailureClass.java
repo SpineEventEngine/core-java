@@ -19,10 +19,12 @@
  */
 package io.spine.core;
 
+import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.type.MessageClass;
 
+import javax.annotation.Nullable;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -85,5 +87,16 @@ public class FailureClass extends MessageClass {
             builder.add(of(cls));
         }
         return builder.build();
+    }
+
+    public static Function<Class<? extends Message>, FailureClass> asFailureClass() {
+        return new Function<Class<? extends Message>, FailureClass>() {
+            @Override
+            public FailureClass apply(
+                    @Nullable Class<? extends Message> input) {
+                checkNotNull(input);
+                return of(input);
+            }
+        };
     }
 }

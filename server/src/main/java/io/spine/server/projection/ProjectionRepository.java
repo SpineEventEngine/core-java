@@ -28,6 +28,7 @@ import io.spine.annotation.Internal;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
+import io.spine.core.Events;
 import io.spine.core.ExternalMessageEnvelope;
 import io.spine.server.BoundedContext;
 import io.spine.server.entity.EntityStorageConverter;
@@ -267,7 +268,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         @Override
         public Set<I> dispatch(ExternalMessageEnvelope envelope) {
             final Event event = (Event) envelope.getOuterObject();
-            final Message eventMessage = event.getMessage();
+            final Message eventMessage = Events.getMessage(event);
             final EventContext context = event.getContext();
             final Set<I> ids = getRouting().apply(eventMessage, context);
             final EventOperation op = new EventOperation(event) {

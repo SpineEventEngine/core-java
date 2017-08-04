@@ -77,12 +77,16 @@ public abstract class EventDispatchingRepository<I,
     @Override
     public void onRegistered() {
         super.onRegistered();
-        getBoundedContext().getEventBus()
-                           .register(this);
+        if(!getMessageClasses().isEmpty()) {
+            getBoundedContext().getEventBus()
+                               .register(this);
+        }
 
-        getBoundedContext().getIntegrationBus()
-                           .register(getExternalDispatcher());
-
+        final ExternalMessageDispatcher<I> thisAsExternal = getExternalDispatcher();
+        if(!thisAsExternal.getMessageClasses().isEmpty()) {
+            getBoundedContext().getIntegrationBus()
+                               .register(getExternalDispatcher());
+        }
     }
 
     @Override

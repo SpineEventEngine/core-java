@@ -103,8 +103,15 @@ public final class BoundedContext
         this.commandBus = builder.commandBus.build();
         this.eventBus = builder.eventBus.build();
         this.stand = builder.stand.build();
-        this.integrationBus = builder.integrationBus.build();
         this.tenantIndex = builder.tenantIndex;
+
+        /*
+         * Additionally initialize the {@code IntegrationBus} with a ready-to-go instances
+         * of {@code EventBus} and {@code FailureBus}.
+         */
+        this.integrationBus = builder.integrationBus.setEventBus(this.eventBus)
+                                                    .setFailureBus(this.commandBus.failureBus())
+                                                    .build();
     }
 
     private void init() {

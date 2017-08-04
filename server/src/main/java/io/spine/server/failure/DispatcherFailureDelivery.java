@@ -24,7 +24,7 @@ import io.spine.annotation.SPI;
 import io.spine.core.Failure;
 import io.spine.core.FailureClass;
 import io.spine.core.FailureEnvelope;
-import io.spine.server.outbus.MulticastDelivery;
+import io.spine.server.delivery.MulticastDelivery;
 
 import java.util.concurrent.Executor;
 

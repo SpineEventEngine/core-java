@@ -103,12 +103,11 @@ public final class EventSubscriberMethod extends HandlerMethod<EventContext> {
      *                               for the class of the passed message
      */
     public static EventSubscriberMethod getMethod(Class<?> cls,
-                                                   Message eventMessage,
-                                                   EventContext eventContext) {
+                                                  Message eventMessage,
+                                                  EventContext eventContext) {
         checkNotNull(cls);
         checkNotNull(eventMessage);
         checkNotNull(eventContext);
-
 
         final Class<? extends Message> eventClass = eventMessage.getClass();
         final MethodRegistry registry = MethodRegistry.getInstance();
