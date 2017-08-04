@@ -72,7 +72,7 @@ public class QueryServiceShould {
     public void setUp() {
         // Create Projects Bounded Context with one repository and one projection.
         projectsContext = BoundedContext.newBuilder()
-                                        .setName("Projects")
+                                        .setId("Projects")
                                         .build();
 
         // Inject spy, which will be obtained later via getStand().
@@ -89,7 +89,7 @@ public class QueryServiceShould {
 
         // Create Customers Bounded Context with one repository.
         customersContext = BoundedContext.newBuilder()
-                                         .setName("Customers")
+                                         .setId("Customers")
                                          .build();
 
         // Inject spy, which will be obtained later via getStand().

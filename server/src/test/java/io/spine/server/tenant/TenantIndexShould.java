@@ -29,6 +29,7 @@ import org.junit.Test;
 
 import java.util.List;
 
+import static io.spine.server.BoundedContext.newId;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.Assert.assertEquals;
 
@@ -46,7 +47,8 @@ public class TenantIndexShould {
     public void pass_null_tolerance_test() {
         new NullPointerTester()
                 .setDefault(StorageFactory.class,
-                            InMemoryStorageFactory.newInstance(getClass().getSimpleName(), false))
+                            InMemoryStorageFactory.newInstance(
+                                    newId(getClass().getSimpleName()), false))
                 .testAllPublicStaticMethods(TenantIndex.Factory.class);
     }
 

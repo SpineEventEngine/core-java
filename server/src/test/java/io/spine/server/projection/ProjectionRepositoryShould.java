@@ -122,7 +122,7 @@ public class ProjectionRepositoryShould
     @Before
     public void setUp() {
         boundedContext = BoundedContext.newBuilder()
-                                       .setName(getClass().getSimpleName())
+                                       .setId(getClass().getSimpleName())
                                        .setMultitenant(true)
                                        .build();
         super.setUp();

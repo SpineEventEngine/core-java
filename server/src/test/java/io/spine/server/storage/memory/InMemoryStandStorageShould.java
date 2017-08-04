@@ -20,6 +20,7 @@
 
 package io.spine.server.storage.memory;
 
+import io.spine.server.BoundedContext;
 import io.spine.server.entity.Entity;
 import io.spine.server.stand.StandStorage;
 import io.spine.server.stand.StandStorageShould;
@@ -32,7 +33,8 @@ public class InMemoryStandStorageShould extends StandStorageShould {
     @Override
     protected StandStorage getStorage(Class<? extends Entity> cls) {
         return InMemoryStandStorage.newBuilder()
-                                   .setBoundedContextName(getClass().getSimpleName())
+                                   .setBoundedContextId(
+                                           BoundedContext.newId(getClass().getSimpleName()))
                                    .setMultitenant(false)
                                    .build();
     }

@@ -161,7 +161,7 @@ public class EventFactory {
 
     private static EventContext toEventContext(IntegrationEventContext value) {
         final Timestamp timestamp = value.getTimestamp();
-        final Any producerId = toAny(value.getBoundedContextName());
+        final Any producerId = toAny(value.getBoundedContextId());
         return EventContext.newBuilder()
                            .setTimestamp(timestamp)
                            .setProducerId(producerId)

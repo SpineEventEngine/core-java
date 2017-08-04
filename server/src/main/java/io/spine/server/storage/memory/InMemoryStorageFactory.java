@@ -21,6 +21,7 @@
 package io.spine.server.storage.memory;
 
 import com.google.protobuf.Message;
+import io.spine.core.BoundedContextId;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.entity.Entity;
@@ -42,16 +43,16 @@ import static io.spine.server.entity.Entity.TypeInfo.getStateClass;
  */
 public class InMemoryStorageFactory implements StorageFactory {
 
-    private final String boundedContextName;
+    private final BoundedContextId boundedContextId;
     private final boolean multitenant;
 
-    public static InMemoryStorageFactory newInstance(String boundedContextName,
+    public static InMemoryStorageFactory newInstance(BoundedContextId boundedContextId,
                                                      boolean multitenant) {
-        return new InMemoryStorageFactory(boundedContextName, multitenant);
+        return new InMemoryStorageFactory(boundedContextId, multitenant);
     }
 
-    private InMemoryStorageFactory(String boundedContextName, boolean multitenant) {
-        this.boundedContextName = boundedContextName;
+    private InMemoryStorageFactory(BoundedContextId boundedContextId, boolean multitenant) {
+        this.boundedContextId = boundedContextId;
         this.multitenant = multitenant;
     }
 
@@ -77,7 +78,7 @@ public class InMemoryStorageFactory implements StorageFactory {
     public StandStorage createStandStorage() {
         final InMemoryStandStorage result =
                 InMemoryStandStorage.newBuilder()
-                                    .setBoundedContextName(boundedContextName)
+                                    .setBoundedContextId(boundedContextId)
                                     .setMultitenant(isMultitenant())
                                     .build();
         return result;
@@ -99,7 +100,7 @@ public class InMemoryStorageFactory implements StorageFactory {
         final Class<? extends Message> stateClass = getStateClass(entityClass);
         final TypeUrl typeUrl = TypeUrl.of(stateClass);
         final Class<I> idClass = getIdClass(entityClass);
-        final StorageSpec<I> spec = StorageSpec.of(boundedContextName, typeUrl, idClass);
+        final StorageSpec<I> spec = StorageSpec.of(boundedContextId, typeUrl, idClass);
         return InMemoryRecordStorage.newInstance(spec, isMultitenant());
     }
 
@@ -109,7 +110,7 @@ public class InMemoryStorageFactory implements StorageFactory {
         final Class<Message> stateClass = getStateClass(projectionClass);
         final Class<I> idClass = getIdClass(projectionClass);
         final TypeUrl stateUrl = TypeUrl.of(stateClass);
-        final StorageSpec<I> spec = StorageSpec.of(boundedContextName, stateUrl, idClass);
+        final StorageSpec<I> spec = StorageSpec.of(boundedContextId, stateUrl, idClass);
 
         final boolean multitenant = isMultitenant();
         final InMemoryRecordStorage<I> entityStorage =
@@ -127,6 +128,6 @@ public class InMemoryStorageFactory implements StorageFactory {
         if (!isMultitenant()) {
             return this;
         }
-        return newInstance(this.boundedContextName, false);
+        return newInstance(this.boundedContextId, false);
     }
 }

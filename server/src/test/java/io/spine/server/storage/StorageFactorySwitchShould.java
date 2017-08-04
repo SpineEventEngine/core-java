@@ -22,6 +22,8 @@ package io.spine.server.storage;
 
 import com.google.common.base.Supplier;
 import io.spine.Environment;
+import io.spine.core.BoundedContextId;
+import io.spine.server.BoundedContext;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -29,6 +31,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import static io.spine.server.BoundedContext.newId;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -75,24 +78,24 @@ public class StorageFactorySwitchShould {
         this(false);
     }
 
-    private final String boundedContextName = getClass().getSimpleName();
+    private final BoundedContextId boundedContextId = newId(getClass().getSimpleName());
     private final Supplier<StorageFactory> testsSupplier = new Supplier<StorageFactory>() {
         @Override
         public StorageFactory get() {
-            return InMemoryStorageFactory.newInstance(boundedContextName, multitenant);
+            return InMemoryStorageFactory.newInstance(boundedContextId, multitenant);
         }
     };
 
     private final Supplier<StorageFactory> productionSupplier = new Supplier<StorageFactory>() {
         @Override
         public StorageFactory get() {
-            return InMemoryStorageFactory.newInstance(boundedContextName, multitenant);
+            return InMemoryStorageFactory.newInstance(boundedContextId, multitenant);
         }
     };
 
     @Before
     public void setUp() throws NoSuchFieldException, IllegalAccessException {
-        storageFactorySwitch = StorageFactorySwitch.newInstance(boundedContextName, multitenant);
+        storageFactorySwitch = StorageFactorySwitch.newInstance(boundedContextId, multitenant);
     }
 
     @After

@@ -21,13 +21,14 @@
 package io.spine.server.storage.memory;
 
 import com.google.common.base.MoreObjects;
+import io.spine.core.BoundedContextId;
 import io.spine.type.TypeUrl;
 
 import java.io.Serializable;
 import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.validate.Validate.checkNotEmptyOrBlank;
+import static io.spine.validate.Validate.checkNotDefault;
 
 /**
  * Attributes for accessing in-memory storage over in-process gRPC.
@@ -40,33 +41,33 @@ public final class StorageSpec<I> implements Serializable {
 
     private static final long serialVersionUID = 0L;
     
-    private static final String FLD_BOUNDED_CONTEXT_NAME = "boundedContextName";
+    private static final String FLD_BOUNDED_CONTEXT_ID = "boundedContextId";
     private static final String FLD_ENTITY_STATE_URL = "entityStateUrl";
     private static final String FLD_ID_CLASS = "idClass";
 
-    private final String boundedContextName;
+    private final BoundedContextId boundedContextId;
     private final TypeUrl entityStateUrl;
     private final Class<I> idClass;
 
-    public static <I> StorageSpec<I> of(String boundedContextName,
+    public static <I> StorageSpec<I> of(BoundedContextId boundedContextId,
                                      TypeUrl entityStateUrl,
                                      Class<I> idClass) {
-        checkNotNull(boundedContextName);
+        checkNotNull(boundedContextId);
         checkNotNull(entityStateUrl);
         checkNotNull(idClass);
-        checkNotEmptyOrBlank(boundedContextName, FLD_BOUNDED_CONTEXT_NAME);
-        return new StorageSpec<>(boundedContextName, entityStateUrl, idClass);
+        checkNotDefault(boundedContextId);
+        return new StorageSpec<>(boundedContextId, entityStateUrl, idClass);
     }
 
-    private StorageSpec(String boundedContextName, TypeUrl entityStateUrl,
+    private StorageSpec(BoundedContextId boundedContextId, TypeUrl entityStateUrl,
                         Class<I> idClass) {
-        this.boundedContextName = boundedContextName;
+        this.boundedContextId = boundedContextId;
         this.entityStateUrl = entityStateUrl;
         this.idClass = idClass;
     }
 
-    public String getBoundedContextName() {
-        return boundedContextName;
+    public BoundedContextId getBoundedContextId() {
+        return boundedContextId;
     }
 
     public TypeUrl getEntityStateUrl() {
@@ -79,7 +80,7 @@ public final class StorageSpec<I> implements Serializable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(boundedContextName, entityStateUrl);
+        return Objects.hash(boundedContextId, entityStateUrl);
     }
 
     @Override
@@ -91,14 +92,14 @@ public final class StorageSpec<I> implements Serializable {
             return false;
         }
         final StorageSpec other = (StorageSpec) obj;
-        return Objects.equals(this.boundedContextName, other.boundedContextName)
+        return Objects.equals(this.boundedContextId, other.boundedContextId)
                 && Objects.equals(this.entityStateUrl, other.entityStateUrl);
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                          .add(FLD_BOUNDED_CONTEXT_NAME, boundedContextName)
+                          .add(FLD_BOUNDED_CONTEXT_ID, boundedContextId)
                           .add(FLD_ENTITY_STATE_URL, entityStateUrl.value())
                           .add(FLD_ID_CLASS, idClass.getName())
                           .toString();

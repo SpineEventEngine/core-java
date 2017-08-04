@@ -64,7 +64,7 @@ public class CommandDispatcherRegistryShould {
     @Before
     public void setUp() {
         final BoundedContext boundedContext = BoundedContext.newBuilder()
-                                                            .setName(getClass().getSimpleName())
+                                                            .setId(getClass().getSimpleName())
                                                             .build();
         eventBus = boundedContext.getEventBus();
         registry = new CommandDispatcherRegistry();

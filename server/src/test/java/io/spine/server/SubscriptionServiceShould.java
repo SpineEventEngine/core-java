@@ -70,7 +70,7 @@ public class SubscriptionServiceShould {
     /** Creates a new multi-tenant BoundedContext with the passed name. */
     private static BoundedContext ctx(String name) {
         return BoundedContext.newBuilder()
-                             .setName(name)
+                             .setId(name)
                              .setMultitenant(true)
                              .build();
     }

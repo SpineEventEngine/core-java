@@ -21,6 +21,7 @@
 package io.spine.server.storage.memory;
 
 import com.google.protobuf.Message;
+import io.spine.server.BoundedContext;
 import io.spine.server.entity.Entity;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.RecordStorageShould;
@@ -42,9 +43,10 @@ public class InMemoryRecordStorageShould
 
     @Override
     protected RecordStorage<ProjectId> getStorage(Class<? extends Entity> cls) {
-        final StorageSpec<ProjectId> spec = StorageSpec.of(getClass().getSimpleName(),
-                                                           TypeUrl.of(Project.class),
-                                                           ProjectId.class);
+        final StorageSpec<ProjectId> spec = StorageSpec.of(
+                BoundedContext.newId(getClass().getSimpleName()),
+                TypeUrl.of(Project.class),
+                ProjectId.class);
         return InMemoryRecordStorage.newInstance(spec, false);
     }
 

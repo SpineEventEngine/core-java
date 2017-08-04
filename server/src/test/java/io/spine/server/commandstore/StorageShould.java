@@ -58,6 +58,7 @@ import static io.spine.core.CommandStatus.SCHEDULED;
 import static io.spine.core.Commands.generateId;
 import static io.spine.core.given.GivenTenantId.newUuid;
 import static io.spine.protobuf.TypeConverter.toAny;
+import static io.spine.server.BoundedContext.newId;
 import static io.spine.server.commandbus.Given.CommandMessage.createProjectMessage;
 import static io.spine.server.commandstore.CommandTestUtil.checkRecord;
 import static io.spine.server.commandstore.Records.newRecordBuilder;
@@ -87,7 +88,7 @@ public class StorageShould extends TenantAwareTest {
         setCurrentTenant(newUuid());
         repository = new CRepository();
         final StorageFactorySwitch storageSwitch =
-                StorageFactorySwitch.newInstance(getClass().getSimpleName(), true);
+                StorageFactorySwitch.newInstance(newId(getClass().getSimpleName()), true);
         repository.initStorage(storageSwitch.get());
     }
 

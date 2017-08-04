@@ -20,24 +20,26 @@
 
 package io.spine.server.storage.memory;
 
+import io.spine.core.BoundedContextId;
 import org.junit.Test;
 
+import static io.spine.server.BoundedContext.newId;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class InMemoryStorageFactoryShould {
 
-    private final String boundedContextName = getClass().getSimpleName();
+    private final BoundedContextId boundedContextId = newId(getClass().getSimpleName());
 
     @Test
     public void have_single_tenant_instance() {
-        assertFalse(InMemoryStorageFactory.newInstance(boundedContextName, false)
+        assertFalse(InMemoryStorageFactory.newInstance(boundedContextId, false)
                                           .isMultitenant());
     }
 
     @Test
     public void have_multitenant_instance() {
-        assertTrue(InMemoryStorageFactory.newInstance(boundedContextName, true)
+        assertTrue(InMemoryStorageFactory.newInstance(boundedContextId, true)
                                          .isMultitenant());
     }
 }

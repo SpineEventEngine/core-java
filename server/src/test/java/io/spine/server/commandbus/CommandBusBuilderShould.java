@@ -32,6 +32,7 @@ import io.spine.test.Tests;
 import org.junit.Before;
 import org.junit.Test;
 
+import static io.spine.server.BoundedContext.newId;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -57,7 +58,7 @@ public class CommandBusBuilderShould extends BusBuilderShould<CommandBus.Builder
     public void setUp() {
         final boolean multitenant = true;
         final InMemoryStorageFactory storageFactory =
-                InMemoryStorageFactory.newInstance(getClass().getSimpleName(), multitenant);
+                InMemoryStorageFactory.newInstance(newId(getClass().getSimpleName()), multitenant);
         final TenantIndex tenantIndex =
                 TenantAwareTest.createTenantIndex(multitenant, storageFactory);
         commandStore = new CommandStore(storageFactory, tenantIndex);
