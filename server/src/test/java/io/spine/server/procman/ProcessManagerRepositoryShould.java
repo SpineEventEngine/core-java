@@ -23,7 +23,6 @@ package io.spine.server.procman;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
-import com.google.protobuf.StringValue;
 import io.spine.Identifier;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;
@@ -218,13 +217,6 @@ public class ProcessManagerRepositoryShould
                 requestFactory.createCommand(Int32Value.getDefaultInstance());
         final CommandEnvelope request = CommandEnvelope.of(unknownCommand);
         repository().dispatchCommand(request);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void throw_exception_if_dispatch_unknown_event() {
-        final StringValue unknownEventMessage = StringValue.getDefaultInstance();
-        final Event event = GivenEvent.withMessage(unknownEventMessage);
-        repository().dispatch(EventEnvelope.of(event));
     }
 
     @Test
