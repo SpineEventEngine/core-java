@@ -23,6 +23,7 @@ package io.spine.server.rejection;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Message;
+import io.spine.Identifier;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;
 import io.spine.core.Rejection;
@@ -56,7 +57,7 @@ public class DelegatingRejectionDispatcherShould {
         final Command command = requestFactory.generateCommand();
         final Message rejectionMessage =
                 EntityAlreadyDeleted.newBuilder()
-                                    .setEntityId(getClass().getName())
+                                    .setEntityId(Identifier.pack(getClass().getName()))
                                     .build();
         final Rejection rejection = Rejections.createRejection(rejectionMessage, command);
         rejectionEnvelope = RejectionEnvelope.of(rejection);

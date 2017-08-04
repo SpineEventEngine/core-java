@@ -23,7 +23,9 @@ package io.spine.server.route;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.testing.NullPointerTester;
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.Identifier;
 import io.spine.core.RejectionContext;
 import io.spine.server.entity.rejection.Rejections.EntityAlreadyArchived;
 import io.spine.server.entity.rejection.Rejections.EntityAlreadyDeleted;
@@ -142,7 +144,7 @@ public class RejectionRoutingShould {
         // Create a rejection for which there's no custom path.
         final EntityAlreadyDeleted rejection =
                 EntityAlreadyDeleted.newBuilder()
-                                    .setEntityId(getClass().getName())
+                                    .setEntityId(thisTestAsEntity())
                                     .build();
 
         // Do have custom route.
@@ -160,11 +162,15 @@ public class RejectionRoutingShould {
 
         final EntityAlreadyArchived rejection =
                 EntityAlreadyArchived.newBuilder()
-                                     .setEntityId(getClass().getName())
+                                     .setEntityId(thisTestAsEntity())
                                      .build();
         final Set<String> ids = rejectionRouting.apply(rejection,
                                                        RejectionContext.getDefaultInstance());
         assertEquals(CUSTOM_ROUTE, ids);
+    }
+
+    private Any thisTestAsEntity() {
+        return Identifier.pack(getClass().getName());
     }
 
     @Test

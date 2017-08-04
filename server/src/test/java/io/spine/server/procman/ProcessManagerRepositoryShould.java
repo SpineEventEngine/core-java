@@ -247,7 +247,7 @@ public class ProcessManagerRepositoryShould
         final CommandEnvelope ce = requestFactory.generateEnvelope();
         final EntityAlreadyArchived rejectionMessage =
                 EntityAlreadyArchived.newBuilder()
-                                     .setEntityId(newUuid())
+                                     .setEntityId(Identifier.pack(newUuid()))
                                      .build();
         final Rejection rejection = createRejection(rejectionMessage,
                                                     ce.getCommand());

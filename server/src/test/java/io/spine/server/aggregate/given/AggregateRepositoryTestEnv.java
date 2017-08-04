@@ -32,6 +32,7 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.UInt32Value;
 import com.google.protobuf.UInt64Value;
 import com.google.protobuf.util.Timestamps;
+import io.spine.Identifier;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
@@ -48,7 +49,6 @@ import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
 import io.spine.server.entity.rejection.EntityAlreadyArchived;
 import io.spine.server.route.CommandRoute;
 import io.spine.server.route.EventRoute;
-import io.spine.string.Stringifiers;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.ProjectVBuilder;
@@ -322,7 +322,7 @@ public class AggregateRepositoryTestEnv {
         @Assign
         Timestamp on(UInt64Value value) throws CannotModifyArchivedEntity {
             if (value.getValue() < 0) {
-                throw new CannotModifyArchivedEntity(Stringifiers.toString(getId()));
+                throw new CannotModifyArchivedEntity(Identifier.pack(getId()));
             }
             return Time.getCurrentTime();
         }

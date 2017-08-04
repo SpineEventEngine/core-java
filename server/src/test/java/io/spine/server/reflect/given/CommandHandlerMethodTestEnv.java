@@ -151,7 +151,7 @@ public class CommandHandlerMethodTestEnv {
     public static class RejectingHandler extends TestCommandHandler {
         @Assign
         RefProjectCreated handleTest(RefCreateProject cmd) throws EntityAlreadyArchived {
-            throw new EntityAlreadyArchived(Identifier.toString(cmd.getProjectId()));
+            throw new EntityAlreadyArchived(Identifier.pack(cmd.getProjectId()));
         }
     }
 
@@ -165,7 +165,7 @@ public class CommandHandlerMethodTestEnv {
 
         @Assign
         RefProjectCreated on(RefCreateProject cmd) throws EntityAlreadyArchived {
-            throw new EntityAlreadyArchived(Identifier.toString(cmd.getProjectId()));
+            throw new EntityAlreadyArchived(Identifier.pack(cmd.getProjectId()));
         }
 
         @Apply

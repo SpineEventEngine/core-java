@@ -243,7 +243,7 @@ public class ProcessManagerShould {
     public void dispatch_rejection() {
         final EntityAlreadyArchived rejectionMessage =
                 EntityAlreadyArchived.newBuilder()
-                                     .setEntityId(getClass().getName())
+                                     .setEntityId(Identifier.pack(getClass().getName()))
                                      .build();
 
         final Command command = requestFactory.generateCommand();
