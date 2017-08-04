@@ -418,17 +418,29 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     @VisibleForTesting
     A loadOrCreate(I id) {
-        final Optional<AggregateStateRecord> eventsFromStorage = aggregateStorage().read(id);
+        final Optional<A> optional = load(id);
+
+        if (optional.isPresent()) {
+            return optional.get();
+        }
+
         final A result = create(id);
+        return result;
+    }
+
+    private Optional<A> load(I id) {
+        final Optional<AggregateStateRecord> eventsFromStorage = aggregateStorage().read(id);
 
         if (eventsFromStorage.isPresent()) {
+            final A result = create(id);
             final AggregateStateRecord aggregateStateRecord = eventsFromStorage.get();
             final AggregateTransaction tx = AggregateTransaction.start(result);
             result.play(aggregateStateRecord);
             tx.commit();
+            return Optional.of(result);
         }
 
-        return result;
+        return Optional.absent();
     }
 
     /**
@@ -456,7 +468,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * @param  id the ID of the aggregate to load
      * @return the loaded object
      * @throws IllegalStateException
-     *         if the repository wasn't configured prior to calling this method
+     *         if the storage of the repository is not {@linkplain #initStorage(StorageFactory)
+     *         initialized} prior to this call
      * @see AggregateStateRecord
      */
     @Override
