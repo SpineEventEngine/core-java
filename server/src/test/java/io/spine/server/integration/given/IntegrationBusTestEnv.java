@@ -147,12 +147,12 @@ public class IntegrationBusTestEnv {
         private static ItgProjectStarted domesticEvent = null;
 
         @Subscribe(external = true)
-        void on(ItgProjectCreated msg) {
+        public void on(ItgProjectCreated msg) {
             externalEvent = msg;
         }
 
         @Subscribe
-        void on(ItgProjectStarted msg) {
+        public void on(ItgProjectStarted msg) {
             domesticEvent = msg;
         }
 
