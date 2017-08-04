@@ -23,7 +23,6 @@ import com.google.protobuf.StringValue;
 import io.spine.Identifier;
 import io.spine.core.Event;
 import io.spine.core.Subscribe;
-import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.event.EventSubscriber;
@@ -35,6 +34,7 @@ import io.spine.test.integration.ProjectId;
 import io.spine.test.integration.event.ItgProjectCreated;
 import io.spine.validate.StringValueVBuilder;
 
+import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.command.TestEventFactory.newInstance;
 
 /**
@@ -42,11 +42,22 @@ import static io.spine.server.command.TestEventFactory.newInstance;
  */
 public class IntegrationBusTestEnv {
 
-    public static BoundedContext contextWithExternalSubscriber(TransportFactory transportFactory) {
+    private IntegrationBusTestEnv() {
+        // Prevent instantiation of this utility class.
+    }
+
+    public static BoundedContext contextWithExternalRepoSubscriber(TransportFactory transportFactory) {
         final BoundedContext boundedContext = contextWithTransport(transportFactory);
         boundedContext.register(new ProjectDetailsRepository());
         return boundedContext;
     }
+
+    public static BoundedContext contextWithExternalSubscriber(TransportFactory transportFactory) {
+        final BoundedContext boundedContext = contextWithTransport(transportFactory);
+        boundedContext.getIntegrationBus().register(new ExternalSubscriber());
+        return boundedContext;
+    }
+
 
     public static BoundedContext contextWithTransport(TransportFactory transportFactory) {
         final IntegrationBus.Builder builder = IntegrationBus.newBuilder()
@@ -61,7 +72,7 @@ public class IntegrationBusTestEnv {
         final ProjectId projectId = ProjectId.newBuilder()
                                              .setId(Identifier.newUuid())
                                              .build();
-        final TestEventFactory eventFactory = newInstance(AnyPacker.pack(projectId),
+        final TestEventFactory eventFactory = newInstance(pack(projectId),
                                                           IntegrationBusTestEnv.class);
         return eventFactory.createEvent(ItgProjectCreated.newBuilder()
                                                          .setProjectId(projectId)
@@ -69,6 +80,7 @@ public class IntegrationBusTestEnv {
         );
     }
 
+    @SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod")  // OK to preserve the state.
     public static class ProjectDetails
             extends Projection<ProjectId, StringValue, StringValueVBuilder> {
 
@@ -98,6 +110,8 @@ public class IntegrationBusTestEnv {
             extends ProjectionRepository<ProjectId, ProjectDetails, StringValue> {
     }
 
+
+    @SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod")  // OK to preserve the state.
     public static class ExternalSubscriber extends EventSubscriber {
 
         private static ItgProjectCreated externalEvent = null;

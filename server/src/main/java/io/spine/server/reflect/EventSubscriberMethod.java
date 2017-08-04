@@ -23,6 +23,7 @@ package io.spine.server.reflect;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import com.google.protobuf.Message;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
@@ -39,6 +40,7 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.core.Rejections.isRejection;
 import static io.spine.util.Exceptions.newIllegalStateException;
+import static java.util.Collections.unmodifiableSet;
 
 /**
  * A wrapper for an event subscriber method.
@@ -154,6 +156,17 @@ public final class EventSubscriberMethod extends HandlerMethod<EventContext> {
         return result;
     }
 
+    @Override
+    protected Set<MethodAttribute<?>> getAttributes() {
+        final Set<MethodAttribute<?>> attributes = Sets.newHashSet();
+
+        final Subscribe annotation = getMethod().getAnnotation(Subscribe.class);
+        if (annotation != null && annotation.external()) {
+            attributes.add(new ExternalAttribute(true));
+        }
+
+        return unmodifiableSet(attributes);
+    }
 
     /** Returns the factory for filtering and creating event subscriber methods. */
     private static HandlerMethod.Factory<EventSubscriberMethod> factory() {

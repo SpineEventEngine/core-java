@@ -22,10 +22,12 @@ package io.spine.server.integration;
 import io.spine.core.Event;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
+import io.spine.server.integration.given.IntegrationBusTestEnv.ExternalSubscriber;
 import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectDetails;
 import io.spine.server.integration.local.LocalTransportFactory;
 import org.junit.Test;
 
+import static io.spine.server.integration.given.IntegrationBusTestEnv.contextWithExternalRepoSubscriber;
 import static io.spine.server.integration.given.IntegrationBusTestEnv.contextWithExternalSubscriber;
 import static io.spine.server.integration.given.IntegrationBusTestEnv.contextWithTransport;
 import static io.spine.server.integration.given.IntegrationBusTestEnv.projectCreated;
@@ -38,16 +40,31 @@ import static org.junit.Assert.assertNull;
 public class IntegrationBusShould {
 
     @Test
+    public void dispatch_events_from_one_BC_to_entities_with_external_subscribers_of_another_BC() {
+        final LocalTransportFactory transportFactory = LocalTransportFactory.newInstance();
+
+        final BoundedContext sourceContext = contextWithTransport(transportFactory);
+        final BoundedContext destinationContext = contextWithExternalRepoSubscriber(transportFactory);
+
+        assertNull(ProjectDetails.getEventCaught());
+
+        final Event event = projectCreated();
+        sourceContext.getEventBus().post(event);
+
+        assertEquals(AnyPacker.unpack(event.getMessage()), ProjectDetails.getEventCaught());
+    }
+
+    @Test
     public void dispatch_events_from_one_BC_to_external_subscribers_of_another_BC() {
         final LocalTransportFactory transportFactory = LocalTransportFactory.newInstance();
 
         final BoundedContext sourceContext = contextWithTransport(transportFactory);
         final BoundedContext destinationContext = contextWithExternalSubscriber(transportFactory);
 
-        assertNull(ProjectDetails.getEventCaught());
+        assertNull(ExternalSubscriber.getExternalEvent());
 
         final Event event = projectCreated();
         sourceContext.getEventBus().post(event);
-        assertEquals(AnyPacker.unpack(event.getMessage()), ProjectDetails.getEventCaught());
+        assertEquals(AnyPacker.unpack(event.getMessage()), ExternalSubscriber.getExternalEvent());
     }
 }

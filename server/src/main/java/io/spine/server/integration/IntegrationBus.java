@@ -30,6 +30,7 @@ import io.spine.Identifier;
 import io.spine.core.Ack;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
+import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.core.ExternalMessageEnvelope;
 import io.spine.core.MessageInvalid;
@@ -94,6 +95,7 @@ public class IntegrationBus extends MulticastBus<Message,
      */
     private final EventBus eventBus;
     private final RejectionBus rejectionBus;
+
     private final SubscriberHub subscriberHub;
     private final PublisherHub publisherHub;
 
@@ -137,8 +139,8 @@ public class IntegrationBus extends MulticastBus<Message,
 
     @Override
     protected ExternalMessageEnvelope toEnvelope(Message message) {
-        if(message instanceof Event) {
-            return ExternalMessageEnvelope.of((Event)message);
+        if (message instanceof Event) {
+            return ExternalMessageEnvelope.of((Event) message);
         }
         throw Exceptions.newIllegalArgumentException("The message of %s type isn't supported",
                                                      message.getClass());
@@ -146,13 +148,29 @@ public class IntegrationBus extends MulticastBus<Message,
 
     @Override
     protected Ack doPost(ExternalMessageEnvelope envelope) {
-        final int dispatchersCalled = callDispatchers(envelope);
+        final ExternalMessageEnvelope markedEnvelope = markExternal(envelope);
+        final int dispatchersCalled = callDispatchers(markedEnvelope);
 
-        final Any packedId = Identifier.pack(envelope.getId());
+        final Any packedId = Identifier.pack(markedEnvelope.getId());
         checkState(dispatchersCalled != 0,
-                   format("External message %s has no local dispatchers.", envelope.getMessage()));
+                   format("External message %s has no local dispatchers.",
+                          markedEnvelope.getMessage()));
         final Ack result = acknowledge(packedId);
         return result;
+    }
+
+    private static ExternalMessageEnvelope markExternal(ExternalMessageEnvelope envelope) {
+        final Event event = (Event) envelope.getOuterObject();
+        final Event.Builder eventBuilder = event.toBuilder();
+        final EventContext modifiedContext = eventBuilder
+                .getContext()
+                .toBuilder()
+                .setExternal(true)
+                .build();
+
+        final Event marked = eventBuilder.setContext(modifiedContext)
+                                         .build();
+        return ExternalMessageEnvelope.of(marked);
     }
 
     @Override
@@ -192,6 +210,11 @@ public class IntegrationBus extends MulticastBus<Message,
         }
     }
 
+    public void register(final EventSubscriber eventSubscriber) {
+        final ExternalEventSubscriber wrapped = new ExternalEventSubscriber(eventSubscriber);
+        register(wrapped);
+    }
+
     private void subscribeToIncoming(ExternalMessageDispatcher<?> dispatcher) {
         final Set<MessageClass> messageClasses = dispatcher.getMessageClasses();
 
@@ -218,8 +241,8 @@ public class IntegrationBus extends MulticastBus<Message,
 
     private static Any newId() {
         final StringValue stringId = StringValue.newBuilder()
-                                             .setValue(Identifier.newUuid())
-                                             .build();
+                                                .setValue(Identifier.newUuid())
+                                                .build();
         final Any result = AnyPacker.pack(stringId);
         return result;
     }
@@ -252,8 +275,8 @@ public class IntegrationBus extends MulticastBus<Message,
      * of {@code external} messages in this bounded context.
      */
     static class LocalDelivery extends MulticastDelivery<ExternalMessageEnvelope,
-                                                         MessageClass,
-                                                         ExternalMessageDispatcher<?>> {
+            MessageClass,
+            ExternalMessageDispatcher<?>> {
 
         @Override
         protected boolean shouldPostponeDelivery(ExternalMessageEnvelope deliverable,
@@ -462,12 +485,11 @@ public class IntegrationBus extends MulticastBus<Message,
             checkState(rejectionBus != null,
                        "`rejectionBus` must be set for integration bus.");
 
-            if(transportFactory == null) {
+            if (transportFactory == null) {
                 transportFactory = initTransportFactory();
             }
 
             this.delivery = new LocalDelivery();
-
 
             return new IntegrationBus(this);
         }
