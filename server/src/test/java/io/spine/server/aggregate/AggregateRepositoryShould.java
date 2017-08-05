@@ -31,6 +31,7 @@ import io.grpc.stub.StreamObserver;
 import io.spine.Identifier;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Ack;
+import io.spine.core.Command;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
@@ -440,22 +441,21 @@ public class AggregateRepositoryShould {
 
         // Create the parent project.
         final ImmutableSet<ProjectId> childProjects = ImmutableSet.of(childId1, childId2, childId3);
-        final CommandEnvelope createParent = CommandEnvelope.of(
-                requestFactory.createCommand(
-                        AggCreateProjectWithChildren.newBuilder()
-                                                    .setProjectId(parentId)
-                                                    .addAllChildProjectId(childProjects)
-                                                    .build())
+        final Command createParent = requestFactory.createCommand(
+                AggCreateProjectWithChildren.newBuilder()
+                                            .setProjectId(parentId)
+                                            .addAllChildProjectId(childProjects)
+                                            .build()
         );
-        commandBus.post(createParent.getCommand(), observer);
+        commandBus.post(createParent, observer);
 
         // Fire a command which would cause rejection.
-        final CommandEnvelope startProject = CommandEnvelope.of(
-                requestFactory.createCommand(AggStartProjectWithChildren.newBuilder()
-                                                                        .setProjectId(parentId)
-                                                                        .build())
+        final Command startProject = requestFactory.createCommand(
+                AggStartProjectWithChildren.newBuilder()
+                                           .setProjectId(parentId)
+                                           .build()
         );
-        commandBus.post(startProject.getCommand(), observer);
+        commandBus.post(startProject, observer);
 
         for (ProjectId childProject : childProjects) {
             final Optional<RejectionReactingAggregate> optional = repository.find(childProject);
