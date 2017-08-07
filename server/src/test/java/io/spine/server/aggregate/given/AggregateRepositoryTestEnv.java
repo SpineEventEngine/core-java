@@ -431,7 +431,7 @@ public class AggregateRepositoryTestEnv {
     }
 
     /**
-     * An aggregate class which neither handle commands nor react on events or rejections.
+     * An aggregate class which neither handles commands nor reacts on events or rejections.
      */
     static class AnemicAggregate extends Aggregate<Integer, BoolValue, BoolValueVBuilder> {
         private AnemicAggregate(Integer id) {
@@ -521,11 +521,6 @@ public class AggregateRepositoryTestEnv {
                                }
                            });
         }
-
-        public void createAndStore(ProjectId id) {
-            ReactingAggregate newAggregate = new ReactingAggregate(id);
-            store(newAggregate);
-        }
     }
 
     /*
@@ -534,7 +529,7 @@ public class AggregateRepositoryTestEnv {
 
     /**
      * The aggregate with the state of {@linkplain AggProjectCreated creation event}
-     * wrapped into Any. The event keeps the list of child project IDs, which we use
+     * wrapped into {@code Any}. The event keeps the list of child project IDs, which we use
      * in rejecting subsequent commands.
      */
     static class RejectingAggregate

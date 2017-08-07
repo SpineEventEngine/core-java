@@ -32,5 +32,4 @@ import "spine/test/aggregate/project.proto";
 message AggCannotStartArchivedProject {
     ProjectId project_id = 1;
     repeated ProjectId child_project_id = 2;
-
 }

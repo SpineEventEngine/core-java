@@ -462,8 +462,8 @@ public class AggregateRepositoryShould {
             assertTrue(optional.isPresent());
 
             // Check that all the aggregates:
-            // 1. got Rejections.AggCannotStartArchivedProject
-            // 2. produced the state the event
+            // 1. got Rejections.AggCannotStartArchivedProject;
+            // 2. produced the state the event;
             // 3. applied the event.
             final String value = optional.get()
                                          .getState()
