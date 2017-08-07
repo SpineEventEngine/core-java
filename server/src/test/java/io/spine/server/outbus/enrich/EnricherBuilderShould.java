@@ -43,7 +43,7 @@ public class EnricherBuilderShould {
 
     private Enricher.Builder builder;
     private Function<Timestamp, StringValue> function;
-    private FieldEnricher<Timestamp, StringValue> fieldEnricher;
+    private FieldEnrichment<Timestamp, StringValue> fieldEnrichment;
 
     @Before
     public void setUp() {
@@ -58,7 +58,7 @@ public class EnricherBuilderShould {
                 return toMessage(Timestamps.toString(input));
             }
         };
-        this.fieldEnricher = FieldEnricher.newInstance(Timestamp.class, StringValue.class, function);
+        this.fieldEnrichment = FieldEnrichment.newInstance(Timestamp.class, StringValue.class, function);
     }
 
     @Test
@@ -78,14 +78,14 @@ public class EnricherBuilderShould {
         builder.addFieldEnrichment(Timestamp.class, StringValue.class, function);
 
         assertTrue(builder.getFunctions()
-                          .contains(fieldEnricher));
+                          .contains(fieldEnrichment));
     }
 
     @Test
     public void remove_enrichment_function() {
         builder.addFieldEnrichment(Timestamp.class, StringValue.class, function);
 
-        builder.remove(fieldEnricher);
+        builder.remove(fieldEnrichment);
 
         assertTrue(builder.getFunctions()
                           .isEmpty());
@@ -138,11 +138,11 @@ public class EnricherBuilderShould {
 
     @Test
     public void assure_that_function_performs_same_transition() {
-        assertTrue(SameTransition.asFor(fieldEnricher).apply(fieldEnricher));
+        assertTrue(SameTransition.asFor(fieldEnrichment).apply(fieldEnrichment));
     }
 
     @Test
     public void return_false_if_input_to_SameTransition_predicate_is_null() {
-        assertFalse(SameTransition.asFor(fieldEnricher).apply(null));
+        assertFalse(SameTransition.asFor(fieldEnrichment).apply(null));
     }
 }

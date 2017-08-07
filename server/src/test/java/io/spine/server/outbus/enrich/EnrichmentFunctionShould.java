@@ -42,7 +42,7 @@ import static org.junit.Assert.assertTrue;
 public class EnrichmentFunctionShould {
 
     private Function<ProjectCreated, ProjectCreated.Enrichment> function;
-    private FieldEnricher<ProjectCreated, ProjectCreated.Enrichment> fieldEnricher;
+    private FieldEnrichment<ProjectCreated, ProjectCreated.Enrichment> fieldEnrichment;
 
     @Before
     public void setUp() {
@@ -59,9 +59,9 @@ public class EnrichmentFunctionShould {
                 return result;
             }
         };
-        this.fieldEnricher = FieldEnricher.newInstance(ProjectCreated.class,
-                                                       ProjectCreated.Enrichment.class,
-                                                       function);
+        this.fieldEnrichment = FieldEnrichment.newInstance(ProjectCreated.class,
+                                                           ProjectCreated.Enrichment.class,
+                                                           function);
     }
 
     @Test
@@ -70,7 +70,7 @@ public class EnrichmentFunctionShould {
                 .setDefault(Message.class, Empty.getDefaultInstance())
                 .setDefault(Class.class, Empty.class)
                 .setDefault(Function.class, function)
-                .testAllPublicStaticMethods(FieldEnricher.class);
+                .testAllPublicStaticMethods(FieldEnrichment.class);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -82,24 +82,24 @@ public class EnrichmentFunctionShould {
                 return null;
             }
         };
-        FieldEnricher.newInstance(StringValue.class, StringValue.class, func);
+        FieldEnrichment.newInstance(StringValue.class, StringValue.class, func);
     }
 
     @Test
     public void return_sourceClass() throws Exception {
-        assertEquals(ProjectCreated.class, fieldEnricher.getEventClass());
+        assertEquals(ProjectCreated.class, fieldEnrichment.getEventClass());
     }
 
     @Test
     public void return_targetClass() throws Exception {
-        assertEquals(ProjectCreated.Enrichment.class, fieldEnricher.getEnrichmentClass());
+        assertEquals(ProjectCreated.Enrichment.class, fieldEnrichment.getEnrichmentClass());
     }
 
     @Test
     public void create_custom_instances() throws Exception {
-        assertEquals(fieldEnricher, FieldEnricher.newInstance(ProjectCreated.class,
-                                                              ProjectCreated.Enrichment.class,
-                                                              function));
+        assertEquals(fieldEnrichment, FieldEnrichment.newInstance(ProjectCreated.class,
+                                                                  ProjectCreated.Enrichment.class,
+                                                                  function));
     }
 
     @Test
@@ -107,7 +107,7 @@ public class EnrichmentFunctionShould {
         final ProjectCreated event = GivenEventMessage.projectCreated();
 
         final ProjectCreated.Enrichment enriched =
-                fieldEnricher.apply(event, EventContext.getDefaultInstance());
+                fieldEnrichment.apply(event, EventContext.getDefaultInstance());
 
         assertNotNull(enriched);
         assertEquals(event.getProjectId()
@@ -116,24 +116,24 @@ public class EnrichmentFunctionShould {
 
     @Test
     public void have_hashCode() throws Exception {
-        assertNotEquals(System.identityHashCode(fieldEnricher), fieldEnricher.hashCode());
+        assertNotEquals(System.identityHashCode(fieldEnrichment), fieldEnrichment.hashCode());
     }
 
     @Test
     public void have_toString() throws Exception {
-        final String str = fieldEnricher.toString();
+        final String str = fieldEnrichment.toString();
         assertTrue(str.contains(ProjectCreated.class.getName()));
         assertTrue(str.contains(ProjectCreated.Enrichment.class.getName()));
     }
 
     @Test
     public void have_smart_equals() {
-        final FieldEnricher<ProjectCreated, ProjectCreated.Enrichment> anotherEnricher =
-                FieldEnricher.newInstance(
+        final FieldEnrichment<ProjectCreated, ProjectCreated.Enrichment> anotherEnricher =
+                FieldEnrichment.newInstance(
                     ProjectCreated.class,
                     ProjectCreated.Enrichment.class,
                     function);
-        new EqualsTester().addEqualityGroup(fieldEnricher, anotherEnricher)
+        new EqualsTester().addEqualityGroup(fieldEnrichment, anotherEnricher)
                           .testEquals();
     }
 }

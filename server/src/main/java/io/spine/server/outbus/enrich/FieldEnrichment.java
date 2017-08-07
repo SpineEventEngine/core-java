@@ -33,14 +33,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alexander Yevsyukov
  */
-class FieldEnricher<S, T> extends EnrichmentFunction<S, T> {
+class FieldEnrichment<S, T> extends EnrichmentFunction<S, T> {
 
     /** A function, which performs the enrichment. */
     private final Function<S, T> function;
 
-    private FieldEnricher(Class<S> eventClass, Class<T> enrichmentClass, Function<S, T> function) {
+    private FieldEnrichment(Class<S> eventClass, Class<T> enrichmentClass, Function<S, T> func) {
         super(eventClass, enrichmentClass);
-        this.function = checkNotNull(function);
+        this.function = checkNotNull(func);
     }
 
     /**
@@ -50,16 +50,16 @@ class FieldEnricher<S, T> extends EnrichmentFunction<S, T> {
      *         a class of the field in the event message
      * @param  enrichmentFieldClass
      *         a class of the field in the enrichment message
-     * @param  translator
+     * @param  func
      *         a conversion function
      * @return a new instance
      */
-    static <S, T> FieldEnricher<S, T> newInstance(Class<S> eventFieldClass,
-                                                  Class<T> enrichmentFieldClass,
-                                                  Function<S, T> translator) {
-        final FieldEnricher<S, T> result = new FieldEnricher<>(eventFieldClass,
-                                                               enrichmentFieldClass,
-                                                               translator);
+    static <S, T> FieldEnrichment<S, T> newInstance(Class<S> eventFieldClass,
+                                                    Class<T> enrichmentFieldClass,
+                                                    Function<S, T> func) {
+        final FieldEnrichment<S, T> result = new FieldEnrichment<>(eventFieldClass,
+                                                                   enrichmentFieldClass,
+                                                                   func);
         return result;
     }
 

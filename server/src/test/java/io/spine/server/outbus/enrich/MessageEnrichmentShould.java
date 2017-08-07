@@ -34,14 +34,14 @@ import static org.junit.Assert.assertFalse;
 /**
  * @author Alexander Litus
  */
-public class MessageEnricherShould {
+public class MessageEnrichmentShould {
 
-    private MessageEnricher<ProjectCreated, ProjectCreated.Enrichment> enricher;
+    private MessageEnrichment<ProjectCreated, ProjectCreated.Enrichment> enricher;
 
     @Before
     public void setUp() {
         final Enricher enricher = Enrichment.newEventEnricher();
-        this.enricher = MessageEnricher.newInstance(
+        this.enricher = MessageEnrichment.newInstance(
                 enricher,
                 ProjectCreated.class,
                 ProjectCreated.Enrichment.class);

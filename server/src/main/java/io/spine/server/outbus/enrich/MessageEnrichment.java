@@ -46,7 +46,7 @@ import static com.google.protobuf.Descriptors.FieldDescriptor;
  *
  * @author Alexander Yevsyukov
  */
-class MessageEnricher<S extends Message, T extends Message> extends EnrichmentFunction<S, T> {
+class MessageEnrichment<S extends Message, T extends Message> extends EnrichmentFunction<S, T> {
 
     /** A parent instance holding this instance and its siblings. */
     private final Enricher enricher;
@@ -64,15 +64,15 @@ class MessageEnricher<S extends Message, T extends Message> extends EnrichmentFu
 
     /** Creates a new message enricher instance. */
     static <S extends Message, T extends Message>
-    MessageEnricher<S, T> newInstance(Enricher enricher,
-                                      Class<S> eventClass,
-                                      Class<T> enrichmentClass) {
-        return new MessageEnricher<>(enricher, eventClass, enrichmentClass);
+    MessageEnrichment<S, T> newInstance(Enricher enricher,
+                                        Class<S> eventClass,
+                                        Class<T> enrichmentClass) {
+        return new MessageEnrichment<>(enricher, eventClass, enrichmentClass);
     }
 
-    private MessageEnricher(Enricher enricher,
-                            Class<S> eventClass,
-                            Class<T> enrichmentClass) {
+    private MessageEnrichment(Enricher enricher,
+                              Class<S> eventClass,
+                              Class<T> enrichmentClass) {
         super(eventClass, enrichmentClass);
         this.enricher = enricher;
     }

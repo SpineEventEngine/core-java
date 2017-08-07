@@ -78,7 +78,7 @@ public class Enricher {
     /**
      * Creates a new instance taking functions from the passed builder.
      *
-     * <p>Also adds {@link MessageEnricher}s for all enrichments defined in Protobuf.
+     * <p>Also adds {@link MessageEnrichment}s for all enrichments defined in Protobuf.
      */
     Enricher(Builder builder) {
         final LinkedListMultimap<Class<?>, EnrichmentFunction<?, ?>> rawMap = create();
@@ -102,8 +102,8 @@ public class Enricher {
             for (String eventType : eventTypes) {
                 final Class<Message> eventClass = TypeName.of(eventType)
                                                           .getJavaClass();
-                final MessageEnricher msgEnricher =
-                        MessageEnricher.newInstance(this, eventClass, enrichmentClass);
+                final MessageEnrichment msgEnricher =
+                        MessageEnrichment.newInstance(this, eventClass, enrichmentClass);
                 functionsMap.put(eventClass, msgEnricher);
             }
         }
@@ -119,8 +119,8 @@ public class Enricher {
      *     {@code enrichment_for} and/or {@code by} options.
      *     <li>There is one or more field enrichment functions registered for
      *     the class of the passed event.
-     *     <li>The flag {@code do_not_enrich} is not set in the
-     *     {@code EventContext} of the passed event.
+     *     <li>The flag {@code do_not_enrich} is not set in the {@link io.spine.core.Enrichment
+     *     Enrichment} instance of the context of the passed event.
      * </ol>
      *
      * @return {@code true} if the enrichment for the event is possible, {@code false} otherwise
@@ -193,7 +193,7 @@ public class Enricher {
      *        the class of the field to enrich
      * @param enrichmentFieldClass
      *        the class of the resulting enrichment field
-     * @param function
+     * @param func
      *        enrichment function
      * @param <S>
      *        the type of the enriched event message
@@ -202,13 +202,13 @@ public class Enricher {
      */
     public <S, T> void registerFieldEnrichment(Class<S> eventFieldClass,
                                                Class<T> enrichmentFieldClass,
-                                               Function<S, T> function) {
+                                               Function<S, T> func) {
         checkNotNull(eventFieldClass);
         checkNotNull(enrichmentFieldClass);
-        checkNotNull(function);
+        checkNotNull(func);
 
         final EnrichmentFunction<S, T> newEntry =
-                FieldEnricher.newInstance(eventFieldClass, enrichmentFieldClass, function);
+                FieldEnrichment.newInstance(eventFieldClass, enrichmentFieldClass, func);
 
         checkDuplicate(newEntry, functions.values());
         functions.put(newEntry.getEventClass(), newEntry);
@@ -267,19 +267,19 @@ public class Enricher {
          *         a class of the field in the event message
          * @param  enrichmentFieldClass
          *         a class of the field in the enrichment message
-         * @param  function
+         * @param  func
          *         a function which converts fields
          * @return the builder instance
          */
         public <S, T> Builder addFieldEnrichment(Class<S> eventFieldClass,
                                                  Class<T> enrichmentFieldClass,
-                                                 Function<S, T> function) {
+                                                 Function<S, T> func) {
             checkNotNull(eventFieldClass);
             checkNotNull(enrichmentFieldClass);
-            checkNotNull(function);
+            checkNotNull(func);
 
             final EnrichmentFunction<S, T> newEntry =
-                    FieldEnricher.newInstance(eventFieldClass, enrichmentFieldClass, function);
+                    FieldEnrichment.newInstance(eventFieldClass, enrichmentFieldClass, func);
             checkDuplicate(newEntry, functions);
             functions.add(newEntry);
             return this;
