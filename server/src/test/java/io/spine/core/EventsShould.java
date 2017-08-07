@@ -46,6 +46,7 @@ import static io.spine.core.Events.getActor;
 import static io.spine.core.Events.getMessage;
 import static io.spine.core.Events.getProducer;
 import static io.spine.core.Events.getTimestamp;
+import static io.spine.core.Events.nothing;
 import static io.spine.core.Events.sort;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.TypeConverter.toMessage;
@@ -53,6 +54,7 @@ import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Test functionality of {@link Events} utility class.
@@ -194,5 +196,12 @@ public class EventsShould {
                                                .getTypeName();
         assertNotNull(typeName);
         assertEquals(Timestamp.class.getSimpleName(), typeName.getSimpleName());
+    }
+
+    @Test
+    public void provide_empty_Iterable() {
+        for (Object ignored : nothing()) {
+            fail("Something found in nothing().");
+        }
     }
 }
