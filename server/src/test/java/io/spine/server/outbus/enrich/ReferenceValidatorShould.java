@@ -55,12 +55,12 @@ import static org.mockito.Mockito.when;
 public class ReferenceValidatorShould {
 
     private static final String USER_GOOGLE_UID_FIELD = "user_google_uid";
-    private final EventEnricher eventEnricher = Enrichment.newEventEnricher();
+    private final Enricher enricher = Enrichment.newEventEnricher();
 
     @Test
     public void initialize_with_valid_enricher() {
         final ReferenceValidator validator =
-                new ReferenceValidator(eventEnricher,
+                new ReferenceValidator(enricher,
                                        ProjectCreated.class,
                                        ProjectCreatedEnrichmentAnotherPackage.class);
         assertNotNull(validator);
@@ -69,7 +69,7 @@ public class ReferenceValidatorShould {
     @Test
     public void store_valid_map_of_enrichment_fields_after_validation() {
         final ReferenceValidator validator
-                = new ReferenceValidator(eventEnricher,
+                = new ReferenceValidator(enricher,
                                          UserDeletedEvent.class,
                                          EnrichmentBoundWithMultipleFieldsWithDifferentNames.class);
         final ValidationResult result = validator.validate();
@@ -107,7 +107,7 @@ public class ReferenceValidatorShould {
 
     @Test(expected = IllegalStateException.class)
     public void fail_validation_if_enrichment_is_not_declared() {
-        final ReferenceValidator validator = new ReferenceValidator(eventEnricher,
+        final ReferenceValidator validator = new ReferenceValidator(enricher,
                                                                     UserDeletedEvent.class,
                                                                     GranterEventsEnrichment.class);
         validator.validate();
@@ -115,7 +115,7 @@ public class ReferenceValidatorShould {
 
     @Test
     public void skip_mapping_if_no_mapping_function_is_defined() {
-        final EventEnricher mockEnricher = mock(EventEnricher.class);
+        final Enricher mockEnricher = mock(Enricher.class);
         when(mockEnricher.functionFor(any(Class.class), any(Class.class)))
                 .thenReturn(Optional.<EnrichmentFunction<?, ?>>absent());
         final ReferenceValidator validator
@@ -132,7 +132,7 @@ public class ReferenceValidatorShould {
     @Test
     public void handle_separator_spaces_in_by_argument() {
         final ReferenceValidator validator
-                = new ReferenceValidator(eventEnricher,
+                = new ReferenceValidator(enricher,
                                          TaskAdded.class,
                                          EnrichmentBoundWithFieldsSeparatedWithSpaces.class);
         final ValidationResult result = validator.validate();

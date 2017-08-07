@@ -110,11 +110,6 @@ public class EnrichmentFunctionShould {
     }
 
     @Test
-    public void return_function() {
-        assertNotNull(fieldEnricher.getFunction());
-    }
-
-    @Test
     public void apply_enrichment() throws Exception {
         final ProjectCreated event = GivenEventMessage.projectCreated();
 

@@ -57,25 +57,25 @@ import static io.spine.core.Enrichments.isEnrichmentEnabled;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
- * {@code EventEnricher} extends information of an event basing on its type and content.
+ * Extends information of an command output message basing on its type and content.
  *
  * <p>The class implements the
  * <a href="http://www.enterpriseintegrationpatterns.com/patterns/messaging/DataEnricher.html">ContentEnricher</a>
  * Enterprise Integration pattern.
  *
- * <p>There is one instance of an {@code EventEnricher} per {@code BoundedContext}.
- * This instance is called by an {@link io.spine.server.event.EventBus EventBus} to enrich
- * a new event before it is passed to further processing by dispatchers or handlers.
+ * <p>There is one instance of an {@code Enricher} per
+ * {@link io.spine.server.outbus.CommandOutputBus CommandOutputBus}.
+ * This instance is called by the bus to enrich a new command output message before it is passed to
+ * further processing by dispatchers or handlers.
  *
- * <p>The event is passed to enrichment <em>after</em> it was passed to the
- * {@link io.spine.server.event.EventStore EventStore}.
- * Therefore events are stored without attached enrichment information.
+ * <p>The message is passed to enrichment <em>after</em> it was passed to the corresponding storage.
+ * Therefore command output messages are stored without attached enrichment information.
  *
  * @author Alexander Yevsyukov
  */
-public class EventEnricher {
+public class Enricher {
 
-    /** Available enrichment functions per event message class. */
+    /** Available enrichment functions per message class. */
     private final Multimap<Class<?>, EnrichmentFunction<?, ?>> functions;
 
     private final EnrichmentFunctionAppender appender;
@@ -88,9 +88,9 @@ public class EventEnricher {
     /**
      * Creates a new instance taking functions from the passed builder.
      *
-     * <p>Also adds {@link EventMessageEnricher}s for all enrichments defined in Protobuf.
+     * <p>Also adds {@link MessageEnricher}s for all enrichments defined in Protobuf.
      */
-    EventEnricher(Builder builder) {
+    Enricher(Builder builder) {
         final LinkedListMultimap<Class<?>, EnrichmentFunction<?, ?>> rawMap = create();
         final Multimap<Class<?>, EnrichmentFunction<?, ?>> functionMap =
                 synchronizedMultimap(rawMap);
@@ -114,10 +114,8 @@ public class EventEnricher {
             for (String eventType : eventTypes) {
                 final Class<Message> eventClass = TypeName.of(eventType)
                                                           .getJavaClass();
-                final EventMessageEnricher msgEnricher =
-                        EventMessageEnricher.newInstance(this,
-                                                         eventClass,
-                                                         enrichmentClass);
+                final MessageEnricher msgEnricher =
+                        MessageEnricher.newInstance(this, eventClass, enrichmentClass);
                 functionsMap.put(eventClass, msgEnricher);
             }
         }
@@ -180,7 +178,7 @@ public class EventEnricher {
 
         private final Map<String, Any> enrichments = Maps.newHashMap();
 
-        private Action(EventEnricher parent, EventEnvelope envelope) {
+        private Action(Enricher parent, EventEnvelope envelope) {
             this.envelope = envelope;
             final Class<? extends Message> eventClass = envelope.getMessageClass()
                                                                 .value();
@@ -413,8 +411,8 @@ public class EventEnricher {
         }
 
         /** Creates a new {@code Enricher}. */
-        public EventEnricher build() {
-            final EventEnricher result = new EventEnricher(this);
+        public Enricher build() {
+            final Enricher result = new Enricher(this);
             validate(result.functions);
             return result;
         }

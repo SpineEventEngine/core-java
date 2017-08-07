@@ -76,11 +76,11 @@ class ReferenceValidator {
         // not a variable name as other strings that use the same value.
     private static final String CONTEXT_REFERENCE = "context";
 
-    private final EventEnricher enricher;
+    private final Enricher enricher;
     private final Descriptor eventDescriptor;
     private final Descriptor enrichmentDescriptor;
 
-    ReferenceValidator(EventEnricher enricher,
+    ReferenceValidator(Enricher enricher,
             Class<? extends Message> eventClass,
             Class<? extends Message> enrichmentClass) {
         this.enricher = enricher;

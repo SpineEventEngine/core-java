@@ -24,7 +24,7 @@ import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.server.BoundedContext;
 import io.spine.server.bus.BusBuilderShould;
-import io.spine.server.outbus.enrich.EventEnricher;
+import io.spine.server.outbus.enrich.Enricher;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.test.Tests;
@@ -146,14 +146,14 @@ public class EventBusBuilderShould extends BusBuilderShould<EventBus.Builder,
 
     @Test
     public void accept_null_Enricher() {
-        assertNull(builder().setEnricher(Tests.<EventEnricher>nullRef())
+        assertNull(builder().setEnricher(Tests.<Enricher>nullRef())
                             .getEnricher()
                             .orNull());
     }
 
     @Test
     public void return_set_Enricher() {
-        final EventEnricher enricher = mock(EventEnricher.class);
+        final Enricher enricher = mock(Enricher.class);
 
         assertEquals(enricher, builder().setStorageFactory(storageFactory)
                                         .setEnricher(enricher)

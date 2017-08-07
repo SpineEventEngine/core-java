@@ -38,7 +38,7 @@ import io.spine.server.bus.DeadMessageTap;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.outbus.CommandOutputBus;
 import io.spine.server.outbus.OutputDispatcherRegistry;
-import io.spine.server.outbus.enrich.EventEnricher;
+import io.spine.server.outbus.enrich.Enricher;
 import io.spine.server.storage.StorageFactory;
 import io.spine.validate.MessageValidator;
 
@@ -119,7 +119,7 @@ public class EventBus extends CommandOutputBus<Event,
 
     /** The enricher for posted events or {@code null} if the enrichment is not supported. */
     @Nullable
-    private EventEnricher enricher;
+    private Enricher enricher;
 
     /** Creates new instance by the passed builder. */
     private EventBus(Builder builder) {
@@ -137,7 +137,7 @@ public class EventBus extends CommandOutputBus<Event,
 
     @VisibleForTesting
     @Nullable
-    EventEnricher getEnricher() {
+    Enricher getEnricher() {
         return enricher;
     }
 
@@ -240,7 +240,7 @@ public class EventBus extends CommandOutputBus<Event,
      * @param eventFieldClass      a class of the field in the event message
      * @param enrichmentFieldClass a class of the field in the enrichment message
      * @param function             a function which converts fields
-     * @see EventEnricher
+     * @see Enricher
      */
     public <S, T> void addFieldEnrichment(Class<S> eventFieldClass,
                                           Class<T> enrichmentFieldClass,
@@ -250,11 +250,11 @@ public class EventBus extends CommandOutputBus<Event,
         checkNotNull(function);
 
         if (enricher == null) {
-            enricher = EventEnricher.newBuilder()
-                                    .addFieldEnrichment(eventFieldClass,
+            enricher = Enricher.newBuilder()
+                               .addFieldEnrichment(eventFieldClass,
                                                         enrichmentFieldClass,
                                                         function)
-                                    .build();
+                               .build();
         } else {
             enricher.registerFieldEnrichment(eventFieldClass, enrichmentFieldClass, function);
         }
@@ -350,7 +350,7 @@ public class EventBus extends CommandOutputBus<Event,
          * in the {@code EventBus} instance built.
          */
         @Nullable
-        private EventEnricher enricher;
+        private Enricher enricher;
 
         private Builder() {
             super();
@@ -451,7 +451,7 @@ public class EventBus extends CommandOutputBus<Event,
         }
 
         /**
-         * Sets a custom {@link EventEnricher} for events posted to
+         * Sets a custom {@link Enricher} for events posted to
          * the {@code EventBus} which is being built.
          *
          * <p>If the {@code Enricher} is not set, the enrichments
@@ -460,12 +460,12 @@ public class EventBus extends CommandOutputBus<Event,
          * @param enricher the {@code Enricher} for events or
          *                 {@code null} if enrichment is not supported
          */
-        public Builder setEnricher(EventEnricher enricher) {
+        public Builder setEnricher(Enricher enricher) {
             this.enricher = enricher;
             return this;
         }
 
-        public Optional<EventEnricher> getEnricher() {
+        public Optional<Enricher> getEnricher() {
             return Optional.fromNullable(enricher);
         }
 

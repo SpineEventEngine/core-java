@@ -20,14 +20,13 @@
 
 package io.spine.server.outbus.enrich;
 
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.protobuf.Internal;
 import com.google.protobuf.Message;
 import io.spine.core.EventContext;
-import io.spine.server.outbus.enrich.EventEnricher.SupportsFieldConversion;
+import io.spine.server.outbus.enrich.Enricher.SupportsFieldConversion;
 import io.spine.server.reflect.Field;
 
 import javax.annotation.Nullable;
@@ -47,10 +46,10 @@ import static com.google.protobuf.Descriptors.FieldDescriptor;
  *
  * @author Alexander Yevsyukov
  */
-class EventMessageEnricher<S extends Message, T extends Message> extends EnrichmentFunction<S, T> {
+class MessageEnricher<S extends Message, T extends Message> extends EnrichmentFunction<S, T> {
 
     /** A parent instance holding this instance and its siblings. */
-    private final EventEnricher enricher;
+    private final Enricher enricher;
 
     /** Tells, whether this instance is active or not. */
     private boolean active = false;
@@ -64,30 +63,24 @@ class EventMessageEnricher<S extends Message, T extends Message> extends Enrichm
     private ImmutableMultimap<FieldDescriptor, FieldDescriptor> fieldMap;
 
     /** Creates a new message enricher instance. */
-    static <S extends Message, T extends Message> EventMessageEnricher<S, T> newInstance(
-            EventEnricher enricher,
-            Class<S> eventClass,
-            Class<T> enrichmentClass) {
-        return new EventMessageEnricher<>(enricher, eventClass, enrichmentClass);
+    static <S extends Message, T extends Message>
+    MessageEnricher<S, T> newInstance(Enricher enricher,
+                                      Class<S> eventClass,
+                                      Class<T> enrichmentClass) {
+        return new MessageEnricher<>(enricher, eventClass, enrichmentClass);
     }
 
-    private EventMessageEnricher(EventEnricher enricher,
-                                 Class<S> eventClass,
-                                 Class<T> enrichmentClass) {
+    private MessageEnricher(Enricher enricher,
+                            Class<S> eventClass,
+                            Class<T> enrichmentClass) {
         super(eventClass, enrichmentClass);
         this.enricher = enricher;
     }
 
     @Override
-    public Function<S, T> getFunction() {
-        return this;
-    }
-
-    @Override
     void activate() {
-        final ReferenceValidator referenceValidator = new ReferenceValidator(enricher,
-                                                                             getEventClass(),
-                                                                             getEnrichmentClass());
+        final ReferenceValidator referenceValidator =
+                new ReferenceValidator(enricher, getEventClass(), getEnrichmentClass());
         final ImmutableMultimap.Builder<Class<?>, EnrichmentFunction> map =
                                                                       ImmutableMultimap.builder();
         final ReferenceValidator.ValidationResult validationResult = referenceValidator.validate();

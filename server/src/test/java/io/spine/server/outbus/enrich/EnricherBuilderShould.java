@@ -25,8 +25,8 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.spine.core.UserId;
-import io.spine.server.outbus.enrich.EventEnricher.SameTransition;
-import io.spine.server.outbus.enrich.given.EventEnricherBuilderTestEnv.Enrichment;
+import io.spine.server.outbus.enrich.Enricher.SameTransition;
+import io.spine.server.outbus.enrich.given.EnricherBuilderTestEnv.Enrichment;
 import io.spine.test.Tests;
 import io.spine.test.event.ProjectId;
 import org.junit.Before;
@@ -40,15 +40,15 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 @SuppressWarnings("ResultOfMethodCallIgnored")
-public class EventEnricherBuilderShould {
+public class EnricherBuilderShould {
 
-    private EventEnricher.Builder builder;
+    private Enricher.Builder builder;
     private Function<Timestamp, StringValue> function;
     private FieldEnricher<Timestamp, StringValue> fieldEnricher;
 
     @Before
     public void setUp() {
-        this.builder = EventEnricher.newBuilder();
+        this.builder = Enricher.newBuilder();
         this.function = new Function<Timestamp, StringValue>() {
             @Nullable
             @Override
@@ -64,12 +64,12 @@ public class EventEnricherBuilderShould {
 
     @Test
     public void create_new_instance() {
-        assertNotNull(EventEnricher.Builder.newInstance());
+        assertNotNull(Enricher.Builder.newInstance());
     }
 
     @Test
     public void build_enricher_if_all_functions_registered() {
-        final EventEnricher enricher = Enrichment.newEventEnricher();
+        final Enricher enricher = Enrichment.newEnricher();
 
         assertNotNull(enricher);
     }
@@ -122,8 +122,8 @@ public class EventEnricherBuilderShould {
 
     @Test
     public void allow_registering_no_functions() {
-        final EventEnricher enricher = EventEnricher.newBuilder()
-                                                 .build();
+        final Enricher enricher = Enricher.newBuilder()
+                                          .build();
         assertNotNull(enricher);
     }
 
@@ -131,7 +131,7 @@ public class EventEnricherBuilderShould {
     public void allow_registering_just_some_of_expected_functions() {
         builder.addFieldEnrichment(ProjectId.class, UserId.class, new Enrichment.GetProjectOwnerId());
         builder.addFieldEnrichment(ProjectId.class, String.class, new Enrichment.GetProjectName());
-        final EventEnricher enricher = builder.build();
+        final Enricher enricher = builder.build();
         assertNotNull(enricher);
     }
 

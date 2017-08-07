@@ -62,17 +62,17 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-public class EventEnricherShould {
+public class EnricherShould {
 
     private BoundedContext boundedContext;
     private EventBus eventBus;
     private TestEventSubscriber subscriber;
-    private EventEnricher enricher;
+    private Enricher enricher;
     private final Function<ProjectId, String> getProjectName = new GetProjectName();
     private final Function<ProjectId, UserId> getProjectOwnerId = new GetProjectOwnerId();
 
     private static Event createEvent(Message msg) {
-        final TestEventFactory eventFactory = newInstance(EventEnricherShould.class);
+        final TestEventFactory eventFactory = newInstance(EnricherShould.class);
         final Event event = eventFactory.createEvent(msg);
         return event;
     }
@@ -93,7 +93,7 @@ public class EventEnricherShould {
 
     @Test
     public void have_builder() {
-        assertNotNull(EventEnricher.newBuilder());
+        assertNotNull(Enricher.newBuilder());
     }
 
     @Test
@@ -211,9 +211,9 @@ public class EventEnricherShould {
 
     @Test
     public void return_false_if_pass_null_to_function_checking_predicate() {
-        final boolean result = EventEnricher.SupportsFieldConversion.of(StringValue.class,
-                                                                        String.class)
-                                                                    .apply(null);
+        final boolean result = Enricher.SupportsFieldConversion.of(StringValue.class,
+                                                                   String.class)
+                                                               .apply(null);
         assertFalse(result);
     }
 

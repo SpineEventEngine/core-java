@@ -78,11 +78,6 @@ class FieldEnricher<S, T> extends EnrichmentFunction<S, T> {
     }
 
     @Override
-    public Function<S, T> getFunction() {
-        return function;
-    }
-
-    @Override
     @Nullable
     public T apply(@Nullable S message) {
         ensureActive();

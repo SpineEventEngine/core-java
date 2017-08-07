@@ -25,21 +25,20 @@ import io.spine.test.event.ProjectCreated;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
 /**
  * @author Alexander Litus
  */
-public class EventMessageEnricherShould {
+public class MessageEnricherShould {
 
-    private EventMessageEnricher<ProjectCreated, ProjectCreated.Enrichment> enricher;
+    private MessageEnricher<ProjectCreated, ProjectCreated.Enrichment> enricher;
 
     @Before
     public void setUp() {
-        final EventEnricher eventEnricher = Enrichment.newEventEnricher();
-        this.enricher = EventMessageEnricher.newInstance(
-                eventEnricher,
+        final Enricher enricher = Enrichment.newEventEnricher();
+        this.enricher = MessageEnricher.newInstance(
+                enricher,
                 ProjectCreated.class,
                 ProjectCreated.Enrichment.class);
     }
@@ -58,10 +57,5 @@ public class EventMessageEnricherShould {
     @Test(expected = IllegalStateException.class)
     public void throw_ISE_if_activate_not_called_before_apply() {
         enricher.apply(ProjectCreated.getDefaultInstance());
-    }
-
-    @Test
-    public void return_itself_on_get_function() {
-        assertEquals(enricher, enricher.getFunction());
     }
 }
