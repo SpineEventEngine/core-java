@@ -273,8 +273,8 @@ public class IntegrationBus extends MulticastBus<Message,
         final Set<MessageClass> messageClasses = dispatcher.getMessageClasses();
 
         final IntegrationBus integrationBus = this;
-        final Iterable<IntegrationMessageClass> transformed = asIntegrationMessageClasses(
-                messageClasses);
+        final Iterable<IntegrationMessageClass> transformed =
+                asIntegrationMessageClasses(messageClasses);
         for (final IntegrationMessageClass imClass : transformed) {
             final Subscriber subscriber = subscriberHub.get(imClass);
             subscriber.addObserver(new IncomingMessageObserver(boundedContextId, 
@@ -287,8 +287,8 @@ public class IntegrationBus extends MulticastBus<Message,
         final Set<MessageClass> messageClasses = dispatcher.getMessageClasses();
 
         final IntegrationBus integrationBus = this;
-        final Iterable<IntegrationMessageClass> transformed = asIntegrationMessageClasses(
-                messageClasses);
+        final Iterable<IntegrationMessageClass> transformed =
+                asIntegrationMessageClasses(messageClasses);
         for (final IntegrationMessageClass imClass : transformed) {
             final Subscriber subscriber = subscriberHub.get(imClass);
             subscriber.removeObserver(new IncomingMessageObserver(boundedContextId,
@@ -546,7 +546,7 @@ public class IntegrationBus extends MulticastBus<Message,
             for (String itemForRemoval : toRemove) {
                 final boolean wereNonEmpty = !requestedTypes.get(itemForRemoval)
                                                             .isEmpty();
-                requestedTypes.remove(itemForRemoval, boundedContextId);
+                requestedTypes.remove(itemForRemoval, originBoundedContextId);
                 final boolean emptyNow = requestedTypes.get(itemForRemoval)
                                                        .isEmpty();
 
