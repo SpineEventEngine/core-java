@@ -20,14 +20,17 @@
 package io.spine.server.integration;
 
 import com.google.common.base.Function;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.grpc.stub.StreamObserver;
 import io.spine.Identifier;
 import io.spine.core.Ack;
+import io.spine.core.BoundedContextId;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
@@ -64,16 +67,19 @@ import io.spine.util.Exceptions;
 
 import javax.annotation.Nullable;
 import java.util.Deque;
+import java.util.Objects;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Lists.newLinkedList;
+import static com.google.common.collect.Sets.newHashSet;
 import static io.spine.core.EventClass.asEventClass;
 import static io.spine.core.RejectionClass.asRejectionClass;
 import static io.spine.server.bus.Buses.acknowledge;
 import static io.spine.util.Exceptions.newIllegalStateException;
+import static io.spine.validate.Validate.checkNotDefault;
 import static java.lang.String.format;
 
 /**
@@ -95,6 +101,7 @@ public class IntegrationBus extends MulticastBus<Message,
      */
     private final EventBus eventBus;
     private final RejectionBus rejectionBus;
+    private final BoundedContextId boundedContextId;
 
     private final SubscriberHub subscriberHub;
     private final PublisherHub publisherHub;
@@ -103,6 +110,7 @@ public class IntegrationBus extends MulticastBus<Message,
         super(builder.getDelivery());
         this.eventBus = builder.eventBus;
         this.rejectionBus = builder.rejectionBus;
+        this.boundedContextId = builder.boundedContextId;
         this.subscriberHub = new SubscriberHub(builder.transportFactory);
         this.publisherHub = new PublisherHub(builder.transportFactory);
 
@@ -210,6 +218,12 @@ public class IntegrationBus extends MulticastBus<Message,
         }
     }
 
+    /**
+     * Registers the passed event subscriber as an external event dispatcher
+     * by taking only external subscriptions into account.
+     *
+     * @param eventSubscriber the subscriber to register.
+     */
     public void register(final EventSubscriber eventSubscriber) {
         final ExternalEventSubscriber wrapped = new ExternalEventSubscriber(eventSubscriber);
         register(wrapped);
@@ -249,8 +263,7 @@ public class IntegrationBus extends MulticastBus<Message,
 
     @Override
     public String toString() {
-        //TODO:2017-07-24:alex.tymchenko: add more attributes.
-        return "Integration bus";
+        return "Integration bus of BoundedContext ID = " + boundedContextId.getValue();
     }
 
     private static <M extends MessageClass>
@@ -339,6 +352,12 @@ public class IntegrationBus extends MulticastBus<Message,
         }
     }
 
+    /**
+     * Base routines for the {@linkplain io.spine.server.integration.TransportFactory.MessageChannel
+     * message channel} observers.
+     *
+     * @param <M> the type of the message the observer is receiving updates on
+     */
     private abstract static class ChannelObserver<M> implements StreamObserver<M> {
 
         private final Class<? extends Message> messageClass;
@@ -362,7 +381,18 @@ public class IntegrationBus extends MulticastBus<Message,
         }
     }
 
+    /**
+     * An observer, which reacts to the configuration update messages sent by
+     * external entities (such as {@code IntegrationBus}es of other bounded contexts).
+     */
     private class ConfigurationChangeObserver extends ChannelObserver<IntegrationMessage> {
+
+        /**
+         * Current set of message type URLs, received in the latest
+         * {@linkplain RequestedMessageTypes configuration message}.
+         */
+        private final Set<String> currentTypeUrls = newHashSet();
+
 
         private ConfigurationChangeObserver() {
             super(RequestedMessageTypes.class);
@@ -373,65 +403,193 @@ public class IntegrationBus extends MulticastBus<Message,
             final RequestedMessageTypes message = AnyPacker.unpack(value.getOriginalMessage());
 
             final Iterable<String> typeUrlsList = message.getTypeUrlsList();
+            final Set<String> newTypeUrls = newHashSet(typeUrlsList);
 
-            subscribeToLocalBuses(typeUrlsList);
+            final Set<String> toRemove = Sets.difference(currentTypeUrls, newTypeUrls)
+                                             .immutableCopy();
+            final Set<String> toAdd = Sets.difference(newTypeUrls, currentTypeUrls)
+                                          .immutableCopy();
+
+            addLocalSubscriptions(toAdd);
+            removeLocalSubscriptions(toRemove);
+
+            currentTypeUrls.clear();
+            currentTypeUrls.addAll(newTypeUrls);
         }
 
-        private void subscribeToLocalBuses(Iterable<String> typeUrlsList) {
-            final Iterable<EventClass> eventClasses =
-                    asMessageClasses(typeUrlsList, asEventClass());
-            eventBus.register(newEventDispatcher(eventClasses));
+        private void addLocalSubscriptions(Iterable<String> toAdd) {
+            if(toAdd.iterator().hasNext()) {
+                final Iterable<EventClass> eventClasses = asMessageClasses(toAdd, asEventClass());
+                eventBus.register(newEventDispatcher(eventClasses));
 
-            final Iterable<RejectionClass> rejectionClasses =
-                    asMessageClasses(typeUrlsList, asRejectionClass());
-            rejectionBus.register(newRejectionDispatcher(rejectionClasses));
+                final Iterable<RejectionClass> rejectionClasses =
+                        asMessageClasses(toAdd, asRejectionClass());
+                rejectionBus.register(newRejectionDispatcher(rejectionClasses));
+            }
         }
+
+        private void removeLocalSubscriptions(Iterable<String> toRemove) {
+            if(toRemove.iterator().hasNext()) {
+                final Iterable<EventClass> eventClasses = asMessageClasses(toRemove,
+                                                                           asEventClass());
+                eventBus.unregister(newEventDispatcher(eventClasses));
+
+                final Iterable<RejectionClass> rejectionClasses =
+                        asMessageClasses(toRemove, asRejectionClass());
+                rejectionBus.unregister(newRejectionDispatcher(rejectionClasses));
+            }
+        }
+
 
         private RejectionDispatcher<String> newRejectionDispatcher(
                 final Iterable<RejectionClass> rejectionClasses) {
-            return new RejectionSubscriber() {
-                @Override
-                public Set<RejectionClass> getMessageClasses() {
-                    return ImmutableSet.copyOf(rejectionClasses);
-                }
-
-                @Override
-                public Set<String> dispatch(RejectionEnvelope envelope) {
-                    final Rejection rejection = envelope.getOuterObject();
-                    final IntegrationMessage message = IntegrationMessages.of(rejection);
-                    final IntegrationMessageClass messageClass = IntegrationMessageClass.of(
-                            envelope.getMessageClass());
-                    final Publisher channel = publisherHub.get(messageClass);
-                    channel.publish(AnyPacker.pack(envelope.getId()), message);
-                    return ImmutableSet.of(channel.toString());
-                }
-            };
+            return new LocalRejectionSubscriber(boundedContextId, publisherHub, rejectionClasses);
         }
 
         private EventDispatcher newEventDispatcher(final Iterable<EventClass> eventClasses) {
-            return new EventSubscriber() {
-                @Override
-                public Set<EventClass> getMessageClasses() {
-                    return ImmutableSet.copyOf(eventClasses);
-                }
-
-                @Override
-                public Set<String> dispatch(EventEnvelope envelope) {
-                    final Event event = envelope.getOuterObject();
-                    final IntegrationMessage msg = IntegrationMessages.of(event);
-                    final IntegrationMessageClass messageClass = IntegrationMessageClass.of(
-                            envelope.getMessageClass());
-                    final Publisher channel = publisherHub.get(messageClass);
-                    channel.publish(AnyPacker.pack(envelope.getId()), msg);
-
-                    return ImmutableSet.of(channel.toString());
-                }
-            };
+            return new LocalEventSubscriber(boundedContextId, publisherHub, eventClasses);
         }
 
         @Override
         public String toString() {
-            return "Integration bus observer of `RequestedMessageTypes` document message.";
+            return "Integration bus observer of `RequestedMessageTypes`; " +
+                    "Bounded Context ID = " + boundedContextId.getValue();
+        }
+    }
+
+    /**
+     * A subscriber to local {@code RejectionBus}, which publishes each matching message to
+     * a remote channel.
+     *
+     * <p>The messages to subscribe are those that are required by external application components
+     * at this moment; their set is determined by the {@linkplain RequestedMessageTypes
+     * configuration messages}, received by this instance of {@code IntegrationBus}.
+     */
+    private static final class LocalRejectionSubscriber extends RejectionSubscriber {
+        private final BoundedContextId boundedContextId;
+        private final PublisherHub publisherHub;
+        private final Set<RejectionClass> rejectionClasses;
+
+        private LocalRejectionSubscriber(BoundedContextId boundedContextId,
+                                         PublisherHub publisherHub,
+                                         Iterable<RejectionClass> rejectionClasses) {
+            this.boundedContextId = boundedContextId;
+            this.publisherHub = publisherHub;
+            this.rejectionClasses = ImmutableSet.copyOf(rejectionClasses);
+        }
+
+
+        @SuppressWarnings("ReturnOfCollectionOrArrayField")    // Returning an immutable impl.
+        @Override
+        public Set<RejectionClass> getMessageClasses() {
+            return rejectionClasses;
+        }
+
+        @Override
+        public Set<String> dispatch(RejectionEnvelope envelope) {
+            final Rejection rejection = envelope.getOuterObject();
+            final IntegrationMessage message = IntegrationMessages.of(rejection);
+            final IntegrationMessageClass messageClass = IntegrationMessageClass.of(
+                    envelope.getMessageClass());
+            final Publisher channel = publisherHub.get(messageClass);
+            channel.publish(AnyPacker.pack(envelope.getId()), message);
+            return ImmutableSet.of(channel.toString());
+        }
+
+        @SuppressWarnings("DuplicateStringLiteralInspection")
+        @Override
+        public String toString() {
+            return MoreObjects.toStringHelper(this)
+                              .add("boundedContextId", boundedContextId)
+                              .add("rejectionClasses", rejectionClasses)
+                              .toString();
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            LocalRejectionSubscriber that = (LocalRejectionSubscriber) o;
+            return Objects.equals(boundedContextId, that.boundedContextId) &&
+                    Objects.equals(rejectionClasses, that.rejectionClasses);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(boundedContextId, rejectionClasses);
+        }
+    }
+
+
+    /**
+     * A subscriber to local {@code EventBus}, which publishes each matching message to
+     * a remote channel.
+     *
+     * <p>The messages to subscribe are those that are required by external application components
+     * at this moment; their set is determined by the {@linkplain RequestedMessageTypes
+     * configuration messages}, received by this instance of {@code IntegrationBus}.
+     */
+    private static final class LocalEventSubscriber extends EventSubscriber {
+
+        private final BoundedContextId boundedContextId;
+        private final PublisherHub publisherHub;
+        private final Set<EventClass> eventClasses;
+
+        private LocalEventSubscriber(BoundedContextId boundedContextId,
+                                     PublisherHub publisherHub,
+                                     Iterable<EventClass> messageClasses) {
+            this.boundedContextId = boundedContextId;
+            this.publisherHub = publisherHub;
+            this.eventClasses = ImmutableSet.copyOf(messageClasses);
+        }
+
+        @SuppressWarnings("ReturnOfCollectionOrArrayField")     // Returning an immutable impl.
+        @Override
+        public Set<EventClass> getMessageClasses() {
+            return eventClasses;
+        }
+
+        @Override
+        public Set<String> dispatch(EventEnvelope envelope) {
+            final Event event = envelope.getOuterObject();
+            final IntegrationMessage msg = IntegrationMessages.of(event);
+            final IntegrationMessageClass messageClass = IntegrationMessageClass.of(
+                    envelope.getMessageClass());
+            final Publisher channel = publisherHub.get(messageClass);
+            channel.publish(AnyPacker.pack(envelope.getId()), msg);
+
+            return ImmutableSet.of(channel.toString());
+        }
+
+        @SuppressWarnings("DuplicateStringLiteralInspection")
+        @Override
+        public String toString() {
+            return MoreObjects.toStringHelper(this)
+                              .add("boundedContextId", boundedContextId)
+                              .add("eventClasses", eventClasses)
+                              .toString();
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            LocalEventSubscriber that = (LocalEventSubscriber) o;
+            return Objects.equals(boundedContextId, that.boundedContextId) &&
+                    Objects.equals(eventClasses, that.eventClasses);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(boundedContextId, eventClasses);
         }
     }
 
@@ -443,6 +601,7 @@ public class IntegrationBus extends MulticastBus<Message,
 
         private LocalDelivery delivery;
         private EventBus eventBus;
+        private BoundedContextId boundedContextId;
         private RejectionBus rejectionBus;
         private TransportFactory transportFactory;
 
@@ -461,6 +620,11 @@ public class IntegrationBus extends MulticastBus<Message,
 
         public Builder setRejectionBus(RejectionBus rejectionBus) {
             this.rejectionBus = checkNotNull(rejectionBus);
+            return self();
+        }
+
+        public Builder setBoundedContextId(BoundedContextId boundedContextId) {
+            this.boundedContextId = checkNotNull(boundedContextId);
             return self();
         }
 
@@ -484,6 +648,8 @@ public class IntegrationBus extends MulticastBus<Message,
                        "`eventBus` must be set for integration bus.");
             checkState(rejectionBus != null,
                        "`rejectionBus` must be set for integration bus.");
+            checkNotDefault(boundedContextId,
+                            "`boundedContextId` must be set for integration bus.");
 
             if (transportFactory == null) {
                 transportFactory = initTransportFactory();

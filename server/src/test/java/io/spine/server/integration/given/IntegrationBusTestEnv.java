@@ -19,9 +19,10 @@
  */
 package io.spine.server.integration.given;
 
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.StringValue;
-import io.spine.Identifier;
 import io.spine.core.Event;
+import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
 import io.spine.server.BoundedContext;
 import io.spine.server.command.TestEventFactory;
@@ -35,6 +36,11 @@ import io.spine.test.integration.event.ItgProjectCreated;
 import io.spine.test.integration.event.ItgProjectStarted;
 import io.spine.validate.StringValueVBuilder;
 
+import java.util.Collection;
+import java.util.List;
+
+import static com.google.common.collect.Lists.newLinkedList;
+import static io.spine.Identifier.newUuid;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.command.TestEventFactory.newInstance;
 
@@ -53,6 +59,13 @@ public class IntegrationBusTestEnv {
         return boundedContext;
     }
 
+    public static BoundedContext contextWithContextAwareEntitySubscriber(
+            TransportFactory transportFactory) {
+        final BoundedContext boundedContext = contextWithTransport(transportFactory);
+        boundedContext.register(new ContextAwareProjectDetailsRepository());
+        return boundedContext;
+    }
+
     public static BoundedContext contextWithExternalSubscriber(TransportFactory transportFactory) {
         final BoundedContext boundedContext = contextWithTransport(transportFactory);
         final ExternalSubscriber eventSubscriber = new ExternalSubscriber();
@@ -67,6 +80,7 @@ public class IntegrationBusTestEnv {
         final IntegrationBus.Builder builder = IntegrationBus.newBuilder()
                                                              .setTransportFactory(transportFactory);
         final BoundedContext result = BoundedContext.newBuilder()
+                                                    .setId(newUuid())
                                                     .setIntegrationBus(builder)
                                                     .build();
         return result;
@@ -94,7 +108,7 @@ public class IntegrationBusTestEnv {
 
     private static ProjectId projectId() {
         return ProjectId.newBuilder()
-                        .setId(Identifier.newUuid())
+                        .setId(newUuid())
                         .build();
     }
 
@@ -135,8 +149,44 @@ public class IntegrationBusTestEnv {
         }
     }
 
-    public static class ProjectDetailsRepository
+    private static class ProjectDetailsRepository
             extends ProjectionRepository<ProjectId, ProjectDetails, StringValue> {
+    }
+
+    @SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod")  // OK to preserve the state.
+    public static class ContextAwareProjectDetails
+            extends Projection<ProjectId, StringValue, StringValueVBuilder> {
+
+        private static final Collection<EventContext> externalContexts = newLinkedList();
+        private static final Collection<ItgProjectCreated> externalEvents = newLinkedList();
+
+        /**
+         * Creates a new instance.
+         *
+         * @param id the ID for the new instance
+         * @throws IllegalArgumentException if the ID is not of one of the supported types
+         */
+        protected ContextAwareProjectDetails(ProjectId id) {
+            super(id);
+        }
+
+        @Subscribe(external = true)
+        public void on(ItgProjectCreated event, EventContext eventContext) {
+            externalEvents.add(event);
+            externalContexts.add(eventContext);
+        }
+
+        public static List<EventContext> getExternalContexts() {
+            return ImmutableList.copyOf(externalContexts);
+        }
+
+        public static List<ItgProjectCreated> getExternalEvents() {
+            return ImmutableList.copyOf(externalEvents);
+        }
+    }
+
+    private static class ContextAwareProjectDetailsRepository
+            extends ProjectionRepository<ProjectId, ContextAwareProjectDetails, StringValue> {
     }
 
     @SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod")  // OK to preserve the state.

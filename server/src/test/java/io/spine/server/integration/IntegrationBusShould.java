@@ -19,14 +19,20 @@
  */
 package io.spine.server.integration;
 
+import io.spine.core.BoundedContextId;
 import io.spine.core.Event;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
+import io.spine.server.integration.given.IntegrationBusTestEnv.ContextAwareProjectDetails;
 import io.spine.server.integration.given.IntegrationBusTestEnv.ExternalSubscriber;
 import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectDetails;
 import io.spine.server.integration.local.LocalTransportFactory;
 import org.junit.Test;
 
+import java.util.Set;
+
+import static com.google.common.collect.Sets.newHashSet;
+import static io.spine.server.integration.given.IntegrationBusTestEnv.contextWithContextAwareEntitySubscriber;
 import static io.spine.server.integration.given.IntegrationBusTestEnv.contextWithExtEntitySubscriber;
 import static io.spine.server.integration.given.IntegrationBusTestEnv.contextWithExternalSubscriber;
 import static io.spine.server.integration.given.IntegrationBusTestEnv.contextWithTransport;
@@ -35,6 +41,7 @@ import static io.spine.server.integration.given.IntegrationBusTestEnv.projectSta
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Alex Tymchenko
@@ -42,7 +49,7 @@ import static org.junit.Assert.assertNull;
 public class IntegrationBusShould {
 
     @Test
-    public void dispatch_events_from_one_BC_to_entities_with_external_subscribers_of_another_BC() {
+    public void dispatch_events_from_one_BC_to_entities_with_ext_subscribers_of_another_BC() {
         final LocalTransportFactory transportFactory = LocalTransportFactory.newInstance();
 
         final BoundedContext sourceContext = contextWithTransport(transportFactory);
@@ -107,5 +114,31 @@ public class IntegrationBusShould {
 
         destContext.getEventBus().post(event);
         assertEquals(AnyPacker.unpack(event.getMessage()), ExternalSubscriber.getDomesticEvent());
+    }
+
+    @Test
+    public void dispatch_events_from_one_BC_to_entities_with_ext_subscribers_of_multiple_BCs() {
+        final LocalTransportFactory transportFactory = LocalTransportFactory.newInstance();
+
+        final Set<BoundedContextId> destinationIds = newHashSet();
+        final BoundedContext sourceContext = contextWithTransport(transportFactory);
+        for (int i = 0; i < 42; i++) {
+            final BoundedContext destinationCtx =
+                    contextWithContextAwareEntitySubscriber(transportFactory);
+            final BoundedContextId id = destinationCtx.getId();
+            destinationIds.add(id);
+        }
+
+        assertTrue(ContextAwareProjectDetails.getExternalContexts().isEmpty());
+
+        final Event event = projectCreated();
+        sourceContext.getEventBus().post(event);
+
+        assertEquals(destinationIds.size(),
+                     ContextAwareProjectDetails.getExternalContexts().size());
+
+        assertEquals(destinationIds.size(),
+                     ContextAwareProjectDetails.getExternalEvents().size());
+
     }
 }

@@ -77,7 +77,7 @@ public final class BoundedContext
      * The id of the bounded context, which is used to distinguish the context in an application
      * with several bounded contexts.
      */
-    private final String id;
+    private final BoundedContextId id;
 
     /** If {@code true} the bounded context serves many tenants. */
     private final boolean multitenant;
@@ -98,7 +98,7 @@ public final class BoundedContext
 
     private BoundedContext(Builder builder) {
         super();
-        this.id = builder.id;
+        this.id = newId(builder.id);
         this.multitenant = builder.multitenant;
         this.storageFactory = Suppliers.memoize(builder.storageFactorySupplier);
         this.commandBus = builder.commandBus.build();
@@ -112,6 +112,7 @@ public final class BoundedContext
          */
         this.integrationBus = builder.integrationBus.setEventBus(this.eventBus)
                                                     .setRejectionBus(this.commandBus.rejectionBus())
+                                                    .setBoundedContextId(this.id)
                                                     .build();
     }
 
@@ -197,7 +198,7 @@ public final class BoundedContext
     }
 
     private String nameForLogging() {
-        return getClass().getSimpleName() + ' ' + getId();
+        return getClass().getSimpleName() + ' ' + getId().getValue();
     }
 
     /**
@@ -209,7 +210,7 @@ public final class BoundedContext
      *
      * @return the ID of this {@code BoundedContext}
      */
-    public String getId() {
+    public BoundedContextId getId() {
         return id;
     }
 
