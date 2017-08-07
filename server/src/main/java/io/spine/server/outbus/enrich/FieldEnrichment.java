@@ -33,7 +33,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alexander Yevsyukov
  */
-class FieldEnrichment<S, T> extends EnrichmentFunction<S, T> {
+final class FieldEnrichment<S, T> extends EnrichmentFunction<S, T> {
 
     /** A function, which performs the enrichment. */
     private final Function<S, T> function;
@@ -64,7 +64,7 @@ class FieldEnrichment<S, T> extends EnrichmentFunction<S, T> {
     }
 
     /**
-     * Do nothing. Field enrichment relies only on the aggregated function.
+     * Does nothing. Field enrichment relies only on the aggregated function.
      */
     @Override
     void activate() {

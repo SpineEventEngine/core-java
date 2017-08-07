@@ -58,7 +58,7 @@ import static java.lang.String.format;
  *
  * @author Alexander Yevsyukov
  */
-class ReferenceValidator {
+final class ReferenceValidator {
 
     /** The separator used in Protobuf fully-qualified names. */
     private static final String PROTO_FQN_SEPARATOR = ".";

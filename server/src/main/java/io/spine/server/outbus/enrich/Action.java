@@ -41,7 +41,7 @@ import static com.google.common.collect.Collections2.filter;
  *
  * @author Alexander Yevsyukov
  */
-class Action {
+final class Action {
 
     private final EventEnvelope envelope;
     private final Collection<EnrichmentFunction<?, ?>> availableFunctions;

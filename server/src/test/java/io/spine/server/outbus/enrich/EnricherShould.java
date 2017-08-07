@@ -211,9 +211,9 @@ public class EnricherShould {
 
     @Test
     public void return_false_if_pass_null_to_function_checking_predicate() {
-        final boolean result = Enricher.SupportsFieldConversion.of(StringValue.class,
-                                                                   String.class)
-                                                               .apply(null);
+        final boolean result = SupportsFieldConversion.of(StringValue.class,
+                                                          String.class)
+                                                      .apply(null);
         assertFalse(result);
     }
 

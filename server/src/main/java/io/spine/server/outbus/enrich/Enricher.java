@@ -23,7 +23,6 @@ package io.spine.server.outbus.enrich;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMultimap;
@@ -37,7 +36,6 @@ import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.type.TypeName;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Set;
 
@@ -213,39 +211,6 @@ public class Enricher {
         checkDuplicate(newEntry, functions.values());
         functions.put(newEntry.getEventClass(), newEntry);
         validate(functions);
-    }
-
-    /**
-     * The predicate that helps finding a function that converts an event field (of the given class)
-     * into an enrichment field (of another given class).
-     *
-     * @see #functionFor(Class, Class)
-     */
-    static class SupportsFieldConversion implements Predicate<EnrichmentFunction> {
-
-        private final Class<?> eventFieldClass;
-        private final Class<?> enrichmentFieldClass;
-
-        static SupportsFieldConversion of(Class<?> eventFieldClass, Class<?> enrichmentFieldClass) {
-            return new SupportsFieldConversion(eventFieldClass, enrichmentFieldClass);
-        }
-
-        private SupportsFieldConversion(Class<?> eventFieldClass, Class<?> enrichmentFieldClass) {
-            this.eventFieldClass = eventFieldClass;
-            this.enrichmentFieldClass = enrichmentFieldClass;
-        }
-
-        @Override
-        public boolean apply(@Nullable EnrichmentFunction input) {
-            if (input == null) {
-                return false;
-            }
-            final boolean eventClassMatches =
-                    eventFieldClass.equals(input.getEventClass());
-            final boolean enrichmentClassMatches =
-                    enrichmentFieldClass.equals(input.getEnrichmentClass());
-            return eventClassMatches && enrichmentClassMatches;
-        }
     }
 
     /**

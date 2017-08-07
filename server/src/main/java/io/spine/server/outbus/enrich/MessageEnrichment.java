@@ -26,7 +26,6 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.protobuf.Internal;
 import com.google.protobuf.Message;
 import io.spine.core.EventContext;
-import io.spine.server.outbus.enrich.Enricher.SupportsFieldConversion;
 import io.spine.server.reflect.Field;
 
 import javax.annotation.Nullable;

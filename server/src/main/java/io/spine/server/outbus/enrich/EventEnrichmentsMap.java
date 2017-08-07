@@ -101,7 +101,7 @@ class EventEnrichmentsMap {
         private final Iterable<Properties> properties;
         private final ImmutableMultimap.Builder<String, String> builder;
 
-        Builder(Iterable<Properties> properties) {
+        private Builder(Iterable<Properties> properties) {
             this.properties = properties;
             this.builder = ImmutableMultimap.builder();
         }

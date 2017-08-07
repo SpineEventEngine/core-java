@@ -24,28 +24,25 @@ import com.google.common.base.Predicate;
 
 import javax.annotation.Nullable;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 /**
- * A helper predicate that allows to find functions with the same transition from
- * source event to enrichment class.
+ * The predicate that helps finding a function that converts an event field (of the given class)
+ * into an enrichment field (of another given class).
  *
- * <p>Such functions are not necessarily equal because they may have different translators.
- *
- * @see EnrichmentFunction
+ * @see Enricher#functionFor(Class, Class)
  * @author Alexander Yevsyukov
  */
-final class SameTransition implements Predicate<EnrichmentFunction> {
+final class SupportsFieldConversion implements Predicate<EnrichmentFunction> {
 
-    private final EnrichmentFunction function;
+    private final Class<?> eventFieldClass;
+    private final Class<?> enrichmentFieldClass;
 
-    static SameTransition asFor(EnrichmentFunction function) {
-        checkNotNull(function);
-        return new SameTransition(function);
+    static SupportsFieldConversion of(Class<?> eventFieldClass, Class<?> enrichmentFieldClass) {
+        return new SupportsFieldConversion(eventFieldClass, enrichmentFieldClass);
     }
 
-    private SameTransition(EnrichmentFunction function) {
-        this.function = function;
+    private SupportsFieldConversion(Class<?> eventFieldClass, Class<?> enrichmentFieldClass) {
+        this.eventFieldClass = eventFieldClass;
+        this.enrichmentFieldClass = enrichmentFieldClass;
     }
 
     @Override
@@ -53,10 +50,10 @@ final class SameTransition implements Predicate<EnrichmentFunction> {
         if (input == null) {
             return false;
         }
-        final boolean sameSourceClass = function.getEventClass()
-                                                .equals(input.getEventClass());
-        final boolean sameEnrichmentClass = function.getEnrichmentClass()
-                                                    .equals(input.getEnrichmentClass());
-        return sameSourceClass && sameEnrichmentClass;
+        final boolean eventClassMatches =
+                eventFieldClass.equals(input.getEventClass());
+        final boolean enrichmentClassMatches =
+                enrichmentFieldClass.equals(input.getEnrichmentClass());
+        return eventClassMatches && enrichmentClassMatches;
     }
 }
