@@ -80,14 +80,13 @@ public class Enricher {
      */
     Enricher(Builder builder) {
         final LinkedListMultimap<Class<?>, EnrichmentFunction<?, ?>> rawMap = create();
-        final Multimap<Class<?>, EnrichmentFunction<?, ?>> functionMap =
-                synchronizedMultimap(rawMap);
+        final Multimap<Class<?>, EnrichmentFunction<?, ?>> funcMap = synchronizedMultimap(rawMap);
         for (EnrichmentFunction<?, ?> function : builder.getFunctions()) {
-            functionMap.put(function.getEventClass(), function);
+            funcMap.put(function.getSourceClass(), function);
         }
-        putMsgEnrichers(functionMap);
+        putMsgEnrichers(funcMap);
 
-        this.functions = functionMap;
+        this.functions = funcMap;
     }
 
     @SuppressWarnings("MethodWithMultipleLoops") // is OK in this case
@@ -101,7 +100,7 @@ public class Enricher {
                 final Class<Message> eventClass = TypeName.of(eventType)
                                                           .getJavaClass();
                 final MessageEnrichment msgEnricher =
-                        MessageEnrichment.newInstance(this, eventClass, enrichmentClass);
+                        MessageEnrichment.create(this, eventClass, enrichmentClass);
                 functionsMap.put(eventClass, msgEnricher);
             }
         }
@@ -170,16 +169,18 @@ public class Enricher {
     }
 
     /**
-     * Finds a function that converts an event field into an enrichment field.
+     * Finds a function that converts an source message field into an enrichment field.
      *
-     * @param eventFieldClass      the class of event fields
-     * @param enrichmentFieldClass the class of enrichment fields
+     * @param fieldClass
+     *        the class of the source field
+     * @param enrichmentFieldClass
+     *        the class of the enrichment field
      */
-    Optional<EnrichmentFunction<?, ?>> functionFor(Class<?> eventFieldClass,
+    Optional<EnrichmentFunction<?, ?>> functionFor(Class<?> fieldClass,
                                                    Class<?> enrichmentFieldClass) {
         final Optional<EnrichmentFunction<?, ?>> result =
                 FluentIterable.from(functions.values())
-                              .firstMatch(SupportsFieldConversion.of(eventFieldClass,
+                              .firstMatch(SupportsFieldConversion.of(fieldClass,
                                                                      enrichmentFieldClass));
         return result;
     }
@@ -187,29 +188,29 @@ public class Enricher {
     /**
      * Appends enrichment function at runtime.
      *
-     * @param eventFieldClass
+     * @param fieldClass
      *        the class of the field to enrich
      * @param enrichmentFieldClass
      *        the class of the resulting enrichment field
      * @param func
      *        enrichment function
      * @param <S>
-     *        the type of the enriched event message
+     *        the type of the enriched message
      * @param <T>
      *        the type of the enrichment field
      */
-    public <S, T> void registerFieldEnrichment(Class<S> eventFieldClass,
+    public <S, T> void registerFieldEnrichment(Class<S> fieldClass,
                                                Class<T> enrichmentFieldClass,
                                                Function<S, T> func) {
-        checkNotNull(eventFieldClass);
+        checkNotNull(fieldClass);
         checkNotNull(enrichmentFieldClass);
         checkNotNull(func);
 
         final EnrichmentFunction<S, T> newEntry =
-                FieldEnrichment.newInstance(eventFieldClass, enrichmentFieldClass, func);
+                FieldEnrichment.newInstance(fieldClass, enrichmentFieldClass, func);
 
         checkDuplicate(newEntry, functions.values());
-        functions.put(newEntry.getEventClass(), newEntry);
+        functions.put(newEntry.getSourceClass(), newEntry);
         validate(functions);
     }
 
@@ -279,11 +280,10 @@ public class Enricher {
     private static void checkDuplicate(EnrichmentFunction<?, ?> candidate,
                                        Iterable<EnrichmentFunction<?, ?>> currentFns) {
         final Optional<EnrichmentFunction<?, ?>> duplicate =
-                FluentIterable.from(currentFns)
-                              .firstMatch(SameTransition.asFor(candidate));
+                EnrichmentFunction.firstThat(currentFns, SameTransition.asFor(candidate));
         if (duplicate.isPresent()) {
             throw newIllegalArgumentException("Enrichment from %s to %s already added as: %s",
-                                               candidate.getEventClass(),
+                                               candidate.getSourceClass(),
                                                candidate.getEnrichmentClass(),
                                                duplicate.get());
         }

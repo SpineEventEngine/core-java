@@ -41,7 +41,7 @@ public class MessageEnrichmentShould {
     @Before
     public void setUp() {
         final Enricher enricher = Enrichment.newEventEnricher();
-        this.enricher = MessageEnrichment.newInstance(
+        this.enricher = MessageEnrichment.create(
                 enricher,
                 ProjectCreated.class,
                 ProjectCreated.Enrichment.class);

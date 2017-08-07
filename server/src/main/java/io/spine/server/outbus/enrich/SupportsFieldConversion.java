@@ -31,7 +31,7 @@ import javax.annotation.Nullable;
  * @see Enricher#functionFor(Class, Class)
  * @author Alexander Yevsyukov
  */
-final class SupportsFieldConversion implements Predicate<EnrichmentFunction> {
+final class SupportsFieldConversion implements Predicate<EnrichmentFunction<?, ?>> {
 
     private final Class<?> eventFieldClass;
     private final Class<?> enrichmentFieldClass;
@@ -46,12 +46,12 @@ final class SupportsFieldConversion implements Predicate<EnrichmentFunction> {
     }
 
     @Override
-    public boolean apply(@Nullable EnrichmentFunction input) {
+    public boolean apply(@Nullable EnrichmentFunction<?, ?> input) {
         if (input == null) {
             return false;
         }
         final boolean eventClassMatches =
-                eventFieldClass.equals(input.getEventClass());
+                eventFieldClass.equals(input.getSourceClass());
         final boolean enrichmentClassMatches =
                 enrichmentFieldClass.equals(input.getEnrichmentClass());
         return eventClassMatches && enrichmentClassMatches;

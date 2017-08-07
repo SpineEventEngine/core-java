@@ -22,7 +22,9 @@ package io.spine.server.outbus.enrich;
 
 import com.google.common.base.Function;
 import com.google.common.base.MoreObjects;
+import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
+import com.google.common.collect.FluentIterable;
 import io.spine.core.EventContext;
 import io.spine.server.event.EventBus;
 
@@ -53,16 +55,16 @@ abstract class EnrichmentFunction<S, T> {
      * @see Enricher.Builder#addFieldEnrichment(Class, Class, Function)
      */
 
-    private final Class<S> eventClass;
+    private final Class<S> sourceClass;
     private final Class<T> enrichmentClass;
 
-    EnrichmentFunction(Class<S> eventClass, Class<T> enrichmentClass) {
-        this.eventClass = checkNotNull(eventClass);
+    EnrichmentFunction(Class<S> sourceClass, Class<T> enrichmentClass) {
+        this.sourceClass = checkNotNull(sourceClass);
         this.enrichmentClass = checkNotNull(enrichmentClass);
         checkArgument(
-                !eventClass.equals(enrichmentClass),
-                "Event and enrichment class must not be equal. Passed two values of %",
-                eventClass
+                !sourceClass.equals(enrichmentClass),
+                "Source and enrichment class must not be equal. Passed two values of %",
+                sourceClass
         );
     }
 
@@ -75,8 +77,8 @@ abstract class EnrichmentFunction<S, T> {
      */
     public abstract T apply(S input, EventContext context);
 
-    Class<S> getEventClass() {
-        return eventClass;
+    Class<S> getSourceClass() {
+        return sourceClass;
     }
 
     Class<T> getEnrichmentClass() {
@@ -126,7 +128,7 @@ abstract class EnrichmentFunction<S, T> {
 
     @Override
     public int hashCode() {
-        return Objects.hash(eventClass, enrichmentClass);
+        return Objects.hash(sourceClass, enrichmentClass);
     }
 
     @Override
@@ -138,14 +140,14 @@ abstract class EnrichmentFunction<S, T> {
             return false;
         }
         final EnrichmentFunction other = (EnrichmentFunction) obj;
-        return Objects.equals(this.eventClass, other.eventClass)
+        return Objects.equals(this.sourceClass, other.sourceClass)
                 && Objects.equals(this.enrichmentClass, other.enrichmentClass);
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                          .add("eventClass", eventClass)
+                          .add("sourceClass", sourceClass)
                           .add("enrichmentClass", enrichmentClass)
                           .toString();
     }
@@ -161,5 +163,15 @@ abstract class EnrichmentFunction<S, T> {
                     "Enrichment function %s is not active. Please use `activate()` first.",
                     this);
         }
+    }
+
+    /**
+     * Obtains first function that matches the passed predicate.
+     */
+    static Optional<EnrichmentFunction<?, ?>> firstThat(Iterable<EnrichmentFunction<?, ?>> functions,
+                                                  Predicate<? super EnrichmentFunction<?, ?>> predicate) {
+        final FluentIterable<EnrichmentFunction<?, ?>> fi = FluentIterable.from(functions);
+        final Optional<EnrichmentFunction<?, ?>> optional = fi.firstMatch(predicate);
+        return optional;
     }
 }

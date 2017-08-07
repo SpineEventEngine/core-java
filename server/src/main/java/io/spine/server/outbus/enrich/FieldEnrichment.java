@@ -35,7 +35,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 final class FieldEnrichment<S, T> extends EnrichmentFunction<S, T> {
 
-    /** A function, which performs the enrichment. */
+    /** A function, which performs the translation. */
     private final Function<S, T> function;
 
     private FieldEnrichment(Class<S> eventClass, Class<T> enrichmentClass, Function<S, T> func) {
@@ -46,18 +46,18 @@ final class FieldEnrichment<S, T> extends EnrichmentFunction<S, T> {
     /**
      * Creates a new instance.
      *
-     * @param  eventFieldClass
-     *         a class of the field in the event message
+     * @param  messageFieldClass
+     *         a class of the field in the source message
      * @param  enrichmentFieldClass
      *         a class of the field in the enrichment message
      * @param  func
      *         a conversion function
      * @return a new instance
      */
-    static <S, T> FieldEnrichment<S, T> newInstance(Class<S> eventFieldClass,
+    static <S, T> FieldEnrichment<S, T> newInstance(Class<S> messageFieldClass,
                                                     Class<T> enrichmentFieldClass,
                                                     Function<S, T> func) {
-        final FieldEnrichment<S, T> result = new FieldEnrichment<>(eventFieldClass,
+        final FieldEnrichment<S, T> result = new FieldEnrichment<>(messageFieldClass,
                                                                    enrichmentFieldClass,
                                                                    func);
         return result;

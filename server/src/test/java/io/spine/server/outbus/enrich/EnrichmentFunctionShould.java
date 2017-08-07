@@ -87,7 +87,7 @@ public class EnrichmentFunctionShould {
 
     @Test
     public void return_sourceClass() throws Exception {
-        assertEquals(ProjectCreated.class, fieldEnrichment.getEventClass());
+        assertEquals(ProjectCreated.class, fieldEnrichment.getSourceClass());
     }
 
     @Test
