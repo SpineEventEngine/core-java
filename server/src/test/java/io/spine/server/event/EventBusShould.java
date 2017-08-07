@@ -20,7 +20,6 @@
 
 package io.spine.server.event;
 
-import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
@@ -35,7 +34,6 @@ import io.spine.server.event.given.EventBusTestEnv.GivenEvent;
 import io.spine.server.outbus.enrich.Enricher;
 import io.spine.server.storage.StorageFactory;
 import io.spine.test.event.ProjectCreated;
-import io.spine.test.event.ProjectId;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -45,7 +43,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -53,7 +50,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -323,63 +319,6 @@ public class EventBusShould {
         eventBus.post(GivenEvent.projectCreated());
 
         verify(enricher, never()).enrich(any(Event.class));
-    }
-
-    @Test
-    public void allow_enrichment_configuration_at_runtime_if_enricher_not_set_previously() {
-        setUp(null);
-        assertNull(eventBus.getEnricher());
-
-        final Class<ProjectId> eventFieldClass = ProjectId.class;
-        final Class<String> enrichmentFieldClass = String.class;
-        final Function<ProjectId, String> function = new Function<ProjectId, String>() {
-            @Override
-            public String apply(@Nullable ProjectId input) {
-                checkNotNull(input);
-                return input.toString();
-            }
-        };
-        eventBus.addFieldEnrichment(eventFieldClass, enrichmentFieldClass, function);
-        final Enricher enricher = eventBus.getEnricher();
-        assertNotNull(enricher);
-    }
-
-    @Test
-    public void allow_enrichment_configuration_at_runtime_if_enricher_previously_set() {
-        final Enricher enricher = mock(Enricher.class);
-        setUp(enricher);
-
-        final Class<ProjectId> eventFieldClass = ProjectId.class;
-        final Class<String> enrichmentFieldClass = String.class;
-        final Function<ProjectId, String> function = new Function<ProjectId, String>() {
-            @Override
-            public String apply(@Nullable ProjectId input) {
-                checkNotNull(input);
-                return input.toString();
-            }
-        };
-        eventBus.addFieldEnrichment(eventFieldClass, enrichmentFieldClass, function);
-        verify(enricher).registerFieldEnrichment(eq(eventFieldClass),
-                                                 eq(enrichmentFieldClass),
-                                                 eq(function));
-    }
-
-    @SuppressWarnings("ConstantConditions")
-    @Test(expected = NullPointerException.class)
-    public void not_accept_null_eventFieldClass_passed_as_field_enrichment_configuration_param() {
-        eventBus.addFieldEnrichment(null, String.class, mock(Function.class));
-    }
-
-    @SuppressWarnings("ConstantConditions")
-    @Test(expected = NullPointerException.class)
-    public void not_accept_null_enrichmentFieldClass_passed_as_field_enrichment_configuration_param() {
-        eventBus.addFieldEnrichment(ProjectId.class, null, mock(Function.class));
-    }
-
-    @SuppressWarnings("ConstantConditions")
-    @Test(expected = NullPointerException.class)
-    public void not_accept_null_function_passed_as_field_enrichment_configuration_param() {
-        eventBus.addFieldEnrichment(ProjectId.class, String.class, null);
     }
 
     @Test

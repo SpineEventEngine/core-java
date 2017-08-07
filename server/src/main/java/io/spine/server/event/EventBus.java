@@ -20,7 +20,6 @@
 package io.spine.server.event;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Message;
@@ -119,7 +118,7 @@ public class EventBus extends CommandOutputBus<Event,
 
     /** The enricher for posted events or {@code null} if the enrichment is not supported. */
     @Nullable
-    private Enricher enricher;
+    private final Enricher enricher;
 
     /** Creates new instance by the passed builder. */
     private EventBus(Builder builder) {
@@ -232,32 +231,6 @@ public class EventBus extends CommandOutputBus<Event,
     @Override
     protected void store(Iterable<Event> events) {
         eventStore.appendAll(events);
-    }
-
-    /**
-     * Add a new field enrichment translation function.
-     *
-     * @param eventFieldClass      a class of the field in the event message
-     * @param enrichmentFieldClass a class of the field in the enrichment message
-     * @param function             a function which converts fields
-     * @see Enricher
-     */
-    public <S, T> void addFieldEnrichment(Class<S> eventFieldClass,
-                                          Class<T> enrichmentFieldClass,
-                                          Function<S, T> function) {
-        checkNotNull(eventFieldClass);
-        checkNotNull(enrichmentFieldClass);
-        checkNotNull(function);
-
-        if (enricher == null) {
-            enricher = Enricher.newBuilder()
-                               .addFieldEnrichment(eventFieldClass,
-                                                   enrichmentFieldClass,
-                                                   function)
-                               .build();
-        } else {
-            enricher.registerFieldEnrichment(eventFieldClass, enrichmentFieldClass, function);
-        }
     }
 
     @Override

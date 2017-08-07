@@ -186,35 +186,6 @@ public class Enricher {
     }
 
     /**
-     * Appends enrichment function at runtime.
-     *
-     * @param fieldClass
-     *        the class of the field to enrich
-     * @param enrichmentFieldClass
-     *        the class of the resulting enrichment field
-     * @param func
-     *        enrichment function
-     * @param <S>
-     *        the type of the enriched message
-     * @param <T>
-     *        the type of the enrichment field
-     */
-    public <S, T> void registerFieldEnrichment(Class<S> fieldClass,
-                                               Class<T> enrichmentFieldClass,
-                                               Function<S, T> func) {
-        checkNotNull(fieldClass);
-        checkNotNull(enrichmentFieldClass);
-        checkNotNull(func);
-
-        final EnrichmentFunction<S, T> newEntry =
-                FieldEnrichment.of(fieldClass, enrichmentFieldClass, func);
-
-        checkDuplicate(newEntry, functions.values());
-        functions.put(newEntry.getSourceClass(), newEntry);
-        validate(functions);
-    }
-
-    /**
      * The {@code Builder} allows to register {@link EnrichmentFunction}s handled by
      * the {@code Enricher} and set a custom translation function, if needed.
      */

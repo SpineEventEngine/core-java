@@ -51,7 +51,6 @@ import static io.spine.Identifier.newUuid;
 import static io.spine.core.Enrichments.getEnrichment;
 import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.server.command.TestEventFactory.newInstance;
-import static io.spine.server.outbus.enrich.given.EventEnricherTestEnv.Enrichment.GetProjectMaxMemberCount;
 import static io.spine.server.outbus.enrich.given.EventEnricherTestEnv.Enrichment.GetProjectName;
 import static io.spine.server.outbus.enrich.given.EventEnricherTestEnv.Enrichment.GetProjectOwnerId;
 import static io.spine.server.outbus.enrich.given.EventEnricherTestEnv.Enrichment.newEventEnricher;
@@ -164,21 +163,6 @@ public class EnricherShould {
         assertTrue(enricher.canBeEnriched(permissionGranted));
         assertTrue(enricher.canBeEnriched(permissionRevoked));
         assertTrue(enricher.canBeEnriched(sharingRequestApproved));
-    }
-
-    @Test
-    public void enrich_event_if_function_added_at_runtime() {
-        final GetProjectMaxMemberCount function = new GetProjectMaxMemberCount();
-        enricher.registerFieldEnrichment(ProjectId.class, Integer.class,function);
-
-        final ProjectCreated msg = GivenEventMessage.projectCreated();
-        final ProjectId projectId = msg.getProjectId();
-
-        eventBus.post(createEvent(msg));
-
-        @SuppressWarnings("ConstantConditions")     // the `function` was specially implemented to return non-null ints.
-        final int expectedValue = function.apply(projectId);
-        assertEquals(expectedValue, subscriber.projectCreatedDynamicEnrichment.getMaxMemberCount());
     }
 
     @Test
