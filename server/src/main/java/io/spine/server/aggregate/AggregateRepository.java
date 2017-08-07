@@ -116,11 +116,11 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     /** The set of event classes on which aggregates {@linkplain React react}. */
     @Nullable
-    private Set<EventClass> reactedEventClasses;
+    private Set<EventClass> eventReactions;
 
     /** The set of rejection classes on which aggregates {@linkplain React react}. */
     @Nullable
-    private Set<RejectionClass> reactedRejectionClasses;
+    private Set<RejectionClass> rejectionReactions;
 
     /** Creates a new instance. */
     protected AggregateRepository() {
@@ -300,10 +300,10 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // We return immutable impl.
     public Set<EventClass> getEventClasses() {
-        if (reactedEventClasses == null) {
-            reactedEventClasses = Aggregate.TypeInfo.getReactedEventClasses(getAggregateClass());
+        if (eventReactions == null) {
+            eventReactions = Aggregate.TypeInfo.getReactedEventClasses(getAggregateClass());
         }
-        return reactedEventClasses;
+        return eventReactions;
     }
 
     /**
@@ -328,11 +328,11 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // We return immutable impl.
     public Set<RejectionClass> getRejectionClasses() {
-        if (reactedRejectionClasses == null) {
-            reactedRejectionClasses =
+        if (rejectionReactions == null) {
+            rejectionReactions =
                     Aggregate.TypeInfo.getReactedRejectionClasses(getAggregateClass());
         }
-        return reactedRejectionClasses;
+        return rejectionReactions;
     }
 
     @Override
