@@ -158,9 +158,8 @@ abstract class EnrichmentFunction<S, T> {
     protected void ensureActive() {
         if (!isActive()) {
             throw newIllegalStateException(
-                    "The given instance of %s is not active at the moment. " +
-                            "Please use `activate()` first.",
-                    getClass().getName());
+                    "Enrichment function %s is not active. Please use `activate()` first.",
+                    this);
         }
     }
 }

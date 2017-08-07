@@ -24,33 +24,25 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.LinkedListMultimap;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import io.spine.core.Enrichment;
-import io.spine.core.Enrichment.Container;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
-import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
-import io.spine.protobuf.AnyPacker;
 import io.spine.type.TypeName;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
-import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Collections2.filter;
-import static com.google.common.collect.FluentIterable.from;
 import static com.google.common.collect.LinkedListMultimap.create;
 import static com.google.common.collect.Multimaps.synchronizedMultimap;
 import static io.spine.core.Enrichments.isEnrichmentEnabled;
@@ -101,7 +93,6 @@ public class Enricher {
 
         this.functions = functionMap;
         this.appender = new EnrichmentFunctionAppender(functions);
-
     }
 
     @SuppressWarnings("MethodWithMultipleLoops") // is OK in this case
@@ -169,81 +160,8 @@ public class Enricher {
         return result;
     }
 
-    /**
-     * The method object class for enriching an event.
-     */
-    private static class Action {
-        private final EventEnvelope envelope;
-        private final Collection<EnrichmentFunction<?, ?>> availableFunctions;
-
-        private final Map<String, Any> enrichments = Maps.newHashMap();
-
-        private Action(Enricher parent, EventEnvelope envelope) {
-            this.envelope = envelope;
-            final Class<? extends Message> eventClass = envelope.getMessageClass()
-                                                                .value();
-            final Collection<EnrichmentFunction<?, ?>> functionsPerClass =
-                    parent.functions.get(eventClass);
-            this.availableFunctions = filter(functionsPerClass, EnrichmentFunction.activeOnly());
-        }
-
-        private Event perform() {
-            createEnrichments();
-            final EventContext enrichedContext = enrichContext();
-            final Event result = envelope.getOuterObject()
-                                         .toBuilder()
-                                         .setContext(enrichedContext)
-                                         .build();
-            return result;
-        }
-
-        private void createEnrichments() {
-            final EventContext eventContext = envelope.getEventContext();
-            final Message eventMessage = envelope.getMessage();
-            for (EnrichmentFunction function : availableFunctions) {
-                final Message enriched = apply(function, eventMessage, eventContext);
-                checkResult(enriched, function);
-                final String typeName = TypeName.of(enriched)
-                                                .value();
-                enrichments.put(typeName, AnyPacker.pack(enriched));
-            }
-        }
-
-        /**
-         * Applies the passed function to the message.
-         *
-         * <p>We suppress the {@code "unchecked"} because we ensure types when we...
-         * <ol>
-         *      <li>create enrichments,
-         *      <li>put them into {@link #functions} by their event message class.
-         * </ol>
-         */
-        @SuppressWarnings("unchecked")
-        private static Message apply(EnrichmentFunction function,
-                                     Message input,
-                                     EventContext context) {
-            final Message result = (Message) function.apply(input, context);
-            return result;
-        }
-
-        private void checkResult(Message enriched, EnrichmentFunction function) {
-            checkNotNull(
-                enriched,
-                "EnrichmentFunction %s produced `null` from event message %s",
-                function, envelope.getMessage()
-            );
-        }
-
-        private EventContext enrichContext() {
-            final Enrichment.Builder enrichment =
-                    Enrichment.newBuilder()
-                              .setContainer(Container.newBuilder()
-                                                     .putAllItems(enrichments));
-            return envelope.getEventContext()
-                           .toBuilder()
-                           .setEnrichment(enrichment)
-                           .build();
-        }
+    Collection<EnrichmentFunction<?, ?>> getFunctions(Class<? extends Message> messageClass) {
+        return functions.get(messageClass);
     }
 
     private void checkTypeRegistered(Event event) {
@@ -265,9 +183,9 @@ public class Enricher {
     Optional<EnrichmentFunction<?, ?>> functionFor(Class<?> eventFieldClass,
                                                    Class<?> enrichmentFieldClass) {
         final Optional<EnrichmentFunction<?, ?>> result =
-                from(functions.values())
-                        .firstMatch(SupportsFieldConversion.of(eventFieldClass,
-                                                               enrichmentFieldClass));
+                FluentIterable.from(functions.values())
+                              .firstMatch(SupportsFieldConversion.of(eventFieldClass,
+                                                                     enrichmentFieldClass));
         return result;
     }
 
@@ -293,9 +211,12 @@ public class Enricher {
         private <S, T> void addEntry(Class<S> eventFieldClass,
                                      Class<T> enrichmentFieldClass,
                                      Function<S, T> function) {
-            final EnrichmentFunction<S, T> newEntry = fieldEnrichmentOf(eventFieldClass,
-                                                                        enrichmentFieldClass,
-                                                                        function);
+            checkNotNull(eventFieldClass);
+            checkNotNull(enrichmentFieldClass);
+            checkNotNull(function);
+            final EnrichmentFunction<S, T> newEntry = FieldEnricher.newInstance(eventFieldClass,
+                                                                                enrichmentFieldClass,
+                                                                                function);
             checkDuplicate(newEntry, destination.values());
             destination.put(newEntry.getEventClass(), newEntry);
 
@@ -393,8 +314,15 @@ public class Enricher {
         public <S, T> Builder addFieldEnrichment(Class<S> eventFieldClass,
                                                  Class<T> enrichmentFieldClass,
                                                  Function<S, T> function) {
+            checkNotNull(eventFieldClass);
+            checkNotNull(enrichmentFieldClass);
+            checkNotNull(function);
+
+            checkNotNull(eventFieldClass);
+            checkNotNull(enrichmentFieldClass);
+            checkNotNull(function);
             final EnrichmentFunction<S, T> newEntry =
-                    fieldEnrichmentOf(eventFieldClass, enrichmentFieldClass, function);
+                    FieldEnricher.newInstance(eventFieldClass, enrichmentFieldClass, function);
             checkDuplicate(newEntry, functions);
             functions.add(newEntry);
             return this;
@@ -420,33 +348,21 @@ public class Enricher {
     }
 
     /**
-     * A utility method to create an instance of {@link EnrichmentFunction} based on
-     * the {@link FieldEnricher}.
-     */
-    private static <S, T> EnrichmentFunction<S, T> fieldEnrichmentOf(Class<S> eventFieldClass,
-                                                                     Class<T> enrichmentFieldClass,
-                                                                     Function<S, T> function) {
-        checkNotNull(eventFieldClass);
-        checkNotNull(enrichmentFieldClass);
-        checkNotNull(function);
-        return FieldEnricher.newInstance(eventFieldClass,
-                                         enrichmentFieldClass,
-                                         function);
-    }
-
-    /**
+     * Ensures that the passed enrichment function is not
+     *
      * @throws IllegalArgumentException
      *         if the builder already has a function, which has the same couple of source event and
      *         enrichment classes
      */
-    private static void checkDuplicate(EnrichmentFunction<?, ?> function,
+    private static void checkDuplicate(EnrichmentFunction<?, ?> candidate,
                                        Iterable<EnrichmentFunction<?, ?>> currentFns) {
-        final Optional<EnrichmentFunction<?, ?>> duplicate = from(currentFns)
-                .firstMatch(SameTransition.asFor(function));
+        final Optional<EnrichmentFunction<?, ?>> duplicate =
+                FluentIterable.from(currentFns)
+                              .firstMatch(SameTransition.asFor(candidate));
         if (duplicate.isPresent()) {
             throw newIllegalArgumentException("Enrichment from %s to %s already added as: %s",
-                                               function.getEventClass(),
-                                               function.getEnrichmentClass(),
+                                               candidate.getEventClass(),
+                                               candidate.getEnrichmentClass(),
                                                duplicate.get());
         }
     }
