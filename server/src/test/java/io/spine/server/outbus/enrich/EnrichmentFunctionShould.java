@@ -18,13 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.enrich;
+package io.spine.server.outbus.enrich;
 
 import com.google.common.base.Function;
 import com.google.common.testing.EqualsTester;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.StringValue;
-import io.spine.server.event.enrich.given.EnrichmentFunctionTestEnv.GivenEventMessage;
+import io.spine.server.outbus.enrich.given.EnrichmentFunctionTestEnv.GivenEventMessage;
 import io.spine.test.Tests;
 import io.spine.test.event.ProjectCreated;
 import org.junit.Before;

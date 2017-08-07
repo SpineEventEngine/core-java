@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.enrich;
+package io.spine.server.outbus.enrich;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
@@ -27,7 +27,7 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.protobuf.Internal;
 import com.google.protobuf.Message;
 import io.spine.core.EventContext;
-import io.spine.server.event.enrich.EventEnricher.SupportsFieldConversion;
+import io.spine.server.outbus.enrich.EventEnricher.SupportsFieldConversion;
 import io.spine.server.reflect.Field;
 
 import javax.annotation.Nullable;

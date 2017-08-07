@@ -36,9 +36,9 @@ import io.spine.grpc.LoggingObserver.Level;
 import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.DeadMessageTap;
 import io.spine.server.bus.EnvelopeValidator;
-import io.spine.server.event.enrich.EventEnricher;
 import io.spine.server.outbus.CommandOutputBus;
 import io.spine.server.outbus.OutputDispatcherRegistry;
+import io.spine.server.outbus.enrich.EventEnricher;
 import io.spine.server.storage.StorageFactory;
 import io.spine.validate.MessageValidator;
 

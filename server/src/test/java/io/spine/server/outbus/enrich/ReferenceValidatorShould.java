@@ -18,13 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.enrich;
+package io.spine.server.outbus.enrich;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Descriptors.FieldDescriptor;
-import io.spine.server.event.enrich.ReferenceValidator.ValidationResult;
-import io.spine.server.event.enrich.given.ReferenceValidatorTestEnv.Enrichment;
+import io.spine.server.outbus.enrich.ReferenceValidator.ValidationResult;
+import io.spine.server.outbus.enrich.given.ReferenceValidatorTestEnv.Enrichment;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.TaskAdded;
 import io.spine.test.event.enrichment.EnrichmentBoundWithFieldsSeparatedWithSpaces;

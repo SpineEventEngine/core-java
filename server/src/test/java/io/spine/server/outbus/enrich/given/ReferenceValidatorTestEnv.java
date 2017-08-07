@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.enrich.given;
+package io.spine.server.outbus.enrich.given;
 
 import com.google.common.base.Function;
 import com.google.protobuf.Any;
@@ -28,7 +28,7 @@ import io.spine.core.EventId;
 import io.spine.core.UserId;
 import io.spine.core.given.GivenUserId;
 import io.spine.people.PersonName;
-import io.spine.server.event.enrich.EventEnricher;
+import io.spine.server.outbus.enrich.EventEnricher;
 import io.spine.test.event.ProjectId;
 import io.spine.time.ZoneId;
 import io.spine.time.ZoneOffset;
@@ -38,9 +38,9 @@ import javax.annotation.Nullable;
 /**
  * @author Alexander Yevsyukov
  */
-public class EventMessageEnricherTestEnv {
+public class ReferenceValidatorTestEnv {
 
-    private EventMessageEnricherTestEnv() {
+    private ReferenceValidatorTestEnv() {
         // Prevent instantiation of this utility class.
     }
 
@@ -71,7 +71,7 @@ public class EventMessageEnricherTestEnv {
                 if (id == null) {
                     return null;
                 }
-                final String name = "pr-" + id.getId();
+                final String name = "prj-" + id.getId();
                 return name;
             }
         }
@@ -83,7 +83,7 @@ public class EventMessageEnricherTestEnv {
                 if (id == null) {
                     return null;
                 }
-                return GivenUserId.of("po-" + id.getId());
+                return GivenUserId.of("prj-owner-" + id.getId());
             }
         }
 

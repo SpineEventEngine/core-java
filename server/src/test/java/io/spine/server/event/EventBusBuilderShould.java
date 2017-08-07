@@ -24,7 +24,7 @@ import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.server.BoundedContext;
 import io.spine.server.bus.BusBuilderShould;
-import io.spine.server.event.enrich.EventEnricher;
+import io.spine.server.outbus.enrich.EventEnricher;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.test.Tests;

@@ -18,9 +18,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.enrich;
+package io.spine.server.outbus.enrich;
 
-import io.spine.server.event.enrich.given.EventMessageEnricherTestEnv.Enrichment;
+import io.spine.server.outbus.enrich.given.EventMessageEnricherTestEnv.Enrichment;
 import io.spine.test.event.ProjectCreated;
 import org.junit.Before;
 import org.junit.Test;

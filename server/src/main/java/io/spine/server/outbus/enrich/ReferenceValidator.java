@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.enrich;
+package io.spine.server.outbus.enrich;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
@@ -72,6 +72,8 @@ class ReferenceValidator {
 
 
     /** The reference to the event context used in the `by` field option. */
+    @SuppressWarnings("DuplicateStringLiteralInspection") // refers to the proto field name,
+        // not a variable name as other strings that use the same value.
     private static final String CONTEXT_REFERENCE = "context";
 
     private final EventEnricher enricher;
