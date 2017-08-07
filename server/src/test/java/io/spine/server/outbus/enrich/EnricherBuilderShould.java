@@ -58,7 +58,7 @@ public class EnricherBuilderShould {
                 return toMessage(Timestamps.toString(input));
             }
         };
-        this.fieldEnrichment = FieldEnrichment.newInstance(Timestamp.class, StringValue.class, function);
+        this.fieldEnrichment = FieldEnrichment.of(Timestamp.class, StringValue.class, function);
     }
 
     @Test

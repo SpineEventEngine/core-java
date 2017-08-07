@@ -54,12 +54,11 @@ final class FieldEnrichment<S, T> extends EnrichmentFunction<S, T> {
      *         a conversion function
      * @return a new instance
      */
-    static <S, T> FieldEnrichment<S, T> newInstance(Class<S> messageFieldClass,
-                                                    Class<T> enrichmentFieldClass,
-                                                    Function<S, T> func) {
-        final FieldEnrichment<S, T> result = new FieldEnrichment<>(messageFieldClass,
-                                                                   enrichmentFieldClass,
-                                                                   func);
+    static <S, T> FieldEnrichment<S, T> of(Class<S> messageFieldClass,
+                                           Class<T> enrichmentFieldClass,
+                                           Function<S, T> func) {
+        final FieldEnrichment<S, T> result =
+                new FieldEnrichment<>(messageFieldClass, enrichmentFieldClass, func);
         return result;
     }
 

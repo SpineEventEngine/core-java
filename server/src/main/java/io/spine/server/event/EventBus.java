@@ -252,8 +252,8 @@ public class EventBus extends CommandOutputBus<Event,
         if (enricher == null) {
             enricher = Enricher.newBuilder()
                                .addFieldEnrichment(eventFieldClass,
-                                                        enrichmentFieldClass,
-                                                        function)
+                                                   enrichmentFieldClass,
+                                                   function)
                                .build();
         } else {
             enricher.registerFieldEnrichment(eventFieldClass, enrichmentFieldClass, function);

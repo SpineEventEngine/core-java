@@ -44,6 +44,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.LinkedListMultimap.create;
 import static com.google.common.collect.Multimaps.synchronizedMultimap;
 import static io.spine.core.Enrichments.isEnrichmentEnabled;
+import static io.spine.server.outbus.enrich.MessageEnrichment.create;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
@@ -99,8 +100,7 @@ public class Enricher {
             for (String eventType : eventTypes) {
                 final Class<Message> eventClass = TypeName.of(eventType)
                                                           .getJavaClass();
-                final MessageEnrichment msgEnricher =
-                        MessageEnrichment.create(this, eventClass, enrichmentClass);
+                final MessageEnrichment msgEnricher = create(this, eventClass, enrichmentClass);
                 functionsMap.put(eventClass, msgEnricher);
             }
         }
@@ -207,7 +207,7 @@ public class Enricher {
         checkNotNull(func);
 
         final EnrichmentFunction<S, T> newEntry =
-                FieldEnrichment.newInstance(fieldClass, enrichmentFieldClass, func);
+                FieldEnrichment.of(fieldClass, enrichmentFieldClass, func);
 
         checkDuplicate(newEntry, functions.values());
         functions.put(newEntry.getSourceClass(), newEntry);
@@ -229,23 +229,23 @@ public class Enricher {
         /**
          * Adds a new field enrichment function.
          *
-         * @param  eventFieldClass
-         *         a class of the field in the event message
+         * @param  sourceFieldClass
+         *         a class of the field in the source message
          * @param  enrichmentFieldClass
          *         a class of the field in the enrichment message
          * @param  func
          *         a function which converts fields
          * @return the builder instance
          */
-        public <S, T> Builder addFieldEnrichment(Class<S> eventFieldClass,
+        public <S, T> Builder addFieldEnrichment(Class<S> sourceFieldClass,
                                                  Class<T> enrichmentFieldClass,
                                                  Function<S, T> func) {
-            checkNotNull(eventFieldClass);
+            checkNotNull(sourceFieldClass);
             checkNotNull(enrichmentFieldClass);
             checkNotNull(func);
 
             final EnrichmentFunction<S, T> newEntry =
-                    FieldEnrichment.newInstance(eventFieldClass, enrichmentFieldClass, func);
+                    FieldEnrichment.of(sourceFieldClass, enrichmentFieldClass, func);
             checkDuplicate(newEntry, functions);
             functions.add(newEntry);
             return this;
@@ -274,8 +274,8 @@ public class Enricher {
      * Ensures that the passed enrichment function is not
      *
      * @throws IllegalArgumentException
-     *         if the builder already has a function, which has the same couple of source event and
-     *         enrichment classes
+     *         if the builder already has a function, which has the same couple of
+     *         source message and target enrichment classes
      */
     private static void checkDuplicate(EnrichmentFunction<?, ?> candidate,
                                        Iterable<EnrichmentFunction<?, ?>> currentFns) {

@@ -59,9 +59,9 @@ public class EnrichmentFunctionShould {
                 return result;
             }
         };
-        this.fieldEnrichment = FieldEnrichment.newInstance(ProjectCreated.class,
-                                                           ProjectCreated.Enrichment.class,
-                                                           function);
+        this.fieldEnrichment = FieldEnrichment.of(ProjectCreated.class,
+                                                  ProjectCreated.Enrichment.class,
+                                                  function);
     }
 
     @Test
@@ -82,7 +82,7 @@ public class EnrichmentFunctionShould {
                 return null;
             }
         };
-        FieldEnrichment.newInstance(StringValue.class, StringValue.class, func);
+        FieldEnrichment.of(StringValue.class, StringValue.class, func);
     }
 
     @Test
@@ -97,9 +97,9 @@ public class EnrichmentFunctionShould {
 
     @Test
     public void create_custom_instances() throws Exception {
-        assertEquals(fieldEnrichment, FieldEnrichment.newInstance(ProjectCreated.class,
-                                                                  ProjectCreated.Enrichment.class,
-                                                                  function));
+        assertEquals(fieldEnrichment, FieldEnrichment.of(ProjectCreated.class,
+                                                         ProjectCreated.Enrichment.class,
+                                                         function));
     }
 
     @Test
@@ -129,7 +129,7 @@ public class EnrichmentFunctionShould {
     @Test
     public void have_smart_equals() {
         final FieldEnrichment<ProjectCreated, ProjectCreated.Enrichment> anotherEnricher =
-                FieldEnrichment.newInstance(
+                FieldEnrichment.of(
                     ProjectCreated.class,
                     ProjectCreated.Enrichment.class,
                     function);
