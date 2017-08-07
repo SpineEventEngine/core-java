@@ -20,6 +20,10 @@
 
 package io.spine.server.outbus.enrich;
 
+import com.google.common.testing.NullPointerTester;
+import com.google.protobuf.Empty;
+import com.google.protobuf.Message;
+import io.spine.core.EventContext;
 import io.spine.server.outbus.enrich.given.EventMessageEnricherTestEnv.Enrichment;
 import io.spine.test.event.ProjectCreated;
 import org.junit.Before;
@@ -48,14 +52,11 @@ public class MessageEnricherShould {
         assertFalse(enricher.isActive());
     }
 
-    @Test(expected = NullPointerException.class)
-    public void throw_NPE_if_pass_null() {
-        enricher.activate();
-        enricher.apply(null);
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void throw_ISE_if_activate_not_called_before_apply() {
-        enricher.apply(ProjectCreated.getDefaultInstance());
+    @Test
+    public void pass_null_tolerance_check() {
+        new NullPointerTester()
+                .setDefault(Message.class, Empty.getDefaultInstance())
+                .setDefault(EventContext.class, EventContext.getDefaultInstance())
+                .testAllPublicInstanceMethods(enricher);
     }
 }

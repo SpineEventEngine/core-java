@@ -22,10 +22,12 @@ package io.spine.server.outbus.enrich;
 
 import com.google.common.base.Function;
 import com.google.common.testing.EqualsTester;
-import com.google.protobuf.BoolValue;
+import com.google.common.testing.NullPointerTester;
+import com.google.protobuf.Empty;
+import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
+import io.spine.core.EventContext;
 import io.spine.server.outbus.enrich.given.EnrichmentFunctionTestEnv.GivenEventMessage;
-import io.spine.test.Tests;
 import io.spine.test.event.ProjectCreated;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,7 +37,6 @@ import javax.annotation.Nullable;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 public class EnrichmentFunctionShould {
@@ -63,14 +64,13 @@ public class EnrichmentFunctionShould {
                                                        function);
     }
 
-    @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_source_class() {
-        FieldEnricher.newInstance(Tests.<Class<ProjectCreated>>nullRef(), ProjectCreated.Enrichment.class, function);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_target_class() {
-        FieldEnricher.newInstance(ProjectCreated.class, Tests.<Class<ProjectCreated.Enrichment>>nullRef(), function);
+    @Test
+    public void pass_null_tolerance_check() {
+        new NullPointerTester()
+                .setDefault(Message.class, Empty.getDefaultInstance())
+                .setDefault(Class.class, Empty.class)
+                .setDefault(Function.class, function)
+                .testAllPublicStaticMethods(FieldEnricher.class);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -83,13 +83,6 @@ public class EnrichmentFunctionShould {
             }
         };
         FieldEnricher.newInstance(StringValue.class, StringValue.class, func);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_translator_function() {
-        FieldEnricher.newInstance(BoolValue.class,
-                                  ProjectCreated.Enrichment.class,
-                                  Tests.<Function<BoolValue, ProjectCreated.Enrichment>>nullRef());
     }
 
     @Test
@@ -113,7 +106,8 @@ public class EnrichmentFunctionShould {
     public void apply_enrichment() throws Exception {
         final ProjectCreated event = GivenEventMessage.projectCreated();
 
-        final ProjectCreated.Enrichment enriched = fieldEnricher.apply(event);
+        final ProjectCreated.Enrichment enriched =
+                fieldEnricher.apply(event, EventContext.getDefaultInstance());
 
         assertNotNull(enriched);
         assertEquals(event.getProjectId()
@@ -130,11 +124,6 @@ public class EnrichmentFunctionShould {
         final String str = fieldEnricher.toString();
         assertTrue(str.contains(ProjectCreated.class.getName()));
         assertTrue(str.contains(ProjectCreated.Enrichment.class.getName()));
-    }
-
-    @Test
-    public void return_null_on_applying_null() {
-        assertNull(fieldEnricher.apply(Tests.<ProjectCreated>nullRef()));
     }
 
     @Test

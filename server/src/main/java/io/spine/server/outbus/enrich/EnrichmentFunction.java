@@ -55,7 +55,6 @@ abstract class EnrichmentFunction<S, T> {
 
     private final Class<S> eventClass;
     private final Class<T> enrichmentClass;
-    private EventContext context;
 
     EnrichmentFunction(Class<S> eventClass, Class<T> enrichmentClass) {
         this.eventClass = checkNotNull(eventClass);
@@ -71,9 +70,10 @@ abstract class EnrichmentFunction<S, T> {
      * Performs the calculation of target enrichment type.
      *
      * @param  input the source of enrichment
+     * @param  context the context of the message
      * @return enrichment result object
      */
-    public abstract T apply(S input);
+    public abstract T apply(S input, EventContext context);
 
     Class<S> getEventClass() {
         return eventClass;
@@ -81,14 +81,6 @@ abstract class EnrichmentFunction<S, T> {
 
     Class<T> getEnrichmentClass() {
         return enrichmentClass;
-    }
-
-    EventContext getContext() {
-        return context;
-    }
-
-    void setContext(EventContext context) {
-        this.context = context;
     }
 
     /**

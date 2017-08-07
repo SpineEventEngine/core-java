@@ -201,8 +201,7 @@ public class Enricher {
             final EventContext eventContext = envelope.getEventContext();
             final Message eventMessage = envelope.getMessage();
             for (EnrichmentFunction function : availableFunctions) {
-                function.setContext(eventContext);
-                final Message enriched = apply(function, eventMessage);
+                final Message enriched = apply(function, eventMessage, eventContext);
                 checkResult(enriched, function);
                 final String typeName = TypeName.of(enriched)
                                                 .value();
@@ -220,8 +219,10 @@ public class Enricher {
          * </ol>
          */
         @SuppressWarnings("unchecked")
-        private static Message apply(EnrichmentFunction function, Message input) {
-            final Message result = (Message) function.apply(input);
+        private static Message apply(EnrichmentFunction function,
+                                     Message input,
+                                     EventContext context) {
+            final Message result = (Message) function.apply(input, context);
             return result;
         }
 
@@ -439,8 +440,9 @@ public class Enricher {
     }
 
     /**
-     * @throws IllegalArgumentException if the builder already has a function, which has the same
-     *                                  couple of source event and enrichment classes
+     * @throws IllegalArgumentException
+     *         if the builder already has a function, which has the same couple of source event and
+     *         enrichment classes
      */
     private static void checkDuplicate(EnrichmentFunction<?, ?> function,
                                        Iterable<EnrichmentFunction<?, ?>> currentFns) {

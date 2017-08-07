@@ -21,6 +21,7 @@
 package io.spine.server.outbus.enrich;
 
 import com.google.common.base.Function;
+import io.spine.core.EventContext;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -29,6 +30,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @param <S> the type of the field in the source event message
  * @param <T> the type of the field in the target enrichment message
+ *
  * @author Alexander Yevsyukov
  */
 class FieldEnricher<S, T> extends EnrichmentFunction<S, T> {
@@ -44,14 +46,17 @@ class FieldEnricher<S, T> extends EnrichmentFunction<S, T> {
     /**
      * Creates a new instance.
      *
-     * @param eventFieldClass      a class of the field in the event message
-     * @param enrichmentFieldClass a class of the field in the enrichment message
-     * @param translator           a conversion function
+     * @param  eventFieldClass
+     *         a class of the field in the event message
+     * @param  enrichmentFieldClass
+     *         a class of the field in the enrichment message
+     * @param  translator
+     *         a conversion function
      * @return a new instance
      */
     static <S, T> FieldEnricher<S, T> newInstance(Class<S> eventFieldClass,
-                                                                Class<T> enrichmentFieldClass,
-                                                                Function<S, T> translator) {
+                                                  Class<T> enrichmentFieldClass,
+                                                  Function<S, T> translator) {
         final FieldEnricher<S, T> result = new FieldEnricher<>(eventFieldClass,
                                                                enrichmentFieldClass,
                                                                translator);
@@ -76,7 +81,7 @@ class FieldEnricher<S, T> extends EnrichmentFunction<S, T> {
     }
 
     @Override
-    public T apply(S message) {
+    public T apply(S message, EventContext context) {
         ensureActive();
         final T result = function.apply(message);
         return result;

@@ -100,13 +100,15 @@ class MessageEnricher<S extends Message, T extends Message> extends EnrichmentFu
     }
 
     @Override
-    public T apply(S eventMsg) {
+    public T apply(S eventMsg, EventContext context) {
+        checkNotNull(eventMsg);
+        checkNotNull(context);
         ensureActive();
         verifyOwnState();
 
         final T defaultTarget = Internal.getDefaultInstance(getEnrichmentClass());
         final Message.Builder builder = defaultTarget.toBuilder();
-        setFields(builder, eventMsg);
+        setFields(builder, eventMsg, context);
         @SuppressWarnings("unchecked") // types are checked during the initialization and validation
         final T result = (T) builder.build();
         return result;
@@ -128,11 +130,13 @@ class MessageEnricher<S extends Message, T extends Message> extends EnrichmentFu
         checkState(!fieldFunctions.isEmpty(), "fieldFunctions is empty");
     }
 
-    @SuppressWarnings({"ConstantConditions", "MethodWithMultipleLoops"}) // it is assured that
-                                                                         // collections are not null
-    private void setFields(Message.Builder builder, S eventMsg) {
+    @SuppressWarnings({
+            "ConstantConditions" /* it is assured that collections are not null */,
+            "MethodWithMultipleLoops"}
+    )
+    private void setFields(Message.Builder builder, S eventMsg, EventContext context) {
         for (FieldDescriptor srcField : fieldMap.keySet()) {
-            final Object srcFieldValue = getSrcFieldValue(srcField, eventMsg);
+            final Object srcFieldValue = getSrcFieldValue(srcField, eventMsg, context);
             final Class<?> sourceFieldClass = srcFieldValue.getClass();
             final Collection<EnrichmentFunction> functions = fieldFunctions.get(sourceFieldClass);
             final Collection<FieldDescriptor> targetFields = fieldMap.get(srcField);
@@ -144,7 +148,7 @@ class MessageEnricher<S extends Message, T extends Message> extends EnrichmentFu
                         "unchecked" /* the model is checked during */,
                         "OptionalGetWithoutIsPresent" /* the initialization and activation */})
                 final Object targetValue = function.get()
-                                                   .apply(srcFieldValue);
+                                                   .apply(srcFieldValue, context);
                 if (targetValue != null) {
                     builder.setField(targetField, targetValue);
                 }
@@ -152,11 +156,11 @@ class MessageEnricher<S extends Message, T extends Message> extends EnrichmentFu
         }
     }
 
-    private Object getSrcFieldValue(FieldDescriptor srcField, S eventMsg) {
+    private Object getSrcFieldValue(FieldDescriptor srcField, S eventMsg, EventContext context) {
         final boolean isContextField = srcField.getContainingType()
                                                .equals(EventContext.getDescriptor());
         final Object result = isContextField
-                              ? getContext().getField(srcField)
+                              ? context.getField(srcField)
                               : eventMsg.getField(srcField);
         return result;
     }
