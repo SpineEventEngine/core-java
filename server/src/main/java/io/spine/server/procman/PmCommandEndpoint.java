@@ -69,6 +69,7 @@ class PmCommandEndpoint<I, P extends ProcessManager<I, ?, ?>>
      * Throws {@link IllegalStateException} with the message containing details of
      * the process manager and the command in response to which empty set of event messages
      * was generated.
+     * 
      * @throws IllegalStateException always
      */
     @Override
