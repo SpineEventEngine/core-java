@@ -70,8 +70,6 @@ public class Enricher {
     /** Available enrichment functions per message class. */
     private final Multimap<Class<?>, EnrichmentFunction<?, ?>> functions;
 
-    private final EnrichmentFunctionAppender appender;
-
     /** Creates a new builder. */
     public static Builder newBuilder() {
         return new Builder();
@@ -92,7 +90,6 @@ public class Enricher {
         putMsgEnrichers(functionMap);
 
         this.functions = functionMap;
-        this.appender = new EnrichmentFunctionAppender(functions);
     }
 
     @SuppressWarnings("MethodWithMultipleLoops") // is OK in this case
@@ -189,39 +186,33 @@ public class Enricher {
         return result;
     }
 
+    /**
+     * Appends enrichment function at runtime.
+     *
+     * @param eventFieldClass
+     *        the class of the field to enrich
+     * @param enrichmentFieldClass
+     *        the class of the resulting enrichment field
+     * @param function
+     *        enrichment function
+     * @param <S>
+     *        the type of the enriched event message
+     * @param <T>
+     *        the type of the enrichment field
+     */
     public <S, T> void registerFieldEnrichment(Class<S> eventFieldClass,
                                                Class<T> enrichmentFieldClass,
                                                Function<S, T> function) {
-        appender.addEntry(eventFieldClass, enrichmentFieldClass, function);
-    }
+        checkNotNull(eventFieldClass);
+        checkNotNull(enrichmentFieldClass);
+        checkNotNull(function);
 
-    /**
-     * The helper serving to append the enclosing instance of {@code EventEnricher} with
-     * the new enrichment configuration rules at runtime.
-     */
-    private static class EnrichmentFunctionAppender {
+        final EnrichmentFunction<S, T> newEntry =
+                FieldEnricher.newInstance(eventFieldClass, enrichmentFieldClass, function);
 
-        private final Multimap<Class<?>, EnrichmentFunction<?, ?>> destination;
-
-        private EnrichmentFunctionAppender(Multimap<Class<?>,
-                                           EnrichmentFunction<?, ?>> destination) {
-            this.destination = destination;
-        }
-
-        private <S, T> void addEntry(Class<S> eventFieldClass,
-                                     Class<T> enrichmentFieldClass,
-                                     Function<S, T> function) {
-            checkNotNull(eventFieldClass);
-            checkNotNull(enrichmentFieldClass);
-            checkNotNull(function);
-            final EnrichmentFunction<S, T> newEntry = FieldEnricher.newInstance(eventFieldClass,
-                                                                                enrichmentFieldClass,
-                                                                                function);
-            checkDuplicate(newEntry, destination.values());
-            destination.put(newEntry.getEventClass(), newEntry);
-
-            validate(destination);
-        }
+        checkDuplicate(newEntry, functions.values());
+        functions.put(newEntry.getEventClass(), newEntry);
+        validate(functions);
     }
 
     /**
@@ -258,40 +249,6 @@ public class Enricher {
     }
 
     /**
-     * A helper predicate that allows to find functions with the same transition from
-     * source event to enrichment class.
-     *
-     * <p>Such functions are not necessarily equal because they may have different translators.
-     *
-     * @see EnrichmentFunction
-     */
-    @VisibleForTesting
-    static class SameTransition implements Predicate<EnrichmentFunction> {
-
-        private final EnrichmentFunction function;
-
-        static SameTransition asFor(EnrichmentFunction function) {
-            return new SameTransition(function);
-        }
-
-        private SameTransition(EnrichmentFunction function) {
-            this.function = checkNotNull(function);
-        }
-
-        @Override
-        public boolean apply(@Nullable EnrichmentFunction input) {
-            if (input == null) {
-                return false;
-            }
-            final boolean sameSourceClass = function.getEventClass()
-                                                    .equals(input.getEventClass());
-            final boolean sameEnrichmentClass = function.getEnrichmentClass()
-                                                        .equals(input.getEnrichmentClass());
-            return sameSourceClass && sameEnrichmentClass;
-        }
-    }
-
-    /**
      * The {@code Builder} allows to register {@link EnrichmentFunction}s handled by
      * the {@code Enricher} and set a custom translation function, if needed.
      */
@@ -304,12 +261,15 @@ public class Enricher {
         private Builder() {}
 
         /**
-         * Add a new field enrichment translation function.
+         * Adds a new field enrichment function.
          *
-         * @param eventFieldClass      a class of the field in the event message
-         * @param enrichmentFieldClass a class of the field in the enrichment message
-         * @param function             a function which converts fields
-         * @return a builder instance
+         * @param  eventFieldClass
+         *         a class of the field in the event message
+         * @param  enrichmentFieldClass
+         *         a class of the field in the enrichment message
+         * @param  function
+         *         a function which converts fields
+         * @return the builder instance
          */
         public <S, T> Builder addFieldEnrichment(Class<S> eventFieldClass,
                                                  Class<T> enrichmentFieldClass,
@@ -318,9 +278,6 @@ public class Enricher {
             checkNotNull(enrichmentFieldClass);
             checkNotNull(function);
 
-            checkNotNull(eventFieldClass);
-            checkNotNull(enrichmentFieldClass);
-            checkNotNull(function);
             final EnrichmentFunction<S, T> newEntry =
                     FieldEnricher.newInstance(eventFieldClass, enrichmentFieldClass, function);
             checkDuplicate(newEntry, functions);

@@ -25,7 +25,6 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.spine.core.UserId;
-import io.spine.server.outbus.enrich.Enricher.SameTransition;
 import io.spine.server.outbus.enrich.given.EnricherBuilderTestEnv.Enrichment;
 import io.spine.test.Tests;
 import io.spine.test.event.ProjectId;
@@ -129,8 +128,10 @@ public class EnricherBuilderShould {
 
     @Test
     public void allow_registering_just_some_of_expected_functions() {
-        builder.addFieldEnrichment(ProjectId.class, UserId.class, new Enrichment.GetProjectOwnerId());
-        builder.addFieldEnrichment(ProjectId.class, String.class, new Enrichment.GetProjectName());
+        builder.addFieldEnrichment(ProjectId.class, UserId.class,
+                                   new Enrichment.GetProjectOwnerId())
+               .addFieldEnrichment(ProjectId.class, String.class,
+                                   new Enrichment.GetProjectName());
         final Enricher enricher = builder.build();
         assertNotNull(enricher);
     }
