@@ -488,10 +488,9 @@ public class IntegrationBus extends MulticastBus<Message,
      * configuration messages}, received by this instance of {@code IntegrationBus}.
      */
     private static final class LocalRejectionSubscriber extends RejectionSubscriber {
+
         private final BoundedContextId boundedContextId;
         private final PublisherHub publisherHub;
-
-        //TODO:2017-08-7:alex.tymchenko: local dispatcher signature to take a single item?
         private final Set<RejectionClass> rejectionClasses;
 
         private LocalRejectionSubscriber(BoundedContextId boundedContextId,
@@ -559,7 +558,6 @@ public class IntegrationBus extends MulticastBus<Message,
 
         private final BoundedContextId boundedContextId;
         private final PublisherHub publisherHub;
-
         private final Set<EventClass> eventClasses;
 
         private LocalEventSubscriber(BoundedContextId boundedContextId,
