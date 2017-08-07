@@ -21,7 +21,6 @@
 package io.spine.server.outbus.enrich;
 
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.core.Event;
@@ -36,7 +35,6 @@ import io.spine.server.outbus.enrich.given.EventEnricherTestEnv.GivenEvent;
 import io.spine.server.outbus.enrich.given.EventEnricherTestEnv.GivenEventMessage;
 import io.spine.test.event.ProjectCompleted;
 import io.spine.test.event.ProjectCreated;
-import io.spine.test.event.ProjectCreatedDynamicallyConfiguredEnrichment;
 import io.spine.test.event.ProjectCreatedSeparateEnrichment;
 import io.spine.test.event.ProjectId;
 import io.spine.test.event.ProjectStarred;
@@ -208,7 +206,6 @@ public class EnricherShould {
         private ProjectCreated.Enrichment projectCreatedEnrichment;
         private ProjectCreatedSeparateEnrichment projectCreatedSeparateEnrichment;
         private ProjectStarted.Enrichment projectStartedEnrichment;
-        private ProjectCreatedDynamicallyConfiguredEnrichment projectCreatedDynamicEnrichment;
         private SeparateEnrichmentForMultipleProjectEvents projectCompletedEnrichment;
         private SeparateEnrichmentForMultipleProjectEvents projectStarredEnrichment;
         private ProjectCreatedEnrichmentAnotherPackage projectCreatedAnotherPackEnrichment;
@@ -221,14 +218,6 @@ public class EnricherShould {
                     getEnrichment(ProjectCreatedSeparateEnrichment.class, context).get();
             this.projectCreatedAnotherPackEnrichment =
                     getEnrichment(ProjectCreatedEnrichmentAnotherPackage.class, context).get();
-
-            final Optional<ProjectCreatedDynamicallyConfiguredEnrichment> enrichment =
-                    getEnrichment(ProjectCreatedDynamicallyConfiguredEnrichment.class, context);
-
-            // See if dynamically added enrichment available. Only some tests use it.
-            this.projectCreatedDynamicEnrichment = enrichment.isPresent()
-                    ? enrichment.get()
-                    : ProjectCreatedDynamicallyConfiguredEnrichment.getDefaultInstance();
         }
 
         @Subscribe

@@ -67,7 +67,7 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
 public class Enricher {
 
     /** Available enrichment functions per message class. */
-    private final Multimap<Class<?>, EnrichmentFunction<?, ?>> functions;
+    private final ImmutableMultimap<Class<?>, EnrichmentFunction<?, ?>> functions;
 
     /** Creates a new builder. */
     public static Builder newBuilder() {
@@ -87,7 +87,7 @@ public class Enricher {
         }
         putMsgEnrichers(funcMap);
 
-        this.functions = funcMap;
+        this.functions = ImmutableMultimap.copyOf(funcMap);
     }
 
     @SuppressWarnings("MethodWithMultipleLoops") // is OK in this case
