@@ -55,7 +55,7 @@ import static io.spine.util.PropertyFiles.loadAllProperties;
  * @author Alexander Litus
  * @author Dmytro Dashenkov
  */
-class EventEnrichmentsMap {
+class EnrichmentsMap {
 
     /**
      * A path to the file which contains enrichment and event Protobuf type names.
@@ -74,7 +74,7 @@ class EventEnrichmentsMap {
 
     private static final ImmutableMultimap<String, String> enrichmentsMap = buildEnrichmentsMap();
 
-    private EventEnrichmentsMap() {
+    private EnrichmentsMap() {
     }
 
     /** Returns the immutable map instance. */

@@ -63,16 +63,16 @@ import static org.junit.Assert.assertTrue;
  * @author Alexander Litus
  */
 @SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
-public class EventEnrichmentsMapShould {
+public class EnrichmentsMapShould {
 
     @Test
     public void have_private_constructor() {
-        assertHasPrivateParameterlessCtor(EventEnrichmentsMap.class);
+        assertHasPrivateParameterlessCtor(EnrichmentsMap.class);
     }
 
     @Test
     public void return_map_instance() {
-        final ImmutableMultimap<String, String> map = EventEnrichmentsMap.getInstance();
+        final ImmutableMultimap<String, String> map = EnrichmentsMap.getInstance();
 
         assertFalse(map.isEmpty());
     }
@@ -217,8 +217,8 @@ public class EventEnrichmentsMapShould {
             Class<? extends Message> enrichmentClass,
             Class<? extends Message>... eventClassesExpected) {
         final Collection<String> eventTypesActual =
-                EventEnrichmentsMap.getInstance()
-                                   .get(TypeName.of(enrichmentClass)
+                EnrichmentsMap.getInstance()
+                              .get(TypeName.of(enrichmentClass)
                                                 .value());
 
         for (Class<? extends Message> expectedClass : FluentIterable.from(eventClassesExpected)) {
@@ -233,8 +233,8 @@ public class EventEnrichmentsMapShould {
             Class<? extends Message> enrichmentClass,
             Class<? extends Message>... eventClassesExpected) {
         final Collection<String> eventTypesActual =
-                EventEnrichmentsMap.getInstance()
-                                   .get(TypeName.of(enrichmentClass)
+                EnrichmentsMap.getInstance()
+                              .get(TypeName.of(enrichmentClass)
                                                 .value());
         assertEquals(eventClassesExpected.length, eventTypesActual.size());
         assertEventTypeByEnrichmentType(enrichmentClass, eventClassesExpected);

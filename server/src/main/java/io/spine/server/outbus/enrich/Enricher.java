@@ -92,7 +92,7 @@ public class Enricher {
 
     @SuppressWarnings("MethodWithMultipleLoops") // is OK in this case
     private void putMsgEnrichers(Multimap<Class<?>, EnrichmentFunction<?, ?>> functionsMap) {
-        final ImmutableMultimap<String, String> enrichmentsMap = EventEnrichmentsMap.getInstance();
+        final ImmutableMultimap<String, String> enrichmentsMap = EnrichmentsMap.getInstance();
         for (String enrichmentType : enrichmentsMap.keySet()) {
             final Class<Message> enrichmentClass = TypeName.of(enrichmentType)
                                                            .getJavaClass();
