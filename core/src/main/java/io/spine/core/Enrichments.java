@@ -35,9 +35,8 @@ import static io.spine.protobuf.AnyPacker.unpack;
  */
 public final class Enrichments {
 
-    private Enrichments() {
-        // Prevent instantiation of this utility class.
-    }
+    /** Prevents instantiation of this utility class. */
+    private Enrichments() {}
 
     /**
      * Verifies if the enrichment is not disabled in the passed event.

@@ -105,10 +105,15 @@ public class EventBus
     /** The {@code EventStore} to which put events before they get handled. */
     private final EventStore eventStore;
 
+    /** The validator for messages of posted events. */
     private final MessageValidator eventMessageValidator;
 
+    /** Filters applied when an event is posted. */
     private final Deque<BusFilter<EventEnvelope>> filterChain;
+
+    /** The observer of post operations. */
     private final StreamObserver<Ack> streamObserver;
+
     /** The validator for events posted to the bus. */
     @Nullable
     private EventValidator eventValidator;
