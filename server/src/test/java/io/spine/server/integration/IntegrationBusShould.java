@@ -178,4 +178,58 @@ public class IntegrationBusShould {
         assertEquals(AnyPacker.unpack(eventB.getMessage()),
                      ProjectStartedExtSubscriber.getExternalEvent());
     }
+
+    @Test
+    public void update_local_subscriptions_upon_repeated_RequestedMessageTypes() {
+        final LocalTransportFactory transportFactory = LocalTransportFactory.newInstance();
+
+        final BoundedContext sourceContext = contextWithTransport(transportFactory);
+        final BoundedContext destinationCtx = contextWithTransport(transportFactory);
+
+        // Prepare two external subscribers for the different events in the the `destinationCtx`.
+        final ProjectCreatedExtSubscriber projectCreatedSubscriber
+                = new ProjectCreatedExtSubscriber();
+        final ProjectStartedExtSubscriber projectStartedSubscriber
+                = new ProjectStartedExtSubscriber();
+
+        // Before anything happens, there were no events received by those.
+        assertNull(ProjectCreatedExtSubscriber.getExternalEvent());
+        assertNull(ProjectStartedExtSubscriber.getExternalEvent());
+
+        // Both events are prepared along with the `EventBus` of the source bounded context.
+        final EventBus sourceEventBus = sourceContext.getEventBus();
+        final Event eventA = projectCreated();
+        final Event eventB = projectStarted();
+
+        // Both events are emitted, `ProjectCreated` subscriber only is present.
+        destinationCtx.getIntegrationBus().register(projectCreatedSubscriber);
+        sourceEventBus.post(eventA);
+        sourceEventBus.post(eventB);
+        // Only `ProjectCreated` should have been dispatched.
+        assertEquals(AnyPacker.unpack(eventA.getMessage()),
+                     ProjectCreatedExtSubscriber.getExternalEvent());
+        assertNull(ProjectStartedExtSubscriber.getExternalEvent());
+
+        // Clear before the next round starts.
+        ProjectStartedExtSubscriber.clear();
+        ProjectCreatedExtSubscriber.clear();
+
+
+        // Both events are emitted, No external subscribers at all.
+        destinationCtx.getIntegrationBus().unregister(projectCreatedSubscriber);
+        sourceEventBus.post(eventA);
+        sourceEventBus.post(eventB);
+        // No events should have been dispatched.
+        assertNull(ProjectCreatedExtSubscriber.getExternalEvent());
+        assertNull(ProjectStartedExtSubscriber.getExternalEvent());
+
+        // Both events are emitted, `ProjectStarted` subscriber only is present
+        destinationCtx.getIntegrationBus().register(projectStartedSubscriber);
+        sourceEventBus.post(eventA);
+        sourceEventBus.post(eventB);
+        // This time `ProjectStarted` event should only have been dispatched.
+        assertNull(ProjectCreatedExtSubscriber.getExternalEvent());
+        assertEquals(AnyPacker.unpack(eventB.getMessage()),
+                     ProjectStartedExtSubscriber.getExternalEvent());
+    }
 }

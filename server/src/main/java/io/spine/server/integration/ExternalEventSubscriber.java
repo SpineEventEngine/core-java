@@ -33,7 +33,7 @@ import io.spine.type.MessageClass;
 import io.spine.util.Logging;
 import org.slf4j.Logger;
 
-import javax.annotation.Nullable;
+import java.util.Objects;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -53,26 +53,23 @@ import static java.lang.String.format;
  */
 class ExternalEventSubscriber implements ExternalMessageDispatcher<String> {
 
-    private final EventSubscriber delegate;
-
     /** Lazily initialized logger. */
     private final Supplier<Logger> loggerSupplier = Logging.supplyFor(getClass());
 
+    private final EventSubscriber delegate;
+
     /**
-     * Cached set of the external event classes this subscriber is subscribed to.
+     * Set of the external event classes this subscriber is subscribed to.
      */
-    @Nullable
-    private Set<EventClass> eventClasses;
+    private final Set<EventClass> eventClasses;
 
     ExternalEventSubscriber(EventSubscriber delegate) {
         this.delegate = delegate;
+        this.eventClasses = EventSubscriberMethod.inspectExternal(delegate.getClass());
     }
 
     @Override
     public Set<MessageClass> getMessageClasses() {
-        if (eventClasses == null) {
-            eventClasses = EventSubscriberMethod.inspectExternal(delegate.getClass());
-        }
         return ImmutableSet.<MessageClass>copyOf(eventClasses);
     }
 
@@ -105,5 +102,23 @@ class ExternalEventSubscriber implements ExternalMessageDispatcher<String> {
 
     private Logger log() {
         return loggerSupplier.get();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ExternalEventSubscriber that = (ExternalEventSubscriber) o;
+        return Objects.equals(delegate, that.delegate) &&
+                Objects.equals(eventClasses, that.eventClasses);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(delegate, eventClasses);
     }
 }

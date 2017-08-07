@@ -88,6 +88,12 @@ public class LocalTransportFactory implements TransportFactory {
             this.messageClass = messageClass;
         }
 
+        @SuppressWarnings("NoopMethodInAbstractClass")  // See the method body for the explanation.
+        @Override
+        public void close() throws Exception {
+            // There is nothing to close in the in-memory local channel implementation.
+        }
+
         @Override
         public IntegrationMessageClass getMessageClass() {
             return messageClass;
@@ -130,6 +136,11 @@ public class LocalTransportFactory implements TransportFactory {
                 MessageClass genericCls) {
             return subscriberProvider.apply(genericCls);
         }
+
+        @Override
+        public boolean isStale() {
+            return false;   // publishers are never stale.
+        }
     }
 
     /**
@@ -162,5 +173,11 @@ public class LocalTransportFactory implements TransportFactory {
             checkNotNull(observer);
             observers.remove(observer);
         }
+
+        @Override
+        public boolean isStale() {
+            return observers.isEmpty();
+        }
+
     }
 }

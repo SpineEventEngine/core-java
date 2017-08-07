@@ -89,7 +89,7 @@ public class IntegrationBusTestEnv {
     public static BoundedContext contextWithProjectCreatedNeeds(TransportFactory factory) {
         final BoundedContext result = contextWithTransport(factory);
         result.getIntegrationBus()
-                                     .register(new ProjectCreatedExtSubscriber());
+              .register(new ProjectCreatedExtSubscriber());
         return result;
     }
 

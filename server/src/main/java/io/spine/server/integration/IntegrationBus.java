@@ -187,7 +187,7 @@ public class IntegrationBus extends MulticastBus<Message,
     }
 
     /**
-     * Register a local dispatcher, which is subscribed to {@code external} messages.
+     * Registers a local dispatcher, which is subscribed to {@code external} messages.
      *
      * @param dispatcher the dispatcher to register
      */
@@ -203,20 +203,48 @@ public class IntegrationBus extends MulticastBus<Message,
 
         final Set<IntegrationMessageClass> currentlyRequested = subscriberHub.keys();
         if (!currentlyRequested.equals(requestedBefore)) {
-            // Notify others that the requested message set has been changed.
 
-            final RequestedMessageTypes.Builder resultBuilder = RequestedMessageTypes.newBuilder();
-            for (IntegrationMessageClass messageClass : currentlyRequested) {
-                final TypeUrl typeUrl = KnownTypes.getTypeUrl(messageClass.getClassName());
-                resultBuilder.addTypeUrls(typeUrl.value());
-            }
-            final RequestedMessageTypes result = resultBuilder.build();
-            final IntegrationMessage integrationMessage = IntegrationMessages.of(result,
-                                                                                 boundedContextId);
-            final IntegrationMessageClass channelId = IntegrationMessageClass.of(result.getClass());
-            publisherHub.get(channelId)
-                        .publish(newId(), integrationMessage);
+            // Notify others that the requested message set has been changed.
+            notifyOfNeeds(currentlyRequested);
         }
+    }
+
+    /**
+     * Unregisters a local dispatcher, which should no longer be subscribed 
+     * to {@code external} messages.
+     *
+     * @param dispatcher the dispatcher to unregister
+     */
+    @Override
+    public void unregister(ExternalMessageDispatcher<?> dispatcher) {
+        super.unregister(dispatcher);
+
+        // Remember the message types, that we have been subscribed before.
+        final Set<IntegrationMessageClass> requestedBefore = subscriberHub.keys();
+
+        // Subscribe to incoming messages of requested types.
+        unsubscribeFromIncoming(dispatcher);
+
+        final Set<IntegrationMessageClass> currentlyRequested = subscriberHub.keys();
+        if (!currentlyRequested.equals(requestedBefore)) {
+            notifyOfNeeds(currentlyRequested);
+        }
+    }
+
+    private void notifyOfNeeds(Set<IntegrationMessageClass> currentlyRequested) {
+        // Notify others that the requested message set has been changed.
+
+        final RequestedMessageTypes.Builder resultBuilder = RequestedMessageTypes.newBuilder();
+        for (IntegrationMessageClass messageClass : currentlyRequested) {
+            final TypeUrl typeUrl = KnownTypes.getTypeUrl(messageClass.getClassName());
+            resultBuilder.addTypeUrls(typeUrl.value());
+        }
+        final RequestedMessageTypes result = resultBuilder.build();
+        final IntegrationMessage integrationMessage = IntegrationMessages.of(result,
+                                                                             boundedContextId);
+        final IntegrationMessageClass channelId = IntegrationMessageClass.of(result.getClass());
+        publisherHub.get(channelId)
+                    .publish(newId(), integrationMessage);
     }
 
     /**
@@ -230,11 +258,49 @@ public class IntegrationBus extends MulticastBus<Message,
         register(wrapped);
     }
 
+    /**
+     * Unregisters the passed event subscriber as an external event dispatcher
+     * by taking only external subscriptions into account.
+     *
+     * @param eventSubscriber the subscriber to register.
+     */
+    public void unregister(final EventSubscriber eventSubscriber) {
+        final ExternalEventSubscriber wrapped = new ExternalEventSubscriber(eventSubscriber);
+        unregister(wrapped);
+    }
+
     private void subscribeToIncoming(ExternalMessageDispatcher<?> dispatcher) {
         final Set<MessageClass> messageClasses = dispatcher.getMessageClasses();
 
         final IntegrationBus integrationBus = this;
-        final Iterable<IntegrationMessageClass> transformed = transform(
+        final Iterable<IntegrationMessageClass> transformed = asIntegrationMessageClasses(
+                messageClasses);
+        for (final IntegrationMessageClass imClass : transformed) {
+            final Subscriber subscriber = subscriberHub.get(imClass);
+            subscriber.addObserver(new IncomingMessageObserver(boundedContextId, 
+                                                               imClass.value(), 
+                                                               integrationBus));
+        }
+    }
+    
+    private void unsubscribeFromIncoming(ExternalMessageDispatcher<?> dispatcher) {
+        final Set<MessageClass> messageClasses = dispatcher.getMessageClasses();
+
+        final IntegrationBus integrationBus = this;
+        final Iterable<IntegrationMessageClass> transformed = asIntegrationMessageClasses(
+                messageClasses);
+        for (final IntegrationMessageClass imClass : transformed) {
+            final Subscriber subscriber = subscriberHub.get(imClass);
+            subscriber.removeObserver(new IncomingMessageObserver(boundedContextId,
+                                                                  imClass.value(),
+                                                                  integrationBus));
+        }
+        subscriberHub.releaseStale();
+    }
+
+    private static Iterable<IntegrationMessageClass> asIntegrationMessageClasses(
+            Set<MessageClass> messageClasses) {
+        return transform(
                 messageClasses, new Function<MessageClass, IntegrationMessageClass>() {
                     @Override
                     public IntegrationMessageClass apply(@Nullable MessageClass input) {
@@ -242,17 +308,6 @@ public class IntegrationBus extends MulticastBus<Message,
                         return IntegrationMessageClass.of(input);
                     }
                 });
-        for (final IntegrationMessageClass imClass : transformed) {
-            final Subscriber subscriber = subscriberHub.get(imClass);
-            subscriber.addObserver(new ChannelObserver(boundedContextId,
-                                                       imClass.value()) {
-                @Override
-                public void handle(IntegrationMessage value) {
-                    final Message unpackedMessage = AnyPacker.unpack(value.getOriginalMessage());
-                    integrationBus.post(unpackedMessage, StreamObservers.<Ack>noOpObserver());
-                }
-            });
-        }
     }
 
     private static Any newId() {
@@ -266,6 +321,30 @@ public class IntegrationBus extends MulticastBus<Message,
     @Override
     public String toString() {
         return "Integration bus of BoundedContext ID = " + boundedContextId.getValue();
+    }
+
+    /**
+     * An observer of the incoming external messages of the specified message class.
+     *
+     * <p>Responsible of receiving those from the transport layer and posting those to the local
+     * instance of {@code IntegrationBus}.
+     */
+    private static class IncomingMessageObserver extends ChannelObserver {
+
+        private final IntegrationBus integrationBus;
+
+        protected IncomingMessageObserver(BoundedContextId boundedContextId,
+                                          Class<? extends Message> messageClass,
+                                          IntegrationBus integrationBus) {
+            super(boundedContextId, messageClass);
+            this.integrationBus = integrationBus;
+        }
+
+        @Override
+        protected void handle(IntegrationMessage message) {
+            final Message unpackedMessage = AnyPacker.unpack(message.getOriginalMessage());
+            integrationBus.post(unpackedMessage, StreamObservers.<Ack>noOpObserver());
+        }
     }
 
     /**
@@ -356,7 +435,6 @@ public class IntegrationBus extends MulticastBus<Message,
         public void onError(Throwable t) {
             throw newIllegalStateException("Error caught when observing the incoming " +
                                                    "messages of type %s", messageClass);
-
         }
 
         @Override
@@ -375,6 +453,24 @@ public class IntegrationBus extends MulticastBus<Message,
                 return;
             }
             handle(message);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            ChannelObserver that = (ChannelObserver) o;
+            return Objects.equals(boundedContextId, that.boundedContextId) &&
+                    Objects.equals(messageClass, that.messageClass);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(boundedContextId, messageClass);
         }
 
         protected abstract void handle(IntegrationMessage message);
@@ -432,22 +528,31 @@ public class IntegrationBus extends MulticastBus<Message,
 
         private void clearStaleSubscriptions(Set<String> newTypeUrls,
                                              BoundedContextId originBoundedContextId) {
+
+            final Set<String> toRemove = newHashSet();
+
             for (String previouslyRequestedType : requestedTypes.keySet()) {
                 final Collection<BoundedContextId> contextsThatRequested =
                         requestedTypes.get(previouslyRequestedType);
-                final boolean wereNonEmpty = !contextsThatRequested.isEmpty();
-                if(contextsThatRequested.contains(originBoundedContextId) &&
+                if (contextsThatRequested.contains(originBoundedContextId) &&
                         !newTypeUrls.contains(previouslyRequestedType)) {
 
                     // The `previouslyRequestedType` item is no longer requested
                     // by the bounded context with `originBoundedContextId` ID.
-                    requestedTypes.remove(previouslyRequestedType, originBoundedContextId);
+
+                    toRemove.add(previouslyRequestedType);
                 }
+            }
+            for (String itemForRemoval : toRemove) {
+                final boolean wereNonEmpty = !requestedTypes.get(itemForRemoval)
+                                                            .isEmpty();
+                requestedTypes.remove(itemForRemoval, boundedContextId);
+                final boolean emptyNow = requestedTypes.get(itemForRemoval)
+                                                       .isEmpty();
 
-                if(wereNonEmpty && requestedTypes.get(previouslyRequestedType).isEmpty()) {
+                if (wereNonEmpty && emptyNow) {
                     // It's now the time to remove the local bus subscription.
-
-                    final Class<Message> javaClass = asMessageClass(previouslyRequestedType);
+                    final Class<Message> javaClass = asMessageClass(itemForRemoval);
 
                     final EventClass eventClass = EventClass.of(javaClass);
                     eventBus.unregister(newEventDispatcher(eventClass));
@@ -456,6 +561,7 @@ public class IntegrationBus extends MulticastBus<Message,
                     rejectionBus.unregister(newRejectionDispatcher(rejectionClass));
                 }
             }
+
         }
 
         private RejectionDispatcher<String> newRejectionDispatcher(

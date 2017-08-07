@@ -29,6 +29,8 @@ import io.spine.type.MessageClass;
 import java.util.Map;
 import java.util.Set;
 
+import static com.google.common.collect.Sets.newHashSet;
+import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static java.util.Collections.synchronizedMap;
 
 /**
@@ -50,9 +52,11 @@ public interface TransportFactory {
      * A channel dedicated to exchanging the messages of a single message type.
      */
     @SuppressWarnings("unused") // the parameter is used to determine a type of the message.
-    interface MessageChannel{
+    interface MessageChannel extends AutoCloseable {
 
         IntegrationMessageClass getMessageClass();
+
+        boolean isStale();
     }
 
     /**
@@ -109,6 +113,25 @@ public interface TransportFactory {
                 channels.put(key, newChannel);
             }
             return channels.get(key);
+        }
+
+        public void releaseStale() {
+            final Set<IntegrationMessageClass> toRemove = newHashSet();
+            for (IntegrationMessageClass cls : channels.keySet()) {
+                final C channel = channels.get(cls);
+                if(channel.isStale()) {
+                    try {
+                        channel.close();
+                    } catch (Exception e) {
+                        throw illegalStateWithCauseOf(e);
+                    } finally {
+                        toRemove.add(cls);
+                    }
+                }
+            }
+            for (IntegrationMessageClass cls : toRemove) {
+                channels.remove(cls);
+            }
         }
 
         protected TransportFactory transportFactory() {
