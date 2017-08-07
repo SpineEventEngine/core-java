@@ -379,13 +379,8 @@ public class Enricher {
         /** Translation functions which perform the enrichment. */
         private final Set<EnrichmentFunction<?, ?>> functions = Sets.newHashSet();
 
-        /** Creates a new instance. */
-        public static Builder newInstance() {
-            return new Builder();
-        }
-
-        private Builder() {
-        }
+        /** Prevents instantiation from outside. */
+        private Builder() {}
 
         /**
          * Add a new field enrichment translation function.

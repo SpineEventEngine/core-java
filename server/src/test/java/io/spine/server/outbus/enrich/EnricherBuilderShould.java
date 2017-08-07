@@ -63,8 +63,8 @@ public class EnricherBuilderShould {
     }
 
     @Test
-    public void create_new_instance() {
-        assertNotNull(Enricher.Builder.newInstance());
+    public void have_private_constructor() {
+        Tests.assertHasPrivateParameterlessCtor(Enricher.Builder.class);
     }
 
     @Test
