@@ -161,6 +161,11 @@ public class IntegrationBusTestEnv {
         public static ItgProjectStarted getDomesticEvent() {
             return domesticEvent;
         }
+
+        public static void clear() {
+            externalEvent = null;
+            domesticEvent = null;
+        }
     }
 
     private static class ProjectDetailsRepository
@@ -197,6 +202,11 @@ public class IntegrationBusTestEnv {
         public static List<ItgProjectCreated> getExternalEvents() {
             return ImmutableList.copyOf(externalEvents);
         }
+
+        public static void clear() {
+            externalContexts.clear();
+            externalEvents.clear();
+        }
     }
 
     private static class ContextAwareProjectDetailsRepository
@@ -227,6 +237,11 @@ public class IntegrationBusTestEnv {
         public static ItgProjectStarted getDomesticEvent() {
             return domesticEvent;
         }
+
+        public static void clear() {
+            externalEvent = null;
+            domesticEvent = null;
+        }
     }
 
     @SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod")  // OK to preserve the state.
@@ -241,6 +256,10 @@ public class IntegrationBusTestEnv {
 
         public static ItgProjectStarted getExternalEvent() {
             return externalEvent;
+        }
+
+        public static void clear() {
+            externalEvent = null;
         }
     }
 }

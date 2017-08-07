@@ -29,6 +29,7 @@ import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectCreatedExt
 import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectDetails;
 import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectStartedExtSubscriber;
 import io.spine.server.integration.local.LocalTransportFactory;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Set;
@@ -51,6 +52,14 @@ import static org.junit.Assert.assertTrue;
  * @author Alex Tymchenko
  */
 public class IntegrationBusShould {
+
+    @Before
+    public void setUp() {
+        ProjectDetails.clear();
+        ContextAwareProjectDetails.clear();
+        ProjectCreatedExtSubscriber.clear();
+        ProjectStartedExtSubscriber.clear();
+    }
 
     @Test
     public void dispatch_events_from_one_BC_to_entities_with_ext_subscribers_of_another_BC() {

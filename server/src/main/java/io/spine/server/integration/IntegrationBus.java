@@ -22,8 +22,9 @@ package io.spine.server.integration;
 import com.google.common.base.Function;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Optional;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
+import com.google.common.collect.Multimap;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
@@ -66,6 +67,7 @@ import io.spine.type.TypeUrl;
 import io.spine.util.Exceptions;
 
 import javax.annotation.Nullable;
+import java.util.Collection;
 import java.util.Deque;
 import java.util.Objects;
 import java.util.Set;
@@ -75,8 +77,6 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.common.collect.Sets.newHashSet;
-import static io.spine.core.EventClass.asEventClass;
-import static io.spine.core.RejectionClass.asRejectionClass;
 import static io.spine.server.bus.Buses.acknowledge;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static io.spine.validate.Validate.checkNotDefault;
@@ -268,23 +268,6 @@ public class IntegrationBus extends MulticastBus<Message,
         return "Integration bus of BoundedContext ID = " + boundedContextId.getValue();
     }
 
-    private static <M extends MessageClass>
-    Iterable<M> asMessageClasses(Iterable<String> rawTypeUrls,
-                                 final Function<Class<? extends Message>, M> transformFn) {
-        return transform(rawTypeUrls,
-                         new Function<String, M>() {
-                             @Override
-                             public M apply(@Nullable String typeUrlString) {
-                                 checkNotNull(typeUrlString);
-
-                                 final TypeUrl typeUrl = TypeUrl.parse(typeUrlString);
-                                 final Class<Message> javaClass = typeUrl.getJavaClass();
-                                 final M result = transformFn.apply(javaClass);
-                                 return result;
-                             }
-                         });
-    }
-
     /**
      * Delivers the messages from external sources to the local subscribers
      * of {@code external} messages in this bounded context.
@@ -404,10 +387,11 @@ public class IntegrationBus extends MulticastBus<Message,
     private class ConfigurationChangeObserver extends ChannelObserver {
 
         /**
-         * Current set of message type URLs, received in the latest
-         * {@linkplain RequestedMessageTypes configuration message}.
+         * Current set of message type URLs, requested by other parties via sending the
+         * {@linkplain RequestedMessageTypes configuration messages}, mapped to IDs of their origin
+         * bounded contexts.
          */
-        private final Set<String> currentTypeUrls = newHashSet();
+        private final Multimap<String, BoundedContextId> requestedTypes = HashMultimap.create();
 
         private ConfigurationChangeObserver() {
             super(boundedContextId, RequestedMessageTypes.class);
@@ -416,63 +400,71 @@ public class IntegrationBus extends MulticastBus<Message,
         @Override
         public void handle(IntegrationMessage value) {
             final RequestedMessageTypes message = AnyPacker.unpack(value.getOriginalMessage());
+            final Set<String> newTypeUrls = newHashSet(message.getTypeUrlsList());
 
-            final Iterable<String> typeUrlsList = message.getTypeUrlsList();
-            final Set<String> newTypeUrls = newHashSet(typeUrlsList);
-
-            final Set<String> toRemove = Sets.difference(currentTypeUrls, newTypeUrls)
-                                             .immutableCopy();
-            final Set<String> toAdd = Sets.difference(newTypeUrls, currentTypeUrls)
-                                          .immutableCopy();
-
-            addLocalSubscriptions(toAdd);
-            removeLocalSubscriptions(toRemove);
-
-            currentTypeUrls.clear();
-            currentTypeUrls.addAll(newTypeUrls);
+            final BoundedContextId originBoundedContextId = value.getBoundedContextId();
+            addNewSubscriptions(newTypeUrls, originBoundedContextId);
+            clearStaleSubscriptions(newTypeUrls, originBoundedContextId);
         }
 
-        private void addLocalSubscriptions(Iterable<String> toAdd) {
-            if (toAdd.iterator()
-                     .hasNext()) {
-                //TODO:2017-08-7:alex.tymchenko: local dispatcher signature to take a single item?
-                final Iterable<EventClass> eventClasses = asMessageClasses(toAdd, asEventClass());
-                for (EventClass eventClass : eventClasses) {
-                    eventBus.register(newEventDispatcher(newHashSet(eventClass)));
+        private void addNewSubscriptions(Set<String> newTypeUrls,
+                                         BoundedContextId originBoundedContextId) {
+            for (String newRequestedUrl : newTypeUrls) {
+                final Collection<BoundedContextId> contextsWithSameRequest =
+                        requestedTypes.get(newRequestedUrl);
+                if(contextsWithSameRequest.isEmpty()) {
+
+                    // This item has is not requested by anyone at the moment.
+                    // Let's create a subscription.
+
+                    final Class<Message> javaClass = asMessageClass(newRequestedUrl);
+
+                    final EventClass eventClass = EventClass.of(javaClass);
+                    eventBus.register(newEventDispatcher(eventClass));
+
+                    final RejectionClass rejectionClass = RejectionClass.of(javaClass);
+                    rejectionBus.register(newRejectionDispatcher(rejectionClass));
                 }
 
-                final Iterable<RejectionClass> rejectionClasses =
-                        asMessageClasses(toAdd, asRejectionClass());
-                for (RejectionClass rejectionClass : rejectionClasses) {
-                    rejectionBus.register(newRejectionDispatcher(newHashSet(rejectionClass)));
-                }
+                requestedTypes.put(newRequestedUrl, originBoundedContextId);
             }
         }
 
-        private void removeLocalSubscriptions(Iterable<String> toRemove) {
-            if (toRemove.iterator()
-                        .hasNext()) {
-                final Iterable<EventClass> eventClasses =
-                        asMessageClasses(toRemove, asEventClass());
-                for (EventClass eventClass : eventClasses) {
-                    eventBus.unregister(newEventDispatcher(newHashSet(eventClass)));
+        private void clearStaleSubscriptions(Set<String> newTypeUrls,
+                                             BoundedContextId originBoundedContextId) {
+            for (String previouslyRequestedType : requestedTypes.keySet()) {
+                final Collection<BoundedContextId> contextsThatRequested =
+                        requestedTypes.get(previouslyRequestedType);
+                final boolean wereNonEmpty = !contextsThatRequested.isEmpty();
+                if(contextsThatRequested.contains(originBoundedContextId) &&
+                        !newTypeUrls.contains(previouslyRequestedType)) {
+
+                    // The `previouslyRequestedType` item is no longer requested
+                    // by the bounded context with `originBoundedContextId` ID.
+                    requestedTypes.remove(previouslyRequestedType, originBoundedContextId);
                 }
 
-                final Iterable<RejectionClass> rejectionClasses =
-                        asMessageClasses(toRemove, asRejectionClass());
-                for (RejectionClass rejectionClass : rejectionClasses) {
-                    rejectionBus.unregister(newRejectionDispatcher(newHashSet(rejectionClass)));
+                if(wereNonEmpty && requestedTypes.get(previouslyRequestedType).isEmpty()) {
+                    // It's now the time to remove the local bus subscription.
+
+                    final Class<Message> javaClass = asMessageClass(previouslyRequestedType);
+
+                    final EventClass eventClass = EventClass.of(javaClass);
+                    eventBus.unregister(newEventDispatcher(eventClass));
+
+                    final RejectionClass rejectionClass = RejectionClass.of(javaClass);
+                    rejectionBus.unregister(newRejectionDispatcher(rejectionClass));
                 }
             }
         }
 
         private RejectionDispatcher<String> newRejectionDispatcher(
-                final Iterable<RejectionClass> rejectionClasses) {
-            return new LocalRejectionSubscriber(boundedContextId, publisherHub, rejectionClasses);
+                final RejectionClass rejectionClass) {
+            return new LocalRejectionSubscriber(boundedContextId, publisherHub, rejectionClass);
         }
 
-        private EventDispatcher newEventDispatcher(final Iterable<EventClass> eventClasses) {
-            return new LocalEventSubscriber(boundedContextId, publisherHub, eventClasses);
+        private EventDispatcher newEventDispatcher(final EventClass eventClass) {
+            return new LocalEventSubscriber(boundedContextId, publisherHub, eventClass);
         }
 
         @Override
@@ -480,6 +472,11 @@ public class IntegrationBus extends MulticastBus<Message,
             return "Integration bus observer of `RequestedMessageTypes`; " +
                     "Bounded Context ID = " + boundedContextId.getValue();
         }
+    }
+
+    private static Class<Message> asMessageClass(String classStr) {
+        final TypeUrl typeUrl = TypeUrl.parse(classStr);
+        return typeUrl.getJavaClass();
     }
 
     /**
@@ -493,14 +490,16 @@ public class IntegrationBus extends MulticastBus<Message,
     private static final class LocalRejectionSubscriber extends RejectionSubscriber {
         private final BoundedContextId boundedContextId;
         private final PublisherHub publisherHub;
+
+        //TODO:2017-08-7:alex.tymchenko: local dispatcher signature to take a single item?
         private final Set<RejectionClass> rejectionClasses;
 
         private LocalRejectionSubscriber(BoundedContextId boundedContextId,
                                          PublisherHub publisherHub,
-                                         Iterable<RejectionClass> rejectionClasses) {
+                                         RejectionClass rejectionClass) {
             this.boundedContextId = boundedContextId;
             this.publisherHub = publisherHub;
-            this.rejectionClasses = ImmutableSet.copyOf(rejectionClasses);
+            this.rejectionClasses = ImmutableSet.of(rejectionClass);
         }
 
         @SuppressWarnings("ReturnOfCollectionOrArrayField")    // Returning an immutable impl.
@@ -560,14 +559,15 @@ public class IntegrationBus extends MulticastBus<Message,
 
         private final BoundedContextId boundedContextId;
         private final PublisherHub publisherHub;
+
         private final Set<EventClass> eventClasses;
 
         private LocalEventSubscriber(BoundedContextId boundedContextId,
                                      PublisherHub publisherHub,
-                                     Iterable<EventClass> messageClasses) {
+                                     EventClass messageClass) {
             this.boundedContextId = boundedContextId;
             this.publisherHub = publisherHub;
-            this.eventClasses = ImmutableSet.copyOf(messageClasses);
+            this.eventClasses = ImmutableSet.of(messageClass);
         }
 
         @SuppressWarnings("ReturnOfCollectionOrArrayField")     // Returning an immutable impl.
