@@ -22,8 +22,6 @@ package io.spine.server.outbus.enrich;
 
 import com.google.common.base.Function;
 
-import javax.annotation.Nullable;
-
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -78,12 +76,8 @@ class FieldEnricher<S, T> extends EnrichmentFunction<S, T> {
     }
 
     @Override
-    @Nullable
-    public T apply(@Nullable S message) {
+    public T apply(S message) {
         ensureActive();
-        if (message == null) {
-            return null;
-        }
         final T result = function.apply(message);
         return result;
     }

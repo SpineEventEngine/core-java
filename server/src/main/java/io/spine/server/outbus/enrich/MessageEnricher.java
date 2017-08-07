@@ -100,10 +100,8 @@ class MessageEnricher<S extends Message, T extends Message> extends EnrichmentFu
     }
 
     @Override
-    public T apply(@Nullable S eventMsg) {
+    public T apply(S eventMsg) {
         ensureActive();
-
-        checkNotNull(eventMsg);
         verifyOwnState();
 
         final T defaultTarget = Internal.getDefaultInstance(getEnrichmentClass());

@@ -44,7 +44,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @param <T> a type of the target enrichment
  * @author Alexander Yevsyukov
  */
-abstract class EnrichmentFunction<S, T> implements Function<S, T> {
+abstract class EnrichmentFunction<S, T> {
 
     /**
      * We are having the generified class to be able to bound the types of messages and the
@@ -66,6 +66,14 @@ abstract class EnrichmentFunction<S, T> implements Function<S, T> {
                 eventClass
         );
     }
+
+    /**
+     * Performs the calculation of target enrichment type.
+     *
+     * @param  input the source of enrichment
+     * @return enrichment result object
+     */
+    public abstract T apply(S input);
 
     Class<S> getEventClass() {
         return eventClass;
