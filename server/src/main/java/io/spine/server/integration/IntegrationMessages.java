@@ -23,6 +23,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.Identifier;
+import io.spine.core.BoundedContextId;
 import io.spine.core.Event;
 import io.spine.core.Rejection;
 import io.spine.protobuf.AnyPacker;
@@ -40,37 +41,40 @@ class IntegrationMessages {
         // prevent an instantiation of this utility class.
     }
 
-    static IntegrationMessage of(Event event) {
+    static IntegrationMessage of(Event event, BoundedContextId boundedContextId) {
         checkNotNull(event);
-        final IntegrationMessage result = of(event.getId(), event);
+        final IntegrationMessage result = of(event.getId(), event, boundedContextId);
         return result;
     }
 
-    static IntegrationMessage of(Rejection rejection) {
+    static IntegrationMessage of(Rejection rejection, BoundedContextId boundedContextId) {
         checkNotNull(rejection);
 
-        final IntegrationMessage result = of(rejection.getId(), rejection);
+        final IntegrationMessage result = of(rejection.getId(), rejection, boundedContextId);
         return result;
     }
 
-    static IntegrationMessage of(RequestedMessageTypes messageTypes) {
+    static IntegrationMessage of(RequestedMessageTypes messageTypes,
+                                 BoundedContextId boundedContextId) {
         checkNotNull(messageTypes);
-
-        //TODO:2017-08-2:alex.tymchenko: identify the message with some BC identity.
         final String idString = Identifier.newUuid();
         final IntegrationMessage result = of(StringValue.newBuilder()
                                                         .setValue(idString)
-                                                        .build(), messageTypes);
+                                                        .build(), messageTypes,
+                                             boundedContextId);
         return result;
     }
 
-    private static IntegrationMessage of(Message messageId, Message message) {
+    private static IntegrationMessage of(Message messageId,
+                                         Message message,
+                                         BoundedContextId boundedContextId) {
         final Any packedId = Identifier.pack(messageId);
         final Any packedMessage = AnyPacker.pack(message);
 
         return IntegrationMessage.newBuilder()
                                  .setId(packedId)
                                  .setOriginalMessage(packedMessage)
+                                 .setBoundedContextId(boundedContextId)
                                  .build();
     }
 }

@@ -211,7 +211,8 @@ public class IntegrationBus extends MulticastBus<Message,
                 resultBuilder.addTypeUrls(typeUrl.value());
             }
             final RequestedMessageTypes result = resultBuilder.build();
-            final IntegrationMessage integrationMessage = IntegrationMessages.of(result);
+            final IntegrationMessage integrationMessage = IntegrationMessages.of(result,
+                                                                                 boundedContextId);
             final IntegrationMessageClass channelId = IntegrationMessageClass.of(result.getClass());
             publisherHub.get(channelId)
                         .publish(newId(), integrationMessage);
@@ -243,9 +244,10 @@ public class IntegrationBus extends MulticastBus<Message,
                 });
         for (final IntegrationMessageClass imClass : transformed) {
             final Subscriber subscriber = subscriberHub.get(imClass);
-            subscriber.addObserver(new ChannelObserver<IntegrationMessage>(imClass.value()) {
+            subscriber.addObserver(new ChannelObserver(boundedContextId,
+                                                       imClass.value()) {
                 @Override
-                public void onNext(IntegrationMessage value) {
+                public void handle(IntegrationMessage value) {
                     final Message unpackedMessage = AnyPacker.unpack(value.getOriginalMessage());
                     integrationBus.post(unpackedMessage, StreamObservers.<Ack>noOpObserver());
                 }
@@ -355,14 +357,15 @@ public class IntegrationBus extends MulticastBus<Message,
     /**
      * Base routines for the {@linkplain io.spine.server.integration.TransportFactory.MessageChannel
      * message channel} observers.
-     *
-     * @param <M> the type of the message the observer is receiving updates on
      */
-    private abstract static class ChannelObserver<M> implements StreamObserver<M> {
+    private abstract static class ChannelObserver implements StreamObserver<IntegrationMessage> {
 
+        private final BoundedContextId boundedContextId;
         private final Class<? extends Message> messageClass;
 
-        protected ChannelObserver(Class<? extends Message> messageClass) {
+        protected ChannelObserver(BoundedContextId boundedContextId,
+                                  Class<? extends Message> messageClass) {
+            this.boundedContextId = boundedContextId;
             this.messageClass = messageClass;
         }
 
@@ -379,13 +382,26 @@ public class IntegrationBus extends MulticastBus<Message,
                                                    "the incoming messages of type %s",
                                            messageClass);
         }
+
+        @Override
+        public final void onNext(IntegrationMessage message) {
+            checkNotNull(message);
+
+            final BoundedContextId source = message.getBoundedContextId();
+            if (this.boundedContextId.equals(source)){
+                return;
+            }
+            handle(message);
+        }
+
+        protected abstract void handle(IntegrationMessage message);
     }
 
     /**
      * An observer, which reacts to the configuration update messages sent by
      * external entities (such as {@code IntegrationBus}es of other bounded contexts).
      */
-    private class ConfigurationChangeObserver extends ChannelObserver<IntegrationMessage> {
+    private class ConfigurationChangeObserver extends ChannelObserver {
 
         /**
          * Current set of message type URLs, received in the latest
@@ -393,13 +409,12 @@ public class IntegrationBus extends MulticastBus<Message,
          */
         private final Set<String> currentTypeUrls = newHashSet();
 
-
         private ConfigurationChangeObserver() {
-            super(RequestedMessageTypes.class);
+            super(boundedContextId, RequestedMessageTypes.class);
         }
 
         @Override
-        public void onNext(IntegrationMessage value) {
+        public void handle(IntegrationMessage value) {
             final RequestedMessageTypes message = AnyPacker.unpack(value.getOriginalMessage());
 
             final Iterable<String> typeUrlsList = message.getTypeUrlsList();
@@ -418,28 +433,38 @@ public class IntegrationBus extends MulticastBus<Message,
         }
 
         private void addLocalSubscriptions(Iterable<String> toAdd) {
-            if(toAdd.iterator().hasNext()) {
+            if (toAdd.iterator()
+                     .hasNext()) {
+                //TODO:2017-08-7:alex.tymchenko: local dispatcher signature to take a single item?
                 final Iterable<EventClass> eventClasses = asMessageClasses(toAdd, asEventClass());
-                eventBus.register(newEventDispatcher(eventClasses));
+                for (EventClass eventClass : eventClasses) {
+                    eventBus.register(newEventDispatcher(newHashSet(eventClass)));
+                }
 
                 final Iterable<RejectionClass> rejectionClasses =
                         asMessageClasses(toAdd, asRejectionClass());
-                rejectionBus.register(newRejectionDispatcher(rejectionClasses));
+                for (RejectionClass rejectionClass : rejectionClasses) {
+                    rejectionBus.register(newRejectionDispatcher(newHashSet(rejectionClass)));
+                }
             }
         }
 
         private void removeLocalSubscriptions(Iterable<String> toRemove) {
-            if(toRemove.iterator().hasNext()) {
-                final Iterable<EventClass> eventClasses = asMessageClasses(toRemove,
-                                                                           asEventClass());
-                eventBus.unregister(newEventDispatcher(eventClasses));
+            if (toRemove.iterator()
+                        .hasNext()) {
+                final Iterable<EventClass> eventClasses =
+                        asMessageClasses(toRemove, asEventClass());
+                for (EventClass eventClass : eventClasses) {
+                    eventBus.unregister(newEventDispatcher(newHashSet(eventClass)));
+                }
 
                 final Iterable<RejectionClass> rejectionClasses =
                         asMessageClasses(toRemove, asRejectionClass());
-                rejectionBus.unregister(newRejectionDispatcher(rejectionClasses));
+                for (RejectionClass rejectionClass : rejectionClasses) {
+                    rejectionBus.unregister(newRejectionDispatcher(newHashSet(rejectionClass)));
+                }
             }
         }
-
 
         private RejectionDispatcher<String> newRejectionDispatcher(
                 final Iterable<RejectionClass> rejectionClasses) {
@@ -478,7 +503,6 @@ public class IntegrationBus extends MulticastBus<Message,
             this.rejectionClasses = ImmutableSet.copyOf(rejectionClasses);
         }
 
-
         @SuppressWarnings("ReturnOfCollectionOrArrayField")    // Returning an immutable impl.
         @Override
         public Set<RejectionClass> getMessageClasses() {
@@ -488,7 +512,7 @@ public class IntegrationBus extends MulticastBus<Message,
         @Override
         public Set<String> dispatch(RejectionEnvelope envelope) {
             final Rejection rejection = envelope.getOuterObject();
-            final IntegrationMessage message = IntegrationMessages.of(rejection);
+            final IntegrationMessage message = IntegrationMessages.of(rejection, boundedContextId);
             final IntegrationMessageClass messageClass = IntegrationMessageClass.of(
                     envelope.getMessageClass());
             final Publisher channel = publisherHub.get(messageClass);
@@ -524,7 +548,6 @@ public class IntegrationBus extends MulticastBus<Message,
         }
     }
 
-
     /**
      * A subscriber to local {@code EventBus}, which publishes each matching message to
      * a remote channel.
@@ -556,7 +579,7 @@ public class IntegrationBus extends MulticastBus<Message,
         @Override
         public Set<String> dispatch(EventEnvelope envelope) {
             final Event event = envelope.getOuterObject();
-            final IntegrationMessage msg = IntegrationMessages.of(event);
+            final IntegrationMessage msg = IntegrationMessages.of(event, boundedContextId);
             final IntegrationMessageClass messageClass = IntegrationMessageClass.of(
                     envelope.getMessageClass());
             final Publisher channel = publisherHub.get(messageClass);

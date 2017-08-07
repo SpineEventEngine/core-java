@@ -68,7 +68,7 @@ public class IntegrationBusTestEnv {
 
     public static BoundedContext contextWithExternalSubscriber(TransportFactory transportFactory) {
         final BoundedContext boundedContext = contextWithTransport(transportFactory);
-        final ExternalSubscriber eventSubscriber = new ExternalSubscriber();
+        final ProjectCreatedExtSubscriber eventSubscriber = new ProjectCreatedExtSubscriber();
         boundedContext.getIntegrationBus()
                       .register(eventSubscriber);
         boundedContext.getEventBus()
@@ -83,6 +83,20 @@ public class IntegrationBusTestEnv {
                                                     .setId(newUuid())
                                                     .setIntegrationBus(builder)
                                                     .build();
+        return result;
+    }
+
+    public static BoundedContext contextWithProjectCreatedNeeds(TransportFactory factory) {
+        final BoundedContext result = contextWithTransport(factory);
+        result.getIntegrationBus()
+                                     .register(new ProjectCreatedExtSubscriber());
+        return result;
+    }
+
+    public static BoundedContext contextWithProjectStartedNeeds(TransportFactory factory) {
+        final BoundedContext result = contextWithTransport(factory);
+        result.getIntegrationBus()
+              .register(new ProjectStartedExtSubscriber());
         return result;
     }
 
@@ -135,7 +149,7 @@ public class IntegrationBusTestEnv {
             externalEvent = event;
         }
 
-        @Subscribe()
+        @Subscribe
         public void on(ItgProjectStarted event) {
             domesticEvent = event;
         }
@@ -190,7 +204,7 @@ public class IntegrationBusTestEnv {
     }
 
     @SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod")  // OK to preserve the state.
-    public static class ExternalSubscriber extends EventSubscriber {
+    public static class ProjectCreatedExtSubscriber extends EventSubscriber {
 
         private static ItgProjectCreated externalEvent = null;
 
@@ -212,6 +226,21 @@ public class IntegrationBusTestEnv {
 
         public static ItgProjectStarted getDomesticEvent() {
             return domesticEvent;
+        }
+    }
+
+    @SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod")  // OK to preserve the state.
+    public static class ProjectStartedExtSubscriber extends EventSubscriber {
+
+        private static ItgProjectStarted externalEvent = null;
+
+        @Subscribe(external = true)
+        public void on(ItgProjectStarted msg) {
+            externalEvent = msg;
+        }
+
+        public static ItgProjectStarted getExternalEvent() {
+            return externalEvent;
         }
     }
 }
