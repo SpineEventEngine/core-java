@@ -92,10 +92,8 @@ import static com.google.common.base.Preconditions.checkState;
  * @see io.spine.server.projection.Projection Projection
  * @see io.spine.core.Subscribe @Subscribe
  */
-public class EventBus extends CommandOutputBus<Event,
-                                               EventEnvelope,
-                                               EventClass,
-                                               EventDispatcher<?>> {
+public class EventBus
+        extends CommandOutputBus<Event, EventEnvelope, EventClass, EventDispatcher<?>> {
 
     /*
      * NOTE: Even though, the EventBus has a private constructor and
@@ -110,8 +108,7 @@ public class EventBus extends CommandOutputBus<Event,
     private final MessageValidator eventMessageValidator;
 
     private final Deque<BusFilter<EventEnvelope>> filterChain;
-    private final StreamObserver<Ack> streamObserver = LoggingObserver.forClass(getClass(),
-                                                                                Level.TRACE);
+    private final StreamObserver<Ack> streamObserver;
     /** The validator for events posted to the bus. */
     @Nullable
     private EventValidator eventValidator;
@@ -127,6 +124,7 @@ public class EventBus extends CommandOutputBus<Event,
         this.enricher = builder.enricher;
         this.eventMessageValidator = builder.eventValidator;
         this.filterChain = builder.getFilters();
+        this.streamObserver = LoggingObserver.forClass(getClass(), builder.logLevelForPost);
     }
 
     /** Creates a builder for new {@code EventBus}. */
@@ -325,9 +323,12 @@ public class EventBus extends CommandOutputBus<Event,
         @Nullable
         private Enricher enricher;
 
+        /** Logging level for posted events.  */
+        private LoggingObserver.Level logLevelForPost = Level.TRACE;
+
+        /** Prevents direct instantiation. */
         private Builder() {
             super();
-            // Prevent direct instantiation.
         }
 
         /**
@@ -440,6 +441,23 @@ public class EventBus extends CommandOutputBus<Event,
 
         public Optional<Enricher> getEnricher() {
             return Optional.fromNullable(enricher);
+        }
+
+        /**
+         * Sets logging level for post operations.
+         *
+         * <p>If not set directly, {@link LoggingObserver.Level#TRACE} will be used.
+         */
+        public Builder setLogLevelForPost(Level level) {
+            this.logLevelForPost = level;
+            return this;
+        }
+
+        /**
+         * Obtains the logging level for {@linkplain EventBus#post(Event) post} operations.
+         */
+        public Level getLogLevelForPost() {
+            return this.logLevelForPost;
         }
 
         /**
