@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.aggregate;
+package io.spine.core;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -27,7 +27,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Marks a method of an aggregate as one that <em>may</em> modify the state of the aggregate in
+ * Marks a method of an entity as one that <em>may</em> modify the state of the entity in
  * response to an <em>external</em> event.
  *
  * <p>A reacting method <strong>must:</strong>
@@ -35,22 +35,14 @@ import java.lang.annotation.Target;
  *     <li>be annotated with {@link React @React};
  *
  *     <li>accept an event message (derived from {@link com.google.protobuf.Message
- *     Message}) which is <em>generated</em> by this aggregate, as the first parameter;
+ *     Message}), as the first parameter;
  *
- *     <li>return an event derived from {@link com.google.protobuf.Message Message}
+ *     <li>return an event message derived from {@link com.google.protobuf.Message Message}
  *     <strong>or</strong> several event messages returned as a {@link java.util.List List}.
- *     The returned event messages represent the state of the aggregate. Therefore, each returned
- *     event message must have corresponding {@linkplain Apply event applier}.
  * </ul>
  *
  * <p>If the annotation is applied to a method which does not satisfy any of these requirements,
  * this method will not be registering for receiving events.
- *
- * <p>A reacting method <strong>must not:</strong>
- * <ul>
- *     <li>React to events produced by this aggregate.
- *     <li>Return the event message on which it reacts.
- * </ul>
  *
  * @author Alexander Yevsyukov
  */
@@ -60,8 +52,8 @@ import java.lang.annotation.Target;
 public @interface React {
 
     /**
-     * When {@code true}, the annotated method of the aggregate reacts on the event generated from
-     * outside of the Bounded Context to which this aggregate belongs.
+     * When {@code true}, the annotated method of the entity reacts on the event generated from
+     * outside of the Bounded Context to which this this entity belongs.
      */
     boolean external() default false;
 }

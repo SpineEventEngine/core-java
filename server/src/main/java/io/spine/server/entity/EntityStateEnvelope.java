@@ -25,7 +25,6 @@ import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.Identifier;
-import io.spine.core.ActorContext;
 import io.spine.core.EventContext;
 import io.spine.core.MessageEnvelope;
 import io.spine.core.TenantId;
@@ -130,13 +129,6 @@ public final class EntityStateEnvelope<I, S extends Message>
     @Override
     public EntityStateClass getMessageClass() {
         return this.entityStateClass;
-    }
-
-    @Override
-    public ActorContext getActorContext() {
-        return ActorContext.newBuilder()
-                           .setTenantId(tenantId)
-                           .build();
     }
 
     /**

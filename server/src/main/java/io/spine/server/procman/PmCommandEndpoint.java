@@ -18,43 +18,34 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.aggregate;
+package io.spine.server.procman;
 
-import com.google.protobuf.Message;
 import io.spine.core.CommandEnvelope;
+import io.spine.core.Event;
 
 import java.util.List;
 
 /**
- * Dispatches commands to aggregates of the associated {@code AggregateRepository}.
+ * Dispatches command to process managers.
  *
- * @param <I> the type of the aggregate IDs
- * @param <A> the type of the aggregates managed by the parent repository
+ * @param <I> the type of process manager IDs
+ * @param <P> the type of process managers
  * @author Alexander Yevsyukov
  */
-class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
-    extends AggregateMessageEndpoint<I, A, CommandEnvelope, I> {
+class PmCommandEndpoint<I, P extends ProcessManager<I, ?, ?>>
+        extends PmEndpoint<I, P, CommandEnvelope, I> {
 
-    private AggregateCommandEndpoint(AggregateRepository<I, A> repo, CommandEnvelope command) {
-        super(repo, command);
+    private PmCommandEndpoint(ProcessManagerRepository<I, P, ?> repository, CommandEnvelope cmd) {
+        super(repository, cmd);
     }
 
-    static <I, A extends Aggregate<I, ?, ?>>
-    I handle(AggregateRepository<I, A> repository, CommandEnvelope command) {
-        final AggregateCommandEndpoint<I, A> endpoint =
-                new AggregateCommandEndpoint<>(repository, command);
-
-        return endpoint.handle();
+    static <I, P extends ProcessManager<I, ?, ?>>
+    I handle (ProcessManagerRepository<I, P, ?> repository, CommandEnvelope cmd) {
+        final PmCommandEndpoint<I, P> endpoint = new PmCommandEndpoint<>(repository, cmd);
+        final I result = endpoint.handle();
+        return result;
     }
 
-    @Override
-    protected List<? extends Message> doDispatch(A aggregate, CommandEnvelope envelope) {
-        return aggregate.dispatchCommand(envelope);
-    }
-
-    /**
-     * Returns ID of the aggregate that is responsible for handling the command.
-     */
     @Override
     protected I getTargets() {
         final CommandEnvelope envelope = envelope();
@@ -64,20 +55,29 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
+    protected List<Event> doDispatch(P processManager, CommandEnvelope command) {
+        return processManager.dispatchCommand(command);
+    }
+
+    @Override
     protected void onError(CommandEnvelope envelope, RuntimeException exception) {
         repository().onError(envelope, exception);
-        // Re-throw exception so that unhandled command gets proper status.
         throw exception;
     }
 
     /**
-     * Throws {@link IllegalStateException} with the message containing details of the aggregate and
-     * the command in response to which the aggregate generated empty set of event messages.
+     * Throws {@link IllegalStateException} with the message containing details of
+     * the process manager and the command in response to which empty set of event messages
+     * was generated.
+     * 
      * @throws IllegalStateException always
      */
     @Override
-    protected void onEmptyResult(A aggregate, CommandEnvelope cmd) throws IllegalStateException {
-        final String format = "The aggregate (class: %s, id: %s) produced empty response for the command (class: %s, id: %s).";
-        onUnhandledCommand(aggregate, cmd, format);
+    protected void onEmptyResult(P processManager, CommandEnvelope cmd)
+            throws IllegalStateException {
+        final String format =
+                "The process manager (class: %s, id: %s) produced " +
+                        "empty response for the command (class: %s, id: %s).";
+        onUnhandledCommand(processManager, cmd, format);
     }
 }

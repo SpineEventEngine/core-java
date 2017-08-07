@@ -54,11 +54,6 @@ public interface MessageEnvelope<I extends Message, T> {
     MessageClass getMessageClass();
 
     /**
-     * Obtains an actor context for the wrapped message.
-     */
-    ActorContext getActorContext();
-
-    /**
      * Sets the context of the enclosed message into as the origin in the context of an event
      * to be build.
      *

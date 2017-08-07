@@ -24,8 +24,8 @@ import com.google.common.base.Predicate;
 import com.google.protobuf.Message;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
-import io.spine.protobuf.Messages;
-import io.spine.server.aggregate.React;
+import io.spine.core.Events;
+import io.spine.core.React;
 
 import javax.annotation.CheckReturnValue;
 import java.lang.reflect.Method;
@@ -64,15 +64,16 @@ public final class EventReactorMethod extends HandlerMethod<EventContext> {
         checkNotNull(target);
         checkNotNull(event);
         checkNotNull(context);
-        final Message eventMessage = Messages.ensureMessage(event);
+        final Message eventMessage = Events.ensureMessage(event);
         final EventReactorMethod method = getMethod(target.getClass(), eventMessage);
         return method.invoke(target, eventMessage, context);
     }
 
     private static EventReactorMethod getMethod(Class<?> cls, Message eventMessage) {
         final Class<? extends Message> eventClass = eventMessage.getClass();
-        final EventReactorMethod method = MethodRegistry.getInstance()
-                                                        .get(cls, eventClass, factory());
+        final HandlerMethod.Factory<EventReactorMethod> factory = factory();
+        final MethodRegistry registry = MethodRegistry.getInstance();
+        final EventReactorMethod method = registry.get(cls, eventClass, factory);
         if (method == null) {
             throw newIllegalStateException("The class %s does not react to events of class %s.",
                                            cls.getName(), eventClass.getName());
@@ -87,10 +88,10 @@ public final class EventReactorMethod extends HandlerMethod<EventContext> {
      */
     @Override
     public <R> R invoke(Object target, Message message, EventContext context) {
-        final R handlingResult = super.invoke(target, message, context);
-        final List<? extends Message> events = toList(handlingResult);
+        final Object handlingResult = super.invoke(target, message, context);
+        final List<? extends Message> eventMessages = toList(handlingResult);
         // The list of event messages is the return type expected.
-        @SuppressWarnings("unchecked") final R result = (R) events;
+        @SuppressWarnings("unchecked") final R result = (R) eventMessages;
         return result;
     }
 
@@ -158,10 +159,20 @@ public final class EventReactorMethod extends HandlerMethod<EventContext> {
     /**
      * The predicate that filters event reactor methods.
      */
-    private static class FilterPredicate extends HandlerMethodPredicate<EventContext> {
+    private static class FilterPredicate extends EventMethodPredicate {
 
         private FilterPredicate() {
-            super(React.class, EventContext.class);
+            super(React.class);
+        }
+
+        @Override
+        protected boolean verifyReturnType(Method method) {
+            final boolean returnsMessageOrIterable = returnsMessageOrIterable(method);
+            if (returnsMessageOrIterable) {
+                checkOutputMessageType(method);
+                return true;
+            }
+            return false;
         }
 
         /**
@@ -195,16 +206,6 @@ public final class EventReactorMethod extends HandlerMethod<EventContext> {
                         "React method cannot return the same event message {}",
                         firstParamType.getName());
             }
-        }
-
-        @Override
-        protected boolean verifyReturnType(Method method) {
-            final boolean returnsMessageOrIterable = returnsMessageOrIterable(method);
-            if (returnsMessageOrIterable) {
-                checkOutputMessageType(method);
-                return true;
-            }
-            return false;
         }
     }
 }

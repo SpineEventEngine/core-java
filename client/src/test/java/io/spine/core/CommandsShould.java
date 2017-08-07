@@ -53,7 +53,6 @@ import static io.spine.core.Commands.causedByRejection;
 import static io.spine.core.Commands.sameActorAndTenant;
 import static io.spine.core.given.GivenTenantId.newUuid;
 import static io.spine.protobuf.TypeConverter.toMessage;
-import static io.spine.test.TestValues.newUuidValue;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.TimeTests.Past.minutesAgo;
 import static io.spine.test.TimeTests.Past.secondsAgo;
@@ -230,8 +229,7 @@ public class CommandsShould {
 
     @Test
     public void obtain_type_of_command() {
-        final Command command = requestFactory.command()
-                                              .create(newUuidValue());
+        final Command command = requestFactory.generateCommand();
 
         final TypeName typeName = CommandEnvelope.of(command)
                                                  .getTypeName();

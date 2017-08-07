@@ -26,15 +26,15 @@ import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.rejection.given.BareDispatcher;
-import io.spine.server.rejection.given.CommandAwareSubscriber;
-import io.spine.server.rejection.given.CommandMessageAwareSubscriber;
-import io.spine.server.rejection.given.ContextAwareSubscriber;
-import io.spine.server.rejection.given.FaultySubscriber;
-import io.spine.server.rejection.given.InvalidOrderSubscriber;
-import io.spine.server.rejection.given.InvalidProjectNameSubscriber;
+import io.spine.server.rejection.given.CommandAwareReactor;
+import io.spine.server.rejection.given.CommandMessageAwareReactor;
+import io.spine.server.rejection.given.ContextAwareReactor;
+import io.spine.server.rejection.given.FaultyReactor;
+import io.spine.server.rejection.given.InvalidOrderReactor;
+import io.spine.server.rejection.given.InvalidProjectNameReactor;
 import io.spine.server.rejection.given.PostponedDispatcherRejectionDelivery;
-import io.spine.server.rejection.given.RejectionMessageSubscriber;
-import io.spine.server.rejection.given.VerifiableSubscriber;
+import io.spine.server.rejection.given.RejectionMessageReactor;
+import io.spine.server.rejection.given.VerifiableReactor;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -124,13 +124,13 @@ public class RejectionBusShould {
 
     @Test(expected = IllegalArgumentException.class)
     public void reject_object_with_no_subscriber_methods() {
-        rejectionBus.register(new RejectionSubscriber());
+        rejectionBus.register(new RejectionReactor());
     }
 
     @Test
     public void register_rejection_subscriber() {
-        final RejectionSubscriber subscriberOne = new InvalidProjectNameSubscriber();
-        final RejectionSubscriber subscriberTwo = new InvalidProjectNameSubscriber();
+        final RejectionReactor subscriberOne = new InvalidProjectNameReactor();
+        final RejectionReactor subscriberTwo = new InvalidProjectNameReactor();
 
         rejectionBus.register(subscriberOne);
         rejectionBus.register(subscriberTwo);
@@ -146,8 +146,8 @@ public class RejectionBusShould {
 
     @Test
     public void unregister_subscribers() {
-        final RejectionSubscriber subscriberOne = new InvalidProjectNameSubscriber();
-        final RejectionSubscriber subscriberTwo = new InvalidProjectNameSubscriber();
+        final RejectionReactor subscriberOne = new InvalidProjectNameReactor();
+        final RejectionReactor subscriberTwo = new InvalidProjectNameReactor();
         rejectionBus.register(subscriberOne);
         rejectionBus.register(subscriberTwo);
         final RejectionClass rejectionClass = RejectionClass.of(
@@ -171,7 +171,7 @@ public class RejectionBusShould {
 
     @Test
     public void call_subscriber_when_rejection_posted() {
-        final InvalidProjectNameSubscriber subscriber = new InvalidProjectNameSubscriber();
+        final InvalidProjectNameReactor subscriber = new InvalidProjectNameReactor();
         final Rejection rejection = invalidProjectNameRejection();
         rejectionBus.register(subscriber);
 
@@ -269,7 +269,7 @@ public class RejectionBusShould {
 
     @Test
     public void catch_exceptions_caused_by_subscribers() {
-        final VerifiableSubscriber faultySubscriber = new FaultySubscriber();
+        final VerifiableReactor faultySubscriber = new FaultyReactor();
 
         rejectionBus.register(faultySubscriber);
         rejectionBus.post(invalidProjectNameRejection());
@@ -282,7 +282,7 @@ public class RejectionBusShould {
         final RejectionBus rejectionBus = RejectionBus.newBuilder()
                                                       .build();
         rejectionBus.register(new BareDispatcher());
-        rejectionBus.register(new InvalidProjectNameSubscriber());
+        rejectionBus.register(new InvalidProjectNameReactor());
         final RejectionClass rejectionClass = RejectionClass.of(InvalidProjectName.class);
 
         rejectionBus.close();
@@ -293,25 +293,25 @@ public class RejectionBusShould {
 
     @Test
     public void support_short_form_subscriber_methods() {
-        final RejectionMessageSubscriber subscriber = new RejectionMessageSubscriber();
+        final RejectionMessageReactor subscriber = new RejectionMessageReactor();
         checkRejection(subscriber);
     }
 
     @Test
     public void support_context_aware_subscriber_methods() {
-        final ContextAwareSubscriber subscriber = new ContextAwareSubscriber();
+        final ContextAwareReactor subscriber = new ContextAwareReactor();
         checkRejection(subscriber);
     }
 
     @Test
     public void support_command_msg_aware_subscriber_methods() {
-        final CommandMessageAwareSubscriber subscriber = new CommandMessageAwareSubscriber();
+        final CommandMessageAwareReactor subscriber = new CommandMessageAwareReactor();
         checkRejection(subscriber);
     }
 
     @Test
     public void support_command_aware_subscriber_methods() {
-        final CommandAwareSubscriber subscriber = new CommandAwareSubscriber();
+        final CommandAwareReactor subscriber = new CommandAwareReactor();
         checkRejection(subscriber);
     }
 
@@ -320,7 +320,7 @@ public class RejectionBusShould {
                 // In Bus ->  No message types are forwarded by this dispatcher.
     )
     public void not_support_subscriber_methods_with_wrong_parameter_sequence() {
-        final RejectionDispatcher<?> subscriber = new InvalidOrderSubscriber();
+        final RejectionDispatcher<?> subscriber = new InvalidOrderReactor();
 
         rejectionBus.register(subscriber);
         rejectionBus.post(missingOwnerRejection());
@@ -343,7 +343,7 @@ public class RejectionBusShould {
         assertNotNull(RejectionBus.log());
     }
 
-    private void checkRejection(VerifiableSubscriber subscriber) {
+    private void checkRejection(VerifiableReactor subscriber) {
         final Rejection rejection = missingOwnerRejection();
         rejectionBus.register(subscriber);
         rejectionBus.post(rejection);

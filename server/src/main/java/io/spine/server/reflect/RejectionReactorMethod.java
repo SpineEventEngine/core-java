@@ -24,6 +24,7 @@ import com.google.common.base.Predicate;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.CommandContext;
+import io.spine.core.React;
 import io.spine.core.RejectionClass;
 import io.spine.core.Subscribe;
 
@@ -31,6 +32,7 @@ import javax.annotation.CheckReturnValue;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -46,7 +48,7 @@ import static java.lang.String.format;
  * @author Alexander Yevsyukov
  */
 @Internal
-public class RejectionSubscriberMethod extends HandlerMethod<CommandContext> {
+public class RejectionReactorMethod extends HandlerMethod<CommandContext> {
 
     /** The instance of the predicate to filter rejection subscriber methods of a class. */
     private static final MethodPredicate PREDICATE = new FilterPredicate();
@@ -60,7 +62,7 @@ public class RejectionSubscriberMethod extends HandlerMethod<CommandContext> {
      * @param method subscriber method
      */
     @VisibleForTesting
-    RejectionSubscriberMethod(Method method) {
+    RejectionReactorMethod(Method method) {
         super(method);
         this.kind = getKind(method);
     }
@@ -92,36 +94,41 @@ public class RejectionSubscriberMethod extends HandlerMethod<CommandContext> {
      * this one does return any value, since the rejection subscriber methods are {@code void}
      * by design.
      *
-     * @param target           the target object on which call the method
-     * @param rejectionMessage the rejection message to handle
-     * @param commandMessage   the command message
-     * @param context          the context of the command
+     * @param  target           the target object on which call the method
+     * @param  rejectionMessage the rejection message to handle
+     * @param  commandMessage   the command message
+     * @param  context          the context of the command
+     * @return the list of event messages produced by the reacting method or empty list if no event
+     * messages were produced
      */
-    public void invoke(Object target,
-                       Message rejectionMessage,
-                       Message commandMessage,
-                       CommandContext context) {
+    public List<? extends Message> invoke(Object target,
+                                          Message rejectionMessage,
+                                          Message commandMessage,
+                                          CommandContext context) {
         checkNotNull(rejectionMessage);
         checkNotNull(commandMessage);
         checkNotNull(context);
         try {
+            final Object output;
             final Method method = getMethod();
             switch (kind) {
                 case REJECTION_MESSAGE_AWARE:
-                    method.invoke(target, rejectionMessage);
+                    output = method.invoke(target, rejectionMessage);
                     break;
                 case COMMAND_CONTEXT_AWARE:
-                    method.invoke(target, rejectionMessage, context);
+                    output = method.invoke(target, rejectionMessage, context);
                     break;
                 case COMMAND_MESSAGE_AWARE:
-                    method.invoke(target, rejectionMessage, commandMessage);
+                    output = method.invoke(target, rejectionMessage, commandMessage);
                     break;
                 case COMMAND_AWARE:
-                    method.invoke(target, rejectionMessage, commandMessage, context);
+                    output = method.invoke(target, rejectionMessage, commandMessage, context);
                     break;
                 default:
                     throw unsupported("Unsupported method kind encountered %s", kind.name());
             }
+            final List<? extends Message> eventMessages = toList(output);
+            return eventMessages;
         } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
             throw whyFailed(target, rejectionMessage, context, e);
         }
@@ -140,20 +147,22 @@ public class RejectionSubscriberMethod extends HandlerMethod<CommandContext> {
     }
 
     /**
-     * Invokes the subscriber method in the passed object.
+     * Invokes the reactor method in the passed object.
      */
-    public static void invokeFor(Object target,
-                                 Message rejectionMessage,
-                                 Message commandMessage,
-                                 CommandContext context) {
+    public static List<? extends Message> invokeFor(Object target,
+                                                    Message rejectionMessage,
+                                                    Message commandMessage,
+                                                    CommandContext context) {
         checkNotNull(target);
         checkNotNull(rejectionMessage);
         checkNotNull(commandMessage);
         checkNotNull(context);
 
-        final RejectionSubscriberMethod method = getMethod(target.getClass(),
-                                                           rejectionMessage, commandMessage);
-        method.invoke(target, rejectionMessage, commandMessage, context);
+        final RejectionReactorMethod method =
+                getMethod(target.getClass(), rejectionMessage, commandMessage);
+        final List<? extends Message> result =
+                method.invoke(target, rejectionMessage, commandMessage, context);
+        return result;
     }
 
     /**
@@ -162,18 +171,18 @@ public class RejectionSubscriberMethod extends HandlerMethod<CommandContext> {
      * @throws IllegalStateException if the passed class does not have an rejection handling method
      *                               for the class of the passed message
      */
-    public static RejectionSubscriberMethod getMethod(Class<?> cls,
-                                                      Message rejectionMessage,
-                                                      Message commandMessage) {
+    public static RejectionReactorMethod getMethod(Class<?> cls,
+                                                   Message rejectionMessage,
+                                                   Message commandMessage) {
         checkNotNull(cls);
         checkNotNull(rejectionMessage);
         checkNotNull(commandMessage);
 
         final Class<? extends Message> rejectionClass = rejectionMessage.getClass();
         final MethodRegistry registry = MethodRegistry.getInstance();
-        final RejectionSubscriberMethod method = registry.get(cls,
-                                                              rejectionClass,
-                                                              factory());
+        final RejectionReactorMethod method = registry.get(cls,
+                                                           rejectionClass,
+                                                           factory());
         if (method == null) {
             throw missingRejectionHandler(cls, rejectionClass);
         }
@@ -197,7 +206,7 @@ public class RejectionSubscriberMethod extends HandlerMethod<CommandContext> {
     }
 
     /** Returns the factory for filtering and creating rejection subscriber methods. */
-    private static HandlerMethod.Factory<RejectionSubscriberMethod> factory() {
+    private static HandlerMethod.Factory<RejectionReactorMethod> factory() {
         return Factory.getInstance();
     }
 
@@ -208,16 +217,16 @@ public class RejectionSubscriberMethod extends HandlerMethod<CommandContext> {
     /**
      * The factory for filtering methods that match {@code RejectionSubscriberMethod} specification.
      */
-    private static class Factory implements HandlerMethod.Factory<RejectionSubscriberMethod> {
+    private static class Factory implements HandlerMethod.Factory<RejectionReactorMethod> {
 
         @Override
-        public Class<RejectionSubscriberMethod> getMethodClass() {
-            return RejectionSubscriberMethod.class;
+        public Class<RejectionReactorMethod> getMethodClass() {
+            return RejectionReactorMethod.class;
         }
 
         @Override
-        public RejectionSubscriberMethod create(Method method) {
-            final RejectionSubscriberMethod result = new RejectionSubscriberMethod(method);
+        public RejectionReactorMethod create(Method method) {
+            final RejectionReactorMethod result = new RejectionReactorMethod(method);
             return result;
         }
 
@@ -312,13 +321,13 @@ public class RejectionSubscriberMethod extends HandlerMethod<CommandContext> {
     private static class FilterPredicate extends HandlerMethodPredicate<CommandContext> {
 
         private FilterPredicate() {
-            super(Subscribe.class, CommandContext.class);
+            super(React.class, CommandContext.class);
         }
 
         @Override
         protected boolean verifyReturnType(Method method) {
-            final boolean isVoid = Void.TYPE.equals(method.getReturnType());
-            return isVoid;
+            final boolean result = returnsMessageOrIterable(method);
+            return result;
         }
 
         @Override

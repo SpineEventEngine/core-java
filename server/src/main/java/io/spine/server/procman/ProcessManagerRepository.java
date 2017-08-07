@@ -20,23 +20,17 @@
 
 package io.spine.server.procman;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.core.CommandClass;
-import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
-import io.spine.core.Rejection;
 import io.spine.core.RejectionClass;
-import io.spine.core.RejectionContext;
 import io.spine.core.RejectionEnvelope;
-import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.commandbus.CommandBus;
-import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.commandbus.CommandDispatcherDelegate;
 import io.spine.server.commandbus.DelegatingCommandDispatcher;
 import io.spine.server.entity.EventDispatchingRepository;
@@ -45,13 +39,12 @@ import io.spine.server.rejection.DelegatingRejectionDispatcher;
 import io.spine.server.rejection.RejectionDispatcherDelegate;
 import io.spine.server.route.CommandRouting;
 import io.spine.server.route.EventProducers;
+import io.spine.server.route.EventRouting;
 import io.spine.server.route.RejectionProducers;
 import io.spine.server.route.RejectionRouting;
-import io.spine.server.tenant.TenantAwareFunction0;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -200,56 +193,48 @@ public abstract class ProcessManagerRepository<I,
      * <p>If there is no stored process manager with such an ID,
      * a new process manager is created and stored after it handles the passed command.
      *
-     * @param envelope a request to dispatch
+     * @param command a request to dispatch
      * @see CommandHandlingEntity#dispatchCommand(CommandEnvelope)
      */
     @Override
-    public I dispatchCommand(CommandEnvelope envelope) {
-        final Message commandMessage = envelope.getMessage();
-        final CommandContext context = envelope.getCommandContext();
-        final CommandClass commandClass = envelope.getMessageClass();
-        checkCommandClass(commandClass);
-        final I id = getCommandRouting().apply(commandMessage, context);
-        final P manager = findOrCreate(id);
+    public I dispatchCommand(final CommandEnvelope command) {
+        final I result = PmCommandEndpoint.handle(this, command);
+        return result;
+    }
 
-        final ProcManTransaction<?, ?, ?> tx = beginTransactionFor(manager);
-        final List<Event> events = manager.dispatchCommand(envelope);
-        store(manager);
-        tx.commit();
+    /**
+     * Dispatches the event to a corresponding process manager.
+     *
+     * <p>If there is no stored process manager with such an ID, a new process manager is created
+     * and stored after it handles the passed event.
+     *
+     * @param event the event to dispatch
+     * @see ProcessManager#dispatchEvent(EventEnvelope)
+     */
+    @Override
+    public Set<I> dispatch(EventEnvelope event) {
+        Set<I> result = PmEventEndpoint.handle(this, event);
+        return result;
+    }
 
-        postEvents(events);
-        return id;
+    /**
+     * Dispatches the rejection to one or more subscribing process managers.
+     *
+     * @param rejection the rejection to dispatch
+     * @return IDs of process managers who successfully consumed the rejection
+     */
+    @Override
+    public Set<I> dispatchRejection(final RejectionEnvelope rejection) {
+        return PmRejectionEndpoint.handle(this, rejection);
     }
 
     @Override
-    public Set<I> dispatchRejection(final RejectionEnvelope envelope) {
-        final Message rejectionMessage = envelope.getMessage();
-        final Rejection rejection = envelope.getOuterObject();
-        final RejectionContext context = rejection.getContext();
-        final Set<I> targets = getRejectionRouting().apply(rejectionMessage, context);
-        final TenantId tenantId = context.getCommand()
-                                         .getContext()
-                                         .getActorContext()
-                                         .getTenantId();
-        final TenantAwareFunction0<Set<I>> op = new TenantAwareFunction0<Set<I>>(tenantId) {
-            @Override
-            public Set<I> apply() {
-                final ImmutableSet.Builder<I> consumed = ImmutableSet.builder();
-                for (I id : targets) {
-                    try {
-                        ProcessManager<I, ?, ?> processManager = findOrCreate(id);
-                        processManager.dispatchRejection(envelope);
-                        consumed.add(id);
-                    } catch (RuntimeException exception) {
-                        onError(envelope, exception);
-                        // Do not re-throw letting other subscribers to consume the rejection.
-                    }
-                }
-                return consumed.build();
-            }
-        };
-        final Set<I> consumed = op.execute();
-        return consumed;
+    protected void dispatchToEntity(I id, EventEnvelope event) {
+        final P manager = findOrCreate(id);
+        final PmTransaction<?, ?, ?> transaction = beginTransactionFor(manager);
+        manager.dispatchEvent(event);
+        transaction.commit();
+        store(manager);
     }
 
     @Override
@@ -262,44 +247,18 @@ public abstract class ProcessManagerRepository<I,
         logError("Rejection dispatching caused error (class: %s, id: %s", envelope, exception);
     }
 
-    private ProcManTransaction<?, ?, ?> beginTransactionFor(P manager) {
-        return ProcManTransaction.start((ProcessManager<?, ?, ?>) manager);
+    PmTransaction<?, ?, ?> beginTransactionFor(P manager) {
+        return PmTransaction.start((ProcessManager<?, ?, ?>) manager);
     }
 
     /**
      * Posts passed events to {@link EventBus}.
      */
-    private void postEvents(Iterable<Event> events) {
+    void postEvents(Iterable<Event> events) {
         final EventBus eventBus = getBoundedContext().getEventBus();
         for (Event event : events) {
             eventBus.post(event);
         }
-    }
-
-    /**
-     * Dispatches the event to a corresponding process manager.
-     *
-     * <p>If there is no stored process manager with such an ID, a new process manager is created
-     * and stored after it handles the passed event.
-     *
-     * @param event the event to dispatch
-     * @throws IllegalArgumentException if events of this type are not handled by
-     *                                  this process manager
-     * @see ProcessManager#dispatchEvent(EventEnvelope)
-     */
-    @Override
-    public Set<I> dispatch(EventEnvelope event) throws IllegalArgumentException {
-        checkEventClass(event.getMessageClass());
-        return super.dispatch(event);
-    }
-
-    @Override
-    protected void dispatchToEntity(I id, EventEnvelope event) {
-        final P manager = findOrCreate(id);
-        final ProcManTransaction<?, ?, ?> transaction = beginTransactionFor(manager);
-        manager.dispatchEvent(event);
-        transaction.commit();
-        store(manager);
     }
 
     /**
@@ -322,17 +281,8 @@ public abstract class ProcessManagerRepository<I,
         return result;
     }
 
-    private void checkCommandClass(CommandClass commandClass) throws IllegalArgumentException {
-        final Set<CommandClass> classes = getCommandClasses();
-        if (!classes.contains(commandClass)) {
-            throw CommandDispatcher.Error.unexpectedCommandEncountered(commandClass);
-        }
-    }
-
-    private void checkEventClass(EventClass eventClass) throws IllegalArgumentException {
-        final Set<EventClass> classes = getMessageClasses();
-        if (!classes.contains(eventClass)) {
-            throw Error.unexpectedEventEncountered(eventClass);
-        }
+    /** Open access to the event routing to the package. */
+    EventRouting<I> eventRouting() {
+        return getEventRouting();
     }
 }

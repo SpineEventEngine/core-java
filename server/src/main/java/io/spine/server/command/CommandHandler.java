@@ -31,6 +31,7 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.event.EventBus;
 import io.spine.server.reflect.CommandHandlerMethod;
+import io.spine.server.reflect.HandlerMethod;
 import io.spine.string.Stringifiers;
 import io.spine.type.MessageClass;
 import io.spine.util.Logging;
@@ -162,7 +163,7 @@ public abstract class CommandHandler implements CommandDispatcher<String> {
     }
 
     private List<Event> toEvents(List<? extends Message> eventMessages, CommandEnvelope ce) {
-        return CommandHandlerMethod.toEvents(producerId, null, eventMessages, ce);
+        return HandlerMethod.toEvents(producerId, null, eventMessages, ce);
     }
 
     /** Posts passed events to {@link EventBus}. */

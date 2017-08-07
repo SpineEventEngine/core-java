@@ -18,17 +18,31 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event;
+package io.spine.server.rejection.given;
 
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
-import io.spine.server.bus.MulticastDispatcher;
+import com.google.protobuf.Empty;
+import io.spine.core.CommandContext;
+import io.spine.core.React;
+import io.spine.core.Rejection;
+import io.spine.test.rejection.ProjectRejections;
+import io.spine.test.rejection.command.RemoveOwner;
 
-/**
- * {@code EventDispatcher} delivers events to subscribers.
- *
- * @param <I> the type of entity IDs
- * @author Alexander Yevsyukov
- */
-public interface EventDispatcher<I> extends MulticastDispatcher<EventClass, EventEnvelope, I> {
+import static org.junit.Assert.fail;
+
+public class InvalidOrderReactor extends VerifiableReactor {
+
+    @SuppressWarnings("unused") // The method should never be invoked, so the params are unused.
+    @React
+    public Empty on(ProjectRejections.MissingOwner rejection,
+                    CommandContext context,
+                    RemoveOwner command) {
+        triggerCall();
+        fail("InvalidOrderSubscriber invoked the handler method");
+        return Empty.getDefaultInstance();
+    }
+
+    @Override
+    public void verifyGot(Rejection rejection) {
+        fail("InvalidOrderSubscriber");
+    }
 }

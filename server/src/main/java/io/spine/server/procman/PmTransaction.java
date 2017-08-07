@@ -35,25 +35,25 @@ import io.spine.validate.ValidatingBuilder;
  * @param <B> the type of a {@code ValidatingBuilder} for the process manager state
  * @author Alex Tymchenko
  */
-class ProcManTransaction<I,
-                         S extends Message,
-                         B extends ValidatingBuilder<S, ? extends Message.Builder>>
+class PmTransaction<I,
+                    S extends Message,
+                    B extends ValidatingBuilder<S, ? extends Message.Builder>>
         extends Transaction<I, ProcessManager<I, S, B>, S, B> {
 
     @VisibleForTesting
-    ProcManTransaction(ProcessManager<I, S, B> processManager) {
+    PmTransaction(ProcessManager<I, S, B> processManager) {
         super(processManager);
     }
 
     @VisibleForTesting
-    ProcManTransaction(ProcessManager<I, S, B> processManager,
-                       TransactionListener<I, ProcessManager<I, S, B>, S, B> listener) {
+    PmTransaction(ProcessManager<I, S, B> processManager,
+                  TransactionListener<I, ProcessManager<I, S, B>, S, B> listener) {
         super(processManager, listener);
     }
 
 
     @VisibleForTesting
-    ProcManTransaction(ProcessManager<I, S, B> processManager, S state, Version version) {
+    PmTransaction(ProcessManager<I, S, B> processManager, S state, Version version) {
         super(processManager, state, version);
     }
 
@@ -76,14 +76,14 @@ class ProcManTransaction<I,
     /**
      * Creates a new transaction for a given {@code ProcessManager}.
      *
-     * @param processManager the {@code ProcessManager} instance to start the transaction for.
+     * @param  processManager the {@code ProcessManager} instance to start the transaction for
      * @return the new transaction instance
      */
     static <I,
             S extends Message,
             B extends ValidatingBuilder<S, ? extends Message.Builder>>
-    ProcManTransaction<I, S, B> start(ProcessManager<I, S, B> processManager) {
-        final ProcManTransaction<I, S, B> tx = new ProcManTransaction<>(processManager);
+    PmTransaction<I, S, B> start(ProcessManager<I, S, B> processManager) {
+        final PmTransaction<I, S, B> tx = new PmTransaction<>(processManager);
         return tx;
     }
 
@@ -95,20 +95,21 @@ class ProcManTransaction<I,
      * manager directly and require a {@linkplain Transaction#commit() transaction commit} in order
      * to be applied.
      *
-     * @param processManager  the {@code ProcessManager} instance to start the transaction for.
-     * @param state   the starting state to set
-     * @param version the starting version to set
+     * @param  processManager
+     *         the {@code ProcessManager} instance to start the transaction for
+     * @param  state
+     *         the starting state to set
+     * @param  version
+     *         the starting version to set
      * @return the new transaction instance
      */
     static <I,
             S extends Message,
             B extends ValidatingBuilder<S, ? extends Message.Builder>>
-    ProcManTransaction<I, S, B> startWith(ProcessManager<I, S, B> processManager,
-                                          S state,
-                                          Version version) {
-        final ProcManTransaction<I, S, B> tx = new ProcManTransaction<>(processManager,
-                                                                        state,
-                                                                        version);
+    PmTransaction<I, S, B> startWith(ProcessManager<I, S, B> processManager,
+                                     S state,
+                                     Version version) {
+        final PmTransaction<I, S, B> tx = new PmTransaction<>(processManager, state, version);
         return tx;
     }
 }

@@ -20,21 +20,23 @@
 
 package io.spine.server.rejection.given;
 
+import com.google.protobuf.Empty;
+import io.spine.core.React;
 import io.spine.core.Rejection;
-import io.spine.core.Subscribe;
 import io.spine.test.rejection.ProjectRejections;
 
 import static io.spine.core.Rejections.getMessage;
 import static org.junit.Assert.assertEquals;
 
-public class RejectionMessageSubscriber extends VerifiableSubscriber {
+public class RejectionMessageReactor extends VerifiableReactor {
 
     private ProjectRejections.MissingOwner rejection;
 
-    @Subscribe
-    public void on(ProjectRejections.MissingOwner rejection) {
+    @React
+    public Empty on(ProjectRejections.MissingOwner rejection) {
         triggerCall();
         this.rejection = rejection;
+        return Empty.getDefaultInstance();
     }
 
     @Override

@@ -29,7 +29,6 @@ import java.util.Arrays;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.core.Messages.ensureMessage;
 
 /**
  * A value object for class type references.
@@ -65,7 +64,7 @@ public final class CommandClass extends MessageClass {
      * @return new instance
      */
     public static CommandClass of(Message commandOrMessage) {
-        final Message commandMessage = ensureMessage(commandOrMessage);
+        final Message commandMessage = Commands.ensureMessage(commandOrMessage);
         return of(commandMessage.getClass());
     }
 

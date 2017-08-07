@@ -90,6 +90,18 @@ public final class Commands {
     }
 
     /**
+     * Extracts a command message if the passed instance is a {@link Command} object or
+     * {@link com.google.protobuf.Any Any}, otherwise returns the passed message.
+     */
+    public static Message ensureMessage(Message commandOrMessage) {
+        checkNotNull(commandOrMessage);
+        if (commandOrMessage instanceof Command) {
+            return getMessage((Command) commandOrMessage);
+        }
+        return io.spine.protobuf.Messages.ensureMessage(commandOrMessage);
+    }
+
+    /**
      * Obtains a tenant ID from the command.
      */
     public static TenantId getTenantId(Command command) {

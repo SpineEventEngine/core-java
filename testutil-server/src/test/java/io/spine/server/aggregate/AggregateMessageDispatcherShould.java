@@ -34,6 +34,8 @@ import org.junit.Test;
 
 import java.util.List;
 
+import static io.spine.server.aggregate.AggregateMessageDispatcher.dispatchCommand;
+import static io.spine.server.aggregate.AggregateMessageDispatcher.dispatchEvent;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -58,8 +60,7 @@ public class AggregateMessageDispatcherShould {
                                                .build();
         final CommandEnvelope commandEnvelope = CommandEnvelope.of(factory.createCommand(message));
 
-        final List<? extends Message> eventMessages =
-                AggregateMessageDispatcher.dispatchCommand(aggregate, commandEnvelope);
+        final List<? extends Message> eventMessages = dispatchCommand(aggregate, commandEnvelope);
 
         assertTrue(aggregate.getState()
                             .getValue()
@@ -77,8 +78,7 @@ public class AggregateMessageDispatcherShould {
                                              .build();
         final EventEnvelope eventEnvelope = EventEnvelope.of(factory.createEvent(message));
 
-        final List<? extends Message> eventMessages =
-                AggregateMessageDispatcher.dispatchEvent(aggregate, eventEnvelope);
+        final List<? extends Message> eventMessages = dispatchEvent(aggregate, eventEnvelope);
 
         assertTrue(aggregate.getState()
                             .getValue()

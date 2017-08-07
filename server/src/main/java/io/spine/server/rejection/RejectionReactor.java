@@ -26,7 +26,7 @@ import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
-import io.spine.server.reflect.RejectionSubscriberMethod;
+import io.spine.server.reflect.RejectionReactorMethod;
 import io.spine.server.tenant.CommandOperation;
 import io.spine.string.Stringifiers;
 import io.spine.type.MessageClass;
@@ -46,7 +46,7 @@ import static java.lang.String.format;
  * @author Alexander Yevsyukov
  * @see RejectionBus#register(io.spine.server.bus.MessageDispatcher)
  */
-public class RejectionSubscriber implements RejectionDispatcher<String> {
+public class RejectionReactor implements RejectionDispatcher<String> {
 
     /**
      * Cached set of the rejection classes this subscriber is subscribed to.
@@ -115,12 +115,12 @@ public class RejectionSubscriber implements RejectionDispatcher<String> {
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // as we return an immutable collection.
     public Set<RejectionClass> getMessageClasses() {
         if (rejectionClasses == null) {
-            rejectionClasses = RejectionSubscriberMethod.inspect(getClass());
+            rejectionClasses = RejectionReactorMethod.inspect(getClass());
         }
         return rejectionClasses;
     }
 
     public void handle(Message rejectionMessage, Message commandMessage, CommandContext context) {
-        RejectionSubscriberMethod.invokeFor(this, rejectionMessage, commandMessage, context);
+        RejectionReactorMethod.invokeFor(this, rejectionMessage, commandMessage, context);
     }
 }

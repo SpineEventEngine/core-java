@@ -33,6 +33,8 @@ import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.core.MessageEnvelope;
+import io.spine.core.RejectionClass;
+import io.spine.core.RejectionEnvelope;
 import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.protobuf.AnyPacker;
@@ -41,6 +43,7 @@ import io.spine.server.event.EventFactory;
 import io.spine.server.reflect.CommandHandlerMethod;
 import io.spine.server.reflect.EventApplierMethod;
 import io.spine.server.reflect.EventReactorMethod;
+import io.spine.server.reflect.RejectionReactorMethod;
 import io.spine.validate.ValidatingBuilder;
 
 import javax.annotation.CheckReturnValue;
@@ -168,14 +171,29 @@ public abstract class Aggregate<I,
     }
 
     /**
-     * Dispatches the event on which the aggreagate reacts.
+     * Dispatches the event on which the aggregate reacts.
      *
-     * @param event the envelope with the event to dispatch
+     * @param  event the envelope with the event to dispatch
      * @return a list with event messages that the aggregate produces in reaction to the event or
-     * an empty list if the aggregate state does not change in reaction to the event
+     *         an empty list if the aggregate state does not change in reaction to the event
      */
-    protected List<? extends Message> dispatchEvent(EventEnvelope event) {
+    List<? extends Message> reactOn(EventEnvelope event) {
         return EventReactorMethod.invokeFor(this, event.getMessage(), event.getEventContext());
+    }
+
+    /**
+     * Dispatches the rejection to which the aggregate reacts.
+     *
+     * @param  rejection the envelope with the rejection
+     * @return a list with event messages that the aggregate produces in reaction to
+     *         the rejection, or an empty list if the aggregate state does not change in
+     *         response to this rejection
+     */
+    List<? extends Message> reactOn(RejectionEnvelope rejection) {
+        return RejectionReactorMethod.invokeFor(this,
+                                                rejection.getMessage(),
+                                                rejection.getCommandMessage(),
+                                                rejection.getCommandContext());
     }
 
     /**
@@ -195,9 +213,10 @@ public abstract class Aggregate<I,
      * a {@code Snapshot}) loaded by a repository and passed to the aggregate so that
      * it restores its state.
      *
-     * @param aggregateStateRecord the aggregate state with events to play
-     * @throws IllegalStateException if applying events caused an exception, which is set as
-     *                               the {@code cause} for the thrown instance
+     * @param  aggregateStateRecord the aggregate state with events to play
+     * @throws IllegalStateException
+     *         if applying events caused an exception, which is set as the {@code cause} for
+     *         the thrown instance
      */
     void play(AggregateStateRecord aggregateStateRecord) {
         final Snapshot snapshot = aggregateStateRecord.getSnapshot();
@@ -252,8 +271,9 @@ public abstract class Aggregate<I,
     /**
      * Creates an event based on the event received in an import command.
      *
-     * @param event          the event to import
-     * @param commandContext the context of the import command
+     * @param  event          the event to import
+     * @param  commandContext the context of the import command
+     * @param  version        the version of the aggregate to use for the event
      * @return an event with updated command context and entity version
      */
     private static Event importEvent(Event event, CommandContext commandContext, Version version) {
@@ -278,7 +298,7 @@ public abstract class Aggregate<I,
      * corresponding command handling method returned either {@code List<Event>}
      * or {@code Event}.
      *
-     * @param eventOrMsg an event message or {@code Event}
+     * @param  eventOrMsg an event message or {@code Event}
      * @return the passed instance or an event message extracted from the passed
      *         {@code Event} instance
      */
@@ -380,16 +400,19 @@ public abstract class Aggregate<I,
      */
     static class TypeInfo {
 
-        private TypeInfo() {
-            // Prevent construction of this utility class.
+        /** Prevents instantiation of this utility class. */
+        private TypeInfo() {}
+
+        static Set<CommandClass> getCommandClasses(Class<? extends Aggregate> cls) {
+            return CommandHandlerMethod.inspect(cls);
         }
 
-        static Set<CommandClass> getCommandClasses(Class<? extends Aggregate> aggregateClass) {
-            return CommandHandlerMethod.inspect(aggregateClass);
+        static Set<EventClass> getReactedEventClasses(Class<? extends Aggregate> cls) {
+            return EventReactorMethod.inspect(cls);
         }
 
-        static Set<EventClass> getReactedEventClasses(Class<? extends Aggregate> aggregateClass) {
-            return EventReactorMethod.inspect(aggregateClass);
+        static Set<RejectionClass> getReactedRejectionClasses(Class<? extends Aggregate> cls) {
+            return RejectionReactorMethod.inspect(cls);
         }
     }
 }

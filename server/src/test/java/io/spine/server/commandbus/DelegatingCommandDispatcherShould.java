@@ -28,7 +28,6 @@ import org.junit.Test;
 
 import java.util.Set;
 
-import static io.spine.test.TestValues.newUuidValue;
 import static org.junit.Assert.assertTrue;
 
 public class DelegatingCommandDispatcherShould {
@@ -40,9 +39,8 @@ public class DelegatingCommandDispatcherShould {
         final DelegatingCommandDispatcher<String> delegatingDispatcher =
                 DelegatingCommandDispatcher.of(delegate);
 
-        final CommandEnvelope commandEnvelope = CommandEnvelope.of(
-                TestActorRequestFactory.newInstance(getClass()).createCommand(newUuidValue())
-        );
+        final CommandEnvelope commandEnvelope =
+                TestActorRequestFactory.newInstance(getClass()).generateEnvelope();
 
         delegatingDispatcher.onError(commandEnvelope, new RuntimeException(getClass().getName()));
 

@@ -20,20 +20,28 @@
 
 package io.spine.server.rejection.given;
 
+import com.google.protobuf.Empty;
+import io.spine.core.CommandContext;
+import io.spine.core.React;
 import io.spine.core.Rejection;
-import io.spine.server.rejection.RejectionSubscriber;
+import io.spine.test.rejection.ProjectRejections;
 
-public abstract class VerifiableSubscriber extends RejectionSubscriber {
+import static org.junit.Assert.fail;
 
-    private boolean methodCalled = false;
+/** The subscriber which throws exception from the subscriber method. */
+public class FaultyReactor extends VerifiableReactor {
 
-    public void triggerCall() {
-        methodCalled = true;
+    @SuppressWarnings("unused") // It's fine for a faulty subscriber.
+    @React
+    public Empty on(ProjectRejections.InvalidProjectName rejection, CommandContext context) {
+        triggerCall();
+        throw new UnsupportedOperationException(
+                "Faulty subscriber should have failed: " +
+                        FaultyReactor.class.getSimpleName());
     }
 
-    public  boolean isMethodCalled() {
-        return methodCalled;
+    @Override
+    public void verifyGot(Rejection ignored) {
+        fail("FaultySubscriber");
     }
-
-    public abstract void verifyGot(Rejection rejection);
 }

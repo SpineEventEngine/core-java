@@ -18,29 +18,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.rejection.given;
+package io.spine.core;
 
-import io.spine.core.CommandContext;
-import io.spine.core.Rejection;
-import io.spine.core.Subscribe;
-import io.spine.test.rejection.ProjectRejections;
+import com.google.protobuf.Message;
 
-import static org.junit.Assert.fail;
+/**
+ * A common interface for messages sent by an actor.
+ *
+ * @param <I> the type of the message ID
+ * @param <T> the type of the object that wraps a message
+ * @author Alexander Yevsyukov
+ */
+public interface ActorMessageEnvelope<I extends Message, T> extends MessageEnvelope<I, T> {
 
-/** The subscriber which throws exception from the subscriber method. */
-public class FaultySubscriber extends VerifiableSubscriber {
+    /**
+     * Obtains ID of the tenant in which context the actor works.
+     */
+    TenantId getTenantId();
 
-    @SuppressWarnings("unused") // It's fine for a faulty subscriber.
-    @Subscribe
-    public void on(ProjectRejections.InvalidProjectName rejection, CommandContext context) {
-        triggerCall();
-        throw new UnsupportedOperationException(
-                "Faulty subscriber should have failed: " +
-                        FaultySubscriber.class.getSimpleName());
-    }
-
-    @Override
-    public void verifyGot(Rejection ignored) {
-        fail("FaultySubscriber");
-    }
+    /**
+     * Obtains an actor context for the wrapped message.
+     */
+    ActorContext getActorContext();
 }

@@ -18,17 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event;
-
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
-import io.spine.server.bus.MulticastDispatcher;
-
 /**
- * {@code EventDispatcher} delivers events to subscribers.
- *
- * @param <I> the type of entity IDs
- * @author Alexander Yevsyukov
+ * Test environment classes for tests of the {@link io.spine.server.procman} package.
  */
-public interface EventDispatcher<I> extends MulticastDispatcher<EventClass, EventEnvelope, I> {
-}
+
+@ParametersAreNonnullByDefault
+package io.spine.server.procman.given;
+
+import javax.annotation.ParametersAreNonnullByDefault;

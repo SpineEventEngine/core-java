@@ -26,16 +26,17 @@ import "spine/options.proto";
 option (type_url_prefix) = "type.spine.io";
 option (SPI_all) = true;
 option java_package = "io.spine.server.entity.rejection";
-// Keep all the rejections under the same outer class called `Rejections`.
+// Keep all the rejections under the same outer class called `StandardRejections`.
 option java_generate_equals_and_hash = true;
 
+import "google/protobuf/any.proto";
 
 // The rejection thrown when a request for modification of an entity cannot be satisfied
 // because the entity is marked as `archived`.
 message CannotModifyArchivedEntity {
 
     // The ID of the archived entity.
-    string entity_id = 1;
+    google.protobuf.Any entity_id = 1;
 }
 
 // The rejection thrown when a request for modification of an entity cannot be satisfied
@@ -43,7 +44,7 @@ message CannotModifyArchivedEntity {
 message CannotModifyDeletedEntity {
 
     // The ID of the deleted entity.
-    string entity_id = 1;
+    google.protobuf.Any entity_id = 1;
 }
 
 // The rejection thrown when a request to mark the entity as `archived`
@@ -51,7 +52,7 @@ message CannotModifyDeletedEntity {
 message EntityAlreadyArchived {
 
     // The ID of the archived entity.
-    string entity_id = 1;
+    google.protobuf.Any entity_id = 1;
 }
 
 // The rejection thrown when a request to mark the entity as `deleted`
@@ -59,5 +60,5 @@ message EntityAlreadyArchived {
 message EntityAlreadyDeleted {
 
     // The ID of the entity which is already marked as `deleted`.
-    string entity_id = 1;
+    google.protobuf.Any entity_id = 1;
 }

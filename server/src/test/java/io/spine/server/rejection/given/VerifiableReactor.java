@@ -20,29 +20,20 @@
 
 package io.spine.server.rejection.given;
 
-import io.spine.core.CommandContext;
 import io.spine.core.Rejection;
-import io.spine.core.Subscribe;
-import io.spine.test.rejection.ProjectRejections;
+import io.spine.server.rejection.RejectionReactor;
 
-import static io.spine.core.Rejections.getMessage;
-import static org.junit.Assert.assertEquals;
+public abstract class VerifiableReactor extends RejectionReactor {
 
-public class ContextAwareSubscriber extends VerifiableSubscriber {
+    private boolean methodCalled = false;
 
-    private ProjectRejections.MissingOwner rejection;
-    private CommandContext context;
-
-    @Subscribe
-    public void on(ProjectRejections.MissingOwner rejection, CommandContext context) {
-        triggerCall();
-        this.rejection = rejection;
-        this.context = context;
+    public void triggerCall() {
+        methodCalled = true;
     }
 
-    @Override
-    public void verifyGot(Rejection rejection) {
-        assertEquals(getMessage(rejection), this.rejection);
-        assertEquals(rejection.getContext().getCommand().getContext(), context);
+    public  boolean isMethodCalled() {
+        return methodCalled;
     }
+
+    public abstract void verifyGot(Rejection rejection);
 }

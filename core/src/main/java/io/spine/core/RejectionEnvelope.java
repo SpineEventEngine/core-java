@@ -29,7 +29,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alex Tymchenko
  */
-public class RejectionEnvelope extends AbstractMessageEnvelope<RejectionId, Rejection> {
+public class RejectionEnvelope extends AbstractMessageEnvelope<RejectionId, Rejection>
+        implements ActorMessageEnvelope<RejectionId, Rejection> {
 
     /** The rejection message. */
     private final Message rejectionMessage;
@@ -70,6 +71,11 @@ public class RejectionEnvelope extends AbstractMessageEnvelope<RejectionId, Reje
     }
 
     @Override
+    public TenantId getTenantId() {
+        return getActorContext().getTenantId();
+    }
+
+    @Override
     public Message getMessage() {
         return rejectionMessage;
     }
@@ -82,6 +88,10 @@ public class RejectionEnvelope extends AbstractMessageEnvelope<RejectionId, Reje
     @Override
     public ActorContext getActorContext() {
         return getCommandContext().getActorContext();
+    }
+
+    public RejectionContext getRejectionContext() {
+        return getOuterObject().getContext();
     }
 
     /**
