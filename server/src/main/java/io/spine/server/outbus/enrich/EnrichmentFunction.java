@@ -53,7 +53,7 @@ abstract class EnrichmentFunction<S, T, C extends Message> {
      * We are having the generified class to be able to bound the types of messages and the
      * translation function when building the {@link Enricher}.
      *
-     * @see Enricher.AbstractBuilder#addFieldEnrichment(Class, Class, Function)
+     * @see Enricher.AbstractBuilder#add(Class, Class, Function)
      */
 
     private final Class<S> sourceClass;
@@ -161,8 +161,8 @@ abstract class EnrichmentFunction<S, T, C extends Message> {
     protected void ensureActive() {
         if (!isActive()) {
             throw newIllegalStateException(
-                    "Enrichment function %s is not active. Please use `activate()` first.",
-                    this);
+                    "Enrichment function %s is not active. Please use `activate()` first.", this
+            );
         }
     }
 

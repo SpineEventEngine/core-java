@@ -64,8 +64,8 @@ class MessageEnrichment<S extends Message, T extends Message, C extends Message>
     /** Creates a new message enricher instance. */
     static <S extends Message, T extends Message, C extends Message>
     MessageEnrichment<S, T, C> create(Enricher enricher,
-                                   Class<S> messageClass,
-                                   Class<T> enrichmentClass) {
+                                      Class<S> messageClass,
+                                      Class<T> enrichmentClass) {
         return new MessageEnrichment<>(enricher, messageClass, enrichmentClass);
     }
 

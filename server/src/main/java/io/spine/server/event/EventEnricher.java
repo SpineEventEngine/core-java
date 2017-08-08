@@ -24,6 +24,23 @@ import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.server.outbus.enrich.Enricher;
 
+/**
+ * Enriches events <em>after</em> they are stored, and <em>before</em> they are dispatched.
+ *
+ * <p>Enrichment schema is constructed like this:
+ * <pre>
+ *     {@code
+ *     EventEnricher enricher = EventEnricher.newBuilder()
+ *         .add(ProjectId.class, String.class, new GetProjectName())
+ *         .add(ProjectId.class, UserId.class, new GetProjectOwnerId())
+ *         ...
+ *         .build();
+ *     }
+ * </pre>
+ *
+ * @author Alexander Yevsyukov
+ * @see Enricher
+ */
 public class EventEnricher extends Enricher<EventEnvelope, EventContext> {
 
     /**

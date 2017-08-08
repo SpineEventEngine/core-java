@@ -31,6 +31,7 @@ import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.google.protobuf.Message;
+import io.spine.annotation.SPI;
 import io.spine.core.EnrichableMessageEnvelope;
 import io.spine.type.TypeName;
 
@@ -60,6 +61,7 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  *
  * @author Alexander Yevsyukov
  */
+@SPI
 public abstract class Enricher<M extends EnrichableMessageEnvelope<?, ?, C>, C extends Message> {
 
     /** Available enrichment functions per Java class. */
@@ -206,9 +208,9 @@ public abstract class Enricher<M extends EnrichableMessageEnvelope<?, ?, C>, C e
          *         a function which converts fields
          * @return the builder instance
          */
-        public <S, T> B addFieldEnrichment(Class<S> sourceFieldClass,
-                                                 Class<T> enrichmentFieldClass,
-                                                 Function<S, T> func) {
+        public <S, T> B add(Class<S> sourceFieldClass,
+                            Class<T> enrichmentFieldClass,
+                            Function<S, T> func) {
             checkNotNull(sourceFieldClass);
             checkNotNull(enrichmentFieldClass);
             checkNotNull(func);

@@ -71,7 +71,7 @@ public class EnricherBuilderShould {
 
     @Test
     public void add_field_enrichment() {
-        builder.addFieldEnrichment(Timestamp.class, StringValue.class, function);
+        builder.add(Timestamp.class, StringValue.class, function);
 
         assertTrue(builder.getFunctions()
                           .contains(fieldEnrichment));
@@ -79,7 +79,7 @@ public class EnricherBuilderShould {
 
     @Test
     public void remove_enrichment_function() {
-        builder.addFieldEnrichment(Timestamp.class, StringValue.class, function);
+        builder.add(Timestamp.class, StringValue.class, function);
 
         builder.remove(fieldEnrichment);
 
@@ -89,30 +89,30 @@ public class EnricherBuilderShould {
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_source_class_for_field_enrichment() {
-        builder.addFieldEnrichment(Tests.<Class<Timestamp>>nullRef(),
-                                   StringValue.class,
-                                   function);
+        builder.add(Tests.<Class<Timestamp>>nullRef(),
+                    StringValue.class,
+                    function);
     }
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_target_class_for_field_enrichment() {
-        builder.addFieldEnrichment(Timestamp.class,
-                                   Tests.<Class<StringValue>>nullRef(),
-                                   function);
+        builder.add(Timestamp.class,
+                    Tests.<Class<StringValue>>nullRef(),
+                    function);
     }
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_function_for_field_enrichment() {
-        builder.addFieldEnrichment(Timestamp.class,
-                                   StringValue.class,
-                                   Tests.<Function<Timestamp, StringValue>>nullRef());
+        builder.add(Timestamp.class,
+                    StringValue.class,
+                    Tests.<Function<Timestamp, StringValue>>nullRef());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void do_not_accept_duplicates_for_field_enrichment() {
-        builder.addFieldEnrichment(Timestamp.class, StringValue.class, function);
+        builder.add(Timestamp.class, StringValue.class, function);
         // This should fail.
-        builder.addFieldEnrichment(Timestamp.class, StringValue.class, function);
+        builder.add(Timestamp.class, StringValue.class, function);
     }
 
     @Test
@@ -124,10 +124,10 @@ public class EnricherBuilderShould {
 
     @Test
     public void allow_registering_just_some_of_expected_functions() {
-        builder.addFieldEnrichment(ProjectId.class, UserId.class,
-                                   new Enrichment.GetProjectOwnerId())
-               .addFieldEnrichment(ProjectId.class, String.class,
-                                   new Enrichment.GetProjectName());
+        builder.add(ProjectId.class, UserId.class,
+                    new Enrichment.GetProjectOwnerId())
+               .add(ProjectId.class, String.class,
+                    new Enrichment.GetProjectName());
         final Enricher enricher = builder.build();
         assertNotNull(enricher);
     }

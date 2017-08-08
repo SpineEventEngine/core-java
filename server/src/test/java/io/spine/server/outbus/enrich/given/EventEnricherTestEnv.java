@@ -196,16 +196,16 @@ public class EventEnricherTestEnv {
         /** Creates a new enricher with all required enrichment functions set. */
         public static EventEnricher newEventEnricher() {
             final EventEnricher.Builder builder = EventEnricher.newBuilder();
-            builder.addFieldEnrichment(ProjectId.class, String.class, new GetProjectName())
-                   .addFieldEnrichment(ProjectId.class, UserId.class, new GetProjectOwnerId())
-                   .addFieldEnrichment(EventId.class, String.class, EVENT_ID_TO_STRING)
-                   .addFieldEnrichment(Timestamp.class, String.class, TIMESTAMP_TO_STRING)
-                   .addFieldEnrichment(CommandContext.class, String.class, CMD_CONTEXT_TO_STRING)
-                   .addFieldEnrichment(Any.class, String.class, ANY_TO_STRING)
-                   .addFieldEnrichment(Integer.class, String.class, VERSION_TO_STRING)
-                   .addFieldEnrichment(String.class, ZoneOffset.class, STRING_TO_ZONE_OFFSET)
-                   .addFieldEnrichment(String.class, PersonName.class, STRING_TO_PERSON_NAME)
-                   .addFieldEnrichment(String.class, Integer.class, STRING_TO_INT);
+            builder.add(ProjectId.class, String.class, new GetProjectName())
+                   .add(ProjectId.class, UserId.class, new GetProjectOwnerId())
+                   .add(EventId.class, String.class, EVENT_ID_TO_STRING)
+                   .add(Timestamp.class, String.class, TIMESTAMP_TO_STRING)
+                   .add(CommandContext.class, String.class, CMD_CONTEXT_TO_STRING)
+                   .add(Any.class, String.class, ANY_TO_STRING)
+                   .add(Integer.class, String.class, VERSION_TO_STRING)
+                   .add(String.class, ZoneOffset.class, STRING_TO_ZONE_OFFSET)
+                   .add(String.class, PersonName.class, STRING_TO_PERSON_NAME)
+                   .add(String.class, Integer.class, STRING_TO_INT);
             return builder.build();
         }
 
