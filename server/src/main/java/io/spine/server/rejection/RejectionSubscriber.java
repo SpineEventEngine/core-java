@@ -26,7 +26,7 @@ import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
-import io.spine.server.reflect.RejectionReactorMethod;
+import io.spine.server.reflect.RejectionSubscriberMethod;
 import io.spine.server.tenant.CommandOperation;
 import io.spine.string.Stringifiers;
 import io.spine.type.MessageClass;
@@ -40,13 +40,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
 
 /**
- * Abstract base for objects receiving rejections from {@link RejectionBus}.
+ * A base for objects subscribing to rejections from {@link RejectionBus}.
  *
- * @author Alex Tymchenko
  * @author Alexander Yevsyukov
+ * @author Alex Tymchenko
  * @see RejectionBus#register(io.spine.server.bus.MessageDispatcher)
+ * @see io.spine.core.Subscribe
  */
-public class RejectionReactor implements RejectionDispatcher<String> {
+public class RejectionSubscriber implements RejectionDispatcher<String> {
 
     /**
      * Cached set of the rejection classes this subscriber is subscribed to.
@@ -89,7 +90,7 @@ public class RejectionReactor implements RejectionDispatcher<String> {
 
     /**
      * Logs the error into the subscriber {@linkplain #log() log}.
-     * 
+     *
      * @param envelope  the message which caused the error
      * @param exception the error
      */
@@ -115,12 +116,12 @@ public class RejectionReactor implements RejectionDispatcher<String> {
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // as we return an immutable collection.
     public Set<RejectionClass> getMessageClasses() {
         if (rejectionClasses == null) {
-            rejectionClasses = RejectionReactorMethod.inspect(getClass());
+            rejectionClasses = RejectionSubscriberMethod.inspect(getClass());
         }
         return rejectionClasses;
     }
 
     public void handle(Message rejectionMessage, Message commandMessage, CommandContext context) {
-        RejectionReactorMethod.invokeFor(this, rejectionMessage, commandMessage, context);
+        RejectionSubscriberMethod.invokeFor(this, rejectionMessage, commandMessage, context);
     }
 }

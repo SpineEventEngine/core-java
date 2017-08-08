@@ -24,58 +24,55 @@ import com.google.common.base.Predicate;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.CommandContext;
-import io.spine.core.React;
 import io.spine.core.RejectionClass;
+import io.spine.core.Subscribe;
 
 import javax.annotation.CheckReturnValue;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.unsupported;
 
 /**
- * A wrapper for a rejection reactor method.
+ * A wrapper for a rejection subscriber method.
  *
  * @author Alex Tymchenko
  * @author Dmytro Dashenkov
  * @author Alexander Yevsyukov
  */
 @Internal
-public class RejectionReactorMethod extends RejectionHandlerMethod {
+public class RejectionSubscriberMethod extends RejectionHandlerMethod {
 
-    /** The instance of the predicate to filter rejection reactor methods of a class. */
+    /** The instance of the predicate to filter rejection subscriber methods of a class. */
     private static final MethodPredicate PREDICATE = new FilterPredicate();
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
      *
-     * @param method reactor method
+     * @param method subscriber method
      */
     @VisibleForTesting
-    RejectionReactorMethod(Method method) {
+    RejectionSubscriberMethod(Method method) {
         super(method);
     }
 
     /**
-     * Invokes the reactor method in the passed object.
+     * Invokes the subscriber method in the passed object.
      */
-    public static List<? extends Message> invokeFor(Object target,
-                                                    Message rejectionMessage,
-                                                    Message commandMessage,
-                                                    CommandContext context) {
+    public static void invokeFor(Object target,
+                                 Message rejectionMessage,
+                                 Message commandMessage,
+                                 CommandContext context) {
         checkNotNull(target);
         checkNotNull(rejectionMessage);
         checkNotNull(commandMessage);
         checkNotNull(context);
 
-        final RejectionReactorMethod method =
+        final RejectionSubscriberMethod method =
                 getMethod(target.getClass(), rejectionMessage, commandMessage);
-        final List<? extends Message> result =
-                method.invoke(target, rejectionMessage, commandMessage, context);
-        return result;
+        method.invoke(target, rejectionMessage, commandMessage, context);
     }
 
     /**
@@ -84,18 +81,18 @@ public class RejectionReactorMethod extends RejectionHandlerMethod {
      * @throws IllegalStateException if the passed class does not have an rejection handling method
      *                               for the class of the passed message
      */
-    public static RejectionReactorMethod getMethod(Class<?> cls,
-                                                   Message rejectionMessage,
-                                                   Message commandMessage) {
+    public static RejectionSubscriberMethod getMethod(Class<?> cls,
+                                                      Message rejectionMessage,
+                                                      Message commandMessage) {
         checkNotNull(cls);
         checkNotNull(rejectionMessage);
         checkNotNull(commandMessage);
 
         final Class<? extends Message> rejectionClass = rejectionMessage.getClass();
         final MethodRegistry registry = MethodRegistry.getInstance();
-        final RejectionReactorMethod method = registry.get(cls,
-                                                           rejectionClass,
-                                                           factory());
+        final RejectionSubscriberMethod method = registry.get(cls,
+                                                              rejectionClass,
+                                                              factory());
         if (method == null) {
             throw missingRejectionHandler(cls, rejectionClass);
         }
@@ -107,29 +104,20 @@ public class RejectionReactorMethod extends RejectionHandlerMethod {
         return inspectWith(cls, predicate());
     }
 
-
     /**
      * Invokes the wrapped handler method to handle {@code rejectionMessage},
      * {@code commandMessage} with the passed {@code context} of the {@code Command}.
      *
-     * <p>Unlike the {@linkplain #invoke(Object, Message, Message) overloaded alternative method},
-     * this one implies returning the value, being a reaction to the rejection passed.
-     *
-     * @param  target           the target object on which call the method
-     * @param  rejectionMessage the rejection message to handle
-     * @param  commandMessage   the command message
-     * @param  context          the context of the command
-     * @return the list of event messages produced by the reacting method or empty list if no event
-     * messages were produced
+     * @param target           the target object on which call the method
+     * @param rejectionMessage the rejection message to handle
+     * @param commandMessage   the command message
+     * @param context          the context of the command
      */
-    public List<? extends Message> invoke(Object target,
-                                          Message rejectionMessage,
-                                          Message commandMessage,
-                                          CommandContext context) {
-
-        final Object output = doInvoke(target, rejectionMessage, commandMessage, context);
-        final List<? extends Message> eventMessages = toList(output);
-        return eventMessages;
+    public void invoke(Object target,
+                       Message rejectionMessage,
+                       Message commandMessage,
+                       CommandContext context) {
+        doInvoke(target, rejectionMessage, commandMessage, context);
     }
 
     /**
@@ -141,12 +129,13 @@ public class RejectionReactorMethod extends RejectionHandlerMethod {
      */
     @Override
     public <R> R invoke(Object target, Message message, CommandContext context) {
-        throw unsupported("Call invoke(Object, Message, Message, CommandContext) instead.");
+        throw unsupported("Call an overloaded" +
+                                  " `invoke(Object, Message, Message, CommandContext)` instead.");
     }
 
-    /** Returns the factory for filtering and creating rejection reactor methods. */
-    private static HandlerMethod.Factory<RejectionReactorMethod> factory() {
-        return Factory.getInstance();
+    /** Returns the factory for filtering and creating rejection subscriber methods. */
+    private static HandlerMethod.Factory<RejectionSubscriberMethod> factory() {
+        return RejectionSubscriberMethod.Factory.getInstance();
     }
 
     static MethodPredicate predicate() {
@@ -154,18 +143,18 @@ public class RejectionReactorMethod extends RejectionHandlerMethod {
     }
 
     /**
-     * The factory for filtering methods that match {@code RejectionReactorMethod} specification.
+     * The factory for filtering methods that match {@code RejectionSubscriberMethod} specification.
      */
-    private static class Factory implements HandlerMethod.Factory<RejectionReactorMethod> {
+    private static class Factory implements HandlerMethod.Factory<RejectionSubscriberMethod> {
 
         @Override
-        public Class<RejectionReactorMethod> getMethodClass() {
-            return RejectionReactorMethod.class;
+        public Class<RejectionSubscriberMethod> getMethodClass() {
+            return RejectionSubscriberMethod.class;
         }
 
         @Override
-        public RejectionReactorMethod create(Method method) {
-            final RejectionReactorMethod result = new RejectionReactorMethod(method);
+        public RejectionSubscriberMethod create(Method method) {
+            final RejectionSubscriberMethod result = new RejectionSubscriberMethod(method);
             return result;
         }
 
@@ -177,7 +166,7 @@ public class RejectionReactorMethod extends RejectionHandlerMethod {
         @Override
         public void checkAccessModifier(Method method) {
             if (!Modifier.isPublic(method.getModifiers())) {
-                warnOnWrongModifier("Rejection reactor {} must be declared 'public'",
+                warnOnWrongModifier("Rejection subscriber {} must be declared 'public'",
                                     method);
             }
         }
@@ -189,25 +178,26 @@ public class RejectionReactorMethod extends RejectionHandlerMethod {
         }
 
         private static Factory getInstance() {
-            return Singleton.INSTANCE.value;
+            return Factory.Singleton.INSTANCE.value;
         }
     }
 
     /**
-     * The predicate class allowing to filter rejection reactor methods.
+     * The predicate class allowing to filter rejection subscriber methods.
      *
-     * <p>Please see {@link React} annotation for more information.
+     * <p>Please see {@link Subscribe} annotation for more information.
      */
     private static class FilterPredicate extends RejectionFilterPredicate {
 
         private FilterPredicate() {
-            super(React.class);
+            super(Subscribe.class);
         }
 
         @Override
         protected boolean verifyReturnType(Method method) {
-            final boolean result = returnsMessageOrIterable(method);
-            return result;
+            final boolean isVoid = Void.TYPE.equals(method.getReturnType());
+            return isVoid;
         }
     }
+
 }
