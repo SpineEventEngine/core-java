@@ -45,7 +45,7 @@ import static io.spine.server.outbus.enrich.MessageEnrichment.create;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
- * Extends information of an command output message basing on its type and content.
+ * Extends information of a command output message basing on its type and content.
  *
  * <p>The class implements the
  * <a href="http://www.enterpriseintegrationpatterns.com/patterns/messaging/DataEnricher.html">ContentEnricher</a>
@@ -88,54 +88,54 @@ public abstract class Enricher<M extends EnrichableMessageEnvelope<?, ?, C>, C e
         for (String enrichmentType : enrichmentsMap.keySet()) {
             final Class<Message> enrichmentClass = TypeName.of(enrichmentType)
                                                            .getJavaClass();
-            final ImmutableCollection<String> eventTypes = enrichmentsMap.get(enrichmentType);
-            for (String eventType : eventTypes) {
-                final Class<Message> eventClass = TypeName.of(eventType)
-                                                          .getJavaClass();
-                final MessageEnrichment msgEnricher = create(this, eventClass, enrichmentClass);
-                functionsMap.put(eventClass, msgEnricher);
+            final ImmutableCollection<String> srcMessageTypes = enrichmentsMap.get(enrichmentType);
+            for (String srcType : srcMessageTypes) {
+                final Class<Message> messageClass = TypeName.of(srcType)
+                                                            .getJavaClass();
+                final MessageEnrichment msgEnricher = create(this, messageClass, enrichmentClass);
+                functionsMap.put(messageClass, msgEnricher);
             }
         }
     }
 
     /**
-     * Verifies if the passed event class can be enriched.
+     * Verifies if the passed message can be enriched.
      *
-     * <p>An event can be enriched if the following conditions are met:
+     * <p>An message can be enriched if the following conditions are met:
      *
      * <ol>
      *     <li>There is one or more enrichments defined in Protobuf using
      *     {@code enrichment_for} and/or {@code by} options.
      *     <li>There is one or more field enrichment functions registered for
-     *     the class of the passed event.
+     *     the class of the passed message.
      *     <li>The flag {@code do_not_enrich} is not set in the {@link io.spine.core.Enrichment
-     *     Enrichment} instance of the context of the passed event.
+     *     Enrichment} instance of the context of the outer object of the message.
      * </ol>
      *
-     * @param event the event to inspect
-     * @return {@code true} if the enrichment for the event is possible, {@code false} otherwise
+     * @param message the message to inspect
+     * @return {@code true} if the message can be enriched, {@code false} otherwise
      */
-    public boolean canBeEnriched(M event) {
-        if (!enrichmentRegistered(event)) {
+    public boolean canBeEnriched(M message) {
+        if (!enrichmentRegistered(message)) {
             return false;
         }
-        final boolean enrichmentEnabled = event.isEnrichmentEnabled();
+        final boolean enrichmentEnabled = message.isEnrichmentEnabled();
         return enrichmentEnabled;
     }
 
-    private boolean enrichmentRegistered(M event) {
-        final boolean result = functions.containsKey(event.getMessageClass()
-                                                          .value());
+    private boolean enrichmentRegistered(M message) {
+        final boolean result = functions.containsKey(message.getMessageClass()
+                                                            .value());
         return result;
     }
 
     /**
-     * Enriches the passed event.
+     * Enriches the passed message.
      *
      * @param  source
-     *         the envelope with the source event
+     *         the envelope with the source message
      * @throws IllegalArgumentException
-     *         if the passed event cannot be enriched
+     *         if the passed message cannot be enriched
      * @see    #canBeEnriched(M)
      */
     public M enrich(M source) {
@@ -151,9 +151,9 @@ public abstract class Enricher<M extends EnrichableMessageEnvelope<?, ?, C>, C e
         return functions.get(messageClass);
     }
 
-    private void checkTypeRegistered(M event) {
-        checkArgument(enrichmentRegistered(event),
-                      "No registered enrichment for the message %s", event);
+    private void checkTypeRegistered(M message) {
+        checkArgument(enrichmentRegistered(message),
+                      "No registered enrichment for the message %s", message);
     }
 
     private static <M extends EnrichableMessageEnvelope> void checkEnabled(M envelope) {
