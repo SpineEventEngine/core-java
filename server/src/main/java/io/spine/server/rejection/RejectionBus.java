@@ -193,7 +193,9 @@ public class RejectionBus extends CommandOutputBus<Rejection,
         private RejectionEnricher enricher;
 
         /** Prevents direct instantiation. */
-        private Builder() {}
+        private Builder() {
+            super();
+        }
 
         /**
          * Sets a {@code DispatcherRejectionDelivery} to be used for the rejection delivery
