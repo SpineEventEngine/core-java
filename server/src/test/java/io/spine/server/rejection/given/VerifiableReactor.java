@@ -23,6 +23,11 @@ package io.spine.server.rejection.given;
 import io.spine.core.Rejection;
 import io.spine.server.rejection.RejectionReactor;
 
+/**
+ * A test rejection reactor, which allows to verify the interactions performed with it.
+ *
+ * @author Alexander Yevsyukov
+ */
 public abstract class VerifiableReactor extends RejectionReactor {
 
     private boolean methodCalled = false;

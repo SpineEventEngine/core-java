@@ -17,35 +17,28 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package io.spine.server.rejection.given;
 
-import com.google.protobuf.Empty;
-import io.spine.core.CommandContext;
-import io.spine.core.React;
 import io.spine.core.Rejection;
-import io.spine.test.rejection.ProjectRejections;
-
-import static org.junit.Assert.fail;
+import io.spine.server.rejection.RejectionSubscriber;
 
 /**
- * The reactor which throws exception from the reactor method.
+ * A test rejection subscriber, which allows to verify the interactions performed with it.
  *
+ * @author Alex Tymchenko
  * @author Alexander Yevsyukov
- **/
-public class FaultyReactor extends VerifiableReactor {
+ */
+public abstract class VerifiableSubscriber extends RejectionSubscriber {
 
-    @SuppressWarnings("unused") // It's fine for a faulty reactor.
-    @React
-    public Empty on(ProjectRejections.InvalidProjectName rejection, CommandContext context) {
-        triggerCall();
-        throw new UnsupportedOperationException(
-                "Faulty reactor should have failed: " +
-                        FaultyReactor.class.getSimpleName());
+    private boolean methodCalled = false;
+
+    public void triggerCall() {
+        methodCalled = true;
     }
 
-    @Override
-    public void verifyGot(Rejection ignored) {
-        fail("FaultyReactor");
+    public boolean isMethodCalled() {
+        return methodCalled;
     }
+
+    public abstract void verifyGot(Rejection rejection);
 }

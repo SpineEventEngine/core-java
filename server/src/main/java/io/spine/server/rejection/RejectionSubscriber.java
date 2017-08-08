@@ -17,35 +17,32 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package io.spine.server.rejection;
 
-package io.spine.server.rejection.given;
-
-import com.google.protobuf.Empty;
+import com.google.protobuf.Message;
 import io.spine.core.CommandContext;
-import io.spine.core.React;
-import io.spine.core.Rejection;
-import io.spine.test.rejection.ProjectRejections;
+import io.spine.core.RejectionClass;
+import io.spine.server.reflect.RejectionSubscriberMethod;
 
-import static org.junit.Assert.fail;
+import java.util.Set;
 
 /**
- * The reactor which throws exception from the reactor method.
+ * A base for objects subscribing to rejections from {@link RejectionBus}.
  *
+ * @author Alex Tymchenko
  * @author Alexander Yevsyukov
- **/
-public class FaultyReactor extends VerifiableReactor {
+ * @see RejectionBus#register(io.spine.server.bus.MessageDispatcher)
+ * @see io.spine.core.Subscribe
+ */
+public class RejectionSubscriber extends AbstractRejectionDispatcher {
 
-    @SuppressWarnings("unused") // It's fine for a faulty reactor.
-    @React
-    public Empty on(ProjectRejections.InvalidProjectName rejection, CommandContext context) {
-        triggerCall();
-        throw new UnsupportedOperationException(
-                "Faulty reactor should have failed: " +
-                        FaultyReactor.class.getSimpleName());
+    @Override
+    public void handle(Message rejectionMessage, Message commandMessage, CommandContext context) {
+        RejectionSubscriberMethod.invokeFor(this, rejectionMessage, commandMessage, context);
     }
 
     @Override
-    public void verifyGot(Rejection ignored) {
-        fail("FaultyReactor");
+    protected Set<RejectionClass> inspect() {
+        return RejectionSubscriberMethod.inspect(getClass());
     }
 }
