@@ -113,8 +113,7 @@ public class RejectionReactorMethod extends RejectionHandlerMethod {
      * {@code commandMessage} with the passed {@code context} of the {@code Command}.
      *
      * <p>Unlike the {@linkplain #invoke(Object, Message, Message) overloaded alternative method},
-     * this one does return any value, since the rejection handler methods are {@code void}
-     * by design.
+     * this one implies returning the value, being a reaction to the rejection passed.
      *
      * @param  target           the target object on which call the method
      * @param  rejectionMessage the rejection message to handle
