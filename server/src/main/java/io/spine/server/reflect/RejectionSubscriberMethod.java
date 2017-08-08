@@ -115,17 +115,14 @@ public class RejectionSubscriberMethod extends RejectionHandlerMethod {
      *        the context of the rejection
      */
     @Override
-    public <R> R invoke(Object target,
-                        Message rejectionMessage,
-                        RejectionContext context) {
-        @SuppressWarnings("unchecked") //
-        final R result = (R)doInvoke(target, rejectionMessage, context);
+    public Object invoke(Object target, Message rejectionMessage, RejectionContext context) {
+        final Object result = doInvoke(target, rejectionMessage, context);
         return result;
     }
 
     /** Returns the factory for filtering and creating rejection subscriber methods. */
     private static HandlerMethod.Factory<RejectionSubscriberMethod> factory() {
-        return RejectionSubscriberMethod.Factory.getInstance();
+        return Factory.getInstance();
     }
 
     static MethodPredicate predicate() {

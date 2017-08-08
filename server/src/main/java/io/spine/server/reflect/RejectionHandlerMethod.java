@@ -89,12 +89,9 @@ class RejectionHandlerMethod extends HandlerMethod<RejectionContext>{
      * <p>Unlike the {@linkplain #invoke(Object, Message, Message) overloaded alternative method},
      * this one may return some value.
      *
-     * @param target
-     *        the target object on which call the method
-     * @param rejectionMsg
-     *        the rejection message to handle
-     * @param context
-     *        the context of the rejection
+     * @param  target       the target object on which call the method
+     * @param  rejectionMsg the rejection message to handle
+     * @param  context      the context of the rejection
      * @return the result of the invocation
      */
     @SuppressWarnings("OverlyLongMethod")

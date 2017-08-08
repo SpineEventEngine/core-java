@@ -114,21 +114,17 @@ public class RejectionReactorMethod extends RejectionHandlerMethod {
      * <p>Unlike the {@linkplain #invoke(Object, Message, Message) overloaded alternative method},
      * this one implies returning the value, being a reaction to the rejection passed.
      *
-     * @param  target
-     *         the target object on which call the method
-     * @param  rejectionMessage
-     *         the rejection message to handle
-     * @param  context
-     *         the context of the rejection
+     * @param  target           the target object on which call the method
+     * @param  rejectionMessage the rejection message to handle
+     * @param  context          the context of the rejection
      * @return the list of event messages produced by the reacting method or empty list if no event
      * messages were produced
      */
-    @SuppressWarnings("unchecked")
+    //@SuppressWarnings("unchecked") //
     @Override
     public List<? extends Message> invoke(Object target,
                                           Message rejectionMessage,
                                           RejectionContext context) {
-
         final Object output = doInvoke(target, rejectionMessage, context);
         final List<? extends Message> eventMessages = toList(output);
         return eventMessages;
