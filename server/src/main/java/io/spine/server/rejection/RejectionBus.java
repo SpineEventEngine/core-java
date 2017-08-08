@@ -95,7 +95,7 @@ public class RejectionBus extends CommandOutputBus<Rejection,
      * @return the same message
      */
     @Override
-    protected Rejection enrich(Rejection originalMessage) {
+    protected RejectionEnvelope enrich(RejectionEnvelope originalMessage) {
         return originalMessage;
     }
 

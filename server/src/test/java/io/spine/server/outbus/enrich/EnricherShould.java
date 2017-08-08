@@ -25,11 +25,13 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
+import io.spine.core.EventEnvelope;
 import io.spine.core.Subscribe;
 import io.spine.core.UserId;
 import io.spine.server.BoundedContext;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.event.EventBus;
+import io.spine.server.event.EventEnricher;
 import io.spine.server.event.EventSubscriber;
 import io.spine.server.outbus.enrich.given.EventEnricherTestEnv.GivenEvent;
 import io.spine.server.outbus.enrich.given.EventEnricherTestEnv.GivenEventMessage;
@@ -64,7 +66,7 @@ public class EnricherShould {
     private BoundedContext boundedContext;
     private EventBus eventBus;
     private TestEventSubscriber subscriber;
-    private Enricher enricher;
+    private EventEnricher enricher;
     private final Function<ProjectId, String> getProjectName = new GetProjectName();
     private final Function<ProjectId, UserId> getProjectOwnerId = new GetProjectOwnerId();
 
@@ -90,7 +92,7 @@ public class EnricherShould {
 
     @Test
     public void have_builder() {
-        assertNotNull(Enricher.newBuilder());
+        assertNotNull(EventEnricher.newBuilder());
     }
 
     @Test
@@ -154,9 +156,9 @@ public class EnricherShould {
 
     @Test
     public void enrich_several_events_bound_by_fields() {
-        final Event permissionGranted = GivenEvent.permissionGranted();
-        final Event permissionRevoked = GivenEvent.permissionRevoked();
-        final Event sharingRequestApproved = GivenEvent.sharingRequestApproved();
+        final EventEnvelope permissionGranted = EventEnvelope.of(GivenEvent.permissionGranted());
+        final EventEnvelope permissionRevoked = EventEnvelope.of(GivenEvent.permissionRevoked());
+        final EventEnvelope sharingRequestApproved = EventEnvelope.of(GivenEvent.sharingRequestApproved());
 
         assertTrue(enricher.canBeEnriched(permissionGranted));
         assertTrue(enricher.canBeEnriched(permissionRevoked));
@@ -165,12 +167,12 @@ public class EnricherShould {
 
     @Test
     public void confirm_that_event_can_be_enriched_if_enrichment_registered() {
-        assertTrue(enricher.canBeEnriched(projectStarted()));
+        assertTrue(enricher.canBeEnriched(EventEnvelope.of(projectStarted())));
     }
 
     @Test
     public void confirm_that_event_can_not_be_enriched_if_no_such_enrichment_registered() {
-        final Event dummyEvent = createEvent(toMessage(newUuid()));
+        final EventEnvelope dummyEvent = EventEnvelope.of(createEvent(toMessage(newUuid())));
 
         assertFalse(enricher.canBeEnriched(dummyEvent));
     }
@@ -178,7 +180,7 @@ public class EnricherShould {
     @Test
     public void confirm_that_event_can_not_be_enriched_if_enrichment_disabled() {
         final Event event = createEvent(toMessage(newUuid()));
-        final Event notEnrichableEvent =
+        final EventEnvelope notEnrichableEvent = EventEnvelope.of(
                 event.toBuilder()
                      .setContext(event.getContext()
                                       .toBuilder()
@@ -186,7 +188,8 @@ public class EnricherShould {
                                                           .getEnrichment()
                                                           .toBuilder()
                                                           .setDoNotEnrich(true)))
-                     .build();
+                     .build()
+        );
 
         assertFalse(enricher.canBeEnriched(notEnrichableEvent));
     }

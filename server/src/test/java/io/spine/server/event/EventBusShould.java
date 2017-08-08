@@ -31,7 +31,6 @@ import io.spine.core.Subscribe;
 import io.spine.server.BoundedContext;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.event.given.EventBusTestEnv.GivenEvent;
-import io.spine.server.outbus.enrich.Enricher;
 import io.spine.server.storage.StorageFactory;
 import io.spine.test.event.ProjectCreated;
 import org.junit.Before;
@@ -70,7 +69,7 @@ public class EventBusShould {
         setUp(null);
     }
 
-    private void setUp(@Nullable Enricher enricher) {
+    private void setUp(@Nullable EventEnricher enricher) {
         final BoundedContext bc = BoundedContext.newBuilder()
                                                 .setMultitenant(true)
                                                 .build();
@@ -96,7 +95,7 @@ public class EventBusShould {
         };
     }
 
-    private void buildEventBusWithPostponedExecution(@Nullable Enricher enricher) {
+    private void buildEventBusWithPostponedExecution(@Nullable EventEnricher enricher) {
         final EventBus.Builder busBuilder =
                 EventBus.newBuilder()
                         .setStorageFactory(storageFactory)
@@ -108,7 +107,7 @@ public class EventBusShould {
         this.eventBusWithPosponedExecution = busBuilder.build();
     }
 
-    private void buildEventBus(@Nullable Enricher enricher) {
+    private void buildEventBus(@Nullable EventEnricher enricher) {
         final EventBus.Builder busBuilder = EventBus.newBuilder()
                                                     .setStorageFactory(storageFactory);
         if (enricher != null) {
@@ -294,31 +293,31 @@ public class EventBusShould {
 
     @Test
     public void enrich_event_if_it_can_be_enriched() {
-        final Enricher enricher = mock(Enricher.class);
+        final EventEnricher enricher = mock(EventEnricher.class);
         final Event event = GivenEvent.projectCreated();
         doReturn(true).when(enricher)
-                      .canBeEnriched(any(Event.class));
+                      .canBeEnriched(any(EventEnvelope.class));
         doReturn(event).when(enricher)
-                       .enrich(any(Event.class));
+                       .enrich(any(EventEnvelope.class));
         setUp(enricher);
         eventBus.register(new ProjectCreatedSubscriber());
 
         eventBus.post(event);
 
-        verify(enricher).enrich(any(Event.class));
+        verify(enricher).enrich(any(EventEnvelope.class));
     }
 
     @Test
     public void do_not_enrich_event_if_it_cannot_be_enriched() {
-        final Enricher enricher = mock(Enricher.class);
+        final EventEnricher enricher = mock(EventEnricher.class);
         doReturn(false).when(enricher)
-                       .canBeEnriched(any(Event.class));
+                       .canBeEnriched(any(EventEnvelope.class));
         setUp(enricher);
         eventBus.register(new ProjectCreatedSubscriber());
 
         eventBus.post(GivenEvent.projectCreated());
 
-        verify(enricher, never()).enrich(any(Event.class));
+        verify(enricher, never()).enrich(any(EventEnvelope.class));
     }
 
     @Test

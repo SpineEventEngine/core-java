@@ -29,8 +29,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alex Tymchenko
  */
-public class RejectionEnvelope extends AbstractMessageEnvelope<RejectionId, Rejection>
-        implements ActorMessageEnvelope<RejectionId, Rejection> {
+public class RejectionEnvelope
+        extends EnrichableMessageEnvelope<RejectionId, Rejection, RejectionContext> {
 
     /** The rejection message. */
     private final Message rejectionMessage;
@@ -90,7 +90,8 @@ public class RejectionEnvelope extends AbstractMessageEnvelope<RejectionId, Reje
         return getCommandContext().getActorContext();
     }
 
-    public RejectionContext getRejectionContext() {
+    @Override
+    public RejectionContext getMessageContext() {
         return getOuterObject().getContext();
     }
 
@@ -110,5 +111,20 @@ public class RejectionEnvelope extends AbstractMessageEnvelope<RejectionId, Reje
 
     public CommandContext getCommandContext() {
         return commandContext;
+    }
+
+    @Override
+    Enrichment getEnrichment() {
+        return getMessageContext().getEnrichment();
+    }
+
+    @Override
+    protected RejectionEnvelope enrich(Enrichment enrichment) {
+        final Rejection.Builder enrichedCopy =
+                getOuterObject().toBuilder()
+                                .setContext(
+                                        getMessageContext().toBuilder()
+                                                           .setEnrichment(enrichment));
+        return of(enrichedCopy.build());
     }
 }

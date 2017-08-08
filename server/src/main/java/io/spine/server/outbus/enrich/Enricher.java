@@ -31,9 +31,7 @@ import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.google.protobuf.Message;
-import io.spine.core.Event;
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
+import io.spine.core.EnrichableMessageEnvelope;
 import io.spine.type.TypeName;
 
 import java.util.Collection;
@@ -43,7 +41,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.LinkedListMultimap.create;
 import static com.google.common.collect.Multimaps.synchronizedMultimap;
-import static io.spine.core.Enrichments.isEnrichmentEnabled;
 import static io.spine.server.outbus.enrich.MessageEnrichment.create;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
@@ -64,25 +61,20 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  *
  * @author Alexander Yevsyukov
  */
-public class Enricher {
+public abstract class Enricher<M extends EnrichableMessageEnvelope<?, ?, C>, C extends Message> {
 
     /** Available enrichment functions per message class. */
-    private final ImmutableMultimap<Class<?>, EnrichmentFunction<?, ?>> functions;
-
-    /** Creates a new builder. */
-    public static Builder newBuilder() {
-        return new Builder();
-    }
+    private final ImmutableMultimap<Class<?>, EnrichmentFunction<?, ?, ?>> functions;
 
     /**
      * Creates a new instance taking functions from the passed builder.
      *
      * <p>Also adds {@link MessageEnrichment}s for all enrichments defined in Protobuf.
      */
-    Enricher(Builder builder) {
-        final LinkedListMultimap<Class<?>, EnrichmentFunction<?, ?>> rawMap = create();
-        final Multimap<Class<?>, EnrichmentFunction<?, ?>> funcMap = synchronizedMultimap(rawMap);
-        for (EnrichmentFunction<?, ?> function : builder.getFunctions()) {
+    protected Enricher(AbstractBuilder<? extends Enricher, ?> builder) {
+        final LinkedListMultimap<Class<?>, EnrichmentFunction<?, ?, ?>> rawMap = create();
+        final Multimap<Class<?>, EnrichmentFunction<?, ?, ?>> funcMap = synchronizedMultimap(rawMap);
+        for (EnrichmentFunction<?, ?, ?> function : builder.getFunctions()) {
             funcMap.put(function.getSourceClass(), function);
         }
         putMsgEnrichers(funcMap);
@@ -91,7 +83,7 @@ public class Enricher {
     }
 
     @SuppressWarnings("MethodWithMultipleLoops") // is OK in this case
-    private void putMsgEnrichers(Multimap<Class<?>, EnrichmentFunction<?, ?>> functionsMap) {
+    private void putMsgEnrichers(Multimap<Class<?>, EnrichmentFunction<?, ?, ?>> functionsMap) {
         final ImmutableMultimap<String, String> enrichmentsMap = EnrichmentsMap.getInstance();
         for (String enrichmentType : enrichmentsMap.keySet()) {
             final Class<Message> enrichmentClass = TypeName.of(enrichmentType)
@@ -120,52 +112,56 @@ public class Enricher {
      *     Enrichment} instance of the context of the passed event.
      * </ol>
      *
+     * @param event the event to inspect
      * @return {@code true} if the enrichment for the event is possible, {@code false} otherwise
      */
-    public boolean canBeEnriched(Event event) {
+    public boolean canBeEnriched(M event) {
         if (!enrichmentRegistered(event)) {
             return false;
         }
-        final boolean enrichmentEnabled = isEnrichmentEnabled(event);
+        final boolean enrichmentEnabled = event.isEnrichmentEnabled();
         return enrichmentEnabled;
     }
 
-    private boolean enrichmentRegistered(Event event) {
-        final Class<? extends Message> eventClass = EventClass.of(event)
-                                                              .value();
-        final boolean result = functions.containsKey(eventClass);
+    private boolean enrichmentRegistered(M event) {
+        final boolean result = functions.containsKey(event.getMessageClass());
         return result;
     }
 
     /**
      * Enriches the passed event.
      *
-     * @throws IllegalArgumentException if the passed event cannot be enriched
-     * @see #canBeEnriched(Event)
+     * @param  source
+     *         the envelope with the source event
+     * @throws IllegalArgumentException
+     *         if the passed event cannot be enriched
+     * @see    #canBeEnriched(M)
      */
-    public Event enrich(Event event) {
-        checkTypeRegistered(event);
-        checkEnabled(event);
+    public M enrich(M source) {
+        checkTypeRegistered(source);
+        checkEnabled(source);
 
-        final EventEnvelope envelope = EventEnvelope.of(event);
-
-        final Action action = new Action(this, envelope);
-        final Event result = action.perform();
+        final Action<M, C> action = new Action<>(this, source);
+        final M result = action.perform();
         return result;
     }
 
-    Collection<EnrichmentFunction<?, ?>> getFunctions(Class<? extends Message> messageClass) {
+    Collection<EnrichmentFunction<?, ?, ?>> getFunctions(Class<? extends Message> messageClass) {
         return functions.get(messageClass);
     }
 
-    private void checkTypeRegistered(Event event) {
+    private void checkTypeRegistered(M event) {
         checkArgument(enrichmentRegistered(event),
-                      "No registered enrichment for the event %s", event);
+                      "No registered enrichment for the message %s", event);
     }
 
-    private static void checkEnabled(Event event) {
-        checkArgument(isEnrichmentEnabled(event),
-                      "Enrichment is disabled for the event %s", event);
+    private static <M extends EnrichableMessageEnvelope> void checkEnabled(M envelope) {
+        checkArgument(envelope.isEnrichmentEnabled(),
+                      "Enrichment is disabled for the message %s", envelope.getOuterObject());
+    }
+
+    protected ImmutableMultimap<Class<?>, EnrichmentFunction<?, ?, ?>> functions() {
+        return functions;
     }
 
     /**
@@ -176,9 +172,9 @@ public class Enricher {
      * @param enrichmentFieldClass
      *        the class of the enrichment field
      */
-    Optional<EnrichmentFunction<?, ?>> functionFor(Class<?> fieldClass,
+    Optional<EnrichmentFunction<?, ?, ?>> functionFor(Class<?> fieldClass,
                                                    Class<?> enrichmentFieldClass) {
-        final Optional<EnrichmentFunction<?, ?>> result =
+        final Optional<EnrichmentFunction<?, ?, ?>> result =
                 FluentIterable.from(functions.values())
                               .firstMatch(SupportsFieldConversion.of(fieldClass,
                                                                      enrichmentFieldClass));
@@ -189,13 +185,16 @@ public class Enricher {
      * The {@code Builder} allows to register {@link EnrichmentFunction}s handled by
      * the {@code Enricher} and set a custom translation function, if needed.
      */
-    public static class Builder {
+    protected abstract static class AbstractBuilder<E extends Enricher<?, ?>,
+                                                    B extends AbstractBuilder<E, B>> {
 
         /** Translation functions which perform the enrichment. */
-        private final Set<EnrichmentFunction<?, ?>> functions = Sets.newHashSet();
+        private final Set<EnrichmentFunction<?, ?, ?>> functions = Sets.newHashSet();
 
         /** Prevents instantiation from outside. */
-        private Builder() {}
+        protected AbstractBuilder() {}
+
+        protected abstract E createEnricher();
 
         /**
          * Adds a new field enrichment function.
@@ -208,36 +207,42 @@ public class Enricher {
          *         a function which converts fields
          * @return the builder instance
          */
-        public <S, T> Builder addFieldEnrichment(Class<S> sourceFieldClass,
+        public <S, T> B addFieldEnrichment(Class<S> sourceFieldClass,
                                                  Class<T> enrichmentFieldClass,
                                                  Function<S, T> func) {
             checkNotNull(sourceFieldClass);
             checkNotNull(enrichmentFieldClass);
             checkNotNull(func);
 
-            final EnrichmentFunction<S, T> newEntry =
+            final EnrichmentFunction<S, T, ?> newEntry =
                     FieldEnrichment.of(sourceFieldClass, enrichmentFieldClass, func);
             checkDuplicate(newEntry, functions);
             functions.add(newEntry);
-            return this;
+            return castThis();
         }
 
         /** Removes a translation for the passed type. */
-        public Builder remove(EnrichmentFunction entry) {
+        public B remove(EnrichmentFunction entry) {
             functions.remove(entry);
-            return this;
+            return castThis();
         }
 
         /** Creates a new {@code Enricher}. */
-        public Enricher build() {
-            final Enricher result = new Enricher(this);
-            validate(result.functions);
+        public E build() {
+            final E result = createEnricher();
+            validate(result.functions());
             return result;
         }
 
         @VisibleForTesting
-        Set<EnrichmentFunction<?, ?>> getFunctions() {
+        Set<EnrichmentFunction<?, ?, ?>> getFunctions() {
             return ImmutableSet.copyOf(functions);
+        }
+
+        /** Casts this to generic type to provide type covariance in the derived classes. */
+        @SuppressWarnings("unchecked") // See Javadoc
+        private B castThis() {
+            return (B) this;
         }
     }
 
@@ -248,9 +253,9 @@ public class Enricher {
      *         if the builder already has a function, which has the same couple of
      *         source message and target enrichment classes
      */
-    private static void checkDuplicate(EnrichmentFunction<?, ?> candidate,
-                                       Iterable<EnrichmentFunction<?, ?>> currentFns) {
-        final Optional<EnrichmentFunction<?, ?>> duplicate =
+    private static void checkDuplicate(EnrichmentFunction<?, ?, ?> candidate,
+                                       Iterable<EnrichmentFunction<?, ?, ?>> currentFns) {
+        final Optional<EnrichmentFunction<?, ?, ?>> duplicate =
                 EnrichmentFunction.firstThat(currentFns, SameTransition.asFor(candidate));
         if (duplicate.isPresent()) {
             throw newIllegalArgumentException("Enrichment from %s to %s already added as: %s",
@@ -261,8 +266,8 @@ public class Enricher {
     }
 
     /** Performs validation by validating its functions. */
-    private static void validate(Multimap<Class<?>, EnrichmentFunction<?, ?>> fnRegistry) {
-        for (EnrichmentFunction<?, ?> func : fnRegistry.values()) {
+    private static void validate(Multimap<Class<?>, EnrichmentFunction<?, ?, ?>> fnRegistry) {
+        for (EnrichmentFunction<?, ?, ?> func : fnRegistry.values()) {
             func.activate();
         }
     }

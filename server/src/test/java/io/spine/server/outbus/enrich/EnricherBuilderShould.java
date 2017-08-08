@@ -25,6 +25,7 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.spine.core.UserId;
+import io.spine.server.event.EventEnricher;
 import io.spine.server.outbus.enrich.given.EnricherBuilderTestEnv.Enrichment;
 import io.spine.test.Tests;
 import io.spine.test.event.ProjectId;
@@ -41,13 +42,13 @@ import static org.junit.Assert.assertTrue;
 @SuppressWarnings("ResultOfMethodCallIgnored")
 public class EnricherBuilderShould {
 
-    private Enricher.Builder builder;
+    private Enricher.AbstractBuilder builder;
     private Function<Timestamp, StringValue> function;
-    private FieldEnrichment<Timestamp, StringValue> fieldEnrichment;
+    private FieldEnrichment<Timestamp, StringValue, ?> fieldEnrichment;
 
     @Before
     public void setUp() {
-        this.builder = Enricher.newBuilder();
+        this.builder = EventEnricher.newBuilder();
         this.function = new Function<Timestamp, StringValue>() {
             @Nullable
             @Override
@@ -63,7 +64,7 @@ public class EnricherBuilderShould {
 
     @Test
     public void have_private_constructor() {
-        Tests.assertHasPrivateParameterlessCtor(Enricher.Builder.class);
+        Tests.assertHasPrivateParameterlessCtor(Enricher.AbstractBuilder.class);
     }
 
     @Test
@@ -121,8 +122,8 @@ public class EnricherBuilderShould {
 
     @Test
     public void allow_registering_no_functions() {
-        final Enricher enricher = Enricher.newBuilder()
-                                          .build();
+        final Enricher enricher = EventEnricher.newBuilder()
+                                               .build();
         assertNotNull(enricher);
     }
 

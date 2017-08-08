@@ -36,7 +36,7 @@ import static org.junit.Assert.assertFalse;
  */
 public class MessageEnrichmentShould {
 
-    private MessageEnrichment<ProjectCreated, ProjectCreated.Enrichment> enricher;
+    private MessageEnrichment<ProjectCreated, ProjectCreated.Enrichment, ?> enricher;
 
     @Before
     public void setUp() {

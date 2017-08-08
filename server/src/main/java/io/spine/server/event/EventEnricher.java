@@ -18,27 +18,31 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.bus;
+package io.spine.server.event;
 
-import com.google.common.base.Optional;
-import io.spine.core.MessageEnvelope;
-import io.spine.core.MessageInvalid;
+import io.spine.core.EventContext;
+import io.spine.core.EventEnvelope;
+import io.spine.server.outbus.enrich.Enricher;
 
-/**
- * An interface defining the validator for a {@link MessageEnvelope}.
- *
- * @param <E> the type of the {@link MessageEnvelope} to validate
- * @author Dmytro Dashenkov
- */
-public interface EnvelopeValidator<E extends MessageEnvelope<?, ?, ?>> {
+public class EventEnricher extends Enricher<EventEnvelope, EventContext> {
 
     /**
-     * Validates the given {@link MessageEnvelope} by some specific rules.
-     *
-     * @param envelope the envelope to validate
-     * @return {@link Optional#absent() Optional.absent()} if the envelope passes the validation or
-     *         the cause of the validation error
-     * @see MessageInvalid for the detailed description of the returned value
+     * Creates a new instance taking functions from the passed builder.
      */
-    Optional<MessageInvalid> validate(E envelope);
+    EventEnricher(Builder builder) {
+        super(builder);
+    }
+
+    /** Creates a new builder. */
+    public static Builder newBuilder() {
+        return new Builder();
+    }
+
+    public static class Builder extends AbstractBuilder<EventEnricher, Builder> {
+
+        @Override
+        protected EventEnricher createEnricher() {
+            return new EventEnricher(this);
+        }
+    }
 }

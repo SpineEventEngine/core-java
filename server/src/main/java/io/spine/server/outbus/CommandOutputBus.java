@@ -59,7 +59,7 @@ import static java.lang.String.format;
  */
 @Internal
 public abstract class CommandOutputBus<M extends Message,
-                                       E extends MessageEnvelope<?, M>,
+                                       E extends MessageEnvelope<?, M, ?>,
                                        C extends MessageClass,
                                        D extends MessageDispatcher<C, E, ?>>
                 extends Bus<M, E, C, D> {
@@ -100,7 +100,7 @@ public abstract class CommandOutputBus<M extends Message,
      * @param originalMessage the original message posted to the bus
      * @return the enriched message
      */
-    protected abstract M enrich(M originalMessage);
+    protected abstract E enrich(E originalMessage);
 
     /**
      * Obtains the {@linkplain Delivery delivery strategy} configured for this bus.
@@ -121,8 +121,7 @@ public abstract class CommandOutputBus<M extends Message,
 
     @Override
     protected Ack doPost(E envelope) {
-        final M enriched = enrich(envelope.getOuterObject());
-        final E enrichedEnvelope = toEnvelope(enriched);
+        final E enrichedEnvelope = enrich(envelope);
         final int dispatchersCalled = callDispatchers(enrichedEnvelope);
 
         final Any packedId = Identifier.pack(envelope.getId());

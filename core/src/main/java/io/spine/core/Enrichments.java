@@ -39,18 +39,6 @@ public final class Enrichments {
     private Enrichments() {}
 
     /**
-     * Verifies if the enrichment is not disabled in the passed event.
-     */
-    public static boolean isEnrichmentEnabled(Event event) {
-        checkNotNull(event);
-        final EventContext context = event.getContext();
-        final boolean isEnabled =
-                context.getEnrichment()
-                       .getModeCase() != Enrichment.ModeCase.DO_NOT_ENRICH;
-        return isEnabled;
-    }
-
-    /**
      * Returns all enrichments from the context.
      *
      * @param context a context to get enrichments from

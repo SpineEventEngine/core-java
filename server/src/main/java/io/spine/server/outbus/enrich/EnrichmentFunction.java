@@ -25,7 +25,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
-import io.spine.core.EventContext;
+import com.google.protobuf.Message;
 import io.spine.server.event.EventBus;
 
 import javax.annotation.Nullable;
@@ -44,15 +44,16 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *
  * @param <S> a type of the source object to enrich
  * @param <T> a type of the target enrichment
+ * @param <C> a type of the message context
  * @author Alexander Yevsyukov
  */
-abstract class EnrichmentFunction<S, T> {
+abstract class EnrichmentFunction<S, T, C extends Message> {
 
     /**
      * We are having the generified class to be able to bound the types of messages and the
      * translation function when building the {@link Enricher}.
      *
-     * @see Enricher.Builder#addFieldEnrichment(Class, Class, Function)
+     * @see Enricher.AbstractBuilder#addFieldEnrichment(Class, Class, Function)
      */
 
     private final Class<S> sourceClass;
@@ -75,7 +76,7 @@ abstract class EnrichmentFunction<S, T> {
      * @param  context the context of the message
      * @return enrichment result object
      */
-    public abstract T apply(S input, EventContext context);
+    public abstract T apply(S input, C context);
 
     Class<S> getSourceClass() {
         return sourceClass;
@@ -116,10 +117,10 @@ abstract class EnrichmentFunction<S, T> {
     /**
      * A helper predicate to filter the active functions only.
      */
-    static Predicate<EnrichmentFunction<?, ?>> activeOnly() {
-        return new Predicate<EnrichmentFunction<?, ?>>() {
+    static Predicate<EnrichmentFunction<?, ?, ?>> activeOnly() {
+        return new Predicate<EnrichmentFunction<?, ?, ?>>() {
             @Override
-            public boolean apply(@Nullable EnrichmentFunction<?, ?> input) {
+            public boolean apply(@Nullable EnrichmentFunction<?, ?, ?> input) {
                 checkNotNull(input);
                 return input.isActive();
             }
@@ -168,10 +169,11 @@ abstract class EnrichmentFunction<S, T> {
     /**
      * Obtains first function that matches the passed predicate.
      */
-    static Optional<EnrichmentFunction<?, ?>> firstThat(Iterable<EnrichmentFunction<?, ?>> functions,
-                                                  Predicate<? super EnrichmentFunction<?, ?>> predicate) {
-        final FluentIterable<EnrichmentFunction<?, ?>> fi = FluentIterable.from(functions);
-        final Optional<EnrichmentFunction<?, ?>> optional = fi.firstMatch(predicate);
+    static Optional<EnrichmentFunction<?, ?, ?>>
+    firstThat(Iterable<EnrichmentFunction<?, ?, ?>> functions,
+              Predicate<? super EnrichmentFunction<?, ?, ?>> predicate) {
+        final FluentIterable<EnrichmentFunction<?, ?, ?>> fi = FluentIterable.from(functions);
+        final Optional<EnrichmentFunction<?, ?, ?>> optional = fi.firstMatch(predicate);
         return optional;
     }
 }

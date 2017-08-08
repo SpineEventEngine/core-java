@@ -42,7 +42,7 @@ import static org.junit.Assert.assertTrue;
 public class EnrichmentFunctionShould {
 
     private Function<ProjectCreated, ProjectCreated.Enrichment> function;
-    private FieldEnrichment<ProjectCreated, ProjectCreated.Enrichment> fieldEnrichment;
+    private FieldEnrichment<ProjectCreated, ProjectCreated.Enrichment, EventContext> fieldEnrichment;
 
     @Before
     public void setUp() {
@@ -128,7 +128,7 @@ public class EnrichmentFunctionShould {
 
     @Test
     public void have_smart_equals() {
-        final FieldEnrichment<ProjectCreated, ProjectCreated.Enrichment> anotherEnricher =
+        final FieldEnrichment<ProjectCreated, ProjectCreated.Enrichment, EventContext> anotherEnricher =
                 FieldEnrichment.of(
                     ProjectCreated.class,
                     ProjectCreated.Enrichment.class,

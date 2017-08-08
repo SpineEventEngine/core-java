@@ -115,15 +115,15 @@ public class ReferenceValidatorShould {
 
     @Test
     public void skip_mapping_if_no_mapping_function_is_defined() {
-        final Enricher mockEnricher = mock(Enricher.class);
+        final Enricher<?, ?> mockEnricher = mock(Enricher.class);
         when(mockEnricher.functionFor(any(Class.class), any(Class.class)))
-                .thenReturn(Optional.<EnrichmentFunction<?, ?>>absent());
+                .thenReturn(Optional.<EnrichmentFunction<?, ?, ?>>absent());
         final ReferenceValidator validator
                 = new ReferenceValidator(mockEnricher,
                                          UserDeletedEvent.class,
                                          EnrichmentBoundWithMultipleFieldsWithDifferentNames.class);
         final ValidationResult result = validator.validate();
-        final List<EnrichmentFunction<?, ?>> functions = result.getFunctions();
+        final List<EnrichmentFunction<?, ?, ?>> functions = result.getFunctions();
         assertTrue(functions.isEmpty());
         final Multimap<FieldDescriptor, FieldDescriptor> fields = result.getFieldMap();
         assertEmpty(fields);

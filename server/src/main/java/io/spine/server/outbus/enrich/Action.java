@@ -23,10 +23,7 @@ package io.spine.server.outbus.enrich;
 import com.google.common.collect.Maps;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import io.spine.core.Enrichment;
-import io.spine.core.Event;
-import io.spine.core.EventContext;
-import io.spine.core.EventEnvelope;
+import io.spine.core.EnrichableMessageEnvelope;
 import io.spine.protobuf.AnyPacker;
 import io.spine.type.TypeName;
 
@@ -41,37 +38,34 @@ import static com.google.common.collect.Collections2.filter;
  *
  * @author Alexander Yevsyukov
  */
-final class Action {
+final class Action<M extends EnrichableMessageEnvelope<?, ?, C>, C extends Message> {
 
-    private final EventEnvelope envelope;
-    private final Collection<EnrichmentFunction<?, ?>> availableFunctions;
+    private final M envelope;
+    private final Collection<EnrichmentFunction<?, ?, ?>> availableFunctions;
 
     private final Map<String, Any> enrichments = Maps.newHashMap();
 
-    Action(Enricher parent, EventEnvelope envelope) {
+    Action(Enricher<M, ?> parent, M envelope) {
         this.envelope = envelope;
         final Class<? extends Message> eventClass = envelope.getMessageClass()
                                                             .value();
-        final Collection<EnrichmentFunction<?, ?>> functionsPerClass =
+        final Collection<EnrichmentFunction<?, ?, ?>> functionsPerClass =
                 parent.getFunctions(eventClass);
         this.availableFunctions = filter(functionsPerClass, EnrichmentFunction.activeOnly());
     }
 
-    Event perform() {
+    M perform() {
         createEnrichments();
-        final EventContext enrichedContext = enrichContext();
-        final Event result = envelope.getOuterObject()
-                                     .toBuilder()
-                                     .setContext(enrichedContext)
-                                     .build();
-        return result;
+        @SuppressWarnings("unchecked")
+            // The cast is safe because envelopes produce enriched versions of the same type.
+        final M enriched = (M) envelope.toEnriched(enrichments);
+        return enriched;
     }
 
     private void createEnrichments() {
-        final EventContext eventContext = envelope.getEventContext();
         final Message eventMessage = envelope.getMessage();
         for (EnrichmentFunction function : availableFunctions) {
-            final Message enriched = apply(function, eventMessage, eventContext);
+            final Message enriched = apply(function, eventMessage, envelope.getMessageContext());
             checkResult(enriched, function);
             final String typeName = TypeName.of(enriched)
                                             .value();
@@ -89,7 +83,7 @@ final class Action {
      * </ol>
      */
     @SuppressWarnings("unchecked")
-    private static Message apply(EnrichmentFunction function, Message input, EventContext context) {
+    private Message apply(EnrichmentFunction function, Message input, C context) {
         final Message result = (Message) function.apply(input, context);
         return result;
     }
@@ -100,16 +94,5 @@ final class Action {
             "EnrichmentFunction %s produced `null` from event message %s",
             function, envelope.getMessage()
         );
-    }
-
-    private EventContext enrichContext() {
-        final Enrichment.Builder enrichment =
-                Enrichment.newBuilder()
-                          .setContainer(Enrichment.Container.newBuilder()
-                                                            .putAllItems(enrichments));
-        return envelope.getEventContext()
-                       .toBuilder()
-                       .setEnrichment(enrichment)
-                       .build();
     }
 }

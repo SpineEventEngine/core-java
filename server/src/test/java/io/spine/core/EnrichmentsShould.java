@@ -35,7 +35,6 @@ import org.junit.Test;
 import static io.spine.Identifier.newUuid;
 import static io.spine.core.Enrichments.getEnrichment;
 import static io.spine.core.Enrichments.getEnrichments;
-import static io.spine.core.Enrichments.isEnrichmentEnabled;
 import static io.spine.core.given.GivenEvent.context;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.TypeConverter.toMessage;
@@ -99,16 +98,18 @@ public class EnrichmentsShould {
 
     @Test
     public void return_true_if_event_enrichment_is_enabled() {
-        final Event event = eventFactory.createEvent(stringValue);
+        final EventEnvelope event = EventEnvelope.of(eventFactory.createEvent(stringValue));
 
-        assertTrue(isEnrichmentEnabled(event));
+        assertTrue(event.isEnrichmentEnabled());
     }
 
     @Test
     public void return_false_if_event_enrichment_is_disabled() {
-        final Event event = GivenEvent.withDisabledEnrichmentOf(stringValue);
+        final EventEnvelope event = EventEnvelope.of(
+                GivenEvent.withDisabledEnrichmentOf(stringValue)
+        );
 
-        assertFalse(isEnrichmentEnabled(event));
+        assertFalse(event.isEnrichmentEnabled());
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")

@@ -21,7 +21,7 @@
 package io.spine.server.outbus.enrich;
 
 import com.google.common.base.Function;
-import io.spine.core.EventContext;
+import com.google.protobuf.Message;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -33,7 +33,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alexander Yevsyukov
  */
-final class FieldEnrichment<S, T> extends EnrichmentFunction<S, T> {
+final class FieldEnrichment<S, T, C extends Message> extends EnrichmentFunction<S, T, C> {
 
     /** A function, which performs the translation. */
     private final Function<S, T> function;
@@ -54,10 +54,11 @@ final class FieldEnrichment<S, T> extends EnrichmentFunction<S, T> {
      *         a conversion function
      * @return a new instance
      */
-    static <S, T> FieldEnrichment<S, T> of(Class<S> messageFieldClass,
-                                           Class<T> enrichmentFieldClass,
-                                           Function<S, T> func) {
-        final FieldEnrichment<S, T> result =
+    static <S, T, C extends Message>
+    FieldEnrichment<S, T, C> of(Class<S> messageFieldClass,
+                                Class<T> enrichmentFieldClass,
+                                Function<S, T> func) {
+        final FieldEnrichment<S, T, C> result =
                 new FieldEnrichment<>(messageFieldClass, enrichmentFieldClass, func);
         return result;
     }
@@ -80,7 +81,7 @@ final class FieldEnrichment<S, T> extends EnrichmentFunction<S, T> {
     }
 
     @Override
-    public T apply(S message, EventContext context) {
+    public T apply(S message, C context) {
         ensureActive();
         final T result = function.apply(message);
         return result;

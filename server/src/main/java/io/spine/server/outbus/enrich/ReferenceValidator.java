@@ -76,7 +76,7 @@ final class ReferenceValidator {
         // not a variable name as other strings that use the same value.
     private static final String CONTEXT_REFERENCE = "context";
 
-    private final Enricher enricher;
+    private final Enricher<?, ?> enricher;
     private final Descriptor eventDescriptor;
     private final Descriptor enrichmentDescriptor;
 
@@ -97,7 +97,7 @@ final class ReferenceValidator {
      * functions.
      */
     ValidationResult validate() {
-        final List<EnrichmentFunction<?, ?>> functions = new LinkedList<>();
+        final List<EnrichmentFunction<?, ?, ?>> functions = new LinkedList<>();
         final Multimap<FieldDescriptor, FieldDescriptor> fields = LinkedListMultimap.create();
         for (FieldDescriptor enrichmentField : enrichmentDescriptor.getFields()) {
             final Collection<FieldDescriptor> sourceFields = findSourceFields(enrichmentField);
@@ -105,19 +105,19 @@ final class ReferenceValidator {
         }
         final ImmutableMultimap<FieldDescriptor, FieldDescriptor> sourceToTargetMap =
                 ImmutableMultimap.copyOf(fields);
-        final ImmutableList<EnrichmentFunction<?, ?>> enrichmentFunctions =
+        final ImmutableList<EnrichmentFunction<?, ?, ?>> enrichmentFunctions =
                 ImmutableList.copyOf(functions);
         final ValidationResult result = new ValidationResult(enrichmentFunctions,
                                                              sourceToTargetMap);
         return result;
     }
 
-    private void putEnrichmentsByField(List<EnrichmentFunction<?, ?>> functions,
+    private void putEnrichmentsByField(List<EnrichmentFunction<?, ?, ?>> functions,
                                        Multimap<FieldDescriptor, FieldDescriptor> fields,
                                        FieldDescriptor enrichmentField,
                                        Iterable<FieldDescriptor> sourceFields) {
         for (FieldDescriptor sourceField : sourceFields) {
-            final Optional<EnrichmentFunction<?, ?>> function =
+            final Optional<EnrichmentFunction<?, ?, ?>> function =
                     getEnrichmentFunction(sourceField, enrichmentField);
             if (function.isPresent()) {
                 functions.add(function.get());
@@ -248,12 +248,12 @@ final class ReferenceValidator {
         return msg;
     }
 
-    private Optional<EnrichmentFunction<?, ?>> getEnrichmentFunction(FieldDescriptor srcField,
+    private Optional<EnrichmentFunction<?, ?, ?>> getEnrichmentFunction(FieldDescriptor srcField,
                                                                      FieldDescriptor targetField) {
         final Class<?> sourceFieldClass = Field.getFieldClass(srcField);
         final Class<?> targetFieldClass = Field.getFieldClass(targetField);
-        final Optional<EnrichmentFunction<?, ?>> func = enricher.functionFor(sourceFieldClass,
-                                                                             targetFieldClass);
+        final Optional<EnrichmentFunction<?, ?, ?>> func =
+                enricher.functionFor(sourceFieldClass,targetFieldClass);
         if (!func.isPresent()) {
             logNoFunction(sourceFieldClass, targetFieldClass);
         }
@@ -294,10 +294,10 @@ final class ReferenceValidator {
      * A wrapper DTO for the validation result.
      */
     static class ValidationResult {
-        private final ImmutableList<EnrichmentFunction<?, ?>> functions;
+        private final ImmutableList<EnrichmentFunction<?, ?, ?>> functions;
         private final ImmutableMultimap<FieldDescriptor, FieldDescriptor> fieldMap;
 
-        private ValidationResult(ImmutableList<EnrichmentFunction<?, ?>> functions,
+        private ValidationResult(ImmutableList<EnrichmentFunction<?, ?, ?>> functions,
                                  ImmutableMultimap<FieldDescriptor, FieldDescriptor> fieldMap) {
             this.functions = functions;
             this.fieldMap = fieldMap;
@@ -309,7 +309,7 @@ final class ReferenceValidator {
          */
         @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK, since an `ImmutableList`
                                                             // is returned.
-        List<EnrichmentFunction<?, ?>> getFunctions() {
+        List<EnrichmentFunction<?, ?, ?>> getFunctions() {
             return functions;
         }
 

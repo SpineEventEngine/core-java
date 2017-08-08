@@ -120,7 +120,7 @@ public class EventBus
 
     /** The enricher for posted events or {@code null} if the enrichment is not supported. */
     @Nullable
-    private final Enricher enricher;
+    private final EventEnricher enricher;
 
     /** Creates new instance by the passed builder. */
     private EventBus(Builder builder) {
@@ -139,7 +139,7 @@ public class EventBus
 
     @VisibleForTesting
     @Nullable
-    Enricher getEnricher() {
+    EventEnricher getEnricher() {
         return enricher;
     }
 
@@ -223,11 +223,11 @@ public class EventBus
     }
 
     @Override
-    protected Event enrich(Event event) {
+    protected EventEnvelope enrich(EventEnvelope event) {
         if (enricher == null || !enricher.canBeEnriched(event)) {
             return event;
         }
-        final Event enriched = enricher.enrich(event);
+        final EventEnvelope enriched = enricher.enrich(event);
         return enriched;
     }
 
@@ -326,7 +326,7 @@ public class EventBus
          * in the {@code EventBus} instance built.
          */
         @Nullable
-        private Enricher enricher;
+        private EventEnricher enricher;
 
         /** Logging level for posted events.  */
         private LoggingObserver.Level logLevelForPost = Level.TRACE;
@@ -439,12 +439,12 @@ public class EventBus
          * @param enricher the {@code Enricher} for events or
          *                 {@code null} if enrichment is not supported
          */
-        public Builder setEnricher(Enricher enricher) {
+        public Builder setEnricher(EventEnricher enricher) {
             this.enricher = enricher;
             return this;
         }
 
-        public Optional<Enricher> getEnricher() {
+        public Optional<EventEnricher> getEnricher() {
             return Optional.fromNullable(enricher);
         }
 

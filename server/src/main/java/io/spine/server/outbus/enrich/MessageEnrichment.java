@@ -44,25 +44,26 @@ import static com.google.protobuf.Descriptors.FieldDescriptor;
  *
  * @author Alexander Yevsyukov
  */
-class MessageEnrichment<S extends Message, T extends Message> extends EnrichmentFunction<S, T> {
+class MessageEnrichment<S extends Message, T extends Message, C extends Message>
+        extends EnrichmentFunction<S, T, C> {
 
     /** A parent instance holding this instance and its siblings. */
-    private final Enricher enricher;
+    private final Enricher<?, ?> enricher;
 
     /** Tells, whether this instance is active or not. */
     private boolean active = false;
 
     /** A map from source message field class to enrichment functions. */
     @Nullable
-    private ImmutableMultimap<Class<?>, EnrichmentFunction<?, ?>> fieldFunctions;
+    private ImmutableMultimap<Class<?>, EnrichmentFunction<?, ?, ?>> fieldFunctions;
 
     /** A map from source message/context field to target enrichment field descriptors. */
     @Nullable
     private ImmutableMultimap<FieldDescriptor, FieldDescriptor> fieldMap;
 
     /** Creates a new message enricher instance. */
-    static <S extends Message, T extends Message>
-    MessageEnrichment<S, T> create(Enricher enricher,
+    static <S extends Message, T extends Message, C extends Message>
+    MessageEnrichment<S, T, C> create(Enricher enricher,
                                    Class<S> messageClass,
                                    Class<T> enrichmentClass) {
         return new MessageEnrichment<>(enricher, messageClass, enrichmentClass);
@@ -79,11 +80,11 @@ class MessageEnrichment<S extends Message, T extends Message> extends Enrichment
     void activate() {
         final ReferenceValidator referenceValidator =
                 new ReferenceValidator(enricher, getSourceClass(), getEnrichmentClass());
-        final ImmutableMultimap.Builder<Class<?>, EnrichmentFunction<?, ?>> map =
+        final ImmutableMultimap.Builder<Class<?>, EnrichmentFunction<?, ?, ?>> map =
                                                                       ImmutableMultimap.builder();
         final ReferenceValidator.ValidationResult validationResult = referenceValidator.validate();
-        final List<EnrichmentFunction<?, ?>> fieldFunctions = validationResult.getFunctions();
-        for (EnrichmentFunction<?, ?> fieldFunction : fieldFunctions) {
+        final List<EnrichmentFunction<?, ?, ?>> fieldFunctions = validationResult.getFunctions();
+        for (EnrichmentFunction<?, ?, ?> fieldFunction : fieldFunctions) {
             map.put(fieldFunction.getSourceClass(), fieldFunction);
         }
         this.fieldFunctions = map.build();
@@ -98,7 +99,7 @@ class MessageEnrichment<S extends Message, T extends Message> extends Enrichment
     }
 
     @Override
-    public T apply(S eventMsg, EventContext context) {
+    public T apply(S eventMsg, C context) {
         checkNotNull(eventMsg);
         checkNotNull(context);
         ensureActive();
@@ -133,14 +134,15 @@ class MessageEnrichment<S extends Message, T extends Message> extends Enrichment
                                     after validation maps have required entries. */,
             "MethodWithMultipleLoops"}
     )
-    private void setFields(Message.Builder builder, S sourceMessage, EventContext context) {
+    private void setFields(Message.Builder builder, S sourceMessage, C context) {
         for (FieldDescriptor srcField : fieldMap.keySet()) {
             final Object srcFieldValue = getSrcFieldValue(srcField, sourceMessage, context);
             final Class<?> sourceFieldClass = srcFieldValue.getClass();
-            final Collection<EnrichmentFunction<?, ?>> functions = fieldFunctions.get(sourceFieldClass);
+            final Collection<EnrichmentFunction<?, ?, ?>> functions =
+                    fieldFunctions.get(sourceFieldClass);
             final Collection<FieldDescriptor> targetFields = fieldMap.get(srcField);
             for (FieldDescriptor targetField : targetFields) {
-                final Optional<EnrichmentFunction<?, ?>> function =
+                final Optional<EnrichmentFunction<?, ?, ?>> function =
                         firstThat(functions,
                                   SupportsFieldConversion.of(sourceFieldClass,
                                                              Field.getFieldClass(targetField)));
@@ -155,7 +157,7 @@ class MessageEnrichment<S extends Message, T extends Message> extends Enrichment
         }
     }
 
-    private Object getSrcFieldValue(FieldDescriptor srcField, S eventMsg, EventContext context) {
+    private Object getSrcFieldValue(FieldDescriptor srcField, S eventMsg, C context) {
         final boolean isContextField = srcField.getContainingType()
                                                .equals(EventContext.getDescriptor());
         final Object result = isContextField

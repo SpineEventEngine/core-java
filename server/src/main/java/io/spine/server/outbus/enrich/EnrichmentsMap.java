@@ -74,8 +74,8 @@ class EnrichmentsMap {
 
     private static final ImmutableMultimap<String, String> enrichmentsMap = buildEnrichmentsMap();
 
-    private EnrichmentsMap() {
-    }
+    /** Prevents instantiation of this utility class. */
+    private EnrichmentsMap() {}
 
     /** Returns the immutable map instance. */
     static ImmutableMultimap<String, String> getInstance() {
