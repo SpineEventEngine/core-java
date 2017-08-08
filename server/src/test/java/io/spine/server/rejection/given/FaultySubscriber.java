@@ -17,41 +17,33 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package io.spine.server.rejection.given;
 
-import com.google.protobuf.Empty;
 import io.spine.core.CommandContext;
-import io.spine.core.Commands;
-import io.spine.core.React;
 import io.spine.core.Rejection;
+import io.spine.core.Subscribe;
 import io.spine.test.rejection.ProjectRejections;
-import io.spine.test.rejection.command.RemoveOwner;
 
-import static io.spine.core.Rejections.getMessage;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
-public class CommandAwareReactor extends VerifiableReactor {
-
-    private ProjectRejections.MissingOwner rejection;
-    private RemoveOwner command;
-    private CommandContext context;
-
-    @React
-    public Empty on(ProjectRejections.MissingOwner rejection,
-                    RemoveOwner command,
-                    CommandContext context) {
+/**
+ * The subscriber which throws an exception from the subscriber method.
+ *
+ * @author Alex Tymchenko
+ * @author Alexander Yevsyukov
+ */
+public class FaultySubscriber extends VerifiableSubscriber {
+    @SuppressWarnings("unused") // It's fine for a faulty subscriber.
+    @Subscribe
+    public void on(ProjectRejections.InvalidProjectName rejection, CommandContext context) {
         triggerCall();
-        this.rejection = rejection;
-        this.command = command;
-        this.context = context;
-        return Empty.getDefaultInstance();
+        throw new UnsupportedOperationException(
+                "Faulty subscriber should have failed: " +
+                        FaultySubscriber.class.getSimpleName());
     }
 
     @Override
-    public void verifyGot(Rejection rejection) {
-        assertEquals(getMessage(rejection), this.rejection);
-        assertEquals(Commands.getMessage(rejection.getContext().getCommand()), command);
-        assertEquals(rejection.getContext().getCommand().getContext(), context);
+    public void verifyGot(Rejection ignored) {
+        fail("FaultySubscriber");
     }
 }

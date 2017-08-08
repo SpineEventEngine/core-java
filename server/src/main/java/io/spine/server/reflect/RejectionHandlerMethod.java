@@ -1,0 +1,238 @@
+/*
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
+ *
+ * Redistribution and use in source and/or binary forms, with or without
+ * modification, must retain the above copyright notice and the following
+ * disclaimer.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+package io.spine.server.reflect;
+
+import com.google.protobuf.Message;
+import io.spine.core.CommandContext;
+import io.spine.core.RejectionClass;
+
+import javax.annotation.CheckReturnValue;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Set;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.util.Exceptions.newIllegalArgumentException;
+import static io.spine.util.Exceptions.newIllegalStateException;
+import static io.spine.util.Exceptions.unsupported;
+
+/**
+ * A base class for methods, that handle rejections.
+ *
+ * @author Alex Tymchenko
+ * @author Dmytro Dashenkov
+ * @author Alexander Yevsyukov
+ */
+class RejectionHandlerMethod extends HandlerMethod<CommandContext>{
+
+    /** Determines the number of parameters and their types. */
+    private final Kind kind;
+
+    /**
+     * Creates a new instance to wrap {@code method} on {@code target}.
+     *
+     * @param method handler method
+     */
+    RejectionHandlerMethod(Method method) {
+        super(method);
+        this.kind = getKind(method);
+    }
+
+    private static Kind getKind(Method method) {
+        final Class[] paramTypes = method.getParameterTypes();
+        final int paramCount = paramTypes.length;
+        switch (paramCount) {
+            case 1:
+                return Kind.REJECTION_MESSAGE_AWARE;
+            case 2:
+                final Class<?> secondParamType = paramTypes[1];
+                return  secondParamType == CommandContext.class
+                        ? Kind.COMMAND_CONTEXT_AWARE
+                        : Kind.COMMAND_MESSAGE_AWARE;
+            case 3:
+                return Kind.COMMAND_AWARE;
+            default:
+                throw newIllegalArgumentException(
+                        "Invalid Rejection handler method parameter count: %s.", paramCount);
+        }
+    }
+
+    /**
+     * Invokes the wrapped handler method to handle {@code rejectionMessage},
+     * {@code commandMessage} with the passed {@code context} of the {@code Command}.
+     *
+     * <p>Unlike the {@linkplain #invoke(Object, Message, Message) overloaded alternative method},
+     * this one may return some value.
+     *
+     * @param target       the target object on which call the method
+     * @param rejectionMsg the rejection message to handle
+     * @param commandMsg   the command message
+     * @param ctx          the context of the command
+     * @return the result of the invocation
+     */
+    Object doInvoke(Object target, Message rejectionMsg, Message commandMsg, CommandContext ctx) {
+        checkNotNull(rejectionMsg);
+        checkNotNull(commandMsg);
+        checkNotNull(ctx);
+
+        try {
+            final Object output;
+            final Method method = getMethod();
+            switch (kind) {
+                case REJECTION_MESSAGE_AWARE:
+                    output = method.invoke(target, rejectionMsg);
+                    break;
+                case COMMAND_CONTEXT_AWARE:
+                    output = method.invoke(target, rejectionMsg, ctx);
+                    break;
+                case COMMAND_MESSAGE_AWARE:
+                    output = method.invoke(target, rejectionMsg, commandMsg);
+                    break;
+                case COMMAND_AWARE:
+                    output = method.invoke(target, rejectionMsg, commandMsg, ctx);
+                    break;
+                default:
+                    throw unsupported("Unsupported method kind encountered %s", kind.name());
+            }
+            return output;
+        } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
+            throw whyFailed(target, rejectionMsg, ctx, e);
+        }
+    }
+
+    static IllegalStateException missingRejectionHandler(
+            Class<?> cls, Class<? extends Message> rejectionClass) {
+        return newIllegalStateException("Missing handler for rejection class %s in the class %s",
+                                        rejectionClass, cls);
+    }
+
+    @CheckReturnValue
+    static Set<RejectionClass> inspectWith(Class<?> cls, MethodPredicate predicate) {
+        checkNotNull(cls);
+        checkNotNull(predicate);
+        final Set<RejectionClass> result = RejectionClass.setOf(inspect(cls, predicate));
+        return result;
+    }
+
+
+    /**
+     * The kind of the method signature, which is determined by the number of parameters and
+     * their types.
+     *
+     * <p>Depending on a descendant, the signatures should be used with a particular
+     * handler method annotation.
+     */
+    protected enum Kind {
+
+        /**
+         * A wrapper of a rejection handler method which receives a rejection message
+         * as a single parameter.
+         *
+         * <p>The signature of such a method is following:
+         * <pre>
+         * [{@literal @}HandlerAnnotation]
+         * public void on(RejectionMessage rejection);
+         * </pre>
+         * where {@code RejectionMessage} is a specific generated rejection message class.
+         */
+        REJECTION_MESSAGE_AWARE,
+
+        /**
+         * A rejection handler method aware of the {@link CommandContext}.
+         *
+         * <p>The signature of such a method is following:
+         * <pre>
+         * [{@literal @}HandlerAnnotation]
+         * public void on(RejectionMessage rejection, CommandContext context);
+         * </pre>
+         * where {@code RejectionMessage} is a specific generated rejection message class.
+         */
+        COMMAND_CONTEXT_AWARE,
+
+        /**
+         * A rejection handler method aware of the command message.
+         *
+         * <p>The signature of such a method is following:
+         * <pre>
+         * [{@literal @}HandlerAnnotation]
+         * public void on(RejectionMessage rejection, CommandMessage command);
+         * </pre>
+         * where {@code RejectionMessage} is a specific generated rejection message class, and
+         * {@code CommandMessage} is a specific generated command message class.
+         */
+        COMMAND_MESSAGE_AWARE,
+
+        /**
+         * A rejection handler method aware of both the command message and
+         * the {@link CommandContext}.
+         *
+         * <p>The signature of such a method is following:
+         * <pre>
+         * [{@literal @}HandlerAnnotation]
+         * public void on(RejectionMessage rejection, CommandMessage command, CommandContext context);
+         * </pre>
+         * where {@code RejectionMessage} is a specific generated rejection message class, and
+         * {@code CommandMessage} is a specific generated command message class.
+         */
+        COMMAND_AWARE
+    }
+
+    /**
+     * The abstract base for predicates allowing to filter rejection handler methods.
+     */
+    protected abstract static class RejectionFilterPredicate
+            extends HandlerMethodPredicate<CommandContext> {
+
+        RejectionFilterPredicate(Class<? extends Annotation> annotationClass) {
+            super(annotationClass, CommandContext.class);
+        }
+
+        @Override
+        protected boolean verifyParams(Method method) {
+            final Class<?>[] paramTypes = method.getParameterTypes();
+            final int paramCount = paramTypes.length;
+            final boolean paramCountCorrect = paramCount >= 1 && paramCount <= 3;
+            if (!paramCountCorrect) {
+                return false;
+            }
+
+            final boolean firstParamCorrect = Message.class.isAssignableFrom(paramTypes[0]);
+            if (!firstParamCorrect) {
+                return false;
+            }
+            if (paramCount == 1) {
+                return true;
+            }
+
+            final boolean secondParamCorrect = Message.class.isAssignableFrom(paramTypes[1]);
+            if (!secondParamCorrect) {
+                return false;
+            }
+            if (paramCount == 2) {
+                return true;
+            }
+
+            final Class<? extends Message> contextClass = getContextClass();
+            final boolean thirdParamCorrect = contextClass == paramTypes[2];
+            return thirdParamCorrect;
+        }
+    }
+}

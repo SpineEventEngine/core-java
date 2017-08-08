@@ -20,32 +20,25 @@
 
 package io.spine.server.rejection.given;
 
-import com.google.protobuf.Empty;
-import io.spine.core.Commands;
-import io.spine.core.React;
 import io.spine.core.Rejection;
+import io.spine.core.Subscribe;
 import io.spine.test.rejection.ProjectRejections;
-import io.spine.test.rejection.command.RemoveOwner;
 
 import static io.spine.core.Rejections.getMessage;
 import static org.junit.Assert.assertEquals;
 
-public class CommandMessageAwareReactor extends VerifiableReactor {
+public class RejectionMessageSubscriber extends VerifiableSubscriber {
 
     private ProjectRejections.MissingOwner rejection;
-    private RemoveOwner command;
 
-    @React
-    public Empty on(ProjectRejections.MissingOwner rejection, RemoveOwner command) {
+    @Subscribe
+    public void on(ProjectRejections.MissingOwner rejection) {
         triggerCall();
         this.rejection = rejection;
-        this.command = command;
-        return Empty.getDefaultInstance();
     }
 
     @Override
     public void verifyGot(Rejection rejection) {
         assertEquals(getMessage(rejection), this.rejection);
-        assertEquals(Commands.getMessage(rejection.getContext().getCommand()), command);
     }
 }

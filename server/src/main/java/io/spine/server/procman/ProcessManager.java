@@ -146,7 +146,7 @@ public abstract class ProcessManager<I,
     }
 
     /**
-     * Dispatches a rejection to the subscribing method of the process manager.
+     * Dispatches a rejection to the reacting method of the process manager.
      *
      * @param rejection the envelope with the rejection
      * @return a list of produced events or an empty list if the process manager does not

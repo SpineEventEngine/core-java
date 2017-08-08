@@ -28,16 +28,20 @@ import io.spine.test.rejection.command.UpdateProjectName;
 
 import java.lang.reflect.Method;
 
+/**
+ * @author Alexander Yevsyukov
+ */
 public class RejectionReactorMethodTestEnv {
 
     /** Prevents instantiation of this utility class. */
-    private RejectionReactorMethodTestEnv() {}
+    private RejectionReactorMethodTestEnv() {
+    }
 
     /**
-     * The abstract base for test subscriber classes.
+     * The abstract base for testing reactor classes.
      *
      * <p>The purpose of this class is to obtain a reference to a
-     * {@linkplain #HANDLER_METHOD_NAME single subscriber method}.
+     * {@linkplain #HANDLER_METHOD_NAME single reactor method}.
      * This reference will be later used for assertions.
      */
     public abstract static class TestRejectionReactor {
@@ -48,15 +52,15 @@ public class RejectionReactorMethodTestEnv {
         public Method getMethod() {
             final Method[] methods = getClass().getDeclaredMethods();
             for (Method method : methods) {
-                if (method.getName().equals(HANDLER_METHOD_NAME)) {
+                if (method.getName()
+                          .equals(HANDLER_METHOD_NAME)) {
                     return method;
                 }
             }
-            throw new RuntimeException("No rejection subscriber method found " +
+            throw new RuntimeException("No rejection reactor method found " +
                                                HANDLER_METHOD_NAME);
         }
     }
-
 
     public static class ValidTwoParams extends TestRejectionReactor {
         @React
@@ -68,7 +72,7 @@ public class RejectionReactorMethodTestEnv {
     public static class ValidThreeParams extends TestRejectionReactor {
         @React
         public Empty handle(InvalidProjectName rejection,
-                           UpdateProjectName command, CommandContext context) {
+                            UpdateProjectName command, CommandContext context) {
             return Empty.getDefaultInstance();
         }
     }
@@ -82,7 +86,7 @@ public class RejectionReactorMethodTestEnv {
     }
 
     /**
-     * The subscriber with a method which is not annotated.
+     * The reactor with a method which is not annotated.
      */
     public static class InvalidNoAnnotation extends TestRejectionReactor {
         @SuppressWarnings("unused")
@@ -92,7 +96,7 @@ public class RejectionReactorMethodTestEnv {
     }
 
     /**
-     * The subscriber with a method which does not have parameters.
+     * The reactor with a method which does not have parameters.
      */
     public static class InvalidNoParams extends TestRejectionReactor {
         @React
@@ -102,20 +106,20 @@ public class RejectionReactorMethodTestEnv {
     }
 
     /**
-     * The subscriber which has too many parameters.
+     * The reactor which has too many parameters.
      */
     public static class InvalidTooManyParams extends TestRejectionReactor {
         @React
         public Empty handle(InvalidProjectName rejection,
-                           UpdateProjectName command,
-                           CommandContext context,
-                           Object redundant) {
+                            UpdateProjectName command,
+                            CommandContext context,
+                            Object redundant) {
             return Empty.getDefaultInstance();
         }
     }
 
     /**
-     * The subscriber which has invalid single argument.
+     * The reactor which has invalid single argument.
      */
     public static class InvalidOneNotMsgParam extends TestRejectionReactor {
         @React
@@ -125,17 +129,17 @@ public class RejectionReactorMethodTestEnv {
     }
 
     /**
-     * The subscriber with a method with first invalid parameter.
+     * The reactor with a method with first invalid parameter.
      */
     public static class InvalidTwoParamsFirstInvalid extends TestRejectionReactor {
         @React
-        public Empty handle(Exception invalid,  UpdateProjectName command) {
+        public Empty handle(Exception invalid, UpdateProjectName command) {
             return Empty.getDefaultInstance();
         }
     }
 
     /**
-     * The subscriber which has invalid second parameter.
+     * The reactor which has invalid second parameter.
      */
     public static class InvalidTwoParamsSecondInvalid extends TestRejectionReactor {
         @React
@@ -145,7 +149,7 @@ public class RejectionReactorMethodTestEnv {
     }
 
     /**
-     * The class with rejection subscriber that returns {@code Object} instead of {@code void}.
+     * The class with rejection reactor that returns {@code Object} instead of {@code Message}.
      */
     public static class InvalidNotMessage extends TestRejectionReactor {
         @React

@@ -20,32 +20,30 @@
 
 package io.spine.server.rejection.given;
 
-import com.google.protobuf.Empty;
 import io.spine.client.CommandFactory;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
-import io.spine.core.React;
 import io.spine.core.Rejection;
 import io.spine.core.Rejections;
-import io.spine.server.rejection.RejectionReactor;
+import io.spine.core.Subscribe;
+import io.spine.server.rejection.RejectionSubscriber;
 import io.spine.test.rejection.ProjectRejections.InvalidProjectName;
 import io.spine.test.rejection.command.UpdateProjectName;
 
-public class InvalidProjectNameReactor extends RejectionReactor {
+public class InvalidProjectNameSubscriber extends RejectionSubscriber {
 
     private Rejection rejectionHandled;
 
-    @React
-    public Empty on(InvalidProjectName rejection,
-                    UpdateProjectName commandMessage,
-                    CommandContext context) {
+    @Subscribe
+    public void on(InvalidProjectName rejection,
+                   UpdateProjectName commandMessage,
+                   CommandContext context) {
         final CommandFactory commandFactory =
-                TestActorRequestFactory.newInstance(InvalidProjectNameReactor.class)
+                TestActorRequestFactory.newInstance(InvalidProjectNameSubscriber.class)
                                        .command();
         final Command command = commandFactory.createWithContext(commandMessage, context);
         this.rejectionHandled = Rejections.createRejection(rejection, command);
-        return Empty.getDefaultInstance();
     }
 
     public Rejection getRejectionHandled() {

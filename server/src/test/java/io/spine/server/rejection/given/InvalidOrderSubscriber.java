@@ -20,28 +20,27 @@
 
 package io.spine.server.rejection.given;
 
-import com.google.protobuf.Empty;
 import io.spine.core.CommandContext;
-import io.spine.core.React;
 import io.spine.core.Rejection;
+import io.spine.core.Subscribe;
 import io.spine.test.rejection.ProjectRejections;
+import io.spine.test.rejection.command.RemoveOwner;
 
 import static org.junit.Assert.fail;
 
-/** The subscriber which throws exception from the subscriber method. */
-public class FaultyReactor extends VerifiableReactor {
+public class InvalidOrderSubscriber extends VerifiableSubscriber {
 
-    @SuppressWarnings("unused") // It's fine for a faulty subscriber.
-    @React
-    public Empty on(ProjectRejections.InvalidProjectName rejection, CommandContext context) {
+    @SuppressWarnings("unused") // The method should never be invoked, so the params are unused.
+    @Subscribe
+    public void on(ProjectRejections.MissingOwner rejection,
+                    CommandContext context,
+                    RemoveOwner command) {
         triggerCall();
-        throw new UnsupportedOperationException(
-                "Faulty subscriber should have failed: " +
-                        FaultyReactor.class.getSimpleName());
+        fail("InvalidOrderSubscriber invoked the handler method");
     }
 
     @Override
-    public void verifyGot(Rejection ignored) {
-        fail("FaultySubscriber");
+    public void verifyGot(Rejection rejection) {
+        fail("InvalidOrderSubscriber");
     }
 }

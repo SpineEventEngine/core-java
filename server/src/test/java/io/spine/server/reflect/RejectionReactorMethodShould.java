@@ -22,7 +22,6 @@ package io.spine.server.reflect;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import io.spine.core.CommandContext;
-import io.spine.core.RejectionEnvelope;
 import io.spine.server.reflect.given.Given;
 import io.spine.server.reflect.given.RejectionReactorMethodTestEnv.InvalidNoAnnotation;
 import io.spine.server.reflect.given.RejectionReactorMethodTestEnv.InvalidNoParams;
@@ -34,8 +33,6 @@ import io.spine.server.reflect.given.RejectionReactorMethodTestEnv.InvalidTwoPar
 import io.spine.server.reflect.given.RejectionReactorMethodTestEnv.ValidButPrivate;
 import io.spine.server.reflect.given.RejectionReactorMethodTestEnv.ValidThreeParams;
 import io.spine.server.reflect.given.RejectionReactorMethodTestEnv.ValidTwoParams;
-import io.spine.server.rejection.given.FaultyReactor;
-import io.spine.server.rejection.given.VerifiableReactor;
 import io.spine.test.reflect.ReflectRejections.InvalidProjectName;
 import io.spine.test.rejection.command.UpdateProjectName;
 import org.junit.Test;
@@ -43,16 +40,14 @@ import org.junit.Test;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import static io.spine.server.rejection.given.Given.invalidProjectNameRejection;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 /**
- * @author Alex Tymchenko
+ * @author Alexander Yevsyukov
  */
 @SuppressWarnings("unused")     // some of tests address just the fact of method declaration.
 public class RejectionReactorMethodShould {
@@ -68,84 +63,75 @@ public class RejectionReactorMethodShould {
     }
 
     @Test
-    public void invoke_subscriber_method() throws InvocationTargetException {
-        final ValidThreeParams subscriberObject = spy(new ValidThreeParams());
-        final RejectionReactorMethod subscriber =
-                new RejectionReactorMethod(subscriberObject.getMethod());
+    public void invoke_reactor_method() throws InvocationTargetException {
+        final ValidThreeParams reactorObject = spy(new ValidThreeParams());
+        final RejectionReactorMethod reactor =
+                new RejectionReactorMethod(reactorObject.getMethod());
         final InvalidProjectName msg = Given.RejectionMessage.invalidProjectName();
 
-        subscriber.invoke(subscriberObject,
-                          msg,
-                          UpdateProjectName.getDefaultInstance(),
-                          emptyContext);
+        reactor.invoke(reactorObject,
+                       msg,
+                       UpdateProjectName.getDefaultInstance(),
+                       emptyContext);
 
-        verify(subscriberObject, times(1))
+        verify(reactorObject, times(1))
                 .handle(msg, UpdateProjectName.getDefaultInstance(), emptyContext);
     }
 
     @Test(expected = UnsupportedOperationException.class)
     public void not_allow_invoking_inherited_invoke_method() {
-        final ValidThreeParams subscriberObject = new ValidThreeParams();
-        final RejectionReactorMethod subscriber =
-                new RejectionReactorMethod(subscriberObject.getMethod());
+        final ValidThreeParams reactorObject = new ValidThreeParams();
+        final RejectionReactorMethod reactor =
+                new RejectionReactorMethod(reactorObject.getMethod());
 
         final InvalidProjectName msg = Given.RejectionMessage.invalidProjectName();
 
         // This should fail.
-        subscriber.invoke(subscriberObject, msg, emptyContext);
-        
+        reactor.invoke(reactorObject, msg, emptyContext);
+
         fail("Exception not thrown");
     }
 
     @Test
-    public void catch_exceptions_caused_by_subscribers() {
-        final VerifiableReactor faultySubscriber = new FaultyReactor();
+    public void consider_reactor_with_two_msg_param_valid() {
+        final Method reactor = new ValidTwoParams().getMethod();
 
-        faultySubscriber.dispatch(RejectionEnvelope.of(invalidProjectNameRejection()));
-
-        assertTrue(faultySubscriber.isMethodCalled());
+        assertIsRejectionReactor(reactor, true);
     }
 
     @Test
-    public void consider_subscriber_with_two_msg_param_valid() {
-        final Method subscriber = new ValidTwoParams().getMethod();
+    public void consider_reactor_with_both_messages_and_context_params_valid() {
+        final Method reactor = new ValidThreeParams().getMethod();
 
-        assertIsRejectionSubscriber(subscriber, true);
+        assertIsRejectionReactor(reactor, true);
     }
 
     @Test
-    public void consider_subscriber_with_both_messages_and_context_params_valid() {
-        final Method subscriber = new ValidThreeParams().getMethod();
-
-        assertIsRejectionSubscriber(subscriber, true);
-    }
-
-    @Test
-    public void consider_not_public_subscriber_valid() {
+    public void consider_not_public_reactor_valid() {
         final Method method = new ValidButPrivate().getMethod();
 
-        assertIsRejectionSubscriber(method, true);
+        assertIsRejectionReactor(method, true);
     }
 
     @Test
-    public void consider_not_annotated_subscriber_invalid() {
-        final Method subscriber = new InvalidNoAnnotation().getMethod();
+    public void consider_not_annotated_reactor_invalid() {
+        final Method reactor = new InvalidNoAnnotation().getMethod();
 
-        assertIsRejectionSubscriber(subscriber, false);
+        assertIsRejectionReactor(reactor, false);
     }
 
     @Test
-    public void consider_subscriber_without_params_invalid() {
-        final Method subscriber = new InvalidNoParams().getMethod();
+    public void consider_reactor_without_params_invalid() {
+        final Method reactor = new InvalidNoParams().getMethod();
 
-        assertIsRejectionSubscriber(subscriber, false);
+        assertIsRejectionReactor(reactor, false);
     }
 
     @Test
-    public void consider_subscriber_with_too_many_params_invalid() {
-        final Method subscriber = new InvalidTooManyParams().getMethod();
+    public void consider_reactor_with_too_many_params_invalid() {
+        final Method reactor = new InvalidTooManyParams().getMethod();
 
-        assertIsRejectionSubscriber(subscriber, false);
+        assertIsRejectionReactor(reactor, false);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -156,34 +142,35 @@ public class RejectionReactorMethodShould {
     }
 
     @Test
-    public void consider_subscriber_with_one_invalid_param_invalid() {
-        final Method subscriber = new InvalidOneNotMsgParam().getMethod();
+    public void consider_reactor_with_one_invalid_param_invalid() {
+        final Method reactor = new InvalidOneNotMsgParam().getMethod();
 
-        assertIsRejectionSubscriber(subscriber, false);
+        assertIsRejectionReactor(reactor, false);
     }
 
     @Test
-    public void consider_subscriber_with_first_not_message_param_invalid() {
-        final Method subscriber = new InvalidTwoParamsFirstInvalid().getMethod();
+    public void consider_reactor_with_first_not_message_param_invalid() {
+        final Method reactor = new InvalidTwoParamsFirstInvalid().getMethod();
 
-        assertIsRejectionSubscriber(subscriber, false);
+        assertIsRejectionReactor(reactor, false);
     }
 
     @Test
-    public void consider_subscriber_with_second_not_context_param_invalid() {
-        final Method subscriber = new InvalidTwoParamsSecondInvalid().getMethod();
+    public void consider_reactor_with_second_not_context_param_invalid() {
+        final Method reactor = new InvalidTwoParamsSecondInvalid().getMethod();
 
-        assertIsRejectionSubscriber(subscriber, false);
+        assertIsRejectionReactor(reactor, false);
     }
 
     @Test
-    public void consider_not_void_subscriber_invalid() {
-        final Method subscriber = new InvalidNotMessage().getMethod();
+    public void consider_not_void_reactor_invalid() {
+        final Method reactor = new InvalidNotMessage().getMethod();
 
-        assertIsRejectionSubscriber(subscriber, false);
+        assertIsRejectionReactor(reactor, false);
     }
 
-    private static void assertIsRejectionSubscriber(Method subscriber, boolean isSubscriber) {
-        assertEquals(isSubscriber, RejectionReactorMethod.predicate().apply(subscriber));
+    private static void assertIsRejectionReactor(Method reactor, boolean isReactor) {
+        assertEquals(isReactor, RejectionReactorMethod.predicate()
+                                                      .apply(reactor));
     }
 }
