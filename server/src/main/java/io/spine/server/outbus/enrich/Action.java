@@ -34,7 +34,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Collections2.filter;
 
 /**
- * Performs enrichment operation of an event.
+ * Performs enrichment operation of an enrichable message.
  *
  * @author Alexander Yevsyukov
  */
@@ -47,10 +47,10 @@ final class Action<M extends EnrichableMessageEnvelope<?, ?, C>, C extends Messa
 
     Action(Enricher<M, ?> parent, M envelope) {
         this.envelope = envelope;
-        final Class<? extends Message> eventClass = envelope.getMessageClass()
-                                                            .value();
+        final Class<? extends Message> sourceClass = envelope.getMessageClass()
+                                                             .value();
         final Collection<EnrichmentFunction<?, ?, ?>> functionsPerClass =
-                parent.getFunctions(eventClass);
+                parent.getFunctions(sourceClass);
         this.availableFunctions = filter(functionsPerClass, EnrichmentFunction.activeOnly());
     }
 
@@ -63,9 +63,9 @@ final class Action<M extends EnrichableMessageEnvelope<?, ?, C>, C extends Messa
     }
 
     private void createEnrichments() {
-        final Message eventMessage = envelope.getMessage();
+        final Message sourceMessage = envelope.getMessage();
         for (EnrichmentFunction function : availableFunctions) {
-            final Message enriched = apply(function, eventMessage, envelope.getMessageContext());
+            final Message enriched = apply(function, sourceMessage, envelope.getMessageContext());
             checkResult(enriched, function);
             final String typeName = TypeName.of(enriched)
                                             .value();
@@ -79,7 +79,7 @@ final class Action<M extends EnrichableMessageEnvelope<?, ?, C>, C extends Messa
      * <p>We suppress the {@code "unchecked"} because we ensure types when we...
      * <ol>
      *      <li>create enrichments,
-     *      <li>put them into {@linkplain Enricher#functions} by their event message class.
+     *      <li>put them into {@linkplain Enricher#functions} by their message class.
      * </ol>
      */
     @SuppressWarnings("unchecked")
@@ -91,7 +91,7 @@ final class Action<M extends EnrichableMessageEnvelope<?, ?, C>, C extends Messa
     private void checkResult(Message enriched, EnrichmentFunction function) {
         checkNotNull(
             enriched,
-            "EnrichmentFunction %s produced `null` from event message %s",
+            "EnrichmentFunction %s produced `null` for the source message %s",
             function, envelope.getMessage()
         );
     }
