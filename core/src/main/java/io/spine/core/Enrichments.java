@@ -25,6 +25,8 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.type.TypeName;
 
+import java.util.Map;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.protobuf.AnyPacker.unpack;
 
@@ -113,5 +115,16 @@ public final class Enrichments {
         }
         final E result = unpack(any);
         return Optional.fromNullable(result);
+    }
+
+    /**
+     * Creates a new {@link Enrichment} instance from the passed map.
+     */
+    static Enrichment createEnrichment(Map<String, Any> enrichments) {
+        final Enrichment.Builder enrichment =
+                Enrichment.newBuilder()
+                          .setContainer(Enrichment.Container.newBuilder()
+                                                            .putAllItems(enrichments));
+        return enrichment.build();
     }
 }

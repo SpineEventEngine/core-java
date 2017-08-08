@@ -25,6 +25,17 @@ import com.google.protobuf.Message;
 
 import java.util.Map;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.core.Enrichments.createEnrichment;
+
+/**
+ * Common base for envelopes of messages that can be enriched.
+ *
+ * @param <I> the type of message IDs
+ * @param <T> the type of outer objects
+ * @param <C> the type of context of the messages
+ * @author Alexander Yevsyukov
+ */
 public abstract class EnrichableMessageEnvelope<I extends Message, T, C extends Message>
         extends AbstractMessageEnvelope<I, T, C>
         implements ActorMessageEnvelope<I, T, C> {
@@ -33,6 +44,11 @@ public abstract class EnrichableMessageEnvelope<I extends Message, T, C extends 
         super(object);
     }
 
+    /**
+     * Verifies if the enrichment of the message is enabled.
+     *
+     * @see Enrichment.Builder#setDoNotEnrich(boolean)
+     */
     public final boolean isEnrichmentEnabled() {
         final boolean result = getEnrichment().getModeCase() != Enrichment.ModeCase.DO_NOT_ENRICH;
         return result;
@@ -40,21 +56,22 @@ public abstract class EnrichableMessageEnvelope<I extends Message, T, C extends 
 
     protected abstract Enrichment getEnrichment();
 
-    private static Enrichment createEnrichment(Map<String, Any> enrichments) {
-        final Enrichment.Builder enrichment =
-                Enrichment.newBuilder()
-                          .setContainer(Enrichment.Container.newBuilder()
-                                                            .putAllItems(enrichments));
-        return enrichment.build();
-    }
-
+    /**
+     * Creates a new version of the message with the enrichments applied.
+     *
+     * @param enrichments the enrichments to apply
+     * @return new enriched envelope
+     */
     public EnrichableMessageEnvelope<I, T, C> toEnriched(Map<String, Any> enrichments) {
-
+        checkNotNull(enrichments);
         final Enrichment enrichment = createEnrichment(enrichments);
         final EnrichableMessageEnvelope<I, T, C> result = enrich(enrichment);
         return result;
 
     }
 
+    /**
+     * Factory method for creating enriched version of the message.
+     */
     protected abstract EnrichableMessageEnvelope<I, T, C> enrich(Enrichment enrichment);
 }
