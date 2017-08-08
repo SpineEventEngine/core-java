@@ -40,7 +40,6 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.LinkedListMultimap.create;
-import static com.google.common.collect.Multimaps.synchronizedMultimap;
 import static io.spine.server.outbus.enrich.MessageEnrichment.create;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
@@ -63,7 +62,7 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  */
 public abstract class Enricher<M extends EnrichableMessageEnvelope<?, ?, C>, C extends Message> {
 
-    /** Available enrichment functions per message class. */
+    /** Available enrichment functions per Java class. */
     private final ImmutableMultimap<Class<?>, EnrichmentFunction<?, ?, ?>> functions;
 
     /**
@@ -72,8 +71,7 @@ public abstract class Enricher<M extends EnrichableMessageEnvelope<?, ?, C>, C e
      * <p>Also adds {@link MessageEnrichment}s for all enrichments defined in Protobuf.
      */
     protected Enricher(AbstractBuilder<? extends Enricher, ?> builder) {
-        final LinkedListMultimap<Class<?>, EnrichmentFunction<?, ?, ?>> rawMap = create();
-        final Multimap<Class<?>, EnrichmentFunction<?, ?, ?>> funcMap = synchronizedMultimap(rawMap);
+        final LinkedListMultimap<Class<?>, EnrichmentFunction<?, ?, ?>> funcMap = create();
         for (EnrichmentFunction<?, ?, ?> function : builder.getFunctions()) {
             funcMap.put(function.getSourceClass(), function);
         }
@@ -124,7 +122,8 @@ public abstract class Enricher<M extends EnrichableMessageEnvelope<?, ?, C>, C e
     }
 
     private boolean enrichmentRegistered(M event) {
-        final boolean result = functions.containsKey(event.getMessageClass());
+        final boolean result = functions.containsKey(event.getMessageClass()
+                                                          .value());
         return result;
     }
 

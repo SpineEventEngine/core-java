@@ -63,11 +63,6 @@ public class EnricherBuilderShould {
     }
 
     @Test
-    public void have_private_constructor() {
-        Tests.assertHasPrivateParameterlessCtor(Enricher.AbstractBuilder.class);
-    }
-
-    @Test
     public void build_enricher_if_all_functions_registered() {
         final Enricher enricher = Enrichment.newEnricher();
 

@@ -61,7 +61,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-public class EnricherShould {
+public class EventEnricherShould {
 
     private BoundedContext boundedContext;
     private EventBus eventBus;
@@ -71,7 +71,7 @@ public class EnricherShould {
     private final Function<ProjectId, UserId> getProjectOwnerId = new GetProjectOwnerId();
 
     private static Event createEvent(Message msg) {
-        final TestEventFactory eventFactory = newInstance(EnricherShould.class);
+        final TestEventFactory eventFactory = newInstance(EventEnricherShould.class);
         final Event event = eventFactory.createEvent(msg);
         return event;
     }
@@ -98,8 +98,9 @@ public class EnricherShould {
     @Test
     public void enrich_event_if_enrichment_definition_is_enclosed_to_event() {
         final ProjectStarted msg = GivenEventMessage.projectStarted();
+        final Event event = createEvent(msg);
 
-        eventBus.post(createEvent(msg));
+        eventBus.post(event);
 
         assertEquals(getProjectName.apply(msg.getProjectId()),
                      subscriber.projectStartedEnrichment.getProjectName());
@@ -225,8 +226,8 @@ public class EnricherShould {
 
         @Subscribe
         public void on(ProjectStarted event, EventContext context) {
-            this.projectStartedEnrichment = getEnrichment(ProjectStarted.Enrichment.class,
-                                                          context).get();
+            this.projectStartedEnrichment =
+                    getEnrichment(ProjectStarted.Enrichment.class, context).get();
         }
 
         @Subscribe

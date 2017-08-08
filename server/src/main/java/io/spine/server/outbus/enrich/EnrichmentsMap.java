@@ -23,8 +23,10 @@ package io.spine.server.outbus.enrich;
 import com.google.common.base.Function;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.protobuf.Descriptors.Descriptor;
+import com.google.protobuf.Message;
 import io.spine.option.OptionsProto;
 import io.spine.type.KnownTypes;
 import io.spine.type.TypeName;
@@ -72,14 +74,22 @@ class EnrichmentsMap {
 
     private static final char PROTO_PACKAGE_SEPARATOR = '.';
 
+    /** A map from enrichment class name to enriched message class name. */
     private static final ImmutableMultimap<String, String> enrichmentsMap = buildEnrichmentsMap();
 
     /** Prevents instantiation of this utility class. */
     private EnrichmentsMap() {}
 
-    /** Returns the immutable map instance. */
+    /** Obtains immutable map from enrichment class name to enriched message class name. */
     static ImmutableMultimap<String, String> getInstance() {
         return enrichmentsMap;
+    }
+
+    static Collection<String> getEventTypes(Class<? extends Message> enrichmentClass) {
+        final String enrichmentType = TypeName.of(enrichmentClass)
+                                              .value();
+        final ImmutableCollection<String> result = getInstance().get(enrichmentType);
+        return result;
     }
 
     private static ImmutableMultimap<String, String> buildEnrichmentsMap() {

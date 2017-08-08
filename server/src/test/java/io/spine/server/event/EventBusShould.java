@@ -294,7 +294,7 @@ public class EventBusShould {
     @Test
     public void enrich_event_if_it_can_be_enriched() {
         final EventEnricher enricher = mock(EventEnricher.class);
-        final Event event = GivenEvent.projectCreated();
+        final EventEnvelope event = EventEnvelope.of(GivenEvent.projectCreated());
         doReturn(true).when(enricher)
                       .canBeEnriched(any(EventEnvelope.class));
         doReturn(event).when(enricher)
@@ -302,7 +302,7 @@ public class EventBusShould {
         setUp(enricher);
         eventBus.register(new ProjectCreatedSubscriber());
 
-        eventBus.post(event);
+        eventBus.post(event.getOuterObject());
 
         verify(enricher).enrich(any(EventEnvelope.class));
     }
