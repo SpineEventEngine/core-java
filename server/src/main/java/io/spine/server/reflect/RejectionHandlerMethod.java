@@ -31,8 +31,8 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
+import static io.spine.util.Exceptions.newIllegalStateException;
 import static io.spine.util.Exceptions.unsupported;
-import static java.lang.String.format;
 
 /**
  * A base class for methods, that handle rejections.
@@ -120,11 +120,8 @@ class RejectionHandlerMethod extends HandlerMethod<CommandContext>{
 
     static IllegalStateException missingRejectionHandler(
             Class<?> cls, Class<? extends Message> rejectionClass) {
-        final String msg = format(
-                "Missing handler for rejection class %s in the class %s",
-                rejectionClass, cls
-        );
-        return new IllegalStateException(msg);
+        return newIllegalStateException("Missing handler for rejection class %s in the class %s",
+                                        rejectionClass, cls);
     }
 
     @CheckReturnValue
