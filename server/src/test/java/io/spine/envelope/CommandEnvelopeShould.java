@@ -28,6 +28,7 @@ import io.spine.core.MessageEnvelopeShould;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 
 /**
  * @author Alexander Yevsyukov
@@ -43,6 +44,7 @@ public class CommandEnvelopeShould
         final Command command = outerObject();
         final CommandEnvelope envelope = toEnvelope(command);
         assertEquals(command.getContext(), envelope.getCommandContext());
+        assertSame(envelope.getCommandContext(), envelope.getMessageContext());
     }
 
     @Test
