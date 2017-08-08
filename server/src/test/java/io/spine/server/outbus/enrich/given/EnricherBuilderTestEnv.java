@@ -41,12 +41,12 @@ import javax.annotation.Nullable;
  */
 public class EnricherBuilderTestEnv {
 
-    private EnricherBuilderTestEnv() {
-        // Prevent instantiation of this utility class.
-    }
+    /** Prevent instantiation of this utility class. */
+    private EnricherBuilderTestEnv() {}
 
     public static class Enrichment {
 
+        /** Prevent instantiation of this utility class. */
         private Enrichment() {}
 
         /** Creates a new enricher with all required enrichment functions set. */

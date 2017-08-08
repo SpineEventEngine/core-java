@@ -53,7 +53,7 @@ import static io.spine.protobuf.AnyPacker.pack;
  */
 public class EventEnricherTestEnv {
 
-    /** Prevent instantiation of this utility class. */
+    /** Prevents instantiation of this utility class. */
     private EventEnricherTestEnv() {}
 
     static ProjectId newProjectId() {
@@ -71,6 +71,7 @@ public class EventEnricherTestEnv {
         private static final ProjectCompleted PROJECT_COMPLETED = projectCompleted(PROJECT_ID);
         private static final ProjectStarred PROJECT_STARRED = projectStarred(PROJECT_ID);
 
+        /** Prevents instantiation of this utility class. */
         private GivenEventMessage() {}
 
         public static ProjectCreated projectCreated() {

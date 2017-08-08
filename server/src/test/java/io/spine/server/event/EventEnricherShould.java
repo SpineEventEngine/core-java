@@ -191,8 +191,14 @@ public class EventEnricherShould {
         assertFalse(enricher.canBeEnriched(notEnrichableEvent));
     }
 
-    @SuppressWarnings({"OptionalGetWithoutIsPresent",
-            "UnusedParameters", "InstanceVariableNamingConvention", "ConstantConditions"})
+    /**
+     * Event subscriber that remembers enrichments.
+     *
+     * <p>This class is a part of assert checking, and as such it is not placed under the test
+     * {@linkplain io.spine.server.event.given.EventEnricherTestEnv environment class} .
+     */
+    @SuppressWarnings({"OptionalGetWithoutIsPresent", "InstanceVariableNamingConvention",
+                       "ConstantConditions"})
     private static class TestEventSubscriber extends EventSubscriber {
 
         private ProjectCreated.Enrichment projectCreatedEnrichment;
