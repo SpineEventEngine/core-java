@@ -20,32 +20,31 @@
 
 package io.spine.server.rejection.given;
 
-import com.google.protobuf.Empty;
 import io.spine.core.CommandContext;
-import io.spine.core.React;
 import io.spine.core.Rejection;
+import io.spine.core.Subscribe;
 import io.spine.test.rejection.ProjectRejections;
 
-import static org.junit.Assert.fail;
+import static io.spine.core.Rejections.getMessage;
+import static org.junit.Assert.assertEquals;
 
-/**
- * The reactor which throws exception from the reactor method.
- *
- * @author Alexander Yevsyukov
- **/
-public class FaultyReactor extends VerifiableReactor {
+public class ContextAwareSubscriber extends VerifiableSubscriber {
 
-    @SuppressWarnings("unused") // It's fine for a faulty reactor.
-    @React
-    public Empty on(ProjectRejections.InvalidProjectName rejection, CommandContext context) {
+    private ProjectRejections.MissingOwner rejection;
+    private CommandContext context;
+
+    @Subscribe
+    public void on(ProjectRejections.MissingOwner rejection, CommandContext context) {
         triggerCall();
-        throw new UnsupportedOperationException(
-                "Faulty reactor should have failed: " +
-                        FaultyReactor.class.getSimpleName());
+        this.rejection = rejection;
+        this.context = context;
     }
 
     @Override
-    public void verifyGot(Rejection ignored) {
-        fail("FaultyReactor");
+    public void verifyGot(Rejection rejection) {
+        assertEquals(getMessage(rejection), this.rejection);
+        assertEquals(rejection.getContext()
+                              .getCommand()
+                              .getContext(), context);
     }
 }

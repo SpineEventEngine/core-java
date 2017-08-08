@@ -76,53 +76,48 @@ class RejectionHandlerMethod extends HandlerMethod<CommandContext>{
         }
     }
 
-
     /**
      * Invokes the wrapped handler method to handle {@code rejectionMessage},
      * {@code commandMessage} with the passed {@code context} of the {@code Command}.
      *
      * <p>Unlike the {@linkplain #invoke(Object, Message, Message) overloaded alternative method},
-     * this one may return some value, since the rejection handler methods are {@code void}
-     * by design.
+     * this one may return some value.
      *
-     * @param  target           the target object on which call the method
-     * @param  rejectionMessage the rejection message to handle
-     * @param  commandMessage   the command message
-     * @param  context          the context of the command
+     * @param target       the target object on which call the method
+     * @param rejectionMsg the rejection message to handle
+     * @param commandMsg   the command message
+     * @param ctx          the context of the command
      * @return the result of the invocation
      */
-    Object doInvoke(Object target,
-                    Message rejectionMessage,
-                    Message commandMessage,
-                    CommandContext context) {
-        checkNotNull(rejectionMessage);
-        checkNotNull(commandMessage);
-        checkNotNull(context);
+    Object doInvoke(Object target, Message rejectionMsg, Message commandMsg, CommandContext ctx) {
+        checkNotNull(rejectionMsg);
+        checkNotNull(commandMsg);
+        checkNotNull(ctx);
+
         try {
             final Object output;
             final Method method = getMethod();
             switch (kind) {
                 case REJECTION_MESSAGE_AWARE:
-                    output = method.invoke(target, rejectionMessage);
+                    output = method.invoke(target, rejectionMsg);
                     break;
                 case COMMAND_CONTEXT_AWARE:
-                    output = method.invoke(target, rejectionMessage, context);
+                    output = method.invoke(target, rejectionMsg, ctx);
                     break;
                 case COMMAND_MESSAGE_AWARE:
-                    output = method.invoke(target, rejectionMessage, commandMessage);
+                    output = method.invoke(target, rejectionMsg, commandMsg);
                     break;
                 case COMMAND_AWARE:
-                    output = method.invoke(target, rejectionMessage, commandMessage, context);
+                    output = method.invoke(target, rejectionMsg, commandMsg, ctx);
                     break;
                 default:
                     throw unsupported("Unsupported method kind encountered %s", kind.name());
             }
             return output;
         } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
-            throw whyFailed(target, rejectionMessage, context, e);
+            throw whyFailed(target, rejectionMsg, ctx, e);
         }
     }
-
 
     static IllegalStateException missingRejectionHandler(
             Class<?> cls, Class<? extends Message> rejectionClass) {

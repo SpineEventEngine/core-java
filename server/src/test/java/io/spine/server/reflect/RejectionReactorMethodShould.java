@@ -22,7 +22,6 @@ package io.spine.server.reflect;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import io.spine.core.CommandContext;
-import io.spine.core.RejectionEnvelope;
 import io.spine.server.reflect.given.Given;
 import io.spine.server.reflect.given.RejectionReactorMethodTestEnv.InvalidNoAnnotation;
 import io.spine.server.reflect.given.RejectionReactorMethodTestEnv.InvalidNoParams;
@@ -34,8 +33,6 @@ import io.spine.server.reflect.given.RejectionReactorMethodTestEnv.InvalidTwoPar
 import io.spine.server.reflect.given.RejectionReactorMethodTestEnv.ValidButPrivate;
 import io.spine.server.reflect.given.RejectionReactorMethodTestEnv.ValidThreeParams;
 import io.spine.server.reflect.given.RejectionReactorMethodTestEnv.ValidTwoParams;
-import io.spine.server.rejection.given.FaultyReactor;
-import io.spine.server.rejection.given.VerifiableReactor;
 import io.spine.test.reflect.ReflectRejections.InvalidProjectName;
 import io.spine.test.rejection.command.UpdateProjectName;
 import org.junit.Test;
@@ -43,9 +40,7 @@ import org.junit.Test;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import static io.spine.server.rejection.given.Given.invalidProjectNameRejection;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -95,15 +90,6 @@ public class RejectionReactorMethodShould {
         reactor.invoke(reactorObject, msg, emptyContext);
 
         fail("Exception not thrown");
-    }
-
-    @Test
-    public void catch_exceptions_caused_by_reactors() {
-        final VerifiableReactor faultyReactor = new FaultyReactor();
-
-        faultyReactor.dispatch(RejectionEnvelope.of(invalidProjectNameRejection()));
-
-        assertTrue(faultyReactor.isMethodCalled());
     }
 
     @Test

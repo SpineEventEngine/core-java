@@ -20,35 +20,36 @@
 
 package io.spine.server.rejection.given;
 
-import com.google.protobuf.Empty;
-import io.spine.client.CommandFactory;
-import io.spine.client.TestActorRequestFactory;
-import io.spine.core.Command;
 import io.spine.core.CommandContext;
-import io.spine.core.React;
+import io.spine.core.Commands;
 import io.spine.core.Rejection;
-import io.spine.core.Rejections;
-import io.spine.server.rejection.RejectionReactor;
-import io.spine.test.rejection.ProjectRejections.InvalidProjectName;
-import io.spine.test.rejection.command.UpdateProjectName;
+import io.spine.core.Subscribe;
+import io.spine.test.rejection.ProjectRejections;
+import io.spine.test.rejection.command.RemoveOwner;
 
-public class InvalidProjectNameReactor extends RejectionReactor {
+import static io.spine.core.Rejections.getMessage;
+import static org.junit.Assert.assertEquals;
 
-    private Rejection rejectionHandled;
+public class CommandAwareSubscriber extends VerifiableSubscriber {
 
-    @React
-    public Empty on(InvalidProjectName rejection,
-                    UpdateProjectName commandMessage,
+    private ProjectRejections.MissingOwner rejection;
+    private RemoveOwner command;
+    private CommandContext context;
+
+    @Subscribe
+    public void on(ProjectRejections.MissingOwner rejection,
+                    RemoveOwner command,
                     CommandContext context) {
-        final CommandFactory commandFactory =
-                TestActorRequestFactory.newInstance(InvalidProjectNameReactor.class)
-                                       .command();
-        final Command command = commandFactory.createWithContext(commandMessage, context);
-        this.rejectionHandled = Rejections.createRejection(rejection, command);
-        return Empty.getDefaultInstance();
+        triggerCall();
+        this.rejection = rejection;
+        this.command = command;
+        this.context = context;
     }
 
-    public Rejection getRejectionHandled() {
-        return rejectionHandled;
+    @Override
+    public void verifyGot(Rejection rejection) {
+        assertEquals(getMessage(rejection), this.rejection);
+        assertEquals(Commands.getMessage(rejection.getContext().getCommand()), command);
+        assertEquals(rejection.getContext().getCommand().getContext(), context);
     }
 }

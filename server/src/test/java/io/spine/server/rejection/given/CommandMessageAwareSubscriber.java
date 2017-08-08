@@ -20,25 +20,30 @@
 
 package io.spine.server.rejection.given;
 
+import io.spine.core.Commands;
 import io.spine.core.Rejection;
-import io.spine.server.rejection.RejectionReactor;
+import io.spine.core.Subscribe;
+import io.spine.test.rejection.ProjectRejections;
+import io.spine.test.rejection.command.RemoveOwner;
 
-/**
- * A test rejection reactor, which allows to verify the interactions performed with it.
- *
- * @author Alexander Yevsyukov
- */
-public abstract class VerifiableReactor extends RejectionReactor {
+import static io.spine.core.Rejections.getMessage;
+import static org.junit.Assert.assertEquals;
 
-    private boolean methodCalled = false;
+public class CommandMessageAwareSubscriber extends VerifiableSubscriber {
 
-    public void triggerCall() {
-        methodCalled = true;
+    private ProjectRejections.MissingOwner rejection;
+    private RemoveOwner command;
+
+    @Subscribe
+    public void on(ProjectRejections.MissingOwner rejection, RemoveOwner command) {
+        triggerCall();
+        this.rejection = rejection;
+        this.command = command;
     }
 
-    public  boolean isMethodCalled() {
-        return methodCalled;
+    @Override
+    public void verifyGot(Rejection rejection) {
+        assertEquals(getMessage(rejection), this.rejection);
+        assertEquals(Commands.getMessage(rejection.getContext().getCommand()), command);
     }
-
-    public abstract void verifyGot(Rejection rejection);
 }

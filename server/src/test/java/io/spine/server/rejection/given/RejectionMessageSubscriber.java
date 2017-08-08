@@ -17,32 +17,28 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.rejection;
 
-import com.google.protobuf.Message;
-import io.spine.core.CommandContext;
-import io.spine.core.RejectionClass;
-import io.spine.server.reflect.RejectionReactorMethod;
+package io.spine.server.rejection.given;
 
-import java.util.Set;
+import io.spine.core.Rejection;
+import io.spine.core.Subscribe;
+import io.spine.test.rejection.ProjectRejections;
 
-/**
- * A base for objects reacting upon rejections from {@link RejectionBus}.
- *
- * @author Alex Tymchenko
- * @author Alexander Yevsyukov
- * @see RejectionBus#register(io.spine.server.bus.MessageDispatcher)
- * @see io.spine.core.React
- */
-public class RejectionReactor extends AbstractRejectionDispatcher {
+import static io.spine.core.Rejections.getMessage;
+import static org.junit.Assert.assertEquals;
 
-    @Override
-    public void handle(Message rejectionMessage, Message commandMessage, CommandContext context) {
-        RejectionReactorMethod.invokeFor(this, rejectionMessage, commandMessage, context);
+public class RejectionMessageSubscriber extends VerifiableSubscriber {
+
+    private ProjectRejections.MissingOwner rejection;
+
+    @Subscribe
+    public void on(ProjectRejections.MissingOwner rejection) {
+        triggerCall();
+        this.rejection = rejection;
     }
 
     @Override
-    protected Set<RejectionClass> inspect() {
-        return RejectionReactorMethod.inspect(getClass());
+    public void verifyGot(Rejection rejection) {
+        assertEquals(getMessage(rejection), this.rejection);
     }
 }
