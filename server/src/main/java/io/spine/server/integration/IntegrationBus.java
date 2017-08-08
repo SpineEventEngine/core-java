@@ -19,66 +19,50 @@
  */
 package io.spine.server.integration;
 
-import com.google.common.base.Function;
-import com.google.common.base.MoreObjects;
 import com.google.common.base.Optional;
 import com.google.common.collect.HashMultimap;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import com.google.protobuf.StringValue;
-import io.grpc.stub.StreamObserver;
-import io.spine.Identifier;
 import io.spine.core.Ack;
 import io.spine.core.BoundedContextId;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
-import io.spine.core.EventEnvelope;
 import io.spine.core.ExternalMessageEnvelope;
-import io.spine.core.MessageInvalid;
-import io.spine.core.Rejection;
 import io.spine.core.RejectionClass;
-import io.spine.core.RejectionEnvelope;
-import io.spine.grpc.StreamObservers;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.bus.Bus;
 import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.DeadMessageTap;
-import io.spine.server.bus.DispatcherRegistry;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.bus.MulticastBus;
-import io.spine.server.delivery.MulticastDelivery;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.event.EventSubscriber;
-import io.spine.server.integration.TransportFactory.Publisher;
 import io.spine.server.integration.TransportFactory.PublisherHub;
 import io.spine.server.integration.TransportFactory.Subscriber;
 import io.spine.server.integration.TransportFactory.SubscriberHub;
 import io.spine.server.integration.local.LocalTransportFactory;
 import io.spine.server.rejection.RejectionBus;
 import io.spine.server.rejection.RejectionDispatcher;
-import io.spine.server.rejection.RejectionSubscriber;
 import io.spine.type.KnownTypes;
 import io.spine.type.MessageClass;
 import io.spine.type.TypeUrl;
 import io.spine.util.Exceptions;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Deque;
-import java.util.Objects;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.common.collect.Sets.newHashSet;
+import static io.spine.Identifier.newUuid;
+import static io.spine.Identifier.pack;
 import static io.spine.server.bus.Buses.acknowledge;
-import static io.spine.util.Exceptions.newIllegalStateException;
+import static io.spine.server.integration.IntegrationMessages.asIntegrationMessageClasses;
 import static io.spine.validate.Validate.checkNotDefault;
 import static java.lang.String.format;
 
@@ -137,7 +121,7 @@ public class IntegrationBus extends MulticastBus<Message,
 
     @Override
     protected EnvelopeValidator<ExternalMessageEnvelope> getValidator() {
-        return LocalValidator.INSTANCE;
+        return IncomingMessageValidator.INSTANCE;
     }
 
     @Override
@@ -159,7 +143,7 @@ public class IntegrationBus extends MulticastBus<Message,
         final ExternalMessageEnvelope markedEnvelope = markExternal(envelope);
         final int dispatchersCalled = callDispatchers(markedEnvelope);
 
-        final Any packedId = Identifier.pack(markedEnvelope.getId());
+        final Any packedId = pack(markedEnvelope.getId());
         checkState(dispatchersCalled != 0,
                    format("External message %s has no local dispatchers.",
                           markedEnvelope.getMessage()));
@@ -170,11 +154,10 @@ public class IntegrationBus extends MulticastBus<Message,
     private static ExternalMessageEnvelope markExternal(ExternalMessageEnvelope envelope) {
         final Event event = (Event) envelope.getOuterObject();
         final Event.Builder eventBuilder = event.toBuilder();
-        final EventContext modifiedContext = eventBuilder
-                .getContext()
-                .toBuilder()
-                .setExternal(true)
-                .build();
+        final EventContext modifiedContext = eventBuilder.getContext()
+                                                         .toBuilder()
+                                                         .setExternal(true)
+                                                         .build();
 
         final Event marked = eventBuilder.setContext(modifiedContext)
                                          .build();
@@ -244,7 +227,7 @@ public class IntegrationBus extends MulticastBus<Message,
                                                                              boundedContextId);
         final IntegrationMessageClass channelId = IntegrationMessageClass.of(result.getClass());
         publisherHub.get(channelId)
-                    .publish(newId(), integrationMessage);
+                    .publish(pack(newUuid()), integrationMessage);
     }
 
     /**
@@ -270,11 +253,10 @@ public class IntegrationBus extends MulticastBus<Message,
     }
 
     private void subscribeToIncoming(ExternalMessageDispatcher<?> dispatcher) {
-        final Set<MessageClass> messageClasses = dispatcher.getMessageClasses();
+        final Set<MessageClass> classes = dispatcher.getMessageClasses();
 
         final IntegrationBus integrationBus = this;
-        final Iterable<IntegrationMessageClass> transformed =
-                asIntegrationMessageClasses(messageClasses);
+        final Iterable<IntegrationMessageClass> transformed = asIntegrationMessageClasses(classes);
         for (final IntegrationMessageClass imClass : transformed) {
             final Subscriber subscriber = subscriberHub.get(imClass);
             subscriber.addObserver(new IncomingMessageObserver(boundedContextId, 
@@ -284,11 +266,10 @@ public class IntegrationBus extends MulticastBus<Message,
     }
     
     private void unsubscribeFromIncoming(ExternalMessageDispatcher<?> dispatcher) {
-        final Set<MessageClass> messageClasses = dispatcher.getMessageClasses();
+        final Set<MessageClass> classes = dispatcher.getMessageClasses();
 
         final IntegrationBus integrationBus = this;
-        final Iterable<IntegrationMessageClass> transformed =
-                asIntegrationMessageClasses(messageClasses);
+        final Iterable<IntegrationMessageClass> transformed = asIntegrationMessageClasses(classes);
         for (final IntegrationMessageClass imClass : transformed) {
             final Subscriber subscriber = subscriberHub.get(imClass);
             subscriber.removeObserver(new IncomingMessageObserver(boundedContextId,
@@ -298,182 +279,9 @@ public class IntegrationBus extends MulticastBus<Message,
         subscriberHub.releaseStale();
     }
 
-    private static Iterable<IntegrationMessageClass> asIntegrationMessageClasses(
-            Set<MessageClass> messageClasses) {
-        return transform(
-                messageClasses, new Function<MessageClass, IntegrationMessageClass>() {
-                    @Override
-                    public IntegrationMessageClass apply(@Nullable MessageClass input) {
-                        checkNotNull(input);
-                        return IntegrationMessageClass.of(input);
-                    }
-                });
-    }
-
-    private static Any newId() {
-        final StringValue stringId = StringValue.newBuilder()
-                                                .setValue(Identifier.newUuid())
-                                                .build();
-        final Any result = AnyPacker.pack(stringId);
-        return result;
-    }
-
     @Override
     public String toString() {
         return "Integration bus of BoundedContext ID = " + boundedContextId.getValue();
-    }
-
-    /**
-     * An observer of the incoming external messages of the specified message class.
-     *
-     * <p>Responsible of receiving those from the transport layer and posting those to the local
-     * instance of {@code IntegrationBus}.
-     */
-    private static class IncomingMessageObserver extends ChannelObserver {
-
-        private final IntegrationBus integrationBus;
-
-        protected IncomingMessageObserver(BoundedContextId boundedContextId,
-                                          Class<? extends Message> messageClass,
-                                          IntegrationBus integrationBus) {
-            super(boundedContextId, messageClass);
-            this.integrationBus = integrationBus;
-        }
-
-        @Override
-        protected void handle(IntegrationMessage message) {
-            final Message unpackedMessage = AnyPacker.unpack(message.getOriginalMessage());
-            integrationBus.post(unpackedMessage, StreamObservers.<Ack>noOpObserver());
-        }
-    }
-
-    /**
-     * Delivers the messages from external sources to the local subscribers
-     * of {@code external} messages in this bounded context.
-     */
-    static class LocalDelivery extends MulticastDelivery<ExternalMessageEnvelope,
-            MessageClass,
-            ExternalMessageDispatcher<?>> {
-
-        @Override
-        protected boolean shouldPostponeDelivery(ExternalMessageEnvelope deliverable,
-                                                 ExternalMessageDispatcher<?> consumer) {
-            return false;
-        }
-
-        @Override
-        protected Runnable getDeliveryAction(final ExternalMessageDispatcher<?> consumer,
-                                             final ExternalMessageEnvelope deliverable) {
-            return new Runnable() {
-                @Override
-                public void run() {
-                    consumer.dispatch(deliverable);
-                }
-            };
-        }
-    }
-
-    /**
-     * A validator of the incoming external messages to use in {@code IntegrationBus}.
-     */
-    private enum LocalValidator implements EnvelopeValidator<ExternalMessageEnvelope> {
-        INSTANCE;
-
-        @Override
-        public Optional<MessageInvalid> validate(ExternalMessageEnvelope envelope) {
-            return Optional.absent();
-        }
-    }
-
-    /**
-     * A registry of subscribers which {@linkplain io.spine.core.Subscribe#external() subscribe}
-     * to handle external messages.
-     */
-    private static class LocalDispatcherRegistry
-            extends DispatcherRegistry<MessageClass, ExternalMessageDispatcher<?>> {
-        @Override
-        protected void checkDispatcher(ExternalMessageDispatcher dispatcher)
-                throws IllegalArgumentException {
-            // Do not call `super()`, as long as we don't want to enforce
-            // non-empty message class set for an external message dispatcher.
-            checkNotNull(dispatcher);
-        }
-    }
-
-    /**
-     * Produces an {@link UnsupportedExternalMessageException} upon capturing an external message,
-     * which has no targets to be dispatched to.
-     */
-    private enum DeadExternalMessageTap implements DeadMessageTap<ExternalMessageEnvelope> {
-        INSTANCE;
-
-        @Override
-        public UnsupportedExternalMessageException capture(ExternalMessageEnvelope envelope) {
-            final Message message = envelope.getMessage();
-            final UnsupportedExternalMessageException exception =
-                    new UnsupportedExternalMessageException(message);
-            return exception;
-        }
-    }
-
-    /**
-     * Base routines for the {@linkplain io.spine.server.integration.TransportFactory.MessageChannel
-     * message channel} observers.
-     */
-    private abstract static class ChannelObserver implements StreamObserver<IntegrationMessage> {
-
-        private final BoundedContextId boundedContextId;
-        private final Class<? extends Message> messageClass;
-
-        protected ChannelObserver(BoundedContextId boundedContextId,
-                                  Class<? extends Message> messageClass) {
-            this.boundedContextId = boundedContextId;
-            this.messageClass = messageClass;
-        }
-
-        @Override
-        public void onError(Throwable t) {
-            throw newIllegalStateException("Error caught when observing the incoming " +
-                                                   "messages of type %s", messageClass);
-        }
-
-        @Override
-        public void onCompleted() {
-            throw newIllegalStateException("Unexpected 'onCompleted' when observing " +
-                                                   "the incoming messages of type %s",
-                                           messageClass);
-        }
-
-        @Override
-        public final void onNext(IntegrationMessage message) {
-            checkNotNull(message);
-
-            final BoundedContextId source = message.getBoundedContextId();
-            if (this.boundedContextId.equals(source)){
-                return;
-            }
-            handle(message);
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-            ChannelObserver that = (ChannelObserver) o;
-            return Objects.equals(boundedContextId, that.boundedContextId) &&
-                    Objects.equals(messageClass, that.messageClass);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(boundedContextId, messageClass);
-        }
-
-        protected abstract void handle(IntegrationMessage message);
     }
 
     /**
@@ -583,141 +391,6 @@ public class IntegrationBus extends MulticastBus<Message,
     private static Class<Message> asMessageClass(String classStr) {
         final TypeUrl typeUrl = TypeUrl.parse(classStr);
         return typeUrl.getJavaClass();
-    }
-
-    /**
-     * A subscriber to local {@code RejectionBus}, which publishes each matching message to
-     * a remote channel.
-     *
-     * <p>The messages to subscribe are those that are required by external application components
-     * at this moment; their set is determined by the {@linkplain RequestedMessageTypes
-     * configuration messages}, received by this instance of {@code IntegrationBus}.
-     */
-    private static final class LocalRejectionSubscriber extends RejectionSubscriber {
-
-        private final BoundedContextId boundedContextId;
-        private final PublisherHub publisherHub;
-        private final Set<RejectionClass> rejectionClasses;
-
-        private LocalRejectionSubscriber(BoundedContextId boundedContextId,
-                                         PublisherHub publisherHub,
-                                         RejectionClass rejectionClass) {
-            this.boundedContextId = boundedContextId;
-            this.publisherHub = publisherHub;
-            this.rejectionClasses = ImmutableSet.of(rejectionClass);
-        }
-
-        @SuppressWarnings("ReturnOfCollectionOrArrayField")    // Returning an immutable impl.
-        @Override
-        public Set<RejectionClass> getMessageClasses() {
-            return rejectionClasses;
-        }
-
-        @Override
-        public Set<String> dispatch(RejectionEnvelope envelope) {
-            final Rejection rejection = envelope.getOuterObject();
-            final IntegrationMessage message = IntegrationMessages.of(rejection, boundedContextId);
-            final IntegrationMessageClass messageClass = IntegrationMessageClass.of(
-                    envelope.getMessageClass());
-            final Publisher channel = publisherHub.get(messageClass);
-            channel.publish(AnyPacker.pack(envelope.getId()), message);
-            return ImmutableSet.of(channel.toString());
-        }
-
-        @SuppressWarnings("DuplicateStringLiteralInspection")
-        @Override
-        public String toString() {
-            return MoreObjects.toStringHelper(this)
-                              .add("boundedContextId", boundedContextId)
-                              .add("rejectionClasses", rejectionClasses)
-                              .toString();
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-            LocalRejectionSubscriber that = (LocalRejectionSubscriber) o;
-            return Objects.equals(boundedContextId, that.boundedContextId) &&
-                    Objects.equals(rejectionClasses, that.rejectionClasses);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(boundedContextId, rejectionClasses);
-        }
-    }
-
-    /**
-     * A subscriber to local {@code EventBus}, which publishes each matching message to
-     * a remote channel.
-     *
-     * <p>The messages to subscribe are those that are required by external application components
-     * at this moment; their set is determined by the {@linkplain RequestedMessageTypes
-     * configuration messages}, received by this instance of {@code IntegrationBus}.
-     */
-    private static final class LocalEventSubscriber extends EventSubscriber {
-
-        private final BoundedContextId boundedContextId;
-        private final PublisherHub publisherHub;
-        private final Set<EventClass> eventClasses;
-
-        private LocalEventSubscriber(BoundedContextId boundedContextId,
-                                     PublisherHub publisherHub,
-                                     EventClass messageClass) {
-            this.boundedContextId = boundedContextId;
-            this.publisherHub = publisherHub;
-            this.eventClasses = ImmutableSet.of(messageClass);
-        }
-
-        @SuppressWarnings("ReturnOfCollectionOrArrayField")     // Returning an immutable impl.
-        @Override
-        public Set<EventClass> getMessageClasses() {
-            return eventClasses;
-        }
-
-        @Override
-        public Set<String> dispatch(EventEnvelope envelope) {
-            final Event event = envelope.getOuterObject();
-            final IntegrationMessage msg = IntegrationMessages.of(event, boundedContextId);
-            final IntegrationMessageClass messageClass = IntegrationMessageClass.of(
-                    envelope.getMessageClass());
-            final Publisher channel = publisherHub.get(messageClass);
-            channel.publish(AnyPacker.pack(envelope.getId()), msg);
-
-            return ImmutableSet.of(channel.toString());
-        }
-
-        @SuppressWarnings("DuplicateStringLiteralInspection")
-        @Override
-        public String toString() {
-            return MoreObjects.toStringHelper(this)
-                              .add("boundedContextId", boundedContextId)
-                              .add("eventClasses", eventClasses)
-                              .toString();
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-            LocalEventSubscriber that = (LocalEventSubscriber) o;
-            return Objects.equals(boundedContextId, that.boundedContextId) &&
-                    Objects.equals(eventClasses, that.eventClasses);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(boundedContextId, eventClasses);
-        }
     }
 
     /**

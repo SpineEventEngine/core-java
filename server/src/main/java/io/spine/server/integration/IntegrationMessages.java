@@ -19,6 +19,7 @@
  */
 package io.spine.server.integration;
 
+import com.google.common.base.Function;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
@@ -27,8 +28,13 @@ import io.spine.core.BoundedContextId;
 import io.spine.core.Event;
 import io.spine.core.Rejection;
 import io.spine.protobuf.AnyPacker;
+import io.spine.type.MessageClass;
+
+import javax.annotation.Nullable;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Iterables.transform;
 
 /**
  * Utilities for working with {@linkplain IntegrationMessage integration messages}.
@@ -76,5 +82,17 @@ class IntegrationMessages {
                                  .setOriginalMessage(packedMessage)
                                  .setBoundedContextId(boundedContextId)
                                  .build();
+    }
+
+    static Iterable<IntegrationMessageClass> asIntegrationMessageClasses(
+            Set<MessageClass> messageClasses) {
+        return transform(
+                messageClasses, new Function<MessageClass, IntegrationMessageClass>() {
+                    @Override
+                    public IntegrationMessageClass apply(@Nullable MessageClass input) {
+                        checkNotNull(input);
+                        return IntegrationMessageClass.of(input);
+                    }
+                });
     }
 }
