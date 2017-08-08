@@ -21,12 +21,14 @@
 package io.spine.server.rejection;
 
 import com.google.common.base.Function;
-import com.google.protobuf.StringValue;
+import com.google.common.base.Optional;
 import io.spine.core.Enrichment;
+import io.spine.core.Enrichments;
 import io.spine.core.Rejection;
 import io.spine.core.RejectionContext;
 import io.spine.server.rejection.given.RejectionEnrichmentConsumer;
 import io.spine.test.rejection.ProjectId;
+import io.spine.test.rejection.ProjectRejections;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -34,24 +36,26 @@ import javax.annotation.Nullable;
 
 import static io.spine.server.rejection.given.Given.invalidProjectNameRejection;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Alexander Yevsyukov
  */
 public class RejectionEnricherShould {
 
+    /** The prefix to be used when converting a project ID to project name. */
+    private static final String PROJECT_NAME_PREFIX = "PROJECT:";
+
     private RejectionBus rejectionBus;
 
     @Before
     public void setUp() {
         final RejectionEnricher.Builder builder = RejectionEnricher.newBuilder();
-        builder.add(ProjectId.class, StringValue.class,
-                    new Function<ProjectId, StringValue>() {
+        builder.add(ProjectId.class, String.class,
+                    new Function<ProjectId, String>() {
                         @Override
-                        public StringValue apply(@Nullable ProjectId input) {
-                            return StringValue.newBuilder()
-                                              .setValue("PROJECT:" + input.getId())
-                                              .build();
+                        public String apply(@Nullable ProjectId input) {
+                            return PROJECT_NAME_PREFIX + input.getId();
                         }
                     });
         RejectionEnricher enricher = builder.build();
@@ -71,6 +75,11 @@ public class RejectionEnricherShould {
 
         final RejectionContext context = consumer.getContext();
 
-        assertNotEquals(Enrichment.getDefaultInstance(), context.getEnrichment());
+        final Enrichment enrichment = context.getEnrichment();
+        assertNotEquals(Enrichment.getDefaultInstance(), enrichment);
+        final Optional<ProjectRejections.ProjectInfo> optional =
+                Enrichments.getEnrichment(ProjectRejections.ProjectInfo.class, context);
+        assertTrue(optional.isPresent());
+        assertTrue(optional.get().getProjectName().startsWith(PROJECT_NAME_PREFIX));
     }
 }

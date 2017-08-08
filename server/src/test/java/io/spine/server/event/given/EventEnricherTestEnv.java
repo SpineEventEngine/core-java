@@ -45,6 +45,7 @@ import io.spine.time.ZoneOffset;
 
 import javax.annotation.Nullable;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.Identifier.newUuid;
 import static io.spine.protobuf.AnyPacker.pack;
 
@@ -213,9 +214,7 @@ public class EventEnricherTestEnv {
             @Nullable
             @Override
             public String apply(@Nullable ProjectId id) {
-                if (id == null) {
-                    return null;
-                }
+                checkNotNull(id);
                 final String name = "prj_" + id.getId();
                 return name;
             }
@@ -225,9 +224,7 @@ public class EventEnricherTestEnv {
             @Nullable
             @Override
             public UserId apply(@Nullable ProjectId id) {
-                if (id == null) {
-                    return null;
-                }
+                checkNotNull(id);
                 return GivenUserId.of("po_" + id.getId());
             }
         }
@@ -237,7 +234,8 @@ public class EventEnricherTestEnv {
                     @Nullable
                     @Override
                     public String apply(@Nullable EventId input) {
-                        return input == null ? "" : input.getValue();
+                        checkNotNull(input);
+                        return input.getValue();
                     }
                 };
 
@@ -245,7 +243,8 @@ public class EventEnricherTestEnv {
                 new Function<Timestamp, String>() {
                     @Override
                     public String apply(@Nullable Timestamp input) {
-                        return input == null ? "" : input.toString();
+                        checkNotNull(input);
+                        return input.toString();
                     }
                 };
 
@@ -253,7 +252,7 @@ public class EventEnricherTestEnv {
                 new Function<CommandContext, String>() {
                     @Override
                     public String apply(@Nullable CommandContext input) {
-                        return input == null ? "" : input.toString();
+                        return checkNotNull(input).toString();
                     }
                 };
 
@@ -261,7 +260,7 @@ public class EventEnricherTestEnv {
                 new Function<Any, String>() {
                     @Override
                     public String apply(@Nullable Any input) {
-                        return input == null ? "" : input.toString();
+                        return checkNotNull(input).toString();
                     }
                 };
 
@@ -269,7 +268,7 @@ public class EventEnricherTestEnv {
                 new Function<Integer, String>() {
                     @Override
                     public String apply(@Nullable Integer input) {
-                        return input == null ? "" : input.toString();
+                        return checkNotNull(input).toString();
                     }
                 };
 
@@ -278,12 +277,11 @@ public class EventEnricherTestEnv {
                     @Nullable
                     @Override
                     public ZoneOffset apply(@Nullable String input) {
-                        return input == null
-                                ? ZoneOffset.getDefaultInstance()
-                                : ZoneOffset.newBuilder()
-                                            .setId(ZoneId.newBuilder()
-                                                         .setValue(input))
-                                            .build();
+                        checkNotNull(input);
+                        return ZoneOffset.newBuilder()
+                                         .setId(ZoneId.newBuilder()
+                                                      .setValue(input))
+                                         .build();
                     }
                 };
 
@@ -292,9 +290,10 @@ public class EventEnricherTestEnv {
                     @Nullable
                     @Override
                     public PersonName apply(@Nullable String input) {
-                        return input == null
-                               ? PersonName.getDefaultInstance()
-                               : PersonName.newBuilder().setFamilyName(input).build();
+                        checkNotNull(input);
+                        return PersonName.newBuilder()
+                                         .setFamilyName(input)
+                                         .build();
                     }
                 };
 
