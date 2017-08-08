@@ -54,7 +54,15 @@ public abstract class EnrichableMessageEnvelope<I extends Message, T, C extends 
         return result;
     }
 
+    /**
+     * Obtains the enrichment of the message.
+     */
     protected abstract Enrichment getEnrichment();
+
+    /**
+     * Factory method for creating enriched version of the message.
+     */
+    protected abstract EnrichableMessageEnvelope<I, T, C> enrich(Enrichment enrichment);
 
     /**
      * Creates a new version of the message with the enrichments applied.
@@ -67,11 +75,5 @@ public abstract class EnrichableMessageEnvelope<I extends Message, T, C extends 
         final Enrichment enrichment = createEnrichment(enrichments);
         final EnrichableMessageEnvelope<I, T, C> result = enrich(enrichment);
         return result;
-
     }
-
-    /**
-     * Factory method for creating enriched version of the message.
-     */
-    protected abstract EnrichableMessageEnvelope<I, T, C> enrich(Enrichment enrichment);
 }

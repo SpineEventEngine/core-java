@@ -118,9 +118,8 @@ public class RejectionReactorMethod extends RejectionHandlerMethod {
      * @param  rejectionMessage the rejection message to handle
      * @param  context          the context of the rejection
      * @return the list of event messages produced by the reacting method or empty list if no event
-     * messages were produced
+     *         messages were produced
      */
-    //@SuppressWarnings("unchecked") //
     @Override
     public List<? extends Message> invoke(Object target,
                                           Message rejectionMessage,
