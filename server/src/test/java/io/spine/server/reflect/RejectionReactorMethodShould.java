@@ -21,18 +21,20 @@ package io.spine.server.reflect;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
+import io.spine.core.Command;
 import io.spine.core.CommandContext;
+import io.spine.core.RejectionContext;
 import io.spine.server.reflect.given.Given;
-import io.spine.server.reflect.given.RejectionReactorMethodTestEnv.InvalidNoAnnotation;
-import io.spine.server.reflect.given.RejectionReactorMethodTestEnv.InvalidNoParams;
-import io.spine.server.reflect.given.RejectionReactorMethodTestEnv.InvalidNotMessage;
-import io.spine.server.reflect.given.RejectionReactorMethodTestEnv.InvalidOneNotMsgParam;
-import io.spine.server.reflect.given.RejectionReactorMethodTestEnv.InvalidTooManyParams;
-import io.spine.server.reflect.given.RejectionReactorMethodTestEnv.InvalidTwoParamsFirstInvalid;
-import io.spine.server.reflect.given.RejectionReactorMethodTestEnv.InvalidTwoParamsSecondInvalid;
-import io.spine.server.reflect.given.RejectionReactorMethodTestEnv.ValidButPrivate;
-import io.spine.server.reflect.given.RejectionReactorMethodTestEnv.ValidThreeParams;
-import io.spine.server.reflect.given.RejectionReactorMethodTestEnv.ValidTwoParams;
+import io.spine.server.reflect.given.RejectionReactorMethodTestEnv.RInvalidNoAnnotation;
+import io.spine.server.reflect.given.RejectionReactorMethodTestEnv.RInvalidNoParams;
+import io.spine.server.reflect.given.RejectionReactorMethodTestEnv.RInvalidNotMessage;
+import io.spine.server.reflect.given.RejectionReactorMethodTestEnv.RInvalidOneNotMsgParam;
+import io.spine.server.reflect.given.RejectionReactorMethodTestEnv.RInvalidTooManyParams;
+import io.spine.server.reflect.given.RejectionReactorMethodTestEnv.RInvalidTwoParamsFirstInvalid;
+import io.spine.server.reflect.given.RejectionReactorMethodTestEnv.RInvalidTwoParamsSecondInvalid;
+import io.spine.server.reflect.given.RejectionReactorMethodTestEnv.RValidButPrivate;
+import io.spine.server.reflect.given.RejectionReactorMethodTestEnv.RValidThreeParams;
+import io.spine.server.reflect.given.RejectionReactorMethodTestEnv.RValidTwoParams;
 import io.spine.test.reflect.ReflectRejections.InvalidProjectName;
 import io.spine.test.rejection.command.UpdateProjectName;
 import org.junit.Test;
@@ -40,11 +42,8 @@ import org.junit.Test;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import static io.spine.protobuf.AnyPacker.pack;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 /**
  * @author Alexander Yevsyukov
@@ -52,119 +51,115 @@ import static org.mockito.Mockito.verify;
 @SuppressWarnings("unused")     // some of tests address just the fact of method declaration.
 public class RejectionReactorMethodShould {
 
-    private static final CommandContext emptyContext = CommandContext.getDefaultInstance();
+    private static final CommandContext emptyCommandContext = CommandContext.getDefaultInstance();
 
     @Test
     public void pass_null_tolerance_check() {
         new NullPointerTester()
                 .setDefault(Any.class, Any.getDefaultInstance())
-                .setDefault(CommandContext.class, emptyContext)
+                .setDefault(CommandContext.class, emptyCommandContext)
+                .setDefault(RejectionContext.class, RejectionContext.getDefaultInstance())
                 .testAllPublicStaticMethods(RejectionReactorMethod.class);
     }
 
     @Test
     public void invoke_reactor_method() throws InvocationTargetException {
-        final ValidThreeParams reactorObject = spy(new ValidThreeParams());
+        final RValidThreeParams reactorObject = new RValidThreeParams();
         final RejectionReactorMethod reactor =
                 new RejectionReactorMethod(reactorObject.getMethod());
-        final InvalidProjectName msg = Given.RejectionMessage.invalidProjectName();
+        final InvalidProjectName rejectionMessage = Given.RejectionMessage.invalidProjectName();
 
-        reactor.invoke(reactorObject,
-                       msg,
-                       UpdateProjectName.getDefaultInstance(),
-                       emptyContext);
+        final RejectionContext.Builder builder = RejectionContext.newBuilder();
+        final CommandContext commandContext =
+                CommandContext.newBuilder()
+                              .setTargetVersion(3040)
+                              .build();
+        final UpdateProjectName commandMessage = UpdateProjectName.getDefaultInstance();
+        builder.setCommand(Command.newBuilder()
+                                  .setMessage(pack(commandMessage))
+                                  .setContext(commandContext));
+        final RejectionContext rejectionContext = builder.build();
 
-        verify(reactorObject, times(1))
-                .handle(msg, UpdateProjectName.getDefaultInstance(), emptyContext);
-    }
+        reactor.invoke(reactorObject, rejectionMessage, rejectionContext);
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void not_allow_invoking_inherited_invoke_method() {
-        final ValidThreeParams reactorObject = new ValidThreeParams();
-        final RejectionReactorMethod reactor =
-                new RejectionReactorMethod(reactorObject.getMethod());
-
-        final InvalidProjectName msg = Given.RejectionMessage.invalidProjectName();
-
-        // This should fail.
-        reactor.invoke(reactorObject, msg, emptyContext);
-
-        fail("Exception not thrown");
+        assertEquals(rejectionMessage, reactorObject.getLastRejectionMessage());
+        assertEquals(commandMessage, reactorObject.getLastCommandMessage());
+        assertEquals(commandContext, reactorObject.getLastCommandContext());
     }
 
     @Test
     public void consider_reactor_with_two_msg_param_valid() {
-        final Method reactor = new ValidTwoParams().getMethod();
+        final Method reactor = new RValidTwoParams().getMethod();
 
         assertIsRejectionReactor(reactor, true);
     }
 
     @Test
     public void consider_reactor_with_both_messages_and_context_params_valid() {
-        final Method reactor = new ValidThreeParams().getMethod();
+        final Method reactor = new RValidThreeParams().getMethod();
 
         assertIsRejectionReactor(reactor, true);
     }
 
     @Test
     public void consider_not_public_reactor_valid() {
-        final Method method = new ValidButPrivate().getMethod();
+        final Method method = new RValidButPrivate().getMethod();
 
         assertIsRejectionReactor(method, true);
     }
 
     @Test
     public void consider_not_annotated_reactor_invalid() {
-        final Method reactor = new InvalidNoAnnotation().getMethod();
+        final Method reactor = new RInvalidNoAnnotation().getMethod();
 
         assertIsRejectionReactor(reactor, false);
     }
 
     @Test
     public void consider_reactor_without_params_invalid() {
-        final Method reactor = new InvalidNoParams().getMethod();
+        final Method reactor = new RInvalidNoParams().getMethod();
 
         assertIsRejectionReactor(reactor, false);
     }
 
     @Test
     public void consider_reactor_with_too_many_params_invalid() {
-        final Method reactor = new InvalidTooManyParams().getMethod();
+        final Method reactor = new RInvalidTooManyParams().getMethod();
 
         assertIsRejectionReactor(reactor, false);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void throw_exception_on_attempt_to_create_instance_for_a_method_with_too_many_params() {
-        final Method illegalMethod = new InvalidTooManyParams().getMethod();
+        final Method illegalMethod = new RInvalidTooManyParams().getMethod();
 
         new RejectionReactorMethod(illegalMethod);
     }
 
     @Test
     public void consider_reactor_with_one_invalid_param_invalid() {
-        final Method reactor = new InvalidOneNotMsgParam().getMethod();
+        final Method reactor = new RInvalidOneNotMsgParam().getMethod();
 
         assertIsRejectionReactor(reactor, false);
     }
 
     @Test
     public void consider_reactor_with_first_not_message_param_invalid() {
-        final Method reactor = new InvalidTwoParamsFirstInvalid().getMethod();
+        final Method reactor = new RInvalidTwoParamsFirstInvalid().getMethod();
 
         assertIsRejectionReactor(reactor, false);
     }
 
     @Test
     public void consider_reactor_with_second_not_context_param_invalid() {
-        final Method reactor = new InvalidTwoParamsSecondInvalid().getMethod();
+        final Method reactor = new RInvalidTwoParamsSecondInvalid().getMethod();
 
         assertIsRejectionReactor(reactor, false);
     }
 
     @Test
     public void consider_not_void_reactor_invalid() {
-        final Method reactor = new InvalidNotMessage().getMethod();
+        final Method reactor = new RInvalidNotMessage().getMethod();
 
         assertIsRejectionReactor(reactor, false);
     }

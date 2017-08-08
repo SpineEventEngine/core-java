@@ -193,7 +193,7 @@ public abstract class Aggregate<I,
         return RejectionReactorMethod.invokeFor(this,
                                                 rejection.getMessage(),
                                                 rejection.getCommandMessage(),
-                                                rejection.getCommandContext());
+                                                rejection.getRejectionContext());
     }
 
     /**

@@ -21,11 +21,13 @@
 package io.spine.server.reflect.given;
 
 import com.google.protobuf.Empty;
+import com.google.protobuf.Message;
 import io.spine.core.CommandContext;
 import io.spine.core.React;
 import io.spine.test.reflect.ReflectRejections.InvalidProjectName;
 import io.spine.test.rejection.command.UpdateProjectName;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.Method;
 
 /**
@@ -62,22 +64,50 @@ public class RejectionReactorMethodTestEnv {
         }
     }
 
-    public static class ValidTwoParams extends TestRejectionReactor {
+    public static class RValidTwoParams extends TestRejectionReactor {
         @React
         public Empty handle(InvalidProjectName rejection, UpdateProjectName command) {
             return Empty.getDefaultInstance();
         }
     }
 
-    public static class ValidThreeParams extends TestRejectionReactor {
+    public static class RValidThreeParams extends TestRejectionReactor {
+
+        @Nullable
+        private Message lastRejectionMessage;
+        @Nullable
+        private Message lastCommandMessage;
+        @Nullable
+        private CommandContext lastCommandContext;
+
         @React
         public Empty handle(InvalidProjectName rejection,
-                            UpdateProjectName command, CommandContext context) {
+                            UpdateProjectName command,
+                            CommandContext context) {
+            lastRejectionMessage = rejection;
+            lastCommandMessage = command;
+            lastCommandContext = context;
+
             return Empty.getDefaultInstance();
+        }
+
+        @Nullable
+        public Message getLastRejectionMessage() {
+            return lastRejectionMessage;
+        }
+
+        @Nullable
+        public Message getLastCommandMessage() {
+            return lastCommandMessage;
+        }
+
+        @Nullable
+        public CommandContext getLastCommandContext() {
+            return lastCommandContext;
         }
     }
 
-    public static class ValidButPrivate extends TestRejectionReactor {
+    public static class RValidButPrivate extends TestRejectionReactor {
         @SuppressWarnings("MethodMayBeStatic") // Need instance method for the test.
         @React
         private Empty handle(InvalidProjectName rejection, UpdateProjectName command) {
@@ -88,7 +118,7 @@ public class RejectionReactorMethodTestEnv {
     /**
      * The reactor with a method which is not annotated.
      */
-    public static class InvalidNoAnnotation extends TestRejectionReactor {
+    public static class RInvalidNoAnnotation extends TestRejectionReactor {
         @SuppressWarnings("unused")
         public Empty handle(InvalidProjectName rejection, UpdateProjectName command) {
             return Empty.getDefaultInstance();
@@ -98,7 +128,7 @@ public class RejectionReactorMethodTestEnv {
     /**
      * The reactor with a method which does not have parameters.
      */
-    public static class InvalidNoParams extends TestRejectionReactor {
+    public static class RInvalidNoParams extends TestRejectionReactor {
         @React
         public Empty handle() {
             return Empty.getDefaultInstance();
@@ -108,7 +138,7 @@ public class RejectionReactorMethodTestEnv {
     /**
      * The reactor which has too many parameters.
      */
-    public static class InvalidTooManyParams extends TestRejectionReactor {
+    public static class RInvalidTooManyParams extends TestRejectionReactor {
         @React
         public Empty handle(InvalidProjectName rejection,
                             UpdateProjectName command,
@@ -121,7 +151,7 @@ public class RejectionReactorMethodTestEnv {
     /**
      * The reactor which has invalid single argument.
      */
-    public static class InvalidOneNotMsgParam extends TestRejectionReactor {
+    public static class RInvalidOneNotMsgParam extends TestRejectionReactor {
         @React
         public Empty handle(Exception invalid) {
             return Empty.getDefaultInstance();
@@ -131,7 +161,7 @@ public class RejectionReactorMethodTestEnv {
     /**
      * The reactor with a method with first invalid parameter.
      */
-    public static class InvalidTwoParamsFirstInvalid extends TestRejectionReactor {
+    public static class RInvalidTwoParamsFirstInvalid extends TestRejectionReactor {
         @React
         public Empty handle(Exception invalid, UpdateProjectName command) {
             return Empty.getDefaultInstance();
@@ -141,7 +171,7 @@ public class RejectionReactorMethodTestEnv {
     /**
      * The reactor which has invalid second parameter.
      */
-    public static class InvalidTwoParamsSecondInvalid extends TestRejectionReactor {
+    public static class RInvalidTwoParamsSecondInvalid extends TestRejectionReactor {
         @React
         public Empty handle(InvalidProjectName rejection, Exception invalid) {
             return Empty.getDefaultInstance();
@@ -151,7 +181,7 @@ public class RejectionReactorMethodTestEnv {
     /**
      * The class with rejection reactor that returns {@code Object} instead of {@code Message}.
      */
-    public static class InvalidNotMessage extends TestRejectionReactor {
+    public static class RInvalidNotMessage extends TestRejectionReactor {
         @React
         public Object handle(InvalidProjectName rejection, UpdateProjectName command) {
             return rejection;

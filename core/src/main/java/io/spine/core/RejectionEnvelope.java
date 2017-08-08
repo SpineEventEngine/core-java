@@ -85,6 +85,10 @@ public class RejectionEnvelope
         return rejectionClass;
     }
 
+    public RejectionContext getRejectionContext() {
+        return getOuterObject().getContext();
+    }
+
     @Override
     public ActorContext getActorContext() {
         return getCommandContext().getActorContext();

@@ -23,8 +23,8 @@ import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.core.Command;
-import io.spine.core.CommandContext;
 import io.spine.core.RejectionClass;
+import io.spine.core.RejectionContext;
 import io.spine.core.RejectionEnvelope;
 import io.spine.server.reflect.RejectionSubscriberMethod;
 import io.spine.server.tenant.CommandOperation;
@@ -76,7 +76,7 @@ public class RejectionSubscriber implements RejectionDispatcher<String> {
             public void run() {
                 handle(envelope.getMessage(),
                        envelope.getCommandMessage(),
-                       envelope.getCommandContext());
+                       envelope.getRejectionContext());
             }
         };
         try {
@@ -101,7 +101,8 @@ public class RejectionSubscriber implements RejectionDispatcher<String> {
         final MessageClass messageClass = envelope.getMessageClass();
         final String messageId = Stringifiers.toString(envelope.getId());
         final String errorMessage =
-                format("Error reacting on rejection (class: %s id: %s).", messageClass, messageId);
+                format("Rejection subscriber (%s) could not handle rejection (class: %s id: %s).",
+                       this, messageClass, messageId);
         log().error(errorMessage, exception);
     }
 
@@ -121,7 +122,7 @@ public class RejectionSubscriber implements RejectionDispatcher<String> {
         return rejectionClasses;
     }
 
-    public void handle(Message rejectionMessage, Message commandMessage, CommandContext context) {
+    public void handle(Message rejectionMessage, Message commandMessage, RejectionContext context) {
         RejectionSubscriberMethod.invokeFor(this, rejectionMessage, commandMessage, context);
     }
 }

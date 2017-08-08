@@ -20,8 +20,11 @@
 package io.spine.server.reflect;
 
 import com.google.protobuf.Message;
+import io.spine.core.Command;
 import io.spine.core.CommandContext;
+import io.spine.core.Commands;
 import io.spine.core.RejectionClass;
+import io.spine.core.RejectionContext;
 
 import javax.annotation.CheckReturnValue;
 import java.lang.annotation.Annotation;
@@ -41,7 +44,7 @@ import static io.spine.util.Exceptions.unsupported;
  * @author Dmytro Dashenkov
  * @author Alexander Yevsyukov
  */
-class RejectionHandlerMethod extends HandlerMethod<CommandContext>{
+class RejectionHandlerMethod extends HandlerMethod<RejectionContext>{
 
     /** Determines the number of parameters and their types. */
     private final Kind kind;
@@ -64,9 +67,13 @@ class RejectionHandlerMethod extends HandlerMethod<CommandContext>{
                 return Kind.REJECTION_MESSAGE_AWARE;
             case 2:
                 final Class<?> secondParamType = paramTypes[1];
-                return  secondParamType == CommandContext.class
-                        ? Kind.COMMAND_CONTEXT_AWARE
-                        : Kind.COMMAND_MESSAGE_AWARE;
+                if (secondParamType.equals(CommandContext.class)) {
+                    return Kind.COMMAND_CONTEXT_AWARE;
+                }
+                if (secondParamType.equals(RejectionContext.class)) {
+                    return Kind.REJECTION_CONTEXT_AWARE;
+                }
+                return  Kind.COMMAND_MESSAGE_AWARE;
             case 3:
                 return Kind.COMMAND_AWARE;
             default:
@@ -82,39 +89,49 @@ class RejectionHandlerMethod extends HandlerMethod<CommandContext>{
      * <p>Unlike the {@linkplain #invoke(Object, Message, Message) overloaded alternative method},
      * this one may return some value.
      *
-     * @param target       the target object on which call the method
-     * @param rejectionMsg the rejection message to handle
-     * @param commandMsg   the command message
-     * @param ctx          the context of the command
+     * @param target
+     *        the target object on which call the method
+     * @param rejectionMsg
+     *        the rejection message to handle
+     * @param context
+     *        the context of the rejection
      * @return the result of the invocation
      */
-    Object doInvoke(Object target, Message rejectionMsg, Message commandMsg, CommandContext ctx) {
+    @SuppressWarnings("OverlyLongMethod")
+    Object doInvoke(Object target, Message rejectionMsg, RejectionContext context) {
+        checkNotNull(target);
         checkNotNull(rejectionMsg);
-        checkNotNull(commandMsg);
-        checkNotNull(ctx);
-
+        checkNotNull(context);
+        final Command command = context.getCommand();
+        final CommandContext commandContext = command.getContext();
         try {
             final Object output;
             final Method method = getMethod();
+            Message commandMessage;
             switch (kind) {
                 case REJECTION_MESSAGE_AWARE:
                     output = method.invoke(target, rejectionMsg);
                     break;
+                case REJECTION_CONTEXT_AWARE:
+                    output = method.invoke(target, rejectionMsg, context);
+                    break;
                 case COMMAND_CONTEXT_AWARE:
-                    output = method.invoke(target, rejectionMsg, ctx);
+                    output = method.invoke(target, rejectionMsg, commandContext);
                     break;
                 case COMMAND_MESSAGE_AWARE:
-                    output = method.invoke(target, rejectionMsg, commandMsg);
+                    commandMessage = Commands.getMessage(command);
+                    output = method.invoke(target, rejectionMsg, commandMessage);
                     break;
                 case COMMAND_AWARE:
-                    output = method.invoke(target, rejectionMsg, commandMsg, ctx);
+                    commandMessage = Commands.getMessage(command);
+                    output = method.invoke(target, rejectionMsg, commandMessage, commandContext);
                     break;
                 default:
                     throw unsupported("Unsupported method kind encountered %s", kind.name());
             }
             return output;
         } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
-            throw whyFailed(target, rejectionMsg, ctx, e);
+            throw whyFailed(target, rejectionMsg, context, e);
         }
     }
 
@@ -143,7 +160,7 @@ class RejectionHandlerMethod extends HandlerMethod<CommandContext>{
     protected enum Kind {
 
         /**
-         * A wrapper of a rejection handler method which receives a rejection message
+         * A rejection handler method which receives a rejection message
          * as a single parameter.
          *
          * <p>The signature of such a method is following:
@@ -154,6 +171,19 @@ class RejectionHandlerMethod extends HandlerMethod<CommandContext>{
          * where {@code RejectionMessage} is a specific generated rejection message class.
          */
         REJECTION_MESSAGE_AWARE,
+
+        /**
+         * A rejection handler method which receives a rejection message as the first parameter,
+         * and {@link io.spine.core.RejectionContext RejectionContext} as the second.
+         *
+         * <p>The signature of such a method is following:
+         * <pre>
+         * [{@literal @}HandlerAnnotation]
+         * public void on(RejectionMessage rejection, RejectionContext context);
+         * </pre>
+         * where {@code RejectionMessage} is a specific generated rejection message class.
+         */
+        REJECTION_CONTEXT_AWARE,
 
         /**
          * A rejection handler method aware of the {@link CommandContext}.

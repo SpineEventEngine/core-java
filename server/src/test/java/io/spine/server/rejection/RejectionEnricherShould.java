@@ -24,8 +24,8 @@ import com.google.common.base.Function;
 import com.google.protobuf.StringValue;
 import io.spine.core.Enrichment;
 import io.spine.core.Rejection;
-import io.spine.core.RejectionEnvelope;
-import io.spine.server.rejection.given.InvalidProjectNameReactor;
+import io.spine.core.RejectionContext;
+import io.spine.server.rejection.given.RejectionEnrichmentConsumer;
 import io.spine.test.rejection.ProjectId;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,7 +41,6 @@ import static org.junit.Assert.assertNotEquals;
 public class RejectionEnricherShould {
 
     private RejectionBus rejectionBus;
-    private RejectionEnricher enricher;
 
     @Before
     public void setUp() {
@@ -55,7 +54,7 @@ public class RejectionEnricherShould {
                                               .build();
                         }
                     });
-        enricher = builder.build();
+        RejectionEnricher enricher = builder.build();
 
         rejectionBus = RejectionBus.newBuilder()
                                    .setEnricher(enricher)
@@ -64,14 +63,14 @@ public class RejectionEnricherShould {
 
     @Test
     public void boolean_enrich_rejection() {
-        final InvalidProjectNameReactor reactor = new InvalidProjectNameReactor();
-        rejectionBus.register(reactor);
+        final RejectionEnrichmentConsumer consumer = new RejectionEnrichmentConsumer();
+        rejectionBus.register(consumer);
 
         final Rejection rejection = invalidProjectNameRejection();
         rejectionBus.post(rejection);
 
-        final RejectionEnvelope delivered = RejectionEnvelope.of(reactor.getRejectionHandled());
+        final RejectionContext context = consumer.getContext();
 
-        assertNotEquals(Enrichment.getDefaultInstance(), delivered.getEnrichment());
+        assertNotEquals(Enrichment.getDefaultInstance(), context.getEnrichment());
     }
 }
