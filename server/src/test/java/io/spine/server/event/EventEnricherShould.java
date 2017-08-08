@@ -18,11 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.outbus.enrich;
+package io.spine.server.event;
 
 import com.google.common.base.Function;
 import com.google.protobuf.Message;
-import com.google.protobuf.StringValue;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
@@ -30,11 +29,8 @@ import io.spine.core.Subscribe;
 import io.spine.core.UserId;
 import io.spine.server.BoundedContext;
 import io.spine.server.command.TestEventFactory;
-import io.spine.server.event.EventBus;
-import io.spine.server.event.EventEnricher;
-import io.spine.server.event.EventSubscriber;
-import io.spine.server.outbus.enrich.given.EventEnricherTestEnv.GivenEvent;
-import io.spine.server.outbus.enrich.given.EventEnricherTestEnv.GivenEventMessage;
+import io.spine.server.event.given.EventEnricherTestEnv.GivenEvent;
+import io.spine.server.event.given.EventEnricherTestEnv.GivenEventMessage;
 import io.spine.test.event.ProjectCompleted;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.ProjectCreatedSeparateEnrichment;
@@ -51,10 +47,10 @@ import static io.spine.Identifier.newUuid;
 import static io.spine.core.Enrichments.getEnrichment;
 import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.server.command.TestEventFactory.newInstance;
-import static io.spine.server.outbus.enrich.given.EventEnricherTestEnv.Enrichment.GetProjectName;
-import static io.spine.server.outbus.enrich.given.EventEnricherTestEnv.Enrichment.GetProjectOwnerId;
-import static io.spine.server.outbus.enrich.given.EventEnricherTestEnv.Enrichment.newEventEnricher;
-import static io.spine.server.outbus.enrich.given.EventEnricherTestEnv.GivenEvent.projectStarted;
+import static io.spine.server.event.given.EventEnricherTestEnv.Enrichment.GetProjectName;
+import static io.spine.server.event.given.EventEnricherTestEnv.Enrichment.GetProjectOwnerId;
+import static io.spine.server.event.given.EventEnricherTestEnv.Enrichment.newEventEnricher;
+import static io.spine.server.event.given.EventEnricherTestEnv.GivenEvent.projectStarted;
 import static io.spine.testdata.TestBoundedContextFactory.MultiTenant.newBoundedContext;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -193,14 +189,6 @@ public class EventEnricherShould {
         );
 
         assertFalse(enricher.canBeEnriched(notEnrichableEvent));
-    }
-
-    @Test
-    public void return_false_if_pass_null_to_function_checking_predicate() {
-        final boolean result = SupportsFieldConversion.of(StringValue.class,
-                                                          String.class)
-                                                      .apply(null);
-        assertFalse(result);
     }
 
     @SuppressWarnings({"OptionalGetWithoutIsPresent",

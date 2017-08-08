@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.outbus.enrich.given;
+package io.spine.server.event.given;
 
 import com.google.common.base.Function;
 import com.google.protobuf.Any;
@@ -53,9 +53,8 @@ import static io.spine.protobuf.AnyPacker.pack;
  */
 public class EventEnricherTestEnv {
 
-    private EventEnricherTestEnv() {
-        // Prevent instantiation of this utility class.
-    }
+    /** Prevent instantiation of this utility class. */
+    private EventEnricherTestEnv() {}
 
     static ProjectId newProjectId() {
         final String uuid = newUuid();

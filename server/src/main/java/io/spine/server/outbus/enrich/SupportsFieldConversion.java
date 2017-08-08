@@ -20,38 +20,43 @@
 
 package io.spine.server.outbus.enrich;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Predicate;
+import io.spine.annotation.Internal;
 
 import javax.annotation.Nullable;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
- * The predicate that helps finding a function that converts an event field (of the given class)
+ * The predicate that helps finding a function that converts a message field (of the given class)
  * into an enrichment field (of another given class).
  *
  * @see Enricher#functionFor(Class, Class)
  * @author Alexander Yevsyukov
  */
-final class SupportsFieldConversion implements Predicate<EnrichmentFunction<?, ?, ?>> {
+@Internal
+@VisibleForTesting
+public final class SupportsFieldConversion implements Predicate<EnrichmentFunction<?, ?, ?>> {
 
-    private final Class<?> eventFieldClass;
+    private final Class<?> messageFieldClass;
     private final Class<?> enrichmentFieldClass;
 
-    static SupportsFieldConversion of(Class<?> eventFieldClass, Class<?> enrichmentFieldClass) {
-        return new SupportsFieldConversion(eventFieldClass, enrichmentFieldClass);
+    public static SupportsFieldConversion of(Class<?> messageFieldClass,
+                                             Class<?> enrichmentFieldClass) {
+        return new SupportsFieldConversion(messageFieldClass, enrichmentFieldClass);
     }
 
-    private SupportsFieldConversion(Class<?> eventFieldClass, Class<?> enrichmentFieldClass) {
-        this.eventFieldClass = eventFieldClass;
+    private SupportsFieldConversion(Class<?> messageFieldClass, Class<?> enrichmentFieldClass) {
+        this.messageFieldClass = messageFieldClass;
         this.enrichmentFieldClass = enrichmentFieldClass;
     }
 
     @Override
     public boolean apply(@Nullable EnrichmentFunction<?, ?, ?> input) {
-        if (input == null) {
-            return false;
-        }
+        checkNotNull(input);
         final boolean eventClassMatches =
-                eventFieldClass.equals(input.getSourceClass());
+                messageFieldClass.equals(input.getSourceClass());
         final boolean enrichmentClassMatches =
                 enrichmentFieldClass.equals(input.getEnrichmentClass());
         return eventClassMatches && enrichmentClassMatches;
