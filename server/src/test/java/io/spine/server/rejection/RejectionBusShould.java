@@ -117,7 +117,7 @@ public class RejectionBusShould {
 
     @Test   // as the RejectionBus instances do not support enrichment yet.
     public void not_enrich_rejection_messages() {
-        final Rejection original = Rejection.getDefaultInstance();
+        final Rejection original = invalidProjectNameRejection();
         final RejectionEnvelope enriched = rejectionBus.enrich(RejectionEnvelope.of(original));
         assertEquals(original, enriched.getOuterObject());
     }
