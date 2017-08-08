@@ -114,7 +114,7 @@ public class RejectionEnvelope
     }
 
     @Override
-    Enrichment getEnrichment() {
+    public Enrichment getEnrichment() {
         return getMessageContext().getEnrichment();
     }
 

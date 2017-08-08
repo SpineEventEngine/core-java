@@ -80,8 +80,7 @@ public class RejectionBusShould {
                 new PostponedDispatcherRejectionDelivery(delegateDispatcherExecutor);
         this.rejectionBusWithPostponedExecution =
                 RejectionBus.newBuilder()
-                            .setDispatcherRejectionDelivery(
-                                  postponedDelivery)
+                            .setDispatcherRejectionDelivery(postponedDelivery)
                             .build();
     }
 
@@ -157,8 +156,8 @@ public class RejectionBusShould {
 
         // Check that the 2nd subscriber with the same rejection subscriber method remains
         // after the 1st subscriber unregisters.
-        final Collection<RejectionDispatcher<?>> subscribers = rejectionBus.getDispatchers(
-                rejectionClass);
+        final Collection<RejectionDispatcher<?>> subscribers =
+                rejectionBus.getDispatchers(rejectionClass);
         assertFalse(subscribers.contains(subscriberOne));
         assertTrue(subscribers.contains(subscriberTwo));
 

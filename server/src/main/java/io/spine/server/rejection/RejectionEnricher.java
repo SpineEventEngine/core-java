@@ -22,7 +22,6 @@ package io.spine.server.rejection;
 
 import io.spine.core.RejectionContext;
 import io.spine.core.RejectionEnvelope;
-import io.spine.server.event.EventEnricher;
 import io.spine.server.outbus.enrich.Enricher;
 
 /**
@@ -49,8 +48,8 @@ public class RejectionEnricher extends Enricher<RejectionEnvelope, RejectionCont
     }
 
     /** Creates a new builder. */
-    public static EventEnricher.Builder newBuilder() {
-        return new EventEnricher.Builder();
+    public static RejectionEnricher.Builder newBuilder() {
+        return new RejectionEnricher.Builder();
     }
 
     /** The builder for {@link RejectionEnricher}. */

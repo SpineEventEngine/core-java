@@ -38,7 +38,7 @@ public abstract class EnrichableMessageEnvelope<I extends Message, T, C extends 
         return result;
     }
 
-    abstract Enrichment getEnrichment();
+    protected abstract Enrichment getEnrichment();
 
     private static Enrichment createEnrichment(Map<String, Any> enrichments) {
         final Enrichment.Builder enrichment =

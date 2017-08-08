@@ -123,7 +123,7 @@ public final class EventEnvelope extends EnrichableMessageEnvelope<EventId, Even
     }
 
     @Override
-    Enrichment getEnrichment() {
+    public Enrichment getEnrichment() {
         return getEventContext().getEnrichment();
     }
 
