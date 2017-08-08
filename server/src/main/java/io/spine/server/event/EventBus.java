@@ -37,7 +37,6 @@ import io.spine.server.bus.DeadMessageTap;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.outbus.CommandOutputBus;
 import io.spine.server.outbus.OutputDispatcherRegistry;
-import io.spine.server.outbus.enrich.Enricher;
 import io.spine.server.storage.StorageFactory;
 import io.spine.validate.MessageValidator;
 
@@ -135,12 +134,6 @@ public class EventBus
     /** Creates a builder for new {@code EventBus}. */
     public static Builder newBuilder() {
         return new Builder();
-    }
-
-    @VisibleForTesting
-    @Nullable
-    EventEnricher getEnricher() {
-        return enricher;
     }
 
     @VisibleForTesting
@@ -430,14 +423,14 @@ public class EventBus
         }
 
         /**
-         * Sets a custom {@link Enricher} for events posted to
+         * Sets a custom {@link EventEnricher} for events posted to
          * the {@code EventBus} which is being built.
          *
-         * <p>If the {@code Enricher} is not set, the enrichments
+         * <p>If the {@code EventEnricher} is not set, the enrichments
          * will <strong>NOT</strong> be supported for the {@code EventBus} instance built.
          *
-         * @param enricher the {@code Enricher} for events or
-         *                 {@code null} if enrichment is not supported
+         * @param enricher the {@code EventEnricher} for events or {@code null} if enrichment is
+         *                 not supported
          */
         public Builder setEnricher(EventEnricher enricher) {
             this.enricher = enricher;

@@ -122,9 +122,8 @@ public class RejectionEnvelope
     protected RejectionEnvelope enrich(Enrichment enrichment) {
         final Rejection.Builder enrichedCopy =
                 getOuterObject().toBuilder()
-                                .setContext(
-                                        getMessageContext().toBuilder()
-                                                           .setEnrichment(enrichment));
+                                .setContext(getMessageContext().toBuilder()
+                                                               .setEnrichment(enrichment));
         return of(enrichedCopy.build());
     }
 }

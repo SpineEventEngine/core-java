@@ -18,19 +18,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event;
+package io.spine.server.rejection;
 
-import io.spine.core.EventContext;
-import io.spine.core.EventEnvelope;
+import io.spine.core.RejectionContext;
+import io.spine.core.RejectionEnvelope;
+import io.spine.server.event.EventEnricher;
 import io.spine.server.outbus.enrich.Enricher;
 
 /**
- * Enriches events <em>after</em> they are stored, and <em>before</em> they are dispatched.
+ * Enriches rejections <em>after</em> they are stored, and <em>before</em> they are dispatched.
  *
  * <p>Enrichment schema is constructed like this:
  * <pre>
  *     {@code
- *     EventEnricher enricher = EventEnricher.newBuilder()
+ *     RejectionEnricher enricher = RejectionEnricher.newBuilder()
  *         .add(ProjectId.class, String.class, new Function<ProjectId, String> { ... } )
  *         .add(ProjectId.class, UserId.class, new Function<ProjectId, UserId> { ... } )
  *         ...
@@ -41,23 +42,23 @@ import io.spine.server.outbus.enrich.Enricher;
  * @author Alexander Yevsyukov
  * @see Enricher
  */
-public class EventEnricher extends Enricher<EventEnvelope, EventContext> {
+public class RejectionEnricher extends Enricher<RejectionEnvelope, RejectionContext> {
 
-    private EventEnricher(Builder builder) {
+    private RejectionEnricher(AbstractBuilder<? extends Enricher, ?> builder) {
         super(builder);
     }
 
     /** Creates a new builder. */
-    public static Builder newBuilder() {
-        return new Builder();
+    public static EventEnricher.Builder newBuilder() {
+        return new EventEnricher.Builder();
     }
 
-    /** The builder for {@link EventEnricher}. */
-    public static class Builder extends AbstractBuilder<EventEnricher, Builder> {
+    /** The builder for {@link RejectionEnricher}. */
+    public static class Builder extends AbstractBuilder<RejectionEnricher, Builder> {
 
         @Override
-        protected EventEnricher createEnricher() {
-            return new EventEnricher(this);
+        protected RejectionEnricher createEnricher() {
+            return new RejectionEnricher(this);
         }
     }
 }

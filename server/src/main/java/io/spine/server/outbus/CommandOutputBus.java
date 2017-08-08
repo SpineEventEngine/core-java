@@ -97,8 +97,9 @@ public abstract class CommandOutputBus<M extends Message,
     /**
      * Enriches the message posted to this instance of {@code CommandOutputBus}.
      *
-     * @param originalMessage the original message posted to the bus
-     * @return the enriched message
+     * @param  originalMessage the original message posted to the bus
+     * @return the enriched message or the passed instance if {@code originalMessage} cannot
+     *         be enriched
      */
     protected abstract E enrich(E originalMessage);
 
