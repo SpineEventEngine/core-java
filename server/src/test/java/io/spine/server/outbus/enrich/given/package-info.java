@@ -23,6 +23,6 @@
  */
 
 @ParametersAreNonnullByDefault
-package io.spine.server.event.enrich.given;
+package io.spine.server.outbus.enrich.given;
 
 import javax.annotation.ParametersAreNonnullByDefault;

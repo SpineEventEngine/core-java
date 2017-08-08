@@ -23,9 +23,9 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Predicate;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.core.CommandContext;
 import io.spine.core.React;
 import io.spine.core.RejectionClass;
+import io.spine.core.RejectionContext;
 
 import javax.annotation.CheckReturnValue;
 import java.lang.reflect.Method;
@@ -34,7 +34,6 @@ import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.util.Exceptions.unsupported;
 
 /**
  * A wrapper for a rejection reactor method.
@@ -65,7 +64,7 @@ public class RejectionReactorMethod extends RejectionHandlerMethod {
     public static List<? extends Message> invokeFor(Object target,
                                                     Message rejectionMessage,
                                                     Message commandMessage,
-                                                    CommandContext context) {
+                                                    RejectionContext context) {
         checkNotNull(target);
         checkNotNull(rejectionMessage);
         checkNotNull(commandMessage);
@@ -74,7 +73,7 @@ public class RejectionReactorMethod extends RejectionHandlerMethod {
         final RejectionReactorMethod method =
                 getMethod(target.getClass(), rejectionMessage, commandMessage);
         final List<? extends Message> result =
-                method.invoke(target, rejectionMessage, commandMessage, context);
+                method.invoke(target, rejectionMessage, context);
         return result;
     }
 
@@ -117,31 +116,17 @@ public class RejectionReactorMethod extends RejectionHandlerMethod {
      *
      * @param  target           the target object on which call the method
      * @param  rejectionMessage the rejection message to handle
-     * @param  commandMessage   the command message
-     * @param  context          the context of the command
+     * @param  context          the context of the rejection
      * @return the list of event messages produced by the reacting method or empty list if no event
-     * messages were produced
-     */
-    public List<? extends Message> invoke(Object target,
-                                          Message rejectionMessage,
-                                          Message commandMessage,
-                                          CommandContext context) {
-
-        final Object output = doInvoke(target, rejectionMessage, commandMessage, context);
-        final List<? extends Message> eventMessages = toList(output);
-        return eventMessages;
-    }
-
-    /**
-     * Always throws {@link UnsupportedOperationException}.
-     * Call {@link #invoke(Object, Message, Message, CommandContext)} instead.
-     *
-     * @return nothing ever
-     * @throws IllegalStateException always
+     *         messages were produced
      */
     @Override
-    public <R> R invoke(Object target, Message message, CommandContext context) {
-        throw unsupported("Call invoke(Object, Message, Message, CommandContext) instead.");
+    public List<? extends Message> invoke(Object target,
+                                          Message rejectionMessage,
+                                          RejectionContext context) {
+        final Object output = doInvoke(target, rejectionMessage, context);
+        final List<? extends Message> eventMessages = toList(output);
+        return eventMessages;
     }
 
     /** Returns the factory for filtering and creating rejection reactor methods. */

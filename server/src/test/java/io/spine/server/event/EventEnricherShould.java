@@ -18,25 +18,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.enrich;
+package io.spine.server.event;
 
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.protobuf.Message;
-import com.google.protobuf.StringValue;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
+import io.spine.core.EventEnvelope;
 import io.spine.core.Subscribe;
 import io.spine.core.UserId;
 import io.spine.server.BoundedContext;
 import io.spine.server.command.TestEventFactory;
-import io.spine.server.event.EventBus;
-import io.spine.server.event.EventSubscriber;
-import io.spine.server.event.enrich.given.EventEnricherTestEnv.GivenEvent;
-import io.spine.server.event.enrich.given.EventEnricherTestEnv.GivenEventMessage;
+import io.spine.server.event.given.EventEnricherTestEnv.GivenEvent;
+import io.spine.server.event.given.EventEnricherTestEnv.GivenEventMessage;
 import io.spine.test.event.ProjectCompleted;
 import io.spine.test.event.ProjectCreated;
-import io.spine.test.event.ProjectCreatedDynamicallyConfiguredEnrichment;
 import io.spine.test.event.ProjectCreatedSeparateEnrichment;
 import io.spine.test.event.ProjectId;
 import io.spine.test.event.ProjectStarred;
@@ -51,11 +47,10 @@ import static io.spine.Identifier.newUuid;
 import static io.spine.core.Enrichments.getEnrichment;
 import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.server.command.TestEventFactory.newInstance;
-import static io.spine.server.event.enrich.given.EventEnricherTestEnv.Enrichment.GetProjectMaxMemberCount;
-import static io.spine.server.event.enrich.given.EventEnricherTestEnv.Enrichment.GetProjectName;
-import static io.spine.server.event.enrich.given.EventEnricherTestEnv.Enrichment.GetProjectOwnerId;
-import static io.spine.server.event.enrich.given.EventEnricherTestEnv.Enrichment.newEventEnricher;
-import static io.spine.server.event.enrich.given.EventEnricherTestEnv.GivenEvent.projectStarted;
+import static io.spine.server.event.given.EventEnricherTestEnv.Enrichment.GetProjectName;
+import static io.spine.server.event.given.EventEnricherTestEnv.Enrichment.GetProjectOwnerId;
+import static io.spine.server.event.given.EventEnricherTestEnv.Enrichment.newEventEnricher;
+import static io.spine.server.event.given.EventEnricherTestEnv.GivenEvent.projectStarted;
 import static io.spine.testdata.TestBoundedContextFactory.MultiTenant.newBoundedContext;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -99,8 +94,9 @@ public class EventEnricherShould {
     @Test
     public void enrich_event_if_enrichment_definition_is_enclosed_to_event() {
         final ProjectStarted msg = GivenEventMessage.projectStarted();
+        final Event event = createEvent(msg);
 
-        eventBus.post(createEvent(msg));
+        eventBus.post(event);
 
         assertEquals(getProjectName.apply(msg.getProjectId()),
                      subscriber.projectStartedEnrichment.getProjectName());
@@ -157,9 +153,9 @@ public class EventEnricherShould {
 
     @Test
     public void enrich_several_events_bound_by_fields() {
-        final Event permissionGranted = GivenEvent.permissionGranted();
-        final Event permissionRevoked = GivenEvent.permissionRevoked();
-        final Event sharingRequestApproved = GivenEvent.sharingRequestApproved();
+        final EventEnvelope permissionGranted = EventEnvelope.of(GivenEvent.permissionGranted());
+        final EventEnvelope permissionRevoked = EventEnvelope.of(GivenEvent.permissionRevoked());
+        final EventEnvelope sharingRequestApproved = EventEnvelope.of(GivenEvent.sharingRequestApproved());
 
         assertTrue(enricher.canBeEnriched(permissionGranted));
         assertTrue(enricher.canBeEnriched(permissionRevoked));
@@ -167,28 +163,13 @@ public class EventEnricherShould {
     }
 
     @Test
-    public void enrich_event_if_function_added_at_runtime() {
-        final GetProjectMaxMemberCount function = new GetProjectMaxMemberCount();
-        enricher.registerFieldEnrichment(ProjectId.class, Integer.class,function);
-
-        final ProjectCreated msg = GivenEventMessage.projectCreated();
-        final ProjectId projectId = msg.getProjectId();
-
-        eventBus.post(createEvent(msg));
-
-        @SuppressWarnings("ConstantConditions")     // the `function` was specially implemented to return non-null ints.
-        final int expectedValue = function.apply(projectId);
-        assertEquals(expectedValue, subscriber.projectCreatedDynamicEnrichment.getMaxMemberCount());
-    }
-
-    @Test
     public void confirm_that_event_can_be_enriched_if_enrichment_registered() {
-        assertTrue(enricher.canBeEnriched(projectStarted()));
+        assertTrue(enricher.canBeEnriched(EventEnvelope.of(projectStarted())));
     }
 
     @Test
     public void confirm_that_event_can_not_be_enriched_if_no_such_enrichment_registered() {
-        final Event dummyEvent = createEvent(toMessage(newUuid()));
+        final EventEnvelope dummyEvent = EventEnvelope.of(createEvent(toMessage(newUuid())));
 
         assertFalse(enricher.canBeEnriched(dummyEvent));
     }
@@ -196,7 +177,7 @@ public class EventEnricherShould {
     @Test
     public void confirm_that_event_can_not_be_enriched_if_enrichment_disabled() {
         final Event event = createEvent(toMessage(newUuid()));
-        final Event notEnrichableEvent =
+        final EventEnvelope notEnrichableEvent = EventEnvelope.of(
                 event.toBuilder()
                      .setContext(event.getContext()
                                       .toBuilder()
@@ -204,27 +185,25 @@ public class EventEnricherShould {
                                                           .getEnrichment()
                                                           .toBuilder()
                                                           .setDoNotEnrich(true)))
-                     .build();
+                     .build()
+        );
 
         assertFalse(enricher.canBeEnriched(notEnrichableEvent));
     }
 
-    @Test
-    public void return_false_if_pass_null_to_function_checking_predicate() {
-        final boolean result = EventEnricher.SupportsFieldConversion.of(StringValue.class,
-                                                                        String.class)
-                                                                    .apply(null);
-        assertFalse(result);
-    }
-
-    @SuppressWarnings({"OptionalGetWithoutIsPresent",
-            "UnusedParameters", "InstanceVariableNamingConvention", "ConstantConditions"})
+    /**
+     * Event subscriber that remembers enrichments.
+     *
+     * <p>This class is a part of assert checking, and as such it is not placed under the test
+     * {@linkplain io.spine.server.event.given.EventEnricherTestEnv environment class} .
+     */
+    @SuppressWarnings({"OptionalGetWithoutIsPresent", "InstanceVariableNamingConvention",
+                       "ConstantConditions"})
     private static class TestEventSubscriber extends EventSubscriber {
 
         private ProjectCreated.Enrichment projectCreatedEnrichment;
         private ProjectCreatedSeparateEnrichment projectCreatedSeparateEnrichment;
         private ProjectStarted.Enrichment projectStartedEnrichment;
-        private ProjectCreatedDynamicallyConfiguredEnrichment projectCreatedDynamicEnrichment;
         private SeparateEnrichmentForMultipleProjectEvents projectCompletedEnrichment;
         private SeparateEnrichmentForMultipleProjectEvents projectStarredEnrichment;
         private ProjectCreatedEnrichmentAnotherPackage projectCreatedAnotherPackEnrichment;
@@ -237,20 +216,12 @@ public class EventEnricherShould {
                     getEnrichment(ProjectCreatedSeparateEnrichment.class, context).get();
             this.projectCreatedAnotherPackEnrichment =
                     getEnrichment(ProjectCreatedEnrichmentAnotherPackage.class, context).get();
-
-            final Optional<ProjectCreatedDynamicallyConfiguredEnrichment> enrichment =
-                    getEnrichment(ProjectCreatedDynamicallyConfiguredEnrichment.class, context);
-
-            // See if dynamically added enrichment available. Only some tests use it.
-            this.projectCreatedDynamicEnrichment = enrichment.isPresent()
-                    ? enrichment.get()
-                    : ProjectCreatedDynamicallyConfiguredEnrichment.getDefaultInstance();
         }
 
         @Subscribe
         public void on(ProjectStarted event, EventContext context) {
-            this.projectStartedEnrichment = getEnrichment(ProjectStarted.Enrichment.class,
-                                                          context).get();
+            this.projectStartedEnrichment =
+                    getEnrichment(ProjectStarted.Enrichment.class, context).get();
         }
 
         @Subscribe

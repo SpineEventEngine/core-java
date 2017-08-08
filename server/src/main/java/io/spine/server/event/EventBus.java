@@ -20,7 +20,6 @@
 package io.spine.server.event;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Message;
@@ -36,7 +35,6 @@ import io.spine.grpc.LoggingObserver.Level;
 import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.DeadMessageTap;
 import io.spine.server.bus.EnvelopeValidator;
-import io.spine.server.event.enrich.EventEnricher;
 import io.spine.server.outbus.CommandOutputBus;
 import io.spine.server.outbus.OutputDispatcherRegistry;
 import io.spine.server.storage.StorageFactory;
@@ -93,10 +91,8 @@ import static com.google.common.base.Preconditions.checkState;
  * @see io.spine.server.projection.Projection Projection
  * @see io.spine.core.Subscribe @Subscribe
  */
-public class EventBus extends CommandOutputBus<Event,
-                                               EventEnvelope,
-                                               EventClass,
-                                               EventDispatcher<?>> {
+public class EventBus
+        extends CommandOutputBus<Event, EventEnvelope, EventClass, EventDispatcher<?>> {
 
     /*
      * NOTE: Even though, the EventBus has a private constructor and
@@ -108,18 +104,22 @@ public class EventBus extends CommandOutputBus<Event,
     /** The {@code EventStore} to which put events before they get handled. */
     private final EventStore eventStore;
 
+    /** The validator for messages of posted events. */
     private final MessageValidator eventMessageValidator;
 
+    /** Filters applied when an event is posted. */
     private final Deque<BusFilter<EventEnvelope>> filterChain;
-    private final StreamObserver<Ack> streamObserver = LoggingObserver.forClass(getClass(),
-                                                                                Level.TRACE);
+
+    /** The observer of post operations. */
+    private final StreamObserver<Ack> streamObserver;
+
     /** The validator for events posted to the bus. */
     @Nullable
     private EventValidator eventValidator;
 
     /** The enricher for posted events or {@code null} if the enrichment is not supported. */
     @Nullable
-    private EventEnricher enricher;
+    private final EventEnricher enricher;
 
     /** Creates new instance by the passed builder. */
     private EventBus(Builder builder) {
@@ -128,17 +128,12 @@ public class EventBus extends CommandOutputBus<Event,
         this.enricher = builder.enricher;
         this.eventMessageValidator = builder.eventValidator;
         this.filterChain = builder.getFilters();
+        this.streamObserver = LoggingObserver.forClass(getClass(), builder.logLevelForPost);
     }
 
     /** Creates a builder for new {@code EventBus}. */
     public static Builder newBuilder() {
         return new Builder();
-    }
-
-    @VisibleForTesting
-    @Nullable
-    EventEnricher getEnricher() {
-        return enricher;
     }
 
     @VisibleForTesting
@@ -221,43 +216,17 @@ public class EventBus extends CommandOutputBus<Event,
     }
 
     @Override
-    protected Event enrich(Event event) {
+    protected EventEnvelope enrich(EventEnvelope event) {
         if (enricher == null || !enricher.canBeEnriched(event)) {
             return event;
         }
-        final Event enriched = enricher.enrich(event);
+        final EventEnvelope enriched = enricher.enrich(event);
         return enriched;
     }
 
     @Override
     protected void store(Iterable<Event> events) {
         eventStore.appendAll(events);
-    }
-
-    /**
-     * Add a new field enrichment translation function.
-     *
-     * @param eventFieldClass      a class of the field in the event message
-     * @param enrichmentFieldClass a class of the field in the enrichment message
-     * @param function             a function which converts fields
-     * @see EventEnricher
-     */
-    public <S, T> void addFieldEnrichment(Class<S> eventFieldClass,
-                                          Class<T> enrichmentFieldClass,
-                                          Function<S, T> function) {
-        checkNotNull(eventFieldClass);
-        checkNotNull(enrichmentFieldClass);
-        checkNotNull(function);
-
-        if (enricher == null) {
-            enricher = EventEnricher.newBuilder()
-                                    .addFieldEnrichment(eventFieldClass,
-                                                        enrichmentFieldClass,
-                                                        function)
-                                    .build();
-        } else {
-            enricher.registerFieldEnrichment(eventFieldClass, enrichmentFieldClass, function);
-        }
     }
 
     @Override
@@ -352,9 +321,12 @@ public class EventBus extends CommandOutputBus<Event,
         @Nullable
         private EventEnricher enricher;
 
+        /** Logging level for posted events.  */
+        private LoggingObserver.Level logLevelForPost = Level.TRACE;
+
+        /** Prevents direct instantiation. */
         private Builder() {
             super();
-            // Prevent direct instantiation.
         }
 
         /**
@@ -454,11 +426,11 @@ public class EventBus extends CommandOutputBus<Event,
          * Sets a custom {@link EventEnricher} for events posted to
          * the {@code EventBus} which is being built.
          *
-         * <p>If the {@code Enricher} is not set, the enrichments
+         * <p>If the {@code EventEnricher} is not set, the enrichments
          * will <strong>NOT</strong> be supported for the {@code EventBus} instance built.
          *
-         * @param enricher the {@code Enricher} for events or
-         *                 {@code null} if enrichment is not supported
+         * @param enricher the {@code EventEnricher} for events or {@code null} if enrichment is
+         *                 not supported
          */
         public Builder setEnricher(EventEnricher enricher) {
             this.enricher = enricher;
@@ -467,6 +439,23 @@ public class EventBus extends CommandOutputBus<Event,
 
         public Optional<EventEnricher> getEnricher() {
             return Optional.fromNullable(enricher);
+        }
+
+        /**
+         * Sets logging level for post operations.
+         *
+         * <p>If not set directly, {@link LoggingObserver.Level#TRACE} will be used.
+         */
+        public Builder setLogLevelForPost(Level level) {
+            this.logLevelForPost = level;
+            return this;
+        }
+
+        /**
+         * Obtains the logging level for {@linkplain EventBus#post(Event) post} operations.
+         */
+        public Level getLogLevelForPost() {
+            return this.logLevelForPost;
         }
 
         /**

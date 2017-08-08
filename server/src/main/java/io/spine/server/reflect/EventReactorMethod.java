@@ -87,12 +87,10 @@ public final class EventReactorMethod extends HandlerMethod<EventContext> {
      * @return the list of event messages (or an empty list if the reactor method returns nothing)
      */
     @Override
-    public <R> R invoke(Object target, Message message, EventContext context) {
+    public List<? extends Message> invoke(Object target, Message message, EventContext context) {
         final Object handlingResult = super.invoke(target, message, context);
         final List<? extends Message> eventMessages = toList(handlingResult);
-        // The list of event messages is the return type expected.
-        @SuppressWarnings("unchecked") final R result = (R) eventMessages;
-        return result;
+        return eventMessages;
     }
 
     static EventReactorMethod from(Method method) {

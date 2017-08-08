@@ -54,7 +54,7 @@ class AggregateRejectionEndpoint<I, A extends Aggregate<I, ?, ?>>
         final RejectionEnvelope envelope = envelope();
         final Set<I> ids =
                 repository().getRejectionRouting()
-                            .apply(envelope.getMessage(), envelope.getRejectionContext());
+                            .apply(envelope.getMessage(), envelope.getMessageContext());
         return ids;
     }
 

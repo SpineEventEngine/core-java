@@ -19,11 +19,13 @@
  */
 package io.spine.server.reflect.given;
 
+import com.google.protobuf.Message;
 import io.spine.core.CommandContext;
 import io.spine.core.Subscribe;
-import io.spine.test.reflect.ReflectRejections;
+import io.spine.test.reflect.ReflectRejections.InvalidProjectName;
 import io.spine.test.rejection.command.UpdateProjectName;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.Method;
 
 /**
@@ -62,24 +64,50 @@ public class RejectionSubscriberMethodTestEnv {
 
     public static class ValidTwoParams extends TestRejectionSubscriber {
         @Subscribe
-        public void handle(ReflectRejections.InvalidProjectName rejection,
+        public void handle(InvalidProjectName rejection,
                            UpdateProjectName command) {
             // do nothing.
         }
     }
 
     public static class ValidThreeParams extends TestRejectionSubscriber {
+
+        @Nullable
+        private Message lastRejectionMessage;
+        @Nullable
+        private Message lastCommandMessage;
+        @Nullable
+        private CommandContext lastCommandContext;
+
         @Subscribe
-        public void handle(ReflectRejections.InvalidProjectName rejection,
-                           UpdateProjectName command, CommandContext context) {
-            // do nothing.
+        public void handle(InvalidProjectName rejection,
+                           UpdateProjectName command,
+                           CommandContext context) {
+            lastRejectionMessage = rejection;
+            lastCommandMessage = command;
+            lastCommandContext = context;
+        }
+
+        @Nullable
+        public Message getLastRejectionMessage() {
+            return lastRejectionMessage;
+        }
+
+        @Nullable
+        public Message getLastCommandMessage() {
+            return lastCommandMessage;
+        }
+
+        @Nullable
+        public CommandContext getLastCommandContext() {
+            return lastCommandContext;
         }
     }
 
     public static class ValidButPrivate extends TestRejectionSubscriber {
         @SuppressWarnings("MethodMayBeStatic") // Need instance method for the test.
         @Subscribe
-        private void handle(ReflectRejections.InvalidProjectName rejection,
+        private void handle(InvalidProjectName rejection,
                             UpdateProjectName command) {
             // do nothing.
         }
@@ -90,7 +118,7 @@ public class RejectionSubscriberMethodTestEnv {
      */
     public static class InvalidNoAnnotation extends TestRejectionSubscriber {
         @SuppressWarnings("unused")
-        public void handle(ReflectRejections.InvalidProjectName rejection,
+        public void handle(InvalidProjectName rejection,
                            UpdateProjectName command) {
             // do nothing.
         }
@@ -111,7 +139,7 @@ public class RejectionSubscriberMethodTestEnv {
      */
     public static class InvalidTooManyParams extends TestRejectionSubscriber {
         @Subscribe
-        public void handle(ReflectRejections.InvalidProjectName rejection,
+        public void handle(InvalidProjectName rejection,
                            UpdateProjectName command,
                            CommandContext context,
                            Object redundant) {
@@ -144,7 +172,7 @@ public class RejectionSubscriberMethodTestEnv {
      */
     public static class InvalidTwoParamsSecondInvalid extends TestRejectionSubscriber {
         @Subscribe
-        public void handle(ReflectRejections.InvalidProjectName rejection, Exception invalid) {
+        public void handle(InvalidProjectName rejection, Exception invalid) {
             // do nothing.
         }
     }
@@ -154,7 +182,7 @@ public class RejectionSubscriberMethodTestEnv {
      */
     public static class InvalidNotMessage extends TestRejectionSubscriber {
         @Subscribe
-        public Object handle(ReflectRejections.InvalidProjectName rejection,
+        public Object handle(InvalidProjectName rejection,
                              UpdateProjectName command) {
             return rejection;
         }

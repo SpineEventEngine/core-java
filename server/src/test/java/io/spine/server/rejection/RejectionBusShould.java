@@ -80,8 +80,7 @@ public class RejectionBusShould {
                 new PostponedDispatcherRejectionDelivery(delegateDispatcherExecutor);
         this.rejectionBusWithPostponedExecution =
                 RejectionBus.newBuilder()
-                            .setDispatcherRejectionDelivery(
-                                  postponedDelivery)
+                            .setDispatcherRejectionDelivery(postponedDelivery)
                             .build();
     }
 
@@ -117,9 +116,9 @@ public class RejectionBusShould {
 
     @Test   // as the RejectionBus instances do not support enrichment yet.
     public void not_enrich_rejection_messages() {
-        final Rejection original = Rejection.getDefaultInstance();
-        final Rejection enriched = rejectionBus.enrich(original);
-        assertEquals(original, enriched);
+        final Rejection original = invalidProjectNameRejection();
+        final RejectionEnvelope enriched = rejectionBus.enrich(RejectionEnvelope.of(original));
+        assertEquals(original, enriched.getOuterObject());
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -157,8 +156,8 @@ public class RejectionBusShould {
 
         // Check that the 2nd subscriber with the same rejection subscriber method remains
         // after the 1st subscriber unregisters.
-        final Collection<RejectionDispatcher<?>> subscribers = rejectionBus.getDispatchers(
-                rejectionClass);
+        final Collection<RejectionDispatcher<?>> subscribers =
+                rejectionBus.getDispatchers(rejectionClass);
         assertFalse(subscribers.contains(subscriberOne));
         assertTrue(subscribers.contains(subscriberTwo));
 

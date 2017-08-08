@@ -132,13 +132,10 @@ public final class CommandHandlerMethod extends HandlerMethod<CommandContext> {
      * @return the list of event messages (or an empty list if the handler returns nothing)
      */
     @Override
-    public <R> R invoke(Object target, Message message, CommandContext context) {
-        final R handlingResult = super.invoke(target, message, context);
-
+    public List<? extends Message> invoke(Object target, Message message, CommandContext context) {
+        final Object handlingResult = super.invoke(target, message, context);
         final List<? extends Message> events = toList(handlingResult);
-        // The list of event messages is the return type expected.
-        @SuppressWarnings("unchecked") final R result = (R) events;
-        return result;
+        return events;
     }
 
     /**

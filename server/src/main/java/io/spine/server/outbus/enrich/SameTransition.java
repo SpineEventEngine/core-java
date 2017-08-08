@@ -18,52 +18,45 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.core;
+package io.spine.server.outbus.enrich;
 
-import com.google.protobuf.Message;
+import com.google.common.base.Predicate;
 
-import java.util.Objects;
+import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Abstract base for classes implementing {@link MessageEnvelope}.
+ * A helper predicate that allows to find functions with the same transition from
+ * source event to enrichment class.
  *
- * @param <I> the class of the message ID
- * @param <T> the type of the object that wraps a message
- * @param <C> the type of the message context
+ * <p>Such functions are not necessarily equal because they may have different translators.
+ *
+ * @see EnrichmentFunction
  * @author Alexander Yevsyukov
- * @author Alex Tymchenko
  */
-public abstract class AbstractMessageEnvelope<I extends Message, T, C extends Message>
-        implements MessageEnvelope<I, T, C> {
+final class SameTransition implements Predicate<EnrichmentFunction> {
 
-    private final T object;
+    private final EnrichmentFunction function;
 
-    AbstractMessageEnvelope(T object) {
-        checkNotNull(object);
-        this.object = object;
+    static SameTransition asFor(EnrichmentFunction function) {
+        checkNotNull(function);
+        return new SameTransition(function);
+    }
+
+    private SameTransition(EnrichmentFunction function) {
+        this.function = function;
     }
 
     @Override
-    public T getOuterObject() {
-        return object;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(object);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null || getClass() != obj.getClass()) {
+    public boolean apply(@Nullable EnrichmentFunction input) {
+        if (input == null) {
             return false;
         }
-        final AbstractMessageEnvelope other = (AbstractMessageEnvelope) obj;
-        return Objects.equals(this.object, other.object);
+        final boolean sameSourceClass = function.getSourceClass()
+                                                .equals(input.getSourceClass());
+        final boolean sameEnrichmentClass = function.getEnrichmentClass()
+                                                    .equals(input.getEnrichmentClass());
+        return sameSourceClass && sameEnrichmentClass;
     }
 }

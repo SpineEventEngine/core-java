@@ -18,15 +18,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.enrich;
+package io.spine.server.outbus.enrich;
 
 import com.google.common.base.Function;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.spine.core.UserId;
-import io.spine.server.event.enrich.EventEnricher.SameTransition;
-import io.spine.server.event.enrich.given.EventEnricherBuilderTestEnv.Enrichment;
+import io.spine.server.event.EventEnricher;
+import io.spine.server.outbus.enrich.given.EnricherBuilderTestEnv.Enrichment;
 import io.spine.test.Tests;
 import io.spine.test.event.ProjectId;
 import org.junit.Before;
@@ -40,11 +40,11 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 @SuppressWarnings("ResultOfMethodCallIgnored")
-public class EventEnricherBuilderShould {
+public class EnricherBuilderShould {
 
-    private EventEnricher.Builder builder;
+    private Enricher.AbstractBuilder builder;
     private Function<Timestamp, StringValue> function;
-    private FieldEnricher<Timestamp, StringValue> fieldEnricher;
+    private FieldEnrichment<Timestamp, StringValue, ?> fieldEnrichment;
 
     @Before
     public void setUp() {
@@ -59,34 +59,29 @@ public class EventEnricherBuilderShould {
                 return toMessage(Timestamps.toString(input));
             }
         };
-        this.fieldEnricher = FieldEnricher.newInstance(Timestamp.class, StringValue.class, function);
-    }
-
-    @Test
-    public void create_new_instance() {
-        assertNotNull(EventEnricher.Builder.newInstance());
+        this.fieldEnrichment = FieldEnrichment.of(Timestamp.class, StringValue.class, function);
     }
 
     @Test
     public void build_enricher_if_all_functions_registered() {
-        final EventEnricher enricher = Enrichment.newEventEnricher();
+        final Enricher enricher = Enrichment.newEnricher();
 
         assertNotNull(enricher);
     }
 
     @Test
     public void add_field_enrichment() {
-        builder.addFieldEnrichment(Timestamp.class, StringValue.class, function);
+        builder.add(Timestamp.class, StringValue.class, function);
 
         assertTrue(builder.getFunctions()
-                          .contains(fieldEnricher));
+                          .contains(fieldEnrichment));
     }
 
     @Test
     public void remove_enrichment_function() {
-        builder.addFieldEnrichment(Timestamp.class, StringValue.class, function);
+        builder.add(Timestamp.class, StringValue.class, function);
 
-        builder.remove(fieldEnricher);
+        builder.remove(fieldEnrichment);
 
         assertTrue(builder.getFunctions()
                           .isEmpty());
@@ -94,54 +89,56 @@ public class EventEnricherBuilderShould {
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_source_class_for_field_enrichment() {
-        builder.addFieldEnrichment(Tests.<Class<Timestamp>>nullRef(),
-                                   StringValue.class,
-                                   function);
+        builder.add(Tests.<Class<Timestamp>>nullRef(),
+                    StringValue.class,
+                    function);
     }
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_target_class_for_field_enrichment() {
-        builder.addFieldEnrichment(Timestamp.class,
-                                   Tests.<Class<StringValue>>nullRef(),
-                                   function);
+        builder.add(Timestamp.class,
+                    Tests.<Class<StringValue>>nullRef(),
+                    function);
     }
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_function_for_field_enrichment() {
-        builder.addFieldEnrichment(Timestamp.class,
-                                   StringValue.class,
-                                   Tests.<Function<Timestamp, StringValue>>nullRef());
+        builder.add(Timestamp.class,
+                    StringValue.class,
+                    Tests.<Function<Timestamp, StringValue>>nullRef());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void do_not_accept_duplicates_for_field_enrichment() {
-        builder.addFieldEnrichment(Timestamp.class, StringValue.class, function);
+        builder.add(Timestamp.class, StringValue.class, function);
         // This should fail.
-        builder.addFieldEnrichment(Timestamp.class, StringValue.class, function);
+        builder.add(Timestamp.class, StringValue.class, function);
     }
 
     @Test
     public void allow_registering_no_functions() {
-        final EventEnricher enricher = EventEnricher.newBuilder()
-                                                 .build();
+        final Enricher enricher = EventEnricher.newBuilder()
+                                               .build();
         assertNotNull(enricher);
     }
 
     @Test
     public void allow_registering_just_some_of_expected_functions() {
-        builder.addFieldEnrichment(ProjectId.class, UserId.class, new Enrichment.GetProjectOwnerId());
-        builder.addFieldEnrichment(ProjectId.class, String.class, new Enrichment.GetProjectName());
-        final EventEnricher enricher = builder.build();
+        builder.add(ProjectId.class, UserId.class,
+                    new Enrichment.GetProjectOwnerId())
+               .add(ProjectId.class, String.class,
+                    new Enrichment.GetProjectName());
+        final Enricher enricher = builder.build();
         assertNotNull(enricher);
     }
 
     @Test
     public void assure_that_function_performs_same_transition() {
-        assertTrue(SameTransition.asFor(fieldEnricher).apply(fieldEnricher));
+        assertTrue(SameTransition.asFor(fieldEnrichment).apply(fieldEnrichment));
     }
 
     @Test
     public void return_false_if_input_to_SameTransition_predicate_is_null() {
-        assertFalse(SameTransition.asFor(fieldEnricher).apply(null));
+        assertFalse(SameTransition.asFor(fieldEnrichment).apply(null));
     }
 }

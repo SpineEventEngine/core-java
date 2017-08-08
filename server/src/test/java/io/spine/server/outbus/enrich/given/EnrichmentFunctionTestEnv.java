@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.enrich.given;
+package io.spine.server.outbus.enrich.given;
 
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.ProjectId;

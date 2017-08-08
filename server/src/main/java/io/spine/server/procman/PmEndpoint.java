@@ -39,7 +39,7 @@ import java.util.List;
  */
 abstract class PmEndpoint<I,
                           P extends ProcessManager<I, ?, ?>,
-                          M extends ActorMessageEnvelope<?, ?>,
+                          M extends ActorMessageEnvelope<?, ?, ?>,
                           R>
         extends EntityMessageEndpoint<I, P, M, R> {
 

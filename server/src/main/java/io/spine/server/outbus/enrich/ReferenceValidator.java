@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.enrich;
+package io.spine.server.outbus.enrich;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
@@ -58,7 +58,7 @@ import static java.lang.String.format;
  *
  * @author Alexander Yevsyukov
  */
-class ReferenceValidator {
+final class ReferenceValidator {
 
     /** The separator used in Protobuf fully-qualified names. */
     private static final String PROTO_FQN_SEPARATOR = ".";
@@ -72,13 +72,15 @@ class ReferenceValidator {
 
 
     /** The reference to the event context used in the `by` field option. */
+    @SuppressWarnings("DuplicateStringLiteralInspection") // refers to the proto field name,
+        // not a variable name as other strings that use the same value.
     private static final String CONTEXT_REFERENCE = "context";
 
-    private final EventEnricher enricher;
+    private final Enricher<?, ?> enricher;
     private final Descriptor eventDescriptor;
     private final Descriptor enrichmentDescriptor;
 
-    ReferenceValidator(EventEnricher enricher,
+    ReferenceValidator(Enricher enricher,
             Class<? extends Message> eventClass,
             Class<? extends Message> enrichmentClass) {
         this.enricher = enricher;
@@ -95,7 +97,7 @@ class ReferenceValidator {
      * functions.
      */
     ValidationResult validate() {
-        final List<EnrichmentFunction<?, ?>> functions = new LinkedList<>();
+        final List<EnrichmentFunction<?, ?, ?>> functions = new LinkedList<>();
         final Multimap<FieldDescriptor, FieldDescriptor> fields = LinkedListMultimap.create();
         for (FieldDescriptor enrichmentField : enrichmentDescriptor.getFields()) {
             final Collection<FieldDescriptor> sourceFields = findSourceFields(enrichmentField);
@@ -103,19 +105,19 @@ class ReferenceValidator {
         }
         final ImmutableMultimap<FieldDescriptor, FieldDescriptor> sourceToTargetMap =
                 ImmutableMultimap.copyOf(fields);
-        final ImmutableList<EnrichmentFunction<?, ?>> enrichmentFunctions =
+        final ImmutableList<EnrichmentFunction<?, ?, ?>> enrichmentFunctions =
                 ImmutableList.copyOf(functions);
         final ValidationResult result = new ValidationResult(enrichmentFunctions,
                                                              sourceToTargetMap);
         return result;
     }
 
-    private void putEnrichmentsByField(List<EnrichmentFunction<?, ?>> functions,
+    private void putEnrichmentsByField(List<EnrichmentFunction<?, ?, ?>> functions,
                                        Multimap<FieldDescriptor, FieldDescriptor> fields,
                                        FieldDescriptor enrichmentField,
                                        Iterable<FieldDescriptor> sourceFields) {
         for (FieldDescriptor sourceField : sourceFields) {
-            final Optional<EnrichmentFunction<?, ?>> function =
+            final Optional<EnrichmentFunction<?, ?, ?>> function =
                     getEnrichmentFunction(sourceField, enrichmentField);
             if (function.isPresent()) {
                 functions.add(function.get());
@@ -246,12 +248,12 @@ class ReferenceValidator {
         return msg;
     }
 
-    private Optional<EnrichmentFunction<?, ?>> getEnrichmentFunction(FieldDescriptor srcField,
+    private Optional<EnrichmentFunction<?, ?, ?>> getEnrichmentFunction(FieldDescriptor srcField,
                                                                      FieldDescriptor targetField) {
         final Class<?> sourceFieldClass = Field.getFieldClass(srcField);
         final Class<?> targetFieldClass = Field.getFieldClass(targetField);
-        final Optional<EnrichmentFunction<?, ?>> func = enricher.functionFor(sourceFieldClass,
-                                                                             targetFieldClass);
+        final Optional<EnrichmentFunction<?, ?, ?>> func =
+                enricher.functionFor(sourceFieldClass,targetFieldClass);
         if (!func.isPresent()) {
             logNoFunction(sourceFieldClass, targetFieldClass);
         }
@@ -292,10 +294,10 @@ class ReferenceValidator {
      * A wrapper DTO for the validation result.
      */
     static class ValidationResult {
-        private final ImmutableList<EnrichmentFunction<?, ?>> functions;
+        private final ImmutableList<EnrichmentFunction<?, ?, ?>> functions;
         private final ImmutableMultimap<FieldDescriptor, FieldDescriptor> fieldMap;
 
-        private ValidationResult(ImmutableList<EnrichmentFunction<?, ?>> functions,
+        private ValidationResult(ImmutableList<EnrichmentFunction<?, ?, ?>> functions,
                                  ImmutableMultimap<FieldDescriptor, FieldDescriptor> fieldMap) {
             this.functions = functions;
             this.fieldMap = fieldMap;
@@ -307,7 +309,7 @@ class ReferenceValidator {
          */
         @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK, since an `ImmutableList`
                                                             // is returned.
-        List<EnrichmentFunction<?, ?>> getFunctions() {
+        List<EnrichmentFunction<?, ?, ?>> getFunctions() {
             return functions;
         }
 

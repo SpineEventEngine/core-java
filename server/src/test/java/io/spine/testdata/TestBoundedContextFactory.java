@@ -23,7 +23,7 @@ package io.spine.testdata;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.event.EventBus;
-import io.spine.server.event.enrich.EventEnricher;
+import io.spine.server.event.EventEnricher;
 import io.spine.server.stand.Stand;
 
 /**

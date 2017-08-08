@@ -18,12 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.enrich;
+package io.spine.server.outbus.enrich;
 
 import com.google.common.base.Function;
 import com.google.common.base.MoreObjects;
+import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
-import io.spine.core.EventContext;
+import com.google.common.collect.FluentIterable;
+import com.google.protobuf.Message;
 import io.spine.server.event.EventBus;
 
 import javax.annotation.Nullable;
@@ -37,53 +39,52 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * {@code EnrichmentFunction} defines how a source message class can be transformed
  * into a target message class.
  *
- * <p>{@code EnrichmentFunction}s are used by an {@link EventEnricher} to augment events
+ * <p>{@code EnrichmentFunction}s are used by an {@link Enricher} to augment events
  * passed to {@link EventBus}.
  *
  * @param <S> a type of the source object to enrich
  * @param <T> a type of the target enrichment
+ * @param <C> a type of the message context
  * @author Alexander Yevsyukov
  */
-abstract class EnrichmentFunction<S, T> implements Function<S, T> {
+abstract class EnrichmentFunction<S, T, C extends Message> {
 
     /**
      * We are having the generified class to be able to bound the types of messages and the
-     * translation function when building the {@link EventEnricher}.
+     * translation function when building the {@link Enricher}.
      *
-     * @see EventEnricher.Builder#addFieldEnrichment(Class, Class, Function)
+     * @see Enricher.AbstractBuilder#add(Class, Class, Function)
      */
 
-    private final Class<S> eventClass;
+    private final Class<S> sourceClass;
     private final Class<T> enrichmentClass;
-    private EventContext context;
 
-    EnrichmentFunction(Class<S> eventClass, Class<T> enrichmentClass) {
-        this.eventClass = checkNotNull(eventClass);
+    EnrichmentFunction(Class<S> sourceClass, Class<T> enrichmentClass) {
+        this.sourceClass = checkNotNull(sourceClass);
         this.enrichmentClass = checkNotNull(enrichmentClass);
         checkArgument(
-                !eventClass.equals(enrichmentClass),
-                "Event and enrichment class must not be equal. Passed two values of %",
-                eventClass
+                !sourceClass.equals(enrichmentClass),
+                "Source and enrichment class must not be equal. Passed two values of %",
+                sourceClass
         );
     }
 
-    Class<S> getEventClass() {
-        return eventClass;
+    /**
+     * Performs the calculation of target enrichment type.
+     *
+     * @param  input the source of enrichment
+     * @param  context the context of the message
+     * @return enrichment result object
+     */
+    public abstract T apply(S input, C context);
+
+    Class<S> getSourceClass() {
+        return sourceClass;
     }
 
     Class<T> getEnrichmentClass() {
         return enrichmentClass;
     }
-
-    EventContext getContext() {
-        return context;
-    }
-
-    void setContext(EventContext context) {
-        this.context = context;
-    }
-
-    protected abstract Function<S, T> getFunction();
 
     /**
      * Activates the function.
@@ -116,10 +117,10 @@ abstract class EnrichmentFunction<S, T> implements Function<S, T> {
     /**
      * A helper predicate to filter the active functions only.
      */
-    static Predicate<EnrichmentFunction<?, ?>> activeOnly() {
-        return new Predicate<EnrichmentFunction<?, ?>>() {
+    static Predicate<EnrichmentFunction<?, ?, ?>> activeOnly() {
+        return new Predicate<EnrichmentFunction<?, ?, ?>>() {
             @Override
-            public boolean apply(@Nullable EnrichmentFunction<?, ?> input) {
+            public boolean apply(@Nullable EnrichmentFunction<?, ?, ?> input) {
                 checkNotNull(input);
                 return input.isActive();
             }
@@ -128,7 +129,7 @@ abstract class EnrichmentFunction<S, T> implements Function<S, T> {
 
     @Override
     public int hashCode() {
-        return Objects.hash(eventClass, enrichmentClass);
+        return Objects.hash(sourceClass, enrichmentClass);
     }
 
     @Override
@@ -140,14 +141,14 @@ abstract class EnrichmentFunction<S, T> implements Function<S, T> {
             return false;
         }
         final EnrichmentFunction other = (EnrichmentFunction) obj;
-        return Objects.equals(this.eventClass, other.eventClass)
+        return Objects.equals(this.sourceClass, other.sourceClass)
                 && Objects.equals(this.enrichmentClass, other.enrichmentClass);
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                          .add("eventClass", eventClass)
+                          .add("sourceClass", sourceClass)
                           .add("enrichmentClass", enrichmentClass)
                           .toString();
     }
@@ -160,9 +161,19 @@ abstract class EnrichmentFunction<S, T> implements Function<S, T> {
     protected void ensureActive() {
         if (!isActive()) {
             throw newIllegalStateException(
-                    "The given instance of %s is not active at the moment. " +
-                            "Please use `activate()` first.",
-                    getClass().getName());
+                    "Enrichment function %s is not active. Please use `activate()` first.", this
+            );
         }
+    }
+
+    /**
+     * Obtains first function that matches the passed predicate.
+     */
+    static Optional<EnrichmentFunction<?, ?, ?>>
+    firstThat(Iterable<EnrichmentFunction<?, ?, ?>> functions,
+              Predicate<? super EnrichmentFunction<?, ?, ?>> predicate) {
+        final FluentIterable<EnrichmentFunction<?, ?, ?>> fi = FluentIterable.from(functions);
+        final Optional<EnrichmentFunction<?, ?, ?>> optional = fi.firstMatch(predicate);
+        return optional;
     }
 }

@@ -40,7 +40,7 @@ import java.util.List;
  */
 abstract class AggregateMessageEndpoint<I,
                                         A extends Aggregate<I, ?, ?>,
-                                        M extends ActorMessageEnvelope<?, ?>, R>
+                                        M extends ActorMessageEnvelope<?, ?, ?>, R>
         extends EntityMessageEndpoint<I, A, M, R> {
     
     AggregateMessageEndpoint(AggregateRepository<I, A> repository, M envelope) {

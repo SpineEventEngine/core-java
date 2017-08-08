@@ -41,7 +41,7 @@ import static org.mockito.Mockito.mock;
  * @see RejectionBusBuilderShould
  */
 public abstract class BusBuilderShould<B extends Bus.AbstractBuilder<E, T, ?>,
-                                       E extends MessageEnvelope<?, T>,
+                                       E extends MessageEnvelope<?, T, ?>,
                                        T extends Message> {
 
     protected abstract B builder();

@@ -52,7 +52,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 @Internal
 public abstract class EntityMessageEndpoint<I,
                                             E extends Entity<I, ?>,
-                                            M extends ActorMessageEnvelope<?, ?>,
+                                            M extends ActorMessageEnvelope<?, ?, ?>,
                                             R> {
 
     /** The repository which created this endpoint. */

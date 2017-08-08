@@ -18,11 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.enrich;
+package io.spine.server.outbus.enrich;
 
 import com.google.common.base.Function;
-
-import javax.annotation.Nullable;
+import com.google.protobuf.Message;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -31,37 +30,41 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @param <S> the type of the field in the source event message
  * @param <T> the type of the field in the target enrichment message
+ *
  * @author Alexander Yevsyukov
  */
-class FieldEnricher<S, T> extends EnrichmentFunction<S, T> {
+final class FieldEnrichment<S, T, C extends Message> extends EnrichmentFunction<S, T, C> {
 
-    /** A function, which performs the enrichment. */
+    /** A function, which performs the translation. */
     private final Function<S, T> function;
 
-    private FieldEnricher(Class<S> eventClass, Class<T> enrichmentClass, Function<S, T> function) {
+    private FieldEnrichment(Class<S> eventClass, Class<T> enrichmentClass, Function<S, T> func) {
         super(eventClass, enrichmentClass);
-        this.function = checkNotNull(function);
+        this.function = checkNotNull(func);
     }
 
     /**
      * Creates a new instance.
      *
-     * @param eventFieldClass      a class of the field in the event message
-     * @param enrichmentFieldClass a class of the field in the enrichment message
-     * @param translator           a conversion function
+     * @param  messageFieldClass
+     *         a class of the field in the source message
+     * @param  enrichmentFieldClass
+     *         a class of the field in the enrichment message
+     * @param  func
+     *         a conversion function
      * @return a new instance
      */
-    static <S, T> FieldEnricher<S, T> newInstance(Class<S> eventFieldClass,
-                                                                Class<T> enrichmentFieldClass,
-                                                                Function<S, T> translator) {
-        final FieldEnricher<S, T> result = new FieldEnricher<>(eventFieldClass,
-                                                               enrichmentFieldClass,
-                                                               translator);
+    static <S, T, C extends Message>
+    FieldEnrichment<S, T, C> of(Class<S> messageFieldClass,
+                                Class<T> enrichmentFieldClass,
+                                Function<S, T> func) {
+        final FieldEnrichment<S, T, C> result =
+                new FieldEnrichment<>(messageFieldClass, enrichmentFieldClass, func);
         return result;
     }
 
     /**
-     * Do nothing. Field enrichment relies only on the aggregated function.
+     * Does nothing. Field enrichment relies only on the aggregated function.
      */
     @Override
     void activate() {
@@ -78,17 +81,8 @@ class FieldEnricher<S, T> extends EnrichmentFunction<S, T> {
     }
 
     @Override
-    public Function<S, T> getFunction() {
-        return function;
-    }
-
-    @Override
-    @Nullable
-    public T apply(@Nullable S message) {
+    public T apply(S message, C context) {
         ensureActive();
-        if (message == null) {
-            return null;
-        }
         final T result = function.apply(message);
         return result;
     }

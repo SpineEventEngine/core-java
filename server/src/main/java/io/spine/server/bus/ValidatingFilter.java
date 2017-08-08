@@ -38,7 +38,7 @@ import static io.spine.server.bus.Buses.reject;
  *
  * @author Dmytro Dashenkov
  */
-final class ValidatingFilter<E extends MessageEnvelope<?, T>, T extends Message>
+final class ValidatingFilter<E extends MessageEnvelope<?, T, ?>, T extends Message>
         extends AbstractBusFilter<E> {
 
     private final EnvelopeValidator<E> validator;

@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.enrich.given;
+package io.spine.server.event.given;
 
 import com.google.common.base.Function;
 import com.google.protobuf.Any;
@@ -31,7 +31,7 @@ import io.spine.core.UserId;
 import io.spine.core.given.GivenUserId;
 import io.spine.people.PersonName;
 import io.spine.server.command.TestEventFactory;
-import io.spine.server.event.enrich.EventEnricher;
+import io.spine.server.event.EventEnricher;
 import io.spine.test.event.ProjectCompleted;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.ProjectId;
@@ -45,6 +45,7 @@ import io.spine.time.ZoneOffset;
 
 import javax.annotation.Nullable;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.Identifier.newUuid;
 import static io.spine.protobuf.AnyPacker.pack;
 
@@ -53,9 +54,8 @@ import static io.spine.protobuf.AnyPacker.pack;
  */
 public class EventEnricherTestEnv {
 
-    private EventEnricherTestEnv() {
-        // Prevent instantiation of this utility class.
-    }
+    /** Prevents instantiation of this utility class. */
+    private EventEnricherTestEnv() {}
 
     static ProjectId newProjectId() {
         final String uuid = newUuid();
@@ -72,6 +72,7 @@ public class EventEnricherTestEnv {
         private static final ProjectCompleted PROJECT_COMPLETED = projectCompleted(PROJECT_ID);
         private static final ProjectStarred PROJECT_STARRED = projectStarred(PROJECT_ID);
 
+        /** Prevents instantiation of this utility class. */
         private GivenEventMessage() {}
 
         public static ProjectCreated projectCreated() {
@@ -196,16 +197,16 @@ public class EventEnricherTestEnv {
         /** Creates a new enricher with all required enrichment functions set. */
         public static EventEnricher newEventEnricher() {
             final EventEnricher.Builder builder = EventEnricher.newBuilder();
-            builder.addFieldEnrichment(ProjectId.class, String.class, new GetProjectName())
-                   .addFieldEnrichment(ProjectId.class, UserId.class, new GetProjectOwnerId())
-                   .addFieldEnrichment(EventId.class, String.class, EVENT_ID_TO_STRING)
-                   .addFieldEnrichment(Timestamp.class, String.class, TIMESTAMP_TO_STRING)
-                   .addFieldEnrichment(CommandContext.class, String.class, CMD_CONTEXT_TO_STRING)
-                   .addFieldEnrichment(Any.class, String.class, ANY_TO_STRING)
-                   .addFieldEnrichment(Integer.class, String.class, VERSION_TO_STRING)
-                   .addFieldEnrichment(String.class, ZoneOffset.class, STRING_TO_ZONE_OFFSET)
-                   .addFieldEnrichment(String.class, PersonName.class, STRING_TO_PERSON_NAME)
-                   .addFieldEnrichment(String.class, Integer.class, STRING_TO_INT);
+            builder.add(ProjectId.class, String.class, new GetProjectName())
+                   .add(ProjectId.class, UserId.class, new GetProjectOwnerId())
+                   .add(EventId.class, String.class, EVENT_ID_TO_STRING)
+                   .add(Timestamp.class, String.class, TIMESTAMP_TO_STRING)
+                   .add(CommandContext.class, String.class, CMD_CONTEXT_TO_STRING)
+                   .add(Any.class, String.class, ANY_TO_STRING)
+                   .add(Integer.class, String.class, VERSION_TO_STRING)
+                   .add(String.class, ZoneOffset.class, STRING_TO_ZONE_OFFSET)
+                   .add(String.class, PersonName.class, STRING_TO_PERSON_NAME)
+                   .add(String.class, Integer.class, STRING_TO_INT);
             return builder.build();
         }
 
@@ -213,9 +214,7 @@ public class EventEnricherTestEnv {
             @Nullable
             @Override
             public String apply(@Nullable ProjectId id) {
-                if (id == null) {
-                    return null;
-                }
+                checkNotNull(id);
                 final String name = "prj_" + id.getId();
                 return name;
             }
@@ -225,21 +224,8 @@ public class EventEnricherTestEnv {
             @Nullable
             @Override
             public UserId apply(@Nullable ProjectId id) {
-                if (id == null) {
-                    return null;
-                }
+                checkNotNull(id);
                 return GivenUserId.of("po_" + id.getId());
-            }
-        }
-
-        public static class GetProjectMaxMemberCount implements Function<ProjectId, Integer> {
-            @Nullable
-            @Override
-            public Integer apply(@Nullable ProjectId input) {
-                if (input == null) {
-                    return 0;
-                }
-                return input.hashCode();
             }
         }
 
@@ -248,7 +234,8 @@ public class EventEnricherTestEnv {
                     @Nullable
                     @Override
                     public String apply(@Nullable EventId input) {
-                        return input == null ? "" : input.getValue();
+                        checkNotNull(input);
+                        return input.getValue();
                     }
                 };
 
@@ -256,7 +243,8 @@ public class EventEnricherTestEnv {
                 new Function<Timestamp, String>() {
                     @Override
                     public String apply(@Nullable Timestamp input) {
-                        return input == null ? "" : input.toString();
+                        checkNotNull(input);
+                        return input.toString();
                     }
                 };
 
@@ -264,7 +252,7 @@ public class EventEnricherTestEnv {
                 new Function<CommandContext, String>() {
                     @Override
                     public String apply(@Nullable CommandContext input) {
-                        return input == null ? "" : input.toString();
+                        return checkNotNull(input).toString();
                     }
                 };
 
@@ -272,7 +260,7 @@ public class EventEnricherTestEnv {
                 new Function<Any, String>() {
                     @Override
                     public String apply(@Nullable Any input) {
-                        return input == null ? "" : input.toString();
+                        return checkNotNull(input).toString();
                     }
                 };
 
@@ -280,7 +268,7 @@ public class EventEnricherTestEnv {
                 new Function<Integer, String>() {
                     @Override
                     public String apply(@Nullable Integer input) {
-                        return input == null ? "" : input.toString();
+                        return checkNotNull(input).toString();
                     }
                 };
 
@@ -289,12 +277,11 @@ public class EventEnricherTestEnv {
                     @Nullable
                     @Override
                     public ZoneOffset apply(@Nullable String input) {
-                        return input == null
-                                ? ZoneOffset.getDefaultInstance()
-                                : ZoneOffset.newBuilder()
-                                            .setId(ZoneId.newBuilder()
-                                                         .setValue(input))
-                                            .build();
+                        checkNotNull(input);
+                        return ZoneOffset.newBuilder()
+                                         .setId(ZoneId.newBuilder()
+                                                      .setValue(input))
+                                         .build();
                     }
                 };
 
@@ -303,9 +290,10 @@ public class EventEnricherTestEnv {
                     @Nullable
                     @Override
                     public PersonName apply(@Nullable String input) {
-                        return input == null
-                               ? PersonName.getDefaultInstance()
-                               : PersonName.newBuilder().setFamilyName(input).build();
+                        checkNotNull(input);
+                        return PersonName.newBuilder()
+                                         .setFamilyName(input)
+                                         .build();
                     }
                 };
 

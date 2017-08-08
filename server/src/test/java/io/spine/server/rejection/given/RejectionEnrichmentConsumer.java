@@ -18,27 +18,33 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.bus;
+package io.spine.server.rejection.given;
 
-import com.google.common.base.Optional;
-import io.spine.core.MessageEnvelope;
-import io.spine.core.MessageInvalid;
+import io.spine.core.RejectionContext;
+import io.spine.core.Subscribe;
+import io.spine.server.rejection.RejectionSubscriber;
+import io.spine.test.rejection.ProjectRejections.InvalidProjectName;
+
+import javax.annotation.Nullable;
 
 /**
- * An interface defining the validator for a {@link MessageEnvelope}.
+ * A rejection subscriber which listens to {@link InvalidProjectName} and remembers
+ * passed {@link RejectionContext}.
  *
- * @param <E> the type of the {@link MessageEnvelope} to validate
- * @author Dmytro Dashenkov
+ * @author Alexander Yevsyukov
  */
-public interface EnvelopeValidator<E extends MessageEnvelope<?, ?, ?>> {
+public class RejectionEnrichmentConsumer extends RejectionSubscriber {
 
-    /**
-     * Validates the given {@link MessageEnvelope} by some specific rules.
-     *
-     * @param envelope the envelope to validate
-     * @return {@link Optional#absent() Optional.absent()} if the envelope passes the validation or
-     *         the cause of the validation error
-     * @see MessageInvalid for the detailed description of the returned value
-     */
-    Optional<MessageInvalid> validate(E envelope);
+    @Nullable
+    private RejectionContext context;
+
+    @Subscribe
+    public void on(InvalidProjectName rejection, RejectionContext context) {
+        this.context = context;
+    }
+
+    @Nullable
+    public RejectionContext getContext() {
+        return context;
+    }
 }

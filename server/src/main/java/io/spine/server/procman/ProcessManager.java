@@ -160,7 +160,7 @@ public abstract class ProcessManager<I,
                 RejectionReactorMethod.getMethod(getClass(), rejectionMessage, commandMessage);
 
         final List<? extends Message> eventMessages =
-        method.invoke(this, rejectionMessage, commandMessage, rejection.getCommandContext());
+        method.invoke(this, rejectionMessage, rejection.getRejectionContext());
         final List<Event> events = toEvents(eventMessages, rejection);
         return events;
     }

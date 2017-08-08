@@ -236,13 +236,12 @@ public abstract class HandlerMethod<C extends Message> {
     /**
      * Invokes the wrapped method to handle {@code message} with the {@code context}.
      *
-     * @param <R>     the type of the expected handler invocation result
      * @param target  the target object on which call the method
      * @param message the message to handle
      * @param context the context of the message
      * @return the result of message handling
      */
-    public <R> R invoke(Object target, Message message, C context) {
+    public Object invoke(Object target, Message message, C context) {
         checkNotNull(message);
         checkNotNull(context);
         try {
@@ -250,9 +249,7 @@ public abstract class HandlerMethod<C extends Message> {
             final Object returnedValue = (paramCount == 1)
                     ? method.invoke(target, message)
                     : method.invoke(target, message, context);
-            @SuppressWarnings("unchecked") // It is assumed that the method returns this type.
-            final R result = (R)returnedValue;
-            return result;
+            return returnedValue;
         } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
             throw whyFailed(target, message, context, e);
         }

@@ -18,28 +18,31 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.enrich;
+package io.spine.server.outbus.enrich;
 
-import io.spine.server.event.enrich.given.EventMessageEnricherTestEnv.Enrichment;
+import com.google.common.testing.NullPointerTester;
+import com.google.protobuf.Empty;
+import com.google.protobuf.Message;
+import io.spine.core.EventContext;
+import io.spine.server.outbus.enrich.given.EventMessageEnricherTestEnv.Enrichment;
 import io.spine.test.event.ProjectCreated;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
 /**
  * @author Alexander Litus
  */
-public class EventMessageEnricherShould {
+public class MessageEnrichmentShould {
 
-    private EventMessageEnricher<ProjectCreated, ProjectCreated.Enrichment> enricher;
+    private MessageEnrichment<ProjectCreated, ProjectCreated.Enrichment, ?> enricher;
 
     @Before
     public void setUp() {
-        final EventEnricher eventEnricher = Enrichment.newEventEnricher();
-        this.enricher = EventMessageEnricher.newInstance(
-                eventEnricher,
+        final Enricher enricher = Enrichment.newEventEnricher();
+        this.enricher = MessageEnrichment.create(
+                enricher,
                 ProjectCreated.class,
                 ProjectCreated.Enrichment.class);
     }
@@ -49,19 +52,11 @@ public class EventMessageEnricherShould {
         assertFalse(enricher.isActive());
     }
 
-    @Test(expected = NullPointerException.class)
-    public void throw_NPE_if_pass_null() {
-        enricher.activate();
-        enricher.apply(null);
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void throw_ISE_if_activate_not_called_before_apply() {
-        enricher.apply(ProjectCreated.getDefaultInstance());
-    }
-
     @Test
-    public void return_itself_on_get_function() {
-        assertEquals(enricher, enricher.getFunction());
+    public void pass_null_tolerance_check() {
+        new NullPointerTester()
+                .setDefault(Message.class, Empty.getDefaultInstance())
+                .setDefault(EventContext.class, EventContext.getDefaultInstance())
+                .testAllPublicInstanceMethods(enricher);
     }
 }

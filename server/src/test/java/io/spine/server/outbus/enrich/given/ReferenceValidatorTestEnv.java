@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.enrich.given;
+package io.spine.server.outbus.enrich.given;
 
 import com.google.common.base.Function;
 import com.google.protobuf.Any;
@@ -28,7 +28,8 @@ import io.spine.core.EventId;
 import io.spine.core.UserId;
 import io.spine.core.given.GivenUserId;
 import io.spine.people.PersonName;
-import io.spine.server.event.enrich.EventEnricher;
+import io.spine.server.event.EventEnricher;
+import io.spine.server.outbus.enrich.Enricher;
 import io.spine.test.event.ProjectId;
 import io.spine.time.ZoneId;
 import io.spine.time.ZoneOffset;
@@ -38,9 +39,9 @@ import javax.annotation.Nullable;
 /**
  * @author Alexander Yevsyukov
  */
-public class EventEnricherBuilderTestEnv {
+public class ReferenceValidatorTestEnv {
 
-    private EventEnricherBuilderTestEnv() {
+    private ReferenceValidatorTestEnv() {
         // Prevent instantiation of this utility class.
     }
 
@@ -49,18 +50,18 @@ public class EventEnricherBuilderTestEnv {
         private Enrichment() {}
 
         /** Creates a new enricher with all required enrichment functions set. */
-        public static EventEnricher newEventEnricher() {
+        public static Enricher newEventEnricher() {
             final EventEnricher.Builder builder = EventEnricher.newBuilder();
-            builder.addFieldEnrichment(ProjectId.class, String.class, new GetProjectName())
-                   .addFieldEnrichment(ProjectId.class, UserId.class, new GetProjectOwnerId())
-                   .addFieldEnrichment(EventId.class, String.class, EVENT_ID_TO_STRING)
-                   .addFieldEnrichment(Timestamp.class, String.class, TIMESTAMP_TO_STRING)
-                   .addFieldEnrichment(CommandContext.class, String.class, CMD_CONTEXT_TO_STRING)
-                   .addFieldEnrichment(Any.class, String.class, ANY_TO_STRING)
-                   .addFieldEnrichment(Integer.class, String.class, VERSION_TO_STRING)
-                   .addFieldEnrichment(String.class, ZoneOffset.class, STRING_TO_ZONE_OFFSET)
-                   .addFieldEnrichment(String.class, PersonName.class, STRING_TO_PERSON_NAME)
-                   .addFieldEnrichment(String.class, Integer.class, STRING_TO_INT);
+            builder.add(ProjectId.class, String.class, new GetProjectName())
+                   .add(ProjectId.class, UserId.class, new GetProjectOwnerId())
+                   .add(EventId.class, String.class, EVENT_ID_TO_STRING)
+                   .add(Timestamp.class, String.class, TIMESTAMP_TO_STRING)
+                   .add(CommandContext.class, String.class, CMD_CONTEXT_TO_STRING)
+                   .add(Any.class, String.class, ANY_TO_STRING)
+                   .add(Integer.class, String.class, VERSION_TO_STRING)
+                   .add(String.class, ZoneOffset.class, STRING_TO_ZONE_OFFSET)
+                   .add(String.class, PersonName.class, STRING_TO_PERSON_NAME)
+                   .add(String.class, Integer.class, STRING_TO_INT);
             return builder.build();
         }
 
@@ -71,7 +72,7 @@ public class EventEnricherBuilderTestEnv {
                 if (id == null) {
                     return null;
                 }
-                final String name = "P-" + id.getId();
+                final String name = "prj-" + id.getId();
                 return name;
             }
         }
@@ -83,7 +84,7 @@ public class EventEnricherBuilderTestEnv {
                 if (id == null) {
                     return null;
                 }
-                return GivenUserId.of("PO-" + id.getId());
+                return GivenUserId.of("prj-owner-" + id.getId());
             }
         }
 
