@@ -29,7 +29,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alex Tymchenko
  */
-public class ExternalMessageEnvelope extends AbstractMessageEnvelope<Message, Message> {
+public class ExternalMessageEnvelope
+        extends AbstractMessageEnvelope<Message, Message, ActorContext> {
 
     private final Message id;
     private final Message message;
@@ -66,7 +67,7 @@ public class ExternalMessageEnvelope extends AbstractMessageEnvelope<Message, Me
     }
 
     @Override
-    public ActorContext getActorContext() {
+    public ActorContext getMessageContext() {
         return actorContext;
     }
 

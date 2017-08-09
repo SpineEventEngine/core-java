@@ -37,7 +37,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alex Tymchenko
  */
 public abstract class MulticastBus<M extends Message,
-                          E extends MessageEnvelope<?, M>,
+                          E extends MessageEnvelope<?, M, ?>,
                           C extends MessageClass,
                           D extends MessageDispatcher<C, E, ?>>
         extends Bus<M, E, C, D> {
