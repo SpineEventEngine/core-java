@@ -21,18 +21,14 @@
 package io.spine.server.aggregate;
 
 import com.google.protobuf.Message;
-import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
-import io.spine.server.tenant.TenantAwareFunction0;
+import io.spine.core.React;
 
 import java.util.List;
 import java.util.Set;
 
 /**
  * Dispatches events to aggregates of the associated {@code AggregateRepository}.
- *
- * <p>Loading and storing an aggregate is a tenant-sensitive operation,
- * which depends on the tenant ID of the command we dispatch.
  *
  * @param <I> the type of the aggregate IDs
  * @param <A> the type of the aggregates
@@ -41,41 +37,35 @@ import java.util.Set;
  * @see React
  */
 class AggregateEventEndpoint<I, A extends Aggregate<I, ?, ?>>
-        extends AggregateMessageEndpoint<I, A, EventEnvelope, Set<I>>{
+        extends AggregateMessageEndpoint<I, A, EventEnvelope, Set<I>> {
 
-    private AggregateEventEndpoint(AggregateRepository<I, A> repo, EventEnvelope envelope) {
-        super(repo, envelope);
+    private AggregateEventEndpoint(AggregateRepository<I, A> repo, EventEnvelope event) {
+        super(repo, event);
     }
 
     static <I, A extends Aggregate<I, ?, ?>>
-    Set<I> handle(AggregateRepository<I, A> repository, EventEnvelope envelope) {
+    Set<I> handle(AggregateRepository<I, A> repository, EventEnvelope event) {
         final AggregateEventEndpoint<I, A> endpoint =
-                new AggregateEventEndpoint<>(repository, envelope);
+                new AggregateEventEndpoint<>(repository, event);
 
-        final TenantAwareFunction0<Set<I>> operation = endpoint.createOperation();
-        return operation.execute();
+        return endpoint.handle();
     }
 
     @Override
-    TenantAwareFunction0<Set<I>> createOperation() {
-        return new Operation(envelope().getOuterObject());
+    protected List<? extends Message> doDispatch(A aggregate, EventEnvelope envelope) {
+        return aggregate.reactOn(envelope);
     }
 
     @Override
-    List<? extends Message> dispatchEnvelope(A aggregate, EventEnvelope envelope) {
-        try {
-            return aggregate.dispatchEvent(envelope);
-        } catch (RuntimeException exception) {
-            repository().onError(envelope, exception);
-            throw exception;
-        }
+    protected void onError(EventEnvelope envelope, RuntimeException exception) {
+        repository().onError(envelope, exception);
     }
 
     /**
      * Does nothing since an aggregate is not required to produce events in reaction to an event.
      */
     @Override
-    void onEmptyResult(A aggregate, EventEnvelope envelope) {
+    protected void onEmptyResult(A aggregate, EventEnvelope envelope) {
         // Do nothing.
     }
 
@@ -83,26 +73,10 @@ class AggregateEventEndpoint<I, A extends Aggregate<I, ?, ?>>
      * Obtains IDs of aggregates that react on the event processed by this endpoint.
      */
     @Override
-    Set<I> getTargets() {
-        final EventEnvelope env = envelope();
-        return repository().getEventTargets(env.getMessage(), env.getEventContext());
-    }
-
-    /**
-     * The operation executed under the event's tenant.
-     */
-    private class Operation extends TenantAwareFunction0<Set<I>> {
-
-        private Operation(Event event) {
-            super(event.getContext()
-                       .getCommandContext()
-                       .getActorContext()
-                       .getTenantId());
-        }
-
-        @Override
-        public Set<I> apply() {
-            return dispatch();
-        }
+    protected Set<I> getTargets() {
+        final EventEnvelope envelope = envelope();
+        final Set<I> ids = repository().getEventRouting()
+                                       .apply(envelope.getMessage(), envelope.getEventContext());
+        return ids;
     }
 }

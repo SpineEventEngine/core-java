@@ -60,7 +60,12 @@ public class RejectionBus extends CommandOutputBus<Rejection,
                                                    RejectionClass,
                                                    RejectionDispatcher<?>> {
 
+    /** Filters applied when a rejection is posted. */
     private final Deque<BusFilter<RejectionEnvelope>> filterChain;
+
+    /** The enricher for posted rejections or {@code null} if the enrichment is not supported. */
+    @Nullable
+    private final RejectionEnricher enricher;
 
     /**
      * Creates a new instance according to the pre-configured {@code Builder}.
@@ -68,6 +73,7 @@ public class RejectionBus extends CommandOutputBus<Rejection,
     private RejectionBus(Builder builder) {
         super(checkNotNull(builder.dispatcherRejectionDelivery));
         this.filterChain = builder.getFilters();
+        this.enricher = builder.enricher;
     }
 
     /**
@@ -87,16 +93,13 @@ public class RejectionBus extends CommandOutputBus<Rejection,
         // do nothing for now.
     }
 
-    /**
-     * Always returns the original {@code Rejection}, as the enrichment is not supported
-     * for rejections yet.
-     *
-     * @param originalMessage the rejection to enrich
-     * @return the same message
-     */
     @Override
-    protected Rejection enrich(Rejection originalMessage) {
-        return originalMessage;
+    protected RejectionEnvelope enrich(RejectionEnvelope rejection) {
+        if (enricher == null || !enricher.canBeEnriched(rejection)) {
+            return rejection;
+        }
+        final RejectionEnvelope enriched = enricher.enrich(rejection);
+        return enriched;
     }
 
     @Override
@@ -180,9 +183,18 @@ public class RejectionBus extends CommandOutputBus<Rejection,
         @Nullable
         private DispatcherRejectionDelivery dispatcherRejectionDelivery;
 
+        /**
+         * Optional enricher for rejections.
+         *
+         * <p>If not set, the enrichments will NOT be supported
+         * in the {@code RejectionBus} instance built.
+         */
+        @Nullable
+        private RejectionEnricher enricher;
+
+        /** Prevents direct instantiation. */
         private Builder() {
             super();
-            // Prevent direct instantiation.
         }
 
         /**
@@ -199,6 +211,25 @@ public class RejectionBus extends CommandOutputBus<Rejection,
 
         public Optional<DispatcherRejectionDelivery> getDispatcherRejectionDelivery() {
             return Optional.fromNullable(dispatcherRejectionDelivery);
+        }
+
+        /**
+         * Sets a custom {@link RejectionEnricher} for events posted to
+         * the {@code RejectionBus} which is being built.
+         *
+         * <p>If the {@code RejectionEnricher} is not set, the enrichments
+         * will <strong>NOT</strong> be supported for the {@code RejectionBus} instance built.
+         *
+         * @param enricher the {@code RejectionEnricher} for events or {@code null} if enrichment is
+         *                 not supported
+         */
+        public Builder setEnricher(RejectionEnricher enricher) {
+            this.enricher = enricher;
+            return this;
+        }
+
+        public Optional<RejectionEnricher> getEnricher() {
+            return Optional.fromNullable(enricher);
         }
 
         @Override

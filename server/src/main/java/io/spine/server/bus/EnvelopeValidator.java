@@ -30,7 +30,7 @@ import io.spine.core.MessageInvalid;
  * @param <E> the type of the {@link MessageEnvelope} to validate
  * @author Dmytro Dashenkov
  */
-public interface EnvelopeValidator<E extends MessageEnvelope<?, ?>> {
+public interface EnvelopeValidator<E extends MessageEnvelope<?, ?, ?>> {
 
     /**
      * Validates the given {@link MessageEnvelope} by some specific rules.

@@ -31,7 +31,6 @@ import javax.annotation.Nullable;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.core.Messages.ensureMessage;
 
 /**
  * A value object holding a class of events.
@@ -67,7 +66,7 @@ public final class EventClass extends MessageClass {
      * @return new instance
      */
     public static EventClass of(Message eventOrMessage) {
-        final Message eventMessage = ensureMessage(eventOrMessage);
+        final Message eventMessage = Events.ensureMessage(eventOrMessage);
         return of(eventMessage.getClass());
     }
 

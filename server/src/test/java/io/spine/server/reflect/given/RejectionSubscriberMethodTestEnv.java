@@ -17,20 +17,25 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package io.spine.server.reflect.given;
 
+import com.google.protobuf.Message;
 import io.spine.core.CommandContext;
 import io.spine.core.Subscribe;
 import io.spine.test.reflect.ReflectRejections.InvalidProjectName;
 import io.spine.test.rejection.command.UpdateProjectName;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.Method;
 
+/**
+ * @author Alexander Yevsyukov
+ * @author Alex Tymchenko
+ */
 public class RejectionSubscriberMethodTestEnv {
-
     /** Prevents instantiation of this utility class. */
-    private RejectionSubscriberMethodTestEnv() {}
+    private RejectionSubscriberMethodTestEnv() {
+    }
 
     /**
      * The abstract base for test subscriber classes.
@@ -47,7 +52,8 @@ public class RejectionSubscriberMethodTestEnv {
         public Method getMethod() {
             final Method[] methods = getClass().getDeclaredMethods();
             for (Method method : methods) {
-                if (method.getName().equals(HANDLER_METHOD_NAME)) {
+                if (method.getName()
+                          .equals(HANDLER_METHOD_NAME)) {
                     return method;
                 }
             }
@@ -56,89 +62,128 @@ public class RejectionSubscriberMethodTestEnv {
         }
     }
 
-
-    public static class ValidSubscriberTwoParams extends TestRejectionSubscriber {
-        @Subscribe
-        public void handle(InvalidProjectName rejection, UpdateProjectName command) {
-        }
-    }
-
-    public static class ValidSubscriberThreeParams extends TestRejectionSubscriber {
+    public static class ValidTwoParams extends TestRejectionSubscriber {
         @Subscribe
         public void handle(InvalidProjectName rejection,
-                           UpdateProjectName command, CommandContext context) {
+                           UpdateProjectName command) {
+            // do nothing.
         }
     }
 
-    public static class ValidSubscriberButPrivate extends TestRejectionSubscriber {
+    public static class ValidThreeParams extends TestRejectionSubscriber {
+
+        @Nullable
+        private Message lastRejectionMessage;
+        @Nullable
+        private Message lastCommandMessage;
+        @Nullable
+        private CommandContext lastCommandContext;
+
         @Subscribe
-        private void handle(InvalidProjectName rejection, UpdateProjectName command) {
+        public void handle(InvalidProjectName rejection,
+                           UpdateProjectName command,
+                           CommandContext context) {
+            lastRejectionMessage = rejection;
+            lastCommandMessage = command;
+            lastCommandContext = context;
+        }
+
+        @Nullable
+        public Message getLastRejectionMessage() {
+            return lastRejectionMessage;
+        }
+
+        @Nullable
+        public Message getLastCommandMessage() {
+            return lastCommandMessage;
+        }
+
+        @Nullable
+        public CommandContext getLastCommandContext() {
+            return lastCommandContext;
+        }
+    }
+
+    public static class ValidButPrivate extends TestRejectionSubscriber {
+        @SuppressWarnings("MethodMayBeStatic") // Need instance method for the test.
+        @Subscribe
+        private void handle(InvalidProjectName rejection,
+                            UpdateProjectName command) {
+            // do nothing.
         }
     }
 
     /**
      * The subscriber with a method which is not annotated.
      */
-    public static class InvalidSubscriberNoAnnotation extends TestRejectionSubscriber {
+    public static class InvalidNoAnnotation extends TestRejectionSubscriber {
         @SuppressWarnings("unused")
-        public void handle(InvalidProjectName rejection, UpdateProjectName command) {
+        public void handle(InvalidProjectName rejection,
+                           UpdateProjectName command) {
+            // do nothing.
         }
     }
 
     /**
      * The subscriber with a method which does not have parameters.
      */
-    public static class InvalidSubscriberNoParams extends TestRejectionSubscriber {
+    public static class InvalidNoParams extends TestRejectionSubscriber {
         @Subscribe
         public void handle() {
+            // do nothing.
         }
     }
 
     /**
      * The subscriber which has too many parameters.
      */
-    public static class InvalidSubscriberTooManyParams extends TestRejectionSubscriber {
+    public static class InvalidTooManyParams extends TestRejectionSubscriber {
         @Subscribe
         public void handle(InvalidProjectName rejection,
                            UpdateProjectName command,
                            CommandContext context,
                            Object redundant) {
+            // do nothing.
         }
     }
 
     /**
      * The subscriber which has invalid single argument.
      */
-    public static class InvalidSubscriberOneNotMsgParam extends TestRejectionSubscriber {
+    public static class InvalidOneNotMsgParam extends TestRejectionSubscriber {
         @Subscribe
         public void handle(Exception invalid) {
+            // do nothing.
         }
     }
 
     /**
      * The subscriber with a method with first invalid parameter.
      */
-    public static class InvalidSubscriberTwoParamsFirstInvalid extends TestRejectionSubscriber {
+    public static class InvalidTwoParamsFirstInvalid extends TestRejectionSubscriber {
         @Subscribe
-        public void handle(Exception invalid,  UpdateProjectName command) {
+        public void handle(Exception invalid, UpdateProjectName command) {
+            // do nothing.
         }
     }
 
     /**
      * The subscriber which has invalid second parameter.
      */
-    public static class InvalidSubscriberTwoParamsSecondInvalid extends TestRejectionSubscriber {
+    public static class InvalidTwoParamsSecondInvalid extends TestRejectionSubscriber {
         @Subscribe
         public void handle(InvalidProjectName rejection, Exception invalid) {
+            // do nothing.
         }
     }
 
     /**
      * The class with rejection subscriber that returns {@code Object} instead of {@code void}.
      */
-    public static class InvalidSubscriberNotVoid extends TestRejectionSubscriber {
+    public static class InvalidNotMessage extends TestRejectionSubscriber {
         @Subscribe
-        public Object handle(InvalidProjectName rejection, UpdateProjectName command) {
+        public Object handle(InvalidProjectName rejection,
+                             UpdateProjectName command) {
             return rejection;
         }
     }

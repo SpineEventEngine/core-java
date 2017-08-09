@@ -24,7 +24,6 @@ import com.google.protobuf.Message;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.List;
 
 /**
  * The predicate for filtering message handling methods.
@@ -81,20 +80,6 @@ abstract class HandlerMethodPredicate<C extends Message> extends MethodPredicate
             final boolean paramsCorrect = isFirstParamMsg && contextClass.equals(paramTypes[1]);
             return paramsCorrect;
         }
-    }
-
-    /**
-     * Returns {@code true} if a method returns an instance of the class assignable from
-     * {@link Message}, or {@link List}.
-     */
-    protected static boolean returnsMessageOrList(Method method) {
-        final Class<?> returnType = method.getReturnType();
-        final boolean isMessage = Message.class.isAssignableFrom(returnType);
-        if (isMessage) {
-            return true;
-        }
-        final boolean isList = List.class.isAssignableFrom(returnType);
-        return isList;
     }
 
     /**

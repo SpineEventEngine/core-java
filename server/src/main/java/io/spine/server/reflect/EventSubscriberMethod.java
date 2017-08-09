@@ -38,7 +38,6 @@ import java.util.Objects;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.core.Rejections.isRejection;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.util.Collections.unmodifiableSet;
 
@@ -221,7 +220,7 @@ public final class EventSubscriberMethod extends HandlerMethod<EventContext> {
      *
      * <p>Please see {@link Subscribe} annotation for more information.
      */
-    private static class FilterPredicate extends HandlerMethodPredicate<EventContext> {
+    private static class FilterPredicate extends EventMethodPredicate {
 
         private final boolean externalOnly;
 
@@ -230,7 +229,7 @@ public final class EventSubscriberMethod extends HandlerMethod<EventContext> {
         }
 
         private FilterPredicate(boolean externalOnly) {
-            super(Subscribe.class, EventContext.class);
+            super(Subscribe.class);
             this.externalOnly = externalOnly;
         }
 

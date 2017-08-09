@@ -22,6 +22,7 @@ package io.spine.server.reflect;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Predicate;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.server.aggregate.Aggregate;
@@ -91,7 +92,8 @@ public final class EventApplierMethod extends HandlerMethod<Empty> {
      * Such redirection is correct because {@linkplain #getParamCount()} the number of parameters}
      * is set to one during instance construction.
      */
-    public <R> R invoke(Aggregate aggregate, Message message) {
+    @CanIgnoreReturnValue
+    public Object invoke(Aggregate aggregate, Message message) {
         // Make this method visible to Aggregate class.
         return invoke(aggregate, message, Empty.getDefaultInstance());
     }

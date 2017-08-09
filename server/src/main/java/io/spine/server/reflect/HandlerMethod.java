@@ -19,9 +19,18 @@
  */
 package io.spine.server.reflect;
 
+import com.google.common.base.Function;
 import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
+import com.google.protobuf.Any;
+import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
+import io.spine.core.Event;
+import io.spine.core.MessageEnvelope;
+import io.spine.core.Version;
+import io.spine.server.event.EventFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +59,7 @@ import static java.util.Collections.singletonList;
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
-abstract class HandlerMethod<C extends Message> {
+public abstract class HandlerMethod<C extends Message> {
 
     /** The method to be called. */
     private final Method method;
@@ -63,7 +72,7 @@ abstract class HandlerMethod<C extends Message> {
      *
      * @param method subscriber method
      */
-    protected HandlerMethod(Method method) {
+    HandlerMethod(Method method) {
         this.method = checkNotNull(method);
         this.paramCount = method.getParameterTypes().length;
         method.setAccessible(true);
@@ -92,7 +101,7 @@ abstract class HandlerMethod<C extends Message> {
     /**
      * Returns {@code true} if the method has package-private access, {@code false} otherwise.
      */
-    protected static boolean isPackagePrivate(Method method) {
+    static boolean isPackagePrivate(Method method) {
         final int modifiers = method.getModifiers();
         final boolean result =
                 !(Modifier.isPublic(modifiers)
@@ -104,7 +113,7 @@ abstract class HandlerMethod<C extends Message> {
     /**
      * Logs a message at the WARN level according to the specified format and method.
      */
-    protected static void warnOnWrongModifier(String messageFormat, Method method) {
+    static void warnOnWrongModifier(String messageFormat, Method method) {
         log().warn(messageFormat, getFullMethodName(method));
     }
 
@@ -139,6 +148,27 @@ abstract class HandlerMethod<C extends Message> {
     /** The common logger used by message handling method classes. */
     protected static Logger log() {
         return LogSingleton.INSTANCE.value;
+    }
+
+    public static List<Event> toEvents(final Any producerId,
+                                       @Nullable final Version version,
+                                       final List<? extends Message> eventMessages,
+                                       final MessageEnvelope origin) {
+        checkNotNull(producerId);
+        checkNotNull(eventMessages);
+        checkNotNull(origin);
+
+        final EventFactory eventFactory =
+                EventFactory.on(origin, producerId, eventMessages.size());
+
+        return Lists.transform(eventMessages, new Function<Message, Event>() {
+            @Override
+            public Event apply(@Nullable Message eventMessage) {
+                checkNotNull(eventMessage);
+                final Event result = eventFactory.createEvent(eventMessage, version);
+                return result;
+            }
+        });
     }
 
     /** Returns the handling method. */
@@ -180,32 +210,45 @@ abstract class HandlerMethod<C extends Message> {
      *               Could be a {@link Message}, a list of messages, or {@code null}.
      * @return the list of event messages or an empty list if {@code null} is passed
      */
-    protected static <R> List<? extends Message> toList(@Nullable R output) {
+    @SuppressWarnings({"unchecked", "ChainOfInstanceofChecks"})
+    static List<? extends Message> toList(@Nullable Object output) {
         if (output == null) {
             return emptyList();
         }
+
+        // Allow reacting methods to return `Empty` instead of empty `List`. Do not store such
+        // events. Command Handling methods will not be able to use this trick because we check
+        // for non-empty result of such methods.
+        if (output instanceof Empty) {
+            return emptyList();
+        }
+
         if (output instanceof List) {
             // Cast to the list of messages as it is the one of the return types
             // we expect by methods we call.
-            @SuppressWarnings("unchecked") final List<? extends Message> result = (List<? extends Message>) output;
-            return result;
-        } else {
-            // Another type of result is single event message (as Message).
-            final List<Message> result = singletonList((Message) output);
+            final List<? extends Message> result = (List<? extends Message>) output;
             return result;
         }
+
+        // If it's not a list it could be another `Iterable`.
+        if (output instanceof Iterable) {
+            return ImmutableList.copyOf((Iterable<? extends Message>)output);
+        }
+
+        // Another type of result is single event message (as Message).
+        final List<Message> result = singletonList((Message) output);
+        return result;
     }
 
     /**
      * Invokes the wrapped method to handle {@code message} with the {@code context}.
      *
-     * @param <R>     the type of the expected handler invocation result
      * @param target  the target object on which call the method
      * @param message the message to handle
      * @param context the context of the message
      * @return the result of message handling
      */
-    public <R> R invoke(Object target, Message message, C context) {
+    public Object invoke(Object target, Message message, C context) {
         checkNotNull(message);
         checkNotNull(context);
         try {
@@ -213,9 +256,7 @@ abstract class HandlerMethod<C extends Message> {
             final Object returnedValue = (paramCount == 1)
                     ? method.invoke(target, message)
                     : method.invoke(target, message, context);
-            @SuppressWarnings("unchecked") // It is assumed that the method returns this type.
-            final R result = (R)returnedValue;
-            return result;
+            return returnedValue;
         } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
             throw whyFailed(target, message, context, e);
         }
@@ -290,7 +331,7 @@ abstract class HandlerMethod<C extends Message> {
      *
      * @param <H> the type of the handler method objects to create
      */
-    public interface Factory<H extends HandlerMethod> {
+    interface Factory<H extends HandlerMethod> {
 
         /** Returns the class of the method wrapper. */
         Class<H> getMethodClass();

@@ -23,20 +23,20 @@ package io.spine.server.rejection;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Message;
+import io.spine.Identifier;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;
 import io.spine.core.Rejection;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
 import io.spine.core.Rejections;
-import io.spine.server.entity.rejection.Rejections.EntityAlreadyArchived;
-import io.spine.server.entity.rejection.Rejections.EntityAlreadyDeleted;
+import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived;
+import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyDeleted;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Set;
 
-import static io.spine.test.TestValues.newUuidValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -54,10 +54,10 @@ public class DelegatingRejectionDispatcherShould {
         delegate = new EmptyRejectionDispatcherDelegate();
         delegatingDispatcher = DelegatingRejectionDispatcher.of(delegate);
 
-        final Command command = requestFactory.createCommand(newUuidValue());
+        final Command command = requestFactory.generateCommand();
         final Message rejectionMessage =
                 EntityAlreadyDeleted.newBuilder()
-                                    .setEntityId(getClass().getName())
+                                    .setEntityId(Identifier.pack(getClass().getName()))
                                     .build();
         final Rejection rejection = Rejections.createRejection(rejectionMessage, command);
         rejectionEnvelope = RejectionEnvelope.of(rejection);

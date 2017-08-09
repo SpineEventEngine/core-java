@@ -20,6 +20,7 @@
 
 package io.spine.server.entity;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.Identifier;
@@ -268,8 +269,8 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
      */
     protected void checkNotArchived() throws CannotModifyArchivedEntity {
         if (getLifecycleFlags().getArchived()) {
-            final String idStr = Identifier.toString(getId());
-            throw new CannotModifyArchivedEntity(idStr);
+            final Any packedId = Identifier.pack(getId());
+            throw new CannotModifyArchivedEntity(packedId);
         }
     }
 
@@ -282,8 +283,8 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
      */
     protected void checkNotDeleted() throws CannotModifyDeletedEntity {
         if (getLifecycleFlags().getDeleted()) {
-            final String idStr = Identifier.toString(getId());
-            throw new CannotModifyDeletedEntity(idStr);
+            final Any packedId = Identifier.pack(getId());
+            throw new CannotModifyDeletedEntity(packedId);
         }
     }
 

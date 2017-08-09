@@ -21,27 +21,20 @@
 package io.spine.server.reflect;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
-import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.Identifier;
 import io.spine.base.ThrowableMessage;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
-import io.spine.core.CommandEnvelope;
-import io.spine.core.Event;
-import io.spine.core.Version;
-import io.spine.protobuf.Messages;
+import io.spine.core.Commands;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.entity.Entity;
-import io.spine.server.event.EventFactory;
 
 import javax.annotation.CheckReturnValue;
-import javax.annotation.Nullable;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Set;
@@ -120,33 +113,12 @@ public final class CommandHandlerMethod extends HandlerMethod<CommandContext> {
         checkNotNull(target);
         checkNotNull(command);
         checkNotNull(context);
-        final Message commandMessage = Messages.ensureMessage(command);
+        final Message commandMessage = Commands.ensureMessage(command);
 
         final CommandHandlerMethod method = getMethod(target.getClass(), commandMessage);
         final List<? extends Message> eventMessages =
                 method.invoke(target, commandMessage, context);
         return eventMessages;
-    }
-
-    public static List<Event> toEvents(final Any producerId,
-                                       @Nullable final Version version,
-                                       final List<? extends Message> eventMessages,
-                                       final CommandEnvelope origin) {
-        checkNotNull(producerId);
-        checkNotNull(eventMessages);
-        checkNotNull(origin);
-
-        final EventFactory eventFactory =
-                EventFactory.on(origin, producerId, eventMessages.size());
-
-        return Lists.transform(eventMessages, new Function<Message, Event>() {
-            @Override
-            public Event apply(@Nullable Message eventMessage) {
-                checkNotNull(eventMessage);
-                final Event result = eventFactory.createEvent(eventMessage, version);
-                return result;
-            }
-        });
     }
 
     @VisibleForTesting
@@ -160,13 +132,10 @@ public final class CommandHandlerMethod extends HandlerMethod<CommandContext> {
      * @return the list of event messages (or an empty list if the handler returns nothing)
      */
     @Override
-    public <R> R invoke(Object target, Message message, CommandContext context) {
-        final R handlingResult = super.invoke(target, message, context);
-
+    public List<? extends Message> invoke(Object target, Message message, CommandContext context) {
+        final Object handlingResult = super.invoke(target, message, context);
         final List<? extends Message> events = toList(handlingResult);
-        // The list of event messages is the return type expected.
-        @SuppressWarnings("unchecked") final R result = (R) events;
-        return result;
+        return events;
     }
 
     /**
@@ -264,7 +233,8 @@ public final class CommandHandlerMethod extends HandlerMethod<CommandContext> {
 
         @Override
         protected boolean verifyReturnType(Method method) {
-            return returnsMessageOrList(method);
+            final boolean result = returnsMessageOrIterable(method);
+            return result;
         }
     }
 }

@@ -22,14 +22,15 @@ package io.spine.server.procman.given;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.core.CommandContext;
 import io.spine.core.EventContext;
-import io.spine.core.Subscribe;
+import io.spine.core.React;
 import io.spine.server.command.Assign;
 import io.spine.server.entity.TestEntityWithStringColumn;
-import io.spine.server.entity.rejection.Rejections.EntityAlreadyArchived;
-import io.spine.server.entity.rejection.Rejections.EntityAlreadyDeleted;
+import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived;
+import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyDeleted;
 import io.spine.server.procman.CommandRouted;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
@@ -87,11 +88,16 @@ public class ProcessManagerRepositoryTestEnv {
             messagesDelivered.put(getState().getId(), commandOrEventMsg);
         }
 
-        @Subscribe
-        public void on(PmProjectCreated event, EventContext ignored) {
+        @React
+        public Empty on(PmProjectCreated event, EventContext ignored) {
             keep(event);
 
             handleProjectCreated(event.getProjectId());
+            return withNothing();
+        }
+
+        private static Empty withNothing() {
+            return Empty.getDefaultInstance();
         }
 
         private void handleProjectCreated(ProjectId projectId) {
@@ -102,12 +108,13 @@ public class ProcessManagerRepositoryTestEnv {
             getBuilder().mergeFrom(newState);
         }
 
-        @Subscribe
-        public void on(PmTaskAdded event) {
+        @React
+        public Empty on(PmTaskAdded event) {
             keep(event);
 
             final Task task = event.getTask();
             handleTaskAdded(task);
+            return withNothing();
         }
 
         private void handleTaskAdded(Task task) {
@@ -117,11 +124,12 @@ public class ProcessManagerRepositoryTestEnv {
             getBuilder().mergeFrom(newState);
         }
 
-        @Subscribe
-        public void on(PmProjectStarted event) {
+        @React
+        public Empty on(PmProjectStarted event) {
             keep(event);
 
             handleProjectStarted();
+            return withNothing();
         }
 
         private void handleProjectStarted() {
@@ -169,19 +177,65 @@ public class ProcessManagerRepositoryTestEnv {
                     .routeAll();
         }
 
-        @Subscribe
-        void on(EntityAlreadyArchived rejection) {
+        @React
+        Empty on(EntityAlreadyArchived rejection) {
             keep(rejection);
+            return withNothing();
         }
 
-        @Subscribe
-        void on(EntityAlreadyDeleted rejection) {
+        @React
+        Empty on(EntityAlreadyDeleted rejection) {
             keep(rejection);
+            return withNothing();
         }
 
         @Override
         public String getIdString() {
             return getId().toString();
+        }
+    }
+
+    public static class GivenCommandMessage {
+
+        public static final ProjectId ID = Sample.messageOfType(ProjectId.class);
+
+        /** Prevents instantiation on this utility class. */
+        private GivenCommandMessage() {}
+
+        public static PmCreateProject createProject() {
+            return ((PmCreateProject.Builder) Sample.builderForType(PmCreateProject.class))
+                    .setProjectId(ID)
+                    .build();
+        }
+
+        public static PmStartProject startProject() {
+            return ((PmStartProject.Builder) Sample.builderForType(PmStartProject.class))
+                    .setProjectId(ID)
+                    .build();
+        }
+
+        public static PmAddTask addTask() {
+            return ((PmAddTask.Builder) Sample.builderForType(PmAddTask.class))
+                    .setProjectId(ID)
+                    .build();
+        }
+
+        public static PmProjectStarted projectStarted() {
+            return ((PmProjectStarted.Builder) Sample.builderForType(PmProjectStarted.class))
+                    .setProjectId(ID)
+                    .build();
+        }
+
+        public static PmProjectCreated projectCreated() {
+            return ((PmProjectCreated.Builder) Sample.builderForType(PmProjectCreated.class))
+                    .setProjectId(ID)
+                    .build();
+        }
+
+        public static PmTaskAdded taskAdded() {
+            return ((PmTaskAdded.Builder) Sample.builderForType(PmTaskAdded.class))
+                    .setProjectId(ID)
+                    .build();
         }
     }
 }

@@ -23,10 +23,10 @@ package io.spine.server.aggregate.given;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.UInt32Value;
+import io.spine.core.React;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
-import io.spine.server.aggregate.React;
 import io.spine.validate.StringValueVBuilder;
 
 /**

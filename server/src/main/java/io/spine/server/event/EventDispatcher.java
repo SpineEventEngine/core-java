@@ -24,8 +24,6 @@ import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.server.bus.MulticastDispatcher;
 
-import static io.spine.util.Exceptions.newIllegalArgumentException;
-
 /**
  * {@code EventDispatcher} delivers events to subscribers.
  *
@@ -33,28 +31,4 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  * @author Alexander Yevsyukov
  */
 public interface EventDispatcher<I> extends MulticastDispatcher<EventClass, EventEnvelope, I> {
-
-    /**
-     * Utility class for reporting event dispatching errors.
-     */
-    class Error {
-
-        private Error() {
-            // Prevent instantiation of this utility class.
-        }
-
-        /**
-         * Throws {@link IllegalArgumentException} to report unexpected event passed.
-         *
-         * @param eventClass the event class which name will be used in the exception message
-         * @return nothing ever
-         * @throws IllegalArgumentException always
-         */
-        public static IllegalArgumentException unexpectedEventEncountered(EventClass eventClass)
-                throws IllegalArgumentException {
-            final String eventClassName = eventClass.value()
-                                                    .getName();
-            throw newIllegalArgumentException("Unexpected event of class: %s", eventClassName);
-        }
-    }
 }

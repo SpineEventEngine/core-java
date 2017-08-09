@@ -40,7 +40,7 @@ import io.spine.server.command.TestEventFactory;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandstore.CommandStore;
 import io.spine.server.entity.given.Given;
-import io.spine.server.entity.rejection.Rejections.EntityAlreadyArchived;
+import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived;
 import io.spine.server.procman.given.ProcessManagerTestEnv.AddTaskDispatcher;
 import io.spine.server.procman.given.ProcessManagerTestEnv.TestProcessManager;
 import io.spine.server.storage.StorageFactory;
@@ -67,7 +67,6 @@ import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.server.TestEventClasses.assertContains;
 import static io.spine.server.procman.ProcessManagerDispatcher.dispatch;
-import static io.spine.test.TestValues.newUuidValue;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Verify.assertSize;
 import static org.hamcrest.Matchers.instanceOf;
@@ -218,8 +217,7 @@ public class ProcessManagerShould {
         final Int32Value unknownCommand = Int32Value.getDefaultInstance();
 
         final CommandEnvelope envelope = CommandEnvelope.of(
-                requestFactory.command()
-                              .create(unknownCommand)
+                requestFactory.createCommand(unknownCommand)
         );
         processManager.dispatchCommand(envelope);
     }
@@ -232,7 +230,7 @@ public class ProcessManagerShould {
     }
 
     @Test
-    public void return_handled_event_classes() {
+    public void return_reacted_event_classes() {
         final Set<EventClass> classes =
                 ProcessManager.TypeInfo.getEventClasses(TestProcessManager.class);
 
@@ -245,11 +243,10 @@ public class ProcessManagerShould {
     public void dispatch_rejection() {
         final EntityAlreadyArchived rejectionMessage =
                 EntityAlreadyArchived.newBuilder()
-                                     .setEntityId(getClass().getName())
+                                     .setEntityId(Identifier.pack(getClass().getName()))
                                      .build();
 
-        final Command command = requestFactory.command()
-                                              .create(newUuidValue());
+        final Command command = requestFactory.generateCommand();
         final RejectionEnvelope rejection = RejectionEnvelope.of(
                 createRejection(rejectionMessage, command)
         );

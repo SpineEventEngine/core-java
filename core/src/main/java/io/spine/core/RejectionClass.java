@@ -58,16 +58,11 @@ public class RejectionClass extends MessageClass {
      * passed to this method, enclosing rejection message will be un-wrapped to determine
      * the class of the rejection.
      *
-     * @param rejection a rejection instance
+     * @param rejectionOrMessage a rejection instance
      * @return new instance
      */
-    public static RejectionClass of(Message rejection) {
-        final Message message = checkNotNull(rejection);
-        if (message instanceof Rejection) {
-            final Rejection rejectionRecord = (Rejection) rejection;
-            final Message enclosed = Rejections.getMessage(rejectionRecord);
-            return of(enclosed.getClass());
-        }
+    public static RejectionClass of(Message rejectionOrMessage) {
+        final Message message = Rejections.ensureMessage(rejectionOrMessage);
         final RejectionClass result = of(message.getClass());
         return result;
     }

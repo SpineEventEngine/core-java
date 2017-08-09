@@ -46,6 +46,7 @@ import static io.spine.core.Events.getActor;
 import static io.spine.core.Events.getMessage;
 import static io.spine.core.Events.getProducer;
 import static io.spine.core.Events.getTimestamp;
+import static io.spine.core.Events.nothing;
 import static io.spine.core.Events.sort;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.TypeConverter.toMessage;
@@ -53,6 +54,7 @@ import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Test functionality of {@link Events} utility class.
@@ -80,7 +82,7 @@ public class EventsShould {
     public void setUp() {
         final TestActorRequestFactory requestFactory =
                 TestActorRequestFactory.newInstance(getClass());
-        final CommandEnvelope cmd = requestFactory.generateAndWrap();
+        final CommandEnvelope cmd = requestFactory.generateEnvelope();
         final StringValue producerId = toMessage(getClass().getSimpleName());
         EventFactory eventFactory = EventFactory.on(cmd, Identifier.pack(producerId));
         event = eventFactory.createEvent(Time.getCurrentTime(),
@@ -185,7 +187,7 @@ public class EventsShould {
 
     @Test
     public void obtain_type_name_of_event() {
-        final CommandEnvelope command = requestFactory.generateAndWrap();
+        final CommandEnvelope command = requestFactory.generateEnvelope();
         final StringValue producerId = toMessage(getClass().getSimpleName());
         final EventFactory ef = EventFactory.on(command, Identifier.pack(producerId));
         final Event event = ef.createEvent(Time.getCurrentTime(), Tests.<Version>nullRef());
@@ -194,5 +196,12 @@ public class EventsShould {
                                                .getTypeName();
         assertNotNull(typeName);
         assertEquals(Timestamp.class.getSimpleName(), typeName.getSimpleName());
+    }
+
+    @Test
+    public void provide_empty_Iterable() {
+        for (Object ignored : nothing()) {
+            fail("Something found in nothing().");
+        }
     }
 }

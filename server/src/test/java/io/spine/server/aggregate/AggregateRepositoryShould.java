@@ -20,14 +20,18 @@
 
 package io.spine.server.aggregate;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Predicates;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.protobuf.FloatValue;
 import com.google.protobuf.UInt32Value;
 import com.google.protobuf.UInt64Value;
+import io.grpc.stub.StreamObserver;
 import io.spine.Identifier;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Ack;
+import io.spine.core.Command;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
@@ -41,12 +45,18 @@ import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.FailingAggrega
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.GivenAggregate;
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.ProjectAggregate;
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.ProjectAggregateRepository;
+import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.ReactingAggregate;
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.ReactingRepository;
+import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.RejectingRepository;
+import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.RejectionReactingAggregate;
+import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.RejectionReactingRepository;
 import io.spine.server.command.TestEventFactory;
+import io.spine.server.commandbus.CommandBus;
 import io.spine.server.reflect.HandlerMethodFailedException;
 import io.spine.server.tenant.TenantAwareOperation;
-import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
+import io.spine.test.aggregate.command.AggCreateProjectWithChildren;
+import io.spine.test.aggregate.command.AggStartProjectWithChildren;
 import io.spine.test.aggregate.event.AggProjectArchived;
 import io.spine.test.aggregate.event.AggProjectDeleted;
 import io.spine.testdata.Sample;
@@ -58,7 +68,6 @@ import java.util.Iterator;
 import java.util.Set;
 
 import static io.spine.core.given.GivenTenantId.newUuid;
-import static io.spine.validate.Validate.isDefault;
 import static io.spine.validate.Validate.isNotDefault;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -69,6 +78,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 public class AggregateRepositoryShould {
+
+    private final TestActorRequestFactory requestFactory =
+            TestActorRequestFactory.newInstance(getClass());
 
     private BoundedContext boundedContext;
     private AggregateRepository<ProjectId, ProjectAggregate> repository;
@@ -104,12 +116,10 @@ public class AggregateRepositoryShould {
     }
 
     @Test
-    public void create_aggregate_with_default_state_if_no_aggregate_found() {
-        final ProjectAggregate aggregate = repository.find(Sample.messageOfType(ProjectId.class))
-                                                     .get();
-        final Project state = aggregate.getState();
-
-        assertTrue(isDefault(state));
+    public void do_not_create_new_aggregates_on_find() {
+        final ProjectId newId = Sample.messageOfType(ProjectId.class);
+        final Optional<ProjectAggregate> optional = repository.find(newId);
+        assertFalse(optional.isPresent());
     }
 
     @Test
@@ -295,9 +305,6 @@ public class AggregateRepositoryShould {
         final FailingAggregateRepository repository = new FailingAggregateRepository();
         boundedContext.register(repository);
 
-        final TestActorRequestFactory requestFactory =
-                TestActorRequestFactory.newInstance(getClass());
-
         // Passing negative value to `FailingAggregate` should cause exception.
         final CommandEnvelope ce = CommandEnvelope.of(
                 requestFactory.createCommand(UInt32Value.newBuilder()
@@ -379,16 +386,19 @@ public class AggregateRepositoryShould {
     }
 
     @Test
-    public void allow_reacting_aggregates() {
+    public void allow_aggregates_react_on_events() {
         final ReactingRepository repository = new ReactingRepository();
         boundedContext.register(repository);
 
         final ProjectId parentId = givenAggregateId("parent");
         final ProjectId childId = givenAggregateId("child");
 
-        // Create event factory for which producer ID would be the `childId`.
-        // This will allow dispatching the event correctly.
-        final TestEventFactory factory = TestEventFactory.newInstance(Identifier.pack(childId),
+        /**
+         * Create event factory for which producer ID would be the `parentId`.
+         * Custom routing set by {@linkplain ReactingRepository()} would use
+         * child IDs from the event.
+         */
+        final TestEventFactory factory = TestEventFactory.newInstance(Identifier.pack(parentId),
                                                                       getClass());
         final AggProjectArchived msg = AggProjectArchived.newBuilder()
                                                          .setProjectId(parentId)
@@ -396,16 +406,70 @@ public class AggregateRepositoryShould {
                                                          .build();
         final Event event = factory.createEvent(msg);
 
-        repository.createAndStore(childId);
-
-        // See that the aggregate can find the aggregate.
-        assertTrue(repository.find(childId).isPresent());
-
         // Posting this event should archive the aggregate.
         boundedContext.getEventBus()
                       .post(event);
 
-        assertFalse(repository.find(childId).isPresent());
+        // Check that the aggregate marked itself as `archived`, and therefore became invisible
+        // to regular queries.
+        final Optional<ReactingAggregate> optional = repository.find(childId);
+
+        // The aggregate was created because of dispatching.
+        assertTrue(optional.isPresent());
+
+        // The proper method was called, which we check by the state the aggregate got.
+        assertEquals(ReactingAggregate.PROJECT_ARCHIVED,
+                     optional.get()
+                             .getState()
+                             .getValue());
+    }
+
+    @Test
+    public void allow_aggregates_react_on_rejections() {
+        boundedContext.register(new RejectingRepository());
+        final RejectionReactingRepository repository = new RejectionReactingRepository();
+        boundedContext.register(repository);
+
+        final ProjectId parentId = givenAggregateId("rejectingParent");
+        final ProjectId childId1 = givenAggregateId("acceptingChild-1");
+        final ProjectId childId2 = givenAggregateId("acceptingChild-2");
+        final ProjectId childId3 = givenAggregateId("acceptingChild-3");
+
+
+        final StreamObserver<Ack> observer = StreamObservers.noOpObserver();
+        final CommandBus commandBus = boundedContext.getCommandBus();
+
+        // Create the parent project.
+        final ImmutableSet<ProjectId> childProjects = ImmutableSet.of(childId1, childId2, childId3);
+        final Command createParent = requestFactory.createCommand(
+                AggCreateProjectWithChildren.newBuilder()
+                                            .setProjectId(parentId)
+                                            .addAllChildProjectId(childProjects)
+                                            .build()
+        );
+        commandBus.post(createParent, observer);
+
+        // Fire a command which would cause rejection.
+        final Command startProject = requestFactory.createCommand(
+                AggStartProjectWithChildren.newBuilder()
+                                           .setProjectId(parentId)
+                                           .build()
+        );
+        commandBus.post(startProject, observer);
+
+        for (ProjectId childProject : childProjects) {
+            final Optional<RejectionReactingAggregate> optional = repository.find(childProject);
+            assertTrue(optional.isPresent());
+
+            // Check that all the aggregates:
+            // 1. got Rejections.AggCannotStartArchivedProject;
+            // 2. produced the state the event;
+            // 3. applied the event.
+            final String value = optional.get()
+                                         .getState()
+                                         .getValue();
+            assertEquals(RejectionReactingAggregate.PARENT_ARCHIVED, value);
+        }
     }
 
     /*

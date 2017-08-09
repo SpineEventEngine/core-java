@@ -21,6 +21,7 @@
 package io.spine.server.reflect;
 
 import com.google.common.testing.NullPointerTester;
+import com.google.protobuf.Any;
 import io.spine.core.EventContext;
 import io.spine.server.reflect.given.EventSubscriberMethodTestEnv.ARejectionSubscriber;
 import io.spine.server.reflect.given.EventSubscriberMethodTestEnv.InvalidNoAnnotation;
@@ -53,6 +54,7 @@ public class EventSubscriberMethodShould {
     @Test
     public void pass_null_tolerance_check() {
         new NullPointerTester()
+                .setDefault(Any.class, Any.getDefaultInstance())
                 .setDefault(EventContext.class, EventContext.getDefaultInstance())
                 .testAllPublicStaticMethods(EventSubscriberMethod.class);
     }

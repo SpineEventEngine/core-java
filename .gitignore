@@ -19,6 +19,9 @@ generated/
 # Gradle build files
 build/
 
+# IDEA build files
+out/
+
 # Login details to Maven repository.
 # Each workstation should have developer's login defined in this file.
 credentials.properties

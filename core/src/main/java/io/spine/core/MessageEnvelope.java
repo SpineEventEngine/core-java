@@ -28,10 +28,11 @@ import io.spine.type.MessageClass;
  *
  * @param <I> the the of the message id
  * @param <T> the type of the object that wraps a message
+ * @param <C> the type of the message context
  * @author Alex Tymchenko
  * @author Alexander Yevsyukov
  */
-public interface MessageEnvelope<I extends Message, T> {
+public interface MessageEnvelope<I extends Message, T, C extends Message> {
 
     /**
      * The ID of the message.
@@ -54,9 +55,9 @@ public interface MessageEnvelope<I extends Message, T> {
     MessageClass getMessageClass();
 
     /**
-     * Obtains an actor context for the wrapped message.
+     * Obtains the context of the message.
      */
-    ActorContext getActorContext();
+    C getMessageContext();
 
     /**
      * Sets the context of the enclosed message into as the origin in the context of an event

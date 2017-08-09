@@ -53,7 +53,7 @@ import static java.util.Collections.singleton;
  * @author Dmytro Dashenkov
  */
 public abstract class Bus<T extends Message,
-                          E extends MessageEnvelope<?, T>,
+                          E extends MessageEnvelope<?, T, ?>,
                           C extends MessageClass,
                           D extends MessageDispatcher<C, E, ?>> implements AutoCloseable {
 
@@ -339,7 +339,7 @@ public abstract class Bus<T extends Message,
      * @param <T> the type of {@link Message} posted by the bus
      * @param <B> the own type of the builder
      */
-    public abstract static class AbstractBuilder<E extends MessageEnvelope<?, T>,
+    public abstract static class AbstractBuilder<E extends MessageEnvelope<?, T, ?>,
                                                  T extends Message,
                                                  B extends AbstractBuilder<E, T, B>> {
 

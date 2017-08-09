@@ -74,7 +74,7 @@ public class RejectionsShould {
     @Test
     public void filter_rejection_classes() {
         assertTrue(
-                isRejection(io.spine.server.entity.rejection.Rejections.EntityAlreadyArchived.class)
+                isRejection(io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived.class)
         );
         assertFalse(isRejection(Timestamp.class));
     }

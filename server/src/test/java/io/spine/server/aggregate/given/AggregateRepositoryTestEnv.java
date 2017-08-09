@@ -32,42 +32,52 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.UInt32Value;
 import com.google.protobuf.UInt64Value;
 import com.google.protobuf.util.Timestamps;
+import io.spine.Identifier;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.EventContext;
 import io.spine.core.MessageEnvelope;
+import io.spine.core.React;
+import io.spine.core.RejectionContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.AggregateRepositoryShould;
 import io.spine.server.aggregate.Apply;
-import io.spine.server.aggregate.React;
 import io.spine.server.command.Assign;
 import io.spine.server.entity.given.Given;
 import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
 import io.spine.server.route.CommandRoute;
 import io.spine.server.route.EventRoute;
-import io.spine.string.Stringifiers;
+import io.spine.server.route.RejectionRoute;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.ProjectVBuilder;
 import io.spine.test.aggregate.Status;
+import io.spine.test.aggregate.SubProjectList;
+import io.spine.test.aggregate.SubProjectListVBuilder;
 import io.spine.test.aggregate.command.AggAddTask;
 import io.spine.test.aggregate.command.AggCreateProject;
+import io.spine.test.aggregate.command.AggCreateProjectWithChildren;
 import io.spine.test.aggregate.command.AggStartProject;
+import io.spine.test.aggregate.command.AggStartProjectWithChildren;
 import io.spine.test.aggregate.event.AggProjectArchived;
 import io.spine.test.aggregate.event.AggProjectCreated;
 import io.spine.test.aggregate.event.AggProjectDeleted;
 import io.spine.test.aggregate.event.AggProjectStarted;
 import io.spine.test.aggregate.event.AggTaskAdded;
+import io.spine.test.aggregate.rejection.AggCannotStartArchivedProject;
+import io.spine.test.aggregate.rejection.Rejections;
 import io.spine.testdata.Sample;
 import io.spine.time.Time;
 import io.spine.validate.BoolValueVBuilder;
 import io.spine.validate.StringValueVBuilder;
 
 import javax.annotation.Nullable;
+import java.util.List;
 import java.util.Set;
 
+import static io.spine.core.Events.nothing;
 import static io.spine.server.aggregate.AggregateMessageDispatcher.dispatchCommand;
 
 /**
@@ -89,10 +99,11 @@ public class AggregateRepositoryTestEnv {
                                          .create(commandMessage));
     }
 
+    /** Utility factory for test aggregates. */
     public static class GivenAggregate {
 
+        /** Prevents instantiation of this utility class. */
         private GivenAggregate() {
-            // Prevent instantiation of this utility class.
         }
 
         public static ProjectAggregate withUncommittedEvents() {
@@ -125,16 +136,14 @@ public class AggregateRepositoryTestEnv {
         }
     }
 
+    /**
+     * The main aggregate class for positive scenarios tests.
+     */
     public static class ProjectAggregate
             extends Aggregate<ProjectId, Project, ProjectVBuilder> {
 
         private ProjectAggregate(ProjectId id) {
             super(id);
-        }
-
-        //TODO:2017-07-19:alexander.yevsyukov: Return Optional.absent() instead.
-        private static <M> Iterable<M> nothing() {
-            return ImmutableList.of();
         }
 
         @Override
@@ -240,6 +249,9 @@ public class AggregateRepositoryTestEnv {
         }
     }
 
+    /**
+     * The repository of positive scenarios {@linkplain ProjectAggregate  aggregates}.
+     */
     @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
     public static class ProjectAggregateRepository
             extends AggregateRepository<ProjectId, ProjectAggregate> {
@@ -292,7 +304,7 @@ public class AggregateRepositoryTestEnv {
      *
      * @see FailingAggregateRepository
      */
-    public static class FailingAggregate extends Aggregate<Long, StringValue, StringValueVBuilder> {
+    static class FailingAggregate extends Aggregate<Long, StringValue, StringValueVBuilder> {
 
         private FailingAggregate(Long id) {
             super(id);
@@ -316,7 +328,7 @@ public class AggregateRepositoryTestEnv {
         @Assign
         Timestamp on(UInt64Value value) throws CannotModifyArchivedEntity {
             if (value.getValue() < 0) {
-                throw new CannotModifyArchivedEntity(Stringifiers.toString(getId()));
+                throw new CannotModifyArchivedEntity(Identifier.pack(getId()));
             }
             return Time.getCurrentTime();
         }
@@ -343,6 +355,9 @@ public class AggregateRepositoryTestEnv {
         }
     }
 
+    /**
+     * The repository of {@link FailingAggregate}s.
+     */
     public static class FailingAggregateRepository
             extends AggregateRepository<Long, FailingAggregate> {
 
@@ -416,9 +431,9 @@ public class AggregateRepositoryTestEnv {
     }
 
     /**
-     * An aggregate class which neither handle commands nor react on events.
+     * An aggregate class which neither handles commands nor reacts on events or rejections.
      */
-    public static class AnemicAggregate extends Aggregate<Integer, BoolValue, BoolValueVBuilder> {
+    static class AnemicAggregate extends Aggregate<Integer, BoolValue, BoolValueVBuilder> {
         private AnemicAggregate(Integer id) {
             super(id);
         }
@@ -436,6 +451,9 @@ public class AggregateRepositoryTestEnv {
      */
     public static class ReactingAggregate
             extends Aggregate<ProjectId, StringValue, StringValueVBuilder> {
+
+        public static final String PROJECT_ARCHIVED = "PROJECT_ARCHIVED";
+        public static final String PROJECT_DELETED = "PROJECT_DELETED";
 
         private ReactingAggregate(ProjectId id) {
             super(id);
@@ -471,30 +489,129 @@ public class AggregateRepositoryTestEnv {
             return nothing();
         }
 
-        private static <M> Iterable<M> nothing() {
-            return ImmutableList.of();
-        }
-
         @Apply
         private void apply(AggProjectArchived event) {
-            setArchived(true);
+            getBuilder().setValue(PROJECT_ARCHIVED);
         }
 
         @Apply
         private void apply(AggProjectDeleted event) {
-            setDeleted(true);
+            getBuilder().setValue(PROJECT_DELETED);
         }
     }
 
     /**
      * The repository of {@link ReactingAggregate}.
      */
+    @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
     public static class ReactingRepository
             extends AggregateRepository<ProjectId, ReactingAggregate> {
 
-        public void createAndStore(ProjectId id) {
-            ReactingAggregate newAggregate = new ReactingAggregate(id);
-            store(newAggregate);
+        public ReactingRepository() {
+            super();
+            getEventRouting()
+                    .route(AggProjectArchived.class,
+                           new EventRoute<ProjectId, AggProjectArchived>() {
+                               private static final long serialVersionUID = 0L;
+
+                               @Override
+                               public Set<ProjectId> apply(AggProjectArchived message,
+                                                           EventContext context) {
+                                   return ImmutableSet.copyOf(message.getChildProjectIdList());
+                               }
+                           });
+        }
+    }
+
+    /*
+     * Test environment for testing aggregates reacting on rejections.
+     *******************************************************************/
+
+    /**
+     * The aggregate with the state of {@linkplain AggProjectCreated creation event}
+     * wrapped into {@code Any}. The event keeps the list of child project IDs, which we use
+     * in rejecting subsequent commands.
+     */
+    static class RejectingAggregate
+            extends Aggregate<ProjectId, SubProjectList, SubProjectListVBuilder> {
+
+        private RejectingAggregate(ProjectId id) {
+            super(id);
+        }
+
+        @Assign
+        AggProjectCreated on(AggCreateProjectWithChildren cmd) {
+            return AggProjectCreated.newBuilder()
+                                    .setProjectId(cmd.getProjectId())
+                                    .addAllChildProjectId(cmd.getChildProjectIdList())
+                                    .build();
+        }
+
+        @Apply
+        void event(AggProjectCreated event) {
+            getBuilder().addAllItem(event.getChildProjectIdList());
+        }
+
+        @Assign
+        AggProjectStarted on(AggStartProjectWithChildren cmd) throws AggCannotStartArchivedProject {
+            throw new AggCannotStartArchivedProject(getId(), getState().getItemList());
+        }
+    }
+
+    public static class RejectingRepository
+            extends AggregateRepository<ProjectId, RejectingAggregate> {
+    }
+
+    /**
+     * An aggregate class that reacts only on rejections, and neither handles commands, nor
+     * reacts on events.
+     */
+    public static class RejectionReactingAggregate
+            extends Aggregate<ProjectId, StringValue, StringValueVBuilder> {
+
+        public static final String PARENT_ARCHIVED = "parent-archived";
+
+        private RejectionReactingAggregate(ProjectId id) {
+            super(id);
+        }
+
+        @React
+        private Iterable<AggProjectArchived> on(
+                Rejections.AggCannotStartArchivedProject rejection) {
+            final List<ProjectId> childIdList = rejection.getChildProjectIdList();
+            if (childIdList.contains(getId())) {
+                return ImmutableList.of(AggProjectArchived.newBuilder()
+                                                          .setProjectId(getId())
+                                                          .build());
+            }
+            return nothing();
+        }
+
+        @Apply
+        void event(AggProjectArchived event) {
+            getBuilder().setValue(PARENT_ARCHIVED);
+        }
+    }
+
+    @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
+    public static class RejectionReactingRepository
+            extends AggregateRepository<ProjectId, RejectionReactingAggregate> {
+
+        public RejectionReactingRepository() {
+            super();
+            getRejectionRouting()
+                    .route(Rejections.AggCannotStartArchivedProject.class,
+                           new RejectionRoute<ProjectId,
+                                   Rejections.AggCannotStartArchivedProject>() {
+                               private static final long serialVersionUID = 0L;
+
+                               @Override
+                               public Set<ProjectId> apply(
+                                       Rejections.AggCannotStartArchivedProject message,
+                                       RejectionContext context) {
+                                   return ImmutableSet.copyOf(message.getChildProjectIdList());
+                               }
+                           });
         }
     }
 }

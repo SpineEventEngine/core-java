@@ -49,10 +49,10 @@ import static io.spine.validate.Validate.checkValid;
 public class EventFactory {
 
     private final Any producerId;
-    private final MessageEnvelope<?, ?> origin;
+    private final MessageEnvelope<?, ?, ?> origin;
     private final EventIdSequence idSequence;
 
-    protected EventFactory(MessageEnvelope<?, ?> origin, Any producerId, int eventCount) {
+    protected EventFactory(MessageEnvelope<?, ?, ?> origin, Any producerId, int eventCount) {
         this.origin = origin;
         this.producerId = producerId;
         this.idSequence = EventIdSequence.on(origin.getId())

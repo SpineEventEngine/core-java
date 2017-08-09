@@ -21,20 +21,12 @@
 package io.spine.server.aggregate;
 
 import com.google.protobuf.Message;
-import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
-import io.spine.server.tenant.TenantAwareFunction0;
-import io.spine.string.Stringifiers;
 
 import java.util.List;
 
-import static io.spine.util.Exceptions.newIllegalStateException;
-
 /**
  * Dispatches commands to aggregates of the associated {@code AggregateRepository}.
- *
- * <p>Loading and storing an aggregate is a tenant-sensitive operation,
- * which depends on the tenant ID of the command we dispatch.
  *
  * @param <I> the type of the aggregate IDs
  * @param <A> the type of the aggregates managed by the parent repository
@@ -43,22 +35,39 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
     extends AggregateMessageEndpoint<I, A, CommandEnvelope, I> {
 
-    private AggregateCommandEndpoint(AggregateRepository<I, A> repo, CommandEnvelope envelope) {
-        super(repo, envelope);
+    private AggregateCommandEndpoint(AggregateRepository<I, A> repo, CommandEnvelope command) {
+        super(repo, command);
     }
 
     static <I, A extends Aggregate<I, ?, ?>>
-    I handle(AggregateRepository<I, A> repository, CommandEnvelope envelope) {
-        final AggregateCommandEndpoint<I, A> commandEndpoint =
-                new AggregateCommandEndpoint<>(repository, envelope);
+    I handle(AggregateRepository<I, A> repository, CommandEnvelope command) {
+        final AggregateCommandEndpoint<I, A> endpoint =
+                new AggregateCommandEndpoint<>(repository, command);
 
-        final TenantAwareFunction0<I> operation = commandEndpoint.createOperation();
-        return operation.execute();
+        return endpoint.handle();
     }
 
     @Override
-    List<? extends Message> dispatchEnvelope(A aggregate, CommandEnvelope envelope) {
+    protected List<? extends Message> doDispatch(A aggregate, CommandEnvelope envelope) {
         return aggregate.dispatchCommand(envelope);
+    }
+
+    /**
+     * Returns ID of the aggregate that is responsible for handling the command.
+     */
+    @Override
+    protected I getTargets() {
+        final CommandEnvelope envelope = envelope();
+        final I id = repository().getCommandRouting()
+                                 .apply(envelope.getMessage(), envelope.getCommandContext());
+        return id;
+    }
+
+    @Override
+    protected void onError(CommandEnvelope envelope, RuntimeException exception) {
+        repository().onError(envelope, exception);
+        // Re-throw exception so that unhandled command gets proper status.
+        throw exception;
     }
 
     /**
@@ -67,48 +76,8 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
      * @throws IllegalStateException always
      */
     @Override
-    void onEmptyResult(A aggregate, CommandEnvelope envelope) throws IllegalStateException {
-        throw newIllegalStateException(
-                "The aggregate (class: %s, id: %s) produced empty response for " +
-                        "command (class: %s, id: %s).",
-                aggregate.getClass()
-                         .getName(),
-                Stringifiers.toString(aggregate.getId()),
-                envelope.getMessageClass(),
-                Stringifiers.toString(envelope.getId()));
-    }
-
-    @Override
-    TenantAwareFunction0<I> createOperation() {
-        return new Operation(envelope().getCommand());
-    }
-
-    /**
-     * Returns immutable set containing ID of the aggregate that is responsible for
-     * handling the command.
-     */
-    @Override
-    I getTargets() {
-        final CommandEnvelope envelope = envelope();
-        final I commandTarget = repository().getCommandTarget(envelope.getMessage(),
-                                                              envelope.getCommandContext());
-        return commandTarget;
-    }
-
-    /**
-     * The operation executed under the command's tenant.
-     */
-    private class Operation extends TenantAwareFunction0<I> {
-
-        private Operation(Command command) {
-            super(command.getContext()
-                         .getActorContext()
-                         .getTenantId());
-        }
-
-        @Override
-        public I apply() {
-            return dispatch();
-        }
+    protected void onEmptyResult(A aggregate, CommandEnvelope cmd) throws IllegalStateException {
+        final String format = "The aggregate (class: %s, id: %s) produced empty response for the command (class: %s, id: %s).";
+        onUnhandledCommand(aggregate, cmd, format);
     }
 }
