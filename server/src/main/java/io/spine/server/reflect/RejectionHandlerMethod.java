@@ -19,6 +19,7 @@
  */
 package io.spine.server.reflect;
 
+import com.google.common.base.Predicate;
 import com.google.protobuf.Message;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
@@ -139,7 +140,7 @@ class RejectionHandlerMethod extends HandlerMethod<RejectionContext>{
     }
 
     @CheckReturnValue
-    static Set<RejectionClass> inspectWith(Class<?> cls, MethodPredicate predicate) {
+    static Set<RejectionClass> inspectWith(Class<?> cls, Predicate<Method> predicate) {
         checkNotNull(cls);
         checkNotNull(predicate);
         final Set<RejectionClass> result = RejectionClass.setOf(inspect(cls, predicate));

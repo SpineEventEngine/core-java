@@ -63,8 +63,8 @@ class MethodMap<H extends HandlerMethod> {
      * @param <H>     the type of the handler methods
      * @return new method map
      */
-    public static <H extends HandlerMethod> MethodMap<H> create(Class<?> clazz,
-                                                                HandlerMethod.Factory<H> factory) {
+    static <H extends HandlerMethod> MethodMap<H> create(Class<?> clazz,
+                                                         HandlerMethod.Factory<H> factory) {
         return new MethodMap<>(clazz, factory);
     }
 

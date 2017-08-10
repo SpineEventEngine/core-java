@@ -89,9 +89,7 @@ public class RejectionSubscriberMethod extends RejectionHandlerMethod {
 
         final Class<? extends Message> rejectionClass = rejectionMessage.getClass();
         final MethodRegistry registry = MethodRegistry.getInstance();
-        final RejectionSubscriberMethod method = registry.get(cls,
-                                                              rejectionClass,
-                                                              factory());
+        final RejectionSubscriberMethod method = registry.get(cls, rejectionClass, factory());
         if (method == null) {
             throw missingRejectionHandler(cls, rejectionClass);
         }
