@@ -25,6 +25,8 @@ import com.google.common.base.Predicate;
 import javax.annotation.Nullable;
 import java.lang.reflect.Method;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * A filter for methods by annotation, method parameters, and return type.
  *
@@ -34,9 +36,7 @@ abstract class MethodPredicate implements Predicate<Method> {
 
     @Override
     public boolean apply(@Nullable Method method) {
-        if (method == null) {
-            return false;
-        }
+        checkNotNull(method);
         final boolean result = verifyAnnotation(method)
                                && verifyParams(method)
                                && verifyReturnType(method);
