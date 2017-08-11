@@ -21,16 +21,13 @@ package io.spine.server.integration;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.core.Ack;
 import io.spine.core.BoundedContextId;
-import io.spine.core.Event;
-import io.spine.core.EventClass;
-import io.spine.core.EventContext;
 import io.spine.core.ExternalMessageEnvelope;
-import io.spine.core.RejectionClass;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.bus.Bus;
 import io.spine.server.bus.BusFilter;
@@ -38,18 +35,15 @@ import io.spine.server.bus.DeadMessageTap;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.bus.MulticastBus;
 import io.spine.server.event.EventBus;
-import io.spine.server.event.EventDispatcher;
 import io.spine.server.event.EventSubscriber;
 import io.spine.server.integration.TransportFactory.PublisherHub;
 import io.spine.server.integration.TransportFactory.Subscriber;
 import io.spine.server.integration.TransportFactory.SubscriberHub;
 import io.spine.server.integration.local.LocalTransportFactory;
 import io.spine.server.rejection.RejectionBus;
-import io.spine.server.rejection.RejectionDispatcher;
 import io.spine.type.KnownTypes;
 import io.spine.type.MessageClass;
 import io.spine.type.TypeUrl;
-import io.spine.util.Exceptions;
 
 import java.util.Collection;
 import java.util.Deque;
@@ -63,6 +57,7 @@ import static io.spine.Identifier.newUuid;
 import static io.spine.Identifier.pack;
 import static io.spine.server.bus.Buses.acknowledge;
 import static io.spine.server.integration.IntegrationMessages.asIntegrationMessageClasses;
+import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static io.spine.validate.Validate.checkNotDefault;
 import static java.lang.String.format;
 
@@ -76,15 +71,7 @@ public class IntegrationBus extends MulticastBus<Message,
                                                  MessageClass,
                                                  ExternalMessageDispatcher<?>> {
 
-    /**
-     * Buses that act inside the bounded context, e.g. {@code EventBus}, and which allow
-     * dispatching their events to other bounded contexts.
-     *
-     * <p>{@code CommandBus} does <em>not</em> allow such a dispatching, as commands cannot be
-     * sent to another bounded context for a postponed handling.
-     */
-    private final EventBus eventBus;
-    private final RejectionBus rejectionBus;
+    private final Iterable<BusAdapter<?, ?>> localAdapters;
     private final BoundedContextId boundedContextId;
 
     private final SubscriberHub subscriberHub;
@@ -92,11 +79,20 @@ public class IntegrationBus extends MulticastBus<Message,
 
     private IntegrationBus(Builder builder) {
         super(builder.getDelivery());
-        this.eventBus = builder.eventBus;
-        this.rejectionBus = builder.rejectionBus;
         this.boundedContextId = builder.boundedContextId;
         this.subscriberHub = new SubscriberHub(builder.transportFactory);
         this.publisherHub = new PublisherHub(builder.transportFactory);
+
+        this.localAdapters = ImmutableSet.<BusAdapter<?, ?>>of(
+                EventBusAdapter.builderWith(builder.eventBus)
+                               .setPublisherHub(publisherHub)
+                               .setSubscriberHub(subscriberHub)
+                               .build(),
+                RejectionBusAdapter.builderWith(builder.rejectionBus)
+                                   .setPublisherHub(publisherHub)
+                                   .setSubscriberHub(subscriberHub)
+                                   .build()
+        );
 
         /*
          * React upon {@code RequestedMessageTypes} message arrival.
@@ -131,11 +127,13 @@ public class IntegrationBus extends MulticastBus<Message,
 
     @Override
     protected ExternalMessageEnvelope toEnvelope(Message message) {
-        if (message instanceof Event) {
-            return ExternalMessageEnvelope.of((Event) message);
-        }
-        throw Exceptions.newIllegalArgumentException("The message of %s type isn't supported",
-                                                     message.getClass());
+        final BusAdapter<?, ?> adapter = adapterFor(message.getClass());
+        final ExternalMessageEnvelope result = adapter.toExternalEnvelope(message);
+        return result;
+    }
+
+    private static IllegalArgumentException messageUnsupported(Class<? extends Message> msgClass) {
+        throw newIllegalArgumentException("The message of %s type isn't supported", msgClass);
     }
 
     @Override
@@ -151,17 +149,10 @@ public class IntegrationBus extends MulticastBus<Message,
         return result;
     }
 
-    private static ExternalMessageEnvelope markExternal(ExternalMessageEnvelope envelope) {
-        final Event event = (Event) envelope.getOuterObject();
-        final Event.Builder eventBuilder = event.toBuilder();
-        final EventContext modifiedContext = eventBuilder.getContext()
-                                                         .toBuilder()
-                                                         .setExternal(true)
-                                                         .build();
-
-        final Event marked = eventBuilder.setContext(modifiedContext)
-                                         .build();
-        return ExternalMessageEnvelope.of(marked);
+    private  ExternalMessageEnvelope markExternal(ExternalMessageEnvelope envelope) {
+        final Message originalMsg = envelope.getOuterObject();
+        final BusAdapter<?, ?> adapter = adapterFor(originalMsg.getClass());
+        return adapter.markExternal(originalMsg);
     }
 
     @Override
@@ -214,8 +205,15 @@ public class IntegrationBus extends MulticastBus<Message,
         }
     }
 
-    private void notifyOfNeeds(Set<IntegrationMessageClass> currentlyRequested) {
-        // Notify others that the requested message set has been changed.
+    /**
+     * Notify other parts of the application that this integration bus instance now requests
+     * for a different set of message types than previously.
+     *
+     * @param  currentlyRequested
+     *         the set of message types that are now requested by this instance of
+     *         integration bus
+     */
+    private void notifyOfNeeds(Iterable<IntegrationMessageClass> currentlyRequested) {
 
         final RequestedMessageTypes.Builder resultBuilder = RequestedMessageTypes.newBuilder();
         for (IntegrationMessageClass messageClass : currentlyRequested) {
@@ -321,13 +319,9 @@ public class IntegrationBus extends MulticastBus<Message,
                     // This item has is not requested by anyone at the moment.
                     // Let's create a subscription.
 
-                    final Class<Message> javaClass = asMessageClass(newRequestedUrl);
-
-                    final EventClass eventClass = EventClass.of(javaClass);
-                    eventBus.register(newEventDispatcher(eventClass));
-
-                    final RejectionClass rejectionClass = RejectionClass.of(javaClass);
-                    rejectionBus.register(newRejectionDispatcher(rejectionClass));
+                    final Class<Message> javaClass = asClassOfMsg(newRequestedUrl);
+                    final BusAdapter<?, ?> adapter = adapterFor(javaClass);
+                    adapter.register(javaClass, boundedContextId);
                 }
 
                 requestedTypes.put(newRequestedUrl, originBoundedContextId);
@@ -360,25 +354,12 @@ public class IntegrationBus extends MulticastBus<Message,
 
                 if (wereNonEmpty && emptyNow) {
                     // It's now the time to remove the local bus subscription.
-                    final Class<Message> javaClass = asMessageClass(itemForRemoval);
-
-                    final EventClass eventClass = EventClass.of(javaClass);
-                    eventBus.unregister(newEventDispatcher(eventClass));
-
-                    final RejectionClass rejectionClass = RejectionClass.of(javaClass);
-                    rejectionBus.unregister(newRejectionDispatcher(rejectionClass));
+                    final Class<Message> javaClass = asClassOfMsg(itemForRemoval);
+                    final BusAdapter<?, ?> adapter = adapterFor(javaClass);
+                    adapter.unregister(javaClass, boundedContextId);
                 }
             }
 
-        }
-
-        private RejectionDispatcher<String> newRejectionDispatcher(
-                final RejectionClass rejectionClass) {
-            return new LocalRejectionSubscriber(boundedContextId, publisherHub, rejectionClass);
-        }
-
-        private EventDispatcher newEventDispatcher(final EventClass eventClass) {
-            return new LocalEventSubscriber(boundedContextId, publisherHub, eventClass);
         }
 
         @Override
@@ -388,7 +369,16 @@ public class IntegrationBus extends MulticastBus<Message,
         }
     }
 
-    private static Class<Message> asMessageClass(String classStr) {
+    private BusAdapter<?, ?> adapterFor(Class<? extends Message> messageClass) {
+        for (BusAdapter<?, ?> localAdapter : localAdapters) {
+            if(localAdapter.accepts(messageClass)) {
+                return localAdapter;
+            }
+        }
+        throw messageUnsupported(messageClass);
+    }
+
+    private static Class<Message> asClassOfMsg(String classStr) {
         final TypeUrl typeUrl = TypeUrl.parse(classStr);
         return typeUrl.getJavaClass();
     }
@@ -399,11 +389,21 @@ public class IntegrationBus extends MulticastBus<Message,
     public static class Builder
             extends Bus.AbstractBuilder<ExternalMessageEnvelope, Message, Builder> {
 
-        private LocalDelivery delivery;
+        /**
+         * Buses that act inside the bounded context, e.g. {@code EventBus}, and which allow
+         * dispatching their events to other bounded contexts.
+         *
+         * <p>{@code CommandBus} does <em>not</em> allow such a dispatching, as commands cannot be
+         * sent to another bounded context for a postponed handling.
+         */
         private EventBus eventBus;
-        private BoundedContextId boundedContextId;
         private RejectionBus rejectionBus;
+
+        private LocalDelivery delivery;
+        private BoundedContextId boundedContextId;
         private TransportFactory transportFactory;
+
+        private Set<BusAdapter<?, ?>> adapters = newHashSet();
 
         public Optional<EventBus> getEventBus() {
             return Optional.fromNullable(eventBus);

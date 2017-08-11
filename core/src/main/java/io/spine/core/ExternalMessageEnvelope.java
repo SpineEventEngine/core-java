@@ -43,12 +43,31 @@ public class ExternalMessageEnvelope
         this.id = event.getId();
         this.message = Events.getMessage(event);
         this.messageClass = EventClass.of(event);
-        this.actorContext = event.getContext().getCommandContext().getActorContext();
+        this.actorContext = event.getContext()
+                                 .getCommandContext()
+                                 .getActorContext();
+    }
+
+    private ExternalMessageEnvelope(Rejection rejection) {
+        super(rejection);
+
+        this.id = rejection.getId();
+        this.message = Rejections.getMessage(rejection);
+        this.messageClass = RejectionClass.of(rejection);
+        this.actorContext = rejection.getContext()
+                                     .getCommand()
+                                     .getContext()
+                                     .getActorContext();
     }
 
     public static ExternalMessageEnvelope of(Event event) {
         checkNotNull(event);
         return new ExternalMessageEnvelope(event);
+    }
+
+    public static ExternalMessageEnvelope of(Rejection rejection) {
+        checkNotNull(rejection);
+        return new ExternalMessageEnvelope(rejection);
     }
 
     @Override

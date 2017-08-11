@@ -88,4 +88,8 @@ message RejectionContext {
 
     // Optional enrichment of the rejection.
     Enrichment enrichment = 6;
+
+    // An internal runtime attribute, which marks a rejection as external to the `BoundedContext`
+    // in which the rejection is being processed.
+    bool external = 7 [(internal) = true];
 }
