@@ -19,16 +19,14 @@
  */
 package io.spine.server.integration;
 
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
-import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Multimap;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.core.Ack;
 import io.spine.core.BoundedContextId;
 import io.spine.core.ExternalMessageEnvelope;
-import io.spine.protobuf.AnyPacker;
 import io.spine.server.bus.Bus;
 import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.DeadMessageTap;
@@ -45,14 +43,13 @@ import io.spine.type.KnownTypes;
 import io.spine.type.MessageClass;
 import io.spine.type.TypeUrl;
 
-import java.util.Collection;
+import javax.annotation.Nullable;
 import java.util.Deque;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Lists.newLinkedList;
-import static com.google.common.collect.Sets.newHashSet;
 import static io.spine.Identifier.newUuid;
 import static io.spine.Identifier.pack;
 import static io.spine.server.bus.Buses.acknowledge;
@@ -71,9 +68,8 @@ public class IntegrationBus extends MulticastBus<Message,
                                                  MessageClass,
                                                  ExternalMessageDispatcher<?>> {
 
-    private final Iterable<BusAdapter<?, ?>> localAdapters;
+    private final Iterable<BusAdapter<?, ?>> localBusAdapters;
     private final BoundedContextId boundedContextId;
-
     private final SubscriberHub subscriberHub;
     private final PublisherHub publisherHub;
 
@@ -83,7 +79,7 @@ public class IntegrationBus extends MulticastBus<Message,
         this.subscriberHub = new SubscriberHub(builder.transportFactory);
         this.publisherHub = new PublisherHub(builder.transportFactory);
 
-        this.localAdapters = ImmutableSet.<BusAdapter<?, ?>>of(
+        this.localBusAdapters = ImmutableSet.<BusAdapter<?, ?>>of(
                 EventBusAdapter.builderWith(builder.eventBus)
                                .setPublisherHub(publisherHub)
                                .setSubscriberHub(subscriberHub)
@@ -97,8 +93,17 @@ public class IntegrationBus extends MulticastBus<Message,
         /*
          * React upon {@code RequestedMessageTypes} message arrival.
          */
+        final ConfigurationChangeObserver observer = new ConfigurationChangeObserver(
+                boundedContextId,
+                new Function<Class<? extends Message>, BusAdapter<?, ?>>() {
+                    @Override
+                    public BusAdapter<?, ?> apply(@Nullable Class<? extends Message> message) {
+                        checkNotNull(message);
+                        return adapterFor(message);
+                    }
+                });
         subscriberHub.get(IntegrationMessageClass.of(RequestedMessageTypes.class))
-                     .addObserver(new ConfigurationChangeObserver());
+                     .addObserver(observer);
     }
 
     public static Builder newBuilder() {
@@ -282,105 +287,13 @@ public class IntegrationBus extends MulticastBus<Message,
         return "Integration bus of BoundedContext ID = " + boundedContextId.getValue();
     }
 
-    /**
-     * An observer, which reacts to the configuration update messages sent by
-     * external entities (such as {@code IntegrationBus}es of other bounded contexts).
-     */
-    private class ConfigurationChangeObserver extends ChannelObserver {
-
-        /**
-         * Current set of message type URLs, requested by other parties via sending the
-         * {@linkplain RequestedMessageTypes configuration messages}, mapped to IDs of their origin
-         * bounded contexts.
-         */
-        private final Multimap<String, BoundedContextId> requestedTypes = HashMultimap.create();
-
-        private ConfigurationChangeObserver() {
-            super(boundedContextId, RequestedMessageTypes.class);
-        }
-
-        @Override
-        public void handle(IntegrationMessage value) {
-            final RequestedMessageTypes message = AnyPacker.unpack(value.getOriginalMessage());
-            final Set<String> newTypeUrls = newHashSet(message.getTypeUrlsList());
-
-            final BoundedContextId originBoundedContextId = value.getBoundedContextId();
-            addNewSubscriptions(newTypeUrls, originBoundedContextId);
-            clearStaleSubscriptions(newTypeUrls, originBoundedContextId);
-        }
-
-        private void addNewSubscriptions(Set<String> newTypeUrls,
-                                         BoundedContextId originBoundedContextId) {
-            for (String newRequestedUrl : newTypeUrls) {
-                final Collection<BoundedContextId> contextsWithSameRequest =
-                        requestedTypes.get(newRequestedUrl);
-                if(contextsWithSameRequest.isEmpty()) {
-
-                    // This item has is not requested by anyone at the moment.
-                    // Let's create a subscription.
-
-                    final Class<Message> javaClass = asClassOfMsg(newRequestedUrl);
-                    final BusAdapter<?, ?> adapter = adapterFor(javaClass);
-                    adapter.register(javaClass, boundedContextId);
-                }
-
-                requestedTypes.put(newRequestedUrl, originBoundedContextId);
-            }
-        }
-
-        private void clearStaleSubscriptions(Set<String> newTypeUrls,
-                                             BoundedContextId originBoundedContextId) {
-
-            final Set<String> toRemove = newHashSet();
-
-            for (String previouslyRequestedType : requestedTypes.keySet()) {
-                final Collection<BoundedContextId> contextsThatRequested =
-                        requestedTypes.get(previouslyRequestedType);
-                if (contextsThatRequested.contains(originBoundedContextId) &&
-                        !newTypeUrls.contains(previouslyRequestedType)) {
-
-                    // The `previouslyRequestedType` item is no longer requested
-                    // by the bounded context with `originBoundedContextId` ID.
-
-                    toRemove.add(previouslyRequestedType);
-                }
-            }
-            for (String itemForRemoval : toRemove) {
-                final boolean wereNonEmpty = !requestedTypes.get(itemForRemoval)
-                                                            .isEmpty();
-                requestedTypes.remove(itemForRemoval, originBoundedContextId);
-                final boolean emptyNow = requestedTypes.get(itemForRemoval)
-                                                       .isEmpty();
-
-                if (wereNonEmpty && emptyNow) {
-                    // It's now the time to remove the local bus subscription.
-                    final Class<Message> javaClass = asClassOfMsg(itemForRemoval);
-                    final BusAdapter<?, ?> adapter = adapterFor(javaClass);
-                    adapter.unregister(javaClass, boundedContextId);
-                }
-            }
-
-        }
-
-        @Override
-        public String toString() {
-            return "Integration bus observer of `RequestedMessageTypes`; " +
-                    "Bounded Context ID = " + boundedContextId.getValue();
-        }
-    }
-
     private BusAdapter<?, ?> adapterFor(Class<? extends Message> messageClass) {
-        for (BusAdapter<?, ?> localAdapter : localAdapters) {
+        for (BusAdapter<?, ?> localAdapter : localBusAdapters) {
             if(localAdapter.accepts(messageClass)) {
                 return localAdapter;
             }
         }
         throw messageUnsupported(messageClass);
-    }
-
-    private static Class<Message> asClassOfMsg(String classStr) {
-        final TypeUrl typeUrl = TypeUrl.parse(classStr);
-        return typeUrl.getJavaClass();
     }
 
     /**
@@ -402,8 +315,6 @@ public class IntegrationBus extends MulticastBus<Message,
         private LocalDelivery delivery;
         private BoundedContextId boundedContextId;
         private TransportFactory transportFactory;
-
-        private Set<BusAdapter<?, ?>> adapters = newHashSet();
 
         public Optional<EventBus> getEventBus() {
             return Optional.fromNullable(eventBus);
