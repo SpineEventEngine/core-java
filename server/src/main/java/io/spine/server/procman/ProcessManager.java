@@ -144,9 +144,9 @@ public abstract class ProcessManager<I,
      *         produce new events because of the passed event
      */
     List<Event> dispatchEvent(EventEnvelope event)  {
-        checkNotNull(event);
+        final EventReactorMethod method = thisClass.getReactor(event.getMessageClass());
         final List<? extends Message> eventMessages =
-                EventReactorMethod.invokeFor(this, event.getMessage(), event.getEventContext());
+                method.invoke(this, event.getMessage(), event.getEventContext());
         final List<Event> events = toEvents(eventMessages, event);
         return events;
     }
