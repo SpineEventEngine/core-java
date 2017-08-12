@@ -34,6 +34,7 @@ import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.commandbus.CommandBus;
+import io.spine.server.model.Model;
 import io.spine.server.reflect.CommandHandlerMethod;
 import io.spine.server.reflect.EventReactorMethod;
 import io.spine.server.reflect.HandlerMethod;
@@ -76,6 +77,9 @@ public abstract class ProcessManager<I,
                                      B extends ValidatingBuilder<S, ? extends Message.Builder>>
         extends CommandHandlingEntity<I, S, B> {
 
+    private final ProcessManagerClass<?> thisClass = Model.getInstance()
+                                                          .asProcessManagerClass(getClass());
+
     /** The Command Bus to post routed commands. */
     private volatile CommandBus commandBus;
 
@@ -114,7 +118,9 @@ public abstract class ProcessManager<I,
      */
     @Override
     protected List<Event> dispatchCommand(CommandEnvelope cmd) {
-        final List<? extends Message> messages = super.dispatchCommand(cmd);
+        final CommandHandlerMethod method = thisClass.getHandler(cmd.getMessageClass());
+        final List<? extends Message> messages =
+                method.invoke(this, cmd.getMessage(), cmd.getCommandContext());
         final List<Event> result = toEvents(messages, cmd);
         return result;
     }

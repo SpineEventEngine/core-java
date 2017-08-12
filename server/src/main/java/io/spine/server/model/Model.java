@@ -23,6 +23,8 @@ package io.spine.server.model;
 import com.google.common.collect.Maps;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateClass;
+import io.spine.server.procman.ProcessManager;
+import io.spine.server.procman.ProcessManagerClass;
 
 import java.util.Map;
 
@@ -49,5 +51,15 @@ public class Model {
             handlerClasses.put(cls, handlerClass);
         }
         return (AggregateClass<?>)handlerClass;
+    }
+
+    public ProcessManagerClass<?> asProcessManagerClass(Class<? extends ProcessManager> cls) {
+        checkNotNull(cls);
+        HandlerClass<?> handlerClass = handlerClasses.get(cls);
+        if (handlerClass == null) {
+            handlerClass = ProcessManagerClass.of(cls);
+            handlerClasses.put(cls, handlerClass);
+        }
+        return (ProcessManagerClass<?>)handlerClass;
     }
 }

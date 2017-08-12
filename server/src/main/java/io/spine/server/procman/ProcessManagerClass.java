@@ -21,21 +21,65 @@
 package io.spine.server.procman;
 
 import io.spine.annotation.Internal;
+import io.spine.core.CommandClass;
+import io.spine.core.EventClass;
+import io.spine.core.RejectionClass;
+import io.spine.server.aggregate.MessageHandlerMap;
+import io.spine.server.command.CommandHandlerClass;
 import io.spine.server.model.EntityClass;
+import io.spine.server.reflect.CommandHandlerMethod;
+import io.spine.server.reflect.EventReactorMethod;
+import io.spine.server.reflect.RejectionReactorMethod;
+
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 @Internal
-public final class ProcessManagerClass<P extends ProcessManager> extends EntityClass<P> {
+public final class ProcessManagerClass<P extends ProcessManager>
+        extends EntityClass<P>
+        implements CommandHandlerClass {
 
     private static final long serialVersionUID = 0L;
 
-    private ProcessManagerClass(Class<? extends P> value) {
-        super(value);
+    private final MessageHandlerMap<CommandClass, CommandHandlerMethod> commands;
+    private final MessageHandlerMap<EventClass, EventReactorMethod> eventReactions;
+    private final MessageHandlerMap<RejectionClass, RejectionReactorMethod> rejectionReactions;
+
+    private ProcessManagerClass(Class<? extends P> cls) {
+        super(cls);
+        this.commands = new MessageHandlerMap<>(cls, CommandHandlerMethod.factory());
+        this.eventReactions = new MessageHandlerMap<>(cls, EventReactorMethod.factory());
+        this.rejectionReactions = new MessageHandlerMap<>(cls, RejectionReactorMethod.factory());
     }
 
     public static <P extends ProcessManager> ProcessManagerClass<P> of(Class<P> cls) {
         checkNotNull(cls);
         return new ProcessManagerClass<>(cls);
+    }
+
+    @Override
+    public Set<CommandClass> getCommands() {
+        return commands.getMessageClasses();
+    }
+
+    public Set<EventClass> getEventReactions() {
+        return eventReactions.getMessageClasses();
+    }
+
+    public Set<RejectionClass> getRejectionReactions() {
+        return rejectionReactions.getMessageClasses();
+    }
+
+    public CommandHandlerMethod getHandler(CommandClass commandClass) {
+        return commands.getMethod(commandClass);
+    }
+
+    public EventReactorMethod getReactor(EventClass eventClass) {
+        return eventReactions.getMethod(eventClass);
+    }
+
+    public RejectionReactorMethod getReactor(RejectionClass rejectionClass) {
+        return rejectionReactions.getMethod(rejectionClass);
     }
 }
