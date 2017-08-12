@@ -159,14 +159,9 @@ public abstract class ProcessManager<I,
      *         produce new events because of the passed event
      */
     List<Event> dispatchRejection(RejectionEnvelope rejection) {
-        checkNotNull(rejection);
-        final Message rejectionMessage = rejection.getMessage();
-        final Message commandMessage = rejection.getCommandMessage();
-        final RejectionReactorMethod method =
-                RejectionReactorMethod.getMethod(getClass(), rejectionMessage, commandMessage);
-
+        final RejectionReactorMethod method = thisClass.getReactor(rejection.getMessageClass());
         final List<? extends Message> eventMessages =
-        method.invoke(this, rejectionMessage, rejection.getRejectionContext());
+        method.invoke(this, rejection.getMessage(), rejection.getRejectionContext());
         final List<Event> events = toEvents(eventMessages, rejection);
         return events;
     }
