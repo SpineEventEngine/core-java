@@ -35,6 +35,7 @@ import io.spine.server.commandbus.CommandDispatcherDelegate;
 import io.spine.server.commandbus.DelegatingCommandDispatcher;
 import io.spine.server.entity.EventDispatchingRepository;
 import io.spine.server.event.EventBus;
+import io.spine.server.model.Model;
 import io.spine.server.rejection.DelegatingRejectionDispatcher;
 import io.spine.server.rejection.RejectionDispatcherDelegate;
 import io.spine.server.route.CommandRouting;
@@ -64,20 +65,11 @@ public abstract class ProcessManagerRepository<I,
                 implements CommandDispatcherDelegate<I>,
                            RejectionDispatcherDelegate<I> {
 
+    @Nullable
+    private ProcessManagerClass<P> processManagerClass;
+
     /** The command routing schema used by this repository. */
     private final CommandRouting<I> commandRouting = CommandRouting.newInstance();
-
-    /** Cached set of command classes handled by process managers of this repository. */
-    @Nullable
-    private Set<CommandClass> commandClasses;
-
-    /** Cached set of event classes to which process managers of this repository are subscribed. */
-    @Nullable
-    private Set<EventClass> eventClasses;
-
-    /** Cached set of rejection classes to which process managers are subscribed. */
-    @Nullable
-    private Set<RejectionClass> rejectionClasses;
 
     /** The rejection routing schema used by this repository. */
     private final RejectionRouting<I> rejectionRouting =
@@ -86,6 +78,16 @@ public abstract class ProcessManagerRepository<I,
     /** {@inheritDoc} */
     protected ProcessManagerRepository() {
         super(EventProducers.<I>fromFirstMessageField());
+    }
+
+    @SuppressWarnings("unchecked") // The cast is ensured by generic parameters of the repository.
+    protected ProcessManagerClass<P> processManagerClass() {
+        if (processManagerClass == null) {
+            processManagerClass = (ProcessManagerClass<P>)
+                    Model.getInstance()
+                         .asProcessManagerClass(getEntityClass());
+        }
+        return processManagerClass;
     }
 
     /**
@@ -136,11 +138,7 @@ public abstract class ProcessManagerRepository<I,
     @Override
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // it is immutable
     public Set<EventClass> getMessageClasses() {
-        if (eventClasses == null) {
-            final Class<? extends ProcessManager> pmClass = getEntityClass();
-            eventClasses = ProcessManager.TypeInfo.getEventClasses(pmClass);
-        }
-        return eventClasses;
+        return processManagerClass().getEventReactions();
     }
 
     /**
@@ -151,10 +149,7 @@ public abstract class ProcessManagerRepository<I,
     @Override
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // it is immutable
     public Set<CommandClass> getCommandClasses() {
-        if (commandClasses == null) {
-            commandClasses = ProcessManager.TypeInfo.getCommandClasses(getEntityClass());
-        }
-        return commandClasses;
+        return processManagerClass().getCommands();
     }
 
     /**
@@ -167,10 +162,7 @@ public abstract class ProcessManagerRepository<I,
     @Override
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // it is immutable
     public Set<RejectionClass> getRejectionClasses() {
-        if (rejectionClasses == null) {
-            rejectionClasses = ProcessManager.TypeInfo.getRejectionClasses(getEntityClass());
-        }
-        return rejectionClasses;
+        return processManagerClass().getRejectionReactions();
     }
 
     /**

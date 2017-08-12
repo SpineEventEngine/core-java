@@ -30,7 +30,6 @@ import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
-import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Events;
 import io.spine.core.RejectionEnvelope;
@@ -58,16 +57,13 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
-import java.util.Set;
 
 import static io.spine.core.Commands.getMessage;
 import static io.spine.core.Rejections.createRejection;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.TypeConverter.toMessage;
-import static io.spine.server.TestEventClasses.assertContains;
 import static io.spine.server.procman.ProcessManagerDispatcher.dispatch;
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Verify.assertSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertEquals;
@@ -230,16 +226,6 @@ public class ProcessManagerShould {
     }
 
     @Test
-    public void return_reacted_event_classes() {
-        final Set<EventClass> classes =
-                ProcessManager.TypeInfo.getEventClasses(TestProcessManager.class);
-
-        assertEquals(3, classes.size());
-        assertContains(classes,
-                       PmProjectCreated.class, PmTaskAdded.class, PmProjectStarted.class);
-    }
-
-    @Test
     public void dispatch_rejection() {
         final EntityAlreadyArchived rejectionMessage =
                 EntityAlreadyArchived.newBuilder()
@@ -311,10 +297,5 @@ public class ProcessManagerShould {
         return ((PmAddTask.Builder) Sample.builderForType(PmAddTask.class))
                 .setProjectId(ID)
                 .build();
-    }
-
-    @Test
-    public void have_TypeInfo_utility_class() {
-        assertHasPrivateParameterlessCtor(ProcessManager.TypeInfo.class);
     }
 }

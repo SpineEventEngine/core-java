@@ -21,16 +21,12 @@
 package io.spine.server.procman;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
-import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
-import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.core.MessageEnvelope;
-import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.commandbus.CommandBus;
@@ -42,7 +38,6 @@ import io.spine.server.reflect.RejectionReactorMethod;
 import io.spine.validate.ValidatingBuilder;
 
 import java.util.List;
-import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -254,47 +249,5 @@ public abstract class ProcessManager<I,
     protected String getMissingTxMessage() {
         return "ProcessManager modification is not available this way. Please modify the state from" +
                 " a command handling or event reacting method.";
-    }
-
-    /**
-     * Provides type information for process manager classes.
-     */
-    static class TypeInfo {
-
-        private TypeInfo() {
-            // Prevent construction of this utility class.
-        }
-
-        /**
-         * Obtains the set of command classes handled by passed process manager class.
-         *
-         * @param pmClass the process manager class to inspect
-         * @return immutable set of command classes or an empty set if no commands are handled
-         */
-        static Set<CommandClass> getCommandClasses(Class<? extends ProcessManager> pmClass) {
-            return ImmutableSet.copyOf(CommandHandlerMethod.inspect(pmClass));
-        }
-
-        /**
-         * Returns the set of event classes on which the process manager reacts.
-         *
-         * @param pmClass the process manager class to inspect
-         * @return immutable set of event classes or an empty set if no events are handled
-         */
-        static Set<EventClass> getEventClasses(Class<? extends ProcessManager> pmClass) {
-            return EventReactorMethod.inspect(pmClass);
-        }
-
-        /**
-         * Obtains the set of rejection classes to which process managers of the passed class are
-         * subscribed.
-         *
-         * @param pmClass the process manager class to inspect
-         * @return immutable set of rejection classes or an empty set if the class is not subscribed
-         * to rejections
-         */
-        static Set<RejectionClass> getRejectionClasses(Class<? extends ProcessManager> pmClass) {
-            return ImmutableSet.copyOf(RejectionReactorMethod.inspect(pmClass));
-        }
     }
 }
