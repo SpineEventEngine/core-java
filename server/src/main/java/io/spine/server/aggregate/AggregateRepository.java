@@ -37,6 +37,7 @@ import io.spine.server.entity.Repository;
 import io.spine.server.event.DelegatingEventDispatcher;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcherDelegate;
+import io.spine.server.model.Model;
 import io.spine.server.rejection.DelegatingRejectionDispatcher;
 import io.spine.server.rejection.RejectionDispatcherDelegate;
 import io.spine.server.route.CommandRouting;
@@ -258,7 +259,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     public Set<CommandClass> getMessageClasses() {
         if (commandClasses == null) {
-            commandClasses = Aggregate.TypeInfo.getCommandClasses(getAggregateClass());
+            commandClasses = Model.getInstance()
+                                  .asAggregateClass(getAggregateClass())
+                                  .getCommands();
         }
         return commandClasses;
     }
@@ -301,7 +304,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // We return immutable impl.
     public Set<EventClass> getEventClasses() {
         if (eventReactions == null) {
-            eventReactions = Aggregate.TypeInfo.getReactedEventClasses(getAggregateClass());
+            eventReactions = Model.getInstance()
+                                  .asAggregateClass(getAggregateClass())
+                                  .getEventReactions();
         }
         return eventReactions;
     }
@@ -330,7 +335,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     public Set<RejectionClass> getRejectionClasses() {
         if (rejectionReactions == null) {
             rejectionReactions =
-                    Aggregate.TypeInfo.getReactedRejectionClasses(getAggregateClass());
+                    Model.getInstance()
+                         .asAggregateClass(getAggregateClass())
+                         .getRejectionReactions();
         }
         return rejectionReactions;
     }

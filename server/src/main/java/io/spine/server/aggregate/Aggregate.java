@@ -25,22 +25,18 @@ import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.grpc.Internal;
-import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
-import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.core.MessageEnvelope;
-import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
 import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.event.EventFactory;
-import io.spine.server.reflect.CommandHandlerMethod;
 import io.spine.server.reflect.EventApplierMethod;
 import io.spine.server.reflect.EventReactorMethod;
 import io.spine.server.reflect.RejectionReactorMethod;
@@ -48,7 +44,6 @@ import io.spine.validate.ValidatingBuilder;
 
 import javax.annotation.CheckReturnValue;
 import java.util.List;
-import java.util.Set;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
@@ -393,26 +388,5 @@ public abstract class Aggregate<I,
     @VisibleForTesting
     protected int versionNumber() {
         return super.versionNumber();
-    }
-
-    /**
-     * Provides type information on an aggregate class.
-     */
-    static class TypeInfo {
-
-        /** Prevents instantiation of this utility class. */
-        private TypeInfo() {}
-
-        static Set<CommandClass> getCommandClasses(Class<? extends Aggregate> cls) {
-            return CommandHandlerMethod.inspect(cls);
-        }
-
-        static Set<EventClass> getReactedEventClasses(Class<? extends Aggregate> cls) {
-            return EventReactorMethod.inspect(cls);
-        }
-
-        static Set<RejectionClass> getReactedRejectionClasses(Class<? extends Aggregate> cls) {
-            return RejectionReactorMethod.inspect(cls);
-        }
     }
 }

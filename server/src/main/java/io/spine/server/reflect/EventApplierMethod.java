@@ -25,11 +25,13 @@ import com.google.common.base.Predicate;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
+import io.spine.core.EventClass;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalStateException;
@@ -81,6 +83,15 @@ public final class EventApplierMethod extends HandlerMethod<Empty> {
 
     public static HandlerMethod.Factory<EventApplierMethod> factory() {
         return Factory.getInstance();
+    }
+
+    /**
+     * Returns set of classes of events that represent data for the passed class of aggregates.
+     */
+    public static Set<EventClass> inspect(Class<? extends Aggregate> cls) {
+        checkNotNull(cls);
+        final Set<EventClass> result = EventClass.setOf(inspect(cls, predicate()));
+        return result;
     }
 
     /**

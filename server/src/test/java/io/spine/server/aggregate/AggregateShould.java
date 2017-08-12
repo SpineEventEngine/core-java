@@ -40,6 +40,7 @@ import io.spine.server.aggregate.given.Given;
 import io.spine.server.command.Assign;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.entity.InvalidEntityStateException;
+import io.spine.server.model.Model;
 import io.spine.test.TimeTests;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
@@ -73,7 +74,6 @@ import static io.spine.server.aggregate.given.Given.EventMessage.projectCreated;
 import static io.spine.server.aggregate.given.Given.EventMessage.projectStarted;
 import static io.spine.server.aggregate.given.Given.EventMessage.taskAdded;
 import static io.spine.server.entity.given.Given.aggregateOfClass;
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Verify.assertSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -223,7 +223,9 @@ public class AggregateShould {
     @Test
     public void return_command_classes_which_are_handled_by_aggregate() {
         final Set<CommandClass> commandClasses =
-                Aggregate.TypeInfo.getCommandClasses(TestAggregate.class);
+                Model.getInstance()
+                     .asAggregateClass(TestAggregate.class)
+                     .getCommands();
 
         assertTrue(commandClasses.size() == 4);
 
@@ -516,11 +518,6 @@ public class AggregateShould {
     @Test(expected = IllegalStateException.class)
     public void do_not_allow_getting_state_builder_from_outside_the_event_applier() {
         new IntAggregate(100).getBuilder();
-    }
-
-    @Test
-    public void have_TypeInfo_utility_class() {
-        assertHasPrivateParameterlessCtor(Aggregate.TypeInfo.class);
     }
 
     @Test
