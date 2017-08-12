@@ -90,4 +90,8 @@ public final class AggregateClass<A extends Aggregate>
     public EventApplierMethod getApplier(EventClass eventClass) {
         return stateEvents.getMethod(eventClass);
     }
+
+    public EventReactorMethod getReactor(EventClass eventClass) {
+        return eventReactions.getMethod(eventClass);
+    }
 }

@@ -179,7 +179,8 @@ public abstract class Aggregate<I,
      *         an empty list if the aggregate state does not change in reaction to the event
      */
     List<? extends Message> reactOn(EventEnvelope event) {
-        return EventReactorMethod.invokeFor(this, event.getMessage(), event.getEventContext());
+        final EventReactorMethod method = thisClass.getReactor(event.getMessageClass());
+        return method.invoke(this, event.getMessage(), event.getEventContext());
     }
 
     /**
@@ -203,8 +204,8 @@ public abstract class Aggregate<I,
      * @param eventMessage the event message to apply
      */
     void invokeApplier(Message eventMessage) {
-        final EventApplierMethod applier = thisClass.getApplier(EventClass.of(eventMessage));
-        applier.invoke(this, eventMessage);
+        final EventApplierMethod method = thisClass.getApplier(EventClass.of(eventMessage));
+        method.invoke(this, eventMessage);
     }
 
     /**
