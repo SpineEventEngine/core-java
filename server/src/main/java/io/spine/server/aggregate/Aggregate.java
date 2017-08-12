@@ -192,10 +192,8 @@ public abstract class Aggregate<I,
      *         response to this rejection
      */
     List<? extends Message> reactOn(RejectionEnvelope rejection) {
-        return RejectionReactorMethod.invokeFor(this,
-                                                rejection.getMessage(),
-                                                rejection.getCommandMessage(),
-                                                rejection.getRejectionContext());
+        final RejectionReactorMethod method = thisClass.getReactor(rejection.getMessageClass());
+        return method.invoke(this, rejection.getMessage(), rejection.getRejectionContext());
     }
 
     /**

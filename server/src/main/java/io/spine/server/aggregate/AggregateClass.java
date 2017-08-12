@@ -94,4 +94,8 @@ public final class AggregateClass<A extends Aggregate>
     public EventReactorMethod getReactor(EventClass eventClass) {
         return eventReactions.getMethod(eventClass);
     }
+
+    public RejectionReactorMethod getReactor(RejectionClass rejectionClass) {
+        return rejectionReactions.getMethod(rejectionClass);
+    }
 }
