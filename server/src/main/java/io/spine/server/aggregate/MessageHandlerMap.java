@@ -33,6 +33,7 @@ import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Set;
 
+import static com.google.common.base.Preconditions.checkState;
 import static io.spine.server.reflect.HandlerMethod.getFirstParamType;
 
 public class MessageHandlerMap<M extends MessageClass, H extends HandlerMethod>
@@ -80,5 +81,12 @@ public class MessageHandlerMap<M extends MessageClass, H extends HandlerMethod>
 
     public Set<M> getMessageClasses() {
         return map.keySet();
+    }
+
+    public H getMethod(M messageClass) {
+        final H handlerMethod = map.get(messageClass);
+        checkState(handlerMethod != null,
+                   "Unable to find handler for the message class %s", messageClass);
+        return handlerMethod;
     }
 }

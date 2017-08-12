@@ -82,4 +82,8 @@ public final class AggregateClass<A extends Aggregate>
     public Set<RejectionClass> getRejectionReactions() {
         return rejectionReactions.getMessageClasses();
     }
+
+    public CommandHandlerMethod getMethod(CommandClass commandClass) {
+        return commands.getMethod(commandClass);
+    }
 }

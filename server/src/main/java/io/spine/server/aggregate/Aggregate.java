@@ -37,6 +37,8 @@ import io.spine.core.Versions;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.event.EventFactory;
+import io.spine.server.model.Model;
+import io.spine.server.reflect.CommandHandlerMethod;
 import io.spine.server.reflect.EventApplierMethod;
 import io.spine.server.reflect.EventReactorMethod;
 import io.spine.server.reflect.RejectionReactorMethod;
@@ -120,6 +122,9 @@ public abstract class Aggregate<I,
                                 B extends ValidatingBuilder<S, ? extends Message.Builder>>
                 extends CommandHandlingEntity<I, S, B> {
 
+    private final AggregateClass<?> thisClass = Model.getInstance()
+                                                     .asAggregateClass(getClass());
+
     /**
      * Events generated in the process of handling commands that were not yet committed.
      *
@@ -156,13 +161,14 @@ public abstract class Aggregate<I,
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * <p>Overrides to expose the method to the package.
+     * Obtains a method for the passed command and invokes it.
      */
     @Override
-    protected List<? extends Message> dispatchCommand(CommandEnvelope cmd) {
-        return super.dispatchCommand(cmd);
+    protected List<? extends Message> dispatchCommand(CommandEnvelope command) {
+        final CommandHandlerMethod method = thisClass.getMethod(command.getMessageClass());
+        final List<? extends Message> result =
+                method.invoke(this, command.getMessage(), command.getCommandContext());
+        return result;
     }
 
     /**
