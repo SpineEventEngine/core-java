@@ -28,6 +28,7 @@ import io.grpc.Internal;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
+import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.core.MessageEnvelope;
@@ -50,7 +51,6 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static io.spine.core.Events.getMessage;
-import static io.spine.server.reflect.EventApplierMethod.getMethod;
 import static io.spine.time.Time.getCurrentTime;
 import static io.spine.validate.Validate.isNotDefault;
 
@@ -165,7 +165,7 @@ public abstract class Aggregate<I,
      */
     @Override
     protected List<? extends Message> dispatchCommand(CommandEnvelope command) {
-        final CommandHandlerMethod method = thisClass.getMethod(command.getMessageClass());
+        final CommandHandlerMethod method = thisClass.getHandler(command.getMessageClass());
         final List<? extends Message> result =
                 method.invoke(this, command.getMessage(), command.getCommandContext());
         return result;
@@ -203,8 +203,8 @@ public abstract class Aggregate<I,
      * @param eventMessage the event message to apply
      */
     void invokeApplier(Message eventMessage) {
-        final EventApplierMethod method = getMethod(getClass(), eventMessage);
-        method.invoke(this, eventMessage);
+        final EventApplierMethod applier = thisClass.getApplier(EventClass.of(eventMessage));
+        applier.invoke(this, eventMessage);
     }
 
     /**
