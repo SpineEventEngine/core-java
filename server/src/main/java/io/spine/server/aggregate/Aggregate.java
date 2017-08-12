@@ -117,6 +117,7 @@ import static io.spine.validate.Validate.isNotDefault;
  * @author Alexander Litus
  * @author Mikhail Melnik
  */
+@SuppressWarnings("OverlyCoupledClass") // OK for this central class.
 public abstract class Aggregate<I,
                                 S extends Message,
                                 B extends ValidatingBuilder<S, ? extends Message.Builder>>
