@@ -23,6 +23,7 @@ package io.spine.server.reflect;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Empty;
 import com.google.protobuf.StringValue;
+import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.test.Tests;
 import org.junit.Before;
@@ -182,6 +183,11 @@ public class HandlerMethodShould {
         protected TwoParamMethod(Method method) {
             super(method);
         }
+
+        @Override
+        public EventClass getMessageClass() {
+            return EventClass.of(rawMessageClass());
+        }
     }
 
     private static class OneParamMethod extends HandlerMethod<Empty> {
@@ -189,5 +195,11 @@ public class HandlerMethodShould {
         protected OneParamMethod(Method method) {
             super(method);
         }
+
+        @Override
+        public EventClass getMessageClass() {
+            return EventClass.of(rawMessageClass());
+        }
+
     }
 }

@@ -49,6 +49,11 @@ public final class EventReactorMethod extends HandlerMethod<EventContext> {
         super(method);
     }
 
+    @Override
+    public EventClass getMessageClass() {
+        return EventClass.of(rawMessageClass());
+    }
+
     /**
      * Invokes reacting method for the passed event.
      *
@@ -115,7 +120,7 @@ public final class EventReactorMethod extends HandlerMethod<EventContext> {
         return result;
     }
 
-    private static HandlerMethod.Factory<EventReactorMethod> factory() {
+    public static HandlerMethod.Factory<EventReactorMethod> factory() {
         return Factory.getInstance();
     }
 

@@ -20,7 +20,6 @@
 
 package io.spine.server.reflect;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.protobuf.Any;
@@ -60,6 +59,11 @@ public final class CommandHandlerMethod extends HandlerMethod<CommandContext> {
      */
     private CommandHandlerMethod(Method method) {
         super(method);
+    }
+
+    @Override
+    public CommandClass getMessageClass() {
+        return CommandClass.of(rawMessageClass());
     }
 
     /**
@@ -121,8 +125,7 @@ public final class CommandHandlerMethod extends HandlerMethod<CommandContext> {
         return eventMessages;
     }
 
-    @VisibleForTesting
-    static HandlerMethod.Factory<CommandHandlerMethod> factory() {
+    public static HandlerMethod.Factory<CommandHandlerMethod> factory() {
         return Factory.getInstance();
     }
 

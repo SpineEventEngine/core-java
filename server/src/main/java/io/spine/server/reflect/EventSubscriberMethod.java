@@ -54,6 +54,11 @@ public final class EventSubscriberMethod extends HandlerMethod<EventContext> {
         super(method);
     }
 
+    @Override
+    public EventClass getMessageClass() {
+        return EventClass.of(rawMessageClass());
+    }
+
     /**
      * Invokes the subscriber method in the passed object.
      */

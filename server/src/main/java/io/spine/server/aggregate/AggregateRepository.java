@@ -26,7 +26,6 @@ import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
-import io.spine.core.React;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
 import io.spine.core.TenantId;
@@ -111,17 +110,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     /** The constructor for creating entity instances. */
     private Constructor<A> entityConstructor;
 
-    /** The set of command classes dispatched to aggregates by this repository. */
     @Nullable
-    private Set<CommandClass> commandClasses;
-
-    /** The set of event classes on which aggregates {@linkplain React react}. */
-    @Nullable
-    private Set<EventClass> eventReactions;
-
-    /** The set of rejection classes on which aggregates {@linkplain React react}. */
-    @Nullable
-    private Set<RejectionClass> rejectionReactions;
+    private AggregateClass<A> aggregateClass;
 
     /** Creates a new instance. */
     protected AggregateRepository() {
@@ -175,6 +165,15 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     public A create(I id) {
         return createEntity(getEntityConstructor(), id);
+    }
+
+    @SuppressWarnings("unchecked") // The cast is ensured by generic parameters of the repository.
+    protected AggregateClass<A> aggregateClass() {
+        if (aggregateClass == null) {
+            aggregateClass = (AggregateClass<A>) Model.getInstance()
+                                                      .asAggregateClass(getEntityClass());
+        }
+        return aggregateClass;
     }
 
     /**
@@ -258,12 +257,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // We return immutable impl.
     @Override
     public Set<CommandClass> getMessageClasses() {
-        if (commandClasses == null) {
-            commandClasses = Model.getInstance()
-                                  .asAggregateClass(getAggregateClass())
-                                  .getCommands();
-        }
-        return commandClasses;
+        return aggregateClass().getCommands();
     }
 
     /**
@@ -303,12 +297,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // We return immutable impl.
     public Set<EventClass> getEventClasses() {
-        if (eventReactions == null) {
-            eventReactions = Model.getInstance()
-                                  .asAggregateClass(getAggregateClass())
-                                  .getEventReactions();
-        }
-        return eventReactions;
+        return aggregateClass().getEventReactions();
     }
 
     /**
@@ -333,13 +322,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // We return immutable impl.
     public Set<RejectionClass> getRejectionClasses() {
-        if (rejectionReactions == null) {
-            rejectionReactions =
-                    Model.getInstance()
-                         .asAggregateClass(getAggregateClass())
-                         .getRejectionReactions();
-        }
-        return rejectionReactions;
+        return aggregateClass().getRejectionReactions();
     }
 
     @Override

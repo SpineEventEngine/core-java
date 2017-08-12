@@ -31,6 +31,7 @@ import io.spine.core.Event;
 import io.spine.core.MessageEnvelope;
 import io.spine.core.Version;
 import io.spine.server.event.EventFactory;
+import io.spine.type.MessageClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,6 +64,9 @@ public abstract class HandlerMethod<C extends Message> {
     /** The method to be called. */
     private final Method method;
 
+    /** The class of the first parameter. */
+    private final Class<? extends Message> messageClass;
+
     /** The number of parameters the method has. */
     private final int paramCount;
 
@@ -73,9 +77,16 @@ public abstract class HandlerMethod<C extends Message> {
      */
     HandlerMethod(Method method) {
         this.method = checkNotNull(method);
+        this.messageClass = getFirstParamType(method);
         this.paramCount = method.getParameterTypes().length;
         method.setAccessible(true);
     }
+
+    protected Class<? extends Message> rawMessageClass() {
+        return messageClass;
+    }
+
+    public abstract MessageClass getMessageClass();
 
     /**
      * Returns types of messages handled by the passed class.
@@ -137,7 +148,7 @@ public abstract class HandlerMethod<C extends Message> {
      * @return the class of the first method parameter
      * @throws ClassCastException if the first parameter isn't a class implementing {@link Message}
      */
-    static Class<? extends Message> getFirstParamType(Method handler) {
+    public static Class<? extends Message> getFirstParamType(Method handler) {
         @SuppressWarnings("unchecked") /* we always expect first param as {@link Message} */
         final Class<? extends Message> result =
                 (Class<? extends Message>) handler.getParameterTypes()[0];
@@ -324,7 +335,7 @@ public abstract class HandlerMethod<C extends Message> {
      *
      * @param <H> the type of the handler method objects to create
      */
-    interface Factory<H extends HandlerMethod> {
+    public interface Factory<H extends HandlerMethod> {
 
         /** Returns the class of the method wrapper. */
         Class<H> getMethodClass();

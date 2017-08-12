@@ -60,6 +60,11 @@ class RejectionHandlerMethod extends HandlerMethod<RejectionContext>{
         this.kind = getKind(method);
     }
 
+    @Override
+    public RejectionClass getMessageClass() {
+        return RejectionClass.of(rawMessageClass());
+    }
+
     private static Kind getKind(Method method) {
         final Class[] paramTypes = method.getParameterTypes();
         final int paramCount = paramTypes.length;

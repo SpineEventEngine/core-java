@@ -31,7 +31,6 @@ import io.spine.server.reflect.EventApplierMethod;
 import io.spine.server.reflect.EventReactorMethod;
 import io.spine.server.reflect.RejectionReactorMethod;
 
-import javax.annotation.Nullable;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -49,20 +48,17 @@ public final class AggregateClass<A extends Aggregate>
 
     private static final long serialVersionUID = 0L;
 
-    @Nullable
-    private Set<CommandClass> commands;
+    private final MessageHandlerMap<CommandClass, CommandHandlerMethod> commands;
+    private final MessageHandlerMap<EventClass, EventApplierMethod> stateEvents;
+    private final MessageHandlerMap<EventClass, EventReactorMethod> eventReactions;
+    private final MessageHandlerMap<RejectionClass, RejectionReactorMethod> rejectionReactions;
 
-    @Nullable
-    private Set<EventClass> stateEvents;
-
-    @Nullable
-    private Set<EventClass> eventReactions;
-
-    @Nullable
-    private Set<RejectionClass> rejectionReactions;
-
-    private AggregateClass(Class<? extends A> value) {
-        super(value);
+    private AggregateClass(Class<? extends A> cls) {
+        super(cls);
+        this.commands = new MessageHandlerMap<>(cls, CommandHandlerMethod.factory());
+        this.stateEvents = new MessageHandlerMap<>(cls, EventApplierMethod.factory());
+        this.eventReactions = new MessageHandlerMap<>(cls, EventReactorMethod.factory());
+        this.rejectionReactions = new MessageHandlerMap<>(cls, RejectionReactorMethod.factory());
     }
 
     public static <A extends Aggregate> AggregateClass<A> of(Class<A> cls) {
@@ -72,30 +68,18 @@ public final class AggregateClass<A extends Aggregate>
 
     @Override
     public Set<CommandClass> getCommands() {
-        if (commands == null) {
-            commands = CommandHandlerMethod.inspect(value());
-        }
-        return commands;
+        return commands.getMessageClasses();
     }
 
     public Set<EventClass> getStateEvents() {
-        if (stateEvents == null) {
-            stateEvents = EventApplierMethod.inspect(value());
-        }
-        return stateEvents;
+        return stateEvents.getMessageClasses();
     }
 
     public Set<EventClass> getEventReactions() {
-        if (eventReactions == null) {
-            eventReactions = EventReactorMethod.inspect(value());
-        }
-        return eventReactions;
+        return eventReactions.getMessageClasses();
     }
 
     public Set<RejectionClass> getRejectionReactions() {
-        if (rejectionReactions == null) {
-            rejectionReactions = RejectionReactorMethod.inspect(value());
-        }
-        return rejectionReactions;
+        return rejectionReactions.getMessageClasses();
     }
 }

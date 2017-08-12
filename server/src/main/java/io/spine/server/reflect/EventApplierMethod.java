@@ -55,6 +55,11 @@ public final class EventApplierMethod extends HandlerMethod<Empty> {
         super(method);
     }
 
+    @Override
+    public EventClass getMessageClass() {
+        return EventClass.of(rawMessageClass());
+    }
+
     static EventApplierMethod from(Method method) {
         return new EventApplierMethod(method);
     }

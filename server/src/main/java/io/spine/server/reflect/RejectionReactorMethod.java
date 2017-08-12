@@ -130,7 +130,7 @@ public class RejectionReactorMethod extends RejectionHandlerMethod {
     }
 
     /** Returns the factory for filtering and creating rejection reactor methods. */
-    private static HandlerMethod.Factory<RejectionReactorMethod> factory() {
+    public static HandlerMethod.Factory<RejectionReactorMethod> factory() {
         return Factory.getInstance();
     }
 
