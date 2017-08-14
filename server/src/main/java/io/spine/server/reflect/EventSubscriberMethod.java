@@ -103,7 +103,7 @@ public final class EventSubscriberMethod extends HandlerMethod<EventContext> {
     }
 
     /** Returns the factory for filtering and creating event subscriber methods. */
-    private static HandlerMethod.Factory<EventSubscriberMethod> factory() {
+    public static HandlerMethod.Factory<EventSubscriberMethod> factory() {
         return Factory.getInstance();
     }
 

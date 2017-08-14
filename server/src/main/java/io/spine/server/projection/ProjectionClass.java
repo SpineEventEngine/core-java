@@ -21,7 +21,12 @@
 package io.spine.server.projection;
 
 import io.spine.annotation.Internal;
+import io.spine.core.EventClass;
+import io.spine.server.aggregate.MessageHandlerMap;
 import io.spine.server.model.EntityClass;
+import io.spine.server.reflect.EventSubscriberMethod;
+
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -30,12 +35,23 @@ public final class ProjectionClass<P extends Projection> extends EntityClass<P> 
 
     private static final long serialVersionUID = 0L;
 
+    private final MessageHandlerMap<EventClass, EventSubscriberMethod> eventSubscriptions;
+
     private ProjectionClass(Class<? extends P> value) {
         super(value);
+        this.eventSubscriptions = new MessageHandlerMap<>(value, EventSubscriberMethod.factory());
     }
 
     public static <P extends Projection> ProjectionClass<P> of(Class<P> cls) {
         checkNotNull(cls);
         return new ProjectionClass<>(cls);
+    }
+
+    public Set<EventClass> getEventSubscriptions() {
+        return eventSubscriptions.getMessageClasses();
+    }
+
+    public EventSubscriberMethod getSubscriber(EventClass eventClass) {
+        return eventSubscriptions.getMethod(eventClass);
     }
 }

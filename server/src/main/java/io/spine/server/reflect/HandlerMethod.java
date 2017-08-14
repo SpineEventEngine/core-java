@@ -82,7 +82,7 @@ public abstract class HandlerMethod<C extends Message> {
         method.setAccessible(true);
     }
 
-    protected Class<? extends Message> rawMessageClass() {
+    Class<? extends Message> rawMessageClass() {
         return messageClass;
     }
 

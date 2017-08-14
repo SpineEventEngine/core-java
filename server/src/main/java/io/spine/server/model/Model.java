@@ -26,6 +26,8 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateClass;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerClass;
+import io.spine.server.projection.Projection;
+import io.spine.server.projection.ProjectionClass;
 
 import java.util.Map;
 
@@ -63,5 +65,15 @@ public class Model {
             handlerClasses.put(cls, handlerClass);
         }
         return (ProcessManagerClass<?>)handlerClass;
+    }
+
+    public ProjectionClass<?> asProjectionClass(Class<? extends Projection> cls) {
+        checkNotNull(cls);
+        HandlerClass<?> handlerClass = handlerClasses.get(cls);
+        if (handlerClass == null) {
+            handlerClass = ProjectionClass.of(cls);
+            handlerClasses.put(cls, handlerClass);
+        }
+        return (ProjectionClass<?>)handlerClass;
     }
 }
