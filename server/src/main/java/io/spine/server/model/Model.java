@@ -21,6 +21,7 @@
 package io.spine.server.model;
 
 import com.google.common.collect.Maps;
+import io.spine.annotation.Internal;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateClass;
 import io.spine.server.procman.ProcessManager;
@@ -30,6 +31,7 @@ import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+@Internal
 public class Model {
 
     private static final Model INSTANCE = new Model();

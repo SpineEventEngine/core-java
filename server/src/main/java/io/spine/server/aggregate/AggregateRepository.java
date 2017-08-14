@@ -90,6 +90,10 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
                    EventDispatcherDelegate<I>,
                    RejectionDispatcherDelegate<I> {
 
+    /** The class of aggregates managed by this repository. */
+    @Nullable
+    private AggregateClass<A> aggregateClass;
+
     /** The default number of events to be stored before a next snapshot is made. */
     static final int DEFAULT_SNAPSHOT_TRIGGER = 100;
 
@@ -110,8 +114,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     /** The constructor for creating entity instances. */
     private Constructor<A> entityConstructor;
 
-    @Nullable
-    private AggregateClass<A> aggregateClass;
 
     /** Creates a new instance. */
     protected AggregateRepository() {
@@ -167,8 +169,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         return createEntity(getEntityConstructor(), id);
     }
 
+    /** Obtains class information of aggregates managed by this repository. */
     @SuppressWarnings("unchecked") // The cast is ensured by generic parameters of the repository.
-    protected AggregateClass<A> aggregateClass() {
+    private AggregateClass<A> aggregateClass() {
         if (aggregateClass == null) {
             aggregateClass = (AggregateClass<A>) Model.getInstance()
                                                       .asAggregateClass(getEntityClass());
@@ -223,7 +226,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * <p>The method returns cached value if called more than once.
      * During the first call, it {@linkplain #findEntityConstructor() finds} the constructor.
      */
-    protected Constructor<A> getEntityConstructor() {
+    Constructor<A> getEntityConstructor() {
         if (this.entityConstructor == null) {
             this.entityConstructor = findEntityConstructor();
         }

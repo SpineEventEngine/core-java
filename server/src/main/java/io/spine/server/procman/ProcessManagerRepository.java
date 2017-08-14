@@ -65,6 +65,7 @@ public abstract class ProcessManagerRepository<I,
                 implements CommandDispatcherDelegate<I>,
                            RejectionDispatcherDelegate<I> {
 
+    /** The class of process managers managed by this repository. */
     @Nullable
     private ProcessManagerClass<P> processManagerClass;
 
@@ -80,8 +81,9 @@ public abstract class ProcessManagerRepository<I,
         super(EventProducers.<I>fromFirstMessageField());
     }
 
+    /** Obtains class information of process managers managed by this repository. */
     @SuppressWarnings("unchecked") // The cast is ensured by generic parameters of the repository.
-    protected ProcessManagerClass<P> processManagerClass() {
+    private ProcessManagerClass<P> processManagerClass() {
         if (processManagerClass == null) {
             processManagerClass = (ProcessManagerClass<P>)
                     Model.getInstance()
