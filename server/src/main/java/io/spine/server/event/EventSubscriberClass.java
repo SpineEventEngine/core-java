@@ -18,12 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.projection;
+package io.spine.server.event;
 
 import io.spine.annotation.Internal;
 import io.spine.core.EventClass;
 import io.spine.server.aggregate.MessageHandlerMap;
-import io.spine.server.model.EntityClass;
+import io.spine.server.model.HandlerClass;
 import io.spine.server.reflect.EventSubscriberMethod;
 
 import java.util.Set;
@@ -31,26 +31,29 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Provides type information on a projection class.
+ * Provides type information on an {@link EventSubscriber} class.
  *
- * @param <P> the type of projections
+ * @param <S> the type of event subscribers
  * @author Alexander Yevsyukov
  */
 @Internal
-public final class ProjectionClass<P extends Projection> extends EntityClass<P> {
+public final class EventSubscriberClass<S extends EventSubscriber> extends HandlerClass<S> {
 
     private static final long serialVersionUID = 0L;
 
     private final MessageHandlerMap<EventClass, EventSubscriberMethod> eventSubscriptions;
 
-    private ProjectionClass(Class<? extends P> cls) {
+    private EventSubscriberClass(Class<? extends S> cls) {
         super(cls);
         this.eventSubscriptions = new MessageHandlerMap<>(cls, EventSubscriberMethod.factory());
     }
 
-    public static <P extends Projection> ProjectionClass<P> of(Class<P> cls) {
+    /**
+     * Creates new instance for the passed class value.
+     */
+    public static <S extends EventSubscriber> EventSubscriberClass<S> of(Class<S> cls) {
         checkNotNull(cls);
-        return new ProjectionClass<>(cls);
+        return new EventSubscriberClass<>(cls);
     }
 
     Set<EventClass> getEventSubscriptions() {

@@ -63,23 +63,23 @@ public final class ProcessManagerClass<P extends ProcessManager>
         return commands.getMessageClasses();
     }
 
-    public Set<EventClass> getEventReactions() {
+    Set<EventClass> getEventReactions() {
         return eventReactions.getMessageClasses();
     }
 
-    public Set<RejectionClass> getRejectionReactions() {
+    Set<RejectionClass> getRejectionReactions() {
         return rejectionReactions.getMessageClasses();
     }
 
-    public CommandHandlerMethod getHandler(CommandClass commandClass) {
+    CommandHandlerMethod getHandler(CommandClass commandClass) {
         return commands.getMethod(commandClass);
     }
 
-    public EventReactorMethod getReactor(EventClass eventClass) {
+    EventReactorMethod getReactor(EventClass eventClass) {
         return eventReactions.getMethod(eventClass);
     }
 
-    public RejectionReactorMethod getReactor(RejectionClass rejectionClass) {
+    RejectionReactorMethod getReactor(RejectionClass rejectionClass) {
         return rejectionReactions.getMethod(rejectionClass);
     }
 }

@@ -22,11 +22,10 @@ package io.spine.server.event;
 
 import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableSet;
-import com.google.protobuf.Message;
 import io.spine.core.EventClass;
-import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.server.bus.MessageDispatcher;
+import io.spine.server.model.Model;
 import io.spine.server.reflect.EventSubscriberMethod;
 import io.spine.server.tenant.EventOperation;
 import io.spine.string.Stringifiers;
@@ -34,7 +33,6 @@ import io.spine.type.MessageClass;
 import io.spine.util.Logging;
 import org.slf4j.Logger;
 
-import javax.annotation.Nullable;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -52,12 +50,8 @@ import static java.lang.String.format;
  */
 public abstract class EventSubscriber implements EventDispatcher<String> {
 
-    /**
-     * Cached set of the event classes this subscriber is subscribed to.
-     */
-    @Nullable
-    private Set<EventClass> eventClasses;
-
+    private final EventSubscriberClass<?> thisClass = Model.getInstance()
+                                                           .asEventSubscriberClass(getClass());
     /** Lazily initialized logger. */
     private final Supplier<Logger> loggerSupplier = Logging.supplyFor(getClass());
 
@@ -73,7 +67,7 @@ public abstract class EventSubscriber implements EventDispatcher<String> {
         final EventOperation op = new EventOperation(envelope.getOuterObject()) {
             @Override
             public void run() {
-                handle(envelope.getMessage(), envelope.getEventContext());
+                handle(envelope);
             }
         };
         try {
@@ -113,13 +107,11 @@ public abstract class EventSubscriber implements EventDispatcher<String> {
     @Override
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // as we return an immutable collection.
     public Set<EventClass> getMessageClasses() {
-        if (eventClasses == null) {
-            eventClasses = EventSubscriberMethod.inspect(getClass());
-        }
-        return eventClasses;
+        return thisClass.getEventSubscriptions();
     }
 
-    public void handle(Message eventMessage, EventContext context) {
-        EventSubscriberMethod.invokeFor(this, eventMessage, context);
+    private void handle(EventEnvelope envelope) {
+        EventSubscriberMethod method = thisClass.getSubscriber(envelope.getMessageClass());
+        method.invoke(this, envelope.getMessage(), envelope.getEventContext());
     }
 }

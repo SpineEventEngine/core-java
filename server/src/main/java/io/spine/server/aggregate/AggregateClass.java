@@ -38,6 +38,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Provides type information on an aggregate class.
  *
+ * @param <A> the type of aggregates
  * @author Alexander Yevsyukov
  */
 @Internal
@@ -71,31 +72,27 @@ public final class AggregateClass<A extends Aggregate>
         return commands.getMessageClasses();
     }
 
-    public Set<EventClass> getStateEvents() {
-        return stateEvents.getMessageClasses();
-    }
-
-    public Set<EventClass> getEventReactions() {
+    Set<EventClass> getEventReactions() {
         return eventReactions.getMessageClasses();
     }
 
-    public Set<RejectionClass> getRejectionReactions() {
+    Set<RejectionClass> getRejectionReactions() {
         return rejectionReactions.getMessageClasses();
     }
 
-    public CommandHandlerMethod getHandler(CommandClass commandClass) {
+    CommandHandlerMethod getHandler(CommandClass commandClass) {
         return commands.getMethod(commandClass);
     }
 
-    public EventApplierMethod getApplier(EventClass eventClass) {
+    EventApplierMethod getApplier(EventClass eventClass) {
         return stateEvents.getMethod(eventClass);
     }
 
-    public EventReactorMethod getReactor(EventClass eventClass) {
+    EventReactorMethod getReactor(EventClass eventClass) {
         return eventReactions.getMethod(eventClass);
     }
 
-    public RejectionReactorMethod getReactor(RejectionClass rejectionClass) {
+    RejectionReactorMethod getReactor(RejectionClass rejectionClass) {
         return rejectionReactions.getMethod(rejectionClass);
     }
 }

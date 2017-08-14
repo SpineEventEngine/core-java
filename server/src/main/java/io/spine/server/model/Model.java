@@ -24,6 +24,8 @@ import com.google.common.collect.Maps;
 import io.spine.annotation.Internal;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateClass;
+import io.spine.server.event.EventSubscriber;
+import io.spine.server.event.EventSubscriberClass;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerClass;
 import io.spine.server.projection.Projection;
@@ -75,5 +77,15 @@ public class Model {
             handlerClasses.put(cls, handlerClass);
         }
         return (ProjectionClass<?>)handlerClass;
+    }
+
+    public EventSubscriberClass<?> asEventSubscriberClass(Class<? extends EventSubscriber> cls) {
+        checkNotNull(cls);
+        HandlerClass<?> handlerClass = handlerClasses.get(cls);
+        if (handlerClass == null) {
+            handlerClass = EventSubscriberClass.of(cls);
+            handlerClasses.put(cls, handlerClass);
+        }
+        return (EventSubscriberClass<?>)handlerClass;
     }
 }
