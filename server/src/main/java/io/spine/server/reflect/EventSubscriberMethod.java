@@ -21,18 +21,12 @@
 package io.spine.server.reflect;
 
 import com.google.common.base.Predicate;
-import com.google.protobuf.Message;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
 
-import javax.annotation.CheckReturnValue;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Set;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * A wrapper for an event subscriber method.
@@ -45,11 +39,7 @@ public final class EventSubscriberMethod extends HandlerMethod<EventContext> {
     /** The instance of the predicate to filter event subscriber methods of a class. */
     private static final MethodPredicate PREDICATE = new FilterPredicate();
 
-    /**
-     * Creates a new instance to wrap {@code method} on {@code target}.
-     *
-     * @param method subscriber method
-     */
+    /** Creates a new instance. */
     private EventSubscriberMethod(Method method) {
         super(method);
     }
@@ -59,47 +49,8 @@ public final class EventSubscriberMethod extends HandlerMethod<EventContext> {
         return EventClass.of(rawMessageClass());
     }
 
-    /**
-     * Invokes the subscriber method in the passed object.
-     */
-    public static void invokeFor(Object target, Message eventMessage, EventContext context) {
-        checkNotNull(target);
-        checkNotNull(eventMessage);
-        checkNotNull(context);
-
-        final EventSubscriberMethod method = getMethod(target.getClass(), eventMessage);
-        method.invoke(target, eventMessage, context);
-    }
-
-    /**
-     * Obtains the method for handling the event in the passed class.
-     *
-     * @throws IllegalStateException if the passed class does not have an event handling method
-     *                               for the class of the passed message
-     */
-    public static EventSubscriberMethod getMethod(Class<?> cls, Message eventMessage) {
-        checkNotNull(cls);
-        checkNotNull(eventMessage);
-
-        final Class<? extends Message> eventClass = eventMessage.getClass();
-        final EventSubscriberMethod method = MethodRegistry.getInstance()
-                                                           .get(cls, eventClass, factory());
-        if (method == null) {
-            throw newIllegalStateException("The class %s is not subscribed to events of %s.",
-                                           cls.getName(), eventClass.getName());
-        }
-        return method;
-    }
-
     static EventSubscriberMethod from(Method method) {
         return new EventSubscriberMethod(method);
-    }
-
-    @CheckReturnValue
-    public static Set<EventClass> inspect(Class<?> cls) {
-        checkNotNull(cls);
-        final Set<EventClass> result = EventClass.setOf(inspect(cls, predicate()));
-        return result;
     }
 
     /** Returns the factory for filtering and creating event subscriber methods. */

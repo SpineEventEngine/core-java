@@ -30,8 +30,6 @@ import io.spine.server.model.Model;
 import io.spine.server.reflect.EventSubscriberMethod;
 import io.spine.validate.ValidatingBuilder;
 
-import java.util.Set;
-
 /**
  * {@link Projection} holds a structural representation of data extracted from a stream of events.
  *
@@ -96,22 +94,5 @@ public abstract class Projection<I,
     void apply(Message eventMessage, EventContext eventContext)  {
         final EventSubscriberMethod method = thisClass.getSubscriber(EventClass.of(eventMessage));
         method.invoke(this, eventMessage, eventContext);
-    }
-
-    static class TypeInfo {
-
-        private TypeInfo() {
-            // Prevent instantiation of this utility class.
-        }
-
-        /**
-         * Returns the set of event classes handled by the passed {@link Projection} class.
-         *
-         * @param cls the class to inspect
-         * @return immutable set of event classes or an empty set if no events are handled
-         */
-        static Set<EventClass> getEventClasses(Class<? extends Projection> cls) {
-            return EventSubscriberMethod.inspect(cls);
-        }
     }
 }
