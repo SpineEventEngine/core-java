@@ -59,7 +59,7 @@ class ExternalRejectionSubscriber implements ExternalMessageDispatcher<String> {
     private final RejectionSubscriber delegate;
 
     /**
-     * Set of the external event classes this subscriber is subscribed to.
+     * Set of the external rejection classes this subscriber is subscribed to.
      */
     private final Set<RejectionClass> rejectionClasses;
 
