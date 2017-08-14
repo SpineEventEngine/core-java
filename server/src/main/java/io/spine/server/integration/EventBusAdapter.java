@@ -26,6 +26,7 @@ import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.core.ExternalMessageEnvelope;
+import io.spine.core.Rejection;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
 
@@ -35,21 +36,21 @@ import static io.spine.core.Rejections.isRejection;
 /**
  * @author Alex Tymchenko
  */
-class EventBusAdapter extends BusAdapter<EventEnvelope, EventDispatcher<?>>{
+class EventBusAdapter extends BusAdapter<EventEnvelope, EventDispatcher<?>> {
 
     EventBusAdapter(Builder builder) {
         super(builder);
     }
 
-    static Builder builderWith(EventBus eventBus) {
+    static Builder builderWith(EventBus eventBus, BoundedContextId boundedContextId) {
         checkNotNull(eventBus);
-        return new Builder(eventBus);
+        checkNotNull(boundedContextId);
+        return new Builder(eventBus, boundedContextId);
     }
 
     @Override
     ExternalMessageEnvelope toExternalEnvelope(Message message) {
         final Event event = (Event) message;
-        //TODO:2017-08-11:alex.tymchenko: should we inline this method?
         final ExternalMessageEnvelope result = ExternalMessageEnvelope.of(event);
         return result;
     }
@@ -70,16 +71,13 @@ class EventBusAdapter extends BusAdapter<EventEnvelope, EventDispatcher<?>>{
 
     @Override
     boolean accepts(Class<? extends Message> messageClass) {
-        checkNotNull(messageClass);
-        //TODO:2017-08-11:alex.tymchenko: use app model instead, once it's available.
-        return !isRejection(messageClass);
+        return Rejection.class != messageClass && !isRejection(checkNotNull(messageClass));
     }
 
     @Override
-    EventDispatcher<?> createDispatcher(Class<? extends Message> messageClass,
-                                        BoundedContextId boundedContextId) {
+    EventDispatcher<?> createDispatcher(Class<? extends Message> messageClass) {
         final LocalEventSubscriber result =
-                new LocalEventSubscriber(boundedContextId,
+                new LocalEventSubscriber(getBoundedContextId(),
                                          getPublisherHub(),
                                          EventClass.of(messageClass));
         return result;
@@ -87,8 +85,8 @@ class EventBusAdapter extends BusAdapter<EventEnvelope, EventDispatcher<?>>{
 
     static class Builder extends AbstractBuilder<Builder, EventEnvelope, EventDispatcher<?>> {
 
-        Builder(EventBus eventBus) {
-            super(eventBus);
+        Builder(EventBus eventBus, BoundedContextId boundedContextId) {
+            super(eventBus, boundedContextId);
         }
 
         @Override

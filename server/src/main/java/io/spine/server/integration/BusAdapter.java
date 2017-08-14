@@ -27,53 +27,99 @@ import io.spine.core.MessageEnvelope;
 import io.spine.server.bus.Bus;
 import io.spine.server.bus.MessageDispatcher;
 import io.spine.server.integration.TransportFactory.PublisherHub;
-import io.spine.server.integration.TransportFactory.SubscriberHub;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
+ * An abstract base for adapters of local buses (such as {@code EventBus})
+ * to {@code IntegrationBus}.
+ *
+ * <p>Provides an API for routines, performed by the {@code IntegrationBus} lifecycle.
+ *
+ * @param <E> the type of envelopes which are handled by the local bus, which is being adapted
+ * @param <D> the type of dispatchers suitable for the local bus, which is being adapted
  * @author Alex Tymchenko
  */
 abstract class BusAdapter<E extends MessageEnvelope<?, ?, ?>,
         D extends MessageDispatcher<?, E, ?>> {
 
+    /**
+     * The wrapped local bus.
+     */
     private final Bus<?, E, ?, D> targetBus;
 
+    /**
+     * The ID of the bounded context, to which the wrapped local bus belongs.
+     */
+    private final BoundedContextId boundedContextId;
+
+    /**
+     * The publisher hub, used publish the messages dispatched from the local buses to external
+     * collaborators.
+     */
     private final PublisherHub publisherHub;
 
-    private final SubscriberHub subscriberHub;
-
-    protected BusAdapter(AbstractBuilder<?, E, D> builder) {
+    BusAdapter(AbstractBuilder<?, E, D> builder) {
         this.targetBus = builder.targetBus;
         this.publisherHub = builder.publisherHub;
-        this.subscriberHub = builder.subscriberHub;
+        this.boundedContextId = builder.boundedContextId;
     }
 
+    /**
+     * Wraps a given {@code Message} into an {@link ExternalMessageEnvelope}.
+     *
+     * @param message a message to wrap
+     * @return an {@code ExternalMessageEnvelope}, containing the given message
+     */
     abstract ExternalMessageEnvelope toExternalEnvelope(Message message);
 
+    /**
+     * Wraps the given message into an {@link ExternalMessageEnvelope}, marking it as the one
+     * received from the collaborators outside of the current bounded context.
+     *
+     * @param message the message to wrap and mark external
+     * @return an {@code ExternalMessageEnvelope}, containing the given message marked external
+     */
     abstract ExternalMessageEnvelope markExternal(Message message);
 
-    abstract boolean accepts(Class<? extends Message> message);
+    /**
+     * Tells whether a message of a given message class is eligible for processing with this
+     * bus adapter
+     *
+     * @param messageClass a {@code Class} of message
+     * @return {@code true} if this bus adapter is able to accept messages of this type,
+     * {@code false} otherwise
+     */
+    abstract boolean accepts(Class<? extends Message> messageClass);
 
-    abstract D createDispatcher(Class<? extends Message> messageCls,
-                                BoundedContextId boundedContextId);
+    /**
+     * Creates a dispatcher suitable for the wrapped local bus, dispatching the messages of
+     * the given class.
+     *
+     * <p>The created dispatcher is serving as a listener, notifying the {@code IntegrationBus}
+     * of the messages, that are requested by the collaborators outside of this bounded context.
+     *
+     * @param messageCls the class of message to be dispatched by the created dispatcher
+     * @return a dispatcher for the local bus
+     */
+    abstract D createDispatcher(Class<? extends Message> messageCls);
 
-    void register(Class<? extends Message> messageClass, BoundedContextId boundedContextId) {
-        final D dispatcher = createDispatcher(messageClass, boundedContextId);
+    void register(Class<? extends Message> messageClass) {
+        final D dispatcher = createDispatcher(messageClass);
         targetBus.register(dispatcher);
     }
 
-    void unregister(Class<? extends Message> messageClass, BoundedContextId boundedContextId) {
-        final D dispatcher = createDispatcher(messageClass, boundedContextId);
+    void unregister(Class<? extends Message> messageClass) {
+        final D dispatcher = createDispatcher(messageClass);
         targetBus.unregister(dispatcher);
-    }
-
-    Bus<?, E, ?, D> getTargetBus() {
-        return targetBus;
     }
 
     PublisherHub getPublisherHub() {
         return publisherHub;
+    }
+
+    BoundedContextId getBoundedContextId() {
+        return boundedContextId;
     }
 
     abstract static class AbstractBuilder<B extends AbstractBuilder<B, E, D>,
@@ -81,13 +127,13 @@ abstract class BusAdapter<E extends MessageEnvelope<?, ?, ?>,
                                           D extends MessageDispatcher<?, E, ?>> {
 
         private final Bus<?, E, ?, D> targetBus;
+        private final BoundedContextId boundedContextId;
 
         private PublisherHub publisherHub;
 
-        private SubscriberHub subscriberHub;
-
-        AbstractBuilder(Bus<?, E, ?, D> targetBus) {
+        AbstractBuilder(Bus<?, E, ?, D> targetBus, BoundedContextId boundedContextId) {
             this.targetBus = checkNotNull(targetBus);
+            this.boundedContextId = boundedContextId;
         }
 
         public Optional<PublisherHub> getPublisherHub() {
@@ -99,22 +145,12 @@ abstract class BusAdapter<E extends MessageEnvelope<?, ?, ?>,
             return self();
         }
 
-        public Optional<SubscriberHub> getSubscriberHub() {
-            return Optional.fromNullable(subscriberHub);
-        }
-
-        public B setSubscriberHub(SubscriberHub subscriberHub) {
-            this.subscriberHub = checkNotNull(subscriberHub);
-            return self();
-        }
-
         protected abstract BusAdapter<E, D> doBuild();
 
         protected abstract B self();
 
         public BusAdapter<E, D> build() {
             checkNotNull(publisherHub, "PublisherHub must be set");
-            checkNotNull(subscriberHub, "SubscriberHub must be set");
 
             final BusAdapter<E, D> result = doBuild();
             return result;

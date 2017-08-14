@@ -35,21 +35,21 @@ import static io.spine.core.Rejections.isRejection;
 /**
  * @author Alex Tymchenko
  */
-class RejectionBusAdapter extends BusAdapter<RejectionEnvelope, RejectionDispatcher<?>>{
+class RejectionBusAdapter extends BusAdapter<RejectionEnvelope, RejectionDispatcher<?>> {
 
     RejectionBusAdapter(Builder builder) {
         super(builder);
     }
 
-    static Builder builderWith(RejectionBus rejectionBus) {
+    static Builder builderWith(RejectionBus rejectionBus, BoundedContextId boundedContextId) {
         checkNotNull(rejectionBus);
-        return new Builder(rejectionBus);
+        checkNotNull(boundedContextId);
+        return new Builder(rejectionBus, boundedContextId);
     }
 
     @Override
     ExternalMessageEnvelope toExternalEnvelope(Message message) {
         final Rejection rejection = (Rejection) message;
-        //TODO:2017-08-11:alex.tymchenko: should we inline this method?
         final ExternalMessageEnvelope result = ExternalMessageEnvelope.of(rejection);
         return result;
     }
@@ -64,32 +64,30 @@ class RejectionBusAdapter extends BusAdapter<RejectionEnvelope, RejectionDispatc
                                                                  .build();
 
         final Rejection marked = rejectionBuilder.setContext(modifiedContext)
-                                         .build();
+                                                 .build();
         return toExternalEnvelope(marked);
     }
 
     @Override
     boolean accepts(Class<? extends Message> messageClass) {
-        checkNotNull(messageClass);
-        return isRejection(messageClass);
+        return Rejection.class == messageClass || isRejection(checkNotNull(messageClass));
     }
 
     @Override
-    RejectionDispatcher<?> createDispatcher(Class<? extends Message> messageClass,
-                                        BoundedContextId boundedContextId) {
+    RejectionDispatcher<?> createDispatcher(Class<? extends Message> messageClass) {
         final LocalRejectionSubscriber result =
-                new LocalRejectionSubscriber(boundedContextId,
+                new LocalRejectionSubscriber(getBoundedContextId(),
                                              getPublisherHub(),
                                              RejectionClass.of(messageClass));
         return result;
     }
 
     static class Builder extends AbstractBuilder<Builder,
-                                                 RejectionEnvelope,
-                                                 RejectionDispatcher<?>> {
+            RejectionEnvelope,
+            RejectionDispatcher<?>> {
 
-        Builder(RejectionBus eventBus) {
-            super(eventBus);
+        Builder(RejectionBus eventBus, BoundedContextId boundedContextId) {
+            super(eventBus, boundedContextId);
         }
 
         @Override

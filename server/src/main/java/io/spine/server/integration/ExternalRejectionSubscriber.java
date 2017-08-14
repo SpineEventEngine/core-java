@@ -22,12 +22,12 @@ package io.spine.server.integration;
 import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
-import io.spine.core.Event;
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
 import io.spine.core.ExternalMessageEnvelope;
-import io.spine.server.event.EventSubscriber;
-import io.spine.server.reflect.EventSubscriberMethod;
+import io.spine.core.Rejection;
+import io.spine.core.RejectionClass;
+import io.spine.core.RejectionEnvelope;
+import io.spine.server.reflect.RejectionSubscriberMethod;
+import io.spine.server.rejection.RejectionSubscriber;
 import io.spine.string.Stringifiers;
 import io.spine.type.MessageClass;
 import io.spine.util.Logging;
@@ -38,53 +38,54 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.core.Events.isExternal;
+import static io.spine.core.Rejections.isExternal;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.lang.String.format;
 
 /**
- * An internal wrapper class, which exposes an {@link EventSubscriber}
+ * A wrapper class, which exposes a {@link RejectionSubscriber}
  * as an {@link ExternalMessageDispatcher}.
  *
- * <p>Allows to register {@code EventSubscriber}s as dispatchers of
+ * <p>Allows to register {@code RejectionSubscriber}s as dispatchers of
  * {@code IntegrationBus}.
  *
  * @author Alex Tymchenko
  */
-class ExternalEventSubscriber implements ExternalMessageDispatcher<String> {
+class ExternalRejectionSubscriber implements ExternalMessageDispatcher<String> {
 
     /** Lazily initialized logger. */
     private final Supplier<Logger> loggerSupplier = Logging.supplyFor(getClass());
 
-    private final EventSubscriber delegate;
+    private final RejectionSubscriber delegate;
 
     /**
      * Set of the external event classes this subscriber is subscribed to.
      */
-    private final Set<EventClass> eventClasses;
+    private final Set<RejectionClass> rejectionClasses;
 
-    ExternalEventSubscriber(EventSubscriber delegate) {
+    ExternalRejectionSubscriber(RejectionSubscriber delegate) {
         this.delegate = delegate;
-        this.eventClasses = EventSubscriberMethod.inspectExternal(delegate.getClass());
+        this.rejectionClasses = RejectionSubscriberMethod.inspectExternal(delegate.getClass());
     }
 
     @Override
     public Set<MessageClass> getMessageClasses() {
-        return ImmutableSet.<MessageClass>copyOf(eventClasses);
+        return ImmutableSet.<MessageClass>copyOf(rejectionClasses);
     }
 
     @Override
     public Set<String> dispatch(ExternalMessageEnvelope envelope) {
         final Message outerObject = envelope.getOuterObject();
-        if (!(outerObject instanceof Event)) {
-            throw newIllegalStateException("Unexpected object %s while dispatching " +
-                                                   "the external event to the event subscriber.",
+        if (!(outerObject instanceof Rejection)) {
+            throw newIllegalStateException("Unexpected object %s while dispatching the external " +
+                                                   "rejection to the rejection subscriber.",
                                            Stringifiers.toString(outerObject));
         }
-        final Event event = (Event) outerObject;
-        checkArgument(isExternal(event.getContext()),
-                      "External event expected, but got %s", Stringifiers.toString(event));
-        return delegate.dispatch(EventEnvelope.of(event));
+        final Rejection rejection = (Rejection) outerObject;
+        checkArgument(isExternal(rejection.getContext()),
+                      "External rejection expected, but got %s",
+                      Stringifiers.toString(rejection));
+        return delegate.dispatch(RejectionEnvelope.of(rejection));
     }
 
     @Override
@@ -95,7 +96,7 @@ class ExternalEventSubscriber implements ExternalMessageDispatcher<String> {
         final MessageClass messageClass = envelope.getMessageClass();
         final String messageId = Stringifiers.toString(envelope.getId());
         final String errorMessage =
-                format("Error handling external event subscription (class: %s id: %s).",
+                format("Error handling external rejection subscription (class: %s id: %s).",
                        messageClass, messageId);
         log().error(errorMessage, exception);
     }
@@ -112,13 +113,13 @@ class ExternalEventSubscriber implements ExternalMessageDispatcher<String> {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        ExternalEventSubscriber that = (ExternalEventSubscriber) o;
+        ExternalRejectionSubscriber that = (ExternalRejectionSubscriber) o;
         return Objects.equals(delegate, that.delegate) &&
-                Objects.equals(eventClasses, that.eventClasses);
+                Objects.equals(rejectionClasses, that.rejectionClasses);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(delegate, eventClasses);
+        return Objects.hash(delegate, rejectionClasses);
     }
 }

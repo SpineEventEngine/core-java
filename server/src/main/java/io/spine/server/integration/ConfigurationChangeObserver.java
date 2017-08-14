@@ -82,7 +82,7 @@ class ConfigurationChangeObserver extends ChannelObserver {
 
                 final Class<Message> javaClass = asClassOfMsg(newRequestedUrl);
                 final BusAdapter<?, ?> adapter = getAdapter(javaClass);
-                adapter.register(javaClass, boundedContextId);
+                adapter.register(javaClass);
 
             }
 
@@ -111,7 +111,7 @@ class ConfigurationChangeObserver extends ChannelObserver {
                 // It's now the time to remove the local bus subscription.
                 final Class<Message> javaClass = asClassOfMsg(itemForRemoval);
                 final BusAdapter<?, ?> adapter = getAdapter(javaClass);
-                adapter.unregister(javaClass, boundedContextId);
+                adapter.unregister(javaClass);
             }
         }
     }

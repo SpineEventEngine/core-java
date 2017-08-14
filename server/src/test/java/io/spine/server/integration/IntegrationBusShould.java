@@ -21,12 +21,14 @@ package io.spine.server.integration;
 
 import io.spine.core.BoundedContextId;
 import io.spine.core.Event;
+import io.spine.core.Rejection;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.event.EventBus;
+import io.spine.server.integration.given.IntegrationBusTestEnv.CannotCreateProjectExtSubscriber;
 import io.spine.server.integration.given.IntegrationBusTestEnv.ContextAwareProjectDetails;
-import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectCreatedExtSubscriber;
 import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectDetails;
+import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectEventsSubscriber;
 import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectStartedExtSubscriber;
 import io.spine.server.integration.local.LocalTransportFactory;
 import org.junit.Before;
@@ -35,9 +37,10 @@ import org.junit.Test;
 import java.util.Set;
 
 import static com.google.common.collect.Sets.newHashSet;
+import static io.spine.server.integration.given.IntegrationBusTestEnv.cannotStartArchivedProject;
 import static io.spine.server.integration.given.IntegrationBusTestEnv.contextWithContextAwareEntitySubscriber;
 import static io.spine.server.integration.given.IntegrationBusTestEnv.contextWithExtEntitySubscriber;
-import static io.spine.server.integration.given.IntegrationBusTestEnv.contextWithExternalSubscriber;
+import static io.spine.server.integration.given.IntegrationBusTestEnv.contextWithExternalSubscribers;
 import static io.spine.server.integration.given.IntegrationBusTestEnv.contextWithProjectCreatedNeeds;
 import static io.spine.server.integration.given.IntegrationBusTestEnv.contextWithProjectStartedNeeds;
 import static io.spine.server.integration.given.IntegrationBusTestEnv.contextWithTransport;
@@ -57,7 +60,7 @@ public class IntegrationBusShould {
     public void setUp() {
         ProjectDetails.clear();
         ContextAwareProjectDetails.clear();
-        ProjectCreatedExtSubscriber.clear();
+        ProjectEventsSubscriber.clear();
         ProjectStartedExtSubscriber.clear();
     }
 
@@ -71,7 +74,8 @@ public class IntegrationBusShould {
         assertNull(ProjectDetails.getExternalEvent());
 
         final Event event = projectCreated();
-        sourceContext.getEventBus().post(event);
+        sourceContext.getEventBus()
+                     .post(event);
 
         assertEquals(AnyPacker.unpack(event.getMessage()), ProjectDetails.getExternalEvent());
     }
@@ -86,12 +90,14 @@ public class IntegrationBusShould {
         assertNull(ProjectDetails.getDomesticEvent());
 
         final Event event = projectStarted();
-        sourceContext.getEventBus().post(event);
+        sourceContext.getEventBus()
+                     .post(event);
 
         assertNotEquals(AnyPacker.unpack(event.getMessage()), ProjectDetails.getDomesticEvent());
         assertNull(ProjectDetails.getDomesticEvent());
 
-        destContext.getEventBus().post(event);
+        destContext.getEventBus()
+                   .post(event);
         assertEquals(AnyPacker.unpack(event.getMessage()), ProjectDetails.getDomesticEvent());
     }
 
@@ -100,13 +106,15 @@ public class IntegrationBusShould {
         final LocalTransportFactory transportFactory = LocalTransportFactory.newInstance();
 
         final BoundedContext sourceContext = contextWithTransport(transportFactory);
-        contextWithExternalSubscriber(transportFactory);
+        contextWithExternalSubscribers(transportFactory);
 
-        assertNull(ProjectCreatedExtSubscriber.getExternalEvent());
+        assertNull(ProjectEventsSubscriber.getExternalEvent());
 
         final Event event = projectCreated();
-        sourceContext.getEventBus().post(event);
-        assertEquals(AnyPacker.unpack(event.getMessage()), ProjectCreatedExtSubscriber.getExternalEvent());
+        sourceContext.getEventBus()
+                     .post(event);
+        assertEquals(AnyPacker.unpack(event.getMessage()),
+                     ProjectEventsSubscriber.getExternalEvent());
     }
 
     @Test
@@ -114,19 +122,22 @@ public class IntegrationBusShould {
         final LocalTransportFactory transportFactory = LocalTransportFactory.newInstance();
 
         final BoundedContext sourceContext = contextWithTransport(transportFactory);
-        final BoundedContext destContext = contextWithExternalSubscriber(transportFactory);
+        final BoundedContext destContext = contextWithExternalSubscribers(transportFactory);
 
-        assertNull(ProjectCreatedExtSubscriber.getDomesticEvent());
+        assertNull(ProjectEventsSubscriber.getDomesticEvent());
 
         final Event event = projectStarted();
-        sourceContext.getEventBus().post(event);
+        sourceContext.getEventBus()
+                     .post(event);
 
         assertNotEquals(AnyPacker.unpack(event.getMessage()),
-                        ProjectCreatedExtSubscriber.getDomesticEvent());
-        assertNull(ProjectCreatedExtSubscriber.getDomesticEvent());
+                        ProjectEventsSubscriber.getDomesticEvent());
+        assertNull(ProjectEventsSubscriber.getDomesticEvent());
 
-        destContext.getEventBus().post(event);
-        assertEquals(AnyPacker.unpack(event.getMessage()), ProjectCreatedExtSubscriber.getDomesticEvent());
+        destContext.getEventBus()
+                   .post(event);
+        assertEquals(AnyPacker.unpack(event.getMessage()),
+                     ProjectEventsSubscriber.getDomesticEvent());
     }
 
     @Test
@@ -142,16 +153,20 @@ public class IntegrationBusShould {
             destinationIds.add(id);
         }
 
-        assertTrue(ContextAwareProjectDetails.getExternalContexts().isEmpty());
+        assertTrue(ContextAwareProjectDetails.getExternalContexts()
+                                             .isEmpty());
 
         final Event event = projectCreated();
-        sourceContext.getEventBus().post(event);
+        sourceContext.getEventBus()
+                     .post(event);
 
         assertEquals(destinationIds.size(),
-                     ContextAwareProjectDetails.getExternalContexts().size());
+                     ContextAwareProjectDetails.getExternalContexts()
+                                               .size());
 
         assertEquals(destinationIds.size(),
-                     ContextAwareProjectDetails.getExternalEvents().size());
+                     ContextAwareProjectDetails.getExternalEvents()
+                                               .size());
 
     }
 
@@ -164,7 +179,7 @@ public class IntegrationBusShould {
         final BoundedContext destB = contextWithProjectStartedNeeds(transportFactory);
 
         assertNull(ProjectStartedExtSubscriber.getExternalEvent());
-        assertNull(ProjectCreatedExtSubscriber.getExternalEvent());
+        assertNull(ProjectEventsSubscriber.getExternalEvent());
 
         final EventBus sourceEventBus = sourceContext.getEventBus();
         final Event eventA = projectCreated();
@@ -173,7 +188,7 @@ public class IntegrationBusShould {
         sourceEventBus.post(eventB);
 
         assertEquals(AnyPacker.unpack(eventA.getMessage()),
-                     ProjectCreatedExtSubscriber.getExternalEvent());
+                     ProjectEventsSubscriber.getExternalEvent());
 
         assertEquals(AnyPacker.unpack(eventB.getMessage()),
                      ProjectStartedExtSubscriber.getExternalEvent());
@@ -187,13 +202,13 @@ public class IntegrationBusShould {
         final BoundedContext destinationCtx = contextWithTransport(transportFactory);
 
         // Prepare two external subscribers for the different events in the the `destinationCtx`.
-        final ProjectCreatedExtSubscriber projectCreatedSubscriber
-                = new ProjectCreatedExtSubscriber();
+        final ProjectEventsSubscriber projectCreatedSubscriber
+                = new ProjectEventsSubscriber();
         final ProjectStartedExtSubscriber projectStartedSubscriber
                 = new ProjectStartedExtSubscriber();
 
         // Before anything happens, there were no events received by those.
-        assertNull(ProjectCreatedExtSubscriber.getExternalEvent());
+        assertNull(ProjectEventsSubscriber.getExternalEvent());
         assertNull(ProjectStartedExtSubscriber.getExternalEvent());
 
         // Both events are prepared along with the `EventBus` of the source bounded context.
@@ -202,34 +217,53 @@ public class IntegrationBusShould {
         final Event eventB = projectStarted();
 
         // Both events are emitted, `ProjectCreated` subscriber only is present.
-        destinationCtx.getIntegrationBus().register(projectCreatedSubscriber);
+        destinationCtx.getIntegrationBus()
+                      .register(projectCreatedSubscriber);
         sourceEventBus.post(eventA);
         sourceEventBus.post(eventB);
         // Only `ProjectCreated` should have been dispatched.
         assertEquals(AnyPacker.unpack(eventA.getMessage()),
-                     ProjectCreatedExtSubscriber.getExternalEvent());
+                     ProjectEventsSubscriber.getExternalEvent());
         assertNull(ProjectStartedExtSubscriber.getExternalEvent());
 
         // Clear before the next round starts.
         ProjectStartedExtSubscriber.clear();
-        ProjectCreatedExtSubscriber.clear();
-
+        ProjectEventsSubscriber.clear();
 
         // Both events are emitted, No external subscribers at all.
-        destinationCtx.getIntegrationBus().unregister(projectCreatedSubscriber);
+        destinationCtx.getIntegrationBus()
+                      .unregister(projectCreatedSubscriber);
         sourceEventBus.post(eventA);
         sourceEventBus.post(eventB);
         // No events should have been dispatched.
-        assertNull(ProjectCreatedExtSubscriber.getExternalEvent());
+        assertNull(ProjectEventsSubscriber.getExternalEvent());
         assertNull(ProjectStartedExtSubscriber.getExternalEvent());
 
         // Both events are emitted, `ProjectStarted` subscriber only is present
-        destinationCtx.getIntegrationBus().register(projectStartedSubscriber);
+        destinationCtx.getIntegrationBus()
+                      .register(projectStartedSubscriber);
         sourceEventBus.post(eventA);
         sourceEventBus.post(eventB);
         // This time `ProjectStarted` event should only have been dispatched.
-        assertNull(ProjectCreatedExtSubscriber.getExternalEvent());
+        assertNull(ProjectEventsSubscriber.getExternalEvent());
         assertEquals(AnyPacker.unpack(eventB.getMessage()),
                      ProjectStartedExtSubscriber.getExternalEvent());
     }
+
+    @Test
+    public void dispatch_rejections_from_one_BC_to_external_subscribers_of_another_BC() {
+        final LocalTransportFactory transportFactory = LocalTransportFactory.newInstance();
+
+        final BoundedContext sourceContext = contextWithTransport(transportFactory);
+        contextWithExternalSubscribers(transportFactory);
+
+        assertNull(CannotCreateProjectExtSubscriber.getExternalRejection());
+
+        final Rejection rejection = cannotStartArchivedProject();
+        sourceContext.getRejectionBus()
+                     .post(rejection);
+        assertEquals(AnyPacker.unpack(rejection.getMessage()),
+                     CannotCreateProjectExtSubscriber.getExternalRejection());
+    }
+
 }

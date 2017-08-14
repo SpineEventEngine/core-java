@@ -21,6 +21,7 @@ package io.spine.server.reflect;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.RejectionClass;
@@ -28,6 +29,7 @@ import io.spine.core.RejectionContext;
 import io.spine.core.Subscribe;
 
 import javax.annotation.CheckReturnValue;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Set;
@@ -44,8 +46,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @Internal
 public class RejectionSubscriberMethod extends RejectionHandlerMethod {
 
-    /** The instance of the predicate to filter rejection subscriber methods of a class. */
-    private static final MethodPredicate PREDICATE = new FilterPredicate();
+    /** The instance of the predicate to filter domestic rejection subscriber methods of a class. */
+    private static final MethodPredicate DOMESTIC_SUBSCRIBERS = new FilterPredicate();
+
+    /** The instance of the predicate to filter external rejection subscriber methods of a class. */
+    private static final MethodPredicate EXTERNAL_SUBSCRIBERS = new FilterPredicate(true);
+
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
@@ -100,7 +106,12 @@ public class RejectionSubscriberMethod extends RejectionHandlerMethod {
 
     @CheckReturnValue
     public static Set<RejectionClass> inspect(Class<?> cls) {
-        return inspectWith(cls, predicate());
+        return inspectWith(cls, domesticSubscribers());
+    }
+
+    @CheckReturnValue
+    public static Set<RejectionClass> inspectExternal(Class<?> cls) {
+        return inspectWith(cls, externalSubscribers());
     }
 
     /**
@@ -125,8 +136,13 @@ public class RejectionSubscriberMethod extends RejectionHandlerMethod {
         return Factory.getInstance();
     }
 
-    static MethodPredicate predicate() {
-        return PREDICATE;
+    static MethodPredicate domesticSubscribers() {
+        return DOMESTIC_SUBSCRIBERS;
+    }
+
+    //TODO:2017-07-21:alex.tymchenko: cover external subscribers with tests as well.
+    static MethodPredicate externalSubscribers() {
+        return EXTERNAL_SUBSCRIBERS;
     }
 
     /**
@@ -147,7 +163,7 @@ public class RejectionSubscriberMethod extends RejectionHandlerMethod {
 
         @Override
         public Predicate<Method> getPredicate() {
-            return predicate();
+            return Predicates.or(domesticSubscribers(), externalSubscribers());
         }
 
         @Override
@@ -176,14 +192,33 @@ public class RejectionSubscriberMethod extends RejectionHandlerMethod {
      */
     private static class FilterPredicate extends RejectionFilterPredicate {
 
+        private final boolean externalOnly;
+
         private FilterPredicate() {
+            this(false);
+        }
+
+        private FilterPredicate(boolean externalOnly) {
             super(Subscribe.class);
+            this.externalOnly = externalOnly;
         }
 
         @Override
         protected boolean verifyReturnType(Method method) {
             final boolean isVoid = Void.TYPE.equals(method.getReturnType());
             return isVoid;
+        }
+
+        @Override
+        protected boolean verifyAnnotation(Method method) {
+            return super.verifyAnnotation(method) && matchesExternal(externalOnly, method);
+        }
+
+        private boolean matchesExternal(boolean externalOnly, Method method) {
+            final Annotation annotation = method.getAnnotation(getAnnotationClass());
+            final Subscribe subscribeAnnotation = (Subscribe) annotation;
+            final boolean result = externalOnly == subscribeAnnotation.external();
+            return result;
         }
     }
 

@@ -39,6 +39,7 @@ import io.spine.server.integration.TransportFactory.Subscriber;
 import io.spine.server.integration.TransportFactory.SubscriberHub;
 import io.spine.server.integration.local.LocalTransportFactory;
 import io.spine.server.rejection.RejectionBus;
+import io.spine.server.rejection.RejectionSubscriber;
 import io.spine.type.KnownTypes;
 import io.spine.type.MessageClass;
 import io.spine.type.TypeUrl;
@@ -79,16 +80,7 @@ public class IntegrationBus extends MulticastBus<Message,
         this.subscriberHub = new SubscriberHub(builder.transportFactory);
         this.publisherHub = new PublisherHub(builder.transportFactory);
 
-        this.localBusAdapters = ImmutableSet.<BusAdapter<?, ?>>of(
-                EventBusAdapter.builderWith(builder.eventBus)
-                               .setPublisherHub(publisherHub)
-                               .setSubscriberHub(subscriberHub)
-                               .build(),
-                RejectionBusAdapter.builderWith(builder.rejectionBus)
-                                   .setPublisherHub(publisherHub)
-                                   .setSubscriberHub(subscriberHub)
-                                   .build()
-        );
+        this.localBusAdapters = createAdapters(builder, publisherHub);
 
         /*
          * React upon {@code RequestedMessageTypes} message arrival.
@@ -104,6 +96,18 @@ public class IntegrationBus extends MulticastBus<Message,
                 });
         subscriberHub.get(IntegrationMessageClass.of(RequestedMessageTypes.class))
                      .addObserver(observer);
+    }
+
+    private static ImmutableSet<BusAdapter<?, ?>> createAdapters(Builder builder,
+                                                                 PublisherHub publisherHub) {
+        return ImmutableSet.<BusAdapter<?, ?>>of(
+                EventBusAdapter.builderWith(builder.eventBus, builder.boundedContextId)
+                               .setPublisherHub(publisherHub)
+                               .build(),
+                RejectionBusAdapter.builderWith(builder.rejectionBus, builder.boundedContextId)
+                                   .setPublisherHub(publisherHub)
+                                   .build()
+        );
     }
 
     public static Builder newBuilder() {
@@ -241,6 +245,18 @@ public class IntegrationBus extends MulticastBus<Message,
      */
     public void register(final EventSubscriber eventSubscriber) {
         final ExternalEventSubscriber wrapped = new ExternalEventSubscriber(eventSubscriber);
+        register(wrapped);
+    }
+
+    /**
+     * Registers the passed rejection subscriber as an external rejection dispatcher
+     * by taking only external subscriptions into account.
+     *
+     * @param rejectionSubscriber the subscriber to register.
+     */
+    public void register(final RejectionSubscriber rejectionSubscriber) {
+        final ExternalRejectionSubscriber wrapped =
+                new ExternalRejectionSubscriber(rejectionSubscriber);
         register(wrapped);
     }
 
