@@ -22,41 +22,11 @@ package io.spine.server.command;
 
 import io.spine.annotation.Internal;
 import io.spine.core.CommandClass;
-import io.spine.server.aggregate.MessageHandlerMap;
-import io.spine.server.model.HandlerClass;
-import io.spine.server.reflect.CommandHandlerMethod;
 
 import java.util.Set;
 
-/**
- * Provides message handling information on a command handler class.
- *
- * @author Alexander Yevsyukov
- */
 @Internal
-public final class CommandHandlerClass<C extends CommandHandler>
-        extends HandlerClass<C>
-        implements CommandHandlingClass {
+public interface CommandHandlingClass {
 
-    private static final long serialVersionUID = 0L;
-
-    private final MessageHandlerMap<CommandClass, CommandHandlerMethod> commands;
-
-    private CommandHandlerClass(Class<? extends C> cls) {
-        super(cls);
-        this.commands = new MessageHandlerMap<>(cls, CommandHandlerMethod.factory());
-    }
-
-    public static HandlerClass<?> of(Class<? extends CommandHandler> cls) {
-        return new CommandHandlerClass<>(cls);
-    }
-
-    CommandHandlerMethod getHandler(CommandClass commandClass) {
-        return commands.getMethod(commandClass);
-    }
-
-    @Override
-    public Set<CommandClass> getCommands() {
-        return commands.getMessageClasses();
-    }
+    Set<CommandClass> getCommands();
 }

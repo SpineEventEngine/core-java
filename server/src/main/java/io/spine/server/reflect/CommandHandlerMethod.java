@@ -28,7 +28,6 @@ import io.spine.Identifier;
 import io.spine.base.ThrowableMessage;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
-import io.spine.core.Commands;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.entity.Entity;
@@ -40,7 +39,6 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.getRootCause;
-import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * The wrapper for a command handler method.
@@ -79,50 +77,12 @@ public final class CommandHandlerMethod extends HandlerMethod<CommandContext> {
         return result;
     }
 
-    /**
-     * Obtains handler method for the command message.
-     *
-     * @param cls            the class that handles the message
-     * @param commandMessage the message
-     * @return handler method
-     * @throws IllegalStateException if the passed class does not handle messages of this class
-     */
-    private static CommandHandlerMethod getMethod(Class<?> cls, Message commandMessage) {
-        final Class<? extends Message> commandClass = commandMessage.getClass();
-        final CommandHandlerMethod method = MethodRegistry.getInstance()
-                                                          .get(cls, commandClass, factory());
-        if (method == null) {
-            throw newIllegalStateException("The class %s does not handle commands of the class %s.",
-                                           cls.getName(), commandClass.getName());
-        }
-        return method;
-    }
-
     static CommandHandlerMethod from(Method method) {
         return new CommandHandlerMethod(method);
     }
 
     static MethodPredicate predicate() {
         return PREDICATE;
-    }
-
-    /**
-     * Invokes the handler method in the passed object.
-     *
-     * @return the list of events produced by the handler method
-     */
-    public static List<? extends Message> invokeFor(Object target,
-                                                    Message command,
-                                                    CommandContext context) {
-        checkNotNull(target);
-        checkNotNull(command);
-        checkNotNull(context);
-        final Message commandMessage = Commands.ensureMessage(command);
-
-        final CommandHandlerMethod method = getMethod(target.getClass(), commandMessage);
-        final List<? extends Message> eventMessages =
-                method.invoke(target, commandMessage, context);
-        return eventMessages;
     }
 
     public static HandlerMethod.Factory<CommandHandlerMethod> factory() {

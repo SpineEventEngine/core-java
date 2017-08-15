@@ -24,7 +24,7 @@ import io.spine.annotation.Internal;
 import io.spine.core.CommandClass;
 import io.spine.core.EventClass;
 import io.spine.core.RejectionClass;
-import io.spine.server.command.CommandHandlerClass;
+import io.spine.server.command.CommandHandlingClass;
 import io.spine.server.model.EntityClass;
 import io.spine.server.reflect.CommandHandlerMethod;
 import io.spine.server.reflect.EventApplierMethod;
@@ -36,7 +36,7 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Provides type information on an aggregate class.
+ * Provides message handling information on an aggregate class.
  *
  * @param <A> the type of aggregates
  * @author Alexander Yevsyukov
@@ -45,7 +45,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @SuppressWarnings("ReturnOfCollectionOrArrayField") // impl. is immutable
 public final class AggregateClass<A extends Aggregate>
         extends EntityClass<A>
-        implements CommandHandlerClass {
+        implements CommandHandlingClass {
 
     private static final long serialVersionUID = 0L;
 

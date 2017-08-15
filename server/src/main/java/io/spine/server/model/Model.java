@@ -24,6 +24,8 @@ import com.google.common.collect.Maps;
 import io.spine.annotation.Internal;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateClass;
+import io.spine.server.command.CommandHandler;
+import io.spine.server.command.CommandHandlerClass;
 import io.spine.server.event.EventSubscriber;
 import io.spine.server.event.EventSubscriberClass;
 import io.spine.server.procman.ProcessManager;
@@ -35,11 +37,17 @@ import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+/**
+ * Stores information of message handling classes.
+ *
+ * @author Alexander Yevsyukov
+ */
 @Internal
 public class Model {
 
     private static final Model INSTANCE = new Model();
 
+    /** A map from a raw class to an extended class information instance. */
     private final Map<Class<?>, HandlerClass<?>> handlerClasses = Maps.newConcurrentMap();
 
     public static Model getInstance() {
@@ -49,6 +57,9 @@ public class Model {
     /** Prevent instantiation from outside. */
     private Model() {}
 
+    /**
+     * Obtains an instance of aggregate class information.
+     */
     public AggregateClass<?> asAggregateClass(Class<? extends Aggregate> cls) {
         checkNotNull(cls);
         HandlerClass<?> handlerClass = handlerClasses.get(cls);
@@ -59,6 +70,9 @@ public class Model {
         return (AggregateClass<?>)handlerClass;
     }
 
+    /**
+     * Obtains an instance of a process manager class information.
+     */
     public ProcessManagerClass<?> asProcessManagerClass(Class<? extends ProcessManager> cls) {
         checkNotNull(cls);
         HandlerClass<?> handlerClass = handlerClasses.get(cls);
@@ -69,6 +83,9 @@ public class Model {
         return (ProcessManagerClass<?>)handlerClass;
     }
 
+    /**
+     * Obtains an instance of a projection class information.
+     */
     public ProjectionClass<?> asProjectionClass(Class<? extends Projection> cls) {
         checkNotNull(cls);
         HandlerClass<?> handlerClass = handlerClasses.get(cls);
@@ -79,6 +96,9 @@ public class Model {
         return (ProjectionClass<?>)handlerClass;
     }
 
+    /**
+     * Obtains an instance of event subscriber class information.
+     */
     public EventSubscriberClass<?> asEventSubscriberClass(Class<? extends EventSubscriber> cls) {
         checkNotNull(cls);
         HandlerClass<?> handlerClass = handlerClasses.get(cls);
@@ -87,5 +107,18 @@ public class Model {
             handlerClasses.put(cls, handlerClass);
         }
         return (EventSubscriberClass<?>)handlerClass;
+    }
+
+    /**
+     * Obtains an instance of a command handler class information.
+     */
+    public CommandHandlerClass asCommandHandlerClass(Class<? extends CommandHandler> cls) {
+        checkNotNull(cls);
+        HandlerClass<?> handlerClass = handlerClasses.get(cls);
+        if (handlerClass == null) {
+            handlerClass = CommandHandlerClass.of(cls);
+            handlerClasses.put(cls, handlerClass);
+        }
+        return (CommandHandlerClass<?>)handlerClass;
     }
 }

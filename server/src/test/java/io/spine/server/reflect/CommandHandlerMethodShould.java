@@ -28,8 +28,9 @@ import io.spine.base.ThrowableMessage;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
+import io.spine.server.aggregate.Aggregate;
+import io.spine.server.aggregate.AggregateMessageDispatcher;
 import io.spine.server.command.CommandHandler;
-import io.spine.server.entity.Entity;
 import io.spine.server.reflect.given.CommandHandlerMethodTestEnv.InvalidHandlerNoAnnotation;
 import io.spine.server.reflect.given.CommandHandlerMethodTestEnv.InvalidHandlerNoParams;
 import io.spine.server.reflect.given.CommandHandlerMethodTestEnv.InvalidHandlerOneNotMsgParam;
@@ -54,7 +55,6 @@ import java.util.List;
 
 import static com.google.common.base.Throwables.getRootCause;
 import static io.spine.server.reflect.CommandHandlerMethod.from;
-import static io.spine.server.reflect.CommandHandlerMethod.invokeFor;
 import static io.spine.server.reflect.CommandHandlerMethod.predicate;
 import static io.spine.server.reflect.given.Given.CommandMessage.createProject;
 import static io.spine.server.reflect.given.Given.CommandMessage.startProject;
@@ -217,15 +217,17 @@ public class CommandHandlerMethodShould {
 
     @Test(expected = IllegalStateException.class)
     public void throw_ISE_for_not_handled_command_type() {
-        final Object handler = new ValidHandlerOneParam();
-        invokeFor(handler, startProject(), emptyContext);
+        final CommandHandler handler = new ValidHandlerOneParam();
+        final CommandEnvelope cmd = requestFactory.createEnvelope(startProject());
+        handler.dispatch(cmd);
     }
 
     @Test
     public void set_producer_ID_if_command_handler() {
         final CommandHandler handler = new RejectingHandler();
+        final CommandEnvelope envelope = requestFactory.createEnvelope(createProject());
         try {
-            invokeFor(handler, createProject(), emptyContext);
+            handler.dispatch(envelope);
         } catch (HandlerMethodFailedException e) {
             assertCauseAndId(e, handler.getId());
         }
@@ -234,9 +236,11 @@ public class CommandHandlerMethodShould {
     @Test
     public void set_producer_ID_if_entity() {
         final RefCreateProject commandMessage = createProject();
-        final Entity<ProjectId, ?> entity = new RejectingAggregate(commandMessage.getProjectId());
+        final Aggregate<ProjectId, ?, ?> entity =
+                new RejectingAggregate(commandMessage.getProjectId());
+        final CommandEnvelope cmd = requestFactory.createEnvelope(commandMessage);
         try {
-            invokeFor(entity, commandMessage, emptyContext);
+            AggregateMessageDispatcher.dispatchCommand(entity, cmd);
         } catch (HandlerMethodFailedException e) {
             assertCauseAndId(e, entity.getId());
         }

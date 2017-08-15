@@ -30,6 +30,7 @@ import io.spine.core.Event;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.event.EventBus;
+import io.spine.server.model.Model;
 import io.spine.server.reflect.CommandHandlerMethod;
 import io.spine.server.reflect.HandlerMethod;
 import io.spine.string.Stringifiers;
@@ -37,7 +38,6 @@ import io.spine.type.MessageClass;
 import io.spine.util.Logging;
 import org.slf4j.Logger;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Set;
 
@@ -74,6 +74,9 @@ import static java.lang.String.format;
  */
 public abstract class CommandHandler implements CommandDispatcher<String> {
 
+    private final CommandHandlerClass<?> thisClass = Model.getInstance()
+                                                          .asCommandHandlerClass(getClass());
+
     /**
      * The {@code EventBut} to which the handler posts events it produces.
      */
@@ -83,12 +86,6 @@ public abstract class CommandHandler implements CommandDispatcher<String> {
      * Fully qualified name of the class wrapped into {@code Any}.
      */
     private final Any producerId;
-
-    /**
-     * Cached set of the command classes this handler can handle.
-     */
-    @Nullable
-    private Set<CommandClass> commandClasses;
 
     /** Lazily initialized logger. */
     private final Supplier<Logger> loggerSupplier = Logging.supplyFor(getClass());
@@ -126,10 +123,9 @@ public abstract class CommandHandler implements CommandDispatcher<String> {
      */
     @Override
     public String dispatch(CommandEnvelope envelope) {
+        final CommandHandlerMethod method = thisClass.getHandler(envelope.getMessageClass());
         final List<? extends Message> eventMessages =
-                CommandHandlerMethod.invokeFor(this,
-                                               envelope.getMessage(),
-                                               envelope.getCommandContext());
+                method.invoke(this, envelope.getMessage(), envelope.getCommandContext());
         final List<Event> events = toEvents(eventMessages, envelope);
         postEvents(events);
         return getId();
@@ -156,10 +152,7 @@ public abstract class CommandHandler implements CommandDispatcher<String> {
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK as we return immutable impl.
     @Override
     public Set<CommandClass> getMessageClasses() {
-        if (commandClasses == null) {
-            commandClasses = CommandHandlerMethod.inspect(getClass());
-        }
-        return commandClasses;
+        return thisClass.getCommands();
     }
 
     private List<Event> toEvents(List<? extends Message> eventMessages, CommandEnvelope ce) {

@@ -25,7 +25,7 @@ import io.spine.core.CommandClass;
 import io.spine.core.EventClass;
 import io.spine.core.RejectionClass;
 import io.spine.server.aggregate.MessageHandlerMap;
-import io.spine.server.command.CommandHandlerClass;
+import io.spine.server.command.CommandHandlingClass;
 import io.spine.server.model.EntityClass;
 import io.spine.server.reflect.CommandHandlerMethod;
 import io.spine.server.reflect.EventReactorMethod;
@@ -38,7 +38,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @Internal
 public final class ProcessManagerClass<P extends ProcessManager>
         extends EntityClass<P>
-        implements CommandHandlerClass {
+        implements CommandHandlingClass {
 
     private static final long serialVersionUID = 0L;
 

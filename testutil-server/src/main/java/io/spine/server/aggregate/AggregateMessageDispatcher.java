@@ -38,9 +38,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @VisibleForTesting
 public class AggregateMessageDispatcher {
 
-    private AggregateMessageDispatcher() {
-        // Prevent instantiation of this utility class.
-    }
+    /** Prevents instantiation of this utility class. */
+    private AggregateMessageDispatcher() {}
 
     /**
      * Dispatches the {@linkplain CommandEnvelope command envelope} and applies the resulting events
