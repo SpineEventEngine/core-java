@@ -20,12 +20,14 @@
 
 package io.spine.server.procman;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
+import io.spine.core.ExternalMessageEnvelope;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
 import io.spine.server.BoundedContext;
@@ -35,6 +37,7 @@ import io.spine.server.commandbus.CommandDispatcherDelegate;
 import io.spine.server.commandbus.DelegatingCommandDispatcher;
 import io.spine.server.entity.EventDispatchingRepository;
 import io.spine.server.event.EventBus;
+import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.rejection.DelegatingRejectionDispatcher;
 import io.spine.server.rejection.RejectionDispatcherDelegate;
 import io.spine.server.route.CommandRouting;
@@ -42,10 +45,13 @@ import io.spine.server.route.EventProducers;
 import io.spine.server.route.EventRouting;
 import io.spine.server.route.RejectionProducers;
 import io.spine.server.route.RejectionRouting;
+import io.spine.type.MessageClass;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
 import java.util.Set;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * The abstract base for Process Managers repositories.
@@ -284,5 +290,36 @@ public abstract class ProcessManagerRepository<I,
     /** Open access to the event routing to the package. */
     EventRouting<I> eventRouting() {
         return getEventRouting();
+    }
+
+    @Override
+    protected ExternalMessageDispatcher<I> getExternalDispatcher() {
+        return new PmExternalMessageDispatcher();
+    }
+
+    /**
+     * An implementation of an external message dispatcher feeding external events
+     * to {@code ProcessManager} instances.
+     */
+    private class PmExternalMessageDispatcher extends AbstractExternalMessageDispatcher {
+
+        @Override
+        public Set<MessageClass> getMessageClasses() {
+            final Class<? extends ProcessManager> pmClass = getEntityClass();
+            final Set<EventClass> eventClasses =
+                    ProcessManager.TypeInfo.getExternalEventClasses(pmClass);
+            final ImmutableSet<MessageClass> messageClasses =
+                    ImmutableSet.<MessageClass>copyOf(eventClasses);
+            return messageClasses;
+        }
+
+        @Override
+        public void onError(ExternalMessageEnvelope envelope, RuntimeException exception) {
+            checkNotNull(envelope);
+            checkNotNull(exception);
+            logError("Error dispatching external event to process manager" +
+                             " (class: %s, id: %s)",
+                     envelope, exception);
+        }
     }
 }

@@ -36,8 +36,11 @@ import static io.spine.core.Rejections.isRejection;
  */
 abstract class EventMethodPredicate extends HandlerMethodPredicate<EventContext> {
 
-    EventMethodPredicate(Class<? extends Annotation> annotationClass) {
+    private final boolean externalOnly;
+
+    EventMethodPredicate(Class<? extends Annotation> annotationClass, boolean externalOnly) {
         super(annotationClass, EventContext.class);
+        this.externalOnly = externalOnly;
     }
 
     /**
@@ -56,4 +59,11 @@ abstract class EventMethodPredicate extends HandlerMethodPredicate<EventContext>
         }
         return false;
     }
+
+    @Override
+    protected boolean verifyAnnotation(Method method) {
+        return super.verifyAnnotation(method) && matchesExternal(externalOnly, method);
+    }
+
+    protected abstract boolean matchesExternal(boolean externalOnly, Method method);
 }

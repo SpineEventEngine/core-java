@@ -34,7 +34,6 @@ import javax.annotation.CheckReturnValue;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Objects;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -76,27 +75,6 @@ public final class EventSubscriberMethod extends HandlerMethod<EventContext> {
 
         final EventSubscriberMethod method = getMethod(target.getClass(), eventMessage, context);
         method.invoke(target, eventMessage, context);
-    }
-
-    /**
-     * Obtains the method for handling the event in the passed class.
-     *
-     * @throws IllegalStateException if the passed class does not have an event handling method
-     *                               for the class of the passed message
-     */
-    //TODO:2017-07-21:alex.tymchenko: eliminate code duplication
-    public static EventSubscriberMethod getMethod(Class<?> cls, Message eventMessage) {
-        checkNotNull(cls);
-        checkNotNull(eventMessage);
-
-        final Class<? extends Message> eventClass = eventMessage.getClass();
-        final EventSubscriberMethod method = MethodRegistry.getInstance()
-                                                           .get(cls, eventClass, factory());
-        if (method == null) {
-            throw newIllegalStateException("The class %s is not subscribed to events of %s.",
-                                           cls.getName(), eventClass.getName());
-        }
-        return method;
     }
 
     /**
@@ -223,15 +201,12 @@ public final class EventSubscriberMethod extends HandlerMethod<EventContext> {
      */
     private static class FilterPredicate extends EventMethodPredicate {
 
-        private final boolean externalOnly;
-
         private FilterPredicate() {
             this(false);
         }
 
         private FilterPredicate(boolean externalOnly) {
-            super(Subscribe.class);
-            this.externalOnly = externalOnly;
+            super(Subscribe.class, externalOnly);
         }
 
         /**
@@ -252,57 +227,17 @@ public final class EventSubscriberMethod extends HandlerMethod<EventContext> {
         }
 
         @Override
-        protected boolean verifyReturnType(Method method) {
-            final boolean isVoid = Void.TYPE.equals(method.getReturnType());
-            return isVoid;
-        }
-
-        @Override
-        protected boolean verifyAnnotation(Method method) {
-            return super.verifyAnnotation(method) && matchesExternal(externalOnly, method);
-        }
-
-        private boolean matchesExternal(boolean externalOnly, Method method) {
+        protected boolean matchesExternal(boolean externalOnly, Method method) {
             final Annotation annotation = method.getAnnotation(getAnnotationClass());
             final Subscribe subscribeAnnotation = (Subscribe) annotation;
             final boolean result = externalOnly == subscribeAnnotation.external();
             return result;
         }
-    }
-
-    private static class ExternalAttribute implements MethodAttribute<Boolean> {
-
-        private final boolean value;
-
-        private ExternalAttribute(boolean value) {
-            this.value = value;
-        }
 
         @Override
-        public String getName() {
-            return "external";
-        }
-
-        @Override
-        public Boolean getValue() {
-            return value;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-            ExternalAttribute that = (ExternalAttribute) o;
-            return value == that.value;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(value);
+        protected boolean verifyReturnType(Method method) {
+            final boolean isVoid = Void.TYPE.equals(method.getReturnType());
+            return isVoid;
         }
     }
 }

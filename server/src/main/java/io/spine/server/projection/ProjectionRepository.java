@@ -25,11 +25,9 @@ import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
-import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
-import io.spine.core.Events;
 import io.spine.core.ExternalMessageEnvelope;
 import io.spine.server.BoundedContext;
 import io.spine.server.entity.EntityStorageConverter;
@@ -42,7 +40,6 @@ import io.spine.server.route.EventProducers;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
-import io.spine.server.tenant.EventOperation;
 import io.spine.type.MessageClass;
 import io.spine.type.TypeName;
 
@@ -245,7 +242,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      * An implementation of an external message dispatcher feeding external events
      * to {@code Projection} instances.
      */
-    private class ProjectionExternalMessageDispatcher implements ExternalMessageDispatcher<I> {
+    private class ProjectionExternalMessageDispatcher extends AbstractExternalMessageDispatcher {
 
         @Override
         public Set<MessageClass> getMessageClasses() {
@@ -258,29 +255,11 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         }
 
         @Override
-        public Set<I> dispatch(ExternalMessageEnvelope envelope) {
-            final Event event = (Event) envelope.getOuterObject();
-            final Message eventMessage = Events.getMessage(event);
-            final EventContext context = event.getContext();
-            final Set<I> ids = getEventRouting().apply(eventMessage, context);
-            final EventOperation op = new EventOperation(event) {
-                @Override
-                public void run() {
-                    for (I id : ids) {
-                        dispatchToEntity(id, EventEnvelope.of(event));
-                    }
-                }
-            };
-            op.execute();
-            return ids;
-        }
-
-        @Override
         public void onError(ExternalMessageEnvelope envelope, RuntimeException exception) {
 
             checkNotNull(envelope);
             checkNotNull(exception);
-            logError("Error dispatching external event to projection (class: %s, id: %s",
+            logError("Error dispatching external event to projection (class: %s, id: %s)",
                      envelope, exception);
         }
     }

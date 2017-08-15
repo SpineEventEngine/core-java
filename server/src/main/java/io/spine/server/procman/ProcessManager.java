@@ -295,5 +295,15 @@ public abstract class ProcessManager<I,
         static Set<RejectionClass> getRejectionClasses(Class<? extends ProcessManager> pmClass) {
             return ImmutableSet.copyOf(RejectionReactorMethod.inspect(pmClass));
         }
+
+        /**
+         * Returns the set of event classes handled by the passed {@link ProcessManager} class.
+         *
+         * @param cls the class to inspect
+         * @return immutable set of event classes or an empty set if no events are handled
+         */
+        static Set<EventClass> getExternalEventClasses(Class<? extends ProcessManager> cls) {
+            return EventReactorMethod.inspectExternal(cls);
+        }
     }
 }

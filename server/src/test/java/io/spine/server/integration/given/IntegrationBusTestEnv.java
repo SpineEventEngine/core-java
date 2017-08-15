@@ -20,30 +20,41 @@
 package io.spine.server.integration.given;
 
 import com.google.common.collect.ImmutableList;
+import com.google.protobuf.Int32Value;
+import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
+import io.spine.core.React;
 import io.spine.core.Rejection;
 import io.spine.core.Subscribe;
 import io.spine.server.BoundedContext;
+import io.spine.server.aggregate.Aggregate;
+import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.event.EventSubscriber;
 import io.spine.server.integration.IntegrationBus;
 import io.spine.server.integration.TransportFactory;
+import io.spine.server.procman.ProcessManager;
+import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.rejection.RejectionSubscriber;
+import io.spine.test.integration.Project;
 import io.spine.test.integration.ProjectId;
+import io.spine.test.integration.ProjectVBuilder;
 import io.spine.test.integration.command.ItgStartProject;
 import io.spine.test.integration.event.ItgProjectCreated;
 import io.spine.test.integration.event.ItgProjectStarted;
 import io.spine.test.integration.rejection.IntegrationRejections.ItgCannotStartArchivedProject;
 import io.spine.test.integration.rejection.IntegrationRejections.ItgProjectAlreadyExists;
+import io.spine.validate.Int32ValueVBuilder;
 import io.spine.validate.StringValueVBuilder;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newLinkedList;
@@ -61,9 +72,11 @@ public class IntegrationBusTestEnv {
         // Prevent instantiation of this utility class.
     }
 
-    public static BoundedContext contextWithExtEntitySubscriber(TransportFactory transportFactory) {
+    public static BoundedContext contextWithExtEntitySubscribers(TransportFactory transportFactory) {
         final BoundedContext boundedContext = contextWithTransport(transportFactory);
         boundedContext.register(new ProjectDetailsRepository());
+        boundedContext.register(new ProjectWizardRepository());
+        boundedContext.register(new ProjectCountAggregateRepository());
         return boundedContext;
     }
 
@@ -167,12 +180,6 @@ public class IntegrationBusTestEnv {
 
         private static ItgProjectStarted domesticEvent = null;
 
-        /**
-         * Creates a new instance.
-         *
-         * @param id the ID for the new instance
-         * @throws IllegalArgumentException if the ID is not of one of the supported types
-         */
         protected ProjectDetails(ProjectId id) {
             super(id);
         }
@@ -203,6 +210,90 @@ public class IntegrationBusTestEnv {
 
     private static class ProjectDetailsRepository
             extends ProjectionRepository<ProjectId, ProjectDetails, StringValue> {
+    }
+
+    @SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod")  // OK to preserve the state.
+    public static class ProjectWizard
+            extends ProcessManager<ProjectId, Project, ProjectVBuilder> {
+
+        protected ProjectWizard(ProjectId id) {
+            super(id);
+        }
+
+        private static ItgProjectCreated externalEvent = null;
+
+        private static ItgProjectStarted domesticEvent = null;
+
+        @React(external = true)
+        List<Message> on(ItgProjectCreated event) {
+            externalEvent = event;
+            return Collections.emptyList();
+        }
+
+        @React
+        List<Message> on(ItgProjectStarted event) {
+            domesticEvent = event;
+            return Collections.emptyList();
+        }
+
+        public static ItgProjectCreated getExternalEvent() {
+            return externalEvent;
+        }
+
+        public static ItgProjectStarted getDomesticEvent() {
+            return domesticEvent;
+        }
+
+        public static void clear() {
+            externalEvent = null;
+            domesticEvent = null;
+        }
+    }
+
+    private static class ProjectWizardRepository
+            extends ProcessManagerRepository<ProjectId, ProjectWizard, Project> {
+    }
+
+    @SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod")  // OK to preserve the state.
+    public static class ProjectCountAggregate
+            extends Aggregate<ProjectId, Int32Value, Int32ValueVBuilder> {
+
+        private static ItgProjectCreated externalEvent = null;
+
+        private static ItgProjectStarted domesticEvent = null;
+
+        protected ProjectCountAggregate(ProjectId id) {
+            super(id);
+        }
+
+        @React(external = true)
+        List<Message> on(ItgProjectCreated event) {
+            externalEvent = event;
+            return Collections.emptyList();
+        }
+
+        @React
+        List<Message> on(ItgProjectStarted event) {
+            domesticEvent = event;
+            return Collections.emptyList();
+        }
+
+        public static ItgProjectCreated getExternalEvent() {
+            return externalEvent;
+        }
+
+        public static ItgProjectStarted getDomesticEvent() {
+            return domesticEvent;
+        }
+
+        public static void clear() {
+            externalEvent = null;
+            domesticEvent = null;
+        }
+    }
+
+    private static class ProjectCountAggregateRepository
+            extends AggregateRepository<ProjectId, ProjectCountAggregate> {
     }
 
     @SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod")  // OK to preserve the state.

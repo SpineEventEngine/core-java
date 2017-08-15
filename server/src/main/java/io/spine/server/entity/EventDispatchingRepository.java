@@ -22,15 +22,18 @@ package io.spine.server.entity;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
+import io.spine.core.Event;
+import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
+import io.spine.core.Events;
+import io.spine.core.ExternalMessageEnvelope;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
-import io.spine.core.ExternalMessageEnvelope;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.route.EventRoute;
 import io.spine.server.route.EventRouting;
-import io.spine.server.tenant.TenantAwareFunction0;
 import io.spine.server.tenant.EventOperation;
+import io.spine.server.tenant.TenantAwareFunction0;
 import io.spine.type.MessageClass;
 
 import javax.annotation.CheckReturnValue;
@@ -171,14 +174,9 @@ public abstract class EventDispatchingRepository<I,
      * @return the external event dispatcher
      */
     protected ExternalMessageDispatcher<I> getExternalDispatcher() {
-        return new ExternalMessageDispatcher<I>() {
+        return new AbstractExternalMessageDispatcher() {
             @Override
             public Set<MessageClass> getMessageClasses() {
-                return Collections.emptySet();
-            }
-
-            @Override
-            public Set<I> dispatch(ExternalMessageEnvelope envelope) {
                 return Collections.emptySet();
             }
 
@@ -187,5 +185,31 @@ public abstract class EventDispatchingRepository<I,
                 logError("Error dispatching external event (class: %s, id: %s", envelope, exception);
             }
         };
+    }
+
+    /**
+     * An abstract base for the external message dispatchers, enabling
+     * the {@code EventDispatchingRepository} instances to handle external events.
+     */
+    protected abstract class AbstractExternalMessageDispatcher
+            implements ExternalMessageDispatcher<I> {
+
+        @Override
+        public Set<I> dispatch(ExternalMessageEnvelope envelope) {
+            final Event event = (Event) envelope.getOuterObject();
+            final Message eventMessage = Events.getMessage(event);
+            final EventContext context = event.getContext();
+            final Set<I> ids = getEventRouting().apply(eventMessage, context);
+            final EventOperation op = new EventOperation(event) {
+                @Override
+                public void run() {
+                    for (I id : ids) {
+                        dispatchToEntity(id, EventEnvelope.of(event));
+                    }
+                }
+            };
+            op.execute();
+            return ids;
+        }
     }
 }

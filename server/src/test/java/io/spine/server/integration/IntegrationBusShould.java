@@ -19,6 +19,7 @@
  */
 package io.spine.server.integration;
 
+import com.google.protobuf.Message;
 import io.spine.core.BoundedContextId;
 import io.spine.core.Event;
 import io.spine.core.Rejection;
@@ -27,9 +28,11 @@ import io.spine.server.BoundedContext;
 import io.spine.server.event.EventBus;
 import io.spine.server.integration.given.IntegrationBusTestEnv.CannotCreateProjectExtSubscriber;
 import io.spine.server.integration.given.IntegrationBusTestEnv.ContextAwareProjectDetails;
+import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectCountAggregate;
 import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectDetails;
 import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectEventsSubscriber;
 import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectStartedExtSubscriber;
+import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectWizard;
 import io.spine.server.integration.local.LocalTransportFactory;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,7 +42,7 @@ import java.util.Set;
 import static com.google.common.collect.Sets.newHashSet;
 import static io.spine.server.integration.given.IntegrationBusTestEnv.cannotStartArchivedProject;
 import static io.spine.server.integration.given.IntegrationBusTestEnv.contextWithContextAwareEntitySubscriber;
-import static io.spine.server.integration.given.IntegrationBusTestEnv.contextWithExtEntitySubscriber;
+import static io.spine.server.integration.given.IntegrationBusTestEnv.contextWithExtEntitySubscribers;
 import static io.spine.server.integration.given.IntegrationBusTestEnv.contextWithExternalSubscribers;
 import static io.spine.server.integration.given.IntegrationBusTestEnv.contextWithProjectCreatedNeeds;
 import static io.spine.server.integration.given.IntegrationBusTestEnv.contextWithProjectStartedNeeds;
@@ -69,15 +72,21 @@ public class IntegrationBusShould {
         final LocalTransportFactory transportFactory = LocalTransportFactory.newInstance();
 
         final BoundedContext sourceContext = contextWithTransport(transportFactory);
-        contextWithExtEntitySubscriber(transportFactory);
+        contextWithExtEntitySubscribers(transportFactory);
 
         assertNull(ProjectDetails.getExternalEvent());
+        assertNull(ProjectWizard.getExternalEvent());
+        assertNull(ProjectCountAggregate.getExternalEvent());
 
         final Event event = projectCreated();
         sourceContext.getEventBus()
                      .post(event);
 
-        assertEquals(AnyPacker.unpack(event.getMessage()), ProjectDetails.getExternalEvent());
+        final Message expectedMessage = AnyPacker.unpack(event.getMessage());
+        assertEquals(expectedMessage, ProjectDetails.getExternalEvent());
+        assertEquals(expectedMessage, ProjectWizard.getExternalEvent());
+        //TODO:2017-08-15:alex.tymchenko: uncomment;
+//        assertEquals(expectedMessage, ProjectCountAggregate.getExternalEvent());
     }
 
     @Test
@@ -85,7 +94,7 @@ public class IntegrationBusShould {
         final LocalTransportFactory transportFactory = LocalTransportFactory.newInstance();
 
         final BoundedContext sourceContext = contextWithTransport(transportFactory);
-        final BoundedContext destContext = contextWithExtEntitySubscriber(transportFactory);
+        final BoundedContext destContext = contextWithExtEntitySubscribers(transportFactory);
 
         assertNull(ProjectDetails.getDomesticEvent());
 
