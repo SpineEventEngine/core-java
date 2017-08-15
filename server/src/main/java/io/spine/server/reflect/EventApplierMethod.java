@@ -34,7 +34,6 @@ import java.lang.reflect.Modifier;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * A wrapper for event applier method.
@@ -62,23 +61,6 @@ public final class EventApplierMethod extends HandlerMethod<Empty> {
 
     static EventApplierMethod from(Method method) {
         return new EventApplierMethod(method);
-    }
-
-    public static EventApplierMethod getMethod(Class<? extends Aggregate> cls,
-                                               Message eventMessage) {
-        checkNotNull(cls);
-        checkNotNull(eventMessage);
-
-        final EventApplierMethod method =
-                MethodRegistry.getInstance()
-                              .get(cls, eventMessage.getClass(), factory());
-        if (method == null) {
-            throw newIllegalStateException(
-                    "Missing event applier for event class %s in aggregate class %s.",
-                    eventMessage.getClass().getName(),
-                    cls.getName());
-        }
-        return method;
     }
 
     @VisibleForTesting

@@ -24,7 +24,6 @@ import com.google.common.base.Predicate;
 import com.google.protobuf.Message;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
-import io.spine.core.Events;
 import io.spine.core.React;
 
 import javax.annotation.CheckReturnValue;
@@ -52,38 +51,6 @@ public final class EventReactorMethod extends HandlerMethod<EventContext> {
     @Override
     public EventClass getMessageClass() {
         return EventClass.of(rawMessageClass());
-    }
-
-    /**
-     * Invokes reacting method for the passed event.
-     *
-     * @param target  the object which method to be invoked
-     * @param event   the event message
-     * @param context the event context
-     * @return a list of produced event messages or an empty list if a target object did not
-     * modified its state because of the passed event
-     */
-    public static List<? extends Message> invokeFor(Object target,
-                                                    Message event,
-                                                    EventContext context) {
-        checkNotNull(target);
-        checkNotNull(event);
-        checkNotNull(context);
-        final Message eventMessage = Events.ensureMessage(event);
-        final EventReactorMethod method = getMethod(target.getClass(), eventMessage);
-        return method.invoke(target, eventMessage, context);
-    }
-
-    private static EventReactorMethod getMethod(Class<?> cls, Message eventMessage) {
-        final Class<? extends Message> eventClass = eventMessage.getClass();
-        final HandlerMethod.Factory<EventReactorMethod> factory = factory();
-        final MethodRegistry registry = MethodRegistry.getInstance();
-        final EventReactorMethod method = registry.get(cls, eventClass, factory);
-        if (method == null) {
-            throw newIllegalStateException("The class %s does not react to events of class %s.",
-                                           cls.getName(), eventClass.getName());
-        }
-        return method;
     }
 
     /**
