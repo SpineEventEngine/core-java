@@ -32,8 +32,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public final class Consumers {
 
-    private Consumers() {
-    }
+    /** Prevents instantiation of this utility class. */
+    private Consumers() {}
 
     /**
      * Creates an identity for the {@linkplain Delivery} consumer.
