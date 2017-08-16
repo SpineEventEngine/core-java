@@ -21,6 +21,7 @@ package io.spine.server.rejection;
 
 import com.google.common.base.Predicate;
 import com.google.protobuf.Message;
+import io.spine.annotation.Internal;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.Commands;
@@ -47,6 +48,7 @@ import static io.spine.util.Exceptions.unsupported;
  * @author Dmytro Dashenkov
  * @author Alexander Yevsyukov
  */
+@Internal
 class RejectionHandlerMethod extends HandlerMethod<RejectionContext> {
 
     /** Determines the number of parameters and their types. */

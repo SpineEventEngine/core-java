@@ -25,6 +25,7 @@ import com.google.common.base.Predicate;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.Identifier;
+import io.spine.annotation.Internal;
 import io.spine.base.ThrowableMessage;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
@@ -47,6 +48,7 @@ import static com.google.common.base.Throwables.getRootCause;
  *
  * @author Alexander Yevsyukov
  */
+@Internal
 public final class CommandHandlerMethod extends HandlerMethod<CommandContext> {
 
     /** The instance of the predicate to filter command handler methods of a class. */

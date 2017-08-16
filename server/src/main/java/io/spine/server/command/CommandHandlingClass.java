@@ -25,6 +25,11 @@ import io.spine.core.CommandClass;
 
 import java.util.Set;
 
+/**
+ * A common interface for classes that handle commands.
+ *
+ * @author Alexander Yevsyukov
+ */
 @Internal
 public interface CommandHandlingClass {
 
