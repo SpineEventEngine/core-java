@@ -22,8 +22,8 @@ package io.spine.server.event;
 
 import io.spine.annotation.Internal;
 import io.spine.core.EventClass;
-import io.spine.server.aggregate.MessageHandlerMap;
 import io.spine.server.model.HandlerClass;
+import io.spine.server.model.MessageHandlerMap;
 import io.spine.server.reflect.EventSubscriberMethod;
 
 import java.util.Set;

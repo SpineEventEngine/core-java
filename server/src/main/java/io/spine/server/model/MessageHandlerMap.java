@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.aggregate;
+package io.spine.server.model;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
@@ -36,6 +36,13 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkState;
 import static io.spine.server.reflect.HandlerMethod.getFirstParamType;
 
+/**
+ * Provides mapping from a class of messages to a method which handles such messages.
+ *
+ * @param <M> the type of messages
+ * @param <H> the type of handler methods
+ * @author Alexander Yevsyukov
+ */
 public class MessageHandlerMap<M extends MessageClass, H extends HandlerMethod>
         implements Serializable {
 

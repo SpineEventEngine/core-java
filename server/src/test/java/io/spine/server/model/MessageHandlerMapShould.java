@@ -18,45 +18,34 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.command;
+package io.spine.server.model;
 
-import io.spine.annotation.Internal;
 import io.spine.core.CommandClass;
-import io.spine.server.model.HandlerClass;
-import io.spine.server.model.MessageHandlerMap;
+import io.spine.server.command.Assign;
 import io.spine.server.reflect.CommandHandlerMethod;
+import io.spine.server.reflect.DuplicateHandlerMethodException;
+import io.spine.test.event.ProjectCreated;
+import io.spine.test.event.command.CreateProject;
+import org.junit.Test;
 
-import java.util.Set;
+public class MessageHandlerMapShould {
 
-/**
- * Provides message handling information on a command handler class.
- *
- * @author Alexander Yevsyukov
- */
-@Internal
-public final class CommandHandlerClass<C extends CommandHandler>
-        extends HandlerClass<C>
-        implements CommandHandlingClass {
-
-    private static final long serialVersionUID = 0L;
-
-    private final MessageHandlerMap<CommandClass, CommandHandlerMethod> commands;
-
-    private CommandHandlerClass(Class<? extends C> cls) {
-        super(cls);
-        this.commands = new MessageHandlerMap<>(cls, CommandHandlerMethod.factory());
+    @Test(expected = DuplicateHandlerMethodException.class)
+    public void not_allow_duplicating_message_classes() {
+        new MessageHandlerMap<CommandClass, CommandHandlerMethod>
+                (HandlerWithDuplicatingMethods.class, CommandHandlerMethod.factory());
     }
 
-    public static HandlerClass<?> of(Class<? extends CommandHandler> cls) {
-        return new CommandHandlerClass<>(cls);
-    }
+    private static class HandlerWithDuplicatingMethods {
 
-    CommandHandlerMethod getHandler(CommandClass commandClass) {
-        return commands.getMethod(commandClass);
-    }
+        @Assign
+        public ProjectCreated on(CreateProject cmd) {
+            return ProjectCreated.getDefaultInstance();
+        }
 
-    @Override
-    public Set<CommandClass> getCommands() {
-        return commands.getMessageClasses();
+        @Assign
+        public ProjectCreated handle(CreateProject cmd) {
+            return ProjectCreated.getDefaultInstance();
+        }
     }
 }

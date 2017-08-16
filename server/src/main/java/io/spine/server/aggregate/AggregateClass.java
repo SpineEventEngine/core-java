@@ -26,6 +26,7 @@ import io.spine.core.EventClass;
 import io.spine.core.RejectionClass;
 import io.spine.server.command.CommandHandlingClass;
 import io.spine.server.model.EntityClass;
+import io.spine.server.model.MessageHandlerMap;
 import io.spine.server.reflect.CommandHandlerMethod;
 import io.spine.server.reflect.EventApplierMethod;
 import io.spine.server.reflect.EventReactorMethod;
