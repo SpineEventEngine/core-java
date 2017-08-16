@@ -20,6 +20,7 @@
 
 package io.spine.server.event;
 
+import com.google.common.base.MoreObjects;
 import io.spine.annotation.Internal;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
@@ -73,5 +74,12 @@ public final class DelegatingEventDispatcher<I> implements EventDispatcher<I> {
     @Override
     public void onError(EventEnvelope envelope, RuntimeException exception) {
         delegate.onError(envelope, exception);
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                          .add("delegate", delegate.getClass())
+                          .toString();
     }
 }

@@ -19,6 +19,7 @@
  */
 package io.spine.server.commandbus;
 
+import com.google.common.base.MoreObjects;
 import io.spine.annotation.Internal;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
@@ -67,5 +68,12 @@ public class DelegatingCommandDispatcher<I> implements CommandDispatcher<I> {
     @Override
     public void onError(CommandEnvelope envelope, RuntimeException exception) {
         delegate.onError(envelope, exception);
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                          .add("delegate", delegate.getClass())
+                          .toString();
     }
 }

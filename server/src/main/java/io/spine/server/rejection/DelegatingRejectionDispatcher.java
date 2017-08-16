@@ -20,6 +20,7 @@
 
 package io.spine.server.rejection;
 
+import com.google.common.base.MoreObjects;
 import io.spine.annotation.Internal;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
@@ -67,5 +68,12 @@ public final class DelegatingRejectionDispatcher<I> implements RejectionDispatch
         checkNotNull(envelope);
         checkNotNull(exception);
         delegate.onError(envelope, exception);
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                          .add("delegate", delegate.getClass())
+                          .toString();
     }
 }

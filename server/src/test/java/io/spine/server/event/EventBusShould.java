@@ -30,6 +30,7 @@ import io.spine.core.Events;
 import io.spine.core.Subscribe;
 import io.spine.server.BoundedContext;
 import io.spine.server.bus.EnvelopeValidator;
+import io.spine.server.delivery.Consumers;
 import io.spine.server.event.given.EventBusTestEnv.GivenEvent;
 import io.spine.server.storage.StorageFactory;
 import io.spine.test.event.ProjectCreated;
@@ -243,7 +244,7 @@ public class EventBusShould {
         final EventEnvelope postponedEvent = postponedEvents.iterator()
                                                             .next();
         verify(delegateDispatcherExecutor, never()).execute(any(Runnable.class));
-        postponedDispatcherDelivery.deliverNow(postponedEvent, dispatcher.getClass());
+        postponedDispatcherDelivery.deliverNow(postponedEvent, Consumers.idOf(dispatcher));
         assertTrue(dispatcher.isDispatchCalled());
         verify(delegateDispatcherExecutor).execute(any(Runnable.class));
     }

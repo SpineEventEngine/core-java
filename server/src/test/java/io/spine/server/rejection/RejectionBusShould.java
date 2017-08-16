@@ -25,6 +25,7 @@ import io.spine.core.Rejection;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
 import io.spine.grpc.MemoizingObserver;
+import io.spine.server.delivery.Consumers;
 import io.spine.server.rejection.given.BareDispatcher;
 import io.spine.server.rejection.given.CommandAwareSubscriber;
 import io.spine.server.rejection.given.CommandMessageAwareSubscriber;
@@ -241,7 +242,7 @@ public class RejectionBusShould {
         final RejectionEnvelope postponedRejection = postponedRejections.iterator()
                                                                         .next();
         verify(delegateDispatcherExecutor, never()).execute(any(Runnable.class));
-        postponedDelivery.deliverNow(postponedRejection, dispatcher.getClass());
+        postponedDelivery.deliverNow(postponedRejection, Consumers.idOf(dispatcher));
         assertTrue(dispatcher.isDispatchCalled());
         verify(delegateDispatcherExecutor).execute(any(Runnable.class));
     }
