@@ -32,8 +32,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Set;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 /**
  * A wrapper for a rejection subscriber method.
  *
@@ -55,45 +53,6 @@ public class RejectionSubscriberMethod extends RejectionHandlerMethod {
     @VisibleForTesting
     RejectionSubscriberMethod(Method method) {
         super(method);
-    }
-
-    /**
-     * Invokes the subscriber method in the passed object.
-     */
-    public static void invokeFor(Object target,
-                                 Message rejectionMessage,
-                                 Message commandMessage,
-                                 RejectionContext context) {
-        checkNotNull(target);
-        checkNotNull(rejectionMessage);
-        checkNotNull(commandMessage);
-        checkNotNull(context);
-
-        final RejectionSubscriberMethod method =
-                getMethod(target.getClass(), rejectionMessage, commandMessage);
-        method.invoke(target, rejectionMessage, context);
-    }
-
-    /**
-     * Obtains the method for handling the rejection in the passed class.
-     *
-     * @throws IllegalStateException if the passed class does not have an rejection handling method
-     *                               for the class of the passed message
-     */
-    public static RejectionSubscriberMethod getMethod(Class<?> cls,
-                                                      Message rejectionMessage,
-                                                      Message commandMessage) {
-        checkNotNull(cls);
-        checkNotNull(rejectionMessage);
-        checkNotNull(commandMessage);
-
-        final Class<? extends Message> rejectionClass = rejectionMessage.getClass();
-        final MethodRegistry registry = MethodRegistry.getInstance();
-        final RejectionSubscriberMethod method = registry.get(cls, rejectionClass, factory());
-        if (method == null) {
-            throw missingRejectionHandler(cls, rejectionClass);
-        }
-        return method;
     }
 
     @CheckReturnValue
@@ -119,7 +78,7 @@ public class RejectionSubscriberMethod extends RejectionHandlerMethod {
     }
 
     /** Returns the factory for filtering and creating rejection subscriber methods. */
-    private static HandlerMethod.Factory<RejectionSubscriberMethod> factory() {
+    public static HandlerMethod.Factory<RejectionSubscriberMethod> factory() {
         return Factory.getInstance();
     }
 

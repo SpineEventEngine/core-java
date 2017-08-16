@@ -32,6 +32,8 @@ import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerClass;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionClass;
+import io.spine.server.rejection.RejectionSubscriber;
+import io.spine.server.rejection.RejectionSubscriberClass;
 
 import java.util.Map;
 
@@ -120,5 +122,19 @@ public class Model {
             handlerClasses.put(cls, handlerClass);
         }
         return (CommandHandlerClass<?>)handlerClass;
+    }
+
+    /**
+     * Obtains an instance of a rejection subscriber class information.
+     */
+    public
+    RejectionSubscriberClass<?> asRejectionSubscriber(Class<? extends RejectionSubscriber> cls) {
+        checkNotNull(cls);
+        HandlerClass<?> handlerClass = handlerClasses.get(cls);
+        if (handlerClass == null) {
+            handlerClass = RejectionSubscriberClass.of(cls);
+            handlerClasses.put(cls, handlerClass);
+        }
+        return (RejectionSubscriberClass<?>)handlerClass;
     }
 }

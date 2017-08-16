@@ -33,8 +33,6 @@ import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.Set;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 /**
  * A wrapper for a rejection reactor method.
  *
@@ -56,49 +54,6 @@ public class RejectionReactorMethod extends RejectionHandlerMethod {
     @VisibleForTesting
     RejectionReactorMethod(Method method) {
         super(method);
-    }
-
-    /**
-     * Invokes the reactor method in the passed object.
-     */
-    public static List<? extends Message> invokeFor(Object target,
-                                                    Message rejectionMessage,
-                                                    Message commandMessage,
-                                                    RejectionContext context) {
-        checkNotNull(target);
-        checkNotNull(rejectionMessage);
-        checkNotNull(commandMessage);
-        checkNotNull(context);
-
-        final RejectionReactorMethod method =
-                getMethod(target.getClass(), rejectionMessage, commandMessage);
-        final List<? extends Message> result =
-                method.invoke(target, rejectionMessage, context);
-        return result;
-    }
-
-    /**
-     * Obtains the method for handling the rejection in the passed class.
-     *
-     * @throws IllegalStateException if the passed class does not have an rejection handling method
-     *                               for the class of the passed message
-     */
-    public static RejectionReactorMethod getMethod(Class<?> cls,
-                                                   Message rejectionMessage,
-                                                   Message commandMessage) {
-        checkNotNull(cls);
-        checkNotNull(rejectionMessage);
-        checkNotNull(commandMessage);
-
-        final Class<? extends Message> rejectionClass = rejectionMessage.getClass();
-        final MethodRegistry registry = MethodRegistry.getInstance();
-        final RejectionReactorMethod method = registry.get(cls,
-                                                           rejectionClass,
-                                                           factory());
-        if (method == null) {
-            throw missingRejectionHandler(cls, rejectionClass);
-        }
-        return method;
     }
 
     @CheckReturnValue
