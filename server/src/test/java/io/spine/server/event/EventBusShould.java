@@ -34,6 +34,7 @@ import io.spine.server.delivery.Consumers;
 import io.spine.server.event.given.EventBusTestEnv.GivenEvent;
 import io.spine.server.storage.StorageFactory;
 import io.spine.test.event.ProjectCreated;
+import io.spine.test.event.ProjectStarred;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -250,6 +251,31 @@ public class EventBusShould {
     }
 
     @Test
+    public void deliver_postponed_event_to_delegating_dispatchers_using_configured_executor() {
+        final ProjectCreatedDelegate first = new ProjectCreatedDelegate();
+        final ProjectStartedDelegate second = new ProjectStartedDelegate();
+
+        final DelegatingEventDispatcher<String> firstDispatcher =
+                DelegatingEventDispatcher.of(first);
+        final DelegatingEventDispatcher<String> secondDispatcher =
+                DelegatingEventDispatcher.of(second);
+
+        eventBusWithPosponedExecution.register(firstDispatcher);
+        eventBusWithPosponedExecution.register(secondDispatcher);
+
+        final Event event = GivenEvent.projectCreated();
+        eventBusWithPosponedExecution.post(event);
+        final Set<EventEnvelope> postponedEvents = postponedDispatcherDelivery.getPostponedEvents();
+        final EventEnvelope postponedEvent = postponedEvents.iterator()
+                                                            .next();
+        verify(delegateDispatcherExecutor, never()).execute(any(Runnable.class));
+        postponedDispatcherDelivery.deliverNow(postponedEvent, Consumers.idOf(firstDispatcher));
+        assertTrue(first.isDispatchCalled());
+        verify(delegateDispatcherExecutor).execute(any(Runnable.class));
+        assertFalse(second.isDispatchCalled());
+    }
+
+    @Test
     public void unregister_dispatchers() {
         final EventDispatcher dispatcherOne = new BareDispatcher();
         final EventDispatcher dispatcherTwo = new BareDispatcher();
@@ -398,6 +424,60 @@ public class EventBusShould {
         private Set<EventEnvelope> getPostponedEvents() {
             final Set<EventEnvelope> envelopes = postponedExecutions.keySet();
             return envelopes;
+        }
+    }
+
+    /**
+     * A delegate, dispatching {@link ProjectCreated} events.
+     */
+    private static class ProjectCreatedDelegate implements EventDispatcherDelegate<String> {
+        private boolean dispatchCalled = false;
+
+        @Override
+        public Set<EventClass> getEventClasses() {
+            return ImmutableSet.of(EventClass.of(ProjectCreated.class));
+        }
+
+        @Override
+        public Set<String> dispatchEvent(EventEnvelope envelope) {
+            dispatchCalled = true;
+            return ImmutableSet.of(toString());
+        }
+
+        @Override
+        public void onError(EventEnvelope envelope, RuntimeException exception) {
+            // Do nothing.
+        }
+
+        private boolean isDispatchCalled() {
+            return dispatchCalled;
+        }
+    }
+
+    /**
+     * A delegate, dispatching {@link ProjectStarred} events.
+     */
+    private static class ProjectStartedDelegate implements EventDispatcherDelegate<String> {
+        private boolean dispatchCalled = false;
+
+        @Override
+        public Set<EventClass> getEventClasses() {
+            return ImmutableSet.of(EventClass.of(ProjectStarred.class));
+        }
+
+        @Override
+        public Set<String> dispatchEvent(EventEnvelope envelope) {
+            dispatchCalled = true;
+            return ImmutableSet.of(toString());
+        }
+
+        @Override
+        public void onError(EventEnvelope envelope, RuntimeException exception) {
+            // Do nothing.
+        }
+
+        private boolean isDispatchCalled() {
+            return dispatchCalled;
         }
     }
 }

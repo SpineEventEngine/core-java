@@ -32,7 +32,9 @@ import io.spine.server.rejection.given.CommandMessageAwareSubscriber;
 import io.spine.server.rejection.given.ContextAwareSubscriber;
 import io.spine.server.rejection.given.FaultySubscriber;
 import io.spine.server.rejection.given.InvalidOrderSubscriber;
+import io.spine.server.rejection.given.InvalidProjectNameDelegate;
 import io.spine.server.rejection.given.InvalidProjectNameSubscriber;
+import io.spine.server.rejection.given.MissingOwnerDelegate;
 import io.spine.server.rejection.given.PostponedDispatcherRejectionDelivery;
 import io.spine.server.rejection.given.RejectionMessageSubscriber;
 import io.spine.server.rejection.given.VerifiableSubscriber;
@@ -245,6 +247,31 @@ public class RejectionBusShould {
         postponedDelivery.deliverNow(postponedRejection, Consumers.idOf(dispatcher));
         assertTrue(dispatcher.isDispatchCalled());
         verify(delegateDispatcherExecutor).execute(any(Runnable.class));
+    }
+
+    @Test
+    public void deliver_postponed_rejection_to_delegating_dispatchers_using_configured_executor() {
+        final InvalidProjectNameDelegate first = new InvalidProjectNameDelegate();
+        final MissingOwnerDelegate second = new MissingOwnerDelegate();
+
+        final DelegatingRejectionDispatcher<String> firstDispatcher =
+                DelegatingRejectionDispatcher.of(first);
+        final DelegatingRejectionDispatcher<String> secondDispatcher =
+                DelegatingRejectionDispatcher.of(second);
+
+        rejectionBusWithPostponedExecution.register(firstDispatcher);
+        rejectionBusWithPostponedExecution.register(secondDispatcher);
+
+        final Rejection rejection = invalidProjectNameRejection();
+        rejectionBusWithPostponedExecution.post(rejection);
+        final Set<RejectionEnvelope> postponedRejections = postponedDelivery.getPostponedRejections();
+        final RejectionEnvelope postponedRejection = postponedRejections.iterator()
+                                                            .next();
+        verify(delegateDispatcherExecutor, never()).execute(any(Runnable.class));
+        postponedDelivery.deliverNow(postponedRejection, Consumers.idOf(firstDispatcher));
+        assertTrue(first.isDispatchCalled());
+        verify(delegateDispatcherExecutor).execute(any(Runnable.class));
+        assertFalse(second.isDispatchCalled());
     }
 
     @Test
