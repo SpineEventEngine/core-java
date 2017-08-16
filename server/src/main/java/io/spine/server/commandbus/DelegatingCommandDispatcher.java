@@ -70,10 +70,16 @@ public class DelegatingCommandDispatcher<I> implements CommandDispatcher<I> {
         delegate.onError(envelope, exception);
     }
 
+    /**
+     * Returns the string representation of this dispatcher.
+     *
+     * <p>Includes an FQN of the {@code delegate} in order to allow distinguish
+     * {@code DelegatingCommandDispatcher} instances with different delegates.
+     */
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                          .add("delegate", delegate.getClass())
+                          .add("commandDelegate", delegate.getClass())
                           .toString();
     }
 }
