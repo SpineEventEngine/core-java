@@ -136,7 +136,7 @@ public abstract class Enricher<M extends EnrichableMessageEnvelope<?, ?, C>, C e
      *         the envelope with the source message
      * @throws IllegalArgumentException
      *         if the passed message cannot be enriched
-     * @see    #canBeEnriched(M)
+     * @see    Enricher#canBeEnriched(EnrichableMessageEnvelope)
      */
     public M enrich(M source) {
         checkTypeRegistered(source);
