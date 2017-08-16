@@ -30,6 +30,7 @@ import io.spine.core.EventEnvelope;
 import io.spine.core.Version;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.AggregateRepository;
+import io.spine.server.delivery.Consumers;
 import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.server.entity.EntityStateEnvelope;
 import io.spine.server.entity.VersionableEntity;
@@ -139,7 +140,7 @@ public class StandPostShould {
         final EntityStateEnvelope envelope = EntityStateEnvelope.of(entity,
                                                                     context.getActorContext()
                                                                            .getTenantId());
-        verify(delivery).deliverNow(eq(envelope), eq(Stand.class));
+        verify(delivery).deliverNow(eq(envelope), eq(Consumers.idOf(stand)));
     }
 
     // **** Integration scenarios (<source> -> StandFunnel -> Mock Stand) ****

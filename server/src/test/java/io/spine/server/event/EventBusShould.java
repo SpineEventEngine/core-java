@@ -30,6 +30,7 @@ import io.spine.core.Events;
 import io.spine.core.Subscribe;
 import io.spine.server.BoundedContext;
 import io.spine.server.bus.EnvelopeValidator;
+import io.spine.server.delivery.Consumers;
 import io.spine.server.event.given.EventBusTestEnv.GivenEvent;
 import io.spine.server.storage.StorageFactory;
 import io.spine.test.event.ProjectCreated;
@@ -243,9 +244,34 @@ public class EventBusShould {
         final EventEnvelope postponedEvent = postponedEvents.iterator()
                                                             .next();
         verify(delegateDispatcherExecutor, never()).execute(any(Runnable.class));
-        postponedDispatcherDelivery.deliverNow(postponedEvent, dispatcher.getClass());
+        postponedDispatcherDelivery.deliverNow(postponedEvent, Consumers.idOf(dispatcher));
         assertTrue(dispatcher.isDispatchCalled());
         verify(delegateDispatcherExecutor).execute(any(Runnable.class));
+    }
+
+    @Test
+    public void pick_proper_consumer_by_consumer_id_when_delivering_to_delegates_of_same_event() {
+        final FirstProjectCreatedDelegate first = new FirstProjectCreatedDelegate();
+        final AnotherProjectCreatedDelegate second = new AnotherProjectCreatedDelegate();
+
+        final DelegatingEventDispatcher<String> firstDispatcher =
+                DelegatingEventDispatcher.of(first);
+        final DelegatingEventDispatcher<String> secondDispatcher =
+                DelegatingEventDispatcher.of(second);
+
+        eventBusWithPosponedExecution.register(firstDispatcher);
+        eventBusWithPosponedExecution.register(secondDispatcher);
+
+        final Event event = GivenEvent.projectCreated();
+        eventBusWithPosponedExecution.post(event);
+        final Set<EventEnvelope> postponedEvents = postponedDispatcherDelivery.getPostponedEvents();
+        final EventEnvelope postponedEvent = postponedEvents.iterator()
+                                                            .next();
+        verify(delegateDispatcherExecutor, never()).execute(any(Runnable.class));
+        postponedDispatcherDelivery.deliverNow(postponedEvent, Consumers.idOf(firstDispatcher));
+        assertTrue(first.isDispatchCalled());
+        verify(delegateDispatcherExecutor).execute(any(Runnable.class));
+        assertFalse(second.isDispatchCalled());
     }
 
     @Test
@@ -397,6 +423,60 @@ public class EventBusShould {
         private Set<EventEnvelope> getPostponedEvents() {
             final Set<EventEnvelope> envelopes = postponedExecutions.keySet();
             return envelopes;
+        }
+    }
+
+    /**
+     * A delegate, dispatching {@link ProjectCreated} events.
+     */
+    private static class FirstProjectCreatedDelegate implements EventDispatcherDelegate<String> {
+        private boolean dispatchCalled = false;
+
+        @Override
+        public Set<EventClass> getEventClasses() {
+            return ImmutableSet.of(EventClass.of(ProjectCreated.class));
+        }
+
+        @Override
+        public Set<String> dispatchEvent(EventEnvelope envelope) {
+            dispatchCalled = true;
+            return ImmutableSet.of(toString());
+        }
+
+        @Override
+        public void onError(EventEnvelope envelope, RuntimeException exception) {
+            // Do nothing.
+        }
+
+        private boolean isDispatchCalled() {
+            return dispatchCalled;
+        }
+    }
+
+    /**
+     * Another delegate, dispatching {@link ProjectCreated} events.
+     */
+    private static class AnotherProjectCreatedDelegate implements EventDispatcherDelegate<String> {
+        private boolean dispatchCalled = false;
+
+        @Override
+        public Set<EventClass> getEventClasses() {
+            return ImmutableSet.of(EventClass.of(ProjectCreated.class));
+        }
+
+        @Override
+        public Set<String> dispatchEvent(EventEnvelope envelope) {
+            dispatchCalled = true;
+            return ImmutableSet.of(toString());
+        }
+
+        @Override
+        public void onError(EventEnvelope envelope, RuntimeException exception) {
+            // Do nothing.
+        }
+
+        private boolean isDispatchCalled() {
+            return dispatchCalled;
         }
     }
 }
