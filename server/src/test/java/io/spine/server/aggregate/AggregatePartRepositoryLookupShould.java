@@ -25,6 +25,7 @@ import com.google.protobuf.Timestamp;
 import io.spine.core.CommandContext;
 import io.spine.server.BoundedContext;
 import io.spine.server.command.Assign;
+import io.spine.server.model.ModelTests;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.ProjectVBuilder;
@@ -49,12 +50,12 @@ public class AggregatePartRepositoryLookupShould {
 
     @Before
     public void setUp() {
+        ModelTests.clearModel();
         boundedContext = BoundedContext.newBuilder()
                                        .build();
         final ProjectId id = ProjectId.newBuilder()
                                       .setId(newUuid())
                                       .build();
-        final ProjectRoot root = new ProjectRoot(boundedContext, id);
         boundedContext.register(new ProjectPartRepository(boundedContext));
         boundedContext.register(new TaskAggregateRepository(boundedContext));
     }

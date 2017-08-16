@@ -20,11 +20,16 @@
 
 package io.spine.server.model;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+import io.spine.core.CommandClass;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateClass;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.command.CommandHandlerClass;
+import io.spine.server.command.CommandHandlingClass;
 import io.spine.server.event.EventSubscriber;
 import io.spine.server.event.EventSubscriberClass;
 import io.spine.server.procman.ProcessManager;
@@ -35,6 +40,7 @@ import io.spine.server.rejection.RejectionSubscriber;
 import io.spine.server.rejection.RejectionSubscriberClass;
 
 import java.util.Map;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -57,6 +63,11 @@ public class Model {
     /** Prevent instantiation from outside. */
     private Model() {}
 
+    @VisibleForTesting
+    void clear() {
+        handlerClasses.clear();
+    }
+
     /**
      * Obtains an instance of aggregate class information.
      */
@@ -65,6 +76,7 @@ public class Model {
         HandlerClass<?> handlerClass = handlerClasses.get(cls);
         if (handlerClass == null) {
             handlerClass = AggregateClass.of(cls);
+            checkDuplicates((CommandHandlingClass) handlerClass);
             handlerClasses.put(cls, handlerClass);
         }
         return (AggregateClass<?>)handlerClass;
@@ -78,6 +90,7 @@ public class Model {
         HandlerClass<?> handlerClass = handlerClasses.get(cls);
         if (handlerClass == null) {
             handlerClass = ProcessManagerClass.of(cls);
+            checkDuplicates((CommandHandlingClass) handlerClass);
             handlerClasses.put(cls, handlerClass);
         }
         return (ProcessManagerClass<?>)handlerClass;
@@ -117,6 +130,7 @@ public class Model {
         HandlerClass<?> handlerClass = handlerClasses.get(cls);
         if (handlerClass == null) {
             handlerClass = CommandHandlerClass.of(cls);
+            checkDuplicates((CommandHandlingClass) handlerClass);
             handlerClasses.put(cls, handlerClass);
         }
         return (CommandHandlerClass<?>)handlerClass;
@@ -134,5 +148,29 @@ public class Model {
             handlerClasses.put(cls, handlerClass);
         }
         return (RejectionSubscriberClass<?>)handlerClass;
+    }
+
+    private void checkDuplicates(CommandHandlingClass candidate)
+        throws DuplicateCommandHandlerError {
+        final Set<CommandClass> candidateCommands = candidate.getCommands();
+        final ImmutableMap.Builder<Set<CommandClass>, CommandHandlingClass> map =
+                ImmutableMap.builder();
+
+        for (HandlerClass<?> handlerClass : handlerClasses.values()) {
+            if (handlerClass instanceof CommandHandlingClass) {
+                final CommandHandlingClass commandHandler = (CommandHandlingClass) handlerClass;
+                final Set<CommandClass> commandClasses = commandHandler.getCommands();
+                final Sets.SetView<CommandClass> intersection =
+                        Sets.intersection(commandClasses, candidateCommands);
+                if (intersection.size() > 0) {
+                    map.put(intersection, commandHandler);
+                }
+            }
+        }
+
+        final ImmutableMap<Set<CommandClass>, CommandHandlingClass> currentHandlers = map.build();
+        if (!currentHandlers.isEmpty()) {
+            throw new DuplicateCommandHandlerError(candidate, currentHandlers);
+        }
     }
 }

@@ -27,9 +27,11 @@ import io.spine.core.Version;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.entity.Transaction.Phase;
 import io.spine.server.event.EventFactory;
+import io.spine.server.model.ModelTests;
 import io.spine.validate.ConstraintViolation;
 import io.spine.validate.ValidatingBuilder;
 import io.spine.validate.ValidationException;
+import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 
@@ -85,6 +87,11 @@ public abstract class TransactionShould<I,
     protected abstract Message createEventMessageThatFailsInHandler();
 
     protected abstract void breakEntityValidation(E entity, RuntimeException toThrow);
+
+    @Before
+    public void setUp() {
+        ModelTests.clearModel();
+    }
 
     @Test
     public void initialize_from_entity() {

@@ -54,6 +54,7 @@ import io.spine.server.command.TestEventFactory;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.model.HandlerMethodFailedException;
 import io.spine.server.model.Model;
+import io.spine.server.model.ModelTests;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggCreateProjectWithChildren;
@@ -94,6 +95,7 @@ public class AggregateRepositoryShould {
 
     @Before
     public void setUp() {
+        ModelTests.clearModel();
         boundedContext = BoundedContext.newBuilder()
                                        .build();
         repository = new ProjectAggregateRepository();

@@ -22,7 +22,15 @@ package io.spine.server.model;
 
 import io.spine.server.entity.Entity;
 
+/**
+ * A class of entities.
+ *
+ * @param <E> the type of entities
+ * @author Alexander Yevsyukov
+ */
 public abstract class EntityClass<E extends Entity> extends HandlerClass<E> {
+
+    private static final long serialVersionUID = 0L;
 
     protected EntityClass(Class<? extends E> value) {
         super(value);

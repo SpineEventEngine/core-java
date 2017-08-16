@@ -20,20 +20,46 @@
 
 package io.spine.server.model;
 
-import io.spine.type.ClassTypeValue;
+import com.google.protobuf.Empty;
+import com.google.protobuf.Timestamp;
+import io.spine.server.command.Assign;
+import io.spine.server.command.CommandHandler;
+import io.spine.server.event.EventBus;
+import io.spine.test.Tests;
+import org.junit.Test;
 
 /**
- * A class of objects that expose {@linkplain HandlerMethod methods} that
- * accept messages.
- *
- * @param <T> the type of handlers
  * @author Alexander Yevsyukov
  */
-public abstract class HandlerClass<T> extends ClassTypeValue<T> {
+public class ModelTestsShould {
 
-    private static final long serialVersionUID = 0L;
+    @Test
+    public void have_utility_ctor() {
+        Tests.assertHasPrivateParameterlessCtor(ModelTests.class);
+    }
 
-    protected HandlerClass(Class<? extends T> value) {
-        super(value);
+    @Test
+    public void clear_the_model() {
+        final Model model = Model.getInstance();
+
+        // This adds new class to the model.
+        model.asCommandHandlerClass(TestCommandHandler.class);
+
+        ModelTests.clearModel();
+
+        // This should pass as we cleared the model.
+        model.asCommandHandlerClass(TestCommandHandler.class);
+    }
+
+    private static class TestCommandHandler extends CommandHandler {
+
+        private TestCommandHandler(EventBus eventBus) {
+            super(eventBus);
+        }
+
+        @Assign
+        Empty handle(Timestamp cmd) {
+            return Empty.getDefaultInstance();
+        }
     }
 }

@@ -40,6 +40,7 @@ import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandstore.CommandStore;
 import io.spine.server.entity.given.Given;
 import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived;
+import io.spine.server.model.ModelTests;
 import io.spine.server.procman.given.ProcessManagerTestEnv.AddTaskDispatcher;
 import io.spine.server.procman.given.ProcessManagerTestEnv.TestProcessManager;
 import io.spine.server.storage.StorageFactory;
@@ -94,6 +95,7 @@ public class ProcessManagerShould {
 
     @Before
     public void setUp() {
+        ModelTests.clearModel();
         final BoundedContext bc = BoundedContext.newBuilder()
                                                 .setMultitenant(true)
                                                 .build();

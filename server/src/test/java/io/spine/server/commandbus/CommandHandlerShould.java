@@ -33,6 +33,7 @@ import io.spine.server.BoundedContext;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.given.CommandHandlerTestEnv.EventCatcher;
 import io.spine.server.event.given.CommandHandlerTestEnv.TestCommandHandler;
+import io.spine.server.model.ModelTests;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -63,6 +64,7 @@ public class CommandHandlerShould {
 
     @Before
     public void setUp() {
+        ModelTests.clearModel();
         final BoundedContext boundedContext = BoundedContext.newBuilder()
                                                             .setMultitenant(true)
                                                             .build();

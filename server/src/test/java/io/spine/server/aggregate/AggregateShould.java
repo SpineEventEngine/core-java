@@ -41,6 +41,7 @@ import io.spine.server.command.Assign;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.entity.InvalidEntityStateException;
 import io.spine.server.model.Model;
+import io.spine.server.model.ModelTests;
 import io.spine.test.TimeTests;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
@@ -139,6 +140,7 @@ public class AggregateShould {
 
     @Before
     public void setUp() {
+        ModelTests.clearModel();
         aggregate = newAggregate(ID);
     }
 
@@ -202,6 +204,7 @@ public class AggregateShould {
 
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_missing_command_handler() {
+        ModelTests.clearModel();
         final AggregateWithMissingApplier aggregate = new AggregateWithMissingApplier(ID);
 
         // Pass a command for which the target aggregate does not have a handling method.
@@ -210,6 +213,7 @@ public class AggregateShould {
 
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_missing_event_applier_for_non_state_neutral_event() {
+        ModelTests.clearModel();
         final AggregateWithMissingApplier aggregate =
                 new AggregateWithMissingApplier(ID);
         try {
@@ -461,6 +465,7 @@ public class AggregateShould {
 
     @Test
     public void propagate_RuntimeException_when_handler_throws() {
+        ModelTests.clearModel();
         final FaultyAggregate faultyAggregate = new FaultyAggregate(ID, true, false);
 
         final Command command = Given.ACommand.createProject();
@@ -477,6 +482,7 @@ public class AggregateShould {
 
     @Test
     public void propagate_RuntimeException_when_applier_throws() {
+        ModelTests.clearModel();
         final FaultyAggregate faultyAggregate =
                 new FaultyAggregate(ID, false, true);
 
@@ -495,6 +501,7 @@ public class AggregateShould {
 
     @Test
     public void propagate_RuntimeException_when_play_raises_exception() {
+        ModelTests.clearModel();
         final FaultyAggregate faultyAggregate =
                 new FaultyAggregate(ID, false, true);
         try {

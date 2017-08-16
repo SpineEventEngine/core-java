@@ -20,20 +20,19 @@
 
 package io.spine.server.model;
 
-import io.spine.type.ClassTypeValue;
-
 /**
- * A class of objects that expose {@linkplain HandlerMethod methods} that
- * accept messages.
+ * Utilities for tests that deal with {@link Model}.
  *
- * @param <T> the type of handlers
  * @author Alexander Yevsyukov
  */
-public abstract class HandlerClass<T> extends ClassTypeValue<T> {
+public class ModelTests {
 
-    private static final long serialVersionUID = 0L;
+    /** Prevents instantiation on this utility class. */
+    private ModelTests() {}
 
-    protected HandlerClass(Class<? extends T> value) {
-        super(value);
+    /** Clears the {@link Model}. */
+    public static void clearModel() {
+        Model.getInstance()
+             .clear();
     }
 }

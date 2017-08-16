@@ -45,9 +45,11 @@ import io.spine.server.command.given.CommandHandlerMethodTestEnv.ValidHandlerOne
 import io.spine.server.command.given.CommandHandlerMethodTestEnv.ValidHandlerTwoParams;
 import io.spine.server.command.given.CommandHandlerMethodTestEnv.ValidHandlerTwoParamsReturnsList;
 import io.spine.server.model.HandlerMethodFailedException;
+import io.spine.server.model.ModelTests;
 import io.spine.test.reflect.ProjectId;
 import io.spine.test.reflect.command.RefCreateProject;
 import io.spine.test.reflect.event.RefProjectCreated;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.lang.reflect.Method;
@@ -89,6 +91,11 @@ public class CommandHandlerMethodShould {
                          .isPresent());
         assertEquals(handlerId, Identifier.unpack(thrown.producerId()
                                                         .get()));
+    }
+
+    @Before
+    public void setUp() {
+        ModelTests.clearModel();
     }
 
     @Test
