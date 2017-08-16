@@ -48,6 +48,12 @@ public class MessageHandlerMap<M extends MessageClass, H extends HandlerMethod>
 
     private final ImmutableMap<M, H> map;
 
+    /**
+     * Creates a map of methods found in the passed class.
+     *
+     * @param cls     the class to inspect
+     * @param factory the factory of methods
+     */
     public MessageHandlerMap(Class<?> cls, HandlerMethod.Factory<H> factory) {
         final Predicate<Method> predicate = factory.getPredicate();
 
@@ -84,10 +90,20 @@ public class MessageHandlerMap<M extends MessageClass, H extends HandlerMethod>
         return result;
     }
 
+    /**
+     * Obtains classes of messages for which handlers are stored in this map.
+     */
     public Set<M> getMessageClasses() {
         return map.keySet();
     }
 
+    /**
+     * Obtains the method for handling the passed class of messages.
+     *
+     * @param  messageClass the class of messages for which to find a handler method
+     * @return a handler method
+     * @throws IllegalStateException if there is no method found in the map
+     */
     public H getMethod(M messageClass) {
         final H handlerMethod = map.get(messageClass);
         checkState(handlerMethod != null,
