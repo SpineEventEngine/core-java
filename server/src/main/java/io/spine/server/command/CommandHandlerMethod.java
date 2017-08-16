@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.reflect;
+package io.spine.server.command;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
@@ -28,9 +28,11 @@ import io.spine.Identifier;
 import io.spine.base.ThrowableMessage;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
-import io.spine.server.command.Assign;
-import io.spine.server.command.CommandHandler;
 import io.spine.server.entity.Entity;
+import io.spine.server.model.HandlerMethod;
+import io.spine.server.model.HandlerMethodFailedException;
+import io.spine.server.model.HandlerMethodPredicate;
+import io.spine.server.model.MethodPredicate;
 
 import javax.annotation.CheckReturnValue;
 import java.lang.reflect.Method;

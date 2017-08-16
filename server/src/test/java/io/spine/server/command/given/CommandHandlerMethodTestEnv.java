@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.reflect.given;
+package io.spine.server.command.given;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Empty;
@@ -40,7 +40,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newLinkedList;
-import static io.spine.server.reflect.given.Given.EventMessage.projectCreated;
+import static io.spine.server.model.given.Given.EventMessage.projectCreated;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 public class CommandHandlerMethodTestEnv {

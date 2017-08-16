@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.reflect.given;
+package io.spine.server.event.given;
 
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.StringValue;

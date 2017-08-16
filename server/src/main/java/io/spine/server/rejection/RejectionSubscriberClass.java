@@ -24,7 +24,6 @@ import io.spine.annotation.Internal;
 import io.spine.core.RejectionClass;
 import io.spine.server.model.HandlerClass;
 import io.spine.server.model.MessageHandlerMap;
-import io.spine.server.reflect.RejectionSubscriberMethod;
 
 import java.util.Set;
 

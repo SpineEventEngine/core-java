@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.reflect;
+package io.spine.server.command;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
@@ -30,21 +30,21 @@ import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateMessageDispatcher;
-import io.spine.server.command.CommandHandler;
-import io.spine.server.reflect.given.CommandHandlerMethodTestEnv.InvalidHandlerNoAnnotation;
-import io.spine.server.reflect.given.CommandHandlerMethodTestEnv.InvalidHandlerNoParams;
-import io.spine.server.reflect.given.CommandHandlerMethodTestEnv.InvalidHandlerOneNotMsgParam;
-import io.spine.server.reflect.given.CommandHandlerMethodTestEnv.InvalidHandlerReturnsVoid;
-import io.spine.server.reflect.given.CommandHandlerMethodTestEnv.InvalidHandlerTooManyParams;
-import io.spine.server.reflect.given.CommandHandlerMethodTestEnv.InvalidHandlerTwoParamsFirstInvalid;
-import io.spine.server.reflect.given.CommandHandlerMethodTestEnv.InvalidHandlerTwoParamsSecondInvalid;
-import io.spine.server.reflect.given.CommandHandlerMethodTestEnv.RejectingAggregate;
-import io.spine.server.reflect.given.CommandHandlerMethodTestEnv.RejectingHandler;
-import io.spine.server.reflect.given.CommandHandlerMethodTestEnv.ValidHandlerButPrivate;
-import io.spine.server.reflect.given.CommandHandlerMethodTestEnv.ValidHandlerOneParam;
-import io.spine.server.reflect.given.CommandHandlerMethodTestEnv.ValidHandlerOneParamReturnsList;
-import io.spine.server.reflect.given.CommandHandlerMethodTestEnv.ValidHandlerTwoParams;
-import io.spine.server.reflect.given.CommandHandlerMethodTestEnv.ValidHandlerTwoParamsReturnsList;
+import io.spine.server.command.given.CommandHandlerMethodTestEnv.InvalidHandlerNoAnnotation;
+import io.spine.server.command.given.CommandHandlerMethodTestEnv.InvalidHandlerNoParams;
+import io.spine.server.command.given.CommandHandlerMethodTestEnv.InvalidHandlerOneNotMsgParam;
+import io.spine.server.command.given.CommandHandlerMethodTestEnv.InvalidHandlerReturnsVoid;
+import io.spine.server.command.given.CommandHandlerMethodTestEnv.InvalidHandlerTooManyParams;
+import io.spine.server.command.given.CommandHandlerMethodTestEnv.InvalidHandlerTwoParamsFirstInvalid;
+import io.spine.server.command.given.CommandHandlerMethodTestEnv.InvalidHandlerTwoParamsSecondInvalid;
+import io.spine.server.command.given.CommandHandlerMethodTestEnv.RejectingAggregate;
+import io.spine.server.command.given.CommandHandlerMethodTestEnv.RejectingHandler;
+import io.spine.server.command.given.CommandHandlerMethodTestEnv.ValidHandlerButPrivate;
+import io.spine.server.command.given.CommandHandlerMethodTestEnv.ValidHandlerOneParam;
+import io.spine.server.command.given.CommandHandlerMethodTestEnv.ValidHandlerOneParamReturnsList;
+import io.spine.server.command.given.CommandHandlerMethodTestEnv.ValidHandlerTwoParams;
+import io.spine.server.command.given.CommandHandlerMethodTestEnv.ValidHandlerTwoParamsReturnsList;
+import io.spine.server.model.HandlerMethodFailedException;
 import io.spine.test.reflect.ProjectId;
 import io.spine.test.reflect.command.RefCreateProject;
 import io.spine.test.reflect.event.RefProjectCreated;
@@ -54,10 +54,10 @@ import java.lang.reflect.Method;
 import java.util.List;
 
 import static com.google.common.base.Throwables.getRootCause;
-import static io.spine.server.reflect.CommandHandlerMethod.from;
-import static io.spine.server.reflect.CommandHandlerMethod.predicate;
-import static io.spine.server.reflect.given.Given.CommandMessage.createProject;
-import static io.spine.server.reflect.given.Given.CommandMessage.startProject;
+import static io.spine.server.command.CommandHandlerMethod.from;
+import static io.spine.server.command.CommandHandlerMethod.predicate;
+import static io.spine.server.model.given.Given.CommandMessage.createProject;
+import static io.spine.server.model.given.Given.CommandMessage.startProject;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.spy;

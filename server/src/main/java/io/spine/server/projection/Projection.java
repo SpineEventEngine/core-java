@@ -26,8 +26,8 @@ import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.server.entity.EventPlayingEntity;
+import io.spine.server.event.EventSubscriberMethod;
 import io.spine.server.model.Model;
-import io.spine.server.reflect.EventSubscriberMethod;
 import io.spine.validate.ValidatingBuilder;
 
 /**

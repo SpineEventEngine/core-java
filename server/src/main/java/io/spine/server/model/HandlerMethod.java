@@ -17,7 +17,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.reflect;
+package io.spine.server.model;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
@@ -75,14 +75,14 @@ public abstract class HandlerMethod<C extends Message> {
      *
      * @param method subscriber method
      */
-    HandlerMethod(Method method) {
+    protected HandlerMethod(Method method) {
         this.method = checkNotNull(method);
         this.messageClass = getFirstParamType(method);
         this.paramCount = method.getParameterTypes().length;
         method.setAccessible(true);
     }
 
-    Class<? extends Message> rawMessageClass() {
+    protected final Class<? extends Message> rawMessageClass() {
         return messageClass;
     }
 
@@ -94,7 +94,7 @@ public abstract class HandlerMethod<C extends Message> {
      * @return immutable set of message classes or an empty set
      */
     @CheckReturnValue
-    static Set<Class<? extends Message>> inspect(Class<?> cls, Predicate<Method> predicate) {
+    protected static Set<Class<? extends Message>> inspect(Class<?> cls, Predicate<Method> predicate) {
         final ImmutableSet.Builder<Class<? extends Message>> builder = ImmutableSet.builder();
 
         for (Method method : cls.getDeclaredMethods()) {
@@ -111,7 +111,7 @@ public abstract class HandlerMethod<C extends Message> {
     /**
      * Returns {@code true} if the method has package-private access, {@code false} otherwise.
      */
-    static boolean isPackagePrivate(Method method) {
+    protected static boolean isPackagePrivate(Method method) {
         final int modifiers = method.getModifiers();
         final boolean result =
                 !(Modifier.isPublic(modifiers)
@@ -123,7 +123,7 @@ public abstract class HandlerMethod<C extends Message> {
     /**
      * Logs a message at the WARN level according to the specified format and method.
      */
-    static void warnOnWrongModifier(String messageFormat, Method method) {
+    protected static void warnOnWrongModifier(String messageFormat, Method method) {
         log().warn(messageFormat, getFullMethodName(method));
     }
 
@@ -215,7 +215,7 @@ public abstract class HandlerMethod<C extends Message> {
      * @return the list of event messages or an empty list if {@code null} is passed
      */
     @SuppressWarnings({"unchecked", "ChainOfInstanceofChecks"})
-    static List<? extends Message> toList(@Nullable Object output) {
+    protected static List<? extends Message> toList(@Nullable Object output) {
         if (output == null) {
             return emptyList();
         }

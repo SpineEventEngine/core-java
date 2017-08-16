@@ -25,7 +25,6 @@ import io.spine.core.Command;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
 import io.spine.server.model.Model;
-import io.spine.server.reflect.RejectionSubscriberMethod;
 import io.spine.server.tenant.CommandOperation;
 import io.spine.string.Stringifiers;
 import io.spine.type.MessageClass;

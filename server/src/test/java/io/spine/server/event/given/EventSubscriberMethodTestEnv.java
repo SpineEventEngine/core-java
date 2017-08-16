@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.reflect.given;
+package io.spine.server.event.given;
 
 import io.spine.core.EventContext;
 import io.spine.core.Subscribe;

@@ -24,8 +24,6 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.protobuf.Message;
-import io.spine.server.reflect.DuplicateHandlerMethodException;
-import io.spine.server.reflect.HandlerMethod;
 import io.spine.type.MessageClass;
 
 import java.io.Serializable;
@@ -34,7 +32,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkState;
-import static io.spine.server.reflect.HandlerMethod.getFirstParamType;
+import static io.spine.server.model.HandlerMethod.getFirstParamType;
 
 /**
  * Provides mapping from a class of messages to a method which handles such messages.
@@ -73,7 +71,7 @@ public class MessageHandlerMap<M extends MessageClass, H extends HandlerMethod>
                 final Class<? extends Message> messageClass = getFirstParamType(method);
                 if (tempMap.containsKey(messageClass)) {
                     final Method alreadyPresent = tempMap.get(messageClass);
-                    throw new DuplicateHandlerMethodException(
+                    throw new DuplicateHandlerMethodError(
                             declaringClass,
                             messageClass,
                             alreadyPresent.getName(),

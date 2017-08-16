@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.reflect;
+package io.spine.server.model;
 
 import com.google.protobuf.Message;
 
@@ -32,13 +32,13 @@ import java.lang.reflect.Method;
  *            a context parameter is never used
  * @author Alexander Yevsyukov
  */
-abstract class HandlerMethodPredicate<C extends Message> extends MethodPredicate {
+public abstract class HandlerMethodPredicate<C extends Message> extends MethodPredicate {
 
     private final Class<? extends Annotation> annotationClass;
     private final Class<C> contextClass;
 
-    HandlerMethodPredicate(Class<? extends Annotation> annotationClass,
-                           Class<C> contextClass) {
+    protected HandlerMethodPredicate(Class<? extends Annotation> annotationClass,
+                                     Class<C> contextClass) {
         super();
         this.annotationClass = annotationClass;
         this.contextClass = contextClass;

@@ -17,13 +17,11 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package io.spine.server.rejection.given;
 
-package io.spine.server.reflect.given;
-
-import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.core.CommandContext;
-import io.spine.core.React;
+import io.spine.core.Subscribe;
 import io.spine.test.reflect.ReflectRejections.InvalidProjectName;
 import io.spine.test.rejection.command.UpdateProjectName;
 
@@ -32,21 +30,21 @@ import java.lang.reflect.Method;
 
 /**
  * @author Alexander Yevsyukov
+ * @author Alex Tymchenko
  */
-public class RejectionReactorMethodTestEnv {
-
+public class RejectionSubscriberMethodTestEnv {
     /** Prevents instantiation of this utility class. */
-    private RejectionReactorMethodTestEnv() {
+    private RejectionSubscriberMethodTestEnv() {
     }
 
     /**
-     * The abstract base for testing reactor classes.
+     * The abstract base for test subscriber classes.
      *
      * <p>The purpose of this class is to obtain a reference to a
-     * {@linkplain #HANDLER_METHOD_NAME single reactor method}.
+     * {@linkplain #HANDLER_METHOD_NAME single subscriber method}.
      * This reference will be later used for assertions.
      */
-    public abstract static class TestRejectionReactor {
+    public abstract static class TestRejectionSubscriber {
 
         @SuppressWarnings("DuplicateStringLiteralInspection")
         private static final String HANDLER_METHOD_NAME = "handle";
@@ -59,19 +57,20 @@ public class RejectionReactorMethodTestEnv {
                     return method;
                 }
             }
-            throw new RuntimeException("No rejection reactor method found " +
+            throw new RuntimeException("No rejection subscriber method found " +
                                                HANDLER_METHOD_NAME);
         }
     }
 
-    public static class RValidTwoParams extends TestRejectionReactor {
-        @React
-        public Empty handle(InvalidProjectName rejection, UpdateProjectName command) {
-            return Empty.getDefaultInstance();
+    public static class ValidTwoParams extends TestRejectionSubscriber {
+        @Subscribe
+        public void handle(InvalidProjectName rejection,
+                           UpdateProjectName command) {
+            // do nothing.
         }
     }
 
-    public static class RValidThreeParams extends TestRejectionReactor {
+    public static class ValidThreeParams extends TestRejectionSubscriber {
 
         @Nullable
         private Message lastRejectionMessage;
@@ -80,15 +79,13 @@ public class RejectionReactorMethodTestEnv {
         @Nullable
         private CommandContext lastCommandContext;
 
-        @React
-        public Empty handle(InvalidProjectName rejection,
-                            UpdateProjectName command,
-                            CommandContext context) {
+        @Subscribe
+        public void handle(InvalidProjectName rejection,
+                           UpdateProjectName command,
+                           CommandContext context) {
             lastRejectionMessage = rejection;
             lastCommandMessage = command;
             lastCommandContext = context;
-
-            return Empty.getDefaultInstance();
         }
 
         @Nullable
@@ -107,83 +104,86 @@ public class RejectionReactorMethodTestEnv {
         }
     }
 
-    public static class RValidButPrivate extends TestRejectionReactor {
+    public static class ValidButPrivate extends TestRejectionSubscriber {
         @SuppressWarnings("MethodMayBeStatic") // Need instance method for the test.
-        @React
-        private Empty handle(InvalidProjectName rejection, UpdateProjectName command) {
-            return Empty.getDefaultInstance();
+        @Subscribe
+        private void handle(InvalidProjectName rejection,
+                            UpdateProjectName command) {
+            // do nothing.
         }
     }
 
     /**
-     * The reactor with a method which is not annotated.
+     * The subscriber with a method which is not annotated.
      */
-    public static class RInvalidNoAnnotation extends TestRejectionReactor {
+    public static class InvalidNoAnnotation extends TestRejectionSubscriber {
         @SuppressWarnings("unused")
-        public Empty handle(InvalidProjectName rejection, UpdateProjectName command) {
-            return Empty.getDefaultInstance();
+        public void handle(InvalidProjectName rejection,
+                           UpdateProjectName command) {
+            // do nothing.
         }
     }
 
     /**
-     * The reactor with a method which does not have parameters.
+     * The subscriber with a method which does not have parameters.
      */
-    public static class RInvalidNoParams extends TestRejectionReactor {
-        @React
-        public Empty handle() {
-            return Empty.getDefaultInstance();
+    public static class InvalidNoParams extends TestRejectionSubscriber {
+        @Subscribe
+        public void handle() {
+            // do nothing.
         }
     }
 
     /**
-     * The reactor which has too many parameters.
+     * The subscriber which has too many parameters.
      */
-    public static class RInvalidTooManyParams extends TestRejectionReactor {
-        @React
-        public Empty handle(InvalidProjectName rejection,
-                            UpdateProjectName command,
-                            CommandContext context,
-                            Object redundant) {
-            return Empty.getDefaultInstance();
+    public static class InvalidTooManyParams extends TestRejectionSubscriber {
+        @Subscribe
+        public void handle(InvalidProjectName rejection,
+                           UpdateProjectName command,
+                           CommandContext context,
+                           Object redundant) {
+            // do nothing.
         }
     }
 
     /**
-     * The reactor which has invalid single argument.
+     * The subscriber which has invalid single argument.
      */
-    public static class RInvalidOneNotMsgParam extends TestRejectionReactor {
-        @React
-        public Empty handle(Exception invalid) {
-            return Empty.getDefaultInstance();
+    public static class InvalidOneNotMsgParam extends TestRejectionSubscriber {
+        @Subscribe
+        public void handle(Exception invalid) {
+            // do nothing.
         }
     }
 
     /**
-     * The reactor with a method with first invalid parameter.
+     * The subscriber with a method with first invalid parameter.
      */
-    public static class RInvalidTwoParamsFirstInvalid extends TestRejectionReactor {
-        @React
-        public Empty handle(Exception invalid, UpdateProjectName command) {
-            return Empty.getDefaultInstance();
+    public static class InvalidTwoParamsFirstInvalid extends TestRejectionSubscriber {
+        @Subscribe
+        public void handle(Exception invalid, UpdateProjectName command) {
+            // do nothing.
         }
     }
 
     /**
-     * The reactor which has invalid second parameter.
+     * The subscriber which has invalid second parameter.
      */
-    public static class RInvalidTwoParamsSecondInvalid extends TestRejectionReactor {
-        @React
-        public Empty handle(InvalidProjectName rejection, Exception invalid) {
-            return Empty.getDefaultInstance();
+    public static class InvalidTwoParamsSecondInvalid extends TestRejectionSubscriber {
+        @Subscribe
+        public void handle(InvalidProjectName rejection, Exception invalid) {
+            // do nothing.
         }
     }
 
     /**
-     * The class with rejection reactor that returns {@code Object} instead of {@code Message}.
+     * The class with rejection subscriber that returns {@code Object} instead of {@code void}.
      */
-    public static class RInvalidNotMessage extends TestRejectionReactor {
-        @React
-        public Object handle(InvalidProjectName rejection, UpdateProjectName command) {
+    public static class InvalidNotMessage extends TestRejectionSubscriber {
+        @Subscribe
+        public Object handle(InvalidProjectName rejection,
+                             UpdateProjectName command) {
             return rejection;
         }
     }

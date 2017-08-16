@@ -26,7 +26,6 @@ import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.server.bus.MessageDispatcher;
 import io.spine.server.model.Model;
-import io.spine.server.reflect.EventSubscriberMethod;
 import io.spine.server.tenant.EventOperation;
 import io.spine.string.Stringifiers;
 import io.spine.type.MessageClass;

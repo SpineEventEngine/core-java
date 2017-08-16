@@ -18,23 +18,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.reflect;
+package io.spine.server.event;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import io.spine.core.EventContext;
-import io.spine.server.reflect.given.EventSubscriberMethodTestEnv.ARejectionSubscriber;
-import io.spine.server.reflect.given.EventSubscriberMethodTestEnv.InvalidNoAnnotation;
-import io.spine.server.reflect.given.EventSubscriberMethodTestEnv.InvalidNoParams;
-import io.spine.server.reflect.given.EventSubscriberMethodTestEnv.InvalidNotVoid;
-import io.spine.server.reflect.given.EventSubscriberMethodTestEnv.InvalidOneNotMsgParam;
-import io.spine.server.reflect.given.EventSubscriberMethodTestEnv.InvalidTooManyParams;
-import io.spine.server.reflect.given.EventSubscriberMethodTestEnv.InvalidTwoParamsFirstInvalid;
-import io.spine.server.reflect.given.EventSubscriberMethodTestEnv.InvalidTwoParamsSecondInvalid;
-import io.spine.server.reflect.given.EventSubscriberMethodTestEnv.ValidButPrivate;
-import io.spine.server.reflect.given.EventSubscriberMethodTestEnv.ValidOneParam;
-import io.spine.server.reflect.given.EventSubscriberMethodTestEnv.ValidTwoParams;
-import io.spine.server.reflect.given.Given;
+import io.spine.server.event.given.EventSubscriberMethodTestEnv.ARejectionSubscriber;
+import io.spine.server.event.given.EventSubscriberMethodTestEnv.InvalidNoAnnotation;
+import io.spine.server.event.given.EventSubscriberMethodTestEnv.InvalidNoParams;
+import io.spine.server.event.given.EventSubscriberMethodTestEnv.InvalidNotVoid;
+import io.spine.server.event.given.EventSubscriberMethodTestEnv.InvalidOneNotMsgParam;
+import io.spine.server.event.given.EventSubscriberMethodTestEnv.InvalidTooManyParams;
+import io.spine.server.event.given.EventSubscriberMethodTestEnv.InvalidTwoParamsFirstInvalid;
+import io.spine.server.event.given.EventSubscriberMethodTestEnv.InvalidTwoParamsSecondInvalid;
+import io.spine.server.event.given.EventSubscriberMethodTestEnv.ValidButPrivate;
+import io.spine.server.event.given.EventSubscriberMethodTestEnv.ValidOneParam;
+import io.spine.server.event.given.EventSubscriberMethodTestEnv.ValidTwoParams;
+import io.spine.server.model.given.Given;
 import io.spine.test.reflect.event.RefProjectCreated;
 import org.junit.Test;
 

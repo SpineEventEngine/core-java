@@ -17,31 +17,33 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package io.spine.server.model;
 
-package io.spine.server.reflect.given;
+import com.google.protobuf.Message;
 
-import io.spine.server.command.Assign;
-import io.spine.test.event.ProjectCreated;
-import io.spine.test.event.command.CreateProject;
+import static java.lang.String.format;
 
 /**
+ * Indicates that more than one handling method for the same message class are present
+ * in the declaring class.
+ *
+ * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
-public class MethodMapTestEnv {
+public class DuplicateHandlerMethodError extends ModelError {
 
-    /** Prevents instantiation on this utility class. */
-    private MethodMapTestEnv() {}
+    private static final long serialVersionUID = 0L;
 
-    public static class HandlerWithDuplicatingMethods {
+    public DuplicateHandlerMethodError(
+            Class<?> targetClass,
+            Class<? extends Message> messageClass,
+            String firstMethodName,
+            String secondMethodName) {
 
-        @Assign
-        public ProjectCreated on(CreateProject cmd) {
-            return ProjectCreated.getDefaultInstance();
-        }
-
-        @Assign
-        public ProjectCreated handle(CreateProject cmd) {
-            return ProjectCreated.getDefaultInstance();
-        }
+        super(format(
+                "The %s class defines more than one method for handling the message class %s." +
+                        " Methods encountered: %s, %s.",
+                targetClass.getName(), messageClass.getName(),
+                firstMethodName, secondMethodName));
     }
 }

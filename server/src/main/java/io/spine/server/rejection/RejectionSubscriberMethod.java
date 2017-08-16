@@ -17,42 +17,43 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.reflect;
+package io.spine.server.rejection;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Predicate;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.core.React;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionContext;
+import io.spine.core.Subscribe;
+import io.spine.server.model.HandlerMethod;
+import io.spine.server.model.MethodPredicate;
 
 import javax.annotation.CheckReturnValue;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.List;
 import java.util.Set;
 
 /**
- * A wrapper for a rejection reactor method.
+ * A wrapper for a rejection subscriber method.
  *
  * @author Alex Tymchenko
  * @author Dmytro Dashenkov
  * @author Alexander Yevsyukov
  */
 @Internal
-public class RejectionReactorMethod extends RejectionHandlerMethod {
+public class RejectionSubscriberMethod extends RejectionHandlerMethod {
 
-    /** The instance of the predicate to filter rejection reactor methods of a class. */
+    /** The instance of the predicate to filter rejection subscriber methods of a class. */
     private static final MethodPredicate PREDICATE = new FilterPredicate();
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
      *
-     * @param method reactor method
+     * @param method subscriber method
      */
     @VisibleForTesting
-    RejectionReactorMethod(Method method) {
+    RejectionSubscriberMethod(Method method) {
         super(method);
     }
 
@@ -61,31 +62,25 @@ public class RejectionReactorMethod extends RejectionHandlerMethod {
         return inspectWith(cls, predicate());
     }
 
-
     /**
      * Invokes the wrapped handler method to handle {@code rejectionMessage},
      * {@code commandMessage} with the passed {@code context} of the {@code Command}.
      *
-     * <p>Unlike the {@linkplain #invoke(Object, Message, Message) overloaded alternative method},
-     * this one implies returning the value, being a reaction to the rejection passed.
-     *
-     * @param  target           the target object on which call the method
-     * @param  rejectionMessage the rejection message to handle
-     * @param  context          the context of the rejection
-     * @return the list of event messages produced by the reacting method or empty list if no event
-     *         messages were produced
+     * @param target
+     *        the target object on which call the method
+     * @param rejectionMessage
+     *        the rejection message to handle
+     * @param context
+     *        the context of the rejection
      */
     @Override
-    public List<? extends Message> invoke(Object target,
-                                          Message rejectionMessage,
-                                          RejectionContext context) {
-        final Object output = doInvoke(target, rejectionMessage, context);
-        final List<? extends Message> eventMessages = toList(output);
-        return eventMessages;
+    public Object invoke(Object target, Message rejectionMessage, RejectionContext context) {
+        final Object result = doInvoke(target, rejectionMessage, context);
+        return result;
     }
 
-    /** Returns the factory for filtering and creating rejection reactor methods. */
-    public static HandlerMethod.Factory<RejectionReactorMethod> factory() {
+    /** Returns the factory for filtering and creating rejection subscriber methods. */
+    public static HandlerMethod.Factory<RejectionSubscriberMethod> factory() {
         return Factory.getInstance();
     }
 
@@ -94,18 +89,18 @@ public class RejectionReactorMethod extends RejectionHandlerMethod {
     }
 
     /**
-     * The factory for filtering methods that match {@code RejectionReactorMethod} specification.
+     * The factory for filtering methods that match {@code RejectionSubscriberMethod} specification.
      */
-    private static class Factory implements HandlerMethod.Factory<RejectionReactorMethod> {
+    private static class Factory implements HandlerMethod.Factory<RejectionSubscriberMethod> {
 
         @Override
-        public Class<RejectionReactorMethod> getMethodClass() {
-            return RejectionReactorMethod.class;
+        public Class<RejectionSubscriberMethod> getMethodClass() {
+            return RejectionSubscriberMethod.class;
         }
 
         @Override
-        public RejectionReactorMethod create(Method method) {
-            final RejectionReactorMethod result = new RejectionReactorMethod(method);
+        public RejectionSubscriberMethod create(Method method) {
+            final RejectionSubscriberMethod result = new RejectionSubscriberMethod(method);
             return result;
         }
 
@@ -117,7 +112,7 @@ public class RejectionReactorMethod extends RejectionHandlerMethod {
         @Override
         public void checkAccessModifier(Method method) {
             if (!Modifier.isPublic(method.getModifiers())) {
-                warnOnWrongModifier("Rejection reactor {} must be declared 'public'",
+                warnOnWrongModifier("Rejection subscriber {} must be declared 'public'",
                                     method);
             }
         }
@@ -129,25 +124,26 @@ public class RejectionReactorMethod extends RejectionHandlerMethod {
         }
 
         private static Factory getInstance() {
-            return Singleton.INSTANCE.value;
+            return Factory.Singleton.INSTANCE.value;
         }
     }
 
     /**
-     * The predicate class allowing to filter rejection reactor methods.
+     * The predicate class allowing to filter rejection subscriber methods.
      *
-     * <p>Please see {@link React} annotation for more information.
+     * <p>Please see {@link Subscribe} annotation for more information.
      */
     private static class FilterPredicate extends RejectionFilterPredicate {
 
         private FilterPredicate() {
-            super(React.class);
+            super(Subscribe.class);
         }
 
         @Override
         protected boolean verifyReturnType(Method method) {
-            final boolean result = returnsMessageOrIterable(method);
-            return result;
+            final boolean isVoid = Void.TYPE.equals(method.getReturnType());
+            return isVoid;
         }
     }
+
 }

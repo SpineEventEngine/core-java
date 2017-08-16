@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.reflect;
+package io.spine.server.model;
 
 import com.google.common.base.Predicate;
 
@@ -32,7 +32,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alexander Yevsyukov
  */
-abstract class MethodPredicate implements Predicate<Method> {
+public abstract class MethodPredicate implements Predicate<Method> {
 
     @Override
     public boolean apply(@Nullable Method method) {

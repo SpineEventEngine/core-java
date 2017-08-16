@@ -18,13 +18,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.reflect;
+package io.spine.server.event;
 
 import com.google.common.base.Predicate;
 import com.google.protobuf.Message;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.React;
+import io.spine.server.model.HandlerMethod;
+import io.spine.server.model.MethodPredicate;
 
 import javax.annotation.CheckReturnValue;
 import java.lang.reflect.Method;

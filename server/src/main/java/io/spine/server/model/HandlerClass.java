@@ -23,7 +23,7 @@ package io.spine.server.model;
 import io.spine.type.ClassTypeValue;
 
 /**
- * A class of objects that expose {@linkplain io.spine.server.reflect.HandlerMethod methods} that
+ * A class of objects that expose {@linkplain HandlerMethod methods} that
  * accept messages.
  *
  * @param <T>

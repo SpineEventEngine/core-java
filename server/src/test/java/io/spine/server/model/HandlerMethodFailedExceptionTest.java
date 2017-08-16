@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.reflect;
+package io.spine.server.model;
 
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.CommandEnvelope;

@@ -17,7 +17,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.reflect;
+package io.spine.server.rejection;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
@@ -25,17 +25,17 @@ import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.RejectionContext;
 import io.spine.core.RejectionEnvelope;
-import io.spine.server.reflect.given.Given;
-import io.spine.server.reflect.given.RejectionSubscriberMethodTestEnv;
-import io.spine.server.reflect.given.RejectionSubscriberMethodTestEnv.InvalidNotMessage;
-import io.spine.server.reflect.given.RejectionSubscriberMethodTestEnv.InvalidOneNotMsgParam;
-import io.spine.server.reflect.given.RejectionSubscriberMethodTestEnv.InvalidTooManyParams;
-import io.spine.server.reflect.given.RejectionSubscriberMethodTestEnv.InvalidTwoParamsFirstInvalid;
-import io.spine.server.reflect.given.RejectionSubscriberMethodTestEnv.InvalidTwoParamsSecondInvalid;
-import io.spine.server.reflect.given.RejectionSubscriberMethodTestEnv.ValidButPrivate;
-import io.spine.server.reflect.given.RejectionSubscriberMethodTestEnv.ValidThreeParams;
-import io.spine.server.reflect.given.RejectionSubscriberMethodTestEnv.ValidTwoParams;
+import io.spine.server.model.given.Given;
 import io.spine.server.rejection.given.FaultySubscriber;
+import io.spine.server.rejection.given.RejectionSubscriberMethodTestEnv;
+import io.spine.server.rejection.given.RejectionSubscriberMethodTestEnv.InvalidNotMessage;
+import io.spine.server.rejection.given.RejectionSubscriberMethodTestEnv.InvalidOneNotMsgParam;
+import io.spine.server.rejection.given.RejectionSubscriberMethodTestEnv.InvalidTooManyParams;
+import io.spine.server.rejection.given.RejectionSubscriberMethodTestEnv.InvalidTwoParamsFirstInvalid;
+import io.spine.server.rejection.given.RejectionSubscriberMethodTestEnv.InvalidTwoParamsSecondInvalid;
+import io.spine.server.rejection.given.RejectionSubscriberMethodTestEnv.ValidButPrivate;
+import io.spine.server.rejection.given.RejectionSubscriberMethodTestEnv.ValidThreeParams;
+import io.spine.server.rejection.given.RejectionSubscriberMethodTestEnv.ValidTwoParams;
 import io.spine.server.rejection.given.VerifiableSubscriber;
 import io.spine.test.reflect.ReflectRejections.InvalidProjectName;
 import io.spine.test.rejection.command.UpdateProjectName;

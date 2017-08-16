@@ -24,12 +24,12 @@ import io.spine.annotation.Internal;
 import io.spine.core.CommandClass;
 import io.spine.core.EventClass;
 import io.spine.core.RejectionClass;
+import io.spine.server.command.CommandHandlerMethod;
 import io.spine.server.command.CommandHandlingClass;
+import io.spine.server.event.EventReactorMethod;
 import io.spine.server.model.EntityClass;
 import io.spine.server.model.MessageHandlerMap;
-import io.spine.server.reflect.CommandHandlerMethod;
-import io.spine.server.reflect.EventReactorMethod;
-import io.spine.server.reflect.RejectionReactorMethod;
+import io.spine.server.rejection.RejectionReactorMethod;
 
 import java.util.Set;
 

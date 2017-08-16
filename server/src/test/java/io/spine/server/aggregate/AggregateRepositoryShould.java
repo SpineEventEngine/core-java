@@ -52,8 +52,8 @@ import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.RejectionReact
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.RejectionReactingRepository;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.commandbus.CommandBus;
+import io.spine.server.model.HandlerMethodFailedException;
 import io.spine.server.model.Model;
-import io.spine.server.reflect.HandlerMethodFailedException;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggCreateProjectWithChildren;

@@ -36,13 +36,12 @@ import io.spine.core.RejectionEnvelope;
 import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.protobuf.AnyPacker;
+import io.spine.server.command.CommandHandlerMethod;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.event.EventFactory;
+import io.spine.server.event.EventReactorMethod;
 import io.spine.server.model.Model;
-import io.spine.server.reflect.CommandHandlerMethod;
-import io.spine.server.reflect.EventApplierMethod;
-import io.spine.server.reflect.EventReactorMethod;
-import io.spine.server.reflect.RejectionReactorMethod;
+import io.spine.server.rejection.RejectionReactorMethod;
 import io.spine.validate.ValidatingBuilder;
 
 import javax.annotation.CheckReturnValue;

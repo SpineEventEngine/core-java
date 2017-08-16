@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.reflect;
+package io.spine.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Predicate;
@@ -26,8 +26,9 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.core.EventClass;
-import io.spine.server.aggregate.Aggregate;
-import io.spine.server.aggregate.Apply;
+import io.spine.server.model.HandlerMethod;
+import io.spine.server.model.HandlerMethodPredicate;
+import io.spine.server.model.MethodPredicate;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;

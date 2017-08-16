@@ -17,24 +17,24 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.reflect;
+package io.spine.server.rejection;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.RejectionContext;
-import io.spine.server.reflect.given.Given;
-import io.spine.server.reflect.given.RejectionReactorMethodTestEnv.RInvalidNoAnnotation;
-import io.spine.server.reflect.given.RejectionReactorMethodTestEnv.RInvalidNoParams;
-import io.spine.server.reflect.given.RejectionReactorMethodTestEnv.RInvalidNotMessage;
-import io.spine.server.reflect.given.RejectionReactorMethodTestEnv.RInvalidOneNotMsgParam;
-import io.spine.server.reflect.given.RejectionReactorMethodTestEnv.RInvalidTooManyParams;
-import io.spine.server.reflect.given.RejectionReactorMethodTestEnv.RInvalidTwoParamsFirstInvalid;
-import io.spine.server.reflect.given.RejectionReactorMethodTestEnv.RInvalidTwoParamsSecondInvalid;
-import io.spine.server.reflect.given.RejectionReactorMethodTestEnv.RValidButPrivate;
-import io.spine.server.reflect.given.RejectionReactorMethodTestEnv.RValidThreeParams;
-import io.spine.server.reflect.given.RejectionReactorMethodTestEnv.RValidTwoParams;
+import io.spine.server.model.given.Given;
+import io.spine.server.rejection.given.RejectionReactorMethodTestEnv.RInvalidNoAnnotation;
+import io.spine.server.rejection.given.RejectionReactorMethodTestEnv.RInvalidNoParams;
+import io.spine.server.rejection.given.RejectionReactorMethodTestEnv.RInvalidNotMessage;
+import io.spine.server.rejection.given.RejectionReactorMethodTestEnv.RInvalidOneNotMsgParam;
+import io.spine.server.rejection.given.RejectionReactorMethodTestEnv.RInvalidTooManyParams;
+import io.spine.server.rejection.given.RejectionReactorMethodTestEnv.RInvalidTwoParamsFirstInvalid;
+import io.spine.server.rejection.given.RejectionReactorMethodTestEnv.RInvalidTwoParamsSecondInvalid;
+import io.spine.server.rejection.given.RejectionReactorMethodTestEnv.RValidButPrivate;
+import io.spine.server.rejection.given.RejectionReactorMethodTestEnv.RValidThreeParams;
+import io.spine.server.rejection.given.RejectionReactorMethodTestEnv.RValidTwoParams;
 import io.spine.test.reflect.ReflectRejections.InvalidProjectName;
 import io.spine.test.rejection.command.UpdateProjectName;
 import org.junit.Test;

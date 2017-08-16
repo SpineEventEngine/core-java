@@ -17,7 +17,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.reflect;
+package io.spine.server.rejection;
 
 import com.google.common.base.Predicate;
 import com.google.protobuf.Message;
@@ -26,6 +26,8 @@ import io.spine.core.CommandContext;
 import io.spine.core.Commands;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionContext;
+import io.spine.server.model.HandlerMethod;
+import io.spine.server.model.HandlerMethodPredicate;
 
 import javax.annotation.CheckReturnValue;
 import java.lang.annotation.Annotation;
@@ -45,7 +47,7 @@ import static io.spine.util.Exceptions.unsupported;
  * @author Dmytro Dashenkov
  * @author Alexander Yevsyukov
  */
-class RejectionHandlerMethod extends HandlerMethod<RejectionContext>{
+class RejectionHandlerMethod extends HandlerMethod<RejectionContext> {
 
     /** Determines the number of parameters and their types. */
     private final Kind kind;

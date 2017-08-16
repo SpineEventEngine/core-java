@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.reflect.given;
+package io.spine.server.model.given;
 
 import io.spine.test.reflect.ProjectId;
 import io.spine.test.reflect.ReflectRejections.InvalidProjectName;
