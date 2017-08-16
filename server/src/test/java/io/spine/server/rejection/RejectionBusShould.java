@@ -26,6 +26,7 @@ import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.delivery.Consumers;
+import io.spine.server.rejection.given.AnotherInvalidProjectNameDelegate;
 import io.spine.server.rejection.given.BareDispatcher;
 import io.spine.server.rejection.given.CommandAwareSubscriber;
 import io.spine.server.rejection.given.CommandMessageAwareSubscriber;
@@ -34,7 +35,6 @@ import io.spine.server.rejection.given.FaultySubscriber;
 import io.spine.server.rejection.given.InvalidOrderSubscriber;
 import io.spine.server.rejection.given.InvalidProjectNameDelegate;
 import io.spine.server.rejection.given.InvalidProjectNameSubscriber;
-import io.spine.server.rejection.given.MissingOwnerDelegate;
 import io.spine.server.rejection.given.PostponedDispatcherRejectionDelivery;
 import io.spine.server.rejection.given.RejectionMessageSubscriber;
 import io.spine.server.rejection.given.VerifiableSubscriber;
@@ -250,9 +250,9 @@ public class RejectionBusShould {
     }
 
     @Test
-    public void deliver_postponed_rejection_to_delegating_dispatchers_using_configured_executor() {
+    public void pick_proper_consumer_by_consumer_id_when_delivering_to_delegates_of_same_rejection() {
         final InvalidProjectNameDelegate first = new InvalidProjectNameDelegate();
-        final MissingOwnerDelegate second = new MissingOwnerDelegate();
+        final AnotherInvalidProjectNameDelegate second = new AnotherInvalidProjectNameDelegate();
 
         final DelegatingRejectionDispatcher<String> firstDispatcher =
                 DelegatingRejectionDispatcher.of(first);

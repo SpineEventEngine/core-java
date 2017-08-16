@@ -23,22 +23,22 @@ import com.google.common.collect.ImmutableSet;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
 import io.spine.server.rejection.RejectionDispatcherDelegate;
-import io.spine.test.rejection.ProjectRejections.MissingOwner;
+import io.spine.test.rejection.ProjectRejections.InvalidProjectName;
 
 import java.util.Set;
 
 /**
- * A test delegate, which dispatches {@link MissingOwner} rejections.
+ * Another test delegate, which dispatches {@link InvalidProjectName} rejections.
  *
  * @author Alex Tymchenko
  */
-public class MissingOwnerDelegate implements RejectionDispatcherDelegate<String> {
+public class AnotherInvalidProjectNameDelegate implements RejectionDispatcherDelegate<String> {
 
     private boolean dispatchCalled = false;
 
     @Override
     public Set<RejectionClass> getRejectionClasses() {
-        return RejectionClass.setOf(MissingOwner.class);
+        return RejectionClass.setOf(InvalidProjectName.class);
     }
 
     @Override

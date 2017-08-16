@@ -34,7 +34,6 @@ import io.spine.server.delivery.Consumers;
 import io.spine.server.event.given.EventBusTestEnv.GivenEvent;
 import io.spine.server.storage.StorageFactory;
 import io.spine.test.event.ProjectCreated;
-import io.spine.test.event.ProjectStarred;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -251,9 +250,9 @@ public class EventBusShould {
     }
 
     @Test
-    public void deliver_postponed_event_to_delegating_dispatchers_using_configured_executor() {
-        final ProjectCreatedDelegate first = new ProjectCreatedDelegate();
-        final ProjectStartedDelegate second = new ProjectStartedDelegate();
+    public void pick_proper_consumer_by_consumer_id_when_delivering_to_delegates_of_same_event() {
+        final FirstProjectCreatedDelegate first = new FirstProjectCreatedDelegate();
+        final AnotherProjectCreatedDelegate second = new AnotherProjectCreatedDelegate();
 
         final DelegatingEventDispatcher<String> firstDispatcher =
                 DelegatingEventDispatcher.of(first);
@@ -430,7 +429,7 @@ public class EventBusShould {
     /**
      * A delegate, dispatching {@link ProjectCreated} events.
      */
-    private static class ProjectCreatedDelegate implements EventDispatcherDelegate<String> {
+    private static class FirstProjectCreatedDelegate implements EventDispatcherDelegate<String> {
         private boolean dispatchCalled = false;
 
         @Override
@@ -455,14 +454,14 @@ public class EventBusShould {
     }
 
     /**
-     * A delegate, dispatching {@link ProjectStarred} events.
+     * Another delegate, dispatching {@link ProjectCreated} events.
      */
-    private static class ProjectStartedDelegate implements EventDispatcherDelegate<String> {
+    private static class AnotherProjectCreatedDelegate implements EventDispatcherDelegate<String> {
         private boolean dispatchCalled = false;
 
         @Override
         public Set<EventClass> getEventClasses() {
-            return ImmutableSet.of(EventClass.of(ProjectStarred.class));
+            return ImmutableSet.of(EventClass.of(ProjectCreated.class));
         }
 
         @Override
