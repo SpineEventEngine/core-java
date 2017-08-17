@@ -17,35 +17,33 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.aggregate;
+package io.spine.server.procman;
 
 import io.spine.core.ActorMessageEnvelope;
 import io.spine.server.delivery.EndpointDelivery;
 
 /**
- * A strategy on delivering the messages to the instances of a certain aggregate type.
- *
  * @author Alex Tymchenko
  */
-public abstract class AggregateEndpointDelivery<I,
-                                                A extends Aggregate<I, ?, ?>,
-                                                E extends ActorMessageEnvelope<?, ?, ?>>
-        extends EndpointDelivery<I, A, E> {
+public abstract class PmEndpointDelivery<I,
+                                         P extends ProcessManager<I, ?, ?>,
+                                         M extends ActorMessageEnvelope<?, ?, ?>>
+        extends EndpointDelivery<I, P, M> {
 
-    AggregateEndpointDelivery(AggregateRepository<I, A> repository) {
+    protected PmEndpointDelivery(ProcessManagerRepository<I, P, ?> repository) {
         super(repository);
     }
 
     @Override
-    protected abstract AggregateMessageEndpoint<I, A, E, ?> getEndpoint(E messageEnvelope);
+    protected abstract PmEndpoint<I, P, M, ?> getEndpoint(M messageEnvelope);
 
     @Override
-    protected AggregateRepository<I, A> repository() {
-        return (AggregateRepository<I, A>) super.repository();
+    protected ProcessManagerRepository<I, P, ?> repository() {
+        return (ProcessManagerRepository<I, P, ?>) super.repository();
     }
 
     @Override
-    protected void passToEndpoint(I id, E envelopeMessage) {
+    protected void passToEndpoint(I id, M envelopeMessage) {
         getEndpoint(envelopeMessage).deliverNowTo(id);
     }
 }

@@ -47,30 +47,8 @@ abstract class AggregateMessageEndpoint<I,
         super(repository, envelope);
     }
 
-    /**
-     * Obtains an instance of endpoint delivery for the given envelope.
-     *
-     * @param envelope the envelope to obtain an instance of delivery for
-     * @return the instance of endpoint delivery
-     */
-    protected abstract AggregateEndpointDelivery<I, A, M> getEndpointDelivery(M envelope);
-
-    /**
-     * Dispatched the message to the aggregate with the passed ID.
-     *
-     * @param aggregateId the ID of the aggregate to which dispatch the message
-     */
     @Override
-    protected void dispatchToOne(I aggregateId) {
-
-        final M envelope = envelope();
-        final AggregateEndpointDelivery<I, A, M> delivery = getEndpointDelivery(envelope);
-        if(!delivery.shouldPostpone(aggregateId, envelope)) {
-            deliverNow(aggregateId);
-        }
-    }
-
-    void deliverNow(I aggregateId) {
+    protected void deliverNowTo(I aggregateId) {
         final A aggregate = repository().loadOrCreate(aggregateId);
         final LifecycleFlags flagsBefore = aggregate.getLifecycleFlags();
 

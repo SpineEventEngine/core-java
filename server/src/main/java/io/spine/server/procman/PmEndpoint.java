@@ -23,7 +23,6 @@ package io.spine.server.procman;
 import io.spine.core.ActorMessageEnvelope;
 import io.spine.core.Event;
 import io.spine.server.entity.EntityMessageEndpoint;
-import io.spine.server.entity.Repository;
 
 import java.util.List;
 
@@ -43,7 +42,7 @@ abstract class PmEndpoint<I,
                           R>
         extends EntityMessageEndpoint<I, P, M, R> {
 
-    PmEndpoint(Repository<I, P> repository, M envelope) {
+    PmEndpoint(ProcessManagerRepository<I, P, ?> repository, M envelope) {
         super(repository, envelope);
     }
 
@@ -64,7 +63,7 @@ abstract class PmEndpoint<I,
     }
 
     @Override
-    protected void dispatchToOne(I id) {
+    protected void deliverNowTo(I id) {
         final ProcessManagerRepository<I, P, ?> repository = repository();
         final P manager = repository.findOrCreate(id);
 

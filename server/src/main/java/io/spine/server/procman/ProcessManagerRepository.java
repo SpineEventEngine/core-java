@@ -285,4 +285,16 @@ public abstract class ProcessManagerRepository<I,
     EventRouting<I> eventRouting() {
         return getEventRouting();
     }
+
+    protected PmEventDelivery<I, P> getEventEndpointDelivery() {
+        return PmEventDelivery.directDelivery(this);
+    }
+
+    protected PmRejectionDelivery<I, P> getRejectionEndpointDelivery() {
+        return PmRejectionDelivery.directDelivery(this);
+    }
+
+    protected PmCommandDelivery<I, P> getCommandEndpointDelivery() {
+        return PmCommandDelivery.directDelivery(this);
+    }
 }
