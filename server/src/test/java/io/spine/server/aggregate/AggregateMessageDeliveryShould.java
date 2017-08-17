@@ -22,19 +22,25 @@ package io.spine.server.aggregate;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Events;
+import io.spine.core.Rejection;
+import io.spine.core.RejectionEnvelope;
 import io.spine.server.BoundedContext;
-import io.spine.server.aggregate.given.AggregateEventDeliveryTestEnv.PostponedReactingRepository;
-import io.spine.server.aggregate.given.AggregateEventDeliveryTestEnv.PostponingDelivery;
-import io.spine.server.aggregate.given.AggregateEventDeliveryTestEnv.ReactingProject;
+import io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.PostponedReactingRepository;
+import io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.PostponingEventDelivery;
+import io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.PostponingRejectionDelivery;
+import io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.ReactingProject;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.event.AggProjectStarted;
+import io.spine.test.aggregate.rejection.Rejections.AggCannotStartArchivedProject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Map;
 
-import static io.spine.server.aggregate.given.AggregateEventDeliveryTestEnv.projectStarted;
+import static io.spine.core.Rejections.getMessage;
+import static io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.cannotStartProject;
+import static io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.projectStarted;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -43,7 +49,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Alex Tymchenko
  */
-public class AggregateEventDeliveryShould {
+public class AggregateMessageDeliveryShould {
 
     private BoundedContext boundedContext;
     private PostponedReactingRepository repository;
@@ -73,7 +79,7 @@ public class AggregateEventDeliveryShould {
         assertNull(ReactingProject.getEventReceived());
 
         final EventEnvelope expectedEnvelope = EventEnvelope.of(event);
-        final PostponingDelivery delivery = PostponedReactingRepository.getDelivery();
+        final PostponingEventDelivery delivery = repository.getEventEndpointDelivery();
         final Map<ProjectId, EventEnvelope> postponedEvents = delivery.getPostponedEvents();
         assertTrue(postponedEvents.size() == 1 &&
                            postponedEvents.containsValue(expectedEnvelope));
@@ -87,5 +93,34 @@ public class AggregateEventDeliveryShould {
         final AggProjectStarted deliveredEventMsg = ReactingProject.getEventReceived();
         assertNotNull(deliveredEventMsg);
         assertEquals(Events.getMessage(event), deliveredEventMsg);
+    }
+
+    @Test
+    public void postpone_rejections_dispatched_to_reactor_method() {
+        assertNull(ReactingProject.getEventReceived());
+
+        final Rejection rejection = cannotStartProject();
+        boundedContext.getRejectionBus()
+                      .post(rejection);
+
+        assertNull(ReactingProject.getRejectionReceived());
+
+        final RejectionEnvelope expectedEnvelope = RejectionEnvelope.of(rejection);
+        final PostponingRejectionDelivery delivery = repository.getRejectionEndpointDelivery();
+        final Map<ProjectId, RejectionEnvelope> postponedRejections =
+                delivery.getPostponedRejections();
+        assertTrue(postponedRejections.size() == 1 &&
+                           postponedRejections.containsValue(expectedEnvelope));
+
+        final ProjectId projectId = postponedRejections.keySet()
+                                                   .iterator()
+                                                   .next();
+
+        delivery.deliverNow(projectId, postponedRejections.get(projectId));
+
+        final AggCannotStartArchivedProject deliveredRejectionMsg
+                = ReactingProject.getRejectionReceived();
+        assertNotNull(deliveredRejectionMsg);
+        assertEquals(getMessage(rejection), deliveredRejectionMsg);
     }
 }

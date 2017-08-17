@@ -29,7 +29,7 @@ import io.spine.core.RejectionEnvelope;
 public abstract class AggregateRejectionDelivery<I, A extends Aggregate<I, ?, ?>>
         extends AggregateEndpointDelivery<I, A, RejectionEnvelope> {
 
-    AggregateRejectionDelivery(AggregateRepository<I, A> repository) {
+    protected AggregateRejectionDelivery(AggregateRepository<I, A> repository) {
         super(repository);
     }
 
