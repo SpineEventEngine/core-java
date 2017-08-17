@@ -42,7 +42,7 @@ abstract class AggregateMessageEndpoint<I,
                                         A extends Aggregate<I, ?, ?>,
                                         M extends ActorMessageEnvelope<?, ?, ?>, R>
         extends EntityMessageEndpoint<I, A, M, R> {
-    
+
     AggregateMessageEndpoint(AggregateRepository<I, A> repository, M envelope) {
         super(repository, envelope);
     }
@@ -54,6 +54,15 @@ abstract class AggregateMessageEndpoint<I,
      */
     @Override
     protected void dispatchToOne(I aggregateId) {
+
+        final M envelope = envelope();
+        final AggregateEndpointDelivery<I, A, M> delivery = getEndpointDelivery(envelope);
+        if(!delivery.shouldPostpone(aggregateId, envelope)) {
+            deliverNow(aggregateId);
+        }
+    }
+
+    void deliverNow(I aggregateId) {
         final A aggregate = repository().loadOrCreate(aggregateId);
         final LifecycleFlags flagsBefore = aggregate.getLifecycleFlags();
 
@@ -70,6 +79,8 @@ abstract class AggregateMessageEndpoint<I,
 
         store(aggregate);
     }
+
+    protected abstract AggregateEndpointDelivery<I, A, M> getEndpointDelivery(M envelope);
 
     protected AggregateTransaction startTransaction(A aggregate) {
         return AggregateTransaction.start(aggregate);
