@@ -28,12 +28,9 @@ import io.spine.core.React;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.MethodPredicate;
 
-import javax.annotation.CheckReturnValue;
 import java.lang.reflect.Method;
 import java.util.List;
-import java.util.Set;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -73,20 +70,6 @@ public final class EventReactorMethod extends HandlerMethod<EventContext> {
 
     static MethodPredicate predicate() {
         return PREDICATE;
-    }
-
-    /**
-     * Obtains classes of events on which instances of the passed class {@linkplain React react}.
-     *
-     * @param cls the class of objects that react on events
-     * @return immutable set of classes of events, or empty set of none reacting methods are found
-     * in the passed class
-     */
-    @CheckReturnValue
-    public static Set<EventClass> inspect(Class<?> cls) {
-        checkNotNull(cls);
-        final Set<EventClass> result = EventClass.setOf(inspect(cls, predicate()));
-        return result;
     }
 
     public static HandlerMethod.Factory<EventReactorMethod> factory() {

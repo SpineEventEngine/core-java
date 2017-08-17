@@ -33,9 +33,6 @@ import io.spine.server.model.MethodPredicate;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Set;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A wrapper for event applier method.
@@ -73,15 +70,6 @@ public final class EventApplierMethod extends HandlerMethod<Empty> {
 
     public static HandlerMethod.Factory<EventApplierMethod> factory() {
         return Factory.getInstance();
-    }
-
-    /**
-     * Returns set of classes of events that represent data for the passed class of aggregates.
-     */
-    public static Set<EventClass> inspect(Class<? extends Aggregate> cls) {
-        checkNotNull(cls);
-        final Set<EventClass> result = EventClass.setOf(inspect(cls, predicate()));
-        return result;
     }
 
     /**

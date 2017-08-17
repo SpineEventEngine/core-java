@@ -23,16 +23,13 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Predicate;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.core.RejectionClass;
 import io.spine.core.RejectionContext;
 import io.spine.core.Subscribe;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.MethodPredicate;
 
-import javax.annotation.CheckReturnValue;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Set;
 
 /**
  * A wrapper for a rejection subscriber method.
@@ -55,11 +52,6 @@ public class RejectionSubscriberMethod extends RejectionHandlerMethod {
     @VisibleForTesting
     RejectionSubscriberMethod(Method method) {
         super(method);
-    }
-
-    @CheckReturnValue
-    public static Set<RejectionClass> inspect(Class<?> cls) {
-        return inspectWith(cls, predicate());
     }
 
     /**

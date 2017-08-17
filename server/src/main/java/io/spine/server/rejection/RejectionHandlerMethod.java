@@ -19,7 +19,6 @@
  */
 package io.spine.server.rejection;
 
-import com.google.common.base.Predicate;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.Command;
@@ -30,15 +29,12 @@ import io.spine.core.RejectionContext;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.HandlerMethodPredicate;
 
-import javax.annotation.CheckReturnValue;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
-import static io.spine.util.Exceptions.newIllegalStateException;
 import static io.spine.util.Exceptions.unsupported;
 
 /**
@@ -141,21 +137,6 @@ class RejectionHandlerMethod extends HandlerMethod<RejectionContext> {
             throw whyFailed(target, rejectionMsg, context, e);
         }
     }
-
-    static IllegalStateException missingRejectionHandler(
-            Class<?> cls, Class<? extends Message> rejectionClass) {
-        return newIllegalStateException("Missing handler for rejection class %s in the class %s",
-                                        rejectionClass, cls);
-    }
-
-    @CheckReturnValue
-    static Set<RejectionClass> inspectWith(Class<?> cls, Predicate<Method> predicate) {
-        checkNotNull(cls);
-        checkNotNull(predicate);
-        final Set<RejectionClass> result = RejectionClass.setOf(inspect(cls, predicate));
-        return result;
-    }
-
 
     /**
      * The kind of the method signature, which is determined by the number of parameters and

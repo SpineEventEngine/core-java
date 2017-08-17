@@ -35,12 +35,9 @@ import io.spine.server.model.HandlerMethodFailedException;
 import io.spine.server.model.HandlerMethodPredicate;
 import io.spine.server.model.MethodPredicate;
 
-import javax.annotation.CheckReturnValue;
 import java.lang.reflect.Method;
 import java.util.List;
-import java.util.Set;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.getRootCause;
 
 /**
@@ -66,19 +63,6 @@ public final class CommandHandlerMethod extends HandlerMethod<CommandContext> {
     @Override
     public CommandClass getMessageClass() {
         return CommandClass.of(rawMessageClass());
-    }
-
-    /**
-     * Returns command classes handled by the passed class.
-     *
-     * @param cls the class of objects that handle commands
-     * @return immutable set of command classes
-     */
-    @CheckReturnValue
-    public static Set<CommandClass> inspect(Class<?> cls) {
-        checkNotNull(cls);
-        final Set<CommandClass> result = CommandClass.setOf(inspect(cls, predicate()));
-        return result;
     }
 
     static CommandHandlerMethod from(Method method) {

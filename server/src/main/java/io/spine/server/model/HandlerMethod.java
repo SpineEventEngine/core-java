@@ -22,7 +22,6 @@ package io.spine.server.model;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
@@ -35,14 +34,12 @@ import io.spine.type.MessageClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Collections.emptyList;
@@ -87,26 +84,6 @@ public abstract class HandlerMethod<C extends Message> {
     }
 
     public abstract MessageClass getMessageClass();
-
-    /**
-     * Returns types of messages handled by the passed class.
-     *
-     * @return immutable set of message classes or an empty set
-     */
-    @CheckReturnValue
-    protected static Set<Class<? extends Message>> inspect(Class<?> cls, Predicate<Method> predicate) {
-        final ImmutableSet.Builder<Class<? extends Message>> builder = ImmutableSet.builder();
-
-        for (Method method : cls.getDeclaredMethods()) {
-            final boolean methodMatches = predicate.apply(method);
-            if (methodMatches) {
-                final Class<? extends Message> firstParamType = getFirstParamType(method);
-                builder.add(firstParamType);
-            }
-        }
-
-        return builder.build();
-    }
 
     /**
      * Returns {@code true} if the method has package-private access, {@code false} otherwise.
