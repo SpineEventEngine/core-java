@@ -26,6 +26,7 @@ import com.google.protobuf.StringValue;
 import io.spine.Identifier;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;
+import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.core.React;
@@ -34,13 +35,17 @@ import io.spine.core.RejectionEnvelope;
 import io.spine.core.Rejections;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.aggregate.Aggregate;
+import io.spine.server.aggregate.AggregateCommandDelivery;
 import io.spine.server.aggregate.AggregateEventDelivery;
 import io.spine.server.aggregate.AggregateRejectionDelivery;
 import io.spine.server.aggregate.AggregateRepository;
+import io.spine.server.aggregate.Apply;
+import io.spine.server.command.Assign;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.route.RejectionProducers;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggCreateProject;
+import io.spine.test.aggregate.event.AggProjectCreated;
 import io.spine.test.aggregate.event.AggProjectStarted;
 import io.spine.test.aggregate.rejection.Rejections.AggCannotStartArchivedProject;
 import io.spine.validate.StringValueVBuilder;
@@ -59,6 +64,15 @@ public class AggregateMessageDeliveryTestEnv {
 
     /** Prevents instantiation of this utility class. */
     private AggregateMessageDeliveryTestEnv() {
+    }
+
+    public static Command createProject() {
+        final ProjectId projectId = projectId();
+        final Command command = createCommand(AggCreateProject.newBuilder()
+                                                              .setName("A project" + projectId)
+                                                              .setProjectId(projectId)
+                                                              .build());
+        return command;
     }
 
     public static Event projectStarted() {
@@ -91,9 +105,7 @@ public class AggregateMessageDeliveryTestEnv {
                                                             .setName("A project " + projectId)
                                                             .setProjectId(projectId)
                                                             .build();
-        final Command command = TestActorRequestFactory.newInstance(
-                AggregateMessageDeliveryTestEnv.class)
-                                                       .createCommand(cmdMessage);
+        final Command command = createCommand(cmdMessage);
 
         final Rejection result = Rejections.toRejection(
                 new io.spine.test.aggregate.rejection.AggCannotStartArchivedProject(
@@ -102,15 +114,35 @@ public class AggregateMessageDeliveryTestEnv {
         return result;
     }
 
+    private static Command createCommand(Message cmdMessage) {
+        final Command result =
+                TestActorRequestFactory.newInstance(AggregateMessageDeliveryTestEnv.class)
+                                       .createCommand(cmdMessage);
+        return result;
+    }
+
     @SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod")
     public static class ReactingProject
             extends Aggregate<ProjectId, StringValue, StringValueVBuilder> {
 
+        private static AggCreateProject commandReceived = null;
         private static AggProjectStarted eventReceived = null;
         private static AggCannotStartArchivedProject rejectionReceived = null;
 
         protected ReactingProject(ProjectId id) {
             super(id);
+        }
+
+        @Assign
+        AggProjectCreated on(AggCreateProject cmd) {
+            commandReceived = cmd;
+            return AggProjectCreated.newBuilder().setName(cmd.getName()).build();
+        }
+
+        @SuppressWarnings("unused")
+        @Apply
+        void the(AggProjectCreated event) {
+            // do nothing.
         }
 
         @React
@@ -126,6 +158,11 @@ public class AggregateMessageDeliveryTestEnv {
         }
 
         @Nullable
+        public static AggCreateProject getCommandReceived() {
+            return commandReceived;
+        }
+
+        @Nullable
         public static AggProjectStarted getEventReceived() {
             return eventReceived;
         }
@@ -134,7 +171,6 @@ public class AggregateMessageDeliveryTestEnv {
         public static AggCannotStartArchivedProject getRejectionReceived() {
             return rejectionReceived;
         }
-
     }
 
     public static class PostponedReactingRepository
@@ -142,6 +178,7 @@ public class AggregateMessageDeliveryTestEnv {
 
         private PostponingEventDelivery eventDelivery = null;
         private PostponingRejectionDelivery rejectionDelivery = null;
+        private PostponingCommandDelivery commandDelivery = null;
 
         public PostponedReactingRepository() {
             getRejectionRouting().replaceDefault(
@@ -162,6 +199,14 @@ public class AggregateMessageDeliveryTestEnv {
                 rejectionDelivery = new PostponingRejectionDelivery(this);
             }
             return rejectionDelivery;
+        }
+
+        @Override
+        public PostponingCommandDelivery getCommandEndpointDelivery() {
+            if(commandDelivery == null) {
+                commandDelivery = new PostponingCommandDelivery(this);
+            }
+            return commandDelivery;
         }
     }
 
@@ -204,6 +249,27 @@ public class AggregateMessageDeliveryTestEnv {
 
         public Map<ProjectId, RejectionEnvelope> getPostponedRejections() {
             return ImmutableMap.copyOf(postponedRejections);
+        }
+    }
+
+    public static class PostponingCommandDelivery
+            extends AggregateCommandDelivery<ProjectId, ReactingProject> {
+
+        private final Map<ProjectId, CommandEnvelope> postponedCommands = newHashMap();
+
+        protected PostponingCommandDelivery(
+                AggregateRepository<ProjectId, ReactingProject> repository) {
+            super(repository);
+        }
+
+        @Override
+        public boolean shouldPostpone(ProjectId id, CommandEnvelope envelope) {
+            postponedCommands.put(id, envelope);
+            return true;
+        }
+
+        public Map<ProjectId, CommandEnvelope> getPostponedCommands() {
+            return ImmutableMap.copyOf(postponedCommands);
         }
     }
 }

@@ -19,17 +19,24 @@
  */
 package io.spine.server.aggregate;
 
+import io.spine.core.Ack;
+import io.spine.core.Command;
+import io.spine.core.CommandEnvelope;
+import io.spine.core.Commands;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Events;
 import io.spine.core.Rejection;
 import io.spine.core.RejectionEnvelope;
+import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.PostponedReactingRepository;
+import io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.PostponingCommandDelivery;
 import io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.PostponingEventDelivery;
 import io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.PostponingRejectionDelivery;
 import io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.ReactingProject;
 import io.spine.test.aggregate.ProjectId;
+import io.spine.test.aggregate.command.AggCreateProject;
 import io.spine.test.aggregate.event.AggProjectStarted;
 import io.spine.test.aggregate.rejection.Rejections.AggCannotStartArchivedProject;
 import org.junit.After;
@@ -40,6 +47,7 @@ import java.util.Map;
 
 import static io.spine.core.Rejections.getMessage;
 import static io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.cannotStartProject;
+import static io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.createProject;
 import static io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.projectStarted;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -122,5 +130,33 @@ public class AggregateMessageDeliveryShould {
                 = ReactingProject.getRejectionReceived();
         assertNotNull(deliveredRejectionMsg);
         assertEquals(getMessage(rejection), deliveredRejectionMsg);
+    }
+
+    @Test
+    public void postpone_commands_dispatched_to_command_handler_method() {
+        assertNull(ReactingProject.getCommandReceived());
+
+        final Command command = createProject();
+        boundedContext.getCommandBus()
+                      .post(command, StreamObservers.<Ack>noOpObserver());
+
+        assertNull(ReactingProject.getCommandReceived());
+
+        final CommandEnvelope expectedEnvelope = CommandEnvelope.of(command);
+        final PostponingCommandDelivery delivery = repository.getCommandEndpointDelivery();
+        final Map<ProjectId, CommandEnvelope> postponedCommands =
+                delivery.getPostponedCommands();
+        assertTrue(postponedCommands.size() == 1 &&
+                           postponedCommands.containsValue(expectedEnvelope));
+
+        final ProjectId projectId = postponedCommands.keySet()
+                                                       .iterator()
+                                                       .next();
+
+        delivery.deliverNow(projectId, postponedCommands.get(projectId));
+
+        final AggCreateProject deliveredCommandMsg = ReactingProject.getCommandReceived();
+        assertNotNull(deliveredCommandMsg);
+        assertEquals(Commands.getMessage(command), deliveredCommandMsg);
     }
 }
