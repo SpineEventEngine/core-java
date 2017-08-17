@@ -17,10 +17,9 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.aggregate.given;
+package io.spine.server.procman.given;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.Identifier;
@@ -32,22 +31,22 @@ import io.spine.core.EventEnvelope;
 import io.spine.core.React;
 import io.spine.core.Rejection;
 import io.spine.core.RejectionEnvelope;
-import io.spine.core.Rejections;
-import io.spine.server.aggregate.Aggregate;
-import io.spine.server.aggregate.AggregateCommandDelivery;
-import io.spine.server.aggregate.AggregateEventDelivery;
-import io.spine.server.aggregate.AggregateRejectionDelivery;
-import io.spine.server.aggregate.AggregateRepository;
-import io.spine.server.aggregate.Apply;
+import io.spine.protobuf.AnyPacker;
+import io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv;
 import io.spine.server.command.Assign;
 import io.spine.server.command.TestEventFactory;
+import io.spine.server.procman.PmCommandDelivery;
+import io.spine.server.procman.PmEventDelivery;
+import io.spine.server.procman.PmRejectionDelivery;
+import io.spine.server.procman.ProcessManager;
+import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.server.route.RejectionProducers;
-import io.spine.test.aggregate.ProjectId;
-import io.spine.test.aggregate.command.AggCreateProject;
-import io.spine.test.aggregate.command.AggStartProject;
-import io.spine.test.aggregate.event.AggProjectCreated;
-import io.spine.test.aggregate.event.AggProjectStarted;
-import io.spine.test.aggregate.rejection.Rejections.AggCannotStartArchivedProject;
+import io.spine.test.procman.ProjectId;
+import io.spine.test.procman.command.PmCreateProject;
+import io.spine.test.procman.command.PmStartProject;
+import io.spine.test.procman.event.PmProjectCreated;
+import io.spine.test.procman.event.PmProjectStarted;
+import io.spine.test.procman.rejection.Rejections.PmCannotStartArchivedProject;
 import io.spine.validate.StringValueVBuilder;
 
 import javax.annotation.Nullable;
@@ -55,23 +54,22 @@ import java.util.List;
 import java.util.Map;
 
 import static com.google.common.collect.Maps.newHashMap;
-import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.core.Rejections.toRejection;
 import static java.util.Collections.emptyList;
 
 /**
  * @author Alex Tymchenko
  */
-public class AggregateMessageDeliveryTestEnv {
+public class PmMessageDeliveryTestEnv {
 
     /** Prevents instantiation of this utility class. */
-    private AggregateMessageDeliveryTestEnv() {}
+    private PmMessageDeliveryTestEnv() {}
 
     public static Command createProject() {
         final ProjectId projectId = projectId();
-        final Command command = createCommand(AggCreateProject.newBuilder()
-                                                              .setName("A project" + projectId)
-                                                              .setProjectId(projectId)
-                                                              .build());
+        final Command command = createCommand(PmCreateProject.newBuilder()
+                                                             .setProjectId(projectId)
+                                                             .build());
         return command;
     }
 
@@ -79,13 +77,13 @@ public class AggregateMessageDeliveryTestEnv {
         final ProjectId projectId = projectId();
         final TestEventFactory eventFactory =
                 TestEventFactory.newInstance(
-                        pack(projectId),
-                        AggregateMessageDeliveryTestEnv.class
+                        AnyPacker.pack(projectId),
+                        PmMessageDeliveryTestEnv.class
                 );
 
-        final AggProjectStarted msg = AggProjectStarted.newBuilder()
-                                                       .setProjectId(projectId)
-                                                       .build();
+        final PmProjectStarted msg = PmProjectStarted.newBuilder()
+                                                     .setProjectId(projectId)
+                                                     .build();
 
         final Event result = eventFactory.createEvent(msg);
         return result;
@@ -100,17 +98,17 @@ public class AggregateMessageDeliveryTestEnv {
     public static Rejection cannotStartProject() {
         final ProjectId projectId = projectId();
 
-
-        final AggStartProject cmdMessage = AggStartProject.newBuilder()
-                                                          .setProjectId(projectId)
-                                                          .build();
+        final PmStartProject cmdMessage = PmStartProject.newBuilder()
+                                                        .setProjectId(projectId)
+                                                        .build();
         final Command command = createCommand(cmdMessage);
-
-        final Rejection result = Rejections.toRejection(
-                new io.spine.test.aggregate.rejection.AggCannotStartArchivedProject(
-                        projectId, Lists.<ProjectId>newArrayList()),
-                command);
+        final Rejection result = toRejection(throwableWith(projectId), command);
         return result;
+    }
+
+    private static io.spine.test.procman.rejection.PmCannotStartArchivedProject
+    throwableWith(ProjectId projectId) {
+        return new io.spine.test.procman.rejection.PmCannotStartArchivedProject(projectId);
     }
 
     private static Command createCommand(Message cmdMessage) {
@@ -121,67 +119,68 @@ public class AggregateMessageDeliveryTestEnv {
     }
 
     /**
-     * An aggregate class, which declares all kinds of message dispatching methods and remembers
+     * A process manager class, which declares all kinds of dispatching methods and remembers
      * the latest values submitted to each of them.
      */
     @SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod")
-    public static class ReactingProject
-            extends Aggregate<ProjectId, StringValue, StringValueVBuilder> {
+    public static class ReactingProjectWizard
+            extends ProcessManager<ProjectId, StringValue, StringValueVBuilder> {
 
-        private static AggCreateProject commandReceived = null;
-        private static AggProjectStarted eventReceived = null;
-        private static AggCannotStartArchivedProject rejectionReceived = null;
+        private static PmProjectStarted eventReceived = null;
+        private static PmCreateProject commandReceived = null;
+        private static PmCannotStartArchivedProject rejectionReceived = null;
 
-        protected ReactingProject(ProjectId id) {
+        protected ReactingProjectWizard(ProjectId id) {
             super(id);
         }
 
+        @SuppressWarnings("unused")     // Accessed by the framework via reflection.
         @Assign
-        AggProjectCreated on(AggCreateProject cmd) {
-            commandReceived = cmd;
-            return AggProjectCreated.newBuilder().setName(cmd.getName()).build();
+        PmProjectCreated on(PmCreateProject command) {
+            commandReceived = command;
+            getBuilder().setValue(command.getProjectId().getId());
+            return PmProjectCreated.newBuilder()
+                                   .setProjectId(command.getProjectId())
+                                   .build();
         }
 
-        @SuppressWarnings("unused")     // an applier is required by the framework.
-        @Apply
-        private void the(AggProjectCreated event) {
-            // do nothing.
-        }
-
+        @SuppressWarnings("unused")     // Accessed by the framework via reflection.
         @React
-        List<Message> onEvent(AggProjectStarted event) {
+        List<Message> on(PmProjectStarted event) {
             eventReceived = event;
             return emptyList();
         }
 
+        @SuppressWarnings("unused")     // Accessed by the framework via reflection.
         @React
-        List<Message> onRejection(AggCannotStartArchivedProject rejection) {
+        List<Message> on(PmCannotStartArchivedProject rejection) {
             rejectionReceived = rejection;
             return emptyList();
         }
 
         @Nullable
-        public static AggCreateProject getCommandReceived() {
+        public static PmCreateProject getCommandReceived() {
             return commandReceived;
         }
 
         @Nullable
-        public static AggProjectStarted getEventReceived() {
+        public static PmProjectStarted getEventReceived() {
             return eventReceived;
         }
 
         @Nullable
-        public static AggCannotStartArchivedProject getRejectionReceived() {
+        public static PmCannotStartArchivedProject getRejectionReceived() {
             return rejectionReceived;
         }
+
     }
 
     /**
      * A repository which overrides the delivery strategy for events, rejections and commands,
-     * postponing the delivery of each of these objects to aggregate instances.
+     * postponing the delivery of each of these objects to process manager instances.
      */
     public static class PostponingRepository
-            extends AggregateRepository<ProjectId, ReactingProject> {
+            extends ProcessManagerRepository<ProjectId, ReactingProjectWizard, StringValue> {
 
         private PostponingEventDelivery eventDelivery = null;
         private PostponingRejectionDelivery rejectionDelivery = null;
@@ -211,7 +210,7 @@ public class AggregateMessageDeliveryTestEnv {
 
         @Override
         public PostponingCommandDelivery getCommandEndpointDelivery() {
-            if(commandDelivery == null) {
+            if (commandDelivery == null) {
                 commandDelivery = new PostponingCommandDelivery(this);
             }
             return commandDelivery;
@@ -223,12 +222,12 @@ public class AggregateMessageDeliveryTestEnv {
      * along with the target entity ID.
      */
     public static class PostponingEventDelivery
-            extends AggregateEventDelivery<ProjectId, ReactingProject> {
+            extends PmEventDelivery<ProjectId, ReactingProjectWizard> {
 
         private final Map<ProjectId, EventEnvelope> postponedEvents = newHashMap();
 
-        protected PostponingEventDelivery(PostponingRepository repository) {
-            super(repository);
+        PostponingEventDelivery(PostponingRepository repo) {
+            super(repo);
         }
 
         @Override
@@ -247,11 +246,11 @@ public class AggregateMessageDeliveryTestEnv {
      * along with the target entity ID.
      */
     public static class PostponingRejectionDelivery
-            extends AggregateRejectionDelivery<ProjectId, ReactingProject> {
+            extends PmRejectionDelivery<ProjectId, ReactingProjectWizard> {
 
         private final Map<ProjectId, RejectionEnvelope> postponedRejections = newHashMap();
 
-        protected PostponingRejectionDelivery(PostponingRepository repository) {
+        PostponingRejectionDelivery(PostponingRepository repository) {
             super(repository);
         }
 
@@ -266,17 +265,16 @@ public class AggregateMessageDeliveryTestEnv {
         }
     }
 
-
     /**
      * Command delivery strategy which always postpones the delivery, but remembers the command
      * along with the target entity ID.
      */
     public static class PostponingCommandDelivery
-            extends AggregateCommandDelivery<ProjectId, ReactingProject> {
+            extends PmCommandDelivery<ProjectId, ReactingProjectWizard> {
 
         private final Map<ProjectId, CommandEnvelope> postponedCommands = newHashMap();
 
-        protected PostponingCommandDelivery(PostponingRepository repository) {
+        PostponingCommandDelivery(PostponingRepository repository) {
             super(repository);
         }
 

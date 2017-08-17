@@ -17,7 +17,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.aggregate;
+package io.spine.server.procman;
 
 import io.spine.core.Ack;
 import io.spine.core.Command;
@@ -30,15 +30,15 @@ import io.spine.core.Rejection;
 import io.spine.core.RejectionEnvelope;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
-import io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.PostponingCommandDelivery;
-import io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.PostponingEventDelivery;
-import io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.PostponingRejectionDelivery;
-import io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.PostponingRepository;
-import io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.ReactingProject;
-import io.spine.test.aggregate.ProjectId;
-import io.spine.test.aggregate.command.AggCreateProject;
-import io.spine.test.aggregate.event.AggProjectStarted;
-import io.spine.test.aggregate.rejection.Rejections.AggCannotStartArchivedProject;
+import io.spine.server.procman.given.PmMessageDeliveryTestEnv.PostponingCommandDelivery;
+import io.spine.server.procman.given.PmMessageDeliveryTestEnv.PostponingEventDelivery;
+import io.spine.server.procman.given.PmMessageDeliveryTestEnv.PostponingRejectionDelivery;
+import io.spine.server.procman.given.PmMessageDeliveryTestEnv.PostponingRepository;
+import io.spine.server.procman.given.PmMessageDeliveryTestEnv.ReactingProjectWizard;
+import io.spine.test.procman.ProjectId;
+import io.spine.test.procman.command.PmCreateProject;
+import io.spine.test.procman.event.PmProjectStarted;
+import io.spine.test.procman.rejection.Rejections.PmCannotStartArchivedProject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -46,9 +46,9 @@ import org.junit.Test;
 import java.util.Map;
 
 import static io.spine.core.Rejections.getMessage;
-import static io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.cannotStartProject;
-import static io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.createProject;
-import static io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.projectStarted;
+import static io.spine.server.procman.given.PmMessageDeliveryTestEnv.cannotStartProject;
+import static io.spine.server.procman.given.PmMessageDeliveryTestEnv.createProject;
+import static io.spine.server.procman.given.PmMessageDeliveryTestEnv.projectStarted;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -57,7 +57,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Alex Tymchenko
  */
-public class AggregateMessageDeliveryShould {
+public class PmMessageDeliveryShould {
 
     private BoundedContext boundedContext;
     private PostponingRepository repository;
@@ -78,13 +78,13 @@ public class AggregateMessageDeliveryShould {
 
     @Test
     public void postpone_events_dispatched_to_reactor_method() {
-        assertNull(ReactingProject.getEventReceived());
+        assertNull(ReactingProjectWizard.getEventReceived());
 
         final Event event = projectStarted();
         boundedContext.getEventBus()
                       .post(event);
 
-        assertNull(ReactingProject.getEventReceived());
+        assertNull(ReactingProjectWizard.getEventReceived());
 
         final EventEnvelope expectedEnvelope = EventEnvelope.of(event);
         final PostponingEventDelivery delivery = repository.getEventEndpointDelivery();
@@ -93,25 +93,26 @@ public class AggregateMessageDeliveryShould {
                            postponedEvents.containsValue(expectedEnvelope));
 
         final ProjectId projectId = postponedEvents.keySet()
-                                              .iterator()
-                                              .next();
+                                                   .iterator()
+                                                   .next();
 
         delivery.deliverNow(projectId, postponedEvents.get(projectId));
 
-        final AggProjectStarted deliveredEventMsg = ReactingProject.getEventReceived();
+        final PmProjectStarted deliveredEventMsg = ReactingProjectWizard.getEventReceived();
         assertNotNull(deliveredEventMsg);
         assertEquals(Events.getMessage(event), deliveredEventMsg);
     }
 
+
     @Test
     public void postpone_rejections_dispatched_to_reactor_method() {
-        assertNull(ReactingProject.getEventReceived());
+        assertNull(ReactingProjectWizard.getEventReceived());
 
         final Rejection rejection = cannotStartProject();
         boundedContext.getRejectionBus()
                       .post(rejection);
 
-        assertNull(ReactingProject.getRejectionReceived());
+        assertNull(ReactingProjectWizard.getRejectionReceived());
 
         final RejectionEnvelope expectedEnvelope = RejectionEnvelope.of(rejection);
         final PostponingRejectionDelivery delivery = repository.getRejectionEndpointDelivery();
@@ -121,26 +122,26 @@ public class AggregateMessageDeliveryShould {
                            postponedRejections.containsValue(expectedEnvelope));
 
         final ProjectId projectId = postponedRejections.keySet()
-                                                   .iterator()
-                                                   .next();
+                                                       .iterator()
+                                                       .next();
 
         delivery.deliverNow(projectId, postponedRejections.get(projectId));
 
-        final AggCannotStartArchivedProject deliveredRejectionMsg
-                = ReactingProject.getRejectionReceived();
+        final PmCannotStartArchivedProject deliveredRejectionMsg =
+                ReactingProjectWizard.getRejectionReceived();
         assertNotNull(deliveredRejectionMsg);
         assertEquals(getMessage(rejection), deliveredRejectionMsg);
     }
 
     @Test
-    public void postpone_commands_dispatched_to_command_handler_method() {
-        assertNull(ReactingProject.getCommandReceived());
+    public void postpone_commands_dispatched_to_command_subscriber_method() {
+        assertNull(ReactingProjectWizard.getCommandReceived());
 
         final Command command = createProject();
         boundedContext.getCommandBus()
                       .post(command, StreamObservers.<Ack>noOpObserver());
 
-        assertNull(ReactingProject.getCommandReceived());
+        assertNull(ReactingProjectWizard.getCommandReceived());
 
         final CommandEnvelope expectedEnvelope = CommandEnvelope.of(command);
         final PostponingCommandDelivery delivery = repository.getCommandEndpointDelivery();
@@ -150,12 +151,12 @@ public class AggregateMessageDeliveryShould {
                            postponedCommands.containsValue(expectedEnvelope));
 
         final ProjectId projectId = postponedCommands.keySet()
-                                                       .iterator()
-                                                       .next();
+                                                     .iterator()
+                                                     .next();
 
         delivery.deliverNow(projectId, postponedCommands.get(projectId));
 
-        final AggCreateProject deliveredCommandMsg = ReactingProject.getCommandReceived();
+        final PmCreateProject deliveredCommandMsg = ReactingProjectWizard.getCommandReceived();
         assertNotNull(deliveredCommandMsg);
         assertEquals(Commands.getMessage(command), deliveredCommandMsg);
     }
