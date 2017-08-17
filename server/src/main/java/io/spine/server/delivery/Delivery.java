@@ -84,7 +84,7 @@ public abstract class Delivery<D extends MessageEnvelope, C> {
      * <p>The result is defined as {@link Runnable}, as this action will be executed by
      * a delegate {@code Executor}, according to the strategy implementation regulated by
      * {@link #shouldPostponeDelivery(MessageEnvelope, Object) shouldPostponeDelivery()} and
-     * {@link #deliverNow(MessageEnvelope, Class) deliverNow()} methods.
+     * {@link #deliverNow(MessageEnvelope, ConsumerId) deliverNow()} methods.
      *
      * @param consumer    the consumer to deliver the item to
      * @param deliverable the item to be delivered
@@ -115,7 +115,7 @@ public abstract class Delivery<D extends MessageEnvelope, C> {
         for (C consumer : consumers) {
             final boolean shouldPostpone = shouldPostponeDelivery(deliverable, consumer);
             if (!shouldPostpone) {
-                deliverNow(deliverable, consumer.getClass());
+                deliverNow(deliverable, Consumers.idOf(consumer));
             }
         }
     }
@@ -124,12 +124,12 @@ public abstract class Delivery<D extends MessageEnvelope, C> {
      * Delivers the item immediately.
      *
      * @param deliverable   the item, packaged for the delivery
-     * @param consumerClass the class of the target consumer
+     * @param consumerId the ID of the target consumer
      */
     @SuppressWarnings("WeakerAccess")       // Part of API.
-    public void deliverNow(final D deliverable, final Class<?> consumerClass) {
+    public void deliverNow(final D deliverable, final ConsumerId consumerId) {
         final Collection<C> consumers = consumersFor(deliverable);
-        final Iterable<C> matching = Iterables.filter(consumers, matchClass(consumerClass));
+        final Iterable<C> matching = Iterables.filter(consumers, matches(consumerId));
 
         for (final C targetConsumer : matching) {
             final Runnable deliveryAction = getDeliveryAction(targetConsumer, deliverable);
@@ -141,12 +141,12 @@ public abstract class Delivery<D extends MessageEnvelope, C> {
         delegate.execute(command);
     }
 
-    private static <T> Predicate<T> matchClass(final Class<? extends T> classToMatch) {
+    private static <T> Predicate<T> matches(final ConsumerId consumerId) {
         return new Predicate<T>() {
             @Override
-            public boolean apply(@Nullable T input) {
-                checkNotNull(input);
-                return classToMatch.equals(input.getClass());
+            public boolean apply(@Nullable T consumer) {
+                checkNotNull(consumer);
+                return consumerId.equals(Consumers.idOf(consumer));
             }
         };
     }
