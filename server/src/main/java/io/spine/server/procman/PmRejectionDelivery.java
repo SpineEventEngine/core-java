@@ -23,6 +23,8 @@ import io.spine.annotation.SPI;
 import io.spine.core.RejectionEnvelope;
 
 /**
+ * A strategy on delivering the rejections to the instances of a certain process manager type.
+ *
  * @author Alex Tymchenko
  */
 @SPI

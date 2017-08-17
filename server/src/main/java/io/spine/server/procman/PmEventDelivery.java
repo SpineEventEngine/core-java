@@ -23,6 +23,8 @@ import io.spine.annotation.SPI;
 import io.spine.core.EventEnvelope;
 
 /**
+ * A strategy on delivering the events to the instances of a certain process manager type.
+ *
  * @author Alex Tymchenko
  */
 @SPI

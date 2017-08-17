@@ -23,6 +23,8 @@ import io.spine.annotation.SPI;
 import io.spine.core.CommandEnvelope;
 
 /**
+ * A strategy on delivering the ecommandsvents to the instances of a certain process manager type.
+ *
  * @author Alex Tymchenko
  */
 @SPI
