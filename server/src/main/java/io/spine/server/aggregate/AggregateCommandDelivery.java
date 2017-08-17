@@ -19,6 +19,7 @@
  */
 package io.spine.server.aggregate;
 
+import io.spine.annotation.SPI;
 import io.spine.core.CommandEnvelope;
 
 /**
@@ -26,6 +27,7 @@ import io.spine.core.CommandEnvelope;
  *
  * @author Alex Tymchenko
  */
+@SPI
 public abstract class AggregateCommandDelivery <I, A extends Aggregate<I, ?, ?>>
         extends AggregateEndpointDelivery<I, A, CommandEnvelope> {
 

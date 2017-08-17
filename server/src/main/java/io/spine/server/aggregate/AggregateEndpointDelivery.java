@@ -19,6 +19,7 @@
  */
 package io.spine.server.aggregate;
 
+import io.spine.annotation.SPI;
 import io.spine.core.ActorMessageEnvelope;
 import io.spine.server.delivery.EndpointDelivery;
 
@@ -27,6 +28,7 @@ import io.spine.server.delivery.EndpointDelivery;
  *
  * @author Alex Tymchenko
  */
+@SPI
 public abstract class AggregateEndpointDelivery<I,
                                                 A extends Aggregate<I, ?, ?>,
                                                 E extends ActorMessageEnvelope<?, ?, ?>>
