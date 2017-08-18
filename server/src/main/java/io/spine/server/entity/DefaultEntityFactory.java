@@ -20,12 +20,11 @@
 
 package io.spine.server.entity;
 
-import javax.annotation.Nullable;
-import java.lang.reflect.Constructor;
+import io.spine.server.model.EntityClass;
+
 import java.util.Objects;
 
 import static io.spine.server.entity.AbstractEntity.createEntity;
-import static io.spine.server.entity.AbstractEntity.getConstructor;
 
 /**
  * Default factory that creates entities by invoking constructor that
@@ -39,42 +38,20 @@ class DefaultEntityFactory<I, E extends AbstractEntity<I, ?>> implements EntityF
 
     private static final long serialVersionUID = 0L;
 
-    /** The class of entities to create. */
-    private final Class<E> entityClass;
+    private final EntityClass<E> entityClass;
 
-    /** The class of entity IDs. */
-    private final Class<I> idClass;
-
-    /**
-     * The constructor for creating entity instances.
-     *
-     * <p>Is {@code null} upon deserialization.
-     */
-    @Nullable
-    private transient Constructor<E> entityConstructor;
-
-    DefaultEntityFactory(Class<E> entityClass, Class<I> idClass) {
-        this.entityClass = entityClass;
-        this.idClass = idClass;
-    }
-
-    private Constructor<E> getEntityConstructor() {
-        final Constructor<E> result = getConstructor(entityClass, idClass);
-        result.setAccessible(true);
-        return result;
+    DefaultEntityFactory(Class<E> entityClass) {
+        this.entityClass = EntityClass.valueOf(entityClass);
     }
 
     @Override
     public E create(I id) {
-        if (entityConstructor == null) {
-            entityConstructor = getEntityConstructor();
-        }
-        return createEntity(this.entityConstructor, id);
+        return createEntity(entityClass.getConstructor(), id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(entityClass, idClass);
+        return Objects.hash(entityClass);
     }
 
     @Override
@@ -86,7 +63,6 @@ class DefaultEntityFactory<I, E extends AbstractEntity<I, ?>> implements EntityF
             return false;
         }
         final DefaultEntityFactory other = (DefaultEntityFactory) obj;
-        return Objects.equals(this.entityClass, other.entityClass)
-                && Objects.equals(this.idClass, other.idClass);
+        return Objects.equals(this.entityClass, other.entityClass);
     }
 }
