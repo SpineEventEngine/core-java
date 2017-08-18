@@ -70,6 +70,13 @@ public class Model {
 
     /**
      * Obtains an instance of aggregate class information.
+     *
+     * <p>If the passed class was not added to the model before, it would be added as the result of
+     * this method call.
+     *
+     * @throws DuplicateCommandHandlerError if there is the aggregate class handles one or more
+     *         commands that are handled by another class, which was added to the model before
+     *         calling this method
      */
     public AggregateClass<?> asAggregateClass(Class<? extends Aggregate> cls) {
         checkNotNull(cls);
@@ -84,8 +91,16 @@ public class Model {
 
     /**
      * Obtains an instance of a process manager class information.
+     *
+     * <p>If the passed class was not added to the model before, it would be added as the result of
+     * this method call.
+     *
+     * @throws DuplicateCommandHandlerError if there is the passed process manager class handles one
+     *         or more commands that are handled by another class, which was added to the model
+     *         before calling this method
      */
-    public ProcessManagerClass<?> asProcessManagerClass(Class<? extends ProcessManager> cls) {
+    public ProcessManagerClass<?> asProcessManagerClass(Class<? extends ProcessManager> cls)
+        throws DuplicateCommandHandlerError {
         checkNotNull(cls);
         HandlerClass<?> handlerClass = handlerClasses.get(cls);
         if (handlerClass == null) {
@@ -98,6 +113,9 @@ public class Model {
 
     /**
      * Obtains an instance of a projection class information.
+
+     * <p>If the passed class was not added to the model before, it would be added as the result of
+     * this method call.
      */
     public ProjectionClass<?> asProjectionClass(Class<? extends Projection> cls) {
         checkNotNull(cls);
@@ -111,6 +129,9 @@ public class Model {
 
     /**
      * Obtains an instance of event subscriber class information.
+
+     * <p>If the passed class was not added to the model before, it would be added as the result of
+     * this method call.
      */
     public EventSubscriberClass<?> asEventSubscriberClass(Class<? extends EventSubscriber> cls) {
         checkNotNull(cls);
@@ -124,8 +145,16 @@ public class Model {
 
     /**
      * Obtains an instance of a command handler class information.
+     *
+     * <p>If the passed class was not added to the model before, it would be added as the result of
+     * this method call.
+     *
+     * @throws DuplicateCommandHandlerError if there is the passed command handler class handles one
+     *         or more commands that are handled by another class, which was added to the model
+     *         before calling this method
      */
-    public CommandHandlerClass asCommandHandlerClass(Class<? extends CommandHandler> cls) {
+    public CommandHandlerClass asCommandHandlerClass(Class<? extends CommandHandler> cls)
+            throws DuplicateCommandHandlerError {
         checkNotNull(cls);
         HandlerClass<?> handlerClass = handlerClasses.get(cls);
         if (handlerClass == null) {
@@ -138,6 +167,9 @@ public class Model {
 
     /**
      * Obtains an instance of a rejection subscriber class information.
+
+     * <p>If the passed class was not added to the model before, it would be added as the result of
+     * this method call.
      */
     public
     RejectionSubscriberClass<?> asRejectionSubscriber(Class<? extends RejectionSubscriber> cls) {
