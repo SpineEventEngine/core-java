@@ -20,15 +20,20 @@
 
 package io.spine.server.model.given;
 
+import com.google.protobuf.StringValue;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.event.EventBus;
+import io.spine.server.procman.ProcessManager;
 import io.spine.test.reflect.Project;
 import io.spine.test.reflect.ProjectVBuilder;
 import io.spine.test.reflect.command.RefCreateProject;
+import io.spine.test.reflect.command.RefStartProject;
 import io.spine.test.reflect.event.RefProjectCreated;
+import io.spine.test.reflect.event.RefProjectStarted;
+import io.spine.validate.StringValueVBuilder;
 
 /**
  * Test environment for {@linkplain io.spine.server.model.ModelShould Model tests}.
@@ -56,6 +61,16 @@ public class ModelTestEnv {
         private void event(RefProjectCreated evt) {
             getBuilder().setId(evt.getProjectId());
         }
+
+        @Assign
+        private RefProjectStarted on(RefStartProject cmd) {
+            return RefProjectStarted.getDefaultInstance();
+        }
+
+        @Apply
+        private void event(RefProjectStarted evt) {
+            getBuilder().setId(evt.getProjectId());
+        }
     }
 
     @SuppressWarnings("MethodMayBeStatic")
@@ -68,6 +83,25 @@ public class ModelTestEnv {
         @Assign
         private RefProjectCreated on(RefCreateProject cmd) {
             return RefProjectCreated.getDefaultInstance();
+        }
+    }
+
+    @SuppressWarnings("MethodMayBeStatic")
+    public static class MProcessManager
+            extends ProcessManager<Long, StringValue, StringValueVBuilder> {
+
+        private MProcessManager(Long id) {
+            super(id);
+        }
+
+        @Assign
+        private RefProjectCreated on(RefCreateProject cmd) {
+            return RefProjectCreated.getDefaultInstance();
+        }
+
+        @Assign
+        private RefProjectStarted on(RefStartProject cmd) {
+            return RefProjectStarted.getDefaultInstance();
         }
     }
 }

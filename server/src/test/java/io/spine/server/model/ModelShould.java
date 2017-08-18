@@ -22,14 +22,21 @@ package io.spine.server.model;
 
 import io.spine.server.model.given.ModelTestEnv.MAggregate;
 import io.spine.server.model.given.ModelTestEnv.MCommandHandler;
+import io.spine.server.model.given.ModelTestEnv.MProcessManager;
+import io.spine.test.reflect.command.RefCreateProject;
+import io.spine.test.reflect.command.RefStartProject;
 import org.junit.Before;
 import org.junit.Test;
+
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Tests of {@link Model}.
  *
  * @author Alexander Yevsyukov
  */
+@SuppressWarnings("ErrorNotRethrown")
 public class ModelShould {
 
     private final Model model = Model.getInstance();
@@ -39,9 +46,39 @@ public class ModelShould {
         model.clear();
     }
 
-    @Test(expected = DuplicateCommandHandlerError.class)
+    @Test
     public void not_allow_duplicated_command_handlers() {
-        model.asAggregateClass(MAggregate.class);
-        model.asCommandHandlerClass(MCommandHandler.class);
+        try {
+            model.asAggregateClass(MAggregate.class);
+            model.asCommandHandlerClass(MCommandHandler.class);
+            failErrorNotThrown();
+        } catch (DuplicateCommandHandlerError error) {
+            assertContainsClassName(error, RefCreateProject.class);
+            assertContainsClassName(error, MAggregate.class);
+            assertContainsClassName(error, MCommandHandler.class);
+        }
+    }
+
+    @Test
+    public void not_allow_more_than_one_command_duplication() {
+        try {
+            model.asAggregateClass(MAggregate.class);
+            model.asProcessManagerClass(MProcessManager.class);
+            failErrorNotThrown();
+        } catch (DuplicateCommandHandlerError error) {
+            assertContainsClassName(error, RefCreateProject.class);
+            assertContainsClassName(error, RefStartProject.class);
+            assertContainsClassName(error, MAggregate.class);
+            assertContainsClassName(error, MProcessManager.class);
+        }
+    }
+
+    private static void assertContainsClassName(DuplicateCommandHandlerError error, Class<?> cls) {
+        final String errorMessage = error.getMessage();
+        assertTrue(errorMessage.contains(cls.getName()));
+    }
+
+    private static void failErrorNotThrown() {
+        fail(DuplicateCommandHandlerError.class.getName() + " should be thrown");
     }
 }
