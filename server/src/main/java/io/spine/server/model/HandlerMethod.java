@@ -146,7 +146,7 @@ public abstract class HandlerMethod<C extends Message> {
         checkNotNull(origin);
 
         final EventFactory eventFactory =
-                EventFactory.on(origin, producerId, eventMessages.size());
+                EventFactory.on(origin, producerId);
 
         return Lists.transform(eventMessages, new Function<Message, Event>() {
             @Override
