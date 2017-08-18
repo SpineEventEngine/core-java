@@ -73,7 +73,7 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
      *
      * @throws ModelError if unsupported ID class passed
      */
-    private static <I> void checkIdClass(Class<I> idClass) throws IllegalStateException {
+    private static <I> void checkIdClass(Class<I> idClass) throws ModelError {
         try {
             Identifier.checkSupported(idClass);
         } catch (IllegalArgumentException e) {
