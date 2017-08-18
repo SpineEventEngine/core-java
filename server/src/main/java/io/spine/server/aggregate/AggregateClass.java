@@ -44,7 +44,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 @Internal
 @SuppressWarnings("ReturnOfCollectionOrArrayField") // impl. is immutable
-public final class AggregateClass<A extends Aggregate>
+public class AggregateClass<A extends Aggregate>
         extends EntityClass<A>
         implements CommandHandlingClass {
 
@@ -55,17 +55,13 @@ public final class AggregateClass<A extends Aggregate>
     private final MessageHandlerMap<EventClass, EventReactorMethod> eventReactions;
     private final MessageHandlerMap<RejectionClass, RejectionReactorMethod> rejectionReactions;
 
-    private AggregateClass(Class<? extends A> cls) {
-        super(cls);
+    /** Creates new instance. */
+    public AggregateClass(Class<? extends A> cls) {
+        super(checkNotNull(cls));
         this.commands = new MessageHandlerMap<>(cls, CommandHandlerMethod.factory());
         this.stateEvents = new MessageHandlerMap<>(cls, EventApplierMethod.factory());
         this.eventReactions = new MessageHandlerMap<>(cls, EventReactorMethod.factory());
         this.rejectionReactions = new MessageHandlerMap<>(cls, RejectionReactorMethod.factory());
-    }
-
-    public static <A extends Aggregate> AggregateClass<A> of(Class<A> cls) {
-        checkNotNull(cls);
-        return new AggregateClass<>(cls);
     }
 
     @Override
