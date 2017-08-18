@@ -30,6 +30,7 @@ import java.util.Set;
 /**
  * Provides message handling information on a command handler class.
  *
+ * @param <C> the type of command handlers
  * @author Alexander Yevsyukov
  */
 @Internal
@@ -54,6 +55,9 @@ public final class CommandHandlerClass<C extends CommandHandler>
         return commands.getMethod(commandClass);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Set<CommandClass> getCommands() {
         return commands.getMessageClasses();

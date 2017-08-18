@@ -35,6 +35,12 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+/**
+ * Provides message handling information on a process manager class.
+ *
+ * @param <P> the type of process managers
+ * @author Alexander Yevsyukov
+ */
 @Internal
 public final class ProcessManagerClass<P extends ProcessManager>
         extends EntityClass<P>
@@ -58,6 +64,9 @@ public final class ProcessManagerClass<P extends ProcessManager>
         return new ProcessManagerClass<>(cls);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Set<CommandClass> getCommands() {
         return commands.getMessageClasses();

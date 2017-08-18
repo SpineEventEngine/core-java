@@ -33,5 +33,8 @@ import java.util.Set;
 @Internal
 public interface CommandHandlingClass {
 
+    /**
+     * Obtains classes of commands handled by the class.
+     */
     Set<CommandClass> getCommands();
 }

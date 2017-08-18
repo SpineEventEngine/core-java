@@ -67,6 +67,9 @@ public final class AggregateClass<A extends Aggregate>
         return new AggregateClass<>(cls);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Set<CommandClass> getCommands() {
         return commands.getMessageClasses();
