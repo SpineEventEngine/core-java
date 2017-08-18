@@ -20,8 +20,12 @@
 
 package io.spine.server.model;
 
+import com.google.protobuf.Message;
 import io.spine.Identifier;
 import io.spine.server.entity.Entity;
+import io.spine.type.ClassName;
+import io.spine.type.KnownTypes;
+import io.spine.type.TypeUrl;
 
 /**
  * A class of entities.
@@ -33,13 +37,23 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
 
     private static final long serialVersionUID = 0L;
 
+    /** The class of entity IDs. */
     private final Class<?> idClass;
+
+    /** The class of the entity state. */
+    private final Class<? extends Message> stateClass;
+
+    /** Type of the entity state. */
+    private final TypeUrl entityStateType;
 
     protected EntityClass(Class<? extends E> cls) {
         super(cls);
         final Class<?> idClass = Entity.TypeInfo.getIdClass(cls);
         checkIdClass(idClass);
         this.idClass = idClass;
+        this.stateClass = Entity.TypeInfo.getStateClass(cls);
+        final ClassName stateClassName = ClassName.of(stateClass);
+        this.entityStateType = KnownTypes.getTypeUrl(stateClassName);
     }
 
     public static <E extends Entity> EntityClass<E> valueOf(Class<? extends E> cls) {
@@ -72,5 +86,19 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
      */
     public Class<?> getIdClass() {
         return idClass;
+    }
+
+    /**
+     * Obtains the class of the state of entities of this class.
+     */
+    public Class<? extends Message> getStateClass() {
+        return stateClass;
+    }
+
+    /**
+     * Obtains type URL of the state of entities of this class.
+     */
+    public TypeUrl getStateType() {
+        return entityStateType;
     }
 }

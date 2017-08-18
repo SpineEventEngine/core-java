@@ -24,7 +24,6 @@ import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Supplier;
 import com.google.common.collect.Iterators;
-import com.google.protobuf.Message;
 import io.spine.Identifier;
 import io.spine.core.MessageEnvelope;
 import io.spine.server.BoundedContext;
@@ -34,8 +33,6 @@ import io.spine.server.stand.Stand;
 import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.string.Stringifiers;
-import io.spine.type.ClassName;
-import io.spine.type.KnownTypes;
 import io.spine.type.MessageClass;
 import io.spine.type.TypeUrl;
 import io.spine.util.GenericTypeIndex;
@@ -47,7 +44,6 @@ import javax.annotation.Nullable;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 import java.util.Iterator;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static io.spine.server.entity.Repository.GenericParameter.ENTITY;
 import static io.spine.util.Exceptions.newIllegalStateException;
@@ -76,6 +72,10 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     @Nullable
     private BoundedContext boundedContext;
 
+    /** Model class of entities managed by this repository. */
+    @Nullable
+    private volatile EntityClass<E> entityClass;
+
     /**
      * The data storage for this repository.
      *
@@ -84,17 +84,6 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      */
     @Nullable
     private Storage<I, ?> storage;
-
-    /**
-     * Cached value for the entity state type.
-     *
-     * <p>Used to optimise heavy {@link #getEntityStateType()} calls.
-     **/
-    private volatile TypeUrl entityStateType;
-
-    /** Model class of entities managed by this repository. */
-    @Nullable
-    private volatile EntityClass<E> entityClass;
 
     /** Lazily initialized logger. */
     private final Supplier<Logger> loggerSupplier = Logging.supplyFor(getClass());
@@ -220,28 +209,12 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     }
 
     /**
-     * Obtains the class of the entity state.
-     *
-     * <p>The default implementation uses generic type parameter from the entity class declaration.
-     */
-    protected Class<? extends Message> getEntityStateClass() {
-        final Class<E> entityClass = getEntityClass();
-        return Entity.TypeInfo.getStateClass(entityClass);
-    }
-
-    /**
      * Returns the {@link TypeUrl} for the state objects wrapped by entities
      * managed by this repository
      */
     @CheckReturnValue
     public TypeUrl getEntityStateType() {
-        if (entityStateType == null) {
-            final Class<? extends Message> stateClass = getEntityStateClass();
-            final ClassName stateClassName = ClassName.of(stateClass);
-            entityStateType = KnownTypes.getTypeUrl(stateClassName);
-        }
-        checkNotNull(entityStateType);
-        return entityStateType;
+        return entityClass().getStateType();
     }
 
     /**
