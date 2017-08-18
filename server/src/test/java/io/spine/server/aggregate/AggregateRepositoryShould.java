@@ -163,7 +163,7 @@ public class AggregateRepositoryShould {
 
     @Test
     public void return_aggregate_class() {
-        assertEquals(ProjectAggregate.class, repository.getAggregateClass());
+        assertEquals(ProjectAggregate.class, repository.getEntityClass());
     }
 
     @Test

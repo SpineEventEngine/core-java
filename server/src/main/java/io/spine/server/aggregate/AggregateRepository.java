@@ -208,7 +208,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     @Override
     protected Storage<I, ?> createStorage(StorageFactory factory) {
-        final Storage<I, ?> result = factory.createAggregateStorage(getAggregateClass());
+        final Storage<I, ?> result = factory.createAggregateStorage(getEntityClass());
         return result;
     }
 
@@ -220,20 +220,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     /**
-     * Returns the class of aggregates managed by this repository.
-     *
-     * <p>This is convenience method, which redirects to {@link #getEntityClass()}.
-     *
-     * @return the class of the aggregates
-     */
-    Class<? extends Aggregate<I, ?, ?>> getAggregateClass() {
-        return getEntityClass();
-    }
-
-    /**
      * {@inheritDoc}
      */
-    @SuppressWarnings("ReturnOfCollectionOrArrayField") // We return immutable impl.
     @Override
     public Set<CommandClass> getMessageClasses() {
         return aggregateClass().getCommands();
@@ -274,7 +262,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
-    @SuppressWarnings("ReturnOfCollectionOrArrayField") // We return immutable impl.
     public Set<EventClass> getEventClasses() {
         return aggregateClass().getEventReactions();
     }
@@ -299,7 +286,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
-    @SuppressWarnings("ReturnOfCollectionOrArrayField") // We return immutable impl.
     public Set<RejectionClass> getRejectionClasses() {
         return aggregateClass().getRejectionReactions();
     }
