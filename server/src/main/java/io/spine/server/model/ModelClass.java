@@ -23,17 +23,16 @@ package io.spine.server.model;
 import io.spine.type.ClassTypeValue;
 
 /**
- * A class of objects that expose {@linkplain HandlerMethod methods} that
- * accept messages.
+ * A class that belongs to a {@link Model}.
  *
- * @param <T> the type of handlers
+ * @param <T> the type of objects
  * @author Alexander Yevsyukov
  */
-public abstract class HandlerClass<T> extends ClassTypeValue<T> {
+public abstract class ModelClass<T> extends ClassTypeValue<T> {
 
     private static final long serialVersionUID = 0L;
 
-    protected HandlerClass(Class<? extends T> value) {
+    protected ModelClass(Class<? extends T> value) {
         super(value);
     }
 }

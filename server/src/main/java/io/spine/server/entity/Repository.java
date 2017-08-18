@@ -28,6 +28,8 @@ import com.google.protobuf.Message;
 import io.spine.Identifier;
 import io.spine.core.MessageEnvelope;
 import io.spine.server.BoundedContext;
+import io.spine.server.model.EntityClass;
+import io.spine.server.model.Model;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
@@ -48,7 +50,6 @@ import java.util.Iterator;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static io.spine.server.entity.Repository.GenericParameter.ENTITY;
-import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static io.spine.util.Exceptions.unsupported;
 import static java.lang.String.format;
@@ -91,21 +92,9 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      **/
     private volatile TypeUrl entityStateType;
 
-    /**
-     * Cached value for the entity class.
-     *
-     * <p>Used to optimize heavy {@link #getEntityClass()} calls.
-     **/
+    /** Model class of entities managed by this repository. */
     @Nullable
-    private volatile Class<E> entityClass;
-
-    /**
-     * Cached value for the entity ID class.
-     *
-     * <p>Used to optimize heavy {@link #getIdClass()} calls.
-     */
-    @Nullable
-    private volatile Class<I> idClass;
+    private volatile EntityClass<E> entityClass;
 
     /** Lazily initialized logger. */
     private final Supplier<Logger> loggerSupplier = Logging.supplyFor(getClass());
@@ -114,6 +103,29 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      * Creates the repository.
      */
     protected Repository() {
+    }
+
+    /**
+     * Obtains model class for the entities managed by this repository.
+     */
+    protected final EntityClass<E> entityClass() {
+        if (entityClass == null) {
+            @SuppressWarnings("unchecked") // By the cast we enforce having generic params.
+            final Class<? extends Repository<I, E>> repoClass =
+                    (Class<? extends Repository<I, E>>) getClass();
+            final Class<E> cls = TypeInfo.getEntityClass(repoClass);
+            entityClass = getModelClass(cls);
+        }
+        return entityClass;
+    }
+
+    /**
+     * Obtains a model class for the passed entity class value.
+     */
+    @SuppressWarnings("unchecked") // The cast is ensured by generic parameters of the repository.
+    protected EntityClass<E> getModelClass(Class<E> cls) {
+        return (EntityClass<E>) Model.getInstance()
+                                     .asEntityClass(cls);
     }
 
     /**
@@ -194,48 +206,17 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     }
 
     /** Returns the class of IDs used by this repository. */
+    @SuppressWarnings("unchecked") // The cast is ensured by generic parameters of the repository.
     @CheckReturnValue
     protected Class<I> getIdClass() {
-        if (idClass == null) {
-            final Class<I> candidateClass = Entity.TypeInfo.getIdClass(getEntityClass());
-            checkIdClass(candidateClass);
-            idClass = candidateClass;
-        }
-        return idClass;
-    }
-
-    /**
-     * Checks that this class of identifiers is supported by the framework.
-     *
-     * <p>The type of entity identifiers ({@code <I>}) cannot be bound because
-     * it can be {@code Long}, {@code String}, {@code Integer}, and class implementing
-     * {@code Message}.
-     *
-     * <p>We perform the check to to detect possible programming error
-     * in declarations of entity and repository classes <em>until</em> we have
-     * compile-time model check.
-     *
-     * @throws IllegalStateException of unsupported ID class passed
-     */
-    private static <I> void checkIdClass(Class<I> idClass) throws IllegalStateException {
-        try {
-            Identifier.checkSupported(idClass);
-        } catch (IllegalArgumentException e) {
-            throw illegalStateWithCauseOf(e);
-        }
+        return (Class<I>) entityClass().getIdClass();
     }
 
     /** Returns the class of entities managed by this repository. */
+    @SuppressWarnings("unchecked") // The cast is ensured by generic parameters of the repository.
     @CheckReturnValue
     public Class<E> getEntityClass() {
-        if (entityClass == null) {
-            @SuppressWarnings("unchecked") // By the cast we enforce having generic params.
-            final Class<? extends Repository<I, E>> repoClass =
-                    (Class<? extends Repository<I, E>>) getClass();
-            entityClass = TypeInfo.getEntityClass(repoClass);
-        }
-        checkNotNull(entityClass);
-        return entityClass;
+        return (Class<E>) entityClass().value();
     }
 
     /**

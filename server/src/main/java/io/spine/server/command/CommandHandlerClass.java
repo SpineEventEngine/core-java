@@ -22,8 +22,8 @@ package io.spine.server.command;
 
 import io.spine.annotation.Internal;
 import io.spine.core.CommandClass;
-import io.spine.server.model.HandlerClass;
 import io.spine.server.model.MessageHandlerMap;
+import io.spine.server.model.ModelClass;
 
 import java.util.Set;
 
@@ -35,7 +35,7 @@ import java.util.Set;
  */
 @Internal
 public final class CommandHandlerClass<C extends CommandHandler>
-        extends HandlerClass<C>
+        extends ModelClass<C>
         implements CommandHandlingClass {
 
     private static final long serialVersionUID = 0L;
@@ -47,7 +47,7 @@ public final class CommandHandlerClass<C extends CommandHandler>
         this.commands = new MessageHandlerMap<>(cls, CommandHandlerMethod.factory());
     }
 
-    public static HandlerClass<?> of(Class<? extends CommandHandler> cls) {
+    public static ModelClass<?> of(Class<? extends CommandHandler> cls) {
         return new CommandHandlerClass<>(cls);
     }
 

@@ -49,7 +49,6 @@ import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
 
 import javax.annotation.CheckReturnValue;
-import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
 import java.util.List;
 import java.util.Set;
@@ -89,10 +88,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         implements CommandDispatcher<I>,
                    EventDispatcherDelegate<I>,
                    RejectionDispatcherDelegate<I> {
-
-    /** The class of aggregates managed by this repository. */
-    @Nullable
-    private AggregateClass<A> aggregateClass;
 
     /** The default number of events to be stored before a next snapshot is made. */
     static final int DEFAULT_SNAPSHOT_TRIGGER = 100;
@@ -170,13 +165,15 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     /** Obtains class information of aggregates managed by this repository. */
-    @SuppressWarnings("unchecked") // The cast is ensured by generic parameters of the repository.
     private AggregateClass<A> aggregateClass() {
-        if (aggregateClass == null) {
-            aggregateClass = (AggregateClass<A>) Model.getInstance()
-                                                      .asAggregateClass(getEntityClass());
-        }
-        return aggregateClass;
+        return (AggregateClass<A>)entityClass();
+    }
+
+    @Override
+    @SuppressWarnings("unchecked") // The cast is ensured by generic parameters of the repository.
+    protected final AggregateClass<A> getModelClass(Class<A> cls) {
+        return (AggregateClass<A>) Model.getInstance()
+                                        .asAggregateClass(cls);
     }
 
     /**

@@ -20,6 +20,7 @@
 
 package io.spine.server.model;
 
+import io.spine.Identifier;
 import io.spine.server.entity.Entity;
 
 /**
@@ -28,11 +29,48 @@ import io.spine.server.entity.Entity;
  * @param <E> the type of entities
  * @author Alexander Yevsyukov
  */
-public abstract class EntityClass<E extends Entity> extends HandlerClass<E> {
+public class EntityClass<E extends Entity> extends ModelClass<E> {
 
     private static final long serialVersionUID = 0L;
 
-    protected EntityClass(Class<? extends E> value) {
-        super(value);
+    private final Class<?> idClass;
+
+    protected EntityClass(Class<? extends E> cls) {
+        super(cls);
+        final Class<?> idClass = Entity.TypeInfo.getIdClass(cls);
+        checkIdClass(idClass);
+        this.idClass = idClass;
+    }
+
+    public static <E extends Entity> EntityClass<E> valueOf(Class<? extends E> cls) {
+        return new EntityClass<>(cls);
+    }
+
+    /**
+     * Checks that this class of identifiers is supported by the framework.
+     *
+     * <p>The type of entity identifiers ({@code <I>}) cannot be bound because
+     * it can be {@code Long}, {@code String}, {@code Integer}, and class implementing
+     * {@code Message}.
+     *
+     * <p>We perform the check to to detect possible programming error
+     * in declarations of entity and repository classes <em>until</em> we have
+     * compile-time model check.
+     *
+     * @throws ModelError if unsupported ID class passed
+     */
+    private static <I> void checkIdClass(Class<I> idClass) throws IllegalStateException {
+        try {
+            Identifier.checkSupported(idClass);
+        } catch (IllegalArgumentException e) {
+            throw new ModelError(e);
+        }
+    }
+
+    /**
+     * Obtains the class of IDs used by the entities of this class.
+     */
+    public Class<?> getIdClass() {
+        return idClass;
     }
 }

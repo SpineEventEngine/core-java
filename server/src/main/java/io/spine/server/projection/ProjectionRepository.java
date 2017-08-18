@@ -55,10 +55,6 @@ import java.util.Set;
 public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S extends Message>
         extends EventDispatchingRepository<I, P, S> {
 
-    /** The class of projections managed by this repository. */
-    @Nullable
-    private ProjectionClass<P> projectionClass;
-
     /** An underlying entity storage used to store projections. */
     private RecordStorage<I> recordStorage;
 
@@ -78,11 +74,14 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     /** Obtains class information of projection managed by this repository. */
     @SuppressWarnings("unchecked") // The cast is ensured by generic parameters of the repository.
     private ProjectionClass<P> projectionClass() {
-        if (projectionClass == null) {
-            projectionClass = (ProjectionClass<P>) Model.getInstance()
-                                                        .asProjectionClass(getEntityClass());
-        }
-        return projectionClass;
+        return (ProjectionClass<P>) entityClass();
+    }
+
+    @SuppressWarnings("unchecked") // The cast is ensured by generic parameters of the repository.
+    @Override
+    protected final ProjectionClass<P> getModelClass(Class<P> cls) {
+        return (ProjectionClass<P>) Model.getInstance()
+                                         .asProjectionClass(cls);
     }
 
     /**
