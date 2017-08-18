@@ -72,7 +72,11 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     @Nullable
     private BoundedContext boundedContext;
 
-    /** Model class of entities managed by this repository. */
+    /**
+     * Model class of entities managed by this repository.
+     *
+     * <p>This field is null if {@link #entityClass()} is never called.
+     */
     @Nullable
     private volatile EntityClass<E> entityClass;
 
@@ -115,6 +119,29 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     protected EntityClass<E> getModelClass(Class<E> cls) {
         return (EntityClass<E>) Model.getInstance()
                                      .asEntityClass(cls);
+    }
+
+    /** Returns the class of IDs used by this repository. */
+    @SuppressWarnings("unchecked") // The cast is ensured by generic parameters of the repository.
+    @CheckReturnValue
+    protected Class<I> getIdClass() {
+        return (Class<I>) entityClass().getIdClass();
+    }
+
+    /** Returns the class of entities managed by this repository. */
+    @SuppressWarnings("unchecked") // The cast is ensured by generic parameters of the repository.
+    @CheckReturnValue
+    public Class<E> getEntityClass() {
+        return (Class<E>) entityClass().value();
+    }
+
+    /**
+     * Returns the {@link TypeUrl} for the state objects wrapped by entities
+     * managed by this repository
+     */
+    @CheckReturnValue
+    public TypeUrl getEntityStateType() {
+        return entityClass().getStateType();
     }
 
     /**
@@ -192,29 +219,6 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     private static <I, E extends Entity<I, ?>>
     Repository<I, VersionableEntity<I, ?>> cast(Repository<I, E> repository) {
         return (Repository<I, VersionableEntity<I, ?>>) repository;
-    }
-
-    /** Returns the class of IDs used by this repository. */
-    @SuppressWarnings("unchecked") // The cast is ensured by generic parameters of the repository.
-    @CheckReturnValue
-    protected Class<I> getIdClass() {
-        return (Class<I>) entityClass().getIdClass();
-    }
-
-    /** Returns the class of entities managed by this repository. */
-    @SuppressWarnings("unchecked") // The cast is ensured by generic parameters of the repository.
-    @CheckReturnValue
-    public Class<E> getEntityClass() {
-        return (Class<E>) entityClass().value();
-    }
-
-    /**
-     * Returns the {@link TypeUrl} for the state objects wrapped by entities
-     * managed by this repository
-     */
-    @CheckReturnValue
-    public TypeUrl getEntityStateType() {
-        return entityClass().getStateType();
     }
 
     /**
