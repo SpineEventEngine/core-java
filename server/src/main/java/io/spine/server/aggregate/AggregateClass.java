@@ -31,6 +31,7 @@ import io.spine.server.model.EntityClass;
 import io.spine.server.model.MessageHandlerMap;
 import io.spine.server.rejection.RejectionReactorMethod;
 
+import java.lang.reflect.Constructor;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -65,6 +66,17 @@ public final class AggregateClass<A extends Aggregate>
     public static <A extends Aggregate> AggregateClass<A> of(Class<A> cls) {
         checkNotNull(cls);
         return new AggregateClass<>(cls);
+    }
+
+    @Override
+    protected Constructor<A> findConstructor(Class<? extends A> aggregateClass, Class<?> idClass) {
+        if (AggregatePart.class.isAssignableFrom(aggregateClass)) {
+            @SuppressWarnings("unchecked") // OK to cast as we checked inheritance above.
+            final Constructor<A> ctor =
+                    AggregatePart.getConstructor((Class<? extends AggregatePart>) aggregateClass);
+            return ctor;
+        }
+        return super.findConstructor(aggregateClass, idClass);
     }
 
     /**

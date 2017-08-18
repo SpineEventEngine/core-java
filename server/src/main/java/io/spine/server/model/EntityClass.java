@@ -22,10 +22,14 @@ package io.spine.server.model;
 
 import com.google.protobuf.Message;
 import io.spine.Identifier;
+import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.Entity;
 import io.spine.type.ClassName;
 import io.spine.type.KnownTypes;
 import io.spine.type.TypeUrl;
+
+import javax.annotation.Nullable;
+import java.lang.reflect.Constructor;
 
 /**
  * A class of entities.
@@ -46,6 +50,11 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
     /** Type of the entity state. */
     private final TypeUrl entityStateType;
 
+    /** The constructor for entities of this class. */
+    @SuppressWarnings("TransientFieldNotInitialized") // Lazily initialized via accessor method.
+    @Nullable
+    private transient Constructor<E> entityConstructor;
+
     protected EntityClass(Class<? extends E> cls) {
         super(cls);
         final Class<?> idClass = Entity.TypeInfo.getIdClass(cls);
@@ -58,6 +67,21 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
 
     public static <E extends Entity> EntityClass<E> valueOf(Class<? extends E> cls) {
         return new EntityClass<>(cls);
+    }
+
+    /**
+     * Obtains constructor for the entities of this class.
+     */
+    public Constructor<E> getConstructor() {
+        if (entityConstructor == null) {
+            entityConstructor = findConstructor(value(), idClass);
+        }
+        return entityConstructor;
+    }
+
+    protected Constructor<E> findConstructor(Class<? extends E> entityClass, Class<?> idClass) {
+        //TODO:2017-08-18:alexander.yevsyukov: Move the method into this class.
+        return (Constructor<E>) AbstractEntity.getConstructor(entityClass, idClass);
     }
 
     /**
@@ -84,21 +108,21 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
     /**
      * Obtains the class of IDs used by the entities of this class.
      */
-    public Class<?> getIdClass() {
+    public final Class<?> getIdClass() {
         return idClass;
     }
 
     /**
      * Obtains the class of the state of entities of this class.
      */
-    public Class<? extends Message> getStateClass() {
+    public final Class<? extends Message> getStateClass() {
         return stateClass;
     }
 
     /**
      * Obtains type URL of the state of entities of this class.
      */
-    public TypeUrl getStateType() {
+    public final TypeUrl getStateType() {
         return entityStateType;
     }
 }

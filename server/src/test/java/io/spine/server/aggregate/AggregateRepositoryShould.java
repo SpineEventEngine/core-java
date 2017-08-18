@@ -75,9 +75,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 public class AggregateRepositoryShould {
 
@@ -87,12 +84,6 @@ public class AggregateRepositoryShould {
     private BoundedContext boundedContext;
     private AggregateRepository<ProjectId, ProjectAggregate> repository;
 
-    /**
-     * Use spy only when it is required to avoid problems,
-     * make tests faster and make it easier to debug.
-     */
-    private AggregateRepository<ProjectId, ProjectAggregate> repositorySpy;
-
     @Before
     public void setUp() {
         ModelTests.clearModel();
@@ -100,22 +91,12 @@ public class AggregateRepositoryShould {
                                        .build();
         repository = new ProjectAggregateRepository();
         boundedContext.register(repository);
-        repositorySpy = spy(repository);
     }
 
     @After
     public void tearDown() throws Exception {
         repository.close();
         boundedContext.close();
-    }
-
-    @Test
-    public void call_get_aggregate_constructor_method_only_once() {
-        final ProjectId id = Sample.messageOfType(ProjectId.class);
-        repositorySpy.create(id);
-        repositorySpy.create(id);
-
-        verify(repositorySpy, times(1)).findEntityConstructor();
     }
 
     @Test
