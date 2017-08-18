@@ -37,6 +37,10 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
+/**
+ * @author Alexander Litus
+ * @author Alexander Yevsyukov
+ */
 public class HandlerMethodShould {
 
     private HandlerMethod<EventContext> twoParamMethod;
@@ -84,7 +88,9 @@ public class HandlerMethodShould {
 
     @Test
     public void invoke_the_method_with_two_parameters() throws InvocationTargetException {
-        twoParamMethod.invoke(target, StringValue.getDefaultInstance(), EventContext.getDefaultInstance());
+        twoParamMethod.invoke(target,
+                              StringValue.getDefaultInstance(),
+                              EventContext.getDefaultInstance());
 
         assertTrue(((StubHandler) target).wasOnInvoked());
     }
@@ -121,7 +127,8 @@ public class HandlerMethodShould {
 
     @Test
     public void compare_fields_in_equals() {
-        final HandlerMethod<EventContext> anotherMethod = new TwoParamMethod(StubHandler.getTwoParameterMethod());
+        final HandlerMethod<EventContext> anotherMethod =
+                new TwoParamMethod(StubHandler.getTwoParameterMethod());
 
         assertTrue(twoParamMethod.equals(anotherMethod));
     }
@@ -130,6 +137,10 @@ public class HandlerMethodShould {
     public void have_hashCode() {
         assertNotEquals(System.identityHashCode(twoParamMethod), twoParamMethod.hashCode());
     }
+
+    /*
+     * Test environment classes.
+     *****************************/
 
     @SuppressWarnings("UnusedParameters") // OK for test methods.
     private static class StubHandler {
@@ -146,7 +157,7 @@ public class HandlerMethodShould {
             handleInvoked = true;
         }
 
-        static Method getTwoParameterMethod() {
+        private static Method getTwoParameterMethod() {
             final Method method;
             final Class<?> clazz = StubHandler.class;
             try {
@@ -157,7 +168,7 @@ public class HandlerMethodShould {
             return method;
         }
 
-        static Method getOneParameterMethod() {
+        private static Method getOneParameterMethod() {
             final Method method;
             final Class<?> clazz = StubHandler.class;
             try {
@@ -169,18 +180,18 @@ public class HandlerMethodShould {
             return method;
         }
 
-        boolean wasOnInvoked() {
+        private boolean wasOnInvoked() {
             return onInvoked;
         }
 
-        boolean wasHandleInvoked() {
+        private boolean wasHandleInvoked() {
             return handleInvoked;
         }
     }
 
     private static class TwoParamMethod extends HandlerMethod<EventContext> {
 
-        protected TwoParamMethod(Method method) {
+        private TwoParamMethod(Method method) {
             super(method);
         }
 
@@ -192,7 +203,7 @@ public class HandlerMethodShould {
 
     private static class OneParamMethod extends HandlerMethod<Empty> {
 
-        protected OneParamMethod(Method method) {
+        private OneParamMethod(Method method) {
             super(method);
         }
 
@@ -200,6 +211,5 @@ public class HandlerMethodShould {
         public EventClass getMessageClass() {
             return EventClass.of(rawMessageClass());
         }
-
     }
 }
