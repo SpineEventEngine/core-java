@@ -28,7 +28,7 @@ import io.spine.server.entity.Repository;
 import io.spine.server.tenant.TenantAwareOperation;
 
 /**
- * A strategy on delivering the messages to the instances of a certain aggregate type.
+ * A strategy on delivering the messages to the instances of a certain entity type.
  *
  * <p>Allows {@linkplain #shouldPostpone(Object, ActorMessageEnvelope) to postpone} the delivery
  * at runtime for a certain ID and message.
@@ -36,6 +36,10 @@ import io.spine.server.tenant.TenantAwareOperation;
  * <p>The postponed messages are not dispatched to the entity instances automatically. However
  * it is expected they are dispatched manually later via
  * {@linkplain #deliverNow(Object, ActorMessageEnvelope) deliverNow(ID, envelope)} method call.
+ *
+ * @param <I> the ID type of entity, to which the messages are being delivered
+ * @param <E> the type of entity
+ * @param <M> the type of message envelope, which is used for message delivery
  *
  * @author Alex Tymchenko
  */
