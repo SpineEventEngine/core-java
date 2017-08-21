@@ -100,10 +100,6 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
 
     /**
      * Retrieves the state class of the passed entity class.
-     *
-     * @param <S>         the entity state type
-     * @param entityClass the entity class to inspect
-     * @return the entity state class
      */
     static <S extends Message> Class<S> getStateClass(Class<? extends Entity> entityClass) {
         @SuppressWarnings("unchecked") // The type is preserved by the Entity type declaration.

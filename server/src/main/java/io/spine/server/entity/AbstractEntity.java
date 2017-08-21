@@ -157,10 +157,25 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      * Obtains the class of the entity state.
      */
     private Class<S> getStateClass() {
-        return EntityClass.getStateClass(getClass());
-        //TODO:2017-08-21:alexander.yevsyukov: Use the below code instead of the line above when
-        // RecordStorageShould is changed to avoid TypeVariable <I> in the test entity class.
-        // return (Class<S>) thisClass().getStateClass();
+        final Class<? extends AbstractEntity> entityClass = getClass();
+
+        //TODO:2017-08-21:alexander.yevsyukov: Use the below code to overcome the issue in the test
+        // environment entity, which is created with the generic type <I> variable, which is
+        // resolved only at the level of enclosed test suite (RecordStorageShould).
+        // Since there is no way to get the value of the type variable (which we need to construct
+        // model entity class), we use this type name checking and return state class via static
+        // method call. The rest of the classes should follow general declaration contract.
+        //
+        // Once these test are reworked, eliminate the below code, and inline
+        // the EntityClass.getStateClass() method.
+        //
+        if (entityClass.getName().contains("TestCounterEntity")) {
+            return EntityClass.getStateClass(entityClass);
+        }
+
+        @SuppressWarnings("unchecked") // The cast is protected by calling code generic parameters.
+        final Class<S> result = (Class<S>) thisClass().getStateClass();
+        return result;
     }
 
     /**
