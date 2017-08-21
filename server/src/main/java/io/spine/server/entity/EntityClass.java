@@ -142,11 +142,8 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
     /**
      * Creates a new entity and sets it to the default state.
      *
-     * @param ctor the constructor to use
-     * @param id   the ID of the entity
-     * @param <I>  the type of entity IDs
-     * @param <E>  the type of the entity
-     * @return a new entity
+     * <p>If the created entity is {@link AbstractEntity} it is also
+     * {@linkplain AbstractEntity#init() initialized}.
      */
     private static <I, E extends Entity<I, ?>> E createEntity(Constructor<E> ctor, I id) {
         checkNotNull(ctor);
