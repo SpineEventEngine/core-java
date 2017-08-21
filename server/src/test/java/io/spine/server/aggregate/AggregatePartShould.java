@@ -33,6 +33,7 @@ import io.spine.server.aggregate.given.AggregatePartTestEnv.TaskPart;
 import io.spine.server.aggregate.given.AggregatePartTestEnv.TaskRepository;
 import io.spine.server.aggregate.given.AggregatePartTestEnv.WrongAggregatePart;
 import io.spine.server.entity.InvalidEntityStateException;
+import io.spine.server.model.ModelTests;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.Task;
 import io.spine.test.aggregate.command.AggAddTask;
@@ -77,6 +78,7 @@ public class AggregatePartShould {
 
     @Before
     public void setUp() {
+        ModelTests.clearModel();
         boundedContext = BoundedContext.newBuilder()
                                        .build();
         root = new AnAggregateRoot(boundedContext, newUuid());

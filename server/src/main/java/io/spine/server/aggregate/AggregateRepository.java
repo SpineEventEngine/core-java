@@ -26,7 +26,6 @@ import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
-import io.spine.core.React;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
 import io.spine.core.TenantId;
@@ -37,6 +36,7 @@ import io.spine.server.entity.Repository;
 import io.spine.server.event.DelegatingEventDispatcher;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcherDelegate;
+import io.spine.server.model.Model;
 import io.spine.server.rejection.DelegatingRejectionDispatcher;
 import io.spine.server.rejection.RejectionDispatcherDelegate;
 import io.spine.server.route.CommandRouting;
@@ -90,6 +90,10 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
                    EventDispatcherDelegate<I>,
                    RejectionDispatcherDelegate<I> {
 
+    /** The class of aggregates managed by this repository. */
+    @Nullable
+    private AggregateClass<A> aggregateClass;
+
     /** The default number of events to be stored before a next snapshot is made. */
     static final int DEFAULT_SNAPSHOT_TRIGGER = 100;
 
@@ -110,17 +114,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     /** The constructor for creating entity instances. */
     private Constructor<A> entityConstructor;
 
-    /** The set of command classes dispatched to aggregates by this repository. */
-    @Nullable
-    private Set<CommandClass> commandClasses;
-
-    /** The set of event classes on which aggregates {@linkplain React react}. */
-    @Nullable
-    private Set<EventClass> eventReactions;
-
-    /** The set of rejection classes on which aggregates {@linkplain React react}. */
-    @Nullable
-    private Set<RejectionClass> rejectionReactions;
 
     /** Creates a new instance. */
     protected AggregateRepository() {
@@ -176,6 +169,16 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         return createEntity(getEntityConstructor(), id);
     }
 
+    /** Obtains class information of aggregates managed by this repository. */
+    @SuppressWarnings("unchecked") // The cast is ensured by generic parameters of the repository.
+    private AggregateClass<A> aggregateClass() {
+        if (aggregateClass == null) {
+            aggregateClass = (AggregateClass<A>) Model.getInstance()
+                                                      .asAggregateClass(getEntityClass());
+        }
+        return aggregateClass;
+    }
+
     /**
      * Stores the passed aggregate and commits its uncommitted events.
      *
@@ -223,7 +226,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * <p>The method returns cached value if called more than once.
      * During the first call, it {@linkplain #findEntityConstructor() finds} the constructor.
      */
-    protected Constructor<A> getEntityConstructor() {
+    Constructor<A> getEntityConstructor() {
         if (this.entityConstructor == null) {
             this.entityConstructor = findEntityConstructor();
         }
@@ -257,10 +260,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // We return immutable impl.
     @Override
     public Set<CommandClass> getMessageClasses() {
-        if (commandClasses == null) {
-            commandClasses = Aggregate.TypeInfo.getCommandClasses(getAggregateClass());
-        }
-        return commandClasses;
+        return aggregateClass().getCommands();
     }
 
     /**
@@ -300,10 +300,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // We return immutable impl.
     public Set<EventClass> getEventClasses() {
-        if (eventReactions == null) {
-            eventReactions = Aggregate.TypeInfo.getReactedEventClasses(getAggregateClass());
-        }
-        return eventReactions;
+        return aggregateClass().getEventReactions();
     }
 
     /**
@@ -328,11 +325,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // We return immutable impl.
     public Set<RejectionClass> getRejectionClasses() {
-        if (rejectionReactions == null) {
-            rejectionReactions =
-                    Aggregate.TypeInfo.getReactedRejectionClasses(getAggregateClass());
-        }
-        return rejectionReactions;
+        return aggregateClass().getRejectionReactions();
     }
 
     @Override

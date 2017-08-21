@@ -60,7 +60,7 @@ class AggregateTransaction<I,
     /**
      * {@inheritDoc}
      *
-     * <p>As long as {@linkplain io.spine.server.reflect.EventApplierMethod event applier method}
+     * <p>As long as {@linkplain EventApplierMethod event applier method}
      * does not operate with {@linkplain EventContext event context}, this parameter is ignored.
      */
     @Override

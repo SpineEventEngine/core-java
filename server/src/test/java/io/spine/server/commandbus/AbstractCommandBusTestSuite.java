@@ -40,6 +40,7 @@ import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.commandstore.CommandStore;
 import io.spine.server.event.EventBus;
+import io.spine.server.model.ModelTests;
 import io.spine.server.rejection.RejectionBus;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.tenant.TenantAwareTest;
@@ -169,6 +170,8 @@ public abstract class AbstractCommandBusTestSuite {
 
     @Before
     public void setUp() {
+        ModelTests.clearModel();
+        
         final InMemoryStorageFactory storageFactory =
                 InMemoryStorageFactory.newInstance(getClass().getSimpleName(), this.multitenant);
         final TenantIndex tenantIndex = TenantAwareTest.createTenantIndex(this.multitenant,

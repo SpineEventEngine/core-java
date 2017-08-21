@@ -42,7 +42,6 @@ import java.util.Set;
 import static io.spine.Identifier.newUuid;
 import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.server.projection.ProjectionEventDispatcher.dispatch;
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -86,7 +85,8 @@ public class ProjectionShould {
 
     @Test
     public void return_event_classes_which_it_handles() {
-        final Set<EventClass> classes = Projection.TypeInfo.getEventClasses(TestProjection.class);
+        final Set<EventClass> classes = ProjectionClass.of(TestProjection.class)
+                                                       .getEventSubscriptions();
 
         assertEquals(TestProjection.HANDLING_EVENT_COUNT, classes.size());
         assertTrue(classes.contains(EventClass.of(StringValue.class)));
@@ -112,11 +112,6 @@ public class ProjectionShould {
         assertTrue(projectionChanged);
         assertTrue(projectionState.contains(strValue.getValue()));
         assertTrue(projectionState.contains(String.valueOf(intValue.getValue())));
-    }
-
-    @Test
-    public void have_TypeInfo_utility_class() {
-        assertHasPrivateParameterlessCtor(Projection.TypeInfo.class);
     }
 
     private static class TestProjection

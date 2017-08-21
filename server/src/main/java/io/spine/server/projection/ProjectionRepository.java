@@ -34,6 +34,7 @@ import io.spine.server.entity.EventDispatchingRepository;
 import io.spine.server.event.EventFilter;
 import io.spine.server.event.EventStore;
 import io.spine.server.event.EventStreamQuery;
+import io.spine.server.model.Model;
 import io.spine.server.route.EventProducers;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.RecordStorage;
@@ -54,6 +55,10 @@ import java.util.Set;
 public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S extends Message>
         extends EventDispatchingRepository<I, P, S> {
 
+    /** The class of projections managed by this repository. */
+    @Nullable
+    private ProjectionClass<P> projectionClass;
+
     /** An underlying entity storage used to store projections. */
     private RecordStorage<I> recordStorage;
 
@@ -68,6 +73,16 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     EventStore getEventStore() {
         return getBoundedContext().getEventBus()
                                   .getEventStore();
+    }
+
+    /** Obtains class information of projection managed by this repository. */
+    @SuppressWarnings("unchecked") // The cast is ensured by generic parameters of the repository.
+    private ProjectionClass<P> projectionClass() {
+        if (projectionClass == null) {
+            projectionClass = (ProjectionClass<P>) Model.getInstance()
+                                                        .asProjectionClass(getEntityClass());
+        }
+        return projectionClass;
     }
 
     /**
@@ -164,9 +179,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     /** {@inheritDoc} */
     @Override
     public Set<EventClass> getMessageClasses() {
-        final Class<? extends Projection> projectionClass = getEntityClass();
-        final Set<EventClass> result = Projection.TypeInfo.getEventClasses(projectionClass);
-        return result;
+        return projectionClass().getEventSubscriptions();
     }
 
     /**
