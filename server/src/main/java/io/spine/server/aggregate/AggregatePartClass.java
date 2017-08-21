@@ -27,6 +27,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.server.aggregate.AggregatePart.GenericParameter.AGGREGATE_ROOT;
 
 /**
  * Provides type information on an aggregate part class.
@@ -55,7 +56,7 @@ public final class AggregatePartClass<A extends AggregatePart> extends Aggregate
         checkNotNull(aggregatePartClass);
         @SuppressWarnings("unchecked") // The type is ensured by the class declaration.
         final Class<R> rootClass =
-                (Class<R>) AggregatePart.GenericParameter.AGGREGATE_ROOT.getArgumentIn(aggregatePartClass);
+                (Class<R>) AGGREGATE_ROOT.getArgumentIn(aggregatePartClass);
         return rootClass;
     }
 
