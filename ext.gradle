@@ -25,14 +25,14 @@
  *  as we want to manage the versions in a single source.
  */
 
-def final SPINE_VERSION = '0.9.51-SNAPSHOT'
+def final SPINE_VERSION = '0.9.52-SNAPSHOT'
 
 ext {
     // The version of the modules in this project.
     spineVersion = SPINE_VERSION
 
     // Depend on `base` for the general definitions and a model compiler.
-    spineBaseVersion = '0.9.48-SNAPSHOT'
+    spineBaseVersion = '0.9.54-SNAPSHOT'
 
     // We use Spine tools in the build process.
     spineToolsVersion = '0.9.41-SNAPSHOT'
@@ -49,6 +49,5 @@ ext {
     jUnitVersion = '4.12'
     mockitoVersion = '2.7.22'
 
-    protobufGradlePluginVerison = '0.8.1'
+    protobufGradlePluginVerison = '0.8.3'
 }
-
