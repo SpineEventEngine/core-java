@@ -49,6 +49,7 @@ import static io.spine.core.Rejections.getMessage;
 import static io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.cannotStartProject;
 import static io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.createProject;
 import static io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.projectStarted;
+import static io.spine.server.model.ModelTests.clearModel;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -64,6 +65,7 @@ public class AggregateMessageDeliveryShould {
 
     @Before
     public void setUp() {
+        clearModel();
         boundedContext = BoundedContext.newBuilder()
                                        .build();
         repository = new PostponingRepository();

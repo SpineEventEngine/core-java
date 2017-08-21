@@ -46,6 +46,7 @@ import org.junit.Test;
 import java.util.Map;
 
 import static io.spine.core.Rejections.getMessage;
+import static io.spine.server.model.ModelTests.clearModel;
 import static io.spine.server.procman.given.PmMessageDeliveryTestEnv.cannotStartProject;
 import static io.spine.server.procman.given.PmMessageDeliveryTestEnv.createProject;
 import static io.spine.server.procman.given.PmMessageDeliveryTestEnv.projectStarted;
@@ -64,6 +65,7 @@ public class PmMessageDeliveryShould {
 
     @Before
     public void setUp() {
+        clearModel();
         boundedContext = BoundedContext.newBuilder()
                                        .build();
         repository = new PostponingRepository();
