@@ -44,7 +44,7 @@ import static io.spine.protobuf.AnyPacker.pack;
 public class TestEventFactory extends EventFactory {
 
     private TestEventFactory(MessageEnvelope<?, ?, ?> origin, Any producerId, int eventCount) {
-        super(origin, producerId, eventCount);
+        super(origin, producerId);
     }
 
     public static TestEventFactory newInstance(Any producerId, Class<?> testSuiteClass) {

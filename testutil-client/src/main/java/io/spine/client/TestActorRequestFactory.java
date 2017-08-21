@@ -106,6 +106,10 @@ public class TestActorRequestFactory extends ActorRequestFactory {
         return command;
     }
 
+    public CommandEnvelope createEnvelope(Message message) {
+        return CommandEnvelope.of(createCommand(message));
+    }
+
     /**
      * Generates a test instance of a command based on {@link StringValue}
      */

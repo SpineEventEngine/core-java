@@ -40,6 +40,8 @@ import io.spine.server.aggregate.given.Given;
 import io.spine.server.command.Assign;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.entity.InvalidEntityStateException;
+import io.spine.server.model.Model;
+import io.spine.server.model.ModelTests;
 import io.spine.test.TimeTests;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
@@ -73,7 +75,6 @@ import static io.spine.server.aggregate.given.Given.EventMessage.projectCreated;
 import static io.spine.server.aggregate.given.Given.EventMessage.projectStarted;
 import static io.spine.server.aggregate.given.Given.EventMessage.taskAdded;
 import static io.spine.server.entity.given.Given.aggregateOfClass;
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Verify.assertSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -139,6 +140,7 @@ public class AggregateShould {
 
     @Before
     public void setUp() {
+        ModelTests.clearModel();
         aggregate = newAggregate(ID);
     }
 
@@ -202,6 +204,7 @@ public class AggregateShould {
 
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_missing_command_handler() {
+        ModelTests.clearModel();
         final AggregateWithMissingApplier aggregate = new AggregateWithMissingApplier(ID);
 
         // Pass a command for which the target aggregate does not have a handling method.
@@ -210,6 +213,7 @@ public class AggregateShould {
 
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_missing_event_applier_for_non_state_neutral_event() {
+        ModelTests.clearModel();
         final AggregateWithMissingApplier aggregate =
                 new AggregateWithMissingApplier(ID);
         try {
@@ -223,7 +227,9 @@ public class AggregateShould {
     @Test
     public void return_command_classes_which_are_handled_by_aggregate() {
         final Set<CommandClass> commandClasses =
-                Aggregate.TypeInfo.getCommandClasses(TestAggregate.class);
+                Model.getInstance()
+                     .asAggregateClass(TestAggregate.class)
+                     .getCommands();
 
         assertTrue(commandClasses.size() == 4);
 
@@ -459,6 +465,7 @@ public class AggregateShould {
 
     @Test
     public void propagate_RuntimeException_when_handler_throws() {
+        ModelTests.clearModel();
         final FaultyAggregate faultyAggregate = new FaultyAggregate(ID, true, false);
 
         final Command command = Given.ACommand.createProject();
@@ -475,6 +482,7 @@ public class AggregateShould {
 
     @Test
     public void propagate_RuntimeException_when_applier_throws() {
+        ModelTests.clearModel();
         final FaultyAggregate faultyAggregate =
                 new FaultyAggregate(ID, false, true);
 
@@ -493,6 +501,7 @@ public class AggregateShould {
 
     @Test
     public void propagate_RuntimeException_when_play_raises_exception() {
+        ModelTests.clearModel();
         final FaultyAggregate faultyAggregate =
                 new FaultyAggregate(ID, false, true);
         try {
@@ -516,11 +525,6 @@ public class AggregateShould {
     @Test(expected = IllegalStateException.class)
     public void do_not_allow_getting_state_builder_from_outside_the_event_applier() {
         new IntAggregate(100).getBuilder();
-    }
-
-    @Test
-    public void have_TypeInfo_utility_class() {
-        assertHasPrivateParameterlessCtor(Aggregate.TypeInfo.class);
     }
 
     @Test

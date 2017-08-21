@@ -24,6 +24,7 @@ import com.google.common.testing.SerializableTester;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.StringValue;
 import io.spine.server.BoundedContext;
+import io.spine.type.TypeUrl;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -45,7 +46,9 @@ public class DefaultEntityStorageConverterShould {
         RecordBasedRepository<Long, TestEntity, StringValue> repository = new TestRepository();
         bc.register(repository);
 
-        converter = forAllFields(repository.getEntityStateType(), repository.entityFactory());
+        final TypeUrl stateType = repository.entityClass()
+                                            .getStateType();
+        converter = forAllFields(stateType, repository.entityFactory());
     }
 
     @Test

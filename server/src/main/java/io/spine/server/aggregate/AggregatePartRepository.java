@@ -70,11 +70,4 @@ public abstract class AggregatePartRepository<I,
         final Constructor<A> entityConstructor = getEntityConstructor();
         return AggregatePart.create(entityConstructor, root);
     }
-
-    @SuppressWarnings("MethodDoesntCallSuperMethod") // We find constructor for another class.
-    @Override
-    protected Constructor<A> findEntityConstructor() {
-        final Constructor<A> result = AggregatePart.getConstructor(getEntityClass());
-        return result;
-    }
 }
