@@ -166,7 +166,7 @@ public final class AggregatePartClass<A extends AggregatePart> extends Aggregate
     private static IllegalStateException noSuchConstructor(Class<?> aggregatePartClass,
                                                            Class<?> aggregateRootClass) {
         final String errMsg =
-                format("%s class must declare a constructor with %s parameter type.",
+                format("%s class must declare a constructor with one parameter of the %s type.",
                        aggregatePartClass.getName(),
                        aggregateRootClass.getName());
         final NoSuchMethodException cause = new NoSuchMethodException(errMsg);
