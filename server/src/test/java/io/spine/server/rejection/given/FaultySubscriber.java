@@ -17,7 +17,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package io.spine.server.rejection.given;
 
 import io.spine.core.CommandContext;
@@ -27,9 +26,13 @@ import io.spine.test.rejection.ProjectRejections;
 
 import static org.junit.Assert.fail;
 
-/** The subscriber which throws exception from the subscriber method. */
+/**
+ * The subscriber which throws an exception from the subscriber method.
+ *
+ * @author Alex Tymchenko
+ * @author Alexander Yevsyukov
+ */
 public class FaultySubscriber extends VerifiableSubscriber {
-
     @SuppressWarnings("unused") // It's fine for a faulty subscriber.
     @Subscribe
     public void on(ProjectRejections.InvalidProjectName rejection, CommandContext context) {

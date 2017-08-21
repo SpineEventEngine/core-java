@@ -33,8 +33,8 @@ public class InvalidOrderSubscriber extends VerifiableSubscriber {
     @SuppressWarnings("unused") // The method should never be invoked, so the params are unused.
     @Subscribe
     public void on(ProjectRejections.MissingOwner rejection,
-                   CommandContext context,
-                   RemoveOwner command) {
+                    CommandContext context,
+                    RemoveOwner command) {
         triggerCall();
         fail("InvalidOrderSubscriber invoked the handler method");
     }

@@ -290,6 +290,11 @@ public class MultiTenantCommandBusShould extends AbstractCommandBusTestSuite {
             return Empty.getDefaultInstance();
         }
 
+        @Override
+        public void onError(CommandEnvelope envelope, RuntimeException exception) {
+            // Do nothing.
+        }
+
         public boolean wasDispatcherInvoked() {
             return dispatcherInvoked;
         }

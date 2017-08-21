@@ -26,6 +26,7 @@ import com.google.protobuf.Timestamp;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventId;
+import io.spine.core.Events;
 import io.spine.core.MessageEnvelope;
 import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
@@ -49,14 +50,11 @@ import static io.spine.validate.Validate.checkValid;
 public class EventFactory {
 
     private final Any producerId;
-    private final MessageEnvelope<?, ?> origin;
-    private final EventIdSequence idSequence;
+    private final MessageEnvelope<?, ?, ?> origin;
 
-    protected EventFactory(MessageEnvelope<?, ?> origin, Any producerId, int eventCount) {
+    protected EventFactory(MessageEnvelope<?, ?, ?> origin, Any producerId) {
         this.origin = origin;
         this.producerId = producerId;
-        this.idSequence = EventIdSequence.on(origin.getId())
-                                         .withMaxSize(eventCount);
     }
 
     /**
@@ -64,25 +62,12 @@ public class EventFactory {
      *
      * @param origin     the message in response to which events will be generated
      * @param producerId the ID of the entity producing the events
-     * @param maxCount   the maximum number of events to be produced
-     * @return new event factory
-     */
-    public static EventFactory on(MessageEnvelope origin, Any producerId, int maxCount) {
-        checkNotNull(origin);
-        checkNotNull(producerId);
-        return new EventFactory(origin, producerId, maxCount);
-    }
-
-    /**
-     * Creates a new event factory for producing {@linkplain EventIdSequence#MAX_ONE_DIGIT_SIZE
-     * 36 events or less} in response to the passed message.
-     *
-     * @param origin     the message in response to which events will be generated
-     * @param producerId the ID of the entity producing the events. Can be passed as {@link Any}.
      * @return new event factory
      */
     public static EventFactory on(MessageEnvelope origin, Any producerId) {
-        return on(origin, producerId, EventIdSequence.MAX_ONE_DIGIT_SIZE);
+        checkNotNull(origin);
+        checkNotNull(producerId);
+        return new EventFactory(origin, producerId);
     }
 
     /**
@@ -107,7 +92,7 @@ public class EventFactory {
         checkNotNull(messageOrAny);
         validate(messageOrAny);     // we must validate it now before emitting the next ID.
 
-        final EventId eventId = idSequence.next();
+        final EventId eventId = Events.generateId();
         final EventContext context = createContext(version);
         final Event result = createEvent(eventId, messageOrAny, context);
         return result;

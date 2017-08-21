@@ -24,9 +24,13 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.testing.NullPointerTester;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
+import io.spine.server.command.TestEventFactory;
 import org.junit.Test;
 
 import java.util.Set;
+
+import static io.spine.test.TestValues.newUuidValue;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Alexander Yevsyukov
@@ -40,8 +44,24 @@ public class DelegatingEventDispatcherShould {
                 .testAllPublicStaticMethods(DelegatingEventDispatcher.class);
     }
 
+    @Test
+    public void delegate_onError() {
+        final EmptyEventDispatcherDelegate delegate = new EmptyEventDispatcherDelegate();
+        final DelegatingEventDispatcher<String> delegatingDispatcher =
+                DelegatingEventDispatcher.of(delegate);
+
+        final TestEventFactory factory = TestEventFactory.newInstance(getClass());
+        EventEnvelope envelope = EventEnvelope.of(factory.createEvent(newUuidValue()));
+
+        delegatingDispatcher.onError(envelope, new RuntimeException("test delegating onError"));
+
+        assertTrue(delegate.onErrorCalled());
+    }
+
     private static final class EmptyEventDispatcherDelegate
             implements EventDispatcherDelegate<String> {
+
+        private boolean onErrorCalled;
 
         @Override
         public Set<EventClass> getEventClasses() {
@@ -52,6 +72,15 @@ public class DelegatingEventDispatcherShould {
         public Set<String> dispatchEvent(EventEnvelope envelope) {
             // Do nothing.
             return ImmutableSet.of();
+        }
+
+        @Override
+        public void onError(EventEnvelope envelope, RuntimeException exception) {
+            onErrorCalled = true;
+        }
+
+        private boolean onErrorCalled() {
+            return onErrorCalled;
         }
     }
 }

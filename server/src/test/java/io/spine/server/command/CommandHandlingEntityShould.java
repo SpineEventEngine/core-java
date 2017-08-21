@@ -20,10 +20,15 @@
 
 package io.spine.server.command;
 
+import com.google.common.collect.ImmutableList;
+import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
+import io.spine.core.CommandEnvelope;
 import io.spine.validate.StringValueVBuilder;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.List;
 
 import static io.spine.test.TestValues.newUuidValue;
 import static org.junit.Assert.assertEquals;
@@ -75,6 +80,11 @@ public class CommandHandlingEntityShould {
                                                                       StringValueVBuilder> {
         private HandlingEntity(Long id) {
             super(id);
+        }
+
+        @Override
+        protected List<? extends Message> dispatchCommand(CommandEnvelope cmd) {
+            return ImmutableList.of();
         }
     }
 }

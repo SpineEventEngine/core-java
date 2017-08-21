@@ -33,7 +33,7 @@ import io.spine.core.MessageEnvelope;
  * @author Dmytro Dashenkov
  */
 @SPI
-public interface BusFilter<E extends MessageEnvelope<?, ?>> extends AutoCloseable {
+public interface BusFilter<E extends MessageEnvelope<?, ?, ?>> extends AutoCloseable {
 
     /**
      * Accepts or rejects a passed message.

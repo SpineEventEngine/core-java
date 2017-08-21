@@ -21,127 +21,72 @@
 package io.spine.server.aggregate;
 
 import com.google.protobuf.Message;
+import io.spine.core.ActorMessageEnvelope;
 import io.spine.core.Event;
-import io.spine.core.MessageEnvelope;
+import io.spine.server.entity.EntityMessageEndpoint;
 import io.spine.server.entity.LifecycleFlags;
-import io.spine.server.tenant.TenantAwareFunction0;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * Abstract base for endpoints handling messages sent to aggregates.
  *
  * @param <I> the type of aggregate IDs
  * @param <A> the type of aggregates
- * @param <E> the type of message envelopes
- * @param <R> the type of the dispatch result, can be {@code <I>} for unicast dispatching, or
+ * @param <M> the type of message envelopes
+ * @param <R> the type of the dispatch result, which is {@code <I>} for unicast dispatching, and
  *            {@code Set<I>} for multicast
  * @author Alexander Yevsyukov
  */
 abstract class AggregateMessageEndpoint<I,
                                         A extends Aggregate<I, ?, ?>,
-                                        E extends MessageEnvelope<?, ?>, R> {
-    private final AggregateRepository<I, A> repository;
-    private final E envelope;
+                                        M extends ActorMessageEnvelope<?, ?, ?>, R>
+        extends EntityMessageEndpoint<I, A, M, R> {
 
-    AggregateMessageEndpoint(AggregateRepository<I, A> repository, E envelope) {
-        this.repository = repository;
-        this.envelope = envelope;
+    AggregateMessageEndpoint(AggregateRepository<I, A> repository, M envelope) {
+        super(repository, envelope);
     }
 
-    /**
-     * Creates a tenant-aware operation based on the message this endpoint processes.
-     */
-    abstract TenantAwareFunction0<R> createOperation();
-
-    /**
-     * {@linkplain #getTargets() Selects} one or more message targets and {@linkplain #dispatchTo(I)
-     * dispatches} the message to them.
-     */
-    @SuppressWarnings("unchecked")
-    R dispatch() {
-        final R targets = getTargets();
-        if (targets instanceof Set) {
-            final Set<I> set = (Set<I>) targets;
-            for (I id : set) { //TODO:2017-07-21:alexander.yevsyukov: Can we run this in parallel?
-                //TODO:2017-07-21:alexander.yevsyukov: What if we dispatch events to multiple aggregates
-                // and one of them fails?
-                dispatchTo(id);
-            }
-        } else {
-            dispatchTo((I)targets);
-        }
-        return targets;
-    }
-
-    /**
-     * Dispatched the message to the aggregate with the passed ID.
-     *
-     * @param aggregateId the ID of the aggreagate to which dispatch the message
-     */
-    private void dispatchTo(I aggregateId) {
+    @Override
+    protected void deliverNowTo(I aggregateId) {
         final A aggregate = repository().loadOrCreate(aggregateId);
+        final LifecycleFlags flagsBefore = aggregate.getLifecycleFlags();
 
-        final LifecycleFlags statusBefore = aggregate.getLifecycleFlags();
-
-        final List<? extends Message> eventMessages = dispatchEnvelope(aggregate, envelope);
-
-        final AggregateTransaction tx = AggregateTransaction.start(aggregate);
-
-        aggregate.apply(eventMessages, envelope);
-
+        final List<? extends Message> eventMessages = doDispatch(aggregate, envelope());
+        final AggregateTransaction tx = startTransaction(aggregate);
+        aggregate.apply(eventMessages, envelope());
         tx.commit();
 
-        // Update status only if the message was handled successfully.
-        final LifecycleFlags statusAfter = aggregate.getLifecycleFlags();
-        if (statusAfter != null && !statusBefore.equals(statusAfter)) {
-            storage().writeLifecycleFlags(aggregateId, statusAfter);
+        // Update lifecycle flags only if the message was handled successfully and flags changed.
+        final LifecycleFlags flagsAfter = aggregate.getLifecycleFlags();
+        if (flagsAfter != null && !flagsBefore.equals(flagsAfter)) {
+            storage().writeLifecycleFlags(aggregateId, flagsAfter);
         }
 
         store(aggregate);
     }
 
-    abstract List<? extends Message> dispatchEnvelope(A aggregate, E envelope);
+    protected AggregateTransaction startTransaction(A aggregate) {
+        return AggregateTransaction.start(aggregate);
+    }
 
-    /**
-     * Stores the aggregate if it has uncommitted events.
-     *
-     * @param aggregate the aggregate to store
-     */
-    private void store(A aggregate) {
+    @Override
+    protected void onModified(A entity) {
+        repository().onModifiedAggregate(envelope().getTenantId(), entity);
+    }
+
+    @Override
+    protected boolean isModified(A aggregate) {
         final List<Event> events = aggregate.getUncommittedEvents();
-        if (!events.isEmpty()) {
-            repository.onModifiedAggregate(envelope.getActorContext()
-                                                   .getTenantId(), aggregate);
-        } else {
-            onEmptyResult(aggregate, envelope);
-        }
+        return !events.isEmpty();
     }
 
-    /**
-     * Allows derived classes to handle empty list of uncommitted events returned by the aggregate
-     * in response to the message.
-     */
-    abstract void onEmptyResult(A aggregate, E envelope);
-
-    /**
-     * Obtains IDs of aggregates to which the endpoint delivers the message.
-     */
-    abstract R getTargets();
-
-    /**
-     * Obtains the envelope of the message processed by this endpoint.
-     */
-    E envelope() {
-        return envelope;
-    }
-
-    AggregateRepository<I, A> repository() {
-        return repository;
+    @Override
+    protected AggregateRepository<I, A> repository() {
+        return (AggregateRepository<I, A>)super.repository();
     }
 
     private AggregateStorage<I> storage() {
-        return repository.aggregateStorage();
+        return repository().aggregateStorage();
     }
 }

@@ -39,6 +39,7 @@ import java.util.Set;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -79,6 +80,8 @@ public class EventRoutingShould {
         }
     };
 
+    private final TestEventFactory eventFactory = TestEventFactory.newInstance(getClass());
+
     @Before
     public void setUp() {
         eventRouting = EventRouting.withDefault(defaultRoute);
@@ -101,19 +104,19 @@ public class EventRoutingShould {
             }
         };
 
-        assertEquals(eventRouting, eventRouting.replaceDefault(newDefault));
+        assertSame(eventRouting, eventRouting.replaceDefault(newDefault));
 
-        assertEquals(newDefault, eventRouting.getDefault());
+        assertSame(newDefault, eventRouting.getDefault());
     }
 
     @Test
     public void set_custom_route() {
-        assertEquals(eventRouting, eventRouting.route(StringValue.class, customRoute));
+        assertSame(eventRouting, eventRouting.route(StringValue.class, customRoute));
 
         final Optional<EventRoute<Long, StringValue>> route = eventRouting.get(StringValue.class);
 
         assertTrue(route.isPresent());
-        assertEquals(customRoute, route.get());
+        assertSame(customRoute, route.get());
     }
 
     @Test(expected = IllegalStateException.class)
@@ -127,7 +130,8 @@ public class EventRoutingShould {
         eventRouting.route(StringValue.class, customRoute);
         eventRouting.remove(StringValue.class);
 
-        assertFalse(eventRouting.doGet(StringValue.class).isPresent());
+        assertFalse(eventRouting.doGet(StringValue.class)
+                                .isPresent());
     }
 
     @Test(expected = IllegalStateException.class)
@@ -137,8 +141,6 @@ public class EventRoutingShould {
 
     @Test
     public void apply_default_route() {
-        final TestEventFactory eventFactory = TestEventFactory.newInstance(getClass());
-
         // Have custom route too.
         eventRouting.route(StringValue.class, customRoute);
 
@@ -152,8 +154,6 @@ public class EventRoutingShould {
 
     @Test
     public void apply_custom_route() {
-        final TestEventFactory eventFactory = TestEventFactory.newInstance(getClass());
-
         eventRouting.route(StringValue.class, customRoute);
 
         // An event which has `StringValue` as its message, which should go the custom route.

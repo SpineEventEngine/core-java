@@ -36,6 +36,7 @@ import io.spine.core.TenantId;
 import io.spine.protobuf.TypeConverter;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandler;
+import io.spine.server.model.ModelTests;
 import io.spine.server.tenant.TenantAwareFunction;
 import io.spine.test.TimeTests;
 import io.spine.test.command.CmdAddTask;
@@ -107,6 +108,8 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
 
     @Test
     public void set_command_status_to_rejection_when_handler_throws_rejection() {
+        ModelTests.clearModel();
+
         final TestRejection rejection = new TestRejection();
         final Command command = givenThrowingHandler(rejection);
         final CommandId commandId = command.getId();
@@ -144,6 +147,8 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
 
     @Test
     public void set_command_status_to_error_when_handler_throws_exception() {
+        ModelTests.clearModel();
+
         final RuntimeException exception = new IllegalStateException("handler throws");
         final Command command = givenThrowingHandler(exception);
         final CommandEnvelope envelope = CommandEnvelope.of(command);
@@ -191,6 +196,8 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
     @Test
     public void set_command_status_to_error_when_handler_throws_unknown_Throwable()
             throws TestRejection, TestThrowable {
+        ModelTests.clearModel();
+
         final Throwable throwable = new TestThrowable("Unexpected Throwable");
         final Command command = givenThrowingHandler(throwable);
         final CommandEnvelope envelope = CommandEnvelope.of(command);
@@ -299,6 +306,11 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
         @Override
         public Message dispatch(CommandEnvelope envelope) {
             throw exception;
+        }
+
+        @Override
+        public void onError(CommandEnvelope envelope, RuntimeException exception) {
+            // Do nothing.
         }
     }
 }

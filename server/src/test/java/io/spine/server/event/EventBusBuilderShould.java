@@ -22,9 +22,9 @@ package io.spine.server.event;
 
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
+import io.spine.grpc.LoggingObserver;
 import io.spine.server.BoundedContext;
 import io.spine.server.bus.BusBuilderShould;
-import io.spine.server.event.enrich.EventEnricher;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.test.Tests;
@@ -39,6 +39,7 @@ import java.util.concurrent.TimeUnit;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
@@ -232,6 +233,19 @@ public class EventBusBuilderShould extends BusBuilderShould<EventBus.Builder,
                                            .setStorageFactory(storageFactory)
                                            .build();
         assertEquals(validator, eventBus.getMessageValidator());
+    }
+
+    @Test
+    public void allow_configuring_logging_level_for_post_operations() {
+        // See that the default level is TRACE.
+        assertEquals(LoggingObserver.Level.TRACE, builder().getLogLevelForPost());
+
+        // Check setting new value.
+        final EventBus.Builder builder = builder();
+        final LoggingObserver.Level newLevel = LoggingObserver.Level.DEBUG;
+
+        assertSame(builder, builder.setLogLevelForPost(newLevel));
+        assertEquals(newLevel, builder.getLogLevelForPost());
     }
 
     private static void ensureExecutorDirect(Executor streamExecutor) {

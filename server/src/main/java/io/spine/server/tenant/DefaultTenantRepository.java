@@ -20,7 +20,6 @@
 
 package io.spine.server.tenant;
 
-import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.core.TenantId;
 import io.spine.time.Time;
@@ -33,11 +32,6 @@ import io.spine.time.Time;
  */
 final class DefaultTenantRepository
       extends TenantRepository<Timestamp, DefaultTenantRepository.Entity> {
-
-    @Override
-    protected Class<? extends Message> getEntityStateClass() {
-        return Timestamp.class;
-    }
 
     public static class Entity extends TenantRepository.Entity<Timestamp> {
         protected Entity(TenantId id) {

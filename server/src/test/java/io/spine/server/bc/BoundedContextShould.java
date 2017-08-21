@@ -28,11 +28,11 @@ import io.spine.grpc.MemoizingObserver;
 import io.spine.option.EntityOption;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
-import io.spine.server.bc.given.BoundedContextTestEnv;
 import io.spine.server.bc.given.BoundedContextTestEnv.AnotherProjectAggregateRepository;
 import io.spine.server.bc.given.BoundedContextTestEnv.ProjectAggregateRepository;
 import io.spine.server.bc.given.BoundedContextTestEnv.ProjectPmRepo;
 import io.spine.server.bc.given.BoundedContextTestEnv.ProjectReportRepository;
+import io.spine.server.bc.given.BoundedContextTestEnv.SecretProjectRepository;
 import io.spine.server.bc.given.BoundedContextTestEnv.TestEventSubscriber;
 import io.spine.server.bc.given.Given;
 import io.spine.server.commandbus.CommandBus;
@@ -40,6 +40,7 @@ import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventStore;
 import io.spine.server.integration.IntegrationEvent;
+import io.spine.server.model.ModelTests;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.StorageFactory;
 import io.spine.test.Spy;
@@ -85,6 +86,7 @@ public class BoundedContextShould {
 
     @Before
     public void setUp() {
+        ModelTests.clearModel();
         boundedContext = BoundedContext.newBuilder()
                                        .setMultitenant(true)
                                        .build();
@@ -141,6 +143,8 @@ public class BoundedContextShould {
 
     @Test
     public void register_ProcessManagerRepository() {
+        ModelTests.clearModel();
+
         final ProjectPmRepo repository = new ProjectPmRepo();
         boundedContext.register(repository);
     }
@@ -321,7 +325,9 @@ public class BoundedContextShould {
 
     @Test
     public void do_not_expose_invisible_aggregate() {
-        boundedContext.register(new BoundedContextTestEnv.SecretProjectRepository());
+        ModelTests.clearModel();
+
+        boundedContext.register(new SecretProjectRepository());
 
         assertFalse(boundedContext.findRepository(SecretProject.class)
                                   .isPresent());

@@ -25,12 +25,15 @@ import io.spine.core.Rejection;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
 import io.spine.grpc.MemoizingObserver;
+import io.spine.server.delivery.Consumers;
+import io.spine.server.rejection.given.AnotherInvalidProjectNameDelegate;
 import io.spine.server.rejection.given.BareDispatcher;
 import io.spine.server.rejection.given.CommandAwareSubscriber;
 import io.spine.server.rejection.given.CommandMessageAwareSubscriber;
 import io.spine.server.rejection.given.ContextAwareSubscriber;
 import io.spine.server.rejection.given.FaultySubscriber;
 import io.spine.server.rejection.given.InvalidOrderSubscriber;
+import io.spine.server.rejection.given.InvalidProjectNameDelegate;
 import io.spine.server.rejection.given.InvalidProjectNameSubscriber;
 import io.spine.server.rejection.given.PostponedDispatcherRejectionDelivery;
 import io.spine.server.rejection.given.RejectionMessageSubscriber;
@@ -60,8 +63,10 @@ import static org.mockito.Mockito.verify;
 /**
  * @author Alex Tymchenko
  */
-@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass", "InstanceVariableNamingConvention"})
-    // OK as for the test class for one of the primary framework features
+@SuppressWarnings({"ClassWithTooManyMethods",
+        "OverlyCoupledClass",
+        "InstanceVariableNamingConvention"})
+// OK as for the test class for one of the primary framework features
 public class RejectionBusShould {
 
     private RejectionBus rejectionBus;
@@ -78,8 +83,7 @@ public class RejectionBusShould {
                 new PostponedDispatcherRejectionDelivery(delegateDispatcherExecutor);
         this.rejectionBusWithPostponedExecution =
                 RejectionBus.newBuilder()
-                            .setDispatcherRejectionDelivery(
-                                  postponedDelivery)
+                            .setDispatcherRejectionDelivery(postponedDelivery)
                             .build();
     }
 
@@ -115,9 +119,9 @@ public class RejectionBusShould {
 
     @Test   // as the RejectionBus instances do not support enrichment yet.
     public void not_enrich_rejection_messages() {
-        final Rejection original = Rejection.getDefaultInstance();
-        final Rejection enriched = rejectionBus.enrich(original);
-        assertEquals(original, enriched);
+        final Rejection original = invalidProjectNameRejection();
+        final RejectionEnvelope enriched = rejectionBus.enrich(RejectionEnvelope.of(original));
+        assertEquals(original, enriched.getOuterObject());
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -155,8 +159,8 @@ public class RejectionBusShould {
 
         // Check that the 2nd subscriber with the same rejection subscriber method remains
         // after the 1st subscriber unregisters.
-        final Collection<RejectionDispatcher<?>> subscribers = rejectionBus.getDispatchers(
-                rejectionClass);
+        final Collection<RejectionDispatcher<?>> subscribers =
+                rejectionBus.getDispatchers(rejectionClass);
         assertFalse(subscribers.contains(subscriberOne));
         assertTrue(subscribers.contains(subscriberTwo));
 
@@ -240,9 +244,34 @@ public class RejectionBusShould {
         final RejectionEnvelope postponedRejection = postponedRejections.iterator()
                                                                         .next();
         verify(delegateDispatcherExecutor, never()).execute(any(Runnable.class));
-        postponedDelivery.deliverNow(postponedRejection, dispatcher.getClass());
+        postponedDelivery.deliverNow(postponedRejection, Consumers.idOf(dispatcher));
         assertTrue(dispatcher.isDispatchCalled());
         verify(delegateDispatcherExecutor).execute(any(Runnable.class));
+    }
+
+    @Test
+    public void pick_proper_consumer_by_consumer_id_when_delivering_to_delegates_of_same_rejection() {
+        final InvalidProjectNameDelegate first = new InvalidProjectNameDelegate();
+        final AnotherInvalidProjectNameDelegate second = new AnotherInvalidProjectNameDelegate();
+
+        final DelegatingRejectionDispatcher<String> firstDispatcher =
+                DelegatingRejectionDispatcher.of(first);
+        final DelegatingRejectionDispatcher<String> secondDispatcher =
+                DelegatingRejectionDispatcher.of(second);
+
+        rejectionBusWithPostponedExecution.register(firstDispatcher);
+        rejectionBusWithPostponedExecution.register(secondDispatcher);
+
+        final Rejection rejection = invalidProjectNameRejection();
+        rejectionBusWithPostponedExecution.post(rejection);
+        final Set<RejectionEnvelope> postponedRejections = postponedDelivery.getPostponedRejections();
+        final RejectionEnvelope postponedRejection = postponedRejections.iterator()
+                                                            .next();
+        verify(delegateDispatcherExecutor, never()).execute(any(Runnable.class));
+        postponedDelivery.deliverNow(postponedRejection, Consumers.idOf(firstDispatcher));
+        assertTrue(first.isDispatchCalled());
+        verify(delegateDispatcherExecutor).execute(any(Runnable.class));
+        assertFalse(second.isDispatchCalled());
     }
 
     @Test

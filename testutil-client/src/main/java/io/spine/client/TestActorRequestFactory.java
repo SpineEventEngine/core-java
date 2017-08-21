@@ -106,22 +106,32 @@ public class TestActorRequestFactory extends ActorRequestFactory {
         return command;
     }
 
+    public CommandEnvelope createEnvelope(Message message) {
+        return CommandEnvelope.of(createCommand(message));
+    }
+
     /**
      * Generates a test instance of a command based on {@link StringValue}
      */
-    public Command generate() {
-        final String randomSuffix = String.valueOf(TestValues.random(10_000));
-        final StringValue msg = StringValue.newBuilder()
-                                           .setValue("GeneratedTestCommand" + randomSuffix)
-                                           .build();
-        return createCommand(msg);
+    public Command generateCommand() {
+        return generate();
     }
 
     /**
      * Generates a command and wraps it into envelope.
      */
-    public CommandEnvelope generateAndWrap() {
-        return CommandEnvelope.of(generate());
+    public CommandEnvelope generateEnvelope() {
+        final Command command = generateCommand();
+        final CommandEnvelope result = CommandEnvelope.of(command);
+        return result;
+    }
+
+    private Command generate() {
+        final String randomSuffix = String.valueOf(TestValues.random(10_000));
+        final StringValue msg = StringValue.newBuilder()
+                                           .setValue("GeneratedTestCommand" + randomSuffix)
+                                           .build();
+        return createCommand(msg);
     }
 
     /**

@@ -33,6 +33,7 @@ import io.spine.server.aggregate.given.AggregatePartTestEnv.TaskPart;
 import io.spine.server.aggregate.given.AggregatePartTestEnv.TaskRepository;
 import io.spine.server.aggregate.given.AggregatePartTestEnv.WrongAggregatePart;
 import io.spine.server.entity.InvalidEntityStateException;
+import io.spine.server.model.ModelTests;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.Task;
 import io.spine.test.aggregate.command.AggAddTask;
@@ -46,7 +47,6 @@ import java.lang.reflect.Constructor;
 import java.util.List;
 
 import static io.spine.Identifier.newUuid;
-import static io.spine.server.aggregate.AggregateCommandDispatcher.dispatch;
 import static io.spine.server.aggregate.AggregatePart.create;
 import static io.spine.server.aggregate.AggregatePart.getConstructor;
 import static io.spine.server.entity.given.Given.aggregatePartOfClass;
@@ -78,6 +78,7 @@ public class AggregatePartShould {
 
     @Before
     public void setUp() {
+        ModelTests.clearModel();
         boundedContext = BoundedContext.newBuilder()
                                        .build();
         root = new AnAggregateRoot(boundedContext, newUuid());
@@ -194,6 +195,6 @@ public class AggregatePartShould {
                         .setProjectId(ProjectId.newBuilder()
                                                .setId("agg-part-ID"))
                         .build();
-        dispatch(taskPart, env(addTask));
+        AggregateMessageDispatcher.dispatchCommand(taskPart, env(addTask));
     }
 }

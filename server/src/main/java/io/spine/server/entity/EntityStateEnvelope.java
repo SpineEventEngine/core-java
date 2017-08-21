@@ -23,9 +23,9 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.protobuf.Any;
+import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.Identifier;
-import io.spine.core.ActorContext;
 import io.spine.core.EventContext;
 import io.spine.core.MessageEnvelope;
 import io.spine.core.TenantId;
@@ -42,7 +42,7 @@ import static io.spine.util.Exceptions.unsupported;
  * @author Alex Tymchenko
  */
 public final class EntityStateEnvelope<I, S extends Message>
-        implements MessageEnvelope<Any, Entity<I, S>> {
+        implements MessageEnvelope<Any, Entity<I, S>, Empty> {
 
     /**
      * The state of the entity.
@@ -133,10 +133,8 @@ public final class EntityStateEnvelope<I, S extends Message>
     }
 
     @Override
-    public ActorContext getActorContext() {
-        return ActorContext.newBuilder()
-                           .setTenantId(tenantId)
-                           .build();
+    public Empty getMessageContext() {
+        throw unsupported("Entity state does not have context");
     }
 
     /**
@@ -148,7 +146,7 @@ public final class EntityStateEnvelope<I, S extends Message>
     @Override
     public void setOriginContext(EventContext.Builder builder)
             throws UnsupportedOperationException {
-        throw unsupported();
+        throw unsupported("An entity state cannot originate other messages");
     }
 
     /**

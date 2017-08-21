@@ -20,7 +20,6 @@
 
 package io.spine.server.event;
 
-import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
@@ -31,13 +30,11 @@ import io.spine.core.Events;
 import io.spine.core.Subscribe;
 import io.spine.server.BoundedContext;
 import io.spine.server.bus.EnvelopeValidator;
-import io.spine.server.event.enrich.EventEnricher;
+import io.spine.server.delivery.Consumers;
 import io.spine.server.event.given.EventBusTestEnv.GivenEvent;
 import io.spine.server.storage.StorageFactory;
 import io.spine.test.event.ProjectCreated;
-import io.spine.test.event.ProjectId;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.annotation.Nullable;
@@ -46,15 +43,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -250,9 +244,34 @@ public class EventBusShould {
         final EventEnvelope postponedEvent = postponedEvents.iterator()
                                                             .next();
         verify(delegateDispatcherExecutor, never()).execute(any(Runnable.class));
-        postponedDispatcherDelivery.deliverNow(postponedEvent, dispatcher.getClass());
+        postponedDispatcherDelivery.deliverNow(postponedEvent, Consumers.idOf(dispatcher));
         assertTrue(dispatcher.isDispatchCalled());
         verify(delegateDispatcherExecutor).execute(any(Runnable.class));
+    }
+
+    @Test
+    public void pick_proper_consumer_by_consumer_id_when_delivering_to_delegates_of_same_event() {
+        final FirstProjectCreatedDelegate first = new FirstProjectCreatedDelegate();
+        final AnotherProjectCreatedDelegate second = new AnotherProjectCreatedDelegate();
+
+        final DelegatingEventDispatcher<String> firstDispatcher =
+                DelegatingEventDispatcher.of(first);
+        final DelegatingEventDispatcher<String> secondDispatcher =
+                DelegatingEventDispatcher.of(second);
+
+        eventBusWithPosponedExecution.register(firstDispatcher);
+        eventBusWithPosponedExecution.register(secondDispatcher);
+
+        final Event event = GivenEvent.projectCreated();
+        eventBusWithPosponedExecution.post(event);
+        final Set<EventEnvelope> postponedEvents = postponedDispatcherDelivery.getPostponedEvents();
+        final EventEnvelope postponedEvent = postponedEvents.iterator()
+                                                            .next();
+        verify(delegateDispatcherExecutor, never()).execute(any(Runnable.class));
+        postponedDispatcherDelivery.deliverNow(postponedEvent, Consumers.idOf(firstDispatcher));
+        assertTrue(first.isDispatchCalled());
+        verify(delegateDispatcherExecutor).execute(any(Runnable.class));
+        assertFalse(second.isDispatchCalled());
     }
 
     @Test
@@ -275,17 +294,6 @@ public class EventBusShould {
                             .contains(dispatcherTwo));
     }
 
-    @Ignore("Resume after CommandOutputBus.doPost() can handle exceptions and return multiple statuses per consumer.")
-    @Test
-    public void catch_exceptions_caused_by_subscribers() {
-        final FaultySubscriber faultySubscriber = new FaultySubscriber();
-
-        eventBus.register(faultySubscriber);
-        eventBus.post(GivenEvent.projectCreated());
-
-        assertTrue(faultySubscriber.isMethodCalled());
-    }
-
     @Test
     public void unregister_registries_on_close() throws Exception {
         final EventStore eventStore = spy(mock(EventStore.class));
@@ -304,94 +312,32 @@ public class EventBusShould {
     }
 
     @Test
-    public void do_not_have_Enricher_by_default() {
-        assertNull(eventBus.getEnricher());
-    }
-
-    @Test
     public void enrich_event_if_it_can_be_enriched() {
         final EventEnricher enricher = mock(EventEnricher.class);
-        final Event event = GivenEvent.projectCreated();
+        final EventEnvelope event = EventEnvelope.of(GivenEvent.projectCreated());
         doReturn(true).when(enricher)
-                      .canBeEnriched(any(Event.class));
+                      .canBeEnriched(any(EventEnvelope.class));
         doReturn(event).when(enricher)
-                       .enrich(any(Event.class));
+                       .enrich(any(EventEnvelope.class));
         setUp(enricher);
         eventBus.register(new ProjectCreatedSubscriber());
 
-        eventBus.post(event);
+        eventBus.post(event.getOuterObject());
 
-        verify(enricher).enrich(any(Event.class));
+        verify(enricher).enrich(any(EventEnvelope.class));
     }
 
     @Test
     public void do_not_enrich_event_if_it_cannot_be_enriched() {
         final EventEnricher enricher = mock(EventEnricher.class);
         doReturn(false).when(enricher)
-                       .canBeEnriched(any(Event.class));
+                       .canBeEnriched(any(EventEnvelope.class));
         setUp(enricher);
         eventBus.register(new ProjectCreatedSubscriber());
 
         eventBus.post(GivenEvent.projectCreated());
 
-        verify(enricher, never()).enrich(any(Event.class));
-    }
-
-    @Test
-    public void allow_enrichment_configuration_at_runtime_if_enricher_not_set_previously() {
-        setUp(null);
-        assertNull(eventBus.getEnricher());
-
-        final Class<ProjectId> eventFieldClass = ProjectId.class;
-        final Class<String> enrichmentFieldClass = String.class;
-        final Function<ProjectId, String> function = new Function<ProjectId, String>() {
-            @Override
-            public String apply(@Nullable ProjectId input) {
-                checkNotNull(input);
-                return input.toString();
-            }
-        };
-        eventBus.addFieldEnrichment(eventFieldClass, enrichmentFieldClass, function);
-        final EventEnricher enricher = eventBus.getEnricher();
-        assertNotNull(enricher);
-    }
-
-    @Test
-    public void allow_enrichment_configuration_at_runtime_if_enricher_previously_set() {
-        final EventEnricher enricher = mock(EventEnricher.class);
-        setUp(enricher);
-
-        final Class<ProjectId> eventFieldClass = ProjectId.class;
-        final Class<String> enrichmentFieldClass = String.class;
-        final Function<ProjectId, String> function = new Function<ProjectId, String>() {
-            @Override
-            public String apply(@Nullable ProjectId input) {
-                checkNotNull(input);
-                return input.toString();
-            }
-        };
-        eventBus.addFieldEnrichment(eventFieldClass, enrichmentFieldClass, function);
-        verify(enricher).registerFieldEnrichment(eq(eventFieldClass),
-                                                 eq(enrichmentFieldClass),
-                                                 eq(function));
-    }
-
-    @SuppressWarnings("ConstantConditions")
-    @Test(expected = NullPointerException.class)
-    public void not_accept_null_eventFieldClass_passed_as_field_enrichment_configuration_param() {
-        eventBus.addFieldEnrichment(null, String.class, mock(Function.class));
-    }
-
-    @SuppressWarnings("ConstantConditions")
-    @Test(expected = NullPointerException.class)
-    public void not_accept_null_enrichmentFieldClass_passed_as_field_enrichment_configuration_param() {
-        eventBus.addFieldEnrichment(ProjectId.class, null, mock(Function.class));
-    }
-
-    @SuppressWarnings("ConstantConditions")
-    @Test(expected = NullPointerException.class)
-    public void not_accept_null_function_passed_as_field_enrichment_configuration_param() {
-        eventBus.addFieldEnrichment(ProjectId.class, String.class, null);
+        verify(enricher, never()).enrich(any(EventEnvelope.class));
     }
 
     @Test
@@ -421,25 +367,6 @@ public class EventBusShould {
         }
     }
 
-    /** The subscriber which throws exception from the subscriber method. */
-    private static class FaultySubscriber extends EventSubscriber {
-
-        private boolean methodCalled = false;
-
-        @SuppressWarnings("unused") // It's fine for a faulty subscriber.
-        @Subscribe
-        public void on(ProjectCreated event, EventContext context) {
-            methodCalled = true;
-            throw new UnsupportedOperationException(
-                    "What did you expect from " +
-                    FaultySubscriber.class.getSimpleName() + '?');
-        }
-
-        private boolean isMethodCalled() {
-            return this.methodCalled;
-        }
-    }
-
     /**
      * A simple dispatcher class, which only dispatch and does not have own event
      * subscribing methods.
@@ -457,6 +384,11 @@ public class EventBusShould {
         public Set<String> dispatch(EventEnvelope event) {
             dispatchCalled = true;
             return Identity.of(this);
+        }
+
+        @Override
+        public void onError(EventEnvelope envelope, RuntimeException exception) {
+            // Do nothing.
         }
 
         private boolean isDispatchCalled() {
@@ -491,6 +423,60 @@ public class EventBusShould {
         private Set<EventEnvelope> getPostponedEvents() {
             final Set<EventEnvelope> envelopes = postponedExecutions.keySet();
             return envelopes;
+        }
+    }
+
+    /**
+     * A delegate, dispatching {@link ProjectCreated} events.
+     */
+    private static class FirstProjectCreatedDelegate implements EventDispatcherDelegate<String> {
+        private boolean dispatchCalled = false;
+
+        @Override
+        public Set<EventClass> getEventClasses() {
+            return ImmutableSet.of(EventClass.of(ProjectCreated.class));
+        }
+
+        @Override
+        public Set<String> dispatchEvent(EventEnvelope envelope) {
+            dispatchCalled = true;
+            return ImmutableSet.of(toString());
+        }
+
+        @Override
+        public void onError(EventEnvelope envelope, RuntimeException exception) {
+            // Do nothing.
+        }
+
+        private boolean isDispatchCalled() {
+            return dispatchCalled;
+        }
+    }
+
+    /**
+     * Another delegate, dispatching {@link ProjectCreated} events.
+     */
+    private static class AnotherProjectCreatedDelegate implements EventDispatcherDelegate<String> {
+        private boolean dispatchCalled = false;
+
+        @Override
+        public Set<EventClass> getEventClasses() {
+            return ImmutableSet.of(EventClass.of(ProjectCreated.class));
+        }
+
+        @Override
+        public Set<String> dispatchEvent(EventEnvelope envelope) {
+            dispatchCalled = true;
+            return ImmutableSet.of(toString());
+        }
+
+        @Override
+        public void onError(EventEnvelope envelope, RuntimeException exception) {
+            // Do nothing.
+        }
+
+        private boolean isDispatchCalled() {
+            return dispatchCalled;
         }
     }
 }

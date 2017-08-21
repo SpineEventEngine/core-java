@@ -38,8 +38,8 @@ public class CommandAwareSubscriber extends VerifiableSubscriber {
 
     @Subscribe
     public void on(ProjectRejections.MissingOwner rejection,
-                   RemoveOwner command,
-                   CommandContext context) {
+                    RemoveOwner command,
+                    CommandContext context) {
         triggerCall();
         this.rejection = rejection;
         this.command = command;

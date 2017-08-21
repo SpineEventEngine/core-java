@@ -35,7 +35,7 @@ import io.spine.core.MessageEnvelope;
  * @author Dmytro Dashenkov
  */
 @Internal
-public interface DeadMessageTap<E extends MessageEnvelope<?, ?>> {
+public interface DeadMessageTap<E extends MessageEnvelope<?, ?, ?>> {
 
     /**
      * Handles the dead message in a bus-specific way and produces an {@link MessageUnhandled} which

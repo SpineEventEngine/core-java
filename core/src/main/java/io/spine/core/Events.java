@@ -19,6 +19,7 @@
  */
 package io.spine.core;
 
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
@@ -31,6 +32,7 @@ import io.spine.time.Timestamps2;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.protobuf.AnyPacker.unpack;
@@ -62,8 +64,20 @@ public final class Events {
                            .register(idStringifier(), EventId.class);
     }
 
-    private Events() {
-        // Prevent instantiation of this utility class.
+    /** Prevents instantiation of this utility class. */
+    private Events() {}
+
+    /**
+     * Creates a new {@link EventId} based on random UUID.
+     *
+     * @return new UUID-based event ID
+     */
+    public static EventId generateId() {
+        final String value = UUID.randomUUID()
+                                 .toString();
+        return EventId.newBuilder()
+                      .setValue(value)
+                      .build();
     }
 
     /**
@@ -107,6 +121,18 @@ public final class Events {
     }
 
     /**
+     * Extracts an event message if the passed instance is an {@link Event} object or {@link Any},
+     * otherwise returns the passed message.
+     */
+    public static Message ensureMessage(Message eventOrMessage) {
+        checkNotNull(eventOrMessage);
+        if (eventOrMessage instanceof Event) {
+            return getMessage((Event) eventOrMessage);
+        }
+        return io.spine.protobuf.Messages.ensureMessage(eventOrMessage);
+    }
+
+    /**
      * Obtains the actor user ID from the passed {@code EventContext}.
      *
      * <p>The 'actor' is the user who sent the command, which generated the event which context is
@@ -126,14 +152,13 @@ public final class Events {
      * {@code <I>} type.
      *
      * @param context the event context to to get the event producer ID
-     * @param <I>     the type of the producer ID wrapped in the passed {@code EventContext}
+     * @param <I>     the type of the producer ID
      * @return the producer ID
      */
     public static <I> I getProducer(EventContext context) {
         checkNotNull(context);
         final I id = Identifier.unpack(context.getProducerId());
         return id;
-
     }
 
     /**
@@ -165,6 +190,18 @@ public final class Events {
                                      .getActorContext()
                                      .getTenantId();
         return result;
+    }
+
+    /**
+     * Creates an empty {@link Iterable} over the messages of the type {@code <M>}.
+     *
+     * <p>This method is useful for returning empty result from reacting methods.
+     *
+     * @param <M> the type of messages
+     * @return empty {@link Iterable}
+     */
+    public static <M> Iterable<M> nothing() {
+        return ImmutableList.of();
     }
 
     /**

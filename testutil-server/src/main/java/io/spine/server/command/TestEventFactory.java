@@ -43,8 +43,8 @@ import static io.spine.protobuf.AnyPacker.pack;
  */
 public class TestEventFactory extends EventFactory {
 
-    private TestEventFactory(MessageEnvelope<?, ?> origin, Any producerId, int eventCount) {
-        super(origin, producerId, eventCount);
+    private TestEventFactory(MessageEnvelope<?, ?, ?> origin, Any producerId, int eventCount) {
+        super(origin, producerId);
     }
 
     public static TestEventFactory newInstance(Any producerId, Class<?> testSuiteClass) {
@@ -54,7 +54,7 @@ public class TestEventFactory extends EventFactory {
     public static TestEventFactory newInstance(Any producerId,
                                                TestActorRequestFactory requestFactory) {
         checkNotNull(requestFactory);
-        final CommandEnvelope cmd = requestFactory.generateAndWrap();
+        final CommandEnvelope cmd = requestFactory.generateEnvelope();
         return new TestEventFactory(cmd, producerId, 1);
     }
 

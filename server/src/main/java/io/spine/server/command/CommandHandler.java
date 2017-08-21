@@ -20,7 +20,7 @@
 
 package io.spine.server.command;
 
-import com.google.common.collect.ImmutableSet;
+import com.google.common.base.Supplier;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
@@ -30,13 +30,19 @@ import io.spine.core.Event;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.event.EventBus;
-import io.spine.server.reflect.CommandHandlerMethod;
+import io.spine.server.model.HandlerMethod;
+import io.spine.server.model.Model;
+import io.spine.string.Stringifiers;
+import io.spine.type.MessageClass;
+import io.spine.util.Logging;
+import org.slf4j.Logger;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Set;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.protobuf.TypeConverter.toMessage;
+import static java.lang.String.format;
 
 /**
  * The abstract base for non-aggregate classes that expose command handling methods
@@ -67,6 +73,9 @@ import static io.spine.protobuf.TypeConverter.toMessage;
  */
 public abstract class CommandHandler implements CommandDispatcher<String> {
 
+    private final CommandHandlerClass<?> thisClass = Model.getInstance()
+                                                          .asCommandHandlerClass(getClass());
+
     /**
      * The {@code EventBut} to which the handler posts events it produces.
      */
@@ -77,11 +86,8 @@ public abstract class CommandHandler implements CommandDispatcher<String> {
      */
     private final Any producerId;
 
-    /**
-     * Cached set of the command classes this handler can handle.
-     */
-    @Nullable
-    private Set<CommandClass> commandClasses;
+    /** Lazily initialized logger. */
+    private final Supplier<Logger> loggerSupplier = Logging.supplyFor(getClass());
 
     /**
      * Creates a new instance of the command handler.
@@ -101,7 +107,7 @@ public abstract class CommandHandler implements CommandDispatcher<String> {
      *
      * @return the string with the handler identity
      */
-    protected String getId() {
+    public String getId() {
         return toString();
     }
 
@@ -116,27 +122,40 @@ public abstract class CommandHandler implements CommandDispatcher<String> {
      */
     @Override
     public String dispatch(CommandEnvelope envelope) {
+        final CommandHandlerMethod method = thisClass.getHandler(envelope.getMessageClass());
         final List<? extends Message> eventMessages =
-                CommandHandlerMethod.invokeFor(this,
-                                               envelope.getMessage(),
-                                               envelope.getCommandContext());
+                method.invoke(this, envelope.getMessage(), envelope.getCommandContext());
         final List<Event> events = toEvents(eventMessages, envelope);
         postEvents(events);
         return getId();
     }
 
+    @Override
+    public void onError(CommandEnvelope envelope, RuntimeException exception) {
+        checkNotNull(envelope);
+        checkNotNull(exception);
+        final MessageClass messageClass = envelope.getMessageClass();
+        final String messageId = Stringifiers.toString(envelope.getId());
+        final String errorMessage =
+                format("Error handling command (class: %s id: %s).", messageClass, messageId);
+        log().error(errorMessage, exception);
+    }
+
+    /**
+     * Obtains the instance of logger associated with the class of the handler.
+     */
+    protected Logger log() {
+        return loggerSupplier.get();
+    }
+
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK as we return immutable impl.
     @Override
     public Set<CommandClass> getMessageClasses() {
-        if (commandClasses == null) {
-            commandClasses = ImmutableSet.copyOf(
-                    CommandHandlerMethod.inspect(getClass()));
-        }
-        return commandClasses;
+        return thisClass.getCommands();
     }
 
     private List<Event> toEvents(List<? extends Message> eventMessages, CommandEnvelope ce) {
-        return CommandHandlerMethod.toEvents(producerId, null, eventMessages, ce);
+        return HandlerMethod.toEvents(producerId, null, eventMessages, ce);
     }
 
     /** Posts passed events to {@link EventBus}. */

@@ -27,14 +27,15 @@ import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
+import io.spine.core.EventEnvelope;
 import io.spine.server.BoundedContext;
 import io.spine.server.entity.EntityStorageConverter;
 import io.spine.server.entity.EventDispatchingRepository;
 import io.spine.server.event.EventFilter;
 import io.spine.server.event.EventStore;
 import io.spine.server.event.EventStreamQuery;
-import io.spine.server.route.EventRouting;
-import io.spine.server.route.Producers;
+import io.spine.server.model.Model;
+import io.spine.server.route.EventProducers;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
@@ -61,7 +62,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      * Creates a new {@code ProjectionRepository}.
      */
     protected ProjectionRepository() {
-        super(Producers.<I>fromContext());
+        super(EventProducers.<I>fromContext());
     }
 
     /** Obtains {@link EventStore} from which to get events during catch-up. */
@@ -70,15 +71,17 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
                                   .getEventStore();
     }
 
-    /**
-     * Exposes {@linkplain #getRouting() routing} to the package.
-     *
-     * <p>{@link EventDispatchingRepository#getRouting()} is {@code final} to restrict routing
-     * customization only via adding custom entries.
-     */
-    @VisibleForTesting
-    EventRouting<I> routing() {
-        return getRouting();
+    /** Obtains class information of projection managed by this repository. */
+    @SuppressWarnings("unchecked") // The cast is ensured by generic parameters of the repository.
+    private ProjectionClass<P> projectionClass() {
+        return (ProjectionClass<P>) entityClass();
+    }
+
+    @SuppressWarnings("unchecked") // The cast is ensured by generic parameters of the repository.
+    @Override
+    protected final ProjectionClass<P> getModelClass(Class<P> cls) {
+        return (ProjectionClass<P>) Model.getInstance()
+                                         .asProjectionClass(cls);
     }
 
     /**
@@ -175,9 +178,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     /** {@inheritDoc} */
     @Override
     public Set<EventClass> getMessageClasses() {
-        final Class<? extends Projection> projectionClass = getEntityClass();
-        final Set<EventClass> result = Projection.TypeInfo.getEventClasses(projectionClass);
-        return result;
+        return projectionClass().getEventSubscriptions();
     }
 
     /**
@@ -199,11 +200,12 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      * @see Projection#handle(Message, EventContext)
      */
     @Override
-    protected void dispatchToEntity(I id, Message eventMessage, EventContext context) {
+    protected void dispatchToEntity(I id, EventEnvelope event) {
         final P projection = findOrCreate(id);
         final ProjectionTransaction<I, ?, ?> tx =
                 ProjectionTransaction.start((Projection<I, ?, ?>) projection);
-        projection.handle(eventMessage, context);
+        final EventContext context = event.getEventContext();
+        projection.handle(event.getMessage(), context);
         tx.commit();
 
         if (projection.isChanged()) {

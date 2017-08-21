@@ -29,11 +29,13 @@ import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
+import io.spine.core.Events;
 import io.spine.core.TenantId;
 import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.core.given.GivenEvent;
 import io.spine.server.BoundedContext;
+import io.spine.server.TestEventClasses;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.RecordBasedRepositoryShould;
@@ -58,7 +60,6 @@ import java.util.List;
 import java.util.Set;
 
 import static io.spine.Identifier.newUuid;
-import static io.spine.test.Verify.assertContainsAll;
 import static io.spine.time.Time.getCurrentTime;
 import static java.lang.String.format;
 import static org.junit.Assert.assertEquals;
@@ -199,22 +200,33 @@ public class ProjectionRepositoryShould
         }
     }
 
-    @Test(expected = RuntimeException.class)
-    public void throw_exception_if_dispatch_unknown_event() {
+    @Test
+    public void log_error_if_dispatch_unknown_event() {
         final StringValue unknownEventMessage = StringValue.getDefaultInstance();
 
         final Event event = GivenEvent.withMessage(unknownEventMessage);
 
         repository().dispatch(EventEnvelope.of(event));
+
+        TestProjectionRepository testRepo = (TestProjectionRepository)repository();
+
+        assertTrue(testRepo.getLastErrorEnvelope() instanceof EventEnvelope);
+        assertEquals(Events.getMessage(event), testRepo.getLastErrorEnvelope()
+                                                       .getMessage());
+        assertEquals(event, testRepo.getLastErrorEnvelope().getOuterObject());
+
+        // It must be "illegal argument type" since projections of this repository
+        // do not handle such events.
+        assertTrue(testRepo.getLastException() instanceof IllegalArgumentException);
     }
 
     @Test
     public void return_event_classes() {
         final Set<EventClass> eventClasses = repository().getMessageClasses();
-        assertContainsAll(eventClasses,
-                          EventClass.of(PrjProjectCreated.class),
-                          EventClass.of(PrjTaskAdded.class),
-                          EventClass.of(PrjProjectStarted.class));
+        TestEventClasses.assertContains(eventClasses,
+                                        PrjProjectCreated.class,
+                                        PrjTaskAdded.class,
+                                        PrjProjectStarted.class);
     }
 
     @Test

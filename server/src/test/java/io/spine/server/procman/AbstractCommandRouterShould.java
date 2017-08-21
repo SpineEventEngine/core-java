@@ -110,6 +110,11 @@ public abstract class AbstractCommandRouterShould<T extends AbstractCommandRoute
                 // Do nothing.
                 return "Anonymous";
             }
+
+            @Override
+            public void onError(CommandEnvelope envelope, RuntimeException exception) {
+                // Do nothing.
+            }
         });
 
         sourceMessage = toMessage(getClass().getSimpleName());

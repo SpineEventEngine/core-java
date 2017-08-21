@@ -31,7 +31,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alexander Yevsyukov
  * @author Alex Tymchenko
  */
-public final class EventEnvelope extends AbstractMessageEnvelope<EventId, Event> {
+public final class EventEnvelope extends EnrichableMessageEnvelope<EventId, Event, EventContext> {
 
     private final Message eventMessage;
     private final EventClass eventClass;
@@ -62,6 +62,14 @@ public final class EventEnvelope extends AbstractMessageEnvelope<EventId, Event>
     }
 
     /**
+     * Obtains tenant ID of the event.
+     */
+    @Override
+    public TenantId getTenantId() {
+        return getActorContext().getTenantId();
+    }
+
+    /**
      * Obtains the event message.
      */
     @Override
@@ -75,6 +83,11 @@ public final class EventEnvelope extends AbstractMessageEnvelope<EventId, Event>
     @Override
     public EventClass getMessageClass() {
         return this.eventClass;
+    }
+
+    @Override
+    public EventContext getMessageContext() {
+        return getEventContext();
     }
 
     @Override
@@ -107,5 +120,19 @@ public final class EventEnvelope extends AbstractMessageEnvelope<EventId, Event>
     public TypeName getTypeName() {
         final TypeName result = TypeName.of(eventMessage);
         return result;
+    }
+
+    @Override
+    public Enrichment getEnrichment() {
+        return getEventContext().getEnrichment();
+    }
+
+    @Override
+    protected EventEnvelope enrich(Enrichment enrichment) {
+        final Event.Builder enrichedCopy =
+                getOuterObject().toBuilder()
+                                .setContext(getMessageContext().toBuilder()
+                                                               .setEnrichment(enrichment));
+        return of(enrichedCopy.build());
     }
 }

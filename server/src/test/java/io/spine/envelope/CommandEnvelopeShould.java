@@ -27,15 +27,14 @@ import io.spine.core.CommandEnvelope;
 import io.spine.core.MessageEnvelopeShould;
 import org.junit.Test;
 
-import static io.spine.test.TestValues.newUuidValue;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 
 /**
  * @author Alexander Yevsyukov
  */
-public class CommandEnvelopeShould extends MessageEnvelopeShould<Command,
-        CommandEnvelope,
-                                                                 CommandClass> {
+public class CommandEnvelopeShould
+        extends MessageEnvelopeShould<Command, CommandEnvelope, CommandClass> {
 
     private final TestActorRequestFactory requestFactory =
             TestActorRequestFactory.newInstance(CommandEnvelopeShould.class);
@@ -45,11 +44,21 @@ public class CommandEnvelopeShould extends MessageEnvelopeShould<Command,
         final Command command = outerObject();
         final CommandEnvelope envelope = toEnvelope(command);
         assertEquals(command.getContext(), envelope.getCommandContext());
+        assertSame(envelope.getCommandContext(), envelope.getMessageContext());
+    }
+
+    @Test
+    public void obtain_actor_context() {
+        final Command command = outerObject();
+        final CommandEnvelope envelope = toEnvelope(command);
+
+        assertEquals(command.getContext()
+                            .getActorContext(), envelope.getActorContext());
     }
 
     @Override
     protected Command outerObject() {
-        return requestFactory.command().create(newUuidValue());
+        return requestFactory.generateCommand();
     }
 
     @Override

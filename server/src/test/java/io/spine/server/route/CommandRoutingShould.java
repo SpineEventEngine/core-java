@@ -26,7 +26,6 @@ import com.google.protobuf.StringValue;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
-import io.spine.test.TestValues;
 import io.spine.time.Time;
 import org.junit.Before;
 import org.junit.Test;
@@ -138,8 +137,7 @@ public class CommandRoutingShould {
         // Have custom route.
         commandRouting.route(StringValue.class, customRoute);
 
-        final CommandEnvelope command =
-                CommandEnvelope.of(factory.createCommand(TestValues.newUuidValue()));
+        final CommandEnvelope command = factory.generateEnvelope();
 
         final long id = commandRouting.apply(command.getMessage(), command.getCommandContext());
 

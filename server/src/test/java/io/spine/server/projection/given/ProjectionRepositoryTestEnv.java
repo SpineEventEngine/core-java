@@ -24,6 +24,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Message;
 import io.spine.core.EventContext;
+import io.spine.core.MessageEnvelope;
 import io.spine.core.Subscribe;
 import io.spine.server.entity.TestEntityWithStringColumn;
 import io.spine.server.projection.Projection;
@@ -36,6 +37,8 @@ import io.spine.test.projection.ProjectVBuilder;
 import io.spine.test.projection.event.PrjProjectCreated;
 import io.spine.test.projection.event.PrjProjectStarted;
 import io.spine.test.projection.event.PrjTaskAdded;
+
+import javax.annotation.Nullable;
 
 public class ProjectionRepositoryTestEnv {
 
@@ -73,9 +76,33 @@ public class ProjectionRepositoryTestEnv {
     public static class TestProjectionRepository
             extends ProjectionRepository<ProjectId, TestProjection, Project> {
 
+        @Nullable
+        private MessageEnvelope lastErrorEnvelope;
+        @Nullable
+        private RuntimeException lastException;
+
         @Subscribe
         public void apply(PrjProjectCreated event, EventContext eventContext) {
             // NOP
+        }
+
+        @Override
+        protected void logError(String msgFormat,
+                                MessageEnvelope envelope,
+                                RuntimeException exception) {
+            super.logError(msgFormat, envelope, exception);
+            lastErrorEnvelope = envelope;
+            lastException = exception;
+        }
+
+        @Nullable
+        public MessageEnvelope getLastErrorEnvelope() {
+            return lastErrorEnvelope;
+        }
+
+        @Nullable
+        public RuntimeException getLastException() {
+            return lastException;
         }
     }
 

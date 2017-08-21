@@ -21,7 +21,6 @@ package io.spine.server.commandbus;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
-import io.spine.Environment;
 import io.spine.Identifier;
 import io.spine.annotation.Internal;
 import io.spine.base.Error;
@@ -46,6 +45,7 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.getRootCause;
+import static io.spine.core.Commands.causedByRejection;
 import static io.spine.core.Rejections.toRejection;
 import static io.spine.server.bus.Buses.acknowledge;
 import static io.spine.server.bus.Buses.reject;
@@ -202,7 +202,7 @@ public class CommandBus extends Bus<Command,
             final Throwable cause = getRootCause(e);
             commandStore.updateCommandStatus(envelope, cause, log);
 
-            if (cause instanceof ThrowableMessage) {
+            if (causedByRejection(e)) {
                 final ThrowableMessage throwableMessage = (ThrowableMessage) cause;
                 final Rejection rejection = toRejection(throwableMessage, envelope.getCommand());
                 rejectionBus().post(rejection);
@@ -409,7 +409,7 @@ public class CommandBus extends Bus<Command,
          * to {@code false}.
          *
          * <p>If not set explicitly, the default value of this flag is set upon the best guess,
-         * based on current {@link Environment}.
+         * based on current {@link io.spine.server.ServerEnvironment server environment}.
          */
         public Builder setThreadSpawnAllowed(boolean threadSpawnAllowed) {
             this.threadSpawnAllowed = threadSpawnAllowed;

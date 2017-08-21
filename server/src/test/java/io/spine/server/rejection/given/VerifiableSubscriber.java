@@ -17,12 +17,17 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package io.spine.server.rejection.given;
 
 import io.spine.core.Rejection;
 import io.spine.server.rejection.RejectionSubscriber;
 
+/**
+ * A test rejection subscriber, which allows to verify the interactions performed with it.
+ *
+ * @author Alex Tymchenko
+ * @author Alexander Yevsyukov
+ */
 public abstract class VerifiableSubscriber extends RejectionSubscriber {
 
     private boolean methodCalled = false;
@@ -31,7 +36,7 @@ public abstract class VerifiableSubscriber extends RejectionSubscriber {
         methodCalled = true;
     }
 
-    public  boolean isMethodCalled() {
+    public boolean isMethodCalled() {
         return methodCalled;
     }
 

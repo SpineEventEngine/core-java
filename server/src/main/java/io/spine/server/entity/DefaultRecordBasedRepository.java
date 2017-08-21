@@ -21,6 +21,7 @@
 package io.spine.server.entity;
 
 import com.google.protobuf.Message;
+import io.spine.type.TypeUrl;
 
 /**
  * Implementation of {@link RecordBasedRepository} that manages entities
@@ -44,7 +45,8 @@ public abstract class DefaultRecordBasedRepository<I,
     protected DefaultRecordBasedRepository() {
         super();
         this.entityFactory = new DefaultEntityFactory<>(getEntityClass(), getIdClass());
-        this.storageConverter = DefaultEntityStorageConverter.forAllFields(getEntityStateType(),
+        final TypeUrl stateType = entityClass().getStateType();
+        this.storageConverter = DefaultEntityStorageConverter.forAllFields(stateType,
                                                                            this.entityFactory);
     }
 

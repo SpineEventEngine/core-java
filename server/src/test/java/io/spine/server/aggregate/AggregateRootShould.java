@@ -27,6 +27,7 @@ import io.spine.server.aggregate.given.AggregateRootTestEnv;
 import io.spine.server.aggregate.given.AggregateRootTestEnv.AnAggregateRoot;
 import io.spine.server.aggregate.given.AggregateRootTestEnv.ProjectDefinitionRepository;
 import io.spine.server.aggregate.given.AggregateRootTestEnv.ProjectLifeCycleRepository;
+import io.spine.server.model.ModelTests;
 import io.spine.test.aggregate.ProjectDefinition;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.ProjectLifecycle;
@@ -45,6 +46,7 @@ public class AggregateRootShould {
 
     @Before
     public void setUp() {
+        ModelTests.clearModel();
         boundedContext = BoundedContext.newBuilder()
                                        .build();
         ProjectId projectId = ProjectId.newBuilder()

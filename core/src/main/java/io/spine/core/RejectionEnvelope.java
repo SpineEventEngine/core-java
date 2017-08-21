@@ -29,7 +29,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alex Tymchenko
  */
-public class RejectionEnvelope extends AbstractMessageEnvelope<RejectionId, Rejection> {
+public class RejectionEnvelope
+        extends EnrichableMessageEnvelope<RejectionId, Rejection, RejectionContext> {
 
     /** The rejection message. */
     private final Message rejectionMessage;
@@ -70,6 +71,11 @@ public class RejectionEnvelope extends AbstractMessageEnvelope<RejectionId, Reje
     }
 
     @Override
+    public TenantId getTenantId() {
+        return getActorContext().getTenantId();
+    }
+
+    @Override
     public Message getMessage() {
         return rejectionMessage;
     }
@@ -79,9 +85,18 @@ public class RejectionEnvelope extends AbstractMessageEnvelope<RejectionId, Reje
         return rejectionClass;
     }
 
+    public RejectionContext getRejectionContext() {
+        return getOuterObject().getContext();
+    }
+
     @Override
     public ActorContext getActorContext() {
         return getCommandContext().getActorContext();
+    }
+
+    @Override
+    public RejectionContext getMessageContext() {
+        return getOuterObject().getContext();
     }
 
     /**
@@ -100,5 +115,19 @@ public class RejectionEnvelope extends AbstractMessageEnvelope<RejectionId, Reje
 
     public CommandContext getCommandContext() {
         return commandContext;
+    }
+
+    @Override
+    public Enrichment getEnrichment() {
+        return getMessageContext().getEnrichment();
+    }
+
+    @Override
+    protected RejectionEnvelope enrich(Enrichment enrichment) {
+        final Rejection.Builder enrichedCopy =
+                getOuterObject().toBuilder()
+                                .setContext(getMessageContext().toBuilder()
+                                                               .setEnrichment(enrichment));
+        return of(enrichedCopy.build());
     }
 }

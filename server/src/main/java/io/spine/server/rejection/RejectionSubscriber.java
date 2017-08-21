@@ -19,33 +19,46 @@
  */
 package io.spine.server.rejection;
 
+import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableSet;
-import com.google.protobuf.Message;
 import io.spine.core.Command;
-import io.spine.core.CommandContext;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
-import io.spine.server.reflect.RejectionSubscriberMethod;
+import io.spine.server.model.Model;
 import io.spine.server.tenant.CommandOperation;
+import io.spine.string.Stringifiers;
+import io.spine.type.MessageClass;
+import io.spine.util.Logging;
+import org.slf4j.Logger;
 
-import javax.annotation.Nullable;
 import java.util.Set;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.String.format;
+
 /**
- * Abstract base for objects receiving rejections from {@link RejectionBus}.
+ * A base for objects subscribing to rejections from {@link RejectionBus}.
  *
- * @author Alex Tymchenko
  * @author Alexander Yevsyukov
+ * @author Alex Tymchenko
  * @see RejectionBus#register(io.spine.server.bus.MessageDispatcher)
+ * @see io.spine.core.Subscribe
  */
 public class RejectionSubscriber implements RejectionDispatcher<String> {
 
-    /**
-     * Cached set of the rejection classes this subscriber is subscribed to.
-     */
-    @Nullable
-    private Set<RejectionClass> rejectionClasses;
+    private final RejectionSubscriberClass<?> thisClass = Model.getInstance()
+                                                               .asRejectionSubscriber(getClass());
 
+    /** Lazily initialized logger. */
+    private final Supplier<Logger> loggerSupplier = Logging.supplyFor(getClass());
+
+    /**
+     * {@inheritDoc}
+     *
+     * @param envelope the envelope with the message
+     * @return a one element set with the result of {@link #toString()} as the identity of
+     * the subscriber, or empty set if dispatching failed
+     */
     @Override
     public Set<String> dispatch(final RejectionEnvelope envelope) {
         final Command originCommand = envelope.getOuterObject()
@@ -55,26 +68,52 @@ public class RejectionSubscriber implements RejectionDispatcher<String> {
 
             @Override
             public void run() {
-                handle(envelope.getMessage(),
-                       envelope.getCommandMessage(),
-                       envelope.getCommandContext());
+                handle(envelope);
             }
         };
-        op.execute();
+        try {
+            op.execute();
+        } catch (RuntimeException e) {
+            onError(envelope, e);
+            return ImmutableSet.of();
+        }
         return Identity.of(this);
+    }
+
+    private void handle(RejectionEnvelope rejection) {
+        final RejectionSubscriberMethod method =
+                thisClass.getSubscriber(rejection.getMessageClass());
+        method.invoke(this, rejection.getMessage(), rejection.getRejectionContext());
+    }
+
+    /**
+     * Logs the error into the subscriber {@linkplain #log() log}.
+     *
+     * @param envelope  the message which caused the error
+     * @param exception the error
+     */
+    @Override
+    public void onError(RejectionEnvelope envelope, RuntimeException exception) {
+        checkNotNull(envelope);
+        checkNotNull(exception);
+        final MessageClass messageClass = envelope.getMessageClass();
+        final String messageId = Stringifiers.toString(envelope.getId());
+        final String errorMessage =
+                format("Rejection subscriber (%s) could not handle rejection (class: %s id: %s).",
+                       this, messageClass, messageId);
+        log().error(errorMessage, exception);
+    }
+
+    /**
+     * Obtains the instance of logger associated with the class of the subscriber.
+     */
+    protected Logger log() {
+        return loggerSupplier.get();
     }
 
     @Override
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // as we return an immutable collection.
     public Set<RejectionClass> getMessageClasses() {
-        if (rejectionClasses == null) {
-            rejectionClasses = ImmutableSet.copyOf(
-                    RejectionSubscriberMethod.getRejectionClasses(getClass()));
-        }
-        return rejectionClasses;
-    }
-
-    public void handle(Message rejectionMessage, Message commandMessage, CommandContext context) {
-        RejectionSubscriberMethod.invokeFor(this, rejectionMessage, commandMessage, context);
+        return thisClass.getRejectionSubscriptions();
     }
 }

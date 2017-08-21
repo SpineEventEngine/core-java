@@ -43,6 +43,8 @@ public class ContextAwareSubscriber extends VerifiableSubscriber {
     @Override
     public void verifyGot(Rejection rejection) {
         assertEquals(getMessage(rejection), this.rejection);
-        assertEquals(rejection.getContext().getCommand().getContext(), context);
+        assertEquals(rejection.getContext()
+                              .getCommand()
+                              .getContext(), context);
     }
 }

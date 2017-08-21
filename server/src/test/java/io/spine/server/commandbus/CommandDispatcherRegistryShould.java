@@ -33,6 +33,7 @@ import io.spine.server.commandbus.given.CommandDispatcherRegistryTestEnv.EmptyCo
 import io.spine.server.commandbus.given.CommandDispatcherRegistryTestEnv.EmptyDispatcher;
 import io.spine.server.commandbus.given.CommandDispatcherRegistryTestEnv.NoCommandsDispatcherRepo;
 import io.spine.server.event.EventBus;
+import io.spine.server.model.ModelTests;
 import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.test.command.CmdAddTask;
 import io.spine.test.command.CmdCreateProject;
@@ -63,6 +64,8 @@ public class CommandDispatcherRegistryShould {
 
     @Before
     public void setUp() {
+        ModelTests.clearModel();
+        
         final BoundedContext boundedContext = BoundedContext.newBuilder()
                                                             .setName(getClass().getSimpleName())
                                                             .build();

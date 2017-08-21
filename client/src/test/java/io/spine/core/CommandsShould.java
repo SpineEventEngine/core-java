@@ -31,12 +31,14 @@ import com.google.protobuf.Int64Value;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.spine.Identifier;
+import io.spine.base.ThrowableMessage;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.given.GivenCommandContext;
 import io.spine.core.given.GivenUserId;
 import io.spine.string.Stringifiers;
 import io.spine.time.Durations2;
+import io.spine.time.Time;
 import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
 import io.spine.type.TypeName;
@@ -47,13 +49,13 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.protobuf.Descriptors.FileDescriptor;
+import static io.spine.core.Commands.causedByRejection;
 import static io.spine.core.Commands.sameActorAndTenant;
 import static io.spine.core.given.GivenTenantId.newUuid;
 import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.TimeTests.Past.minutesAgo;
 import static io.spine.test.TimeTests.Past.secondsAgo;
-import static io.spine.test.TestValues.newUuidValue;
 import static io.spine.time.Durations2.seconds;
 import static io.spine.time.Time.getCurrentTime;
 import static org.junit.Assert.assertEquals;
@@ -227,8 +229,7 @@ public class CommandsShould {
 
     @Test
     public void obtain_type_of_command() {
-        final Command command = requestFactory.command()
-                                              .create(newUuidValue());
+        final Command command = requestFactory.generateCommand();
 
         final TypeName typeName = CommandEnvelope.of(command)
                                                  .getTypeName();
@@ -249,5 +250,22 @@ public class CommandsShould {
                                                .toUrl();
 
         assertEquals(TypeUrl.of(StringValue.class), typeUrl);
+    }
+
+    @SuppressWarnings({
+            "NewExceptionWithoutArguments" /* No need to have a message for this test. */,
+            "SerializableInnerClassWithNonSerializableOuterClass" /* Does not refer anything. */
+    })
+    @Test
+    public void say_if_RuntimeException_was_called_by_command_rejection() {
+        assertFalse(causedByRejection(new RuntimeException()));
+        final ThrowableMessage throwableMessage = new ThrowableMessage(Time.getCurrentTime()) {
+            private static final long serialVersionUID = 0L;
+        };
+        assertTrue(causedByRejection(new IllegalStateException(throwableMessage)));
+
+        // Check that root cause is analyzed.
+        assertTrue(causedByRejection(
+                new RuntimeException(new IllegalStateException(throwableMessage))));
     }
 }

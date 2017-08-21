@@ -20,11 +20,10 @@
 package io.spine.server.procman;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.protobuf.Message;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
-import io.spine.core.EventContext;
-import io.spine.protobuf.AnyPacker;
+import io.spine.core.EventEnvelope;
+import io.spine.core.RejectionEnvelope;
 
 import java.util.List;
 
@@ -38,53 +37,46 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @VisibleForTesting
 public class ProcessManagerDispatcher {
 
-    private ProcessManagerDispatcher() {
-        // Prevent this utility class from instantiation.
-    }
+    /** Prevents this utility class from instantiation. */
+    private ProcessManagerDispatcher() {}
 
     /**
-     * Dispatches the {@linkplain CommandEnvelope Command envelope}
-     * to the given {@code ProcessManager}.
+     * Dispatches the {@linkplain CommandEnvelope command} to the given {@code ProcessManager}.
      *
      * @return the list of {@linkplain Event events}, being the command output.
      */
-    public static List<Event> dispatch(ProcessManager<?, ?, ?> processManager,
-                                       CommandEnvelope envelope) {
-        checkNotNull(processManager);
-        checkNotNull(envelope);
+    public static List<Event> dispatch(ProcessManager<?, ?, ?> pm, CommandEnvelope command) {
+        checkNotNull(pm);
+        checkNotNull(command);
 
-        final ProcManTransaction<?, ?, ?> tx = ProcManTransaction.start(processManager);
-        final List<Event> eventMessages = processManager.dispatchCommand(envelope);
+        final PmTransaction<?, ?, ?> tx = PmTransaction.start(pm);
+        final List<Event> eventMessages = pm.dispatchCommand(command);
         tx.commit();
 
         return eventMessages;
     }
 
     /**
-     * Dispatches the {@code Event} to the given {@code ProcessManager}.
+     * Dispatches an {@linkplain EventEnvelope event} to the given {@code ProcessManager}.
      */
-    public static void dispatch(ProcessManager<?, ?, ?> processManager,
-                                Event event) {
-        checkNotNull(processManager);
+    public static void dispatch(ProcessManager<?, ?, ?> pm, EventEnvelope event) {
+        checkNotNull(pm);
         checkNotNull(event);
 
-        final Message unpackedMessage = AnyPacker.unpack(event.getMessage());
-        dispatch(processManager, unpackedMessage, event.getContext());
+        final PmTransaction<?, ?, ?> tx = PmTransaction.start(pm);
+        pm.dispatchEvent(event);
+        tx.commit();
     }
 
     /**
-     * Dispatches the passed {@code Event} message along with its context
-     * to the given {@code ProcessManager}.
+     * Dispatches a {@linkplain RejectionEnvelope rejection} to the given {@code ProcessManager}.
      */
-    public static void dispatch(ProcessManager<?, ?, ?> processManager,
-                                Message eventMessage,
-                                EventContext eventContext) {
-        checkNotNull(processManager);
-        checkNotNull(eventMessage);
-        checkNotNull(eventContext);
+    public static void dispatch(ProcessManager<?, ?, ?> pm, RejectionEnvelope rejection) {
+        checkNotNull(pm);
+        checkNotNull(rejection);
 
-        final ProcManTransaction<?, ?, ?> tx = ProcManTransaction.start(processManager);
-        processManager.dispatchEvent(eventMessage, eventContext);
+        final PmTransaction<?, ?, ?> tx = PmTransaction.start(pm);
+        pm.dispatchRejection(rejection);
         tx.commit();
     }
 }

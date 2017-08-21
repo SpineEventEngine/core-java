@@ -21,26 +21,26 @@
 package io.spine.server.procman;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
-import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
-import io.spine.core.EventClass;
-import io.spine.core.EventContext;
+import io.spine.core.EventEnvelope;
+import io.spine.core.MessageEnvelope;
+import io.spine.core.RejectionEnvelope;
+import io.spine.server.command.CommandHandlerMethod;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.commandbus.CommandBus;
-import io.spine.server.reflect.CommandHandlerMethod;
-import io.spine.server.reflect.EventSubscriberMethod;
+import io.spine.server.event.EventReactorMethod;
+import io.spine.server.model.HandlerMethod;
+import io.spine.server.model.Model;
+import io.spine.server.rejection.RejectionReactorMethod;
 import io.spine.validate.ValidatingBuilder;
 
 import java.util.List;
-import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static io.spine.server.reflect.EventSubscriberMethod.getMethod;
 
 /**
  * A central processing unit used to maintain the state of the business process and determine
@@ -71,6 +71,9 @@ public abstract class ProcessManager<I,
                                      S extends Message,
                                      B extends ValidatingBuilder<S, ? extends Message.Builder>>
         extends CommandHandlingEntity<I, S, B> {
+
+    private final ProcessManagerClass<?> thisClass = Model.getInstance()
+                                                          .asProcessManagerClass(getClass());
 
     /** The Command Bus to post routed commands. */
     private volatile CommandBus commandBus;
@@ -110,7 +113,9 @@ public abstract class ProcessManager<I,
      */
     @Override
     protected List<Event> dispatchCommand(CommandEnvelope cmd) {
-        final List<? extends Message> messages = super.dispatchCommand(cmd);
+        final CommandHandlerMethod method = thisClass.getHandler(cmd.getMessageClass());
+        final List<? extends Message> messages =
+                method.invoke(this, cmd.getMessage(), cmd.getCommandContext());
         final List<Event> result = toEvents(messages, cmd);
         return result;
     }
@@ -118,30 +123,42 @@ public abstract class ProcessManager<I,
     /**
      * Transforms the passed list of event messages into the list of events.
      *
-     * @param eventMessages event messages for which generate events
-     * @param envelope the context of the command which generated the event messages
+     * @param  eventMessages event messages for which generate events
+     * @param  origin        the envelope with the origin of events
      * @return list of events
      */
-    private List<Event> toEvents(List<? extends Message> eventMessages,
-                                 final CommandEnvelope envelope) {
-        return CommandHandlerMethod.toEvents(getProducerId(),
-                                             getVersion(),
-                                             eventMessages,
-                                             envelope);
+    private List<Event> toEvents(List<? extends Message> eventMessages, MessageEnvelope origin) {
+        return HandlerMethod.toEvents(getProducerId(), getVersion(), eventMessages, origin);
     }
 
     /**
-     * Dispatches an event to the event subscriber method of the process manager.
+     * Dispatches an event to the event reactor method of the process manager.
      *
-     * @param eventMessage the event to be handled by the process manager
-     * @param context of the event
+     * @param  event the envelope with the event
+     * @return a list of produced events or an empty list if the process manager does not
+     *         produce new events because of the passed event
      */
-    void dispatchEvent(Message eventMessage, EventContext context)  {
-        checkNotNull(context);
-        checkNotNull(eventMessage);
+    List<Event> dispatchEvent(EventEnvelope event)  {
+        final EventReactorMethod method = thisClass.getReactor(event.getMessageClass());
+        final List<? extends Message> eventMessages =
+                method.invoke(this, event.getMessage(), event.getEventContext());
+        final List<Event> events = toEvents(eventMessages, event);
+        return events;
+    }
 
-        final EventSubscriberMethod method = getMethod(getClass(), eventMessage);
-        method.invoke(this, eventMessage, context);
+    /**
+     * Dispatches a rejection to the reacting method of the process manager.
+     *
+     * @param rejection the envelope with the rejection
+     * @return a list of produced events or an empty list if the process manager does not
+     *         produce new events because of the passed event
+     */
+    List<Event> dispatchRejection(RejectionEnvelope rejection) {
+        final RejectionReactorMethod method = thisClass.getReactor(rejection.getMessageClass());
+        final List<? extends Message> eventMessages =
+        method.invoke(this, rejection.getMessage(), rejection.getRejectionContext());
+        final List<Event> events = toEvents(eventMessages, rejection);
+        return events;
     }
 
     /**
@@ -230,37 +247,7 @@ public abstract class ProcessManager<I,
 
     @Override
     protected String getMissingTxMessage() {
-        return "ProcessManager modification is not available this way. Please modify the state from" +
-                " a command handling or event subscribing method.";
-    }
-
-    /**
-     * Provides type information for process manager classes.
-     */
-    static class TypeInfo {
-
-        private TypeInfo() {
-            // Prevent construction of this utility class.
-        }
-
-        /**
-         * Obtains the set of command classes handled by passed process manager class.
-         *
-         * @param pmClass the process manager class to inspect
-         * @return immutable set of command classes or an empty set if no commands are handled
-         */
-        static Set<CommandClass> getCommandClasses(Class<? extends ProcessManager> pmClass) {
-            return ImmutableSet.copyOf(CommandHandlerMethod.inspect(pmClass));
-        }
-
-        /**
-         * Returns the set of event classes handled by the process manager.
-         *
-         * @param pmClass the process manager class to inspect
-         * @return immutable set of event classes or an empty set if no events are handled
-         */
-        static Set<EventClass> getEventClasses(Class<? extends ProcessManager> pmClass) {
-            return EventSubscriberMethod.inspect(pmClass);
-        }
+        return "ProcessManager modification is not available this way. " +
+                "Please modify the state from a command handling or event reacting method.";
     }
 }
