@@ -22,6 +22,9 @@ build/
 # IDEA build files
 out/
 
+# Spine temporary artifact storage
+.spine/
+
 # Login details to Maven repository.
 # Each workstation should have developer's login defined in this file.
 credentials.properties
