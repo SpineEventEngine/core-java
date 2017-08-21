@@ -86,8 +86,8 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
      * @return the constructor
      * @throws IllegalStateException if the entity class does not have the required constructor
      */
-    public static <E extends Entity<I, ?>, I> Constructor<E> getConstructor(Class<E> entityClass,
-                                                                            Class<I> idClass) {
+    private static <E extends Entity<I, ?>, I> Constructor<E> getConstructor(Class<E> entityClass,
+                                                                             Class<I> idClass) {
         checkNotNull(entityClass);
         checkNotNull(idClass);
 
@@ -101,9 +101,8 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
         }
     }
 
-    public <E extends AbstractEntity<I, ?>, I> E createEntity(I id) {
-        @SuppressWarnings("unchecked") //
-        final Constructor<E> ctor = (Constructor<E>) getConstructor();
+    public <I> E createEntity(I id) {
+        final Constructor<E> ctor = getConstructor();
         final E result = createEntity(ctor, id);
         return result;
     }
@@ -137,7 +136,7 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
      * @param entityClass the entity class to inspect
      * @return the entity state class
      */
-    public static <S extends Message> Class<S> getStateClass(Class<? extends Entity> entityClass) {
+    static <S extends Message> Class<S> getStateClass(Class<? extends Entity> entityClass) {
         @SuppressWarnings("unchecked") // The type is preserved by the Entity type declaration.
         final Class<S> result = (Class<S>) Entity.GenericParameter.STATE.getArgumentIn(entityClass);
         return result;
@@ -152,12 +151,15 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
      * @param <E>  the type of the entity
      * @return a new entity
      */
-    private static <I, E extends AbstractEntity<I, ?>> E createEntity(Constructor<E> ctor, I id) {
+    private static <I, E extends Entity<I, ?>> E createEntity(Constructor<E> ctor, I id) {
         checkNotNull(ctor);
         checkNotNull(id);
         try {
             final E result = ctor.newInstance(id);
-            result.init();
+            if (result instanceof AbstractEntity) {
+                AbstractEntity abstractEntity = (AbstractEntity) result;
+                abstractEntity.init();
+            }
             return result;
         } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
             throw new IllegalStateException(e);

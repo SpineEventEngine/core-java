@@ -44,6 +44,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public abstract class AbstractEntity<I, S extends Message> implements Entity<I, S> {
 
+    /**
+     * Lazily initialized reference to the model class of this entity.
+     *
+     * @see #thisClass()
+     * @see #getModelClass()
+     */
     @Nullable
     private volatile EntityClass<?> thisClass;
 
@@ -98,7 +104,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     }
 
     /**
-     * Obtains the entity class from {@link io.spine.server.model.Model Model}.
+     * Obtains the model class for this entity from the {@link io.spine.server.model.Model Model}.
      */
     protected EntityClass<?> getModelClass() {
         return Model.getInstance()
@@ -150,14 +156,11 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     /**
      * Obtains the class of the entity state.
      */
-    @SuppressWarnings("unchecked") // The cast is protected by generic params of the class.
     private Class<S> getStateClass() {
         return EntityClass.getStateClass(getClass());
-
         //TODO:2017-08-21:alexander.yevsyukov: Use the below code instead of the line above when
         // RecordStorageShould is changed to avoid TypeVariable <I> in the test entity class.
-
-//        return (Class<S>) thisClass().getStateClass();
+        // return (Class<S>) thisClass().getStateClass();
     }
 
     /**

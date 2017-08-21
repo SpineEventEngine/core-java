@@ -39,18 +39,14 @@ import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.lang.reflect.Constructor;
-
 import static io.spine.Identifier.newUuid;
 import static io.spine.protobuf.TypeConverter.toMessage;
-import static io.spine.server.entity.EntityClass.getConstructor;
 import static io.spine.test.Tests.assertSecondsEqual;
 import static io.spine.time.Time.getCurrentTime;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
@@ -257,14 +253,6 @@ public class EntityShould {
         protected EntityWithMessageId() {
             super(Sample.messageOfType(ProjectId.class));
         }
-    }
-
-    @Test
-    public void obtain_entity_constructor_by_class_and_ID_class() {
-        final Constructor<BareBonesEntity> ctor = getConstructor(BareBonesEntity.class,
-                                                                 Long.class);
-
-        assertNotNull(ctor);
     }
 
     @Test

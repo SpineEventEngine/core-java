@@ -20,23 +20,37 @@
 
 package io.spine.server.model;
 
+import com.google.protobuf.StringValue;
+import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.server.entity.EntityClass;
-import io.spine.server.entity.TestEntity;
 import org.junit.Test;
 
+import java.lang.reflect.Constructor;
+
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class EntityClassShould {
 
+    private final EntityClass<NanoEntity> entityClass = EntityClass.valueOf(NanoEntity.class);
+
     @Test
     public void return_id_class() {
-        final EntityClass<TestEntity> entityClass = EntityClass.valueOf(TestEntity.class);
-
         @SuppressWarnings("unchecked") //
-        final Class<String> actual = (Class<String>) entityClass.getIdClass();
-
-        assertEquals(String.class, actual);
+        final Class<Long> actual = (Class<Long>) entityClass.getIdClass();
+        assertEquals(Long.class, actual);
     }
 
+    @Test
+    public void obtain_entity_constructor() {
+        final Constructor<NanoEntity> ctor = entityClass.getConstructor();
+        assertNotNull(ctor);
+    }
 
+    /** A test entity which defines ID and state. */
+    private static class NanoEntity extends AbstractVersionableEntity<Long, StringValue> {
+        private NanoEntity(Long id) {
+            super(id);
+        }
+    }
 }
