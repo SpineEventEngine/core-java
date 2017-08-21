@@ -21,6 +21,7 @@
 package io.spine.server.procman;
 
 import com.google.protobuf.Message;
+import io.spine.annotation.SPI;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
@@ -275,5 +276,52 @@ public abstract class ProcessManagerRepository<I,
     /** Open access to the event routing to the package. */
     EventRouting<I> eventRouting() {
         return getEventRouting();
+    }
+
+    /**
+     * Defines a strategy of event delivery applied to the instances managed by this repository.
+     *
+     * <p>By default uses direct delivery.
+     *
+     * <p>Descendants may override this method to redefine the strategy. In particular,
+     * it is possible to postpone dispatching of a certain event to a particular process manager
+     * instance at runtime.
+     *
+     * @return delivery strategy for events applied to the instances managed by this repository
+     */
+    @SPI
+    protected PmEventDelivery<I, P> getEventEndpointDelivery() {
+        return PmEventDelivery.directDelivery(this);
+    }
+
+
+    /**
+     * Defines a strategy of rejection delivery applied to the instances managed by this repository.
+     *
+     * <p>By default uses direct delivery.
+     *
+     * <p>Descendants may override this method to redefine the strategy. In particular,
+     * it is possible to postpone dispatching of a certain rejection to a particular process manager
+     * instance at runtime.
+     *
+     * @return delivery strategy for rejections
+     */
+    protected PmRejectionDelivery<I, P> getRejectionEndpointDelivery() {
+        return PmRejectionDelivery.directDelivery(this);
+    }
+
+    /**
+     * Defines a strategy of command delivery applied to the instances managed by this repository.
+     *
+     * <p>By default uses direct delivery.
+     *
+     * <p>Descendants may override this method to redefine the strategy. In particular,
+     * it is possible to postpone dispatching of a certain command to a particular process manager
+     * instance at runtime.
+     *
+     * @return delivery strategy for rejections
+     */
+    protected PmCommandDelivery<I, P> getCommandEndpointDelivery() {
+        return PmCommandDelivery.directDelivery(this);
     }
 }

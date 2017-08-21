@@ -21,6 +21,7 @@ package io.spine.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
+import io.spine.annotation.SPI;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
@@ -463,5 +464,52 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     /** The Stand instance for sending updated aggregate states. */
     private Stand getStand() {
         return getBoundedContext().getStand();
+    }
+
+    /**
+     * Defines a strategy of event delivery applied to the instances managed by this repository.
+     *
+     * <p>By default uses direct delivery.
+     *
+     * <p>Descendants may override this method to redefine the strategy. In particular,
+     * it is possible to postpone dispatching of a certain event to a particular aggregate
+     * instance at runtime.
+     *
+     * @return delivery strategy for events applied to the instances managed by this repository
+     */
+    @SPI
+    protected AggregateEndpointDelivery<I, A, EventEnvelope> getEventEndpointDelivery() {
+        return AggregateEventDelivery.directDelivery(this);
+    }
+
+    /**
+     * Defines a strategy of rejection delivery applied to the instances managed by this repository.
+     *
+     * <p>By default uses direct delivery.
+     *
+     * <p>Descendants may override this method to redefine the strategy. In particular,
+     * it is possible to postpone dispatching of a certain rejection to a particular aggregate
+     * instance at runtime.
+     *
+     * @return delivery strategy for rejections
+     */
+    @SPI
+    protected AggregateEndpointDelivery<I, A, RejectionEnvelope> getRejectionEndpointDelivery() {
+        return AggregateRejectionDelivery.directDelivery(this);
+    }
+
+    /**
+     * Defines a strategy of command delivery applied to the instances managed by this repository.
+     *
+     * <p>By default uses direct delivery.
+     *
+     * <p>Descendants may override this method to redefine the strategy. In particular,
+     * it is possible to postpone dispatching of a certain command to a particular aggregate
+     * instance at runtime.
+     *
+     * @return delivery strategy for rejections
+     */
+    protected AggregateEndpointDelivery<I, A, CommandEnvelope> getCommandEndpointDelivery() {
+        return AggregateCommandDelivery.directDelivery(this);
     }
 }

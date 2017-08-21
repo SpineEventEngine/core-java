@@ -40,6 +40,12 @@ class PmCommandEndpoint<I, P extends ProcessManager<I, ?, ?>>
     }
 
     static <I, P extends ProcessManager<I, ?, ?>>
+    PmCommandEndpoint<I, P> of(ProcessManagerRepository<I, P, ?> repository,
+                               CommandEnvelope event) {
+        return new PmCommandEndpoint<>(repository, event);
+    }
+
+    static <I, P extends ProcessManager<I, ?, ?>>
     I handle (ProcessManagerRepository<I, P, ?> repository, CommandEnvelope cmd) {
         final PmCommandEndpoint<I, P> endpoint = new PmCommandEndpoint<>(repository, cmd);
         final I result = endpoint.handle();
@@ -52,6 +58,11 @@ class PmCommandEndpoint<I, P extends ProcessManager<I, ?, ?>>
         final I id = repository().getCommandRouting()
                                  .apply(envelope.getMessage(), envelope.getCommandContext());
         return id;
+    }
+
+    @Override
+    protected PmCommandDelivery<I, P> getEndpointDelivery(CommandEnvelope envelope) {
+        return repository().getCommandEndpointDelivery();
     }
 
     @Override

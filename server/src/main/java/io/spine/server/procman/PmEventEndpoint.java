@@ -22,7 +22,6 @@ package io.spine.server.procman;
 
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
-import io.spine.server.entity.Repository;
 
 import java.util.List;
 import java.util.Set;
@@ -37,8 +36,13 @@ import java.util.Set;
 class PmEventEndpoint<I, P extends ProcessManager<I, ?, ?>>
         extends PmEndpoint<I, P, EventEnvelope, Set<I>> {
 
-    private PmEventEndpoint(Repository<I, P> repository, EventEnvelope envelope) {
+    private PmEventEndpoint(ProcessManagerRepository<I, P, ?> repository, EventEnvelope envelope) {
         super(repository, envelope);
+    }
+
+    static <I, P extends ProcessManager<I, ?, ?>>
+    PmEventEndpoint<I, P> of(ProcessManagerRepository<I, P, ?> repository, EventEnvelope event) {
+        return new PmEventEndpoint<>(repository, event);
     }
 
     static <I, P extends ProcessManager<I, ?, ?>>
@@ -46,6 +50,11 @@ class PmEventEndpoint<I, P extends ProcessManager<I, ?, ?>>
         final PmEventEndpoint<I, P> endpoint = new PmEventEndpoint<>(repository, event);
         final Set<I> result = endpoint.handle();
         return result;
+    }
+
+    @Override
+    protected PmEventDelivery<I, P> getEndpointDelivery(EventEnvelope envelope) {
+        return repository().getEventEndpointDelivery();
     }
 
     @Override

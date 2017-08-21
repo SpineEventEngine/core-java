@@ -42,18 +42,13 @@ abstract class AggregateMessageEndpoint<I,
                                         A extends Aggregate<I, ?, ?>,
                                         M extends ActorMessageEnvelope<?, ?, ?>, R>
         extends EntityMessageEndpoint<I, A, M, R> {
-    
+
     AggregateMessageEndpoint(AggregateRepository<I, A> repository, M envelope) {
         super(repository, envelope);
     }
 
-    /**
-     * Dispatched the message to the aggregate with the passed ID.
-     *
-     * @param aggregateId the ID of the aggregate to which dispatch the message
-     */
     @Override
-    protected void dispatchToOne(I aggregateId) {
+    protected void deliverNowTo(I aggregateId) {
         final A aggregate = repository().loadOrCreate(aggregateId);
         final LifecycleFlags flagsBefore = aggregate.getLifecycleFlags();
 
