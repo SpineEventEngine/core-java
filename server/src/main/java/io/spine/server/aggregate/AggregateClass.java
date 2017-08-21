@@ -65,14 +65,14 @@ public class AggregateClass<A extends Aggregate>
     }
 
     @Override
-    protected Constructor<A> findConstructor(Class<? extends A> aggregateClass, Class<?> idClass) {
-        if (AggregatePart.class.isAssignableFrom(aggregateClass)) {
+    protected Constructor<A> findConstructor() {
+        if (AggregatePart.class.isAssignableFrom(value())) {
             @SuppressWarnings("unchecked") // OK to cast as we checked inheritance above.
             final Constructor<A> ctor =
-                    AggregatePart.getConstructor((Class<? extends AggregatePart>) aggregateClass);
+                    AggregatePart.getConstructor((Class<? extends AggregatePart>) value());
             return ctor;
         }
-        return super.findConstructor(aggregateClass, idClass);
+        return super.findConstructor();
     }
 
     /**

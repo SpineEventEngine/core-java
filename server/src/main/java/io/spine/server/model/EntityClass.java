@@ -22,7 +22,6 @@ package io.spine.server.model;
 
 import com.google.protobuf.Message;
 import io.spine.Identifier;
-import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.Entity;
 import io.spine.type.ClassName;
 import io.spine.type.KnownTypes;
@@ -30,6 +29,9 @@ import io.spine.type.TypeUrl;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.String.format;
 
 /**
  * A class of entities.
@@ -70,18 +72,54 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
     }
 
     /**
+     * Obtains the constructor for the passed entity class.
+     *
+     * <p>The entity class must have a constructor with the single parameter of type defined by
+     * generic type {@code <I>}.
+     *
+     * @param entityClass the entity class
+     * @param idClass     the class of entity identifiers
+     * @param <E>         the entity type
+     * @param <I>         the ID type
+     * @return the constructor
+     * @throws IllegalStateException if the entity class does not have the required constructor
+     */
+    public static <E extends Entity<I, ?>, I> Constructor<E> getConstructor(Class<E> entityClass,
+                                                                            Class<I> idClass) {
+        checkNotNull(entityClass);
+        checkNotNull(idClass);
+
+        try {
+            @SuppressWarnings("JavaReflectionMemberAccess") // Required in the Entity definition.
+            final Constructor<E> result = entityClass.getDeclaredConstructor(idClass);
+            result.setAccessible(true);
+            return result;
+        } catch (NoSuchMethodException ignored) {
+            throw noSuchConstructor(entityClass.getName(), idClass.getName());
+        }
+    }
+
+    private static IllegalStateException noSuchConstructor(String entityClass, String idClass) {
+        final String errMsg = format(
+                "%s class must declare a constructor with a single %s ID parameter.",
+                entityClass, idClass
+        );
+        return new IllegalStateException(new NoSuchMethodException(errMsg));
+    }
+
+    /**
      * Obtains constructor for the entities of this class.
      */
     public Constructor<E> getConstructor() {
         if (entityConstructor == null) {
-            entityConstructor = findConstructor(value(), idClass);
+            entityConstructor = findConstructor();
         }
         return entityConstructor;
     }
 
-    protected Constructor<E> findConstructor(Class<? extends E> entityClass, Class<?> idClass) {
-        //TODO:2017-08-18:alexander.yevsyukov: Move the method into this class.
-        return (Constructor<E>) AbstractEntity.getConstructor(entityClass, idClass);
+    @SuppressWarnings("unchecked")
+    protected Constructor<E> findConstructor() {
+        return (Constructor<E>) getConstructor(value(), getIdClass());
     }
 
     /**

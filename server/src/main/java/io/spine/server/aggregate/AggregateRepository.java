@@ -166,7 +166,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     @Override
     @SuppressWarnings("unchecked") // The cast is ensured by generic parameters of the repository.
-    protected final AggregateClass<A> getModelClass(Class<A> cls) {
+    protected AggregateClass<A> getModelClass(Class<A> cls) {
         return (AggregateClass<A>) Model.getInstance()
                                         .asAggregateClass(cls);
     }

@@ -44,7 +44,7 @@ import java.lang.reflect.Constructor;
 import static io.spine.Identifier.newUuid;
 import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.server.entity.AbstractEntity.createEntity;
-import static io.spine.server.entity.AbstractEntity.getConstructor;
+import static io.spine.server.model.EntityClass.getConstructor;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Tests.assertSecondsEqual;
 import static io.spine.time.Time.getCurrentTime;

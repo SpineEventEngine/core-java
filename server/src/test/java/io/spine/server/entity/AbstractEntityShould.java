@@ -29,7 +29,7 @@ import org.junit.Test;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
-import static io.spine.server.entity.AbstractEntity.getConstructor;
+import static io.spine.server.model.EntityClass.getConstructor;
 import static io.spine.test.Verify.assertSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
@@ -50,16 +50,16 @@ public class AbstractEntityShould {
 
     @Test
     public void define_final_updateState_method() throws NoSuchMethodException {
-        final Method updateState = AbstractEntity.class.getDeclaredMethod(
-                "updateState", Message.class);
+        final Method updateState =
+                AbstractEntity.class.getDeclaredMethod("updateState", Message.class);
         final int modifiers = updateState.getModifiers();
         assertTrue(Modifier.isFinal(modifiers));
     }
 
     @Test
     public void prevent_validate_overriding() throws NoSuchMethodException {
-        final Method validate = AbstractEntity.class.getDeclaredMethod(
-                "validate", Message.class);
+        final Method validate =
+                AbstractEntity.class.getDeclaredMethod("validate", Message.class);
         final int modifiers = validate.getModifiers();
         assertTrue(Modifier.isPrivate(modifiers) || Modifier.isFinal(modifiers));
     }

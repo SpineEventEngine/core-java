@@ -47,9 +47,9 @@ public final class AggregatePartClass<A extends AggregatePart> extends Aggregate
     }
 
     @Override
-    protected Constructor<A> findConstructor(Class<? extends A> aggregateClass, Class<?> idClass) {
+    protected Constructor<A> findConstructor() {
         @SuppressWarnings("unchecked") // The cast is protected by generic params.
-        final Constructor<A> ctor = AggregatePart.getConstructor(aggregateClass);
+        final Constructor<A> ctor = AggregatePart.getConstructor(value());
         return ctor;
     }
 
