@@ -37,7 +37,7 @@ class DefaultEntityFactory<I, E extends AbstractEntity<I, ?>> implements EntityF
     private final EntityClass<E> entityClass;
 
     DefaultEntityFactory(Class<E> entityClass) {
-        this.entityClass = EntityClass.valueOf(entityClass);
+        this.entityClass = new EntityClass<>(entityClass);
     }
 
     @Override

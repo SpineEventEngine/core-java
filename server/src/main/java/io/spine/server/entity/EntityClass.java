@@ -59,6 +59,7 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
     @Nullable
     private transient Constructor<E> entityConstructor;
 
+    /** Creates new instance of the model class for the passed class of entities. */
     protected EntityClass(Class<? extends E> cls) {
         super(cls);
         final Class<?> idClass = getIdClass(cls);
@@ -67,10 +68,6 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
         this.stateClass = getStateClass(cls);
         final ClassName stateClassName = ClassName.of(stateClass);
         this.entityStateType = KnownTypes.getTypeUrl(stateClassName);
-    }
-
-    public static <E extends Entity> EntityClass<E> valueOf(Class<? extends E> cls) {
-        return new EntityClass<>(cls);
     }
 
     /**

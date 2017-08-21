@@ -241,7 +241,7 @@ public class Model {
         checkNotNull(cls);
         ModelClass<?> modelClass = classes.get(cls);
         if (modelClass == null) {
-            modelClass = EntityClass.valueOf(cls);
+            modelClass = new EntityClass<>(cls);
             classes.put(cls, modelClass);
         }
         return (EntityClass<?>) modelClass;

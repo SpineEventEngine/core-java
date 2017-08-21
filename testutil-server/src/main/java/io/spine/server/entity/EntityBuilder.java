@@ -82,7 +82,7 @@ public class EntityBuilder<E extends AbstractVersionableEntity<I, S>, I, S exten
     @Override
     public EntityBuilder<E, I, S> setResultClass(Class<E> entityClass) {
         super.setResultClass(entityClass);
-        this.entityClass = EntityClass.valueOf(entityClass);
+        this.entityClass = new EntityClass<>(entityClass);
         return this;
     }
 

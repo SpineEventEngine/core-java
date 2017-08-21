@@ -261,7 +261,7 @@ public class EntityShould {
         final Timestamp before = TimeTests.Past.secondsAgo(1);
 
         // Create and init the entity.
-        final EntityClass<BareBonesEntity> entityClass = EntityClass.valueOf(BareBonesEntity.class);
+        final EntityClass<BareBonesEntity> entityClass = new EntityClass<>(BareBonesEntity.class);
         final AbstractVersionableEntity<Long, StringValue> entity = entityClass.createEntity(id);
 
         final Timestamp after = Time.getCurrentTime();

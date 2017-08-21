@@ -32,7 +32,8 @@ import static org.junit.Assert.assertNotNull;
 
 public class EntityClassShould {
 
-    private final EntityClass<NanoEntity> entityClass = EntityClass.valueOf(NanoEntity.class);
+    private final EntityClass<NanoEntity> entityClass = new EntityClass<>(
+            (Class<? extends NanoEntity>) NanoEntity.class);
 
     @Test
     public void return_id_class() {
