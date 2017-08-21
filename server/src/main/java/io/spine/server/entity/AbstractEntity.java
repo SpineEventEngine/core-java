@@ -156,6 +156,11 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     @SuppressWarnings("unchecked") // The cast is protected by generic params of the class.
     private Class<S> getStateClass() {
         return EntityClass.getStateClass(getClass());
+
+        //TODO:2017-08-21:alexander.yevsyukov: Use the below code instead of the line above when
+        // RecordStorageShould is changed to avoid TypeVariable <I> in the test entity class.
+
+//        return (Class<S>) thisClass().getStateClass();
     }
 
     /**
