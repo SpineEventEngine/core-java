@@ -30,6 +30,7 @@ import io.spine.server.aggregate.AggregateClass;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.command.CommandHandlerClass;
 import io.spine.server.command.CommandHandlingClass;
+import io.spine.server.entity.Entity;
 import io.spine.server.event.EventSubscriber;
 import io.spine.server.event.EventSubscriberClass;
 import io.spine.server.procman.ProcessManager;
@@ -54,7 +55,7 @@ public class Model {
     private static final Model INSTANCE = new Model();
 
     /** A map from a raw class to an extended class information instance. */
-    private final Map<Class<?>, HandlerClass<?>> handlerClasses = Maps.newConcurrentMap();
+    private final Map<Class<?>, ModelClass<?>> classes = Maps.newConcurrentMap();
 
     public static Model getInstance() {
         return INSTANCE;
@@ -65,7 +66,7 @@ public class Model {
 
     @VisibleForTesting
     void clear() {
-        handlerClasses.clear();
+        classes.clear();
     }
 
     /**
@@ -80,13 +81,13 @@ public class Model {
      */
     public AggregateClass<?> asAggregateClass(Class<? extends Aggregate> cls) {
         checkNotNull(cls);
-        HandlerClass<?> handlerClass = handlerClasses.get(cls);
-        if (handlerClass == null) {
-            handlerClass = AggregateClass.of(cls);
-            checkDuplicates((CommandHandlingClass) handlerClass);
-            handlerClasses.put(cls, handlerClass);
+        ModelClass<?> modelClass = classes.get(cls);
+        if (modelClass == null) {
+            modelClass = AggregateClass.of(cls);
+            checkDuplicates((CommandHandlingClass) modelClass);
+            classes.put(cls, modelClass);
         }
-        return (AggregateClass<?>)handlerClass;
+        return (AggregateClass<?>) modelClass;
     }
 
     /**
@@ -102,13 +103,13 @@ public class Model {
     public ProcessManagerClass<?> asProcessManagerClass(Class<? extends ProcessManager> cls)
         throws DuplicateCommandHandlerError {
         checkNotNull(cls);
-        HandlerClass<?> handlerClass = handlerClasses.get(cls);
-        if (handlerClass == null) {
-            handlerClass = ProcessManagerClass.of(cls);
-            checkDuplicates((CommandHandlingClass) handlerClass);
-            handlerClasses.put(cls, handlerClass);
+        ModelClass<?> modelClass = classes.get(cls);
+        if (modelClass == null) {
+            modelClass = ProcessManagerClass.of(cls);
+            checkDuplicates((CommandHandlingClass) modelClass);
+            classes.put(cls, modelClass);
         }
-        return (ProcessManagerClass<?>)handlerClass;
+        return (ProcessManagerClass<?>) modelClass;
     }
 
     /**
@@ -119,12 +120,12 @@ public class Model {
      */
     public ProjectionClass<?> asProjectionClass(Class<? extends Projection> cls) {
         checkNotNull(cls);
-        HandlerClass<?> handlerClass = handlerClasses.get(cls);
-        if (handlerClass == null) {
-            handlerClass = ProjectionClass.of(cls);
-            handlerClasses.put(cls, handlerClass);
+        ModelClass<?> modelClass = classes.get(cls);
+        if (modelClass == null) {
+            modelClass = ProjectionClass.of(cls);
+            classes.put(cls, modelClass);
         }
-        return (ProjectionClass<?>)handlerClass;
+        return (ProjectionClass<?>) modelClass;
     }
 
     /**
@@ -135,12 +136,12 @@ public class Model {
      */
     public EventSubscriberClass<?> asEventSubscriberClass(Class<? extends EventSubscriber> cls) {
         checkNotNull(cls);
-        HandlerClass<?> handlerClass = handlerClasses.get(cls);
-        if (handlerClass == null) {
-            handlerClass = EventSubscriberClass.of(cls);
-            handlerClasses.put(cls, handlerClass);
+        ModelClass<?> modelClass = classes.get(cls);
+        if (modelClass == null) {
+            modelClass = EventSubscriberClass.of(cls);
+            classes.put(cls, modelClass);
         }
-        return (EventSubscriberClass<?>)handlerClass;
+        return (EventSubscriberClass<?>) modelClass;
     }
 
     /**
@@ -156,13 +157,13 @@ public class Model {
     public CommandHandlerClass asCommandHandlerClass(Class<? extends CommandHandler> cls)
             throws DuplicateCommandHandlerError {
         checkNotNull(cls);
-        HandlerClass<?> handlerClass = handlerClasses.get(cls);
-        if (handlerClass == null) {
-            handlerClass = CommandHandlerClass.of(cls);
-            checkDuplicates((CommandHandlingClass) handlerClass);
-            handlerClasses.put(cls, handlerClass);
+        ModelClass<?> modelClass = classes.get(cls);
+        if (modelClass == null) {
+            modelClass = CommandHandlerClass.of(cls);
+            checkDuplicates((CommandHandlingClass) modelClass);
+            classes.put(cls, modelClass);
         }
-        return (CommandHandlerClass<?>)handlerClass;
+        return (CommandHandlerClass<?>) modelClass;
     }
 
     /**
@@ -174,12 +175,12 @@ public class Model {
     public
     RejectionSubscriberClass<?> asRejectionSubscriber(Class<? extends RejectionSubscriber> cls) {
         checkNotNull(cls);
-        HandlerClass<?> handlerClass = handlerClasses.get(cls);
-        if (handlerClass == null) {
-            handlerClass = RejectionSubscriberClass.of(cls);
-            handlerClasses.put(cls, handlerClass);
+        ModelClass<?> modelClass = classes.get(cls);
+        if (modelClass == null) {
+            modelClass = RejectionSubscriberClass.of(cls);
+            classes.put(cls, modelClass);
         }
-        return (RejectionSubscriberClass<?>)handlerClass;
+        return (RejectionSubscriberClass<?>) modelClass;
     }
 
     private void checkDuplicates(CommandHandlingClass candidate)
@@ -188,9 +189,9 @@ public class Model {
         final ImmutableMap.Builder<Set<CommandClass>, CommandHandlingClass> map =
                 ImmutableMap.builder();
 
-        for (HandlerClass<?> handlerClass : handlerClasses.values()) {
-            if (handlerClass instanceof CommandHandlingClass) {
-                final CommandHandlingClass commandHandler = (CommandHandlingClass) handlerClass;
+        for (ModelClass<?> modelClass : classes.values()) {
+            if (modelClass instanceof CommandHandlingClass) {
+                final CommandHandlingClass commandHandler = (CommandHandlingClass) modelClass;
                 final Set<CommandClass> commandClasses = commandHandler.getCommands();
                 final Sets.SetView<CommandClass> intersection =
                         Sets.intersection(commandClasses, candidateCommands);
@@ -204,5 +205,21 @@ public class Model {
         if (!currentHandlers.isEmpty()) {
             throw new DuplicateCommandHandlerError(candidate, currentHandlers);
         }
+    }
+
+    /**
+     * Obtains an instance of an entity class information.
+     *
+     * <p>If the passed class was not added to the model before, it would be added as the result of
+     * this method call.
+     */
+    public EntityClass<?> asEntityClass(Class<? extends Entity> cls) {
+        checkNotNull(cls);
+        ModelClass<?> modelClass = classes.get(cls);
+        if (modelClass == null) {
+            modelClass = EntityClass.valueOf(cls);
+            classes.put(cls, modelClass);
+        }
+        return (EntityClass<?>) modelClass;
     }
 }

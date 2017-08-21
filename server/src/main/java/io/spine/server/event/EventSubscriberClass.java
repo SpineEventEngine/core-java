@@ -22,8 +22,8 @@ package io.spine.server.event;
 
 import io.spine.annotation.Internal;
 import io.spine.core.EventClass;
-import io.spine.server.model.HandlerClass;
 import io.spine.server.model.MessageHandlerMap;
+import io.spine.server.model.ModelClass;
 
 import java.util.Set;
 
@@ -36,7 +36,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alexander Yevsyukov
  */
 @Internal
-public final class EventSubscriberClass<S extends EventSubscriber> extends HandlerClass<S> {
+public final class EventSubscriberClass<S extends EventSubscriber> extends ModelClass<S> {
 
     private static final long serialVersionUID = 0L;
 

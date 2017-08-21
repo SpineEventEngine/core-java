@@ -22,8 +22,8 @@ package io.spine.server.rejection;
 
 import io.spine.annotation.Internal;
 import io.spine.core.RejectionClass;
-import io.spine.server.model.HandlerClass;
 import io.spine.server.model.MessageHandlerMap;
+import io.spine.server.model.ModelClass;
 
 import java.util.Set;
 
@@ -34,7 +34,7 @@ import java.util.Set;
  * @author Alexander Yevsyukov
  */
 @Internal
-public final class RejectionSubscriberClass<S extends RejectionSubscriber> extends HandlerClass<S> {
+public final class RejectionSubscriberClass<S extends RejectionSubscriber> extends ModelClass<S> {
 
     private static final long serialVersionUID = 0L;
 

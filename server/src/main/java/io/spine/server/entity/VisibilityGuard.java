@@ -70,7 +70,8 @@ public final class VisibilityGuard {
      */
     public void register(Repository<?, ?> repository) {
         checkNotNull(repository);
-        final Class<? extends Message> stateClass = repository.getEntityStateClass();
+        final Class<? extends Message> stateClass = repository.entityClass()
+                                                              .getStateClass();
         checkNotAlreadyRegistered(stateClass);
         repositories.put(stateClass, new RepositoryAccess(repository));
     }
@@ -142,7 +143,8 @@ public final class VisibilityGuard {
                                   @SuppressWarnings("unchecked")
                                   // Safe as it's bounded by Repository class definition.
                                   final Class<? extends Message> cls =
-                                          input.repository.getEntityStateClass();
+                                          input.repository.entityClass()
+                                                          .getStateClass();
                                   final TypeName result = TypeName.of(cls);
                                   return result;
                               }
@@ -171,7 +173,8 @@ public final class VisibilityGuard {
         private RepositoryAccess(Repository repository) {
             this.repository = repository;
             @SuppressWarnings("unchecked") // Safe as it's bounded by Repository class definition.
-            final Class<? extends Message> stateClass = repository.getEntityStateClass();
+            final Class<? extends Message> stateClass = repository.entityClass()
+                                                                  .getStateClass();
             this.visibility = EntityOptions.getVisibility(stateClass);
         }
 

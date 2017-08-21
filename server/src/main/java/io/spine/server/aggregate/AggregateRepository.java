@@ -31,6 +31,7 @@ import io.spine.core.RejectionEnvelope;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandDispatcher;
+import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.DelegatingEventDispatcher;
@@ -49,7 +50,6 @@ import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
 
 import javax.annotation.CheckReturnValue;
-import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
 import java.util.List;
 import java.util.Set;
@@ -57,8 +57,6 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.core.Commands.causedByRejection;
-import static io.spine.server.entity.AbstractEntity.createEntity;
-import static io.spine.server.entity.AbstractEntity.getConstructor;
 import static io.spine.server.entity.EntityWithLifecycle.Predicates.isEntityVisible;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
@@ -90,10 +88,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
                    EventDispatcherDelegate<I>,
                    RejectionDispatcherDelegate<I> {
 
-    /** The class of aggregates managed by this repository. */
-    @Nullable
-    private AggregateClass<A> aggregateClass;
-
     /** The default number of events to be stored before a next snapshot is made. */
     static final int DEFAULT_SNAPSHOT_TRIGGER = 100;
 
@@ -110,10 +104,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     /** The number of events to store between snapshots. */
     private int snapshotTrigger = DEFAULT_SNAPSHOT_TRIGGER;
-
-    /** The constructor for creating entity instances. */
-    private Constructor<A> entityConstructor;
-
 
     /** Creates a new instance. */
     protected AggregateRepository() {
@@ -166,17 +156,19 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     @Override
     public A create(I id) {
-        return createEntity(getEntityConstructor(), id);
+        return AbstractEntity.createEntity(getEntityConstructor(), id);
     }
 
     /** Obtains class information of aggregates managed by this repository. */
-    @SuppressWarnings("unchecked") // The cast is ensured by generic parameters of the repository.
     private AggregateClass<A> aggregateClass() {
-        if (aggregateClass == null) {
-            aggregateClass = (AggregateClass<A>) Model.getInstance()
-                                                      .asAggregateClass(getEntityClass());
-        }
-        return aggregateClass;
+        return (AggregateClass<A>)entityClass();
+    }
+
+    @Override
+    @SuppressWarnings("unchecked") // The cast is ensured by generic parameters of the repository.
+    protected final AggregateClass<A> getModelClass(Class<A> cls) {
+        return (AggregateClass<A>) Model.getInstance()
+                                        .asAggregateClass(cls);
     }
 
     /**
@@ -222,25 +214,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     /**
      * Obtains the constructor.
-     *
-     * <p>The method returns cached value if called more than once.
-     * During the first call, it {@linkplain #findEntityConstructor() finds} the constructor.
      */
     Constructor<A> getEntityConstructor() {
-        if (this.entityConstructor == null) {
-            this.entityConstructor = findEntityConstructor();
-        }
-        return this.entityConstructor;
-    }
-
-    /**
-     * Obtains the constructor for creating entities.
-     */
-    @VisibleForTesting
-    protected Constructor<A> findEntityConstructor() {
-        final Constructor<A> result = getConstructor(getEntityClass(), getIdClass());
-        this.entityConstructor = result;
-        return result;
+        return entityClass().getConstructor();
     }
 
     /**

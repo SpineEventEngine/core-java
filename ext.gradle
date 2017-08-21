@@ -24,8 +24,8 @@
  *  This file is used in both module `build.gradle` scripts and in the integration tests,
  *  as we want to manage the versions in a single source.
  */
-
-def final SPINE_VERSION = '0.9.53-SNAPSHOT'
+ 
+def final SPINE_VERSION = '0.9.54-SNAPSHOT'
 
 ext {
     // The version of the modules in this project.

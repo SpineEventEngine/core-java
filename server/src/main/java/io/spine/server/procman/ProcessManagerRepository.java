@@ -45,7 +45,6 @@ import io.spine.server.route.RejectionProducers;
 import io.spine.server.route.RejectionRouting;
 
 import javax.annotation.CheckReturnValue;
-import javax.annotation.Nullable;
 import java.util.Set;
 
 /**
@@ -65,10 +64,6 @@ public abstract class ProcessManagerRepository<I,
                 implements CommandDispatcherDelegate<I>,
                            RejectionDispatcherDelegate<I> {
 
-    /** The class of process managers managed by this repository. */
-    @Nullable
-    private ProcessManagerClass<P> processManagerClass;
-
     /** The command routing schema used by this repository. */
     private final CommandRouting<I> commandRouting = CommandRouting.newInstance();
 
@@ -84,12 +79,14 @@ public abstract class ProcessManagerRepository<I,
     /** Obtains class information of process managers managed by this repository. */
     @SuppressWarnings("unchecked") // The cast is ensured by generic parameters of the repository.
     private ProcessManagerClass<P> processManagerClass() {
-        if (processManagerClass == null) {
-            processManagerClass = (ProcessManagerClass<P>)
-                    Model.getInstance()
-                         .asProcessManagerClass(getEntityClass());
-        }
-        return processManagerClass;
+        return (ProcessManagerClass<P>) entityClass();
+    }
+
+    @SuppressWarnings("unchecked") // The cast is ensured by generic parameters of the repository.
+    @Override
+    protected final ProcessManagerClass<P> getModelClass(Class<P> cls) {
+        return (ProcessManagerClass<P>) Model.getInstance()
+                                             .asProcessManagerClass(cls);
     }
 
     /**
