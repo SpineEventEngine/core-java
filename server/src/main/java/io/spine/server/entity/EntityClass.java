@@ -60,7 +60,7 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
     private transient Constructor<E> entityConstructor;
 
     /** Creates new instance of the model class for the passed class of entities. */
-    protected EntityClass(Class<? extends E> cls) {
+    public EntityClass(Class<? extends E> cls) {
         super(cls);
         final Class<?> idClass = getIdClass(cls);
         checkIdClass(idClass);
@@ -98,9 +98,22 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
         }
     }
 
+    /**
+     * Creates new entity with the passed ID.
+     */
     public <I> E createEntity(I id) {
+        checkNotNull(id);
         final Constructor<E> ctor = getConstructor();
-        final E result = createEntity(ctor, id);
+        E result;
+        try {
+            result = ctor.newInstance(id);
+            if (result instanceof AbstractEntity) {
+                AbstractEntity abstractEntity = (AbstractEntity) result;
+                abstractEntity.init();
+            }
+        } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
+            throw new IllegalStateException(e);
+        }
         return result;
     }
 
@@ -137,27 +150,6 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
         @SuppressWarnings("unchecked") // The type is preserved by the Entity type declaration.
         final Class<S> result = (Class<S>) Entity.GenericParameter.STATE.getArgumentIn(entityClass);
         return result;
-    }
-
-    /**
-     * Creates a new entity and sets it to the default state.
-     *
-     * <p>If the created entity is {@link AbstractEntity} it is also
-     * {@linkplain AbstractEntity#init() initialized}.
-     */
-    private static <I, E extends Entity<I, ?>> E createEntity(Constructor<E> ctor, I id) {
-        checkNotNull(ctor);
-        checkNotNull(id);
-        try {
-            final E result = ctor.newInstance(id);
-            if (result instanceof AbstractEntity) {
-                AbstractEntity abstractEntity = (AbstractEntity) result;
-                abstractEntity.init();
-            }
-            return result;
-        } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
-            throw new IllegalStateException(e);
-        }
     }
 
     /**

@@ -31,7 +31,6 @@ import io.spine.server.event.EventReactorMethod;
 import io.spine.server.model.MessageHandlerMap;
 import io.spine.server.rejection.RejectionReactorMethod;
 
-import java.lang.reflect.Constructor;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -62,17 +61,6 @@ public class AggregateClass<A extends Aggregate>
         this.stateEvents = new MessageHandlerMap<>(cls, EventApplierMethod.factory());
         this.eventReactions = new MessageHandlerMap<>(cls, EventReactorMethod.factory());
         this.rejectionReactions = new MessageHandlerMap<>(cls, RejectionReactorMethod.factory());
-    }
-
-    @Override
-    protected Constructor<A> findConstructor() {
-        if (AggregatePart.class.isAssignableFrom(value())) {
-            @SuppressWarnings("unchecked") // OK to cast as we checked inheritance above.
-            final Constructor<A> ctor =
-                    AggregatePart.getConstructor((Class<? extends AggregatePart>) value());
-            return ctor;
-        }
-        return super.findConstructor();
     }
 
     /**
