@@ -102,11 +102,10 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      */
     protected final EntityClass<E> entityClass() {
         if (entityClass == null) {
-            @SuppressWarnings("unchecked") // By the cast we enforce having generic params.
-            final Class<? extends Repository<I, E>> repoClass =
-                    (Class<? extends Repository<I, E>>) getClass();
-            final Class<E> cls = TypeInfo.getEntityClass(repoClass);
-            entityClass = getModelClass(cls);
+            @SuppressWarnings("unchecked") // The type is ensured by the declaration of this class.
+            final Class<E> cast =
+                    (Class<E>)ENTITY.getArgumentIn((Class<? extends Repository<I, E>>) getClass());
+            entityClass = getModelClass(cast);
         }
         return entityClass;
     }
@@ -397,16 +396,6 @@ public abstract class Repository<I, E extends Entity<I, ?>>
         @Override
         public Class<?> getArgumentIn(Class<? extends Repository> cls) {
             return Default.getArgument(this, cls);
-        }
-    }
-
-    private static class TypeInfo {
-
-        private static <E extends Entity<I, ?>, I>
-        Class<E> getEntityClass(Class<? extends Repository<I, E>> repositoryClass) {
-            @SuppressWarnings("unchecked") // The type is ensured by the declaration of this class.
-            final Class<E> result = (Class<E>)ENTITY.getArgumentIn(repositoryClass);
-            return result;
         }
     }
 
