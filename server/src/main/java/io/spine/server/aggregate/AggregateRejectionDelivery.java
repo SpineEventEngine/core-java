@@ -24,6 +24,8 @@ import io.spine.core.RejectionEnvelope;
 /**
  * A strategy on delivering the rejections to the instances of a certain aggregate type.
  *
+ * @param <I> the ID type of aggregate, to which rejections are being delivered
+ * @param <A> the type of aggregate
  * @author Alex Tymchenko
  */
 public abstract class AggregateRejectionDelivery<I, A extends Aggregate<I, ?, ?>>

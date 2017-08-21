@@ -19,12 +19,19 @@
  */
 package io.spine.server.procman;
 
+import io.spine.annotation.SPI;
 import io.spine.core.ActorMessageEnvelope;
 import io.spine.server.delivery.EndpointDelivery;
 
 /**
+ * A strategy on delivering the messages to the instances of a certain process manager type.
+ *
+ * @param <I> the ID type of process manager, to which messages are being delivered
+ * @param <P> the type of process manager
+ * @param <M> the type of message envelope, which is used for message delivery
  * @author Alex Tymchenko
  */
+@SPI
 public abstract class PmEndpointDelivery<I,
                                          P extends ProcessManager<I, ?, ?>,
                                          M extends ActorMessageEnvelope<?, ?, ?>>

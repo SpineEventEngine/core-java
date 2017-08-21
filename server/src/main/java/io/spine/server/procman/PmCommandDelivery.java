@@ -25,6 +25,8 @@ import io.spine.core.CommandEnvelope;
 /**
  * A strategy on delivering the ecommandsvents to the instances of a certain process manager type.
  *
+ * @param <I> the ID type of process manager, to which commands are being delivered
+ * @param <P> the type of process manager
  * @author Alex Tymchenko
  */
 @SPI

@@ -25,6 +25,8 @@ import io.spine.core.EventEnvelope;
 /**
  * A strategy on delivering the events to the instances of a certain aggregate type.
  *
+ * @param <I> the ID type of aggregate, to which events are being delivered
+ * @param <A> the type of aggregate
  * @author Alex Tymchenko
  */
 @SPI
