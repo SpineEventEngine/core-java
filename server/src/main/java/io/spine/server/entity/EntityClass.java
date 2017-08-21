@@ -71,34 +71,6 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
     }
 
     /**
-     * Obtains the constructor for the passed entity class.
-     *
-     * <p>The entity class must have a constructor with the single parameter of type defined by
-     * generic type {@code <I>}.
-     *
-     * @param entityClass the entity class
-     * @param idClass     the class of entity identifiers
-     * @param <E>         the entity type
-     * @param <I>         the ID type
-     * @return the constructor
-     * @throws IllegalStateException if the entity class does not have the required constructor
-     */
-    private static <E extends Entity<I, ?>, I> Constructor<E> getConstructor(Class<E> entityClass,
-                                                                             Class<I> idClass) {
-        checkNotNull(entityClass);
-        checkNotNull(idClass);
-
-        try {
-            @SuppressWarnings("JavaReflectionMemberAccess") // Required in the Entity definition.
-            final Constructor<E> result = entityClass.getDeclaredConstructor(idClass);
-            result.setAccessible(true);
-            return result;
-        } catch (NoSuchMethodException ignored) {
-            throw noSuchConstructor(entityClass.getName(), idClass.getName());
-        }
-    }
-
-    /**
      * Creates new entity with the passed ID.
      */
     public <I> E createEntity(I id) {
@@ -162,9 +134,26 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
         return entityConstructor;
     }
 
-    @SuppressWarnings("unchecked")
+    /**
+     * Obtains the constructor for the passed entity class.
+     *
+     * <p>The entity class must have a constructor with the single parameter of type defined by
+     * generic type {@code <I>}.
+     * @throws IllegalStateException if the entity class does not have the required constructor
+    */
+    @SuppressWarnings({"JavaReflectionMemberAccess" /* Entity ctor must accept ID parameter */,
+                       "unchecked" /* The cast is protected by generic params of this class. */})
     protected Constructor<E> findConstructor() {
-        return (Constructor<E>) getConstructor(value(), getIdClass());
+        Class<? extends E> entityClass = value();
+        Class<?> idClass = getIdClass();
+        final Constructor<E> result;
+        try {
+            result = (Constructor<E>) entityClass.getDeclaredConstructor(idClass);
+            result.setAccessible(true);
+        } catch (NoSuchMethodException ignored) {
+            throw noSuchConstructor(entityClass.getName(), idClass.getName());
+        }
+        return result;
     }
 
     /**

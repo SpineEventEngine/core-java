@@ -47,8 +47,7 @@ import java.lang.reflect.Constructor;
 import java.util.List;
 
 import static io.spine.Identifier.newUuid;
-import static io.spine.server.aggregate.AggregatePart.create;
-import static io.spine.server.aggregate.AggregatePart.getConstructor;
+import static io.spine.server.aggregate.AggregatePartClass.create;
 import static io.spine.server.entity.given.Given.aggregatePartOfClass;
 import static io.spine.test.Verify.assertSize;
 import static org.junit.Assert.assertEquals;
@@ -119,23 +118,11 @@ public class AggregatePartShould {
     }
 
     @Test(expected = IllegalStateException.class)
-    public void throw_exception_when_aggregate_part_does_not_have_appropriate_constructor() {
-        getConstructor(WrongAggregatePart.class);
-    }
-
-    @Test(expected = IllegalStateException.class)
     public void throw_exc_during_aggregate_part_creation_when_it_does_not_have_appropriate_ctor()
             throws NoSuchMethodException {
         final Constructor<WrongAggregatePart> constructor =
                 WrongAggregatePart.class.getDeclaredConstructor();
         create(constructor, root);
-    }
-
-    @Test
-    public void obtain_aggregate_part_constructor() {
-        final Constructor<AnAggregatePart> constructor =
-                getConstructor(AnAggregatePart.class);
-        assertNotNull(constructor);
     }
 
     @Test

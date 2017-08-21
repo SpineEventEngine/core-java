@@ -60,13 +60,13 @@ public class AggregatePartBuilder<A extends AggregatePart<I, S, ?, R>,
 
     @Override
     protected A createEntity(I id) {
-        final A result = AggregatePart.create(getConstructor(), aggregateRoot);
+        final A result = AggregatePartClass.create(getConstructor(), aggregateRoot);
         return result;
     }
 
     @Override
     protected Constructor<A> getConstructor() {
-        final Constructor<A> constructor = AggregatePart.getConstructor(getResultClass());
+        final Constructor<A> constructor = AggregatePartClass.getConstructor(getResultClass());
         return constructor;
     }
 }
