@@ -25,15 +25,15 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.storage.ColumnTypeRegistry;
+import io.spine.server.model.EntityClass;
+import io.spine.server.model.Model;
 import io.spine.server.projection.Projection;
+import io.spine.server.projection.ProjectionClass;
 import io.spine.server.projection.ProjectionStorage;
 import io.spine.server.stand.StandStorage;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.type.TypeUrl;
-
-import static io.spine.server.entity.Entity.TypeInfo.getIdClass;
-import static io.spine.server.entity.Entity.TypeInfo.getStateClass;
 
 /**
  * A factory for in-memory storages.
@@ -96,9 +96,11 @@ public class InMemoryStorageFactory implements StorageFactory {
     @Override
     public <I> RecordStorage<I>
     createRecordStorage(Class<? extends Entity<I, ?>> entityClass) {
-        final Class<? extends Message> stateClass = getStateClass(entityClass);
+        final EntityClass<?> modelClass = Model.getInstance().asEntityClass(entityClass);
+        final Class<? extends Message> stateClass = modelClass.getStateClass();
         final TypeUrl typeUrl = TypeUrl.of(stateClass);
-        final Class<I> idClass = getIdClass(entityClass);
+        @SuppressWarnings("unchecked") // The cast is protected by generic params of the method.
+        final Class<I> idClass = (Class<I>) modelClass.getIdClass();
         final StorageSpec<I> spec = StorageSpec.of(boundedContextName, typeUrl, idClass);
         return InMemoryRecordStorage.newInstance(spec, isMultitenant());
     }
@@ -106,8 +108,11 @@ public class InMemoryStorageFactory implements StorageFactory {
     @Override
     public <I> ProjectionStorage<I> createProjectionStorage(
             Class<? extends Projection<I, ?, ?>> projectionClass) {
-        final Class<Message> stateClass = getStateClass(projectionClass);
-        final Class<I> idClass = getIdClass(projectionClass);
+        final ProjectionClass<?> modelClass =
+                Model.getInstance().asProjectionClass(projectionClass);
+        final Class<? extends Message> stateClass = modelClass.getStateClass();
+        @SuppressWarnings("unchecked") // The cast is protected by generic parameters of the method.
+        final Class<I> idClass = (Class<I>) modelClass.getIdClass();
         final TypeUrl stateUrl = TypeUrl.of(stateClass);
         final StorageSpec<I> spec = StorageSpec.of(boundedContextName, stateUrl, idClass);
 

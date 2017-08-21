@@ -231,13 +231,6 @@ public class EntityShould {
     }
 
     @Test
-    public void return_id_class() {
-        final Class<String> actual = Entity.TypeInfo.getIdClass(TestEntity.class);
-
-        assertEquals(String.class, actual);
-    }
-
-    @Test
     public void generate_non_zero_hash_code_if_entity_has_non_empty_id_and_state() {
         assertFalse(entityWithState.getId()
                                    .trim()

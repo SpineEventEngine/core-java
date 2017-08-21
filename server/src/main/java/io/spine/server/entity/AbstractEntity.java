@@ -23,6 +23,7 @@ package io.spine.server.entity;
 import com.google.common.base.MoreObjects;
 import com.google.protobuf.Message;
 import io.spine.protobuf.Messages;
+import io.spine.server.model.EntityClass;
 import io.spine.string.Stringifiers;
 import io.spine.validate.ConstraintViolation;
 import io.spine.validate.MessageValidator;
@@ -130,8 +131,8 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     /**
      * Obtains the class of the entity state.
      */
-    protected Class<S> getStateClass() {
-        return TypeInfo.getStateClass(getClass());
+    private Class<S> getStateClass() {
+        return EntityClass.getStateClass(getClass());
     }
 
     /**

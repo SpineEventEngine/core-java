@@ -24,8 +24,6 @@ import com.google.protobuf.Message;
 import io.spine.Identifier;
 import io.spine.util.GenericTypeIndex;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 /**
  * A server-side object with an {@link Identifier#checkSupported(Class) identity}.
  *
@@ -105,32 +103,5 @@ public interface Entity<I, S extends Message> {
             // Prevent construction from outside.
         }
 
-        /**
-         * Retrieves the ID class of the entities of the given class.
-         *
-         * @param entityClass the entity class to inspect
-         * @param <I>         the entity ID type
-         * @return the entity ID class
-         */
-        public static <I> Class<I> getIdClass(Class<? extends Entity> entityClass) {
-            checkNotNull(entityClass);
-            @SuppressWarnings("unchecked") // The type is preserved by the Entity type declaration.
-            final Class<I> result = (Class<I>) GenericParameter.ID.getArgumentIn(entityClass);
-            return result;
-        }
-
-        /**
-         * Retrieves the state class of the passed entity class.
-         *
-         * @param <S>         the entity state type
-         * @param entityClass the entity class to inspect
-         * @return the entity state class
-         */
-        public static <S extends Message> Class<S>
-        getStateClass(Class<? extends Entity> entityClass) {
-            @SuppressWarnings("unchecked") // The type is preserved by the Entity type declaration.
-            final Class<S> result = (Class<S>) GenericParameter.STATE.getArgumentIn(entityClass);
-            return result;
-        }
     }
 }

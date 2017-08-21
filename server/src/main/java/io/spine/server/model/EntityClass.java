@@ -59,10 +59,10 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
 
     protected EntityClass(Class<? extends E> cls) {
         super(cls);
-        final Class<?> idClass = Entity.TypeInfo.getIdClass(cls);
+        final Class<?> idClass = getIdClass(cls);
         checkIdClass(idClass);
         this.idClass = idClass;
-        this.stateClass = Entity.TypeInfo.getStateClass(cls);
+        this.stateClass = getStateClass(cls);
         final ClassName stateClassName = ClassName.of(stateClass);
         this.entityStateType = KnownTypes.getTypeUrl(stateClassName);
     }
@@ -105,6 +105,34 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
                 entityClass, idClass
         );
         return new IllegalStateException(new NoSuchMethodException(errMsg));
+    }
+
+    /**
+     * Retrieves the ID class of the entities of the given class.
+     *
+     * @param entityClass the entity class to inspect
+     * @param <I>         the entity ID type
+     * @return the entity ID class
+     */
+    private static <I> Class<I> getIdClass(Class<? extends Entity> entityClass) {
+        checkNotNull(entityClass);
+        @SuppressWarnings("unchecked") // The type is preserved by the Entity type declaration.
+        final Class<I> result = (Class<I>) Entity.GenericParameter.ID.getArgumentIn(entityClass);
+        return result;
+    }
+
+    /**
+     * Retrieves the state class of the passed entity class.
+     *
+     * @param <S>         the entity state type
+     * @param entityClass the entity class to inspect
+     * @return the entity state class
+     */
+    public static <S extends Message> Class<S>
+    getStateClass(Class<? extends Entity> entityClass) {
+        @SuppressWarnings("unchecked") // The type is preserved by the Entity type declaration.
+        final Class<S> result = (Class<S>) Entity.GenericParameter.STATE.getArgumentIn(entityClass);
+        return result;
     }
 
     /**
