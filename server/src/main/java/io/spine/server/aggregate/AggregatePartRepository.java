@@ -22,8 +22,6 @@ package io.spine.server.aggregate;
 
 import io.spine.server.model.Model;
 
-import java.lang.reflect.Constructor;
-
 /**
  * Common abstract base for repositories that manage {@code AggregatePart}s.
  *
@@ -80,7 +78,6 @@ public abstract class AggregatePartRepository<I,
     }
 
     private A createAggregatePart(AggregateRoot<I> root) {
-        final Constructor<A> entityConstructor = getEntityConstructor();
-        return AggregatePartClass.create(entityConstructor, root);
+        return aggregatePartClass().createEntity(root);
     }
 }

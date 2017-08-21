@@ -62,7 +62,8 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
     /** Creates new instance of the model class for the passed class of entities. */
     public EntityClass(Class<? extends E> cls) {
         super(cls);
-        final Class<?> idClass = getIdClass(cls);
+        checkNotNull((Class<? extends Entity>) cls);
+        final Class<?> idClass = Entity.GenericParameter.ID.getArgumentIn(cls);
         checkIdClass(idClass);
         this.idClass = idClass;
         this.stateClass = getStateClass(cls);
@@ -71,14 +72,14 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
     }
 
     /**
-     * Creates new entity with the passed ID.
+     * Creates new entity.
      */
-    public <I> E createEntity(I id) {
-        checkNotNull(id);
+    public E createEntity(Object constructorArgument) {
+        checkNotNull(constructorArgument);
         final Constructor<E> ctor = getConstructor();
         E result;
         try {
-            result = ctor.newInstance(id);
+            result = ctor.newInstance(constructorArgument);
             if (result instanceof AbstractEntity) {
                 AbstractEntity abstractEntity = (AbstractEntity) result;
                 abstractEntity.init();
@@ -95,20 +96,6 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
                 entityClass, idClass
         );
         return new IllegalStateException(new NoSuchMethodException(errMsg));
-    }
-
-    /**
-     * Retrieves the ID class of the entities of the given class.
-     *
-     * @param entityClass the entity class to inspect
-     * @param <I>         the entity ID type
-     * @return the entity ID class
-     */
-    private static <I> Class<I> getIdClass(Class<? extends Entity> entityClass) {
-        checkNotNull(entityClass);
-        @SuppressWarnings("unchecked") // The type is preserved by the Entity type declaration.
-        final Class<I> result = (Class<I>) Entity.GenericParameter.ID.getArgumentIn(entityClass);
-        return result;
     }
 
     /**

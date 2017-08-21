@@ -31,7 +31,6 @@ import io.spine.server.aggregate.given.AggregatePartTestEnv.TaskDescriptionPart;
 import io.spine.server.aggregate.given.AggregatePartTestEnv.TaskDescriptionRepository;
 import io.spine.server.aggregate.given.AggregatePartTestEnv.TaskPart;
 import io.spine.server.aggregate.given.AggregatePartTestEnv.TaskRepository;
-import io.spine.server.aggregate.given.AggregatePartTestEnv.WrongAggregatePart;
 import io.spine.server.entity.InvalidEntityStateException;
 import io.spine.server.model.ModelTests;
 import io.spine.test.aggregate.ProjectId;
@@ -47,11 +46,9 @@ import java.lang.reflect.Constructor;
 import java.util.List;
 
 import static io.spine.Identifier.newUuid;
-import static io.spine.server.aggregate.AggregatePartClass.create;
 import static io.spine.server.entity.given.Given.aggregatePartOfClass;
 import static io.spine.test.Verify.assertSize;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 /**
@@ -103,26 +100,10 @@ public class AggregatePartShould {
     }
 
     @Test
-    public void create_aggregate_part_entity() throws NoSuchMethodException {
-        final Constructor<AnAggregatePart> constructor =
-                AnAggregatePart.class.getDeclaredConstructor(AnAggregateRoot.class);
-        final AggregatePart aggregatePart = create(constructor, root);
-        assertNotNull(aggregatePart);
-    }
-
-    @Test
     public void return_aggregate_part_state_by_class() {
         taskRepository.store(taskPart);
         final Task task = taskDescriptionPart.getPartState(Task.class);
         assertEquals(TASK_DESCRIPTION, task.getDescription());
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void throw_exc_during_aggregate_part_creation_when_it_does_not_have_appropriate_ctor()
-            throws NoSuchMethodException {
-        final Constructor<WrongAggregatePart> constructor =
-                WrongAggregatePart.class.getDeclaredConstructor();
-        create(constructor, root);
     }
 
     @Test

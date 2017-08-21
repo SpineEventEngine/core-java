@@ -82,8 +82,12 @@ public class EntityBuilder<E extends AbstractVersionableEntity<I, S>, I, S exten
     @Override
     public EntityBuilder<E, I, S> setResultClass(Class<E> entityClass) {
         super.setResultClass(entityClass);
-        this.entityClass = new EntityClass<>(entityClass);
+        this.entityClass = createModelClass(entityClass);
         return this;
+    }
+
+    protected EntityClass<E> createModelClass(Class<E> entityClass) {
+        return new EntityClass<>(entityClass);
     }
 
     public EntityBuilder<E, I, S> withId(I id) {
@@ -106,7 +110,7 @@ public class EntityBuilder<E extends AbstractVersionableEntity<I, S>, I, S exten
         return this;
     }
 
-    EntityClass<E> entityClass() {
+    protected EntityClass<E> entityClass() {
         checkState(entityClass != null);
         return entityClass;
     }

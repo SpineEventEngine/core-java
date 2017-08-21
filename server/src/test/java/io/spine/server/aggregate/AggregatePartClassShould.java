@@ -20,10 +20,16 @@
 
 package io.spine.server.aggregate;
 
+import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.given.AggregatePartTestEnv.AnAggregatePart;
+import io.spine.server.aggregate.given.AggregatePartTestEnv.AnAggregateRoot;
 import io.spine.server.aggregate.given.AggregatePartTestEnv.WrongAggregatePart;
+import io.spine.server.model.ModelTests;
+import org.junit.Before;
 import org.junit.Test;
 
+import static io.spine.Identifier.newUuid;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 /**
@@ -33,6 +39,15 @@ public class AggregatePartClassShould {
 
     private final AggregatePartClass<AnAggregatePart> partClass =
             new AggregatePartClass<>(AnAggregatePart.class);
+    private AnAggregateRoot root;
+
+    @Before
+    public void setUp() {
+        ModelTests.clearModel();
+        final BoundedContext boundedContext = BoundedContext.newBuilder()
+                                                            .build();
+        root = new AnAggregateRoot(boundedContext, newUuid());
+    }
 
     @Test
     public void obtain_aggregate_part_constructor() {
@@ -42,5 +57,13 @@ public class AggregatePartClassShould {
     @Test(expected = IllegalStateException.class)
     public void throw_exception_when_aggregate_part_does_not_have_appropriate_constructor() {
         new AggregatePartClass<>(WrongAggregatePart.class).getConstructor();
+    }
+
+    @Test
+    public void create_aggregate_part_entity() throws NoSuchMethodException {
+        final AnAggregatePart part = partClass.createEntity(root);
+
+        assertNotNull(part);
+        assertEquals(root.getId(), part.getId());
     }
 }

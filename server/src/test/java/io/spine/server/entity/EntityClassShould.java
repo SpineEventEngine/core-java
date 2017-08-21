@@ -21,12 +21,19 @@
 package io.spine.server.entity;
 
 import com.google.protobuf.StringValue;
+import com.google.protobuf.Timestamp;
+import io.spine.test.TimeTests;
+import io.spine.time.Interval;
+import io.spine.time.Intervals;
+import io.spine.time.Time;
 import org.junit.Test;
 
 import java.lang.reflect.Constructor;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Alexander Yevsyukov
@@ -47,6 +54,29 @@ public class EntityClassShould {
     public void obtain_entity_constructor() {
         final Constructor<NanoEntity> ctor = entityClass.getConstructor();
         assertNotNull(ctor);
+    }
+
+    @Test
+    public void create_and_initialize_entity_instance() {
+        final Long id = 100L;
+        final Timestamp before = TimeTests.Past.secondsAgo(1);
+
+        // Create and init the entity.
+        final EntityClass<NanoEntity> entityClass = new EntityClass<>(NanoEntity.class);
+        final AbstractVersionableEntity<Long, StringValue> entity = entityClass.createEntity(id);
+
+        final Timestamp after = Time.getCurrentTime();
+
+        // The interval with a much earlier start to allow non-zero interval on faster computers.
+        final Interval whileWeCreate = Intervals.between(before, after);
+
+        assertEquals(id, entity.getId());
+        assertEquals(0, entity.getVersion()
+                              .getNumber());
+        assertTrue(Intervals.contains(whileWeCreate, entity.whenModified()));
+        assertEquals(StringValue.getDefaultInstance(), entity.getState());
+        assertFalse(entity.isArchived());
+        assertFalse(entity.isDeleted());
     }
 
     /** A test entity which defines ID and state. */

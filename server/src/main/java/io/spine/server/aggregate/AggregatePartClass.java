@@ -22,8 +22,8 @@ package io.spine.server.aggregate;
 
 import io.spine.annotation.Internal;
 import io.spine.server.BoundedContext;
-import io.spine.server.entity.AbstractEntity;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
@@ -42,46 +42,24 @@ public final class AggregatePartClass<A extends AggregatePart> extends Aggregate
 
     private static final long serialVersionUID = 0L;
 
-    private final Class<? extends AggregateRoot> rootClass;
+    /** The model class of the aggregate root to which the aggregate part belongs. */
+    @Nullable
+    private volatile Class<? extends AggregateRoot> rootClass;
 
     /** Creates new instance. */
     public AggregatePartClass(Class<? extends A> cls) {
         super(cls);
-        @SuppressWarnings("unchecked") // Protected by generic parameters of the calling code.
-        final Class<? extends AggregatePart<Object, ?, ?, AggregateRoot<Object>>> cast =
-                (Class<? extends AggregatePart<Object, ?, ?, AggregateRoot<Object>>>) cls;
-        this.rootClass = getRootClass(cast);
-    }
-
-    static <I, R extends AggregateRoot<I>> Class<R>
-    getRootClass(Class<? extends AggregatePart<I, ?, ?, R>> aggregatePartClass) {
-        checkNotNull(aggregatePartClass);
-        @SuppressWarnings("unchecked") // The type is ensured by the class declaration.
-        final Class<R> rootClass =
-                (Class<R>) AGGREGATE_ROOT.getArgumentIn(aggregatePartClass);
-        return rootClass;
     }
 
     /**
-     * Creates a new {@code AggregatePart} entity and sets it to the default state.
-     *
-     * @param ctor the constructor to use
-     * @param <I>  the type of entity IDs
-     * @param <A>  the type of the entity
-     * @return an {@code AggregatePart} instance
+     * Obtains the aggregate root class of this part class.
      */
-    static <I, A extends AbstractEntity<I, ?>> A create(Constructor<A> ctor,
-                                                        AggregateRoot<I> root) {
-        checkNotNull(ctor);
-        checkNotNull(root);
-
-        try {
-            final A result = ctor.newInstance(root);
-            return result;
-        } catch (InvocationTargetException | InstantiationException |
-                 IllegalAccessException | IllegalArgumentException e) {
-            throw new IllegalStateException(e);
+    @SuppressWarnings("unchecked") // The type is ensured by the class declaration.
+    public Class<? extends AggregateRoot> rootClass() {
+        if (rootClass == null) {
+            rootClass = (Class<? extends AggregateRoot>) AGGREGATE_ROOT.getArgumentIn(value());
         }
+        return rootClass;
     }
 
     /**
@@ -108,48 +86,33 @@ public final class AggregatePartClass<A extends AggregatePart> extends Aggregate
      *
      * <p>Throws {@code IllegalStateException} in other cases.
      *
-     * @param cls the {@code AggregatePart} class
-     * @param <A> the {@code AggregatePart} type
-     * @param <I> the ID type
      * @return the constructor
      * @throws IllegalStateException if the entity class does not have the required constructor
      */
-    static <A extends AggregatePart<I, ?, ?, R>, I, R extends AggregateRoot<I>>
-    Constructor<A> getConstructor(Class<A> cls) {
-        checkNotNull(cls);
-
-        final Class<R> aggregateRootClass = getRootClass(cls);
-        try {
-            final Constructor<A> ctor = cls.getDeclaredConstructor(aggregateRootClass);
-            ctor.setAccessible(true);
-            return ctor;
-        } catch (NoSuchMethodException ignored) {
-            throw noSuchConstructor(cls, aggregateRootClass);
-        }
-    }
-
     @Override
     protected Constructor<A> findConstructor() {
+        Class<? extends A> cls = value();
+        checkNotNull(cls);
+        final Constructor<? extends A> ctor;
+        try {
+            ctor = cls.getDeclaredConstructor(rootClass());
+            ctor.setAccessible(true);
+        } catch (NoSuchMethodException ignored) {
+            throw noSuchConstructor(cls, rootClass());
+        }
         @SuppressWarnings("unchecked") // The cast is protected by generic params.
-        final Constructor<A> ctor = getConstructor(value());
-        return ctor;
-    }
-
-    /**
-     * Obtains the aggregate root class of this part class.
-     */
-    public Class<? extends AggregateRoot> getRootClass() {
-        return rootClass;
+        final Constructor<A> result = (Constructor<A>) ctor;
+        return result;
     }
 
     /**
      * Creates a new {@code AggregateRoot} withing the passed Bounded Context.
      */
-    public <I, R extends AggregateRoot<I>> R createRoot(BoundedContext bc, I aggregateId) {
+    <I, R extends AggregateRoot<I>> R createRoot(BoundedContext bc, I aggregateId) {
         checkNotNull(bc);
         checkNotNull(aggregateId);
         @SuppressWarnings("unchecked") // Protected by generic parameters of the calling code.
-        final Class<R> rootClass = (Class<R>) getRootClass();
+        final Class<R> rootClass = (Class<R>) rootClass();
         R result;
         try {
             final Constructor<R> ctor =
