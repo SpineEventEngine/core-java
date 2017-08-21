@@ -50,7 +50,6 @@ import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
 
 import javax.annotation.CheckReturnValue;
-import java.lang.reflect.Constructor;
 import java.util.List;
 import java.util.Set;
 
@@ -210,13 +209,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     protected Storage<I, ?> createStorage(StorageFactory factory) {
         final Storage<I, ?> result = factory.createAggregateStorage(getEntityClass());
         return result;
-    }
-
-    /**
-     * Obtains the constructor.
-     */
-    Constructor<A> getEntityConstructor() {
-        return entityClass().getConstructor();
     }
 
     /**

@@ -22,6 +22,7 @@ package io.spine.server.aggregate;
 
 import io.spine.annotation.Internal;
 import io.spine.server.BoundedContext;
+import io.spine.server.model.ModelError;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
@@ -87,7 +88,7 @@ public final class AggregatePartClass<A extends AggregatePart> extends Aggregate
      * <p>Throws {@code IllegalStateException} in other cases.
      *
      * @return the constructor
-     * @throws IllegalStateException if the entity class does not have the required constructor
+     * @throws ModelError if the entity class does not have the required constructor
      */
     @Override
     protected Constructor<A> findConstructor() {
@@ -126,13 +127,13 @@ public final class AggregatePartClass<A extends AggregatePart> extends Aggregate
         return result;
     }
 
-    private static IllegalStateException noSuchConstructor(Class<?> aggregatePartClass,
-                                                           Class<?> aggregateRootClass) {
+    private static ModelError noSuchConstructor(Class<?> aggregatePartClass,
+                                                Class<?> aggregateRootClass) {
         final String errMsg =
                 format("%s class must declare a constructor with one parameter of the %s type.",
                        aggregatePartClass.getName(),
                        aggregateRootClass.getName());
         final NoSuchMethodException cause = new NoSuchMethodException(errMsg);
-        throw new IllegalStateException(cause);
+        throw new ModelError(cause);
     }
 }

@@ -24,6 +24,7 @@ import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.given.AggregatePartTestEnv.AnAggregatePart;
 import io.spine.server.aggregate.given.AggregatePartTestEnv.AnAggregateRoot;
 import io.spine.server.aggregate.given.AggregatePartTestEnv.WrongAggregatePart;
+import io.spine.server.model.ModelError;
 import io.spine.server.model.ModelTests;
 import org.junit.Before;
 import org.junit.Test;
@@ -54,7 +55,7 @@ public class AggregatePartClassShould {
         assertNotNull(partClass.getConstructor());
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test(expected = ModelError.class)
     public void throw_exception_when_aggregate_part_does_not_have_appropriate_constructor() {
         new AggregatePartClass<>(WrongAggregatePart.class).getConstructor();
     }

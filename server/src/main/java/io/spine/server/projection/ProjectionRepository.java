@@ -85,16 +85,6 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * <p>Overrides to open the method to the package.
-     */
-    @Override
-    protected Class<I> getIdClass() {
-        return super.getIdClass();
-    }
-
-    /**
      * Obtains event filters for event classes handled by projections of this repository.
      */
     private Set<EventFilter> createEventFilters() {
