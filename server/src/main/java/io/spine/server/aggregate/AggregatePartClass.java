@@ -21,8 +21,12 @@
 package io.spine.server.aggregate;
 
 import io.spine.annotation.Internal;
+import io.spine.server.BoundedContext;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Provides type information on an aggregate part class.
@@ -43,7 +47,16 @@ public final class AggregatePartClass<A extends AggregatePart> extends Aggregate
         @SuppressWarnings("unchecked") // Protected by generic parameters of the calling code.
         final Class<? extends AggregatePart<Object, ?, ?, AggregateRoot<Object>>> cast =
                 (Class<? extends AggregatePart<Object, ?, ?, AggregateRoot<Object>>>) cls;
-        this.rootClass = AggregatePart.TypeInfo.getRootClass(cast);
+        this.rootClass = getRootClass(cast);
+    }
+
+    static <I, R extends AggregateRoot<I>> Class<R>
+    getRootClass(Class<? extends AggregatePart<I, ?, ?, R>> aggregatePartClass) {
+        checkNotNull(aggregatePartClass);
+        @SuppressWarnings("unchecked") // The type is ensured by the class declaration.
+        final Class<R> rootClass =
+                (Class<R>) AggregatePart.GenericParameter.AGGREGATE_ROOT.getArgumentIn(aggregatePartClass);
+        return rootClass;
     }
 
     @Override
@@ -58,5 +71,26 @@ public final class AggregatePartClass<A extends AggregatePart> extends Aggregate
      */
     public Class<? extends AggregateRoot> getRootClass() {
         return rootClass;
+    }
+
+    /**
+     * Creates a new {@code AggregateRoot} withing the passed Bounded Context.
+     */
+    public <I, R extends AggregateRoot<I>> R createRoot(BoundedContext bc, I aggregateId) {
+        checkNotNull(bc);
+        checkNotNull(aggregateId);
+        @SuppressWarnings("unchecked") // Protected by generic parameters of the calling code.
+        final Class<R> rootClass = (Class<R>) getRootClass();
+        R result;
+        try {
+            final Constructor<R> ctor =
+                    rootClass.getDeclaredConstructor(bc.getClass(), aggregateId.getClass());
+            ctor.setAccessible(true);
+            result = ctor.newInstance(bc, aggregateId);
+        } catch (NoSuchMethodException | InvocationTargetException |
+                 InstantiationException | IllegalAccessException e) {
+            throw new IllegalStateException(e);
+        }
+        return result;
     }
 }

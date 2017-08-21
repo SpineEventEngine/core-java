@@ -50,7 +50,6 @@ import static io.spine.Identifier.newUuid;
 import static io.spine.server.aggregate.AggregatePart.create;
 import static io.spine.server.aggregate.AggregatePart.getConstructor;
 import static io.spine.server.entity.given.Given.aggregatePartOfClass;
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Verify.assertSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -137,11 +136,6 @@ public class AggregatePartShould {
         final Constructor<AnAggregatePart> constructor =
                 getConstructor(AnAggregatePart.class);
         assertNotNull(constructor);
-    }
-
-    @Test
-    public void have_TypeInfo_utility_class() {
-        assertHasPrivateParameterlessCtor(AggregatePart.TypeInfo.class);
     }
 
     @Test

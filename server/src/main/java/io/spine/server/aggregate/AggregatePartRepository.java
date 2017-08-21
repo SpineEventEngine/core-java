@@ -74,10 +74,9 @@ public abstract class AggregatePartRepository<I,
     }
 
     //TODO:2017-06-06:alexander.yevsyukov: Have cache of aggregate roots shared among part repositories
-    @SuppressWarnings("unchecked") // The cast is ensured by generic parameters of the repository.
     private AggregateRoot<I> createAggregateRoot(I id) {
-        final Class<R> rootClass = (Class<R>) aggregatePartClass().getRootClass();
-        return AggregateRoot.create(getBoundedContext(), rootClass, id);
+        final AggregateRoot<I> result = aggregatePartClass().createRoot(getBoundedContext(), id);
+        return result;
     }
 
     private A createAggregatePart(AggregateRoot<I> root) {

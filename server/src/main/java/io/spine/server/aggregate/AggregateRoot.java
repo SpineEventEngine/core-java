@@ -26,8 +26,6 @@ import com.google.common.cache.LoadingCache;
 import com.google.protobuf.Message;
 import io.spine.server.BoundedContext;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.ExecutionException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -64,35 +62,6 @@ public class AggregateRoot<I> {
         checkNotNull(id);
         this.boundedContext = boundedContext;
         this.id = id;
-    }
-
-    /**
-     * Creates a new {@code AggregateRoot}.
-     *
-     * @param <I>            the type of entity IDs
-     * @param boundedContext the {@code BoundedContext} to use
-     * @param rootClass      the class of the {@code AggregateRoot}
-     * @param aggregateId    the ID of the aggregate
-     * @return new instance
-     */
-    static <I, R extends AggregateRoot<I>> R create(BoundedContext boundedContext,
-                                                    Class<R> rootClass,
-                                                    I aggregateId) {
-        checkNotNull(aggregateId);
-        checkNotNull(boundedContext);
-        checkNotNull(rootClass);
-
-        try {
-            final Constructor<R> ctor =
-                    rootClass.getDeclaredConstructor(boundedContext.getClass(),
-                                                     aggregateId.getClass());
-            ctor.setAccessible(true);
-            final R root = ctor.newInstance(boundedContext, aggregateId);
-            return root;
-        } catch (NoSuchMethodException | InvocationTargetException |
-                InstantiationException | IllegalAccessException e) {
-            throw new IllegalStateException(e);
-        }
     }
 
     /**

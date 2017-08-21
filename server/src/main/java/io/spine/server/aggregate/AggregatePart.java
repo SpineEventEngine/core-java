@@ -155,7 +155,7 @@ public abstract class AggregatePart<I,
     Constructor<A> getConstructor(Class<A> cls) {
         checkNotNull(cls);
 
-        final Class<R> aggregateRootClass = TypeInfo.getRootClass(cls);
+        final Class<R> aggregateRootClass = AggregatePartClass.getRootClass(cls);
         try {
             final Constructor<A> ctor = cls.getDeclaredConstructor(aggregateRootClass);
             ctor.setAccessible(true);
@@ -206,25 +206,6 @@ public abstract class AggregatePart<I,
         @Override
         public Class<?> getArgumentIn(Class<? extends AggregatePart> cls) {
             return Default.getArgument(this, cls);
-        }
-    }
-
-    /**
-     * Provides type information on classes extending {@code AggregatePart}.
-     */
-    static class TypeInfo {
-
-        private TypeInfo() {
-            // Prevent construction from outside.
-        }
-
-        static <I, R extends AggregateRoot<I>> Class<R>
-        getRootClass(Class<? extends AggregatePart<I, ?, ?, R>> aggregatePartClass) {
-            checkNotNull(aggregatePartClass);
-            @SuppressWarnings("unchecked") // The type is ensured by the class declaration.
-            final Class<R> rootClass =
-                    (Class<R>)GenericParameter.AGGREGATE_ROOT.getArgumentIn(aggregatePartClass);
-            return rootClass;
         }
     }
 }
