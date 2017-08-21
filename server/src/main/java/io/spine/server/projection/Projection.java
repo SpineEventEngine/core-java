@@ -48,8 +48,6 @@ public abstract class Projection<I,
                                  B extends ValidatingBuilder<M, ? extends Message.Builder>>
         extends EventPlayingEntity<I, M, B> {
 
-    private final ProjectionClass<?> thisClass = Model.getInstance()
-                                                      .asProjectionClass(getClass());
     /**
      * Creates a new instance.
      *
@@ -58,6 +56,17 @@ public abstract class Projection<I,
      */
     protected Projection(I id) {
         super(id);
+    }
+
+    @Override
+    protected ProjectionClass<?> thisClass() {
+        return (ProjectionClass<?>) super.thisClass();
+    }
+
+    @Override
+    protected ProjectionClass<?> getModelClass() {
+        return Model.getInstance()
+                    .asProjectionClass(getClass());
     }
 
     protected void handle(Message event, EventContext ctx) {
@@ -92,7 +101,7 @@ public abstract class Projection<I,
     }
 
     void apply(Message eventMessage, EventContext eventContext)  {
-        final EventSubscriberMethod method = thisClass.getSubscriber(EventClass.of(eventMessage));
+        final EventSubscriberMethod method = thisClass().getSubscriber(EventClass.of(eventMessage));
         method.invoke(this, eventMessage, eventContext);
     }
 }

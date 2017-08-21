@@ -72,9 +72,6 @@ public abstract class ProcessManager<I,
                                      B extends ValidatingBuilder<S, ? extends Message.Builder>>
         extends CommandHandlingEntity<I, S, B> {
 
-    private final ProcessManagerClass<?> thisClass = Model.getInstance()
-                                                          .asProcessManagerClass(getClass());
-
     /** The Command Bus to post routed commands. */
     private volatile CommandBus commandBus;
 
@@ -86,6 +83,17 @@ public abstract class ProcessManager<I,
      */
     protected ProcessManager(I id) {
         super(id);
+    }
+
+    @Override
+    protected ProcessManagerClass<?> getModelClass() {
+        return Model.getInstance()
+                    .asProcessManagerClass(getClass());
+    }
+
+    @Override
+    protected ProcessManagerClass<?> thisClass() {
+        return (ProcessManagerClass<?>) super.thisClass();
     }
 
     /** The method to inject {@code CommandBus} instance from the repository. */
@@ -113,7 +121,7 @@ public abstract class ProcessManager<I,
      */
     @Override
     protected List<Event> dispatchCommand(CommandEnvelope cmd) {
-        final CommandHandlerMethod method = thisClass.getHandler(cmd.getMessageClass());
+        final CommandHandlerMethod method = thisClass().getHandler(cmd.getMessageClass());
         final List<? extends Message> messages =
                 method.invoke(this, cmd.getMessage(), cmd.getCommandContext());
         final List<Event> result = toEvents(messages, cmd);
@@ -139,7 +147,7 @@ public abstract class ProcessManager<I,
      *         produce new events because of the passed event
      */
     List<Event> dispatchEvent(EventEnvelope event)  {
-        final EventReactorMethod method = thisClass.getReactor(event.getMessageClass());
+        final EventReactorMethod method = thisClass().getReactor(event.getMessageClass());
         final List<? extends Message> eventMessages =
                 method.invoke(this, event.getMessage(), event.getEventContext());
         final List<Event> events = toEvents(eventMessages, event);
@@ -154,7 +162,7 @@ public abstract class ProcessManager<I,
      *         produce new events because of the passed event
      */
     List<Event> dispatchRejection(RejectionEnvelope rejection) {
-        final RejectionReactorMethod method = thisClass.getReactor(rejection.getMessageClass());
+        final RejectionReactorMethod method = thisClass().getReactor(rejection.getMessageClass());
         final List<? extends Message> eventMessages =
         method.invoke(this, rejection.getMessage(), rejection.getRejectionContext());
         final List<Event> events = toEvents(eventMessages, rejection);

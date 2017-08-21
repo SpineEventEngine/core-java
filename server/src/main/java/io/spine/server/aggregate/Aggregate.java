@@ -45,7 +45,6 @@ import io.spine.server.rejection.RejectionReactorMethod;
 import io.spine.validate.ValidatingBuilder;
 
 import javax.annotation.CheckReturnValue;
-import javax.annotation.Nullable;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -123,9 +122,6 @@ public abstract class Aggregate<I,
                                 B extends ValidatingBuilder<S, ? extends Message.Builder>>
                 extends CommandHandlingEntity<I, S, B> {
 
-    @Nullable
-    private volatile AggregateClass<?> thisClass;
-
     /**
      * Events generated in the process of handling commands that were not yet committed.
      *
@@ -158,16 +154,15 @@ public abstract class Aggregate<I,
     /**
      * Obtains model class for this aggregate.
      */
+    @Override
     protected AggregateClass<?> thisClass() {
-        if (thisClass == null) {
-            thisClass = getModelClass();
-        }
-        return thisClass;
+        return (AggregateClass<?>)super.thisClass();
     }
 
     /**
      * Obtains the model class as {@link Model#asAggregateClass(Class) AggregateClass}.
      */
+    @Override
     protected AggregateClass<?> getModelClass() {
         return Model.getInstance()
                     .asAggregateClass(getClass());

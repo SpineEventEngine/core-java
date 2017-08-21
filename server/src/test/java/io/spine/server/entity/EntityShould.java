@@ -45,7 +45,6 @@ import static io.spine.Identifier.newUuid;
 import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.server.entity.AbstractEntity.createEntity;
 import static io.spine.server.model.EntityClass.getConstructor;
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Tests.assertSecondsEqual;
 import static io.spine.time.Time.getCurrentTime;
 import static org.hamcrest.Matchers.instanceOf;
@@ -291,11 +290,6 @@ public class EntityShould {
         assertEquals(StringValue.getDefaultInstance(), entity.getState());
         assertFalse(entity.isArchived());
         assertFalse(entity.isDeleted());
-    }
-
-    @Test
-    public void have_TypeInfo_utility_class() {
-        assertHasPrivateParameterlessCtor(Entity.TypeInfo.class);
     }
 
     private static Matcher<Long> isBetween(final Long lower, final Long higher) {

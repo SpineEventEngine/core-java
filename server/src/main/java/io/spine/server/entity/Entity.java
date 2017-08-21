@@ -93,15 +93,4 @@ public interface Entity<I, S extends Message> {
             return index;
         }
     }
-
-    /**
-     * Provides type information on classes implementing {@link Entity}.
-     */
-    class TypeInfo {
-
-        private TypeInfo() {
-            // Prevent construction from outside.
-        }
-
-    }
 }

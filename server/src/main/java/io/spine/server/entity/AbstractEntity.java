@@ -24,6 +24,7 @@ import com.google.common.base.MoreObjects;
 import com.google.protobuf.Message;
 import io.spine.protobuf.Messages;
 import io.spine.server.model.EntityClass;
+import io.spine.server.model.Model;
 import io.spine.string.Stringifiers;
 import io.spine.validate.ConstraintViolation;
 import io.spine.validate.MessageValidator;
@@ -45,6 +46,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alexander Yevsyukov
  */
 public abstract class AbstractEntity<I, S extends Message> implements Entity<I, S> {
+
+    @Nullable
+    private volatile EntityClass<?> thisClass;
 
     /** The ID of the entity. */
     private final I id;
@@ -84,6 +88,24 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
             result = state;
         }
         return result;
+    }
+
+    /**
+     * Obtains model class for this aggregate.
+     */
+    protected EntityClass<?> thisClass() {
+        if (thisClass == null) {
+            thisClass = getModelClass();
+        }
+        return thisClass;
+    }
+
+    /**
+     * Obtains the entity class from {@link io.spine.server.model.Model Model}.
+     */
+    protected EntityClass<?> getModelClass() {
+        return Model.getInstance()
+                    .asEntityClass(getClass());
     }
 
     /**
@@ -131,6 +153,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     /**
      * Obtains the class of the entity state.
      */
+    @SuppressWarnings("unchecked") // The cast is protected by generic params of the class.
     private Class<S> getStateClass() {
         return EntityClass.getStateClass(getClass());
     }
