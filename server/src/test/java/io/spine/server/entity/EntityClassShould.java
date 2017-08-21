@@ -22,6 +22,7 @@ package io.spine.server.entity;
 
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
+import io.spine.server.model.ModelError;
 import io.spine.test.TimeTests;
 import io.spine.time.Interval;
 import io.spine.time.Intervals;
@@ -79,10 +80,24 @@ public class EntityClassShould {
         assertFalse(entity.isDeleted());
     }
 
+    @Test(expected = ModelError.class)
+    public void complain_when_there_is_no_one_arg_constructor_for_entity_class() {
+        new EntityClass<>(NoArgEntity.class).getConstructor();
+    }
+
+
     /** A test entity which defines ID and state. */
     private static class NanoEntity extends AbstractVersionableEntity<Long, StringValue> {
         private NanoEntity(Long id) {
             super(id);
+        }
+    }
+
+    /** An entity class without ID constructor. */
+    private static class NoArgEntity extends AbstractEntity<Long, StringValue> {
+
+        private NoArgEntity() {
+            super(0L);
         }
     }
 }

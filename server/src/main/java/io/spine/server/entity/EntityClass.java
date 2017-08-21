@@ -90,12 +90,12 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
         return result;
     }
 
-    private static IllegalStateException noSuchConstructor(String entityClass, String idClass) {
+    private static ModelError noSuchConstructor(String entityClass, String idClass) {
         final String errMsg = format(
                 "%s class must declare a constructor with a single %s ID parameter.",
                 entityClass, idClass
         );
-        return new IllegalStateException(new NoSuchMethodException(errMsg));
+        return new ModelError(new NoSuchMethodException(errMsg));
     }
 
     /**
