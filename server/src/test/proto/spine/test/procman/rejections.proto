@@ -17,37 +17,18 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
+syntax = "proto3";
 
-/**
- *  The versions of the libraries used.
- *
- *  This file is used in both module `build.gradle` scripts and in the integration tests,
- *  as we want to manage the versions in a single source.
- */
- 
-def final SPINE_VERSION = '0.9.55-SNAPSHOT'
+package spine.test.procman.rejection;
 
-ext {
-    // The version of the modules in this project.
-    spineVersion = SPINE_VERSION
+import "spine/options.proto";
 
-    // Depend on `base` for the general definitions and a model compiler.
-    spineBaseVersion = '0.9.54-SNAPSHOT'
+option (type_url_prefix) = "type.spine.io";
+option java_package="io.spine.test.procman.rejection";
+option java_generate_equals_and_hash = true;
 
-    // We use Spine tools in the build process.
-    spineToolsVersion = '0.9.41-SNAPSHOT'
+import "spine/test/procman/project.proto";
 
-    guavaVersion = '20.0'
-
-    // NOTE: when updating Protobuf dependency, please check that
-    // `KnownTypes.addStandardProtobufTypes()` method is updated with new Message types that may be
-    // introduced in the new version of Protobuf.
-    protobufVersion = '3.3.0'
-    
-    gRpcVersion = '1.4.0'
-    slf4JVersion = '1.7.25'
-    jUnitVersion = '4.12'
-    mockitoVersion = '2.7.22'
-
-    protobufGradlePluginVerison = '0.8.3'
+message PmCannotStartArchivedProject {
+    ProjectId project_id = 1;
 }

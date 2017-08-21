@@ -47,9 +47,22 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
         return endpoint.handle();
     }
 
+
+    static <I, A extends Aggregate<I, ?, ?>>
+    AggregateCommandEndpoint<I, A>
+    of(AggregateRepository<I, A> repository, CommandEnvelope command) {
+        return new AggregateCommandEndpoint<>(repository, command);
+    }
+
     @Override
     protected List<? extends Message> doDispatch(A aggregate, CommandEnvelope envelope) {
         return aggregate.dispatchCommand(envelope);
+    }
+
+    @Override
+    protected AggregateEndpointDelivery<I, A, CommandEnvelope> getEndpointDelivery(
+            CommandEnvelope envelope) {
+        return repository().getCommandEndpointDelivery();
     }
 
     /**

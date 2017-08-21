@@ -22,7 +22,6 @@ package io.spine.server.procman;
 
 import io.spine.core.Event;
 import io.spine.core.RejectionEnvelope;
-import io.spine.server.entity.Repository;
 
 import java.util.List;
 import java.util.Set;
@@ -35,8 +34,15 @@ import java.util.Set;
 class PmRejectionEndpoint<I, P extends ProcessManager<I, ?, ?>>
     extends PmEndpoint<I, P, RejectionEnvelope, Set<I>> {
 
-    private PmRejectionEndpoint(Repository<I, P> repository, RejectionEnvelope envelope) {
+    private PmRejectionEndpoint(ProcessManagerRepository<I, P, ?> repository,
+                                RejectionEnvelope envelope) {
         super(repository, envelope);
+    }
+
+    static <I, P extends ProcessManager<I, ?, ?>>
+    PmRejectionEndpoint<I, P> of(ProcessManagerRepository<I, P, ?> repository,
+                                 RejectionEnvelope event) {
+        return new PmRejectionEndpoint<>(repository, event);
     }
 
     static <I, P extends ProcessManager<I, ?, ?>>
@@ -53,6 +59,11 @@ class PmRejectionEndpoint<I, P extends ProcessManager<I, ?, ?>>
                 repository().getRejectionRouting()
                             .apply(envelope.getMessage(), envelope.getMessageContext());
         return ids;
+    }
+
+    @Override
+    protected PmRejectionDelivery<I,P> getEndpointDelivery(RejectionEnvelope envelope) {
+        return repository().getRejectionEndpointDelivery();
     }
 
     @Override
