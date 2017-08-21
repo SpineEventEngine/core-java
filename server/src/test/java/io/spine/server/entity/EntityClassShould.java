@@ -28,6 +28,9 @@ import java.lang.reflect.Constructor;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+/**
+ * @author Alexander Yevsyukov
+ */
 public class EntityClassShould {
 
     private final EntityClass<NanoEntity> entityClass = new EntityClass<>(
