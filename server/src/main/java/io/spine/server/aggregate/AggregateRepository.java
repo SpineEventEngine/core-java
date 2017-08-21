@@ -31,7 +31,6 @@ import io.spine.core.RejectionEnvelope;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandDispatcher;
-import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.DelegatingEventDispatcher;
@@ -156,7 +155,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     @Override
     public A create(I id) {
-        return AbstractEntity.createEntity(getEntityConstructor(), id);
+        return aggregateClass().createEntity(id);
     }
 
     /** Obtains class information of aggregates managed by this repository. */

@@ -33,6 +33,7 @@ import io.spine.server.command.CommandHandler;
 import io.spine.server.command.CommandHandlerClass;
 import io.spine.server.command.CommandHandlingClass;
 import io.spine.server.entity.Entity;
+import io.spine.server.entity.EntityClass;
 import io.spine.server.event.EventSubscriber;
 import io.spine.server.event.EventSubscriberClass;
 import io.spine.server.procman.ProcessManager;

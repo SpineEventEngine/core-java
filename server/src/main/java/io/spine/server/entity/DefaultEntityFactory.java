@@ -20,11 +20,7 @@
 
 package io.spine.server.entity;
 
-import io.spine.server.model.EntityClass;
-
 import java.util.Objects;
-
-import static io.spine.server.entity.AbstractEntity.createEntity;
 
 /**
  * Default factory that creates entities by invoking constructor that
@@ -46,7 +42,7 @@ class DefaultEntityFactory<I, E extends AbstractEntity<I, ?>> implements EntityF
 
     @Override
     public E create(I id) {
-        return createEntity(entityClass.getConstructor(), id);
+        return entityClass.createEntity(id);
     }
 
     @Override

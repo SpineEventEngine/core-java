@@ -26,7 +26,6 @@ import com.google.protobuf.Timestamp;
 import io.spine.Identifier;
 import io.spine.core.Version;
 import io.spine.core.Versions;
-import io.spine.server.model.EntityClass;
 import io.spine.test.ReflectiveBuilder;
 
 import javax.annotation.CheckReturnValue;
@@ -177,8 +176,7 @@ public class EntityBuilder<E extends AbstractVersionableEntity<I, S>, I, S exten
      * Creates an empty entity instance.
      */
     protected E createEntity(I id) {
-        final Constructor<E> constructor = getConstructor();
-        final E result = AbstractEntity.createEntity(constructor, id);
+        final E result = entityClass().createEntity(id);
         return result;
     }
 }

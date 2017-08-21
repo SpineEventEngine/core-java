@@ -18,17 +18,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.model;
+package io.spine.server.entity;
 
 import com.google.protobuf.Message;
 import io.spine.Identifier;
-import io.spine.server.entity.Entity;
+import io.spine.server.model.ModelClass;
+import io.spine.server.model.ModelError;
 import io.spine.type.ClassName;
 import io.spine.type.KnownTypes;
 import io.spine.type.TypeUrl;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
@@ -99,6 +101,13 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
         }
     }
 
+    public <E extends AbstractEntity<I, ?>, I> E createEntity(I id) {
+        @SuppressWarnings("unchecked") //
+        final Constructor<E> ctor = (Constructor<E>) getConstructor();
+        final E result = createEntity(ctor, id);
+        return result;
+    }
+
     private static IllegalStateException noSuchConstructor(String entityClass, String idClass) {
         final String errMsg = format(
                 "%s class must declare a constructor with a single %s ID parameter.",
@@ -132,6 +141,27 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
         @SuppressWarnings("unchecked") // The type is preserved by the Entity type declaration.
         final Class<S> result = (Class<S>) Entity.GenericParameter.STATE.getArgumentIn(entityClass);
         return result;
+    }
+
+    /**
+     * Creates a new entity and sets it to the default state.
+     *
+     * @param ctor the constructor to use
+     * @param id   the ID of the entity
+     * @param <I>  the type of entity IDs
+     * @param <E>  the type of the entity
+     * @return a new entity
+     */
+    private static <I, E extends AbstractEntity<I, ?>> E createEntity(Constructor<E> ctor, I id) {
+        checkNotNull(ctor);
+        checkNotNull(id);
+        try {
+            final E result = ctor.newInstance(id);
+            result.init();
+            return result;
+        } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     /**

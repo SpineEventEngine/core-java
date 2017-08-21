@@ -43,8 +43,7 @@ import java.lang.reflect.Constructor;
 
 import static io.spine.Identifier.newUuid;
 import static io.spine.protobuf.TypeConverter.toMessage;
-import static io.spine.server.entity.AbstractEntity.createEntity;
-import static io.spine.server.model.EntityClass.getConstructor;
+import static io.spine.server.entity.EntityClass.getConstructor;
 import static io.spine.test.Tests.assertSecondsEqual;
 import static io.spine.time.Time.getCurrentTime;
 import static org.hamcrest.Matchers.instanceOf;
@@ -274,9 +273,8 @@ public class EntityShould {
         final Timestamp before = TimeTests.Past.secondsAgo(1);
 
         // Create and init the entity.
-        final Constructor<BareBonesEntity> ctor =
-                getConstructor(BareBonesEntity.class, Long.class);
-        final AbstractVersionableEntity<Long, StringValue> entity = createEntity(ctor, id);
+        final EntityClass<BareBonesEntity> entityClass = EntityClass.valueOf(BareBonesEntity.class);
+        final AbstractVersionableEntity<Long, StringValue> entity = entityClass.createEntity(id);
 
         final Timestamp after = Time.getCurrentTime();
 

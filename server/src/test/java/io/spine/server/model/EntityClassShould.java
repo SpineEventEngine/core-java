@@ -20,6 +20,7 @@
 
 package io.spine.server.model;
 
+import io.spine.server.entity.EntityClass;
 import io.spine.server.entity.TestEntity;
 import org.junit.Test;
 

@@ -23,7 +23,6 @@ package io.spine.server.entity;
 import com.google.common.base.MoreObjects;
 import com.google.protobuf.Message;
 import io.spine.protobuf.Messages;
-import io.spine.server.model.EntityClass;
 import io.spine.server.model.Model;
 import io.spine.string.Stringifiers;
 import io.spine.validate.ConstraintViolation;
@@ -31,8 +30,6 @@ import io.spine.validate.MessageValidator;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Objects;
 
@@ -161,28 +158,6 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
         // RecordStorageShould is changed to avoid TypeVariable <I> in the test entity class.
 
 //        return (Class<S>) thisClass().getStateClass();
-    }
-
-    /**
-     * Creates a new entity and sets it to the default state.
-     *
-     * @param ctor the constructor to use
-     * @param id   the ID of the entity
-     * @param <I>  the type of entity IDs
-     * @param <E>  the type of the entity
-     * @return a new entity
-     */
-    public static <I, E extends AbstractEntity<I, ?>> E createEntity(Constructor<E> ctor, I id) {
-        checkNotNull(ctor);
-        checkNotNull(id);
-
-        try {
-            final E result = ctor.newInstance(id);
-            result.init();
-            return result;
-        } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
-            throw new IllegalStateException(e);
-        }
     }
 
     /**

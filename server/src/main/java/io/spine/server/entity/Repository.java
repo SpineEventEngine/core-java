@@ -27,7 +27,6 @@ import com.google.common.collect.Iterators;
 import io.spine.Identifier;
 import io.spine.core.MessageEnvelope;
 import io.spine.server.BoundedContext;
-import io.spine.server.model.EntityClass;
 import io.spine.server.model.Model;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.Storage;

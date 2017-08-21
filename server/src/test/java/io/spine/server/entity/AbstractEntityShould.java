@@ -29,7 +29,7 @@ import org.junit.Test;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
-import static io.spine.server.model.EntityClass.getConstructor;
+import static io.spine.server.entity.EntityClass.getConstructor;
 import static io.spine.test.Verify.assertSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
