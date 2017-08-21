@@ -18,11 +18,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.model;
+package io.spine.server.entity;
 
 import com.google.protobuf.StringValue;
-import io.spine.server.entity.AbstractVersionableEntity;
-import io.spine.server.entity.EntityClass;
 import org.junit.Test;
 
 import java.lang.reflect.Constructor;
