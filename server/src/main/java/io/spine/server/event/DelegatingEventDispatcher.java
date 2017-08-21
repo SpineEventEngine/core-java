@@ -20,6 +20,7 @@
 
 package io.spine.server.event;
 
+import com.google.common.base.MoreObjects;
 import io.spine.annotation.Internal;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
@@ -73,5 +74,18 @@ public final class DelegatingEventDispatcher<I> implements EventDispatcher<I> {
     @Override
     public void onError(EventEnvelope envelope, RuntimeException exception) {
         delegate.onError(envelope, exception);
+    }
+
+    /**
+     * Returns the string representation of this dispatcher.
+     *
+     * <p>Includes an FQN of the {@code delegate} in order to allow distinguish
+     * {@code DelegatingEventDispatcher} instances with different delegates.
+     */
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                          .add("eventDelegate", delegate.getClass())
+                          .toString();
     }
 }

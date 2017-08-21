@@ -21,22 +21,24 @@ package io.spine.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
+import io.spine.annotation.SPI;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
-import io.spine.core.React;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandDispatcher;
+import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.DelegatingEventDispatcher;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcherDelegate;
+import io.spine.server.model.Model;
 import io.spine.server.rejection.DelegatingRejectionDispatcher;
 import io.spine.server.rejection.RejectionDispatcherDelegate;
 import io.spine.server.route.CommandRouting;
@@ -49,7 +51,6 @@ import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
 
 import javax.annotation.CheckReturnValue;
-import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
 import java.util.List;
 import java.util.Set;
@@ -57,8 +58,6 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.core.Commands.causedByRejection;
-import static io.spine.server.entity.AbstractEntity.createEntity;
-import static io.spine.server.entity.AbstractEntity.getConstructor;
 import static io.spine.server.entity.EntityWithLifecycle.Predicates.isEntityVisible;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
@@ -106,21 +105,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     /** The number of events to store between snapshots. */
     private int snapshotTrigger = DEFAULT_SNAPSHOT_TRIGGER;
-
-    /** The constructor for creating entity instances. */
-    private Constructor<A> entityConstructor;
-
-    /** The set of command classes dispatched to aggregates by this repository. */
-    @Nullable
-    private Set<CommandClass> commandClasses;
-
-    /** The set of event classes on which aggregates {@linkplain React react}. */
-    @Nullable
-    private Set<EventClass> eventReactions;
-
-    /** The set of rejection classes on which aggregates {@linkplain React react}. */
-    @Nullable
-    private Set<RejectionClass> rejectionReactions;
 
     /** Creates a new instance. */
     protected AggregateRepository() {
@@ -173,7 +157,19 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     @Override
     public A create(I id) {
-        return createEntity(getEntityConstructor(), id);
+        return AbstractEntity.createEntity(getEntityConstructor(), id);
+    }
+
+    /** Obtains class information of aggregates managed by this repository. */
+    private AggregateClass<A> aggregateClass() {
+        return (AggregateClass<A>)entityClass();
+    }
+
+    @Override
+    @SuppressWarnings("unchecked") // The cast is ensured by generic parameters of the repository.
+    protected final AggregateClass<A> getModelClass(Class<A> cls) {
+        return (AggregateClass<A>) Model.getInstance()
+                                        .asAggregateClass(cls);
     }
 
     /**
@@ -219,25 +215,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     /**
      * Obtains the constructor.
-     *
-     * <p>The method returns cached value if called more than once.
-     * During the first call, it {@linkplain #findEntityConstructor() finds} the constructor.
      */
-    protected Constructor<A> getEntityConstructor() {
-        if (this.entityConstructor == null) {
-            this.entityConstructor = findEntityConstructor();
-        }
-        return this.entityConstructor;
-    }
-
-    /**
-     * Obtains the constructor for creating entities.
-     */
-    @VisibleForTesting
-    protected Constructor<A> findEntityConstructor() {
-        final Constructor<A> result = getConstructor(getEntityClass(), getIdClass());
-        this.entityConstructor = result;
-        return result;
+    Constructor<A> getEntityConstructor() {
+        return entityClass().getConstructor();
     }
 
     /**
@@ -257,10 +237,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // We return immutable impl.
     @Override
     public Set<CommandClass> getMessageClasses() {
-        if (commandClasses == null) {
-            commandClasses = Aggregate.TypeInfo.getCommandClasses(getAggregateClass());
-        }
-        return commandClasses;
+        return aggregateClass().getCommands();
     }
 
     /**
@@ -300,10 +277,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // We return immutable impl.
     public Set<EventClass> getEventClasses() {
-        if (eventReactions == null) {
-            eventReactions = Aggregate.TypeInfo.getReactedEventClasses(getAggregateClass());
-        }
-        return eventReactions;
+        return aggregateClass().getEventReactions();
     }
 
     /**
@@ -328,11 +302,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // We return immutable impl.
     public Set<RejectionClass> getRejectionClasses() {
-        if (rejectionReactions == null) {
-            rejectionReactions =
-                    Aggregate.TypeInfo.getReactedRejectionClasses(getAggregateClass());
-        }
-        return rejectionReactions;
+        return aggregateClass().getRejectionReactions();
     }
 
     @Override
@@ -494,5 +464,52 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     /** The Stand instance for sending updated aggregate states. */
     private Stand getStand() {
         return getBoundedContext().getStand();
+    }
+
+    /**
+     * Defines a strategy of event delivery applied to the instances managed by this repository.
+     *
+     * <p>By default uses direct delivery.
+     *
+     * <p>Descendants may override this method to redefine the strategy. In particular,
+     * it is possible to postpone dispatching of a certain event to a particular aggregate
+     * instance at runtime.
+     *
+     * @return delivery strategy for events applied to the instances managed by this repository
+     */
+    @SPI
+    protected AggregateEndpointDelivery<I, A, EventEnvelope> getEventEndpointDelivery() {
+        return AggregateEventDelivery.directDelivery(this);
+    }
+
+    /**
+     * Defines a strategy of rejection delivery applied to the instances managed by this repository.
+     *
+     * <p>By default uses direct delivery.
+     *
+     * <p>Descendants may override this method to redefine the strategy. In particular,
+     * it is possible to postpone dispatching of a certain rejection to a particular aggregate
+     * instance at runtime.
+     *
+     * @return delivery strategy for rejections
+     */
+    @SPI
+    protected AggregateEndpointDelivery<I, A, RejectionEnvelope> getRejectionEndpointDelivery() {
+        return AggregateRejectionDelivery.directDelivery(this);
+    }
+
+    /**
+     * Defines a strategy of command delivery applied to the instances managed by this repository.
+     *
+     * <p>By default uses direct delivery.
+     *
+     * <p>Descendants may override this method to redefine the strategy. In particular,
+     * it is possible to postpone dispatching of a certain command to a particular aggregate
+     * instance at runtime.
+     *
+     * @return delivery strategy for rejections
+     */
+    protected AggregateEndpointDelivery<I, A, CommandEnvelope> getCommandEndpointDelivery() {
+        return AggregateCommandDelivery.directDelivery(this);
     }
 }

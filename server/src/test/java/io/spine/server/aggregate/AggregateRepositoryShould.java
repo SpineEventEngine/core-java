@@ -52,7 +52,9 @@ import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.RejectionReact
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.RejectionReactingRepository;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.commandbus.CommandBus;
-import io.spine.server.reflect.HandlerMethodFailedException;
+import io.spine.server.model.HandlerMethodFailedException;
+import io.spine.server.model.Model;
+import io.spine.server.model.ModelTests;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggCreateProjectWithChildren;
@@ -73,9 +75,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 public class AggregateRepositoryShould {
 
@@ -85,34 +84,19 @@ public class AggregateRepositoryShould {
     private BoundedContext boundedContext;
     private AggregateRepository<ProjectId, ProjectAggregate> repository;
 
-    /**
-     * Use spy only when it is required to avoid problems,
-     * make tests faster and make it easier to debug.
-     */
-    private AggregateRepository<ProjectId, ProjectAggregate> repositorySpy;
-
     @Before
     public void setUp() {
+        ModelTests.clearModel();
         boundedContext = BoundedContext.newBuilder()
                                        .build();
         repository = new ProjectAggregateRepository();
         boundedContext.register(repository);
-        repositorySpy = spy(repository);
     }
 
     @After
     public void tearDown() throws Exception {
         repository.close();
         boundedContext.close();
-    }
-
-    @Test
-    public void call_get_aggregate_constructor_method_only_once() {
-        final ProjectId id = Sample.messageOfType(ProjectId.class);
-        repositorySpy.create(id);
-        repositorySpy.create(id);
-
-        verify(repositorySpy, times(1)).findEntityConstructor();
     }
 
     @Test
@@ -209,7 +193,9 @@ public class AggregateRepositoryShould {
     @Test
     public void expose_classes_of_commands_of_its_aggregate() {
         final Set<CommandClass> aggregateCommands =
-                Aggregate.TypeInfo.getCommandClasses(ProjectAggregate.class);
+                Model.getInstance()
+                     .asAggregateClass(ProjectAggregate.class)
+                     .getCommands();
         final Set<CommandClass> exposedByRepository = repository.getMessageClasses();
 
         assertTrue(exposedByRepository.containsAll(aggregateCommands));

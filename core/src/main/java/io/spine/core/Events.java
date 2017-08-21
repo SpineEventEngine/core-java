@@ -32,6 +32,7 @@ import io.spine.time.Timestamps2;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.protobuf.AnyPacker.unpack;
@@ -65,6 +66,19 @@ public final class Events {
 
     /** Prevents instantiation of this utility class. */
     private Events() {}
+
+    /**
+     * Creates a new {@link EventId} based on random UUID.
+     *
+     * @return new UUID-based event ID
+     */
+    public static EventId generateId() {
+        final String value = UUID.randomUUID()
+                                 .toString();
+        return EventId.newBuilder()
+                      .setValue(value)
+                      .build();
+    }
 
     /**
      * Sorts the given event record list by the event timestamps.

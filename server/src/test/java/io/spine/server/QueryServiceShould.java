@@ -27,6 +27,7 @@ import io.spine.core.Responses;
 import io.spine.core.Subscribe;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.grpc.StreamObservers;
+import io.spine.server.model.ModelTests;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.stand.Stand;
@@ -70,6 +71,7 @@ public class QueryServiceShould {
 
     @Before
     public void setUp() {
+        ModelTests.clearModel();
         // Create Projects Bounded Context with one repository and one projection.
         projectsContext = BoundedContext.newBuilder()
                                         .setId("Projects")

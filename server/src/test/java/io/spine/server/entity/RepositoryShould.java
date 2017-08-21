@@ -26,6 +26,7 @@ import io.spine.server.BoundedContext;
 import io.spine.server.entity.given.RepositoryTestEnv.ProjectEntity;
 import io.spine.server.entity.given.RepositoryTestEnv.RepoForEntityWithUnsupportedId;
 import io.spine.server.entity.given.RepositoryTestEnv.TestRepo;
+import io.spine.server.model.ModelError;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantAwareFunction0;
@@ -77,7 +78,7 @@ public class RepositoryShould {
      * Tests of initialization
      **************************/
 
-    @Test(expected = IllegalStateException.class)
+    @Test(expected = ModelError.class)
     public void check_for_entity_id_class() {
         new RepoForEntityWithUnsupportedId().getIdClass();
     }
