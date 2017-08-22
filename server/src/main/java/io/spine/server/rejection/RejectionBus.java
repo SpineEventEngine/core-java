@@ -44,6 +44,7 @@ import java.util.Set;
 
 import static com.google.common.base.Optional.absent;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Lists.newLinkedList;
 
 /**
  * Dispatches the business rejections that occur during the command processing
@@ -110,7 +111,7 @@ public class RejectionBus extends CommandOutputBus<Rejection,
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK for this method.
     @Override
     protected Deque<BusFilter<RejectionEnvelope>> createFilterChain() {
-        return filterChain;
+        return newLinkedList(filterChain);
     }
 
     @Override

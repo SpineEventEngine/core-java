@@ -47,6 +47,7 @@ import java.util.concurrent.Executor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.Lists.newLinkedList;
 
 /**
  * Dispatches incoming events to subscribers, and provides ways for registering those subscribers.
@@ -167,7 +168,7 @@ public class EventBus
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK for this method.
     @Override
     protected Deque<BusFilter<EventEnvelope>> createFilterChain() {
-        return filterChain;
+        return newLinkedList(filterChain);
     }
 
     @Override
