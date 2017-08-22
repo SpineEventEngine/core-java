@@ -39,6 +39,7 @@ import org.junit.Test;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
+import java.util.Deque;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
@@ -47,6 +48,7 @@ import static com.google.common.collect.Maps.newHashMap;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.any;
@@ -135,6 +137,15 @@ public class EventBusShould {
         // Pass just String instance.
         eventBus.register(new EventSubscriber() {
         });
+    }
+
+    @Test
+    public void produce_new_object_on_each_call_to_createFilterChain() {
+        final Deque<?> oldChain = eventBus.createFilterChain();
+        final Deque<?> newChain = eventBus.createFilterChain();
+
+        assertEquals(oldChain, newChain);
+        assertNotSame(oldChain, newChain);
     }
 
     @Test
