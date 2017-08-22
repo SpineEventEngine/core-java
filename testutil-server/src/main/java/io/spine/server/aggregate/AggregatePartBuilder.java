@@ -22,6 +22,7 @@ package io.spine.server.aggregate;
 
 import com.google.protobuf.Message;
 import io.spine.server.entity.EntityBuilder;
+import io.spine.server.entity.EntityClass;
 
 import java.lang.reflect.Constructor;
 
@@ -59,14 +60,24 @@ public class AggregatePartBuilder<A extends AggregatePart<I, S, ?, R>,
     }
 
     @Override
+    protected EntityClass<A> createModelClass(Class<A> entityClass) {
+        return new AggregatePartClass<>(entityClass);
+    }
+
+    @Override
+    protected AggregatePartClass<A> entityClass() {
+        return (AggregatePartClass<A>) super.entityClass();
+    }
+
+    @Override
     protected A createEntity(I id) {
-        final A result = AggregatePart.create(getConstructor(), aggregateRoot);
+        final A result = entityClass().createEntity(aggregateRoot);
         return result;
     }
 
     @Override
     protected Constructor<A> getConstructor() {
-        final Constructor<A> constructor = AggregatePart.getConstructor(getResultClass());
+        final Constructor<A> constructor = entityClass().getConstructor();
         return constructor;
     }
 }

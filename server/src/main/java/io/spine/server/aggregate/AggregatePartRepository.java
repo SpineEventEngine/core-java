@@ -20,7 +20,7 @@
 
 package io.spine.server.aggregate;
 
-import java.lang.reflect.Constructor;
+import io.spine.server.model.Model;
 
 /**
  * Common abstract base for repositories that manage {@code AggregatePart}s.
@@ -60,14 +60,24 @@ public abstract class AggregatePartRepository<I,
         return result;
     }
 
+    @SuppressWarnings("unchecked") // The cast is ensured by generic parameters of the repository.
+    @Override
+    protected final AggregatePartClass<A> getModelClass(Class<A> cls) {
+        return (AggregatePartClass<A>) Model.getInstance()
+                                            .asAggregatePartClass(cls);
+    }
+
+    private AggregatePartClass<A> aggregatePartClass() {
+        return (AggregatePartClass<A>) entityClass();
+    }
+
     //TODO:2017-06-06:alexander.yevsyukov: Have cache of aggregate roots shared among part repositories
     private AggregateRoot<I> createAggregateRoot(I id) {
-        final Class<R> rootClass = AggregatePart.TypeInfo.getRootClass(getEntityClass());
-        return AggregateRoot.create(getBoundedContext(), rootClass, id);
+        final AggregateRoot<I> result = aggregatePartClass().createRoot(getBoundedContext(), id);
+        return result;
     }
 
     private A createAggregatePart(AggregateRoot<I> root) {
-        final Constructor<A> entityConstructor = getEntityConstructor();
-        return AggregatePart.create(entityConstructor, root);
+        return aggregatePartClass().createEntity(root);
     }
 }

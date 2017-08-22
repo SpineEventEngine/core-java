@@ -33,6 +33,7 @@ import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 /**
  * Utility class for building entities for tests.
@@ -46,8 +47,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class EntityBuilder<E extends AbstractVersionableEntity<I, S>, I, S extends Message>
         extends ReflectiveBuilder<E> {
 
-    /** The class of the entity IDs. */
-    private Class<I> idClass;
+    /**
+     * The class of the entity to build.
+     *
+     * <p>Is null until {@link #setResultClass(Class)} is called.
+     */
+    @Nullable
+    private EntityClass<E> entityClass;
 
     /** The ID of the entity. If not set, a value default to the type will be used. */
     @Nullable
@@ -76,8 +82,12 @@ public class EntityBuilder<E extends AbstractVersionableEntity<I, S>, I, S exten
     @Override
     public EntityBuilder<E, I, S> setResultClass(Class<E> entityClass) {
         super.setResultClass(entityClass);
-        this.idClass = getIdClass();
+        this.entityClass = createModelClass(entityClass);
         return this;
+    }
+
+    protected EntityClass<E> createModelClass(Class<E> entityClass) {
+        return new EntityClass<>(entityClass);
     }
 
     public EntityBuilder<E, I, S> withId(I id) {
@@ -100,16 +110,20 @@ public class EntityBuilder<E extends AbstractVersionableEntity<I, S>, I, S exten
         return this;
     }
 
+    protected EntityClass<E> entityClass() {
+        checkState(entityClass != null);
+        return entityClass;
+    }
+
     /** Returns the class of IDs used by entities. */
+    @SuppressWarnings("unchecked") // The cast is protected by generic parameters of the builder.
     @CheckReturnValue
     protected Class<I> getIdClass() {
-        final Class<E> resultClass = getResultClass();
-        final Class<I> idClass = Entity.TypeInfo.getIdClass(resultClass);
-        return idClass;
+        return (Class<I>) entityClass().getIdClass();
     }
 
     private I createDefaultId() {
-        return Identifier.getDefaultValue(idClass);
+        return Identifier.getDefaultValue(getIdClass());
     }
 
     @Override
@@ -157,7 +171,7 @@ public class EntityBuilder<E extends AbstractVersionableEntity<I, S>, I, S exten
 
     @Override
     protected Constructor<E> getConstructor() {
-        final Constructor<E> constructor = AbstractEntity.getConstructor(getResultClass(), idClass);
+        final Constructor<E> constructor = entityClass().getConstructor();
         constructor.setAccessible(true);
         return constructor;
     }
@@ -166,8 +180,7 @@ public class EntityBuilder<E extends AbstractVersionableEntity<I, S>, I, S exten
      * Creates an empty entity instance.
      */
     protected E createEntity(I id) {
-        final Constructor<E> constructor = getConstructor();
-        final E result = AbstractEntity.createEntity(constructor, id);
+        final E result = entityClass().createEntity(id);
         return result;
     }
 }

@@ -21,15 +21,9 @@
 package io.spine.server.aggregate;
 
 import com.google.protobuf.Message;
-import io.spine.server.entity.AbstractEntity;
+import io.spine.server.model.Model;
 import io.spine.util.GenericTypeIndex;
 import io.spine.validate.ValidatingBuilder;
-
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-import static java.lang.String.format;
 
 /**
  * A part of a larger aggregate.
@@ -75,25 +69,12 @@ public abstract class AggregatePart<I,
     }
 
     /**
-     * Creates a new {@code AggregatePart} entity and sets it to the default state.
-     *
-     * @param ctor the constructor to use
-     * @param <I>  the type of entity IDs
-     * @param <A>  the type of the entity
-     * @return an {@code AggregatePart} instance
+     * Obtains the model class as {@link Model#asAggregatePartClass(Class) AggregatePartClass}.
      */
-    static <I, A extends AbstractEntity<I, ?>> A create(Constructor<A> ctor,
-                                                        AggregateRoot<I> root) {
-        checkNotNull(ctor);
-        checkNotNull(root);
-
-        try {
-            final A result = ctor.newInstance(root);
-            return result;
-        } catch (InvocationTargetException | InstantiationException |
-                 IllegalAccessException | IllegalArgumentException e) {
-            throw new IllegalStateException(e);
-        }
+    @Override
+    protected final AggregateClass<?> getModelClass() {
+        return Model.getInstance()
+                    .asAggregatePartClass(getClass());
     }
 
     /**
@@ -109,60 +90,6 @@ public abstract class AggregatePart<I,
     protected <P extends Message> P getPartState(Class<P> partStateClass) {
         final P partState = root.getPartState(partStateClass);
         return partState;
-    }
-
-    /**
-     * Obtains the constructor for the passed aggregate part class.
-     *
-     * <p>The part class must have a constructor with ID and {@code AggregateRoot} parameters.
-     *
-     * <p>Returns the constructor if the first parameter is aggregate ID
-     * and the second constructor parameter is subtype of the {@code AggregateRoot}
-     * For example:
-     * <pre>{@code
-     *
-     * // A user-defined AggregateRoot:
-     * class CustomAggregateRoot extends AggregateRoot{...}
-     *
-     * // An AggregatePart for the CustomAggregateRoot:
-     * class CustomAggregatePart extends AggregatePart<...>{
-     *
-     *     // The expected constructor:
-     *     CustomAggregatePart(AnAggregateId id, CustomAggregateRoot root){...}
-     *     }
-     * }
-     * </pre>
-     *
-     * <p>Throws {@code IllegalStateException} in other cases.
-     *
-     * @param cls the {@code AggregatePart} class
-     * @param <A> the {@code AggregatePart} type
-     * @param <I> the ID type
-     * @return the constructor
-     * @throws IllegalStateException if the entity class does not have the required constructor
-     */
-    static <A extends AggregatePart<I, ?, ?, R>, I, R extends AggregateRoot<I>>
-    Constructor<A> getConstructor(Class<A> cls) {
-        checkNotNull(cls);
-
-        final Class<R> aggregateRootClass = TypeInfo.getRootClass(cls);
-        try {
-            final Constructor<A> ctor = cls.getDeclaredConstructor(aggregateRootClass);
-            ctor.setAccessible(true);
-            return ctor;
-        } catch (NoSuchMethodException ignored) {
-            throw noSuchConstructor(cls, aggregateRootClass);
-        }
-    }
-
-    private static IllegalStateException noSuchConstructor(Class<?> aggregatePartClass,
-                                                           Class<?> aggregateRootClass) {
-        final String errMsg =
-                format("%s class must declare a constructor with %s parameter type.",
-                       aggregatePartClass.getName(),
-                       aggregateRootClass.getName());
-        final NoSuchMethodException cause = new NoSuchMethodException(errMsg);
-        throw new IllegalStateException(cause);
     }
 
     /**
@@ -196,25 +123,6 @@ public abstract class AggregatePart<I,
         @Override
         public Class<?> getArgumentIn(Class<? extends AggregatePart> cls) {
             return Default.getArgument(this, cls);
-        }
-    }
-
-    /**
-     * Provides type information on classes extending {@code AggregatePart}.
-     */
-    static class TypeInfo {
-
-        private TypeInfo() {
-            // Prevent construction from outside.
-        }
-
-        static <I, R extends AggregateRoot<I>> Class<R>
-        getRootClass(Class<? extends AggregatePart<I, ?, ?, R>> aggregatePartClass) {
-            checkNotNull(aggregatePartClass);
-            @SuppressWarnings("unchecked") // The type is ensured by the class declaration.
-            final Class<R> rootClass =
-                    (Class<R>)GenericParameter.AGGREGATE_ROOT.getArgumentIn(aggregatePartClass);
-            return rootClass;
         }
     }
 }

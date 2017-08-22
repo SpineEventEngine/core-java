@@ -22,7 +22,6 @@ package io.spine.server.entity;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
-import com.google.protobuf.Timestamp;
 import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.test.Tests;
@@ -30,29 +29,20 @@ import io.spine.test.TimeTests;
 import io.spine.test.entity.Project;
 import io.spine.test.entity.ProjectId;
 import io.spine.testdata.Sample;
-import io.spine.time.Interval;
-import io.spine.time.Intervals;
-import io.spine.time.Time;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.lang.reflect.Constructor;
-
 import static io.spine.Identifier.newUuid;
 import static io.spine.protobuf.TypeConverter.toMessage;
-import static io.spine.server.entity.AbstractEntity.createEntity;
-import static io.spine.server.entity.AbstractEntity.getConstructor;
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Tests.assertSecondsEqual;
 import static io.spine.time.Time.getCurrentTime;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
@@ -231,13 +221,6 @@ public class EntityShould {
     }
 
     @Test
-    public void return_id_class() {
-        final Class<String> actual = Entity.TypeInfo.getIdClass(TestEntity.class);
-
-        assertEquals(String.class, actual);
-    }
-
-    @Test
     public void generate_non_zero_hash_code_if_entity_has_non_empty_id_and_state() {
         assertFalse(entityWithState.getId()
                                    .trim()
@@ -266,43 +249,6 @@ public class EntityShould {
         protected EntityWithMessageId() {
             super(Sample.messageOfType(ProjectId.class));
         }
-    }
-
-    @Test
-    public void obtain_entity_constructor_by_class_and_ID_class() {
-        final Constructor<BareBonesEntity> ctor = getConstructor(BareBonesEntity.class,
-                                                                 Long.class);
-
-        assertNotNull(ctor);
-    }
-
-    @Test
-    public void create_and_initialize_entity_instance() {
-        final Long id = 100L;
-        final Timestamp before = TimeTests.Past.secondsAgo(1);
-
-        // Create and init the entity.
-        final Constructor<BareBonesEntity> ctor =
-                getConstructor(BareBonesEntity.class, Long.class);
-        final AbstractVersionableEntity<Long, StringValue> entity = createEntity(ctor, id);
-
-        final Timestamp after = Time.getCurrentTime();
-
-        // The interval with a much earlier start to allow non-zero interval on faster computers.
-        final Interval whileWeCreate = Intervals.between(before, after);
-
-        assertEquals(id, entity.getId());
-        assertEquals(0, entity.getVersion()
-                              .getNumber());
-        assertTrue(Intervals.contains(whileWeCreate, entity.whenModified()));
-        assertEquals(StringValue.getDefaultInstance(), entity.getState());
-        assertFalse(entity.isArchived());
-        assertFalse(entity.isDeleted());
-    }
-
-    @Test
-    public void have_TypeInfo_utility_class() {
-        assertHasPrivateParameterlessCtor(Entity.TypeInfo.class);
     }
 
     private static Matcher<Long> isBetween(final Long lower, final Long higher) {

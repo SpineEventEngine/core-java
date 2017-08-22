@@ -31,7 +31,7 @@ import static io.spine.Identifier.newUuid;
  *
  * @author Mikhail Mikhaylov
  */
-class TestEntity extends AbstractVersionableEntity<String, Project> {
+public class TestEntity extends AbstractVersionableEntity<String, Project> {
 
     static TestEntity newInstance(String id) {
         final TestEntity result = Given.entityOfClass(TestEntity.class)
