@@ -21,11 +21,13 @@
 package io.spine.server.event;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
+import io.spine.core.EventId;
 import io.spine.core.Events;
 import io.spine.core.Subscribe;
 import io.spine.server.BoundedContext;
@@ -33,8 +35,10 @@ import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.delivery.Consumers;
 import io.spine.server.event.given.EventBusTestEnv.GivenEvent;
 import io.spine.server.storage.StorageFactory;
+import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.test.event.ProjectCreated;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.annotation.Nullable;
@@ -46,6 +50,7 @@ import java.util.concurrent.Executor;
 
 import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.common.collect.Maps.newHashMap;
+import static io.spine.protobuf.AnyPacker.pack;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -358,6 +363,47 @@ public class EventBusShould {
         final EnvelopeValidator<EventEnvelope> validator = eventBus.getValidator();
         assertNotNull(validator);
         assertSame(validator, eventBus.getValidator());
+    }
+
+    @SuppressWarnings("MethodWithMultipleLoops") // OK for such test case.
+    @Ignore // This test is used only to diagnose EventBus malfunctions in concurrent environment.
+            // It's too long to execute this test per each build, so we leave it as is for now.
+            // Please see build log to find out if there were some errors during the test execution.
+    @Test
+    public void store_filters_regarding_possible_concurrent_modifications() throws InterruptedException {
+        final Thread[] threads = new Thread[50];
+        // "Random" more or less valid Event.
+        final Event event = Event.newBuilder()
+                                 .setId(EventId.newBuilder().setValue("123-1"))
+                                 .setMessage(pack(Int32Value.newBuilder()
+                                                            .setValue(42)
+                                                            .build()))
+                                 .build();
+        // Catch not-easily reproducible bugs.
+        for (int i = 0; i < 300; i++) {
+            final EventBus eventBus = EventBus.newBuilder()
+                                              .setStorageFactory(
+                                                      InMemoryStorageFactory.newInstance("main",
+                                                                                         false))
+                                              .build();
+            for (int j = 0; j < threads.length; j++) {
+                threads[j] = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        eventBus.post(event);
+                    }
+                });
+            }
+            for (Thread thread : threads) {
+                thread.start();
+            }
+            for (Thread thread : threads) {
+                thread.join();
+            }
+
+            // Let the system destroy all the native threads, clean up, etc.
+            Thread.sleep(100);
+        }
     }
 
     private static class ProjectCreatedSubscriber extends EventSubscriber {
