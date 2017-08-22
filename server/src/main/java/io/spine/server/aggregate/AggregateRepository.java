@@ -32,7 +32,6 @@ import io.spine.core.RejectionEnvelope;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandDispatcher;
-import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.DelegatingEventDispatcher;
@@ -51,7 +50,6 @@ import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
 
 import javax.annotation.CheckReturnValue;
-import java.lang.reflect.Constructor;
 import java.util.List;
 import java.util.Set;
 
@@ -157,7 +155,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     @Override
     public A create(I id) {
-        return AbstractEntity.createEntity(getEntityConstructor(), id);
+        return aggregateClass().createEntity(id);
     }
 
     /** Obtains class information of aggregates managed by this repository. */
@@ -167,7 +165,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     @Override
     @SuppressWarnings("unchecked") // The cast is ensured by generic parameters of the repository.
-    protected final AggregateClass<A> getModelClass(Class<A> cls) {
+    protected AggregateClass<A> getModelClass(Class<A> cls) {
         return (AggregateClass<A>) Model.getInstance()
                                         .asAggregateClass(cls);
     }
@@ -209,32 +207,13 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     @Override
     protected Storage<I, ?> createStorage(StorageFactory factory) {
-        final Storage<I, ?> result = factory.createAggregateStorage(getAggregateClass());
+        final Storage<I, ?> result = factory.createAggregateStorage(getEntityClass());
         return result;
-    }
-
-    /**
-     * Obtains the constructor.
-     */
-    Constructor<A> getEntityConstructor() {
-        return entityClass().getConstructor();
-    }
-
-    /**
-     * Returns the class of aggregates managed by this repository.
-     *
-     * <p>This is convenience method, which redirects to {@link #getEntityClass()}.
-     *
-     * @return the class of the aggregates
-     */
-    Class<? extends Aggregate<I, ?, ?>> getAggregateClass() {
-        return getEntityClass();
     }
 
     /**
      * {@inheritDoc}
      */
-    @SuppressWarnings("ReturnOfCollectionOrArrayField") // We return immutable impl.
     @Override
     public Set<CommandClass> getMessageClasses() {
         return aggregateClass().getCommands();
@@ -275,7 +254,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
-    @SuppressWarnings("ReturnOfCollectionOrArrayField") // We return immutable impl.
     public Set<EventClass> getEventClasses() {
         return aggregateClass().getEventReactions();
     }
@@ -300,7 +278,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
-    @SuppressWarnings("ReturnOfCollectionOrArrayField") // We return immutable impl.
     public Set<RejectionClass> getRejectionClasses() {
         return aggregateClass().getRejectionReactions();
     }

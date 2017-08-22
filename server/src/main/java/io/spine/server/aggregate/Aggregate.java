@@ -122,9 +122,6 @@ public abstract class Aggregate<I,
                                 B extends ValidatingBuilder<S, ? extends Message.Builder>>
                 extends CommandHandlingEntity<I, S, B> {
 
-    private final AggregateClass<?> thisClass = Model.getInstance()
-                                                     .asAggregateClass(getClass());
-
     /**
      * Events generated in the process of handling commands that were not yet committed.
      *
@@ -154,6 +151,23 @@ public abstract class Aggregate<I,
         super(id);
     }
 
+    /**
+     * Obtains model class for this aggregate.
+     */
+    @Override
+    protected AggregateClass<?> thisClass() {
+        return (AggregateClass<?>)super.thisClass();
+    }
+
+    /**
+     * Obtains the model class as {@link Model#asAggregateClass(Class) AggregateClass}.
+     */
+    @Override
+    protected AggregateClass<?> getModelClass() {
+        return Model.getInstance()
+                    .asAggregateClass(getClass());
+    }
+
     @Override
     @VisibleForTesting      // Overridden to expose this method to tests.
     protected B getBuilder() {
@@ -165,7 +179,7 @@ public abstract class Aggregate<I,
      */
     @Override
     protected List<? extends Message> dispatchCommand(CommandEnvelope command) {
-        final CommandHandlerMethod method = thisClass.getHandler(command.getMessageClass());
+        final CommandHandlerMethod method = thisClass().getHandler(command.getMessageClass());
         final List<? extends Message> result =
                 method.invoke(this, command.getMessage(), command.getCommandContext());
         return result;
@@ -179,7 +193,7 @@ public abstract class Aggregate<I,
      *         an empty list if the aggregate state does not change in reaction to the event
      */
     List<? extends Message> reactOn(EventEnvelope event) {
-        final EventReactorMethod method = thisClass.getReactor(event.getMessageClass());
+        final EventReactorMethod method = thisClass().getReactor(event.getMessageClass());
         return method.invoke(this, event.getMessage(), event.getEventContext());
     }
 
@@ -192,7 +206,7 @@ public abstract class Aggregate<I,
      *         response to this rejection
      */
     List<? extends Message> reactOn(RejectionEnvelope rejection) {
-        final RejectionReactorMethod method = thisClass.getReactor(rejection.getMessageClass());
+        final RejectionReactorMethod method = thisClass().getReactor(rejection.getMessageClass());
         return method.invoke(this, rejection.getMessage(), rejection.getRejectionContext());
     }
 
@@ -202,7 +216,7 @@ public abstract class Aggregate<I,
      * @param eventMessage the event message to apply
      */
     void invokeApplier(Message eventMessage) {
-        final EventApplierMethod method = thisClass.getApplier(EventClass.of(eventMessage));
+        final EventApplierMethod method = thisClass().getApplier(EventClass.of(eventMessage));
         method.invoke(this, eventMessage);
     }
 

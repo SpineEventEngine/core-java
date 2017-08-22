@@ -18,18 +18,22 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.model;
+package io.spine.server.entity;
 
 import com.google.protobuf.Message;
 import io.spine.Identifier;
-import io.spine.server.entity.AbstractEntity;
-import io.spine.server.entity.Entity;
+import io.spine.server.model.ModelClass;
+import io.spine.server.model.ModelError;
 import io.spine.type.ClassName;
 import io.spine.type.KnownTypes;
 import io.spine.type.TypeUrl;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.String.format;
 
 /**
  * A class of entities.
@@ -55,18 +59,52 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
     @Nullable
     private transient Constructor<E> entityConstructor;
 
-    protected EntityClass(Class<? extends E> cls) {
+    /** Creates new instance of the model class for the passed class of entities. */
+    public EntityClass(Class<? extends E> cls) {
         super(cls);
-        final Class<?> idClass = Entity.TypeInfo.getIdClass(cls);
+        checkNotNull((Class<? extends Entity>) cls);
+        final Class<?> idClass = Entity.GenericParameter.ID.getArgumentIn(cls);
         checkIdClass(idClass);
         this.idClass = idClass;
-        this.stateClass = Entity.TypeInfo.getStateClass(cls);
+        this.stateClass = getStateClass(cls);
         final ClassName stateClassName = ClassName.of(stateClass);
         this.entityStateType = KnownTypes.getTypeUrl(stateClassName);
     }
 
-    public static <E extends Entity> EntityClass<E> valueOf(Class<? extends E> cls) {
-        return new EntityClass<>(cls);
+    /**
+     * Creates new entity.
+     */
+    public E createEntity(Object constructorArgument) {
+        checkNotNull(constructorArgument);
+        final Constructor<E> ctor = getConstructor();
+        E result;
+        try {
+            result = ctor.newInstance(constructorArgument);
+            if (result instanceof AbstractEntity) {
+                AbstractEntity abstractEntity = (AbstractEntity) result;
+                abstractEntity.init();
+            }
+        } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
+            throw new IllegalStateException(e);
+        }
+        return result;
+    }
+
+    private static ModelError noSuchConstructor(String entityClass, String idClass) {
+        final String errMsg = format(
+                "%s class must declare a constructor with a single %s ID parameter.",
+                entityClass, idClass
+        );
+        return new ModelError(new NoSuchMethodException(errMsg));
+    }
+
+    /**
+     * Retrieves the state class of the passed entity class.
+     */
+    static <S extends Message> Class<S> getStateClass(Class<? extends Entity> entityClass) {
+        @SuppressWarnings("unchecked") // The type is preserved by the Entity type declaration.
+        final Class<S> result = (Class<S>) Entity.GenericParameter.STATE.getArgumentIn(entityClass);
+        return result;
     }
 
     /**
@@ -74,14 +112,32 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
      */
     public Constructor<E> getConstructor() {
         if (entityConstructor == null) {
-            entityConstructor = findConstructor(value(), idClass);
+            entityConstructor = findConstructor();
         }
         return entityConstructor;
     }
 
-    protected Constructor<E> findConstructor(Class<? extends E> entityClass, Class<?> idClass) {
-        //TODO:2017-08-18:alexander.yevsyukov: Move the method into this class.
-        return (Constructor<E>) AbstractEntity.getConstructor(entityClass, idClass);
+    /**
+     * Obtains the constructor for the passed entity class.
+     *
+     * <p>The entity class must have a constructor with the single parameter of type defined by
+     * generic type {@code <I>}.
+     * 
+     * @throws IllegalStateException if the entity class does not have the required constructor
+    */
+    @SuppressWarnings({"JavaReflectionMemberAccess" /* Entity ctor must accept ID parameter */,
+                       "unchecked" /* The cast is protected by generic params of this class. */})
+    protected Constructor<E> findConstructor() {
+        Class<? extends E> entityClass = value();
+        Class<?> idClass = getIdClass();
+        final Constructor<E> result;
+        try {
+            result = (Constructor<E>) entityClass.getDeclaredConstructor(idClass);
+            result.setAccessible(true);
+        } catch (NoSuchMethodException ignored) {
+            throw noSuchConstructor(entityClass.getName(), idClass.getName());
+        }
+        return result;
     }
 
     /**
