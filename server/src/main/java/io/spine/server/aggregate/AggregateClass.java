@@ -26,12 +26,11 @@ import io.spine.core.EventClass;
 import io.spine.core.RejectionClass;
 import io.spine.server.command.CommandHandlerMethod;
 import io.spine.server.command.CommandHandlingClass;
+import io.spine.server.entity.EntityClass;
 import io.spine.server.event.EventReactorMethod;
-import io.spine.server.model.EntityClass;
 import io.spine.server.model.MessageHandlerMap;
 import io.spine.server.rejection.RejectionReactorMethod;
 
-import java.lang.reflect.Constructor;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -44,7 +43,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 @Internal
 @SuppressWarnings("ReturnOfCollectionOrArrayField") // impl. is immutable
-public final class AggregateClass<A extends Aggregate>
+public class AggregateClass<A extends Aggregate>
         extends EntityClass<A>
         implements CommandHandlingClass {
 
@@ -55,28 +54,13 @@ public final class AggregateClass<A extends Aggregate>
     private final MessageHandlerMap<EventClass, EventReactorMethod> eventReactions;
     private final MessageHandlerMap<RejectionClass, RejectionReactorMethod> rejectionReactions;
 
-    private AggregateClass(Class<? extends A> cls) {
-        super(cls);
+    /** Creates new instance. */
+    public AggregateClass(Class<? extends A> cls) {
+        super(checkNotNull(cls));
         this.commands = new MessageHandlerMap<>(cls, CommandHandlerMethod.factory());
         this.stateEvents = new MessageHandlerMap<>(cls, EventApplierMethod.factory());
         this.eventReactions = new MessageHandlerMap<>(cls, EventReactorMethod.factory());
         this.rejectionReactions = new MessageHandlerMap<>(cls, RejectionReactorMethod.factory());
-    }
-
-    public static <A extends Aggregate> AggregateClass<A> of(Class<A> cls) {
-        checkNotNull(cls);
-        return new AggregateClass<>(cls);
-    }
-
-    @Override
-    protected Constructor<A> findConstructor(Class<? extends A> aggregateClass, Class<?> idClass) {
-        if (AggregatePart.class.isAssignableFrom(aggregateClass)) {
-            @SuppressWarnings("unchecked") // OK to cast as we checked inheritance above.
-            final Constructor<A> ctor =
-                    AggregatePart.getConstructor((Class<? extends AggregatePart>) aggregateClass);
-            return ctor;
-        }
-        return super.findConstructor(aggregateClass, idClass);
     }
 
     /**

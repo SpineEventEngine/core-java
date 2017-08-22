@@ -31,6 +31,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public final class EntityStateClass extends MessageClass {
 
+    private static final long serialVersionUID = 0L;
+
     private EntityStateClass(Class<? extends Message> value) {
         super(value);
     }

@@ -44,18 +44,7 @@ public abstract class TenantRepository<T extends Message, E extends TenantReposi
         implements TenantIndex {
 
     private final Set<TenantId> cache = Sets.newConcurrentHashSet();
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Overrides the default behaviour because {@link TenantRepository.Entity
-     * TenantRepository.Entity} does not have a generic parameter for the ID.
-     */
-    @Override
-    protected Class<TenantId> getIdClass() {
-        return TenantId.class;
-    }
-
+    
     @Override
     public void initStorage(StorageFactory factory) {
         super.initStorage(factory.toSingleTenant());

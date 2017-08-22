@@ -27,10 +27,13 @@ import com.google.common.collect.Sets;
 import io.spine.core.CommandClass;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateClass;
+import io.spine.server.aggregate.AggregatePart;
+import io.spine.server.aggregate.AggregatePartClass;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.command.CommandHandlerClass;
 import io.spine.server.command.CommandHandlingClass;
 import io.spine.server.entity.Entity;
+import io.spine.server.entity.EntityClass;
 import io.spine.server.event.EventSubscriber;
 import io.spine.server.event.EventSubscriberClass;
 import io.spine.server.procman.ProcessManager;
@@ -83,11 +86,31 @@ public class Model {
         checkNotNull(cls);
         ModelClass<?> modelClass = classes.get(cls);
         if (modelClass == null) {
-            modelClass = AggregateClass.of(cls);
+            modelClass = new AggregateClass<>(cls);
             checkDuplicates((CommandHandlingClass) modelClass);
             classes.put(cls, modelClass);
         }
         return (AggregateClass<?>) modelClass;
+    }
+
+    /**
+     * Obtains an instance of aggregate part class information.
+     *
+     * <p>If the passed class is not added to the model before, it will be added as the result of
+     * this method call.
+     *
+     * @throws DuplicateCommandHandlerError if the given aggregate part class handles one or
+     *         more commands which are already known to the model as handled by another class
+     */
+    public AggregatePartClass<?> asAggregatePartClass(Class<? extends AggregatePart> cls) {
+        checkNotNull(cls);
+        ModelClass<?> modelClass = classes.get(cls);
+        if (modelClass == null) {
+            modelClass = new AggregatePartClass<>(cls);
+            checkDuplicates((CommandHandlingClass) modelClass);
+            classes.put(cls, modelClass);
+        }
+        return (AggregatePartClass<?>) modelClass;
     }
 
     /**
@@ -217,7 +240,7 @@ public class Model {
         checkNotNull(cls);
         ModelClass<?> modelClass = classes.get(cls);
         if (modelClass == null) {
-            modelClass = EntityClass.valueOf(cls);
+            modelClass = new EntityClass<>(cls);
             classes.put(cls, modelClass);
         }
         return (EntityClass<?>) modelClass;

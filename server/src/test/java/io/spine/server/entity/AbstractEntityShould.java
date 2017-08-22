@@ -22,14 +22,12 @@ package io.spine.server.entity;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
-import io.spine.server.aggregate.AggregatePart;
 import io.spine.test.entity.number.NaturalNumber;
 import org.junit.Test;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
-import static io.spine.server.entity.AbstractEntity.getConstructor;
 import static io.spine.test.Verify.assertSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
@@ -41,25 +39,26 @@ import static org.junit.Assert.fail;
  */
 public class AbstractEntityShould {
 
-    @SuppressWarnings("unchecked")
-    // Supply a "wrong" value on purpose to cause the validation failure.
-    @Test(expected = IllegalStateException.class)
-    public void throw_exception_when_aggregate_does_not_have_appropriate_constructor() {
-        getConstructor(AggregatePart.class, String.class);
-    }
-
+    /**
+     * Ensures that {@link AbstractEntity#updateState(Message)} is final so that
+     * it's not possible to override the default behaviour.
+     */
     @Test
-    public void define_final_updateState_method() throws NoSuchMethodException {
-        final Method updateState = AbstractEntity.class.getDeclaredMethod(
-                "updateState", Message.class);
+    public void prevent_updateState_method_overriding() throws NoSuchMethodException {
+        final Method updateState =
+                AbstractEntity.class.getDeclaredMethod("updateState", Message.class);
         final int modifiers = updateState.getModifiers();
         assertTrue(Modifier.isFinal(modifiers));
     }
 
+    /**
+     * Ensures that {@link AbstractEntity#validate(Message)} is final so that
+     * it's not possible to override the default behaviour.
+     */
     @Test
-    public void prevent_validate_overriding() throws NoSuchMethodException {
-        final Method validate = AbstractEntity.class.getDeclaredMethod(
-                "validate", Message.class);
+    public void prevent_validate_method_overriding() throws NoSuchMethodException {
+        final Method validate =
+                AbstractEntity.class.getDeclaredMethod("validate", Message.class);
         final int modifiers = validate.getModifiers();
         assertTrue(Modifier.isPrivate(modifiers) || Modifier.isFinal(modifiers));
     }
