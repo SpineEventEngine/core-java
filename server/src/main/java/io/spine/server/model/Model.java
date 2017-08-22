@@ -94,14 +94,13 @@ public class Model {
     }
 
     /**
-     * Obtains an instance of aggregate part class information.'
+     * Obtains an instance of aggregate part class information.
      *
-     * <p>If the passed class was not added to the model before, it would be added as the result of
+     * <p>If the passed class is not added to the model before, it will be added as the result of
      * this method call.
      *
-     * @throws DuplicateCommandHandlerError if there is the aggregate part class handles one or more
-     *         commands that are handled by another class, which was added to the model before
-     *         calling this method
+     * @throws DuplicateCommandHandlerError if the given aggregate part class handles one or
+     *         more commands which are already known to the model as handled by another class
      */
     public AggregatePartClass<?> asAggregatePartClass(Class<? extends AggregatePart> cls) {
         checkNotNull(cls);

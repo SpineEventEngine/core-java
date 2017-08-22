@@ -166,7 +166,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
         // model entity class), we use this type name checking and return state class via static
         // method call. The rest of the classes should follow general declaration contract.
         //
-        // Once these test are reworked, eliminate the below code, and inline
+        // Once these tests are reworked, eliminate the below code, and inline
         // the EntityClass.getStateClass() method.
         //
         if (entityClass.getName().contains("TestCounterEntity")) {

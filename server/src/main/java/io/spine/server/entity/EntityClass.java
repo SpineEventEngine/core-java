@@ -122,6 +122,7 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
      *
      * <p>The entity class must have a constructor with the single parameter of type defined by
      * generic type {@code <I>}.
+     * 
      * @throws IllegalStateException if the entity class does not have the required constructor
     */
     @SuppressWarnings({"JavaReflectionMemberAccess" /* Entity ctor must accept ID parameter */,

@@ -107,7 +107,7 @@ public final class AggregatePartClass<A extends AggregatePart> extends Aggregate
     }
 
     /**
-     * Creates a new {@code AggregateRoot} withing the passed Bounded Context.
+     * Creates a new {@code AggregateRoot} within the passed Bounded Context.
      */
     <I, R extends AggregateRoot<I>> R createRoot(BoundedContext bc, I aggregateId) {
         checkNotNull(bc);
