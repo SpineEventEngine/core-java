@@ -48,8 +48,6 @@ import io.spine.server.route.RejectionRouting;
 import javax.annotation.CheckReturnValue;
 import java.util.Set;
 
-import static io.spine.util.Exceptions.unsupported;
-
 /**
  * The abstract base for Process Managers repositories.
  *
@@ -222,16 +220,6 @@ public abstract class ProcessManagerRepository<I,
         return PmRejectionEndpoint.handle(this, rejection);
     }
 
-    @Deprecated
-    @Override
-    protected void dispatchToEntity(I id, EventEnvelope event) {
-        throw unsupported(
-                "ProcessManagerRepository.dispatchToEntity() must not be invoked because" +
-                                  " dispatch() is overriden to use PmEventEndpoint. " +
-                "Therefore EventDispatchingRespository.dispatch() will not invoke this method."
-        );
-    }
-
     @Override
     public void onError(CommandEnvelope envelope, RuntimeException exception) {
         logError("Command dispatching caused error (class: %s, id: %s)", envelope, exception);
@@ -309,6 +297,7 @@ public abstract class ProcessManagerRepository<I,
      *
      * @return delivery strategy for rejections
      */
+    @SPI
     protected PmRejectionDelivery<I, P> getRejectionEndpointDelivery() {
         return PmRejectionDelivery.directDelivery(this);
     }
@@ -324,6 +313,7 @@ public abstract class ProcessManagerRepository<I,
      *
      * @return delivery strategy for rejections
      */
+    @SPI
     protected PmCommandDelivery<I, P> getCommandEndpointDelivery() {
         return PmCommandDelivery.directDelivery(this);
     }
