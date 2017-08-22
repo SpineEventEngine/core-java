@@ -74,6 +74,7 @@ class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
                 ProjectionTransaction.start((Projection<I, ?, ?>) projection);
         projection.handle(envelope());
         tx.commit();
+        store(projection);
     }
 
     @Override
