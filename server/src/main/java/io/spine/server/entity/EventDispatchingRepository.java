@@ -23,11 +23,9 @@ package io.spine.server.entity;
 import com.google.protobuf.Message;
 import io.spine.core.EventEnvelope;
 import io.spine.server.BoundedContext;
+import io.spine.server.event.EventDispatcher;
 import io.spine.server.route.EventRoute;
 import io.spine.server.route.EventRouting;
-
-import javax.annotation.CheckReturnValue;
-import java.util.Set;
 
 /**
  * Abstract base for repositories that deliver events to entities they manage.
@@ -41,7 +39,7 @@ public abstract class EventDispatchingRepository<I,
                                                  E extends AbstractVersionableEntity<I, S>,
                                                  S extends Message>
         extends DefaultRecordBasedRepository<I, E, S>
-        implements EntityEventDispatcher<I> {
+        implements EventDispatcher<I> {
 
     private final EventRouting<I> eventRouting;
 
@@ -82,12 +80,6 @@ public abstract class EventDispatchingRepository<I,
     protected void registerAsEventDispatcher() {
         getBoundedContext().getEventBus()
                            .register(this);
-    }
-
-    @Override
-    @CheckReturnValue
-    public final Set<I> getTargets(EventEnvelope envelope) {
-        return getEventRouting().apply(envelope.getMessage(), envelope.getEventContext());
     }
 
     /**
