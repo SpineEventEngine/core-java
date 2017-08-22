@@ -25,6 +25,7 @@ import io.spine.core.Ack;
 import io.spine.core.MessageEnvelope;
 
 import java.util.Deque;
+import java.util.Iterator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -74,8 +75,9 @@ final class FilterChain<E extends MessageEnvelope<?, ?, ?>> implements BusFilter
     public void close() throws Exception {
         checkState(!closed, "The Filter chain is already closed.");
         closed = true;
-        while (!chain.isEmpty()) {
-            final BusFilter<E> filter = chain.pollLast();
+        final Iterator<BusFilter<E>> filters = chain.descendingIterator();
+        while (filters.hasNext()) {
+            final BusFilter<E> filter = filters.next();
             filter.close();
         }
     }
