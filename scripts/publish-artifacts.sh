@@ -6,16 +6,6 @@
 #
 # Tests are skipped during the publishing, as the script should be executed after their execution.
 
-echo " -- PUBLISHING: current branch is $TRAVIS_BRANCH."
-
-if shouldPublish; then
-    echo " ------ Publishing the artifacts to the repository..."
-    ./gradlew publish -x test
-    echo " ------ Artifacts published."
-fi
-
-echo " -- PUBLISHING: completed."
-
 shouldPublish() {
     if [ "$TRAVIS_TEST_RESULT" == 1 ]; then
         echo " ------ The build is broken. Publishing should not be performed."
@@ -29,3 +19,13 @@ shouldPublish() {
 
     return 1
 }
+
+echo " -- PUBLISHING: current branch is $TRAVIS_BRANCH."
+
+if shouldPublish; then
+    echo " ------ Publishing the artifacts to the repository..."
+    ./gradlew publish -x test
+    echo " ------ Artifacts published."
+fi
+
+echo " -- PUBLISHING: completed."
