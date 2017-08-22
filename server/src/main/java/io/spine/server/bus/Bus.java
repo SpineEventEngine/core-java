@@ -32,6 +32,7 @@ import io.spine.type.MessageClass;
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Deque;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -349,7 +350,7 @@ public abstract class Bus<T extends Message,
          * Creates a new instance of the bus builder.
          */
         protected AbstractBuilder() {
-            this.filters = newLinkedList();
+            this.filters = new ConcurrentLinkedDeque<>();
         }
 
         /**
@@ -385,7 +386,7 @@ public abstract class Bus<T extends Message,
          * @see #appendFilter(BusFilter)
          */
         public final Deque<BusFilter<E>> getFilters() {
-            return newLinkedList(filters);
+            return new ConcurrentLinkedDeque<>(filters);
         }
 
         /**

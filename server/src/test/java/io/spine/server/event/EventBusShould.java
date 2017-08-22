@@ -44,6 +44,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
 
+import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.common.collect.Maps.newHashMap;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -144,7 +145,8 @@ public class EventBusShould {
         final Deque<?> oldChain = eventBus.createFilterChain();
         final Deque<?> newChain = eventBus.createFilterChain();
 
-        assertEquals(oldChain, newChain);
+        // Use LinkedList wrapping to ensure `equals()` implementation.
+        assertEquals(newLinkedList(oldChain), newLinkedList(newChain));
         assertNotSame(oldChain, newChain);
     }
 
