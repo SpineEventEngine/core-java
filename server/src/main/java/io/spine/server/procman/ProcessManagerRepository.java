@@ -48,6 +48,8 @@ import io.spine.server.route.RejectionRouting;
 import javax.annotation.CheckReturnValue;
 import java.util.Set;
 
+import static io.spine.util.Exceptions.unsupported;
+
 /**
  * The abstract base for Process Managers repositories.
  *
@@ -220,13 +222,14 @@ public abstract class ProcessManagerRepository<I,
         return PmRejectionEndpoint.handle(this, rejection);
     }
 
+    @Deprecated
     @Override
     protected void dispatchToEntity(I id, EventEnvelope event) {
-        final P manager = findOrCreate(id);
-        final PmTransaction<?, ?, ?> transaction = beginTransactionFor(manager);
-        manager.dispatchEvent(event);
-        transaction.commit();
-        store(manager);
+        throw unsupported(
+                "ProcessManagerRepository.dispatchToEntity() must not be invoked because" +
+                                  " dispatch() is overriden to use PmEventEndpoint. " +
+                "Therefore EventDispatchingRespository.dispatch() will not invoke this method."
+        );
     }
 
     @Override
