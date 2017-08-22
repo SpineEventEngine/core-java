@@ -13,7 +13,7 @@ if [ "$TRAVIS_TEST_RESULT" == 1 ]; then
     exit 0
 fi
 
-if [ "$TRAVIS_BRANCH" == 'master' ] && [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
+if [ "$TRAVIS_BRANCH" != "master" ] || [ "$TRAVIS_PULL_REQUEST" != "false" ]; then
     echo " ------ Publishing is DISABLED for the current branch."
     exit 0
 fi
