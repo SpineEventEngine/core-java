@@ -47,7 +47,7 @@ class PmCommandEndpoint<I, P extends ProcessManager<I, ?, ?>>
 
     static <I, P extends ProcessManager<I, ?, ?>>
     I handle (ProcessManagerRepository<I, P, ?> repository, CommandEnvelope cmd) {
-        final PmCommandEndpoint<I, P> endpoint = new PmCommandEndpoint<>(repository, cmd);
+        final PmCommandEndpoint<I, P> endpoint = of(repository, cmd);
         final I result = endpoint.handle();
         return result;
     }
