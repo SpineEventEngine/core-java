@@ -150,17 +150,16 @@ abstract class MessageRouting<C extends Message, K extends MessageClass, R>
     }
 
     /**
-     * Finds a route for the passed message and applies it.
+     * Obtains IDs of entities to which the passed message should be delivered.
      *
      * <p>If there is no function for the passed message applies the default function.
      *
-     * @param message the message
-     * @param context the message context
-     * @return the set of entity IDs
-     * @throws IllegalStateException if the route for this message class is already set
+     * @param  message the message
+     * @param  context the message context
+     * @return the set of entity IDs to which the message should be delivered
      */
     @Override
-    public R apply(Message message, C context) throws IllegalStateException {
+    public R apply(Message message, C context) {
         checkNotNull(message);
         checkNotNull(context);
         final K messageClass = toMessageClass(message);
