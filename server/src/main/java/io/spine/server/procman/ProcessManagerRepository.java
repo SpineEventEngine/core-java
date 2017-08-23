@@ -221,15 +221,6 @@ public abstract class ProcessManagerRepository<I,
     }
 
     @Override
-    protected void dispatchToEntity(I id, EventEnvelope event) {
-        final P manager = findOrCreate(id);
-        final PmTransaction<?, ?, ?> transaction = beginTransactionFor(manager);
-        manager.dispatchEvent(event);
-        transaction.commit();
-        store(manager);
-    }
-
-    @Override
     public void onError(CommandEnvelope envelope, RuntimeException exception) {
         logError("Command dispatching caused error (class: %s, id: %s)", envelope, exception);
     }
@@ -306,6 +297,7 @@ public abstract class ProcessManagerRepository<I,
      *
      * @return delivery strategy for rejections
      */
+    @SPI
     protected PmRejectionDelivery<I, P> getRejectionEndpointDelivery() {
         return PmRejectionDelivery.directDelivery(this);
     }
@@ -321,6 +313,7 @@ public abstract class ProcessManagerRepository<I,
      *
      * @return delivery strategy for rejections
      */
+    @SPI
     protected PmCommandDelivery<I, P> getCommandEndpointDelivery() {
         return PmCommandDelivery.directDelivery(this);
     }
