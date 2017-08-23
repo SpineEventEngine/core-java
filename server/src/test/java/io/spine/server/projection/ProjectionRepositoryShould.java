@@ -50,6 +50,7 @@ import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.event.PrjProjectCreated;
 import io.spine.test.projection.event.PrjProjectStarted;
 import io.spine.test.projection.event.PrjTaskAdded;
+import io.spine.time.Time;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -267,10 +268,8 @@ public class ProjectionRepositoryShould
      */
     @Test
     public void expose_read_and_write_methods_for_last_handled_event_timestamp() {
-        final Timestamp timestamp = repository().readLastHandledEventTime();
-        if (timestamp != null) {
-            repository().writeLastHandledEventTime(timestamp);
-        }
+        repository().readLastHandledEventTime();
+        repository().writeLastHandledEventTime(Time.getCurrentTime());
     }
 
     /**

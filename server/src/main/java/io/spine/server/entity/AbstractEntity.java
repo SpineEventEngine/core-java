@@ -166,7 +166,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
         // model entity class), we use this type name checking and return state class via static
         // method call. The rest of the classes should follow general declaration contract.
         //
-        // Once these tests are reworked, eliminate the below code, and inline
+        // Once these tests are reworked, eliminate the code in the if() statement below, and inline
         // the EntityClass.getStateClass() method.
         //
         if (entityClass.getName().contains("TestCounterEntity")) {
@@ -183,9 +183,9 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      *
      * <p>The new state must be {@linkplain #validate(Message) valid}.
      *
-     * @param state the new state to set
-     * @throws InvalidEntityStateException if the passed state is not
-     *                                     {@linkplain #validate(Message) valid}
+     * @param  state the new state to set
+     * @throws InvalidEntityStateException
+     *         if the passed state is not {@linkplain #validate(Message) valid}
      */
     protected final void updateState(S state) {
         validate(state);
@@ -198,7 +198,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      * <p>Default implementation uses the {@linkplain MessageValidator#validate(Message)
      * message validation}.
      *
-     * @param newState a state object to replace the current state
+     * @param  newState a state object to replace the current state
      * @return the violation constraints
      */
     protected List<ConstraintViolation> checkEntityState(S newState) {
@@ -210,16 +210,14 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     /**
      * Ensures that the passed new state is valid.
      *
-     * @param newState a state object to replace the current state
+     * @param   newState a state object to replace the current state
      * @throws InvalidEntityStateException if the state is not valid
      * @see #checkEntityState(Message)
      */
     private void validate(S newState) throws InvalidEntityStateException {
-        final List<ConstraintViolation> constraintViolations = checkEntityState(newState);
-
-        if (!constraintViolations.isEmpty()) {
-            throw InvalidEntityStateException.onConstraintViolations(newState,
-                                                                     constraintViolations);
+        final List<ConstraintViolation> violations = checkEntityState(newState);
+        if (!violations.isEmpty()) {
+            throw InvalidEntityStateException.onConstraintViolations(newState, violations);
         }
     }
 
