@@ -45,6 +45,11 @@ import static io.spine.Identifier.newUuid;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+/**
+ * Tests that a command can be rejected within a {@linkplain CommandRoute routing function}.
+ *
+ * @author Alexander Yevsyukov
+ */
 public class CommandRoutingRejectionShould {
 
     private final TestActorRequestFactory requestFactory =
@@ -71,6 +76,15 @@ public class CommandRoutingRejectionShould {
         boundedContext.close();
     }
 
+    /**
+     * Verifies that a command rejected during routing gets rejected status.
+     *
+     * <p>The test initially posts a command which should be processed correctly. This is done to
+     * ensure that basic processing works.
+     *
+     * <p>Then the test posts a command with the argument that should cause rejection in the
+     * routing function.
+     */
     @Test
     public void result_in_rejected_command() {
         // Post a successful command to make sure general case works.
