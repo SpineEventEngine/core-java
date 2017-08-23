@@ -23,6 +23,6 @@
  */
 
 @ParametersAreNonnullByDefault
-package io.spine.test.command.route;
+package io.spine.server.route.given.switchman;
 
 import javax.annotation.ParametersAreNonnullByDefault;

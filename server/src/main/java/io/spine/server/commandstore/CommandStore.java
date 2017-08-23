@@ -28,7 +28,9 @@ import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandId;
 import io.spine.core.CommandStatus;
+import io.spine.core.Commands;
 import io.spine.core.Rejection;
+import io.spine.core.TenantId;
 import io.spine.server.commandbus.CommandException;
 import io.spine.server.commandbus.CommandRecord;
 import io.spine.server.commandbus.Log;
@@ -245,6 +247,9 @@ public class CommandStore implements AutoCloseable {
 
     /**
      * Obtains the processing status for the command with the passed ID.
+     *
+     * <p>Invoking this method must be performed within a {@link TenantAwareFunction} or
+     * {@link TenantAwareOperation}.
      */
     public ProcessingStatus getStatus(CommandId commandId) {
         final Func<CommandId, ProcessingStatus> func = new Func<CommandId, ProcessingStatus>(this) {
@@ -256,6 +261,23 @@ public class CommandStore implements AutoCloseable {
             }
         };
         return func.execute(commandId);
+    }
+
+    /**
+     * Obtains the processing status for the passed command.
+     */
+    public ProcessingStatus getStatus(Command command) {
+        final TenantId tenantId = Commands.getTenantId(command);
+        final TenantAwareFunction<CommandId, ProcessingStatus> func =
+                new TenantAwareFunction<CommandId, ProcessingStatus>(tenantId) {
+                    @Nullable
+                    @Override
+                    public ProcessingStatus apply(@Nullable CommandId commandId) {
+                        checkNotNull(commandId);
+                        return getStatus(commandId);
+                    }
+                };
+        return func.execute(command.getId());
     }
 
     @SuppressWarnings("ChainOfInstanceofChecks") // OK for this consolidated error handling.
