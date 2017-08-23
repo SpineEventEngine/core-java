@@ -49,7 +49,7 @@ class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
 
     static <I, P extends Projection<I, ?, ?>>
     Set<I> handle(ProjectionRepository<I, P, ?> repository, EventEnvelope event) {
-        final ProjectionEndpoint<I, P> endpoint = new ProjectionEndpoint<>(repository, event);
+        final ProjectionEndpoint<I, P> endpoint = of(repository, event);
         final Set<I> result = endpoint.handle();
         return result;
     }
