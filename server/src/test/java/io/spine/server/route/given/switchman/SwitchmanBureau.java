@@ -31,7 +31,7 @@ import io.spine.server.route.given.switchman.rejection.SwitchmanUnavailable;
  * target aggregate ID.
  */
 @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
-public class SwitchmanBureau extends AggregateRepository<String, Switchman> {
+public final class SwitchmanBureau extends AggregateRepository<String, Switchman> {
 
     /** The ID of the aggregate for which a {@link SetSwitch command} would be rejected. */
     public static final String MISSING_SWITCHMAN_NAME = "Petrovich";

@@ -38,3 +38,9 @@ enum SwitchPosition {
     LEFT = 1;
     RIGHT = 2;
 }
+
+// A log with counters of operations per switchman, and list of missing switchman.
+message LogState {
+    map<string, int32> counters = 1;
+    repeated string missing_switchman = 2;
+}

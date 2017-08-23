@@ -33,7 +33,7 @@ import io.spine.validate.UInt32ValueVBuilder;
  *
  * @author Alexander Yevsyukov
  */
-public class Switchman extends Aggregate<String, UInt32Value, UInt32ValueVBuilder> {
+public final class Switchman extends Aggregate<String, UInt32Value, UInt32ValueVBuilder> {
 
     @SuppressWarnings("unused") // invoked by reflection.
     Switchman(String id) {
@@ -43,6 +43,8 @@ public class Switchman extends Aggregate<String, UInt32Value, UInt32ValueVBuilde
     @Assign
     SwitchPositionConfirmed on(SetSwitch cmd) {
         return SwitchPositionConfirmed.newBuilder()
+                                      .setSwitchmanName(getId())
+                                      .setSwitchId(cmd.getSwitchId())
                                       .setPosition(cmd.getPosition())
                                       .build();
     }

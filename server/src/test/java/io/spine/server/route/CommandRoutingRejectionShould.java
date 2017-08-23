@@ -20,6 +20,7 @@
 
 package io.spine.server.route;
 
+import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.client.TestActorRequestFactory;
@@ -32,7 +33,10 @@ import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.ProcessingStatus;
 import io.spine.server.commandstore.CommandStore;
+import io.spine.server.rout.given.switchman.LogState;
 import io.spine.server.rout.given.switchman.SwitchId;
+import io.spine.server.rout.given.switchman.SwitchPosition;
+import io.spine.server.route.given.switchman.Log;
 import io.spine.server.route.given.switchman.Switchman;
 import io.spine.server.route.given.switchman.SwitchmanBureau;
 import io.spine.server.route.given.switchman.command.SetSwitch;
@@ -59,6 +63,7 @@ public class CommandRoutingRejectionShould {
     private BoundedContext boundedContext;
     private CommandBus commandBus;
     private CommandStore commandStore;
+    private Log.Repository logRepository;
 
     @Before
     public void setUp() {
@@ -67,6 +72,8 @@ public class CommandRoutingRejectionShould {
                                        .setMultitenant(false)
                                        .build();
         boundedContext.register(new SwitchmanBureau());
+        logRepository = new Log.Repository();
+        boundedContext.register(logRepository);
         commandBus = boundedContext.getCommandBus();
         commandStore = commandBus.commandStore();
     }
@@ -88,28 +95,43 @@ public class CommandRoutingRejectionShould {
     @Test
     public void result_in_rejected_command() {
         // Post a successful command to make sure general case works.
-        final Command command =
-                requestFactory.createCommand(SetSwitch.newBuilder()
-                                                      .setSwitchId(generateSwitchId())
-                                                      .setSwitchmanName(Switchman.class.getName())
-                                                      .build());
+        final String switchmanName = Switchman.class.getName();
+        final Command command = requestFactory.createCommand(
+                SetSwitch.newBuilder()
+                         .setSwitchId(generateSwitchId())
+                         .setSwitchmanName(switchmanName)
+                         .setPosition(SwitchPosition.RIGHT)
+                         .build()
+        );
         commandBus.post(command, observer);
         assertEquals(CommandStatus.OK, commandStore.getStatus(command).getCode());
 
         // Post a command with the argument which causes rejection in routing.
-        final Command commandToReject =
-                requestFactory.createCommand(SetSwitch.newBuilder()
-                .setSwitchId(generateSwitchId())
-                .setSwitchmanName(SwitchmanBureau.MISSING_SWITCHMAN_NAME)
-                .build());
+        final Command commandToReject = requestFactory.createCommand(
+                SetSwitch.newBuilder()
+                         .setSwitchmanName(SwitchmanBureau.MISSING_SWITCHMAN_NAME)
+                         .setSwitchId(generateSwitchId())
+                         .setPosition(SwitchPosition.LEFT)
+                         .build()
+        );
 
         commandBus.post(commandToReject, observer);
         final ProcessingStatus status = commandStore.getStatus(commandToReject);
 
+        // Check that the command is rejected.
         assertEquals(CommandStatus.REJECTED, status.getCode());
         final Message rejectionMessage = AnyPacker.unpack(status.getRejection()
                                                                 .getMessage());
         assertTrue(rejectionMessage instanceof Rejections.SwitchmanUnavailable);
+
+        // Check that the event and the rejection were dispatched.
+        final Optional<Log> optional = logRepository.find(Log.ID);
+        assertTrue(optional.isPresent());
+        final LogState log = optional.get()
+                                     .getState();
+        assertTrue(log.containsCounters(switchmanName));
+        assertTrue(log.getMissingSwitchmanList()
+                      .contains(SwitchmanBureau.MISSING_SWITCHMAN_NAME));
     }
 
     private static SwitchId generateSwitchId() {
