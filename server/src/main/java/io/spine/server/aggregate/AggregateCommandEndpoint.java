@@ -89,7 +89,9 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
      */
     @Override
     protected void onEmptyResult(A aggregate, CommandEnvelope cmd) throws IllegalStateException {
-        final String format = "The aggregate (class: %s, id: %s) produced empty response for the command (class: %s, id: %s).";
+        final String format =
+                "The aggregate (class: %s, id: %s) produced empty response for " +
+                "the command (class: %s, id: %s).";
         onUnhandledCommand(aggregate, cmd, format);
     }
 }

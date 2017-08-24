@@ -19,10 +19,10 @@
  */
 
 /**
- * Test environments for the {@code io.spine.server.route} package.
+ * This package provides test environment for testing rejecting a command during command routing.
  */
 
 @ParametersAreNonnullByDefault
-package io.spine.server.route.given;
+package io.spine.server.route.given.switchman;
 
 import javax.annotation.ParametersAreNonnullByDefault;
