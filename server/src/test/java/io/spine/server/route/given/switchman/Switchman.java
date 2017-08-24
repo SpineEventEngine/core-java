@@ -29,7 +29,7 @@ import io.spine.server.route.given.switchman.event.SwitchPositionConfirmed;
 import io.spine.validate.UInt32ValueVBuilder;
 
 /**
- * The aggregate that handles commands send to a swtichman.
+ * The aggregate that handles commands send to a switchman.
  *
  * @author Alexander Yevsyukov
  */
