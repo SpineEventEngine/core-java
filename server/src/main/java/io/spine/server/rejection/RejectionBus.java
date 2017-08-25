@@ -41,7 +41,6 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nullable;
 import java.util.Deque;
 import java.util.Set;
-import java.util.concurrent.ConcurrentLinkedDeque;
 
 import static com.google.common.base.Optional.absent;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -111,7 +110,7 @@ public class RejectionBus extends CommandOutputBus<Rejection,
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK for this method.
     @Override
     protected Deque<BusFilter<RejectionEnvelope>> createFilterChain() {
-        return new ConcurrentLinkedDeque<>(filterChain);
+        return filterChain;
     }
 
     @Override

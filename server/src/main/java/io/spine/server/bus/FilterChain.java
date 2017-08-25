@@ -26,10 +26,10 @@ import io.spine.core.MessageEnvelope;
 
 import java.util.Deque;
 import java.util.Iterator;
-import java.util.concurrent.ConcurrentLinkedDeque;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.Lists.newLinkedList;
 
 /**
  * A {@link BusFilter} representing a chain of other bus filters.
@@ -48,7 +48,7 @@ final class FilterChain<E extends MessageEnvelope<?, ?, ?>> implements BusFilter
     private volatile boolean closed;
 
     FilterChain(Deque<? extends BusFilter<E>> chain) {
-        this.chain = new ConcurrentLinkedDeque<>(chain);
+        this.chain = newLinkedList(chain);
     }
 
     @Override

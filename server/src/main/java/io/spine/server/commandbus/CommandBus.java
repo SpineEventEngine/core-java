@@ -41,7 +41,6 @@ import io.spine.server.rejection.RejectionBus;
 import javax.annotation.Nullable;
 import java.util.Deque;
 import java.util.Set;
-import java.util.concurrent.ConcurrentLinkedDeque;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -183,9 +182,8 @@ public class CommandBus extends Bus<Command,
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK for a protected factory method
     @Override
     protected Deque<BusFilter<CommandEnvelope>> createFilterChain() {
-        final Deque<BusFilter<CommandEnvelope>> chain = new ConcurrentLinkedDeque<>(filterChain);
-        chain.push(scheduler);
-        return chain;
+        filterChain.push(scheduler);
+        return filterChain;
     }
 
     @Override

@@ -43,7 +43,6 @@ import io.spine.validate.MessageValidator;
 import javax.annotation.Nullable;
 import java.util.Deque;
 import java.util.Set;
-import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.Executor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -168,7 +167,7 @@ public class EventBus
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK for this method.
     @Override
     protected Deque<BusFilter<EventEnvelope>> createFilterChain() {
-        return new ConcurrentLinkedDeque<>(filterChain);
+        return filterChain;
     }
 
     @Override

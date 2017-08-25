@@ -350,7 +350,7 @@ public abstract class Bus<T extends Message,
          * Creates a new instance of the bus builder.
          */
         protected AbstractBuilder() {
-            this.filters = new ConcurrentLinkedDeque<>();
+            this.filters = newLinkedList();
         }
 
         /**
