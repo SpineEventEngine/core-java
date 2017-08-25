@@ -354,6 +354,19 @@ public class EventBusShould {
         assertSame(validator, eventBus.getValidator());
     }
 
+    /**
+     * Tests the concurrent access to the {@linkplain io.spine.server.bus.BusFilter bus filters}.
+     *
+     * <p>The {@linkplain io.spine.server.bus.FilterChain filter chain} is a queue of the filters
+     * which are sequentially applied to the posted message. The first {@code Bus.post()} call
+     * invokes the filters lazy initialization. In the concurrent environment (which is natural for
+     * a {@link io.spine.server.bus.Bus Bus}), the initialization may be performed multiple times.
+     * Thus, some unexpected issues may appear when accessing the non-synchronously initialized
+     * filter chain.
+     *
+     * <p>To make sure that the chain works fine (i.e. produces no exceptions), we invoke the
+     * initialization multiple times from several threads.
+     */
     @SuppressWarnings("MethodWithMultipleLoops") // OK for such test case.
     @Ignore // This test is used only to diagnose EventBus malfunctions in concurrent environment.
             // It's too long to execute this test per each build, so we leave it as is for now.
