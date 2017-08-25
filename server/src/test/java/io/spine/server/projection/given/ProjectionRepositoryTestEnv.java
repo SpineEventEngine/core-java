@@ -21,6 +21,7 @@
 package io.spine.server.projection.given;
 
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Message;
 import io.spine.core.EventContext;
@@ -39,6 +40,7 @@ import io.spine.test.projection.event.PrjProjectStarted;
 import io.spine.test.projection.event.PrjTaskAdded;
 
 import javax.annotation.Nullable;
+import java.util.Set;
 
 public class ProjectionRepositoryTestEnv {
 
@@ -132,12 +134,27 @@ public class ProjectionRepositoryTestEnv {
             return result;
         }
 
+        /**
+         * Returns the IDs of projection instances, which processed the given message.
+         *
+         * <p>Empty set is returned if no instance processed the given message.
+         */
+        public static Set<ProjectId> whoProcessed(Message eventMessage) {
+            final ImmutableSet.Builder<ProjectId> builder = ImmutableSet.builder();
+            for (ProjectId projectId : eventMessagesDelivered.keySet()) {
+                if(eventMessagesDelivered.get(projectId).contains(eventMessage)) {
+                    builder.add(projectId);
+                }
+            }
+            return builder.build();
+        }
+
         public static void clearMessageDeliveryHistory() {
             eventMessagesDelivered.clear();
         }
 
         private void keep(Message eventMessage) {
-            eventMessagesDelivered.put(getState().getId(), eventMessage);
+            eventMessagesDelivered.put(getId(), eventMessage);
         }
 
         @Subscribe

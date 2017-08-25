@@ -149,7 +149,8 @@ public class CommandBus extends Bus<Command,
         return isThreadSpawnAllowed;
     }
 
-    CommandStore commandStore() {
+    @VisibleForTesting
+    public CommandStore commandStore() {
         return commandStore;
     }
 

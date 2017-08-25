@@ -50,8 +50,7 @@ class AggregateEventEndpoint<I, A extends Aggregate<I, ?, ?>>
 
     static <I, A extends Aggregate<I, ?, ?>>
     Set<I> handle(AggregateRepository<I, A> repository, EventEnvelope event) {
-        final AggregateEventEndpoint<I, A> endpoint =
-                new AggregateEventEndpoint<>(repository, event);
+        final AggregateEventEndpoint<I, A> endpoint = of(repository, event);
 
         return endpoint.handle();
     }

@@ -41,8 +41,7 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
 
     static <I, A extends Aggregate<I, ?, ?>>
     I handle(AggregateRepository<I, A> repository, CommandEnvelope command) {
-        final AggregateCommandEndpoint<I, A> endpoint =
-                new AggregateCommandEndpoint<>(repository, command);
+        final AggregateCommandEndpoint<I, A> endpoint = of(repository, command);
 
         return endpoint.handle();
     }
@@ -90,7 +89,9 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
      */
     @Override
     protected void onEmptyResult(A aggregate, CommandEnvelope cmd) throws IllegalStateException {
-        final String format = "The aggregate (class: %s, id: %s) produced empty response for the command (class: %s, id: %s).";
+        final String format =
+                "The aggregate (class: %s, id: %s) produced empty response for " +
+                "the command (class: %s, id: %s).";
         onUnhandledCommand(aggregate, cmd, format);
     }
 }

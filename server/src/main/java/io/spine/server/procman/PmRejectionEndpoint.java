@@ -47,7 +47,7 @@ class PmRejectionEndpoint<I, P extends ProcessManager<I, ?, ?>>
 
     static <I, P extends ProcessManager<I, ?, ?>>
     Set<I> handle(ProcessManagerRepository<I, P, ?> repository, RejectionEnvelope rejection) {
-        final PmRejectionEndpoint<I, P> endpoint = new PmRejectionEndpoint<>(repository, rejection);
+        final PmRejectionEndpoint<I, P> endpoint = of(repository, rejection);
         final Set<I> result = endpoint.handle();
         return result;
     }
