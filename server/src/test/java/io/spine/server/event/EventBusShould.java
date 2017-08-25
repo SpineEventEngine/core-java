@@ -21,11 +21,13 @@
 package io.spine.server.event;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
+import io.spine.core.EventId;
 import io.spine.core.Events;
 import io.spine.core.Subscribe;
 import io.spine.server.BoundedContext;
@@ -33,8 +35,10 @@ import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.delivery.Consumers;
 import io.spine.server.event.given.EventBusTestEnv.GivenEvent;
 import io.spine.server.storage.StorageFactory;
+import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.test.event.ProjectCreated;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.annotation.Nullable;
@@ -42,8 +46,11 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static com.google.common.collect.Maps.newHashMap;
+import static io.spine.protobuf.AnyPacker.pack;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -345,6 +352,56 @@ public class EventBusShould {
         final EnvelopeValidator<EventEnvelope> validator = eventBus.getValidator();
         assertNotNull(validator);
         assertSame(validator, eventBus.getValidator());
+    }
+
+    /**
+     * Tests the concurrent access to the {@linkplain io.spine.server.bus.BusFilter bus filters}.
+     *
+     * <p>The {@linkplain io.spine.server.bus.FilterChain filter chain} is a queue of the filters
+     * which are sequentially applied to the posted message. The first {@code Bus.post()} call
+     * invokes the filters lazy initialization. In the concurrent environment (which is natural for
+     * a {@link io.spine.server.bus.Bus Bus}), the initialization may be performed multiple times.
+     * Thus, some unexpected issues may appear when accessing the non-synchronously initialized
+     * filter chain.
+     *
+     * <p>To make sure that the chain works fine (i.e. produces no exceptions), we invoke the
+     * initialization multiple times from several threads.
+     */
+    @SuppressWarnings("MethodWithMultipleLoops") // OK for such test case.
+    @Ignore // This test is used only to diagnose EventBus malfunctions in concurrent environment.
+            // It's too long to execute this test per each build, so we leave it as is for now.
+            // Please see build log to find out if there were some errors during the test execution.
+    @Test
+    public void store_filters_regarding_possible_concurrent_modifications()
+            throws InterruptedException {
+        final int threadCount = 50;
+
+        // "Random" more or less valid Event.
+        final Event event = Event.newBuilder()
+                                 .setId(EventId.newBuilder().setValue("123-1"))
+                                 .setMessage(pack(Int32Value.newBuilder()
+                                                            .setValue(42)
+                                                            .build()))
+                                 .build();
+        final StorageFactory storageFactory = StorageFactorySwitch.newInstance("baz", false).get();
+        final ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+        // Catch non-easily reproducible bugs.
+        for (int i = 0; i < 300; i++) {
+            final EventBus eventBus = EventBus.newBuilder()
+                                              .setStorageFactory(storageFactory)
+                                              .build();
+            for (int j = 0; j < threadCount; j++) {
+                executor.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        eventBus.post(event);
+                    }
+                });
+            }
+            // Let the system destroy all the native threads, clean up, etc.
+            Thread.sleep(100);
+        }
+        executor.shutdownNow();
     }
 
     private static class ProjectCreatedSubscriber extends EventSubscriber {
