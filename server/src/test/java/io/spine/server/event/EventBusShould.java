@@ -379,7 +379,7 @@ public class EventBusShould {
                                                             .setValue(42)
                                                             .build()))
                                  .build();
-        // Catch not-easily reproducible bugs.
+        // Catch non-easily reproducible bugs.
         for (int i = 0; i < 300; i++) {
             final EventBus eventBus = EventBus.newBuilder()
                                               .setStorageFactory(
