@@ -71,7 +71,7 @@ public abstract class Bus<T extends Message,
      * @see #filterChain() for the non-null filter chain value
      */
     @Nullable
-    private FilterChain<E> filterChain;
+    private FilterChain<E, ?> filterChain;
 
     /**
      * Registers the passed dispatcher.
