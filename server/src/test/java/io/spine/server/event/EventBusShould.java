@@ -35,7 +35,7 @@ import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.delivery.Consumers;
 import io.spine.server.event.given.EventBusTestEnv.GivenEvent;
 import io.spine.server.storage.StorageFactory;
-import io.spine.server.storage.memory.InMemoryStorageFactory;
+import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.test.event.ProjectCreated;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -46,6 +46,8 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static com.google.common.collect.Maps.newHashMap;
 import static io.spine.protobuf.AnyPacker.pack;
@@ -357,8 +359,10 @@ public class EventBusShould {
             // It's too long to execute this test per each build, so we leave it as is for now.
             // Please see build log to find out if there were some errors during the test execution.
     @Test
-    public void store_filters_regarding_possible_concurrent_modifications() throws InterruptedException {
-        final Thread[] threads = new Thread[50];
+    public void store_filters_regarding_possible_concurrent_modifications()
+            throws InterruptedException {
+        final int threadCount = 50;
+
         // "Random" more or less valid Event.
         final Event event = Event.newBuilder()
                                  .setId(EventId.newBuilder().setValue("123-1"))
@@ -366,31 +370,25 @@ public class EventBusShould {
                                                             .setValue(42)
                                                             .build()))
                                  .build();
+        final StorageFactory storageFactory = StorageFactorySwitch.newInstance("baz", false).get();
+        final ExecutorService executor = Executors.newFixedThreadPool(threadCount);
         // Catch non-easily reproducible bugs.
         for (int i = 0; i < 300; i++) {
             final EventBus eventBus = EventBus.newBuilder()
-                                              .setStorageFactory(
-                                                      InMemoryStorageFactory.newInstance("main",
-                                                                                         false))
+                                              .setStorageFactory(storageFactory)
                                               .build();
-            for (int j = 0; j < threads.length; j++) {
-                threads[j] = new Thread(new Runnable() {
+            for (int j = 0; j < threadCount; j++) {
+                executor.execute(new Runnable() {
                     @Override
                     public void run() {
                         eventBus.post(event);
                     }
                 });
             }
-            for (Thread thread : threads) {
-                thread.start();
-            }
-            for (Thread thread : threads) {
-                thread.join();
-            }
-
             // Let the system destroy all the native threads, clean up, etc.
             Thread.sleep(100);
         }
+        executor.shutdownNow();
     }
 
     private static class ProjectCreatedSubscriber extends EventSubscriber {
