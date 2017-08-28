@@ -20,6 +20,7 @@
 
 package io.spine.server.entity.storage;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
 import io.spine.server.entity.Entity;
@@ -213,11 +214,37 @@ class Columns {
 
         for (PropertyDescriptor property : entityDescriptor.getPropertyDescriptors()) {
             final Method getter = property.getReadMethod();
-            final boolean isColumn = getter.isAnnotationPresent(javax.persistence.Column.class);
-            if (isColumn) {
+            if (isEntityColumn(getter)) {
                 final Column storageField = Column.from(getter);
                 knownEntityProperties.put(entityType, storageField);
             }
+        }
+    }
+
+    private static boolean isEntityColumn(Method getter) {
+        final boolean isAnnotated = getter.isAnnotationPresent(javax.persistence.Column.class);
+        if (isAnnotated) {
+            return true;
+        }
+
+        final Class<?> declaringClass = getter.getDeclaringClass();
+        for (Class<?> implementedInterface : declaringClass.getInterfaces()) {
+            final Optional<Method> interfaceMethod = getMethod(getter, implementedInterface);
+            if (interfaceMethod.isPresent()) {
+                return interfaceMethod.get().isAnnotationPresent(javax.persistence.Column.class);
+            }
+        }
+
+        return false;
+    }
+
+    private static Optional<Method> getMethod(Method method, Class<?> aClass) {
+        try {
+            final Method methodFromClass = aClass.getMethod(method.getName(),
+                                                            method.getParameterTypes());
+            return Optional.of(methodFromClass);
+        } catch (NoSuchMethodException ignored) {
+            return Optional.absent();
         }
     }
 
