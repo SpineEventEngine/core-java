@@ -33,9 +33,9 @@ if %ERRORLEVEL% neq 0 (
 
     :: Push the changes to the new branch.
     set BRANCH_NAME="update-outdated-files"
-    git checkout -B %BRANCH_NAME%
+    git checkout -B "%BRANCH_NAME%"
     git commit -am "Update the outdated files"
-    git push -u origin %BRANCH_NAME%
+    git push -u origin "%BRANCH_NAME%"
 
     :: Checkout the previous branch.
     git checkout -
