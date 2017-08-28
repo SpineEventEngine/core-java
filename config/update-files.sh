@@ -6,7 +6,7 @@
 # from the file repository. If the files are outdated,
 # the new versions will be pushed to the newly created branch.
 #
-# The syntax is: update-files.sh "first_path" "second_path" ...
+# The syntax is: `update-files.bat first_path second_path ...`
 #
 # E.g. you want to update the file `foo/bar/file.txt`, then this file
 # will be replaced by the file from the repository with URL `repository_url/foo/bar/file.txt`.
