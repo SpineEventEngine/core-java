@@ -54,6 +54,7 @@ import static java.lang.String.format;
  *
  *         --UserGroupAggregate.java--
  *
+ *         \@Column
  *         public int getUserCount() {
  *             return getState().getUserCount();
  *         }
@@ -61,6 +62,7 @@ import static java.lang.String.format;
  *         --PaymentProcessManager.java--
  *
  *         \@Nullable
+ *         \@Column
  *         public Date getPaymentSystemName() {
  *             if (getState().hasExpirationDate()) {
  *                 return new Date();
@@ -76,16 +78,23 @@ import static java.lang.String.format;
  *      {@code
  *         --UserAggregate.java--
  *
+ *         // only methods annotated with @javax.persistence.Column may be considered Columns
+ *         public Department getDepartment() { ... }
+ *
  *         // non-public methods may not represent Columns
+ *         \@Column
  *         private double getHourRate() { ... }
  *
  *         // only methods starting with "get" or "is" may be considered Columns
+ *         \@Column
  *         public boolean hasChildren() { ... }
  *
  *         // getter methods must not accept arguments
+ *         \@Column
  *         public User getStateOf(UserAggregate other) { ... }
  *
  *         // only instance methods are considered Columns
+ *         \@Column
  *         public static Integer isNew(UserAggregate aggregate) { ... }
  *      }
  * </pre>
@@ -95,8 +104,8 @@ import static java.lang.String.format;
  *
  * <p>A Column can turn into any type. If use a ready implementation of
  * the {@link io.spine.server.storage.Storage Spine Storages}, the most commonly used types should
- * be already supported. However, you may override the behavior for any type whenever you  wish. For
- * more info, see {@link ColumnTypeRegistry}.
+ * be already supported. However, you may override the behavior for any type whenever you wish.
+ * For more info, see {@link ColumnTypeRegistry}.
  *
  * <p>To handle specific types of the Columns, which are not supported by default,
  * implement the {@link ColumnType} {@code interface}, register it in a {@link ColumnTypeRegistry}

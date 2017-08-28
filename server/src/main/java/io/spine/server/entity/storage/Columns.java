@@ -23,7 +23,6 @@ package io.spine.server.entity.storage;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
 import io.spine.server.entity.Entity;
-import io.spine.server.entity.EntityWithLifecycle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -214,7 +213,8 @@ class Columns {
 
         for (PropertyDescriptor property : entityDescriptor.getPropertyDescriptors()) {
             final Method getter = property.getReadMethod();
-            if (!ExcludedMethod.contain(getter.getName())) {
+            final boolean isColumn = getter.isAnnotationPresent(javax.persistence.Column.class);
+            if (isColumn) {
                 final Column storageField = Column.from(getter);
                 knownEntityProperties.put(entityType, storageField);
             }
@@ -243,63 +243,5 @@ class Columns {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
         private final Logger value = LoggerFactory.getLogger(Columns.class);
-    }
-
-    private enum ExcludedMethod {
-
-        /**
-         * @see Object#getClass()
-         */
-        GET_CLASS("getClass"),
-
-        /**
-         * The {@link Entity} identifier is stored separately and is used more widely then just
-         * for queries.
-         *
-         * @see Entity#getId()
-         */
-        GET_ID("getId"),
-
-        /**
-         * The {@link Entity#getState() Entity state} is stored as a binary by default.
-         *
-         * <p>This provides faster write and read operations, but slows down the queries.
-         *
-         * @see Entity#getState()
-         */
-        GET_STATE("getState"),
-
-        /**
-         * The default state is not a field of the {@link Entity}, but a method which provides
-         * the ancillary information to the repository etc.
-         *
-         * @see Entity#getDefaultState()
-         */
-        GET_DEFAULT_STATE("getDefaultState"),
-
-        /**
-         * The {@link io.spine.server.entity.LifecycleFlags lifecycle flags} are fields that
-         * should be stored separately as well.
-         *
-         * <p>When querying multiple records, the lifecycle flags help to filter them.
-         *
-         * @see EntityWithLifecycle#getLifecycleFlags()
-         */
-        GET_LIFECYCLE_FLAGS("getLifecycleFlags");
-
-        private final String methodName;
-
-        ExcludedMethod(String methodName) {
-            this.methodName = methodName;
-        }
-
-        private static boolean contain(String methodName) {
-            for (ExcludedMethod method : ExcludedMethod.values()) {
-                if (method.methodName.equals(methodName)) {
-                    return true;
-                }
-            }
-            return false;
-        }
     }
 }
