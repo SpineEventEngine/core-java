@@ -26,7 +26,6 @@ import com.google.protobuf.Timestamp;
 import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.server.entity.Entity;
-import io.spine.server.entity.LifecycleFlags;
 import io.spine.test.entity.Project;
 import io.spine.test.entity.ProjectId;
 import io.spine.testdata.Sample;
@@ -34,7 +33,6 @@ import io.spine.time.Time;
 import org.junit.Test;
 
 import javax.annotation.Nullable;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
@@ -44,6 +42,7 @@ import static io.spine.server.storage.LifecycleFlagField.deleted;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Verify.assertContains;
 import static io.spine.test.Verify.assertEmpty;
+import static io.spine.test.Verify.assertNotEmpty;
 import static io.spine.test.Verify.assertSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -69,18 +68,18 @@ public class ColumnsShould {
     }
 
     @Test
-    public void return_empty_map() {
-        final Map<String, Column.MemoizedValue> emptyFields = Collections.emptyMap();
-        assertNotNull(emptyFields);
-        assertEmpty(emptyFields);
-    }
-
-    @Test
     public void extract_no_fields_if_none_defined() {
         final Entity entity = new EntityWithNoStorageFields(STRING_ID);
         final Map<String, Column.MemoizedValue> fields = Columns.from(entity);
         assertNotNull(fields);
         assertEmpty(fields);
+    }
+
+    @Test
+    public void extract_fields_from_implemented_interfaces() {
+        final Entity entity = new EntityWithColumnFromInterface(STRING_ID);
+        final Map<String, Column.MemoizedValue> fields = Columns.from(entity);
+        assertNotEmpty(fields);
     }
 
     @Test
@@ -92,8 +91,7 @@ public class ColumnsShould {
         assertSize(3, fields);
 
         final String floatNullKey = "floatNull";
-        @SuppressWarnings("unchecked") final Column.MemoizedValue floatMemoizedNull =
-                (Column.MemoizedValue) fields.get(floatNullKey);
+        final Column.MemoizedValue floatMemoizedNull = fields.get(floatNullKey);
         assertNotNull(floatMemoizedNull);
         assertNull(floatMemoizedNull.getValue());
 
@@ -109,6 +107,13 @@ public class ColumnsShould {
     }
 
     @Test
+    public void ignore_non_public_getters_with_column_annotation_from_super_class() {
+        final Entity entity = new EntityWithManyGettersDescendant(STRING_ID);
+        final Map<String, Column.MemoizedValue> fields = Columns.from(entity);
+        assertSize(3, fields);
+    }
+
+    @Test
     public void ignore_static_members() {
         final Map<String, Column.MemoizedValue> fields =
                 Columns.from(new EntityWithManyGetters(STRING_ID));
@@ -119,13 +124,6 @@ public class ColumnsShould {
     @Test
     public void handle_non_public_entity_class() {
         final Map<?, ?> fields = Columns.from(new PrivateEntity(STRING_ID));
-        assertNotNull(fields);
-        assertEmpty(fields);
-    }
-
-    @Test
-    public void handle_exclusive_methods() {
-        final Map<?, ?> fields = Columns.from(new ExclusiveMethodsEntity(STRING_ID));
         assertNotNull(fields);
         assertEmpty(fields);
     }
@@ -165,6 +163,11 @@ public class ColumnsShould {
         protected EntityWithNoStorageFields(String id) {
             super(id);
         }
+
+        // A simple getter, which is not an entity column.
+        public int getValue() {
+            return 0;
+        }
     }
 
     @SuppressWarnings("unused")  // Reflective access
@@ -176,29 +179,41 @@ public class ColumnsShould {
             super(id);
         }
 
+        @javax.persistence.Column
         public int getIntegerFieldValue() {
             return 0;
         }
 
         @Nullable
+        @javax.persistence.Column
         public Float getFloatNull() {
             return null;
         }
 
+        @javax.persistence.Column
         public Project getSomeMessage() {
             return someMessage;
         }
 
+        @javax.persistence.Column
         int getSomeNonPublicMethod() {
             throw new AssertionError("getSomeNonPublicMethod invoked");
         }
 
+        @javax.persistence.Column
         public void getSomeVoid() {
             throw new AssertionError("getSomeVoid invoked");
         }
 
+        @javax.persistence.Column
         public static int getStaticMember() {
             return 1024;
+        }
+    }
+
+    public static class EntityWithManyGettersDescendant extends EntityWithManyGetters {
+        protected EntityWithManyGettersDescendant(String id) {
+            super(id);
         }
     }
 
@@ -217,53 +232,49 @@ public class ColumnsShould {
 
     @SuppressWarnings("unused") // Reflective access
     private static class PrivateEntity extends AbstractEntity<String, Any> {
-
         protected PrivateEntity(String id) {
             super(id);
         }
     }
 
-    @SuppressWarnings("unused") // Reflective access
-    public static class ExclusiveMethodsEntity extends AbstractEntity<String, Any> {
-
-        protected ExclusiveMethodsEntity(String id) {
-            super(id);
-        }
-
-        @Override
-        public String getId() {
-            throw new AssertionError("getId invoked");
-        }
-
-        @Override
-        public Any getState() {
-            throw new AssertionError("getState invoked");
-        }
-
-        @Override
-        public Any getDefaultState() {
-            throw new AssertionError("getDefaultState invoked");
-        }
-
-        public LifecycleFlags getLifecycleFlags() {
-            throw new AssertionError("getLifecycleFlags invoked");
-        }
-    }
-
     // Most read-life (non-test) Entities are children of AbstractVersionableEntity,
-    // which brings 3 storage fields from the box
+    // which brings 3 storage fields from the box.
+    @SuppressWarnings("unused") // Reflective access
     public static class RealLifeEntity extends AbstractVersionableEntity<ProjectId, Project> {
 
         protected RealLifeEntity(ProjectId id) {
             super(id);
         }
 
+        @javax.persistence.Column
         public Timestamp getSomeTime() {
             return Time.getCurrentTime();
         }
 
+        @javax.persistence.Column
         public boolean isVisible() {
             return true;
+        }
+    }
+
+    @SuppressWarnings("unused") // Reflective access
+    public interface InterfaceWithEntityColumn {
+
+        // The column annotation from the interface should be taken into account.
+        @javax.persistence.Column
+        int getIntegerFieldValue();
+    }
+
+    public static class EntityWithColumnFromInterface extends AbstractEntity<String, Any>
+            implements InterfaceWithEntityColumn {
+        protected EntityWithColumnFromInterface(String id) {
+            super(id);
+        }
+
+        // The entity column annotation should be `inherited` from the interface.
+        @Override
+        public int getIntegerFieldValue() {
+            return 0;
         }
     }
 }

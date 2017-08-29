@@ -191,6 +191,7 @@ public class ColumnShould {
             super(id);
         }
 
+        @javax.persistence.Column
         public int getMutableState() {
             return mutableState;
         }
@@ -199,15 +200,18 @@ public class ColumnShould {
             this.mutableState = mutableState;
         }
 
+        @javax.persistence.Column
         private long getFortyTwoLong() {
             return 42L;
         }
 
+        @javax.persistence.Column
         public String getNotNull() {
             return null;
         }
 
         @Nullable
+        @javax.persistence.Column
         public String getNull() {
             return null;
         }
@@ -225,6 +229,7 @@ public class ColumnShould {
         }
 
         // non-serializable Entity Column
+        @javax.persistence.Column
         public Object getFoo() {
             fail("Invoked a getter for a non-serializable Entity Column BrokenTestEntity.foo");
             return new Object();

@@ -20,6 +20,9 @@
 dependencies {
     compile group: 'io.grpc', name: 'grpc-all', version: gRpcVersion
 
+    // We use `javax.persistence.Column` annotation to mark entity columns.
+    compile group: 'javax.persistence', name: 'persistence-api', version: '1.0.2'
+
     compile project(path: ':client')
 
     testCompile group: 'io.spine', name: 'spine-testutil-base', version: spineBaseVersion

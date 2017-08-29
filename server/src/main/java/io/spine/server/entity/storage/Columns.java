@@ -20,10 +20,10 @@
 
 package io.spine.server.entity.storage;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
 import io.spine.server.entity.Entity;
-import io.spine.server.entity.EntityWithLifecycle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,21 +33,29 @@ import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.common.collect.Multimaps.synchronizedListMultimap;
 import static java.lang.String.format;
 
 /**
- * A utility for generating the {@link Column Columns} {@linkplain Map}.
+ * A utility for generating the {@linkplain Column columns} {@linkplain Map}.
  *
  * <p>All the methods of the passed {@link Entity} that fit
  * <a href="http://download.oracle.com/otndocs/jcp/7224-javabeans-1.01-fr-spec-oth-JSpec/">
- * the Java Bean</a> getter spec are considered {@link Column Columns}.
+ * the Java Bean</a> getter spec and annotated with {@link javax.persistence.Column
+ * javax.persistence.Column} are considered {@linkplain Column columns}.
+ *
+ * <p>Entity columns are inherited (both from classes and from interfaces).
+ * If a getter for the entity column declared in an interface,
+ * the implementations must not be marked with the annotation.
  *
  * <p>Note that the returned type of a {@link Column} getter must either be primitive or
  * serializable, otherwise a runtime exception is thrown when trying to get an instance of
@@ -55,21 +63,6 @@ import static java.lang.String.format;
  *
  * <p>When passing an instance of an already known {@link Entity} type, the getters are retrieved
  * from a cache and are not updated.
- *
- * <p>There are several excluded methods, which are never taken into account and are
- * <b>not</b> considered {@link Column Columns}:
- * <ul>
- *     <li>{@link Object#getClass()}
- *     <li>{@link Entity#getId()}
- *     <li>{@link Entity#getState()}
- *     <li>{@link Entity#getDefaultState()}
- *     <li>{@link io.spine.server.entity.EntityWithLifecycle#getLifecycleFlags()
- *     EntityWithLifecycle.getLifecycleFlags()}
- *     <li>{@link io.spine.server.aggregate.Aggregate#getBuilder() Aggregate.getBuilder()}
- * </ul>
- *
- * <p>Note: if creating a getter method with a name which intersects with one of these method
- * names, this getter method will also <b>not</b> be considered a {@link Column Column}.
  *
  * @author Dmytro Dashenkov
  * @see Column
@@ -97,14 +90,14 @@ class Columns {
     }
 
     /**
-     * Generates the {@link Column Columns} for the given {@linkplain Entity}.
+     * Generates the {@linkplain Column columns} for the given {@linkplain Entity}.
      *
      * <p>If there were no {@linkplain Entity entities} stored in the scope of current class
      * <a href="https://docs.oracle.com/javase/specs/jls/se7/html/jls-12.html">initialization</a>,
      * a call to this method will create a cache of the passed {@linkplain Entity entity's} getters
      * and use it in all the successive calls.
      *
-     * @param entity an {@link Entity} to get the {@link Column Columns} from
+     * @param entity an {@link Entity} to get the {@linkplain Column columns} from
      * @param <E>    the type of the {@link Entity}
      * @return a {@link Map} of the {@link Column Column} names to their
      * {@linkplain Column.MemoizedValue memoized values}.
@@ -157,7 +150,7 @@ class Columns {
     }
 
     /**
-     * Retrieves a {@link Collection} of {@link Column Columns} from the given Entity class.
+     * Retrieves a {@link Collection} of {@linkplain Column columns} from the given Entity class.
      *
      * @param entityClass the class containing the {@link Column} definition
      * @return a {@link Collection} of {@link Column} corresponded to entity class
@@ -176,7 +169,7 @@ class Columns {
      *
      * @param entityType indexed type of the {@link Entity}
      * @param entity     the object which to take the values from
-     * @return a {@link Map} of the {@link Column Columns}
+     * @return a {@link Map} of the {@linkplain Column columns}
      */
     private static Map<String, Column.MemoizedValue> extractColumns(
             Class<? extends Entity> entityType,
@@ -202,7 +195,8 @@ class Columns {
     }
 
     /**
-     * Caches the {@linkplain Entity entity type} for further {@link Column Columns} retrieving.
+     * Caches the {@linkplain Entity entity type}
+     * for further {@linkplain Column columns} retrieving.
      */
     private static void addToCache(Class<? extends Entity> entityType) {
         final BeanInfo entityDescriptor;
@@ -214,10 +208,70 @@ class Columns {
 
         for (PropertyDescriptor property : entityDescriptor.getPropertyDescriptors()) {
             final Method getter = property.getReadMethod();
-            if (!ExcludedMethod.contain(getter.getName())) {
+            if (isEntityColumn(getter)) {
                 final Column storageField = Column.from(getter);
                 knownEntityProperties.put(entityType, storageField);
             }
+        }
+    }
+
+    /**
+     * Determines whether the specified getter
+     * is annotated with {@link javax.persistence.Column Column}.
+     *
+     * <p>If the method is not annotated directly, declarations from super classes and
+     * implemented interfaces will be checked. If a declaration is annotated with {@code @Column},
+     * {@code true} will be returned.
+     *
+     * @param getter the getter to check
+     * @return {@code true} if the method is getter for {@link Column}
+     */
+    private static boolean isEntityColumn(Method getter) {
+        final boolean isAnnotated = getter.isAnnotationPresent(javax.persistence.Column.class);
+        if (isAnnotated) {
+            return true;
+        }
+        final Class<?> declaringClass = getter.getDeclaringClass();
+        final Iterable<Class<?>> ascendants = getSuperClassesAndInterfaces(declaringClass);
+        for (Class<?> ascendant : ascendants) {
+            final Optional<Method> optional = getMethod(ascendant, getter);
+            if (optional.isPresent()) {
+                final Method ascendantMethod = optional.get();
+                if (ascendantMethod.isAnnotationPresent(javax.persistence.Column.class)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private static Iterable<Class<?>> getSuperClassesAndInterfaces(Class<?> cls) {
+        final Collection<Class<?>> interfaces = Arrays.asList(cls.getInterfaces());
+        final Collection<Class<?>> result = newLinkedList(interfaces);
+        Class<?> currentSuper = cls.getSuperclass();
+        while (currentSuper != null) {
+            result.add(currentSuper);
+            currentSuper = currentSuper.getSuperclass();
+        }
+        return result;
+    }
+
+    /**
+     * Obtains the method from the specified class with the same signature as the specified method.
+     *
+     * @param target the class to obtain the method with the signature
+     * @param method the method to get the signature
+     * @return the method with the same signature obtained from the specified class
+     */
+    private static Optional<Method> getMethod(Class<?> target, Method method) {
+        checkArgument(!method.getDeclaringClass()
+                             .equals(target));
+        try {
+            final Method methodFromTarget = target.getMethod(method.getName(),
+                                                             method.getParameterTypes());
+            return Optional.of(methodFromTarget);
+        } catch (NoSuchMethodException ignored) {
+            return Optional.absent();
         }
     }
 
@@ -243,63 +297,5 @@ class Columns {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
         private final Logger value = LoggerFactory.getLogger(Columns.class);
-    }
-
-    private enum ExcludedMethod {
-
-        /**
-         * @see Object#getClass()
-         */
-        GET_CLASS("getClass"),
-
-        /**
-         * The {@link Entity} identifier is stored separately and is used more widely then just
-         * for queries.
-         *
-         * @see Entity#getId()
-         */
-        GET_ID("getId"),
-
-        /**
-         * The {@link Entity#getState() Entity state} is stored as a binary by default.
-         *
-         * <p>This provides faster write and read operations, but slows down the queries.
-         *
-         * @see Entity#getState()
-         */
-        GET_STATE("getState"),
-
-        /**
-         * The default state is not a field of the {@link Entity}, but a method which provides
-         * the ancillary information to the repository etc.
-         *
-         * @see Entity#getDefaultState()
-         */
-        GET_DEFAULT_STATE("getDefaultState"),
-
-        /**
-         * The {@link io.spine.server.entity.LifecycleFlags lifecycle flags} are fields that
-         * should be stored separately as well.
-         *
-         * <p>When querying multiple records, the lifecycle flags help to filter them.
-         *
-         * @see EntityWithLifecycle#getLifecycleFlags()
-         */
-        GET_LIFECYCLE_FLAGS("getLifecycleFlags");
-
-        private final String methodName;
-
-        ExcludedMethod(String methodName) {
-            this.methodName = methodName;
-        }
-
-        private static boolean contain(String methodName) {
-            for (ExcludedMethod method : ExcludedMethod.values()) {
-                if (method.methodName.equals(methodName)) {
-                    return true;
-                }
-            }
-            return false;
-        }
     }
 }
