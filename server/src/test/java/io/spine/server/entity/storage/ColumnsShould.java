@@ -107,6 +107,13 @@ public class ColumnsShould {
     }
 
     @Test
+    public void ignore_non_public_getters_with_column_annotation_from_super_class() {
+        final Entity entity = new EntityWithManyGettersDescendant(STRING_ID);
+        final Map<String, Column.MemoizedValue> fields = Columns.from(entity);
+        assertSize(3, fields);
+    }
+
+    @Test
     public void ignore_static_members() {
         final Map<String, Column.MemoizedValue> fields =
                 Columns.from(new EntityWithManyGetters(STRING_ID));
@@ -204,6 +211,12 @@ public class ColumnsShould {
         }
     }
 
+    public static class EntityWithManyGettersDescendant extends EntityWithManyGetters {
+        protected EntityWithManyGettersDescendant(String id) {
+            super(id);
+        }
+    }
+
     @SuppressWarnings("unused") // Reflective access
     public static class EntityWithInvalidGetters extends AbstractEntity<String, Any> {
 
@@ -263,7 +276,5 @@ public class ColumnsShould {
         public int getIntegerFieldValue() {
             return 0;
         }
-
-
     }
 }
