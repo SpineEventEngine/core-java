@@ -230,7 +230,6 @@ class Columns {
         if (isAnnotated) {
             return true;
         }
-
         final Class<?> declaringClass = getter.getDeclaringClass();
         final Iterable<Class<?>> ascendants = getSuperClassesAndInterfaces(declaringClass);
         for (Class<?> ascendant : ascendants) {
@@ -242,7 +241,6 @@ class Columns {
                 }
             }
         }
-
         return false;
     }
 

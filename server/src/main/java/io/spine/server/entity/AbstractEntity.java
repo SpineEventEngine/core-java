@@ -88,7 +88,6 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
         if (state == null) {
             state = getDefaultState();
         }
-
         return state;
     }
 
