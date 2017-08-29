@@ -22,7 +22,6 @@ package io.spine.model;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.UInt64Value;
-import io.spine.server.aggregate.Aggregate;
 import io.spine.server.command.Assign;
 import io.spine.server.procman.ProcessManager;
 import io.spine.validate.AnyVBuilder;
