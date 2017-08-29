@@ -7,3 +7,5 @@ exclude_paths:
 - "testutil-core/src/test/**/*.*"
 - "testutil-client/src/test/**/*.*"
 - "testutil-server/src/test/**/*.*"
+- "model/model-assembler/src/test/**/*.*"
+- "model/model-verifier/src/test/**/*.*"
