@@ -118,7 +118,8 @@ import static java.lang.String.format;
  * <h2>Nullability</h2>
  *
  * <p>A Column may turn into {@code null} value if the getter which declares it is annotated as
- * {@link javax.annotation.Nullable}. Otherwise, the Column is considered non-null.
+ * {@link javax.annotation.Nullable javax.annotation.Nullable}.
+ * Otherwise, the Column is considered non-null.
  *
  * <p>If a non-null getter method returns {@code null} when trying to get the value of a Column,
  * a {@linkplain RuntimeException} is thrown. See {@link #isNullable()}.

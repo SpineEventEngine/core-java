@@ -50,8 +50,8 @@ import static java.lang.String.format;
  *
  * <p>All the methods of the passed {@link Entity} that fit
  * <a href="http://download.oracle.com/otndocs/jcp/7224-javabeans-1.01-fr-spec-oth-JSpec/">
- * the Java Bean</a> getter spec and annotated with {@link javax.persistence.Column}
- * are considered {@link Column Columns}.
+ * the Java Bean</a> getter spec and annotated with
+ * {@link javax.persistence.Column javax.persistence.Column} are considered {@link Column Columns}.
  *
  * <p>Entity columns are inherited (both from classes and from interfaces).
  * If a getter for the entity column declared in an interface,
