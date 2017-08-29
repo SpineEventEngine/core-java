@@ -85,12 +85,11 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     @Override
     @CheckReturnValue
     public S getState() {
-        S result = state;
-        if (result == null) {
+        if (state == null) {
             state = getDefaultState();
-            result = state;
         }
-        return result;
+
+        return state;
     }
 
     /**

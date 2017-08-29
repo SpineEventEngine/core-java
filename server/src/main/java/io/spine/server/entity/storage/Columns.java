@@ -33,6 +33,7 @@ import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -40,6 +41,7 @@ import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.common.collect.Multimaps.synchronizedListMultimap;
 import static java.lang.String.format;
 
@@ -48,7 +50,12 @@ import static java.lang.String.format;
  *
  * <p>All the methods of the passed {@link Entity} that fit
  * <a href="http://download.oracle.com/otndocs/jcp/7224-javabeans-1.01-fr-spec-oth-JSpec/">
- * the Java Bean</a> getter spec are considered {@link Column Columns}.
+ * the Java Bean</a> getter spec and annotated with {@link javax.persistence.Column}
+ * are considered {@link Column Columns}.
+ *
+ * <p>Entity columns are inherited (both from classes and from interfaces).
+ * If a getter for the entity column declared in an interface,
+ * the implementations must not be marked with the annotation.
  *
  * <p>Note that the returned type of a {@link Column} getter must either be primitive or
  * serializable, otherwise a runtime exception is thrown when trying to get an instance of
@@ -56,21 +63,6 @@ import static java.lang.String.format;
  *
  * <p>When passing an instance of an already known {@link Entity} type, the getters are retrieved
  * from a cache and are not updated.
- *
- * <p>There are several excluded methods, which are never taken into account and are
- * <b>not</b> considered {@link Column Columns}:
- * <ul>
- *     <li>{@link Object#getClass()}
- *     <li>{@link Entity#getId()}
- *     <li>{@link Entity#getState()}
- *     <li>{@link Entity#getDefaultState()}
- *     <li>{@link io.spine.server.entity.EntityWithLifecycle#getLifecycleFlags()
- *     EntityWithLifecycle.getLifecycleFlags()}
- *     <li>{@link io.spine.server.aggregate.Aggregate#getBuilder() Aggregate.getBuilder()}
- * </ul>
- *
- * <p>Note: if creating a getter method with a name which intersects with one of these method
- * names, this getter method will also <b>not</b> be considered a {@link Column Column}.
  *
  * @author Dmytro Dashenkov
  * @see Column
@@ -222,6 +214,17 @@ class Columns {
         }
     }
 
+    /**
+     * Determines whether the specified getter
+     * is annotated with {@link javax.persistence.Column Column}.
+     *
+     * <p>If the method is not annotated directly, declarations from super classes and
+     * implemented interfaces will be checked. If a declaration is annotated with {@code @Column},
+     * {@code true} will be returned.
+     *
+     * @param getter the getter to check
+     * @return {@code true} if the method is getter for {@link Column}
+     */
     private static boolean isEntityColumn(Method getter) {
         final boolean isAnnotated = getter.isAnnotationPresent(javax.persistence.Column.class);
         if (isAnnotated) {
@@ -229,15 +232,29 @@ class Columns {
         }
 
         final Class<?> declaringClass = getter.getDeclaringClass();
-        for (Class<?> implementedInterface : declaringClass.getInterfaces()) {
-            final Optional<Method> interfaceMethod = getMethod(getter, implementedInterface);
-            if (interfaceMethod.isPresent()) {
-                return interfaceMethod.get()
-                                      .isAnnotationPresent(javax.persistence.Column.class);
+        final Iterable<Class<?>> ascendants = getSuperClassesAndInterfaces(declaringClass);
+        for (Class<?> ascendant : ascendants) {
+            final Optional<Method> optional = getMethod(getter, ascendant);
+            if (optional.isPresent()) {
+                final Method ascendantMethod = optional.get();
+                if (ascendantMethod.isAnnotationPresent(javax.persistence.Column.class)) {
+                    return true;
+                }
             }
         }
 
         return false;
+    }
+
+    private static Iterable<Class<?>> getSuperClassesAndInterfaces(Class<?> aClass) {
+        final Collection<Class<?>> interfaces = Arrays.asList(aClass.getInterfaces());
+        final Collection<Class<?>> result = newLinkedList(interfaces);
+        Class<?> currentSuper = aClass.getSuperclass();
+        while (currentSuper != null) {
+            result.add(currentSuper);
+            currentSuper = currentSuper.getSuperclass();
+        }
+        return result;
     }
 
     /**

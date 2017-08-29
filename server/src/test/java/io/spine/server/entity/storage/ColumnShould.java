@@ -229,6 +229,7 @@ public class ColumnShould {
         }
 
         // non-serializable Entity Column
+        @javax.persistence.Column
         public Object getFoo() {
             fail("Invoked a getter for a non-serializable Entity Column BrokenTestEntity.foo");
             return new Object();
