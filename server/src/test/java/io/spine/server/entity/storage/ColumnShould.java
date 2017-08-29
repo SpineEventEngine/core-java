@@ -49,6 +49,7 @@ import static org.junit.Assert.fail;
 public class ColumnShould {
 
     private static final String CUSTOM_COLUMN_NAME = "customColumnName";
+    private static final String INVALID_COLUMN_NAME = " * ";
 
     @Test
     public void be_serializable() {
@@ -183,7 +184,12 @@ public class ColumnShould {
 
     @Test(expected = IllegalStateException.class)
     public void not_have_same_name_within_one_entity() {
-        forMethod("getValue", EntityWithInvalidColumnNames.class);
+        forMethod("getValue", EntityWithRepeatedColumnNames.class);
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void verify_custom_column_name() {
+        forMethod("getValue", EntityWithInvalidColumnName.class);
     }
 
     private static Column forMethod(String name, Class<?> enclosingClass) {
@@ -260,8 +266,9 @@ public class ColumnShould {
         }
     }
 
-    public static class EntityWithInvalidColumnNames extends AbstractVersionableEntity<String, Any> {
-        protected EntityWithInvalidColumnNames(String id) {
+    public static class EntityWithRepeatedColumnNames
+            extends AbstractVersionableEntity<String, Any> {
+        protected EntityWithRepeatedColumnNames(String id) {
             super(id);
         }
 
@@ -272,6 +279,17 @@ public class ColumnShould {
 
         @javax.persistence.Column(name = CUSTOM_COLUMN_NAME)
         public long getLongValue() {
+            return 0;
+        }
+    }
+
+    public static class EntityWithInvalidColumnName extends AbstractVersionableEntity<String, Any> {
+        protected EntityWithInvalidColumnName(String id) {
+            super(id);
+        }
+
+        @javax.persistence.Column(name = INVALID_COLUMN_NAME)
+        public int getValue() {
             return 0;
         }
     }

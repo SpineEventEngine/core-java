@@ -39,6 +39,7 @@ import java.util.regex.Pattern;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static io.spine.server.entity.storage.ColumnRecords.getAnnotatedVersion;
+import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.lang.String.format;
 
 /**
@@ -151,7 +152,9 @@ public class Column implements Serializable {
     private static final long serialVersionUID = 0L;
 
     private static final String GETTER_PREFIX_REGEX = "(get)|(is)";
+    private static final String ALLOWED_NAME_REGEX = "^[0-9a-zA-Z$_]*$";
     private static final Pattern GETTER_PREFIX_PATTERN = Pattern.compile(GETTER_PREFIX_REGEX);
+    private static final Pattern ALLOWED_NAME_PATTERN = Pattern.compile(ALLOWED_NAME_REGEX);
 
     /**
      * <p>The getter which declares this {@code Column}.
@@ -205,6 +208,13 @@ public class Column implements Serializable {
     private static String columnName(Method getter) {
         final Optional<String> nameFromAnnotation = nameFromAnnotation(getter);
         if (nameFromAnnotation.isPresent()) {
+            final String name = nameFromAnnotation.get();
+            final boolean isValidName = ALLOWED_NAME_PATTERN.matcher(name)
+                                                            .matches();
+            if (!isValidName) {
+                throw newIllegalStateException("Column `%s` does not match the regex `%s`.",
+                                               name, ALLOWED_NAME_REGEX);
+            }
             return nameFromAnnotation.get();
         }
         return nameFromGetterName(getter.getName());
