@@ -38,8 +38,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.common.collect.Multimaps.synchronizedListMultimap;
 import static io.spine.server.entity.storage.ColumnRecords.getAnnotatedVersion;
+import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.lang.String.format;
 
 /**
@@ -203,13 +205,27 @@ class Columns {
             throw new IllegalStateException(e);
         }
 
+        final Collection<Column> entityColumns = newLinkedList();
         for (PropertyDescriptor property : entityDescriptor.getPropertyDescriptors()) {
             final Method getter = property.getReadMethod();
             final boolean isEntityColumn = getAnnotatedVersion(getter).isPresent();
             if (isEntityColumn) {
-                final Column storageField = Column.from(getter);
-                knownEntityProperties.put(entityType, storageField);
+                final Column column = Column.from(getter);
+                entityColumns.add(column);
             }
+        }
+        checkRepeatedColumnNames(entityColumns);
+        knownEntityProperties.putAll(entityType, entityColumns);
+    }
+
+    private static void checkRepeatedColumnNames(Iterable<Column> columns) {
+        final Collection<String> names = newLinkedList();
+        for (Column column : columns) {
+            final String columnName = column.getName();
+            if (names.contains(columnName)) {
+                throw newIllegalStateException("The entity have columns with repeated names.");
+            }
+            names.add(columnName);
         }
     }
 
