@@ -233,7 +233,7 @@ class Columns {
         final Class<?> declaringClass = getter.getDeclaringClass();
         final Iterable<Class<?>> ascendants = getSuperClassesAndInterfaces(declaringClass);
         for (Class<?> ascendant : ascendants) {
-            final Optional<Method> optional = getMethod(getter, ascendant);
+            final Optional<Method> optional = getMethod(ascendant, getter);
             if (optional.isPresent()) {
                 final Method ascendantMethod = optional.get();
                 if (ascendantMethod.isAnnotationPresent(javax.persistence.Column.class)) {
@@ -244,10 +244,10 @@ class Columns {
         return false;
     }
 
-    private static Iterable<Class<?>> getSuperClassesAndInterfaces(Class<?> aClass) {
-        final Collection<Class<?>> interfaces = Arrays.asList(aClass.getInterfaces());
+    private static Iterable<Class<?>> getSuperClassesAndInterfaces(Class<?> cls) {
+        final Collection<Class<?>> interfaces = Arrays.asList(cls.getInterfaces());
         final Collection<Class<?>> result = newLinkedList(interfaces);
-        Class<?> currentSuper = aClass.getSuperclass();
+        Class<?> currentSuper = cls.getSuperclass();
         while (currentSuper != null) {
             result.add(currentSuper);
             currentSuper = currentSuper.getSuperclass();
@@ -256,19 +256,19 @@ class Columns {
     }
 
     /**
-     * Obtains the method with the same signature as the specified method from the specified class.
+     * Obtains the method from the specified class with the same signature as the specified method.
      *
+     * @param target the class to obtain the method with the signature
      * @param method the method to get the signature
-     * @param aClass the class to obtain the method with the same signature
      * @return the method with the same signature obtained from the specified class
      */
-    private static Optional<Method> getMethod(Method method, Class<?> aClass) {
+    private static Optional<Method> getMethod(Class<?> target, Method method) {
         checkArgument(!method.getDeclaringClass()
-                             .equals(aClass));
+                             .equals(target));
         try {
-            final Method methodFromClass = aClass.getMethod(method.getName(),
-                                                            method.getParameterTypes());
-            return Optional.of(methodFromClass);
+            final Method methodFromTarget = target.getMethod(method.getName(),
+                                                             method.getParameterTypes());
+            return Optional.of(methodFromTarget);
         } catch (NoSuchMethodException ignored) {
             return Optional.absent();
         }
