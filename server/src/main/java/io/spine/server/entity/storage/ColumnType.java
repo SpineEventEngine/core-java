@@ -23,7 +23,7 @@ package io.spine.server.entity.storage;
 import io.spine.annotation.SPI;
 
 /**
- * An interface for handling type conversion for the {@link Column Columns}.
+ * An interface for handling type conversion for the {@linkplain Column columns}.
  *
  * <p>When retrieved from an instance of an {@link io.spine.server.entity.Entity Entity},
  * the {@link Column Column} may be of an inappropriate type for storing. To convert the value into

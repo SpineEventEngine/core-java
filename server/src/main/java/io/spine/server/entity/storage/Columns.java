@@ -46,12 +46,12 @@ import static com.google.common.collect.Multimaps.synchronizedListMultimap;
 import static java.lang.String.format;
 
 /**
- * A utility for generating the {@link Column Columns} {@linkplain Map}.
+ * A utility for generating the {@linkplain Column columns} {@linkplain Map}.
  *
  * <p>All the methods of the passed {@link Entity} that fit
  * <a href="http://download.oracle.com/otndocs/jcp/7224-javabeans-1.01-fr-spec-oth-JSpec/">
- * the Java Bean</a> getter spec and annotated with
- * {@link javax.persistence.Column javax.persistence.Column} are considered {@link Column Columns}.
+ * the Java Bean</a> getter spec and annotated with {@link javax.persistence.Column
+ * javax.persistence.Column} are considered {@linkplain Column columns}.
  *
  * <p>Entity columns are inherited (both from classes and from interfaces).
  * If a getter for the entity column declared in an interface,
@@ -90,14 +90,14 @@ class Columns {
     }
 
     /**
-     * Generates the {@link Column Columns} for the given {@linkplain Entity}.
+     * Generates the {@linkplain Column columns} for the given {@linkplain Entity}.
      *
      * <p>If there were no {@linkplain Entity entities} stored in the scope of current class
      * <a href="https://docs.oracle.com/javase/specs/jls/se7/html/jls-12.html">initialization</a>,
      * a call to this method will create a cache of the passed {@linkplain Entity entity's} getters
      * and use it in all the successive calls.
      *
-     * @param entity an {@link Entity} to get the {@link Column Columns} from
+     * @param entity an {@link Entity} to get the {@linkplain Column columns} from
      * @param <E>    the type of the {@link Entity}
      * @return a {@link Map} of the {@link Column Column} names to their
      * {@linkplain Column.MemoizedValue memoized values}.
@@ -150,7 +150,7 @@ class Columns {
     }
 
     /**
-     * Retrieves a {@link Collection} of {@link Column Columns} from the given Entity class.
+     * Retrieves a {@link Collection} of {@linkplain Column columns} from the given Entity class.
      *
      * @param entityClass the class containing the {@link Column} definition
      * @return a {@link Collection} of {@link Column} corresponded to entity class
@@ -169,7 +169,7 @@ class Columns {
      *
      * @param entityType indexed type of the {@link Entity}
      * @param entity     the object which to take the values from
-     * @return a {@link Map} of the {@link Column Columns}
+     * @return a {@link Map} of the {@linkplain Column columns}
      */
     private static Map<String, Column.MemoizedValue> extractColumns(
             Class<? extends Entity> entityType,
@@ -195,7 +195,8 @@ class Columns {
     }
 
     /**
-     * Caches the {@linkplain Entity entity type} for further {@link Column Columns} retrieving.
+     * Caches the {@linkplain Entity entity type}
+     * for further {@linkplain Column columns} retrieving.
      */
     private static void addToCache(Class<? extends Entity> entityType) {
         final BeanInfo entityDescriptor;

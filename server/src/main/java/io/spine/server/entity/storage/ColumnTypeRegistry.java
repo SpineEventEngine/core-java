@@ -32,7 +32,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 /**
- * A registry of type conversion strategies for the {@link Column Columns}.
+ * A registry of type conversion strategies for the {@linkplain Column columns}.
  *
  * <p>To register new {@link Class} to {@link ColumnType} mapping, do:
  * <pre>
