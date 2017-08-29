@@ -20,6 +20,7 @@
 
 package io.spine.model;
 
+import io.spine.annotation.Internal;
 import io.spine.server.command.Assign;
 
 import javax.lang.model.element.Element;
@@ -52,7 +53,8 @@ import static io.spine.validate.Validate.isDefault;
  */
 public class AssignLookup extends SpineAnnotationProcessor {
 
-    private static final String DESTINATION_PATH = ".spine/spine_model.ser";
+    @Internal
+    public static final String DESTINATION_PATH = ".spine/spine_model.ser";
     private static final String DEFAULT_OUTPUT_OPTION = ".";
     private static final String OUTPUT_OPTION_NAME = "spineDirRoot";
 

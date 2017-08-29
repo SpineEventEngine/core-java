@@ -47,7 +47,7 @@ import static java.nio.file.Files.newInputStream;
 @Experimental
 public class ModelVerifierPlugin extends SpinePlugin {
 
-    private static final String RELATIVE_RAW_MODEL_PATH = ".spine/spine_model.ser";
+    private static final String RELATIVE_RAW_MODEL_PATH = AssignLookup.DESTINATION_PATH;
 
     @Override
     public void apply(Project project) {
