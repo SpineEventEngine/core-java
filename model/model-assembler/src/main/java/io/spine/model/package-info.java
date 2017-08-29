@@ -18,18 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-buildscript {
-    apply from: "$rootDir/ext.gradle"
-}
+/**
+ * This package provides tools for analyzing the source code.
+ */
 
-group 'io.spine.tools'
+@ParametersAreNonnullByDefault
+package io.spine.model;
 
-repositories {
-    mavenCentral()
-}
-
-dependencies {
-    compile project(':server')
-
-    testCompile group: 'junit', name: 'junit', version: '4.12'
-}
+import javax.annotation.ParametersAreNonnullByDefault;

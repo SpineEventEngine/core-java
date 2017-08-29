@@ -18,18 +18,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-buildscript {
-    apply from: "$rootDir/ext.gradle"
-}
+package io.spine.model;
 
-group 'io.spine.tools'
+/**
+ * @author Dmytro Dashenkov
+ */
+public class AssignLookupShould extends SpineAnnotationProcessorShould {
 
-repositories {
-    mavenCentral()
-}
-
-dependencies {
-    compile project(':server')
-
-    testCompile group: 'junit', name: 'junit', version: '4.12'
+    @Override
+    protected SpineAnnotationProcessor processor() {
+        return new AssignLookup();
+    }
 }
