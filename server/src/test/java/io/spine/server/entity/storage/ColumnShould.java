@@ -48,6 +48,8 @@ import static org.junit.Assert.fail;
 @SuppressWarnings("DuplicateStringLiteralInspection") // Many string literals for method names
 public class ColumnShould {
 
+    private static final String CUSTOM_COLUMN_NAME = "customColumnName";
+
     @Test
     public void be_serializable() {
         final Column column = forMethod("getVersion", VersionableEntity.class);
@@ -173,6 +175,17 @@ public class ColumnShould {
         assertSame(column, memoizedValue.getSourceColumn());
     }
 
+    @Test
+    public void have_custom_name_from_column_annotation() {
+        final Column column = forMethod("getValue", EntityWithCustomColumnNames.class);
+        assertEquals(CUSTOM_COLUMN_NAME, column.getName());
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void not_have_same_name_within_one_entity() {
+        forMethod("getValue", EntityWithInvalidColumnNames.class);
+    }
+
     private static Column forMethod(String name, Class<?> enclosingClass) {
         try {
             final Method result = enclosingClass.getDeclaredMethod(name);
@@ -233,6 +246,33 @@ public class ColumnShould {
         public Object getFoo() {
             fail("Invoked a getter for a non-serializable Entity Column BrokenTestEntity.foo");
             return new Object();
+        }
+    }
+
+    public static class EntityWithCustomColumnNames extends AbstractVersionableEntity<String, Any> {
+        protected EntityWithCustomColumnNames(String id) {
+            super(id);
+        }
+
+        @javax.persistence.Column(name = CUSTOM_COLUMN_NAME)
+        public int getValue() {
+            return 0;
+        }
+    }
+
+    public static class EntityWithInvalidColumnNames extends AbstractVersionableEntity<String, Any> {
+        protected EntityWithInvalidColumnNames(String id) {
+            super(id);
+        }
+
+        @javax.persistence.Column(name = CUSTOM_COLUMN_NAME)
+        public int getValue() {
+            return 0;
+        }
+
+        @javax.persistence.Column(name = CUSTOM_COLUMN_NAME)
+        public long getLongValue() {
+            return 0;
         }
     }
 }

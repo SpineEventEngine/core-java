@@ -20,7 +20,6 @@
 
 package io.spine.server.entity.storage;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
 import io.spine.server.entity.Entity;
@@ -33,16 +32,14 @@ import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.common.collect.Multimaps.synchronizedListMultimap;
+import static io.spine.server.entity.storage.ColumnRecords.getAnnotatedVersion;
 import static java.lang.String.format;
 
 /**
@@ -208,70 +205,11 @@ class Columns {
 
         for (PropertyDescriptor property : entityDescriptor.getPropertyDescriptors()) {
             final Method getter = property.getReadMethod();
-            if (isEntityColumn(getter)) {
+            final boolean isEntityColumn = getAnnotatedVersion(getter).isPresent();
+            if (isEntityColumn) {
                 final Column storageField = Column.from(getter);
                 knownEntityProperties.put(entityType, storageField);
             }
-        }
-    }
-
-    /**
-     * Determines whether the specified getter
-     * is annotated with {@link javax.persistence.Column Column}.
-     *
-     * <p>If the method is not annotated directly, declarations from super classes and
-     * implemented interfaces will be checked. If a declaration is annotated with {@code @Column},
-     * {@code true} will be returned.
-     *
-     * @param getter the getter to check
-     * @return {@code true} if the method is getter for {@link Column}
-     */
-    private static boolean isEntityColumn(Method getter) {
-        final boolean isAnnotated = getter.isAnnotationPresent(javax.persistence.Column.class);
-        if (isAnnotated) {
-            return true;
-        }
-        final Class<?> declaringClass = getter.getDeclaringClass();
-        final Iterable<Class<?>> ascendants = getSuperClassesAndInterfaces(declaringClass);
-        for (Class<?> ascendant : ascendants) {
-            final Optional<Method> optional = getMethod(ascendant, getter);
-            if (optional.isPresent()) {
-                final Method ascendantMethod = optional.get();
-                if (ascendantMethod.isAnnotationPresent(javax.persistence.Column.class)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    private static Iterable<Class<?>> getSuperClassesAndInterfaces(Class<?> cls) {
-        final Collection<Class<?>> interfaces = Arrays.asList(cls.getInterfaces());
-        final Collection<Class<?>> result = newLinkedList(interfaces);
-        Class<?> currentSuper = cls.getSuperclass();
-        while (currentSuper != null) {
-            result.add(currentSuper);
-            currentSuper = currentSuper.getSuperclass();
-        }
-        return result;
-    }
-
-    /**
-     * Obtains the method from the specified class with the same signature as the specified method.
-     *
-     * @param target the class to obtain the method with the signature
-     * @param method the method to get the signature
-     * @return the method with the same signature obtained from the specified class
-     */
-    private static Optional<Method> getMethod(Class<?> target, Method method) {
-        checkArgument(!method.getDeclaringClass()
-                             .equals(target));
-        try {
-            final Method methodFromTarget = target.getMethod(method.getName(),
-                                                             method.getParameterTypes());
-            return Optional.of(methodFromTarget);
-        } catch (NoSuchMethodException ignored) {
-            return Optional.absent();
         }
     }
 

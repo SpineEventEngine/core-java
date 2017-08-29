@@ -22,6 +22,7 @@ package io.spine.server.entity.storage;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
+import com.google.common.base.Optional;
 import com.google.gson.internal.Primitives;
 import io.spine.annotation.Internal;
 import io.spine.server.entity.Entity;
@@ -37,6 +38,7 @@ import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static io.spine.server.entity.storage.ColumnRecords.getAnnotatedVersion;
 import static java.lang.String.format;
 
 /**
@@ -99,7 +101,7 @@ import static java.lang.String.format;
  *         public static Integer isNew(UserAggregate aggregate) { ... }
  *      }
  * </pre>
-
+ *
  *
  * <h2>Type policy</h2>
  *
@@ -141,8 +143,8 @@ import static java.lang.String.format;
  * <p>This class is effectively {@code final} since it has a single {@code private} constructor.
  * Though the modifier "{@code final}" is absent to make it possible to create mocks for testing.
  *
- * @see ColumnType
  * @author Dmytro Dashenkov
+ * @see ColumnType
  */
 public class Column implements Serializable {
 
@@ -193,11 +195,32 @@ public class Column implements Serializable {
     public static Column from(Method getter) {
         checkNotNull(getter);
         checkType(getter);
-        final String name = nameFromGetterName(getter.getName());
+        final String name = columnName(getter);
         final boolean nullable = getter.isAnnotationPresent(Nullable.class);
         final Column result = new Column(getter, name, nullable);
 
         return result;
+    }
+
+    private static String columnName(Method getter) {
+        final Optional<String> nameFromAnnotation = nameFromAnnotation(getter);
+        if (nameFromAnnotation.isPresent()) {
+            return nameFromAnnotation.get();
+        }
+        return nameFromGetterName(getter.getName());
+    }
+
+    private static Optional<String> nameFromAnnotation(Method getter) {
+        final Optional<Method> optionalMethod = getAnnotatedVersion(getter);
+        if (!optionalMethod.isPresent()) {
+            return Optional.absent();
+        }
+        final Method annotatedVersion = optionalMethod.get();
+        final String name = annotatedVersion.getAnnotation(javax.persistence.Column.class)
+                                            .name();
+        return name.isEmpty()
+                ? Optional.<String>absent()
+                : Optional.of(name);
     }
 
     private static String nameFromGetterName(String getterName) {
@@ -252,7 +275,6 @@ public class Column implements Serializable {
      */
     public Serializable getFor(Entity<?, ?> source) {
         try {
-            @SuppressWarnings("unchecked")
             final Serializable result = (Serializable) getter.invoke(source);
             if (!nullable) {
                 checkNotNull(result, format("Not null getter %s returned null.", getter.getName()));

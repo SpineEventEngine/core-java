@@ -21,12 +21,19 @@
 package io.spine.server.entity.storage;
 
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import io.spine.server.entity.storage.Column.MemoizedValue;
 
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.Sets.newHashSet;
 
 /**
  * A utility for dealing with the {@linkplain EntityRecordWithColumns} and
@@ -84,6 +91,74 @@ public final class ColumnRecords {
                                         columnMetadata.getType()
                                                       .getCanonicalName()));
             setValue(columnValue, destination, columnIdentifier, columnType);
+        }
+    }
+
+    /**
+     * Obtains the method version annotated with {@link javax.persistence.Column
+     * javax.persistence.Column} for the specified method.
+     *
+     * <p>Scans the specified method, the methods with the same signature
+     * from the super classes and interfaces.
+     *
+     * @param method the method to find the annotated version
+     * @return the annotated version of the specified method
+     * @throws IllegalStateException if there is more than one annotated method
+     */
+    static Optional<Method> getAnnotatedVersion(Method method) {
+        final Set<Method> annotatedVersions = newHashSet();
+        if (method.isAnnotationPresent(javax.persistence.Column.class)) {
+            annotatedVersions.add(method);
+        }
+        final Class<?> declaringClass = method.getDeclaringClass();
+        final Iterable<Class<?>> ascendants = getSuperClassesAndInterfaces(declaringClass);
+        for (Class<?> ascendant : ascendants) {
+            final Optional<Method> optionalMethod = getMethodBySignature(ascendant, method);
+            if (optionalMethod.isPresent()) {
+                final Method ascendantMethod = optionalMethod.get();
+                if (ascendantMethod.isAnnotationPresent(javax.persistence.Column.class)) {
+                    annotatedVersions.add(ascendantMethod);
+                }
+            }
+        }
+        checkState(annotatedVersions.size() <= 1,
+                   "Entity column redefines javax.persistence.Column annotation.");
+        if (annotatedVersions.isEmpty()) {
+            return Optional.absent();
+        } else {
+            final Method annotatedVersion = annotatedVersions.iterator()
+                                                             .next();
+            return Optional.of(annotatedVersion);
+        }
+    }
+
+    private static Iterable<Class<?>> getSuperClassesAndInterfaces(Class<?> cls) {
+        final Collection<Class<?>> interfaces = Arrays.asList(cls.getInterfaces());
+        final Collection<Class<?>> result = newHashSet(interfaces);
+        Class<?> currentSuper = cls.getSuperclass();
+        while (currentSuper != null) {
+            result.add(currentSuper);
+            currentSuper = currentSuper.getSuperclass();
+        }
+        return result;
+    }
+
+    /**
+     * Obtains the method from the specified class with the same signature as the specified method.
+     *
+     * @param target the class to obtain the method with the signature
+     * @param method the method to get the signature
+     * @return the method with the same signature obtained from the specified class
+     */
+    private static Optional<Method> getMethodBySignature(Class<?> target, Method method) {
+        checkArgument(!method.getDeclaringClass()
+                             .equals(target));
+        try {
+            final Method methodFromTarget = target.getMethod(method.getName(),
+                                                             method.getParameterTypes());
+            return Optional.of(methodFromTarget);
+        } catch (NoSuchMethodException ignored) {
+            return Optional.absent();
         }
     }
 
