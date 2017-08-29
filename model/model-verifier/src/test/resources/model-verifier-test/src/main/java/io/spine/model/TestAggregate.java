@@ -18,40 +18,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-buildscript {
-    apply from: "$rootDir/ext.gradle"
-}
+package io.spine.model;
 
-group 'io.spine.tools'
+import io.spine.server.aggregate.Aggregate;
+import io.spine.server.command.Assign;
+import io.spine.validate.AnyVBuilder;
 
-repositories {
-    mavenCentral()
-}
+import com.google.protobuf.Any;
+import com.google.protobuf.Message;
 
-sourceSets {
-    main {
-        resources.srcDirs += "$sourcesRootDir/main/resources"
+import java.util.Collections;
+import java.util.List;
+
+class TestAggregate extends Aggregate<String, Any, AnyVBuilder> {
+
+    public TestAggregate(String id) {
+        super(id);
     }
-    test {
-        resources.srcDirs += "$sourcesRootDir/test/resources"
+
+    @Assign
+    List<Message> handle(Any command) {
+        return Collections.emptyList();
     }
-}
-
-dependencies {
-    compile gradleApi()
-    compile group: 'io.spine.tools', name: 'spine-plugin-base', version: spineBaseVersion
-    compile project(':server')
-    compile project(':model-assembler')
-
-    testCompile group: 'junit', name: 'junit', version: '4.12'
-    testCompile gradleTestKit()
-    compile group: 'io.spine.tools', name: 'spine-plugin-base', version: spineBaseVersion, classifier: 'test'
-}
-
-test {
-    dependsOn publishToMavenLocal
-    dependsOn project(':core').publishToMavenLocal
-    dependsOn project(':client').publishToMavenLocal
-    dependsOn project(':server').publishToMavenLocal
-    dependsOn project(':model-assembler').publishToMavenLocal
 }
