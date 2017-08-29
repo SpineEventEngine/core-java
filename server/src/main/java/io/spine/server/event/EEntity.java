@@ -30,6 +30,7 @@ import io.spine.server.entity.AbstractEntity;
 import io.spine.type.TypeName;
 
 import javax.annotation.Nullable;
+import javax.persistence.Column;
 import java.util.Comparator;
 
 /**
@@ -101,6 +102,7 @@ public class EEntity extends AbstractEntity<EventId, Event> {
      * @return the time when the underlying event was fired
      * @see #CREATED_TIME_COLUMN
      */
+    @Column
     public Timestamp getCreated() {
         return getState().getContext()
                          .getTimestamp();
@@ -114,6 +116,7 @@ public class EEntity extends AbstractEntity<EventId, Event> {
      * @return the {@link TypeName} value of the event represented by this Entity
      * @see #TYPE_COLUMN
      */
+    @Column
     public String getType() {
         if (typeName == null) {
             typeName = EventEnvelope.of(getState())

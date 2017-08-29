@@ -34,7 +34,7 @@ import java.util.Map;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A value of {@link EntityRecord} associated with its {@link Column Columns}.
+ * A value of {@link EntityRecord} associated with its {@linkplain Column columns}.
  *
  * @author Dmytro Dashenkov
  */
@@ -50,7 +50,7 @@ public final class EntityRecordWithColumns implements Serializable {
      * Creates a new instance of the {@code EntityRecordWithColumns}.
      *
      * @param record  {@link EntityRecord} to pack
-     * @param columns {@linkplain Columns#from(Entity) {@link Column Columns} map} to pack
+     * @param columns {@linkplain Columns#from(Entity) columns} map to pack
      */
     private EntityRecordWithColumns(EntityRecord record,
                                     Map<String, Column.MemoizedValue> columns) {
@@ -61,7 +61,7 @@ public final class EntityRecordWithColumns implements Serializable {
 
     /**
      * Creates an instance of the {@link EntityRecordWithColumns} with no
-     * {@linkplain Columns {@link Column Columns}}.
+     * {@linkplain Column columns}.
      *
      * <p>An object created with this constructor will always return {@code false} on
      * {@link #hasColumns()}.
@@ -85,7 +85,8 @@ public final class EntityRecordWithColumns implements Serializable {
     }
 
     /**
-     * Creates an instance of the {@link EntityRecordWithColumns} with no {@link Column Columns}.
+     * Creates an instance of the {@link EntityRecordWithColumns}
+     * with no {@linkplain Column columns}.
      *
      * <p>An object created with this factory method will always return {@code false} on
      * {@link #hasColumns()}.
@@ -100,9 +101,8 @@ public final class EntityRecordWithColumns implements Serializable {
      * Creates a new instance of the {@code EntityRecordWithColumns}.
      */
     @VisibleForTesting
-    static EntityRecordWithColumns of(
-            EntityRecord record,
-            Map<String, Column.MemoizedValue> storageFields) {
+    static EntityRecordWithColumns of(EntityRecord record,
+                                      Map<String, Column.MemoizedValue> storageFields) {
         return new EntityRecordWithColumns(record, storageFields);
     }
 
@@ -127,9 +127,10 @@ public final class EntityRecordWithColumns implements Serializable {
     }
 
     /**
-     * Determines whether or not there are any {@link Column Columns} associated with this record.
+     * Determines whether or not there are any {@linkplain Column columns}
+     * associated with this record.
      *
-     * <p>If returns {@code false}, the {@link Column Columns} are not considered
+     * <p>If returns {@code false}, the {@linkplain Column columns} are not considered
      * by the storage.
      *
      * @return {@code true} if current object was constructed with

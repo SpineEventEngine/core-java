@@ -23,6 +23,8 @@ package io.spine.server.entity;
 import com.google.protobuf.Message;
 import io.spine.core.Version;
 
+import javax.persistence.Column;
+
 /**
  * An entity with version and timestamp of the last modification.
  *
@@ -33,5 +35,6 @@ public interface VersionableEntity<I, S extends Message> extends Entity<I, S> {
     /**
      * Obtains the version of the entity.
      */
+    @Column
     Version getVersion();
 }

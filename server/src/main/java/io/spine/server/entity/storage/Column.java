@@ -43,7 +43,8 @@ import static java.lang.String.format;
  * The representation of a field of an {@link Entity} which is stored in the storage in the way
  * efficient for querying.
  *
- * <p>A Column is a value retrieved from an {@link Entity} getter.
+ * <p>A Column is a value retrieved from an {@link Entity} getter,
+ * which is marked with the {@linkplain javax.persistence.Column annotation}.
  *
  * <h2>Examples</h2>
  *
@@ -54,6 +55,7 @@ import static java.lang.String.format;
  *
  *         --UserGroupAggregate.java--
  *
+ *         \@Column
  *         public int getUserCount() {
  *             return getState().getUserCount();
  *         }
@@ -61,6 +63,7 @@ import static java.lang.String.format;
  *         --PaymentProcessManager.java--
  *
  *         \@Nullable
+ *         \@Column
  *         public Date getPaymentSystemName() {
  *             if (getState().hasExpirationDate()) {
  *                 return new Date();
@@ -76,16 +79,23 @@ import static java.lang.String.format;
  *      {@code
  *         --UserAggregate.java--
  *
+ *         // only methods annotated with @javax.persistence.Column may be considered Columns
+ *         public Department getDepartment() { ... }
+ *
  *         // non-public methods may not represent Columns
+ *         \@Column
  *         private double getHourRate() { ... }
  *
  *         // only methods starting with "get" or "is" may be considered Columns
+ *         \@Column
  *         public boolean hasChildren() { ... }
  *
  *         // getter methods must not accept arguments
+ *         \@Column
  *         public User getStateOf(UserAggregate other) { ... }
  *
  *         // only instance methods are considered Columns
+ *         \@Column
  *         public static Integer isNew(UserAggregate aggregate) { ... }
  *      }
  * </pre>
@@ -95,8 +105,8 @@ import static java.lang.String.format;
  *
  * <p>A Column can turn into any type. If use a ready implementation of
  * the {@link io.spine.server.storage.Storage Spine Storages}, the most commonly used types should
- * be already supported. However, you may override the behavior for any type whenever you  wish. For
- * more info, see {@link ColumnTypeRegistry}.
+ * be already supported. However, you may override the behavior for any type whenever you wish.
+ * For more info, see {@link ColumnTypeRegistry}.
  *
  * <p>To handle specific types of the Columns, which are not supported by default,
  * implement the {@link ColumnType} {@code interface}, register it in a {@link ColumnTypeRegistry}
@@ -108,8 +118,8 @@ import static java.lang.String.format;
  * <h2>Nullability</h2>
  *
  * <p>A Column may turn into {@code null} value if the getter which declares it is annotated as
- * {@link javax.annotation.Nullable javax.annotation.Nullable}. Otherwise, the Column is considered
- * non-null.
+ * {@link javax.annotation.Nullable javax.annotation.Nullable}.
+ * Otherwise, the Column is considered non-null.
  *
  * <p>If a non-null getter method returns {@code null} when trying to get the value of a Column,
  * a {@linkplain RuntimeException} is thrown. See {@link #isNullable()}.
@@ -121,6 +131,7 @@ import static java.lang.String.format;
  *         --EmployeeProjection.java--
  *
  *         // method should be annotated as @Nullable to return a null value
+ *         \@Column
  *         public Message getAddress() {
  *             return null;
  *         }
