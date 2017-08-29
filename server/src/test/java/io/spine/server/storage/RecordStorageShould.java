@@ -54,6 +54,7 @@ import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 
 import javax.annotation.Nullable;
+import javax.persistence.Column;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -526,37 +527,45 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
             super(id);
         }
 
+        @Column
         public int getCounter() {
             counter++;
             return counter;
         }
 
+        @Column
         public long getBigCounter() {
             return getCounter();
         }
 
+        @Column
         public boolean isCounterEven() {
             return counter % 2 == 0;
         }
 
+        @Column
         public String getCounterName() {
             return getId().toString();
         }
 
+        @Column
         public Version getCounterVersion() {
             return Version.newBuilder()
                           .setNumber(counter)
                           .build();
         }
 
+        @Column
         public Timestamp getNow() {
             return Time.getCurrentTime();
         }
 
+        @Column
         public Project getCounterState() {
             return getState();
         }
 
+        @Column
         public int getProjectStatusValue() {
             return getState().getStatusValue();
         }

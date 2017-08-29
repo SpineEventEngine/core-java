@@ -176,27 +176,33 @@ public class ColumnsShould {
             super(id);
         }
 
+        @javax.persistence.Column
         public int getIntegerFieldValue() {
             return 0;
         }
 
         @Nullable
+        @javax.persistence.Column
         public Float getFloatNull() {
             return null;
         }
 
+        @javax.persistence.Column
         public Project getSomeMessage() {
             return someMessage;
         }
 
+        @javax.persistence.Column
         int getSomeNonPublicMethod() {
             throw new AssertionError("getSomeNonPublicMethod invoked");
         }
 
+        @javax.persistence.Column
         public void getSomeVoid() {
             throw new AssertionError("getSomeVoid invoked");
         }
 
+        @javax.persistence.Column
         public static int getStaticMember() {
             return 1024;
         }
@@ -258,10 +264,12 @@ public class ColumnsShould {
             super(id);
         }
 
+        @javax.persistence.Column
         public Timestamp getSomeTime() {
             return Time.getCurrentTime();
         }
 
+        @javax.persistence.Column
         public boolean isVisible() {
             return true;
         }

@@ -38,6 +38,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Multimaps.synchronizedListMultimap;
 import static java.lang.String.format;
@@ -231,14 +232,24 @@ class Columns {
         for (Class<?> implementedInterface : declaringClass.getInterfaces()) {
             final Optional<Method> interfaceMethod = getMethod(getter, implementedInterface);
             if (interfaceMethod.isPresent()) {
-                return interfaceMethod.get().isAnnotationPresent(javax.persistence.Column.class);
+                return interfaceMethod.get()
+                                      .isAnnotationPresent(javax.persistence.Column.class);
             }
         }
 
         return false;
     }
 
+    /**
+     * Obtains the method with the same signature as the specified method from the specified class.
+     *
+     * @param method the method to get the signature
+     * @param aClass the class to obtain the method with the same signature
+     * @return the method with the same signature obtained from the specified class
+     */
     private static Optional<Method> getMethod(Method method, Class<?> aClass) {
+        checkArgument(!method.getDeclaringClass()
+                             .equals(aClass));
         try {
             final Method methodFromClass = aClass.getMethod(method.getName(),
                                                             method.getParameterTypes());
