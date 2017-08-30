@@ -53,6 +53,7 @@ import static org.junit.Assert.assertNull;
  */
 public class ColumnsShould {
 
+    private static final String CUSTOM_COLUMN_NAME = "columnName";
     private static final String STRING_ID = "some-string-id-never-used";
 
     @Test
@@ -157,6 +158,11 @@ public class ColumnsShould {
         final Class<? extends Entity<?, ?>> entityClass = EntityWithNoStorageFields.class;
         final String existingColumnName = "foo";
         Columns.findColumn(entityClass, existingColumnName);
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void not_allow_same_column_name_within_one_entity() {
+        Columns.getColumns(EntityWithRepeatedColumnNames.class);
     }
 
     public static class EntityWithNoStorageFields extends AbstractEntity<String, Any> {
@@ -274,6 +280,23 @@ public class ColumnsShould {
         // The entity column annotation should be `inherited` from the interface.
         @Override
         public int getIntegerFieldValue() {
+            return 0;
+        }
+    }
+
+    public static class EntityWithRepeatedColumnNames
+            extends AbstractVersionableEntity<String, Any> {
+        protected EntityWithRepeatedColumnNames(String id) {
+            super(id);
+        }
+
+        @javax.persistence.Column(name = CUSTOM_COLUMN_NAME)
+        public int getValue() {
+            return 0;
+        }
+
+        @javax.persistence.Column(name = CUSTOM_COLUMN_NAME)
+        public long getLongValue() {
             return 0;
         }
     }

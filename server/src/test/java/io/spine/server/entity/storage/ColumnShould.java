@@ -49,6 +49,7 @@ import static org.junit.Assert.fail;
 public class ColumnShould {
 
     private static final String CUSTOM_COLUMN_NAME = "customColumnName";
+    private static final String REDEFINED_COLUMN_NAME = "redefinedColumnName";
     private static final String INVALID_COLUMN_NAME = " * ";
 
     @Test
@@ -178,17 +179,18 @@ public class ColumnShould {
 
     @Test
     public void have_custom_name_from_column_annotation() {
-        final Column column = forMethod("getValue", EntityWithCustomColumnNames.class);
+        final Column column = forMethod("getValue", EntityWithCustomColumnName.class);
         assertEquals(CUSTOM_COLUMN_NAME, column.getName());
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void not_have_same_name_within_one_entity() {
-        forMethod("getValue", EntityWithRepeatedColumnNames.class);
+    @Test
+    public void have_redefined_name() {
+        final Column column = forMethod("getValue", EntityRedefiningColumnName.class);
+        assertEquals(REDEFINED_COLUMN_NAME, column.getName());
     }
 
     @Test(expected = IllegalStateException.class)
-    public void verify_custom_column_name() {
+    public void not_be_with_invalid_name() {
         forMethod("getValue", EntityWithInvalidColumnName.class);
     }
 
@@ -255,8 +257,8 @@ public class ColumnShould {
         }
     }
 
-    public static class EntityWithCustomColumnNames extends AbstractVersionableEntity<String, Any> {
-        protected EntityWithCustomColumnNames(String id) {
+    public static class EntityWithCustomColumnName extends AbstractVersionableEntity<String, Any> {
+        protected EntityWithCustomColumnName(String id) {
             super(id);
         }
 
@@ -266,20 +268,15 @@ public class ColumnShould {
         }
     }
 
-    public static class EntityWithRepeatedColumnNames
-            extends AbstractVersionableEntity<String, Any> {
-        protected EntityWithRepeatedColumnNames(String id) {
+    public static class EntityRedefiningColumnName extends EntityWithCustomColumnName {
+        protected EntityRedefiningColumnName(String id) {
             super(id);
         }
 
-        @javax.persistence.Column(name = CUSTOM_COLUMN_NAME)
+        @javax.persistence.Column(name = REDEFINED_COLUMN_NAME)
+        @Override
         public int getValue() {
-            return 0;
-        }
-
-        @javax.persistence.Column(name = CUSTOM_COLUMN_NAME)
-        public long getLongValue() {
-            return 0;
+            return super.getValue();
         }
     }
 
