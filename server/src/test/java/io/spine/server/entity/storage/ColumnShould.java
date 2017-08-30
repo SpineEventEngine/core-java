@@ -49,7 +49,6 @@ import static org.junit.Assert.fail;
 public class ColumnShould {
 
     private static final String CUSTOM_COLUMN_NAME = "customColumnName";
-    private static final String REDEFINED_COLUMN_NAME = "redefinedColumnName";
     private static final String INVALID_COLUMN_NAME = " * ";
 
     @Test
@@ -62,16 +61,6 @@ public class ColumnShould {
     public void support_toString() {
         final Column column = forMethod("getVersion", VersionableEntity.class);
         assertEquals("VersionableEntity.version", column.toString());
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void construct_for_getter_method_only() {
-        forMethod("toString", Object.class);
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void fail_to_construct_for_non_serializable_column() {
-        forMethod("getFoo", BrokenTestEntity.class);
     }
 
     @Test
@@ -115,22 +104,42 @@ public class ColumnShould {
         assertEquals(changedState, extractedState);
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void fail_to_get_value_from_private_method() {
-        final Column column = forMethod("getFortyTwoLong", TestEntity.class);
-        column.getFor(new TestEntity(""));
+    @Test(expected = IllegalArgumentException.class)
+    public void not_be_constructed_from_non_getter() {
+        forMethod("toString", Object.class);
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void fail_to_memoize_value_from_private_method() {
-        final Column column = forMethod("getFortyTwoLong", TestEntity.class);
-        column.memoizeFor(new TestEntity(""));
+    @Test(expected = IllegalArgumentException.class)
+    public void not_be_constructed_from_non_annotated_getter() {
+        forMethod("getClass", Object.class);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void not_be_constructed_from_static_method() {
+        forMethod("getStatic", TestEntity.class);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void not_be_constructed_from_private_getter() {
+        forMethod("getFortyTwoLong", TestEntity.class);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void not_be_constructed_from_getter_with_parameters() throws NoSuchMethodException {
+        final Method method = TestEntity.class.getDeclaredMethod("getParameter",
+                                                                 String.class);
+        Column.from(method);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void fail_to_construct_for_non_serializable_column() {
+        forMethod("getFoo", BrokenTestEntity.class);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void fail_to_get_value_from_wrong_object() {
         final Column column = forMethod("getMutableState", TestEntity.class);
-        column.getFor(new DifferentTestEntity(""));
+        column.getFor(new EntityWithCustomColumnName(""));
     }
 
     @Test(expected = NullPointerException.class)
@@ -157,7 +166,7 @@ public class ColumnShould {
 
     @Test
     public void contain_property_type() {
-        final Column column = forMethod("getFortyTwoLong", TestEntity.class);
+        final Column column = forMethod("getLong", TestEntity.class);
         assertEquals(Long.TYPE, column.getType());
     }
 
@@ -183,10 +192,9 @@ public class ColumnShould {
         assertEquals(CUSTOM_COLUMN_NAME, column.getName());
     }
 
-    @Test
-    public void have_redefined_name() {
-        final Column column = forMethod("getValue", EntityRedefiningColumnName.class);
-        assertEquals(REDEFINED_COLUMN_NAME, column.getName());
+    @Test(expected = IllegalStateException.class)
+    public void not_allow_redefine_column_annotation() {
+        forMethod("getValue", EntityRedefiningColumnAnnotation.class);
     }
 
     @Test(expected = IllegalStateException.class)
@@ -222,11 +230,6 @@ public class ColumnShould {
         }
 
         @javax.persistence.Column
-        private long getFortyTwoLong() {
-            return 42L;
-        }
-
-        @javax.persistence.Column
         public String getNotNull() {
             return null;
         }
@@ -236,11 +239,25 @@ public class ColumnShould {
         public String getNull() {
             return null;
         }
-    }
 
-    private static class DifferentTestEntity extends AbstractVersionableEntity<String, Any> {
-        protected DifferentTestEntity(String id) {
-            super(id);
+        @javax.persistence.Column
+        public long getLong() {
+            return 0;
+        }
+
+        @javax.persistence.Column
+        private long getFortyTwoLong() {
+            return 42L;
+        }
+
+        @javax.persistence.Column
+        public String getParameter(String param) {
+            return param;
+        }
+
+        @javax.persistence.Column
+        public static String getStatic() {
+            return "";
         }
     }
 
@@ -268,12 +285,12 @@ public class ColumnShould {
         }
     }
 
-    public static class EntityRedefiningColumnName extends EntityWithCustomColumnName {
-        protected EntityRedefiningColumnName(String id) {
+    public static class EntityRedefiningColumnAnnotation extends EntityWithCustomColumnName {
+        protected EntityRedefiningColumnAnnotation(String id) {
             super(id);
         }
 
-        @javax.persistence.Column(name = REDEFINED_COLUMN_NAME)
+        @javax.persistence.Column
         @Override
         public int getValue() {
             return super.getValue();

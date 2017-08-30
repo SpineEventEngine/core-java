@@ -51,10 +51,7 @@ import static java.lang.String.format;
  * <a href="http://download.oracle.com/otndocs/jcp/7224-javabeans-1.01-fr-spec-oth-JSpec/">
  * the Java Bean</a> getter spec and annotated with {@link javax.persistence.Column
  * javax.persistence.Column} are considered {@linkplain Column columns}.
- *
- * <p>Entity columns are inherited (both from classes and from interfaces).
- * If a getter for the entity column declared in an interface,
- * the implementations must not be marked with the annotation.
+ * Inherited columns are taken into account either.
  *
  * <p>Note that the returned type of a {@link Column} getter must either be primitive or
  * serializable, otherwise a runtime exception is thrown when trying to get an instance of

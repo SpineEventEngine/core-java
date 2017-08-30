@@ -103,7 +103,8 @@ public final class ColumnRecords {
      *
      * @param method the method to find the annotated version
      * @return the annotated version of the specified method
-     * @throws IllegalStateException if there is more than one annotated method
+     * @throws IllegalStateException if there is more than one annotated method is found
+     *                               in the scanned classes
      */
     static Optional<Method> getAnnotatedVersion(Method method) {
         final Set<Method> annotatedVersions = newHashSet();
@@ -122,7 +123,7 @@ public final class ColumnRecords {
             }
         }
         checkState(annotatedVersions.size() <= 1,
-                   "Entity column redefines javax.persistence.Column annotation.");
+                   "Entity column should be annotated only once, in a place of declaration.");
         if (annotatedVersions.isEmpty()) {
             return Optional.absent();
         } else {

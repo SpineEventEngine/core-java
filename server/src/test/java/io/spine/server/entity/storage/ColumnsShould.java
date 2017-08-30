@@ -21,6 +21,7 @@
 package io.spine.server.entity.storage;
 
 import com.google.common.testing.NullPointerTester;
+import com.google.common.testing.NullPointerTester.Visibility;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import io.spine.server.entity.AbstractEntity;
@@ -63,9 +64,7 @@ public class ColumnsShould {
 
     @Test
     public void pass_null_check() {
-        new NullPointerTester()
-                .testStaticMethods(Columns.class,
-                                   NullPointerTester.Visibility.PACKAGE);
+        new NullPointerTester().testStaticMethods(Columns.class, Visibility.PACKAGE);
     }
 
     @Test

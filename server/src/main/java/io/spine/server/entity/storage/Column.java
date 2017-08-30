@@ -36,11 +36,14 @@ import java.lang.reflect.Method;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static io.spine.server.entity.storage.ColumnRecords.getAnnotatedVersion;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.lang.String.format;
+import static java.lang.reflect.Modifier.isPublic;
+import static java.lang.reflect.Modifier.isStatic;
 
 /**
  * The representation of a field of an {@link Entity} which is stored in the storage in the way
@@ -49,8 +52,15 @@ import static java.lang.String.format;
  * <p>A Column is a value retrieved from an {@link Entity} getter,
  * which is marked with the {@linkplain javax.persistence.Column annotation}.
  *
- * <h2>Examples</h2>
+ * <p>Columns are inherited (both from classes and from interfaces).
+ * A getter for a column should be annotated with {@code @Column} only once,
+ * i.e. in the place of its declaration.
  *
+ * <p>You can specify a custom name for a column via the annotation
+ * {@linkplain javax.persistence.Column#name() property}. If the property is empty,
+ * column name will be obtained from the getter (e.g. {@code getValue()} -> {@code value}).
+ *
+ * <h2>Examples</h2>
  *
  * <p>These methods represent the Columns:
  * <pre>
@@ -102,7 +112,6 @@ import static java.lang.String.format;
  *         public static Integer isNew(UserAggregate aggregate) { ... }
  *      }
  * </pre>
- *
  *
  * <h2>Type policy</h2>
  *
@@ -197,7 +206,7 @@ public class Column implements Serializable {
      */
     public static Column from(Method getter) {
         checkNotNull(getter);
-        checkType(getter);
+        checkGetter(getter);
         final String name = columnName(getter);
         final boolean nullable = getter.isAnnotationPresent(Nullable.class);
         final Column result = new Column(getter, name, nullable);
@@ -212,18 +221,19 @@ public class Column implements Serializable {
             final boolean isValidName = ALLOWED_NAME_PATTERN.matcher(name)
                                                             .matches();
             if (!isValidName) {
-                throw newIllegalStateException("Column `%s` does not match the regex `%s`.",
+                throw newIllegalStateException("Column name `%s` does not match the regex `%s`.",
                                                name, ALLOWED_NAME_REGEX);
             }
             return nameFromAnnotation.get();
         }
-        return nameFromGetterName(getter.getName());
+        return nameFromGetterName(getter);
     }
 
     private static Optional<String> nameFromAnnotation(Method getter) {
         final Optional<Method> optionalMethod = getAnnotatedVersion(getter);
         if (!optionalMethod.isPresent()) {
-            return Optional.absent();
+            throw newIllegalStateException("Method `%s` is not an entity column getter.",
+                                           getter.getName());
         }
         final Method annotatedVersion = optionalMethod.get();
         final String name = annotatedVersion.getAnnotation(javax.persistence.Column.class)
@@ -233,33 +243,31 @@ public class Column implements Serializable {
                 : Optional.of(name);
     }
 
-    private static String nameFromGetterName(String getterName) {
-        final Matcher prefixMatcher = GETTER_PREFIX_PATTERN.matcher(getterName);
-        String result;
-        if (prefixMatcher.find()) {
-            result = prefixMatcher.replaceFirst("");
-        } else {
-            throw new IllegalArgumentException(
-                    format("Method %s is not a property getter", getterName));
-        }
-        result = Character.toLowerCase(result.charAt(0)) + result.substring(1);
-        return result;
+    private static String nameFromGetterName(Method getter) {
+        final Matcher prefixMatcher = GETTER_PREFIX_PATTERN.matcher(getter.getName());
+        final String nameWithoutPrefix = prefixMatcher.replaceFirst("");
+        return Character.toLowerCase(nameWithoutPrefix.charAt(0)) + nameWithoutPrefix.substring(1);
     }
 
-    private static void checkType(Method getter) {
+    private static void checkGetter(Method getter) {
+        checkArgument(GETTER_PREFIX_PATTERN.matcher(getter.getName())
+                                           .find() && getter.getParameterTypes().length == 0,
+                      "Method `%s` is not a getter.", getter.getName());
+        checkArgument(getAnnotatedVersion(getter).isPresent(),
+                      "Entity column getter should be annotated with `javax.persistence.Column`.");
+        final int modifiers = getter.getModifiers();
+        checkArgument(isPublic(modifiers) && !isStatic(modifiers),
+                      "Entity column getter should be public instance method.");
         final Class<?> returnType = getter.getReturnType();
         final Class<?> wrapped = Primitives.wrap(returnType);
-        checkState(Serializable.class.isAssignableFrom(wrapped),
-                   format("Cannot create Column of non-serializable type %s by method %s.",
-                          returnType,
-                          getter));
+        checkArgument(Serializable.class.isAssignableFrom(wrapped),
+                      format("Cannot create Column of non-serializable type %s by method %s.",
+                             returnType,
+                             getter));
     }
 
     /**
-     * Retrieves the name of the property which represents the Column.
-     *
-     * <p>For example, if the getter method has name "isArchivedOrDeleted", the returned value is
-     * "archivedOrDeleted".
+     * Retrieves the name of the property which represents the column.
      *
      * @return the name of the property exposed by this object
      */
@@ -268,10 +276,10 @@ public class Column implements Serializable {
     }
 
     /**
-     * Shows if the Column may return {@code null}s.
+     * Determines whether the column value may be {@code null}.
      *
      * @return {@code true} if the getter method is annotated as {@link Nullable},
-     * {@code false} otherwise
+     *         {@code false} otherwise
      */
     public boolean isNullable() {
         return nullable;
