@@ -123,7 +123,8 @@ public final class ColumnRecords {
             }
         }
         checkState(annotatedVersions.size() <= 1,
-                   "Entity column should be annotated only once, in a place of declaration.");
+                   "An entity column getter should be annotated only once. " +
+                           "Found the annotated versions: %s.", annotatedVersions);
         if (annotatedVersions.isEmpty()) {
             return Optional.absent();
         } else {

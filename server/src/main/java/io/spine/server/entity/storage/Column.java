@@ -221,8 +221,9 @@ public class Column implements Serializable {
             final boolean isValidName = ALLOWED_NAME_PATTERN.matcher(name)
                                                             .matches();
             if (!isValidName) {
-                throw newIllegalStateException("Column name `%s` does not match the regex `%s`.",
-                                               name, ALLOWED_NAME_REGEX);
+                final String errMsg = "The entity column name `%s` is invalid. " +
+                        "The column getter: `%s`. Should match the regex `%s`.";
+                throw newIllegalStateException(errMsg, name, getter, ALLOWED_NAME_REGEX);
             }
             return nameFromAnnotation.get();
         }
@@ -232,8 +233,7 @@ public class Column implements Serializable {
     private static Optional<String> nameFromAnnotation(Method getter) {
         final Optional<Method> optionalMethod = getAnnotatedVersion(getter);
         if (!optionalMethod.isPresent()) {
-            throw newIllegalStateException("Method `%s` is not an entity column getter.",
-                                           getter.getName());
+            throw newIllegalStateException("Method `%s` is not an entity column getter.", getter);
         }
         final Method annotatedVersion = optionalMethod.get();
         final String name = annotatedVersion.getAnnotation(javax.persistence.Column.class)
@@ -252,7 +252,7 @@ public class Column implements Serializable {
     private static void checkGetter(Method getter) {
         checkArgument(GETTER_PREFIX_PATTERN.matcher(getter.getName())
                                            .find() && getter.getParameterTypes().length == 0,
-                      "Method `%s` is not a getter.", getter.getName());
+                      "Method `%s` is not a getter.", getter);
         checkArgument(getAnnotatedVersion(getter).isPresent(),
                       "Entity column getter should be annotated with `javax.persistence.Column`.");
         final int modifiers = getter.getModifiers();
@@ -261,7 +261,7 @@ public class Column implements Serializable {
         final Class<?> returnType = getter.getReturnType();
         final Class<?> wrapped = Primitives.wrap(returnType);
         checkArgument(Serializable.class.isAssignableFrom(wrapped),
-                      format("Cannot create Column of non-serializable type %s by method %s.",
+                      format("Cannot create column of non-serializable type %s by method %s.",
                              returnType,
                              getter));
     }
