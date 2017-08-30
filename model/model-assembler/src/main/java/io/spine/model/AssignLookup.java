@@ -20,6 +20,7 @@
 
 package io.spine.model;
 
+import com.google.common.annotations.VisibleForTesting;
 import io.spine.annotation.Internal;
 import io.spine.server.command.Assign;
 
@@ -55,8 +56,9 @@ public class AssignLookup extends SpineAnnotationProcessor {
 
     @Internal
     public static final String DESTINATION_PATH = ".spine/spine_model.ser";
+    @VisibleForTesting
+    static final String OUTPUT_OPTION_NAME = "spineDirRoot";
     private static final String DEFAULT_OUTPUT_OPTION = ".";
-    private static final String OUTPUT_OPTION_NAME = "spineDirRoot";
 
     private final SpineModel.Builder model = SpineModel.newBuilder();
 

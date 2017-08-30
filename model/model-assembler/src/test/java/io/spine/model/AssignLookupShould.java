@@ -20,6 +20,14 @@
 
 package io.spine.model;
 
+import org.junit.Test;
+
+import java.util.Set;
+
+import static org.hamcrest.Matchers.contains;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+
 /**
  * @author Dmytro Dashenkov
  */
@@ -28,5 +36,12 @@ public class AssignLookupShould extends SpineAnnotationProcessorShould {
     @Override
     protected SpineAnnotationProcessor processor() {
         return new AssignLookup();
+    }
+
+    @Test
+    public void support_spineDirRoot_option() {
+        final Set<String> opts = processor().getSupportedOptions();
+        assertEquals(1, opts.size());
+        assertThat(opts, contains(AssignLookup.OUTPUT_OPTION_NAME));
     }
 }
