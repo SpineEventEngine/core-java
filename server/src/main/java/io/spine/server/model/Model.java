@@ -57,8 +57,11 @@ public class Model {
 
     private static final Model INSTANCE = new Model();
 
-    /** A map from a raw class to an extended class information instance. */
-    private final Map<Class<?>, ModelClass<?>> classes = Maps.newConcurrentMap();
+    /**
+     * A map from a {@linkplain #nameOf(Class) a class name} to an extended class information
+     * instance.
+     */
+    private final Map<String, ModelClass<?>> classes = Maps.newConcurrentMap();
 
     public static Model getInstance() {
         return INSTANCE;
@@ -84,11 +87,11 @@ public class Model {
      */
     public AggregateClass<?> asAggregateClass(Class<? extends Aggregate> cls) {
         checkNotNull(cls);
-        ModelClass<?> modelClass = classes.get(cls);
+        ModelClass<?> modelClass = classes.get(nameOf(cls));
         if (modelClass == null) {
             modelClass = new AggregateClass<>(cls);
             checkDuplicates((CommandHandlingClass) modelClass);
-            classes.put(cls, modelClass);
+            classes.put(nameOf(cls), modelClass);
         }
         return (AggregateClass<?>) modelClass;
     }
@@ -104,11 +107,11 @@ public class Model {
      */
     public AggregatePartClass<?> asAggregatePartClass(Class<? extends AggregatePart> cls) {
         checkNotNull(cls);
-        ModelClass<?> modelClass = classes.get(cls);
+        ModelClass<?> modelClass = classes.get(nameOf(cls));
         if (modelClass == null) {
             modelClass = new AggregatePartClass<>(cls);
             checkDuplicates((CommandHandlingClass) modelClass);
-            classes.put(cls, modelClass);
+            classes.put(nameOf(cls), modelClass);
         }
         return (AggregatePartClass<?>) modelClass;
     }
@@ -126,11 +129,11 @@ public class Model {
     public ProcessManagerClass<?> asProcessManagerClass(Class<? extends ProcessManager> cls)
         throws DuplicateCommandHandlerError {
         checkNotNull(cls);
-        ModelClass<?> modelClass = classes.get(cls);
+        ModelClass<?> modelClass = classes.get(nameOf(cls));
         if (modelClass == null) {
             modelClass = ProcessManagerClass.of(cls);
             checkDuplicates((CommandHandlingClass) modelClass);
-            classes.put(cls, modelClass);
+            classes.put(nameOf(cls), modelClass);
         }
         return (ProcessManagerClass<?>) modelClass;
     }
@@ -143,10 +146,10 @@ public class Model {
      */
     public ProjectionClass<?> asProjectionClass(Class<? extends Projection> cls) {
         checkNotNull(cls);
-        ModelClass<?> modelClass = classes.get(cls);
+        ModelClass<?> modelClass = classes.get(nameOf(cls));
         if (modelClass == null) {
             modelClass = ProjectionClass.of(cls);
-            classes.put(cls, modelClass);
+            classes.put(nameOf(cls), modelClass);
         }
         return (ProjectionClass<?>) modelClass;
     }
@@ -159,10 +162,10 @@ public class Model {
      */
     public EventSubscriberClass<?> asEventSubscriberClass(Class<? extends EventSubscriber> cls) {
         checkNotNull(cls);
-        ModelClass<?> modelClass = classes.get(cls);
+        ModelClass<?> modelClass = classes.get(nameOf(cls));
         if (modelClass == null) {
             modelClass = EventSubscriberClass.of(cls);
-            classes.put(cls, modelClass);
+            classes.put(nameOf(cls), modelClass);
         }
         return (EventSubscriberClass<?>) modelClass;
     }
@@ -180,11 +183,11 @@ public class Model {
     public CommandHandlerClass asCommandHandlerClass(Class<? extends CommandHandler> cls)
             throws DuplicateCommandHandlerError {
         checkNotNull(cls);
-        ModelClass<?> modelClass = classes.get(cls);
+        ModelClass<?> modelClass = classes.get(nameOf(cls));
         if (modelClass == null) {
             modelClass = CommandHandlerClass.of(cls);
             checkDuplicates((CommandHandlingClass) modelClass);
-            classes.put(cls, modelClass);
+            classes.put(nameOf(cls), modelClass);
         }
         return (CommandHandlerClass<?>) modelClass;
     }
@@ -198,10 +201,10 @@ public class Model {
     public
     RejectionSubscriberClass<?> asRejectionSubscriber(Class<? extends RejectionSubscriber> cls) {
         checkNotNull(cls);
-        ModelClass<?> modelClass = classes.get(cls);
+        ModelClass<?> modelClass = classes.get(nameOf(cls));
         if (modelClass == null) {
             modelClass = RejectionSubscriberClass.of(cls);
-            classes.put(cls, modelClass);
+            classes.put(nameOf(cls), modelClass);
         }
         return (RejectionSubscriberClass<?>) modelClass;
     }
@@ -238,11 +241,23 @@ public class Model {
      */
     public EntityClass<?> asEntityClass(Class<? extends Entity> cls) {
         checkNotNull(cls);
-        ModelClass<?> modelClass = classes.get(cls);
+        ModelClass<?> modelClass = classes.get(nameOf(cls));
         if (modelClass == null) {
             modelClass = new EntityClass<>(cls);
-            classes.put(cls, modelClass);
+            classes.put(nameOf(cls), modelClass);
         }
         return (EntityClass<?>) modelClass;
+    }
+
+    /**
+     * Returns a unique identifying name of the given class.
+     *
+     * <p>The returned value is guaranteed to be unique per class and non-null.
+     *
+     * @param cls the {@link Class} to identity
+     * @return a non-null class name
+     */
+    private static String nameOf(Class<?> cls) {
+        return cls.getName();
     }
 }
