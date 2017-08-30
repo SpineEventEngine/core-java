@@ -45,7 +45,7 @@ dependencies {
 
     testCompile group: 'junit', name: 'junit', version: '4.12'
     testCompile gradleTestKit()
-    compile group: 'io.spine.tools', name: 'spine-plugin-base', version: spineBaseVersion, classifier: 'test'
+    testCompile group: 'io.spine.tools', name: 'spine-plugin-base', version: spineBaseVersion, classifier: 'test'
 }
 
 test {

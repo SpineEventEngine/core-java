@@ -65,6 +65,13 @@ public class ModelVerifierPluginShould {
         assertEquals(FAILED, generationResult);
     }
 
+    @Test
+    public void ignore_duplicate_entries() {
+        final GradleProject project = newProjectWithJava("io/spine/model/TestAggregate.java");
+        project.executeTask(VERIFY_MODEL);
+        project.executeTask(VERIFY_MODEL);
+    }
+
     @Ignore // TODO:2017-08-25:dmytro.dashenkov: Re-enable when Model is capable of checking the handler methods.
             // https://github.com/SpineEventEngine/base/issues/49
     @Test
