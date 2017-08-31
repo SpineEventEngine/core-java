@@ -83,7 +83,9 @@ ext {
                          "server",
                          "testutil-core",
                          "testutil-client",
-                         "testutil-server"]
+                         "testutil-server",
+                         "model-assembler",
+                         "model-verifier"]
 }
 
 allprojects {
