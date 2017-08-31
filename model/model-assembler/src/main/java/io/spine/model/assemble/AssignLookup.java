@@ -22,7 +22,7 @@ package io.spine.model.assemble;
 
 import com.google.common.annotations.VisibleForTesting;
 import io.spine.annotation.Internal;
-import io.spine.model.SpineModel;
+import io.spine.model.CommandHandlers;
 import io.spine.server.command.Assign;
 
 import javax.lang.model.element.Element;
@@ -61,7 +61,7 @@ public class AssignLookup extends SpineAnnotationProcessor {
     static final String OUTPUT_OPTION_NAME = "spineDirRoot";
     private static final String DEFAULT_OUTPUT_OPTION = ".";
 
-    private final SpineModel.Builder model = SpineModel.newBuilder();
+    private final CommandHandlers.Builder commandHandlers = CommandHandlers.newBuilder();
 
     @Override
     protected Class<? extends Annotation> getAnnotationType() {
@@ -79,7 +79,7 @@ public class AssignLookup extends SpineAnnotationProcessor {
     protected void processElement(Element element) {
         final TypeElement enclosingTypeElement = (TypeElement) element.getEnclosingElement();
         final String typeName = enclosingTypeElement.getQualifiedName().toString();
-        model.addCommandHandlingTypes(typeName);
+        commandHandlers.addCommandHandlingTypes(typeName);
     }
 
     @Override
@@ -87,42 +87,42 @@ public class AssignLookup extends SpineAnnotationProcessor {
         final String spineOutput = getOption(OUTPUT_OPTION_NAME).or(DEFAULT_OUTPUT_OPTION);
         final String fileName = spineOutput + '/' + DESTINATION_PATH;
         final File serializedModelStorage = new File(fileName);
-        mergeOldModelFrom(serializedModelStorage);
-        writeModelTo(serializedModelStorage);
+        mergeOldHandlersFrom(serializedModelStorage);
+        writeHandlersTo(serializedModelStorage);
     }
 
     /**
-     * Merges the currently built {@linkplain SpineModel model} with the pre-built one.
+     * Merges the currently built {@linkplain CommandHandlers commandHandlers} with the pre-built one.
      *
-     * <p>If the file exists and is not empty, the message of type {@link SpineModel} is read from
-     * it and merged with the current model by the rules of
+     * <p>If the file exists and is not empty, the message of type {@link CommandHandlers} is read from
+     * it and merged with the current commandHandlers by the rules of
      * {@link com.google.protobuf.Message.Builder#mergeFrom(com.google.protobuf.Message) Message.Builder.mergeFrom()}.
      *
-     * @param file the file which may or may not contain the pre-assembled model
+     * @param file the file which may or may not contain the pre-assembled commandHandlers
      */
-    private void mergeOldModelFrom(File file) {
+    private void mergeOldHandlersFrom(File file) {
         final boolean fileWithData = existsNonEmpty(file);
         if (fileWithData) {
-            final SpineModel preexistingModel = readExisting(file);
-            model.mergeFrom(preexistingModel);
+            final CommandHandlers preexistingModel = readExisting(file);
+            commandHandlers.mergeFrom(preexistingModel);
         }
     }
 
     /**
-     * Writes the {@link SpineModel} to the given file.
+     * Writes the {@link CommandHandlers} to the given file.
      *
      * <p>If the given file does not exist, this method creates it.
      *
-     * <p>The written model will be cleaned from duplications in the repeated fields.
+     * <p>The written commandHandlers will be cleaned from duplications in the repeated fields.
      *
      * <p>The I/O errors are handled by rethrowing them as {@link IllegalStateException}.
      *
-     * @param file an existing file to write the model into
+     * @param file an existing file to write the commandHandlers into
      */
-    private void writeModelTo(File file) {
+    private void writeHandlersTo(File file) {
         ensureFile(file);
         removeDuplicates();
-        final SpineModel serializedModel = model.build();
+        final CommandHandlers serializedModel = commandHandlers.build();
         if (!isDefault(serializedModel)) {
             try (FileOutputStream out = new FileOutputStream(file)) {
                 serializedModel.writeTo(out);
@@ -133,15 +133,15 @@ public class AssignLookup extends SpineAnnotationProcessor {
     }
 
     /**
-     * Cleans the currently built model from the duplicates.
+     * Cleans the currently built commandHandlers from the duplicates.
      *
-     * <p>Calling this method will cause the {@linkplain #model current model} not to contain
+     * <p>Calling this method will cause the {@linkplain #commandHandlers current commandHandlers} not to contain
      * duplicate entries in any {@code repeated} field.
      */
     private void removeDuplicates() {
-        final Set<String> commandHandlingTypes = newTreeSet(model.getCommandHandlingTypesList());
-        model.clearCommandHandlingTypes()
-             .addAllCommandHandlingTypes(commandHandlingTypes);
+        final Set<String> commandHandlingTypes = newTreeSet(commandHandlers.getCommandHandlingTypesList());
+        commandHandlers.clearCommandHandlingTypes()
+                       .addAllCommandHandlingTypes(commandHandlingTypes);
     }
 
     /**
@@ -169,22 +169,22 @@ public class AssignLookup extends SpineAnnotationProcessor {
     }
 
     /**
-     * Reads the existing {@link SpineModel} from the given file.
+     * Reads the existing {@link CommandHandlers} from the given file.
      *
      * <p>The given file should exist.
      *
      * <p>If the given file is empty,
-     * the {@link SpineModel#getDefaultInstance() SpineModel.getDefaultInstance()} is returned.
+     * the {@link CommandHandlers#getDefaultInstance() CommandHandlers.getDefaultInstance()} is returned.
      *
-     * @param file an existing file with a {@link SpineModel} message
-     * @return the read model
+     * @param file an existing file with a {@link CommandHandlers} message
+     * @return the read commandHandlers
      */
-    private static SpineModel readExisting(File file) {
+    private static CommandHandlers readExisting(File file) {
         if (file.length() == 0) {
-            return SpineModel.getDefaultInstance();
+            return CommandHandlers.getDefaultInstance();
         } else {
             try (InputStream in = new FileInputStream(file)) {
-                final SpineModel preexistingModel = SpineModel.parseFrom(in);
+                final CommandHandlers preexistingModel = CommandHandlers.parseFrom(in);
                 return preexistingModel;
             } catch (IOException e) {
                 throw new IllegalStateException(e);

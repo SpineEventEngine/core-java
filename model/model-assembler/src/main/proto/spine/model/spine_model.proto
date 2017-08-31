@@ -26,17 +26,12 @@ import "spine/options.proto";
 option (type_url_prefix) = "type.spine.io";
 option java_generate_equals_and_hash = false;
 option java_multiple_files = true;
-option java_outer_classname = "SpineModelProto";
+option java_outer_classname = "CommandHandlersProto";
 option java_package = "io.spine.model";
 
-// The Spine type model.
+// The command handling types of a project.
 //
-// This message represents raw (i.e. non-typed) model of a Spine project.
-//
-// The message contains the type names of the Spine core entities found in a Spine project (not
-// necessarily grouped by the entity kind).
-//
-message SpineModel {
+message CommandHandlers {
 
     // All the command handling types of a Spine project.
     //
@@ -46,5 +41,5 @@ message SpineModel {
     //
     repeated string command_handling_types = 1;
 
-    reserved 2 to 64; // For future Spine model coverage.
+    reserved 2 to 5;
 }

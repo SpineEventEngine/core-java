@@ -22,7 +22,7 @@ package io.spine.model.verify;
 
 import com.google.common.base.Function;
 import com.google.common.io.Files;
-import io.spine.model.SpineModel;
+import io.spine.model.CommandHandlers;
 import io.spine.model.verify.given.ModelVerifierTestEnv;
 import io.spine.server.model.DuplicateCommandHandlerError;
 import org.gradle.api.Project;
@@ -78,7 +78,7 @@ public class ModelVerifierShould {
         final String commandHandlerTypeName = ModelVerifierTestEnv.AnyCommandHandler.class.getName();
         final String aggregateTypeName = ModelVerifierTestEnv.Int32HandlerAggregate.class.getName();
         final String procManTypeName = ModelVerifierTestEnv.Int64HandlerProcMan.class.getName();
-        final SpineModel spineModel = SpineModel.newBuilder()
+        final CommandHandlers spineModel = CommandHandlers.newBuilder()
                                                 .addCommandHandlingTypes(commandHandlerTypeName)
                                                 .addCommandHandlingTypes(aggregateTypeName)
                                                 .addCommandHandlingTypes(procManTypeName)
@@ -92,7 +92,7 @@ public class ModelVerifierShould {
         final String firstType = ModelVerifierTestEnv.AnyCommandHandler.class.getName();
         final String secondType = ModelVerifierTestEnv.DuplicateAnyCommandHandler.class.getName();
 
-        final SpineModel spineModel = SpineModel.newBuilder()
+        final CommandHandlers spineModel = CommandHandlers.newBuilder()
                                                 .addCommandHandlingTypes(firstType)
                                                 .addCommandHandlingTypes(secondType)
                                                 .build();
@@ -102,7 +102,7 @@ public class ModelVerifierShould {
     @Test(expected = IllegalStateException.class)
     public void not_accept_invalid_class_names() {
         final String invalidClassname = "non.existing.class.Name";
-        final SpineModel spineModel = SpineModel.newBuilder()
+        final CommandHandlers spineModel = CommandHandlers.newBuilder()
                                                 .addCommandHandlingTypes(invalidClassname)
                                                 .build();
         new ModelVerifier(project).verify(spineModel);
@@ -111,7 +111,7 @@ public class ModelVerifierShould {
     @Test(expected = IllegalArgumentException.class)
     public void not_accept_non_command_handler_types() {
         final String invalidClassname = ModelVerifierShould.class.getName();
-        final SpineModel spineModel = SpineModel.newBuilder()
+        final CommandHandlers spineModel = CommandHandlers.newBuilder()
                                                 .addCommandHandlingTypes(invalidClassname)
                                                 .build();
         new ModelVerifier(project).verify(spineModel);

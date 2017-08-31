@@ -22,7 +22,7 @@ package io.spine.model.verify;
 
 import io.spine.annotation.Experimental;
 import io.spine.gradle.SpinePlugin;
-import io.spine.model.SpineModel;
+import io.spine.model.CommandHandlers;
 import io.spine.model.assemble.AssignLookup;
 import org.gradle.api.Action;
 import org.gradle.api.Project;
@@ -80,12 +80,12 @@ public final class ModelVerifierPlugin extends SpinePlugin {
     }
 
     /**
-     * Verifies the {@link SpineModel} upon the {@linkplain Project Gradle project}.
+     * Verifies the {@link CommandHandlers} upon the {@linkplain Project Gradle project}.
      *
      * @param model   the Spine model to process
      * @param project the Gradle project to process the model upon
      */
-    private static void verifyModel(SpineModel model, Project project) {
+    private static void verifyModel(CommandHandlers model, Project project) {
         final ModelVerifier verifier = new ModelVerifier(project);
         verifier.verify(model);
     }
@@ -95,7 +95,7 @@ public final class ModelVerifierPlugin extends SpinePlugin {
      *
      * <p>The action is executed only if the passed {@code rawModelPath} is present.
      *
-     * <p>Reads the {@link SpineModel} from the given file and {@linkplain #verifyModel processes}
+     * <p>Reads the {@link CommandHandlers} from the given file and {@linkplain #verifyModel processes}
      * the model.
      */
     private static class VerifierAction implements Action<Task> {
@@ -113,9 +113,9 @@ public final class ModelVerifierPlugin extends SpinePlugin {
                            rawModelPath);
                 return;
             }
-            final SpineModel model;
+            final CommandHandlers model;
             try (InputStream in = newInputStream(rawModelPath, StandardOpenOption.READ)) {
-                model = SpineModel.parseFrom(in);
+                model = CommandHandlers.parseFrom(in);
             } catch (IOException e) {
                 throw new IllegalStateException(e);
             }

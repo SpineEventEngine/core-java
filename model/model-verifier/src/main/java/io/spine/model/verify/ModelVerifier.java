@@ -23,7 +23,7 @@ package io.spine.model.verify;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import io.spine.gradle.ProjectHierarchy;
-import io.spine.model.SpineModel;
+import io.spine.model.CommandHandlers;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.model.Model;
@@ -79,7 +79,7 @@ final class ModelVerifier {
             "IfStatementWithTooManyBranches", // OK in this case.
             "unchecked" // Checked by the `if` statements
     })
-    void verify(SpineModel spineModel) {
+    void verify(CommandHandlers spineModel) {
         for (String commandHandlingClass : spineModel.getCommandHandlingTypesList()) {
             final Class<?> cls;
             try {
