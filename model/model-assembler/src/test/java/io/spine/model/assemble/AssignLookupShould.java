@@ -18,28 +18,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.model;
+package io.spine.model.assemble;
 
-import com.google.protobuf.Any;
-import com.google.protobuf.UInt64Value;
-import io.spine.server.aggregate.Aggregate;
-import io.spine.server.command.Assign;
-import io.spine.validate.AnyVBuilder;
+import org.junit.Test;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.Set;
+
+import static org.hamcrest.Matchers.contains;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 /**
  * @author Dmytro Dashenkov
  */
-public class MalformedAggregate extends Aggregate<String, Any, AnyVBuilder> {
+public class AssignLookupShould extends SpineAnnotationProcessorShould {
 
-    protected MalformedAggregate(String id) {
-        super(id);
+    @Override
+    protected SpineAnnotationProcessor processor() {
+        return new AssignLookup();
     }
 
-    @Assign
-    public List<UInt64Value> handle() {
-        return Collections.emptyList();
+    @Test
+    public void support_spineDirRoot_option() {
+        final Set<String> opts = processor().getSupportedOptions();
+        assertEquals(1, opts.size());
+        assertThat(opts, contains(AssignLookup.OUTPUT_OPTION_NAME));
     }
 }

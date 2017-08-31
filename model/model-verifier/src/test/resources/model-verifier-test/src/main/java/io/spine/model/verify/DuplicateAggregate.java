@@ -18,30 +18,39 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.model;
+package io.spine.model.verify;
 
-import org.junit.Test;
+import com.google.protobuf.Any;
+import com.google.protobuf.UInt64Value;
+import io.spine.server.aggregate.Aggregate;
+import io.spine.server.command.Assign;
+import io.spine.validate.AnyVBuilder;
 
-import java.util.Set;
+import java.util.List;
 
-import static org.hamcrest.Matchers.contains;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static java.util.Collections.singletonList;
 
 /**
  * @author Dmytro Dashenkov
  */
-public class AssignLookupShould extends SpineAnnotationProcessorShould {
+public class DuplicateAggregate extends Aggregate<String, Any, AnyVBuilder> {
 
-    @Override
-    protected SpineAnnotationProcessor processor() {
-        return new AssignLookup();
+    protected DuplicateAggregate(String id) {
+        super(id);
     }
 
-    @Test
-    public void support_spineDirRoot_option() {
-        final Set<String> opts = processor().getSupportedOptions();
-        assertEquals(1, opts.size());
-        assertThat(opts, contains(AssignLookup.OUTPUT_OPTION_NAME));
+    @Assign
+    public List<UInt64Value> handle(UInt64Value command) {
+        return singletonList(command);
+    }
+
+    @Assign
+    public List<Any> on(Any command) {
+        return singletonList(command);
+    }
+
+    @Assign
+    public void oneMore(Any cmd) {
+        // NoOp for test
     }
 }

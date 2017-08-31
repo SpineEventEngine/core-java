@@ -18,10 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.model;
+package io.spine.model.verify;
 
 import io.spine.annotation.Experimental;
 import io.spine.gradle.SpinePlugin;
+import io.spine.model.SpineModel;
+import io.spine.model.assemble.AssignLookup;
 import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.Task;

@@ -18,26 +18,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.model;
-
-import io.spine.server.aggregate.Aggregate;
-import io.spine.server.command.Assign;
-import io.spine.validate.AnyVBuilder;
+package io.spine.model.verify;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.Message;
+import com.google.protobuf.UInt32Value;
+import io.spine.server.command.Assign;
+import io.spine.server.command.CommandHandler;
+import io.spine.server.event.EventBus;
+import io.spine.validate.AnyVBuilder;
 
-import java.util.Collections;
 import java.util.List;
 
-class TestAggregate extends Aggregate<String, Any, AnyVBuilder> {
+import static java.util.Collections.singletonList;
 
-    public TestAggregate(String id) {
-        super(id);
+/**
+ * @author Dmytro Dashenkov
+ */
+public class TestCommandHandler extends CommandHandler {
+
+    protected TestCommandHandler(EventBus eventBus) {
+        super(eventBus);
     }
 
     @Assign
-    List<Message> handle(Any command) {
-        return Collections.emptyList();
+    public List<UInt32Value> handle(UInt32Value command) {
+        return singletonList(command);
     }
 }

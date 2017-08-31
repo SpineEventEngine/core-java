@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.model;
+package io.spine.model.verify;
 
 import io.spine.gradle.GradleProject;
 import io.spine.gradle.TaskName;
@@ -41,23 +41,25 @@ import static org.junit.Assert.assertNotNull;
 public class ModelVerifierPluginShould {
 
     private static final String PROJECT_NAME = "model-verifier-test";
+    private static final String COMPILING_TEST_ENTITY_PATH =
+            "io/spine/model/verify/TestAggregate.java";
 
     @Rule
     public final TemporaryFolder testProjectDir = new TemporaryFolder();
 
     @Test
     public void pass_valid_model_classes() {
-        newProjectWithJava("io/spine/model/TestAggregate.java",
-                           "io/spine/model/TestProcMan.java",
-                           "io/spine/model/TestCommandHandler.java")
+        newProjectWithJava(COMPILING_TEST_ENTITY_PATH,
+                           "io/spine/model/verify/TestProcMan.java",
+                           "io/spine/model/verify/TestCommandHandler.java")
                 .executeTask(VERIFY_MODEL);
     }
 
     @Test
     public void halt_build_on_duplicate_command_handling_methods() {
         final BuildResult result = newProjectWithJava(
-                "io/spine/model/DuplicateAggregate.java",
-                "io/spine/model/DuplicateCommandHandler.java")
+                "io/spine/model/verify/DuplicateAggregate.java",
+                "io/spine/model/verify/DuplicateCommandHandler.java")
                 .executeAndFail(VERIFY_MODEL);
         final BuildTask task = result.task(toPath(VERIFY_MODEL));
         assertNotNull(task);
@@ -67,7 +69,7 @@ public class ModelVerifierPluginShould {
 
     @Test
     public void ignore_duplicate_entries() {
-        final GradleProject project = newProjectWithJava("io/spine/model/TestAggregate.java");
+        final GradleProject project = newProjectWithJava(COMPILING_TEST_ENTITY_PATH);
         project.executeTask(VERIFY_MODEL);
         project.executeTask(VERIFY_MODEL);
     }
@@ -77,7 +79,7 @@ public class ModelVerifierPluginShould {
     @Test
     public void halt_build_on_malformed_command_handling_methods() {
         final BuildResult result =
-                newProjectWithJava("io/spine/model/MalformedAggregate.java")
+                newProjectWithJava("io/spine/model/verify/MalformedAggregate.java")
                 .executeAndFail(VERIFY_MODEL);
         final BuildTask task = result.task(toPath(VERIFY_MODEL));
         assertNotNull(task);

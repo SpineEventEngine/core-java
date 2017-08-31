@@ -18,11 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.model;
+package io.spine.model.verify;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import io.spine.gradle.ProjectHierarchy;
+import io.spine.model.SpineModel;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.model.Model;

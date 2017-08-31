@@ -46,7 +46,7 @@ repositories {
 }
 
 compileJava {
-    options.compilerArgs += ["-processor", "io.spine.model.AssignLookup", "-AspineDirRoot=${rootDir}"]
+    options.compilerArgs += ["-processor", "io.spine.model.assemble.AssignLookup", "-AspineDirRoot=${rootDir}"]
 }
 
 dependencies {

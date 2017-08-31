@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.model.given;
+package io.spine.model.verify.given;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Int32Value;

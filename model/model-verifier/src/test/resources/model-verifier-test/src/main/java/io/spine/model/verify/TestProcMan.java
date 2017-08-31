@@ -18,12 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.model;
+package io.spine.model.verify;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.UInt64Value;
-import io.spine.server.aggregate.Aggregate;
 import io.spine.server.command.Assign;
+import io.spine.server.procman.ProcessManager;
 import io.spine.validate.AnyVBuilder;
 
 import java.util.List;
@@ -33,9 +33,9 @@ import static java.util.Collections.singletonList;
 /**
  * @author Dmytro Dashenkov
  */
-public class DuplicateCommandHandler extends Aggregate<String, Any, AnyVBuilder> {
+public class TestProcMan extends ProcessManager<String, Any, AnyVBuilder> {
 
-    protected DuplicateCommandHandler(String id) {
+    protected TestProcMan(String id) {
         super(id);
     }
 
@@ -45,7 +45,7 @@ public class DuplicateCommandHandler extends Aggregate<String, Any, AnyVBuilder>
     }
 
     @Assign
-    public List<Any> onCommandAny(Any command) {
-        return singletonList(command);
+    public void handle(Any cmd) {
+        // NoOp for test
     }
 }

@@ -18,11 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.model;
+package io.spine.model.verify;
 
 import com.google.common.base.Function;
 import com.google.common.io.Files;
-import io.spine.model.given.Given;
+import io.spine.model.SpineModel;
+import io.spine.model.verify.given.Given;
 import io.spine.server.model.DuplicateCommandHandlerError;
 import org.gradle.api.Project;
 import org.gradle.api.tasks.TaskCollection;

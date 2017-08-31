@@ -18,10 +18,28 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * This package provides common types for analyzing Spine model at compile time.
- */
-@ParametersAreNonnullByDefault
-package io.spine.model;
+package io.spine.model.verify;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+import com.google.protobuf.Any;
+import com.google.protobuf.UInt64Value;
+import io.spine.server.aggregate.Aggregate;
+import io.spine.server.command.Assign;
+import io.spine.validate.AnyVBuilder;
+
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * @author Dmytro Dashenkov
+ */
+public class MalformedAggregate extends Aggregate<String, Any, AnyVBuilder> {
+
+    protected MalformedAggregate(String id) {
+        super(id);
+    }
+
+    @Assign
+    public List<UInt64Value> handle() {
+        return Collections.emptyList();
+    }
+}

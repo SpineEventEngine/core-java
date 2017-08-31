@@ -18,10 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.model;
+package io.spine.model.assemble;
 
 import com.google.common.annotations.VisibleForTesting;
 import io.spine.annotation.Internal;
+import io.spine.model.SpineModel;
 import io.spine.server.command.Assign;
 
 import javax.lang.model.element.Element;
