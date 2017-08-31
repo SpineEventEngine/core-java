@@ -22,6 +22,7 @@ package io.spine.server.entity;
 
 import com.google.common.collect.Lists;
 import com.google.common.testing.NullPointerTester;
+import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import io.spine.option.EntityOption.Visibility;
 import io.spine.server.BoundedContext;
@@ -38,6 +39,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import javax.persistence.Column;
 import java.util.List;
 import java.util.Set;
 
@@ -121,10 +123,15 @@ public class VisibilityGuardShould {
     public void do_not_allow_double_registration() {
         register(new ExposedRepository());
     }
-    
+
     @Test(expected = IllegalArgumentException.class)
     public void reject_unregistered_state_class() {
         guard.getRepository(Empty.class);
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void cache_entity_columns_on_registration() {
+        guard.register(new RepositoryForInvalidEntity());
     }
 
     @Test
@@ -173,5 +180,28 @@ public class VisibilityGuardShould {
         private HiddenRepository() {
             super();
         }
+    }
+
+    private static class EntityWithInvalidColumns extends AbstractVersionableEntity<String, Any> {
+
+        private static final String COLUMN_NAME = "columnNameFromAnnotation";
+
+        private EntityWithInvalidColumns(String id) {
+            super(id);
+        }
+
+        @Column(name = COLUMN_NAME)
+        public int getInt() {
+            return 0;
+        }
+
+        @Column(name = COLUMN_NAME)
+        public long getLong() {
+            return 0L;
+        }
+    }
+
+    private static class RepositoryForInvalidEntity
+            extends DefaultRecordBasedRepository<String, EntityWithInvalidColumns, Any> {
     }
 }

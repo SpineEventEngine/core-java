@@ -22,7 +22,9 @@ package io.spine.server.entity.storage;
 
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
+import io.spine.annotation.Internal;
 import io.spine.server.entity.Entity;
+import io.spine.server.entity.EntityClass;
 import io.spine.server.entity.storage.Column.MemoizedValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,7 +67,8 @@ import static java.lang.String.format;
  * @author Dmytro Dashenkov
  * @see Column
  */
-class Columns {
+@Internal
+public class Columns {
 
     private static final String SPINE_PACKAGE = "io.spine.";
     private static final String NON_PUBLIC_CLASS_WARNING =
@@ -85,6 +88,15 @@ class Columns {
 
     private Columns() {
         // Prevent initialization of a utility class
+    }
+
+    /**
+     * Ensures that the entity columns are valid for the specified entity class and caches them.
+     *
+     * @param entityClass the class to check entity columns
+     */
+    public static void checkColumnDefinitions(EntityClass<?> entityClass) {
+        ensureRegistered(entityClass.value());
     }
 
     /**

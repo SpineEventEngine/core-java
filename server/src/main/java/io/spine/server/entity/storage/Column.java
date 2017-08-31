@@ -58,7 +58,8 @@ import static java.lang.reflect.Modifier.isStatic;
  *
  * <p>You can specify a custom name for a column via the annotation
  * {@linkplain javax.persistence.Column#name() property}. If the property is empty,
- * column name will be obtained from the getter (e.g. {@code getValue()} -> {@code value}).
+ * column name will be obtained from the getter
+ * (e.g. {@code getValue()} -{@literal >} {@code value}).
  *
  * <h2>Examples</h2>
  *
