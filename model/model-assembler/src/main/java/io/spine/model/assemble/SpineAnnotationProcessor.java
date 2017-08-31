@@ -21,6 +21,7 @@
 package io.spine.model.assemble;
 
 import com.google.common.base.Optional;
+import io.spine.annotation.SPI;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Messager;
@@ -55,6 +56,7 @@ import static javax.tools.Diagnostic.Kind.WARNING;
  *
  * @author Dmytro Dashenkov
  */
+@SPI
 public abstract class SpineAnnotationProcessor extends AbstractProcessor {
 
     @SuppressWarnings("FieldAccessedSynchronizedAndUnsynchronized")

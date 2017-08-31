@@ -47,7 +47,7 @@ import static java.nio.file.Files.newInputStream;
  * @author Dmytro Dashenkov
  */
 @Experimental
-public class ModelVerifierPlugin extends SpinePlugin {
+public final class ModelVerifierPlugin extends SpinePlugin {
 
     private static final String RELATIVE_RAW_MODEL_PATH = AssignLookup.DESTINATION_PATH;
 

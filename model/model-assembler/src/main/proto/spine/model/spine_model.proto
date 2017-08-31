@@ -42,7 +42,7 @@ message SpineModel {
     //
     // Each type is represented with its Java FQN.
     //
-    // These types include `Aggregete`s, `ProcessManager`s and `CommandHandler`s.
+    // These types include `Aggregate`s, `ProcessManager`s and `CommandHandler`s.
     //
     repeated string command_handling_types = 1;
 
