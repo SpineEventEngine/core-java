@@ -36,15 +36,15 @@ import java.util.Collections;
 /**
  * @author Dmytro Dashenkov
  */
-public class Given {
+public class ModelVerifierTestEnv {
 
-    private Given() {
+    private ModelVerifierTestEnv() {
         // Prevent utility class instantiation.
     }
 
-    public static class TestCommandHandler extends CommandHandler {
+    public static class AnyCommandHandler extends CommandHandler {
 
-        protected TestCommandHandler(EventBus eventBus) {
+        protected AnyCommandHandler(EventBus eventBus) {
             super(eventBus);
         }
 
@@ -56,9 +56,9 @@ public class Given {
         }
     }
 
-    public static class TestAggregate extends Aggregate<String, Any, AnyVBuilder> {
+    public static class Int32HandlerAggregate extends Aggregate<String, Any, AnyVBuilder> {
 
-        protected TestAggregate(String id) {
+        protected Int32HandlerAggregate(String id) {
             super(id);
         }
 
@@ -70,9 +70,9 @@ public class Given {
         }
     }
 
-    public static class TestProcMan extends ProcessManager<String, Any, AnyVBuilder> {
+    public static class Int64HandlerProcMan extends ProcessManager<String, Any, AnyVBuilder> {
 
-        protected TestProcMan(String id) {
+        protected Int64HandlerProcMan(String id) {
             super(id);
         }
 
@@ -84,9 +84,9 @@ public class Given {
         }
     }
 
-    public static class DuplicateCommandHandler extends CommandHandler {
+    public static class DuplicateAnyCommandHandler extends CommandHandler {
 
-        protected DuplicateCommandHandler(EventBus eventBus) {
+        protected DuplicateAnyCommandHandler(EventBus eventBus) {
             super(eventBus);
         }
 

@@ -23,7 +23,7 @@ package io.spine.model.verify;
 import com.google.common.base.Function;
 import com.google.common.io.Files;
 import io.spine.model.SpineModel;
-import io.spine.model.verify.given.Given;
+import io.spine.model.verify.given.ModelVerifierTestEnv;
 import io.spine.server.model.DuplicateCommandHandlerError;
 import org.gradle.api.Project;
 import org.gradle.api.tasks.TaskCollection;
@@ -75,9 +75,9 @@ public class ModelVerifierShould {
 
         verify(project).getSubprojects();
 
-        final String commandHandlerTypeName = Given.TestCommandHandler.class.getName();
-        final String aggregateTypeName = Given.TestAggregate.class.getName();
-        final String procManTypeName = Given.TestProcMan.class.getName();
+        final String commandHandlerTypeName = ModelVerifierTestEnv.AnyCommandHandler.class.getName();
+        final String aggregateTypeName = ModelVerifierTestEnv.Int32HandlerAggregate.class.getName();
+        final String procManTypeName = ModelVerifierTestEnv.Int64HandlerProcMan.class.getName();
         final SpineModel spineModel = SpineModel.newBuilder()
                                                 .addCommandHandlingTypes(commandHandlerTypeName)
                                                 .addCommandHandlingTypes(aggregateTypeName)
@@ -89,8 +89,8 @@ public class ModelVerifierShould {
     @Test(expected = DuplicateCommandHandlerError.class)
     public void fail_on_duplicate_command_handlers() {
         final ModelVerifier verifier = new ModelVerifier(project);
-        final String firstType = Given.TestCommandHandler.class.getName();
-        final String secondType = Given.DuplicateCommandHandler.class.getName();
+        final String firstType = ModelVerifierTestEnv.AnyCommandHandler.class.getName();
+        final String secondType = ModelVerifierTestEnv.DuplicateAnyCommandHandler.class.getName();
 
         final SpineModel spineModel = SpineModel.newBuilder()
                                                 .addCommandHandlingTypes(firstType)
