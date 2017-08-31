@@ -6,3 +6,9 @@ include 'server'
 include 'testutil-core'
 include 'testutil-client'
 include 'testutil-server'
+
+include 'model-assembler'
+include 'model-verifier'
+
+project(':model-assembler').projectDir = './model/model-assembler' as File
+project(':model-verifier').projectDir = './model/model-verifier' as File
