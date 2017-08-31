@@ -23,6 +23,7 @@ package io.spine.server.entity.storage;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
 import io.spine.server.entity.Entity;
+import io.spine.server.entity.storage.Column.MemoizedValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,12 +43,13 @@ import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.common.collect.Multimaps.synchronizedListMultimap;
 import static io.spine.server.entity.storage.ColumnRecords.getAnnotatedVersion;
 import static io.spine.util.Exceptions.newIllegalStateException;
+import static io.spine.validate.Validate.checkNotEmptyOrBlank;
 import static java.lang.String.format;
 
 /**
  * A utility for generating the {@linkplain Column columns} {@linkplain Map}.
  *
- * <p>All the methods of the passed {@link Entity} that fit
+ * <p>The methods of all {@link Entity entities} that fit
  * <a href="http://download.oracle.com/otndocs/jcp/7224-javabeans-1.01-fr-spec-oth-JSpec/">
  * the Java Bean</a> getter spec and annotated with {@link javax.persistence.Column
  * javax.persistence.Column} are considered {@linkplain Column columns}.
@@ -96,10 +98,10 @@ class Columns {
      * @param entity an {@link Entity} to get the {@linkplain Column columns} from
      * @param <E>    the type of the {@link Entity}
      * @return a {@link Map} of the {@link Column Column} names to their
-     * {@linkplain Column.MemoizedValue memoized values}.
-     * @see Column.MemoizedValue
+     * {@linkplain MemoizedValue memoized values}.
+     * @see MemoizedValue
      */
-    static <E extends Entity<?, ?>> Map<String, Column.MemoizedValue> from(E entity) {
+    static <E extends Entity<?, ?>> Map<String, MemoizedValue> from(E entity) {
         checkNotNull(entity);
         final Class<? extends Entity> entityType = entity.getClass();
         final int modifiers = entityType.getModifiers();
@@ -109,7 +111,7 @@ class Columns {
         }
         ensureRegistered(entityType);
 
-        final Map<String, Column.MemoizedValue> fields = extractColumns(entityType, entity);
+        final Map<String, MemoizedValue> fields = extractColumns(entityType, entity);
         return fields;
     }
 
@@ -128,7 +130,7 @@ class Columns {
      */
     static Column findColumn(Class<? extends Entity> entityClass, String columnName) {
         checkNotNull(entityClass);
-        checkNotNull(columnName);
+        checkNotEmptyOrBlank(columnName, "entity column name");
         ensureRegistered(entityClass);
 
         final Collection<Column> cachedColumns = getColumns(entityClass);
@@ -146,7 +148,7 @@ class Columns {
     }
 
     /**
-     * Retrieves a {@link Collection} of {@linkplain Column columns} from the given Entity class.
+     * Retrieves {@linkplain Column columns} for the given {@code Entity} class.
      *
      * @param entityClass the class containing the {@link Column} definition
      * @return a {@link Collection} of {@link Column} corresponded to entity class
@@ -167,17 +169,14 @@ class Columns {
      * @param entity     the object which to take the values from
      * @return a {@link Map} of the {@linkplain Column columns}
      */
-    private static Map<String, Column.MemoizedValue> extractColumns(
-            Class<? extends Entity> entityType,
-            Entity entity) {
-        final Collection<Column> storageFieldProperties =
-                knownEntityProperties.get(entityType);
-        final Map<String, Column.MemoizedValue> values =
-                new HashMap<>(storageFieldProperties.size());
+    private static Map<String, MemoizedValue> extractColumns(Class<? extends Entity> entityType,
+                                                             Entity entity) {
+        final Collection<Column> storageFieldProperties = knownEntityProperties.get(entityType);
+        final Map<String, MemoizedValue> values = new HashMap<>(storageFieldProperties.size());
 
         for (Column column : storageFieldProperties) {
             final String name = column.getName();
-            final Column.MemoizedValue value = column.memoizeFor(entity);
+            final MemoizedValue value = column.memoizeFor(entity);
             values.put(name, value);
         }
         return values;
@@ -211,18 +210,26 @@ class Columns {
                 entityColumns.add(column);
             }
         }
-        checkRepeatedColumnNames(entityColumns);
+        checkRepeatedColumnNames(entityColumns, entityType);
         knownEntityProperties.putAll(entityType, entityColumns);
     }
 
-    private static void checkRepeatedColumnNames(Iterable<Column> columns) {
-        final Collection<String> names = newLinkedList();
+    /**
+     * Ensures that the specified columns have no repeated names.
+     *
+     * @param columns     the columns to check
+     * @param entityClass the entity class for the columns
+     */
+    private static void checkRepeatedColumnNames(Iterable<Column> columns,
+                                                 Class<? extends Entity> entityClass) {
+        final Collection<String> checkedNames = newLinkedList();
         for (Column column : columns) {
             final String columnName = column.getName();
-            if (names.contains(columnName)) {
-                throw newIllegalStateException("The entity have columns with repeated names.");
+            if (checkedNames.contains(columnName)) {
+                final String errMsg = "The entity `%s` has columns with the same name `%s`.";
+                throw newIllegalStateException(errMsg, entityClass.getName(), columnName);
             }
-            names.add(columnName);
+            checkedNames.add(columnName);
         }
     }
 
