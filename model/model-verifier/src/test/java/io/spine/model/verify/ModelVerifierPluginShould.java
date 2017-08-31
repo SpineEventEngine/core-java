@@ -42,7 +42,7 @@ public class ModelVerifierPluginShould {
 
     private static final String PROJECT_NAME = "model-verifier-test";
     private static final String COMPILING_TEST_ENTITY_PATH =
-            "io/spine/model/verify/TestAggregate.java";
+            "io/spine/model/verify/ValidAggregate.java";
 
     @Rule
     public final TemporaryFolder testProjectDir = new TemporaryFolder();
@@ -50,8 +50,8 @@ public class ModelVerifierPluginShould {
     @Test
     public void pass_valid_model_classes() {
         newProjectWithJava(COMPILING_TEST_ENTITY_PATH,
-                           "io/spine/model/verify/TestProcMan.java",
-                           "io/spine/model/verify/TestCommandHandler.java")
+                           "io/spine/model/verify/ValidProcMan.java",
+                           "io/spine/model/verify/ValidCommandHandler.java")
                 .executeTask(VERIFY_MODEL);
     }
 

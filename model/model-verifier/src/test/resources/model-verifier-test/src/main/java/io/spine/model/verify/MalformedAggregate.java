@@ -30,6 +30,11 @@ import java.util.Collections;
 import java.util.List;
 
 /**
+ * An Aggregate with n invalid command handler method.
+ *
+ * <p>{@link #handle()} method has no arguments and is marked with {@link Assign}, which makes it
+ * an invalid command handler method.
+ *
  * @author Dmytro Dashenkov
  */
 public class MalformedAggregate extends Aggregate<String, Any, AnyVBuilder> {

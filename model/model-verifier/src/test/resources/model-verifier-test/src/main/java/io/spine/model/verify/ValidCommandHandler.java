@@ -32,11 +32,15 @@ import java.util.List;
 import static java.util.Collections.singletonList;
 
 /**
+ * A CommandHandler with a valid command handler method.
+ *
+ * <p>The command handler method handles command of type {@code UInt32Value}.
+ *
  * @author Dmytro Dashenkov
  */
-public class TestCommandHandler extends CommandHandler {
+public class ValidCommandHandler extends CommandHandler {
 
-    protected TestCommandHandler(EventBus eventBus) {
+    protected ValidCommandHandler(EventBus eventBus) {
         super(eventBus);
     }
 

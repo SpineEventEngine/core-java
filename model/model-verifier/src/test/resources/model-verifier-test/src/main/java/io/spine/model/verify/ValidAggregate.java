@@ -20,32 +20,31 @@
 
 package io.spine.model.verify;
 
-import com.google.protobuf.Any;
-import com.google.protobuf.UInt64Value;
+import io.spine.server.aggregate.Aggregate;
 import io.spine.server.command.Assign;
-import io.spine.server.procman.ProcessManager;
 import io.spine.validate.AnyVBuilder;
 
+import com.google.protobuf.Any;
+import com.google.protobuf.Message;
+
+import java.util.Collections;
 import java.util.List;
 
-import static java.util.Collections.singletonList;
-
 /**
+ * An Aggregate with a valid command handler method.
+ *
+ * <p>The command handler method handles command of type {@code Any}.
+ *
  * @author Dmytro Dashenkov
  */
-public class TestProcMan extends ProcessManager<String, Any, AnyVBuilder> {
+class ValidAggregate extends Aggregate<String, Any, AnyVBuilder> {
 
-    protected TestProcMan(String id) {
+    public ValidAggregate(String id) {
         super(id);
     }
 
     @Assign
-    public List<UInt64Value> handle(UInt64Value command) {
-        return singletonList(command);
-    }
-
-    @Assign
-    public void handle(Any cmd) {
-        // NoOp for test
+    List<Message> handle(Any command) {
+        return Collections.emptyList();
     }
 }

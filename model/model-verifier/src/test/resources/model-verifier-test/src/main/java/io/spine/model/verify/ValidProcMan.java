@@ -20,24 +20,40 @@
 
 package io.spine.model.verify;
 
-import io.spine.server.aggregate.Aggregate;
+import com.google.protobuf.Any;
+import com.google.protobuf.UInt64Value;
 import io.spine.server.command.Assign;
+import io.spine.server.procman.ProcessManager;
 import io.spine.validate.AnyVBuilder;
 
-import com.google.protobuf.Any;
-import com.google.protobuf.Message;
-
-import java.util.Collections;
 import java.util.List;
 
-class TestAggregate extends Aggregate<String, Any, AnyVBuilder> {
+import static java.util.Collections.singletonList;
 
-    public TestAggregate(String id) {
+/**
+ * A ProcessManager with a valid command handler method.
+ *
+ * <p>The command handler method handles command of types {@code UInt64Value}.
+ *
+ * <p>Also, the class defines a malformed command handler for {@code Any} type. The method is
+ * malformed as it returns nothing. Though, the Spine model verifier ignoores such methods. This
+ * behavior may change in future.
+ *
+ * @author Dmytro Dashenkov
+ */
+public class ValidProcMan extends ProcessManager<String, Any, AnyVBuilder> {
+
+    protected ValidProcMan(String id) {
         super(id);
     }
 
     @Assign
-    List<Message> handle(Any command) {
-        return Collections.emptyList();
+    public List<UInt64Value> handle(UInt64Value command) {
+        return singletonList(command);
+    }
+
+    @Assign
+    public void handle(Any cmd) {
+        // NoOp for test
     }
 }
