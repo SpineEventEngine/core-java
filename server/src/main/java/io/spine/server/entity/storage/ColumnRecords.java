@@ -95,8 +95,7 @@ public final class ColumnRecords {
     }
 
     /**
-     * Obtains the method version annotated with {@link javax.persistence.Column
-     * javax.persistence.Column} for the specified method.
+     * Obtains the method version annotated with {@link EntityColumn} for the specified method.
      *
      * <p>Scans the specified method, the methods with the same signature
      * from the super classes and interfaces.
@@ -108,7 +107,7 @@ public final class ColumnRecords {
      */
     static Optional<Method> getAnnotatedVersion(Method method) {
         final Set<Method> annotatedVersions = newHashSet();
-        if (method.isAnnotationPresent(javax.persistence.Column.class)) {
+        if (method.isAnnotationPresent(EntityColumn.class)) {
             annotatedVersions.add(method);
         }
         final Class<?> declaringClass = method.getDeclaringClass();
@@ -117,7 +116,7 @@ public final class ColumnRecords {
             final Optional<Method> optionalMethod = getMethodBySignature(ascendant, method);
             if (optionalMethod.isPresent()) {
                 final Method ascendantMethod = optionalMethod.get();
-                if (ascendantMethod.isAnnotationPresent(javax.persistence.Column.class)) {
+                if (ascendantMethod.isAnnotationPresent(EntityColumn.class)) {
                     annotatedVersions.add(ascendantMethod);
                 }
             }

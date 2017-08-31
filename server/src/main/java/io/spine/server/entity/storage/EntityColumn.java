@@ -18,20 +18,27 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity;
+package io.spine.server.entity.storage;
 
-import io.spine.server.entity.storage.EntityColumn;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * The contract for the test {@linkplain Entity entities} which serve for testing the subclasses of
- * {@link RecordBasedRepository}.
+ * An annotation, which is used to mark getters for entity columns.
  *
- * @author Dmytro Dashenkov
- * @see RecordBasedRepositoryShould
+ * @author Dmytro Grankin
  */
-public interface TestEntityWithStringColumn {
+@Target(METHOD)
+@Retention(RUNTIME)
+public @interface EntityColumn {
 
-    @SuppressWarnings("unused") // Reflective access
-    @EntityColumn
-    String getIdString();
+    /**
+     * (Optional) The name of the column to be persisted.
+     *
+     * Default value is a name extracted from a getter, e.g. {@code value} for {@code getValue()}.
+     */
+    String name() default "";
 }

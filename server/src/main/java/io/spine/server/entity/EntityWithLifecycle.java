@@ -22,10 +22,10 @@ package io.spine.server.entity;
 
 import com.google.common.base.Predicate;
 import com.google.protobuf.Message;
+import io.spine.server.entity.storage.EntityColumn;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 
 import javax.annotation.Nullable;
-import javax.persistence.Column;
 
 /**
  * An entity which has {@linkplain LifecycleFlags lifecycle flags}.
@@ -42,13 +42,13 @@ public interface EntityWithLifecycle<I, S extends Message> extends Entity<I, S> 
     /**
      * Shows if current instance is archived or not.
      */
-    @Column
+    @EntityColumn
     boolean isArchived();
 
     /**
      * Shows if current instance is deleted or not.
      */
-    @Column
+    @EntityColumn
     boolean isDeleted();
 
     /**

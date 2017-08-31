@@ -50,16 +50,10 @@ import static java.lang.reflect.Modifier.isStatic;
  * efficient for querying.
  *
  * <p>A Column is a value retrieved from an {@link Entity} getter,
- * which is marked with the {@linkplain javax.persistence.Column annotation}.
+ * which is marked as {@link EntityColumn}.
  *
  * <p>Columns are inherited (both from classes and from interfaces).
- * A getter for a column should be annotated with {@code @Column} only once,
- * i.e. in the place of its declaration.
- *
- * <p>You can specify a custom name for a column via the annotation
- * {@linkplain javax.persistence.Column#name() property}. If the property is empty,
- * column name will be obtained from the getter
- * (e.g. {@code getValue()} -{@literal >} {@code value}).
+ * A getter for a column should be annotated only once, i.e. in the place of its declaration.
  *
  * <h2>Examples</h2>
  *
@@ -69,7 +63,7 @@ import static java.lang.reflect.Modifier.isStatic;
  *
  *         --UserGroupAggregate.java--
  *
- *         \@Column
+ *         \@EntityColumn
  *         public int getUserCount() {
  *             return getState().getUserCount();
  *         }
@@ -77,7 +71,7 @@ import static java.lang.reflect.Modifier.isStatic;
  *         --PaymentProcessManager.java--
  *
  *         \@Nullable
- *         \@Column
+ *         \@EntityColumn
  *         public Date getPaymentSystemName() {
  *             if (getState().hasExpirationDate()) {
  *                 return new Date();
@@ -93,23 +87,23 @@ import static java.lang.reflect.Modifier.isStatic;
  *      {@code
  *         --UserAggregate.java--
  *
- *         // only methods annotated with @javax.persistence.Column may be considered Columns
+ *         // only methods annotated with @EntityColumn may be considered Columns
  *         public Department getDepartment() { ... }
  *
  *         // non-public methods may not represent Columns
- *         \@Column
+ *         \@EntityColumn
  *         private double getHourRate() { ... }
  *
  *         // only methods starting with "get" or "is" may be considered Columns
- *         \@Column
+ *         \@EntityColumn
  *         public boolean hasChildren() { ... }
  *
  *         // getter methods must not accept arguments
- *         \@Column
+ *         \@EntityColumn
  *         public User getStateOf(UserAggregate other) { ... }
  *
  *         // only instance methods are considered Columns
- *         \@Column
+ *         \@EntityColumn
  *         public static Integer isNew(UserAggregate aggregate) { ... }
  *      }
  * </pre>
@@ -144,7 +138,7 @@ import static java.lang.reflect.Modifier.isStatic;
  *         --EmployeeProjection.java--
  *
  *         // method should be annotated as @Nullable to return a null value
- *         \@Column
+ *         \@EntityColumn
  *         public Message getAddress() {
  *             return null;
  *         }
@@ -237,7 +231,7 @@ public class Column implements Serializable {
             throw newIllegalStateException("Method `%s` is not an entity column getter.", getter);
         }
         final Method annotatedVersion = optionalMethod.get();
-        final String name = annotatedVersion.getAnnotation(javax.persistence.Column.class)
+        final String name = annotatedVersion.getAnnotation(EntityColumn.class)
                                             .name();
         return name.isEmpty()
                 ? Optional.<String>absent()
@@ -255,7 +249,8 @@ public class Column implements Serializable {
                                            .find() && getter.getParameterTypes().length == 0,
                       "Method `%s` is not a getter.", getter);
         checkArgument(getAnnotatedVersion(getter).isPresent(),
-                      "Entity column getter should be annotated with `javax.persistence.Column`.");
+                      "Entity column getter should be annotated with " +
+                              "`io.spine.server.entity.storage.EntityColumn`.");
         final int modifiers = getter.getModifiers();
         checkArgument(isPublic(modifiers) && !isStatic(modifiers),
                       "Entity column getter should be public instance method.");

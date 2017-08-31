@@ -28,6 +28,7 @@ import io.spine.option.EntityOption.Visibility;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
+import io.spine.server.entity.storage.EntityColumn;
 import io.spine.test.entity.FullAccessAggregate;
 import io.spine.test.entity.FullAccessAggregateVBuilder;
 import io.spine.test.entity.HiddenAggregate;
@@ -39,7 +40,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.persistence.Column;
 import java.util.List;
 import java.util.Set;
 
@@ -92,7 +92,8 @@ public class VisibilityGuardShould {
 
     @Test
     public void deny_access_to_invisible_repos() {
-        assertFalse(guard.getRepository(HiddenAggregate.class).isPresent());
+        assertFalse(guard.getRepository(HiddenAggregate.class)
+                         .isPresent());
     }
 
     @Test
@@ -190,12 +191,12 @@ public class VisibilityGuardShould {
             super(id);
         }
 
-        @Column(name = COLUMN_NAME)
+        @EntityColumn(name = COLUMN_NAME)
         public int getInt() {
             return 0;
         }
 
-        @Column(name = COLUMN_NAME)
+        @EntityColumn(name = COLUMN_NAME)
         public long getLong() {
             return 0L;
         }

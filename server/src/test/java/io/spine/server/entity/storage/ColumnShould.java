@@ -220,7 +220,7 @@ public class ColumnShould {
             super(id);
         }
 
-        @javax.persistence.Column
+        @EntityColumn
         public int getMutableState() {
             return mutableState;
         }
@@ -229,33 +229,33 @@ public class ColumnShould {
             this.mutableState = mutableState;
         }
 
-        @javax.persistence.Column
+        @EntityColumn
         public String getNotNull() {
             return null;
         }
 
         @Nullable
-        @javax.persistence.Column
+        @EntityColumn
         public String getNull() {
             return null;
         }
 
-        @javax.persistence.Column
+        @EntityColumn
         public long getLong() {
             return 0;
         }
 
-        @javax.persistence.Column
+        @EntityColumn
         private long getFortyTwoLong() {
             return 42L;
         }
 
-        @javax.persistence.Column
+        @EntityColumn
         public String getParameter(String param) {
             return param;
         }
 
-        @javax.persistence.Column
+        @EntityColumn
         public static String getStatic() {
             return "";
         }
@@ -267,7 +267,7 @@ public class ColumnShould {
         }
 
         // non-serializable Entity Column
-        @javax.persistence.Column
+        @EntityColumn
         public Object getFoo() {
             fail("Invoked a getter for a non-serializable Entity Column BrokenTestEntity.foo");
             return new Object();
@@ -279,7 +279,7 @@ public class ColumnShould {
             super(id);
         }
 
-        @javax.persistence.Column(name = CUSTOM_COLUMN_NAME)
+        @EntityColumn(name = CUSTOM_COLUMN_NAME)
         public int getValue() {
             return 0;
         }
@@ -290,7 +290,7 @@ public class ColumnShould {
             super(id);
         }
 
-        @javax.persistence.Column
+        @EntityColumn
         @Override
         public int getValue() {
             return super.getValue();
@@ -302,7 +302,7 @@ public class ColumnShould {
             super(id);
         }
 
-        @javax.persistence.Column(name = INVALID_COLUMN_NAME)
+        @EntityColumn(name = INVALID_COLUMN_NAME)
         public int getValue() {
             return 0;
         }

@@ -43,6 +43,7 @@ import io.spine.server.entity.EventPlayingEntity;
 import io.spine.server.entity.FieldMasks;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.TestTransaction;
+import io.spine.server.entity.storage.EntityColumn;
 import io.spine.server.entity.storage.EntityQueries;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
@@ -54,7 +55,6 @@ import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 
 import javax.annotation.Nullable;
-import javax.persistence.Column;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -527,45 +527,45 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
             super(id);
         }
 
-        @Column
+        @EntityColumn
         public int getCounter() {
             counter++;
             return counter;
         }
 
-        @Column
+        @EntityColumn
         public long getBigCounter() {
             return getCounter();
         }
 
-        @Column
+        @EntityColumn
         public boolean isCounterEven() {
             return counter % 2 == 0;
         }
 
-        @Column
+        @EntityColumn
         public String getCounterName() {
             return getId().toString();
         }
 
-        @Column
+        @EntityColumn
         public Version getCounterVersion() {
             return Version.newBuilder()
                           .setNumber(counter)
                           .build();
         }
 
-        @Column
+        @EntityColumn
         public Timestamp getNow() {
             return Time.getCurrentTime();
         }
 
-        @Column
+        @EntityColumn
         public Project getCounterState() {
             return getState();
         }
 
-        @Column
+        @EntityColumn
         public int getProjectStatusValue() {
             return getState().getStatusValue();
         }

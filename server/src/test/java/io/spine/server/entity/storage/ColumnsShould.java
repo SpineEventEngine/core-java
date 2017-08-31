@@ -184,33 +184,33 @@ public class ColumnsShould {
             super(id);
         }
 
-        @javax.persistence.Column
+        @EntityColumn
         public int getIntegerFieldValue() {
             return 0;
         }
 
         @Nullable
-        @javax.persistence.Column
+        @EntityColumn
         public Float getFloatNull() {
             return null;
         }
 
-        @javax.persistence.Column
+        @EntityColumn
         public Project getSomeMessage() {
             return someMessage;
         }
 
-        @javax.persistence.Column
+        @EntityColumn
         int getSomeNonPublicMethod() {
             throw new AssertionError("getSomeNonPublicMethod invoked");
         }
 
-        @javax.persistence.Column
+        @EntityColumn
         public void getSomeVoid() {
             throw new AssertionError("getSomeVoid invoked");
         }
 
-        @javax.persistence.Column
+        @EntityColumn
         public static int getStaticMember() {
             return 1024;
         }
@@ -251,12 +251,12 @@ public class ColumnsShould {
             super(id);
         }
 
-        @javax.persistence.Column
+        @EntityColumn
         public Timestamp getSomeTime() {
             return Time.getCurrentTime();
         }
 
-        @javax.persistence.Column
+        @EntityColumn
         public boolean isVisible() {
             return true;
         }
@@ -266,7 +266,7 @@ public class ColumnsShould {
     public interface InterfaceWithEntityColumn {
 
         // The column annotation from the interface should be taken into account.
-        @javax.persistence.Column
+        @EntityColumn
         int getIntegerFieldValue();
     }
 
@@ -289,12 +289,12 @@ public class ColumnsShould {
             super(id);
         }
 
-        @javax.persistence.Column(name = CUSTOM_COLUMN_NAME)
+        @EntityColumn(name = CUSTOM_COLUMN_NAME)
         public int getValue() {
             return 0;
         }
 
-        @javax.persistence.Column(name = CUSTOM_COLUMN_NAME)
+        @EntityColumn(name = CUSTOM_COLUMN_NAME)
         public long getLongValue() {
             return 0;
         }
