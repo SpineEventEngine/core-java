@@ -20,8 +20,6 @@
 
 package io.spine.server.entity.storage;
 
-import io.spine.server.entity.Repository;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
@@ -40,7 +38,8 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  *
  * <p>If there are repeated column names within an {@code Entity},
  * the exception will be raised on a repository
- * {@linkplain io.spine.server.BoundedContext#register(Repository) registration} for the entity.
+ * {@linkplain io.spine.server.BoundedContext#register(io.spine.server.entity.Repository)
+ * registration} for the entity.
  *
  * @author Dmytro Grankin
  */
