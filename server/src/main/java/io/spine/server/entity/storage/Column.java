@@ -156,9 +156,7 @@ public class Column implements Serializable {
     private static final long serialVersionUID = 0L;
 
     private static final String GETTER_PREFIX_REGEX = "(get)|(is)";
-    private static final String ALLOWED_NAME_REGEX = "^[0-9a-zA-Z$_]*$";
     private static final Pattern GETTER_PREFIX_PATTERN = Pattern.compile(GETTER_PREFIX_REGEX);
-    private static final Pattern ALLOWED_NAME_PATTERN = Pattern.compile(ALLOWED_NAME_REGEX);
 
     /**
      * <p>The getter which declares this {@code Column}.
@@ -183,13 +181,16 @@ public class Column implements Serializable {
 
     private final String name;
 
+    private final String storedName;
+
     private final boolean nullable;
 
-    private Column(Method getter, String name, boolean nullable) {
+    private Column(Method getter, String name, String storedName, boolean nullable) {
         this.getter = getter;
         this.entityType = getter.getDeclaringClass();
         this.getterMethodName = getter.getName();
         this.name = name;
+        this.storedName = storedName;
         this.nullable = nullable;
     }
 
@@ -200,29 +201,14 @@ public class Column implements Serializable {
      * @return new instance of the {@code Column} reflecting the given property
      */
     public static Column from(Method getter) {
-        checkNotNull(getter);
         checkGetter(getter);
-        final String name = columnName(getter);
-        final boolean nullable = getter.isAnnotationPresent(Nullable.class);
-        final Column result = new Column(getter, name, nullable);
-
-        return result;
-    }
-
-    private static String columnName(Method getter) {
+        final String nameForQuery = nameFromGetter(getter);
         final Optional<String> nameFromAnnotation = nameFromAnnotation(getter);
-        if (nameFromAnnotation.isPresent()) {
-            final String name = nameFromAnnotation.get();
-            final boolean isValidName = ALLOWED_NAME_PATTERN.matcher(name)
-                                                            .matches();
-            if (!isValidName) {
-                final String errMsg = "The entity column name `%s` is invalid. " +
-                        "The column getter: `%s`. Should match the regex `%s`.";
-                throw newIllegalStateException(errMsg, name, getter, ALLOWED_NAME_REGEX);
-            }
-            return nameFromAnnotation.get();
-        }
-        return nameFromGetterName(getter);
+        final String nameForStore = nameFromAnnotation.isPresent()
+                                    ? nameFromAnnotation.get()
+                                    : nameForQuery;
+        final boolean nullable = getter.isAnnotationPresent(Nullable.class);
+        return new Column(getter, nameForQuery, nameForStore, nullable);
     }
 
     private static Optional<String> nameFromAnnotation(Method getter) {
@@ -231,26 +217,28 @@ public class Column implements Serializable {
             throw newIllegalStateException("Method `%s` is not an entity column getter.", getter);
         }
         final Method annotatedVersion = optionalMethod.get();
-        final String name = annotatedVersion.getAnnotation(EntityColumn.class)
-                                            .name();
-        return name.isEmpty()
-                ? Optional.<String>absent()
-                : Optional.of(name);
+        final String trimmedName = annotatedVersion.getAnnotation(EntityColumn.class)
+                                                   .name()
+                                                   .trim();
+        return trimmedName.isEmpty()
+               ? Optional.<String>absent()
+               : Optional.of(trimmedName);
     }
 
-    private static String nameFromGetterName(Method getter) {
+    private static String nameFromGetter(Method getter) {
         final Matcher prefixMatcher = GETTER_PREFIX_PATTERN.matcher(getter.getName());
         final String nameWithoutPrefix = prefixMatcher.replaceFirst("");
         return Character.toLowerCase(nameWithoutPrefix.charAt(0)) + nameWithoutPrefix.substring(1);
     }
 
     private static void checkGetter(Method getter) {
+        checkNotNull(getter);
         checkArgument(GETTER_PREFIX_PATTERN.matcher(getter.getName())
                                            .find() && getter.getParameterTypes().length == 0,
                       "Method `%s` is not a getter.", getter);
         checkArgument(getAnnotatedVersion(getter).isPresent(),
-                      "Entity column getter should be annotated with " +
-                              "`io.spine.server.entity.storage.EntityColumn`.");
+                      format("Entity column getter should be annotated with `%s`.",
+                             EntityColumn.class.getName()));
         final int modifiers = getter.getModifiers();
         checkArgument(isPublic(modifiers) && !isStatic(modifiers),
                       "Entity column getter should be public instance method.");
@@ -263,19 +251,35 @@ public class Column implements Serializable {
     }
 
     /**
-     * Retrieves the name of the property which represents the column.
+     * Obtains the name of the column, which is used for querying.
      *
-     * @return the name of the property exposed by this object
+     * <p>For example, if the getter method has name "isArchivedOrDeleted", the returned value is
+     * "archivedOrDeleted".
+     *
+     * @return the column name for querying
      */
     public String getName() {
         return name;
     }
 
     /**
+     * Obtains the name of the column, which is used for storing in a repositories.
+     *
+     * <p>The value is obtained from the annotation {@linkplain EntityColumn#name() property}.
+     * If the property value is empty, then the value is equal
+     * to {@linkplain #getName() name for querying}.
+     *
+     * @return the column name for storing
+     */
+    public String getStoredName() {
+        return storedName;
+    }
+
+    /**
      * Determines whether the column value may be {@code null}.
      *
      * @return {@code true} if the getter method is annotated as {@link Nullable},
-     *         {@code false} otherwise
+     * {@code false} otherwise
      */
     public boolean isNullable() {
         return nullable;

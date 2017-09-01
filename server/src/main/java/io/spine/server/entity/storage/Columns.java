@@ -235,10 +235,10 @@ public class Columns {
                                                  Class<? extends Entity> entityClass) {
         final Collection<String> checkedNames = newLinkedList();
         for (Column column : columns) {
-            final String columnName = column.getName();
+            final String columnName = column.getStoredName();
             if (checkedNames.contains(columnName)) {
-                final String errMsg = "The entity `%s` has columns with the same name `%s`.";
-                throw newIllegalStateException(errMsg, entityClass.getName(), columnName);
+                final String msg = "The entity `%s` has columns with the same name for storing `%s`.";
+                throw newIllegalStateException(msg, entityClass.getName(), columnName);
             }
             checkedNames.add(columnName);
         }

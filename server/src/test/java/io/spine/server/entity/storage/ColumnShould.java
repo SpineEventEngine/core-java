@@ -48,7 +48,7 @@ import static org.junit.Assert.fail;
 @SuppressWarnings("DuplicateStringLiteralInspection") // Many string literals for method names
 public class ColumnShould {
 
-    private static final String CUSTOM_COLUMN_NAME = "customColumnName";
+    private static final String CUSTOM_COLUMN_NAME = " customColumnName ";
     private static final String INVALID_COLUMN_NAME = " * ";
 
     @Test
@@ -61,6 +61,11 @@ public class ColumnShould {
     public void support_toString() {
         final Column column = forMethod("getVersion", VersionableEntity.class);
         assertEquals("VersionableEntity.version", column.toString());
+    }
+
+    @Test
+    public void have_name_for_storing_from_annotation_property() {
+
     }
 
     @Test
@@ -139,7 +144,7 @@ public class ColumnShould {
     @Test(expected = IllegalArgumentException.class)
     public void fail_to_get_value_from_wrong_object() {
         final Column column = forMethod("getMutableState", TestEntity.class);
-        column.getFor(new EntityWithCustomColumnName(""));
+        column.getFor(new EntityWithCustomColumnNameForStoring(""));
     }
 
     @Test(expected = NullPointerException.class)
@@ -187,19 +192,23 @@ public class ColumnShould {
     }
 
     @Test
-    public void have_custom_name_from_column_annotation() {
-        final Column column = forMethod("getValue", EntityWithCustomColumnName.class);
-        assertEquals(CUSTOM_COLUMN_NAME, column.getName());
+    public void have_valid_name_for_querying_and_storing() {
+        final Column column = forMethod("getValue", EntityWithCustomColumnNameForStoring.class);
+        assertEquals("value", column.getName());
+        assertEquals(CUSTOM_COLUMN_NAME.trim(), column.getStoredName());
+    }
+
+    @Test
+    public void have_same_names_for_and_querying_storing_if_last_is_not_specified() {
+        final Column column = forMethod("getValue", EntityWithDefaultColumnNameForStoring.class);
+        final String expectedName = "value";
+        assertEquals(expectedName, column.getName());
+        assertEquals(expectedName, column.getStoredName());
     }
 
     @Test(expected = IllegalStateException.class)
     public void not_allow_redefine_column_annotation() {
         forMethod("getValue", EntityRedefiningColumnAnnotation.class);
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void not_be_with_invalid_name() {
-        forMethod("getValue", EntityWithInvalidColumnName.class);
     }
 
     private static Column forMethod(String name, Class<?> enclosingClass) {
@@ -274,8 +283,9 @@ public class ColumnShould {
         }
     }
 
-    public static class EntityWithCustomColumnName extends AbstractVersionableEntity<String, Any> {
-        protected EntityWithCustomColumnName(String id) {
+    public static class EntityWithCustomColumnNameForStoring
+            extends AbstractVersionableEntity<String, Any> {
+        protected EntityWithCustomColumnNameForStoring(String id) {
             super(id);
         }
 
@@ -285,7 +295,7 @@ public class ColumnShould {
         }
     }
 
-    public static class EntityRedefiningColumnAnnotation extends EntityWithCustomColumnName {
+    public static class EntityRedefiningColumnAnnotation extends EntityWithCustomColumnNameForStoring {
         protected EntityRedefiningColumnAnnotation(String id) {
             super(id);
         }
@@ -297,12 +307,13 @@ public class ColumnShould {
         }
     }
 
-    public static class EntityWithInvalidColumnName extends AbstractVersionableEntity<String, Any> {
-        protected EntityWithInvalidColumnName(String id) {
+    public static class EntityWithDefaultColumnNameForStoring
+            extends AbstractVersionableEntity<String, Any> {
+        protected EntityWithDefaultColumnNameForStoring(String id) {
             super(id);
         }
 
-        @EntityColumn(name = INVALID_COLUMN_NAME)
+        @EntityColumn
         public int getValue() {
             return 0;
         }
