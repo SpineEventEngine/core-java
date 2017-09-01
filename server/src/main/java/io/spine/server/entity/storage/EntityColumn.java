@@ -27,7 +27,7 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * An annotation, which is used to mark getters for entity columns.
+ * An annotation, which is used to mark getters for entity {@linkplain Column columns}.
  *
  * @author Dmytro Grankin
  */

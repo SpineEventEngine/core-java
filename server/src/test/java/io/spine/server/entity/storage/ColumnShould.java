@@ -49,7 +49,6 @@ import static org.junit.Assert.fail;
 public class ColumnShould {
 
     private static final String CUSTOM_COLUMN_NAME = " customColumnName ";
-    private static final String INVALID_COLUMN_NAME = " * ";
 
     @Test
     public void be_serializable() {
