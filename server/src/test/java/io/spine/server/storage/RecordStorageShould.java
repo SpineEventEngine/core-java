@@ -302,8 +302,8 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
 
             // Some records are changed and some are not
             final EntityRecord alternateRecord = (i % 2 == 0)
-                    ? record
-                    : newStorageRecord(id);
+                                                 ? record
+                                                 : newStorageRecord(id);
             v1Records.put(id, record);
             v2Records.put(id, alternateRecord);
         }
@@ -497,7 +497,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
 
         // Perform the query
         final Iterator<EntityRecord> readRecords = storage.readAll(query,
-                                                                    FieldMask.getDefaultInstance());
+                                                                   FieldMask.getDefaultInstance());
         // Check results
         assertTrue(readRecords.hasNext());
         final EntityRecord actualRecord = readRecords.next();
@@ -548,7 +548,8 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
             return getId().toString();
         }
 
-        @EntityColumn
+        @EntityColumn(name = "COUNTER_VERSION") // Custom name for storing
+                                                // to check that querying is correct.
         public Version getCounterVersion() {
             return Version.newBuilder()
                           .setNumber(counter)

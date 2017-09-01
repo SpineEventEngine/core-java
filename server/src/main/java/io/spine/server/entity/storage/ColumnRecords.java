@@ -60,8 +60,8 @@ public final class ColumnRecords {
      * @param columnTypeRegistry  the {@link io.spine.server.storage.Storage Storage}
      *                            {@link ColumnTypeRegistry}
      * @param mapColumnIdentifier a {@linkplain Function} mapping
-     *                            the {@linkplain Column#getName() column name} to the database
-     *                            specific column identifier
+     *                            the {@linkplain Column#getStoredName()} column name for storing}
+     *                            to the database specific column identifier
      * @param <D>                 the type of the database record
      * @param <I>                 the type of the column identifier
      */

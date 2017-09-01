@@ -108,8 +108,8 @@ public class Columns {
      *
      * @param entity an {@link Entity} to get the {@linkplain Column columns} from
      * @param <E>    the type of the {@link Entity}
-     * @return a {@link Map} of the {@link Column Column} names to their
-     * {@linkplain MemoizedValue memoized values}.
+     * @return a {@link Map} of the column {@linkplain Column#getStoredName() names for storing}
+     *         to their {@linkplain MemoizedValue memoized values}.
      * @see MemoizedValue
      */
     static <E extends Entity<?, ?>> Map<String, MemoizedValue> from(E entity) {
@@ -186,7 +186,7 @@ public class Columns {
         final Map<String, MemoizedValue> values = new HashMap<>(storageFieldProperties.size());
 
         for (Column column : storageFieldProperties) {
-            final String name = column.getName();
+            final String name = column.getStoredName();
             final MemoizedValue value = column.memoizeFor(entity);
             values.put(name, value);
         }

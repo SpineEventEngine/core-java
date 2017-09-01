@@ -83,7 +83,7 @@ public class ColumnsShould {
     }
 
     @Test
-    public void put_non_null_fields_to_fields_maps() {
+    public void extract_column_values_with_names_for_storing() {
         final EntityWithManyGetters entity = new EntityWithManyGetters(STRING_ID);
         final Map<String, Column.MemoizedValue> fields = Columns.from(entity);
         assertNotNull(fields);
@@ -95,9 +95,8 @@ public class ColumnsShould {
         assertNotNull(floatMemoizedNull);
         assertNull(floatMemoizedNull.getValue());
 
-        final String intFieldKey = "integerFieldValue";
         assertEquals(entity.getIntegerFieldValue(),
-                     fields.get(intFieldKey)
+                     fields.get(CUSTOM_COLUMN_NAME)
                            .getValue());
 
         final String messageKey = "someMessage";
@@ -184,7 +183,7 @@ public class ColumnsShould {
             super(id);
         }
 
-        @EntityColumn
+        @EntityColumn(name = CUSTOM_COLUMN_NAME)
         public int getIntegerFieldValue() {
             return 0;
         }
