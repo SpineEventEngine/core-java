@@ -22,6 +22,7 @@ package io.spine.server.storage.memory;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Timestamp;
+import io.spine.annotation.Internal;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
@@ -39,7 +40,8 @@ import static java.lang.String.format;
  * @author Dmytro Dashenkov
  * @see io.spine.client.CompositeColumnFilter.CompositeOperator for the comparison strategies
  */
-enum OperatorEvaluator {
+@Internal
+public enum OperatorEvaluator {
 
     EQUAL {
         @Override
@@ -125,7 +127,7 @@ enum OperatorEvaluator {
      *                                       <a href="supported_types">not supported</a> for
      *                                       the given data types
      */
-    static <T> boolean eval(@Nullable T left, Operator operator, @Nullable T right)
+    public static <T> boolean eval(@Nullable T left, Operator operator, @Nullable T right)
             throws UnsupportedOperationException {
         checkNotNull(operator);
         final OperatorEvaluator evaluator = EVALUATORS.get(operator);
@@ -142,6 +144,4 @@ enum OperatorEvaluator {
      * @return {@code true} if the expression evaluates into {@code true}, {@code false} otherwise
      */
     abstract boolean eval(@Nullable Object left, @Nullable Object right);
-
-
 }
