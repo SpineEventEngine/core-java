@@ -115,7 +115,7 @@ public enum OperatorEvaluator {
      *
      * <p>For example, if operands where {@code 42} and {@code 9} (exactly in that order) and
      * the operator was {@link Operator#GREATER_THAN GREATER_THAN}, then this function could be
-     * expressed as {@code 42 > 8}. The function returns the {@code boolean} result of
+     * expressed as {@code 42 > 9}. The function returns the {@code boolean} result of
      * the evaluation.
      *
      * @param left     the left operand
