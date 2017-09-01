@@ -55,7 +55,7 @@ final class EntityQueryMatcher<I> implements Predicate<EntityRecordWithColumns> 
     private final Collection<I> acceptedIds;
     private final QueryParameters queryParams;
 
-    public EntityQueryMatcher(EntityQuery<I> query) {
+    EntityQueryMatcher(EntityQuery<I> query) {
         checkNotNull(query);
         this.acceptedIds = query.getIds();
         this.queryParams = query.getParameters();
