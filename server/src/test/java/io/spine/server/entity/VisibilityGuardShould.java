@@ -22,19 +22,16 @@ package io.spine.server.entity;
 
 import com.google.common.collect.Lists;
 import com.google.common.testing.NullPointerTester;
-import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import io.spine.option.EntityOption.Visibility;
 import io.spine.server.BoundedContext;
-import io.spine.server.aggregate.Aggregate;
-import io.spine.server.aggregate.AggregateRepository;
-import io.spine.server.entity.storage.Column;
+import io.spine.server.entity.given.VisibilityGuardTestEnv.ExposedRepository;
+import io.spine.server.entity.given.VisibilityGuardTestEnv.HiddenRepository;
+import io.spine.server.entity.given.VisibilityGuardTestEnv.RepositoryForInvalidEntity;
+import io.spine.server.entity.given.VisibilityGuardTestEnv.SubscribableRepository;
 import io.spine.test.entity.FullAccessAggregate;
-import io.spine.test.entity.FullAccessAggregateVBuilder;
 import io.spine.test.entity.HiddenAggregate;
-import io.spine.test.entity.HiddenAggregateVBuilder;
 import io.spine.test.entity.SubscribableAggregate;
-import io.spine.test.entity.SubscribableAggregateVBuilder;
 import io.spine.type.TypeName;
 import org.junit.After;
 import org.junit.Before;
@@ -142,67 +139,5 @@ public class VisibilityGuardShould {
                 .setDefault(Class.class, FullAccessAggregate.class)
                 .setDefault(Visibility.class, Visibility.NONE)
                 .testAllPublicInstanceMethods(guard);
-    }
-
-    private static class Exposed
-            extends Aggregate<Long, FullAccessAggregate, FullAccessAggregateVBuilder> {
-        private Exposed(Long id) {
-            super(id);
-        }
-    }
-
-    private static class ExposedRepository extends AggregateRepository<Long, Exposed> {
-        private ExposedRepository() {
-            super();
-        }
-    }
-
-    private static class Subscribable
-            extends Aggregate<Long, SubscribableAggregate, SubscribableAggregateVBuilder> {
-        protected Subscribable(Long id) {
-            super(id);
-        }
-    }
-
-    private static class SubscribableRepository extends AggregateRepository<Long, Subscribable> {
-        private SubscribableRepository() {
-            super();
-        }
-    }
-
-    private static class Hidden
-                   extends Aggregate<String, HiddenAggregate, HiddenAggregateVBuilder> {
-        private Hidden(String id) {
-            super(id);
-        }
-    }
-
-    private static class HiddenRepository extends AggregateRepository<String, Hidden> {
-        private HiddenRepository() {
-            super();
-        }
-    }
-
-    private static class EntityWithInvalidColumns extends AbstractVersionableEntity<String, Any> {
-
-        private static final String COLUMN_NAME = "columnNameFromAnnotation";
-
-        private EntityWithInvalidColumns(String id) {
-            super(id);
-        }
-
-        @Column(name = COLUMN_NAME)
-        public int getInt() {
-            return 0;
-        }
-
-        @Column(name = COLUMN_NAME)
-        public long getLong() {
-            return 0L;
-        }
-    }
-
-    private static class RepositoryForInvalidEntity
-            extends DefaultRecordBasedRepository<String, EntityWithInvalidColumns, Any> {
     }
 }

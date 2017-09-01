@@ -23,20 +23,22 @@ package io.spine.server.entity.storage;
 import com.google.common.testing.NullPointerTester;
 import com.google.common.testing.NullPointerTester.Visibility;
 import com.google.protobuf.Any;
-import com.google.protobuf.Timestamp;
 import io.spine.server.entity.AbstractEntity;
-import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.server.entity.Entity;
-import io.spine.test.entity.Project;
+import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithColumnFromInterface;
+import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithManyGetters;
+import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithManyGettersDescendant;
+import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithNoStorageFields;
+import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithRepeatedColumnNames;
+import io.spine.server.entity.storage.given.ColumnsTestEnv.RealLifeEntity;
 import io.spine.test.entity.ProjectId;
 import io.spine.testdata.Sample;
-import io.spine.time.Time;
 import org.junit.Test;
 
-import javax.annotation.Nullable;
 import java.util.Map;
 import java.util.Set;
 
+import static io.spine.server.entity.storage.given.ColumnsTestEnv.CUSTOM_COLUMN_NAME;
 import static io.spine.server.storage.EntityField.version;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
@@ -54,7 +56,6 @@ import static org.junit.Assert.assertNull;
  */
 public class ColumnsShould {
 
-    private static final String CUSTOM_COLUMN_NAME = "columnName";
     private static final String STRING_ID = "some-string-id-never-used";
 
     @Test
@@ -163,139 +164,10 @@ public class ColumnsShould {
         Columns.getColumns(EntityWithRepeatedColumnNames.class);
     }
 
-    public static class EntityWithNoStorageFields extends AbstractEntity<String, Any> {
-        protected EntityWithNoStorageFields(String id) {
-            super(id);
-        }
-
-        // A simple getter, which is not an entity column.
-        public int getValue() {
-            return 0;
-        }
-    }
-
-    @SuppressWarnings("unused")  // Reflective access
-    public static class EntityWithManyGetters extends AbstractEntity<String, Any> {
-
-        private final Project someMessage = Sample.messageOfType(Project.class);
-
-        protected EntityWithManyGetters(String id) {
-            super(id);
-        }
-
-        @Column(name = CUSTOM_COLUMN_NAME)
-        public int getIntegerFieldValue() {
-            return 0;
-        }
-
-        @Nullable
-        @Column
-        public Float getFloatNull() {
-            return null;
-        }
-
-        @Column
-        public Project getSomeMessage() {
-            return someMessage;
-        }
-
-        @Column
-        int getSomeNonPublicMethod() {
-            throw new AssertionError("getSomeNonPublicMethod invoked");
-        }
-
-        @Column
-        public void getSomeVoid() {
-            throw new AssertionError("getSomeVoid invoked");
-        }
-
-        @Column
-        public static int getStaticMember() {
-            return 1024;
-        }
-    }
-
-    public static class EntityWithManyGettersDescendant extends EntityWithManyGetters {
-        protected EntityWithManyGettersDescendant(String id) {
-            super(id);
-        }
-    }
-
-    @SuppressWarnings("unused") // Reflective access
-    public static class EntityWithInvalidGetters extends AbstractEntity<String, Any> {
-
-        protected EntityWithInvalidGetters(String id) {
-            super(id);
-        }
-
-        @SuppressWarnings("ReturnOfNull") // required for the test
-        public Boolean getNonNullBooleanField() {
-            return null;
-        }
-    }
-
     @SuppressWarnings("unused") // Reflective access
     private static class PrivateEntity extends AbstractEntity<String, Any> {
         protected PrivateEntity(String id) {
             super(id);
-        }
-    }
-
-    // Most read-life (non-test) Entities are children of AbstractVersionableEntity,
-    // which brings 3 storage fields from the box.
-    @SuppressWarnings("unused") // Reflective access
-    public static class RealLifeEntity extends AbstractVersionableEntity<ProjectId, Project> {
-
-        protected RealLifeEntity(ProjectId id) {
-            super(id);
-        }
-
-        @Column
-        public Timestamp getSomeTime() {
-            return Time.getCurrentTime();
-        }
-
-        @Column
-        public boolean isVisible() {
-            return true;
-        }
-    }
-
-    @SuppressWarnings("unused") // Reflective access
-    public interface InterfaceWithEntityColumn {
-
-        // The column annotation from the interface should be taken into account.
-        @Column
-        int getIntegerFieldValue();
-    }
-
-    public static class EntityWithColumnFromInterface extends AbstractEntity<String, Any>
-            implements InterfaceWithEntityColumn {
-        protected EntityWithColumnFromInterface(String id) {
-            super(id);
-        }
-
-        // The entity column annotation should be `inherited` from the interface.
-        @Override
-        public int getIntegerFieldValue() {
-            return 0;
-        }
-    }
-
-    public static class EntityWithRepeatedColumnNames
-            extends AbstractVersionableEntity<String, Any> {
-        protected EntityWithRepeatedColumnNames(String id) {
-            super(id);
-        }
-
-        @Column(name = CUSTOM_COLUMN_NAME)
-        public int getValue() {
-            return 0;
-        }
-
-        @Column(name = CUSTOM_COLUMN_NAME)
-        public long getLongValue() {
-            return 0;
         }
     }
 }

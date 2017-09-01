@@ -23,14 +23,17 @@ package io.spine.server.entity.storage;
 import com.google.common.testing.EqualsTester;
 import com.google.protobuf.Any;
 import io.spine.core.Version;
-import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.server.entity.EntityWithLifecycle;
 import io.spine.server.entity.VersionableEntity;
 import io.spine.server.entity.given.Given;
+import io.spine.server.entity.storage.EntityColumn.MemoizedValue;
+import io.spine.server.entity.storage.given.ColumnTestEnv.BrokenTestEntity;
+import io.spine.server.entity.storage.given.ColumnTestEnv.EntityRedefiningColumnAnnotation;
+import io.spine.server.entity.storage.given.ColumnTestEnv.EntityWithDefaultColumnNameForStoring;
+import io.spine.server.entity.storage.given.ColumnTestEnv.TestEntity;
 import org.junit.Test;
 
-import javax.annotation.Nullable;
 import java.lang.reflect.Method;
 
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
@@ -40,7 +43,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Dmytro Dashenkov
@@ -93,7 +95,7 @@ public class ColumnShould {
         final int initialState = 1;
         final int changedState = 42;
         entity.setMutableState(initialState);
-        final EntityColumn.MemoizedValue memoizedState = mutableColumn.memoizeFor(entity);
+        final MemoizedValue memoizedState = mutableColumn.memoizeFor(entity);
         entity.setMutableState(changedState);
         final int extractedState = (int) mutableColumn.getFor(entity);
 
@@ -172,7 +174,7 @@ public class ColumnShould {
     @Test
     public void memoize_value_regarding_nulls() {
         final EntityColumn nullableColumn = forMethod("getNull", TestEntity.class);
-        final EntityColumn.MemoizedValue memoizedNull = nullableColumn.memoizeFor(new TestEntity(""));
+        final MemoizedValue memoizedNull = nullableColumn.memoizeFor(new TestEntity(""));
         assertTrue(memoizedNull.isNull());
         assertNull(memoizedNull.getValue());
     }
@@ -181,20 +183,22 @@ public class ColumnShould {
     public void memoize_value_which_has_reference_on_Column_itself() {
         final EntityColumn column = forMethod("getMutableState", TestEntity.class);
         final TestEntity entity = new TestEntity("");
-        final EntityColumn.MemoizedValue memoizedValue = column.memoizeFor(entity);
+        final MemoizedValue memoizedValue = column.memoizeFor(entity);
         assertSame(column, memoizedValue.getSourceColumn());
     }
 
     @Test
     public void have_valid_name_for_querying_and_storing() {
-        final EntityColumn column = forMethod("getValue", EntityWithCustomColumnNameForStoring.class);
+        final EntityColumn column = forMethod("getValue",
+                                              EntityWithCustomColumnNameForStoring.class);
         assertEquals("value", column.getName());
         assertEquals(CUSTOM_COLUMN_NAME.trim(), column.getStoredName());
     }
 
     @Test
     public void have_same_names_for_and_querying_storing_if_last_is_not_specified() {
-        final EntityColumn column = forMethod("getValue", EntityWithDefaultColumnNameForStoring.class);
+        final EntityColumn column = forMethod("getValue",
+                                              EntityWithDefaultColumnNameForStoring.class);
         final String expectedName = "value";
         assertEquals(expectedName, column.getName());
         assertEquals(expectedName, column.getStoredName());
@@ -214,69 +218,6 @@ public class ColumnShould {
         }
     }
 
-    @SuppressWarnings("unused") // Reflective access
-    public static class TestEntity extends AbstractVersionableEntity<String, Any> {
-
-        private int mutableState = 0;
-
-        protected TestEntity(String id) {
-            super(id);
-        }
-
-        @Column
-        public int getMutableState() {
-            return mutableState;
-        }
-
-        public void setMutableState(int mutableState) {
-            this.mutableState = mutableState;
-        }
-
-        @Column
-        public String getNotNull() {
-            return null;
-        }
-
-        @Nullable
-        @Column
-        public String getNull() {
-            return null;
-        }
-
-        @Column
-        public long getLong() {
-            return 0;
-        }
-
-        @Column
-        private long getFortyTwoLong() {
-            return 42L;
-        }
-
-        @Column
-        public String getParameter(String param) {
-            return param;
-        }
-
-        @Column
-        public static String getStatic() {
-            return "";
-        }
-    }
-
-    public static class BrokenTestEntity extends AbstractEntity<String, Any> {
-        protected BrokenTestEntity(String id) {
-            super(id);
-        }
-
-        // non-serializable Entity EntityColumn
-        @Column
-        public Object getFoo() {
-            fail("Invoked a getter for a non-serializable EntityColumn BrokenTestEntity.foo");
-            return new Object();
-        }
-    }
-
     public static class EntityWithCustomColumnNameForStoring
             extends AbstractVersionableEntity<String, Any> {
         protected EntityWithCustomColumnNameForStoring(String id) {
@@ -284,30 +225,6 @@ public class ColumnShould {
         }
 
         @Column(name = CUSTOM_COLUMN_NAME)
-        public int getValue() {
-            return 0;
-        }
-    }
-
-    public static class EntityRedefiningColumnAnnotation extends EntityWithCustomColumnNameForStoring {
-        protected EntityRedefiningColumnAnnotation(String id) {
-            super(id);
-        }
-
-        @Column
-        @Override
-        public int getValue() {
-            return super.getValue();
-        }
-    }
-
-    public static class EntityWithDefaultColumnNameForStoring
-            extends AbstractVersionableEntity<String, Any> {
-        protected EntityWithDefaultColumnNameForStoring(String id) {
-            super(id);
-        }
-
-        @Column
         public int getValue() {
             return 0;
         }

@@ -21,12 +21,12 @@
 package io.spine.server.entity.storage;
 
 import com.google.common.testing.EqualsTester;
+import io.spine.server.entity.storage.given.ColumnTestEnv.TestEntity;
 import org.junit.Test;
 
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
-import static io.spine.server.entity.storage.EntityColumn.MemoizedValue;
-import static io.spine.server.entity.storage.ColumnShould.TestEntity;
 import static io.spine.server.entity.storage.Columns.findColumn;
+import static io.spine.server.entity.storage.EntityColumn.MemoizedValue;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static org.mockito.Mockito.mock;
 
