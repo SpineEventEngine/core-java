@@ -63,11 +63,6 @@ public class ColumnShould {
     }
 
     @Test
-    public void have_name_for_storing_from_annotation_property() {
-
-    }
-
-    @Test
     public void invoke_getter() {
         final String entityId = "entity-id";
         final int version = 2;
