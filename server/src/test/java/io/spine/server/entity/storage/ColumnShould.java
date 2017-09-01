@@ -52,13 +52,13 @@ public class ColumnShould {
 
     @Test
     public void be_serializable() {
-        final Column column = forMethod("getVersion", VersionableEntity.class);
+        final EntityColumn column = forMethod("getVersion", VersionableEntity.class);
         reserializeAndAssert(column);
     }
 
     @Test
     public void support_toString() {
-        final Column column = forMethod("getVersion", VersionableEntity.class);
+        final EntityColumn column = forMethod("getVersion", VersionableEntity.class);
         assertEquals("VersionableEntity.version", column.toString());
     }
 
@@ -71,7 +71,7 @@ public class ColumnShould {
     public void invoke_getter() {
         final String entityId = "entity-id";
         final int version = 2;
-        final Column column = forMethod("getVersion", VersionableEntity.class);
+        final EntityColumn column = forMethod("getVersion", VersionableEntity.class);
         final TestEntity entity = Given.entityOfClass(TestEntity.class)
                                        .withId(entityId)
                                        .withVersion(version)
@@ -82,9 +82,9 @@ public class ColumnShould {
 
     @Test
     public void have_equals_and_hashCode() {
-        final Column col1 = forMethod("getVersion", VersionableEntity.class);
-        final Column col2 = forMethod("getVersion", VersionableEntity.class);
-        final Column col3 = forMethod("isDeleted", EntityWithLifecycle.class);
+        final EntityColumn col1 = forMethod("getVersion", VersionableEntity.class);
+        final EntityColumn col2 = forMethod("getVersion", VersionableEntity.class);
+        final EntityColumn col3 = forMethod("isDeleted", EntityWithLifecycle.class);
         new EqualsTester()
                 .addEqualityGroup(col1, col2)
                 .addEqualityGroup(col3)
@@ -93,12 +93,12 @@ public class ColumnShould {
 
     @Test
     public void memoize_value_at_at_point_in_time() {
-        final Column mutableColumn = forMethod("getMutableState", TestEntity.class);
+        final EntityColumn mutableColumn = forMethod("getMutableState", TestEntity.class);
         final TestEntity entity = new TestEntity("");
         final int initialState = 1;
         final int changedState = 42;
         entity.setMutableState(initialState);
-        final Column.MemoizedValue memoizedState = mutableColumn.memoizeFor(entity);
+        final EntityColumn.MemoizedValue memoizedState = mutableColumn.memoizeFor(entity);
         entity.setMutableState(changedState);
         final int extractedState = (int) mutableColumn.getFor(entity);
 
@@ -132,7 +132,7 @@ public class ColumnShould {
     public void not_be_constructed_from_getter_with_parameters() throws NoSuchMethodException {
         final Method method = TestEntity.class.getDeclaredMethod("getParameter",
                                                                  String.class);
-        Column.from(method);
+        EntityColumn.from(method);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -142,27 +142,27 @@ public class ColumnShould {
 
     @Test(expected = IllegalArgumentException.class)
     public void fail_to_get_value_from_wrong_object() {
-        final Column column = forMethod("getMutableState", TestEntity.class);
+        final EntityColumn column = forMethod("getMutableState", TestEntity.class);
         column.getFor(new EntityWithCustomColumnNameForStoring(""));
     }
 
     @Test(expected = NullPointerException.class)
     public void check_value_if_getter_is_not_null() {
-        final Column column = forMethod("getNotNull", TestEntity.class);
+        final EntityColumn column = forMethod("getNotNull", TestEntity.class);
         column.getFor(new TestEntity(""));
     }
 
     @Test
     public void allow_nulls_if_getter_is_nullable() {
-        final Column column = forMethod("getNull", TestEntity.class);
+        final EntityColumn column = forMethod("getNull", TestEntity.class);
         final Object value = column.getFor(new TestEntity(""));
         assertNull(value);
     }
 
     @Test
     public void tell_if_property_is_nullable() {
-        final Column notNullColumn = forMethod("getNotNull", TestEntity.class);
-        final Column nullableColumn = forMethod("getNull", TestEntity.class);
+        final EntityColumn notNullColumn = forMethod("getNotNull", TestEntity.class);
+        final EntityColumn nullableColumn = forMethod("getNull", TestEntity.class);
 
         assertFalse(notNullColumn.isNullable());
         assertTrue(nullableColumn.isNullable());
@@ -170,36 +170,36 @@ public class ColumnShould {
 
     @Test
     public void contain_property_type() {
-        final Column column = forMethod("getLong", TestEntity.class);
+        final EntityColumn column = forMethod("getLong", TestEntity.class);
         assertEquals(Long.TYPE, column.getType());
     }
 
     @Test
     public void memoize_value_regarding_nulls() {
-        final Column nullableColumn = forMethod("getNull", TestEntity.class);
-        final Column.MemoizedValue memoizedNull = nullableColumn.memoizeFor(new TestEntity(""));
+        final EntityColumn nullableColumn = forMethod("getNull", TestEntity.class);
+        final EntityColumn.MemoizedValue memoizedNull = nullableColumn.memoizeFor(new TestEntity(""));
         assertTrue(memoizedNull.isNull());
         assertNull(memoizedNull.getValue());
     }
 
     @Test
     public void memoize_value_which_has_reference_on_Column_itself() {
-        final Column column = forMethod("getMutableState", TestEntity.class);
+        final EntityColumn column = forMethod("getMutableState", TestEntity.class);
         final TestEntity entity = new TestEntity("");
-        final Column.MemoizedValue memoizedValue = column.memoizeFor(entity);
+        final EntityColumn.MemoizedValue memoizedValue = column.memoizeFor(entity);
         assertSame(column, memoizedValue.getSourceColumn());
     }
 
     @Test
     public void have_valid_name_for_querying_and_storing() {
-        final Column column = forMethod("getValue", EntityWithCustomColumnNameForStoring.class);
+        final EntityColumn column = forMethod("getValue", EntityWithCustomColumnNameForStoring.class);
         assertEquals("value", column.getName());
         assertEquals(CUSTOM_COLUMN_NAME.trim(), column.getStoredName());
     }
 
     @Test
     public void have_same_names_for_and_querying_storing_if_last_is_not_specified() {
-        final Column column = forMethod("getValue", EntityWithDefaultColumnNameForStoring.class);
+        final EntityColumn column = forMethod("getValue", EntityWithDefaultColumnNameForStoring.class);
         final String expectedName = "value";
         assertEquals(expectedName, column.getName());
         assertEquals(expectedName, column.getStoredName());
@@ -210,10 +210,10 @@ public class ColumnShould {
         forMethod("getValue", EntityRedefiningColumnAnnotation.class);
     }
 
-    private static Column forMethod(String name, Class<?> enclosingClass) {
+    private static EntityColumn forMethod(String name, Class<?> enclosingClass) {
         try {
             final Method result = enclosingClass.getDeclaredMethod(name);
-            return Column.from(result);
+            return EntityColumn.from(result);
         } catch (NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
@@ -228,7 +228,7 @@ public class ColumnShould {
             super(id);
         }
 
-        @EntityColumn
+        @Column
         public int getMutableState() {
             return mutableState;
         }
@@ -237,33 +237,33 @@ public class ColumnShould {
             this.mutableState = mutableState;
         }
 
-        @EntityColumn
+        @Column
         public String getNotNull() {
             return null;
         }
 
         @Nullable
-        @EntityColumn
+        @Column
         public String getNull() {
             return null;
         }
 
-        @EntityColumn
+        @Column
         public long getLong() {
             return 0;
         }
 
-        @EntityColumn
+        @Column
         private long getFortyTwoLong() {
             return 42L;
         }
 
-        @EntityColumn
+        @Column
         public String getParameter(String param) {
             return param;
         }
 
-        @EntityColumn
+        @Column
         public static String getStatic() {
             return "";
         }
@@ -274,10 +274,10 @@ public class ColumnShould {
             super(id);
         }
 
-        // non-serializable Entity Column
-        @EntityColumn
+        // non-serializable Entity EntityColumn
+        @Column
         public Object getFoo() {
-            fail("Invoked a getter for a non-serializable Entity Column BrokenTestEntity.foo");
+            fail("Invoked a getter for a non-serializable EntityColumn BrokenTestEntity.foo");
             return new Object();
         }
     }
@@ -288,7 +288,7 @@ public class ColumnShould {
             super(id);
         }
 
-        @EntityColumn(name = CUSTOM_COLUMN_NAME)
+        @Column(name = CUSTOM_COLUMN_NAME)
         public int getValue() {
             return 0;
         }
@@ -299,7 +299,7 @@ public class ColumnShould {
             super(id);
         }
 
-        @EntityColumn
+        @Column
         @Override
         public int getValue() {
             return super.getValue();
@@ -312,7 +312,7 @@ public class ColumnShould {
             super(id);
         }
 
-        @EntityColumn
+        @Column
         public int getValue() {
             return 0;
         }

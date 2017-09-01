@@ -27,7 +27,7 @@ import com.google.protobuf.Message;
 import io.spine.client.ColumnFilter;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.EntityRecord;
-import io.spine.server.entity.storage.Column;
+import io.spine.server.entity.storage.EntityColumn;
 import io.spine.server.entity.storage.CompositeQueryParameter;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
@@ -99,7 +99,7 @@ public class EntityQueryMatcherShould {
     @Test
     public void match_columns() {
         final String targetName = "feature";
-        final Column target = mock(Column.class);
+        final EntityColumn target = mock(EntityColumn.class);
         when(target.isNullable()).thenReturn(true);
         when(target.getName()).thenReturn(targetName);
         when(target.getType()).thenReturn(Boolean.class);
@@ -107,7 +107,8 @@ public class EntityQueryMatcherShould {
 
         final Collection<Object> ids = Collections.emptyList();
 
-        final Multimap<Column, ColumnFilter> filters = of(target, eq(targetName, acceptedValue));
+        final Multimap<EntityColumn, ColumnFilter> filters = of(target,
+                                                                eq(targetName, acceptedValue));
         final CompositeQueryParameter parameter = createParams(filters, ALL);
         final QueryParameters params = QueryParameters.newBuilder()
                                                       .add(parameter)
@@ -124,10 +125,10 @@ public class EntityQueryMatcherShould {
         final EntityRecord nonMatching = EntityRecord.newBuilder()
                                                      .setEntityId(nonMatchingId)
                                                      .build();
-        final Column.MemoizedValue storedValue = mock(Column.MemoizedValue.class);
+        final EntityColumn.MemoizedValue storedValue = mock(EntityColumn.MemoizedValue.class);
         when(storedValue.getSourceColumn()).thenReturn(target);
         when(storedValue.getValue()).thenReturn(acceptedValue);
-        final Map<String, Column.MemoizedValue> matchingColumns =
+        final Map<String, EntityColumn.MemoizedValue> matchingColumns =
                 ImmutableMap.of(targetName, storedValue);
         final EntityRecordWithColumns nonMatchingRecord = of(nonMatching);
         final EntityRecordWithColumns matchingRecord = createRecord(matching, matchingColumns);
@@ -143,19 +144,20 @@ public class EntityQueryMatcherShould {
         final Project someMessage = Sample.messageOfType(Project.class);
         final Any actualValue = AnyPacker.pack(someMessage);
 
-        final Column column = mock(Column.class);
+        final EntityColumn column = mock(EntityColumn.class);
         when(column.getType()).thenReturn(Any.class);
         when(column.getName()).thenReturn(columnName);
 
-        final Column.MemoizedValue value = mock(Column.MemoizedValue.class);
+        final EntityColumn.MemoizedValue value = mock(EntityColumn.MemoizedValue.class);
         when(value.getSourceColumn()).thenReturn(column);
         when(value.getValue()).thenReturn(actualValue);
 
         final EntityRecord record = Sample.messageOfType(EntityRecord.class);
-        final Map<String, Column.MemoizedValue> columns = singletonMap(columnName, value);
+        final Map<String, EntityColumn.MemoizedValue> columns = singletonMap(columnName, value);
         final EntityRecordWithColumns recordWithColumns = createRecord(record, columns);
 
-        final Multimap<Column, ColumnFilter> filters = of(column, eq(columnName, actualValue));
+        final Multimap<EntityColumn, ColumnFilter> filters = of(column,
+                                                                eq(columnName, actualValue));
         final CompositeQueryParameter parameter = createParams(filters, ALL);
         final QueryParameters parameters = QueryParameters.newBuilder()
                                                           .add(parameter)

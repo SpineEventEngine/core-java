@@ -27,7 +27,7 @@ import io.spine.core.EventEnvelope;
 import io.spine.core.EventId;
 import io.spine.core.Events;
 import io.spine.server.entity.AbstractEntity;
-import io.spine.server.entity.storage.EntityColumn;
+import io.spine.server.entity.storage.Column;
 import io.spine.type.TypeName;
 
 import javax.annotation.Nullable;
@@ -43,18 +43,18 @@ import java.util.Comparator;
 public class EEntity extends AbstractEntity<EventId, Event> {
 
     /**
-     * The name of the Entity Column representing the time, when the event was fired.
+     * The name of the entity column representing the time, when the event was fired.
      *
      * @see #getCreated()
      */
     static final String CREATED_TIME_COLUMN = "created";
 
     /**
-     * The name of the Entity Column representing the Protobuf type name of the event.
+     * The name of the entity column representing the Protobuf type name of the event.
      *
-     * <p>For example, an Event of type {@code io.spine.test.TaskAdded} whose definition is enclosed
-     * in the {@code spine.test} Protobuf package would have this Column equal to
-     * {@code "spine.test.TaskAdded"}.
+     * <p>For example, an Event of type {@code io.spine.test.TaskAdded} whose definition
+     * is enclosed in the {@code spine.test} Protobuf package would have this entity column
+     * equal to {@code "spine.test.TaskAdded"}.
      *
      * @see #getType()
      */
@@ -97,12 +97,12 @@ public class EEntity extends AbstractEntity<EventId, Event> {
     /**
      * Retrieves the time of the event occurrence.
      *
-     * <p>This method represents an Entity Column {@code created}.
+     * <p>This method represents an entity column {@code created}.
      *
      * @return the time when the underlying event was fired
      * @see #CREATED_TIME_COLUMN
      */
-    @EntityColumn
+    @Column
     public Timestamp getCreated() {
         return getState().getContext()
                          .getTimestamp();
@@ -111,12 +111,12 @@ public class EEntity extends AbstractEntity<EventId, Event> {
     /**
      * Retrieves the Protobuf type name of the enclosed event.
      *
-     * <p>This method represents an Entity Column {@code type}.
+     * <p>This method represents an entity column {@link TypeName}.
      *
-     * @return the {@link TypeName} value of the event represented by this Entity
+     * @return the {@link TypeName} value of the event represented by this entity
      * @see #TYPE_COLUMN
      */
-    @EntityColumn
+    @Column
     public String getType() {
         if (typeName == null) {
             typeName = EventEnvelope.of(getState())

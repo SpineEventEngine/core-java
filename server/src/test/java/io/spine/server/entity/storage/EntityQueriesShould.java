@@ -74,7 +74,7 @@ public class EntityQueriesShould {
 
     @Test(expected = IllegalArgumentException.class)
     public void check_filter_type() {
-        // Boolean Column queried for for an Integer value
+        // Boolean EntityColumn queried for for an Integer value
         final ColumnFilter filter = ColumnFilters.gt(archived.name(), 42);
         final CompositeColumnFilter compositeFilter = ColumnFilters.all(filter);
         final EntityFilters filters = EntityFilters.newBuilder()

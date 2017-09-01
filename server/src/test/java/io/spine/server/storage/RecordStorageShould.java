@@ -43,7 +43,7 @@ import io.spine.server.entity.EventPlayingEntity;
 import io.spine.server.entity.FieldMasks;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.TestTransaction;
-import io.spine.server.entity.storage.EntityColumn;
+import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.EntityQueries;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
@@ -527,28 +527,28 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
             super(id);
         }
 
-        @EntityColumn
+        @Column
         public int getCounter() {
             counter++;
             return counter;
         }
 
-        @EntityColumn
+        @Column
         public long getBigCounter() {
             return getCounter();
         }
 
-        @EntityColumn
+        @Column
         public boolean isCounterEven() {
             return counter % 2 == 0;
         }
 
-        @EntityColumn
+        @Column
         public String getCounterName() {
             return getId().toString();
         }
 
-        @EntityColumn(name = "COUNTER_VERSION") // Custom name for storing
+        @Column(name = "COUNTER_VERSION") // Custom name for storing
                                                 // to check that querying is correct.
         public Version getCounterVersion() {
             return Version.newBuilder()
@@ -556,17 +556,17 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
                           .build();
         }
 
-        @EntityColumn
+        @Column
         public Timestamp getNow() {
             return Time.getCurrentTime();
         }
 
-        @EntityColumn
+        @Column
         public Project getCounterState() {
             return getState();
         }
 
-        @EntityColumn
+        @Column
         public int getProjectStatusValue() {
             return getState().getStatusValue();
         }

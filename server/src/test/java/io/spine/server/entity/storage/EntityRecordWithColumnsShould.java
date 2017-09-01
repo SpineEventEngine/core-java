@@ -34,7 +34,7 @@ import java.util.Collections;
 import java.util.Map;
 
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
-import static io.spine.server.entity.storage.Column.MemoizedValue;
+import static io.spine.server.entity.storage.EntityColumn.MemoizedValue;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.of;
 import static io.spine.server.storage.EntityField.version;
 import static io.spine.test.Verify.assertContainsKeyValue;
@@ -59,10 +59,10 @@ public class EntityRecordWithColumnsShould {
                                                     .withVersion(1)
                                                     .build();
         final String columnName = version.name();
-        final Column column = Columns.findColumn(VersionableEntity.class, columnName);
+        final EntityColumn column = Columns.findColumn(VersionableEntity.class, columnName);
         final MemoizedValue value = column.memoizeFor(entity);
 
-        final Map<String, Column.MemoizedValue> columns = singletonMap(columnName, value);
+        final Map<String, MemoizedValue> columns = singletonMap(columnName, value);
         final EntityRecordWithColumns recordWithColumns = of(record, columns);
         reserializeAndAssert(recordWithColumns);
     }
@@ -98,7 +98,7 @@ public class EntityRecordWithColumnsShould {
     @Test
     public void store_column_values() {
         final MemoizedValue mockValue = mock(MemoizedValue.class);
-        final Map<String, Column.MemoizedValue> columnsExpected =
+        final Map<String, MemoizedValue> columnsExpected =
                 Collections.<String, MemoizedValue>singletonMap("some-key", mockValue);
 
         final EntityRecordWithColumns record =
@@ -106,26 +106,23 @@ public class EntityRecordWithColumnsShould {
                    columnsExpected);
         assertTrue(record.hasColumns());
 
-        final Map<String, Column.MemoizedValue> columnsActual =
-                record.getColumnValues();
+        final Map<String, MemoizedValue> columnsActual = record.getColumnValues();
         assertMapsEqual(columnsExpected, columnsActual, "column values");
     }
 
     @Test
     public void store_column_definitions() {
         final MemoizedValue mockValue = mock(MemoizedValue.class);
-        final Column mockColumn = mock(Column.class);
+        final EntityColumn mockColumn = mock(EntityColumn.class);
         when(mockValue.getSourceColumn()).thenReturn(mockColumn);
 
         final String key = "arbitrary";
-        final Map<String, Column.MemoizedValue> columnsExpected =
-                Collections.<String, MemoizedValue>singletonMap(key, mockValue);
+        final Map<String, MemoizedValue> columnsExpected = singletonMap(key, mockValue);
 
-        final EntityRecordWithColumns record =
-                of(Sample.messageOfType(EntityRecord.class),
-                   columnsExpected);
+        final EntityRecordWithColumns record = of(Sample.messageOfType(EntityRecord.class),
+                                                  columnsExpected);
         assertTrue(record.hasColumns());
-        final Map<String, Column> columnsActual = record.getColumns();
+        final Map<String, EntityColumn> columnsActual = record.getColumns();
         assertContainsKeyValue(key, mockColumn, columnsActual);
     }
 
@@ -134,7 +131,7 @@ public class EntityRecordWithColumnsShould {
         final EntityRecordWithColumns record =
                 of(EntityRecord.getDefaultInstance());
         assertFalse(record.hasColumns());
-        final Map<String, Column.MemoizedValue> fields = record.getColumnValues();
+        final Map<String, MemoizedValue> fields = record.getColumnValues();
         assertEmpty(fields);
     }
 

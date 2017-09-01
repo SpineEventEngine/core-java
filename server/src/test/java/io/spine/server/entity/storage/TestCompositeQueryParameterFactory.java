@@ -30,7 +30,7 @@ import static io.spine.client.CompositeColumnFilter.CompositeOperator;
  */
 public class TestCompositeQueryParameterFactory {
 
-    public static CompositeQueryParameter createParams(Multimap<Column, ColumnFilter> filters,
+    public static CompositeQueryParameter createParams(Multimap<EntityColumn, ColumnFilter> filters,
                                                        CompositeOperator operator) {
         return CompositeQueryParameter.from(filters, operator);
     }

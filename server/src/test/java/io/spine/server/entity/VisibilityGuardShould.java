@@ -28,7 +28,7 @@ import io.spine.option.EntityOption.Visibility;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
-import io.spine.server.entity.storage.EntityColumn;
+import io.spine.server.entity.storage.Column;
 import io.spine.test.entity.FullAccessAggregate;
 import io.spine.test.entity.FullAccessAggregateVBuilder;
 import io.spine.test.entity.HiddenAggregate;
@@ -191,12 +191,12 @@ public class VisibilityGuardShould {
             super(id);
         }
 
-        @EntityColumn(name = COLUMN_NAME)
+        @Column(name = COLUMN_NAME)
         public int getInt() {
             return 0;
         }
 
-        @EntityColumn(name = COLUMN_NAME)
+        @Column(name = COLUMN_NAME)
         public long getLong() {
             return 0L;
         }

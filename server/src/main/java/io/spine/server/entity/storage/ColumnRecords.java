@@ -22,7 +22,7 @@ package io.spine.server.entity.storage;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
-import io.spine.server.entity.storage.Column.MemoizedValue;
+import io.spine.server.entity.storage.EntityColumn.MemoizedValue;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -37,7 +37,7 @@ import static com.google.common.collect.Sets.newHashSet;
 
 /**
  * A utility for dealing with the {@linkplain EntityRecordWithColumns} and
- * the {@linkplain Column Columns}.
+ * the {@linkplain EntityColumn entity columns}.
  *
  * @author Dmytro Dashenkov
  */
@@ -50,7 +50,7 @@ public final class ColumnRecords {
     /**
      * Feeds the given {@link EntityRecordWithColumns} to the given record representation.
      *
-     * <p>This method deals with the {@linkplain Column columns} only.
+     * <p>This method deals with the {@linkplain EntityColumn entity columns} only.
      * The {@link io.spine.server.entity.EntityRecord EntityRecord} should be handled separately
      * while persisting a record.
      *
@@ -59,8 +59,8 @@ public final class ColumnRecords {
      * @param recordWithColumns   the {@linkplain EntityRecordWithColumns} to persist
      * @param columnTypeRegistry  the {@link io.spine.server.storage.Storage Storage}
      *                            {@link ColumnTypeRegistry}
-     * @param mapColumnIdentifier a {@linkplain Function} mapping
-     *                            the {@linkplain Column#getStoredName()} column name for storing}
+     * @param mapColumnIdentifier a {@linkplain Function} mapping the column name
+     *                            {@linkplain EntityColumn#getStoredName()} for storing}
      *                            to the database specific column identifier
      * @param <D>                 the type of the database record
      * @param <I>                 the type of the column identifier
@@ -82,7 +82,7 @@ public final class ColumnRecords {
             final I columnIdentifier = mapColumnIdentifier.apply(column.getKey());
             checkNotNull(columnIdentifier);
             final MemoizedValue columnValue = column.getValue();
-            final Column columnMetadata = columnValue.getSourceColumn();
+            final EntityColumn columnMetadata = columnValue.getSourceColumn();
             @SuppressWarnings("unchecked") // We don't know the exact types of the value
             final ColumnType<Object, Object, D, I> columnType =
                     (ColumnType<Object, Object, D, I>) columnTypeRegistry.get(columnMetadata);
@@ -95,7 +95,7 @@ public final class ColumnRecords {
     }
 
     /**
-     * Obtains the method version annotated with {@link EntityColumn} for the specified method.
+     * Obtains the method version annotated with {@link Column} for the specified method.
      *
      * <p>Scans the specified method, the methods with the same signature
      * from the super classes and interfaces.
@@ -107,7 +107,7 @@ public final class ColumnRecords {
      */
     static Optional<Method> getAnnotatedVersion(Method method) {
         final Set<Method> annotatedVersions = newHashSet();
-        if (method.isAnnotationPresent(EntityColumn.class)) {
+        if (method.isAnnotationPresent(Column.class)) {
             annotatedVersions.add(method);
         }
         final Class<?> declaringClass = method.getDeclaringClass();
@@ -116,7 +116,7 @@ public final class ColumnRecords {
             final Optional<Method> optionalMethod = getMethodBySignature(ascendant, method);
             if (optionalMethod.isPresent()) {
                 final Method ascendantMethod = optionalMethod.get();
-                if (ascendantMethod.isAnnotationPresent(EntityColumn.class)) {
+                if (ascendantMethod.isAnnotationPresent(Column.class)) {
                     annotatedVersions.add(ascendantMethod);
                 }
             }

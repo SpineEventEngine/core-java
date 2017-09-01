@@ -20,7 +20,7 @@
 
 package io.spine.server.entity;
 
-import io.spine.server.entity.storage.EntityColumn;
+import io.spine.server.entity.storage.Column;
 
 /**
  * The contract for the test {@linkplain Entity entities} which serve for testing the subclasses of
@@ -32,6 +32,6 @@ import io.spine.server.entity.storage.EntityColumn;
 public interface TestEntityWithStringColumn {
 
     @SuppressWarnings("unused") // Reflective access
-    @EntityColumn
+    @Column
     String getIdString();
 }

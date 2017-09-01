@@ -24,7 +24,7 @@ import com.google.common.testing.EqualsTester;
 import org.junit.Test;
 
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
-import static io.spine.server.entity.storage.Column.MemoizedValue;
+import static io.spine.server.entity.storage.EntityColumn.MemoizedValue;
 import static io.spine.server.entity.storage.ColumnShould.TestEntity;
 import static io.spine.server.entity.storage.Columns.findColumn;
 import static io.spine.server.storage.LifecycleFlagField.archived;
@@ -40,7 +40,7 @@ public class ColumnMemoizedValueShould {
 
     @Test
     public void be_serializable() {
-        final Column column = findColumn(TestEntity.class, MUTABLE_STATE_COLUMN);
+        final EntityColumn column = findColumn(TestEntity.class, MUTABLE_STATE_COLUMN);
         final TestEntity entity = new TestEntity("my-id");
         entity.setMutableState(42);
         final MemoizedValue value = column.memoizeFor(entity);
@@ -52,16 +52,16 @@ public class ColumnMemoizedValueShould {
     public void support_equality() {
         /*
         4 equality groups represent following cases:
-            A - 3 values of the same Column memoized on the same instance of Entity;
-            A-mutated - the value of the same Column on the same object but after the field change;
-            B - the value of a different Column on the same instance;
-            C - the value of a mock Column (used to ensure that MemoizedValue#equals is decoupled
-                from the Column#equals).
+            A - 3 values of the same column memoized on the same instance of Entity;
+            A-mutated - the value of the same column on the same object but after the field change;
+            B - the value of a different column on the same instance;
+            C - the value of a mock column (used to ensure that MemoizedValue#equals is decoupled
+                from the EntityColumn#equals).
          */
 
-        final Column columnA = findColumn(TestEntity.class, MUTABLE_STATE_COLUMN);
-        final Column columnB = findColumn(TestEntity.class, ARCHIVED_COLUMN);
-        final Column columnC = mock(Column.class);
+        final EntityColumn columnA = findColumn(TestEntity.class, MUTABLE_STATE_COLUMN);
+        final EntityColumn columnB = findColumn(TestEntity.class, ARCHIVED_COLUMN);
+        final EntityColumn columnC = mock(EntityColumn.class);
 
         final TestEntity entity = new TestEntity("ID");
 

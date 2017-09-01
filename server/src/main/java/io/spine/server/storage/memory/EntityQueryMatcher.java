@@ -26,8 +26,8 @@ import com.google.protobuf.Any;
 import io.spine.Identifier;
 import io.spine.client.ColumnFilter;
 import io.spine.client.CompositeColumnFilter.CompositeOperator;
-import io.spine.server.entity.storage.Column;
-import io.spine.server.entity.storage.Column.MemoizedValue;
+import io.spine.server.entity.storage.EntityColumn;
+import io.spine.server.entity.storage.EntityColumn.MemoizedValue;
 import io.spine.server.entity.storage.CompositeQueryParameter;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
@@ -108,9 +108,9 @@ final class EntityQueryMatcher<I> implements Predicate<EntityRecordWithColumns> 
         return true;
     }
 
-    private static boolean checkAll(Multimap<Column, ColumnFilter> filters,
+    private static boolean checkAll(Multimap<EntityColumn, ColumnFilter> filters,
                                     Map<String, MemoizedValue> entityColumns) {
-        for (Map.Entry<Column, ColumnFilter> filter : filters.entries()) {
+        for (Map.Entry<EntityColumn, ColumnFilter> filter : filters.entries()) {
             final String columnName = filter.getKey()
                                             .getName();
             final MemoizedValue memoizedValue = entityColumns.get(columnName);
@@ -122,9 +122,9 @@ final class EntityQueryMatcher<I> implements Predicate<EntityRecordWithColumns> 
         return true;
     }
 
-    private static boolean checkEither(Multimap<Column, ColumnFilter> filters,
+    private static boolean checkEither(Multimap<EntityColumn, ColumnFilter> filters,
                                        Map<String, MemoizedValue> entityColumns) {
-        for (Map.Entry<Column, ColumnFilter> filter : filters.entries()) {
+        for (Map.Entry<EntityColumn, ColumnFilter> filter : filters.entries()) {
             final String columnName = filter.getKey()
                                             .getName();
             final MemoizedValue memoizedValue = entityColumns.get(columnName);

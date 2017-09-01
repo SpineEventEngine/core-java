@@ -84,7 +84,7 @@ public class ColumnTypeRegistryShould {
                                   .put(GeneratedMessageV3.class, new GeneratedMessageType())
                                   .put(AbstractMessage.class, new AbstractMessageType())
                                   .build();
-        final Column column = mockProperty(Any.class);
+        final EntityColumn column = mockProperty(Any.class);
         final ColumnType type = registry.get(column);
         assertNotNull(type);
         assertThat(type, instanceOf(GeneratedMessageType.class));
@@ -104,9 +104,8 @@ public class ColumnTypeRegistryShould {
         assertEquals(integerColumnType, intColumnType);
     }
 
-    private static <T> Column mockProperty(Class<T> cls) {
-        @SuppressWarnings("unchecked")
-        final Column column = (Column) mock(Column.class);
+    private static <T> EntityColumn mockProperty(Class<T> cls) {
+        final EntityColumn column = mock(EntityColumn.class);
         when(column.getType()).thenReturn(cls);
         return column;
     }

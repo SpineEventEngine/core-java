@@ -70,7 +70,7 @@ public class ColumnsShould {
     @Test
     public void extract_no_fields_if_none_defined() {
         final Entity entity = new EntityWithNoStorageFields(STRING_ID);
-        final Map<String, Column.MemoizedValue> fields = Columns.from(entity);
+        final Map<String, EntityColumn.MemoizedValue> fields = Columns.from(entity);
         assertNotNull(fields);
         assertEmpty(fields);
     }
@@ -78,20 +78,20 @@ public class ColumnsShould {
     @Test
     public void extract_fields_from_implemented_interfaces() {
         final Entity entity = new EntityWithColumnFromInterface(STRING_ID);
-        final Map<String, Column.MemoizedValue> fields = Columns.from(entity);
+        final Map<String, EntityColumn.MemoizedValue> fields = Columns.from(entity);
         assertNotEmpty(fields);
     }
 
     @Test
     public void extract_column_values_with_names_for_storing() {
         final EntityWithManyGetters entity = new EntityWithManyGetters(STRING_ID);
-        final Map<String, Column.MemoizedValue> fields = Columns.from(entity);
+        final Map<String, EntityColumn.MemoizedValue> fields = Columns.from(entity);
         assertNotNull(fields);
 
         assertSize(3, fields);
 
         final String floatNullKey = "floatNull";
-        final Column.MemoizedValue floatMemoizedNull = fields.get(floatNullKey);
+        final EntityColumn.MemoizedValue floatMemoizedNull = fields.get(floatNullKey);
         assertNotNull(floatMemoizedNull);
         assertNull(floatMemoizedNull.getValue());
 
@@ -108,15 +108,15 @@ public class ColumnsShould {
     @Test
     public void ignore_non_public_getters_with_column_annotation_from_super_class() {
         final Entity entity = new EntityWithManyGettersDescendant(STRING_ID);
-        final Map<String, Column.MemoizedValue> fields = Columns.from(entity);
+        final Map<String, EntityColumn.MemoizedValue> fields = Columns.from(entity);
         assertSize(3, fields);
     }
 
     @Test
     public void ignore_static_members() {
-        final Map<String, Column.MemoizedValue> fields =
+        final Map<String, EntityColumn.MemoizedValue> fields =
                 Columns.from(new EntityWithManyGetters(STRING_ID));
-        final Column.MemoizedValue staticValue = fields.get("staticMember");
+        final EntityColumn.MemoizedValue staticValue = fields.get("staticMember");
         assertNull(staticValue);
     }
 
@@ -146,7 +146,7 @@ public class ColumnsShould {
     public void retrieve_column_metadata_from_given_class() {
         final Class<? extends Entity<?, ?>> entityClass = RealLifeEntity.class;
         final String existingColumnName = archived.name();
-        final Column archivedColumn = Columns.findColumn(entityClass, existingColumnName);
+        final EntityColumn archivedColumn = Columns.findColumn(entityClass, existingColumnName);
         assertNotNull(archivedColumn);
         assertEquals(existingColumnName, archivedColumn.getName());
     }
@@ -183,33 +183,33 @@ public class ColumnsShould {
             super(id);
         }
 
-        @EntityColumn(name = CUSTOM_COLUMN_NAME)
+        @Column(name = CUSTOM_COLUMN_NAME)
         public int getIntegerFieldValue() {
             return 0;
         }
 
         @Nullable
-        @EntityColumn
+        @Column
         public Float getFloatNull() {
             return null;
         }
 
-        @EntityColumn
+        @Column
         public Project getSomeMessage() {
             return someMessage;
         }
 
-        @EntityColumn
+        @Column
         int getSomeNonPublicMethod() {
             throw new AssertionError("getSomeNonPublicMethod invoked");
         }
 
-        @EntityColumn
+        @Column
         public void getSomeVoid() {
             throw new AssertionError("getSomeVoid invoked");
         }
 
-        @EntityColumn
+        @Column
         public static int getStaticMember() {
             return 1024;
         }
@@ -250,12 +250,12 @@ public class ColumnsShould {
             super(id);
         }
 
-        @EntityColumn
+        @Column
         public Timestamp getSomeTime() {
             return Time.getCurrentTime();
         }
 
-        @EntityColumn
+        @Column
         public boolean isVisible() {
             return true;
         }
@@ -265,7 +265,7 @@ public class ColumnsShould {
     public interface InterfaceWithEntityColumn {
 
         // The column annotation from the interface should be taken into account.
-        @EntityColumn
+        @Column
         int getIntegerFieldValue();
     }
 
@@ -288,12 +288,12 @@ public class ColumnsShould {
             super(id);
         }
 
-        @EntityColumn(name = CUSTOM_COLUMN_NAME)
+        @Column(name = CUSTOM_COLUMN_NAME)
         public int getValue() {
             return 0;
         }
 
-        @EntityColumn(name = CUSTOM_COLUMN_NAME)
+        @Column(name = CUSTOM_COLUMN_NAME)
         public long getLongValue() {
             return 0;
         }
