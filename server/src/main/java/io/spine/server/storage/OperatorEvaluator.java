@@ -18,10 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.storage.memory;
+package io.spine.server.storage;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Timestamp;
+import io.spine.annotation.Internal;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
@@ -39,7 +40,8 @@ import static java.lang.String.format;
  * @author Dmytro Dashenkov
  * @see io.spine.client.CompositeColumnFilter.CompositeOperator for the comparison strategies
  */
-enum OperatorEvaluator {
+@Internal
+public enum OperatorEvaluator {
 
     EQUAL {
         @Override
@@ -113,7 +115,7 @@ enum OperatorEvaluator {
      *
      * <p>For example, if operands where {@code 42} and {@code 9} (exactly in that order) and
      * the operator was {@link Operator#GREATER_THAN GREATER_THAN}, then this function could be
-     * expressed as {@code 42 > 8}. The function returns the {@code boolean} result of
+     * expressed as {@code 42 > 9}. The function returns the {@code boolean} result of
      * the evaluation.
      *
      * @param left     the left operand
@@ -125,7 +127,7 @@ enum OperatorEvaluator {
      *                                       <a href="supported_types">not supported</a> for
      *                                       the given data types
      */
-    static <T> boolean eval(@Nullable T left, Operator operator, @Nullable T right)
+    public static <T> boolean eval(@Nullable T left, Operator operator, @Nullable T right)
             throws UnsupportedOperationException {
         checkNotNull(operator);
         final OperatorEvaluator evaluator = EVALUATORS.get(operator);
@@ -142,6 +144,4 @@ enum OperatorEvaluator {
      * @return {@code true} if the expression evaluates into {@code true}, {@code false} otherwise
      */
     abstract boolean eval(@Nullable Object left, @Nullable Object right);
-
-
 }
