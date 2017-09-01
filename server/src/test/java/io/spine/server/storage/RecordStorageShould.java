@@ -549,7 +549,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         }
 
         @Column(name = "COUNTER_VERSION") // Custom name for storing
-                                                // to check that querying is correct.
+                                          // to check that querying is correct.
         public Version getCounterVersion() {
             return Version.newBuilder()
                           .setNumber(counter)

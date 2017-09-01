@@ -61,8 +61,8 @@ import static java.lang.String.format;
  * serializable, otherwise a runtime exception is thrown when trying to get an instance of
  * {@link EntityColumn}.
  *
- * <p>When passing an instance of an already known {@link Entity} type, the getters are retrieved
- * from a cache and are not updated.
+ * <p>When passing an instance of an already known {@link Entity} type,
+ * the getters are retrieved from a cache and are not updated.
  *
  * @author Dmytro Dashenkov
  * @see EntityColumn
@@ -136,7 +136,7 @@ public class Columns {
      * <p>If no column is found, an {@link IllegalArgumentException} is thrown.
      *
      * @param entityClass the class containing the {@link EntityColumn} definition
-     * @param columnName  the name of the {@link EntityColumn}
+     * @param columnName  the entity column {@linkplain EntityColumn#getName() name}
      * @return an instance of {@link EntityColumn} with the given name
      * @throws IllegalArgumentException if the {@link EntityColumn} is not found
      */

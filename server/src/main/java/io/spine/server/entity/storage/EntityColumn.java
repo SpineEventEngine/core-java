@@ -55,6 +55,18 @@ import static java.lang.reflect.Modifier.isStatic;
  * <p>Columns are inherited (both from classes and from interfaces).
  * A getter for a column should be annotated only once, i.e. in the place of its declaration.
  *
+ * <h2>Column names</h2>
+ *
+ * <p>A column has different names for storing and for querying.
+ *
+ * <p>A {@linkplain #getName() name} for working with {@linkplain EntityQueries queries}
+ * is determined by a name of column getter, e.g. {@code value} for {@code getValue()}.
+ * A client should specify this value to a {@linkplain io.spine.client.ColumnFilters
+ * column filters}.
+ *
+ * <p>A {@linkplain #getStoredName() name}, which is used for keeping a column in a {@code Storage}
+ * is determined by the column annotation {@linkplain Column#name() property}.
+ *
  * <h2>Examples</h2>
  *
  * <p>These methods represent the columns:
