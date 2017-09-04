@@ -206,7 +206,7 @@ public class ColumnShould {
 
     @Test(expected = IllegalStateException.class)
     public void not_allow_redefine_column_annotation() {
-        forMethod("getValue", EntityRedefiningColumnAnnotation.class);
+        forMethod("getVersion", EntityRedefiningColumnAnnotation.class);
     }
 
     private static EntityColumn forMethod(String name, Class<?> enclosingClass) {
