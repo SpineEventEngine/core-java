@@ -40,7 +40,7 @@ import java.util.Map;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
 import static io.spine.protobuf.TypeConverter.toObject;
-import static io.spine.server.storage.memory.OperatorEvaluator.eval;
+import static io.spine.server.storage.OperatorEvaluator.eval;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
@@ -56,7 +56,7 @@ final class EntityQueryMatcher<I> implements Predicate<EntityRecordWithColumns> 
     private final Collection<I> acceptedIds;
     private final QueryParameters queryParams;
 
-    public EntityQueryMatcher(EntityQuery<I> query) {
+    EntityQueryMatcher(EntityQuery<I> query) {
         checkNotNull(query);
         this.acceptedIds = query.getIds();
         this.queryParams = query.getParameters();
