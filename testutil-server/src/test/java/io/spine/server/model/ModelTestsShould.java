@@ -26,12 +26,21 @@ import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.event.EventBus;
 import io.spine.test.Tests;
+import org.junit.Before;
 import org.junit.Test;
 
 /**
  * @author Alexander Yevsyukov
  */
 public class ModelTestsShould {
+
+    private final Model model = Model.getInstance();
+
+    @Before
+    public void setUp() throws Exception {
+        // The model should not be polluted by the previously executed tests.
+        model.clear();
+    }
 
     @Test
     public void have_utility_ctor() {
@@ -40,23 +49,36 @@ public class ModelTestsShould {
 
     @Test
     public void clear_the_model() {
-        final Model model = Model.getInstance();
 
-        // This adds new class to the model.
+        // This adds a command handler for `com.google.protobuf.Timestamp`.
         model.asCommandHandlerClass(TestCommandHandler.class);
 
         ModelTests.clearModel();
 
-        // This should pass as we cleared the model.
-        model.asCommandHandlerClass(TestCommandHandler.class);
+        // This should pass as we cleared the model,
+        // i.e. there is no registered command handler for `com.google.protobuf.Timestamp`.
+        model.asCommandHandlerClass(DuplicatedCommandHandler.class);
     }
 
     private static class TestCommandHandler extends CommandHandler {
-
         private TestCommandHandler(EventBus eventBus) {
             super(eventBus);
         }
 
+        @Assign
+        Empty handle(Timestamp cmd) {
+            return Empty.getDefaultInstance();
+        }
+    }
+
+    private static class DuplicatedCommandHandler extends CommandHandler {
+        private DuplicatedCommandHandler(EventBus eventBus) {
+            super(eventBus);
+        }
+
+        /**
+         * Handles the same command as {@link TestCommandHandler#handle(Timestamp)}.
+         */
         @Assign
         Empty handle(Timestamp cmd) {
             return Empty.getDefaultInstance();
