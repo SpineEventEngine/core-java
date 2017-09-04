@@ -20,7 +20,7 @@
 
 package io.spine.server.entity;
 
-import javax.persistence.Column;
+import io.spine.server.entity.storage.Column;
 
 /**
  * The contract for the test {@linkplain Entity entities} which serve for testing the subclasses of

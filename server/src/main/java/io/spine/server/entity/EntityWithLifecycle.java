@@ -22,10 +22,10 @@ package io.spine.server.entity;
 
 import com.google.common.base.Predicate;
 import com.google.protobuf.Message;
+import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 
 import javax.annotation.Nullable;
-import javax.persistence.Column;
 
 /**
  * An entity which has {@linkplain LifecycleFlags lifecycle flags}.

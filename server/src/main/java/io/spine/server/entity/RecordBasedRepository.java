@@ -280,8 +280,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      *
      * <p>Field mask is applied according to <a href="https://goo.gl/tW5wIU">FieldMask specs</a>.
      *
-     * <p>The field paths in the Column field filters are specified to contain a single path
-     * member - the name of the Entity Column.
+     * <p>The field paths in the entity column field filters are specified
+     * to contain a single path member - the name of the entity column.
      *
      * <p>The filtering process is delegated to the underlying {@link RecordStorage}.
      *

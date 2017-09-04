@@ -21,16 +21,23 @@
 package io.spine.server.entity.storage;
 
 import com.google.common.base.Function;
-import io.spine.server.entity.storage.Column.MemoizedValue;
+import com.google.common.base.Optional;
+import io.spine.server.entity.storage.EntityColumn.MemoizedValue;
 
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.Sets.newHashSet;
 
 /**
  * A utility for dealing with the {@linkplain EntityRecordWithColumns} and
- * the {@linkplain Column Columns}.
+ * the {@linkplain EntityColumn entity columns}.
  *
  * @author Dmytro Dashenkov
  */
@@ -43,7 +50,7 @@ public final class ColumnRecords {
     /**
      * Feeds the given {@link EntityRecordWithColumns} to the given record representation.
      *
-     * <p>This method deals with the {@linkplain Column columns} only.
+     * <p>This method deals with the {@linkplain EntityColumn entity columns} only.
      * The {@link io.spine.server.entity.EntityRecord EntityRecord} should be handled separately
      * while persisting a record.
      *
@@ -52,9 +59,9 @@ public final class ColumnRecords {
      * @param recordWithColumns   the {@linkplain EntityRecordWithColumns} to persist
      * @param columnTypeRegistry  the {@link io.spine.server.storage.Storage Storage}
      *                            {@link ColumnTypeRegistry}
-     * @param mapColumnIdentifier a {@linkplain Function} mapping
-     *                            the {@linkplain Column#getName() column name} to the database
-     *                            specific column identifier
+     * @param mapColumnIdentifier a {@linkplain Function} mapping the column name
+     *                            {@linkplain EntityColumn#getStoredName()} for storing}
+     *                            to the database specific column identifier
      * @param <D>                 the type of the database record
      * @param <I>                 the type of the column identifier
      */
@@ -75,7 +82,7 @@ public final class ColumnRecords {
             final I columnIdentifier = mapColumnIdentifier.apply(column.getKey());
             checkNotNull(columnIdentifier);
             final MemoizedValue columnValue = column.getValue();
-            final Column columnMetadata = columnValue.getSourceColumn();
+            final EntityColumn columnMetadata = columnValue.getSourceColumn();
             @SuppressWarnings("unchecked") // We don't know the exact types of the value
             final ColumnType<Object, Object, D, I> columnType =
                     (ColumnType<Object, Object, D, I>) columnTypeRegistry.get(columnMetadata);
@@ -84,6 +91,75 @@ public final class ColumnRecords {
                                         columnMetadata.getType()
                                                       .getCanonicalName()));
             setValue(columnValue, destination, columnIdentifier, columnType);
+        }
+    }
+
+    /**
+     * Obtains the method version annotated with {@link Column} for the specified method.
+     *
+     * <p>Scans the specified method, the methods with the same signature
+     * from the super classes and interfaces.
+     *
+     * @param method the method to find the annotated version
+     * @return the annotated version of the specified method
+     * @throws IllegalStateException if there is more than one annotated method is found
+     *                               in the scanned classes
+     */
+    static Optional<Method> getAnnotatedVersion(Method method) {
+        final Set<Method> annotatedVersions = newHashSet();
+        if (method.isAnnotationPresent(Column.class)) {
+            annotatedVersions.add(method);
+        }
+        final Class<?> declaringClass = method.getDeclaringClass();
+        final Iterable<Class<?>> ascendants = getSuperClassesAndInterfaces(declaringClass);
+        for (Class<?> ascendant : ascendants) {
+            final Optional<Method> optionalMethod = getMethodBySignature(ascendant, method);
+            if (optionalMethod.isPresent()) {
+                final Method ascendantMethod = optionalMethod.get();
+                if (ascendantMethod.isAnnotationPresent(Column.class)) {
+                    annotatedVersions.add(ascendantMethod);
+                }
+            }
+        }
+        checkState(annotatedVersions.size() <= 1,
+                   "An entity column getter should be annotated only once. " +
+                           "Found the annotated versions: %s.", annotatedVersions);
+        if (annotatedVersions.isEmpty()) {
+            return Optional.absent();
+        } else {
+            final Method annotatedVersion = annotatedVersions.iterator()
+                                                             .next();
+            return Optional.of(annotatedVersion);
+        }
+    }
+
+    private static Iterable<Class<?>> getSuperClassesAndInterfaces(Class<?> cls) {
+        final Collection<Class<?>> interfaces = Arrays.asList(cls.getInterfaces());
+        final Collection<Class<?>> result = newHashSet(interfaces);
+        Class<?> currentSuper = cls.getSuperclass();
+        while (currentSuper != null) {
+            result.add(currentSuper);
+            currentSuper = currentSuper.getSuperclass();
+        }
+        return result;
+    }
+
+    /**
+     * Obtains the method from the specified class with the same signature as the specified method.
+     *
+     * @param target the class to obtain the method with the signature
+     * @param method the method to get the signature
+     * @return the method with the same signature obtained from the specified class
+     */
+    private static Optional<Method> getMethodBySignature(Class<?> target, Method method) {
+        checkArgument(!method.getDeclaringClass()
+                             .equals(target));
+        try {
+            final Method methodFromTarget = target.getMethod(method.getName(),
+                                                             method.getParameterTypes());
+            return Optional.of(methodFromTarget);
+        } catch (NoSuchMethodException ignored) {
+            return Optional.absent();
         }
     }
 

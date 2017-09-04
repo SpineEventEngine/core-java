@@ -32,7 +32,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 /**
- * A registry of type conversion strategies for the {@linkplain Column columns}.
+ * A registry of type conversion strategies for the {@linkplain EntityColumn entity columns}.
  *
  * <p>To register new {@link Class} to {@link ColumnType} mapping, do:
  * <pre>
@@ -50,15 +50,15 @@ import static com.google.common.base.Preconditions.checkState;
  * </pre>
  *
  * <p>To retrieve the {@link ColumnType} instance (in case if you implement your own
- * {@linkplain io.spine.server.storage.Storage Storage}) call {@link #get(Column)}
+ * {@linkplain io.spine.server.storage.Storage Storage}) call {@link #get(EntityColumn)}
  * on the column which you'd like to retrieve the {@linkplain ColumnType type} for.
  *
  * <p>Note, that in the example above, if you try to get the {@linkplain ColumnType type} for
- * a {@link Column} of e.g. class {@code java.sql.Timestamp}, which {@code extends Date} unless you
- * specify a {@link ColumnType} for {@code java.sql.Timestamp} explicitly, the same value as for
- * the class {@code Date} will be returned. I.e. the {@link ColumnType} of a parent class can be
- * used for a derived class. But be careful, the {@code interface}s are not supported within this
- * feature.
+ * a {@link EntityColumn} of e.g. class {@code java.sql.Timestamp}, which {@code extends Date}
+ * unless you specify a {@link ColumnType} for {@code java.sql.Timestamp} explicitly,
+ * the same value as for the class {@code Date} will be returned. I.e. the {@link ColumnType}
+ * of a parent class can be used for a derived class.
+ * But be careful, the {@code interface}s are not supported within this feature.
  *
  * <p>If several {@linkplain ColumnType ColumnTypes} are written under a single {@linkplain Class}
  * object, the latest {@code put} overrides all the previous ones.
@@ -75,21 +75,21 @@ public final class ColumnTypeRegistry<C extends ColumnType> {
     }
 
     /**
-     * Retrieves the {@link ColumnType} for specified {@link Column}.
+     * Retrieves the {@link ColumnType} for specified {@link EntityColumn}.
      *
      * <p>By default, this method returns the {@link ColumnType} for the
-     * {@linkplain Column column's} {@linkplain Column#getType() type}.
+     * {@linkplain EntityColumn column's} {@linkplain EntityColumn#getType() type}.
      *
-     * <p>If the {@link ColumnType} was not found by the {@code class} of the {@linkplain Column},
+     * <p>If the {@link ColumnType} was not found by the {@code class} of the {@link EntityColumn},
      * its superclasses are checked one by one until a {@link ColumnType} is found or until
      * the look up reaches the class representing {@link Object}.
      *
      * <p>If no {@link ColumnType} is found, an {@link IllegalStateException} is thrown.
      *
-     * @param field the {@link Column} to get type conversion strategy for
-     * @return the {@link ColumnType} for the given {@link Column}
+     * @param field the {@link EntityColumn} to get type conversion strategy for
+     * @return the {@link ColumnType} for the given {@link EntityColumn}
      */
-    public C get(Column field) {
+    public C get(EntityColumn field) {
         checkNotNull(field);
 
         Class javaType = field.getType();

@@ -26,8 +26,8 @@ import com.google.protobuf.Any;
 import io.spine.Identifier;
 import io.spine.client.ColumnFilter;
 import io.spine.client.CompositeColumnFilter.CompositeOperator;
-import io.spine.server.entity.storage.Column;
-import io.spine.server.entity.storage.Column.MemoizedValue;
+import io.spine.server.entity.storage.EntityColumn;
+import io.spine.server.entity.storage.EntityColumn.MemoizedValue;
 import io.spine.server.entity.storage.CompositeQueryParameter;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
@@ -38,6 +38,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Maps.newHashMap;
 import static io.spine.protobuf.TypeConverter.toObject;
 import static io.spine.server.storage.OperatorEvaluator.eval;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
@@ -85,7 +86,7 @@ final class EntityQueryMatcher<I> implements Predicate<EntityRecordWithColumns> 
 
     @SuppressWarnings("EnumSwitchStatementWhichMissesCases") // Only valuable cases covered
     private boolean columnValuesMatch(EntityRecordWithColumns record) {
-        final Map<String, MemoizedValue> entityColumns = record.getColumnValues();
+        final Map<String, MemoizedValue> entityColumns = getColumnValues(record);
         boolean match;
         for (CompositeQueryParameter filter : queryParams) {
             final CompositeOperator operator = filter.getOperator();
@@ -107,10 +108,11 @@ final class EntityQueryMatcher<I> implements Predicate<EntityRecordWithColumns> 
         return true;
     }
 
-    private static boolean checkAll(Multimap<Column, ColumnFilter> filters,
+    private static boolean checkAll(Multimap<EntityColumn, ColumnFilter> filters,
                                     Map<String, MemoizedValue> entityColumns) {
-        for (Map.Entry<Column, ColumnFilter> filter : filters.entries()) {
-            final String columnName = filter.getKey().getName();
+        for (Map.Entry<EntityColumn, ColumnFilter> filter : filters.entries()) {
+            final String columnName = filter.getKey()
+                                            .getName();
             final MemoizedValue memoizedValue = entityColumns.get(columnName);
             final boolean matches = checkSingleParameter(filter.getValue(), memoizedValue);
             if (!matches) {
@@ -120,10 +122,11 @@ final class EntityQueryMatcher<I> implements Predicate<EntityRecordWithColumns> 
         return true;
     }
 
-    private static boolean checkEither(Multimap<Column, ColumnFilter> filters,
+    private static boolean checkEither(Multimap<EntityColumn, ColumnFilter> filters,
                                        Map<String, MemoizedValue> entityColumns) {
-        for (Map.Entry<Column, ColumnFilter> filter : filters.entries()) {
-            final String columnName = filter.getKey().getName();
+        for (Map.Entry<EntityColumn, ColumnFilter> filter : filters.entries()) {
+            final String columnName = filter.getKey()
+                                            .getName();
             final MemoizedValue memoizedValue = entityColumns.get(columnName);
             final boolean matches = checkSingleParameter(filter.getValue(), memoizedValue);
             if (matches) {
@@ -148,6 +151,25 @@ final class EntityQueryMatcher<I> implements Predicate<EntityRecordWithColumns> 
             value = wrappedValue;
         }
         final boolean result = eval(actualValue.getValue(), filter.getOperator(), value);
+        return result;
+    }
+
+    /**
+     * Obtains entity column values for the specified record.
+     *
+     * <p>Takes into account particularities of memory-based implementations.
+     *
+     * @param record the record to obtain column values
+     * @return column values suited for memory-based implementations
+     */
+    private static Map<String, MemoizedValue> getColumnValues(EntityRecordWithColumns record) {
+        final Map<String, MemoizedValue> result = newHashMap();
+        final Map<String, MemoizedValue> valuesWithDefaultNames = record.getColumnValues();
+        for (MemoizedValue memoizedValue : valuesWithDefaultNames.values()) {
+            final String columnName = memoizedValue.getSourceColumn()
+                                                   .getName();
+            result.put(columnName, memoizedValue);
+        }
         return result;
     }
 }

@@ -41,7 +41,7 @@ public final class TestEntityRecordWithColumnsFactory {
      */
     public static EntityRecordWithColumns createRecord(
             EntityRecord record,
-            Map<String, Column.MemoizedValue> storageFields) {
+            Map<String, EntityColumn.MemoizedValue> storageFields) {
         return EntityRecordWithColumns.of(record, storageFields);
     }
 }

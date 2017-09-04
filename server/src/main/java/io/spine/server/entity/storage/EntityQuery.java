@@ -49,7 +49,7 @@ import static io.spine.server.storage.LifecycleFlagField.deleted;
  * {@link io.spine.server.storage.RecordStorage RecordStorage}.
  *
  * <p>The query contains the acceptable values of the record IDs and the
- * {@linkplain Column Entity Columns}.
+ * {@linkplain EntityColumn entity columns}.
  *
  * <p>A storage may ignore the query or throw an exception if it's specified (see
  * {@link io.spine.server.stand.StandStorage StandSotrage}). By default,
@@ -61,7 +61,7 @@ import static io.spine.server.storage.LifecycleFlagField.deleted;
  * <p>Empty {@linkplain EntityQuery#getParameters() query parameters} are not considered when
  * the actual data query is performed as well as the parameters which have no accepted values.
  *
- * <p>If the {@linkplain Column Entity Column} specified in the query is absent in a record,
+ * <p>If the {@link EntityColumn} specified in the query is absent in a record,
  * the record is considered <b>not matching</b>.
  *
  * <p>If both the {@linkplain EntityQuery#getIds() accepted IDs set} and
@@ -89,9 +89,9 @@ public final class EntityQuery<I> implements Serializable {
      * Creates new instance of {@code EntityQuery}.
      *
      * @param ids        accepted ID values
-     * @param parameters the values of the {@link Column}s stored in a mapping of the
-     *                   {@link Column}'s metadata to the (multiple) acceptable values; if there are
-     *                   no values, all the values are matched upon such Column
+     * @param parameters the values of the {@link EntityColumn}s stored in a mapping of the
+     *                   {@link EntityColumn}'s metadata to the (multiple) acceptable values;
+     *                   if there are no values, all the values are matched upon such a column
      * @return new instance of {@code EntityQuery}
      */
     static <I> EntityQuery<I> of(Collection<I> ids, QueryParameters parameters) {
@@ -114,7 +114,7 @@ public final class EntityQuery<I> implements Serializable {
     }
 
     /**
-     * @return a {@link Map} of the {@linkplain Column Column metadata} to the column required value
+     * @return a {@link Map} of the {@link EntityColumn} metadata to the column required value
      */
     public QueryParameters getParameters() {
         return parameters;
@@ -144,8 +144,8 @@ public final class EntityQuery<I> implements Serializable {
     public EntityQuery<I> withLifecycleFlags(Class<? extends EntityWithLifecycle<I, ?>> cls) {
         checkState(!isLifecycleAttributesSet(),
                    "The query overrides Lifecycle Flags default values.");
-        final Column archivedColumn = findColumn(cls, archived.name());
-        final Column deletedColumn = findColumn(cls, deleted.name());
+        final EntityColumn archivedColumn = findColumn(cls, archived.name());
+        final EntityColumn deletedColumn = findColumn(cls, deleted.name());
         final CompositeQueryParameter lifecycleParameter = CompositeQueryParameter.from(
                 ImmutableMultimap.of(archivedColumn, eq(archived.name(), false),
                                      deletedColumn, eq(deletedColumn.getName(), false)),

@@ -49,9 +49,9 @@ import static io.spine.server.storage.LifecycleFlagField.deleted;
  */
 public final class CompositeQueryParameter implements Serializable {
 
-    private static final Predicate<Column> isLifecycleColumn = new Predicate<Column>() {
+    private static final Predicate<EntityColumn> isLifecycleColumn = new Predicate<EntityColumn>() {
         @Override
-        public boolean apply(@Nullable Column column) {
+        public boolean apply(@Nullable EntityColumn column) {
             checkNotNull(column);
             final boolean result = archived.name().equals(column.getName())
                     || deleted.name().equals(column.getName());
@@ -63,7 +63,7 @@ public final class CompositeQueryParameter implements Serializable {
 
     private final CompositeOperator operator;
 
-    private final ImmutableMultimap<Column, ColumnFilter> filters;
+    private final ImmutableMultimap<EntityColumn, ColumnFilter> filters;
 
     /**
      * A flag that shows if current instance of {@code CompositeQueryParameter} has
@@ -79,7 +79,7 @@ public final class CompositeQueryParameter implements Serializable {
      * @param operator the operator to apply to the given filters
      * @return new instance of {@code CompositeQueryParameter}
      */
-    static CompositeQueryParameter from(Multimap<Column, ColumnFilter> filters,
+    static CompositeQueryParameter from(Multimap<EntityColumn, ColumnFilter> filters,
                                         CompositeOperator operator) {
         checkNotNull(filters);
         checkNotNull(operator);
@@ -89,13 +89,13 @@ public final class CompositeQueryParameter implements Serializable {
     }
 
     private CompositeQueryParameter(CompositeOperator operator,
-                                    Multimap<Column, ColumnFilter> filters) {
+                                    Multimap<EntityColumn, ColumnFilter> filters) {
         this.operator = operator;
         this.filters = copyOf(filters);
         this.hasLifecycle = containsLifecycle(filters.keySet());
     }
 
-    private static boolean containsLifecycle(Iterable<Column> columns) {
+    private static boolean containsLifecycle(Iterable<EntityColumn> columns) {
         final boolean result = Iterables.any(columns, isLifecycleColumn);
         return result;
     }
@@ -108,10 +108,10 @@ public final class CompositeQueryParameter implements Serializable {
     }
 
     /**
-     * @return the joined {@link ColumnFilter Column filters}
+     * @return the joined entity column {@linkplain ColumnFilter filters}
      */
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // Immutable structure
-    public ImmutableMultimap<Column, ColumnFilter> getFilters() {
+    public ImmutableMultimap<EntityColumn, ColumnFilter> getFilters() {
         return filters;
     }
 
@@ -127,7 +127,7 @@ public final class CompositeQueryParameter implements Serializable {
     public CompositeQueryParameter conjunct(Iterable<CompositeQueryParameter> other) {
         checkNotNull(other);
 
-        final Multimap<Column, ColumnFilter> mergedFilters = LinkedListMultimap.create();
+        final Multimap<EntityColumn, ColumnFilter> mergedFilters = LinkedListMultimap.create();
         mergedFilters.putAll(filters);
         for (CompositeQueryParameter parameter : other) {
             mergedFilters.putAll(parameter.getFilters());
@@ -142,16 +142,16 @@ public final class CompositeQueryParameter implements Serializable {
      * <p>The resulting {@code CompositeQueryParameter} is joined with
      * the {@link CompositeOperator#ALL ALL} operator.
      *
-     * @param column the {@link Column} to add the filter to
+     * @param column the {@link EntityColumn} to add the filter to
      * @param columnFilter the value of the filter to add
      * @return new instance of {@code CompositeQueryParameter} merged from current instance and
      * the given filter
      */
-    public CompositeQueryParameter and(Column column, ColumnFilter columnFilter) {
+    public CompositeQueryParameter and(EntityColumn column, ColumnFilter columnFilter) {
         checkNotNull(column);
         checkNotNull(columnFilter);
 
-        final Multimap<Column, ColumnFilter> newFilters = HashMultimap.create(filters);
+        final Multimap<EntityColumn, ColumnFilter> newFilters = HashMultimap.create(filters);
         newFilters.put(column, columnFilter);
         final CompositeQueryParameter parameter = from(newFilters, ALL);
         return parameter;

@@ -23,14 +23,17 @@ package io.spine.server.entity.storage;
 import com.google.common.testing.EqualsTester;
 import com.google.protobuf.Any;
 import io.spine.core.Version;
-import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.server.entity.EntityWithLifecycle;
 import io.spine.server.entity.VersionableEntity;
 import io.spine.server.entity.given.Given;
+import io.spine.server.entity.storage.EntityColumn.MemoizedValue;
+import io.spine.server.entity.storage.given.ColumnTestEnv.BrokenTestEntity;
+import io.spine.server.entity.storage.given.ColumnTestEnv.EntityRedefiningColumnAnnotation;
+import io.spine.server.entity.storage.given.ColumnTestEnv.EntityWithDefaultColumnNameForStoring;
+import io.spine.server.entity.storage.given.ColumnTestEnv.TestEntity;
 import org.junit.Test;
 
-import javax.annotation.Nullable;
 import java.lang.reflect.Method;
 
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
@@ -40,7 +43,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Dmytro Dashenkov
@@ -48,33 +50,25 @@ import static org.junit.Assert.fail;
 @SuppressWarnings("DuplicateStringLiteralInspection") // Many string literals for method names
 public class ColumnShould {
 
+    private static final String CUSTOM_COLUMN_NAME = " customColumnName ";
+
     @Test
     public void be_serializable() {
-        final Column column = forMethod("getVersion", VersionableEntity.class);
+        final EntityColumn column = forMethod("getVersion", VersionableEntity.class);
         reserializeAndAssert(column);
     }
 
     @Test
     public void support_toString() {
-        final Column column = forMethod("getVersion", VersionableEntity.class);
+        final EntityColumn column = forMethod("getVersion", VersionableEntity.class);
         assertEquals("VersionableEntity.version", column.toString());
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void construct_for_getter_method_only() {
-        forMethod("toString", Object.class);
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void fail_to_construct_for_non_serializable_column() {
-        forMethod("getFoo", BrokenTestEntity.class);
     }
 
     @Test
     public void invoke_getter() {
         final String entityId = "entity-id";
         final int version = 2;
-        final Column column = forMethod("getVersion", VersionableEntity.class);
+        final EntityColumn column = forMethod("getVersion", VersionableEntity.class);
         final TestEntity entity = Given.entityOfClass(TestEntity.class)
                                        .withId(entityId)
                                        .withVersion(version)
@@ -85,9 +79,9 @@ public class ColumnShould {
 
     @Test
     public void have_equals_and_hashCode() {
-        final Column col1 = forMethod("getVersion", VersionableEntity.class);
-        final Column col2 = forMethod("getVersion", VersionableEntity.class);
-        final Column col3 = forMethod("isDeleted", EntityWithLifecycle.class);
+        final EntityColumn col1 = forMethod("getVersion", VersionableEntity.class);
+        final EntityColumn col2 = forMethod("getVersion", VersionableEntity.class);
+        final EntityColumn col3 = forMethod("isDeleted", EntityWithLifecycle.class);
         new EqualsTester()
                 .addEqualityGroup(col1, col2)
                 .addEqualityGroup(col3)
@@ -96,12 +90,12 @@ public class ColumnShould {
 
     @Test
     public void memoize_value_at_at_point_in_time() {
-        final Column mutableColumn = forMethod("getMutableState", TestEntity.class);
+        final EntityColumn mutableColumn = forMethod("getMutableState", TestEntity.class);
         final TestEntity entity = new TestEntity("");
         final int initialState = 1;
         final int changedState = 42;
         entity.setMutableState(initialState);
-        final Column.MemoizedValue memoizedState = mutableColumn.memoizeFor(entity);
+        final MemoizedValue memoizedState = mutableColumn.memoizeFor(entity);
         entity.setMutableState(changedState);
         final int extractedState = (int) mutableColumn.getFor(entity);
 
@@ -111,41 +105,61 @@ public class ColumnShould {
         assertEquals(changedState, extractedState);
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void fail_to_get_value_from_private_method() {
-        final Column column = forMethod("getFortyTwoLong", TestEntity.class);
-        column.getFor(new TestEntity(""));
+    @Test(expected = IllegalArgumentException.class)
+    public void not_be_constructed_from_non_getter() {
+        forMethod("toString", Object.class);
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void fail_to_memoize_value_from_private_method() {
-        final Column column = forMethod("getFortyTwoLong", TestEntity.class);
-        column.memoizeFor(new TestEntity(""));
+    @Test(expected = IllegalArgumentException.class)
+    public void not_be_constructed_from_non_annotated_getter() {
+        forMethod("getClass", Object.class);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void not_be_constructed_from_static_method() {
+        forMethod("getStatic", TestEntity.class);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void not_be_constructed_from_private_getter() {
+        forMethod("getFortyTwoLong", TestEntity.class);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void not_be_constructed_from_getter_with_parameters() throws NoSuchMethodException {
+        final Method method = TestEntity.class.getDeclaredMethod("getParameter",
+                                                                 String.class);
+        EntityColumn.from(method);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void fail_to_construct_for_non_serializable_column() {
+        forMethod("getFoo", BrokenTestEntity.class);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void fail_to_get_value_from_wrong_object() {
-        final Column column = forMethod("getMutableState", TestEntity.class);
-        column.getFor(new DifferentTestEntity(""));
+        final EntityColumn column = forMethod("getMutableState", TestEntity.class);
+        column.getFor(new EntityWithCustomColumnNameForStoring(""));
     }
 
     @Test(expected = NullPointerException.class)
     public void check_value_if_getter_is_not_null() {
-        final Column column = forMethod("getNotNull", TestEntity.class);
+        final EntityColumn column = forMethod("getNotNull", TestEntity.class);
         column.getFor(new TestEntity(""));
     }
 
     @Test
     public void allow_nulls_if_getter_is_nullable() {
-        final Column column = forMethod("getNull", TestEntity.class);
+        final EntityColumn column = forMethod("getNull", TestEntity.class);
         final Object value = column.getFor(new TestEntity(""));
         assertNull(value);
     }
 
     @Test
     public void tell_if_property_is_nullable() {
-        final Column notNullColumn = forMethod("getNotNull", TestEntity.class);
-        final Column nullableColumn = forMethod("getNull", TestEntity.class);
+        final EntityColumn notNullColumn = forMethod("getNotNull", TestEntity.class);
+        final EntityColumn nullableColumn = forMethod("getNull", TestEntity.class);
 
         assertFalse(notNullColumn.isNullable());
         assertTrue(nullableColumn.isNullable());
@@ -153,86 +167,66 @@ public class ColumnShould {
 
     @Test
     public void contain_property_type() {
-        final Column column = forMethod("getFortyTwoLong", TestEntity.class);
+        final EntityColumn column = forMethod("getLong", TestEntity.class);
         assertEquals(Long.TYPE, column.getType());
     }
 
     @Test
     public void memoize_value_regarding_nulls() {
-        final Column nullableColumn = forMethod("getNull", TestEntity.class);
-        final Column.MemoizedValue memoizedNull = nullableColumn.memoizeFor(new TestEntity(""));
+        final EntityColumn nullableColumn = forMethod("getNull", TestEntity.class);
+        final MemoizedValue memoizedNull = nullableColumn.memoizeFor(new TestEntity(""));
         assertTrue(memoizedNull.isNull());
         assertNull(memoizedNull.getValue());
     }
 
     @Test
     public void memoize_value_which_has_reference_on_Column_itself() {
-        final Column column = forMethod("getMutableState", TestEntity.class);
+        final EntityColumn column = forMethod("getMutableState", TestEntity.class);
         final TestEntity entity = new TestEntity("");
-        final Column.MemoizedValue memoizedValue = column.memoizeFor(entity);
+        final MemoizedValue memoizedValue = column.memoizeFor(entity);
         assertSame(column, memoizedValue.getSourceColumn());
     }
 
-    private static Column forMethod(String name, Class<?> enclosingClass) {
+    @Test
+    public void have_valid_name_for_querying_and_storing() {
+        final EntityColumn column = forMethod("getValue",
+                                              EntityWithCustomColumnNameForStoring.class);
+        assertEquals("value", column.getName());
+        assertEquals(CUSTOM_COLUMN_NAME.trim(), column.getStoredName());
+    }
+
+    @Test
+    public void have_same_names_for_and_querying_storing_if_last_is_not_specified() {
+        final EntityColumn column = forMethod("getValue",
+                                              EntityWithDefaultColumnNameForStoring.class);
+        final String expectedName = "value";
+        assertEquals(expectedName, column.getName());
+        assertEquals(expectedName, column.getStoredName());
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void not_allow_redefine_column_annotation() {
+        forMethod("getVersion", EntityRedefiningColumnAnnotation.class);
+    }
+
+    private static EntityColumn forMethod(String name, Class<?> enclosingClass) {
         try {
             final Method result = enclosingClass.getDeclaredMethod(name);
-            return Column.from(result);
+            return EntityColumn.from(result);
         } catch (NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
     }
 
-    @SuppressWarnings("unused") // Reflective access
-    public static class TestEntity extends AbstractVersionableEntity<String, Any> {
-
-        private int mutableState = 0;
-
-        protected TestEntity(String id) {
+    public static class EntityWithCustomColumnNameForStoring
+            extends AbstractVersionableEntity<String, Any> {
+        protected EntityWithCustomColumnNameForStoring(String id) {
             super(id);
         }
 
-        @javax.persistence.Column
-        public int getMutableState() {
-            return mutableState;
-        }
-
-        public void setMutableState(int mutableState) {
-            this.mutableState = mutableState;
-        }
-
-        @javax.persistence.Column
-        private long getFortyTwoLong() {
-            return 42L;
-        }
-
-        @javax.persistence.Column
-        public String getNotNull() {
-            return null;
-        }
-
-        @Nullable
-        @javax.persistence.Column
-        public String getNull() {
-            return null;
-        }
-    }
-
-    private static class DifferentTestEntity extends AbstractVersionableEntity<String, Any> {
-        protected DifferentTestEntity(String id) {
-            super(id);
-        }
-    }
-
-    public static class BrokenTestEntity extends AbstractEntity<String, Any> {
-        protected BrokenTestEntity(String id) {
-            super(id);
-        }
-
-        // non-serializable Entity Column
-        @javax.persistence.Column
-        public Object getFoo() {
-            fail("Invoked a getter for a non-serializable Entity Column BrokenTestEntity.foo");
-            return new Object();
+        @Column(name = CUSTOM_COLUMN_NAME)
+        public int getValue() {
+            return 0;
         }
     }
 }

@@ -20,10 +20,12 @@
 
 package io.spine.server.entity.storage;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
+import io.spine.annotation.Internal;
 import io.spine.server.entity.Entity;
+import io.spine.server.entity.EntityClass;
+import io.spine.server.entity.storage.EntityColumn.MemoizedValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,41 +35,40 @@ import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.common.collect.Multimaps.synchronizedListMultimap;
+import static io.spine.server.entity.storage.ColumnRecords.getAnnotatedVersion;
+import static io.spine.util.Exceptions.newIllegalStateException;
+import static io.spine.validate.Validate.checkNotEmptyOrBlank;
 import static java.lang.String.format;
 
 /**
- * A utility for generating the {@linkplain Column columns} {@linkplain Map}.
+ * A utility for generating the {@linkplain EntityColumn columns} {@linkplain Map}.
  *
- * <p>All the methods of the passed {@link Entity} that fit
+ * <p>The methods of all {@link Entity entities} that fit
  * <a href="http://download.oracle.com/otndocs/jcp/7224-javabeans-1.01-fr-spec-oth-JSpec/">
- * the Java Bean</a> getter spec and annotated with {@link javax.persistence.Column
- * javax.persistence.Column} are considered {@linkplain Column columns}.
+ * the Java Bean</a> getter spec and annotated with {@link Column}
+ * are considered {@linkplain EntityColumn columns}.
+ * Inherited columns are taken into account either.
  *
- * <p>Entity columns are inherited (both from classes and from interfaces).
- * If a getter for the entity column declared in an interface,
- * the implementations must not be marked with the annotation.
- *
- * <p>Note that the returned type of a {@link Column} getter must either be primitive or
+ * <p>Note that the returned type of a {@link EntityColumn} getter must either be primitive or
  * serializable, otherwise a runtime exception is thrown when trying to get an instance of
- * {@link Column}.
+ * {@link EntityColumn}.
  *
- * <p>When passing an instance of an already known {@link Entity} type, the getters are retrieved
- * from a cache and are not updated.
+ * <p>When passing an instance of an already known {@link Entity} type,
+ * the getters are retrieved from a cache and are not updated.
  *
  * @author Dmytro Dashenkov
- * @see Column
+ * @see EntityColumn
  */
-class Columns {
+@Internal
+public class Columns {
 
     private static final String SPINE_PACKAGE = "io.spine.";
     private static final String NON_PUBLIC_CLASS_WARNING =
@@ -77,33 +78,42 @@ class Columns {
                     "Storage fields won't be extracted.";
 
     /**
-     * A one to many container of the {@link Class} to {@link Column} relations.
+     * A one to many container of the {@link Class} to {@link EntityColumn} relations.
      *
      * <p>This container is mutable and thread safe.
      */
-    private static final Multimap<Class<? extends Entity>, Column> knownEntityProperties =
+    private static final Multimap<Class<? extends Entity>, EntityColumn> knownEntityProperties =
             synchronizedListMultimap(
-                    LinkedListMultimap.<Class<? extends Entity>, Column>create());
+                    LinkedListMultimap.<Class<? extends Entity>, EntityColumn>create());
 
     private Columns() {
         // Prevent initialization of a utility class
     }
 
     /**
-     * Generates the {@linkplain Column columns} for the given {@linkplain Entity}.
+     * Ensures that the entity columns are valid for the specified entity class and caches them.
+     *
+     * @param entityClass the class to check entity columns
+     */
+    public static void checkColumnDefinitions(EntityClass<?> entityClass) {
+        ensureRegistered(entityClass.value());
+    }
+
+    /**
+     * Generates the {@linkplain EntityColumn columns} for the given {@linkplain Entity}.
      *
      * <p>If there were no {@linkplain Entity entities} stored in the scope of current class
      * <a href="https://docs.oracle.com/javase/specs/jls/se7/html/jls-12.html">initialization</a>,
      * a call to this method will create a cache of the passed {@linkplain Entity entity's} getters
      * and use it in all the successive calls.
      *
-     * @param entity an {@link Entity} to get the {@linkplain Column columns} from
+     * @param entity an {@link Entity} to get the {@linkplain EntityColumn columns} from
      * @param <E>    the type of the {@link Entity}
-     * @return a {@link Map} of the {@link Column Column} names to their
-     * {@linkplain Column.MemoizedValue memoized values}.
-     * @see Column.MemoizedValue
+     * @return a {@link Map} of the column {@linkplain EntityColumn#getStoredName() names for storing}
+     *         to their {@linkplain MemoizedValue memoized values}.
+     * @see MemoizedValue
      */
-    static <E extends Entity<?, ?>> Map<String, Column.MemoizedValue> from(E entity) {
+    static <E extends Entity<?, ?>> Map<String, MemoizedValue> from(E entity) {
         checkNotNull(entity);
         final Class<? extends Entity> entityType = entity.getClass();
         final int modifiers = entityType.getModifiers();
@@ -113,30 +123,30 @@ class Columns {
         }
         ensureRegistered(entityType);
 
-        final Map<String, Column.MemoizedValue> fields = extractColumns(entityType, entity);
+        final Map<String, MemoizedValue> fields = extractColumns(entityType, entity);
         return fields;
     }
 
     /**
-     * Retrieves a {@link Column} instance of the given name and from the given Entity class.
+     * Retrieves a {@link EntityColumn} instance of the given name and from the given entity class.
      *
-     * <p>If the given Entity class has not yet been added to the Column cache, it's added upon this
-     * operation.
+     * <p>If the given entity class has not yet been added to the column cache,
+     * it will be added upon this operation.
      *
      * <p>If no column is found, an {@link IllegalArgumentException} is thrown.
      *
-     * @param entityClass the class containing the {@link Column} definition
-     * @param columnName  the name of the {@link Column}
-     * @return an instance of {@link Column} with the given name
-     * @throws IllegalArgumentException if the {@link Column} is not found
+     * @param entityClass the class containing the {@link EntityColumn} definition
+     * @param columnName  the entity column {@linkplain EntityColumn#getName() name}
+     * @return an instance of {@link EntityColumn} with the given name
+     * @throws IllegalArgumentException if the {@link EntityColumn} is not found
      */
-    static Column findColumn(Class<? extends Entity> entityClass, String columnName) {
+    static EntityColumn findColumn(Class<? extends Entity> entityClass, String columnName) {
         checkNotNull(entityClass);
-        checkNotNull(columnName);
+        checkNotEmptyOrBlank(columnName, "entity column name");
         ensureRegistered(entityClass);
 
-        final Collection<Column> cachedColumns = getColumns(entityClass);
-        for (Column column : cachedColumns) {
+        final Collection<EntityColumn> cachedColumns = getColumns(entityClass);
+        for (EntityColumn column : cachedColumns) {
             if (column.getName()
                       .equals(columnName)) {
                 return column;
@@ -144,44 +154,41 @@ class Columns {
         }
 
         throw new IllegalArgumentException(
-                format("Could not find a Column description for %s.%s.",
+                format("Could not find a EntityColumn description for %s.%s.",
                        entityClass.getCanonicalName(),
                        columnName));
     }
 
     /**
-     * Retrieves a {@link Collection} of {@linkplain Column columns} from the given Entity class.
+     * Retrieves {@linkplain EntityColumn columns} for the given {@code Entity} class.
      *
-     * @param entityClass the class containing the {@link Column} definition
-     * @return a {@link Collection} of {@link Column} corresponded to entity class
+     * @param entityClass the class containing the {@link EntityColumn} definition
+     * @return a {@link Collection} of {@link EntityColumn} corresponded to entity class
      */
-    static Collection<Column> getColumns(Class<? extends Entity> entityClass) {
+    static Collection<EntityColumn> getColumns(Class<? extends Entity> entityClass) {
         checkNotNull(entityClass);
         ensureRegistered(entityClass);
 
-        final Collection<Column> result = knownEntityProperties.get(entityClass);
+        final Collection<EntityColumn> result = knownEntityProperties.get(entityClass);
         return result;
     }
 
     /**
-     * Generates the {@link Column Column} values considering the passed
+     * Generates the {@link EntityColumn} values considering the passed
      * {@linkplain Entity entity type} indexed.
      *
      * @param entityType indexed type of the {@link Entity}
      * @param entity     the object which to take the values from
-     * @return a {@link Map} of the {@linkplain Column columns}
+     * @return a {@link Map} of the {@linkplain EntityColumn columns}
      */
-    private static Map<String, Column.MemoizedValue> extractColumns(
-            Class<? extends Entity> entityType,
-            Entity entity) {
-        final Collection<Column> storageFieldProperties =
-                knownEntityProperties.get(entityType);
-        final Map<String, Column.MemoizedValue> values =
-                new HashMap<>(storageFieldProperties.size());
+    private static Map<String, MemoizedValue> extractColumns(Class<? extends Entity> entityType,
+                                                             Entity entity) {
+        final Collection<EntityColumn> storageFieldProperties = knownEntityProperties.get(entityType);
+        final Map<String, MemoizedValue> values = new HashMap<>(storageFieldProperties.size());
 
-        for (Column column : storageFieldProperties) {
-            final String name = column.getName();
-            final Column.MemoizedValue value = column.memoizeFor(entity);
+        for (EntityColumn column : storageFieldProperties) {
+            final String name = column.getStoredName();
+            final MemoizedValue value = column.memoizeFor(entity);
             values.put(name, value);
         }
         return values;
@@ -196,7 +203,7 @@ class Columns {
 
     /**
      * Caches the {@linkplain Entity entity type}
-     * for further {@linkplain Column columns} retrieving.
+     * for further {@linkplain EntityColumn columns} retrieving.
      */
     private static void addToCache(Class<? extends Entity> entityType) {
         final BeanInfo entityDescriptor;
@@ -206,72 +213,35 @@ class Columns {
             throw new IllegalStateException(e);
         }
 
+        final Collection<EntityColumn> entityColumns = newLinkedList();
         for (PropertyDescriptor property : entityDescriptor.getPropertyDescriptors()) {
             final Method getter = property.getReadMethod();
-            if (isEntityColumn(getter)) {
-                final Column storageField = Column.from(getter);
-                knownEntityProperties.put(entityType, storageField);
+            final boolean isEntityColumn = getAnnotatedVersion(getter).isPresent();
+            if (isEntityColumn) {
+                final EntityColumn column = EntityColumn.from(getter);
+                entityColumns.add(column);
             }
         }
+        checkRepeatedColumnNames(entityColumns, entityType);
+        knownEntityProperties.putAll(entityType, entityColumns);
     }
 
     /**
-     * Determines whether the specified getter
-     * is annotated with {@link javax.persistence.Column Column}.
+     * Ensures that the specified columns have no repeated names.
      *
-     * <p>If the method is not annotated directly, declarations from super classes and
-     * implemented interfaces will be checked. If a declaration is annotated with {@code @Column},
-     * {@code true} will be returned.
-     *
-     * @param getter the getter to check
-     * @return {@code true} if the method is getter for {@link Column}
+     * @param columns     the columns to check
+     * @param entityClass the entity class for the columns
      */
-    private static boolean isEntityColumn(Method getter) {
-        final boolean isAnnotated = getter.isAnnotationPresent(javax.persistence.Column.class);
-        if (isAnnotated) {
-            return true;
-        }
-        final Class<?> declaringClass = getter.getDeclaringClass();
-        final Iterable<Class<?>> ascendants = getSuperClassesAndInterfaces(declaringClass);
-        for (Class<?> ascendant : ascendants) {
-            final Optional<Method> optional = getMethod(ascendant, getter);
-            if (optional.isPresent()) {
-                final Method ascendantMethod = optional.get();
-                if (ascendantMethod.isAnnotationPresent(javax.persistence.Column.class)) {
-                    return true;
-                }
+    private static void checkRepeatedColumnNames(Iterable<EntityColumn> columns,
+                                                 Class<? extends Entity> entityClass) {
+        final Collection<String> checkedNames = newLinkedList();
+        for (EntityColumn column : columns) {
+            final String columnName = column.getStoredName();
+            if (checkedNames.contains(columnName)) {
+                final String msg = "The entity `%s` has columns with the same name for storing `%s`.";
+                throw newIllegalStateException(msg, entityClass.getName(), columnName);
             }
-        }
-        return false;
-    }
-
-    private static Iterable<Class<?>> getSuperClassesAndInterfaces(Class<?> cls) {
-        final Collection<Class<?>> interfaces = Arrays.asList(cls.getInterfaces());
-        final Collection<Class<?>> result = newLinkedList(interfaces);
-        Class<?> currentSuper = cls.getSuperclass();
-        while (currentSuper != null) {
-            result.add(currentSuper);
-            currentSuper = currentSuper.getSuperclass();
-        }
-        return result;
-    }
-
-    /**
-     * Obtains the method from the specified class with the same signature as the specified method.
-     *
-     * @param target the class to obtain the method with the signature
-     * @param method the method to get the signature
-     * @return the method with the same signature obtained from the specified class
-     */
-    private static Optional<Method> getMethod(Class<?> target, Method method) {
-        checkArgument(!method.getDeclaringClass()
-                             .equals(target));
-        try {
-            final Method methodFromTarget = target.getMethod(method.getName(),
-                                                             method.getParameterTypes());
-            return Optional.of(methodFromTarget);
-        } catch (NoSuchMethodException ignored) {
-            return Optional.absent();
+            checkedNames.add(columnName);
         }
     }
 

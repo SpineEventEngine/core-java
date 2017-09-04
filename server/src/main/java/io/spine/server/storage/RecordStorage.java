@@ -29,6 +29,7 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.FieldMasks;
 import io.spine.server.entity.LifecycleFlags;
+import io.spine.server.entity.storage.EntityColumn;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.stand.AggregateStateId;
@@ -95,8 +96,7 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
     }
 
     /**
-     * Writes a record and its {@link io.spine.server.entity.storage.Column Columns} into
-     * the storage.
+     * Writes a record and its {@linkplain EntityColumn entity columns} into the storage.
      *
      * <p>Rewrites it if a record with this ID already exists in the storage.
      *
@@ -274,8 +274,7 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
                                                              FieldMask fieldMask);
 
     /**
-     * Writes a record and the associated
-     * {@link io.spine.server.entity.storage.Column Column values} into the storage.
+     * Writes a record and the associated {@link EntityColumn} values into the storage.
      *
      * <p>Rewrites it if a record with this ID already exists in the storage.
      *

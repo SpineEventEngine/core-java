@@ -64,8 +64,8 @@ public class InMemoryStorageFactory implements StorageFactory {
      * {@inheritDoc}
      *
      * <p>In-memory implementation stores no values separately
-     * ({@link io.spine.server.entity.storage.Column Columns}), therefore
-     * returns an empty ColumnTypeRegistry.
+     * ({@link io.spine.server.entity.storage.EntityColumn entity columns}),
+     * therefore returns an empty {@code ColumnTypeRegistry}.
      */
     @Override
     public ColumnTypeRegistry getTypeRegistry() {
