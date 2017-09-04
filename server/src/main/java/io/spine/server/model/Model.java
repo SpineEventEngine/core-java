@@ -55,8 +55,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class Model {
 
-    private static final Model INSTANCE = new Model();
-
     /**
      * A map from a {@linkplain #nameOf(Class) a class name} to an extended class information
      * instance.
@@ -64,7 +62,7 @@ public class Model {
     private final Map<String, ModelClass<?>> classes = Maps.newConcurrentMap();
 
     public static Model getInstance() {
-        return INSTANCE;
+        return Singleton.INSTANCE.value;
     }
 
     /** Prevent instantiation from outside. */
@@ -140,7 +138,7 @@ public class Model {
 
     /**
      * Obtains an instance of a projection class information.
-
+     *
      * <p>If the passed class was not added to the model before, it would be added as the result of
      * this method call.
      */
@@ -156,7 +154,7 @@ public class Model {
 
     /**
      * Obtains an instance of event subscriber class information.
-
+     *
      * <p>If the passed class was not added to the model before, it would be added as the result of
      * this method call.
      */
@@ -194,7 +192,7 @@ public class Model {
 
     /**
      * Obtains an instance of a rejection subscriber class information.
-
+     *
      * <p>If the passed class was not added to the model before, it would be added as the result of
      * this method call.
      */
@@ -259,5 +257,11 @@ public class Model {
      */
     private static String nameOf(Class<?> cls) {
         return cls.getName();
+    }
+
+    private enum Singleton {
+        INSTANCE;
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Model value = new Model();
     }
 }
