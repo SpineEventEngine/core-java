@@ -1,5 +1,8 @@
 language: java
 
+# To increase the memory size available during Travis build.
+sudo: required
+
 env:
   global:
     # Encrypted `CODACY_PROJECT_TOKEN` variable according to:
