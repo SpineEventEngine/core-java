@@ -22,6 +22,8 @@ package io.spine.server.entity.storage;
 
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
+import com.google.protobuf.Any;
+import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.VersionableEntity;
@@ -35,6 +37,7 @@ import java.util.Map;
 
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
 import static io.spine.server.entity.storage.EntityColumn.MemoizedValue;
+import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.of;
 import static io.spine.server.storage.EntityField.version;
 import static io.spine.test.Verify.assertContainsKeyValue;
@@ -136,6 +139,16 @@ public class EntityRecordWithColumnsShould {
     }
 
     @Test
+    public void not_have_columns_if_values_list_is_empty() {
+        final EntityWithoutColumns entity = new EntityWithoutColumns("ID");
+        final Map<String, MemoizedValue> columnValues = Columns.from(entity);
+        assertTrue(columnValues.isEmpty());
+
+        final EntityRecordWithColumns record = create(EntityRecord.getDefaultInstance(), entity);
+        assertFalse(record.hasColumns());
+    }
+
+    @Test
     public void have_equals() {
         final MemoizedValue mockValue = mock(MemoizedValue.class);
         final EntityRecordWithColumns noFieldsEnvelope =
@@ -149,7 +162,7 @@ public class EntityRecordWithColumnsShould {
         final EntityRecordWithColumns notEmptyFieldsEnvelope =
                 of(
                         EntityRecord.getDefaultInstance(),
-                        Collections.<String, MemoizedValue>singletonMap("key", mockValue)
+                        Collections.singletonMap("key", mockValue)
                 );
         new EqualsTester()
                 .addEqualityGroup(noFieldsEnvelope, emptyFieldsEnvelope, notEmptyFieldsEnvelope)
@@ -166,6 +179,12 @@ public class EntityRecordWithColumnsShould {
     public static class TestEntity extends AbstractVersionableEntity<String, Project> {
 
         protected TestEntity(String id) {
+            super(id);
+        }
+    }
+
+    public static class EntityWithoutColumns extends AbstractEntity<String, Any> {
+        protected EntityWithoutColumns(String id) {
             super(id);
         }
     }

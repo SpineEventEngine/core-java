@@ -56,7 +56,7 @@ public final class EntityRecordWithColumns implements Serializable {
                                     Map<String, EntityColumn.MemoizedValue> columns) {
         this.record = checkNotNull(record);
         this.storageFields = ImmutableMap.copyOf(columns);
-        this.hasStorageFields = true;
+        this.hasStorageFields = !columns.isEmpty();
     }
 
     /**
@@ -133,9 +133,8 @@ public final class EntityRecordWithColumns implements Serializable {
      * <p>If returns {@code false}, the {@linkplain EntityColumn columns} are not considered
      * by the storage.
      *
-     * @return {@code true} if current object was constructed with
-     * {@linkplain #create(EntityRecord, Entity)} and {@code false} if it was
-     * constructed with {@linkplain #of(EntityRecord)}
+     * @return {@code true} if the object was constructed via {@link #create(EntityRecord, Entity)}
+     *         and the entity has columns; {@code false} otherwise
      */
     public boolean hasColumns() {
         return hasStorageFields;
