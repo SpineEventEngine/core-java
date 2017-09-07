@@ -22,16 +22,20 @@ package io.spine.server.entity.storage;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
+import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 
-import javax.annotation.Nullable;
 import java.io.Serializable;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Lists.newLinkedList;
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * A value of {@link EntityRecord} associated with its {@linkplain EntityColumn columns}.
@@ -110,20 +114,38 @@ public final class EntityRecordWithColumns implements Serializable {
         return record;
     }
 
-    public Map<String, EntityColumn> getColumns() {
-        return Maps.transformEntries(storageFields,
-                                     ColumnTransformer.INSTANCE);
+    /**
+     * Obtains sorted {@linkplain EntityColumn#getStoredName() names}
+     * of entity columns for the record.
+     *
+     * <p>The names will be sorted using {@link String#compareTo(String)}.
+     *
+     * @return the sorted entity column names
+     */
+    public Collection<String> getColumnNames() {
+        final ImmutableSet<String> names = storageFields.keySet();
+        final List<String> list = newLinkedList(names);
+        Collections.sort(list);
+        return list;
     }
 
     /**
-     * Retrieves the memoized values of the Entity Columns.
+     * Obtains the memoized value of the entity column
+     * by the specified {@linkplain EntityColumn#getStoredName() name}.
      *
+     * @param columnName the stored column name
+     * @return the memoized value of the column
+     * @throws IllegalStateException if there is no column with the specified name
      * @see ColumnRecords for the recommended way of working with the column values
      */
     @Internal
-    @SuppressWarnings("ReturnOfCollectionOrArrayField") // Immutable structure
-    public Map<String, EntityColumn.MemoizedValue> getColumnValues() {
-        return storageFields;
+    public EntityColumn.MemoizedValue getColumnValue(String columnName) {
+        checkNotNull(columnName);
+        if (!storageFields.containsKey(columnName)) {
+            throw newIllegalStateException("Column with the stored name `%s` was not found.",
+                                           columnName);
+        }
+        return storageFields.get(columnName);
     }
 
     /**
@@ -157,19 +179,5 @@ public final class EntityRecordWithColumns implements Serializable {
     @Override
     public int hashCode() {
         return getRecord().hashCode();
-    }
-
-    private enum ColumnTransformer
-            implements Maps.EntryTransformer<String, EntityColumn.MemoizedValue, EntityColumn> {
-
-        INSTANCE;
-
-        @Override
-        public EntityColumn transformEntry(@Nullable String s,
-                                           @Nullable EntityColumn.MemoizedValue memoizedValue) {
-            checkNotNull(s);
-            checkNotNull(memoizedValue);
-            return memoizedValue.getSourceColumn();
-        }
     }
 }

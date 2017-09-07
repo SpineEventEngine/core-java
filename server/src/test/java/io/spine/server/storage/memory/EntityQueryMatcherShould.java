@@ -27,8 +27,8 @@ import com.google.protobuf.Message;
 import io.spine.client.ColumnFilter;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.EntityRecord;
-import io.spine.server.entity.storage.EntityColumn;
 import io.spine.server.entity.storage.CompositeQueryParameter;
+import io.spine.server.entity.storage.EntityColumn;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.entity.storage.QueryParameters;
@@ -101,7 +101,7 @@ public class EntityQueryMatcherShould {
         final String targetName = "feature";
         final EntityColumn target = mock(EntityColumn.class);
         when(target.isNullable()).thenReturn(true);
-        when(target.getName()).thenReturn(targetName);
+        when(target.getStoredName()).thenReturn(targetName);
         when(target.getType()).thenReturn(Boolean.class);
         final Serializable acceptedValue = true;
 
@@ -146,7 +146,7 @@ public class EntityQueryMatcherShould {
 
         final EntityColumn column = mock(EntityColumn.class);
         when(column.getType()).thenReturn(Any.class);
-        when(column.getName()).thenReturn(columnName);
+        when(column.getStoredName()).thenReturn(columnName);
 
         final EntityColumn.MemoizedValue value = mock(EntityColumn.MemoizedValue.class);
         when(value.getSourceColumn()).thenReturn(column);

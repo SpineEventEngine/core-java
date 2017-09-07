@@ -27,7 +27,6 @@ import io.spine.server.entity.storage.EntityColumn.MemoizedValue;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -77,11 +76,10 @@ public final class ColumnRecords {
         checkArgument(recordWithColumns.hasColumns(),
                       "Passed record has no Entity Columns.");
 
-        for (Map.Entry<String, MemoizedValue> column : recordWithColumns.getColumnValues()
-                                                                        .entrySet()) {
-            final I columnIdentifier = mapColumnIdentifier.apply(column.getKey());
+        for (String columnName : recordWithColumns.getColumnNames()) {
+            final I columnIdentifier = mapColumnIdentifier.apply(columnName);
             checkNotNull(columnIdentifier);
-            final MemoizedValue columnValue = column.getValue();
+            final MemoizedValue columnValue = recordWithColumns.getColumnValue(columnName);
             final EntityColumn columnMetadata = columnValue.getSourceColumn();
             @SuppressWarnings("unchecked") // We don't know the exact types of the value
             final ColumnType<Object, Object, D, I> columnType =
