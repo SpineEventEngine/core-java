@@ -167,9 +167,9 @@ class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> 
         final CompositeColumnFilter.Builder typeFilter = CompositeColumnFilter.newBuilder()
                                                                               .setOperator(EITHER);
         for (EventFilter eventFilter : query.getFilterList()) {
-            final String type = eventFilter.getEventType()
-                                           .trim();
-            if (!type.isEmpty()) {
+            final String type = eventFilter.getEventType();
+            if (!type.trim()
+                     .isEmpty()) {
                 final ColumnFilter filter = eq(TYPE_COLUMN, type);
                 typeFilter.addFilter(filter);
             }

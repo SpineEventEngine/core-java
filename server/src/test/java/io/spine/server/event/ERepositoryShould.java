@@ -20,6 +20,7 @@
 
 package io.spine.server.event;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.util.Timestamps;
 import io.spine.client.ColumnFilter;
 import io.spine.client.CompositeColumnFilter;
@@ -29,6 +30,7 @@ import org.junit.Test;
 
 import java.util.List;
 
+import static io.spine.protobuf.TypeConverter.toObject;
 import static io.spine.server.event.ERepository.toEntityFilters;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
@@ -64,7 +66,8 @@ public class ERepositoryShould {
 
     @Test
     public void convert_type_query_to_EntityFilters() {
-        final EventFilter validFilter = filterForType("com.example.EventType");
+        final String typeName = " com.example.EventType ";
+        final EventFilter validFilter = filterForType(typeName);
         final EventFilter invalidFilter = filterForType("   ");
         final EventStreamQuery query = EventStreamQuery.newBuilder()
                                                        .addFilter(validFilter)
@@ -77,6 +80,9 @@ public class ERepositoryShould {
         final List<ColumnFilter> columnFilters = compositeFilter.getFilterList();
         assertEquals(CompositeOperator.EITHER, compositeFilter.getOperator());
         assertEquals(1, columnFilters.size());
+        final Any typeNameAsAny = columnFilters.get(0)
+                                               .getValue();
+        assertEquals(typeName, toObject(typeNameAsAny, String.class));
     }
 
     private static EventFilter filterForType(String typeName) {
