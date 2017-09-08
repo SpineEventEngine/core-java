@@ -32,7 +32,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
 
-import static io.spine.server.model.MethodFiltering.ensureExternalMatch;
+import static io.spine.server.model.HandlerMethods.ensureExternalMatch;
 
 /**
  * A wrapper for a rejection reactor method.

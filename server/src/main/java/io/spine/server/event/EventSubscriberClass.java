@@ -23,8 +23,8 @@ package io.spine.server.event;
 import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
 import io.spine.core.EventClass;
+import io.spine.server.model.HandlerMethods;
 import io.spine.server.model.MessageHandlerMap;
-import io.spine.server.model.MethodFiltering;
 import io.spine.server.model.ModelClass;
 
 import java.util.Set;
@@ -52,9 +52,9 @@ public final class EventSubscriberClass<S extends EventSubscriber> extends Model
         this.eventSubscriptions = new MessageHandlerMap<>(cls, EventSubscriberMethod.factory());
 
         this.domesticSubscriptions = this.eventSubscriptions.getMessageClasses(
-                MethodFiltering.<EventSubscriberMethod>domesticPredicate());
+                HandlerMethods.<EventSubscriberMethod>domesticPredicate());
         this.externalSubscriptions = this.eventSubscriptions.getMessageClasses(
-                MethodFiltering.<EventSubscriberMethod>externalPredicate());
+                HandlerMethods.<EventSubscriberMethod>externalPredicate());
     }
 
     /**

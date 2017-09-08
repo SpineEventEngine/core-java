@@ -31,7 +31,7 @@ import io.spine.server.model.MethodPredicate;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
-import static io.spine.server.model.MethodFiltering.ensureExternalMatch;
+import static io.spine.server.model.HandlerMethods.ensureExternalMatch;
 
 /**
  * A wrapper for a rejection subscriber method.

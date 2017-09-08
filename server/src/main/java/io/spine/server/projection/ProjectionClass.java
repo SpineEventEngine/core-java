@@ -25,8 +25,8 @@ import io.spine.annotation.Internal;
 import io.spine.core.EventClass;
 import io.spine.server.event.EventSubscriberMethod;
 import io.spine.server.model.EntityClass;
+import io.spine.server.model.HandlerMethods;
 import io.spine.server.model.MessageHandlerMap;
-import io.spine.server.model.MethodFiltering;
 
 import java.util.Set;
 
@@ -53,9 +53,9 @@ public final class ProjectionClass<P extends Projection> extends EntityClass<P> 
         this.eventSubscriptions = new MessageHandlerMap<>(cls, EventSubscriberMethod.factory());
 
         this.domesticSubscriptions = this.eventSubscriptions.getMessageClasses(
-                MethodFiltering.<EventSubscriberMethod>domesticPredicate());
+                HandlerMethods.<EventSubscriberMethod>domesticPredicate());
         this.externalSubscriptions = this.eventSubscriptions.getMessageClasses(
-                MethodFiltering.<EventSubscriberMethod>externalPredicate());
+                HandlerMethods.<EventSubscriberMethod>externalPredicate());
     }
 
     public static <P extends Projection> ProjectionClass<P> of(Class<P> cls) {

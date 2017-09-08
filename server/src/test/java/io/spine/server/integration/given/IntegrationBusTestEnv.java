@@ -105,6 +105,7 @@ public class IntegrationBusTestEnv {
         boundedContext.getIntegrationBus().register(rejectionSubscriber);
 
         boundedContext.register(new ProjectCountAggregateRepository());
+        boundedContext.register(new ProjectWizardRepository());
         return boundedContext;
     }
 
@@ -234,7 +235,7 @@ public class IntegrationBusTestEnv {
 
         private static ItgProjectCreated externalEvent = null;
 
-        private static ItgProjectStarted domesticEvent = null;
+        private static ItgCannotStartArchivedProject externalRejection = null;
 
         @React(external = true)
         List<Message> on(ItgProjectCreated event) {
@@ -242,9 +243,9 @@ public class IntegrationBusTestEnv {
             return Collections.emptyList();
         }
 
-        @React
-        List<Message> on(ItgProjectStarted event) {
-            domesticEvent = event;
+        @React(external = true)
+        List<Message> on(ItgCannotStartArchivedProject rejection) {
+            externalRejection = rejection;
             return Collections.emptyList();
         }
 
@@ -252,13 +253,13 @@ public class IntegrationBusTestEnv {
             return externalEvent;
         }
 
-        public static ItgProjectStarted getDomesticEvent() {
-            return domesticEvent;
+        public static ItgCannotStartArchivedProject getExternalRejection() {
+            return externalRejection;
         }
 
         public static void clear() {
             externalEvent = null;
-            domesticEvent = null;
+            externalRejection = null;
         }
     }
 

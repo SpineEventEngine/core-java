@@ -29,8 +29,8 @@ import io.spine.server.command.CommandHandlerMethod;
 import io.spine.server.command.CommandHandlingClass;
 import io.spine.server.event.EventReactorMethod;
 import io.spine.server.model.EntityClass;
+import io.spine.server.model.HandlerMethods;
 import io.spine.server.model.MessageHandlerMap;
-import io.spine.server.model.MethodFiltering;
 import io.spine.server.rejection.RejectionReactorMethod;
 
 import java.util.Set;
@@ -68,14 +68,14 @@ public final class ProcessManagerClass<P extends ProcessManager>
         this.rejectionReactors =  new MessageHandlerMap<>(cls, RejectionReactorMethod.factory());
 
         this.domesticEventReactions = this.eventReactors.getMessageClasses(
-                MethodFiltering.<EventReactorMethod>domesticPredicate());
+                HandlerMethods.<EventReactorMethod>domesticPredicate());
         this.externalEventReactions = this.eventReactors.getMessageClasses(
-                MethodFiltering.<EventReactorMethod>externalPredicate());
+                HandlerMethods.<EventReactorMethod>externalPredicate());
 
         this.domesticRejectionReactions = this.rejectionReactors.getMessageClasses(
-                MethodFiltering.<RejectionReactorMethod>domesticPredicate());
+                HandlerMethods.<RejectionReactorMethod>domesticPredicate());
         this.externalRejectionReactions = this.rejectionReactors.getMessageClasses(
-                MethodFiltering.<RejectionReactorMethod>externalPredicate());
+                HandlerMethods.<RejectionReactorMethod>externalPredicate());
     }
 
     public static <P extends ProcessManager> ProcessManagerClass<P> of(Class<P> cls) {

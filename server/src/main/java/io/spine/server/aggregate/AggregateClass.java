@@ -29,8 +29,8 @@ import io.spine.server.command.CommandHandlerMethod;
 import io.spine.server.command.CommandHandlingClass;
 import io.spine.server.event.EventReactorMethod;
 import io.spine.server.model.EntityClass;
+import io.spine.server.model.HandlerMethods;
 import io.spine.server.model.MessageHandlerMap;
-import io.spine.server.model.MethodFiltering;
 import io.spine.server.rejection.RejectionReactorMethod;
 
 import java.lang.reflect.Constructor;
@@ -70,14 +70,14 @@ public final class AggregateClass<A extends Aggregate>
         this.rejectionReactions = new MessageHandlerMap<>(cls, RejectionReactorMethod.factory());
 
         this.domesticEventReactions = this.eventReactions.getMessageClasses(
-                MethodFiltering.<EventReactorMethod>domesticPredicate());
+                HandlerMethods.<EventReactorMethod>domesticPredicate());
         this.externalEventReactions = this.eventReactions.getMessageClasses(
-                MethodFiltering.<EventReactorMethod>externalPredicate());
+                HandlerMethods.<EventReactorMethod>externalPredicate());
 
         this.domesticRejectionReactions = this.rejectionReactions.getMessageClasses(
-                MethodFiltering.<RejectionReactorMethod>domesticPredicate());
+                HandlerMethods.<RejectionReactorMethod>domesticPredicate());
         this.externalRejectionReactions = this.rejectionReactions.getMessageClasses(
-                MethodFiltering.<RejectionReactorMethod>externalPredicate());
+                HandlerMethods.<RejectionReactorMethod>externalPredicate());
     }
 
     public static <A extends Aggregate> AggregateClass<A> of(Class<A> cls) {

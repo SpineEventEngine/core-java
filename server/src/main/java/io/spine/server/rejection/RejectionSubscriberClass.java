@@ -23,8 +23,8 @@ package io.spine.server.rejection;
 import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
 import io.spine.core.RejectionClass;
+import io.spine.server.model.HandlerMethods;
 import io.spine.server.model.MessageHandlerMap;
-import io.spine.server.model.MethodFiltering;
 import io.spine.server.model.ModelClass;
 
 import java.util.Set;
@@ -51,9 +51,9 @@ public final class RejectionSubscriberClass<S extends RejectionSubscriber> exten
         rejectionSubscriptions = new MessageHandlerMap<>(cls, RejectionSubscriberMethod.factory());
 
         this.domesticSubscriptions = rejectionSubscriptions.getMessageClasses(
-                MethodFiltering.<RejectionSubscriberMethod>domesticPredicate());
+                HandlerMethods.<RejectionSubscriberMethod>domesticPredicate());
         this.externalSubscriptions = rejectionSubscriptions.getMessageClasses(
-                MethodFiltering.<RejectionSubscriberMethod>externalPredicate());
+                HandlerMethods.<RejectionSubscriberMethod>externalPredicate());
     }
 
     /**

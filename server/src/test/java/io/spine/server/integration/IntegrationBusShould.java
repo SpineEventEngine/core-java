@@ -270,6 +270,7 @@ public class IntegrationBusShould {
 
         assertNull(ProjectRejectionsExtSubscriber.getExternalRejection());
         assertNull(ProjectCountAggregate.getExternalRejection());
+        assertNull(ProjectWizard.getExternalRejection());
 
         final Rejection rejection = cannotStartArchivedProject();
         sourceContext.getRejectionBus()
@@ -278,6 +279,7 @@ public class IntegrationBusShould {
 
         assertEquals(rejectionMessage, ProjectRejectionsExtSubscriber.getExternalRejection());
         assertEquals(rejectionMessage, ProjectCountAggregate.getExternalRejection());
+        assertEquals(rejectionMessage, ProjectWizard.getExternalRejection());
     }
 
     @Test
@@ -307,7 +309,7 @@ public class IntegrationBusShould {
     public void not_dispatch_rejections_to_domestic_subscribers_if_they_requested_external() {
         final LocalTransportFactory transportFactory = LocalTransportFactory.newInstance();
 
-        final BoundedContext sourceContext = contextWithTransport(transportFactory);
+        final BoundedContext sourceContext = contextWithExtEntitySubscribers(transportFactory);
         final ProjectRejectionsExtSubscriber standaloneSubscriber =
                 new ProjectRejectionsExtSubscriber();
 
@@ -315,11 +317,14 @@ public class IntegrationBusShould {
         rejectionBus.register(standaloneSubscriber);
 
         assertNull(ProjectRejectionsExtSubscriber.getExternalRejection());
-
+        assertNull(ProjectWizard.getExternalRejection());
+        assertNull(ProjectCountAggregate.getExternalRejection());
 
         final Rejection rejection = cannotStartArchivedProject();
         rejectionBus.post(rejection);
 
         assertNull(ProjectRejectionsExtSubscriber.getExternalRejection());
+        assertNull(ProjectWizard.getExternalRejection());
+        assertNull(ProjectCountAggregate.getExternalRejection());
     }
 }

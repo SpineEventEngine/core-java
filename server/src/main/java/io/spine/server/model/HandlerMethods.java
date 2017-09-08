@@ -28,12 +28,14 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
+ * Utilities for working with {@linkplain HandlerMethod handler methods}.
+ *
  * @author Alex Tymchenko
  */
 @Internal
-public final class MethodFiltering {
+public final class HandlerMethods {
 
-    private MethodFiltering() {
+    private HandlerMethods() {
         // Prevent from instantiation.
     }
 
