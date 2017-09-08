@@ -103,16 +103,10 @@ public class MessageHandlerMap<M extends MessageClass, H extends HandlerMethod>
      *
      * @param predicate a predicate for hander methods to filter the corresponding message classes
      */
-    public Set<M> getMessageClasses(Predicate<H> predicate) {
-        final ImmutableSet.Builder<M> builder = ImmutableSet.builder();
-
-        for (M messageCls : map.keySet()) {
-            final H handler = map.get(messageCls);
-            if (predicate.apply(handler)) {
-                builder.add(messageCls);
-            }
-        }
-        return builder.build();
+    public ImmutableSet<M> getMessageClasses(Predicate<H> predicate) {
+        final Set<M> matchingKeys = Maps.filterValues(map, predicate)
+                              .keySet();
+        return ImmutableSet.copyOf(matchingKeys);
     }
 
     /**
@@ -128,85 +122,4 @@ public class MessageHandlerMap<M extends MessageClass, H extends HandlerMethod>
                    "Unable to find handler for the message class %s", messageClass);
         return handlerMethod;
     }
-
-//    private final ImmutableMap<Key, H> map;
-//
-//    /**
-//     * A key in the method map, which allows to distinguish the methods
-//     * with different attribute sets.
-//     */
-//    static class Key {
-//        private final Class<? extends Message> clazz;
-//        private final Set<MethodAttribute<?>> attributes;
-//
-//        Key(Class<? extends Message> clazz,
-//            Set<MethodAttribute<?>> attributes) {
-//            this.clazz = clazz;
-//            this.attributes = attributes;
-//        }
-//
-//        @Override
-//        public boolean equals(Object o) {
-//            if (this == o) {
-//                return true;
-//            }
-//            if (o == null || getClass() != o.getClass()) {
-//                return false;
-//            }
-//            Key key = (Key) o;
-//            return Objects.equals(clazz, key.clazz) &&
-//                    Objects.equals(attributes, key.attributes);
-//        }
-//
-//        @Override
-//        public int hashCode() {
-//            return Objects.hash(clazz, attributes);
-//        }
-//    }
-//
-//
-//    private MethodMap(Class<?> clazz, HandlerMethod.Factory<H> factory) {
-//        final Predicate<Method> predicate = factory.getPredicate();
-//        final Map<Class<? extends Message>, Method> rawMethods = scan(clazz, predicate);
-//        final ImmutableMap.Builder<Key, H> builder = ImmutableMap.builder();
-//        for (Map.Entry<Class<? extends Message>, Method> entry : rawMethods.entrySet()) {
-//            final H handler = factory.create(entry.getValue());
-//            factory.checkAccessModifier(handler.getMethod());
-//
-//
-//            //TODO:7/19/17:alex.tymchenko: deal with the generics in the inheritance tree.
-//            final Set<MethodAttribute<?>> attributes = handler.getAttributes();
-//            final Key key = new Key(entry.getKey(), attributes);
-//            builder.put(key, handler);
-//        }
-//        this.map = builder.build();
-//    }
-
-//
-//    /** Returns {@code true} if the map is empty, {@code false} otherwise. */
-//    @CheckReturnValue
-//    public boolean isEmpty() {
-//        return map.isEmpty();
-//    }
-//
-//    @CheckReturnValue
-//    public ImmutableSet<Key> keySet() {
-//        return map.keySet();
-//    }
-//
-//    @CheckReturnValue
-//    public ImmutableSet<Map.Entry<Key, H>> entrySet() {
-//        return map.entrySet();
-//    }
-//
-//    @CheckReturnValue
-//    public ImmutableCollection<H> values() {
-//        return map.values();
-//    }
-//
-//    @CheckReturnValue
-//    @Nullable
-//    public H get(Key messageClass) {
-//        return map.get(checkNotNull(messageClass));
-//    }
 }

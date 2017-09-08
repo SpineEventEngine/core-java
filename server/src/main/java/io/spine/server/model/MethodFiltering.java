@@ -37,12 +37,37 @@ public final class MethodFiltering {
         // Prevent from instantiation.
     }
 
-    public static <M extends HandlerMethod<?>> Predicate<M> onlyExternal() {
+    /**
+     * Creates a predicate to remove the {@linkplain HandlerMethod handler methods}
+     * that are not marked {@linkplain ExternalAttribute#EXTERNAL external}.
+     *
+     * @param <M> the type of the {@code HandlerMethod} to apply this predicate to
+     * @return the predicate
+     */
+    public static <M extends HandlerMethod<?>> Predicate<M> externalPredicate() {
         return new Predicate<M>() {
             @Override
             public boolean apply(@Nullable M input) {
                 final M method = checkNotNull(input);
                 final boolean result = isExternal(method);
+                return result;
+            }
+        };
+    }
+
+    /**
+     * Creates a predicate to remove the {@linkplain HandlerMethod handler methods}
+     * that are marked {@linkplain ExternalAttribute#EXTERNAL external}.
+     *
+     * @param <M> the type of the {@code HandlerMethod} to apply this predicate to
+     * @return the predicate
+     */
+    public static <M extends HandlerMethod<?>> Predicate<M> domesticPredicate() {
+        return new Predicate<M>() {
+            @Override
+            public boolean apply(@Nullable M input) {
+                final M method = checkNotNull(input);
+                final boolean result = !isExternal(method);
                 return result;
             }
         };
@@ -66,8 +91,8 @@ public final class MethodFiltering {
     public static void ensureExternalMatch(HandlerMethod<?> method, boolean shouldBeExternal) {
 
         checkArgument(isExternal(method) == shouldBeExternal,
-                      "Mismatch of `external` value for the handler method {}. " +
-                              "Expected `external` = {}, but got the other way around.", method,
+                      "Mismatch of `external` value for the handler method %s. " +
+                              "Expected `external` = %s, but got the other way around.", method,
                       shouldBeExternal);
     }
 }

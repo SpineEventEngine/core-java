@@ -20,6 +20,7 @@
 
 package io.spine.server.aggregate;
 
+import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
 import io.spine.core.CommandClass;
 import io.spine.core.EventClass;
@@ -56,12 +57,27 @@ public final class AggregateClass<A extends Aggregate>
     private final MessageHandlerMap<EventClass, EventReactorMethod> eventReactions;
     private final MessageHandlerMap<RejectionClass, RejectionReactorMethod> rejectionReactions;
 
+    private final ImmutableSet<EventClass> domesticEventReactions;
+    private final ImmutableSet<EventClass> externalEventReactions;
+    private final ImmutableSet<RejectionClass> domesticRejectionReactions;
+    private final ImmutableSet<RejectionClass> externalRejectionReactions;
+
     private AggregateClass(Class<? extends A> cls) {
         super(cls);
         this.commands = new MessageHandlerMap<>(cls, CommandHandlerMethod.factory());
         this.stateEvents = new MessageHandlerMap<>(cls, EventApplierMethod.factory());
         this.eventReactions = new MessageHandlerMap<>(cls, EventReactorMethod.factory());
         this.rejectionReactions = new MessageHandlerMap<>(cls, RejectionReactorMethod.factory());
+
+        this.domesticEventReactions = this.eventReactions.getMessageClasses(
+                MethodFiltering.<EventReactorMethod>domesticPredicate());
+        this.externalEventReactions = this.eventReactions.getMessageClasses(
+                MethodFiltering.<EventReactorMethod>externalPredicate());
+
+        this.domesticRejectionReactions = this.rejectionReactions.getMessageClasses(
+                MethodFiltering.<RejectionReactorMethod>domesticPredicate());
+        this.externalRejectionReactions = this.rejectionReactions.getMessageClasses(
+                MethodFiltering.<RejectionReactorMethod>externalPredicate());
     }
 
     public static <A extends Aggregate> AggregateClass<A> of(Class<A> cls) {
@@ -89,20 +105,19 @@ public final class AggregateClass<A extends Aggregate>
     }
 
     Set<EventClass> getEventReactions() {
-        return eventReactions.getMessageClasses();
+        return domesticEventReactions;
     }
 
     Set<EventClass> getExternalEventReactions() {
-        return eventReactions.getMessageClasses(MethodFiltering.<EventReactorMethod>onlyExternal());
+        return externalEventReactions;
     }
 
     Set<RejectionClass> getRejectionReactions() {
-        return rejectionReactions.getMessageClasses();
+        return domesticRejectionReactions;
     }
 
     Set<RejectionClass> getExternalRejectionReactions() {
-        return rejectionReactions.getMessageClasses(
-                MethodFiltering.<RejectionReactorMethod>onlyExternal());
+        return externalRejectionReactions;
     }
 
     CommandHandlerMethod getHandler(CommandClass commandClass) {

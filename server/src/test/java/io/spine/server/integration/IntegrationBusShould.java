@@ -203,6 +203,24 @@ public class IntegrationBusShould {
     }
 
     @Test
+    public void not_dispatch_events_to_domestic_subscribers_if_they_requested_external() {
+
+        final LocalTransportFactory transportFactory = LocalTransportFactory.newInstance();
+
+        final BoundedContext sourceContext = contextWithTransport(transportFactory);
+        sourceContext.getIntegrationBus().register(new ProjectEventsSubscriber());
+        sourceContext.getEventBus().register(new ProjectEventsSubscriber());
+
+        assertNull(ProjectEventsSubscriber.getExternalEvent());
+
+        final EventBus sourceEventBus = sourceContext.getEventBus();
+        final Event projectCreated = projectCreated();
+        sourceEventBus.post(projectCreated);
+
+        assertNull(ProjectEventsSubscriber.getExternalEvent());
+    }
+
+    @Test
     public void update_local_subscriptions_upon_repeated_RequestedMessageTypes() {
         final LocalTransportFactory transportFactory = LocalTransportFactory.newInstance();
 

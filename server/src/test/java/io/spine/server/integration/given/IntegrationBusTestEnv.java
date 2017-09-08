@@ -25,10 +25,13 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;
+import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
+import io.spine.core.EventEnvelope;
 import io.spine.core.React;
 import io.spine.core.Rejection;
+import io.spine.core.RejectionEnvelope;
 import io.spine.core.Subscribe;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.Aggregate;
@@ -62,6 +65,7 @@ import static io.spine.Identifier.newUuid;
 import static io.spine.core.Rejections.createRejection;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.command.TestEventFactory.newInstance;
+import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 
 /**
  * @author Alex Tymchenko
@@ -210,6 +214,11 @@ public class IntegrationBusTestEnv {
 
     private static class ProjectDetailsRepository
             extends ProjectionRepository<ProjectId, ProjectDetails, StringValue> {
+
+        @Override
+        public void onError(EventEnvelope envelope, RuntimeException exception) {
+            throw illegalStateWithCauseOf(exception);
+        }
     }
 
     @SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod")  // OK to preserve the state.
@@ -252,6 +261,16 @@ public class IntegrationBusTestEnv {
 
     private static class ProjectWizardRepository
             extends ProcessManagerRepository<ProjectId, ProjectWizard, Project> {
+
+        @Override
+        public void onError(RejectionEnvelope envelope, RuntimeException exception) {
+            throw illegalStateWithCauseOf(exception);
+        }
+
+        @Override
+        public void onError(CommandEnvelope envelope, RuntimeException exception) {
+            throw illegalStateWithCauseOf(exception);
+        }
     }
 
     @SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod")  // OK to preserve the state.
@@ -294,6 +313,21 @@ public class IntegrationBusTestEnv {
 
     private static class ProjectCountAggregateRepository
             extends AggregateRepository<ProjectId, ProjectCountAggregate> {
+
+        @Override
+        public void onError(CommandEnvelope envelope, RuntimeException exception) {
+            throw illegalStateWithCauseOf(exception);
+        }
+
+        @Override
+        public void onError(EventEnvelope envelope, RuntimeException exception) {
+            throw illegalStateWithCauseOf(exception);
+        }
+
+        @Override
+        public void onError(RejectionEnvelope envelope, RuntimeException exception) {
+            throw illegalStateWithCauseOf(exception);
+        }
     }
 
     @SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod")  // OK to preserve the state.
@@ -335,6 +369,11 @@ public class IntegrationBusTestEnv {
 
     private static class ContextAwareProjectDetailsRepository
             extends ProjectionRepository<ProjectId, ContextAwareProjectDetails, StringValue> {
+
+        @Override
+        public void onError(EventEnvelope envelope, RuntimeException exception) {
+            throw illegalStateWithCauseOf(exception);
+        }
     }
 
     @SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod")  // OK to preserve the state.
@@ -366,6 +405,14 @@ public class IntegrationBusTestEnv {
             externalEvent = null;
             domesticEvent = null;
         }
+
+        /**
+         * Rethrow all the issues, so that they are visible to tests.
+         */
+        @Override
+        public void onError(EventEnvelope envelope, RuntimeException exception) {
+            throw illegalStateWithCauseOf(exception);
+        }
     }
 
     @SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod")  // OK to preserve the state.
@@ -384,6 +431,14 @@ public class IntegrationBusTestEnv {
 
         public static void clear() {
             externalEvent = null;
+        }
+
+        /**
+         * Rethrow all the issues, so that they are visible to tests.
+         */
+        @Override
+        public void onError(EventEnvelope envelope, RuntimeException exception) {
+            throw illegalStateWithCauseOf(exception);
         }
     }
 
@@ -415,6 +470,14 @@ public class IntegrationBusTestEnv {
         public static void clear() {
             externalRejection = null;
             domesticRejection = null;
+        }
+
+        /**
+         * Rethrow all the issues, so that they are visible to tests.
+         */
+        @Override
+        public void onError(RejectionEnvelope envelope, RuntimeException exception) {
+            throw illegalStateWithCauseOf(exception);
         }
     }
 }

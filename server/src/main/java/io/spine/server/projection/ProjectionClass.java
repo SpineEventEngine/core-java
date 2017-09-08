@@ -20,6 +20,7 @@
 
 package io.spine.server.projection;
 
+import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
 import io.spine.core.EventClass;
 import io.spine.server.event.EventSubscriberMethod;
@@ -38,15 +39,23 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alexander Yevsyukov
  */
 @Internal
+@SuppressWarnings("ReturnOfCollectionOrArrayField")     // returning an immutable impl.
 public final class ProjectionClass<P extends Projection> extends EntityClass<P> {
 
     private static final long serialVersionUID = 0L;
 
     private final MessageHandlerMap<EventClass, EventSubscriberMethod> eventSubscriptions;
+    private final ImmutableSet<EventClass> domesticSubscriptions;
+    private final ImmutableSet<EventClass> externalSubscriptions;
 
     private ProjectionClass(Class<? extends P> cls) {
         super(cls);
         this.eventSubscriptions = new MessageHandlerMap<>(cls, EventSubscriberMethod.factory());
+
+        this.domesticSubscriptions = this.eventSubscriptions.getMessageClasses(
+                MethodFiltering.<EventSubscriberMethod>domesticPredicate());
+        this.externalSubscriptions = this.eventSubscriptions.getMessageClasses(
+                MethodFiltering.<EventSubscriberMethod>externalPredicate());
     }
 
     public static <P extends Projection> ProjectionClass<P> of(Class<P> cls) {
@@ -55,12 +64,11 @@ public final class ProjectionClass<P extends Projection> extends EntityClass<P> 
     }
 
     Set<EventClass> getEventSubscriptions() {
-        return eventSubscriptions.getMessageClasses();
+        return domesticSubscriptions;
     }
 
     Set<EventClass> getExternalEventSubscriptions() {
-        return eventSubscriptions.getMessageClasses(
-                MethodFiltering.<EventSubscriberMethod>onlyExternal());
+        return externalSubscriptions;
     }
 
     EventSubscriberMethod getSubscriber(EventClass eventClass) {
