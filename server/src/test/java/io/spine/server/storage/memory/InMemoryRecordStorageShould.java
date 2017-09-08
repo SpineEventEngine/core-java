@@ -32,6 +32,7 @@ import org.junit.Test;
 
 import static io.spine.Identifier.newUuid;
 import static java.lang.String.format;
+import static java.lang.System.nanoTime;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -58,10 +59,11 @@ public class InMemoryRecordStorageShould
 
     @Override
     protected Message newState(ProjectId id) {
+        final String uniqueName = format("record-storage-test-%s-%s", id.getId(), nanoTime());
         final Project project = Project.newBuilder()
                                        .setId(id)
                                        .setStatus(Project.Status.CREATED)
-                                       .setName(format("record-storage-test-%s", id.getId()))
+                                       .setName(uniqueName)
                                        .addTask(Task.getDefaultInstance())
                                        .build();
         return project;

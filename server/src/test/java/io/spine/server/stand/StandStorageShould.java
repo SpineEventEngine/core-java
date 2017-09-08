@@ -76,10 +76,11 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
 
     @Override
     protected Message newState(AggregateStateId id) {
+        final String uniqueName = format("test-project-%s-%s", id.toString(), System.nanoTime());
         final Project project = Project.newBuilder()
                                        .setId((ProjectId) id.getAggregateId())
                                        .setStatus(Project.Status.CREATED)
-                                       .setName(format("test-project-%s", id.toString()))
+                                       .setName(uniqueName)
                                        .addTask(Task.getDefaultInstance())
                                        .build();
         return project;

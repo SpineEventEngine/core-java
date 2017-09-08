@@ -35,6 +35,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import static com.google.common.collect.Sets.newHashSet;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -199,7 +200,7 @@ public abstract class AbstractStorageShould<I,
         }
 
         final Iterator<I> index = storage.index();
-        final Collection<I> indexValues = Sets.newHashSet(index);
+        final Collection<I> indexValues = newHashSet(index);
 
         assertEquals(ids.size(), indexValues.size());
         Verify.assertContainsAll(indexValues, (I[]) ids.toArray());
@@ -275,5 +276,19 @@ public abstract class AbstractStorageShould<I,
     public void throw_exception_if_close_twice() throws Exception {
         storage.close();
         storage.close();
+    }
+
+    @SuppressWarnings("MismatchedQueryAndUpdateOfCollection"/* Storing of generated objects and
+                                                               checking via #contains(Object). */)
+    @Test
+    public void return_unique_ID() {
+        final int checkCount = 10;
+        final Set<I> ids = newHashSet();
+        for (int i = 0; i < checkCount; i++) {
+            final I newId = newId();
+            if (ids.contains(newId)) {
+                fail("AbstractStorageShould.newId() should return unique IDs.");
+            }
+        }
     }
 }
