@@ -68,7 +68,8 @@ public abstract class ProjectionStorageShould
 
     @Override
     protected Message newState(ProjectId id) {
-        final Project state = Given.project(id, "Projection name " + id.getId());
+        final String uniqueName = format("Projection_name-%s-%s", id.getId(), System.nanoTime());
+        final Project state = Given.project(id, uniqueName);
         return state;
     }
 
