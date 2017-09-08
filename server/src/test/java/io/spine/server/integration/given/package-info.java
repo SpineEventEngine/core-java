@@ -17,12 +17,16 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+/**
+ * @author Alex Tymchenko
+ */
+
 
 /**
- * Test environment classes for tests of the {@code io.spine.server.event} package.
+ * Test environment classes for tests of the {@code io.spine.server.integration} package.
  */
 
 @ParametersAreNonnullByDefault
-package io.spine.server.event.given;
+package io.spine.server.integration.given;
 
 import javax.annotation.ParametersAreNonnullByDefault;

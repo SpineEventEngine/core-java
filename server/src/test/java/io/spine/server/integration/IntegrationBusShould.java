@@ -26,14 +26,15 @@ import io.spine.core.Rejection;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.event.EventBus;
-import io.spine.server.integration.given.IntegrationBusTestEnv.CannotCreateProjectExtSubscriber;
 import io.spine.server.integration.given.IntegrationBusTestEnv.ContextAwareProjectDetails;
 import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectCountAggregate;
 import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectDetails;
 import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectEventsSubscriber;
+import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectRejectionsExtSubscriber;
 import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectStartedExtSubscriber;
 import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectWizard;
 import io.spine.server.integration.local.LocalTransportFactory;
+import io.spine.server.rejection.RejectionBus;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -62,6 +63,8 @@ public class IntegrationBusShould {
     @Before
     public void setUp() {
         ProjectDetails.clear();
+        ProjectWizard.clear();
+        ProjectCountAggregate.clear();
         ContextAwareProjectDetails.clear();
         ProjectEventsSubscriber.clear();
         ProjectStartedExtSubscriber.clear();
@@ -89,7 +92,7 @@ public class IntegrationBusShould {
     }
 
     @Test
-    public void avoid_dispatch_events_from_one_BC_to_domestic_entity_subscribers_of_another_BC() {
+    public void avoid_dispatching_events_from_one_BC_to_domestic_entity_subscribers_of_another_BC() {
         final LocalTransportFactory transportFactory = LocalTransportFactory.newInstance();
 
         final BoundedContext sourceContext = contextWithTransport(transportFactory);
@@ -126,7 +129,7 @@ public class IntegrationBusShould {
     }
 
     @Test
-    public void avoid_dispatch_events_from_one_BC_to_domestic_st_alone_subscribers_of_another_BC() {
+    public void avoid_dispatching_events_from_one_BC_to_domestic_standalone_subscribers_of_another_BC() {
         final LocalTransportFactory transportFactory = LocalTransportFactory.newInstance();
 
         final BoundedContext sourceContext = contextWithTransport(transportFactory);
@@ -203,24 +206,6 @@ public class IntegrationBusShould {
     }
 
     @Test
-    public void not_dispatch_events_to_domestic_subscribers_if_they_requested_external() {
-
-        final LocalTransportFactory transportFactory = LocalTransportFactory.newInstance();
-
-        final BoundedContext sourceContext = contextWithTransport(transportFactory);
-        sourceContext.getIntegrationBus().register(new ProjectEventsSubscriber());
-        sourceContext.getEventBus().register(new ProjectEventsSubscriber());
-
-        assertNull(ProjectEventsSubscriber.getExternalEvent());
-
-        final EventBus sourceEventBus = sourceContext.getEventBus();
-        final Event projectCreated = projectCreated();
-        sourceEventBus.post(projectCreated);
-
-        assertNull(ProjectEventsSubscriber.getExternalEvent());
-    }
-
-    @Test
     public void update_local_subscriptions_upon_repeated_RequestedMessageTypes() {
         final LocalTransportFactory transportFactory = LocalTransportFactory.newInstance();
 
@@ -283,13 +268,58 @@ public class IntegrationBusShould {
         final BoundedContext sourceContext = contextWithTransport(transportFactory);
         contextWithExternalSubscribers(transportFactory);
 
-        assertNull(CannotCreateProjectExtSubscriber.getExternalRejection());
+        assertNull(ProjectRejectionsExtSubscriber.getExternalRejection());
+        assertNull(ProjectCountAggregate.getExternalRejection());
 
         final Rejection rejection = cannotStartArchivedProject();
         sourceContext.getRejectionBus()
                      .post(rejection);
-        assertEquals(AnyPacker.unpack(rejection.getMessage()),
-                     CannotCreateProjectExtSubscriber.getExternalRejection());
+        final Message rejectionMessage = AnyPacker.unpack(rejection.getMessage());
+
+        assertEquals(rejectionMessage, ProjectRejectionsExtSubscriber.getExternalRejection());
+        assertEquals(rejectionMessage, ProjectCountAggregate.getExternalRejection());
     }
 
+    @Test
+    public void not_dispatch_events_to_domestic_subscribers_if_they_requested_external() {
+        final LocalTransportFactory transportFactory = LocalTransportFactory.newInstance();
+
+        final BoundedContext context = contextWithExtEntitySubscribers(transportFactory);
+        final ProjectEventsSubscriber eventSubscriber = new ProjectEventsSubscriber();
+        final EventBus eventBus = context.getEventBus();
+        eventBus.register(eventSubscriber);
+
+        assertNull(ProjectEventsSubscriber.getExternalEvent());
+        assertNull(ProjectDetails.getExternalEvent());
+        assertNull(ProjectWizard.getExternalEvent());
+        assertNull(ProjectCountAggregate.getExternalEvent());
+
+        final Event projectCreated = projectCreated();
+        eventBus.post(projectCreated);
+
+        assertNull(ProjectEventsSubscriber.getExternalEvent());
+        assertNull(ProjectDetails.getExternalEvent());
+        assertNull(ProjectWizard.getExternalEvent());
+        assertNull(ProjectCountAggregate.getExternalEvent());
+    }
+
+    @Test
+    public void not_dispatch_rejections_to_domestic_subscribers_if_they_requested_external() {
+        final LocalTransportFactory transportFactory = LocalTransportFactory.newInstance();
+
+        final BoundedContext sourceContext = contextWithTransport(transportFactory);
+        final ProjectRejectionsExtSubscriber standaloneSubscriber =
+                new ProjectRejectionsExtSubscriber();
+
+        final RejectionBus rejectionBus = sourceContext.getRejectionBus();
+        rejectionBus.register(standaloneSubscriber);
+
+        assertNull(ProjectRejectionsExtSubscriber.getExternalRejection());
+
+
+        final Rejection rejection = cannotStartArchivedProject();
+        rejectionBus.post(rejection);
+
+        assertNull(ProjectRejectionsExtSubscriber.getExternalRejection());
+    }
 }

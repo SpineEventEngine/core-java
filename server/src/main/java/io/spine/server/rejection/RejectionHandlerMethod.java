@@ -34,6 +34,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.core.Rejections.isRejection;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static io.spine.util.Exceptions.unsupported;
 
@@ -232,7 +233,10 @@ class RejectionHandlerMethod extends HandlerMethod<RejectionContext> {
                 return false;
             }
 
-            final boolean firstParamCorrect = Message.class.isAssignableFrom(paramTypes[0]);
+            final boolean firstParamIsMessage = Message.class.isAssignableFrom(paramTypes[0]);
+            @SuppressWarnings("unchecked")  // checked above.
+            final boolean firstParamCorrect =
+                    firstParamIsMessage && isRejection((Class<? extends Message>) paramTypes[0]);
             if (!firstParamCorrect) {
                 return false;
             }

@@ -33,6 +33,7 @@ import io.spine.core.React;
 import io.spine.core.Rejection;
 import io.spine.core.RejectionEnvelope;
 import io.spine.core.Subscribe;
+import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
@@ -62,7 +63,7 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.Identifier.newUuid;
-import static io.spine.core.Rejections.createRejection;
+import static io.spine.core.Rejections.toRejection;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.command.TestEventFactory.newInstance;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
@@ -99,9 +100,11 @@ public class IntegrationBusTestEnv {
         boundedContext.getEventBus()
                       .register(eventSubscriber);
 
-        final RejectionSubscriber rejectionSubscriber = new CannotCreateProjectExtSubscriber();
+        final RejectionSubscriber rejectionSubscriber = new ProjectRejectionsExtSubscriber();
         boundedContext.getRejectionBus().register(rejectionSubscriber);
         boundedContext.getIntegrationBus().register(rejectionSubscriber);
+
+        boundedContext.register(new ProjectCountAggregateRepository());
         return boundedContext;
     }
 
@@ -149,17 +152,17 @@ public class IntegrationBusTestEnv {
         );
     }
 
+    @SuppressWarnings("ThrowableNotThrown")     // used to create a rejection
     public static Rejection cannotStartArchivedProject() {
         final ProjectId projectId = projectId();
         final ItgStartProject cmdMessage = ItgStartProject.newBuilder()
                                                           .setProjectId(projectId)
                                                           .build();
         final Command startProjectCmd = toCommand(cmdMessage);
-        final Rejection rejection = createRejection(
-                ItgCannotStartArchivedProject.newBuilder()
-                                             .setProjectId(projectId)
-                                             .build(),
-                startProjectCmd);
+        final io.spine.test.integration.rejection.ItgCannotStartArchivedProject throwable =
+                new io.spine.test.integration.rejection.ItgCannotStartArchivedProject(projectId);
+        throwable.initProducer(AnyPacker.pack(projectId));
+        final Rejection rejection = toRejection(throwable, startProjectCmd);
         return rejection;
     }
 
@@ -279,7 +282,7 @@ public class IntegrationBusTestEnv {
 
         private static ItgProjectCreated externalEvent = null;
 
-        private static ItgProjectStarted domesticEvent = null;
+        private static ItgCannotStartArchivedProject externalRejection = null;
 
         protected ProjectCountAggregate(ProjectId id) {
             super(id);
@@ -291,9 +294,9 @@ public class IntegrationBusTestEnv {
             return Collections.emptyList();
         }
 
-        @React
-        List<Message> on(ItgProjectStarted event) {
-            domesticEvent = event;
+        @React(external = true)
+        List<Message> on(ItgCannotStartArchivedProject rejection) {
+            externalRejection = rejection;
             return Collections.emptyList();
         }
 
@@ -301,13 +304,13 @@ public class IntegrationBusTestEnv {
             return externalEvent;
         }
 
-        public static ItgProjectStarted getDomesticEvent() {
-            return domesticEvent;
+        public static ItgCannotStartArchivedProject getExternalRejection() {
+            return externalRejection;
         }
 
         public static void clear() {
             externalEvent = null;
-            domesticEvent = null;
+            externalRejection = null;
         }
     }
 
@@ -443,7 +446,7 @@ public class IntegrationBusTestEnv {
     }
 
     @SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod")  // OK to preserve the state.
-    public static class CannotCreateProjectExtSubscriber extends RejectionSubscriber {
+    public static class ProjectRejectionsExtSubscriber extends RejectionSubscriber {
 
         private static ItgCannotStartArchivedProject externalRejection = null;
 
