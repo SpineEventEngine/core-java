@@ -57,14 +57,14 @@ public class CompositeQueryParameterShould {
 
     @Test
     public void be_serializable() {
-        final CompositeQueryParameter parameter = from(ImmutableMultimap.<Column, ColumnFilter>of(),
-                                                       ALL);
+        final ImmutableMultimap<EntityColumn, ColumnFilter> filters = ImmutableMultimap.of();
+        final CompositeQueryParameter parameter = from(filters, ALL);
         SerializableTester.reserializeAndAssert(parameter);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void fail_to_construct_for_invalid_operator() {
-        from(ImmutableMultimap.<Column, ColumnFilter>of(), CCF_CO_UNDEFINED);
+        from(ImmutableMultimap.<EntityColumn, ColumnFilter>of(), CCF_CO_UNDEFINED);
     }
 
     @Test
@@ -75,9 +75,9 @@ public class CompositeQueryParameterShould {
         final String deletedColumnName = deleted.name();
         final String versionColumnName = version.name();
 
-        final Column archivedColumn = Columns.findColumn(cls, archivedColumnName);
-        final Column deletedColumn = Columns.findColumn(cls, deletedColumnName);
-        final Column versionColumn = Columns.findColumn(cls, versionColumnName);
+        final EntityColumn archivedColumn = Columns.findColumn(cls, archivedColumnName);
+        final EntityColumn deletedColumn = Columns.findColumn(cls, deletedColumnName);
+        final EntityColumn versionColumn = Columns.findColumn(cls, versionColumnName);
 
         final ColumnFilter archived = eq(archivedColumnName, true);
         final ColumnFilter deleted = eq(archivedColumnName, false);
@@ -98,7 +98,7 @@ public class CompositeQueryParameterShould {
         // Check
         assertEquals(all.getOperator(), ALL);
 
-        final Multimap<Column, ColumnFilter> asMultimp = all.getFilters();
+        final Multimap<EntityColumn, ColumnFilter> asMultimp = all.getFilters();
         assertContainsAll(asMultimp.get(versionColumn), versionLower, versionUpper);
         assertContainsAll(asMultimp.get(archivedColumn), archived);
         assertContainsAll(asMultimp.get(deletedColumn), deleted);
@@ -112,9 +112,9 @@ public class CompositeQueryParameterShould {
         final String deletedColumnName = deleted.name();
         final String versionColumnName = version.name();
 
-        final Column archivedColumn = Columns.findColumn(cls, archivedColumnName);
-        final Column deletedColumn = Columns.findColumn(cls, deletedColumnName);
-        final Column versionColumn = Columns.findColumn(cls, versionColumnName);
+        final EntityColumn archivedColumn = Columns.findColumn(cls, archivedColumnName);
+        final EntityColumn deletedColumn = Columns.findColumn(cls, deletedColumnName);
+        final EntityColumn versionColumn = Columns.findColumn(cls, versionColumnName);
 
         final ColumnFilter archived = eq(archivedColumnName, false);
         final ColumnFilter deleted = eq(archivedColumnName, false);
@@ -129,7 +129,7 @@ public class CompositeQueryParameterShould {
         // Check
         assertEquals(all.getOperator(), ALL);
 
-        final Multimap<Column, ColumnFilter> asMultimp = all.getFilters();
+        final Multimap<EntityColumn, ColumnFilter> asMultimp = all.getFilters();
         assertContainsAll(asMultimp.get(versionColumn), version);
         assertContainsAll(asMultimp.get(archivedColumn), archived);
         assertContainsAll(asMultimp.get(deletedColumn), deleted);

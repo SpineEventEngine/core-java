@@ -21,29 +21,31 @@
 package io.spine.server.entity.storage;
 
 import com.google.common.testing.NullPointerTester;
+import com.google.common.testing.NullPointerTester.Visibility;
 import com.google.protobuf.Any;
-import com.google.protobuf.Timestamp;
 import io.spine.server.entity.AbstractEntity;
-import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.server.entity.Entity;
-import io.spine.server.entity.LifecycleFlags;
-import io.spine.test.entity.Project;
+import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithColumnFromInterface;
+import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithManyGetters;
+import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithManyGettersDescendant;
+import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithNoStorageFields;
+import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithRepeatedColumnNames;
+import io.spine.server.entity.storage.given.ColumnsTestEnv.RealLifeEntity;
 import io.spine.test.entity.ProjectId;
 import io.spine.testdata.Sample;
-import io.spine.time.Time;
 import org.junit.Test;
 
-import javax.annotation.Nullable;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
+import static io.spine.server.entity.storage.given.ColumnsTestEnv.CUSTOM_COLUMN_NAME;
 import static io.spine.server.storage.EntityField.version;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Verify.assertContains;
 import static io.spine.test.Verify.assertEmpty;
+import static io.spine.test.Verify.assertNotEmpty;
 import static io.spine.test.Verify.assertSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -63,43 +65,39 @@ public class ColumnsShould {
 
     @Test
     public void pass_null_check() {
-        new NullPointerTester()
-                .testStaticMethods(Columns.class,
-                                   NullPointerTester.Visibility.PACKAGE);
-    }
-
-    @Test
-    public void return_empty_map() {
-        final Map<String, Column.MemoizedValue> emptyFields = Collections.emptyMap();
-        assertNotNull(emptyFields);
-        assertEmpty(emptyFields);
+        new NullPointerTester().testStaticMethods(Columns.class, Visibility.PACKAGE);
     }
 
     @Test
     public void extract_no_fields_if_none_defined() {
         final Entity entity = new EntityWithNoStorageFields(STRING_ID);
-        final Map<String, Column.MemoizedValue> fields = Columns.from(entity);
+        final Map<String, EntityColumn.MemoizedValue> fields = Columns.from(entity);
         assertNotNull(fields);
         assertEmpty(fields);
     }
 
     @Test
-    public void put_non_null_fields_to_fields_maps() {
+    public void extract_fields_from_implemented_interfaces() {
+        final Entity entity = new EntityWithColumnFromInterface(STRING_ID);
+        final Map<String, EntityColumn.MemoizedValue> fields = Columns.from(entity);
+        assertNotEmpty(fields);
+    }
+
+    @Test
+    public void extract_column_values_with_names_for_storing() {
         final EntityWithManyGetters entity = new EntityWithManyGetters(STRING_ID);
-        final Map<String, Column.MemoizedValue> fields = Columns.from(entity);
+        final Map<String, EntityColumn.MemoizedValue> fields = Columns.from(entity);
         assertNotNull(fields);
 
         assertSize(3, fields);
 
         final String floatNullKey = "floatNull";
-        @SuppressWarnings("unchecked") final Column.MemoizedValue floatMemoizedNull =
-                (Column.MemoizedValue) fields.get(floatNullKey);
+        final EntityColumn.MemoizedValue floatMemoizedNull = fields.get(floatNullKey);
         assertNotNull(floatMemoizedNull);
         assertNull(floatMemoizedNull.getValue());
 
-        final String intFieldKey = "integerFieldValue";
         assertEquals(entity.getIntegerFieldValue(),
-                     fields.get(intFieldKey)
+                     fields.get(CUSTOM_COLUMN_NAME)
                            .getValue());
 
         final String messageKey = "someMessage";
@@ -109,23 +107,23 @@ public class ColumnsShould {
     }
 
     @Test
+    public void ignore_non_public_getters_with_column_annotation_from_super_class() {
+        final Entity entity = new EntityWithManyGettersDescendant(STRING_ID);
+        final Map<String, EntityColumn.MemoizedValue> fields = Columns.from(entity);
+        assertSize(3, fields);
+    }
+
+    @Test
     public void ignore_static_members() {
-        final Map<String, Column.MemoizedValue> fields =
+        final Map<String, EntityColumn.MemoizedValue> fields =
                 Columns.from(new EntityWithManyGetters(STRING_ID));
-        final Column.MemoizedValue staticValue = fields.get("staticMember");
+        final EntityColumn.MemoizedValue staticValue = fields.get("staticMember");
         assertNull(staticValue);
     }
 
     @Test
     public void handle_non_public_entity_class() {
         final Map<?, ?> fields = Columns.from(new PrivateEntity(STRING_ID));
-        assertNotNull(fields);
-        assertEmpty(fields);
-    }
-
-    @Test
-    public void handle_exclusive_methods() {
-        final Map<?, ?> fields = Columns.from(new ExclusiveMethodsEntity(STRING_ID));
         assertNotNull(fields);
         assertEmpty(fields);
     }
@@ -149,7 +147,7 @@ public class ColumnsShould {
     public void retrieve_column_metadata_from_given_class() {
         final Class<? extends Entity<?, ?>> entityClass = RealLifeEntity.class;
         final String existingColumnName = archived.name();
-        final Column archivedColumn = Columns.findColumn(entityClass, existingColumnName);
+        final EntityColumn archivedColumn = Columns.findColumn(entityClass, existingColumnName);
         assertNotNull(archivedColumn);
         assertEquals(existingColumnName, archivedColumn.getName());
     }
@@ -161,109 +159,15 @@ public class ColumnsShould {
         Columns.findColumn(entityClass, existingColumnName);
     }
 
-    public static class EntityWithNoStorageFields extends AbstractEntity<String, Any> {
-        protected EntityWithNoStorageFields(String id) {
-            super(id);
-        }
-    }
-
-    @SuppressWarnings("unused")  // Reflective access
-    public static class EntityWithManyGetters extends AbstractEntity<String, Any> {
-
-        private final Project someMessage = Sample.messageOfType(Project.class);
-
-        protected EntityWithManyGetters(String id) {
-            super(id);
-        }
-
-        public int getIntegerFieldValue() {
-            return 0;
-        }
-
-        @Nullable
-        public Float getFloatNull() {
-            return null;
-        }
-
-        public Project getSomeMessage() {
-            return someMessage;
-        }
-
-        int getSomeNonPublicMethod() {
-            throw new AssertionError("getSomeNonPublicMethod invoked");
-        }
-
-        public void getSomeVoid() {
-            throw new AssertionError("getSomeVoid invoked");
-        }
-
-        public static int getStaticMember() {
-            return 1024;
-        }
-    }
-
-    @SuppressWarnings("unused") // Reflective access
-    public static class EntityWithInvalidGetters extends AbstractEntity<String, Any> {
-
-        protected EntityWithInvalidGetters(String id) {
-            super(id);
-        }
-
-        @SuppressWarnings("ReturnOfNull") // required for the test
-        public Boolean getNonNullBooleanField() {
-            return null;
-        }
+    @Test(expected = IllegalStateException.class)
+    public void not_allow_same_column_name_within_one_entity() {
+        Columns.getColumns(EntityWithRepeatedColumnNames.class);
     }
 
     @SuppressWarnings("unused") // Reflective access
     private static class PrivateEntity extends AbstractEntity<String, Any> {
-
         protected PrivateEntity(String id) {
             super(id);
-        }
-    }
-
-    @SuppressWarnings("unused") // Reflective access
-    public static class ExclusiveMethodsEntity extends AbstractEntity<String, Any> {
-
-        protected ExclusiveMethodsEntity(String id) {
-            super(id);
-        }
-
-        @Override
-        public String getId() {
-            throw new AssertionError("getId invoked");
-        }
-
-        @Override
-        public Any getState() {
-            throw new AssertionError("getState invoked");
-        }
-
-        @Override
-        public Any getDefaultState() {
-            throw new AssertionError("getDefaultState invoked");
-        }
-
-        public LifecycleFlags getLifecycleFlags() {
-            throw new AssertionError("getLifecycleFlags invoked");
-        }
-    }
-
-    // Most read-life (non-test) Entities are children of AbstractVersionableEntity,
-    // which brings 3 storage fields from the box
-    public static class RealLifeEntity extends AbstractVersionableEntity<ProjectId, Project> {
-
-        protected RealLifeEntity(ProjectId id) {
-            super(id);
-        }
-
-        public Timestamp getSomeTime() {
-            return Time.getCurrentTime();
-        }
-
-        public boolean isVisible() {
-            return true;
         }
     }
 }

@@ -22,6 +22,7 @@ package io.spine.server.entity;
 
 import com.google.common.base.Predicate;
 import com.google.protobuf.Message;
+import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 
 import javax.annotation.Nullable;
@@ -41,11 +42,13 @@ public interface EntityWithLifecycle<I, S extends Message> extends Entity<I, S> 
     /**
      * Shows if current instance is archived or not.
      */
+    @Column
     boolean isArchived();
 
     /**
      * Shows if current instance is deleted or not.
      */
+    @Column
     boolean isDeleted();
 
     /**

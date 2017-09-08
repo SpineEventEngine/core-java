@@ -79,7 +79,8 @@ public final class EntityQueries {
         final QueryParameters.Builder builder = QueryParameters.newBuilder();
 
         for (CompositeColumnFilter filter : entityFilters.getFilterList()) {
-            final Multimap<Column, ColumnFilter> columnFilters = splitFilters(filter, entityClass);
+            final Multimap<EntityColumn, ColumnFilter> columnFilters = splitFilters(filter,
+                                                                                    entityClass);
             final CompositeOperator operator = filter.getOperator();
             final CompositeQueryParameter parameter =
                     CompositeQueryParameter.from(columnFilters, operator);
@@ -88,25 +89,26 @@ public final class EntityQueries {
         return builder.build();
     }
 
-    private static Multimap<Column, ColumnFilter> splitFilters(
+    private static Multimap<EntityColumn, ColumnFilter> splitFilters(
             CompositeColumnFilter filter,
             Class<? extends Entity> entityClass) {
-        final Multimap<Column, ColumnFilter> columnFilters = create(filter.getFilterCount(), 1);
+        final Multimap<EntityColumn, ColumnFilter> columnFilters = create(filter.getFilterCount(),
+                                                                          1);
         for (ColumnFilter columnFilter : filter.getFilterList()) {
-            final Column column = Columns.findColumn(entityClass, columnFilter.getColumnName());
+            final EntityColumn column = Columns.findColumn(entityClass, columnFilter.getColumnName());
             checkFilterType(column, columnFilter);
             columnFilters.put(column, columnFilter);
         }
         return columnFilters;
     }
 
-    private static void checkFilterType(Column column, ColumnFilter filter) {
+    private static void checkFilterType(EntityColumn column, ColumnFilter filter) {
         final Class<?> expectedType = column.getType();
         final Any filterConvent = filter.getValue();
         final Object filterValue = toObject(filterConvent, expectedType);
         final Class<?> actualType = filterValue.getClass();
         checkArgument(wrap(expectedType).isAssignableFrom(wrap(actualType)),
-                      "Column type mismatch. Column %s cannot have value %s.",
+                      "EntityColumn type mismatch. EntityColumn %s cannot have value %s.",
                       column,
                       filterValue);
     }

@@ -25,8 +25,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
+import io.spine.annotation.SPI;
 import io.spine.core.EventClass;
-import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.core.ExternalMessageEnvelope;
 import io.spine.server.BoundedContext;
@@ -38,6 +38,7 @@ import io.spine.server.event.EventStreamQuery;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.model.Model;
 import io.spine.server.route.EventProducers;
+import io.spine.server.route.EventRouting;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
@@ -87,16 +88,6 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     protected final ProjectionClass<P> getModelClass(Class<P> cls) {
         return (ProjectionClass<P>) Model.getInstance()
                                          .asProjectionClass(cls);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Overrides to open the method to the package.
-     */
-    @Override
-    protected Class<I> getIdClass() {
-        return super.getIdClass();
     }
 
     /**
@@ -186,41 +177,9 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         return projectionClass().getEventSubscriptions();
     }
 
-    /**
-     * Dispatches the passed event to corresponding {@link Projection}s.
-     *
-     * <p>The ID of the projection must be specified as the first property of the passed event.
-     *
-     * <p>If there is no stored projection with the ID from the event, a new projection is created
-     * and stored after it handles the passed event.
-     *
-     * <p>If the projection was changed as the result of dispatching the event, the following
-     * operations are performed:
-     * <ol>
-     *     <li>The projection is stored.
-     *     <li>The timestamp of the event is stored.
-     *     <li>The state of the projection is posted to the {@link Stand}.
-     * </ol>
-     *
-     * @see Projection#handle(Message, EventContext)
-     */
     @Override
-    protected void dispatchToEntity(I id, EventEnvelope event) {
-        final P projection = findOrCreate(id);
-        final ProjectionTransaction<I, ?, ?> tx =
-                ProjectionTransaction.start((Projection<I, ?, ?>) projection);
-        final EventContext context = event.getEventContext();
-        projection.handle(event.getMessage(), context);
-        tx.commit();
-
-        if (projection.isChanged()) {
-            final Timestamp eventTime = context.getTimestamp();
-            store(projection);
-            projectionStorage().writeLastHandledEventTime(eventTime);
-            getStand().post(context.getCommandContext()
-                                   .getActorContext()
-                                   .getTenantId(), projection);
-        }
+    public Set<I> dispatch(EventEnvelope envelope) {
+        return ProjectionEndpoint.handle(this, envelope);
     }
 
     @Internal
@@ -243,6 +202,37 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
                                .setAfter(timestamp)
                                .addAllFilter(eventFilters)
                                .build();
+    }
+
+    /**
+     * Defines a strategy of event delivery applied to the projections managed by this repository.
+     *
+     * <p>By default uses direct delivery.
+     *
+     * <p>Descendants may override this method to redefine the strategy. In particular,
+     * it is possible to postpone dispatching of a certain event to a particular projection
+     * instance at runtime.
+     *
+     * @return delivery strategy for events applied to the instances managed by this repository
+     */
+    @SPI
+    protected ProjectionEventDelivery<I, P> getEndpointDelivery() {
+        return ProjectionEventDelivery.directDelivery(this);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Overrides to expose the method to the package.
+     */
+    @Override
+    protected P findOrCreate(I id) {
+        return super.findOrCreate(id);
+    }
+
+    /** Exposes routing to the package. */
+    EventRouting<I> eventRouting() {
+        return getEventRouting();
     }
 
     @Override

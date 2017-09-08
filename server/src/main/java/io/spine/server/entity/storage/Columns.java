@@ -22,8 +22,10 @@ package io.spine.server.entity.storage;
 
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
+import io.spine.annotation.Internal;
 import io.spine.server.entity.Entity;
-import io.spine.server.entity.EntityWithLifecycle;
+import io.spine.server.entity.EntityClass;
+import io.spine.server.entity.storage.EntityColumn.MemoizedValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,42 +41,34 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.common.collect.Multimaps.synchronizedListMultimap;
+import static io.spine.server.entity.storage.ColumnRecords.getAnnotatedVersion;
+import static io.spine.util.Exceptions.newIllegalStateException;
+import static io.spine.validate.Validate.checkNotEmptyOrBlank;
 import static java.lang.String.format;
 
 /**
- * A utility for generating the {@link Column Columns} {@linkplain Map}.
+ * A utility for generating the {@linkplain EntityColumn columns} {@linkplain Map}.
  *
- * <p>All the methods of the passed {@link Entity} that fit
+ * <p>The methods of all {@link Entity entities} that fit
  * <a href="http://download.oracle.com/otndocs/jcp/7224-javabeans-1.01-fr-spec-oth-JSpec/">
- * the Java Bean</a> getter spec are considered {@link Column Columns}.
+ * the Java Bean</a> getter spec and annotated with {@link Column}
+ * are considered {@linkplain EntityColumn columns}.
+ * Inherited columns are taken into account either.
  *
- * <p>Note that the returned type of a {@link Column} getter must either be primitive or
+ * <p>Note that the returned type of a {@link EntityColumn} getter must either be primitive or
  * serializable, otherwise a runtime exception is thrown when trying to get an instance of
- * {@link Column}.
+ * {@link EntityColumn}.
  *
- * <p>When passing an instance of an already known {@link Entity} type, the getters are retrieved
- * from a cache and are not updated.
- *
- * <p>There are several excluded methods, which are never taken into account and are
- * <b>not</b> considered {@link Column Columns}:
- * <ul>
- *     <li>{@link Object#getClass()}
- *     <li>{@link Entity#getId()}
- *     <li>{@link Entity#getState()}
- *     <li>{@link Entity#getDefaultState()}
- *     <li>{@link io.spine.server.entity.EntityWithLifecycle#getLifecycleFlags()
- *     EntityWithLifecycle.getLifecycleFlags()}
- *     <li>{@link io.spine.server.aggregate.Aggregate#getBuilder() Aggregate.getBuilder()}
- * </ul>
- *
- * <p>Note: if creating a getter method with a name which intersects with one of these method
- * names, this getter method will also <b>not</b> be considered a {@link Column Column}.
+ * <p>When passing an instance of an already known {@link Entity} type,
+ * the getters are retrieved from a cache and are not updated.
  *
  * @author Dmytro Dashenkov
- * @see Column
+ * @see EntityColumn
  */
-class Columns {
+@Internal
+public class Columns {
 
     private static final String SPINE_PACKAGE = "io.spine.";
     private static final String NON_PUBLIC_CLASS_WARNING =
@@ -84,33 +78,42 @@ class Columns {
                     "Storage fields won't be extracted.";
 
     /**
-     * A one to many container of the {@link Class} to {@link Column} relations.
+     * A one to many container of the {@link Class} to {@link EntityColumn} relations.
      *
      * <p>This container is mutable and thread safe.
      */
-    private static final Multimap<Class<? extends Entity>, Column> knownEntityProperties =
+    private static final Multimap<Class<? extends Entity>, EntityColumn> knownEntityProperties =
             synchronizedListMultimap(
-                    LinkedListMultimap.<Class<? extends Entity>, Column>create());
+                    LinkedListMultimap.<Class<? extends Entity>, EntityColumn>create());
 
     private Columns() {
         // Prevent initialization of a utility class
     }
 
     /**
-     * Generates the {@link Column Columns} for the given {@linkplain Entity}.
+     * Ensures that the entity columns are valid for the specified entity class and caches them.
+     *
+     * @param entityClass the class to check entity columns
+     */
+    public static void checkColumnDefinitions(EntityClass<?> entityClass) {
+        ensureRegistered(entityClass.value());
+    }
+
+    /**
+     * Generates the {@linkplain EntityColumn columns} for the given {@linkplain Entity}.
      *
      * <p>If there were no {@linkplain Entity entities} stored in the scope of current class
      * <a href="https://docs.oracle.com/javase/specs/jls/se7/html/jls-12.html">initialization</a>,
      * a call to this method will create a cache of the passed {@linkplain Entity entity's} getters
      * and use it in all the successive calls.
      *
-     * @param entity an {@link Entity} to get the {@link Column Columns} from
+     * @param entity an {@link Entity} to get the {@linkplain EntityColumn columns} from
      * @param <E>    the type of the {@link Entity}
-     * @return a {@link Map} of the {@link Column Column} names to their
-     * {@linkplain Column.MemoizedValue memoized values}.
-     * @see Column.MemoizedValue
+     * @return a {@link Map} of the column {@linkplain EntityColumn#getStoredName() names for storing}
+     *         to their {@linkplain MemoizedValue memoized values}.
+     * @see MemoizedValue
      */
-    static <E extends Entity<?, ?>> Map<String, Column.MemoizedValue> from(E entity) {
+    static <E extends Entity<?, ?>> Map<String, MemoizedValue> from(E entity) {
         checkNotNull(entity);
         final Class<? extends Entity> entityType = entity.getClass();
         final int modifiers = entityType.getModifiers();
@@ -120,30 +123,30 @@ class Columns {
         }
         ensureRegistered(entityType);
 
-        final Map<String, Column.MemoizedValue> fields = extractColumns(entityType, entity);
+        final Map<String, MemoizedValue> fields = extractColumns(entityType, entity);
         return fields;
     }
 
     /**
-     * Retrieves a {@link Column} instance of the given name and from the given Entity class.
+     * Retrieves a {@link EntityColumn} instance of the given name and from the given entity class.
      *
-     * <p>If the given Entity class has not yet been added to the Column cache, it's added upon this
-     * operation.
+     * <p>If the given entity class has not yet been added to the column cache,
+     * it will be added upon this operation.
      *
      * <p>If no column is found, an {@link IllegalArgumentException} is thrown.
      *
-     * @param entityClass the class containing the {@link Column} definition
-     * @param columnName  the name of the {@link Column}
-     * @return an instance of {@link Column} with the given name
-     * @throws IllegalArgumentException if the {@link Column} is not found
+     * @param entityClass the class containing the {@link EntityColumn} definition
+     * @param columnName  the entity column {@linkplain EntityColumn#getName() name}
+     * @return an instance of {@link EntityColumn} with the given name
+     * @throws IllegalArgumentException if the {@link EntityColumn} is not found
      */
-    static Column findColumn(Class<? extends Entity> entityClass, String columnName) {
+    static EntityColumn findColumn(Class<? extends Entity> entityClass, String columnName) {
         checkNotNull(entityClass);
-        checkNotNull(columnName);
+        checkNotEmptyOrBlank(columnName, "entity column name");
         ensureRegistered(entityClass);
 
-        final Collection<Column> cachedColumns = getColumns(entityClass);
-        for (Column column : cachedColumns) {
+        final Collection<EntityColumn> cachedColumns = getColumns(entityClass);
+        for (EntityColumn column : cachedColumns) {
             if (column.getName()
                       .equals(columnName)) {
                 return column;
@@ -151,44 +154,41 @@ class Columns {
         }
 
         throw new IllegalArgumentException(
-                format("Could not find a Column description for %s.%s.",
+                format("Could not find a EntityColumn description for %s.%s.",
                        entityClass.getCanonicalName(),
                        columnName));
     }
 
     /**
-     * Retrieves a {@link Collection} of {@link Column Columns} from the given Entity class.
+     * Retrieves {@linkplain EntityColumn columns} for the given {@code Entity} class.
      *
-     * @param entityClass the class containing the {@link Column} definition
-     * @return a {@link Collection} of {@link Column} corresponded to entity class
+     * @param entityClass the class containing the {@link EntityColumn} definition
+     * @return a {@link Collection} of {@link EntityColumn} corresponded to entity class
      */
-    static Collection<Column> getColumns(Class<? extends Entity> entityClass) {
+    static Collection<EntityColumn> getColumns(Class<? extends Entity> entityClass) {
         checkNotNull(entityClass);
         ensureRegistered(entityClass);
 
-        final Collection<Column> result = knownEntityProperties.get(entityClass);
+        final Collection<EntityColumn> result = knownEntityProperties.get(entityClass);
         return result;
     }
 
     /**
-     * Generates the {@link Column Column} values considering the passed
+     * Generates the {@link EntityColumn} values considering the passed
      * {@linkplain Entity entity type} indexed.
      *
      * @param entityType indexed type of the {@link Entity}
      * @param entity     the object which to take the values from
-     * @return a {@link Map} of the {@link Column Columns}
+     * @return a {@link Map} of the {@linkplain EntityColumn columns}
      */
-    private static Map<String, Column.MemoizedValue> extractColumns(
-            Class<? extends Entity> entityType,
-            Entity entity) {
-        final Collection<Column> storageFieldProperties =
-                knownEntityProperties.get(entityType);
-        final Map<String, Column.MemoizedValue> values =
-                new HashMap<>(storageFieldProperties.size());
+    private static Map<String, MemoizedValue> extractColumns(Class<? extends Entity> entityType,
+                                                             Entity entity) {
+        final Collection<EntityColumn> storageFieldProperties = knownEntityProperties.get(entityType);
+        final Map<String, MemoizedValue> values = new HashMap<>(storageFieldProperties.size());
 
-        for (Column column : storageFieldProperties) {
-            final String name = column.getName();
-            final Column.MemoizedValue value = column.memoizeFor(entity);
+        for (EntityColumn column : storageFieldProperties) {
+            final String name = column.getStoredName();
+            final MemoizedValue value = column.memoizeFor(entity);
             values.put(name, value);
         }
         return values;
@@ -202,7 +202,8 @@ class Columns {
     }
 
     /**
-     * Caches the {@linkplain Entity entity type} for further {@link Column Columns} retrieving.
+     * Caches the {@linkplain Entity entity type}
+     * for further {@linkplain EntityColumn columns} retrieving.
      */
     private static void addToCache(Class<? extends Entity> entityType) {
         final BeanInfo entityDescriptor;
@@ -212,12 +213,35 @@ class Columns {
             throw new IllegalStateException(e);
         }
 
+        final Collection<EntityColumn> entityColumns = newLinkedList();
         for (PropertyDescriptor property : entityDescriptor.getPropertyDescriptors()) {
             final Method getter = property.getReadMethod();
-            if (!ExcludedMethod.contain(getter.getName())) {
-                final Column storageField = Column.from(getter);
-                knownEntityProperties.put(entityType, storageField);
+            final boolean isEntityColumn = getAnnotatedVersion(getter).isPresent();
+            if (isEntityColumn) {
+                final EntityColumn column = EntityColumn.from(getter);
+                entityColumns.add(column);
             }
+        }
+        checkRepeatedColumnNames(entityColumns, entityType);
+        knownEntityProperties.putAll(entityType, entityColumns);
+    }
+
+    /**
+     * Ensures that the specified columns have no repeated names.
+     *
+     * @param columns     the columns to check
+     * @param entityClass the entity class for the columns
+     */
+    private static void checkRepeatedColumnNames(Iterable<EntityColumn> columns,
+                                                 Class<? extends Entity> entityClass) {
+        final Collection<String> checkedNames = newLinkedList();
+        for (EntityColumn column : columns) {
+            final String columnName = column.getStoredName();
+            if (checkedNames.contains(columnName)) {
+                final String msg = "The entity `%s` has columns with the same name for storing `%s`.";
+                throw newIllegalStateException(msg, entityClass.getName(), columnName);
+            }
+            checkedNames.add(columnName);
         }
     }
 
@@ -243,63 +267,5 @@ class Columns {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
         private final Logger value = LoggerFactory.getLogger(Columns.class);
-    }
-
-    private enum ExcludedMethod {
-
-        /**
-         * @see Object#getClass()
-         */
-        GET_CLASS("getClass"),
-
-        /**
-         * The {@link Entity} identifier is stored separately and is used more widely then just
-         * for queries.
-         *
-         * @see Entity#getId()
-         */
-        GET_ID("getId"),
-
-        /**
-         * The {@link Entity#getState() Entity state} is stored as a binary by default.
-         *
-         * <p>This provides faster write and read operations, but slows down the queries.
-         *
-         * @see Entity#getState()
-         */
-        GET_STATE("getState"),
-
-        /**
-         * The default state is not a field of the {@link Entity}, but a method which provides
-         * the ancillary information to the repository etc.
-         *
-         * @see Entity#getDefaultState()
-         */
-        GET_DEFAULT_STATE("getDefaultState"),
-
-        /**
-         * The {@link io.spine.server.entity.LifecycleFlags lifecycle flags} are fields that
-         * should be stored separately as well.
-         *
-         * <p>When querying multiple records, the lifecycle flags help to filter them.
-         *
-         * @see EntityWithLifecycle#getLifecycleFlags()
-         */
-        GET_LIFECYCLE_FLAGS("getLifecycleFlags");
-
-        private final String methodName;
-
-        ExcludedMethod(String methodName) {
-            this.methodName = methodName;
-        }
-
-        private static boolean contain(String methodName) {
-            for (ExcludedMethod method : ExcludedMethod.values()) {
-                if (method.methodName.equals(methodName)) {
-                    return true;
-                }
-            }
-            return false;
-        }
     }
 }

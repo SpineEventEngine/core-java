@@ -233,7 +233,7 @@ public final class Commands {
      *         {@code false} otherwise
      */
     public static boolean causedByRejection(RuntimeException exception) {
-        //TODO:2017-07-26:alexander.yevsyukov: Check against CommandRejected
+        //TODO:2017-07-26:alexander.yevsyukov: Check against CommandRejection
         // instead of ThrowableMessage when code generation allows customizing a custom
         // rejection types instead of `ThrowableMessage`.
         // See: https://github.com/SpineEventEngine/base/issues/20

@@ -20,7 +20,6 @@
 
 package io.spine.server.entity;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
@@ -30,6 +29,7 @@ import io.spine.core.ExternalMessageEnvelope;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
 import io.spine.server.integration.ExternalMessageDispatcher;
+import io.spine.server.event.EventDispatcher;
 import io.spine.server.route.EventRoute;
 import io.spine.server.route.EventRouting;
 import io.spine.server.tenant.EventOperation;
@@ -52,7 +52,7 @@ public abstract class EventDispatchingRepository<I,
                                                  E extends AbstractVersionableEntity<I, S>,
                                                  S extends Message>
         extends DefaultRecordBasedRepository<I, E, S>
-        implements EntityEventDispatcher<I> {
+        implements EventDispatcher<I> {
 
     private final EventRouting<I> eventRouting;
 
@@ -101,43 +101,6 @@ public abstract class EventDispatchingRepository<I,
     protected void registerAsEventDispatcher() {
         getBoundedContext().getEventBus()
                            .register(this);
-    }
-
-    @Override
-    @CheckReturnValue
-    public final Set<I> getTargets(EventEnvelope envelope) {
-        return getEventRouting().apply(envelope.getMessage(), envelope.getEventContext());
-    }
-
-    /**
-     * Dispatches the passed event envelope to entities.
-     *
-     * @param envelope the event envelope to dispatch
-     * @return the set of IDs of entities that consumed the event
-     */
-    @Override
-    public Set<I> dispatch(final EventEnvelope envelope) {
-        final Set<I> targets = getTargets(envelope);
-        final TenantId tenantId = envelope.getTenantId();
-        // Since dispatching involves stored data, perform in the context of the tenant.
-        final TenantAwareFunction0<Set<I>> op = new TenantAwareFunction0<Set<I>>(tenantId) {
-            @Override
-            public Set<I> apply() {
-                final ImmutableSet.Builder<I> consumed = ImmutableSet.builder();
-                for (I id : targets) {
-                    try {
-                        dispatchToEntity(id, envelope);
-                        consumed.add(id);
-                    } catch (RuntimeException exception) {
-                        onError(envelope, exception);
-                        // Do not re-throw letting other subscribers to consume the event.
-                    }
-                }
-                return consumed.build();
-            }
-        };
-        final Set<I> consumed = op.execute();
-        return consumed;
     }
 
     /**

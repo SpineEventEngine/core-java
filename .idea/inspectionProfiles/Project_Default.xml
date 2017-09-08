@@ -557,6 +557,7 @@
       <option name="ignorableAnnotations">
         <value>
           <item value="org.junit.Test" />
+          <item value="org.junit.Rule" />
         </value>
       </option>
     </inspection_tool>

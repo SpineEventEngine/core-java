@@ -25,10 +25,10 @@ import io.spine.core.Ack;
 import io.spine.core.MessageEnvelope;
 
 import java.util.Deque;
+import java.util.Iterator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.collect.Lists.newLinkedList;
 
 /**
  * A {@link BusFilter} representing a chain of other bus filters.
@@ -40,20 +40,21 @@ import static com.google.common.collect.Lists.newLinkedList;
  *
  * @author Dmytro Dashenkov
  */
-final class FilterChain<E extends MessageEnvelope<?, ?, ?>> implements BusFilter<E> {
+final class FilterChain<E extends MessageEnvelope<?, ?, ?>, F extends BusFilter<E>> implements BusFilter<E> {
 
-    private final Deque<BusFilter<E>> chain;
+    private final Deque<F> chain;
 
     private volatile boolean closed;
 
-    FilterChain(Deque<? extends BusFilter<E>> chain) {
-        this.chain = newLinkedList(chain);
+    FilterChain(Deque<F> chain) {
+        this.chain = chain;
     }
 
     @Override
     public Optional<Ack> accept(E envelope) {
         checkNotNull(envelope);
-        for (BusFilter<E> filter : chain) {
+        checkNotClosed();
+        for (F filter : chain) {
             final Optional<Ack> output = filter.accept(envelope);
             if (output.isPresent()) {
                 return output;
@@ -72,11 +73,16 @@ final class FilterChain<E extends MessageEnvelope<?, ?, ?>> implements BusFilter
      */
     @Override
     public void close() throws Exception {
-        checkState(!closed, "The Filter chain is already closed.");
+        checkNotClosed();
         closed = true;
-        while (!chain.isEmpty()) {
-            final BusFilter<E> filter = chain.pollLast();
+        final Iterator<F> filters = chain.descendingIterator();
+        while (filters.hasNext()) {
+            final F filter = filters.next();
             filter.close();
         }
+    }
+
+    private void checkNotClosed() {
+        checkState(!closed, "The Filter chain is already closed.");
     }
 }

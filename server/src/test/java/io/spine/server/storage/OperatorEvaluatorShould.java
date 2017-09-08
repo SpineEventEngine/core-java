@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.storage.memory;
+package io.spine.server.storage;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Duration;
@@ -34,7 +34,7 @@ import static io.spine.client.ColumnFilter.Operator.GREATER_OR_EQUAL;
 import static io.spine.client.ColumnFilter.Operator.GREATER_THAN;
 import static io.spine.client.ColumnFilter.Operator.LESS_OR_EQUAL;
 import static io.spine.client.ColumnFilter.Operator.LESS_THAN;
-import static io.spine.server.storage.memory.OperatorEvaluator.eval;
+import static io.spine.server.storage.OperatorEvaluator.eval;
 import static io.spine.test.Tests.nullRef;
 import static io.spine.time.Durations2.seconds;
 import static io.spine.time.Time.getCurrentTime;

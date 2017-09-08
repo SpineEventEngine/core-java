@@ -20,7 +20,9 @@
 
 package io.spine.server.event;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.protobuf.FieldMask;
@@ -127,17 +129,24 @@ class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> 
      * @param query the source {@link EventStreamQuery} to get the info from
      * @return new instance of {@link EntityFilters} filtering the events
      */
+    @VisibleForTesting
     static EntityFilters toEntityFilters(EventStreamQuery query) {
-        final CompositeColumnFilter timeFilter = timeFilter(query);
-        final CompositeColumnFilter typeFilter = typeFilter(query);
-        final EntityFilters entityFilters = EntityFilters.newBuilder()
-                                                         .addFilter(timeFilter)
-                                                         .addFilter(typeFilter)
-                                                         .build();
-        return entityFilters;
+        final EntityFilters.Builder builder = EntityFilters.newBuilder();
+
+        final Optional<CompositeColumnFilter> timeFilter = timeFilter(query);
+        if (timeFilter.isPresent()) {
+            builder.addFilter(timeFilter.get());
+        }
+
+        final Optional<CompositeColumnFilter> typeFilter = typeFilter(query);
+        if (typeFilter.isPresent()) {
+            builder.addFilter(typeFilter.get());
+        }
+
+        return builder.build();
     }
 
-    private static CompositeColumnFilter timeFilter(EventStreamQuery query) {
+    private static Optional<CompositeColumnFilter> timeFilter(EventStreamQuery query) {
         final CompositeColumnFilter.Builder timeFilter = CompositeColumnFilter.newBuilder()
                                                                               .setOperator(ALL);
         if (query.hasAfter()) {
@@ -150,20 +159,39 @@ class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> 
             final ColumnFilter filter = lt(CREATED_TIME_COLUMN, timestamp);
             timeFilter.addFilter(filter);
         }
-        return timeFilter.build();
+
+        return buildFilter(timeFilter);
     }
 
-    private static CompositeColumnFilter typeFilter(EventStreamQuery query) {
+    private static Optional<CompositeColumnFilter> typeFilter(EventStreamQuery query) {
         final CompositeColumnFilter.Builder typeFilter = CompositeColumnFilter.newBuilder()
                                                                               .setOperator(EITHER);
         for (EventFilter eventFilter : query.getFilterList()) {
             final String type = eventFilter.getEventType();
-            if (!type.isEmpty()) {
+            if (!type.trim()
+                     .isEmpty()) {
                 final ColumnFilter filter = eq(TYPE_COLUMN, type);
                 typeFilter.addFilter(filter);
             }
         }
-        return typeFilter.build();
+
+        return buildFilter(typeFilter);
+    }
+
+    /**
+     * Obtains a {@code CompositeColumnFilter} from the specified builder.
+     *
+     * @param builder the builder of the filter
+     * @return {@code Optional} of the {@code CompositeColumnFilter}, if there are column filters
+     * in the builder; {@code Optional.absent()} otherwise
+     */
+    private static Optional<CompositeColumnFilter> buildFilter(
+            CompositeColumnFilter.Builder builder) {
+        final boolean filterIsEmpty = builder.getFilterList()
+                                             .isEmpty();
+        return filterIsEmpty
+               ? Optional.<CompositeColumnFilter>absent()
+               : Optional.of(builder.build());
     }
 
     private static class EEntityMatchesStreamQuery implements Predicate<EEntity> {

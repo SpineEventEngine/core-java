@@ -23,19 +23,17 @@ package io.spine.server.entity;
 import com.google.common.base.MoreObjects;
 import com.google.protobuf.Message;
 import io.spine.protobuf.Messages;
+import io.spine.server.model.Model;
 import io.spine.string.Stringifiers;
 import io.spine.validate.ConstraintViolation;
 import io.spine.validate.MessageValidator;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.lang.String.format;
 
 /**
  * Abstract base for entities.
@@ -45,6 +43,15 @@ import static java.lang.String.format;
  * @author Alexander Yevsyukov
  */
 public abstract class AbstractEntity<I, S extends Message> implements Entity<I, S> {
+
+    /**
+     * Lazily initialized reference to the model class of this entity.
+     *
+     * @see #thisClass()
+     * @see #getModelClass()
+     */
+    @Nullable
+    private volatile EntityClass<?> thisClass;
 
     /** The ID of the entity. */
     private final I id;
@@ -78,12 +85,28 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     @Override
     @CheckReturnValue
     public S getState() {
-        S result = state;
-        if (result == null) {
+        if (state == null) {
             state = getDefaultState();
-            result = state;
         }
-        return result;
+        return state;
+    }
+
+    /**
+     * Obtains model class for this aggregate.
+     */
+    protected EntityClass<?> thisClass() {
+        if (thisClass == null) {
+            thisClass = getModelClass();
+        }
+        return thisClass;
+    }
+
+    /**
+     * Obtains the model class for this entity from the {@link io.spine.server.model.Model Model}.
+     */
+    protected EntityClass<?> getModelClass() {
+        return Model.getInstance()
+                    .asEntityClass(getClass());
     }
 
     /**
@@ -131,66 +154,26 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     /**
      * Obtains the class of the entity state.
      */
-    protected Class<S> getStateClass() {
-        return TypeInfo.getStateClass(getClass());
-    }
+    private Class<S> getStateClass() {
+        final Class<? extends AbstractEntity> entityClass = getClass();
 
-    /**
-     * Obtains the constructor for the passed entity class.
-     *
-     * <p>The entity class must have a constructor with the single parameter of type defined by
-     * generic type {@code <I>}.
-     *
-     * @param entityClass the entity class
-     * @param idClass     the class of entity identifiers
-     * @param <E>         the entity type
-     * @param <I>         the ID type
-     * @return the constructor
-     * @throws IllegalStateException if the entity class does not have the required constructor
-     */
-    public static <E extends Entity<I, ?>, I> Constructor<E> getConstructor(Class<E> entityClass,
-                                                                            Class<I> idClass) {
-        checkNotNull(entityClass);
-        checkNotNull(idClass);
-
-        try {
-            @SuppressWarnings("JavaReflectionMemberAccess") // Required in the Entity definition.
-            final Constructor<E> result = entityClass.getDeclaredConstructor(idClass);
-            result.setAccessible(true);
-            return result;
-        } catch (NoSuchMethodException ignored) {
-            throw noSuchConstructor(entityClass.getName(), idClass.getName());
+        //TODO:2017-08-21:alexander.yevsyukov: Use the below code to overcome the issue in the test
+        // environment entity, which is created with the generic type <I> variable, which is
+        // resolved only at the level of enclosed test suite (RecordStorageShould).
+        // Since there is no way to get the value of the type variable (which we need to construct
+        // model entity class), we use this type name checking and return state class via static
+        // method call. The rest of the classes should follow general declaration contract.
+        //
+        // Once these tests are reworked, eliminate the code in the if() statement below, and inline
+        // the EntityClass.getStateClass() method.
+        //
+        if (entityClass.getName().contains("TestCounterEntity")) {
+            return EntityClass.getStateClass(entityClass);
         }
-    }
 
-    private static IllegalStateException noSuchConstructor(String entityClass, String idClass) {
-        final String errMsg = format(
-                "%s class must declare a constructor with a single %s ID parameter.",
-                entityClass, idClass
-        );
-        return new IllegalStateException(new NoSuchMethodException(errMsg));
-    }
-
-    /**
-     * Creates a new entity and sets it to the default state.
-     *
-     * @param ctor the constructor to use
-     * @param id   the ID of the entity
-     * @param <I>  the type of entity IDs
-     * @param <E>  the type of the entity
-     * @return a new entity
-     */
-    public static <I, E extends AbstractEntity<I, ?>> E createEntity(Constructor<E> ctor, I id) {
-        checkNotNull(ctor);
-        checkNotNull(id);
-
-        try {
-            final E result = ctor.newInstance(id);
-            result.init();
-            return result;
-        } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
-            throw new IllegalStateException(e);
-        }
+        @SuppressWarnings("unchecked") // The cast is protected by calling code generic parameters.
+        final Class<S> result = (Class<S>) thisClass().getStateClass();
+        return result;
     }
 
     /**
@@ -198,9 +181,9 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      *
      * <p>The new state must be {@linkplain #validate(Message) valid}.
      *
-     * @param state the new state to set
-     * @throws InvalidEntityStateException if the passed state is not
-     *                                     {@linkplain #validate(Message) valid}
+     * @param  state the new state to set
+     * @throws InvalidEntityStateException
+     *         if the passed state is not {@linkplain #validate(Message) valid}
      */
     protected final void updateState(S state) {
         validate(state);
@@ -213,7 +196,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      * <p>Default implementation uses the {@linkplain MessageValidator#validate(Message)
      * message validation}.
      *
-     * @param newState a state object to replace the current state
+     * @param  newState a state object to replace the current state
      * @return the violation constraints
      */
     protected List<ConstraintViolation> checkEntityState(S newState) {
@@ -225,16 +208,14 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     /**
      * Ensures that the passed new state is valid.
      *
-     * @param newState a state object to replace the current state
+     * @param   newState a state object to replace the current state
      * @throws InvalidEntityStateException if the state is not valid
      * @see #checkEntityState(Message)
      */
     private void validate(S newState) throws InvalidEntityStateException {
-        final List<ConstraintViolation> constraintViolations = checkEntityState(newState);
-
-        if (!constraintViolations.isEmpty()) {
-            throw InvalidEntityStateException.onConstraintViolations(newState,
-                                                                     constraintViolations);
+        final List<ConstraintViolation> violations = checkEntityState(newState);
+        if (!violations.isEmpty()) {
+            throw InvalidEntityStateException.onConstraintViolations(newState, violations);
         }
     }
 

@@ -22,19 +22,19 @@ package io.spine.server.entity.storage;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 import io.spine.annotation.Internal;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 
-import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.Map;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
- * A value of {@link EntityRecord} associated with its {@link Column Columns}.
+ * A value of {@link EntityRecord} associated with its {@linkplain EntityColumn columns}.
  *
  * @author Dmytro Dashenkov
  */
@@ -43,25 +43,25 @@ public final class EntityRecordWithColumns implements Serializable {
     private static final long serialVersionUID = 0L;
 
     private final EntityRecord record;
-    private final ImmutableMap<String, Column.MemoizedValue> storageFields;
+    private final ImmutableMap<String, EntityColumn.MemoizedValue> storageFields;
     private final boolean hasStorageFields;
 
     /**
      * Creates a new instance of the {@code EntityRecordWithColumns}.
      *
      * @param record  {@link EntityRecord} to pack
-     * @param columns {@linkplain Columns#from(Entity) {@link Column Columns} map} to pack
+     * @param columns {@linkplain Columns#from(Entity) columns} map to pack
      */
     private EntityRecordWithColumns(EntityRecord record,
-                                    Map<String, Column.MemoizedValue> columns) {
+                                    Map<String, EntityColumn.MemoizedValue> columns) {
         this.record = checkNotNull(record);
         this.storageFields = ImmutableMap.copyOf(columns);
-        this.hasStorageFields = true;
+        this.hasStorageFields = !columns.isEmpty();
     }
 
     /**
      * Creates an instance of the {@link EntityRecordWithColumns} with no
-     * {@linkplain Columns {@link Column Columns}}.
+     * {@linkplain EntityColumn columns}.
      *
      * <p>An object created with this constructor will always return {@code false} on
      * {@link #hasColumns()}.
@@ -77,15 +77,16 @@ public final class EntityRecordWithColumns implements Serializable {
 
     /**
      * Creates a new instance of the {@code EntityRecordWithColumns} with
-     * {@linkplain Column Column values} from the given {@linkplain Entity}.
+     * {@link EntityColumn} values from the given {@linkplain Entity}.
      */
     public static EntityRecordWithColumns create(EntityRecord record, Entity entity) {
-        final Map<String, Column.MemoizedValue> columns = Columns.from(entity);
+        final Map<String, EntityColumn.MemoizedValue> columns = Columns.from(entity);
         return of(record, columns);
     }
 
     /**
-     * Creates an instance of the {@link EntityRecordWithColumns} with no {@link Column Columns}.
+     * Creates an instance of the {@link EntityRecordWithColumns}
+     * with no {@linkplain EntityColumn columns}.
      *
      * <p>An object created with this factory method will always return {@code false} on
      * {@link #hasColumns()}.
@@ -100,9 +101,8 @@ public final class EntityRecordWithColumns implements Serializable {
      * Creates a new instance of the {@code EntityRecordWithColumns}.
      */
     @VisibleForTesting
-    static EntityRecordWithColumns of(
-            EntityRecord record,
-            Map<String, Column.MemoizedValue> storageFields) {
+    static EntityRecordWithColumns of(EntityRecord record,
+                                      Map<String, EntityColumn.MemoizedValue> storageFields) {
         return new EntityRecordWithColumns(record, storageFields);
     }
 
@@ -110,31 +110,43 @@ public final class EntityRecordWithColumns implements Serializable {
         return record;
     }
 
-    public Map<String, Column> getColumns() {
-        return Maps.transformEntries(storageFields,
-                                     ColumnTransformer.INSTANCE);
+    /**
+     * Obtains entity column {@linkplain EntityColumn#getStoredName() names} for the record.
+     *
+     * @return the entity column names
+     */
+    public Set<String> getColumnNames() {
+        return storageFields.keySet();
     }
 
     /**
-     * Retrieves the memoized values of the Entity Columns.
+     * Obtains the memoized value of the entity column
+     * by the specified {@linkplain EntityColumn#getStoredName() name}.
      *
+     * @param columnName the stored column name
+     * @return the memoized value of the column
+     * @throws IllegalStateException if there is no column with the specified name
      * @see ColumnRecords for the recommended way of working with the column values
      */
     @Internal
-    @SuppressWarnings("ReturnOfCollectionOrArrayField") // Immutable structure
-    public Map<String, Column.MemoizedValue> getColumnValues() {
-        return storageFields;
+    public EntityColumn.MemoizedValue getColumnValue(String columnName) {
+        checkNotNull(columnName);
+        if (!storageFields.containsKey(columnName)) {
+            throw newIllegalStateException("Column with the stored name `%s` was not found.",
+                                           columnName);
+        }
+        return storageFields.get(columnName);
     }
 
     /**
-     * Determines whether or not there are any {@link Column Columns} associated with this record.
+     * Determines whether or not there are any {@linkplain EntityColumn columns}
+     * associated with this record.
      *
-     * <p>If returns {@code false}, the {@link Column Columns} are not considered
+     * <p>If returns {@code false}, the {@linkplain EntityColumn columns} are not considered
      * by the storage.
      *
-     * @return {@code true} if current object was constructed with
-     * {@linkplain #create(EntityRecord, Entity)} and {@code false} if it was
-     * constructed with {@linkplain #of(EntityRecord)}
+     * @return {@code true} if the object was constructed via {@link #create(EntityRecord, Entity)}
+     *         and the entity has columns; {@code false} otherwise
      */
     public boolean hasColumns() {
         return hasStorageFields;
@@ -157,19 +169,5 @@ public final class EntityRecordWithColumns implements Serializable {
     @Override
     public int hashCode() {
         return getRecord().hashCode();
-    }
-
-    private enum ColumnTransformer
-            implements Maps.EntryTransformer<String, Column.MemoizedValue, Column> {
-
-        INSTANCE;
-
-        @Override
-        public Column transformEntry(@Nullable String s,
-                                     @Nullable Column.MemoizedValue memoizedValue) {
-            checkNotNull(s);
-            checkNotNull(memoizedValue);
-            return memoizedValue.getSourceColumn();
-        }
     }
 }

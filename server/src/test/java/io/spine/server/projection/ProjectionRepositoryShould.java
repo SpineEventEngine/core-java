@@ -50,6 +50,7 @@ import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.event.PrjProjectCreated;
 import io.spine.test.projection.event.PrjProjectStarted;
 import io.spine.test.projection.event.PrjTaskAdded;
+import io.spine.time.Time;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -165,7 +166,30 @@ public class ProjectionRepositoryShould
 
     @Test
     public void dispatch_event_and_load_projection() {
-        checkDispatchesEvent(GivenEventMessage.projectStarted());
+        final PrjProjectStarted msg = GivenEventMessage.projectStarted();
+
+        // Ensure no instances are present in the repository now.
+        assertFalse(repository().loadAll()
+                                .hasNext());
+        // And no instances of `TestProjection` processed the event message we are going to post.
+        assertTrue(TestProjection.whoProcessed(msg)
+                                 .isEmpty());
+
+        // Post an event message and grab the ID of the projection, which processed it.
+        checkDispatchesEvent(msg);
+        final Set<ProjectId> projectIds = TestProjection.whoProcessed(msg);
+        assertTrue(projectIds.size() == 1);
+        final ProjectId receiverId = projectIds.iterator()
+                                               .next();
+
+        // Check that the projection item has actually been stored and now can be loaded.
+        final Iterator<TestProjection> allItems = repository().loadAll();
+        assertTrue(allItems.hasNext());
+        final TestProjection storedProjection = allItems.next();
+        assertFalse(allItems.hasNext());
+
+        // Check that the stored instance has the same ID as the instance that handled the event.
+        assertEquals(storedProjection.getId(), receiverId);
     }
 
     @Test
@@ -267,10 +291,8 @@ public class ProjectionRepositoryShould
      */
     @Test
     public void expose_read_and_write_methods_for_last_handled_event_timestamp() {
-        final Timestamp timestamp = repository().readLastHandledEventTime();
-        if (timestamp != null) {
-            repository().writeLastHandledEventTime(timestamp);
-        }
+        repository().readLastHandledEventTime();
+        repository().writeLastHandledEventTime(Time.getCurrentTime());
     }
 
     /**

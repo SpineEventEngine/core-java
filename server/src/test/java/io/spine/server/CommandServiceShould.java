@@ -31,6 +31,7 @@ import io.spine.core.CommandValidationError;
 import io.spine.core.Status;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.protobuf.AnyPacker;
+import io.spine.server.model.ModelTests;
 import io.spine.server.transport.GrpcContainer;
 import org.junit.After;
 import org.junit.Before;
@@ -61,6 +62,7 @@ public class CommandServiceShould {
 
     @Before
     public void setUp() {
+        ModelTests.clearModel();
         // Create Projects Bounded Context with one repository.
         projectsContext = BoundedContext.newBuilder()
                                         .setMultitenant(true)

@@ -76,10 +76,11 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
 
     @Override
     protected Message newState(AggregateStateId id) {
+        final String uniqueName = format("test-project-%s-%s", id.toString(), System.nanoTime());
         final Project project = Project.newBuilder()
                                        .setId((ProjectId) id.getAggregateId())
                                        .setStatus(Project.Status.CREATED)
-                                       .setName(format("test-project-%s", id.toString()))
+                                       .setName(uniqueName)
                                        .addTask(Task.getDefaultInstance())
                                        .build();
         return project;
@@ -169,9 +170,14 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
     }
 
     @SuppressWarnings("NoopMethodInAbstractClass") // Overrides the behavior for all the inheritors.
-    @Ignore
     @Override
     public void allow_by_single_id_queries_with_no_columns() {
+        // Stand storage does not support entity columns.
+    }
+
+    @SuppressWarnings("NoopMethodInAbstractClass") // Overrides the behavior for all the inheritors.
+    @Override
+    public void update_entity_column_values() {
         // Stand storage does not support entity columns.
     }
 

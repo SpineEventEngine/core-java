@@ -43,6 +43,7 @@ import io.spine.server.entity.EventPlayingEntity;
 import io.spine.server.entity.FieldMasks;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.TestTransaction;
+import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.EntityQueries;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
@@ -60,8 +61,10 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Sets.newHashSet;
 import static io.spine.Identifier.pack;
 import static io.spine.client.ColumnFilters.eq;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
@@ -78,6 +81,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.spy;
@@ -99,6 +103,14 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
                 }
             };
 
+    /**
+     * Creates an unique {@code Message} with the specified ID.
+     *
+     * <p>Two calls for the same ID should return messages, which are not equal.
+     *
+     * @param id the ID for the message
+     * @return the unique {@code Message}
+     */
     protected abstract Message newState(I id);
 
     @Override
@@ -301,8 +313,8 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
 
             // Some records are changed and some are not
             final EntityRecord alternateRecord = (i % 2 == 0)
-                    ? record
-                    : newStorageRecord(id);
+                                                 ? record
+                                                 : newStorageRecord(id);
             v1Records.put(id, record);
             v2Records.put(id, alternateRecord);
         }
@@ -367,8 +379,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     public void accept_records_with_empty_storage_fields() {
         final I id = newId();
         final EntityRecord record = newStorageRecord(id);
-        final EntityRecordWithColumns recordWithStorageFields =
-                EntityRecordWithColumns.of(record);
+        final EntityRecordWithColumns recordWithStorageFields = EntityRecordWithColumns.of(record);
         assertFalse(recordWithStorageFields.hasColumns());
         final RecordStorage<I> storage = getDefaultStorage();
 
@@ -383,8 +394,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final I id = newId();
         final EntityRecord record = newStorageRecord(id);
         final TestCounterEntity<?> testEntity = new TestCounterEntity<>(id);
-        final EntityRecordWithColumns recordWithColumns =
-                create(record, testEntity);
+        final EntityRecordWithColumns recordWithColumns = create(record, testEntity);
         final S storage = getDefaultStorage();
         storage.write(id, recordWithColumns);
 
@@ -449,10 +459,48 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
 
         final Iterator<EntityRecord> readRecords = storage.readAll(query,
                                                                    FieldMask.getDefaultInstance());
-        assertTrue(readRecords.hasNext());
-        final EntityRecord singleRecord = readRecords.next();
-        assertFalse(readRecords.hasNext());
-        assertEquals(fineRecord, singleRecord);
+        assertSingleRecord(fineRecord, readRecords);
+    }
+
+    @Test
+    public void update_entity_column_values() {
+        final Project.Status initialStatus = Project.Status.DONE;
+        final Project.Status statusAfterUpdate = Project.Status.CANCELLED;
+        final Int32Value initialStatusValue = Int32Value.newBuilder()
+                                                        .setValue(initialStatus.getNumber())
+                                                        .build();
+        final ColumnFilter status = eq("projectStatusValue", initialStatusValue);
+        final CompositeColumnFilter aggregatingFilter = CompositeColumnFilter.newBuilder()
+                                                                             .setOperator(ALL)
+                                                                             .addFilter(status)
+                                                                             .build();
+        final EntityFilters filters = EntityFilters.newBuilder()
+                                                   .addFilter(aggregatingFilter)
+                                                   .build();
+        final EntityQuery<I> query = EntityQueries.from(filters, getTestEntityClass());
+
+        final I id = newId();
+        final TestCounterEntity<I> entity = new TestCounterEntity<>(id);
+        entity.setStatus(initialStatus);
+
+        final EntityRecord record = newStorageRecord(id, newState(id));
+        final EntityRecordWithColumns recordWithColumns = create(record, entity);
+
+        final RecordStorage<I> storage = getDefaultStorage();
+        final FieldMask fieldMask = FieldMask.getDefaultInstance();
+
+        // Create the record.
+        storage.write(id, recordWithColumns);
+        final Iterator<EntityRecord> recordsBefore = storage.readAll(query, fieldMask);
+        assertSingleRecord(record, recordsBefore);
+
+        // Update the entity columns of the record.
+        entity.setStatus(statusAfterUpdate);
+        final EntityRecordWithColumns updatedRecordWithColumns = create(record, entity);
+        storage.write(id, updatedRecordWithColumns);
+
+        final Iterator<EntityRecord> recordsAfter = storage.readAll(query, fieldMask);
+        assertFalse(recordsAfter.hasNext());
     }
 
     @Test
@@ -496,12 +544,24 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
 
         // Perform the query
         final Iterator<EntityRecord> readRecords = storage.readAll(query,
-                                                                    FieldMask.getDefaultInstance());
+                                                                   FieldMask.getDefaultInstance());
         // Check results
-        assertTrue(readRecords.hasNext());
-        final EntityRecord actualRecord = readRecords.next();
-        assertFalse(readRecords.hasNext());
-        assertEquals(fineRecord, actualRecord);
+        assertSingleRecord(fineRecord, readRecords);
+    }
+
+    @SuppressWarnings("MismatchedQueryAndUpdateOfCollection"/* Storing of generated objects and
+                                                               checking via #contains(Object). */)
+    @Test
+    public void create_unique_states_for_same_ID() {
+        final int checkCount = 10;
+        final I id = newId();
+        final Set<Message> states = newHashSet();
+        for (int i = 0; i < checkCount; i++) {
+            final Message newState = newState(id);
+            if (states.contains(newState)) {
+                fail("RecordStorageShould.newState() should return unique messages.");
+            }
+        }
     }
 
     private static EntityRecordWithColumns withRecordAndNoFields(final EntityRecord record) {
@@ -515,6 +575,13 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         });
     }
 
+    private static void assertSingleRecord(EntityRecord expected, Iterator<EntityRecord> actual) {
+        assertTrue(actual.hasNext());
+        final EntityRecord singleRecord = actual.next();
+        assertFalse(actual.hasNext());
+        assertEquals(expected, singleRecord);
+    }
+
     @SuppressWarnings("unused") // Reflective access
     public static class TestCounterEntity<I> extends EventPlayingEntity<I,
                                                                         Project,
@@ -526,37 +593,46 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
             super(id);
         }
 
+        @Column
         public int getCounter() {
             counter++;
             return counter;
         }
 
+        @Column
         public long getBigCounter() {
             return getCounter();
         }
 
+        @Column
         public boolean isCounterEven() {
             return counter % 2 == 0;
         }
 
+        @Column
         public String getCounterName() {
             return getId().toString();
         }
 
+        @Column(name = "COUNTER_VERSION" /* Custom name for storing
+                                            to check that querying is correct. */)
         public Version getCounterVersion() {
             return Version.newBuilder()
                           .setNumber(counter)
                           .build();
         }
 
+        @Column
         public Timestamp getNow() {
             return Time.getCurrentTime();
         }
 
+        @Column
         public Project getCounterState() {
             return getState();
         }
 
+        @Column
         public int getProjectStatusValue() {
             return getState().getStatusValue();
         }

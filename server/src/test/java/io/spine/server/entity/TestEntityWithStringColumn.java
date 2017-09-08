@@ -20,6 +20,8 @@
 
 package io.spine.server.entity;
 
+import io.spine.server.entity.storage.Column;
+
 /**
  * The contract for the test {@linkplain Entity entities} which serve for testing the subclasses of
  * {@link RecordBasedRepository}.
@@ -30,5 +32,6 @@ package io.spine.server.entity;
 public interface TestEntityWithStringColumn {
 
     @SuppressWarnings("unused") // Reflective access
+    @Column
     String getIdString();
 }

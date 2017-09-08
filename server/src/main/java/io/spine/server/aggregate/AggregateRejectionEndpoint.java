@@ -43,8 +43,7 @@ class AggregateRejectionEndpoint<I, A extends Aggregate<I, ?, ?>>
 
     static <I, A extends Aggregate<I, ?, ?>>
     Set<I> handle(AggregateRepository<I, A> repository, RejectionEnvelope rejection) {
-        final AggregateRejectionEndpoint<I, A> endpoint =
-            new AggregateRejectionEndpoint<>(repository, rejection);
+        final AggregateRejectionEndpoint<I, A> endpoint = of(repository, rejection);
 
         return endpoint.handle();
     }

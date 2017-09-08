@@ -23,10 +23,10 @@ package io.spine.server.entity.storage;
 import io.spine.annotation.SPI;
 
 /**
- * An interface for handling type conversion for the {@link Column Columns}.
+ * An interface for handling type conversion for the {@linkplain EntityColumn entity columns}.
  *
  * <p>When retrieved from an instance of an {@link io.spine.server.entity.Entity Entity},
- * the {@link Column Column} may be of an inappropriate type for storing. To convert the value into
+ * the {@link EntityColumn} may be of an inappropriate type for storing. To convert the value into
  * an appropriate type, use {@link #convertColumnValue}.
  *
  * <p>After the conversion, you might want to save the value into a special storage specific DTO,
@@ -69,7 +69,7 @@ import io.spine.annotation.SPI;
 public interface ColumnType<J, S, R, C> {
 
     /**
-     * Converts the {@link Column Column} specified in
+     * Converts the {@link EntityColumn} specified in
      * the {@link io.spine.server.entity.Entity Entity} declaration to the type in which the Field
      * is stored.
      *
@@ -77,13 +77,13 @@ public interface ColumnType<J, S, R, C> {
      * {@link com.google.protobuf.Timestamp com.google.protobuf.Timestamp} into
      * {@link java.util.Date java.util.Date}.
      *
-     * @param fieldValue the {@link Column Column} of the initial type
-     * @return the {@link Column Column} of the "store as" type
+     * @param fieldValue the {@link EntityColumn} of the initial type
+     * @return the {@link EntityColumn} of the "store as" type
      */
     S convertColumnValue(J fieldValue);
 
     /**
-     * Set the {@link Column Column} value to the database record type.
+     * Set the {@link EntityColumn} value to the database record type.
      *
      * <p>Common example is setting a value to
      * a {@link java.sql.PreparedStatement PreparedStatement} instance into a determined position.
@@ -96,9 +96,10 @@ public interface ColumnType<J, S, R, C> {
     void setColumnValue(R storageRecord, S value, C columnIdentifier);
 
     /**
-     * Sets the {@code null} value to the {@linkplain Column}.
+     * Sets the {@code null} value to the {@link EntityColumn}.
      *
-     * <p>Used if the actual value of the {@linkplain Column}, defined for storing, is {@code null}.
+     * <p>Used if the actual value of the {@link EntityColumn},
+     * defined for storing, is {@code null}.
      *
      * @param storageRecord the database record
      * @param columnIdentifier the identifier of the column, e.g. its index

@@ -23,8 +23,8 @@ package io.spine.server.projection;
 import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
 import io.spine.core.EventClass;
+import io.spine.server.entity.EntityClass;
 import io.spine.server.event.EventSubscriberMethod;
-import io.spine.server.model.EntityClass;
 import io.spine.server.model.HandlerMethods;
 import io.spine.server.model.MessageHandlerMap;
 

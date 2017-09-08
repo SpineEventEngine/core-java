@@ -80,6 +80,7 @@ import static io.spine.grpc.StreamObservers.ack;
  *
  * @author Alex Tymchenko
  */
+@SuppressWarnings("OverlyCoupledClass")
 public class Stand implements AutoCloseable {
 
     /**
@@ -126,6 +127,8 @@ public class Stand implements AutoCloseable {
     private final QueryValidator queryValidator;
     private final SubscriptionValidator subscriptionValidator;
 
+    @SuppressWarnings("ConstantConditions")
+        // getDelivery() availability is checked on builder construction.
     private Stand(Builder builder) {
         storage = builder.getStorage();
         delivery = builder.getDelivery()
@@ -393,9 +396,10 @@ public class Stand implements AutoCloseable {
                     callbackExecutor.execute(new Runnable() {
                         @Override
                         public void run() {
-                            //TODO:2017-06-06:alexander.yevsyukov: Handle null result of getCallback().
-                            subscriptionRecord.getCallback()
-                                              .onStateChanged(entityState);
+                            final EntityUpdateCallback callback = subscriptionRecord.getCallback();
+                            if (callback != null) {
+                                callback.onStateChanged(entityState);
+                            }
                         }
                     });
                 }

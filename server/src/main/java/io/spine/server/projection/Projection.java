@@ -25,6 +25,7 @@ import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
+import io.spine.core.EventEnvelope;
 import io.spine.server.entity.EventPlayingEntity;
 import io.spine.server.event.EventSubscriberMethod;
 import io.spine.server.model.Model;
@@ -48,8 +49,6 @@ public abstract class Projection<I,
                                  B extends ValidatingBuilder<M, ? extends Message.Builder>>
         extends EventPlayingEntity<I, M, B> {
 
-    private final ProjectionClass<?> thisClass = Model.getInstance()
-                                                      .asProjectionClass(getClass());
     /**
      * Creates a new instance.
      *
@@ -60,8 +59,19 @@ public abstract class Projection<I,
         super(id);
     }
 
-    protected void handle(Message event, EventContext ctx) {
-        apply(event, ctx);
+    @Override
+    protected ProjectionClass<?> thisClass() {
+        return (ProjectionClass<?>) super.thisClass();
+    }
+
+    @Override
+    protected ProjectionClass<?> getModelClass() {
+        return Model.getInstance()
+                    .asProjectionClass(getClass());
+    }
+
+    protected void handle(EventEnvelope event) {
+        apply(event.getMessage(), event.getEventContext());
     }
 
     @Override
@@ -92,7 +102,7 @@ public abstract class Projection<I,
     }
 
     void apply(Message eventMessage, EventContext eventContext)  {
-        final EventSubscriberMethod method = thisClass.getSubscriber(EventClass.of(eventMessage));
+        final EventSubscriberMethod method = thisClass().getSubscriber(EventClass.of(eventMessage));
         method.invoke(this, eventMessage, eventContext);
     }
 }

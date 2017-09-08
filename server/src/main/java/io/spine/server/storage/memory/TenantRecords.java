@@ -91,8 +91,8 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
     }
 
     Map<I, EntityRecord> readAllRecords(EntityQuery<I> query, FieldMask fieldMask) {
-        final Map<I, EntityRecordWithColumns> filtered = filterValues(records,
-                                                                      new EntityQueryMatcher<>(query));
+        final Map<I, EntityRecordWithColumns> filtered =
+                filterValues(records, new EntityQueryMatcher<>(query));
         final Map<I, EntityRecord> records = transformValues(filtered,
                                                              EntityRecordUnpacker.INSTANCE);
         final Function<EntityRecord, EntityRecord> fieldMaskApplier =

@@ -64,9 +64,9 @@ public class EntityQueryShould {
     @Test
     public void be_serializable() {
         final String columnName = deleted.name();
-        final Column column = Columns.findColumn(EntityWithLifecycle.class, columnName);
+        final EntityColumn column = Columns.findColumn(EntityWithLifecycle.class, columnName);
         final ColumnFilter filter = ColumnFilters.eq(columnName, false);
-        final Multimap<Column, ColumnFilter> filters = of(column, filter);
+        final Multimap<EntityColumn, ColumnFilter> filters = of(column, filter);
         final CompositeQueryParameter parameter = CompositeQueryParameter.from(filters, ALL);
         final QueryParameters parameters = QueryParameters.newBuilder()
                                                           .add(parameter)
@@ -88,10 +88,10 @@ public class EntityQueryShould {
     public void support_toString() {
         final Object someId = Sample.messageOfType(ProjectId.class);
         final Collection<Object> ids = singleton(someId);
-        final Column someColumn = mockColumn();
+        final EntityColumn someColumn = mockColumn();
         final Object someValue = "something";
 
-        final Map<Column, Object> params = new HashMap<>(1);
+        final Map<EntityColumn, Object> params = new HashMap<>(1);
         params.put(someColumn, someValue);
 
         final EntityQuery query = EntityQuery.of(ids, paramsFromValues(params));
@@ -115,7 +115,7 @@ public class EntityQueryShould {
 
     @Test(expected = IllegalStateException.class)
     public void fail_to_append_lifecycle_columns_if_already_contains() {
-        final Column column = Columns.findColumn(EntityWithLifecycle.class, deleted.name());
+        final EntityColumn column = Columns.findColumn(EntityWithLifecycle.class, deleted.name());
         final CompositeQueryParameter queryParameter = CompositeQueryParameter.from(
                 ImmutableMultimap.of(column, ColumnFilter.getDefaultInstance()),
                 ALL
@@ -133,7 +133,7 @@ public class EntityQueryShould {
      */
     private static void addEqualityGroupA(EqualsTester tester) {
         final Collection<?> ids = Arrays.asList(Sample.messageOfType(ProjectId.class), 0);
-        final Map<Column, Object> params = new IdentityHashMap<>(2);
+        final Map<EntityColumn, Object> params = new IdentityHashMap<>(2);
         params.put(mockColumn(), "anything");
         params.put(mockColumn(), 5);
         final EntityQuery<?> query = EntityQuery.of(ids, paramsFromValues(params));
@@ -146,7 +146,7 @@ public class EntityQueryShould {
      */
     private static void addEqualityGroupB(EqualsTester tester) {
         final Collection<?> ids = emptyList();
-        final Map<Column, Object> params = new HashMap<>(1);
+        final Map<EntityColumn, Object> params = new HashMap<>(1);
         params.put(mockColumn(), 5);
         final EntityQuery<?> query1 = EntityQuery.of(ids, paramsFromValues(params));
         final EntityQuery<?> query2 = EntityQuery.of(ids, paramsFromValues(params));
@@ -162,9 +162,9 @@ public class EntityQueryShould {
      */
     private static void addEqualityGroupC(EqualsTester tester) {
         final Collection<?> ids = emptySet();
-        final Column column = mockColumn();
+        final EntityColumn column = mockColumn();
         final Object value = 42;
-        final Map<Column, Object> params = new HashMap<>(1);
+        final Map<EntityColumn, Object> params = new HashMap<>(1);
         params.put(column, value);
         final EntityQuery<?> query1 = EntityQuery.of(ids, paramsFromValues(params));
         final EntityQuery<?> query2 = EntityQuery.of(ids, paramsFromValues(params));
@@ -177,23 +177,24 @@ public class EntityQueryShould {
      */
     private static void addEqualityGroupD(EqualsTester tester) {
         final Collection<ProjectId> ids = singleton(Sample.messageOfType(ProjectId.class));
-        final Map<Column, Object> columns = Collections.emptyMap();
+        final Map<EntityColumn, Object> columns = Collections.emptyMap();
         final EntityQuery<?> query = EntityQuery.of(ids, paramsFromValues(columns));
         tester.addEqualityGroup(query);
     }
 
-    private static Column mockColumn() {
+    private static EntityColumn mockColumn() {
         @SuppressWarnings("unchecked") // Mock cannot have type parameters
-        final Column column = mock(Column.class);
+        final EntityColumn column = mock(EntityColumn.class);
         when(column.getName()).thenReturn("mockColumn");
         return column;
     }
 
-    private static QueryParameters paramsFromValues(Map<Column, Object> values) {
+    private static QueryParameters paramsFromValues(Map<EntityColumn, Object> values) {
         final QueryParameters.Builder builder = QueryParameters.newBuilder();
-        final Multimap<Column, ColumnFilter> filters = HashMultimap.create(values.size(), 1);
-        for (Map.Entry<Column, Object> param : values.entrySet()) {
-            final Column column = param.getKey();
+        final Multimap<EntityColumn, ColumnFilter> filters = HashMultimap.create(values.size(),
+                                                                                 1);
+        for (Map.Entry<EntityColumn, Object> param : values.entrySet()) {
+            final EntityColumn column = param.getKey();
             final ColumnFilter filter = ColumnFilter.newBuilder()
                                                     .setOperator(EQUAL)
                                                     .setValue(toAny(param.getValue()))

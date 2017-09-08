@@ -27,6 +27,8 @@ package io.spine.server.model;
  */
 public class ModelError extends Error {
 
+    private static final long serialVersionUID = 0L;
+
     public ModelError(String message) {
         super(message);
     }

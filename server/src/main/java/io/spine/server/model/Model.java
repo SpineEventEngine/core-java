@@ -27,10 +27,13 @@ import com.google.common.collect.Sets;
 import io.spine.core.CommandClass;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateClass;
+import io.spine.server.aggregate.AggregatePart;
+import io.spine.server.aggregate.AggregatePartClass;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.command.CommandHandlerClass;
 import io.spine.server.command.CommandHandlingClass;
 import io.spine.server.entity.Entity;
+import io.spine.server.entity.EntityClass;
 import io.spine.server.event.EventSubscriber;
 import io.spine.server.event.EventSubscriberClass;
 import io.spine.server.procman.ProcessManager;
@@ -52,13 +55,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class Model {
 
-    private static final Model INSTANCE = new Model();
-
-    /** A map from a raw class to an extended class information instance. */
-    private final Map<Class<?>, ModelClass<?>> classes = Maps.newConcurrentMap();
+    /**
+     * A map from a {@linkplain #nameOf(Class) a class name} to an extended class information
+     * instance.
+     */
+    private final Map<String, ModelClass<?>> classes = Maps.newConcurrentMap();
 
     public static Model getInstance() {
-        return INSTANCE;
+        return Singleton.INSTANCE.value;
     }
 
     /** Prevent instantiation from outside. */
@@ -81,13 +85,33 @@ public class Model {
      */
     public AggregateClass<?> asAggregateClass(Class<? extends Aggregate> cls) {
         checkNotNull(cls);
-        ModelClass<?> modelClass = classes.get(cls);
+        ModelClass<?> modelClass = classes.get(nameOf(cls));
         if (modelClass == null) {
-            modelClass = AggregateClass.of(cls);
+            modelClass = new AggregateClass<>(cls);
             checkDuplicates((CommandHandlingClass) modelClass);
-            classes.put(cls, modelClass);
+            classes.put(nameOf(cls), modelClass);
         }
         return (AggregateClass<?>) modelClass;
+    }
+
+    /**
+     * Obtains an instance of aggregate part class information.
+     *
+     * <p>If the passed class is not added to the model before, it will be added as the result of
+     * this method call.
+     *
+     * @throws DuplicateCommandHandlerError if the given aggregate part class handles one or
+     *         more commands which are already known to the model as handled by another class
+     */
+    public AggregatePartClass<?> asAggregatePartClass(Class<? extends AggregatePart> cls) {
+        checkNotNull(cls);
+        ModelClass<?> modelClass = classes.get(nameOf(cls));
+        if (modelClass == null) {
+            modelClass = new AggregatePartClass<>(cls);
+            checkDuplicates((CommandHandlingClass) modelClass);
+            classes.put(nameOf(cls), modelClass);
+        }
+        return (AggregatePartClass<?>) modelClass;
     }
 
     /**
@@ -103,43 +127,43 @@ public class Model {
     public ProcessManagerClass<?> asProcessManagerClass(Class<? extends ProcessManager> cls)
         throws DuplicateCommandHandlerError {
         checkNotNull(cls);
-        ModelClass<?> modelClass = classes.get(cls);
+        ModelClass<?> modelClass = classes.get(nameOf(cls));
         if (modelClass == null) {
             modelClass = ProcessManagerClass.of(cls);
             checkDuplicates((CommandHandlingClass) modelClass);
-            classes.put(cls, modelClass);
+            classes.put(nameOf(cls), modelClass);
         }
         return (ProcessManagerClass<?>) modelClass;
     }
 
     /**
      * Obtains an instance of a projection class information.
-
+     *
      * <p>If the passed class was not added to the model before, it would be added as the result of
      * this method call.
      */
     public ProjectionClass<?> asProjectionClass(Class<? extends Projection> cls) {
         checkNotNull(cls);
-        ModelClass<?> modelClass = classes.get(cls);
+        ModelClass<?> modelClass = classes.get(nameOf(cls));
         if (modelClass == null) {
             modelClass = ProjectionClass.of(cls);
-            classes.put(cls, modelClass);
+            classes.put(nameOf(cls), modelClass);
         }
         return (ProjectionClass<?>) modelClass;
     }
 
     /**
      * Obtains an instance of event subscriber class information.
-
+     *
      * <p>If the passed class was not added to the model before, it would be added as the result of
      * this method call.
      */
     public EventSubscriberClass<?> asEventSubscriberClass(Class<? extends EventSubscriber> cls) {
         checkNotNull(cls);
-        ModelClass<?> modelClass = classes.get(cls);
+        ModelClass<?> modelClass = classes.get(nameOf(cls));
         if (modelClass == null) {
             modelClass = EventSubscriberClass.of(cls);
-            classes.put(cls, modelClass);
+            classes.put(nameOf(cls), modelClass);
         }
         return (EventSubscriberClass<?>) modelClass;
     }
@@ -157,28 +181,28 @@ public class Model {
     public CommandHandlerClass asCommandHandlerClass(Class<? extends CommandHandler> cls)
             throws DuplicateCommandHandlerError {
         checkNotNull(cls);
-        ModelClass<?> modelClass = classes.get(cls);
+        ModelClass<?> modelClass = classes.get(nameOf(cls));
         if (modelClass == null) {
             modelClass = CommandHandlerClass.of(cls);
             checkDuplicates((CommandHandlingClass) modelClass);
-            classes.put(cls, modelClass);
+            classes.put(nameOf(cls), modelClass);
         }
         return (CommandHandlerClass<?>) modelClass;
     }
 
     /**
      * Obtains an instance of a rejection subscriber class information.
-
+     *
      * <p>If the passed class was not added to the model before, it would be added as the result of
      * this method call.
      */
     public
     RejectionSubscriberClass<?> asRejectionSubscriber(Class<? extends RejectionSubscriber> cls) {
         checkNotNull(cls);
-        ModelClass<?> modelClass = classes.get(cls);
+        ModelClass<?> modelClass = classes.get(nameOf(cls));
         if (modelClass == null) {
             modelClass = RejectionSubscriberClass.of(cls);
-            classes.put(cls, modelClass);
+            classes.put(nameOf(cls), modelClass);
         }
         return (RejectionSubscriberClass<?>) modelClass;
     }
@@ -215,11 +239,29 @@ public class Model {
      */
     public EntityClass<?> asEntityClass(Class<? extends Entity> cls) {
         checkNotNull(cls);
-        ModelClass<?> modelClass = classes.get(cls);
+        ModelClass<?> modelClass = classes.get(nameOf(cls));
         if (modelClass == null) {
-            modelClass = EntityClass.valueOf(cls);
-            classes.put(cls, modelClass);
+            modelClass = new EntityClass<>(cls);
+            classes.put(nameOf(cls), modelClass);
         }
         return (EntityClass<?>) modelClass;
+    }
+
+    /**
+     * Returns a unique identifying name of the given class.
+     *
+     * <p>The returned value is guaranteed to be unique per class and non-null.
+     *
+     * @param cls the {@link Class} to identity
+     * @return a non-null class name
+     */
+    private static String nameOf(Class<?> cls) {
+        return cls.getName();
+    }
+
+    private enum Singleton {
+        INSTANCE;
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Model value = new Model();
     }
 }

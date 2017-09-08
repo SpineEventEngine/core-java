@@ -18,27 +18,33 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity;
+package io.spine.model.verify;
 
-import io.spine.core.EventEnvelope;
-import io.spine.server.event.EventDispatcher;
+import io.spine.server.aggregate.Aggregate;
+import io.spine.server.command.Assign;
+import io.spine.validate.AnyVBuilder;
 
-import java.util.Set;
+import com.google.protobuf.Any;
+import com.google.protobuf.Message;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
- * Delivers events to handlers (which are supposed to be entities).
+ * An Aggregate with a valid command handler method.
  *
- * @param <I> the type of entity IDs
- * @author Alexander Litus
- * @see EventDispatcher
+ * <p>The command handler method handles command of type {@code Any}.
+ *
+ * @author Dmytro Dashenkov
  */
-public interface EntityEventDispatcher<I> extends EventDispatcher<I> {
+class ValidAggregate extends Aggregate<String, Any, AnyVBuilder> {
 
-    /**
-     * Obtains a set of entity identifiers to which dispatch the passed event.
-     *
-     * @param envelope the envelope with the event to dispatch
-     * @return non-empty set of event identifiers
-     */
-    Set<I> getTargets(EventEnvelope envelope);
+    public ValidAggregate(String id) {
+        super(id);
+    }
+
+    @Assign
+    List<Message> handle(Any command) {
+        return Collections.emptyList();
+    }
 }

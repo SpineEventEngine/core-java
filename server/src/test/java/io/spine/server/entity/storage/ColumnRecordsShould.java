@@ -82,7 +82,7 @@ public class ColumnRecordsShould {
         // Set up mocks and arguments
         final List<Object> destination = new ArrayList<>(MOCK_COLUMNS_COUNT);
 
-        final Map<String, Column.MemoizedValue> columns = setupMockColumnsAllowingNulls();
+        final Map<String, EntityColumn.MemoizedValue> columns = setupMockColumnsAllowingNulls();
 
         final CollectAnyColumnType type = spy(CollectAnyColumnType.class);
         final ColumnTypeRegistry<CollectAnyColumnType> registry =
@@ -108,14 +108,14 @@ public class ColumnRecordsShould {
         assertContainsAll(destination, getNonNullColumnValues().toArray());
     }
 
-    private static Map<String, Column.MemoizedValue> setupMockColumnsAllowingNulls() {
-        final Column mockColumn = mock(Column.class);
+    private static Map<String, EntityColumn.MemoizedValue> setupMockColumnsAllowingNulls() {
+        final EntityColumn mockColumn = mock(EntityColumn.class);
         when(mockColumn.getType()).thenReturn(Object.class);
-        final Map<String, Column.MemoizedValue> columns = new HashMap<>(MOCK_COLUMNS_COUNT);
+        final Map<String, EntityColumn.MemoizedValue> columns = new HashMap<>(MOCK_COLUMNS_COUNT);
         for (int i = 0; i < MOCK_COLUMNS_COUNT; i++) {
             final Integer columnValueToPersist = (i % 2 != 0) ? null : i;
 
-            final Column.MemoizedValue value = mock(Column.MemoizedValue.class);
+            final EntityColumn.MemoizedValue value = mock(EntityColumn.MemoizedValue.class);
             when(value.getSourceColumn()).thenReturn(mockColumn);
             when(value.getValue()).thenReturn(columnValueToPersist);
 

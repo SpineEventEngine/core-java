@@ -19,7 +19,7 @@
  */
 
 /**
- * Test environments for the {@code io.spine.server.given} package.
+ * Test environments for the {@code io.spine.server.route} package.
  */
 
 @ParametersAreNonnullByDefault

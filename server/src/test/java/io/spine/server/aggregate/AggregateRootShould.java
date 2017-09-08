@@ -67,20 +67,6 @@ public class AggregateRootShould {
                 .testStaticMethods(AggregateRoot.class, NullPointerTester.Visibility.PACKAGE);
     }
 
-    @SuppressWarnings("unchecked")
-    // Supply a "wrong" value on purpose to cause the validation failure.
-    @Test(expected = IllegalStateException.class)
-    public void throw_exception_when_aggregate_root_does_not_have_appropriate_constructor() {
-        AggregateRoot.create(boundedContext, AggregateRoot.class, newUuid());
-    }
-
-    @Test
-    public void create_aggregate_root_entity() {
-        final AnAggregateRoot aggregateRoot =
-                AggregateRoot.create(boundedContext, AnAggregateRoot.class, newUuid());
-        assertNotNull(aggregateRoot);
-    }
-
     @Test
     public void return_part_state_by_class() {
         final Message definitionPart = aggregateRoot.getPartState(ProjectDefinition.class);
