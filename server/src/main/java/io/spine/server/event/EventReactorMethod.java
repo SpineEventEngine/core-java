@@ -28,13 +28,10 @@ import io.spine.core.React;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.MethodPredicate;
 
-import javax.annotation.CheckReturnValue;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.List;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Predicates.or;
+import static io.spine.server.model.MethodFiltering.ensureExternalMatch;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -45,9 +42,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  */
 public final class EventReactorMethod extends HandlerMethod<EventContext> {
 
-    private static final MethodPredicate DOMESTIC_SUBSCRIBERS = new FilterPredicate();
-
-    private static final MethodPredicate EXTERNAL_SUBSCRIBERS = new FilterPredicate(true);
+    private static final MethodPredicate PREDICATE = new FilterPredicate();
 
     private EventReactorMethod(Method method) {
         super(method);
@@ -59,44 +54,14 @@ public final class EventReactorMethod extends HandlerMethod<EventContext> {
     }
 
     /**
-     //     * Invokes reacting method for the passed event.
-     //     *
-     //     * @param target  the object which method to be invoked
-     //     * @param event   the event message
-     //     * @param context the event context
-     //     * @return a list of produced event messages or an empty list if a target object did not
-     //     * modified its state because of the passed event
-     //     */
-//    public static List<? extends Message> invokeFor(Object target,
-//                                                    Message event,
-//                                                    EventContext context) {
-//        checkNotNull(target);
-//        checkNotNull(event);
-//        checkNotNull(context);
-//        final Message eventMessage = Events.ensureMessage(event);
-//        final EventReactorMethod method = getMethod(target.getClass(), eventMessage);
-//        return method.invoke(target, eventMessage, context);
-//    }
-//
-//    private static EventReactorMethod getMethod(Class<?> cls, Message eventMessage) {
-//        final Class<? extends Message> eventClass = eventMessage.getClass();
-//        final HandlerMethod.Factory<EventReactorMethod> factory = factory();
-//        final MethodRegistry registry = MethodRegistry.getInstance();
-//        final EventReactorMethod method = registry.get(cls, eventClass, factory);
-//        if (method == null) {
-//            throw newIllegalStateException("The class %s does not react to events of class %s.",
-//                                           cls.getName(), eventClass.getName());
-//        }
-//        return method;
-//    }
-
-    /**
      * {@inheritDoc}
      *
      * @return the list of event messages (or an empty list if the reactor method returns nothing)
      */
     @Override
     public List<? extends Message> invoke(Object target, Message message, EventContext context) {
+        ensureExternalMatch(this, context.getExternal());
+
         final Object handlingResult = super.invoke(target, message, context);
         final List<? extends Message> eventMessages = toList(handlingResult);
         return eventMessages;
@@ -106,46 +71,9 @@ public final class EventReactorMethod extends HandlerMethod<EventContext> {
         return new EventReactorMethod(method);
     }
 
-    static MethodPredicate domesticSubscribers() {
-        return DOMESTIC_SUBSCRIBERS;
+    static MethodPredicate predicate() {
+        return PREDICATE;
     }
-
-    //TODO:2017-07-21:alex.tymchenko: cover external subscribers with tests as well.
-    static MethodPredicate externalSubscribers() {
-        return EXTERNAL_SUBSCRIBERS;
-    }
-
-
-    /**
-     * Obtains classes of {@linkplain io.spine.core.Subscribe#external() "domestic"} events
-     * on which instances of the passed class {@linkplain React react}.
-     *
-     * @param cls the class of objects that react on events
-     * @return immutable set of classes of events, or empty set of none reacting methods are found
-     * in the passed class
-     */
-    @CheckReturnValue
-    public static Set<EventClass> inspect(Class<?> cls) {
-        checkNotNull(cls);
-        final Set<EventClass> result = EventClass.setOf(inspect(cls, domesticSubscribers()));
-        return result;
-    }
-
-    /**
-     * Obtains classes of {@linkplain io.spine.core.Subscribe#external() "external"} events
-     * on which instances of the passed class {@linkplain React react}.
-     *
-     * @param cls the class of objects that react on events
-     * @return immutable set of classes of events, or empty set of none reacting methods are found
-     * in the passed class
-     */
-    @CheckReturnValue
-    public static Set<EventClass> inspectExternal(Class<?> cls) {
-        checkNotNull(cls);
-        final Set<EventClass> result = EventClass.setOf(inspect(cls, externalSubscribers()));
-        return result;
-    }
-
 
     public static HandlerMethod.Factory<EventReactorMethod> factory() {
         return Factory.getInstance();
@@ -174,7 +102,7 @@ public final class EventReactorMethod extends HandlerMethod<EventContext> {
 
         @Override
         public Predicate<Method> getPredicate() {
-            return or(domesticSubscribers(), externalSubscribers());
+            return predicate();
         }
 
         @Override
@@ -191,12 +119,8 @@ public final class EventReactorMethod extends HandlerMethod<EventContext> {
      */
     private static class FilterPredicate extends EventMethodPredicate {
 
-        private FilterPredicate(boolean externalOnly) {
-            super(React.class, externalOnly);
-        }
-
         private FilterPredicate() {
-            this(false);
+            super(React.class);
         }
 
         @Override
@@ -240,14 +164,6 @@ public final class EventReactorMethod extends HandlerMethod<EventContext> {
                         "React method cannot return the same event message {}",
                         firstParamType.getName());
             }
-        }
-
-        @Override
-        protected boolean matchesExternal(boolean externalOnly, Method method) {
-            final Annotation annotation = method.getAnnotation(getAnnotationClass());
-            final React reactAnnotation = (React) annotation;
-            final boolean result = externalOnly == reactAnnotation.external();
-            return result;
         }
     }
 }

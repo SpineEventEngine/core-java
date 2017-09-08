@@ -151,7 +151,7 @@ public class EventSubscriberMethodShould {
     }
 
     private static void assertIsEventSubscriber(Method subscriber, boolean isSubscriber) {
-        assertEquals(isSubscriber, EventSubscriberMethod.domesticSubscribers()
+        assertEquals(isSubscriber, EventSubscriberMethod.predicate()
                                                         .apply(subscriber));
     }
 }

@@ -69,6 +69,11 @@ public class DelegatingEventDispatcherShould {
         }
 
         @Override
+        public Set<EventClass> getExternalEventClasses() {
+            return ImmutableSet.of();
+        }
+
+        @Override
         public Set<String> dispatchEvent(EventEnvelope envelope) {
             // Do nothing.
             return ImmutableSet.of();

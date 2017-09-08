@@ -23,6 +23,7 @@ package io.spine.server.rejection;
 import io.spine.annotation.Internal;
 import io.spine.core.RejectionClass;
 import io.spine.server.model.MessageHandlerMap;
+import io.spine.server.model.MethodFiltering;
 import io.spine.server.model.ModelClass;
 
 import java.util.Set;
@@ -55,6 +56,11 @@ public final class RejectionSubscriberClass<S extends RejectionSubscriber> exten
 
     Set<RejectionClass> getRejectionSubscriptions() {
         return rejectionSubscriptions.getMessageClasses();
+    }
+
+    public Set<RejectionClass> getExternalRejectionSubscriptions() {
+        return rejectionSubscriptions.getMessageClasses(
+                MethodFiltering.<RejectionSubscriberMethod>onlyExternal());
     }
 
     RejectionSubscriberMethod getSubscriber(RejectionClass cls) {

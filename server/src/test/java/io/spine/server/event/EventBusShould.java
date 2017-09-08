@@ -438,6 +438,11 @@ public class EventBusShould {
         }
 
         @Override
+        public Set<EventClass> getExternalEventClasses() {
+            return ImmutableSet.of();
+        }
+
+        @Override
         public Set<String> dispatchEvent(EventEnvelope envelope) {
             dispatchCalled = true;
             return ImmutableSet.of(toString());
@@ -462,6 +467,11 @@ public class EventBusShould {
         @Override
         public Set<EventClass> getEventClasses() {
             return ImmutableSet.of(EventClass.of(ProjectCreated.class));
+        }
+
+        @Override
+        public Set<EventClass> getExternalEventClasses() {
+            return ImmutableSet.of();
         }
 
         @Override

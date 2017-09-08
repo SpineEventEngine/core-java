@@ -26,8 +26,9 @@ import io.spine.core.ExternalMessageEnvelope;
 import io.spine.core.Rejection;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
-import io.spine.server.reflect.RejectionSubscriberMethod;
+import io.spine.server.model.Model;
 import io.spine.server.rejection.RejectionSubscriber;
+import io.spine.server.rejection.RejectionSubscriberClass;
 import io.spine.string.Stringifiers;
 import io.spine.type.MessageClass;
 import io.spine.util.Logging;
@@ -58,19 +59,18 @@ class ExternalRejectionSubscriber implements ExternalMessageDispatcher<String> {
 
     private final RejectionSubscriber delegate;
 
-    /**
-     * Set of the external rejection classes this subscriber is subscribed to.
-     */
-    private final Set<RejectionClass> rejectionClasses;
-
     ExternalRejectionSubscriber(RejectionSubscriber delegate) {
         this.delegate = delegate;
-        this.rejectionClasses = RejectionSubscriberMethod.inspectExternal(delegate.getClass());
     }
 
     @Override
     public Set<MessageClass> getMessageClasses() {
-        return ImmutableSet.<MessageClass>copyOf(rejectionClasses);
+        final RejectionSubscriberClass<?> subscriberClass =
+                Model.getInstance()
+                     .asRejectionSubscriber(delegate.getClass());
+        final Set<RejectionClass> extSubscriptions =
+                subscriberClass.getExternalRejectionSubscriptions();
+        return ImmutableSet.<MessageClass>copyOf(extSubscriptions);
     }
 
     @Override
@@ -107,19 +107,14 @@ class ExternalRejectionSubscriber implements ExternalMessageDispatcher<String> {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
+        if (this == o) { return true; }
+        if (o == null || getClass() != o.getClass()) { return false; }
         ExternalRejectionSubscriber that = (ExternalRejectionSubscriber) o;
-        return Objects.equals(delegate, that.delegate) &&
-                Objects.equals(rejectionClasses, that.rejectionClasses);
+        return Objects.equals(delegate, that.delegate);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(delegate, rejectionClasses);
+        return Objects.hash(delegate);
     }
 }

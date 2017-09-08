@@ -180,6 +180,6 @@ public class RejectionSubscriberMethodShould {
 
     private static void assertIsRejectionSubscriber(Method subscriber, boolean isSubscriber) {
         assertEquals(isSubscriber,
-                     RejectionSubscriberMethod.domesticSubscribers().apply(subscriber));
+                     RejectionSubscriberMethod.predicate().apply(subscriber));
     }
 }

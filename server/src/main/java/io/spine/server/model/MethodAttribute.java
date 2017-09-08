@@ -17,50 +17,35 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.reflect;
+package io.spine.server.model;
 
-import java.util.Objects;
+import io.spine.annotation.Internal;
 
 /**
- * A meta-attribute of the {@code Method}, telling whether this method handles the objects,
- * produced outside of the current bounded context.
+ * Meta-data set to a {@link HandlerMethod HandlerMethod}.
  *
- * @see io.spine.core.Subscribe#external()
- * @see io.spine.core.React#external()
+ * <p>Typical way to add more semantics to a method is via a parameterized annotation,
+ * such as {@link io.spine.core.Subscribe Subscribe}.
+ *
  * @author Alex Tymchenko
  */
-class ExternalAttribute implements MethodAttribute<Boolean> {
+@Internal
+public interface MethodAttribute<V> {
 
-    private final boolean value;
+    /**
+     * An attribute name.
+     *
+     * @return a name of the attribute as {@code String}
+     */
+    String getName();
 
-    ExternalAttribute(boolean value) {
-        this.value = value;
-    }
-
-    @Override
-    public String getName() {
-        return "external";
-    }
-
-    @Override
-    public Boolean getValue() {
-        return value;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        ExternalAttribute that = (ExternalAttribute) o;
-        return value == that.value;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(value);
-    }
+    /**
+     * A value of the attribute.
+     *
+     * <p>As it'd typically be an annotation field value, its type cannot be restricted
+     * to anything except for {@link Object}.
+     *
+     * @return the value of the attribute
+     */
+    V getValue();
 }

@@ -85,8 +85,7 @@ public class IntegrationBusShould {
         final Message expectedMessage = AnyPacker.unpack(event.getMessage());
         assertEquals(expectedMessage, ProjectDetails.getExternalEvent());
         assertEquals(expectedMessage, ProjectWizard.getExternalEvent());
-        //TODO:2017-08-15:alex.tymchenko: uncomment;
-//        assertEquals(expectedMessage, ProjectCountAggregate.getExternalEvent());
+        assertEquals(expectedMessage, ProjectCountAggregate.getExternalEvent());
     }
 
     @Test

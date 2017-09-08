@@ -27,7 +27,8 @@ import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.core.ExternalMessageEnvelope;
 import io.spine.server.event.EventSubscriber;
-import io.spine.server.reflect.EventSubscriberMethod;
+import io.spine.server.event.EventSubscriberClass;
+import io.spine.server.model.Model;
 import io.spine.string.Stringifiers;
 import io.spine.type.MessageClass;
 import io.spine.util.Logging;
@@ -58,19 +59,18 @@ class ExternalEventSubscriber implements ExternalMessageDispatcher<String> {
 
     private final EventSubscriber delegate;
 
-    /**
-     * Set of the external event classes this subscriber is subscribed to.
-     */
-    private final Set<EventClass> eventClasses;
-
     ExternalEventSubscriber(EventSubscriber delegate) {
         this.delegate = delegate;
-        this.eventClasses = EventSubscriberMethod.inspectExternal(delegate.getClass());
     }
 
     @Override
     public Set<MessageClass> getMessageClasses() {
-        return ImmutableSet.<MessageClass>copyOf(eventClasses);
+        final EventSubscriberClass<?> subscriberClass =
+                Model.getInstance()
+                     .asEventSubscriberClass(delegate.getClass());
+        final Set<EventClass> extSubscriptions =
+                subscriberClass.getExternalEventSubscriptions();
+        return ImmutableSet.<MessageClass>copyOf(extSubscriptions);
     }
 
     @Override
@@ -106,19 +106,14 @@ class ExternalEventSubscriber implements ExternalMessageDispatcher<String> {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
+        if (this == o) { return true; }
+        if (o == null || getClass() != o.getClass()) { return false; }
         ExternalEventSubscriber that = (ExternalEventSubscriber) o;
-        return Objects.equals(delegate, that.delegate) &&
-                Objects.equals(eventClasses, that.eventClasses);
+        return Objects.equals(delegate, that.delegate);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(delegate, eventClasses);
+        return Objects.hash(delegate);
     }
 }

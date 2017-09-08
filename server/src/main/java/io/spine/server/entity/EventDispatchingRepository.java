@@ -87,10 +87,10 @@ public abstract class EventDispatchingRepository<I,
             registerAsEventDispatcher();
         }
 
-        final ExternalMessageDispatcher<I> thisAsExternal = getExternalDispatcher();
+        final ExternalMessageDispatcher<I> thisAsExternal = getExternalEventDispatcher();
         if(!thisAsExternal.getMessageClasses().isEmpty()) {
             getBoundedContext().getIntegrationBus()
-                               .register(getExternalDispatcher());
+                               .register(getExternalEventDispatcher());
         }
     }
 
@@ -163,8 +163,8 @@ public abstract class EventDispatchingRepository<I,
      * Obtains an external event dispatcher for this repository.
      *
      * <p>This method should be overridden by the repositories, which are eligible
-     * to handle external messages. In this case the implementation would typically delegate
-     * the dispatching of external messages to the repository itself.
+     * to handle external events. In this case the implementation would typically delegate
+     * the dispatching of external events to the repository itself.
      *
      * <p>Such a delegate-based approach is chosen, since it's not possible to make
      * {@code EventDispatchingRepository} extend another
@@ -173,8 +173,8 @@ public abstract class EventDispatchingRepository<I,
      *
      * @return the external event dispatcher
      */
-    protected ExternalMessageDispatcher<I> getExternalDispatcher() {
-        return new AbstractExternalMessageDispatcher() {
+    protected ExternalMessageDispatcher<I> getExternalEventDispatcher() {
+        return new AbstractExternalEventDispatcher() {
             @Override
             public Set<MessageClass> getMessageClasses() {
                 return Collections.emptySet();
@@ -191,7 +191,7 @@ public abstract class EventDispatchingRepository<I,
      * An abstract base for the external message dispatchers, enabling
      * the {@code EventDispatchingRepository} instances to handle external events.
      */
-    protected abstract class AbstractExternalMessageDispatcher
+    protected abstract class AbstractExternalEventDispatcher
             implements ExternalMessageDispatcher<I> {
 
         @Override

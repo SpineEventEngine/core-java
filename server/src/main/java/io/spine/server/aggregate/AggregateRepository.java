@@ -38,6 +38,7 @@ import io.spine.server.entity.Repository;
 import io.spine.server.event.DelegatingEventDispatcher;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcherDelegate;
+import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.model.Model;
 import io.spine.server.rejection.DelegatingRejectionDispatcher;
 import io.spine.server.rejection.RejectionDispatcherDelegate;
@@ -49,6 +50,7 @@ import io.spine.server.route.RejectionRouting;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
+import io.spine.type.MessageClass;
 
 import javax.annotation.CheckReturnValue;
 import java.lang.reflect.Constructor;
@@ -129,29 +131,65 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         eventDispatcher = DelegatingEventDispatcher.of(this);
         final Set<EventClass> eventClasses = eventDispatcher.getMessageClasses();
 
+        final ExternalMessageDispatcher<I> extEventDispatcher;
+        extEventDispatcher = eventDispatcher.getExternalDispatcher();
+        final Set<MessageClass> extEventClasses = extEventDispatcher.getMessageClasses();
+
         final DelegatingRejectionDispatcher<I> rejectionDispatcher;
         rejectionDispatcher = DelegatingRejectionDispatcher.of(this);
         final Set<RejectionClass> rejectionClasses = rejectionDispatcher.getMessageClasses();
 
-        if (commandClasses.isEmpty() && eventClasses.isEmpty() && rejectionClasses.isEmpty()) {
+        final ExternalMessageDispatcher<I> extRejectionDispatcher;
+        extRejectionDispatcher = rejectionDispatcher.getExternalDispatcher();
+        final Set<MessageClass> extRejectionClasses = extRejectionDispatcher.getMessageClasses();
+
+        if (commandClasses.isEmpty() && eventClasses.isEmpty() && rejectionClasses.isEmpty()
+                && extEventClasses.isEmpty() && extRejectionClasses.isEmpty()) {
             throw newIllegalStateException(
                     "Aggregates of the repository %s neither handle commands" +
                             " nor react on events or rejections.", this);
         }
 
-        if (!commandClasses.isEmpty()) {
-            boundedContext.getCommandBus()
-                          .register(this);
-        }
+        registerInCommandBus(boundedContext, commandClasses);
+        registerInEventBus(boundedContext, eventDispatcher, eventClasses);
+        registerInRejectionBus(boundedContext, rejectionDispatcher, rejectionClasses);
 
+        registerExtMessageDispatcher(boundedContext, extEventDispatcher, extEventClasses);
+        registerExtMessageDispatcher(boundedContext, extRejectionDispatcher, extRejectionClasses);
+    }
+
+    private void registerExtMessageDispatcher(BoundedContext boundedContext,
+                                              ExternalMessageDispatcher<I> extEventDispatcher,
+                                              Set<MessageClass> extEventClasses) {
+        if (!extEventClasses.isEmpty()) {
+            boundedContext.getIntegrationBus()
+                          .register(extEventDispatcher);
+        }
+    }
+
+    private void registerInRejectionBus(BoundedContext boundedContext,
+                                        DelegatingRejectionDispatcher<I> rejectionDispatcher,
+                                        Set<RejectionClass> rejectionClasses) {
+        if (!rejectionClasses.isEmpty()) {
+            boundedContext.getRejectionBus()
+                          .register(rejectionDispatcher);
+        }
+    }
+
+    private void registerInEventBus(BoundedContext boundedContext,
+                                    DelegatingEventDispatcher<I> eventDispatcher,
+                                    Set<EventClass> eventClasses) {
         if (!eventClasses.isEmpty()) {
             boundedContext.getEventBus()
                           .register(eventDispatcher);
         }
+    }
 
-        if (!rejectionClasses.isEmpty()) {
-            boundedContext.getRejectionBus()
-                          .register(rejectionDispatcher);
+    private void registerInCommandBus(BoundedContext boundedContext,
+                                      Set<CommandClass> commandClasses) {
+        if (!commandClasses.isEmpty()) {
+            boundedContext.getCommandBus()
+                          .register(this);
         }
     }
 
@@ -280,6 +318,12 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         return aggregateClass().getEventReactions();
     }
 
+    @Override
+    @SuppressWarnings("ReturnOfCollectionOrArrayField") // We return immutable impl.
+    public Set<EventClass> getExternalEventClasses() {
+        return aggregateClass().getExternalEventReactions();
+    }
+
     /**
      * Dispatches event to one or more aggregates reacting on the event.
      *
@@ -303,6 +347,12 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // We return immutable impl.
     public Set<RejectionClass> getRejectionClasses() {
         return aggregateClass().getRejectionReactions();
+    }
+
+    @Override
+    @SuppressWarnings("ReturnOfCollectionOrArrayField") // We return immutable impl.
+    public Set<RejectionClass> getExternalRejectionClasses() {
+        return aggregateClass().getExternalRejectionReactions();
     }
 
     @Override

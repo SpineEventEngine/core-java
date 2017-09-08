@@ -23,6 +23,7 @@ package io.spine.server.event;
 import io.spine.annotation.Internal;
 import io.spine.core.EventClass;
 import io.spine.server.model.MessageHandlerMap;
+import io.spine.server.model.MethodFiltering;
 import io.spine.server.model.ModelClass;
 
 import java.util.Set;
@@ -57,6 +58,11 @@ public final class EventSubscriberClass<S extends EventSubscriber> extends Model
 
     Set<EventClass> getEventSubscriptions() {
         return eventSubscriptions.getMessageClasses();
+    }
+
+    public Set<EventClass> getExternalEventSubscriptions() {
+        return eventSubscriptions.getMessageClasses(
+                MethodFiltering.<EventSubscriberMethod>onlyExternal());
     }
 
     EventSubscriberMethod getSubscriber(EventClass eventClass) {

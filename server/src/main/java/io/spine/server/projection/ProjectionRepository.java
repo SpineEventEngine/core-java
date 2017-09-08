@@ -35,8 +35,8 @@ import io.spine.server.entity.EventDispatchingRepository;
 import io.spine.server.event.EventFilter;
 import io.spine.server.event.EventStore;
 import io.spine.server.event.EventStreamQuery;
-import io.spine.server.model.Model;
 import io.spine.server.integration.ExternalMessageDispatcher;
+import io.spine.server.model.Model;
 import io.spine.server.route.EventProducers;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.RecordStorage;
@@ -246,21 +246,19 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     }
 
     @Override
-    protected ExternalMessageDispatcher<I> getExternalDispatcher() {
-        return new ProjectionExternalMessageDispatcher();
+    protected ExternalMessageDispatcher<I> getExternalEventDispatcher() {
+        return new ProjectionExternalEventDispatcher();
     }
 
     /**
      * An implementation of an external message dispatcher feeding external events
      * to {@code Projection} instances.
      */
-    private class ProjectionExternalMessageDispatcher extends AbstractExternalMessageDispatcher {
+    private class ProjectionExternalEventDispatcher extends AbstractExternalEventDispatcher {
 
         @Override
         public Set<MessageClass> getMessageClasses() {
-            final Class<? extends Projection> projectionClass = getEntityClass();
-            final Set<EventClass> eventClasses =
-                    Projection.TypeInfo.getExternalEventClasses(projectionClass);
+            final Set<EventClass> eventClasses = projectionClass().getExternalEventSubscriptions();
             final ImmutableSet<MessageClass> messageClasses =
                     ImmutableSet.<MessageClass>copyOf(eventClasses);
             return messageClasses;

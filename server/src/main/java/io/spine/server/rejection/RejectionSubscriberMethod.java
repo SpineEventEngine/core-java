@@ -21,7 +21,6 @@ package io.spine.server.rejection;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.RejectionContext;
@@ -29,9 +28,10 @@ import io.spine.core.Subscribe;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.MethodPredicate;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+
+import static io.spine.server.model.MethodFiltering.ensureExternalMatch;
 
 /**
  * A wrapper for a rejection subscriber method.
@@ -43,12 +43,8 @@ import java.lang.reflect.Modifier;
 @Internal
 public class RejectionSubscriberMethod extends RejectionHandlerMethod {
 
-    /** The instance of the predicate to filter domestic rejection subscriber methods of a class. */
-    private static final MethodPredicate DOMESTIC_SUBSCRIBERS = new FilterPredicate();
-
-    /** The instance of the predicate to filter external rejection subscriber methods of a class. */
-    private static final MethodPredicate EXTERNAL_SUBSCRIBERS = new FilterPredicate(true);
-
+    /** The instance of the predicate to filter rejection subscriber methods of a class. */
+    private static final MethodPredicate PREDICATE = new FilterPredicate();
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
@@ -73,6 +69,8 @@ public class RejectionSubscriberMethod extends RejectionHandlerMethod {
      */
     @Override
     public Object invoke(Object target, Message rejectionMessage, RejectionContext context) {
+        ensureExternalMatch(this, context.getExternal());
+
         final Object result = doInvoke(target, rejectionMessage, context);
         return result;
     }
@@ -82,65 +80,8 @@ public class RejectionSubscriberMethod extends RejectionHandlerMethod {
         return Factory.getInstance();
     }
 
-//
-//    /**
-//     * Invokes the subscriber method in the passed object.
-//     */
-//    public static void invokeFor(Object target,
-//                                 Message rejectionMessage,
-//                                 Message commandMessage,
-//                                 RejectionContext context) {
-//        checkNotNull(target);
-//        checkNotNull(rejectionMessage);
-//        checkNotNull(commandMessage);
-//        checkNotNull(context);
-//
-//        final RejectionSubscriberMethod method =
-//                getMethod(target.getClass(), rejectionMessage, commandMessage);
-//        method.invoke(target, rejectionMessage, context);
-//    }
-//
-//    /**
-//     * Obtains the method for handling the rejection in the passed class.
-//     *
-//     * @throws IllegalStateException if the passed class does not have an rejection handling method
-//     *                               for the class of the passed message
-//     */
-//    public static RejectionSubscriberMethod getMethod(Class<?> cls,
-//                                                      Message rejectionMessage,
-//                                                      Message commandMessage) {
-//        checkNotNull(cls);
-//        checkNotNull(rejectionMessage);
-//        checkNotNull(commandMessage);
-//
-//        final Class<? extends Message> rejectionClass = rejectionMessage.getClass();
-//        final MethodRegistry registry = MethodRegistry.getInstance();
-//        final RejectionSubscriberMethod method = registry.get(cls,
-//                                                              rejectionClass,
-//                                                              factory());
-//        if (method == null) {
-//            throw missingRejectionHandler(cls, rejectionClass);
-//        }
-//        return method;
-//    }
-//
-//    @CheckReturnValue
-//    public static Set<RejectionClass> inspect(Class<?> cls) {
-//        return inspectWith(cls, domesticSubscribers());
-//    }
-//
-//    @CheckReturnValue
-//    public static Set<RejectionClass> inspectExternal(Class<?> cls) {
-//        return inspectWith(cls, externalSubscribers());
-//    }
-
-    static MethodPredicate domesticSubscribers() {
-        return DOMESTIC_SUBSCRIBERS;
-    }
-
-    //TODO:2017-07-21:alex.tymchenko: cover external subscribers with tests as well.
-    static MethodPredicate externalSubscribers() {
-        return EXTERNAL_SUBSCRIBERS;
+    static MethodPredicate predicate() {
+        return PREDICATE;
     }
 
     /**
@@ -161,7 +102,7 @@ public class RejectionSubscriberMethod extends RejectionHandlerMethod {
 
         @Override
         public Predicate<Method> getPredicate() {
-            return Predicates.or(domesticSubscribers(), externalSubscribers());
+            return predicate();
         }
 
         @Override
@@ -190,15 +131,8 @@ public class RejectionSubscriberMethod extends RejectionHandlerMethod {
      */
     private static class FilterPredicate extends RejectionFilterPredicate {
 
-        private final boolean externalOnly;
-
         private FilterPredicate() {
-            this(false);
-        }
-
-        private FilterPredicate(boolean externalOnly) {
             super(Subscribe.class);
-            this.externalOnly = externalOnly;
         }
 
         @Override
@@ -206,18 +140,5 @@ public class RejectionSubscriberMethod extends RejectionHandlerMethod {
             final boolean isVoid = Void.TYPE.equals(method.getReturnType());
             return isVoid;
         }
-
-        @Override
-        protected boolean verifyAnnotation(Method method) {
-            return super.verifyAnnotation(method) && matchesExternal(externalOnly, method);
-        }
-
-        private boolean matchesExternal(boolean externalOnly, Method method) {
-            final Annotation annotation = method.getAnnotation(getAnnotationClass());
-            final Subscribe subscribeAnnotation = (Subscribe) annotation;
-            final boolean result = externalOnly == subscribeAnnotation.external();
-            return result;
-        }
     }
-
 }

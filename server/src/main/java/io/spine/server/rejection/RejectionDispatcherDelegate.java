@@ -48,6 +48,11 @@ public interface RejectionDispatcherDelegate<I> {
     Set<RejectionClass> getRejectionClasses();
 
     /**
+     * Obtains external rejection classes dispatched by this delegate.
+     */
+    Set<RejectionClass> getExternalRejectionClasses();
+
+    /**
      * Dispatches the rejection.
      */
     Set<I> dispatchRejection(RejectionEnvelope envelope);

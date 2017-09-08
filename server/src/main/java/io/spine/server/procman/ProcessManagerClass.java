@@ -29,6 +29,7 @@ import io.spine.server.command.CommandHandlingClass;
 import io.spine.server.event.EventReactorMethod;
 import io.spine.server.model.EntityClass;
 import io.spine.server.model.MessageHandlerMap;
+import io.spine.server.model.MethodFiltering;
 import io.spine.server.rejection.RejectionReactorMethod;
 
 import java.util.Set;
@@ -76,8 +77,17 @@ public final class ProcessManagerClass<P extends ProcessManager>
         return eventReactions.getMessageClasses();
     }
 
+    Set<EventClass> getExternalEventReactions() {
+        return eventReactions.getMessageClasses(MethodFiltering.<EventReactorMethod>onlyExternal());
+    }
+
     Set<RejectionClass> getRejectionReactions() {
         return rejectionReactions.getMessageClasses();
+    }
+
+    Set<RejectionClass> getExternalRejectionReactions() {
+        return rejectionReactions.getMessageClasses(
+                MethodFiltering.<RejectionReactorMethod>onlyExternal());
     }
 
     CommandHandlerMethod getHandler(CommandClass commandClass) {

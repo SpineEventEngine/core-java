@@ -38,8 +38,8 @@ import io.spine.server.commandbus.CommandDispatcherDelegate;
 import io.spine.server.commandbus.DelegatingCommandDispatcher;
 import io.spine.server.entity.EventDispatchingRepository;
 import io.spine.server.event.EventBus;
-import io.spine.server.model.Model;
 import io.spine.server.integration.ExternalMessageDispatcher;
+import io.spine.server.model.Model;
 import io.spine.server.rejection.DelegatingRejectionDispatcher;
 import io.spine.server.rejection.RejectionDispatcherDelegate;
 import io.spine.server.route.CommandRouting;
@@ -123,6 +123,14 @@ public abstract class ProcessManagerRepository<I,
             boundedContext.getRejectionBus()
                           .register(rejectionDispatcher);
         }
+
+        final ExternalMessageDispatcher<I> extRejectionDispatcher =
+                rejectionDispatcher.getExternalDispatcher();
+        if (!extRejectionDispatcher.getMessageClasses()
+                                        .isEmpty()) {
+            boundedContext.getIntegrationBus()
+                          .register(extRejectionDispatcher);
+        }
     }
 
     /**
@@ -162,13 +170,26 @@ public abstract class ProcessManagerRepository<I,
      * Obtains a set of rejection classes on which process managers of
      * this repository are subscribed.
      *
-     * @return a set of event classes or empty set if process managers
+     * @return a set of rejection classes or empty set if process managers
      * are not subscribed to rejections
      */
     @Override
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // it is immutable
     public Set<RejectionClass> getRejectionClasses() {
         return processManagerClass().getRejectionReactions();
+    }
+
+    /**
+     * Obtains a set of external rejection classes on which process managers of
+     * this repository are subscribed.
+     *
+     * @return a set of external rejection classes or empty set if process managers
+     * are not subscribed to external rejections
+     */
+    @Override
+    @SuppressWarnings("ReturnOfCollectionOrArrayField") // it is immutable
+    public Set<RejectionClass> getExternalRejectionClasses() {
+        return processManagerClass().getExternalRejectionReactions();
     }
 
     /**
@@ -332,21 +353,21 @@ public abstract class ProcessManagerRepository<I,
     }
 
     @Override
-    protected ExternalMessageDispatcher<I> getExternalDispatcher() {
-        return new PmExternalMessageDispatcher();
+    protected ExternalMessageDispatcher<I> getExternalEventDispatcher() {
+        return new PmExternalEventDispatcher();
     }
 
     /**
      * An implementation of an external message dispatcher feeding external events
      * to {@code ProcessManager} instances.
      */
-    private class PmExternalMessageDispatcher extends AbstractExternalMessageDispatcher {
+    private class PmExternalEventDispatcher extends AbstractExternalEventDispatcher {
 
         @Override
         public Set<MessageClass> getMessageClasses() {
-            final Class<? extends ProcessManager> pmClass = getEntityClass();
-            final Set<EventClass> eventClasses =
-                    ProcessManager.TypeInfo.getExternalEventClasses(pmClass);
+            final ProcessManagerClass<?> pmClass = Model.getInstance()
+                                                        .asProcessManagerClass(getEntityClass());
+            final Set<EventClass> eventClasses = pmClass.getExternalEventReactions();
             final ImmutableSet<MessageClass> messageClasses =
                     ImmutableSet.<MessageClass>copyOf(eventClasses);
             return messageClasses;
