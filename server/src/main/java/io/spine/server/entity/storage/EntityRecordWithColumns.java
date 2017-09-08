@@ -22,19 +22,15 @@ package io.spine.server.entity.storage;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -115,18 +111,12 @@ public final class EntityRecordWithColumns implements Serializable {
     }
 
     /**
-     * Obtains sorted {@linkplain EntityColumn#getStoredName() names}
-     * of entity columns for the record.
+     * Obtains entity column {@linkplain EntityColumn#getStoredName() names} for the record.
      *
-     * <p>The names will be sorted using {@link String#compareTo(String)}.
-     *
-     * @return the sorted entity column names
+     * @return the entity column names
      */
-    public Collection<String> getColumnNames() {
-        final ImmutableSet<String> names = storageFields.keySet();
-        final List<String> list = newLinkedList(names);
-        Collections.sort(list);
-        return list;
+    public Set<String> getColumnNames() {
+        return storageFields.keySet();
     }
 
     /**

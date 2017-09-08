@@ -34,20 +34,15 @@ import org.junit.Test;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
-import static com.google.common.collect.Lists.newLinkedList;
-import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
-import static io.spine.Identifier.newUuid;
 import static io.spine.server.entity.storage.EntityColumn.MemoizedValue;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.of;
 import static io.spine.server.storage.EntityField.version;
 import static io.spine.test.Verify.assertSize;
 import static java.util.Collections.singletonMap;
-import static java.util.Collections.sort;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -121,23 +116,6 @@ public class EntityRecordWithColumnsShould {
         assertFalse(record.hasColumns());
         final Collection<String> names = record.getColumnNames();
         assertTrue(names.isEmpty());
-    }
-
-    @Test
-    public void return_sorted_column_names() {
-        final MemoizedValue value = mock(MemoizedValue.class);
-        final Map<String, MemoizedValue> columns = newHashMap();
-        final int columnSize = 1000;
-        for (int i = 0; i < columnSize; i++) {
-            final String name = newUuid();
-            columns.put(name, value);
-        }
-
-        final List<String> expectedNames = newLinkedList(columns.keySet());
-        sort(expectedNames);
-
-        final EntityRecordWithColumns record = of(EntityRecord.getDefaultInstance(), columns);
-        assertEquals(expectedNames, record.getColumnNames());
     }
 
     @Test(expected = IllegalStateException.class)
