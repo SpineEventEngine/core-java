@@ -79,7 +79,6 @@ import static io.spine.test.Verify.assertSize;
 import static io.spine.validate.Validate.isDefault;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -460,10 +459,48 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
 
         final Iterator<EntityRecord> readRecords = storage.readAll(query,
                                                                    FieldMask.getDefaultInstance());
-        assertTrue(readRecords.hasNext());
-        final EntityRecord singleRecord = readRecords.next();
-        assertFalse(readRecords.hasNext());
-        assertEquals(fineRecord, singleRecord);
+        assertSingleRecord(fineRecord, readRecords);
+    }
+
+    @Test
+    public void update_entity_column_values() {
+        final Project.Status initialStatus = Project.Status.DONE;
+        final Project.Status statusAfterUpdate = Project.Status.CANCELLED;
+        final Int32Value initialStatusValue = Int32Value.newBuilder()
+                                                        .setValue(initialStatus.getNumber())
+                                                        .build();
+        final ColumnFilter status = eq("projectStatusValue", initialStatusValue);
+        final CompositeColumnFilter aggregatingFilter = CompositeColumnFilter.newBuilder()
+                                                                             .setOperator(ALL)
+                                                                             .addFilter(status)
+                                                                             .build();
+        final EntityFilters filters = EntityFilters.newBuilder()
+                                                   .addFilter(aggregatingFilter)
+                                                   .build();
+        final EntityQuery<I> query = EntityQueries.from(filters, getTestEntityClass());
+
+        final I id = newId();
+        final TestCounterEntity<I> entity = new TestCounterEntity<>(id);
+        entity.setStatus(initialStatus);
+
+        final EntityRecord record = newStorageRecord(id, newState(id));
+        final EntityRecordWithColumns recordWithColumns = create(record, entity);
+
+        final RecordStorage<I> storage = getDefaultStorage();
+        final FieldMask fieldMask = FieldMask.getDefaultInstance();
+
+        // Create the record.
+        storage.write(id, recordWithColumns);
+        final Iterator<EntityRecord> recordsBefore = storage.readAll(query, fieldMask);
+        assertSingleRecord(record, recordsBefore);
+
+        // Update the entity columns of the record.
+        entity.setStatus(statusAfterUpdate);
+        final EntityRecordWithColumns updatedRecordWithColumns = create(record, entity);
+        storage.write(id, updatedRecordWithColumns);
+
+        final Iterator<EntityRecord> recordsAfter = storage.readAll(query, fieldMask);
+        assertFalse(recordsAfter.hasNext());
     }
 
     @Test
@@ -509,10 +546,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final Iterator<EntityRecord> readRecords = storage.readAll(query,
                                                                    FieldMask.getDefaultInstance());
         // Check results
-        assertTrue(readRecords.hasNext());
-        final EntityRecord actualRecord = readRecords.next();
-        assertFalse(readRecords.hasNext());
-        assertEquals(fineRecord, actualRecord);
+        assertSingleRecord(fineRecord, readRecords);
     }
 
     @SuppressWarnings("MismatchedQueryAndUpdateOfCollection"/* Storing of generated objects and
@@ -539,6 +573,13 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
                         && !argument.hasColumns();
             }
         });
+    }
+
+    private static void assertSingleRecord(EntityRecord expected, Iterator<EntityRecord> actual) {
+        assertTrue(actual.hasNext());
+        final EntityRecord singleRecord = actual.next();
+        assertFalse(actual.hasNext());
+        assertEquals(expected, singleRecord);
     }
 
     @SuppressWarnings("unused") // Reflective access
