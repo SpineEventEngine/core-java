@@ -46,6 +46,7 @@ import java.util.Map;
 import static com.google.common.collect.ImmutableMultimap.of;
 import static io.spine.client.ColumnFilters.eq;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
+import static io.spine.client.CompositeColumnFilter.CompositeOperator.EITHER;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.of;
 import static io.spine.server.entity.storage.TestCompositeQueryParameterFactory.createParams;
 import static io.spine.server.entity.storage.TestEntityQueryFactory.createQuery;
@@ -166,6 +167,27 @@ public class EntityQueryMatcherShould {
 
         final EntityQueryMatcher<?> matcher = new EntityQueryMatcher<>(query);
         assertTrue(matcher.apply(recordWithColumns));
+    }
+
+    @Test
+    public void not_match_by_wrong_field_name() {
+        final String wrongName = "wrong";
+        final EntityColumn target = mock(EntityColumn.class);
+
+        final Multimap<EntityColumn, ColumnFilter> filters = of(target,
+                                                                eq(wrongName, "any"));
+        final CompositeQueryParameter parameter = createParams(filters, EITHER);
+        final QueryParameters params = QueryParameters.newBuilder()
+                                                      .add(parameter)
+                                                      .build();
+        final EntityQuery<?> query = createQuery(Collections.emptyList(), params);
+        final EntityQueryMatcher<?> matcher = new EntityQueryMatcher<>(query);
+
+        final EntityRecord record = EntityRecord.newBuilder()
+                                                .setEntityId(Any.getDefaultInstance())
+                                                .build();
+        final EntityRecordWithColumns recordWithColumns = of(record);
+        assertFalse(matcher.apply(recordWithColumns));
     }
 
     private static QueryParameters defaultQueryParameters() {
