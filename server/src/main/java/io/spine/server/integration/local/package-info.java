@@ -22,7 +22,8 @@
  */
 
 /**
- * This package provides implementation of local {@link TransportFactory} routines.
+ * This package provides implementation of local
+ * {@link io.spine.server.integration.TransportFactory} routines.
  *
  * <p>Should be used in test purposes only.
  */

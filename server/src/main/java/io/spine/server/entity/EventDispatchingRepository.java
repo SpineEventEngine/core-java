@@ -115,14 +115,6 @@ public abstract class EventDispatchingRepository<I,
     }
 
     /**
-     * Dispatches the event to an entity with the passed ID.
-     *
-     * @param id    the ID of the entity
-     * @param event the envelope with the event
-     */
-    protected abstract void dispatchToEntity(I id, EventEnvelope event);
-
-    /**
      * Obtains an external event dispatcher for this repository.
      *
      * <p>This method should be overridden by the repositories, which are eligible
@@ -160,19 +152,8 @@ public abstract class EventDispatchingRepository<I,
         @Override
         public Set<I> dispatch(ExternalMessageEnvelope envelope) {
             final Event event = (Event) envelope.getOuterObject();
-            final Message eventMessage = Events.getMessage(event);
-            final EventContext context = event.getContext();
-            final Set<I> ids = getEventRouting().apply(eventMessage, context);
-            final EventOperation op = new EventOperation(event) {
-                @Override
-                public void run() {
-                    for (I id : ids) {
-                        dispatchToEntity(id, EventEnvelope.of(event));
-                    }
-                }
-            };
-            op.execute();
-            return ids;
+            final EventEnvelope eventEnvelope = EventEnvelope.of(event);
+            return EventDispatchingRepository.this.dispatch(eventEnvelope);
         }
     }
 }

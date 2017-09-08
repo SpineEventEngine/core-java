@@ -68,7 +68,7 @@ public class CommandRoutingRejectionShould {
     @Before
     public void setUp() {
         boundedContext = BoundedContext.newBuilder()
-                                       .setName("Railway Station")
+                                       .setId("Railway Station")
                                        .setMultitenant(false)
                                        .build();
         boundedContext.register(new SwitchmanBureau());

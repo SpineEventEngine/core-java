@@ -62,7 +62,7 @@ public class AggregateClass<A extends Aggregate>
     private final ImmutableSet<RejectionClass> externalRejectionReactions;
 
     /** Creates new instance. */
-    private AggregateClass(Class<? extends A> cls) {
+    public AggregateClass(Class<? extends A> cls) {
         super(checkNotNull(cls));
         this.commands = new MessageHandlerMap<>(cls, CommandHandlerMethod.factory());
         this.stateEvents = new MessageHandlerMap<>(cls, EventApplierMethod.factory());

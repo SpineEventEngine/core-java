@@ -37,7 +37,7 @@ import static java.util.Collections.synchronizedMap;
  * A factory for creating channel-based transport for {@code Message} inter-exchange between the
  * current deployment component and other application parts.
  *
- * Inspired by <a href="http://www.enterpriseintegrationpatterns.com/patterns/messaging/PublishSubscribeChannel.html>
+ * Inspired by <a href="http://www.enterpriseintegrationpatterns.com/patterns/messaging/PublishSubscribeChannel.html">
  * Publish-Subscriber Channel pattern.</a>
  *
  * @author Alex Tymchenko
