@@ -48,6 +48,7 @@ final class LocalEventSubscriber extends EventSubscriber {
     LocalEventSubscriber(BoundedContextId boundedContextId,
                          TransportFactory.PublisherHub publisherHub,
                          EventClass messageClass) {
+        super();
         this.boundedContextId = boundedContextId;
         this.publisherHub = publisherHub;
         this.eventClasses = ImmutableSet.of(messageClass);
