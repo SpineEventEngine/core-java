@@ -22,21 +22,15 @@ package io.spine.server.entity;
 
 import com.google.protobuf.Message;
 import io.spine.core.Event;
-import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
-import io.spine.core.Events;
 import io.spine.core.ExternalMessageEnvelope;
-import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
-import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.event.EventDispatcher;
+import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.route.EventRoute;
 import io.spine.server.route.EventRouting;
-import io.spine.server.tenant.EventOperation;
-import io.spine.server.tenant.TenantAwareFunction0;
 import io.spine.type.MessageClass;
 
-import javax.annotation.CheckReturnValue;
 import java.util.Collections;
 import java.util.Set;
 
