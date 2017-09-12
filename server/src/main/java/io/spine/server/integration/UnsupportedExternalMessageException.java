@@ -19,9 +19,14 @@
  */
 package io.spine.server.integration;
 
+import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Message;
 import io.spine.base.Error;
+import io.spine.protobuf.AnyPacker;
 import io.spine.server.bus.MessageUnhandled;
+
+import static io.spine.server.integration.ExternalMessageValidationError.UNSUPPORTED_EXTERNAL_MESSAGE;
+import static java.lang.String.format;
 
 /**
  * Exception that is thrown when unsupported external message is obtained
@@ -32,17 +37,38 @@ import io.spine.server.bus.MessageUnhandled;
 public class UnsupportedExternalMessageException
         extends RuntimeException implements MessageUnhandled {
 
-    private final Message message;
+    private static final long serialVersionUID = 0L;
 
-    public UnsupportedExternalMessageException(Message message) {
-        this.message = message;
+    private final GeneratedMessageV3 externalMessage;
+
+    public UnsupportedExternalMessageException(Message externalMessage) {
+        if (externalMessage instanceof GeneratedMessageV3) {
+            this.externalMessage = (GeneratedMessageV3) externalMessage;
+        } else {
+            // This is strange. However, let's preserve the value by packing it.
+            this.externalMessage = AnyPacker.pack(externalMessage);
+        }
     }
 
-    //TODO:2017-07-21:alex.tymchenko: deal with the infrastructure to report external message issues.
+    public GeneratedMessageV3 getExternalMessage() {
+        return externalMessage;
+    }
 
     @Override
     public Error asError() {
-        return Error.getDefaultInstance();
+        final String msgType = externalMessage.getDescriptorForType()
+                                              .getFullName();
+        final String errMsg = format("External messages of the type `%s` are not supported.",
+                                     msgType);
+        final int errorCode = UNSUPPORTED_EXTERNAL_MESSAGE.getNumber();
+        final String errorType = ExternalMessageValidationError.getDescriptor()
+                                                               .getFullName();
+        final Error error = Error.newBuilder()
+                                 .setType(errorType)
+                                 .setCode(errorCode)
+                                 .setMessage(errMsg)
+                                 .build();
+        return error;
     }
 
     @Override

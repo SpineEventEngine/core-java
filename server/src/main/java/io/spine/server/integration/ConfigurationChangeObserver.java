@@ -61,7 +61,7 @@ class ConfigurationChangeObserver extends ChannelObserver {
     }
 
     @Override
-    public void handle(IntegrationMessage value) {
+    public void handle(ExternalMessage value) {
         final RequestedMessageTypes message = AnyPacker.unpack(value.getOriginalMessage());
         final Set<String> newTypeUrls = newHashSet(message.getTypeUrlsList());
 

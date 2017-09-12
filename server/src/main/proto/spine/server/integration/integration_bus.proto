@@ -36,7 +36,7 @@ import "spine/core/bounded_context.proto";
 
 // A wrapper around a message, which is used to send/receive the original message
 // to/from external application components, such as other bounded contexts.
-message IntegrationMessage {
+message ExternalMessage {
 
     // An ID of the original message wrapped to `Any`.
     google.protobuf.Any id = 1 [(required) = true];
@@ -59,4 +59,13 @@ message IntegrationMessage {
 message RequestedMessageTypes {
 
     repeated string type_urls = 1;
+}
+
+enum ExternalMessageValidationError {
+
+    // Reserved value.
+    EM_UNKNOWN_REASON = 0;
+
+    // The external message type is not supported by the server.
+    UNSUPPORTED_EXTERNAL_MESSAGE = 1;
 }

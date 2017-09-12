@@ -31,7 +31,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 /**
  * Base routines for the {@linkplain TransportFactory.MessageChannel message channel} observers.
  */
-abstract class ChannelObserver implements StreamObserver<IntegrationMessage> {
+abstract class ChannelObserver implements StreamObserver<ExternalMessage> {
 
     private final BoundedContextId boundedContextId;
     private final Class<? extends Message> messageClass;
@@ -56,7 +56,7 @@ abstract class ChannelObserver implements StreamObserver<IntegrationMessage> {
     }
 
     @Override
-    public final void onNext(IntegrationMessage message) {
+    public final void onNext(ExternalMessage message) {
         checkNotNull(message);
 
         final BoundedContextId source = message.getBoundedContextId();
@@ -84,5 +84,5 @@ abstract class ChannelObserver implements StreamObserver<IntegrationMessage> {
         return Objects.hash(boundedContextId, messageClass);
     }
 
-    protected abstract void handle(IntegrationMessage message);
+    protected abstract void handle(ExternalMessage message);
 }

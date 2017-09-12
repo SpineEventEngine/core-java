@@ -43,7 +43,7 @@ class IncomingMessageObserver extends ChannelObserver {
     }
 
     @Override
-    protected void handle(IntegrationMessage message) {
+    protected void handle(ExternalMessage message) {
         final Message unpackedMessage = AnyPacker.unpack(message.getOriginalMessage());
         integrationBus.post(unpackedMessage, StreamObservers.<Ack>noOpObserver());
     }

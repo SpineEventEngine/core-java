@@ -54,7 +54,7 @@ public interface TransportFactory {
     @SuppressWarnings("unused") // the parameter is used to determine a type of the message.
     interface MessageChannel extends AutoCloseable {
 
-        IntegrationMessageClass getMessageClass();
+        ExternalMessageClass getMessageClass();
 
         boolean isStale();
     }
@@ -66,7 +66,7 @@ public interface TransportFactory {
      */
     interface Publisher extends MessageChannel {
 
-        Ack publish(Any id, IntegrationMessage message);
+        Ack publish(Any id, ExternalMessage message);
     }
 
     /**
@@ -83,18 +83,18 @@ public interface TransportFactory {
          *
          * @return the instance of observer
          */
-        Iterable<StreamObserver<IntegrationMessage>> getObservers();
+        Iterable<StreamObserver<ExternalMessage>> getObservers();
 
-        void addObserver(StreamObserver<IntegrationMessage> observer);
+        void addObserver(StreamObserver<ExternalMessage> observer);
 
-        void removeObserver(StreamObserver<IntegrationMessage> observer);
+        void removeObserver(StreamObserver<ExternalMessage> observer);
     }
 
     abstract class ChannelHub<C extends MessageChannel> {
 
         private final TransportFactory transportFactory;
-        private final Map<IntegrationMessageClass, C> channels =
-                synchronizedMap(Maps.<IntegrationMessageClass, C>newHashMap());
+        private final Map<ExternalMessageClass, C> channels =
+                synchronizedMap(Maps.<ExternalMessageClass, C>newHashMap());
 
         protected ChannelHub(TransportFactory transportFactory) {
             this.transportFactory = transportFactory;
@@ -102,12 +102,12 @@ public interface TransportFactory {
 
         protected abstract C newChannel(MessageClass channelKey);
 
-        synchronized Set<IntegrationMessageClass> keys() {
+        synchronized Set<ExternalMessageClass> keys() {
             return ImmutableSet.copyOf(channels.keySet());
         }
 
         synchronized C get(MessageClass channelKey) {
-            final IntegrationMessageClass key = IntegrationMessageClass.of(channelKey);
+            final ExternalMessageClass key = ExternalMessageClass.of(channelKey);
             if(!channels.containsKey(key)) {
                 final C newChannel = newChannel(key);
                 channels.put(key, newChannel);
@@ -116,8 +116,8 @@ public interface TransportFactory {
         }
 
         public void releaseStale() {
-            final Set<IntegrationMessageClass> toRemove = newHashSet();
-            for (IntegrationMessageClass cls : channels.keySet()) {
+            final Set<ExternalMessageClass> toRemove = newHashSet();
+            for (ExternalMessageClass cls : channels.keySet()) {
                 final C channel = channels.get(cls);
                 if(channel.isStale()) {
                     try {
@@ -129,7 +129,7 @@ public interface TransportFactory {
                     }
                 }
             }
-            for (IntegrationMessageClass cls : toRemove) {
+            for (ExternalMessageClass cls : toRemove) {
                 channels.remove(cls);
             }
         }

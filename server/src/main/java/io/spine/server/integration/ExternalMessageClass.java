@@ -27,22 +27,25 @@ import io.spine.type.MessageClass;
  * @author Alex Tymchenko
  */
 @Internal
-public class IntegrationMessageClass extends MessageClass {
-    private IntegrationMessageClass(Class<? extends Message> value) {
+public class ExternalMessageClass extends MessageClass {
+
+    private static final long serialVersionUID = 0L;
+
+    private ExternalMessageClass(Class<? extends Message> value) {
         super(value);
     }
 
-    static IntegrationMessageClass of(IntegrationMessage message) {
+    static ExternalMessageClass of(ExternalMessage message) {
         //TODO:2017-07-24:alex.tymchenko: implement properly
         final MessageClass messageClass = new MessageClass(message.getClass()) {};
         return of(messageClass);
     }
 
-    public static IntegrationMessageClass of(MessageClass messageClass) {
-        return new IntegrationMessageClass(messageClass.value());
+    public static ExternalMessageClass of(MessageClass messageClass) {
+        return new ExternalMessageClass(messageClass.value());
     }
 
-    static IntegrationMessageClass of(Class<? extends Message> clz) {
-        return new IntegrationMessageClass(clz);
+    static ExternalMessageClass of(Class<? extends Message> clz) {
+        return new ExternalMessageClass(clz);
     }
 }

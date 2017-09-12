@@ -62,8 +62,8 @@ final class LocalRejectionSubscriber extends RejectionSubscriber {
     @Override
     public Set<String> dispatch(RejectionEnvelope envelope) {
         final Rejection rejection = envelope.getOuterObject();
-        final IntegrationMessage message = IntegrationMessages.of(rejection, boundedContextId);
-        final IntegrationMessageClass messageClass = IntegrationMessageClass.of(
+        final ExternalMessage message = ExternalMessages.of(rejection, boundedContextId);
+        final ExternalMessageClass messageClass = ExternalMessageClass.of(
                 envelope.getMessageClass());
         final TransportFactory.Publisher channel = publisherHub.get(messageClass);
         channel.publish(AnyPacker.pack(envelope.getId()), message);

@@ -54,7 +54,7 @@ import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.Identifier.newUuid;
 import static io.spine.Identifier.pack;
 import static io.spine.server.bus.Buses.acknowledge;
-import static io.spine.server.integration.IntegrationMessages.asIntegrationMessageClasses;
+import static io.spine.server.integration.ExternalMessages.asIntegrationMessageClasses;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static io.spine.validate.Validate.checkNotDefault;
 import static java.lang.String.format;
@@ -94,7 +94,7 @@ public class IntegrationBus extends MulticastBus<Message,
                         return adapterFor(message);
                     }
                 });
-        subscriberHub.get(IntegrationMessageClass.of(RequestedMessageTypes.class))
+        subscriberHub.get(ExternalMessageClass.of(RequestedMessageTypes.class))
                      .addObserver(observer);
     }
 
@@ -179,12 +179,12 @@ public class IntegrationBus extends MulticastBus<Message,
         super.register(dispatcher);
 
         // Remember the message types, that we have been subscribed before.
-        final Set<IntegrationMessageClass> requestedBefore = subscriberHub.keys();
+        final Set<ExternalMessageClass> requestedBefore = subscriberHub.keys();
 
         // Subscribe to incoming messages of requested types.
         subscribeToIncoming(dispatcher);
 
-        final Set<IntegrationMessageClass> currentlyRequested = subscriberHub.keys();
+        final Set<ExternalMessageClass> currentlyRequested = subscriberHub.keys();
         if (!currentlyRequested.equals(requestedBefore)) {
 
             // Notify others that the requested message set has been changed.
@@ -203,12 +203,12 @@ public class IntegrationBus extends MulticastBus<Message,
         super.unregister(dispatcher);
 
         // Remember the message types, that we have been subscribed before.
-        final Set<IntegrationMessageClass> requestedBefore = subscriberHub.keys();
+        final Set<ExternalMessageClass> requestedBefore = subscriberHub.keys();
 
         // Subscribe to incoming messages of requested types.
         unsubscribeFromIncoming(dispatcher);
 
-        final Set<IntegrationMessageClass> currentlyRequested = subscriberHub.keys();
+        final Set<ExternalMessageClass> currentlyRequested = subscriberHub.keys();
         if (!currentlyRequested.equals(requestedBefore)) {
             notifyOfNeeds(currentlyRequested);
         }
@@ -222,19 +222,19 @@ public class IntegrationBus extends MulticastBus<Message,
      *         the set of message types that are now requested by this instance of
      *         integration bus
      */
-    private void notifyOfNeeds(Iterable<IntegrationMessageClass> currentlyRequested) {
+    private void notifyOfNeeds(Iterable<ExternalMessageClass> currentlyRequested) {
 
         final RequestedMessageTypes.Builder resultBuilder = RequestedMessageTypes.newBuilder();
-        for (IntegrationMessageClass messageClass : currentlyRequested) {
+        for (ExternalMessageClass messageClass : currentlyRequested) {
             final TypeUrl typeUrl = KnownTypes.getTypeUrl(messageClass.getClassName());
             resultBuilder.addTypeUrls(typeUrl.value());
         }
         final RequestedMessageTypes result = resultBuilder.build();
-        final IntegrationMessage integrationMessage = IntegrationMessages.of(result,
-                                                                             boundedContextId);
-        final IntegrationMessageClass channelId = IntegrationMessageClass.of(result.getClass());
+        final ExternalMessage externalMessage = ExternalMessages.of(result,
+                                                                    boundedContextId);
+        final ExternalMessageClass channelId = ExternalMessageClass.of(result.getClass());
         publisherHub.get(channelId)
-                    .publish(pack(newUuid()), integrationMessage);
+                    .publish(pack(newUuid()), externalMessage);
     }
 
     /**
@@ -275,8 +275,8 @@ public class IntegrationBus extends MulticastBus<Message,
         final Set<MessageClass> classes = dispatcher.getMessageClasses();
 
         final IntegrationBus integrationBus = this;
-        final Iterable<IntegrationMessageClass> transformed = asIntegrationMessageClasses(classes);
-        for (final IntegrationMessageClass imClass : transformed) {
+        final Iterable<ExternalMessageClass> transformed = asIntegrationMessageClasses(classes);
+        for (final ExternalMessageClass imClass : transformed) {
             final Subscriber subscriber = subscriberHub.get(imClass);
             subscriber.addObserver(new IncomingMessageObserver(boundedContextId, 
                                                                imClass.value(), 
@@ -288,8 +288,8 @@ public class IntegrationBus extends MulticastBus<Message,
         final Set<MessageClass> classes = dispatcher.getMessageClasses();
 
         final IntegrationBus integrationBus = this;
-        final Iterable<IntegrationMessageClass> transformed = asIntegrationMessageClasses(classes);
-        for (final IntegrationMessageClass imClass : transformed) {
+        final Iterable<ExternalMessageClass> transformed = asIntegrationMessageClasses(classes);
+        for (final ExternalMessageClass imClass : transformed) {
             final Subscriber subscriber = subscriberHub.get(imClass);
             subscriber.removeObserver(new IncomingMessageObserver(boundedContextId,
                                                                   imClass.value(),

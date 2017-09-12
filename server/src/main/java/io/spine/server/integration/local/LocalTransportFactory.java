@@ -28,8 +28,8 @@ import com.google.protobuf.Any;
 import io.grpc.stub.StreamObserver;
 import io.spine.core.Ack;
 import io.spine.server.bus.Buses;
-import io.spine.server.integration.IntegrationMessage;
-import io.spine.server.integration.IntegrationMessageClass;
+import io.spine.server.integration.ExternalMessage;
+import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.TransportFactory;
 import io.spine.type.MessageClass;
 
@@ -38,7 +38,7 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Sets.newConcurrentHashSet;
-import static io.spine.server.integration.IntegrationMessageClass.of;
+import static io.spine.server.integration.ExternalMessageClass.of;
 
 /**
  * @author Alex Tymchenko
@@ -82,9 +82,9 @@ public class LocalTransportFactory implements TransportFactory {
 
     abstract static class AbstractLocalChannel implements MessageChannel {
 
-        private final IntegrationMessageClass messageClass;
+        private final ExternalMessageClass messageClass;
 
-        protected AbstractLocalChannel(IntegrationMessageClass messageClass) {
+        protected AbstractLocalChannel(ExternalMessageClass messageClass) {
             this.messageClass = messageClass;
         }
 
@@ -95,7 +95,7 @@ public class LocalTransportFactory implements TransportFactory {
         }
 
         @Override
-        public IntegrationMessageClass getMessageClass() {
+        public ExternalMessageClass getMessageClass() {
             return messageClass;
         }
     }
@@ -110,14 +110,14 @@ public class LocalTransportFactory implements TransportFactory {
 
         private final Function<MessageClass, Iterable<LocalSubscriber>> subscriberProvider;
 
-        private LocalPublisher(IntegrationMessageClass messageClass,
+        private LocalPublisher(ExternalMessageClass messageClass,
                                Function<MessageClass, Iterable<LocalSubscriber>> provider) {
             super(messageClass);
             this.subscriberProvider = provider;
         }
 
         @Override
-        public Ack publish(Any messageId, IntegrationMessage message) {
+        public Ack publish(Any messageId, ExternalMessage message) {
             final Iterable<LocalSubscriber> localSubscribers = getSubscribers(getMessageClass());
             for (LocalSubscriber localSubscriber : localSubscribers) {
                 callSubscriber(message, localSubscriber);
@@ -125,9 +125,9 @@ public class LocalTransportFactory implements TransportFactory {
             return Buses.acknowledge(messageId);
         }
 
-        private static void callSubscriber(IntegrationMessage message, LocalSubscriber subscriber) {
-            final Iterable<StreamObserver<IntegrationMessage>> callees = subscriber.getObservers();
-            for (StreamObserver<IntegrationMessage> observer : callees) {
+        private static void callSubscriber(ExternalMessage message, LocalSubscriber subscriber) {
+            final Iterable<StreamObserver<ExternalMessage>> callees = subscriber.getObservers();
+            for (StreamObserver<ExternalMessage> observer : callees) {
                 observer.onNext(message);
             }
         }
@@ -151,25 +151,25 @@ public class LocalTransportFactory implements TransportFactory {
      */
     static class LocalSubscriber extends AbstractLocalChannel implements Subscriber {
 
-        private final Set<StreamObserver<IntegrationMessage>> observers = newConcurrentHashSet();
+        private final Set<StreamObserver<ExternalMessage>> observers = newConcurrentHashSet();
 
-        private LocalSubscriber(IntegrationMessageClass messageClass) {
+        private LocalSubscriber(ExternalMessageClass messageClass) {
             super(messageClass);
         }
 
         @Override
-        public Iterable<StreamObserver<IntegrationMessage>> getObservers() {
+        public Iterable<StreamObserver<ExternalMessage>> getObservers() {
             return ImmutableSet.copyOf(observers);
         }
 
         @Override
-        public void addObserver(StreamObserver<IntegrationMessage> observer) {
+        public void addObserver(StreamObserver<ExternalMessage> observer) {
             checkNotNull(observer);
             observers.add(observer);
         }
 
         @Override
-        public void removeObserver(StreamObserver<IntegrationMessage> observer) {
+        public void removeObserver(StreamObserver<ExternalMessage> observer) {
             checkNotNull(observer);
             observers.remove(observer);
         }

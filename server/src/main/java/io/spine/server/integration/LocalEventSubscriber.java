@@ -63,8 +63,8 @@ final class LocalEventSubscriber extends EventSubscriber {
     @Override
     public Set<String> dispatch(EventEnvelope envelope) {
         final Event event = envelope.getOuterObject();
-        final IntegrationMessage msg = IntegrationMessages.of(event, boundedContextId);
-        final IntegrationMessageClass messageClass = IntegrationMessageClass.of(
+        final ExternalMessage msg = ExternalMessages.of(event, boundedContextId);
+        final ExternalMessageClass messageClass = ExternalMessageClass.of(
                 envelope.getMessageClass());
         final TransportFactory.Publisher channel = publisherHub.get(messageClass);
         channel.publish(AnyPacker.pack(envelope.getId()), msg);
