@@ -21,9 +21,7 @@
 package io.spine.server.event;
 
 import com.google.common.base.Predicate;
-import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
-import com.google.protobuf.StringValue;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.React;

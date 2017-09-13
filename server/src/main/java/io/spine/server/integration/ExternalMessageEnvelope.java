@@ -19,13 +19,10 @@
  */
 package io.spine.server.integration;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
-import com.google.protobuf.StringValue;
 import io.spine.core.AbstractMessageEnvelope;
 import io.spine.core.ActorContext;
 import io.spine.core.EventContext;
-import io.spine.protobuf.AnyPacker;
 import io.spine.type.MessageClass;
 
 import static com.google.common.base.Preconditions.checkNotNull;

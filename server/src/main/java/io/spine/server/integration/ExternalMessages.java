@@ -25,9 +25,7 @@ import com.google.protobuf.StringValue;
 import io.spine.Identifier;
 import io.spine.core.BoundedContextId;
 import io.spine.core.Event;
-import io.spine.core.Events;
 import io.spine.core.Rejection;
-import io.spine.core.Rejections;
 import io.spine.protobuf.AnyPacker;
 
 import static com.google.common.base.Preconditions.checkNotNull;
