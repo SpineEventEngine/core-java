@@ -20,12 +20,11 @@
 package io.spine.server.integration;
 
 import com.google.common.base.Supplier;
-import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
-import io.spine.core.ExternalMessageEnvelope;
+import io.spine.protobuf.AnyPacker;
 import io.spine.server.event.EventSubscriber;
 import io.spine.server.event.EventSubscriberClass;
 import io.spine.server.model.Model;
@@ -64,26 +63,28 @@ class ExternalEventSubscriber implements ExternalMessageDispatcher<String> {
     }
 
     @Override
-    public Set<MessageClass> getMessageClasses() {
+    public Set<ExternalMessageClass> getMessageClasses() {
         final EventSubscriberClass<?> subscriberClass =
                 Model.getInstance()
                      .asEventSubscriberClass(delegate.getClass());
         final Set<EventClass> extSubscriptions =
                 subscriberClass.getExternalEventSubscriptions();
-        return ImmutableSet.<MessageClass>copyOf(extSubscriptions);
+        return ExternalMessageClass.fromEventClasses(extSubscriptions);
     }
 
     @Override
     public Set<String> dispatch(ExternalMessageEnvelope envelope) {
-        final Message outerObject = envelope.getOuterObject();
-        if (!(outerObject instanceof Event)) {
+        final ExternalMessage externalMessage = envelope.getOuterObject();
+        final Message unpacked = AnyPacker.unpack(externalMessage.getOriginalMessage());
+        if (!(unpacked instanceof Event)) {
             throw newIllegalStateException("Unexpected object %s while dispatching " +
                                                    "the external event to the event subscriber.",
-                                           Stringifiers.toString(outerObject));
+                                           Stringifiers.toString(unpacked));
         }
-        final Event event = (Event) outerObject;
+        final Event event = (Event) unpacked;
         checkArgument(isExternal(event.getContext()),
-                      "External event expected, but got %s", Stringifiers.toString(event));
+                      "External event expected, but got %s",
+                      Stringifiers.toString(event));
         return delegate.dispatch(EventEnvelope.of(event));
     }
 

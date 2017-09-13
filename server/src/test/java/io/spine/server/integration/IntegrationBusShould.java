@@ -20,9 +20,13 @@
 package io.spine.server.integration;
 
 import com.google.protobuf.Message;
+import io.spine.base.Error;
+import io.spine.core.Ack;
 import io.spine.core.BoundedContextId;
 import io.spine.core.Event;
 import io.spine.core.Rejection;
+import io.spine.grpc.MemoizingObserver;
+import io.spine.grpc.StreamObservers;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.event.EventBus;
@@ -35,12 +39,14 @@ import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectStartedExt
 import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectWizard;
 import io.spine.server.integration.local.LocalTransportFactory;
 import io.spine.server.rejection.RejectionBus;
+import io.spine.validate.Validate;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Set;
 
 import static com.google.common.collect.Sets.newHashSet;
+import static io.spine.server.integration.ExternalMessageValidationError.UNSUPPORTED_EXTERNAL_MESSAGE;
 import static io.spine.server.integration.given.IntegrationBusTestEnv.cannotStartArchivedProject;
 import static io.spine.server.integration.given.IntegrationBusTestEnv.contextWithContextAwareEntitySubscriber;
 import static io.spine.server.integration.given.IntegrationBusTestEnv.contextWithExtEntitySubscribers;
@@ -51,6 +57,7 @@ import static io.spine.server.integration.given.IntegrationBusTestEnv.contextWit
 import static io.spine.server.integration.given.IntegrationBusTestEnv.projectCreated;
 import static io.spine.server.integration.given.IntegrationBusTestEnv.projectStarted;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -181,6 +188,7 @@ public class IntegrationBusShould {
 
     }
 
+    @SuppressWarnings("unused")     // variables declared for readability.
     @Test
     public void dispatch_events_from_one_BC_to_two_BCs_with_different_needs() {
         final LocalTransportFactory transportFactory = LocalTransportFactory.newInstance();
@@ -326,5 +334,27 @@ public class IntegrationBusShould {
         assertNull(ProjectRejectionsExtSubscriber.getExternalRejection());
         assertNull(ProjectWizard.getExternalRejection());
         assertNull(ProjectCountAggregate.getExternalRejection());
+    }
+
+    @Test
+    public void emit_unsupported_external_message_exception_if_message_type_is_unknown() {
+        final LocalTransportFactory transportFactory = LocalTransportFactory.newInstance();
+        final BoundedContext boundedContext = contextWithTransport(transportFactory);
+
+        final Event event = projectCreated();
+        final BoundedContextId boundedContextId = BoundedContext.newId("External context ID");
+        final ExternalMessage externalMessage = ExternalMessages.of(event,
+                                                                    boundedContextId);
+        final MemoizingObserver<Ack> observer = StreamObservers.memoizingObserver();
+        boundedContext.getIntegrationBus()
+                      .post(externalMessage, observer);
+        final Error error = observer.firstResponse()
+                                    .getStatus()
+                                    .getError();
+        assertFalse(Validate.isDefault(error));
+        assertEquals(ExternalMessageValidationError.getDescriptor()
+                                                   .getFullName(),
+                     error.getType());
+        assertTrue(UNSUPPORTED_EXTERNAL_MESSAGE.getNumber() == error.getCode());
     }
 }

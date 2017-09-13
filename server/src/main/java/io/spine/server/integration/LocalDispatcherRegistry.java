@@ -20,7 +20,6 @@
 package io.spine.server.integration;
 
 import io.spine.server.bus.DispatcherRegistry;
-import io.spine.type.MessageClass;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -29,7 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * to handle external messages.
  */
 class LocalDispatcherRegistry
-        extends DispatcherRegistry<MessageClass, ExternalMessageDispatcher<?>> {
+        extends DispatcherRegistry<ExternalMessageClass, ExternalMessageDispatcher<?>> {
     @Override
     protected void checkDispatcher(ExternalMessageDispatcher dispatcher)
             throws IllegalArgumentException {

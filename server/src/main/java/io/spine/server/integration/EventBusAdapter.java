@@ -19,21 +19,23 @@
  */
 package io.spine.server.integration;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.core.BoundedContextId;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
-import io.spine.core.ExternalMessageEnvelope;
-import io.spine.core.Rejection;
+import io.spine.core.Events;
+import io.spine.protobuf.AnyPacker;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.core.Rejections.isRejection;
 
 /**
+ * * An adapter for {@link EventBus} to use it along with {@link IntegrationBus}.
+ *
  * @author Alex Tymchenko
  */
 class EventBusAdapter extends BusAdapter<EventEnvelope, EventDispatcher<?>> {
@@ -49,15 +51,18 @@ class EventBusAdapter extends BusAdapter<EventEnvelope, EventDispatcher<?>> {
     }
 
     @Override
-    ExternalMessageEnvelope toExternalEnvelope(Message message) {
-        final Event event = (Event) message;
-        final ExternalMessageEnvelope result = ExternalMessageEnvelope.of(event);
+    ExternalMessageEnvelope toExternalEnvelope(ExternalMessage message) {
+        final Message unpacked = AnyPacker.unpack(message.getOriginalMessage());
+        final Event event = (Event) unpacked;
+        final ExternalMessageEnvelope result =
+                ExternalMessageEnvelope.of(message, Events.getMessage(event));
         return result;
     }
 
     @Override
-    ExternalMessageEnvelope markExternal(Message message) {
-        final Event event = (Event) message;
+    ExternalMessageEnvelope markExternal(ExternalMessage externalMsg) {
+        final Any packedEvent = externalMsg.getOriginalMessage();
+        final Event event = AnyPacker.unpack(packedEvent);
         final Event.Builder eventBuilder = event.toBuilder();
         final EventContext modifiedContext = eventBuilder.getContext()
                                                          .toBuilder()
@@ -66,12 +71,14 @@ class EventBusAdapter extends BusAdapter<EventEnvelope, EventDispatcher<?>> {
 
         final Event marked = eventBuilder.setContext(modifiedContext)
                                          .build();
-        return toExternalEnvelope(marked);
+        final ExternalMessage result = ExternalMessages.of(marked,
+                                                           externalMsg.getBoundedContextId());
+        return ExternalMessageEnvelope.of(result, Events.getMessage(event));
     }
 
     @Override
     boolean accepts(Class<? extends Message> messageClass) {
-        return Rejection.class != messageClass && !isRejection(checkNotNull(messageClass));
+        return Event.class == messageClass;
     }
 
     @Override

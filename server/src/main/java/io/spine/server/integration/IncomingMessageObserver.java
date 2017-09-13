@@ -23,7 +23,6 @@ import com.google.protobuf.Message;
 import io.spine.core.Ack;
 import io.spine.core.BoundedContextId;
 import io.spine.grpc.StreamObservers;
-import io.spine.protobuf.AnyPacker;
 
 /**
  * An observer of the incoming external messages of the specified message class.
@@ -44,7 +43,6 @@ class IncomingMessageObserver extends ChannelObserver {
 
     @Override
     protected void handle(ExternalMessage message) {
-        final Message unpackedMessage = AnyPacker.unpack(message.getOriginalMessage());
-        integrationBus.post(unpackedMessage, StreamObservers.<Ack>noOpObserver());
+        integrationBus.post(message, StreamObservers.<Ack>noOpObserver());
     }
 }

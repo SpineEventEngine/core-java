@@ -28,21 +28,21 @@ import io.spine.annotation.Internal;
 import io.spine.annotation.SPI;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
-import io.spine.core.ExternalMessageEnvelope;
 import io.spine.server.BoundedContext;
 import io.spine.server.entity.EntityStorageConverter;
 import io.spine.server.entity.EventDispatchingRepository;
 import io.spine.server.event.EventFilter;
 import io.spine.server.event.EventStore;
 import io.spine.server.event.EventStreamQuery;
+import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
+import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.model.Model;
 import io.spine.server.route.EventProducers;
 import io.spine.server.route.EventRouting;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
-import io.spine.type.MessageClass;
 import io.spine.type.TypeName;
 
 import javax.annotation.Nullable;
@@ -247,11 +247,9 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     private class ProjectionExternalEventDispatcher extends AbstractExternalEventDispatcher {
 
         @Override
-        public Set<MessageClass> getMessageClasses() {
+        public Set<ExternalMessageClass> getMessageClasses() {
             final Set<EventClass> eventClasses = projectionClass().getExternalEventSubscriptions();
-            final ImmutableSet<MessageClass> messageClasses =
-                    ImmutableSet.<MessageClass>copyOf(eventClasses);
-            return messageClasses;
+            return ExternalMessageClass.fromEventClasses(eventClasses);
         }
 
         @Override

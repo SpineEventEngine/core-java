@@ -36,7 +36,7 @@ import java.util.Set;
  * a remote channel.
  *
  * <p>The messages to subscribe are those that are required by external application components
- * at this moment; their set is determined by the {@linkplain RequestedMessageTypes
+ * at this moment; their set is determined by the {@linkplain RequestForExternalMessages
  * configuration messages}, received by this instance of {@code IntegrationBus}.
  */
 final class LocalEventSubscriber extends EventSubscriber {
@@ -64,8 +64,8 @@ final class LocalEventSubscriber extends EventSubscriber {
     public Set<String> dispatch(EventEnvelope envelope) {
         final Event event = envelope.getOuterObject();
         final ExternalMessage msg = ExternalMessages.of(event, boundedContextId);
-        final ExternalMessageClass messageClass = ExternalMessageClass.of(
-                envelope.getMessageClass());
+        final ExternalMessageClass messageClass =
+                ExternalMessageClass.of(envelope.getMessageClass());
         final TransportFactory.Publisher channel = publisherHub.get(messageClass);
         channel.publish(AnyPacker.pack(envelope.getId()), msg);
 

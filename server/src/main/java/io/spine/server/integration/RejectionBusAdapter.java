@@ -19,20 +19,23 @@
  */
 package io.spine.server.integration;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.core.BoundedContextId;
-import io.spine.core.ExternalMessageEnvelope;
 import io.spine.core.Rejection;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionContext;
 import io.spine.core.RejectionEnvelope;
+import io.spine.core.Rejections;
+import io.spine.protobuf.AnyPacker;
 import io.spine.server.rejection.RejectionBus;
 import io.spine.server.rejection.RejectionDispatcher;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.core.Rejections.isRejection;
 
 /**
+ * An adapter for {@link RejectionBus} to use it along with {@link IntegrationBus}.
+ *
  * @author Alex Tymchenko
  */
 class RejectionBusAdapter extends BusAdapter<RejectionEnvelope, RejectionDispatcher<?>> {
@@ -48,15 +51,18 @@ class RejectionBusAdapter extends BusAdapter<RejectionEnvelope, RejectionDispatc
     }
 
     @Override
-    ExternalMessageEnvelope toExternalEnvelope(Message message) {
-        final Rejection rejection = (Rejection) message;
-        final ExternalMessageEnvelope result = ExternalMessageEnvelope.of(rejection);
+    ExternalMessageEnvelope toExternalEnvelope(ExternalMessage message) {
+        final Any packedRejection = message.getOriginalMessage();
+        final Rejection rejection = AnyPacker.unpack(packedRejection);
+        final ExternalMessageEnvelope result =
+                ExternalMessageEnvelope.of(message, Rejections.getMessage(rejection));
         return result;
     }
 
     @Override
-    ExternalMessageEnvelope markExternal(Message message) {
-        final Rejection rejection = (Rejection) message;
+    ExternalMessageEnvelope markExternal(ExternalMessage externalMsg) {
+        final Any packedEvent = externalMsg.getOriginalMessage();
+        final Rejection rejection = AnyPacker.unpack(packedEvent);
         final Rejection.Builder rejectionBuilder = rejection.toBuilder();
         final RejectionContext modifiedContext = rejectionBuilder.getContext()
                                                                  .toBuilder()
@@ -65,12 +71,14 @@ class RejectionBusAdapter extends BusAdapter<RejectionEnvelope, RejectionDispatc
 
         final Rejection marked = rejectionBuilder.setContext(modifiedContext)
                                                  .build();
-        return toExternalEnvelope(marked);
+        final ExternalMessage result = ExternalMessages.of(marked,
+                                                           externalMsg.getBoundedContextId());
+        return ExternalMessageEnvelope.of(result, Rejections.getMessage(rejection));
     }
 
     @Override
     boolean accepts(Class<? extends Message> messageClass) {
-        return Rejection.class == messageClass || isRejection(checkNotNull(messageClass));
+        return Rejection.class == messageClass;
     }
 
     @Override

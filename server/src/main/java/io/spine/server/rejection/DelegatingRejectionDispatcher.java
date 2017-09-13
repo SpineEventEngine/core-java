@@ -22,13 +22,14 @@ package io.spine.server.rejection;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Supplier;
-import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
-import io.spine.core.ExternalMessageEnvelope;
 import io.spine.core.Rejection;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
+import io.spine.server.integration.ExternalMessage;
+import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
+import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.string.Stringifiers;
 import io.spine.type.MessageClass;
 import io.spine.util.Logging;
@@ -37,6 +38,7 @@ import org.slf4j.Logger;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.protobuf.AnyPacker.unpack;
 import static java.lang.String.format;
 
 /**
@@ -105,13 +107,15 @@ public final class DelegatingRejectionDispatcher<I> implements RejectionDispatch
     public ExternalMessageDispatcher<I> getExternalDispatcher() {
         return new ExternalMessageDispatcher<I>() {
             @Override
-            public Set<MessageClass> getMessageClasses() {
-                return ImmutableSet.<MessageClass>copyOf(delegate.getExternalRejectionClasses());
+            public Set<ExternalMessageClass> getMessageClasses() {
+                final Set<RejectionClass> rejectionClasses = delegate.getExternalRejectionClasses();
+                return ExternalMessageClass.fromRejectionClasses(rejectionClasses);
             }
 
             @Override
             public Set<I> dispatch(ExternalMessageEnvelope envelope) {
-                final Rejection rejection = (Rejection) envelope.getOuterObject();
+                final ExternalMessage externalMessage = envelope.getOuterObject();
+                final Rejection rejection = unpack(externalMessage.getOriginalMessage());
                 final Set<I> ids = delegate.dispatchRejection(RejectionEnvelope.of(rejection));
                 return ids;
             }

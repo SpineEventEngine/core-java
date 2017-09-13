@@ -19,18 +19,33 @@
  */
 package io.spine.server.integration;
 
-import com.google.common.base.Optional;
-import io.spine.core.MessageInvalid;
-import io.spine.server.bus.EnvelopeValidator;
+import com.google.common.testing.NullPointerTester;
+import io.spine.core.BoundedContextId;
+import io.spine.core.Event;
+import io.spine.core.Rejection;
+import org.junit.Test;
+
+import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;
+import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
- * A validator of the incoming external messages to use in {@code IntegrationBus}.
+ * @author Alex Tymchenko
  */
-enum IncomingMessageValidator implements EnvelopeValidator<ExternalMessageEnvelope> {
-    INSTANCE;
+public class ExternalMessagesShould {
 
-    @Override
-    public Optional<MessageInvalid> validate(ExternalMessageEnvelope envelope) {
-        return Optional.absent();
+    @Test
+    public void have_private_constructor() {
+        assertHasPrivateParameterlessCtor(ExternalMessages.class);
+    }
+
+    @Test
+    public void pass_the_null_tolerance_check() {
+        new NullPointerTester()
+                .setDefault(BoundedContextId.class, BoundedContextId.getDefaultInstance())
+                .setDefault(Event.class, Event.getDefaultInstance())
+                .setDefault(Rejection.class, Rejection.getDefaultInstance())
+                .setDefault(RequestForExternalMessages.class,
+                            RequestForExternalMessages.getDefaultInstance())
+                .testStaticMethods(ExternalMessages.class, PACKAGE);
     }
 }

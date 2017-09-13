@@ -42,6 +42,7 @@ public class UnsupportedExternalMessageException
     private final GeneratedMessageV3 externalMessage;
 
     public UnsupportedExternalMessageException(Message externalMessage) {
+        super();
         if (externalMessage instanceof GeneratedMessageV3) {
             this.externalMessage = (GeneratedMessageV3) externalMessage;
         } else {

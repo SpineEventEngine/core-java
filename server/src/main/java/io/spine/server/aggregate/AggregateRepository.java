@@ -37,6 +37,7 @@ import io.spine.server.entity.Repository;
 import io.spine.server.event.DelegatingEventDispatcher;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcherDelegate;
+import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.model.Model;
 import io.spine.server.rejection.DelegatingRejectionDispatcher;
@@ -49,7 +50,6 @@ import io.spine.server.route.RejectionRouting;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
-import io.spine.type.MessageClass;
 
 import javax.annotation.CheckReturnValue;
 import java.util.List;
@@ -131,7 +131,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
         final ExternalMessageDispatcher<I> extEventDispatcher;
         extEventDispatcher = eventDispatcher.getExternalDispatcher();
-        final Set<MessageClass> extEventClasses = extEventDispatcher.getMessageClasses();
+        final Set<ExternalMessageClass> extEventClasses = extEventDispatcher.getMessageClasses();
 
         final DelegatingRejectionDispatcher<I> rejectionDispatcher;
         rejectionDispatcher = DelegatingRejectionDispatcher.of(this);
@@ -139,7 +139,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
         final ExternalMessageDispatcher<I> extRejectionDispatcher;
         extRejectionDispatcher = rejectionDispatcher.getExternalDispatcher();
-        final Set<MessageClass> extRejectionClasses = extRejectionDispatcher.getMessageClasses();
+        final Set<ExternalMessageClass> extRejectionClasses =
+                extRejectionDispatcher.getMessageClasses();
 
         if (commandClasses.isEmpty() && eventClasses.isEmpty() && rejectionClasses.isEmpty()
                 && extEventClasses.isEmpty() && extRejectionClasses.isEmpty()) {
@@ -158,7 +159,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     private void registerExtMessageDispatcher(BoundedContext boundedContext,
                                               ExternalMessageDispatcher<I> extEventDispatcher,
-                                              Set<MessageClass> extEventClasses) {
+                                              Set<ExternalMessageClass> extEventClasses) {
         if (!extEventClasses.isEmpty()) {
             boundedContext.getIntegrationBus()
                           .register(extEventDispatcher);

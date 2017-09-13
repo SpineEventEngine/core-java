@@ -21,7 +21,9 @@
 package io.spine.server.event;
 
 import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
+import com.google.protobuf.StringValue;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.React;
@@ -149,6 +151,8 @@ public final class EventReactorMethod extends HandlerMethod<EventContext> {
             if (Iterable.class.isAssignableFrom(returnType)) {
                 return;
             }
+
+
 
             // The returned value must not be of the same type as the passed message param.
             final Class<?>[] paramTypes = method.getParameterTypes();

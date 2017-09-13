@@ -21,6 +21,7 @@ package io.spine.server.integration;
 
 import com.google.common.base.Function;
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Message;
 import io.spine.core.BoundedContextId;
@@ -31,8 +32,6 @@ import java.util.Collection;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.ImmutableSet.copyOf;
-import static com.google.common.collect.Sets.newHashSet;
 
 /**
  * An observer, which reacts to the configuration update messages sent by
@@ -47,46 +46,46 @@ class ConfigurationChangeObserver extends ChannelObserver {
 
     /**
      * Current set of message type URLs, requested by other parties via sending the
-     * {@linkplain RequestedMessageTypes configuration messages}, mapped to IDs of their origin
+     * {@linkplain RequestForExternalMessages configuration messages}, mapped to IDs of their origin
      * bounded contexts.
      */
-    private final Multimap<String, BoundedContextId> requestedTypes = HashMultimap.create();
+    private final Multimap<ExternalMessageType, BoundedContextId> requestedTypes =
+            HashMultimap.create();
 
     ConfigurationChangeObserver(BoundedContextId boundedContextId,
                                 Function<Class<? extends Message>,
                                         BusAdapter<?, ?>> adapterByClass) {
-        super(boundedContextId, RequestedMessageTypes.class);
+        super(boundedContextId, RequestForExternalMessages.class);
         this.boundedContextId = boundedContextId;
         this.adapterByClass = adapterByClass;
     }
 
     @Override
     public void handle(ExternalMessage value) {
-        final RequestedMessageTypes message = AnyPacker.unpack(value.getOriginalMessage());
-        final Set<String> newTypeUrls = newHashSet(message.getTypeUrlsList());
+        final RequestForExternalMessages request = AnyPacker.unpack(value.getOriginalMessage());
 
         final BoundedContextId originBoundedContextId = value.getBoundedContextId();
-        addNewSubscriptions(newTypeUrls, originBoundedContextId);
-        clearStaleSubscriptions(newTypeUrls, originBoundedContextId);
+        addNewSubscriptions(request.getRequestedMessageTypesList(), originBoundedContextId);
+        clearStaleSubscriptions(request.getRequestedMessageTypesList(), originBoundedContextId);
     }
 
-    private void addNewSubscriptions(Set<String> newTypeUrls,
+    private void addNewSubscriptions(Iterable<ExternalMessageType> types,
                                      BoundedContextId originBoundedContextId) {
-        for (String newRequestedUrl : newTypeUrls) {
+        for (ExternalMessageType newType : types) {
             final Collection<BoundedContextId> contextsWithSameRequest =
-                    requestedTypes.get(newRequestedUrl);
+                    requestedTypes.get(newType);
             if (contextsWithSameRequest.isEmpty()) {
 
                 // This item has is not requested by anyone at the moment.
                 // Let's create a subscription.
 
-                final Class<Message> javaClass = asClassOfMsg(newRequestedUrl);
-                final BusAdapter<?, ?> adapter = getAdapter(javaClass);
-                adapter.register(javaClass);
-
+                final Class<Message> wrapperCls = asClassOfMsg(newType.getWrapperTypeUrl());
+                final Class<Message> messageCls = asClassOfMsg(newType.getMessageTypeUrl());
+                final BusAdapter<?, ?> adapter = getAdapter(wrapperCls);
+                adapter.register(messageCls);
             }
 
-            requestedTypes.put(newRequestedUrl, originBoundedContextId);
+            requestedTypes.put(newType, originBoundedContextId);
         }
     }
 
@@ -95,12 +94,12 @@ class ConfigurationChangeObserver extends ChannelObserver {
         return checkNotNull(adapter);
     }
 
-    private void clearStaleSubscriptions(Set<String> newTypeUrls,
+    private void clearStaleSubscriptions(Collection<ExternalMessageType> types,
                                          BoundedContextId originBoundedContextId) {
 
-        final Set<String> toRemove = findToRemove(newTypeUrls, originBoundedContextId);
+        final Set<ExternalMessageType> toRemove = findStale(types, originBoundedContextId);
 
-        for (String itemForRemoval : toRemove) {
+        for (ExternalMessageType itemForRemoval : toRemove) {
             final boolean wereNonEmpty = !requestedTypes.get(itemForRemoval)
                                                         .isEmpty();
             requestedTypes.remove(itemForRemoval, originBoundedContextId);
@@ -109,22 +108,24 @@ class ConfigurationChangeObserver extends ChannelObserver {
 
             if (wereNonEmpty && emptyNow) {
                 // It's now the time to remove the local bus subscription.
-                final Class<Message> javaClass = asClassOfMsg(itemForRemoval);
-                final BusAdapter<?, ?> adapter = getAdapter(javaClass);
-                adapter.unregister(javaClass);
+                final Class<Message> wrapperCls = asClassOfMsg(itemForRemoval.getWrapperTypeUrl());
+                final Class<Message> messageCls = asClassOfMsg(itemForRemoval.getMessageTypeUrl());
+                final BusAdapter<?, ?> adapter = getAdapter(wrapperCls);
+                adapter.unregister(messageCls);
             }
         }
     }
 
-    private Set<String> findToRemove(Set<String> newTypeUrls,
-                                     BoundedContextId originBoundedContextId) {
-        final Set<String> result = newHashSet();
+    private Set<ExternalMessageType> findStale(Collection<ExternalMessageType> types,
+                                               BoundedContextId originBoundedContextId) {
+        final ImmutableSet.Builder<ExternalMessageType> result = ImmutableSet.builder();
 
-        for (String previouslyRequestedType : requestedTypes.keySet()) {
+        for (ExternalMessageType previouslyRequestedType : requestedTypes.keySet()) {
             final Collection<BoundedContextId> contextsThatRequested =
                     requestedTypes.get(previouslyRequestedType);
+
             if (contextsThatRequested.contains(originBoundedContextId) &&
-                    !newTypeUrls.contains(previouslyRequestedType)) {
+                    !types.contains(previouslyRequestedType)) {
 
                 // The `previouslyRequestedType` item is no longer requested
                 // by the bounded context with `originBoundedContextId` ID.
@@ -132,7 +133,7 @@ class ConfigurationChangeObserver extends ChannelObserver {
                 result.add(previouslyRequestedType);
             }
         }
-        return copyOf(result);
+        return result.build();
     }
 
     @Override

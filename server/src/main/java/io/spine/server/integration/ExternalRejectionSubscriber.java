@@ -20,12 +20,11 @@
 package io.spine.server.integration;
 
 import com.google.common.base.Supplier;
-import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
-import io.spine.core.ExternalMessageEnvelope;
 import io.spine.core.Rejection;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
+import io.spine.protobuf.AnyPacker;
 import io.spine.server.model.Model;
 import io.spine.server.rejection.RejectionSubscriber;
 import io.spine.server.rejection.RejectionSubscriberClass;
@@ -64,24 +63,26 @@ class ExternalRejectionSubscriber implements ExternalMessageDispatcher<String> {
     }
 
     @Override
-    public Set<MessageClass> getMessageClasses() {
+    public Set<ExternalMessageClass> getMessageClasses() {
         final RejectionSubscriberClass<?> subscriberClass =
                 Model.getInstance()
                      .asRejectionSubscriber(delegate.getClass());
         final Set<RejectionClass> extSubscriptions =
                 subscriberClass.getExternalRejectionSubscriptions();
-        return ImmutableSet.<MessageClass>copyOf(extSubscriptions);
+        return ExternalMessageClass.fromRejectionClasses(extSubscriptions);
     }
 
     @Override
     public Set<String> dispatch(ExternalMessageEnvelope envelope) {
-        final Message outerObject = envelope.getOuterObject();
-        if (!(outerObject instanceof Rejection)) {
+
+        final ExternalMessage externalMessage = envelope.getOuterObject();
+        final Message unpacked = AnyPacker.unpack(externalMessage.getOriginalMessage());
+        if (!(unpacked instanceof Rejection)) {
             throw newIllegalStateException("Unexpected object %s while dispatching the external " +
                                                    "rejection to the rejection subscriber.",
-                                           Stringifiers.toString(outerObject));
+                                           Stringifiers.toString(unpacked));
         }
-        final Rejection rejection = (Rejection) outerObject;
+        final Rejection rejection = (Rejection) unpacked;
         checkArgument(isExternal(rejection.getContext()),
                       "External rejection expected, but got %s",
                       Stringifiers.toString(rejection));

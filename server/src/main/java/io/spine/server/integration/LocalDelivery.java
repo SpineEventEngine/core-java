@@ -19,17 +19,15 @@
  */
 package io.spine.server.integration;
 
-import io.spine.core.ExternalMessageEnvelope;
 import io.spine.server.delivery.MulticastDelivery;
-import io.spine.type.MessageClass;
 
 /**
  * Delivers the messages from external sources to the local subscribers
  * of {@code external} messages in this bounded context.
  */
 class LocalDelivery extends MulticastDelivery<ExternalMessageEnvelope,
-        MessageClass,
-        ExternalMessageDispatcher<?>> {
+                                              ExternalMessageClass,
+                                              ExternalMessageDispatcher<?>> {
 
     @Override
     protected boolean shouldPostponeDelivery(ExternalMessageEnvelope deliverable,

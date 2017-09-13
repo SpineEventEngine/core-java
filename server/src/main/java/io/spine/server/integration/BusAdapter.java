@@ -22,7 +22,6 @@ package io.spine.server.integration;
 import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import io.spine.core.BoundedContextId;
-import io.spine.core.ExternalMessageEnvelope;
 import io.spine.core.MessageEnvelope;
 import io.spine.server.bus.Bus;
 import io.spine.server.bus.MessageDispatcher;
@@ -66,12 +65,13 @@ abstract class BusAdapter<E extends MessageEnvelope<?, ?, ?>,
     }
 
     /**
-     * Wraps a given {@code Message} into an {@link ExternalMessageEnvelope}.
+     * Wraps a given {@code ExternalMessage} into an {@link ExternalMessageEnvelope}
+     * to allow its processing inside of the {@code IntegrationBus}.
      *
-     * @param message a message to wrap
+     * @param message an external message to wrap
      * @return an {@code ExternalMessageEnvelope}, containing the given message
      */
-    abstract ExternalMessageEnvelope toExternalEnvelope(Message message);
+    abstract ExternalMessageEnvelope toExternalEnvelope(ExternalMessage message);
 
     /**
      * Wraps the given message into an {@link ExternalMessageEnvelope}, marking it as the one
@@ -80,7 +80,7 @@ abstract class BusAdapter<E extends MessageEnvelope<?, ?, ?>,
      * @param message the message to wrap and mark external
      * @return an {@code ExternalMessageEnvelope}, containing the given message marked external
      */
-    abstract ExternalMessageEnvelope markExternal(Message message);
+    abstract ExternalMessageEnvelope markExternal(ExternalMessage message);
 
     /**
      * Tells whether a message of a given message class is eligible for processing with this

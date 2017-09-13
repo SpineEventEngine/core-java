@@ -23,16 +23,19 @@ package io.spine.server.entity;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
-import io.spine.core.ExternalMessageEnvelope;
 import io.spine.server.BoundedContext;
 import io.spine.server.event.EventDispatcher;
+import io.spine.server.integration.ExternalMessage;
+import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
+import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.route.EventRoute;
 import io.spine.server.route.EventRouting;
-import io.spine.type.MessageClass;
 
 import java.util.Collections;
 import java.util.Set;
+
+import static io.spine.protobuf.AnyPacker.unpack;
 
 /**
  * Abstract base for repositories that deliver events to entities they manage.
@@ -125,7 +128,7 @@ public abstract class EventDispatchingRepository<I,
     protected ExternalMessageDispatcher<I> getExternalEventDispatcher() {
         return new AbstractExternalEventDispatcher() {
             @Override
-            public Set<MessageClass> getMessageClasses() {
+            public Set<ExternalMessageClass> getMessageClasses() {
                 return Collections.emptySet();
             }
 
@@ -145,7 +148,8 @@ public abstract class EventDispatchingRepository<I,
 
         @Override
         public Set<I> dispatch(ExternalMessageEnvelope envelope) {
-            final Event event = (Event) envelope.getOuterObject();
+            final ExternalMessage externalMessage = envelope.getOuterObject();
+            final Event event = unpack(externalMessage.getOriginalMessage());
             final EventEnvelope eventEnvelope = EventEnvelope.of(event);
             return EventDispatchingRepository.this.dispatch(eventEnvelope);
         }

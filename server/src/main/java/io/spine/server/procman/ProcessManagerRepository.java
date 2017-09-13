@@ -20,7 +20,6 @@
 
 package io.spine.server.procman;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.annotation.SPI;
 import io.spine.core.CommandClass;
@@ -28,7 +27,6 @@ import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
-import io.spine.core.ExternalMessageEnvelope;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
 import io.spine.server.BoundedContext;
@@ -38,7 +36,9 @@ import io.spine.server.commandbus.CommandDispatcherDelegate;
 import io.spine.server.commandbus.DelegatingCommandDispatcher;
 import io.spine.server.entity.EventDispatchingRepository;
 import io.spine.server.event.EventBus;
+import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
+import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.model.Model;
 import io.spine.server.rejection.DelegatingRejectionDispatcher;
 import io.spine.server.rejection.RejectionDispatcherDelegate;
@@ -47,7 +47,6 @@ import io.spine.server.route.EventProducers;
 import io.spine.server.route.EventRouting;
 import io.spine.server.route.RejectionProducers;
 import io.spine.server.route.RejectionRouting;
-import io.spine.type.MessageClass;
 
 import javax.annotation.CheckReturnValue;
 import java.util.Set;
@@ -357,13 +356,11 @@ public abstract class ProcessManagerRepository<I,
     private class PmExternalEventDispatcher extends AbstractExternalEventDispatcher {
 
         @Override
-        public Set<MessageClass> getMessageClasses() {
+        public Set<ExternalMessageClass> getMessageClasses() {
             final ProcessManagerClass<?> pmClass = Model.getInstance()
                                                         .asProcessManagerClass(getEntityClass());
             final Set<EventClass> eventClasses = pmClass.getExternalEventReactions();
-            final ImmutableSet<MessageClass> messageClasses =
-                    ImmutableSet.<MessageClass>copyOf(eventClasses);
-            return messageClasses;
+            return ExternalMessageClass.fromEventClasses(eventClasses);
         }
 
         @Override

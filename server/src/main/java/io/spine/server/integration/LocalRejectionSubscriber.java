@@ -36,7 +36,7 @@ import java.util.Set;
  * a remote channel.
  *
  * <p>The messages to subscribe are those that are required by external application components
- * at this moment; their set is determined by the {@linkplain RequestedMessageTypes
+ * at this moment; their set is determined by the {@linkplain RequestForExternalMessages
  * configuration messages}, received by this instance of {@code IntegrationBus}.
  */
 final class LocalRejectionSubscriber extends RejectionSubscriber {
@@ -63,10 +63,11 @@ final class LocalRejectionSubscriber extends RejectionSubscriber {
     public Set<String> dispatch(RejectionEnvelope envelope) {
         final Rejection rejection = envelope.getOuterObject();
         final ExternalMessage message = ExternalMessages.of(rejection, boundedContextId);
-        final ExternalMessageClass messageClass = ExternalMessageClass.of(
-                envelope.getMessageClass());
+        final ExternalMessageClass messageClass =
+                ExternalMessageClass.of(envelope.getMessageClass());
         final TransportFactory.Publisher channel = publisherHub.get(messageClass);
         channel.publish(AnyPacker.pack(envelope.getId()), message);
+
         return ImmutableSet.of(channel.toString());
     }
 

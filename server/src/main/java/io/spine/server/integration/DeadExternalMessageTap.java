@@ -20,7 +20,6 @@
 package io.spine.server.integration;
 
 import com.google.protobuf.Message;
-import io.spine.core.ExternalMessageEnvelope;
 import io.spine.server.bus.DeadMessageTap;
 
 /**

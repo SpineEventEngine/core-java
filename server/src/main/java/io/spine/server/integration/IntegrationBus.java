@@ -26,7 +26,10 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.core.Ack;
 import io.spine.core.BoundedContextId;
-import io.spine.core.ExternalMessageEnvelope;
+import io.spine.core.Event;
+import io.spine.core.Rejection;
+import io.spine.core.Rejections;
+import io.spine.protobuf.AnyPacker;
 import io.spine.server.bus.Bus;
 import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.DeadMessageTap;
@@ -41,7 +44,6 @@ import io.spine.server.integration.local.LocalTransportFactory;
 import io.spine.server.rejection.RejectionBus;
 import io.spine.server.rejection.RejectionSubscriber;
 import io.spine.type.KnownTypes;
-import io.spine.type.MessageClass;
 import io.spine.type.TypeUrl;
 
 import javax.annotation.Nullable;
@@ -54,7 +56,6 @@ import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.Identifier.newUuid;
 import static io.spine.Identifier.pack;
 import static io.spine.server.bus.Buses.acknowledge;
-import static io.spine.server.integration.ExternalMessages.asIntegrationMessageClasses;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static io.spine.validate.Validate.checkNotDefault;
 import static java.lang.String.format;
@@ -64,9 +65,9 @@ import static java.lang.String.format;
  *
  * @author Alex Tymchenko
  */
-public class IntegrationBus extends MulticastBus<Message,
+public class IntegrationBus extends MulticastBus<ExternalMessage,
                                                  ExternalMessageEnvelope,
-                                                 MessageClass,
+                                                 ExternalMessageClass,
                                                  ExternalMessageDispatcher<?>> {
 
     private final Iterable<BusAdapter<?, ?>> localBusAdapters;
@@ -83,7 +84,7 @@ public class IntegrationBus extends MulticastBus<Message,
         this.localBusAdapters = createAdapters(builder, publisherHub);
 
         /*
-         * React upon {@code RequestedMessageTypes} message arrival.
+         * Reacts upon {@code RequestedMessageTypes} message arrival.
          */
         final ConfigurationChangeObserver observer = new ConfigurationChangeObserver(
                 boundedContextId,
@@ -94,7 +95,7 @@ public class IntegrationBus extends MulticastBus<Message,
                         return adapterFor(message);
                     }
                 });
-        subscriberHub.get(ExternalMessageClass.of(RequestedMessageTypes.class))
+        subscriberHub.get(ExternalMessageClass.of(RequestForExternalMessages.class))
                      .addObserver(observer);
     }
 
@@ -135,8 +136,8 @@ public class IntegrationBus extends MulticastBus<Message,
     }
 
     @Override
-    protected ExternalMessageEnvelope toEnvelope(Message message) {
-        final BusAdapter<?, ?> adapter = adapterFor(message.getClass());
+    protected ExternalMessageEnvelope toEnvelope(ExternalMessage message) {
+        final BusAdapter<?, ?> adapter = adapterFor(message);
         final ExternalMessageEnvelope result = adapter.toExternalEnvelope(message);
         return result;
     }
@@ -159,13 +160,18 @@ public class IntegrationBus extends MulticastBus<Message,
     }
 
     private  ExternalMessageEnvelope markExternal(ExternalMessageEnvelope envelope) {
-        final Message originalMsg = envelope.getOuterObject();
-        final BusAdapter<?, ?> adapter = adapterFor(originalMsg.getClass());
-        return adapter.markExternal(originalMsg);
+        final ExternalMessage externalMessage = envelope.getOuterObject();
+        final BusAdapter<?, ?> adapter = adapterFor(externalMessage);
+        return adapter.markExternal(externalMessage);
+    }
+
+    private BusAdapter<?, ?> adapterFor(ExternalMessage message) {
+        final Message unpackedOriginal = AnyPacker.unpack(message.getOriginalMessage());
+        return adapterFor(unpackedOriginal.getClass());
     }
 
     @Override
-    protected void store(Iterable<Message> messages) {
+    protected void store(Iterable<ExternalMessage> messages) {
         // we don't store the incoming messages yet.
     }
 
@@ -215,26 +221,40 @@ public class IntegrationBus extends MulticastBus<Message,
     }
 
     /**
-     * Notify other parts of the application that this integration bus instance now requests
+     * Notifies other parts of the application that this integration bus instance now requests
      * for a different set of message types than previously.
+     *
+     * <p>Sends out an instance of {@linkplain RequestForExternalMessages
+     * request for external messages} for that purpose.
      *
      * @param  currentlyRequested
      *         the set of message types that are now requested by this instance of
      *         integration bus
      */
     private void notifyOfNeeds(Iterable<ExternalMessageClass> currentlyRequested) {
-
-        final RequestedMessageTypes.Builder resultBuilder = RequestedMessageTypes.newBuilder();
+        final RequestForExternalMessages.Builder resultBuilder =
+                RequestForExternalMessages.newBuilder();
         for (ExternalMessageClass messageClass : currentlyRequested) {
-            final TypeUrl typeUrl = KnownTypes.getTypeUrl(messageClass.getClassName());
-            resultBuilder.addTypeUrls(typeUrl.value());
+            final ExternalMessageType type = toExternalMessageType(messageClass);
+            resultBuilder.addRequestedMessageTypes(type);
         }
-        final RequestedMessageTypes result = resultBuilder.build();
+        final RequestForExternalMessages result = resultBuilder.build();
         final ExternalMessage externalMessage = ExternalMessages.of(result,
                                                                     boundedContextId);
         final ExternalMessageClass channelId = ExternalMessageClass.of(result.getClass());
         publisherHub.get(channelId)
                     .publish(pack(newUuid()), externalMessage);
+    }
+
+    private static ExternalMessageType toExternalMessageType(ExternalMessageClass messageClass) {
+        final TypeUrl typeUrl = KnownTypes.getTypeUrl(messageClass.getClassName());
+        final boolean isRejection = Rejections.isRejection(messageClass.value());
+        final String wrapperTypeUrl = isRejection ? TypeUrl.of(Rejection.class).value()
+                                                  : TypeUrl.of(Event.class).value();
+        return ExternalMessageType.newBuilder()
+                                                            .setMessageTypeUrl(typeUrl.value())
+                                                            .setWrapperTypeUrl(wrapperTypeUrl)
+                                                            .build();
     }
 
     /**
@@ -272,10 +292,8 @@ public class IntegrationBus extends MulticastBus<Message,
     }
 
     private void subscribeToIncoming(ExternalMessageDispatcher<?> dispatcher) {
-        final Set<MessageClass> classes = dispatcher.getMessageClasses();
-
         final IntegrationBus integrationBus = this;
-        final Iterable<ExternalMessageClass> transformed = asIntegrationMessageClasses(classes);
+        final Iterable<ExternalMessageClass> transformed = dispatcher.getMessageClasses();
         for (final ExternalMessageClass imClass : transformed) {
             final Subscriber subscriber = subscriberHub.get(imClass);
             subscriber.addObserver(new IncomingMessageObserver(boundedContextId, 
@@ -285,10 +303,8 @@ public class IntegrationBus extends MulticastBus<Message,
     }
     
     private void unsubscribeFromIncoming(ExternalMessageDispatcher<?> dispatcher) {
-        final Set<MessageClass> classes = dispatcher.getMessageClasses();
-
         final IntegrationBus integrationBus = this;
-        final Iterable<ExternalMessageClass> transformed = asIntegrationMessageClasses(classes);
+        final Iterable<ExternalMessageClass> transformed = dispatcher.getMessageClasses();
         for (final ExternalMessageClass imClass : transformed) {
             final Subscriber subscriber = subscriberHub.get(imClass);
             subscriber.removeObserver(new IncomingMessageObserver(boundedContextId,
@@ -316,7 +332,7 @@ public class IntegrationBus extends MulticastBus<Message,
      * A {@code Builder} for {@code IntegrationBus} instances.
      */
     public static class Builder
-            extends Bus.AbstractBuilder<ExternalMessageEnvelope, Message, Builder> {
+            extends Bus.AbstractBuilder<ExternalMessageEnvelope, ExternalMessage, Builder> {
 
         /**
          * Buses that act inside the bounded context, e.g. {@code EventBus}, and which allow

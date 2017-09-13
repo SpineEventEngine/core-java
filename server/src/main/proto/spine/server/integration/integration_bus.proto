@@ -38,10 +38,10 @@ import "spine/core/bounded_context.proto";
 // to/from external application components, such as other bounded contexts.
 message ExternalMessage {
 
-    // An ID of the original message wrapped to `Any`.
+    // An ID of the original message wrapped to `Any` (e.g. an event ID).
     google.protobuf.Any id = 1 [(required) = true];
 
-    // An original message wrapped to `Any`.
+    // An original message wrapped to `Any` (e.g. a wrapped instance of `io.spine.core.Event`).
     google.protobuf.Any original_message = 2 [(required) = true];
 
     // Information about the environment of the user who created the original message.
@@ -51,15 +51,27 @@ message ExternalMessage {
     spine.core.BoundedContextId bounded_context_id = 4 [(required) = true];
 }
 
-// A document message, describing the `Message` type URLs,
+// A document message, describing types of messages,
 // requested by some part of the system.
 //
 // One of the typical scenarios is a notification shoout out from the current bounded context
 // to other bounded contexts of the application about its `external` subscription needs.
-message RequestedMessageTypes {
+message RequestForExternalMessages {
 
-    repeated string type_urls = 1;
+    // Multiple types may be requested at a time.
+    repeated ExternalMessageType requested_message_types = 1;
 }
+
+// The type of message requested by some part of the system.
+message ExternalMessageType {
+
+    // Type URL of the message (e.g. `io.spine.examples.TaskCreated`).
+    string message_type_url = 1 [(required) = true];
+
+    // Type URL of the wrapper, that is used to hold the message (e.g. `io.spine.core.Event`).
+    string wrapper_type_url = 2 [(required) = true];
+}
+
 
 enum ExternalMessageValidationError {
 

@@ -22,13 +22,14 @@ package io.spine.server.event;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Supplier;
-import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
-import io.spine.core.ExternalMessageEnvelope;
+import io.spine.server.integration.ExternalMessage;
+import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
+import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.string.Stringifiers;
 import io.spine.type.MessageClass;
 import io.spine.util.Logging;
@@ -37,6 +38,7 @@ import org.slf4j.Logger;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.protobuf.AnyPacker.unpack;
 import static java.lang.String.format;
 
 /**
@@ -97,13 +99,15 @@ public final class DelegatingEventDispatcher<I> implements EventDispatcher<I> {
     public ExternalMessageDispatcher<I> getExternalDispatcher() {
         return new ExternalMessageDispatcher<I>() {
             @Override
-            public Set<MessageClass> getMessageClasses() {
-                return ImmutableSet.<MessageClass>copyOf(delegate.getExternalEventClasses());
+            public Set<ExternalMessageClass> getMessageClasses() {
+                final Set<EventClass> eventClasses = delegate.getExternalEventClasses();
+                return ExternalMessageClass.fromEventClasses(eventClasses);
             }
 
             @Override
             public Set<I> dispatch(ExternalMessageEnvelope envelope) {
-                final Event event = (Event) envelope.getOuterObject();
+                final ExternalMessage externalMessage = envelope.getOuterObject();
+                final Event event = unpack(externalMessage.getOriginalMessage());
                 final Set<I> ids = delegate.dispatchEvent(EventEnvelope.of(event));
                 return ids;
             }

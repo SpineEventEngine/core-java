@@ -60,7 +60,7 @@ public interface MessageEnvelope<I extends Message, T, C extends Message> {
     C getMessageContext();
 
     /**
-     * Sets the context of the enclosed message into as the origin in the context of an event
+     * Sets the context of the enclosed message as the origin into the context of an event
      * to be build.
      *
      * @param builder event context builder into which set the event origin context
