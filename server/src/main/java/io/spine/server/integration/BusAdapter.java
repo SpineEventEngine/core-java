@@ -122,6 +122,13 @@ abstract class BusAdapter<E extends MessageEnvelope<?, ?, ?>,
         return boundedContextId;
     }
 
+    /**
+     * A builder for bus adapters.
+     *
+     * @param <B> type of the builder
+     * @param <E> type of the message envelope
+     * @param <D> type of message dispatcher
+     */
     abstract static class AbstractBuilder<B extends AbstractBuilder<B, E, D>,
                                           E extends MessageEnvelope<?, ?, ?>,
                                           D extends MessageDispatcher<?, E, ?>> {
