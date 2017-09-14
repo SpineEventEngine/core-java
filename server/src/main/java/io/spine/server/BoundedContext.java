@@ -128,8 +128,10 @@ public final class BoundedContext
      */
     public static BoundedContextId newId(String id) {
         checkNotEmptyOrBlank(id, "ID");
-
-        return BoundedContextId.newBuilder().setValue(id).build();
+        final BoundedContextId result = BoundedContextId.newBuilder()
+                                                        .setValue(id)
+                                                        .build();
+        return result;
     }
 
 
