@@ -69,11 +69,14 @@ import static java.lang.String.format;
  * In a multi-component environment messages may travel across components from one bounded context
  * to another.
  *
- * {@code IntegrationBus} is always based upon some {@linkplain TransportFactory transport},
- * that delivers the messages from and to it. The messages from external components received
- * by the {@code IntegrationBus} instance via the transport are propagated into the bounded context.
- * They are dispatched to the subscribers and reactors marked with {@code external = true}
- * on per-message-type basis.
+ * <p>{@code IntegrationBus} is always based upon some {@linkplain TransportFactory transport},
+ * that delivers the messages from and to it. For several bounded contexts to communicate,
+ * their integration buses have to share the transport. Typically that would be a single
+ * messaging broker.
+ *
+ * <p>The messages from external components received by the {@code IntegrationBus} instance
+ * via the transport are propagated into the bounded context. They are dispatched
+ * to the subscribers and reactors marked with {@code external = true} on per-message-type basis.
  *
  * {@code IntegrationBus} is also responsible for publishing the messages,
  * born within the current `BoundedContext`, to external collaborators. To do that properly,
