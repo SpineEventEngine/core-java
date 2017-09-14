@@ -25,6 +25,7 @@ import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandstore.CommandStore;
 import io.spine.server.event.EventBus;
+import io.spine.server.integration.IntegrationBus;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.test.Tests;
@@ -97,6 +98,14 @@ public class BoundedContextBuilderShould {
     }
 
     @Test
+    public void return_IntegrationBus_builder() {
+        final IntegrationBus.Builder expected = IntegrationBus.newBuilder();
+        builder.setIntegrationBus(expected);
+        assertEquals(expected, builder.getIntegrationBus()
+                                      .get());
+    }
+
+    @Test
     public void support_multitenantcy() {
         builder.setMultitenant(true);
         assertTrue(builder.isMultitenant());
@@ -154,6 +163,11 @@ public class BoundedContextBuilderShould {
         final BoundedContext boundedContext = builder.build();
         assertNotNull(boundedContext.getCommandBus());
         assertNotNull(boundedContext.getEventBus());
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void do_not_accept_null_IntegrationBus() {
+        builder.setIntegrationBus(Tests.<IntegrationBus.Builder>nullRef());
     }
 
     @Test(expected = IllegalStateException.class)
