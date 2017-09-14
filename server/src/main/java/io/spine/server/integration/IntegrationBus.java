@@ -45,6 +45,7 @@ import io.spine.server.rejection.RejectionBus;
 import io.spine.server.rejection.RejectionSubscriber;
 import io.spine.type.KnownTypes;
 import io.spine.type.TypeUrl;
+import io.spine.validate.Validate;
 
 import javax.annotation.Nullable;
 import java.util.Deque;
@@ -112,6 +113,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
         );
     }
 
+    /** Creates a new builder for this bus. */
     public static Builder newBuilder() {
         return new Builder();
     }
@@ -342,9 +344,9 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
          * <p>{@code CommandBus} does <em>not</em> allow such a dispatching, as commands cannot be
          * sent to another bounded context for a postponed handling.
          */
+
         private EventBus eventBus;
         private RejectionBus rejectionBus;
-
         private LocalDelivery delivery;
         private BoundedContextId boundedContextId;
         private TransportFactory transportFactory;
@@ -360,6 +362,13 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
 
         public Optional<RejectionBus> getRejectionBus() {
             return Optional.fromNullable(rejectionBus);
+        }
+
+        public Optional<BoundedContextId> getBoundedContextId() {
+            final BoundedContextId value = Validate.isDefault(this.boundedContextId)
+                                           ? null
+                                           : this.boundedContextId;
+            return Optional.fromNullable(value);
         }
 
         public Builder setRejectionBus(RejectionBus rejectionBus) {
