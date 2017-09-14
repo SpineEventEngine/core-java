@@ -19,13 +19,11 @@
  */
 package io.spine.core;
 
-import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.type.MessageClass;
 
 import java.util.Arrays;
-import javax.annotation.Nullable;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -36,6 +34,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alex Tymchenko
  */
 public class RejectionClass extends MessageClass {
+
+    private static final long serialVersionUID = 0L;
 
     protected RejectionClass(Class<? extends Message> value) {
         super(value);
@@ -80,16 +80,5 @@ public class RejectionClass extends MessageClass {
     @SafeVarargs
     public static Set<RejectionClass> setOf(Class<? extends Message> ...classes) {
         return setOf(Arrays.asList(classes));
-    }
-
-    public static Function<Class<? extends Message>, RejectionClass> asRejectionClass() {
-        return new Function<Class<? extends Message>, RejectionClass>() {
-            @Override
-            public RejectionClass apply(
-                    @Nullable Class<? extends Message> input) {
-                checkNotNull(input);
-                return of(input);
-            }
-        };
     }
 }

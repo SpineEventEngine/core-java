@@ -20,14 +20,12 @@
 
 package io.spine.core;
 
-import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.type.MessageClass;
 
 import java.util.Arrays;
-import javax.annotation.Nullable;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -38,6 +36,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alexander Yevsyukov
  */
 public final class EventClass extends MessageClass {
+
+    private static final long serialVersionUID = 0L;
 
     private EventClass(Class<? extends Message> value) {
         super(value);
@@ -83,16 +83,5 @@ public final class EventClass extends MessageClass {
     @SafeVarargs
     public static Set<EventClass> setOf(Class<? extends Message>... classes) {
         return setOf(Arrays.asList(classes));
-    }
-
-    public static Function<Class<? extends Message>, EventClass> asEventClass() {
-        return new Function<Class<? extends Message>, EventClass>() {
-            @Override
-            public EventClass apply(
-                    @Nullable Class<? extends Message> input) {
-                checkNotNull(input);
-                return of(input);
-            }
-        };
     }
 }
