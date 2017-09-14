@@ -40,7 +40,7 @@ public abstract class AbstractMessageEnvelope<I extends Message, T, C extends Me
 
     private final T object;
 
-    public AbstractMessageEnvelope(T object) {
+    protected AbstractMessageEnvelope(T object) {
         checkNotNull(object);
         this.object = object;
     }
