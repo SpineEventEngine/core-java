@@ -65,6 +65,53 @@ import static java.lang.String.format;
  * Dispatches {@linkplain ExternalMessage external messages} from and to the bounded context,
  * in which this bus operates.
  *
+ * <p>This bus is available as a part of single {@code BoundedContext}.
+ * In a multi-component environment messages may travel across components from one bounded context
+ * to another.
+ *
+ * {@code IntegrationBus} is always based upon some {@linkplain TransportFactory transport},
+ * that delivers the messages from and to it. The messages from external components received
+ * by the {@code IntegrationBus} instance via the transport are propagated into the bounded context.
+ * They are dispatched to the subscribers and reactors marked with {@code external = true}
+ * on per-message-type basis.
+ *
+ * {@code IntegrationBus} is also responsible for publishing the messages,
+ * born within the current `BoundedContext`, to external collaborators. To do that properly,
+ * the bus listens to a special document message called {@linkplain RequestForExternalMessages},
+ * that describes the needs of other parties.
+ *
+ * <p>An example.
+ *
+ * <p>Bounded context "Projects" has the external event handler method in the projection as follows:
+ * <pre>
+ * public class ProjectListView extends Projection<...> {
+ *
+ *      {@literal @}Subscribe(external = true)
+ *      public void on(UserDeleted event) {
+ *          // Remove the projects that belong to this user.
+ *          // ...
+ *      }
+ *
+ *      // ...
+ *  }
+ * </pre>
+ *
+ * <p>Upon a registration of the corresponding repository the  integration bus of
+ * "Projects" context sends out a {@code RequestForExternalMessages} saying that an {@code Event}
+ * of {@code UserDeleted} type is needed from other parties.
+ *
+ * <p>Let's say the second bounded context is "Users". Its integration bus will receive
+ * the {@code RequestForExternalMessages} request sent out by "Projects". To handle it properly
+ * it will create a bridge between "Users"'s event bus (which may eventually be transmitting
+ * a {@code UserDeleted} event) and an external transport.
+ *
+ * <p>Once {@code UserDeleted} is published locally in "Users" context, it will be received
+ * by this bridge (as well as other local dispatchers), and published to the external transport.
+ *
+ * <p>The integration bus of "Projects" context will receive the {@code UserDeleted}
+ * external message. The event will be dispatched to the external event handler of
+ * {@code ProjectListView} projection.
+ *
  * @author Alex Tymchenko
  */
 public class IntegrationBus extends MulticastBus<ExternalMessage,
