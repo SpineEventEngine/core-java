@@ -30,7 +30,7 @@ import io.spine.grpc.StreamObservers;
  * <p>Responsible of receiving those from the transport layer and posting those to the local
  * instance of {@code IntegrationBus}.
  */
-class IncomingMessageObserver extends ChannelObserver {
+class IncomingMessageObserver extends AbstractChannelObserver {
 
     private final IntegrationBus integrationBus;
 

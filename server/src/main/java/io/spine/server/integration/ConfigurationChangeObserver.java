@@ -39,7 +39,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alex Tymchenko
  */
-class ConfigurationChangeObserver extends ChannelObserver {
+class ConfigurationChangeObserver extends AbstractChannelObserver implements AutoCloseable {
 
     private final BoundedContextId boundedContextId;
     private final Function<Class<? extends Message>, BusAdapter<?, ?>> adapterByClass;
@@ -79,14 +79,18 @@ class ConfigurationChangeObserver extends ChannelObserver {
                 // This item has is not requested by anyone at the moment.
                 // Let's create a subscription.
 
-                final Class<Message> wrapperCls = asClassOfMsg(newType.getWrapperTypeUrl());
-                final Class<Message> messageCls = asClassOfMsg(newType.getMessageTypeUrl());
-                final BusAdapter<?, ?> adapter = getAdapter(wrapperCls);
-                adapter.register(messageCls);
+                registerInAdapter(newType);
             }
 
             requestedTypes.put(newType, originBoundedContextId);
         }
+    }
+
+    private void registerInAdapter(ExternalMessageType newType) {
+        final Class<Message> wrapperCls = asClassOfMsg(newType.getWrapperTypeUrl());
+        final Class<Message> messageCls = asClassOfMsg(newType.getMessageTypeUrl());
+        final BusAdapter<?, ?> adapter = getAdapter(wrapperCls);
+        adapter.register(messageCls);
     }
 
     private BusAdapter<?, ?> getAdapter(Class<Message> javaClass) {
@@ -107,13 +111,17 @@ class ConfigurationChangeObserver extends ChannelObserver {
                                                    .isEmpty();
 
             if (wereNonEmpty && emptyNow) {
-                // It's now the time to remove the local bus subscription.
-                final Class<Message> wrapperCls = asClassOfMsg(itemForRemoval.getWrapperTypeUrl());
-                final Class<Message> messageCls = asClassOfMsg(itemForRemoval.getMessageTypeUrl());
-                final BusAdapter<?, ?> adapter = getAdapter(wrapperCls);
-                adapter.unregister(messageCls);
+                unregisterInAdapter(itemForRemoval);
             }
         }
+    }
+
+    private void unregisterInAdapter(ExternalMessageType itemForRemoval) {
+        // It's now the time to remove the local bus subscription.
+        final Class<Message> wrapperCls = asClassOfMsg(itemForRemoval.getWrapperTypeUrl());
+        final Class<Message> messageCls = asClassOfMsg(itemForRemoval.getMessageTypeUrl());
+        final BusAdapter<?, ?> adapter = getAdapter(wrapperCls);
+        adapter.unregister(messageCls);
     }
 
     private Set<ExternalMessageType> findStale(Collection<ExternalMessageType> types,
@@ -145,5 +153,16 @@ class ConfigurationChangeObserver extends ChannelObserver {
     private static Class<Message> asClassOfMsg(String classStr) {
         final TypeUrl typeUrl = TypeUrl.parse(classStr);
         return typeUrl.getJavaClass();
+    }
+
+    /**
+     * Removes all the current subscriptions from the local buses.
+     */
+    @Override
+    public void close() throws Exception {
+        for (ExternalMessageType currentlyRequestedMessage : requestedTypes.keySet()) {
+            unregisterInAdapter(currentlyRequestedMessage);
+        }
+        requestedTypes.clear();
     }
 }

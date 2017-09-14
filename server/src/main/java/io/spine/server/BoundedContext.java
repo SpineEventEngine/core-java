@@ -156,6 +156,7 @@ public final class BoundedContext
      * <li>Closes associated {@link StorageFactory}.
      * <li>Closes {@link CommandBus}.
      * <li>Closes {@link EventBus}.
+     * <li>Closes {@link IntegrationBus}.
      * <li>Closes {@link CommandStore}.
      * <li>Closes {@link io.spine.server.event.EventStore EventStore}.
      * <li>Closes {@link Stand}.
@@ -174,6 +175,7 @@ public final class BoundedContext
         storageFactory.get().close();
         commandBus.close();
         eventBus.close();
+        integrationBus.close();
         stand.close();
 
         shutDownRepositories();

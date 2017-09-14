@@ -19,7 +19,6 @@
  */
 package io.spine.server.integration;
 
-import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import io.spine.core.BoundedContextId;
 import io.spine.core.MessageEnvelope;
@@ -141,10 +140,6 @@ abstract class BusAdapter<E extends MessageEnvelope<?, ?, ?>,
         AbstractBuilder(Bus<?, E, ?, D> targetBus, BoundedContextId boundedContextId) {
             this.targetBus = checkNotNull(targetBus);
             this.boundedContextId = boundedContextId;
-        }
-
-        public Optional<PublisherHub> getPublisherHub() {
-            return Optional.fromNullable(publisherHub);
         }
 
         public B setPublisherHub(PublisherHub publisherHub) {

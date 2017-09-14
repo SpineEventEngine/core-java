@@ -76,19 +76,25 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
     private final BoundedContextId boundedContextId;
     private final SubscriberHub subscriberHub;
     private final PublisherHub publisherHub;
+    private final ConfigurationChangeObserver configurationChangeObserver;
 
     private IntegrationBus(Builder builder) {
         super(builder.getDelivery());
         this.boundedContextId = builder.boundedContextId;
         this.subscriberHub = new SubscriberHub(builder.transportFactory);
         this.publisherHub = new PublisherHub(builder.transportFactory);
-
         this.localBusAdapters = createAdapters(builder, publisherHub);
+        configurationChangeObserver = observeConfigurationChanges();
+        subscriberHub.get(ExternalMessageClass.of(RequestForExternalMessages.class))
+                     .addObserver(configurationChangeObserver);
+    }
 
-        /*
-         * Reacts upon {@code RequestedMessageTypes} message arrival.
-         */
-        final ConfigurationChangeObserver observer = new ConfigurationChangeObserver(
+    /**
+     * Creates an observer to react upon {@linkplain RequestForExternalMessages external request}
+     * message arrival.
+     */
+    private ConfigurationChangeObserver observeConfigurationChanges() {
+        return new ConfigurationChangeObserver(
                 boundedContextId,
                 new Function<Class<? extends Message>, BusAdapter<?, ?>>() {
                     @Override
@@ -97,8 +103,6 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
                         return adapterFor(message);
                     }
                 });
-        subscriberHub.get(ExternalMessageClass.of(RequestForExternalMessages.class))
-                     .addObserver(observer);
     }
 
     private static ImmutableSet<BusAdapter<?, ?>> createAdapters(Builder builder,
@@ -315,6 +319,21 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
                                                                   integrationBus));
         }
         subscriberHub.closeStaleChannels();
+    }
+
+    /**
+     * Removes all subscriptions and closes all the underlying transport channels.
+     */
+    @Override
+    public void close() throws Exception {
+        super.close();
+
+        configurationChangeObserver.close();
+        // Declare that this instance has no needs.
+        notifyOfNeeds(ImmutableSet.<ExternalMessageClass>of());
+
+        subscriberHub.close();
+        publisherHub.close();
     }
 
     @Override

@@ -21,6 +21,7 @@ package io.spine.server.integration;
 
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
+import io.spine.annotation.SPI;
 import io.spine.core.BoundedContextId;
 
 import java.util.Objects;
@@ -29,18 +30,31 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
- * Base routines for the {@linkplain TransportFactory.MessageChannel message channel} observers.
+ * Base routines for the {@linkplain TransportFactory.Subscriber#addObserver(StreamObserver)}
+ * subscriber observers}.
+ *
+ * @author Alex Tymchenko
  */
-abstract class ChannelObserver implements StreamObserver<ExternalMessage> {
+@SPI
+public abstract class AbstractChannelObserver implements StreamObserver<ExternalMessage> {
 
     private final BoundedContextId boundedContextId;
     private final Class<? extends Message> messageClass;
 
-    protected ChannelObserver(BoundedContextId boundedContextId,
-                              Class<? extends Message> messageClass) {
+    protected AbstractChannelObserver(BoundedContextId boundedContextId,
+                                      Class<? extends Message> messageClass) {
         this.boundedContextId = boundedContextId;
         this.messageClass = messageClass;
     }
+
+    /**
+     * Handles the {@linkplain ExternalMessage message} received via this channel.
+     *
+     * <p>This behaviour is specific to the particular channel observer implementation.
+     *
+     * @param message the received message
+     */
+    protected abstract void handle(ExternalMessage message);
 
     @Override
     public void onError(Throwable t) {
@@ -74,7 +88,7 @@ abstract class ChannelObserver implements StreamObserver<ExternalMessage> {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        ChannelObserver that = (ChannelObserver) o;
+        AbstractChannelObserver that = (AbstractChannelObserver) o;
         return Objects.equals(boundedContextId, that.boundedContextId) &&
                 Objects.equals(messageClass, that.messageClass);
     }
@@ -83,6 +97,4 @@ abstract class ChannelObserver implements StreamObserver<ExternalMessage> {
     public int hashCode() {
         return Objects.hash(boundedContextId, messageClass);
     }
-
-    protected abstract void handle(ExternalMessage message);
 }

@@ -144,7 +144,7 @@ public interface TransportFactory {
      * <p>Serves for channel creation and storage-per-key, which in a way makes the hub similar to
      * an entity repository.
      */
-    abstract class ChannelHub<C extends MessageChannel> {
+    abstract class ChannelHub<C extends MessageChannel> implements AutoCloseable {
 
         private final TransportFactory transportFactory;
         private final Map<ExternalMessageClass, C> channels =
@@ -209,6 +209,14 @@ public interface TransportFactory {
                 }
             }
             return toRemove;
+        }
+
+        @Override
+        public void close() throws Exception {
+            for (C channel : channels.values()) {
+                channel.close();
+            }
+            channels.clear();
         }
 
         TransportFactory transportFactory() {
