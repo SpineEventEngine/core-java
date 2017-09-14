@@ -92,7 +92,7 @@ public class ExternalMessageEnvelope
     @Override
     public void setOriginContext(EventContext.Builder builder) {
         /*
-         * This should never happen, as no event is caused directly by an external message.
+         * This should never happen, as no event is caused directly by an {@code ExternalMessage}.
          *
          * Instead, the external messages are consumed by an anti-corruption layer, such as
          * external reactor or subscriber methods in the destination bounded context.
