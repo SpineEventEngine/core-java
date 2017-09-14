@@ -61,7 +61,8 @@ import static io.spine.validate.Validate.checkNotDefault;
 import static java.lang.String.format;
 
 /**
- * Dispatches external messages from and to the current bounded context.
+ * Dispatches {@linkplain ExternalMessage external messages} from and to the bounded context,
+ * in which this bus operates.
  *
  * @author Alex Tymchenko
  */
