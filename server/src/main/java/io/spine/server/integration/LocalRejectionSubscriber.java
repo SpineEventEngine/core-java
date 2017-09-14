@@ -48,6 +48,7 @@ final class LocalRejectionSubscriber extends RejectionSubscriber {
     LocalRejectionSubscriber(BoundedContextId boundedContextId,
                              TransportFactory.PublisherHub publisherHub,
                              RejectionClass rejectionClass) {
+        super();
         this.boundedContextId = boundedContextId;
         this.publisherHub = publisherHub;
         this.rejectionClasses = ImmutableSet.of(rejectionClass);
