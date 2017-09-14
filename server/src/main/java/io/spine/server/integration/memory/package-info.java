@@ -22,13 +22,13 @@
  */
 
 /**
- * This package provides implementation of local
+ * This package provides implementation of in-memory
  * {@link io.spine.server.integration.TransportFactory} routines.
  *
  * <p>Should be used in test purposes only.
  */
 
 @ParametersAreNonnullByDefault
-package io.spine.server.integration.local;
+package io.spine.server.integration.memory;
 
 import javax.annotation.ParametersAreNonnullByDefault;

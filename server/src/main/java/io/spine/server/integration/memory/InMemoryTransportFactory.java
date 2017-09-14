@@ -17,7 +17,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.integration.local;
+package io.spine.server.integration.memory;
 
 import com.google.common.base.Function;
 import com.google.common.collect.HashMultimap;
@@ -41,50 +41,64 @@ import static com.google.common.collect.Sets.newConcurrentHashSet;
 import static io.spine.server.integration.ExternalMessageClass.of;
 
 /**
+ * In-memory implementation of the {@link TransportFactory}.
+ *
  * @author Alex Tymchenko
  */
-public class LocalTransportFactory implements TransportFactory {
+public class InMemoryTransportFactory implements TransportFactory {
 
     /**
      * An in-memory storage of subscribers per message class.
      */
-    private final Multimap<MessageClass, LocalSubscriber> subscribers =
-            Multimaps.synchronizedMultimap(HashMultimap.<MessageClass, LocalSubscriber>create());
+    private final Multimap<MessageClass, InMemorySubscriber> subscribers =
+            Multimaps.synchronizedMultimap(HashMultimap.<MessageClass, InMemorySubscriber>create());
 
-    private LocalTransportFactory() {
+    private InMemoryTransportFactory() {
         // Prevent direct instantiation from the outside.
     }
 
-    public static LocalTransportFactory newInstance() {
-        return new LocalTransportFactory();
+    /**
+     * Creates a new instance of {@code InMemoryTransportFactory}.
+     *
+     * @return a new instance of this factory
+     */
+    public static InMemoryTransportFactory newInstance() {
+        return new InMemoryTransportFactory();
     }
 
     @Override
     public Publisher createPublisher(MessageClass messageClass) {
-        return new LocalPublisher(of(messageClass),
-                                  new Function<MessageClass, Iterable<LocalSubscriber>>() {
-                                      @Override
-                                      public Iterable<LocalSubscriber> apply(
-                                              @Nullable MessageClass input) {
-                                          checkNotNull(input);
-                                          return subscribers.get(input);
-                                      }
-                                  });
+        final InMemoryPublisher result = new InMemoryPublisher(of(messageClass),
+                                                               providerOf(subscribers));
+        return result;
     }
 
+    /**
+     * Abstract base for in-memory channels.
+     */
     @Override
     public Subscriber createSubscriber(MessageClass messageClass) {
-        final LocalSubscriber subscriber = new LocalSubscriber(of(messageClass));
-
+        final InMemorySubscriber subscriber = new InMemorySubscriber(of(messageClass));
         subscribers.put(messageClass, subscriber);
         return subscriber;
     }
 
-    abstract static class AbstractLocalChannel implements MessageChannel {
+    private static Function<MessageClass, Iterable<InMemorySubscriber>>
+    providerOf(final Multimap<MessageClass, InMemorySubscriber> subscribers) {
+        return new Function<MessageClass, Iterable<InMemorySubscriber>>() {
+            @Override
+            public Iterable<InMemorySubscriber> apply(@Nullable MessageClass input) {
+                checkNotNull(input);
+                return subscribers.get(input);
+            }
+        };
+    }
+
+    abstract static class AbstractInMemoryChannel implements MessageChannel {
 
         private final ExternalMessageClass messageClass;
 
-        protected AbstractLocalChannel(ExternalMessageClass messageClass) {
+        AbstractInMemoryChannel(ExternalMessageClass messageClass) {
             this.messageClass = messageClass;
         }
 
@@ -106,33 +120,33 @@ public class LocalTransportFactory implements TransportFactory {
      *
      * <p>To use only in scope of the same JVM as subscribers.
      */
-    static class LocalPublisher extends AbstractLocalChannel implements Publisher {
+    static class InMemoryPublisher extends AbstractInMemoryChannel implements Publisher {
 
-        private final Function<MessageClass, Iterable<LocalSubscriber>> subscriberProvider;
+        private final Function<MessageClass, Iterable<InMemorySubscriber>> subscriberProvider;
 
-        private LocalPublisher(ExternalMessageClass messageClass,
-                               Function<MessageClass, Iterable<LocalSubscriber>> provider) {
+        private InMemoryPublisher(ExternalMessageClass messageClass,
+                                  Function<MessageClass, Iterable<InMemorySubscriber>> provider) {
             super(messageClass);
             this.subscriberProvider = provider;
         }
 
         @Override
         public Ack publish(Any messageId, ExternalMessage message) {
-            final Iterable<LocalSubscriber> localSubscribers = getSubscribers(getMessageClass());
-            for (LocalSubscriber localSubscriber : localSubscribers) {
+            final Iterable<InMemorySubscriber> localSubscribers = getSubscribers(getMessageClass());
+            for (InMemorySubscriber localSubscriber : localSubscribers) {
                 callSubscriber(message, localSubscriber);
             }
             return Buses.acknowledge(messageId);
         }
 
-        private static void callSubscriber(ExternalMessage message, LocalSubscriber subscriber) {
+        private static void callSubscriber(ExternalMessage message, InMemorySubscriber subscriber) {
             final Iterable<StreamObserver<ExternalMessage>> callees = subscriber.getObservers();
             for (StreamObserver<ExternalMessage> observer : callees) {
                 observer.onNext(message);
             }
         }
 
-        private Iterable<LocalSubscriber> getSubscribers(
+        private Iterable<InMemorySubscriber> getSubscribers(
                 MessageClass genericCls) {
             return subscriberProvider.apply(genericCls);
         }
@@ -149,11 +163,11 @@ public class LocalTransportFactory implements TransportFactory {
      *
      * <p>To use only in scope of the same JVM as publishers.
      */
-    static class LocalSubscriber extends AbstractLocalChannel implements Subscriber {
+    static class InMemorySubscriber extends AbstractInMemoryChannel implements Subscriber {
 
         private final Set<StreamObserver<ExternalMessage>> observers = newConcurrentHashSet();
 
-        private LocalSubscriber(ExternalMessageClass messageClass) {
+        private InMemorySubscriber(ExternalMessageClass messageClass) {
             super(messageClass);
         }
 
@@ -178,6 +192,5 @@ public class LocalTransportFactory implements TransportFactory {
         public boolean isStale() {
             return observers.isEmpty();
         }
-
     }
 }

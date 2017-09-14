@@ -37,7 +37,7 @@ import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectEventsSubs
 import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectRejectionsExtSubscriber;
 import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectStartedExtSubscriber;
 import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectWizard;
-import io.spine.server.integration.local.LocalTransportFactory;
+import io.spine.server.integration.memory.InMemoryTransportFactory;
 import io.spine.server.rejection.RejectionBus;
 import io.spine.validate.Validate;
 import org.junit.Before;
@@ -79,7 +79,7 @@ public class IntegrationBusShould {
 
     @Test
     public void dispatch_events_from_one_BC_to_entities_with_ext_subscribers_of_another_BC() {
-        final LocalTransportFactory transportFactory = LocalTransportFactory.newInstance();
+        final InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
 
         final BoundedContext sourceContext = contextWithTransport(transportFactory);
         contextWithExtEntitySubscribers(transportFactory);
@@ -100,7 +100,7 @@ public class IntegrationBusShould {
 
     @Test
     public void avoid_dispatching_events_from_one_BC_to_domestic_entity_subscribers_of_another_BC() {
-        final LocalTransportFactory transportFactory = LocalTransportFactory.newInstance();
+        final InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
 
         final BoundedContext sourceContext = contextWithTransport(transportFactory);
         final BoundedContext destContext = contextWithExtEntitySubscribers(transportFactory);
@@ -121,7 +121,7 @@ public class IntegrationBusShould {
 
     @Test
     public void dispatch_events_from_one_BC_to_external_subscribers_of_another_BC() {
-        final LocalTransportFactory transportFactory = LocalTransportFactory.newInstance();
+        final InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
 
         final BoundedContext sourceContext = contextWithTransport(transportFactory);
         contextWithExternalSubscribers(transportFactory);
@@ -137,7 +137,7 @@ public class IntegrationBusShould {
 
     @Test
     public void avoid_dispatching_events_from_one_BC_to_domestic_standalone_subscribers_of_another_BC() {
-        final LocalTransportFactory transportFactory = LocalTransportFactory.newInstance();
+        final InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
 
         final BoundedContext sourceContext = contextWithTransport(transportFactory);
         final BoundedContext destContext = contextWithExternalSubscribers(transportFactory);
@@ -160,7 +160,7 @@ public class IntegrationBusShould {
 
     @Test
     public void dispatch_events_from_one_BC_to_entities_with_ext_subscribers_of_multiple_BCs() {
-        final LocalTransportFactory transportFactory = LocalTransportFactory.newInstance();
+        final InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
 
         final Set<BoundedContextId> destinationIds = newHashSet();
         final BoundedContext sourceContext = contextWithTransport(transportFactory);
@@ -191,7 +191,7 @@ public class IntegrationBusShould {
     @SuppressWarnings("unused")     // variables declared for readability.
     @Test
     public void dispatch_events_from_one_BC_to_two_BCs_with_different_needs() {
-        final LocalTransportFactory transportFactory = LocalTransportFactory.newInstance();
+        final InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
 
         final BoundedContext sourceContext = contextWithTransport(transportFactory);
         final BoundedContext destA = contextWithProjectCreatedNeeds(transportFactory);
@@ -215,7 +215,7 @@ public class IntegrationBusShould {
 
     @Test
     public void update_local_subscriptions_upon_repeated_RequestedMessageTypes() {
-        final LocalTransportFactory transportFactory = LocalTransportFactory.newInstance();
+        final InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
 
         final BoundedContext sourceContext = contextWithTransport(transportFactory);
         final BoundedContext destinationCtx = contextWithTransport(transportFactory);
@@ -271,7 +271,7 @@ public class IntegrationBusShould {
 
     @Test
     public void dispatch_rejections_from_one_BC_to_external_subscribers_of_another_BC() {
-        final LocalTransportFactory transportFactory = LocalTransportFactory.newInstance();
+        final InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
 
         final BoundedContext sourceContext = contextWithTransport(transportFactory);
         contextWithExternalSubscribers(transportFactory);
@@ -292,7 +292,7 @@ public class IntegrationBusShould {
 
     @Test
     public void not_dispatch_events_to_domestic_subscribers_if_they_requested_external() {
-        final LocalTransportFactory transportFactory = LocalTransportFactory.newInstance();
+        final InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
 
         final BoundedContext context = contextWithExtEntitySubscribers(transportFactory);
         final ProjectEventsSubscriber eventSubscriber = new ProjectEventsSubscriber();
@@ -315,7 +315,7 @@ public class IntegrationBusShould {
 
     @Test
     public void not_dispatch_rejections_to_domestic_subscribers_if_they_requested_external() {
-        final LocalTransportFactory transportFactory = LocalTransportFactory.newInstance();
+        final InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
 
         final BoundedContext sourceContext = contextWithExtEntitySubscribers(transportFactory);
         final ProjectRejectionsExtSubscriber standaloneSubscriber =
@@ -338,7 +338,7 @@ public class IntegrationBusShould {
 
     @Test
     public void emit_unsupported_external_message_exception_if_message_type_is_unknown() {
-        final LocalTransportFactory transportFactory = LocalTransportFactory.newInstance();
+        final InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
         final BoundedContext boundedContext = contextWithTransport(transportFactory);
 
         final Event event = projectCreated();

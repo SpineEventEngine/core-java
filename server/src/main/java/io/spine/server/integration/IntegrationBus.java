@@ -40,7 +40,7 @@ import io.spine.server.event.EventSubscriber;
 import io.spine.server.integration.TransportFactory.PublisherHub;
 import io.spine.server.integration.TransportFactory.Subscriber;
 import io.spine.server.integration.TransportFactory.SubscriberHub;
-import io.spine.server.integration.local.LocalTransportFactory;
+import io.spine.server.integration.memory.InMemoryTransportFactory;
 import io.spine.server.rejection.RejectionBus;
 import io.spine.server.rejection.RejectionSubscriber;
 import io.spine.type.KnownTypes;
@@ -314,7 +314,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
                                                                   imClass.value(),
                                                                   integrationBus));
         }
-        subscriberHub.releaseStale();
+        subscriberHub.closeStaleChannels();
     }
 
     @Override
@@ -414,7 +414,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
         }
 
         private static TransportFactory initTransportFactory() {
-            return LocalTransportFactory.newInstance();
+            return InMemoryTransportFactory.newInstance();
         }
 
         @Override
