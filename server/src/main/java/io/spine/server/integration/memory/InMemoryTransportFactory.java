@@ -21,30 +21,23 @@ package io.spine.server.integration.memory;
 
 import com.google.common.base.Function;
 import com.google.common.collect.HashMultimap;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
-import com.google.protobuf.Any;
-import io.grpc.stub.StreamObserver;
-import io.spine.core.Ack;
-import io.spine.server.bus.Buses;
-import io.spine.server.integration.ExternalMessage;
-import io.spine.server.integration.ExternalMessageClass;
-import io.spine.server.integration.MessageChannel;
 import io.spine.server.integration.Publisher;
 import io.spine.server.integration.Subscriber;
 import io.spine.server.integration.TransportFactory;
 import io.spine.type.MessageClass;
 
 import javax.annotation.Nullable;
-import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Sets.newConcurrentHashSet;
 import static io.spine.server.integration.ExternalMessageClass.of;
 
 /**
  * In-memory implementation of the {@link TransportFactory}.
+ *
+ * <p>Publishers and subscribers must be in the same JVM. Therefore this factory usage should
+ * be limited to tests.
  *
  * @author Alex Tymchenko
  */
@@ -76,9 +69,6 @@ public class InMemoryTransportFactory implements TransportFactory {
         return result;
     }
 
-    /**
-     * Abstract base for in-memory channels.
-     */
     @Override
     public Subscriber createSubscriber(MessageClass messageClass) {
         final InMemorySubscriber subscriber = new InMemorySubscriber(of(messageClass));
@@ -86,6 +76,13 @@ public class InMemoryTransportFactory implements TransportFactory {
         return subscriber;
     }
 
+    /**
+     * Wraps currently registered in-memory subscribers into a function, that returns a subset
+     * of subscribers per message.
+     *
+     * @param subscribers currently registered subscribers and classes of messages they serve
+     * @return a provider function allowing to fetch subscribers per message class.
+     */
     private static Function<MessageClass, Iterable<InMemorySubscriber>>
     providerOf(final Multimap<MessageClass, InMemorySubscriber> subscribers) {
         return new Function<MessageClass, Iterable<InMemorySubscriber>>() {
@@ -95,103 +92,5 @@ public class InMemoryTransportFactory implements TransportFactory {
                 return subscribers.get(input);
             }
         };
-    }
-
-    abstract static class AbstractInMemoryChannel implements MessageChannel {
-
-        private final ExternalMessageClass messageClass;
-
-        AbstractInMemoryChannel(ExternalMessageClass messageClass) {
-            this.messageClass = messageClass;
-        }
-
-        @SuppressWarnings("NoopMethodInAbstractClass")  // See the method body for the explanation.
-        @Override
-        public void close() throws Exception {
-            // There is nothing to close in the in-memory local channel implementation.
-        }
-
-        @Override
-        public ExternalMessageClass getMessageClass() {
-            return messageClass;
-        }
-    }
-
-    /**
-     * An in-memory implementation of the {@link Publisher}.
-     *
-     * <p>To use only in scope of the same JVM as subscribers.
-     */
-    static class InMemoryPublisher extends AbstractInMemoryChannel implements Publisher {
-
-        private final Function<MessageClass, Iterable<InMemorySubscriber>> subscriberProvider;
-
-        private InMemoryPublisher(ExternalMessageClass messageClass,
-                                  Function<MessageClass, Iterable<InMemorySubscriber>> provider) {
-            super(messageClass);
-            this.subscriberProvider = provider;
-        }
-
-        @Override
-        public Ack publish(Any messageId, ExternalMessage message) {
-            final Iterable<InMemorySubscriber> localSubscribers = getSubscribers(getMessageClass());
-            for (InMemorySubscriber localSubscriber : localSubscribers) {
-                callSubscriber(message, localSubscriber);
-            }
-            return Buses.acknowledge(messageId);
-        }
-
-        private static void callSubscriber(ExternalMessage message, InMemorySubscriber subscriber) {
-            final Iterable<StreamObserver<ExternalMessage>> callees = subscriber.getObservers();
-            for (StreamObserver<ExternalMessage> observer : callees) {
-                observer.onNext(message);
-            }
-        }
-
-        private Iterable<InMemorySubscriber> getSubscribers(
-                MessageClass genericCls) {
-            return subscriberProvider.apply(genericCls);
-        }
-
-        @Override
-        public boolean isStale() {
-            return false;   // publishers are never stale.
-        }
-    }
-
-    /**
-     * An in-memory implementation of the {@link Subscriber}.
-     *
-     * <p>To use only in scope of the same JVM as publishers.
-     */
-    static class InMemorySubscriber extends AbstractInMemoryChannel implements Subscriber {
-
-        private final Set<StreamObserver<ExternalMessage>> observers = newConcurrentHashSet();
-
-        private InMemorySubscriber(ExternalMessageClass messageClass) {
-            super(messageClass);
-        }
-
-        @Override
-        public Iterable<StreamObserver<ExternalMessage>> getObservers() {
-            return ImmutableSet.copyOf(observers);
-        }
-
-        @Override
-        public void addObserver(StreamObserver<ExternalMessage> observer) {
-            checkNotNull(observer);
-            observers.add(observer);
-        }
-
-        @Override
-        public void removeObserver(StreamObserver<ExternalMessage> observer) {
-            checkNotNull(observer);
-            observers.remove(observer);
-        }
-
-        @Override
-        public boolean isStale() {
-            return observers.isEmpty();
-        }
     }
 }
