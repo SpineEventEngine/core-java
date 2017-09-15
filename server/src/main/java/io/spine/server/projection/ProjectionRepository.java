@@ -254,7 +254,6 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
 
         @Override
         public void onError(ExternalMessageEnvelope envelope, RuntimeException exception) {
-
             checkNotNull(envelope);
             checkNotNull(exception);
             logError("Error dispatching external event to projection (class: %s, id: %s)",
