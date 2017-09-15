@@ -385,7 +385,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
 
     @Override
     public String toString() {
-        return "Integration bus of BoundedContext ID = " + boundedContextName.getValue();
+        return "Integration Bus of BoundedContext Name = " + boundedContextName.getValue();
     }
 
     private BusAdapter<?, ?> adapterFor(Class<? extends Message> messageClass) {
