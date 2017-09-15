@@ -36,4 +36,3 @@ message ItgCannotStartArchivedProject {
 message ItgProjectAlreadyExists {
     ProjectId project_id = 1;
 }
-
