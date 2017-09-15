@@ -59,7 +59,7 @@ import static io.spine.core.CommandStatus.SCHEDULED;
 import static io.spine.core.CommandValidationError.INVALID_COMMAND;
 import static io.spine.core.given.GivenTenantId.newUuid;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.server.BoundedContext.newId;
+import static io.spine.server.BoundedContext.newName;
 import static io.spine.server.commandbus.CommandScheduler.setSchedule;
 import static io.spine.server.commandbus.Given.ACommand.createProject;
 import static io.spine.test.Verify.assertContainsAll;
@@ -174,7 +174,7 @@ public abstract class AbstractCommandBusTestSuite {
         ModelTests.clearModel();
 
         final InMemoryStorageFactory storageFactory =
-                InMemoryStorageFactory.newInstance(newId(getClass().getSimpleName()),
+                InMemoryStorageFactory.newInstance(newName(getClass().getSimpleName()),
                                                    this.multitenant);
         final TenantIndex tenantIndex = TenantAwareTest.createTenantIndex(this.multitenant,
                                                                           storageFactory);

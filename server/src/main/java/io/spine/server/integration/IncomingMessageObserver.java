@@ -21,7 +21,7 @@ package io.spine.server.integration;
 
 import com.google.protobuf.Message;
 import io.spine.core.Ack;
-import io.spine.core.BoundedContextId;
+import io.spine.core.BoundedContextName;
 import io.spine.grpc.StreamObservers;
 
 /**
@@ -34,10 +34,10 @@ class IncomingMessageObserver extends AbstractChannelObserver {
 
     private final IntegrationBus integrationBus;
 
-    protected IncomingMessageObserver(BoundedContextId boundedContextId,
+    protected IncomingMessageObserver(BoundedContextName boundedContextName,
                                       Class<? extends Message> messageClass,
                                       IntegrationBus integrationBus) {
-        super(boundedContextId, messageClass);
+        super(boundedContextName, messageClass);
         this.integrationBus = integrationBus;
     }
 

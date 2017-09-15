@@ -113,7 +113,7 @@ public class IntegrationBusTestEnv {
         final IntegrationBus.Builder builder = IntegrationBus.newBuilder()
                                                              .setTransportFactory(transportFactory);
         final BoundedContext result = BoundedContext.newBuilder()
-                                                    .setId(newUuid())
+                                                    .setName(newUuid())
                                                     .setIntegrationBus(builder)
                                                     .build();
         return result;

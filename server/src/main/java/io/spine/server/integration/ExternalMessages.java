@@ -23,7 +23,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.Identifier;
-import io.spine.core.BoundedContextId;
+import io.spine.core.BoundedContextName;
 import io.spine.core.Event;
 import io.spine.core.Rejection;
 import io.spine.protobuf.AnyPacker;
@@ -44,60 +44,60 @@ class ExternalMessages {
     /**
      * Wraps the instance of {@link Event} into an {@code ExternalMessage}.
      *
-     * @param event            the event to wrap
-     * @param boundedContextId the bounded context ID in which the event was created
+     * @param event              the event to wrap
+     * @param boundedContextName the name of the bounded context in which the event was created
      * @return the external message wrapping the given event
      */
-    static ExternalMessage of(Event event, BoundedContextId boundedContextId) {
+    static ExternalMessage of(Event event, BoundedContextName boundedContextName) {
         checkNotNull(event);
 
-        final ExternalMessage result = of(event.getId(), event, boundedContextId);
+        final ExternalMessage result = of(event.getId(), event, boundedContextName);
         return result;
     }
 
     /**
      * Wraps the instance of {@link Rejection} into an {@code ExternalMessage}.
      *
-     * @param rejection        the rejection to wrap
-     * @param boundedContextId the bounded context ID in which the rejection was created
+     * @param rejection          the rejection to wrap
+     * @param boundedContextName the name of bounded context in which the rejection was created
      * @return the external message wrapping the given rejection
      */
-    static ExternalMessage of(Rejection rejection, BoundedContextId boundedContextId) {
+    static ExternalMessage of(Rejection rejection, BoundedContextName boundedContextName) {
         checkNotNull(rejection);
 
-        final ExternalMessage result = of(rejection.getId(), rejection, boundedContextId);
+        final ExternalMessage result = of(rejection.getId(), rejection, boundedContextName);
         return result;
     }
 
     /**
      * Wraps the instance of {@link RequestForExternalMessages} into an {@code ExternalMessage}.
      *
-     * @param request          the request to wrap
-     * @param boundedContextId the bounded context ID in which the request was created
+     * @param request            the request to wrap
+     * @param boundedContextName the name of bounded context in which the request was created
      * @return the external message wrapping the given request
      */
     static ExternalMessage of(RequestForExternalMessages request,
-                              BoundedContextId boundedContextId) {
+                              BoundedContextName boundedContextName) {
         checkNotNull(request);
         final String idString = Identifier.newUuid();
         final ExternalMessage result = of(StringValue.newBuilder()
                                                      .setValue(idString)
                                                      .build(),
                                           request,
-                                          boundedContextId);
+                                          boundedContextName);
         return result;
     }
 
     private static ExternalMessage of(Message messageId,
                                       Message message,
-                                      BoundedContextId boundedContextId) {
+                                      BoundedContextName boundedContextName) {
         final Any packedId = Identifier.pack(messageId);
         final Any packedMessage = AnyPacker.pack(message);
 
         return ExternalMessage.newBuilder()
                               .setId(packedId)
                               .setOriginalMessage(packedMessage)
-                              .setBoundedContextId(boundedContextId)
+                              .setBoundedContextName(boundedContextName)
                               .build();
     }
 }

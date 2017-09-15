@@ -21,7 +21,7 @@
 package io.spine.server.bc.given;
 
 import com.google.protobuf.Message;
-import io.spine.core.BoundedContextId;
+import io.spine.core.BoundedContextName;
 import io.spine.core.EventId;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.integration.IntegrationEvent;
@@ -33,7 +33,7 @@ import io.spine.test.bc.event.BcTaskAdded;
 
 import static io.spine.Identifier.newUuid;
 import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.server.BoundedContext.newId;
+import static io.spine.server.BoundedContext.newName;
 import static io.spine.time.Time.getCurrentTime;
 
 public class Given {
@@ -80,7 +80,7 @@ public class Given {
     public static class AnIntegrationEvent {
 
         private static final ProjectId PROJECT_ID = AggregateId.newProjectId();
-        private static final BoundedContextId TEST_BC_ID = newId("Test BC");
+        private static final BoundedContextName TEST_BC_NAME = newName("Test BC");
 
         private AnIntegrationEvent() {
         }
@@ -115,7 +115,7 @@ public class Given {
                     IntegrationEventContext.newBuilder()
                                            .setEventId(eventId)
                                            .setTimestamp(getCurrentTime())
-                                           .setBoundedContextId(TEST_BC_ID)
+                                           .setBoundedContextName(TEST_BC_NAME)
                                            .setProducerId(pack(aggregateId));
             return builder.build();
         }

@@ -22,7 +22,7 @@ package io.spine.server.integration;
 import com.google.protobuf.Message;
 import io.spine.base.Error;
 import io.spine.core.Ack;
-import io.spine.core.BoundedContextId;
+import io.spine.core.BoundedContextName;
 import io.spine.core.Event;
 import io.spine.core.Rejection;
 import io.spine.grpc.MemoizingObserver;
@@ -162,13 +162,13 @@ public class IntegrationBusShould {
     public void dispatch_events_from_one_BC_to_entities_with_ext_subscribers_of_multiple_BCs() {
         final InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
 
-        final Set<BoundedContextId> destinationIds = newHashSet();
+        final Set<BoundedContextName> destinationNames = newHashSet();
         final BoundedContext sourceContext = contextWithTransport(transportFactory);
         for (int i = 0; i < 42; i++) {
             final BoundedContext destinationCtx =
                     contextWithContextAwareEntitySubscriber(transportFactory);
-            final BoundedContextId id = destinationCtx.getId();
-            destinationIds.add(id);
+            final BoundedContextName name = destinationCtx.getName();
+            destinationNames.add(name);
         }
 
         assertTrue(ContextAwareProjectDetails.getExternalContexts()
@@ -178,11 +178,11 @@ public class IntegrationBusShould {
         sourceContext.getEventBus()
                      .post(event);
 
-        assertEquals(destinationIds.size(),
+        assertEquals(destinationNames.size(),
                      ContextAwareProjectDetails.getExternalContexts()
                                                .size());
 
-        assertEquals(destinationIds.size(),
+        assertEquals(destinationNames.size(),
                      ContextAwareProjectDetails.getExternalEvents()
                                                .size());
 
@@ -342,9 +342,9 @@ public class IntegrationBusShould {
         final BoundedContext boundedContext = contextWithTransport(transportFactory);
 
         final Event event = projectCreated();
-        final BoundedContextId boundedContextId = BoundedContext.newId("External context ID");
+        final BoundedContextName boundedContextName = BoundedContext.newName("External context ID");
         final ExternalMessage externalMessage = ExternalMessages.of(event,
-                                                                    boundedContextId);
+                                                                    boundedContextName);
         final MemoizingObserver<Ack> observer = StreamObservers.memoizingObserver();
         boundedContext.getIntegrationBus()
                       .post(externalMessage, observer);

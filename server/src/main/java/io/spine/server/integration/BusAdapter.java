@@ -20,7 +20,7 @@
 package io.spine.server.integration;
 
 import com.google.protobuf.Message;
-import io.spine.core.BoundedContextId;
+import io.spine.core.BoundedContextName;
 import io.spine.core.MessageEnvelope;
 import io.spine.server.bus.Bus;
 import io.spine.server.bus.MessageDispatcher;
@@ -47,9 +47,9 @@ abstract class BusAdapter<E extends MessageEnvelope<?, ?, ?>,
     private final Bus<?, E, ?, D> targetBus;
 
     /**
-     * The ID of the bounded context, to which the wrapped local bus belongs.
+     * The name of the bounded context, to which the wrapped local bus belongs.
      */
-    private final BoundedContextId boundedContextId;
+    private final BoundedContextName boundedContextName;
 
     /**
      * The publisher hub, used publish the messages dispatched from the local buses to external
@@ -60,7 +60,7 @@ abstract class BusAdapter<E extends MessageEnvelope<?, ?, ?>,
     BusAdapter(AbstractBuilder<?, E, D> builder) {
         this.targetBus = builder.targetBus;
         this.publisherHub = builder.publisherHub;
-        this.boundedContextId = builder.boundedContextId;
+        this.boundedContextName = builder.boundedContextName;
     }
 
     /**
@@ -117,8 +117,8 @@ abstract class BusAdapter<E extends MessageEnvelope<?, ?, ?>,
         return publisherHub;
     }
 
-    BoundedContextId getBoundedContextId() {
-        return boundedContextId;
+    BoundedContextName getBoundedContextName() {
+        return boundedContextName;
     }
 
     /**
@@ -133,13 +133,13 @@ abstract class BusAdapter<E extends MessageEnvelope<?, ?, ?>,
                                           D extends MessageDispatcher<?, E, ?>> {
 
         private final Bus<?, E, ?, D> targetBus;
-        private final BoundedContextId boundedContextId;
+        private final BoundedContextName boundedContextName;
 
         private PublisherHub publisherHub;
 
-        AbstractBuilder(Bus<?, E, ?, D> targetBus, BoundedContextId boundedContextId) {
+        AbstractBuilder(Bus<?, E, ?, D> targetBus, BoundedContextName boundedContextName) {
             this.targetBus = checkNotNull(targetBus);
-            this.boundedContextId = boundedContextId;
+            this.boundedContextName = boundedContextName;
         }
 
         public B setPublisherHub(PublisherHub publisherHub) {

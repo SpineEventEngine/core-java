@@ -36,7 +36,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
-import static io.spine.server.BoundedContext.newId;
+import static io.spine.server.BoundedContext.newName;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -228,7 +228,7 @@ public class EventBusBuilderShould extends BusBuilderShould<EventBus.Builder,
     @Test
     public void allow_custom_message_validators() {
         final StorageFactory storageFactory =
-                StorageFactorySwitch.newInstance(newId("test"), false)
+                StorageFactorySwitch.newInstance(newName("test"), false)
                                     .get();
         final MessageValidator validator = mock(MessageValidator.class);
         final EventBus eventBus = builder().setEventValidator(validator)

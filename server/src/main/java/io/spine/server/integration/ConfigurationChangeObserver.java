@@ -24,7 +24,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Message;
-import io.spine.core.BoundedContextId;
+import io.spine.core.BoundedContextName;
 import io.spine.protobuf.AnyPacker;
 import io.spine.type.TypeUrl;
 
@@ -41,7 +41,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 class ConfigurationChangeObserver extends AbstractChannelObserver implements AutoCloseable {
 
-    private final BoundedContextId boundedContextId;
+    private final BoundedContextName boundedContextName;
     private final Function<Class<? extends Message>, BusAdapter<?, ?>> adapterByClass;
 
     /**
@@ -49,14 +49,14 @@ class ConfigurationChangeObserver extends AbstractChannelObserver implements Aut
      * {@linkplain RequestForExternalMessages configuration messages}, mapped to IDs of their origin
      * bounded contexts.
      */
-    private final Multimap<ExternalMessageType, BoundedContextId> requestedTypes =
+    private final Multimap<ExternalMessageType, BoundedContextName> requestedTypes =
             HashMultimap.create();
 
-    ConfigurationChangeObserver(BoundedContextId boundedContextId,
+    ConfigurationChangeObserver(BoundedContextName boundedContextName,
                                 Function<Class<? extends Message>,
                                         BusAdapter<?, ?>> adapterByClass) {
-        super(boundedContextId, RequestForExternalMessages.class);
-        this.boundedContextId = boundedContextId;
+        super(boundedContextName, RequestForExternalMessages.class);
+        this.boundedContextName = boundedContextName;
         this.adapterByClass = adapterByClass;
     }
 
@@ -64,15 +64,15 @@ class ConfigurationChangeObserver extends AbstractChannelObserver implements Aut
     public void handle(ExternalMessage value) {
         final RequestForExternalMessages request = AnyPacker.unpack(value.getOriginalMessage());
 
-        final BoundedContextId originBoundedContextId = value.getBoundedContextId();
-        addNewSubscriptions(request.getRequestedMessageTypesList(), originBoundedContextId);
-        clearStaleSubscriptions(request.getRequestedMessageTypesList(), originBoundedContextId);
+        final BoundedContextName originBoundedContextName = value.getBoundedContextName();
+        addNewSubscriptions(request.getRequestedMessageTypesList(), originBoundedContextName);
+        clearStaleSubscriptions(request.getRequestedMessageTypesList(), originBoundedContextName);
     }
 
     private void addNewSubscriptions(Iterable<ExternalMessageType> types,
-                                     BoundedContextId originBoundedContextId) {
+                                     BoundedContextName originBoundedContextName) {
         for (ExternalMessageType newType : types) {
-            final Collection<BoundedContextId> contextsWithSameRequest =
+            final Collection<BoundedContextName> contextsWithSameRequest =
                     requestedTypes.get(newType);
             if (contextsWithSameRequest.isEmpty()) {
 
@@ -82,7 +82,7 @@ class ConfigurationChangeObserver extends AbstractChannelObserver implements Aut
                 registerInAdapter(newType);
             }
 
-            requestedTypes.put(newType, originBoundedContextId);
+            requestedTypes.put(newType, originBoundedContextName);
         }
     }
 
@@ -99,14 +99,14 @@ class ConfigurationChangeObserver extends AbstractChannelObserver implements Aut
     }
 
     private void clearStaleSubscriptions(Collection<ExternalMessageType> types,
-                                         BoundedContextId originBoundedContextId) {
+                                         BoundedContextName originBoundedContextName) {
 
-        final Set<ExternalMessageType> toRemove = findStale(types, originBoundedContextId);
+        final Set<ExternalMessageType> toRemove = findStale(types, originBoundedContextName);
 
         for (ExternalMessageType itemForRemoval : toRemove) {
             final boolean wereNonEmpty = !requestedTypes.get(itemForRemoval)
                                                         .isEmpty();
-            requestedTypes.remove(itemForRemoval, originBoundedContextId);
+            requestedTypes.remove(itemForRemoval, originBoundedContextName);
             final boolean emptyNow = requestedTypes.get(itemForRemoval)
                                                    .isEmpty();
 
@@ -125,18 +125,18 @@ class ConfigurationChangeObserver extends AbstractChannelObserver implements Aut
     }
 
     private Set<ExternalMessageType> findStale(Collection<ExternalMessageType> types,
-                                               BoundedContextId originBoundedContextId) {
+                                               BoundedContextName originBoundedContextName) {
         final ImmutableSet.Builder<ExternalMessageType> result = ImmutableSet.builder();
 
         for (ExternalMessageType previouslyRequestedType : requestedTypes.keySet()) {
-            final Collection<BoundedContextId> contextsThatRequested =
+            final Collection<BoundedContextName> contextsThatRequested =
                     requestedTypes.get(previouslyRequestedType);
 
-            if (contextsThatRequested.contains(originBoundedContextId) &&
+            if (contextsThatRequested.contains(originBoundedContextName) &&
                     !types.contains(previouslyRequestedType)) {
 
                 // The `previouslyRequestedType` item is no longer requested
-                // by the bounded context with `originBoundedContextId` ID.
+                // by the bounded context with `originBoundedContextName` name.
 
                 result.add(previouslyRequestedType);
             }
@@ -146,8 +146,8 @@ class ConfigurationChangeObserver extends AbstractChannelObserver implements Aut
 
     @Override
     public String toString() {
-        return "Integration bus observer of `RequestedMessageTypes`; " +
-                "Bounded Context ID = " + boundedContextId.getValue();
+        return "Integration bus observer of `RequestedMessageTypes`. " +
+                "Bounded Context name = " + boundedContextName.getValue();
     }
 
     private static Class<Message> asClassOfMsg(String classStr) {

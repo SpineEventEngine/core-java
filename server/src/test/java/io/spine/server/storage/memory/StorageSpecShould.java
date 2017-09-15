@@ -27,11 +27,11 @@ import com.google.protobuf.DoubleValue;
 import com.google.protobuf.Empty;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
-import io.spine.core.BoundedContextId;
+import io.spine.core.BoundedContextName;
 import io.spine.type.TypeUrl;
 import org.junit.Test;
 
-import static io.spine.server.BoundedContext.newId;
+import static io.spine.server.BoundedContext.newName;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -43,41 +43,41 @@ public class StorageSpecShould {
     public void pass_null_tolerance_check() {
         new NullPointerTester()
                 .setDefault(TypeUrl.class, TypeUrl.of(Empty.class))
-                .setDefault(BoundedContextId.class, newId("default"))
+                .setDefault(BoundedContextName.class, newName("default"))
                 .testAllPublicStaticMethods(StorageSpec.class);
     }
 
     @Test
     public void create_new_instances() {
-        final BoundedContextId bcId = newId(getClass().getName());
+        final BoundedContextName bcName = newName(getClass().getName());
         final TypeUrl stateUrl = TypeUrl.of(StringValue.class);
         final Class<Long> idClass = Long.class;
 
-        final StorageSpec<Long> spec = StorageSpec.of(bcId, stateUrl, idClass);
+        final StorageSpec<Long> spec = StorageSpec.of(bcName, stateUrl, idClass);
 
-        assertEquals(bcId, spec.getBoundedContextId());
+        assertEquals(bcName, spec.getBoundedContextName());
         assertEquals(stateUrl, spec.getEntityStateUrl());
         assertEquals(idClass, spec.getIdClass());
     }
 
     @Test
     public void provide_equals_based_on_values() {
-        final BoundedContextId bcId = newId(getClass().getName());
+        final BoundedContextName bcName = newName(getClass().getName());
 
         new EqualsTester()
                 .addEqualityGroup(
-                        StorageSpec.of(bcId, TypeUrl.of(StringValue.class), String.class),
-                        StorageSpec.of(bcId, TypeUrl.of(StringValue.class), String.class))
+                        StorageSpec.of(bcName, TypeUrl.of(StringValue.class), String.class),
+                        StorageSpec.of(bcName, TypeUrl.of(StringValue.class), String.class))
                 .addEqualityGroup(
-                        StorageSpec.of(bcId, TypeUrl.of(Timestamp.class), Integer.class),
-                        StorageSpec.of(bcId, TypeUrl.of(Timestamp.class), Integer.class))
+                        StorageSpec.of(bcName, TypeUrl.of(Timestamp.class), Integer.class),
+                        StorageSpec.of(bcName, TypeUrl.of(Timestamp.class), Integer.class))
                 .testEquals();
     }
 
     @Test
     public void serialize() {
         SerializableTester.reserializeAndAssert(
-                StorageSpec.of(newId(getClass().getSimpleName()),
+                StorageSpec.of(newName(getClass().getSimpleName()),
                                TypeUrl.of(DoubleValue.class),
                                String.class));
     }

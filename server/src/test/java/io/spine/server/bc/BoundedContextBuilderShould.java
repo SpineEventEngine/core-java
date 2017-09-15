@@ -51,11 +51,11 @@ public class BoundedContextBuilderShould {
     }
 
     @Test
-    public void return_id_if_it_was_set() {
-        final String idString = getClass().getName();
-        assertEquals(idString, BoundedContext.newBuilder()
-                                         .setId(idString)
-                                         .getId());
+    public void return_name_if_it_was_set() {
+        final String nameString = getClass().getName();
+        assertEquals(nameString, BoundedContext.newBuilder()
+                                               .setName(nameString)
+                                               .getName());
     }
 
     @Test

@@ -25,7 +25,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.core.Ack;
-import io.spine.core.BoundedContextId;
+import io.spine.core.BoundedContextName;
 import io.spine.core.Event;
 import io.spine.core.Rejection;
 import io.spine.core.Rejections;
@@ -123,14 +123,14 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
                                                  ExternalMessageDispatcher<?>> {
 
     private final Iterable<BusAdapter<?, ?>> localBusAdapters;
-    private final BoundedContextId boundedContextId;
+    private final BoundedContextName boundedContextName;
     private final SubscriberHub subscriberHub;
     private final PublisherHub publisherHub;
     private final ConfigurationChangeObserver configurationChangeObserver;
 
     private IntegrationBus(Builder builder) {
         super(builder.getDelivery());
-        this.boundedContextId = builder.boundedContextId;
+        this.boundedContextName = builder.boundedContextName;
         this.subscriberHub = new SubscriberHub(builder.transportFactory);
         this.publisherHub = new PublisherHub(builder.transportFactory);
         this.localBusAdapters = createAdapters(builder, publisherHub);
@@ -145,7 +145,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
      */
     private ConfigurationChangeObserver observeConfigurationChanges() {
         return new ConfigurationChangeObserver(
-                boundedContextId,
+                boundedContextName,
                 new Function<Class<? extends Message>, BusAdapter<?, ?>>() {
                     @Override
                     public BusAdapter<?, ?> apply(@Nullable Class<? extends Message> message) {
@@ -158,10 +158,10 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
     private static ImmutableSet<BusAdapter<?, ?>> createAdapters(Builder builder,
                                                                  PublisherHub publisherHub) {
         return ImmutableSet.<BusAdapter<?, ?>>of(
-                EventBusAdapter.builderWith(builder.eventBus, builder.boundedContextId)
+                EventBusAdapter.builderWith(builder.eventBus, builder.boundedContextName)
                                .setPublisherHub(publisherHub)
                                .build(),
-                RejectionBusAdapter.builderWith(builder.rejectionBus, builder.boundedContextId)
+                RejectionBusAdapter.builderWith(builder.rejectionBus, builder.boundedContextName)
                                    .setPublisherHub(publisherHub)
                                    .build()
         );
@@ -297,7 +297,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
         }
         final RequestForExternalMessages result = resultBuilder.build();
         final ExternalMessage externalMessage = ExternalMessages.of(result,
-                                                                    boundedContextId);
+                                                                    boundedContextName);
         final ExternalMessageClass channelId = ExternalMessageClass.of(result.getClass());
         publisherHub.get(channelId)
                     .publish(pack(newUuid()), externalMessage);
@@ -353,8 +353,8 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
         final Iterable<ExternalMessageClass> transformed = dispatcher.getMessageClasses();
         for (final ExternalMessageClass imClass : transformed) {
             final Subscriber subscriber = subscriberHub.get(imClass);
-            subscriber.addObserver(new IncomingMessageObserver(boundedContextId, 
-                                                               imClass.value(), 
+            subscriber.addObserver(new IncomingMessageObserver(boundedContextName,
+                                                               imClass.value(),
                                                                integrationBus));
         }
     }
@@ -364,7 +364,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
         final Iterable<ExternalMessageClass> transformed = dispatcher.getMessageClasses();
         for (final ExternalMessageClass imClass : transformed) {
             final Subscriber subscriber = subscriberHub.get(imClass);
-            subscriber.removeObserver(new IncomingMessageObserver(boundedContextId,
+            subscriber.removeObserver(new IncomingMessageObserver(boundedContextName,
                                                                   imClass.value(),
                                                                   integrationBus));
         }
@@ -388,7 +388,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
 
     @Override
     public String toString() {
-        return "Integration bus of BoundedContext ID = " + boundedContextId.getValue();
+        return "Integration bus of BoundedContext ID = " + boundedContextName.getValue();
     }
 
     private BusAdapter<?, ?> adapterFor(Class<? extends Message> messageClass) {
@@ -417,7 +417,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
         private EventBus eventBus;
         private RejectionBus rejectionBus;
         private LocalDelivery delivery;
-        private BoundedContextId boundedContextId;
+        private BoundedContextName boundedContextName;
         private TransportFactory transportFactory;
 
         public Optional<EventBus> getEventBus() {
@@ -433,10 +433,10 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
             return Optional.fromNullable(rejectionBus);
         }
 
-        public Optional<BoundedContextId> getBoundedContextId() {
-            final BoundedContextId value = Validate.isDefault(this.boundedContextId)
-                                           ? null
-                                           : this.boundedContextId;
+        public Optional<BoundedContextName> getBoundedContextName() {
+            final BoundedContextName value = Validate.isDefault(this.boundedContextName)
+                                             ? null
+                                             : this.boundedContextName;
             return Optional.fromNullable(value);
         }
 
@@ -445,8 +445,8 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
             return self();
         }
 
-        public Builder setBoundedContextId(BoundedContextId boundedContextId) {
-            this.boundedContextId = checkNotNull(boundedContextId);
+        public Builder setBoundedContextName(BoundedContextName boundedContextName) {
+            this.boundedContextName = checkNotNull(boundedContextName);
             return self();
         }
 
@@ -470,8 +470,8 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
                        "`eventBus` must be set for integration bus.");
             checkState(rejectionBus != null,
                        "`rejectionBus` must be set for integration bus.");
-            checkNotDefault(boundedContextId,
-                            "`boundedContextId` must be set for integration bus.");
+            checkNotDefault(boundedContextName,
+                            "`boundedContextName` must be set for integration bus.");
 
             if (transportFactory == null) {
                 transportFactory = initTransportFactory();

@@ -27,7 +27,7 @@ import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Experimental;
 import io.spine.annotation.Internal;
 import io.spine.core.Ack;
-import io.spine.core.BoundedContextId;
+import io.spine.core.BoundedContextName;
 import io.spine.core.Event;
 import io.spine.option.EntityOption.Visibility;
 import io.spine.server.commandbus.CommandBus;
@@ -70,14 +70,14 @@ public final class BoundedContext
         extends IntegrationEventSubscriberGrpc.IntegrationEventSubscriberImplBase
         implements AutoCloseable {
 
-    /** The default ID for a {@code BoundedContext}. */
-    static final BoundedContextId DEFAULT_ID = newId("main");
+    /** The default name for a {@code BoundedContext}. */
+    static final BoundedContextName DEFAULT_NAME = newName("main");
 
     /**
-     * The id of the bounded context, which is used to distinguish the context in an application
+     * The name of the bounded context, which is used to distinguish the context in an application
      * with several bounded contexts.
      */
-    private final BoundedContextId id;
+    private final BoundedContextName name;
 
     /** If {@code true} the bounded context serves many tenants. */
     private final boolean multitenant;
@@ -98,7 +98,7 @@ public final class BoundedContext
 
     private BoundedContext(Builder builder) {
         super();
-        this.id = newId(builder.id);
+        this.name = newName(builder.name);
         this.multitenant = builder.multitenant;
         this.storageFactory = Suppliers.memoize(builder.storageFactorySupplier);
         this.commandBus = builder.commandBus.build();
@@ -112,25 +112,25 @@ public final class BoundedContext
          */
         this.integrationBus = builder.integrationBus.setEventBus(this.eventBus)
                                                     .setRejectionBus(this.commandBus.rejectionBus())
-                                                    .setBoundedContextId(this.id)
+                                                    .setBoundedContextName(this.name)
                                                     .build();
     }
 
     /**
-     * Creates a new ID.
+     * Creates a new value object for a bounded context name.
      *
-     * <p>The ID must not be {@code null} or empty.
+     * <p>The {@code name} argument value must not be {@code null} or empty.
      *
      * <p>This method, however, does not check for the uniqueness of the value passed.
      *
-     * @param id the unique string ID of the {@code BoundedContext}
-     * @return a newly created ID
+     * @param name the unique string name of the {@code BoundedContext}
+     * @return a newly created name
      */
-    public static BoundedContextId newId(String id) {
-        checkNotEmptyOrBlank(id, "ID");
-        final BoundedContextId result = BoundedContextId.newBuilder()
-                                                        .setValue(id)
-                                                        .build();
+    public static BoundedContextName newName(String name) {
+        checkNotEmptyOrBlank(name, "Name");
+        final BoundedContextName result = BoundedContextName.newBuilder()
+                                                            .setValue(name)
+                                                            .build();
         return result;
     }
 
@@ -184,7 +184,7 @@ public final class BoundedContext
     }
 
     /**
-     * Returns the passed id with added suffix {@code " closed."}.
+     * Returns the passed name with added suffix {@code " closed."}.
      */
     private static String closed(String name) {
         return name + " closed.";
@@ -202,7 +202,7 @@ public final class BoundedContext
     }
 
     private String nameForLogging() {
-        return getClass().getSimpleName() + ' ' + getId().getValue();
+        return getClass().getSimpleName() + ' ' + getName().getValue();
     }
 
     /**
@@ -210,12 +210,12 @@ public final class BoundedContext
      *
      * <p>The ID allows to identify a bounded context if a multi-context application.
      * If the ID was not defined, during the building process, the context would get
-     * {@link #DEFAULT_ID}.
+     * {@link #DEFAULT_NAME}.
      *
      * @return the ID of this {@code BoundedContext}
      */
-    public BoundedContextId getId() {
-        return id;
+    public BoundedContextName getName() {
+        return name;
     }
 
     /**
@@ -326,12 +326,12 @@ public final class BoundedContext
      * A builder for producing {@code BoundedContext} instances.
      *
      * <p>An application can have more than one bounded context. To distinguish
-     * them use {@link #setId(String)}. If no ID is given the default ID will be assigned.
+     * them use {@link #setName(String)}. If no ID is given the default ID will be assigned.
      */
     @SuppressWarnings("ClassWithTooManyMethods") // OK for this central piece.
     public static class Builder {
 
-        private String id = DEFAULT_ID.getValue();
+        private String name = DEFAULT_NAME.getValue();
         private boolean multitenant;
         private TenantIndex tenantIndex;
         private Supplier<StorageFactory> storageFactorySupplier;
@@ -342,26 +342,27 @@ public final class BoundedContext
         private IntegrationBus.Builder integrationBus;
 
         /**
-         * Sets the ID for a new bounded context.
+         * Sets the name for a new bounded context.
          *
-         * <p>If the ID is not defined in the builder, the context will get {@link #DEFAULT_ID}.
+         * <p>If the name is not defined in the builder, the context will get {@link #DEFAULT_NAME}.
          *
          * <p>It is the responsibility of an application developer to provide meaningful and unique
-         * identifiers for bounded contexts. The framework does not check for duplication of names.
+         * names for bounded contexts. The framework does not check for duplication of names.
          *
-         * @param id an identifier string for a new bounded context. Cannot be null, empty, or blank
+         * @param name an identifier string for a new bounded context.
+         *             Cannot be null, empty, or blank
          */
-        public Builder setId(String id) {
-            this.id = checkNameNotEmptyOrBlank(id);
+        public Builder setName(String name) {
+            this.name = checkNameNotEmptyOrBlank(name);
             return this;
         }
 
         /**
-         * Returns the previously set id or {@link #DEFAULT_ID}
-         * if the id was not explicitly set.
+         * Returns the previously set name or {@link #DEFAULT_NAME}
+         * if the name was not explicitly set.
          */
-        public String getId() {
-            return id;
+        public String getName() {
+            return name;
         }
 
         public Builder setMultitenant(boolean value) {
@@ -455,7 +456,7 @@ public final class BoundedContext
 
         private StorageFactory getStorageFactory() {
             if (storageFactorySupplier == null) {
-                storageFactorySupplier = StorageFactorySwitch.newInstance(newId(id), multitenant);
+                storageFactorySupplier = StorageFactorySwitch.newInstance(newName(name), multitenant);
             }
 
             final StorageFactory storageFactory = storageFactorySupplier.get();

@@ -24,7 +24,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Supplier;
 import io.spine.Environment;
-import io.spine.core.BoundedContextId;
+import io.spine.core.BoundedContextName;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 
 import javax.annotation.Nullable;
@@ -55,8 +55,8 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  */
 public final class StorageFactorySwitch implements Supplier<StorageFactory> {
 
-    /** The ID of the BoundedContext where this switch works. */
-    private final BoundedContextId boundedContextId;
+    /** The name of the BoundedContext where this switch works. */
+    private final BoundedContextName boundedContextName;
 
     @Nullable
     private Supplier<StorageFactory> productionSupplier;
@@ -70,21 +70,21 @@ public final class StorageFactorySwitch implements Supplier<StorageFactory> {
 
     private final boolean multitenant;
 
-    private StorageFactorySwitch(BoundedContextId boundedContextId, boolean multitenant) {
-        this.boundedContextId = boundedContextId;
+    private StorageFactorySwitch(BoundedContextName boundedContextName, boolean multitenant) {
+        this.boundedContextName = boundedContextName;
         this.multitenant = multitenant;
     }
 
     /**
      * Obtains the instance of the switch that corresponds to multi-tenancy mode.
      *
-     * @param boundedContextId the ID of the BoundedContext in which this switch works
-     * @param multitenant if {@code true} the switch is requested for the multi-tenant execution
-     *                    context, {@code false} for the single-tenant context
+     * @param boundedContextName the name of the bounded context in which this switch works
+     * @param multitenant        if {@code true} the switch is requested for the multi-tenant
+     *                           execution context, {@code false} for the single-tenant context
      */
-    public static StorageFactorySwitch newInstance(BoundedContextId boundedContextId,
+    public static StorageFactorySwitch newInstance(BoundedContextName boundedContextName,
                                                    boolean multitenant) {
-        return new StorageFactorySwitch(boundedContextId, multitenant);
+        return new StorageFactorySwitch(boundedContextName, multitenant);
     }
 
     /**
@@ -146,7 +146,7 @@ public final class StorageFactorySwitch implements Supplier<StorageFactory> {
                        .isTests()) {
             storageFactory = testsSupplier != null
                              ? testsSupplier.get()
-                             : InMemoryStorageFactory.newInstance(boundedContextId, multitenant);
+                             : InMemoryStorageFactory.newInstance(boundedContextName, multitenant);
         } else {
             if (productionSupplier == null) {
                 throw newIllegalStateException(

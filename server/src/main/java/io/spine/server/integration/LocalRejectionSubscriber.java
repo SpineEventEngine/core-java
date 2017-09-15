@@ -21,7 +21,7 @@ package io.spine.server.integration;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableSet;
-import io.spine.core.BoundedContextId;
+import io.spine.core.BoundedContextName;
 import io.spine.core.Rejection;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
@@ -41,15 +41,15 @@ import java.util.Set;
  */
 final class LocalRejectionSubscriber extends RejectionSubscriber {
 
-    private final BoundedContextId boundedContextId;
+    private final BoundedContextName boundedContextName;
     private final TransportFactory.PublisherHub publisherHub;
     private final Set<RejectionClass> rejectionClasses;
 
-    LocalRejectionSubscriber(BoundedContextId boundedContextId,
+    LocalRejectionSubscriber(BoundedContextName boundedContextName,
                              TransportFactory.PublisherHub publisherHub,
                              RejectionClass rejectionClass) {
         super();
-        this.boundedContextId = boundedContextId;
+        this.boundedContextName = boundedContextName;
         this.publisherHub = publisherHub;
         this.rejectionClasses = ImmutableSet.of(rejectionClass);
     }
@@ -63,7 +63,7 @@ final class LocalRejectionSubscriber extends RejectionSubscriber {
     @Override
     public Set<String> dispatch(RejectionEnvelope envelope) {
         final Rejection rejection = envelope.getOuterObject();
-        final ExternalMessage message = ExternalMessages.of(rejection, boundedContextId);
+        final ExternalMessage message = ExternalMessages.of(rejection, boundedContextName);
         final ExternalMessageClass messageClass =
                 ExternalMessageClass.of(envelope.getMessageClass());
         final TransportFactory.Publisher channel = publisherHub.get(messageClass);
@@ -76,7 +76,7 @@ final class LocalRejectionSubscriber extends RejectionSubscriber {
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                          .add("boundedContextId", boundedContextId)
+                          .add("boundedContextName", boundedContextName)
                           .add("rejectionClasses", rejectionClasses)
                           .toString();
     }
@@ -90,12 +90,12 @@ final class LocalRejectionSubscriber extends RejectionSubscriber {
             return false;
         }
         LocalRejectionSubscriber that = (LocalRejectionSubscriber) o;
-        return Objects.equals(boundedContextId, that.boundedContextId) &&
+        return Objects.equals(boundedContextName, that.boundedContextName) &&
                 Objects.equals(rejectionClasses, that.rejectionClasses);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(boundedContextId, rejectionClasses);
+        return Objects.hash(boundedContextName, rejectionClasses);
     }
 }

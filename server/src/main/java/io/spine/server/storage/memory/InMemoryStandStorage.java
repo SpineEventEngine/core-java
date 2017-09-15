@@ -22,7 +22,7 @@ package io.spine.server.storage.memory;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.protobuf.FieldMask;
-import io.spine.core.BoundedContextId;
+import io.spine.core.BoundedContextName;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
@@ -60,7 +60,7 @@ class InMemoryStandStorage extends StandStorage {
             passed. Therefore simply pass the `TypeUrl` of `EntityRecord`
         */
         recordStorage = new InMemoryRecordStorage<>(
-                StorageSpec.of(checkNotNull(builder.boundedContextId),
+                StorageSpec.of(checkNotNull(builder.boundedContextName),
                                TypeUrl.of(EntityRecord.class),
                                AggregateStateId.class),
                 builder.isMultitenant());
@@ -164,15 +164,15 @@ class InMemoryStandStorage extends StandStorage {
 
     public static class Builder {
 
-        private BoundedContextId boundedContextId;
+        private BoundedContextName boundedContextName;
         private boolean multitenant;
 
         public boolean isMultitenant() {
             return multitenant;
         }
 
-        public Builder setBoundedContextId(BoundedContextId boundedContextId) {
-            this.boundedContextId = boundedContextId;
+        public Builder setBoundedContextName(BoundedContextName boundedContextName) {
+            this.boundedContextName = boundedContextName;
             return this;
         }
 

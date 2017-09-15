@@ -19,7 +19,7 @@
  */
 package io.spine.server.integration;
 
-import io.spine.core.BoundedContextId;
+import io.spine.core.BoundedContextName;
 import io.spine.server.BoundedContext;
 import io.spine.server.bus.BusBuilderShould;
 import io.spine.server.event.EventBus;
@@ -57,8 +57,8 @@ public class IntegrationBusBuilderShould
     }
 
     @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_BoundedContextId() {
-        builder().setBoundedContextId(Tests.<BoundedContextId>nullRef());
+    public void do_not_accept_null_BoundedContextName() {
+        builder().setBoundedContextName(Tests.<BoundedContextName>nullRef());
     }
 
     @Test
@@ -86,11 +86,11 @@ public class IntegrationBusBuilderShould
     }
 
     @Test
-    public void return_previously_set_BoundedContextId() {
-        final BoundedContextId id =
-                BoundedContext.newId("ID that is expected back from the Builder");
-        assertEquals(id, builder().setBoundedContextId(id)
-                                  .getBoundedContextId()
-                                  .get());
+    public void return_previously_set_BoundedContextName() {
+        final BoundedContextName name =
+                BoundedContext.newName("Name that is expected back from the Builder");
+        assertEquals(name, builder().setBoundedContextName(name)
+                                    .getBoundedContextName()
+                                    .get());
     }
 }

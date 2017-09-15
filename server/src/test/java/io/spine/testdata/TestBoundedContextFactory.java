@@ -67,7 +67,7 @@ public class TestBoundedContextFactory {
         public static BoundedContext newBoundedContext(String name, Stand.Builder stand) {
             return newBuilder()
                     .setStand(stand)
-                    .setId(name)
+                    .setName(name)
                     .build();
         }
 

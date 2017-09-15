@@ -47,8 +47,8 @@ message ExternalMessage {
     // Information about the environment of the user who created the original message.
     spine.core.ActorContext actor_context = 3 [(required) = true];
 
-    // An ID of the bounded context, within which an original message was created.
-    spine.core.BoundedContextId bounded_context_id = 4 [(required) = true];
+    // Name of the bounded context, within which an original message was created.
+    spine.core.BoundedContextName bounded_context_name = 4 [(required) = true];
 }
 
 // A document message, describing types of messages,

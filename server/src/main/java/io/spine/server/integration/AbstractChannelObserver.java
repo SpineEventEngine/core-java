@@ -22,7 +22,7 @@ package io.spine.server.integration;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.SPI;
-import io.spine.core.BoundedContextId;
+import io.spine.core.BoundedContextName;
 
 import java.util.Objects;
 
@@ -38,12 +38,12 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 @SPI
 public abstract class AbstractChannelObserver implements StreamObserver<ExternalMessage> {
 
-    private final BoundedContextId boundedContextId;
+    private final BoundedContextName boundedContextName;
     private final Class<? extends Message> messageClass;
 
-    protected AbstractChannelObserver(BoundedContextId boundedContextId,
+    protected AbstractChannelObserver(BoundedContextName boundedContextName,
                                       Class<? extends Message> messageClass) {
-        this.boundedContextId = boundedContextId;
+        this.boundedContextName = boundedContextName;
         this.messageClass = messageClass;
     }
 
@@ -73,8 +73,8 @@ public abstract class AbstractChannelObserver implements StreamObserver<External
     public final void onNext(ExternalMessage message) {
         checkNotNull(message);
 
-        final BoundedContextId source = message.getBoundedContextId();
-        if (this.boundedContextId.equals(source)){
+        final BoundedContextName source = message.getBoundedContextName();
+        if (this.boundedContextName.equals(source)){
             return;
         }
         handle(message);
@@ -89,12 +89,12 @@ public abstract class AbstractChannelObserver implements StreamObserver<External
             return false;
         }
         AbstractChannelObserver that = (AbstractChannelObserver) o;
-        return Objects.equals(boundedContextId, that.boundedContextId) &&
+        return Objects.equals(boundedContextName, that.boundedContextName) &&
                 Objects.equals(messageClass, that.messageClass);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(boundedContextId, messageClass);
+        return Objects.hash(boundedContextName, messageClass);
     }
 }

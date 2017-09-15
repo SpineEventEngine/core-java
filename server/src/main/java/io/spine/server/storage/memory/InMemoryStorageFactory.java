@@ -21,7 +21,7 @@
 package io.spine.server.storage.memory;
 
 import com.google.protobuf.Message;
-import io.spine.core.BoundedContextId;
+import io.spine.core.BoundedContextName;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.entity.Entity;
@@ -43,16 +43,16 @@ import io.spine.type.TypeUrl;
  */
 public class InMemoryStorageFactory implements StorageFactory {
 
-    private final BoundedContextId boundedContextId;
+    private final BoundedContextName boundedContextName;
     private final boolean multitenant;
 
-    public static InMemoryStorageFactory newInstance(BoundedContextId boundedContextId,
+    public static InMemoryStorageFactory newInstance(BoundedContextName boundedContextName,
                                                      boolean multitenant) {
-        return new InMemoryStorageFactory(boundedContextId, multitenant);
+        return new InMemoryStorageFactory(boundedContextName, multitenant);
     }
 
-    private InMemoryStorageFactory(BoundedContextId boundedContextId, boolean multitenant) {
-        this.boundedContextId = boundedContextId;
+    private InMemoryStorageFactory(BoundedContextName boundedContextName, boolean multitenant) {
+        this.boundedContextName = boundedContextName;
         this.multitenant = multitenant;
     }
 
@@ -78,7 +78,7 @@ public class InMemoryStorageFactory implements StorageFactory {
     public StandStorage createStandStorage() {
         final InMemoryStandStorage result =
                 InMemoryStandStorage.newBuilder()
-                                    .setBoundedContextId(boundedContextId)
+                                    .setBoundedContextName(boundedContextName)
                                     .setMultitenant(isMultitenant())
                                     .build();
         return result;
@@ -102,7 +102,7 @@ public class InMemoryStorageFactory implements StorageFactory {
         final TypeUrl typeUrl = TypeUrl.of(stateClass);
         @SuppressWarnings("unchecked") // The cast is protected by generic params of the method.
         final Class<I> idClass = (Class<I>) modelClass.getIdClass();
-        final StorageSpec<I> spec = StorageSpec.of(boundedContextId, typeUrl, idClass);
+        final StorageSpec<I> spec = StorageSpec.of(boundedContextName, typeUrl, idClass);
         return InMemoryRecordStorage.newInstance(spec, isMultitenant());
     }
 
@@ -115,7 +115,7 @@ public class InMemoryStorageFactory implements StorageFactory {
         @SuppressWarnings("unchecked") // The cast is protected by generic parameters of the method.
         final Class<I> idClass = (Class<I>) modelClass.getIdClass();
         final TypeUrl stateUrl = TypeUrl.of(stateClass);
-        final StorageSpec<I> spec = StorageSpec.of(boundedContextId, stateUrl, idClass);
+        final StorageSpec<I> spec = StorageSpec.of(boundedContextName, stateUrl, idClass);
 
         final boolean multitenant = isMultitenant();
         final InMemoryRecordStorage<I> entityStorage =
@@ -133,6 +133,6 @@ public class InMemoryStorageFactory implements StorageFactory {
         if (!isMultitenant()) {
             return this;
         }
-        return newInstance(this.boundedContextId, false);
+        return newInstance(this.boundedContextName, false);
     }
 }

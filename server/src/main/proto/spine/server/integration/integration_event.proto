@@ -55,8 +55,8 @@ message IntegrationEventContext {
     // When the event occurred.
     google.protobuf.Timestamp timestamp = 2;
 
-    // An ID of a Bounded Context which generated the event.
-    core.BoundedContextId bounded_context_id = 3;
+    // Name of the Bounded Context which generated the event.
+    core.BoundedContextName bounded_context_name = 3;
 
     // An id of an entity which generated the event.
     // Examples of event producers are: aggregates, process managers (which generate `CommandRouted` event).

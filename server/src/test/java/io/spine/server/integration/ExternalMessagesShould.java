@@ -20,7 +20,7 @@
 package io.spine.server.integration;
 
 import com.google.common.testing.NullPointerTester;
-import io.spine.core.BoundedContextId;
+import io.spine.core.BoundedContextName;
 import io.spine.core.Event;
 import io.spine.core.Rejection;
 import org.junit.Test;
@@ -41,7 +41,7 @@ public class ExternalMessagesShould {
     @Test
     public void pass_the_null_tolerance_check() {
         new NullPointerTester()
-                .setDefault(BoundedContextId.class, BoundedContextId.getDefaultInstance())
+                .setDefault(BoundedContextName.class, BoundedContextName.getDefaultInstance())
                 .setDefault(Event.class, Event.getDefaultInstance())
                 .setDefault(Rejection.class, Rejection.getDefaultInstance())
                 .setDefault(RequestForExternalMessages.class,

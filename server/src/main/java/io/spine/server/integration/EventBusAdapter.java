@@ -21,7 +21,7 @@ package io.spine.server.integration;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import io.spine.core.BoundedContextId;
+import io.spine.core.BoundedContextName;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
@@ -44,10 +44,10 @@ class EventBusAdapter extends BusAdapter<EventEnvelope, EventDispatcher<?>> {
         super(builder);
     }
 
-    static Builder builderWith(EventBus eventBus, BoundedContextId boundedContextId) {
+    static Builder builderWith(EventBus eventBus, BoundedContextName boundedContextName) {
         checkNotNull(eventBus);
-        checkNotNull(boundedContextId);
-        return new Builder(eventBus, boundedContextId);
+        checkNotNull(boundedContextName);
+        return new Builder(eventBus, boundedContextName);
     }
 
     @Override
@@ -72,7 +72,7 @@ class EventBusAdapter extends BusAdapter<EventEnvelope, EventDispatcher<?>> {
         final Event marked = eventBuilder.setContext(modifiedContext)
                                          .build();
         final ExternalMessage result = ExternalMessages.of(marked,
-                                                           externalMsg.getBoundedContextId());
+                                                           externalMsg.getBoundedContextName());
         return ExternalMessageEnvelope.of(result, Events.getMessage(event));
     }
 
@@ -84,7 +84,7 @@ class EventBusAdapter extends BusAdapter<EventEnvelope, EventDispatcher<?>> {
     @Override
     EventDispatcher<?> createDispatcher(Class<? extends Message> messageClass) {
         final LocalEventSubscriber result =
-                new LocalEventSubscriber(getBoundedContextId(),
+                new LocalEventSubscriber(getBoundedContextName(),
                                          getPublisherHub(),
                                          EventClass.of(messageClass));
         return result;
@@ -92,8 +92,8 @@ class EventBusAdapter extends BusAdapter<EventEnvelope, EventDispatcher<?>> {
 
     static class Builder extends AbstractBuilder<Builder, EventEnvelope, EventDispatcher<?>> {
 
-        Builder(EventBus eventBus, BoundedContextId boundedContextId) {
-            super(eventBus, boundedContextId);
+        Builder(EventBus eventBus, BoundedContextName boundedContextName) {
+            super(eventBus, boundedContextName);
         }
 
         @Override

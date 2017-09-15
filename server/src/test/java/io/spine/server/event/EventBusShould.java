@@ -51,7 +51,7 @@ import java.util.concurrent.Executors;
 
 import static com.google.common.collect.Maps.newHashMap;
 import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.server.BoundedContext.newId;
+import static io.spine.server.BoundedContext.newName;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -385,7 +385,7 @@ public class EventBusShould {
                                                             .build()))
                                  .build();
         final StorageFactory storageFactory =
-                StorageFactorySwitch.newInstance(newId("baz"), false).get();
+                StorageFactorySwitch.newInstance(newName("baz"), false).get();
         final ExecutorService executor = Executors.newFixedThreadPool(threadCount);
         // Catch non-easily reproducible bugs.
         for (int i = 0; i < 300; i++) {

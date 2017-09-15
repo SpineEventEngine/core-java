@@ -21,7 +21,7 @@ package io.spine.server.integration;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import io.spine.core.BoundedContextId;
+import io.spine.core.BoundedContextName;
 import io.spine.core.Rejection;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionContext;
@@ -44,10 +44,10 @@ class RejectionBusAdapter extends BusAdapter<RejectionEnvelope, RejectionDispatc
         super(builder);
     }
 
-    static Builder builderWith(RejectionBus rejectionBus, BoundedContextId boundedContextId) {
+    static Builder builderWith(RejectionBus rejectionBus, BoundedContextName boundedContextName) {
         checkNotNull(rejectionBus);
-        checkNotNull(boundedContextId);
-        return new Builder(rejectionBus, boundedContextId);
+        checkNotNull(boundedContextName);
+        return new Builder(rejectionBus, boundedContextName);
     }
 
     @Override
@@ -72,7 +72,7 @@ class RejectionBusAdapter extends BusAdapter<RejectionEnvelope, RejectionDispatc
         final Rejection marked = rejectionBuilder.setContext(modifiedContext)
                                                  .build();
         final ExternalMessage result = ExternalMessages.of(marked,
-                                                           externalMsg.getBoundedContextId());
+                                                           externalMsg.getBoundedContextName());
         return ExternalMessageEnvelope.of(result, Rejections.getMessage(rejection));
     }
 
@@ -84,7 +84,7 @@ class RejectionBusAdapter extends BusAdapter<RejectionEnvelope, RejectionDispatc
     @Override
     RejectionDispatcher<?> createDispatcher(Class<? extends Message> messageClass) {
         final LocalRejectionSubscriber result =
-                new LocalRejectionSubscriber(getBoundedContextId(),
+                new LocalRejectionSubscriber(getBoundedContextName(),
                                              getPublisherHub(),
                                              RejectionClass.of(messageClass));
         return result;
@@ -94,8 +94,8 @@ class RejectionBusAdapter extends BusAdapter<RejectionEnvelope, RejectionDispatc
             RejectionEnvelope,
             RejectionDispatcher<?>> {
 
-        Builder(RejectionBus eventBus, BoundedContextId boundedContextId) {
-            super(eventBus, boundedContextId);
+        Builder(RejectionBus eventBus, BoundedContextName boundedContextName) {
+            super(eventBus, boundedContextName);
         }
 
         @Override

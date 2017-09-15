@@ -21,7 +21,7 @@ package io.spine.server.integration;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableSet;
-import io.spine.core.BoundedContextId;
+import io.spine.core.BoundedContextName;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
@@ -41,15 +41,15 @@ import java.util.Set;
  */
 final class LocalEventSubscriber extends EventSubscriber {
 
-    private final BoundedContextId boundedContextId;
+    private final BoundedContextName boundedContextName;
     private final TransportFactory.PublisherHub publisherHub;
     private final Set<EventClass> eventClasses;
 
-    LocalEventSubscriber(BoundedContextId boundedContextId,
+    LocalEventSubscriber(BoundedContextName boundedContextName,
                          TransportFactory.PublisherHub publisherHub,
                          EventClass messageClass) {
         super();
-        this.boundedContextId = boundedContextId;
+        this.boundedContextName = boundedContextName;
         this.publisherHub = publisherHub;
         this.eventClasses = ImmutableSet.of(messageClass);
     }
@@ -63,7 +63,7 @@ final class LocalEventSubscriber extends EventSubscriber {
     @Override
     public Set<String> dispatch(EventEnvelope envelope) {
         final Event event = envelope.getOuterObject();
-        final ExternalMessage msg = ExternalMessages.of(event, boundedContextId);
+        final ExternalMessage msg = ExternalMessages.of(event, boundedContextName);
         final ExternalMessageClass messageClass =
                 ExternalMessageClass.of(envelope.getMessageClass());
         final TransportFactory.Publisher channel = publisherHub.get(messageClass);
@@ -76,7 +76,7 @@ final class LocalEventSubscriber extends EventSubscriber {
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                          .add("boundedContextId", boundedContextId)
+                          .add("boundedContextName", boundedContextName)
                           .add("eventClasses", eventClasses)
                           .toString();
     }
@@ -90,12 +90,12 @@ final class LocalEventSubscriber extends EventSubscriber {
             return false;
         }
         LocalEventSubscriber that = (LocalEventSubscriber) o;
-        return Objects.equals(boundedContextId, that.boundedContextId) &&
+        return Objects.equals(boundedContextName, that.boundedContextName) &&
                 Objects.equals(eventClasses, that.eventClasses);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(boundedContextId, eventClasses);
+        return Objects.hash(boundedContextName, eventClasses);
     }
 }
