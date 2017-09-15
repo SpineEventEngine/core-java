@@ -26,7 +26,7 @@ import io.spine.server.bus.EnvelopeValidator;
 /**
  * A validator of the incoming external messages to use in {@code IntegrationBus}.
  */
-enum IncomingMessageValidator implements EnvelopeValidator<ExternalMessageEnvelope> {
+enum ExternalMessageValidator implements EnvelopeValidator<ExternalMessageEnvelope> {
     INSTANCE;
 
     @Override

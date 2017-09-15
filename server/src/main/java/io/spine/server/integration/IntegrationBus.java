@@ -181,7 +181,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
 
     @Override
     protected EnvelopeValidator<ExternalMessageEnvelope> getValidator() {
-        return IncomingMessageValidator.INSTANCE;
+        return ExternalMessageValidator.INSTANCE;
     }
 
     @Override
