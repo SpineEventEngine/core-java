@@ -122,7 +122,6 @@ public final class DelegatingRejectionDispatcher<I> implements RejectionDispatch
 
             @Override
             public void onError(ExternalMessageEnvelope envelope, RuntimeException exception) {
-
                 final MessageClass messageClass = envelope.getMessageClass();
                 final String messageId = Stringifiers.toString(envelope.getId());
                 final String errorMessage =
