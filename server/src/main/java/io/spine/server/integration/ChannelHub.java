@@ -35,6 +35,8 @@ import static java.util.Collections.synchronizedMap;
  *
  * <p>Serves for channel creation and storage-per-key, which in a way makes the hub similar to
  * an entity repository.
+ *
+ * @author Alex Tymchenko
  */
 public abstract class ChannelHub<C extends MessageChannel> implements AutoCloseable {
 
