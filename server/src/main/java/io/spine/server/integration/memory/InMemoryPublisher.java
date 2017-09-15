@@ -69,9 +69,13 @@ class InMemoryPublisher extends AbstractInMemoryChannel implements Publisher {
         return subscriberProvider.apply(genericCls);
     }
 
+    /**
+     * Always returns {@code false}, as publishers don't get stale.
+     *
+     * @return {@code false} always.
+     */
     @Override
     public boolean isStale() {
-        // Publishers are never stale.
         return false;
     }
 }
