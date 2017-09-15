@@ -31,7 +31,7 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A value object holding {@linkplain ExternalMessage external message}.
+ * A value object holding a class of {@linkplain ExternalMessage external message}.
  *
  * @author Alex Tymchenko
  */
@@ -44,6 +44,12 @@ public class ExternalMessageClass extends MessageClass {
         super(value);
     }
 
+    /**
+     * Creates an instance of {@code ExternalMessageClass} on top of existing message class.
+     *
+     * @param messageClass a message class to wrap
+     * @return a new instance of {@code ExternalMessageClass}.\
+     */
     public static ExternalMessageClass of(MessageClass messageClass) {
         checkNotNull(messageClass);
         return of(messageClass.value());
@@ -54,6 +60,14 @@ public class ExternalMessageClass extends MessageClass {
         return new ExternalMessageClass(clazz);
     }
 
+    /**
+     * Transforms a given set of {@linkplain EventClass event classes} into a set
+     * of {@code ExternalMessageClass}es by wrapping each event class
+     * into an external message class.
+     *
+     * @param classes the set of event classes to transform
+     * @return a set of {@code ExternalMessageClass}es, each wrapping an item from the original set
+     */
     public static Set<ExternalMessageClass> fromEventClasses(Set<EventClass> classes) {
         checkNotNull(classes);
         final ImmutableSet.Builder<ExternalMessageClass> builder = ImmutableSet.builder();
@@ -63,6 +77,14 @@ public class ExternalMessageClass extends MessageClass {
         return builder.build();
     }
 
+    /**
+     * Transforms a given set of {@linkplain RejectionClass rejection classes} into a set
+     * of {@code ExternalMessageClass}es by wrapping each rejection class
+     * into an external message class.
+     *
+     * @param classes the set of rejection classes to transform
+     * @return a set of {@code ExternalMessageClass}es, each wrapping an item from the original set
+     */
     public static Set<ExternalMessageClass> fromRejectionClasses(Set<RejectionClass> classes) {
         checkNotNull(classes);
         final ImmutableSet.Builder<ExternalMessageClass> builder = ImmutableSet.builder();
