@@ -72,7 +72,7 @@ message ExternalMessageType {
     string wrapper_type_url = 2 [(required) = true];
 }
 
-
+// The type of error, that may occur during the `ExternalMessage` validation.
 enum ExternalMessageValidationError {
 
     // Reserved value.
