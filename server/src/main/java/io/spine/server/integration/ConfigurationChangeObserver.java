@@ -75,9 +75,8 @@ class ConfigurationChangeObserver extends AbstractChannelObserver implements Aut
                     requestedTypes.get(newType);
             if (contextsWithSameRequest.isEmpty()) {
 
-                // This item has is not requested by anyone at the moment.
+                // This item has not been requested by anyone yet.
                 // Let's create a subscription.
-
                 registerInAdapter(newType);
             }
 
