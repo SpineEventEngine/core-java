@@ -101,11 +101,11 @@ public class MessageHandlerMap<M extends MessageClass, H extends HandlerMethod>
     /**
      * Obtains classes of messages which handlers satisfy the passed {@code predicate}.
      *
-     * @param predicate a predicate for hander methods to filter the corresponding message classes
+     * @param predicate a predicate for handler methods to filter the corresponding message classes
      */
     public ImmutableSet<M> getMessageClasses(Predicate<H> predicate) {
         final Set<M> matchingKeys = Maps.filterValues(map, predicate)
-                              .keySet();
+                                        .keySet();
         return ImmutableSet.copyOf(matchingKeys);
     }
 
