@@ -51,7 +51,7 @@ import static java.lang.String.format;
  *
  * @author Alex Tymchenko
  */
-class ExternalRejectionSubscriber implements ExternalMessageDispatcher<String> {
+final class ExternalRejectionSubscriber implements ExternalMessageDispatcher<String> {
 
     /** Lazily initialized logger. */
     private final Supplier<Logger> loggerSupplier = Logging.supplyFor(getClass());

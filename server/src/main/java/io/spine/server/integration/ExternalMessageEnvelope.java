@@ -33,7 +33,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *
  * @author Alex Tymchenko
  */
-public class ExternalMessageEnvelope
+public final class ExternalMessageEnvelope
         extends AbstractMessageEnvelope<Message, ExternalMessage, ActorContext> {
 
     /** An identifier of the original message (e.g. event ID). */

@@ -35,7 +35,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alex Tymchenko
  */
-class ExternalMessages {
+final class ExternalMessages {
 
     /** Prevents instantiation on this utility class. */
     private ExternalMessages() {}
