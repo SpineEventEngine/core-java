@@ -21,6 +21,7 @@ package io.spine.server.integration;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
+import io.spine.annotation.SPI;
 import io.spine.type.MessageClass;
 
 import java.util.Map;
@@ -38,6 +39,7 @@ import static java.util.Collections.synchronizedMap;
  *
  * @author Alex Tymchenko
  */
+@SPI
 public abstract class ChannelHub<C extends MessageChannel> implements AutoCloseable {
 
     private final TransportFactory transportFactory;
