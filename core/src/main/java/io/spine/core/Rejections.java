@@ -182,7 +182,7 @@ public final class Rejections {
 
     /**
      * Analyzes the rejection context and determines if the rejection has been produced outside
-     * of the current BoundedContext
+     * of the current BoundedContext.
      *
      * @param context the context of rejection
      * @return {@code true} if the rejection is external, {@code false} otherwise
