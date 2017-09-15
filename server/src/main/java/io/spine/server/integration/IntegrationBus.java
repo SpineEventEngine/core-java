@@ -80,7 +80,7 @@ import static java.lang.String.format;
  * the bus listens to a special document message called {@linkplain RequestForExternalMessages},
  * that describes the needs of other parties.
  *
- * <p>An example.
+ * <h3>An example.
  *
  * <p>Bounded context "Projects" has the external event handler method in the projection as follows:
  * <pre>
