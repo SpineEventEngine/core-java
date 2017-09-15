@@ -26,6 +26,8 @@ import io.spine.core.Ack;
  * Publisher for messages of a specific type.
  *
  * <p>There can be many publishers per message type.
+ *
+ * @author Alex Tymchenko
  */
 public interface Publisher extends MessageChannel {
 
