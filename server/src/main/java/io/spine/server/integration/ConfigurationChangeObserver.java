@@ -53,11 +53,10 @@ class ConfigurationChangeObserver extends AbstractChannelObserver implements Aut
             HashMultimap.create();
 
     ConfigurationChangeObserver(BoundedContextName boundedContextName,
-                                Function<Class<? extends Message>,
-                                        BusAdapter<?, ?>> adapterByClass) {
+                                Function<Class<? extends Message>, BusAdapter<?, ?>> adapterByCls) {
         super(boundedContextName, RequestForExternalMessages.class);
         this.boundedContextName = boundedContextName;
-        this.adapterByClass = adapterByClass;
+        this.adapterByClass = adapterByCls;
     }
 
     @Override
