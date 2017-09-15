@@ -71,7 +71,7 @@ public final class BoundedContext
         implements AutoCloseable {
 
     /** The default name for a {@code BoundedContext}. */
-    static final BoundedContextName DEFAULT_NAME = newName("main");
+    static final BoundedContextName DEFAULT_NAME = newName("Main");
 
     /**
      * The name of the bounded context, which is used to distinguish the context in an application
@@ -127,7 +127,7 @@ public final class BoundedContext
      * @return a newly created name
      */
     public static BoundedContextName newName(String name) {
-        checkNotEmptyOrBlank(name, "Name");
+        checkNotEmptyOrBlank(name, "name");
         final BoundedContextName result = BoundedContextName.newBuilder()
                                                             .setValue(name)
                                                             .build();
