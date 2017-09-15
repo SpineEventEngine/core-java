@@ -34,7 +34,7 @@ import io.spine.server.event.EventDispatcher;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * * An adapter for {@link EventBus} to use it along with {@link IntegrationBus}.
+ * An adapter for {@link EventBus} to use it along with {@link IntegrationBus}.
  *
  * @author Alex Tymchenko
  */
