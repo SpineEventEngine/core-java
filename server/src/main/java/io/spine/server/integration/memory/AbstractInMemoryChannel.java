@@ -38,11 +38,14 @@ abstract class AbstractInMemoryChannel implements MessageChannel {
         this.messageClass = messageClass;
     }
 
-    @SuppressWarnings("NoopMethodInAbstractClass")  // See the method body for the explanation.
+    /**
+     * Does nothing as there is nothing to close in the in-memory local channel implementation.
+     *
+     * @throws Exception never
+     */
+    @SuppressWarnings("NoopMethodInAbstractClass")  // See the Javadoc for the explanation.
     @Override
-    public void close() throws Exception {
-        // There is nothing to close in the in-memory local channel implementation.
-    }
+    public void close() throws Exception {}
 
     @Override
     public ExternalMessageClass getMessageClass() {
