@@ -34,6 +34,9 @@ import io.spine.server.entity.EventDispatchingRepository;
 import io.spine.server.event.EventFilter;
 import io.spine.server.event.EventStore;
 import io.spine.server.event.EventStreamQuery;
+import io.spine.server.integration.ExternalMessageClass;
+import io.spine.server.integration.ExternalMessageDispatcher;
+import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.model.Model;
 import io.spine.server.route.EventProducers;
 import io.spine.server.route.EventRouting;
@@ -44,6 +47,8 @@ import io.spine.type.TypeName;
 
 import javax.annotation.Nullable;
 import java.util.Set;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Abstract base for repositories managing {@link Projection}s.
@@ -228,5 +233,31 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     /** Exposes routing to the package. */
     EventRouting<I> eventRouting() {
         return getEventRouting();
+    }
+
+    @Override
+    protected ExternalMessageDispatcher<I> getExternalEventDispatcher() {
+        return new ProjectionExternalEventDispatcher();
+    }
+
+    /**
+     * An implementation of an external message dispatcher feeding external events
+     * to {@code Projection} instances.
+     */
+    private class ProjectionExternalEventDispatcher extends AbstractExternalEventDispatcher {
+
+        @Override
+        public Set<ExternalMessageClass> getMessageClasses() {
+            final Set<EventClass> eventClasses = projectionClass().getExternalEventSubscriptions();
+            return ExternalMessageClass.fromEventClasses(eventClasses);
+        }
+
+        @Override
+        public void onError(ExternalMessageEnvelope envelope, RuntimeException exception) {
+            checkNotNull(envelope);
+            checkNotNull(exception);
+            logError("Error dispatching external event to projection (class: %s, id: %s)",
+                     envelope, exception);
+        }
     }
 }

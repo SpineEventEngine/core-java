@@ -26,6 +26,7 @@ import com.google.common.base.Throwables;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.Identifier;
+import io.spine.annotation.Internal;
 import io.spine.base.ThrowableMessage;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -51,7 +52,7 @@ public final class Rejections {
     private Rejections() {}
 
     /**
-     * Tells weather the passed message class represents a rejection message.
+     * Tells whether the passed message class represents a rejection message.
      */
     public static boolean isRejection(Class<? extends Message> messageClass) {
         checkNotNull(messageClass);
@@ -177,5 +178,18 @@ public final class Rejections {
         }
         final I id = Identifier.unpack(producerId);
         return Optional.of(id);
+    }
+
+    /**
+     * Analyzes the rejection context and determines if the rejection has been produced outside
+     * of the current bounded context.
+     *
+     * @param context the context of rejection
+     * @return {@code true} if the rejection is external, {@code false} otherwise
+     */
+    @Internal
+    public static boolean isExternal(RejectionContext context) {
+        checkNotNull(context);
+        return context.getExternal();
     }
 }

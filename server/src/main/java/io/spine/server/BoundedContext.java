@@ -27,6 +27,7 @@ import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Experimental;
 import io.spine.annotation.Internal;
 import io.spine.core.Ack;
+import io.spine.core.BoundedContextName;
 import io.spine.core.Event;
 import io.spine.option.EntityOption.Visibility;
 import io.spine.server.commandbus.CommandBus;
@@ -36,6 +37,7 @@ import io.spine.server.entity.Repository;
 import io.spine.server.entity.VisibilityGuard;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventFactory;
+import io.spine.server.integration.IntegrationBus;
 import io.spine.server.integration.IntegrationEvent;
 import io.spine.server.integration.grpc.IntegrationEventSubscriberGrpc;
 import io.spine.server.rejection.RejectionBus;
@@ -56,6 +58,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static io.spine.validate.Validate.checkNameNotEmptyOrBlank;
+import static io.spine.validate.Validate.checkNotEmptyOrBlank;
 
 /**
  * A facade for configuration and entry point for handling commands.
@@ -68,19 +71,20 @@ public final class BoundedContext
         implements AutoCloseable {
 
     /** The default name for a {@code BoundedContext}. */
-    static final String DEFAULT_NAME = "Main";
+    static final BoundedContextName DEFAULT_NAME = newName("Main");
 
     /**
      * The name of the bounded context, which is used to distinguish the context in an application
      * with several bounded contexts.
      */
-    private final String name;
+    private final BoundedContextName name;
 
     /** If {@code true} the bounded context serves many tenants. */
     private final boolean multitenant;
 
     private final CommandBus commandBus;
     private final EventBus eventBus;
+    private final IntegrationBus integrationBus;
     private final Stand stand;
 
     /** Controls access to entities of all repositories registered with this bounded context. */
@@ -94,14 +98,42 @@ public final class BoundedContext
 
     private BoundedContext(Builder builder) {
         super();
-        this.name = builder.name;
+        this.name = newName(builder.name);
         this.multitenant = builder.multitenant;
         this.storageFactory = Suppliers.memoize(builder.storageFactorySupplier);
         this.commandBus = builder.commandBus.build();
         this.eventBus = builder.eventBus.build();
         this.stand = builder.stand.build();
         this.tenantIndex = builder.tenantIndex;
+
+        /*
+         * Additionally initialize the {@code IntegrationBus} with a ready-to-go instances
+         * of {@code EventBus} and {@code FailureBus}.
+         */
+        this.integrationBus = builder.integrationBus.setEventBus(this.eventBus)
+                                                    .setRejectionBus(this.commandBus.rejectionBus())
+                                                    .setBoundedContextName(this.name)
+                                                    .build();
     }
+
+    /**
+     * Creates a new value object for a bounded context name.
+     *
+     * <p>The {@code name} argument value must not be {@code null} or empty.
+     *
+     * <p>This method, however, does not check for the uniqueness of the value passed.
+     *
+     * @param name the unique string name of the {@code BoundedContext}
+     * @return a newly created name
+     */
+    public static BoundedContextName newName(String name) {
+        checkNotEmptyOrBlank(name, "name");
+        final BoundedContextName result = BoundedContextName.newBuilder()
+                                                            .setValue(name)
+                                                            .build();
+        return result;
+    }
+
 
     private void init() {
         stand.onCreated(this);
@@ -124,6 +156,7 @@ public final class BoundedContext
      * <li>Closes associated {@link StorageFactory}.
      * <li>Closes {@link CommandBus}.
      * <li>Closes {@link EventBus}.
+     * <li>Closes {@link IntegrationBus}.
      * <li>Closes {@link CommandStore}.
      * <li>Closes {@link io.spine.server.event.EventStore EventStore}.
      * <li>Closes {@link Stand}.
@@ -142,6 +175,7 @@ public final class BoundedContext
         storageFactory.get().close();
         commandBus.close();
         eventBus.close();
+        integrationBus.close();
         stand.close();
 
         shutDownRepositories();
@@ -168,19 +202,19 @@ public final class BoundedContext
     }
 
     private String nameForLogging() {
-        return getClass().getSimpleName() + ' ' + getName();
+        return getClass().getSimpleName() + ' ' + getName().getValue();
     }
 
     /**
-     * Obtains a name of the bounded context.
+     * Obtains an ID of the bounded context.
      *
-     * <p>The name allows to identify a bounded context if a multi-context application.
-     * If the name was not defined, during the building process, the context would get
+     * <p>The ID allows to identify a bounded context if a multi-context application.
+     * If the ID was not defined, during the building process, the context would get
      * {@link #DEFAULT_NAME}.
      *
-     * @return the name of this {@code BoundedContext}
+     * @return the ID of this {@code BoundedContext}
      */
-    public String getName() {
+    public BoundedContextName getName() {
         return name;
     }
 
@@ -256,6 +290,11 @@ public final class BoundedContext
         return this.commandBus.rejectionBus();
     }
 
+    /** Obtains instance of {@link IntegrationBus} of this {@code BoundedContext}. */
+    public IntegrationBus getIntegrationBus() {
+        return this.integrationBus;
+    }
+
     /** Obtains instance of {@link Stand} of this {@code BoundedContext}. */
     public Stand getStand() {
         return stand;
@@ -287,12 +326,12 @@ public final class BoundedContext
      * A builder for producing {@code BoundedContext} instances.
      *
      * <p>An application can have more than one bounded context. To distinguish
-     * them use {@link #setName(String)}. If no name is given the default name will be assigned.
+     * them use {@link #setName(String)}. If no ID is given the default ID will be assigned.
      */
     @SuppressWarnings("ClassWithTooManyMethods") // OK for this central piece.
     public static class Builder {
 
-        private String name = DEFAULT_NAME;
+        private String name = DEFAULT_NAME.getValue();
         private boolean multitenant;
         private TenantIndex tenantIndex;
         private Supplier<StorageFactory> storageFactorySupplier;
@@ -300,6 +339,7 @@ public final class BoundedContext
         private CommandBus.Builder commandBus;
         private EventBus.Builder eventBus;
         private Stand.Builder stand;
+        private IntegrationBus.Builder integrationBus;
 
         /**
          * Sets the name for a new bounded context.
@@ -309,7 +349,8 @@ public final class BoundedContext
          * <p>It is the responsibility of an application developer to provide meaningful and unique
          * names for bounded contexts. The framework does not check for duplication of names.
          *
-         * @param name a name for a new bounded context. Cannot be null, empty, or blank
+         * @param name an identifier string for a new bounded context.
+         *             Cannot be null, empty, or blank
          */
         public Builder setName(String name) {
             this.name = checkNameNotEmptyOrBlank(name);
@@ -380,6 +421,15 @@ public final class BoundedContext
             return Optional.fromNullable(stand);
         }
 
+        public Builder setIntegrationBus(IntegrationBus.Builder integrationBus) {
+            this.integrationBus = checkNotNull(integrationBus);
+            return this;
+        }
+
+        public Optional<IntegrationBus.Builder> getIntegrationBus() {
+            return Optional.fromNullable(integrationBus);
+        }
+
         public Builder setTenantIndex(TenantIndex tenantIndex) {
             if (this.multitenant) {
                 checkNotNull(tenantIndex,
@@ -396,6 +446,7 @@ public final class BoundedContext
             initCommandBus(storageFactory);
             initEventBus(storageFactory);
             initStand(storageFactory);
+            initIntegrationBus();
 
             final BoundedContext result = new BoundedContext(this);
             result.init();
@@ -405,7 +456,7 @@ public final class BoundedContext
 
         private StorageFactory getStorageFactory() {
             if (storageFactorySupplier == null) {
-                storageFactorySupplier = StorageFactorySwitch.newInstance(name, multitenant);
+                storageFactorySupplier = StorageFactorySwitch.newInstance(newName(name), multitenant);
             }
 
             final StorageFactory storageFactory = storageFactorySupplier.get();
@@ -476,6 +527,12 @@ public final class BoundedContext
                                             "Status in BoundedContext.Builder: %s Stand: %s",
                                    standMultitenant);
                 }
+            }
+        }
+
+        private void initIntegrationBus() {
+            if(integrationBus == null) {
+                integrationBus = IntegrationBus.newBuilder();
             }
         }
 

@@ -24,6 +24,8 @@ import io.spine.server.entity.Entity;
 import io.spine.server.stand.StandStorage;
 import io.spine.server.stand.StandStorageShould;
 
+import static io.spine.server.BoundedContext.newName;
+
 /**
  * @author Dmytro Dashenkov
  */
@@ -32,7 +34,7 @@ public class InMemoryStandStorageShould extends StandStorageShould {
     @Override
     protected StandStorage getStorage(Class<? extends Entity> cls) {
         return InMemoryStandStorage.newBuilder()
-                                   .setBoundedContextName(getClass().getSimpleName())
+                                   .setBoundedContextName(newName(getClass().getSimpleName()))
                                    .setMultitenant(false)
                                    .build();
     }

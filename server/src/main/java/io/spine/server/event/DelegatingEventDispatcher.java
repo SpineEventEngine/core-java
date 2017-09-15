@@ -21,13 +21,25 @@
 package io.spine.server.event;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.base.Supplier;
 import io.spine.annotation.Internal;
+import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
+import io.spine.server.integration.ExternalMessage;
+import io.spine.server.integration.ExternalMessageClass;
+import io.spine.server.integration.ExternalMessageDispatcher;
+import io.spine.server.integration.ExternalMessageEnvelope;
+import io.spine.string.Stringifiers;
+import io.spine.type.MessageClass;
+import io.spine.util.Logging;
+import org.slf4j.Logger;
 
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.protobuf.AnyPacker.unpack;
+import static java.lang.String.format;
 
 /**
  * A {@link EventDispatcher} which delegates the responsibilities to an aggregated {@link
@@ -44,6 +56,9 @@ public final class DelegatingEventDispatcher<I> implements EventDispatcher<I> {
      * A target delegate.
      */
     private final EventDispatcherDelegate<I> delegate;
+
+    /** Lazily initialized logger. */
+    private final Supplier<Logger> loggerSupplier = Logging.supplyFor(getClass());
 
     /**
      * Creates a new instance of {@code DelegatingCommandDispatcher}, proxying the calls
@@ -74,6 +89,44 @@ public final class DelegatingEventDispatcher<I> implements EventDispatcher<I> {
     @Override
     public void onError(EventEnvelope envelope, RuntimeException exception) {
         delegate.onError(envelope, exception);
+    }
+
+    /**
+     * Wraps this dispatcher to an external event dispatcher.
+     *
+     * @return the external rejection dispatcher proxying calls to the underlying instance
+     */
+    public ExternalMessageDispatcher<I> getExternalDispatcher() {
+        return new ExternalMessageDispatcher<I>() {
+            @Override
+            public Set<ExternalMessageClass> getMessageClasses() {
+                final Set<EventClass> eventClasses = delegate.getExternalEventClasses();
+                return ExternalMessageClass.fromEventClasses(eventClasses);
+            }
+
+            @Override
+            public Set<I> dispatch(ExternalMessageEnvelope envelope) {
+                final ExternalMessage externalMessage = envelope.getOuterObject();
+                final Event event = unpack(externalMessage.getOriginalMessage());
+                final Set<I> ids = delegate.dispatchEvent(EventEnvelope.of(event));
+                return ids;
+            }
+
+            @Override
+            public void onError(ExternalMessageEnvelope envelope, RuntimeException exception) {
+
+                final MessageClass messageClass = envelope.getMessageClass();
+                final String messageId = Stringifiers.toString(envelope.getId());
+                final String errorMessage =
+                        format("Error dispatching external event (class: %s, id: %s)",
+                               messageClass, messageId);
+                log().error(errorMessage, exception);
+            }
+        };
+    }
+
+    private Logger log() {
+        return loggerSupplier.get();
     }
 
     /**

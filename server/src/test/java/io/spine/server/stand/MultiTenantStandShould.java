@@ -41,6 +41,7 @@ import org.junit.Test;
 import java.util.Map;
 
 import static io.spine.core.given.GivenTenantId.newUuid;
+import static io.spine.server.BoundedContext.newName;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -84,7 +85,7 @@ public class MultiTenantStandShould extends StandShould {
     @Test
     public void not_trigger_updates_of_aggregate_records_for_another_tenant_subscriptions() {
         final StandStorage standStorage =
-                InMemoryStorageFactory.newInstance(getClass().getSimpleName(),
+                InMemoryStorageFactory.newInstance(newName(getClass().getSimpleName()),
                                                    isMultitenant())
                                       .createStandStorage();
         final Stand stand = prepareStandWithAggregateRepo(standStorage);
@@ -103,9 +104,10 @@ public class MultiTenantStandShould extends StandShould {
                                                                              Customer.class);
 
         // Trigger updates in Default Tenant.
-        final Map.Entry<CustomerId, Customer> sampleData = fillSampleCustomers(1).entrySet()
-                                                                                 .iterator()
-                                                                                 .next();
+        final Map.Entry<CustomerId, Customer> sampleData =
+                fillSampleCustomers(1).entrySet()
+                                      .iterator()
+                                      .next();
         final CustomerId customerId = sampleData.getKey();
         final Customer customer = sampleData.getValue();
         final Version stateVersion = GivenVersion.withNumber(1);

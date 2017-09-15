@@ -20,8 +20,10 @@
 
 package io.spine.server.rejection;
 
+import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
 import io.spine.core.RejectionClass;
+import io.spine.server.model.HandlerMethods;
 import io.spine.server.model.MessageHandlerMap;
 import io.spine.server.model.ModelClass;
 
@@ -34,16 +36,24 @@ import java.util.Set;
  * @author Alexander Yevsyukov
  */
 @Internal
+@SuppressWarnings("ReturnOfCollectionOrArrayField")     // returning an immutable impl.
 public final class RejectionSubscriberClass<S extends RejectionSubscriber> extends ModelClass<S> {
 
     private static final long serialVersionUID = 0L;
 
     private final
     MessageHandlerMap<RejectionClass, RejectionSubscriberMethod> rejectionSubscriptions;
+    private final ImmutableSet<RejectionClass> domesticSubscriptions;
+    private final ImmutableSet<RejectionClass> externalSubscriptions;
 
     private RejectionSubscriberClass(Class<? extends S> cls) {
         super(cls);
         rejectionSubscriptions = new MessageHandlerMap<>(cls, RejectionSubscriberMethod.factory());
+
+        this.domesticSubscriptions = rejectionSubscriptions.getMessageClasses(
+                HandlerMethods.<RejectionSubscriberMethod>domesticPredicate());
+        this.externalSubscriptions = rejectionSubscriptions.getMessageClasses(
+                HandlerMethods.<RejectionSubscriberMethod>externalPredicate());
     }
 
     /**
@@ -54,7 +64,12 @@ public final class RejectionSubscriberClass<S extends RejectionSubscriber> exten
     }
 
     Set<RejectionClass> getRejectionSubscriptions() {
-        return rejectionSubscriptions.getMessageClasses();
+        return domesticSubscriptions;
+    }
+
+    @SuppressWarnings("InstanceMethodNamingConvention")     // it's long to reflect the aim.
+    public Set<RejectionClass> getExternalRejectionSubscriptions() {
+        return externalSubscriptions;
     }
 
     RejectionSubscriberMethod getSubscriber(RejectionClass cls) {

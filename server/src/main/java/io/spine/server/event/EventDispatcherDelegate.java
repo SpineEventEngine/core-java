@@ -48,6 +48,11 @@ public interface EventDispatcherDelegate<I> {
     Set<EventClass> getEventClasses();
 
     /**
+     * Obtains external event classes dispatched by this delegate.
+     */
+    Set<EventClass> getExternalEventClasses();
+
+    /**
      * Dispatches the event.
      */
     Set<I> dispatchEvent(EventEnvelope envelope);

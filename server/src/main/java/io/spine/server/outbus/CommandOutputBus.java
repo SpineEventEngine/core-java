@@ -19,7 +19,6 @@
  */
 package io.spine.server.outbus;
 
-import com.google.common.base.Function;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.Identifier;
@@ -28,16 +27,11 @@ import io.spine.core.Ack;
 import io.spine.core.Event;
 import io.spine.core.MessageEnvelope;
 import io.spine.core.Rejection;
-import io.spine.server.bus.Bus;
 import io.spine.server.bus.MessageDispatcher;
-import io.spine.server.delivery.Delivery;
+import io.spine.server.bus.MulticastBus;
+import io.spine.server.delivery.MulticastDelivery;
 import io.spine.type.MessageClass;
 
-import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.Set;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static io.spine.server.bus.Buses.acknowledge;
 import static java.lang.String.format;
@@ -62,36 +56,10 @@ public abstract class CommandOutputBus<M extends Message,
                                        E extends MessageEnvelope<?, M, ?>,
                                        C extends MessageClass,
                                        D extends MessageDispatcher<C, E, ?>>
-                extends Bus<M, E, C, D> {
+        extends MulticastBus<M, E, C, D> {
 
-    /**
-     * The strategy to deliver the messages to the dispatchers.
-     */
-    private final CommandOutputDelivery<E, C, D> delivery;
-
-    protected CommandOutputBus(CommandOutputDelivery<E, C, D> delivery) {
-        super();
-        this.delivery = delivery;
-        injectDispatcherProvider();
-    }
-
-    /**
-     * Sets up the {@code CommandOutputDelivery} with an ability to obtain
-     * {@linkplain MessageDispatcher message dispatchers} by a given
-     * {@linkplain MessageClass message class} instance at runtime.
-     */
-    private void injectDispatcherProvider() {
-        delivery().setConsumerProvider(
-                new Function<C, Set<D>>() {
-                    @Nullable
-                    @Override
-                    public Set<D> apply(@Nullable C messageClass) {
-                        checkNotNull(messageClass);
-                        final Set<D> dispatchers =
-                                registry().getDispatchers(messageClass);
-                        return dispatchers;
-                    }
-                });
+    protected CommandOutputBus(MulticastDelivery<E, C, D> delivery) {
+        super(delivery);
     }
 
     /**
@@ -102,15 +70,6 @@ public abstract class CommandOutputBus<M extends Message,
      *         be enriched
      */
     protected abstract E enrich(E originalMessage);
-
-    /**
-     * Obtains the {@linkplain Delivery delivery strategy} configured for this bus.
-     *
-     * @return the delivery strategy
-     */
-    protected CommandOutputDelivery<E, C, D> delivery() {
-        return this.delivery;
-    }
 
     /**
      * {@inheritDoc}
@@ -130,20 +89,6 @@ public abstract class CommandOutputBus<M extends Message,
                    format("Message %s has no dispatchers.", envelope.getMessage()));
         final Ack result = acknowledge(packedId);
         return result;
-    }
-
-    /**
-     * Call the dispatchers for the {@code eventEnvelope}.
-     *
-     * @param messageEnvelope the event envelope to pass to the dispatchers.
-     * @return the number of the dispatchers called, or {@code 0} if there weren't any.
-     */
-    private int callDispatchers(E messageEnvelope) {
-        @SuppressWarnings("unchecked")  // it's fine, since the message is validated previously.
-        final C messageClass = (C) messageEnvelope.getMessageClass();
-        final Collection<D> dispatchers = registry().getDispatchers(messageClass);
-        delivery().deliver(messageEnvelope);
-        return dispatchers.size();
     }
 
     /**

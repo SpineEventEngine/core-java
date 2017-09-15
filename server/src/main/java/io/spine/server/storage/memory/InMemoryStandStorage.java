@@ -22,6 +22,7 @@ package io.spine.server.storage.memory;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.protobuf.FieldMask;
+import io.spine.core.BoundedContextName;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
@@ -163,14 +164,14 @@ class InMemoryStandStorage extends StandStorage {
 
     public static class Builder {
 
-        private String boundedContextName;
+        private BoundedContextName boundedContextName;
         private boolean multitenant;
 
         public boolean isMultitenant() {
             return multitenant;
         }
 
-        public Builder setBoundedContextName(String boundedContextName) {
+        public Builder setBoundedContextName(BoundedContextName boundedContextName) {
             this.boundedContextName = boundedContextName;
             return this;
         }

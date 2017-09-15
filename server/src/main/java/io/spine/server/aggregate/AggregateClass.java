@@ -20,6 +20,7 @@
 
 package io.spine.server.aggregate;
 
+import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
 import io.spine.core.CommandClass;
 import io.spine.core.EventClass;
@@ -28,6 +29,7 @@ import io.spine.server.command.CommandHandlerMethod;
 import io.spine.server.command.CommandHandlingClass;
 import io.spine.server.entity.EntityClass;
 import io.spine.server.event.EventReactorMethod;
+import io.spine.server.model.HandlerMethods;
 import io.spine.server.model.MessageHandlerMap;
 import io.spine.server.rejection.RejectionReactorMethod;
 
@@ -54,6 +56,11 @@ public class AggregateClass<A extends Aggregate>
     private final MessageHandlerMap<EventClass, EventReactorMethod> eventReactions;
     private final MessageHandlerMap<RejectionClass, RejectionReactorMethod> rejectionReactions;
 
+    private final ImmutableSet<EventClass> domesticEventReactions;
+    private final ImmutableSet<EventClass> externalEventReactions;
+    private final ImmutableSet<RejectionClass> domesticRejectionReactions;
+    private final ImmutableSet<RejectionClass> externalRejectionReactions;
+
     /** Creates new instance. */
     public AggregateClass(Class<? extends A> cls) {
         super(checkNotNull(cls));
@@ -61,6 +68,16 @@ public class AggregateClass<A extends Aggregate>
         this.stateEvents = new MessageHandlerMap<>(cls, EventApplierMethod.factory());
         this.eventReactions = new MessageHandlerMap<>(cls, EventReactorMethod.factory());
         this.rejectionReactions = new MessageHandlerMap<>(cls, RejectionReactorMethod.factory());
+
+        this.domesticEventReactions = this.eventReactions.getMessageClasses(
+                HandlerMethods.<EventReactorMethod>domesticPredicate());
+        this.externalEventReactions = this.eventReactions.getMessageClasses(
+                HandlerMethods.<EventReactorMethod>externalPredicate());
+
+        this.domesticRejectionReactions = this.rejectionReactions.getMessageClasses(
+                HandlerMethods.<RejectionReactorMethod>domesticPredicate());
+        this.externalRejectionReactions = this.rejectionReactions.getMessageClasses(
+                HandlerMethods.<RejectionReactorMethod>externalPredicate());
     }
 
     /**
@@ -72,11 +89,19 @@ public class AggregateClass<A extends Aggregate>
     }
 
     Set<EventClass> getEventReactions() {
-        return eventReactions.getMessageClasses();
+        return domesticEventReactions;
+    }
+
+    Set<EventClass> getExternalEventReactions() {
+        return externalEventReactions;
     }
 
     Set<RejectionClass> getRejectionReactions() {
-        return rejectionReactions.getMessageClasses();
+        return domesticRejectionReactions;
+    }
+
+    Set<RejectionClass> getExternalRejectionReactions() {
+        return externalRejectionReactions;
     }
 
     CommandHandlerMethod getHandler(CommandClass commandClass) {

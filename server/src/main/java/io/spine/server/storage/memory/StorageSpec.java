@@ -21,13 +21,14 @@
 package io.spine.server.storage.memory;
 
 import com.google.common.base.MoreObjects;
+import io.spine.core.BoundedContextName;
 import io.spine.type.TypeUrl;
 
 import java.io.Serializable;
 import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.validate.Validate.checkNotEmptyOrBlank;
+import static io.spine.validate.Validate.checkNotDefault;
 
 /**
  * Attributes for accessing in-memory storage over in-process gRPC.
@@ -40,32 +41,33 @@ public final class StorageSpec<I> implements Serializable {
 
     private static final long serialVersionUID = 0L;
     
+    @SuppressWarnings("DuplicateStringLiteralInspection")   // duplicates have different purpose.
     private static final String FLD_BOUNDED_CONTEXT_NAME = "boundedContextName";
     private static final String FLD_ENTITY_STATE_URL = "entityStateUrl";
     private static final String FLD_ID_CLASS = "idClass";
 
-    private final String boundedContextName;
+    private final BoundedContextName boundedContextName;
     private final TypeUrl entityStateUrl;
     private final Class<I> idClass;
 
-    public static <I> StorageSpec<I> of(String boundedContextName,
+    public static <I> StorageSpec<I> of(BoundedContextName boundedContextName,
                                      TypeUrl entityStateUrl,
                                      Class<I> idClass) {
         checkNotNull(boundedContextName);
         checkNotNull(entityStateUrl);
         checkNotNull(idClass);
-        checkNotEmptyOrBlank(boundedContextName, FLD_BOUNDED_CONTEXT_NAME);
+        checkNotDefault(boundedContextName);
         return new StorageSpec<>(boundedContextName, entityStateUrl, idClass);
     }
 
-    private StorageSpec(String boundedContextName, TypeUrl entityStateUrl,
+    private StorageSpec(BoundedContextName boundedContextName, TypeUrl entityStateUrl,
                         Class<I> idClass) {
         this.boundedContextName = boundedContextName;
         this.entityStateUrl = entityStateUrl;
         this.idClass = idClass;
     }
 
-    public String getBoundedContextName() {
+    public BoundedContextName getBoundedContextName() {
         return boundedContextName;
     }
 

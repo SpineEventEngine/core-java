@@ -156,7 +156,7 @@ public abstract class EntityMessageEndpoint<I,
     }
 
     /**
-     * Verifies weather the entity was modified during the message dispatching.
+     * Verifies whether the entity was modified during the message dispatching.
      */
     protected abstract boolean isModified(E entity);
 

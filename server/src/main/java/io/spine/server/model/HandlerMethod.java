@@ -22,6 +22,7 @@ package io.spine.server.model;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
@@ -40,6 +41,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Collections.emptyList;
@@ -67,6 +69,9 @@ public abstract class HandlerMethod<C extends Message> {
     /** The number of parameters the method has. */
     private final int paramCount;
 
+    /** The set of the metadata attributes set via method annotations. */
+    private final Set<MethodAttribute<?>> attributes;
+
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
      *
@@ -76,6 +81,7 @@ public abstract class HandlerMethod<C extends Message> {
         this.method = checkNotNull(method);
         this.messageClass = getFirstParamType(method);
         this.paramCount = method.getParameterTypes().length;
+        this.attributes = discoverAttributes(method);
         method.setAccessible(true);
     }
 
@@ -182,6 +188,17 @@ public abstract class HandlerMethod<C extends Message> {
     /** Returns the count of the method parameters. */
     protected int getParamCount() {
         return paramCount;
+    }
+
+    /** Returns the set of method attributes configured for this method. */
+    public final Set<MethodAttribute<?>> getAttributes() {
+        return attributes;
+    }
+
+    private static Set<MethodAttribute<?>> discoverAttributes(Method method) {
+        checkNotNull(method);
+        final ExternalAttribute externalAttribute = ExternalAttribute.of(method);
+        return ImmutableSet.<MethodAttribute<?>>of(externalAttribute);
     }
 
     /**

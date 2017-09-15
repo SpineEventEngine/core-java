@@ -22,6 +22,7 @@ package io.spine.server.storage;
 
 import com.google.common.base.Supplier;
 import io.spine.Environment;
+import io.spine.core.BoundedContextName;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -29,6 +30,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import static io.spine.server.BoundedContext.newName;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -67,15 +69,7 @@ public class StorageFactorySwitchShould {
 
     private final boolean multitenant;
 
-    protected StorageFactorySwitchShould(boolean multitenant) {
-        this.multitenant = multitenant;
-    }
-
-    public StorageFactorySwitchShould() {
-        this(false);
-    }
-
-    private final String boundedContextName = getClass().getSimpleName();
+    private final BoundedContextName boundedContextName = newName(getClass().getSimpleName());
     private final Supplier<StorageFactory> testsSupplier = new Supplier<StorageFactory>() {
         @Override
         public StorageFactory get() {
@@ -89,6 +83,14 @@ public class StorageFactorySwitchShould {
             return InMemoryStorageFactory.newInstance(boundedContextName, multitenant);
         }
     };
+
+    protected StorageFactorySwitchShould(boolean multitenant) {
+        this.multitenant = multitenant;
+    }
+
+    public StorageFactorySwitchShould() {
+        this(false);
+    }
 
     @Before
     public void setUp() throws NoSuchFieldException, IllegalAccessException {

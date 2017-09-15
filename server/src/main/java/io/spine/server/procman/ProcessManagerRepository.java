@@ -36,6 +36,9 @@ import io.spine.server.commandbus.CommandDispatcherDelegate;
 import io.spine.server.commandbus.DelegatingCommandDispatcher;
 import io.spine.server.entity.EventDispatchingRepository;
 import io.spine.server.event.EventBus;
+import io.spine.server.integration.ExternalMessageClass;
+import io.spine.server.integration.ExternalMessageDispatcher;
+import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.model.Model;
 import io.spine.server.rejection.DelegatingRejectionDispatcher;
 import io.spine.server.rejection.RejectionDispatcherDelegate;
@@ -47,6 +50,8 @@ import io.spine.server.route.RejectionRouting;
 
 import javax.annotation.CheckReturnValue;
 import java.util.Set;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * The abstract base for Process Managers repositories.
@@ -117,6 +122,14 @@ public abstract class ProcessManagerRepository<I,
             boundedContext.getRejectionBus()
                           .register(rejectionDispatcher);
         }
+
+        final ExternalMessageDispatcher<I> extRejectionDispatcher =
+                rejectionDispatcher.getExternalDispatcher();
+        if (!extRejectionDispatcher.getMessageClasses()
+                                   .isEmpty()) {
+            boundedContext.getIntegrationBus()
+                          .register(extRejectionDispatcher);
+        }
     }
 
     /**
@@ -156,13 +169,26 @@ public abstract class ProcessManagerRepository<I,
      * Obtains a set of rejection classes on which process managers of
      * this repository are subscribed.
      *
-     * @return a set of event classes or empty set if process managers
+     * @return a set of rejection classes or empty set if process managers
      * are not subscribed to rejections
      */
     @Override
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // it is immutable
     public Set<RejectionClass> getRejectionClasses() {
         return processManagerClass().getRejectionReactions();
+    }
+
+    /**
+     * Obtains a set of external rejection classes on which process managers of
+     * this repository are subscribed.
+     *
+     * @return a set of external rejection classes or empty set if process managers
+     * are not subscribed to external rejections
+     */
+    @Override
+    @SuppressWarnings("ReturnOfCollectionOrArrayField") // it is immutable
+    public Set<RejectionClass> getExternalRejectionClasses() {
+        return processManagerClass().getExternalRejectionReactions();
     }
 
     /**
@@ -316,5 +342,34 @@ public abstract class ProcessManagerRepository<I,
     @SPI
     protected PmCommandDelivery<I, P> getCommandEndpointDelivery() {
         return PmCommandDelivery.directDelivery(this);
+    }
+
+    @Override
+    protected ExternalMessageDispatcher<I> getExternalEventDispatcher() {
+        return new PmExternalEventDispatcher();
+    }
+
+    /**
+     * An implementation of an external message dispatcher feeding external events
+     * to {@code ProcessManager} instances.
+     */
+    private class PmExternalEventDispatcher extends AbstractExternalEventDispatcher {
+
+        @Override
+        public Set<ExternalMessageClass> getMessageClasses() {
+            final ProcessManagerClass<?> pmClass = Model.getInstance()
+                                                        .asProcessManagerClass(getEntityClass());
+            final Set<EventClass> eventClasses = pmClass.getExternalEventReactions();
+            return ExternalMessageClass.fromEventClasses(eventClasses);
+        }
+
+        @Override
+        public void onError(ExternalMessageEnvelope envelope, RuntimeException exception) {
+            checkNotNull(envelope);
+            checkNotNull(exception);
+            logError("Error dispatching external event to process manager" +
+                             " (class: %s, id: %s)",
+                     envelope, exception);
+        }
     }
 }

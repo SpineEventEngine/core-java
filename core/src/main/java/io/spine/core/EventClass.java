@@ -37,6 +37,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public final class EventClass extends MessageClass {
 
+    private static final long serialVersionUID = 0L;
+
     private EventClass(Class<? extends Message> value) {
         super(value);
     }

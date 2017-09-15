@@ -179,6 +179,7 @@ public class RejectionSubscriberMethodShould {
     }
 
     private static void assertIsRejectionSubscriber(Method subscriber, boolean isSubscriber) {
-        assertEquals(isSubscriber, RejectionSubscriberMethod.predicate().apply(subscriber));
+        assertEquals(isSubscriber,
+                     RejectionSubscriberMethod.predicate().apply(subscriber));
     }
 }

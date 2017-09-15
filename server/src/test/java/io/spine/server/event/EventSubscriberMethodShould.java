@@ -146,7 +146,7 @@ public class EventSubscriberMethodShould {
     @Test
     public void filter_out_rejection_subscribers() {
         final Method rejectionSubscriber = new ARejectionSubscriber().getMethod();
-        
+
         assertIsEventSubscriber(rejectionSubscriber, false);
     }
 

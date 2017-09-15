@@ -22,6 +22,7 @@ package io.spine.server.model;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.protobuf.Message;
 import io.spine.type.MessageClass;
@@ -95,6 +96,17 @@ public class MessageHandlerMap<M extends MessageClass, H extends HandlerMethod>
      */
     public Set<M> getMessageClasses() {
         return map.keySet();
+    }
+
+    /**
+     * Obtains classes of messages which handlers satisfy the passed {@code predicate}.
+     *
+     * @param predicate a predicate for handler methods to filter the corresponding message classes
+     */
+    public ImmutableSet<M> getMessageClasses(Predicate<H> predicate) {
+        final Set<M> matchingKeys = Maps.filterValues(map, predicate)
+                                        .keySet();
+        return ImmutableSet.copyOf(matchingKeys);
     }
 
     /**

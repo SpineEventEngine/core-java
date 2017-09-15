@@ -31,6 +31,7 @@ import io.spine.type.TypeUrl;
 import org.junit.Test;
 
 import static io.spine.Identifier.newUuid;
+import static io.spine.server.BoundedContext.newName;
 import static java.lang.String.format;
 import static java.lang.System.nanoTime;
 import static org.junit.Assert.assertEquals;
@@ -43,7 +44,7 @@ public class InMemoryRecordStorageShould
 
     @Override
     protected RecordStorage<ProjectId> getStorage(Class<? extends Entity> cls) {
-        final StorageSpec<ProjectId> spec = StorageSpec.of(getClass().getSimpleName(),
+        final StorageSpec<ProjectId> spec = StorageSpec.of(newName(getClass().getSimpleName()),
                                                            TypeUrl.of(Project.class),
                                                            ProjectId.class);
         return InMemoryRecordStorage.newInstance(spec, false);

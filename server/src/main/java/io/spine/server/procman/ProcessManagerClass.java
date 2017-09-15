@@ -20,6 +20,7 @@
 
 package io.spine.server.procman;
 
+import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
 import io.spine.core.CommandClass;
 import io.spine.core.EventClass;
@@ -28,6 +29,7 @@ import io.spine.server.command.CommandHandlerMethod;
 import io.spine.server.command.CommandHandlingClass;
 import io.spine.server.entity.EntityClass;
 import io.spine.server.event.EventReactorMethod;
+import io.spine.server.model.HandlerMethods;
 import io.spine.server.model.MessageHandlerMap;
 import io.spine.server.rejection.RejectionReactorMethod;
 
@@ -42,6 +44,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alexander Yevsyukov
  */
 @Internal
+@SuppressWarnings("ReturnOfCollectionOrArrayField") // returning an immutable impl.
 public final class ProcessManagerClass<P extends ProcessManager>
         extends EntityClass<P>
         implements CommandHandlingClass {
@@ -49,14 +52,30 @@ public final class ProcessManagerClass<P extends ProcessManager>
     private static final long serialVersionUID = 0L;
 
     private final MessageHandlerMap<CommandClass, CommandHandlerMethod> commands;
-    private final MessageHandlerMap<EventClass, EventReactorMethod> eventReactions;
-    private final MessageHandlerMap<RejectionClass, RejectionReactorMethod> rejectionReactions;
+    private final MessageHandlerMap<EventClass, EventReactorMethod> eventReactors;
+    private final MessageHandlerMap<RejectionClass, RejectionReactorMethod> rejectionReactors;
+
+    private final ImmutableSet<EventClass> domesticEventReactions;
+    private final ImmutableSet<EventClass> externalEventReactions;
+    private final ImmutableSet<RejectionClass> domesticRejectionReactions;
+    private final ImmutableSet<RejectionClass> externalRejectionReactions;
+
 
     private ProcessManagerClass(Class<? extends P> cls) {
         super(cls);
         this.commands = new MessageHandlerMap<>(cls, CommandHandlerMethod.factory());
-        this.eventReactions = new MessageHandlerMap<>(cls, EventReactorMethod.factory());
-        this.rejectionReactions = new MessageHandlerMap<>(cls, RejectionReactorMethod.factory());
+        this.eventReactors =  new MessageHandlerMap<>(cls, EventReactorMethod.factory());
+        this.rejectionReactors =  new MessageHandlerMap<>(cls, RejectionReactorMethod.factory());
+
+        this.domesticEventReactions = this.eventReactors.getMessageClasses(
+                HandlerMethods.<EventReactorMethod>domesticPredicate());
+        this.externalEventReactions = this.eventReactors.getMessageClasses(
+                HandlerMethods.<EventReactorMethod>externalPredicate());
+
+        this.domesticRejectionReactions = this.rejectionReactors.getMessageClasses(
+                HandlerMethods.<RejectionReactorMethod>domesticPredicate());
+        this.externalRejectionReactions = this.rejectionReactors.getMessageClasses(
+                HandlerMethods.<RejectionReactorMethod>externalPredicate());
     }
 
     public static <P extends ProcessManager> ProcessManagerClass<P> of(Class<P> cls) {
@@ -73,11 +92,19 @@ public final class ProcessManagerClass<P extends ProcessManager>
     }
 
     Set<EventClass> getEventReactions() {
-        return eventReactions.getMessageClasses();
+        return domesticEventReactions;
+    }
+
+    Set<EventClass> getExternalEventReactions() {
+        return externalEventReactions;
     }
 
     Set<RejectionClass> getRejectionReactions() {
-        return rejectionReactions.getMessageClasses();
+        return domesticRejectionReactions;
+    }
+
+    Set<RejectionClass> getExternalRejectionReactions() {
+        return externalRejectionReactions;
     }
 
     CommandHandlerMethod getHandler(CommandClass commandClass) {
@@ -85,10 +112,10 @@ public final class ProcessManagerClass<P extends ProcessManager>
     }
 
     EventReactorMethod getReactor(EventClass eventClass) {
-        return eventReactions.getMethod(eventClass);
+        return eventReactors.getMethod(eventClass);
     }
 
     RejectionReactorMethod getReactor(RejectionClass rejectionClass) {
-        return rejectionReactions.getMethod(rejectionClass);
+        return rejectionReactors.getMethod(rejectionClass);
     }
 }

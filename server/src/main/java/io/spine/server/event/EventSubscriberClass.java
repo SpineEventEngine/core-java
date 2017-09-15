@@ -20,8 +20,10 @@
 
 package io.spine.server.event;
 
+import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
 import io.spine.core.EventClass;
+import io.spine.server.model.HandlerMethods;
 import io.spine.server.model.MessageHandlerMap;
 import io.spine.server.model.ModelClass;
 
@@ -36,15 +38,23 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alexander Yevsyukov
  */
 @Internal
+@SuppressWarnings("ReturnOfCollectionOrArrayField")     // returning an immutable impl.
 public final class EventSubscriberClass<S extends EventSubscriber> extends ModelClass<S> {
 
     private static final long serialVersionUID = 0L;
 
     private final MessageHandlerMap<EventClass, EventSubscriberMethod> eventSubscriptions;
+    private final ImmutableSet<EventClass> domesticSubscriptions;
+    private final ImmutableSet<EventClass> externalSubscriptions;
 
     private EventSubscriberClass(Class<? extends S> cls) {
         super(cls);
         this.eventSubscriptions = new MessageHandlerMap<>(cls, EventSubscriberMethod.factory());
+
+        this.domesticSubscriptions = this.eventSubscriptions.getMessageClasses(
+                HandlerMethods.<EventSubscriberMethod>domesticPredicate());
+        this.externalSubscriptions = this.eventSubscriptions.getMessageClasses(
+                HandlerMethods.<EventSubscriberMethod>externalPredicate());
     }
 
     /**
@@ -56,7 +66,11 @@ public final class EventSubscriberClass<S extends EventSubscriber> extends Model
     }
 
     Set<EventClass> getEventSubscriptions() {
-        return eventSubscriptions.getMessageClasses();
+        return domesticSubscriptions;
+    }
+
+    public Set<EventClass> getExternalEventSubscriptions() {
+        return externalSubscriptions;
     }
 
     EventSubscriberMethod getSubscriber(EventClass eventClass) {

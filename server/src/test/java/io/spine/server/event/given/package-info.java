@@ -19,7 +19,7 @@
  */
 
 /**
- * Test environment classes for tests of the {@code server.event} package.
+ * Test environment classes for tests of the {@code io.spine.server.event} package.
  */
 
 @ParametersAreNonnullByDefault

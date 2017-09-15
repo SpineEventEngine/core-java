@@ -1,0 +1,83 @@
+//
+// Copyright 2017, TeamDev Ltd. All rights reserved.
+//
+// Redistribution and use in source and/or binary forms, with or without
+// modification, must retain the above copyright notice and the following
+// disclaimer.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+syntax = "proto3";
+
+package spine.server.integration;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.server.integration";
+option java_multiple_files = true;
+option java_outer_classname = "IntegrationBusProto";
+option java_generate_equals_and_hash = true;
+
+import "google/protobuf/any.proto";
+
+import "spine/core/actor_context.proto";
+import "spine/core/bounded_context.proto";
+
+// A wrapper around a message, which is used to send/receive the original message
+// to/from external application components, such as other bounded contexts.
+message ExternalMessage {
+
+    // An ID of the original message wrapped to `Any` (e.g. an event ID).
+    google.protobuf.Any id = 1 [(required) = true];
+
+    // An original message wrapped to `Any` (e.g. a wrapped instance of `io.spine.core.Event`).
+    google.protobuf.Any original_message = 2 [(required) = true];
+
+    // Information about the environment of the user who created the original message.
+    spine.core.ActorContext actor_context = 3 [(required) = true];
+
+    // Name of the bounded context, within which an original message was created.
+    spine.core.BoundedContextName bounded_context_name = 4 [(required) = true];
+}
+
+// A document message, describing types of messages,
+// requested by some part of the system.
+//
+// One of the typical scenarios is a notification shoout out from the current bounded context
+// to other bounded contexts of the application about its `external` subscription needs.
+message RequestForExternalMessages {
+
+    // Multiple types may be requested at a time.
+    repeated ExternalMessageType requested_message_types = 1;
+}
+
+// The type of message requested by some part of the system.
+message ExternalMessageType {
+
+    // Type URL of the message (e.g. `io.spine.examples.TaskCreated`).
+    string message_type_url = 1 [(required) = true];
+
+    // Type URL of the wrapper, that is used to hold the message (e.g. `io.spine.core.Event`).
+    string wrapper_type_url = 2 [(required) = true];
+}
+
+// The type of error, that may occur during the `ExternalMessage` validation.
+enum ExternalMessageValidationError {
+
+    // Reserved value.
+    EM_UNKNOWN_REASON = 0;
+
+    // The external message type is not supported by the server.
+    UNSUPPORTED_EXTERNAL_MESSAGE = 1;
+}

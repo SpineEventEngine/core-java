@@ -21,6 +21,7 @@
 package io.spine.server.event;
 
 import com.google.common.base.Predicate;
+import com.google.protobuf.Message;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
@@ -29,6 +30,9 @@ import io.spine.server.model.MethodPredicate;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+
+import static io.spine.core.Rejections.isRejection;
+import static io.spine.server.model.HandlerMethods.ensureExternalMatch;
 
 /**
  * A wrapper for an event subscriber method.
@@ -58,6 +62,12 @@ public final class EventSubscriberMethod extends HandlerMethod<EventContext> {
     /** Returns the factory for filtering and creating event subscriber methods. */
     public static HandlerMethod.Factory<EventSubscriberMethod> factory() {
         return Factory.getInstance();
+    }
+
+    @Override
+    public Object invoke(Object target, Message message, EventContext context) {
+        ensureExternalMatch(this, context.getExternal());
+        return super.invoke(target, message, context);
     }
 
     static MethodPredicate predicate() {
@@ -107,6 +117,23 @@ public final class EventSubscriberMethod extends HandlerMethod<EventContext> {
 
         private FilterPredicate() {
             super(Subscribe.class);
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * <p>Filters out methods that accept rejection messages as the first parameter.
+         */
+        @Override
+        protected boolean verifyParams(Method method) {
+            if (super.verifyParams(method)) {
+                @SuppressWarnings("unchecked") // The case is safe since super returned `true`.
+                final Class<? extends Message> firstParameter =
+                        (Class<? extends Message>) method.getParameterTypes()[0];
+                final boolean isRejection = isRejection(firstParameter);
+                return !isRejection;
+            }
+            return false;
         }
 
         @Override

@@ -42,6 +42,11 @@ public class AnotherInvalidProjectNameDelegate implements RejectionDispatcherDel
     }
 
     @Override
+    public Set<RejectionClass> getExternalRejectionClasses() {
+        return ImmutableSet.of();
+    }
+
+    @Override
     public Set<String> dispatchRejection(RejectionEnvelope envelope) {
         dispatchCalled = true;
         return ImmutableSet.of(toString());

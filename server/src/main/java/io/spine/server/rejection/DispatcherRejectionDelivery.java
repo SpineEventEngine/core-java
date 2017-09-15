@@ -24,7 +24,7 @@ import io.spine.annotation.SPI;
 import io.spine.core.Rejection;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
-import io.spine.server.outbus.CommandOutputDelivery;
+import io.spine.server.delivery.MulticastDelivery;
 
 import java.util.concurrent.Executor;
 
@@ -38,13 +38,13 @@ import java.util.concurrent.Executor;
 @SPI
 @SuppressWarnings("WeakerAccess")   // Part of API.
 public abstract class DispatcherRejectionDelivery
-        extends CommandOutputDelivery<RejectionEnvelope, RejectionClass, RejectionDispatcher<?>> {
+        extends MulticastDelivery<RejectionEnvelope, RejectionClass, RejectionDispatcher<?>> {
 
     /**
      * Create a dispatcher rejection delivery with an {@link Executor} used for the operation.
      *
      * @param delegate the instance of {@code Executor} used to dispatch business rejections.
-     * @see CommandOutputDelivery#CommandOutputDelivery(Executor)
+     * @see MulticastDelivery#MulticastDelivery(Executor)
      */
     protected DispatcherRejectionDelivery(Executor delegate) {
         super(delegate);
@@ -55,7 +55,7 @@ public abstract class DispatcherRejectionDelivery
      * {@link com.google.common.util.concurrent.MoreExecutors#directExecutor() direct executor}
      * used for the business rejection dispatching.
      *
-     * @see CommandOutputDelivery#CommandOutputDelivery()
+     * @see MulticastDelivery#MulticastDelivery()
      */
     protected DispatcherRejectionDelivery() {
         super();

@@ -23,6 +23,7 @@ package io.spine.server.entity;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.test.entity.number.NaturalNumber;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.lang.reflect.Method;

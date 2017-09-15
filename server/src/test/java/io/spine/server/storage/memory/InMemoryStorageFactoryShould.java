@@ -20,14 +20,16 @@
 
 package io.spine.server.storage.memory;
 
+import io.spine.core.BoundedContextName;
 import org.junit.Test;
 
+import static io.spine.server.BoundedContext.newName;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class InMemoryStorageFactoryShould {
 
-    private final String boundedContextName = getClass().getSimpleName();
+    private final BoundedContextName boundedContextName = newName(getClass().getSimpleName());
 
     @Test
     public void have_single_tenant_instance() {

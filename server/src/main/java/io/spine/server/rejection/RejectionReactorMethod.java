@@ -32,6 +32,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
 
+import static io.spine.server.model.HandlerMethods.ensureExternalMatch;
+
 /**
  * A wrapper for a rejection reactor method.
  *
@@ -72,6 +74,8 @@ public class RejectionReactorMethod extends RejectionHandlerMethod {
     public List<? extends Message> invoke(Object target,
                                           Message rejectionMessage,
                                           RejectionContext context) {
+        ensureExternalMatch(this, context.getExternal());
+
         final Object output = doInvoke(target, rejectionMessage, context);
         final List<? extends Message> eventMessages = toList(output);
         return eventMessages;

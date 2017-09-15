@@ -33,6 +33,7 @@ import "google/protobuf/any.proto";
 import "google/protobuf/timestamp.proto";
 
 import "spine/core/event.proto";
+import "spine/core/bounded_context.proto";
 
 // An integration event is sent between loosely coupled parts of a system.
 // Typically these parts would be implemented as Bounded Contexts.
@@ -54,8 +55,8 @@ message IntegrationEventContext {
     // When the event occurred.
     google.protobuf.Timestamp timestamp = 2;
 
-    // A name of a Bounded Context which generated the event.
-    string bounded_context_name = 3;
+    // Name of the Bounded Context which generated the event.
+    core.BoundedContextName bounded_context_name = 3;
 
     // An id of an entity which generated the event.
     // Examples of event producers are: aggregates, process managers (which generate `CommandRouted` event).

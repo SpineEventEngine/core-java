@@ -21,6 +21,7 @@
 package io.spine.server.storage.memory;
 
 import com.google.protobuf.Message;
+import io.spine.core.BoundedContextName;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.entity.Entity;
@@ -42,15 +43,15 @@ import io.spine.type.TypeUrl;
  */
 public class InMemoryStorageFactory implements StorageFactory {
 
-    private final String boundedContextName;
+    private final BoundedContextName boundedContextName;
     private final boolean multitenant;
 
-    public static InMemoryStorageFactory newInstance(String boundedContextName,
+    public static InMemoryStorageFactory newInstance(BoundedContextName boundedContextName,
                                                      boolean multitenant) {
         return new InMemoryStorageFactory(boundedContextName, multitenant);
     }
 
-    private InMemoryStorageFactory(String boundedContextName, boolean multitenant) {
+    private InMemoryStorageFactory(BoundedContextName boundedContextName, boolean multitenant) {
         this.boundedContextName = boundedContextName;
         this.multitenant = multitenant;
     }

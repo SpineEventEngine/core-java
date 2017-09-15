@@ -205,6 +205,19 @@ public final class Events {
     }
 
     /**
+     * Analyzes the event context and determines if the event has been produced outside
+     * of the current BoundedContext
+     *
+     * @param context the context of event
+     * @return {@code true} if the event is external, {@code false} otherwise
+     */
+    @Internal
+    public static boolean isExternal(EventContext context) {
+        checkNotNull(context);
+        return context.getExternal();
+    }
+
+    /**
      * The stringifier of event IDs.
      */
     static class EventIdStringifier extends Stringifier<EventId> {
