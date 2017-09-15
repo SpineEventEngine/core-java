@@ -30,7 +30,7 @@ import static java.lang.String.format;
 
 /**
  * Exception that is thrown when unsupported external message is obtained
- * or in case there is no class for given Protobuf event message.
+ * or in case there is no class for the given Protobuf event message.
  *
  * @author Alex Tymchenko
  */
