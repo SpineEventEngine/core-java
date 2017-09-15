@@ -150,8 +150,6 @@ public final class EventReactorMethod extends HandlerMethod<EventContext> {
                 return;
             }
 
-
-
             // The returned value must not be of the same type as the passed message param.
             final Class<?>[] paramTypes = method.getParameterTypes();
             if (paramTypes.length < 1) {
