@@ -51,10 +51,6 @@ public class UnsupportedExternalMessageException
         }
     }
 
-    public GeneratedMessageV3 getExternalMessage() {
-        return externalMessage;
-    }
-
     @Override
     public Error asError() {
         final String msgType = externalMessage.getDescriptorForType()
