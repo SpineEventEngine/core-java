@@ -36,9 +36,9 @@ class ExternalMessageObserver extends AbstractChannelObserver {
 
     private final IntegrationBus integrationBus;
 
-    protected ExternalMessageObserver(BoundedContextName boundedContextName,
-                                      Class<? extends Message> messageClass,
-                                      IntegrationBus integrationBus) {
+    ExternalMessageObserver(BoundedContextName boundedContextName,
+                            Class<? extends Message> messageClass,
+                            IntegrationBus integrationBus) {
         super(boundedContextName, messageClass);
         this.integrationBus = integrationBus;
     }
