@@ -83,10 +83,10 @@ class RejectionBusAdapter extends BusAdapter<RejectionEnvelope, RejectionDispatc
 
     @Override
     RejectionDispatcher<?> createDispatcher(Class<? extends Message> messageClass) {
-        final LocalRejectionSubscriber result =
-                new LocalRejectionSubscriber(getBoundedContextName(),
-                                             getPublisherHub(),
-                                             RejectionClass.of(messageClass));
+        final DomesticRejectionPublisher result =
+                new DomesticRejectionPublisher(getBoundedContextName(),
+                                               getPublisherHub(),
+                                               RejectionClass.of(messageClass));
         return result;
     }
 

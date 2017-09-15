@@ -32,22 +32,24 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- * A subscriber to local {@code EventBus}, which publishes each matching message to
+ * A subscriber to local {@code EventBus}, which publishes each matching domestic event to
  * a remote channel.
  *
- * <p>The messages to subscribe are those that are required by external application components
+ * <p>The events to subscribe are those that are required by external application components
  * at this moment; their set is determined by the {@linkplain RequestForExternalMessages
  * configuration messages}, received by this instance of {@code IntegrationBus}.
+ *
+ * @author Alex Tymchenko
  */
-final class LocalEventSubscriber extends EventSubscriber {
+final class DomesticEventPublisher extends EventSubscriber {
 
     private final BoundedContextName boundedContextName;
     private final PublisherHub publisherHub;
     private final Set<EventClass> eventClasses;
 
-    LocalEventSubscriber(BoundedContextName boundedContextName,
-                         PublisherHub publisherHub,
-                         EventClass messageClass) {
+    DomesticEventPublisher(BoundedContextName boundedContextName,
+                           PublisherHub publisherHub,
+                           EventClass messageClass) {
         super();
         this.boundedContextName = boundedContextName;
         this.publisherHub = publisherHub;
@@ -89,7 +91,7 @@ final class LocalEventSubscriber extends EventSubscriber {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        LocalEventSubscriber that = (LocalEventSubscriber) o;
+        DomesticEventPublisher that = (DomesticEventPublisher) o;
         return Objects.equals(boundedContextName, that.boundedContextName) &&
                 Objects.equals(eventClasses, that.eventClasses);
     }

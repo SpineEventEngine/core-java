@@ -32,22 +32,24 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- * A subscriber to local {@code RejectionBus}, which publishes each matching message to
+ * A subscriber to local {@code RejectionBus}, which publishes each matching domestic rejection to
  * a remote channel.
  *
- * <p>The messages to subscribe are those that are required by external application components
+ * <p>The rejections to subscribe are those that are required by external application components
  * at this moment; their set is determined by the {@linkplain RequestForExternalMessages
  * configuration messages}, received by this instance of {@code IntegrationBus}.
+ *
+ * @author Alex Tymchenko
  */
-final class LocalRejectionSubscriber extends RejectionSubscriber {
+final class DomesticRejectionPublisher extends RejectionSubscriber {
 
     private final BoundedContextName boundedContextName;
     private final PublisherHub publisherHub;
     private final Set<RejectionClass> rejectionClasses;
 
-    LocalRejectionSubscriber(BoundedContextName boundedContextName,
-                             PublisherHub publisherHub,
-                             RejectionClass rejectionClass) {
+    DomesticRejectionPublisher(BoundedContextName boundedContextName,
+                               PublisherHub publisherHub,
+                               RejectionClass rejectionClass) {
         super();
         this.boundedContextName = boundedContextName;
         this.publisherHub = publisherHub;
@@ -89,7 +91,7 @@ final class LocalRejectionSubscriber extends RejectionSubscriber {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        LocalRejectionSubscriber that = (LocalRejectionSubscriber) o;
+        DomesticRejectionPublisher that = (DomesticRejectionPublisher) o;
         return Objects.equals(boundedContextName, that.boundedContextName) &&
                 Objects.equals(rejectionClasses, that.rejectionClasses);
     }
