@@ -45,7 +45,9 @@ abstract class AbstractInMemoryChannel implements MessageChannel {
      */
     @SuppressWarnings("NoopMethodInAbstractClass")  // See the Javadoc for the explanation.
     @Override
-    public void close() throws Exception {}
+    public void close() throws Exception {
+        /* Do nothing. */
+    }
 
     @Override
     public ExternalMessageClass getMessageClass() {
