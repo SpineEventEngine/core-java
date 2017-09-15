@@ -36,7 +36,7 @@ import io.spine.type.MessageClass;
  *
  * @author Alex Tymchenko
  */
-class InMemoryPublisher extends AbstractInMemoryChannel implements Publisher {
+final class InMemoryPublisher extends AbstractInMemoryChannel implements Publisher {
 
     /**
      * A provider of subscribers, to which a message of the specified message type should be headed.

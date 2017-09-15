@@ -41,7 +41,7 @@ import static io.spine.server.integration.ExternalMessageClass.of;
  *
  * @author Alex Tymchenko
  */
-public class InMemoryTransportFactory implements TransportFactory {
+public final class InMemoryTransportFactory implements TransportFactory {
 
     /**
      * An in-memory storage of subscribers per message class.

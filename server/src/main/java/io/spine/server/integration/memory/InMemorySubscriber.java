@@ -37,7 +37,7 @@ import static com.google.common.collect.Sets.newConcurrentHashSet;
  *
  * @author Alex Tymchenko
  */
-class InMemorySubscriber extends AbstractInMemoryChannel implements Subscriber {
+final class InMemorySubscriber extends AbstractInMemoryChannel implements Subscriber {
 
     /**
      * Observers, that actually are informed about the messages arriving through this channel.
