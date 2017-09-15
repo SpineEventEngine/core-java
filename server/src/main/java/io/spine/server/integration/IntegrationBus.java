@@ -353,7 +353,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
         final Iterable<ExternalMessageClass> transformed = dispatcher.getMessageClasses();
         for (final ExternalMessageClass imClass : transformed) {
             final Subscriber subscriber = subscriberHub.get(imClass);
-            subscriber.addObserver(new IncomingMessageObserver(boundedContextName,
+            subscriber.addObserver(new ExternalMessageObserver(boundedContextName,
                                                                imClass.value(),
                                                                integrationBus));
         }
@@ -364,7 +364,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
         final Iterable<ExternalMessageClass> transformed = dispatcher.getMessageClasses();
         for (final ExternalMessageClass imClass : transformed) {
             final Subscriber subscriber = subscriberHub.get(imClass);
-            subscriber.removeObserver(new IncomingMessageObserver(boundedContextName,
+            subscriber.removeObserver(new ExternalMessageObserver(boundedContextName,
                                                                   imClass.value(),
                                                                   integrationBus));
         }
