@@ -49,9 +49,8 @@ public class InMemoryTransportFactory implements TransportFactory {
     private final Multimap<MessageClass, InMemorySubscriber> subscribers =
             Multimaps.synchronizedMultimap(HashMultimap.<MessageClass, InMemorySubscriber>create());
 
-    private InMemoryTransportFactory() {
-        // Prevent direct instantiation from the outside.
-    }
+    /** Prevent direct instantiation from the outside. */
+    private InMemoryTransportFactory() {}
 
     /**
      * Creates a new instance of {@code InMemoryTransportFactory}.
