@@ -25,6 +25,8 @@ import io.spine.server.bus.DeadMessageTap;
 /**
  * Produces an {@link UnsupportedExternalMessageException} upon capturing an external message,
  * which has no targets to be dispatched to.
+ *
+ * @author Alex Tymchenko
  */
 enum DeadExternalMessageTap implements DeadMessageTap<ExternalMessageEnvelope> {
     INSTANCE;
