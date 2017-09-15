@@ -74,7 +74,6 @@ class ExternalRejectionSubscriber implements ExternalMessageDispatcher<String> {
 
     @Override
     public Set<String> dispatch(ExternalMessageEnvelope envelope) {
-
         final ExternalMessage externalMessage = envelope.getOuterObject();
         final Message unpacked = AnyPacker.unpack(externalMessage.getOriginalMessage());
         if (!(unpacked instanceof Rejection)) {
