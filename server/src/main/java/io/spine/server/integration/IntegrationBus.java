@@ -464,11 +464,11 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
         public IntegrationBus build() {
 
             checkState(eventBus != null,
-                       "`eventBus` must be set for integration bus.");
+                       "`eventBus` must be set for IntegrationBus.");
             checkState(rejectionBus != null,
-                       "`rejectionBus` must be set for integration bus.");
+                       "`rejectionBus` must be set for IntegrationBus.");
             checkNotDefault(boundedContextName,
-                            "`boundedContextName` must be set for integration bus.");
+                            "`boundedContextName` must be set for IntegrationBus.");
 
             if (transportFactory == null) {
                 transportFactory = initTransportFactory();
