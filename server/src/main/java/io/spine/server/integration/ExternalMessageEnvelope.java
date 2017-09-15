@@ -39,13 +39,10 @@ public class ExternalMessageEnvelope
     /** An identifier of the original message (e.g. event ID). */
     private final Message id;
 
-    /** An original message (e.g. instance of {@code io.spine.examples.ProjectCreated}). */
+    /** An original message (e.g. instance of {@code io.spine.sample.TaskCreated}). */
     private final Message message;
 
-    /**
-     * A message class of the original message
-     * (e.g. {@code io.spine.examples.ProjectCreated} class).
-     **/
+    /** A message class of the original message (e.g. {@code io.spine.sample.TaskCreated} class). */
     private final MessageClass messageClass;
 
     /** An actor context representing the environment in which the original message was created. */
@@ -57,7 +54,6 @@ public class ExternalMessageEnvelope
 
         this.id = externalMessage.getId();
         this.message = originalMessage;
-
         this.messageClass = ExternalMessageClass.of(this.message.getClass());
         this.actorContext = externalMessage.getActorContext();
 
