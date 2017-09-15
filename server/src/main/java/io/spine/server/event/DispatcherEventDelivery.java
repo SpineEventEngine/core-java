@@ -37,9 +37,8 @@ import java.util.concurrent.Executor;
  */
 @SPI
 @SuppressWarnings("WeakerAccess")   // Part of API.
-public abstract class DispatcherEventDelivery extends MulticastDelivery<EventEnvelope,
-                                                                            EventClass,
-                                                                            EventDispatcher<?>> {
+public abstract class DispatcherEventDelivery
+        extends MulticastDelivery<EventEnvelope, EventClass, EventDispatcher<?>> {
 
     /**
      * Create a dispatcher event delivery with an {@link Executor} used for the operation.
