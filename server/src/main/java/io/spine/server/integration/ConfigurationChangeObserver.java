@@ -39,7 +39,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alex Tymchenko
  */
-class ConfigurationChangeObserver extends AbstractChannelObserver implements AutoCloseable {
+final class ConfigurationChangeObserver extends AbstractChannelObserver implements AutoCloseable {
 
     private final BoundedContextName boundedContextName;
     private final Function<Class<? extends Message>, BusAdapter<?, ?>> adapterByClass;
