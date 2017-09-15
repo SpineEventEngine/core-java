@@ -126,7 +126,7 @@ public abstract class ProcessManagerRepository<I,
         final ExternalMessageDispatcher<I> extRejectionDispatcher =
                 rejectionDispatcher.getExternalDispatcher();
         if (!extRejectionDispatcher.getMessageClasses()
-                                        .isEmpty()) {
+                                   .isEmpty()) {
             boundedContext.getIntegrationBus()
                           .register(extRejectionDispatcher);
         }
