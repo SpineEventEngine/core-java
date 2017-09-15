@@ -26,6 +26,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * A registry of subscribers which {@linkplain io.spine.core.Subscribe#external() subscribe}
  * to handle external messages.
+ *
+ * @author Alex Tymchenko
  */
 class LocalDispatcherRegistry
         extends DispatcherRegistry<ExternalMessageClass, ExternalMessageDispatcher<?>> {

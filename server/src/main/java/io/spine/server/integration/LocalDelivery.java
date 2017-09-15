@@ -24,6 +24,8 @@ import io.spine.server.delivery.MulticastDelivery;
 /**
  * Delivers the messages from external sources to the local subscribers
  * of {@code external} messages in this bounded context.
+ *
+ * @author Alex Tymchenko
  */
 class LocalDelivery extends MulticastDelivery<ExternalMessageEnvelope,
                                               ExternalMessageClass,
