@@ -69,7 +69,7 @@ class ConfigurationChangeObserver extends AbstractChannelObserver implements Aut
     }
 
     private void addNewSubscriptions(Iterable<ExternalMessageType> types,
-                                     BoundedContextName originBoundedContextName) {
+                                     BoundedContextName origin) {
         for (ExternalMessageType newType : types) {
             final Collection<BoundedContextName> contextsWithSameRequest =
                     requestedTypes.get(newType);
@@ -80,7 +80,7 @@ class ConfigurationChangeObserver extends AbstractChannelObserver implements Aut
                 registerInAdapter(newType);
             }
 
-            requestedTypes.put(newType, originBoundedContextName);
+            requestedTypes.put(newType, origin);
         }
     }
 
