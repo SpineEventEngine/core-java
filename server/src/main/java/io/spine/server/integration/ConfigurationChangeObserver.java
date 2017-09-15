@@ -63,9 +63,9 @@ class ConfigurationChangeObserver extends AbstractChannelObserver implements Aut
     public void handle(ExternalMessage value) {
         final RequestForExternalMessages request = AnyPacker.unpack(value.getOriginalMessage());
 
-        final BoundedContextName originBoundedContextName = value.getBoundedContextName();
-        addNewSubscriptions(request.getRequestedMessageTypesList(), originBoundedContextName);
-        clearStaleSubscriptions(request.getRequestedMessageTypesList(), originBoundedContextName);
+        final BoundedContextName origin = value.getBoundedContextName();
+        addNewSubscriptions(request.getRequestedMessageTypesList(), origin);
+        clearStaleSubscriptions(request.getRequestedMessageTypesList(), origin);
     }
 
     private void addNewSubscriptions(Iterable<ExternalMessageType> types,
@@ -97,14 +97,14 @@ class ConfigurationChangeObserver extends AbstractChannelObserver implements Aut
     }
 
     private void clearStaleSubscriptions(Collection<ExternalMessageType> types,
-                                         BoundedContextName originBoundedContextName) {
+                                         BoundedContextName origin) {
 
-        final Set<ExternalMessageType> toRemove = findStale(types, originBoundedContextName);
+        final Set<ExternalMessageType> toRemove = findStale(types, origin);
 
         for (ExternalMessageType itemForRemoval : toRemove) {
             final boolean wereNonEmpty = !requestedTypes.get(itemForRemoval)
                                                         .isEmpty();
-            requestedTypes.remove(itemForRemoval, originBoundedContextName);
+            requestedTypes.remove(itemForRemoval, origin);
             final boolean emptyNow = requestedTypes.get(itemForRemoval)
                                                    .isEmpty();
 
@@ -123,18 +123,18 @@ class ConfigurationChangeObserver extends AbstractChannelObserver implements Aut
     }
 
     private Set<ExternalMessageType> findStale(Collection<ExternalMessageType> types,
-                                               BoundedContextName originBoundedContextName) {
+                                               BoundedContextName origin) {
         final ImmutableSet.Builder<ExternalMessageType> result = ImmutableSet.builder();
 
         for (ExternalMessageType previouslyRequestedType : requestedTypes.keySet()) {
             final Collection<BoundedContextName> contextsThatRequested =
                     requestedTypes.get(previouslyRequestedType);
 
-            if (contextsThatRequested.contains(originBoundedContextName) &&
+            if (contextsThatRequested.contains(origin) &&
                     !types.contains(previouslyRequestedType)) {
 
                 // The `previouslyRequestedType` item is no longer requested
-                // by the bounded context with `originBoundedContextName` name.
+                // by the bounded context with `origin` name.
 
                 result.add(previouslyRequestedType);
             }
