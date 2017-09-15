@@ -37,9 +37,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 class ExternalMessages {
 
-    private ExternalMessages() {
-        // prevent an instantiation of this utility class.
-    }
+    /** Prevents instantiation on this utility class. */
+    private ExternalMessages() {}
 
     /**
      * Wraps the instance of {@link Event} into an {@code ExternalMessage}.
