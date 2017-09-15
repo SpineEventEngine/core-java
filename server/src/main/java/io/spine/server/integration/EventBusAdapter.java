@@ -38,7 +38,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alex Tymchenko
  */
-class EventBusAdapter extends BusAdapter<EventEnvelope, EventDispatcher<?>> {
+final class EventBusAdapter extends BusAdapter<EventEnvelope, EventDispatcher<?>> {
 
     EventBusAdapter(Builder builder) {
         super(builder);

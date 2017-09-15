@@ -38,7 +38,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alex Tymchenko
  */
-class RejectionBusAdapter extends BusAdapter<RejectionEnvelope, RejectionDispatcher<?>> {
+final class RejectionBusAdapter extends BusAdapter<RejectionEnvelope, RejectionDispatcher<?>> {
 
     RejectionBusAdapter(Builder builder) {
         super(builder);
