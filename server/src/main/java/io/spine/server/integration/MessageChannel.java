@@ -23,6 +23,8 @@ package io.spine.server.integration;
  * A channel dedicated to exchanging the messages of a single message type.
  *
  * <p>The class of message serves as a channel key.
+ *
+ * @author Alex Tymchenko
  */
 public interface MessageChannel extends AutoCloseable {
 

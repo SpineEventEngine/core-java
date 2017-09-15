@@ -34,6 +34,8 @@ import static com.google.common.collect.Sets.newConcurrentHashSet;
  * An in-memory implementation of the {@link Subscriber}.
  *
  * <p>To use only in scope of the same JVM as {@linkplain InMemoryPublisher publishers}.
+ *
+ * @author Alex Tymchenko
  */
 class InMemorySubscriber extends AbstractInMemoryChannel implements Subscriber {
 

@@ -33,6 +33,8 @@ import io.spine.type.MessageClass;
  * An in-memory implementation of the {@link Publisher}.
  *
  * <p>To use only in scope of the same JVM as {@linkplain InMemorySubscriber subscribers}.
+ *
+ * @author Alex Tymchenko
  */
 class InMemoryPublisher extends AbstractInMemoryChannel implements Publisher {
 

@@ -26,6 +26,7 @@ import io.grpc.stub.StreamObserver;
  *
  * <p>There can be many subscribers per message type.
  *
+ * @author Alex Tymchenko
  */
 public interface Subscriber extends MessageChannel {
 
