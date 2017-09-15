@@ -22,12 +22,12 @@ package io.spine.server.integration;
 import io.spine.server.delivery.MulticastDelivery;
 
 /**
- * Delivers the messages from external sources to the local subscribers
- * of {@code external} messages in this bounded context.
+ * Delivers the messages from external sources to the domestic subscribers
+ * for {@code external} messages in this bounded context.
  *
  * @author Alex Tymchenko
  */
-class LocalDelivery extends MulticastDelivery<ExternalMessageEnvelope,
+final class DomesticDelivery extends MulticastDelivery<ExternalMessageEnvelope,
                                               ExternalMessageClass,
                                               ExternalMessageDispatcher<?>> {
 

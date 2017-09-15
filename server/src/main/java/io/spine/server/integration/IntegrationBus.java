@@ -170,8 +170,8 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
     }
 
     @Override
-    protected LocalDispatcherRegistry createRegistry() {
-        return new LocalDispatcherRegistry();
+    protected DomesticDispatcherRegistry createRegistry() {
+        return new DomesticDispatcherRegistry();
     }
 
     @Override
@@ -413,7 +413,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
 
         private EventBus eventBus;
         private RejectionBus rejectionBus;
-        private LocalDelivery delivery;
+        private DomesticDelivery delivery;
         private BoundedContextName boundedContextName;
         private TransportFactory transportFactory;
 
@@ -456,7 +456,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
             return Optional.fromNullable(transportFactory);
         }
 
-        private LocalDelivery getDelivery() {
+        private DomesticDelivery getDelivery() {
             return delivery;
         }
 
@@ -474,7 +474,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
                 transportFactory = initTransportFactory();
             }
 
-            this.delivery = new LocalDelivery();
+            this.delivery = new DomesticDelivery();
 
             return new IntegrationBus(this);
         }

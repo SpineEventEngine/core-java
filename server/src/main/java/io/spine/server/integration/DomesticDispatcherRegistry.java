@@ -24,12 +24,11 @@ import io.spine.server.bus.DispatcherRegistry;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A registry of subscribers which {@linkplain io.spine.core.Subscribe#external() subscribe}
- * to handle external messages.
+ * A registry of domestic subscribers which subscribe or react upon external messages.
  *
  * @author Alex Tymchenko
  */
-class LocalDispatcherRegistry
+final class DomesticDispatcherRegistry
         extends DispatcherRegistry<ExternalMessageClass, ExternalMessageDispatcher<?>> {
     @Override
     protected void checkDispatcher(ExternalMessageDispatcher dispatcher)
