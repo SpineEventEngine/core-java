@@ -19,36 +19,37 @@
  */
 package io.spine.server.integration;
 
-import io.spine.annotation.SPI;
-import io.spine.type.MessageClass;
+import io.grpc.stub.StreamObserver;
 
 /**
- * A factory for creating channel-based transport for {@code Message} inter-exchange between the
- * current deployment component and other application parts.
+ * Subscriber for messages of a specific type.
  *
- * Inspired by <a href="http://www.enterpriseintegrationpatterns.com/patterns/messaging/PublishSubscribeChannel.html">
- * Publish-Subscriber Channel pattern.</a>
+ * <p>There can be many subscribers per message type.
  *
- * @author Alex Tymchenko
  */
-@SPI
-public interface TransportFactory {
+public interface Subscriber extends MessageChannel {
 
     /**
-     * Creates a {@link Publisher} for the messages of given class.
+     * Obtains current observers registered in this instance of {@code Subscriber},
+     * which receive the subscription updates.
      *
-     * @param messageClass the class of messages that will be published
-     *                     via a created {@code Publisher}
-     * @return a new {@code Publisher} instance
+     * @return observers for this subscriber
      */
-    Publisher createPublisher(MessageClass messageClass);
+    Iterable<StreamObserver<ExternalMessage>> getObservers();
 
     /**
-     * Creates a {@link Subscriber} for the messages of given class.
+     * Adds an observer, which will be receiving the subscription updates.
      *
-     * @param messageClass the class of messages that will be received
-     *                     via a created {@code Subscriber}
-     * @return a new {@code Subscriber} instance
+     * @param observer an observer to register
      */
-    Subscriber createSubscriber(MessageClass messageClass);
+    void addObserver(StreamObserver<ExternalMessage> observer);
+
+    /**
+     * Removes an existing observer and disconnects it from this subscription channel.
+     *
+     * <p>In case the given observer is not registered at the moment, does nothing.
+     *
+     * @param observer an observer to remove
+     */
+    void removeObserver(StreamObserver<ExternalMessage> observer);
 }

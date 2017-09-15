@@ -19,36 +19,21 @@
  */
 package io.spine.server.integration;
 
-import io.spine.annotation.SPI;
 import io.spine.type.MessageClass;
 
 /**
- * A factory for creating channel-based transport for {@code Message} inter-exchange between the
- * current deployment component and other application parts.
+ * The hub of {@link Publisher}s.
  *
- * Inspired by <a href="http://www.enterpriseintegrationpatterns.com/patterns/messaging/PublishSubscribeChannel.html">
- * Publish-Subscriber Channel pattern.</a>
- *
- * @author Alex Tymchenko
+ * <p>Creates and manages the existing channels born in the given {@linkplain TransportFactory}.
  */
-@SPI
-public interface TransportFactory {
+public class PublisherHub extends ChannelHub<Publisher> {
 
-    /**
-     * Creates a {@link Publisher} for the messages of given class.
-     *
-     * @param messageClass the class of messages that will be published
-     *                     via a created {@code Publisher}
-     * @return a new {@code Publisher} instance
-     */
-    Publisher createPublisher(MessageClass messageClass);
+    public PublisherHub(TransportFactory transportFactory) {
+        super(transportFactory);
+    }
 
-    /**
-     * Creates a {@link Subscriber} for the messages of given class.
-     *
-     * @param messageClass the class of messages that will be received
-     *                     via a created {@code Subscriber}
-     * @return a new {@code Subscriber} instance
-     */
-    Subscriber createSubscriber(MessageClass messageClass);
+    @Override
+    protected Publisher newChannel(MessageClass channelKey) {
+        return transportFactory().createPublisher(channelKey);
+    }
 }

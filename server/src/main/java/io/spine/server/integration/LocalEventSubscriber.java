@@ -42,11 +42,11 @@ import java.util.Set;
 final class LocalEventSubscriber extends EventSubscriber {
 
     private final BoundedContextName boundedContextName;
-    private final TransportFactory.PublisherHub publisherHub;
+    private final PublisherHub publisherHub;
     private final Set<EventClass> eventClasses;
 
     LocalEventSubscriber(BoundedContextName boundedContextName,
-                         TransportFactory.PublisherHub publisherHub,
+                         PublisherHub publisherHub,
                          EventClass messageClass) {
         super();
         this.boundedContextName = boundedContextName;
@@ -66,7 +66,7 @@ final class LocalEventSubscriber extends EventSubscriber {
         final ExternalMessage msg = ExternalMessages.of(event, boundedContextName);
         final ExternalMessageClass messageClass =
                 ExternalMessageClass.of(envelope.getMessageClass());
-        final TransportFactory.Publisher channel = publisherHub.get(messageClass);
+        final Publisher channel = publisherHub.get(messageClass);
         channel.publish(AnyPacker.pack(envelope.getId()), msg);
 
         return ImmutableSet.of(channel.toString());

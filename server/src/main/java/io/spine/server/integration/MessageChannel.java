@@ -19,36 +19,24 @@
  */
 package io.spine.server.integration;
 
-import io.spine.annotation.SPI;
-import io.spine.type.MessageClass;
-
 /**
- * A factory for creating channel-based transport for {@code Message} inter-exchange between the
- * current deployment component and other application parts.
+ * A channel dedicated to exchanging the messages of a single message type.
  *
- * Inspired by <a href="http://www.enterpriseintegrationpatterns.com/patterns/messaging/PublishSubscribeChannel.html">
- * Publish-Subscriber Channel pattern.</a>
- *
- * @author Alex Tymchenko
+ * <p>The class of message serves as a channel key.
  */
-@SPI
-public interface TransportFactory {
+public interface MessageChannel extends AutoCloseable {
 
     /**
-     * Creates a {@link Publisher} for the messages of given class.
+     * Returns a class of messages that are being exchanged within this channel.
      *
-     * @param messageClass the class of messages that will be published
-     *                     via a created {@code Publisher}
-     * @return a new {@code Publisher} instance
+     * @return the message class
      */
-    Publisher createPublisher(MessageClass messageClass);
+    ExternalMessageClass getMessageClass();
 
     /**
-     * Creates a {@link Subscriber} for the messages of given class.
+     * Allows to understand whether this channel is stale and can be closed.
      *
-     * @param messageClass the class of messages that will be received
-     *                     via a created {@code Subscriber}
-     * @return a new {@code Subscriber} instance
+     * @return {@code true} if the channel is stale, {@code false} otherwise
      */
-    Subscriber createSubscriber(MessageClass messageClass);
+    boolean isStale();
 }

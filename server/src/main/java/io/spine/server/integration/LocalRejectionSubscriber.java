@@ -42,11 +42,11 @@ import java.util.Set;
 final class LocalRejectionSubscriber extends RejectionSubscriber {
 
     private final BoundedContextName boundedContextName;
-    private final TransportFactory.PublisherHub publisherHub;
+    private final PublisherHub publisherHub;
     private final Set<RejectionClass> rejectionClasses;
 
     LocalRejectionSubscriber(BoundedContextName boundedContextName,
-                             TransportFactory.PublisherHub publisherHub,
+                             PublisherHub publisherHub,
                              RejectionClass rejectionClass) {
         super();
         this.boundedContextName = boundedContextName;
@@ -66,7 +66,7 @@ final class LocalRejectionSubscriber extends RejectionSubscriber {
         final ExternalMessage message = ExternalMessages.of(rejection, boundedContextName);
         final ExternalMessageClass messageClass =
                 ExternalMessageClass.of(envelope.getMessageClass());
-        final TransportFactory.Publisher channel = publisherHub.get(messageClass);
+        final Publisher channel = publisherHub.get(messageClass);
         channel.publish(AnyPacker.pack(envelope.getId()), message);
 
         return ImmutableSet.of(channel.toString());

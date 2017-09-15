@@ -30,6 +30,9 @@ import io.spine.core.Ack;
 import io.spine.server.bus.Buses;
 import io.spine.server.integration.ExternalMessage;
 import io.spine.server.integration.ExternalMessageClass;
+import io.spine.server.integration.MessageChannel;
+import io.spine.server.integration.Publisher;
+import io.spine.server.integration.Subscriber;
 import io.spine.server.integration.TransportFactory;
 import io.spine.type.MessageClass;
 
@@ -115,8 +118,7 @@ public class InMemoryTransportFactory implements TransportFactory {
     }
 
     /**
-     * An in-memory implementation of the
-     * {@link io.spine.server.integration.TransportFactory.Publisher Publisher}.
+     * An in-memory implementation of the {@link Publisher}.
      *
      * <p>To use only in scope of the same JVM as subscribers.
      */
@@ -158,8 +160,7 @@ public class InMemoryTransportFactory implements TransportFactory {
     }
 
     /**
-     * An in-memory implementation of the
-     * {@link io.spine.server.integration.TransportFactory.Subscriber Subscriber}.
+     * An in-memory implementation of the {@link Subscriber}.
      *
      * <p>To use only in scope of the same JVM as publishers.
      */

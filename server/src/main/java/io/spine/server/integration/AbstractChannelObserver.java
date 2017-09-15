@@ -30,7 +30,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
- * Base routines for the {@linkplain TransportFactory.Subscriber#addObserver(StreamObserver)}
+ * Base routines for the {@linkplain Subscriber#addObserver(StreamObserver)}
  * subscriber observers}.
  *
  * @author Alex Tymchenko
