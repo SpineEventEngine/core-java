@@ -35,9 +35,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @Internal
 public final class HandlerMethods {
 
-    private HandlerMethods() {
-        // Prevent from instantiation.
-    }
+    /** Prevents instantiation on this utility class. */
+    private HandlerMethods() {}
 
     /**
      * Creates a predicate to remove the {@linkplain HandlerMethod handler methods}
