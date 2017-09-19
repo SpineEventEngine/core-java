@@ -146,7 +146,8 @@ public class EEntity extends AbstractEntity<EventId, Event> {
         final EventContext context = event.getContext();
         final EventContext.Builder resultContext = context.toBuilder()
                                                           .clearEnrichment();
-        switch (resultContext.getOriginCase()) {
+        final EventContext.OriginCase originCase = resultContext.getOriginCase();
+        switch (originCase) {
             case EVENT_CONTEXT:
                 resultContext.setEventContext(context.getEventContext()
                                                      .toBuilder()
@@ -165,7 +166,8 @@ public class EEntity extends AbstractEntity<EventId, Event> {
                 // Does nothing because there is no origin for this event.
                 break;
             default:
-                throw newIllegalStateException("Not all of `OriginCase` values were handled.");
+                throw newIllegalStateException("Unsupported origin case encountered: %s",
+                                               originCase);
         }
         return event.toBuilder()
                     .setContext(resultContext)
