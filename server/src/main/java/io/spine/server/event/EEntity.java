@@ -23,6 +23,7 @@ package io.spine.server.event;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
 import io.spine.core.Event;
+import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.core.EventId;
 import io.spine.core.Events;
@@ -32,6 +33,8 @@ import io.spine.type.TypeName;
 
 import javax.annotation.Nullable;
 import java.util.Comparator;
+
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * Stores an event.
@@ -84,7 +87,8 @@ public class EEntity extends AbstractEntity<EventId, Event> {
 
     EEntity(Event event) {
         this(event.getId());
-        updateState(event);
+        final Event compactedEvent = compact(event);
+        updateState(compactedEvent);
     }
 
     /**
@@ -123,5 +127,50 @@ public class EEntity extends AbstractEntity<EventId, Event> {
                                     .getTypeName();
         }
         return typeName.value();
+    }
+
+    /**
+     * Obtains the compacted version of the event.
+     *
+     * <p>A compacted version doesn't contain:
+     * <ul>
+     *     <li>the enrichment from the event context</li>
+     *     <li>the enrichment from the origin</li>
+     *     <li>nested origins if the origin is {@link EventContext}</li>
+     * </ul>
+     *
+     * @param event the event to compact
+     * @return the compacted event
+     */
+    private static Event compact(Event event) {
+        final EventContext context = event.getContext();
+        final EventContext.Builder resultContext = context.toBuilder()
+                                                          .clearEnrichment();
+        final EventContext.OriginCase originCase = resultContext.getOriginCase();
+        switch (originCase) {
+            case EVENT_CONTEXT:
+                resultContext.setEventContext(context.getEventContext()
+                                                     .toBuilder()
+                                                     .clearOrigin()
+                                                     .clearEnrichment());
+                break;
+            case REJECTION_CONTEXT:
+                resultContext.setRejectionContext(context.getRejectionContext()
+                                                         .toBuilder()
+                                                         .clearEnrichment());
+                break;
+            case COMMAND_CONTEXT:
+                // Does nothing.
+                break;
+            case ORIGIN_NOT_SET:
+                // Does nothing because there is no origin for this event.
+                break;
+            default:
+                throw newIllegalStateException("Unsupported origin case encountered: %s",
+                                               originCase);
+        }
+        return event.toBuilder()
+                    .setContext(resultContext)
+                    .build();
     }
 }

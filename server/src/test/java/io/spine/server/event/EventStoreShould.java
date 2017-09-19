@@ -22,20 +22,26 @@ package io.spine.server.event;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.MoreExecutors;
+import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import io.grpc.stub.StreamObserver;
 import io.spine.core.ActorContext;
 import io.spine.core.CommandContext;
+import io.spine.core.Enrichment;
+import io.spine.core.Enrichment.Container;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
+import io.spine.core.RejectionContext;
 import io.spine.core.TenantId;
+import io.spine.grpc.MemoizingObserver;
 import io.spine.server.BoundedContext;
 import io.spine.server.command.TestEventFactory;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.TaskAdded;
 import io.spine.testdata.Sample;
 import io.spine.time.Durations2;
+import io.spine.time.Time;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -45,14 +51,19 @@ import java.util.Collections;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.google.common.collect.Sets.newConcurrentHashSet;
+import static com.google.protobuf.Any.pack;
 import static com.google.protobuf.util.Timestamps.add;
 import static com.google.protobuf.util.Timestamps.subtract;
+import static io.spine.grpc.StreamObservers.memoizingObserver;
+import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.test.Verify.assertContainsAll;
 import static io.spine.test.Verify.assertSize;
 import static io.spine.time.Time.getCurrentTime;
 import static io.spine.type.TypeName.of;
+import static io.spine.validate.Validate.isDefault;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 /**
@@ -210,19 +221,100 @@ public class EventStoreShould {
                                                                  .setActorContext(secondTenantActor)
                                                                  .build();
         final EventContext firstTenantContext = EventContext.newBuilder()
-                                                           .setCommandContext(firstTenantCommand)
-                                                           .build();
+                                                            .setCommandContext(firstTenantCommand)
+                                                            .build();
         final EventContext secondTenantContext = EventContext.newBuilder()
-                                                           .setCommandContext(secondTenantCommand)
-                                                           .build();
+                                                             .setCommandContext(secondTenantCommand)
+                                                             .build();
         final Event firstTenantEvent = Event.newBuilder()
                                             .setContext(firstTenantContext)
                                             .build();
         final Event secondTenantEvent = Event.newBuilder()
-                                            .setContext(secondTenantContext)
-                                            .build();
+                                             .setContext(secondTenantContext)
+                                             .build();
         final Collection<Event> event = ImmutableSet.of(firstTenantEvent, secondTenantEvent);
         eventStore.appendAll(event);
+    }
+
+    @Test
+    public void not_store_enrichment_for_EventContext() {
+        final Event event = projectCreated(Time.getCurrentTime());
+        final Event enriched = event.toBuilder()
+                                    .setContext(event.getContext()
+                                                     .toBuilder()
+                                                     .setEnrichment(newEnrichment()))
+                                    .build();
+        eventStore.append(enriched);
+        final MemoizingObserver<Event> observer = memoizingObserver();
+        eventStore.read(EventStreamQuery.getDefaultInstance(), observer);
+        final EventContext context = observer.responses()
+                                             .get(0)
+                                             .getContext();
+        assertTrue(isDefault(context.getEnrichment()));
+    }
+
+    @Test
+    public void not_store_enrichment_for_origin_of_RejectionContext_type() {
+        final RejectionContext originContext = RejectionContext.newBuilder()
+                                                               .setEnrichment(newEnrichment())
+                                                               .build();
+        final Event event = projectCreated(Time.getCurrentTime());
+        final Event enriched = event.toBuilder()
+                                    .setContext(event.getContext()
+                                                     .toBuilder()
+                                                     .setRejectionContext(originContext))
+                                    .build();
+        eventStore.append(enriched);
+        final MemoizingObserver<Event> observer = memoizingObserver();
+        eventStore.read(EventStreamQuery.getDefaultInstance(), observer);
+        final RejectionContext loadedOriginContext = observer.responses()
+                                                             .get(0)
+                                                             .getContext()
+                                                             .getRejectionContext();
+        assertTrue(isDefault(loadedOriginContext.getEnrichment()));
+    }
+
+    @Test
+    public void not_store_enrichment_for_origin_of_EventContext_type() {
+        final EventContext.Builder originContext = EventContext.newBuilder()
+                                                               .setEnrichment(newEnrichment());
+        final Event event = projectCreated(Time.getCurrentTime());
+        final Event enriched = event.toBuilder()
+                                    .setContext(event.getContext()
+                                                     .toBuilder()
+                                                     .setEventContext(originContext))
+                                    .build();
+        eventStore.append(enriched);
+        final MemoizingObserver<Event> observer = memoizingObserver();
+        eventStore.read(EventStreamQuery.getDefaultInstance(), observer);
+        final EventContext loadedOriginContext = observer.responses()
+                                                         .get(0)
+                                                         .getContext()
+                                                         .getEventContext();
+        assertTrue(isDefault(loadedOriginContext.getEnrichment()));
+    }
+
+    @Test
+    public void not_store_nested_origins_for_EventContext_origin() {
+        final EventContext.Builder context = EventContext.newBuilder()
+                                                         .setEnrichment(newEnrichment());
+        final EventContext originContext = EventContext.newBuilder()
+                                                       .setEventContext(context)
+                                                       .build();
+        final Event event = projectCreated(Time.getCurrentTime());
+        final Event enriched = event.toBuilder()
+                                    .setContext(event.getContext()
+                                                     .toBuilder()
+                                                     .setEventContext(originContext))
+                                    .build();
+        eventStore.append(enriched);
+        final MemoizingObserver<Event> observer = memoizingObserver();
+        eventStore.read(EventStreamQuery.getDefaultInstance(), observer);
+        final EventContext loadedOriginContext = observer.responses()
+                                                    .get(0)
+                                                    .getContext()
+                                                    .getEventContext();
+        assertTrue(isDefault(loadedOriginContext.getEventContext()));
     }
 
     /*
@@ -243,6 +335,16 @@ public class EventStoreShould {
         if (!done.get()) {
             fail("Please use the MoreExecutors.directExecutor in EventStore for tests.");
         }
+    }
+
+    private static Enrichment newEnrichment() {
+        final String key = "enrichment key";
+        final Any value = pack(toMessage("enrichment value"));
+        return Enrichment.newBuilder()
+                         .setContainer(Container.newBuilder()
+                                                .putItems(key, value)
+                                                .build())
+                         .build();
     }
 
     private static class ResponseObserver implements StreamObserver<Event> {
