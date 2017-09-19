@@ -162,7 +162,7 @@ public class EEntity extends AbstractEntity<EventId, Event> {
                 // Does nothing.
                 break;
             case ORIGIN_NOT_SET:
-                // Does nothing because the origins is `null`.
+                // Does nothing because there is no origin for this event.
                 break;
             default:
                 throw newIllegalStateException("Not all of `OriginCase` values were handled.");
