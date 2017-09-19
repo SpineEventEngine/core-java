@@ -162,7 +162,8 @@ public class EEntity extends AbstractEntity<EventId, Event> {
                 // Does nothing.
                 break;
             case ORIGIN_NOT_SET:
-                throw newIllegalStateException("EventContext.origin should be set.");
+                // Does nothing because the origins is `null`.
+                break;
             default:
                 throw newIllegalStateException("Not all of `OriginCase` values were handled.");
         }
