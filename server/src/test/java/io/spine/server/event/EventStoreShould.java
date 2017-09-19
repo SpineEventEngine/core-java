@@ -255,66 +255,66 @@ public class EventStoreShould {
 
     @Test
     public void not_store_enrichment_for_origin_of_RejectionContext_type() {
-        final RejectionContext origin = RejectionContext.newBuilder()
-                                                        .setEnrichment(newEnrichment())
-                                                        .build();
+        final RejectionContext originContext = RejectionContext.newBuilder()
+                                                               .setEnrichment(newEnrichment())
+                                                               .build();
         final Event event = projectCreated(Time.getCurrentTime());
         final Event enriched = event.toBuilder()
                                     .setContext(event.getContext()
                                                      .toBuilder()
-                                                     .setRejectionContext(origin))
+                                                     .setRejectionContext(originContext))
                                     .build();
         eventStore.append(enriched);
         final MemoizingObserver<Event> observer = memoizingObserver();
         eventStore.read(EventStreamQuery.getDefaultInstance(), observer);
-        final RejectionContext modifiedOrigin = observer.responses()
-                                                        .get(0)
-                                                        .getContext()
-                                                        .getRejectionContext();
-        assertTrue(isDefault(modifiedOrigin.getEnrichment()));
+        final RejectionContext loadedOriginContext = observer.responses()
+                                                             .get(0)
+                                                             .getContext()
+                                                             .getRejectionContext();
+        assertTrue(isDefault(loadedOriginContext.getEnrichment()));
     }
 
     @Test
     public void not_store_enrichment_for_origin_of_EventContext_type() {
-        final EventContext.Builder origin = EventContext.newBuilder()
-                                                        .setEnrichment(newEnrichment());
+        final EventContext.Builder originContext = EventContext.newBuilder()
+                                                               .setEnrichment(newEnrichment());
         final Event event = projectCreated(Time.getCurrentTime());
         final Event enriched = event.toBuilder()
                                     .setContext(event.getContext()
                                                      .toBuilder()
-                                                     .setEventContext(origin))
+                                                     .setEventContext(originContext))
                                     .build();
         eventStore.append(enriched);
         final MemoizingObserver<Event> observer = memoizingObserver();
         eventStore.read(EventStreamQuery.getDefaultInstance(), observer);
-        final EventContext modifiedOrigin = observer.responses()
-                                                    .get(0)
-                                                    .getContext()
-                                                    .getEventContext();
-        assertTrue(isDefault(modifiedOrigin.getEnrichment()));
+        final EventContext loadedOriginContext = observer.responses()
+                                                         .get(0)
+                                                         .getContext()
+                                                         .getEventContext();
+        assertTrue(isDefault(loadedOriginContext.getEnrichment()));
     }
 
     @Test
     public void not_store_nested_origins_for_EventContext_origin() {
         final EventContext.Builder context = EventContext.newBuilder()
                                                          .setEnrichment(newEnrichment());
-        final EventContext origin = EventContext.newBuilder()
-                                                .setEventContext(context)
-                                                .build();
+        final EventContext originContext = EventContext.newBuilder()
+                                                       .setEventContext(context)
+                                                       .build();
         final Event event = projectCreated(Time.getCurrentTime());
         final Event enriched = event.toBuilder()
                                     .setContext(event.getContext()
                                                      .toBuilder()
-                                                     .setEventContext(origin))
+                                                     .setEventContext(originContext))
                                     .build();
         eventStore.append(enriched);
         final MemoizingObserver<Event> observer = memoizingObserver();
         eventStore.read(EventStreamQuery.getDefaultInstance(), observer);
-        final EventContext modifiedOrigin = observer.responses()
+        final EventContext loadedOriginContext = observer.responses()
                                                     .get(0)
                                                     .getContext()
                                                     .getEventContext();
-        assertTrue(isDefault(modifiedOrigin.getEventContext()));
+        assertTrue(isDefault(loadedOriginContext.getEventContext()));
     }
 
     /*
