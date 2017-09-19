@@ -27,7 +27,6 @@ import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.core.EventId;
 import io.spine.core.Events;
-import io.spine.core.RejectionContext;
 import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.storage.Column;
 import io.spine.type.TypeName;
@@ -35,7 +34,7 @@ import io.spine.type.TypeName;
 import javax.annotation.Nullable;
 import java.util.Comparator;
 
-import static io.spine.validate.Validate.isDefault;
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * Stores an event.
@@ -147,16 +146,23 @@ public class EEntity extends AbstractEntity<EventId, Event> {
         final EventContext context = event.getContext();
         final EventContext.Builder resultContext = context.toBuilder()
                                                           .clearEnrichment();
-        final EventContext originEventContext = context.getEventContext();
-        if (!isDefault(originEventContext)) {
-            resultContext.setEventContext(originEventContext.toBuilder()
-                                                            .clearOrigin()
-                                                            .clearEnrichment());
-        }
-        final RejectionContext originRejectionContext = context.getRejectionContext();
-        if (!isDefault(originRejectionContext)) {
-            resultContext.setRejectionContext(originRejectionContext.toBuilder()
-                                                                    .clearEnrichment());
+        switch (resultContext.getOriginCase()) {
+            case EVENT_CONTEXT:
+                resultContext.setEventContext(context.getEventContext()
+                                                     .toBuilder()
+                                                     .clearOrigin()
+                                                     .clearEnrichment());
+                break;
+            case REJECTION_CONTEXT:
+                resultContext.setRejectionContext(context.getRejectionContext()
+                                                         .toBuilder()
+                                                         .clearEnrichment());
+                break;
+            case COMMAND_CONTEXT:
+                // Does nothing.
+                break;
+            case ORIGIN_NOT_SET:
+                throw newIllegalStateException("EventContext.origin should be set.");
         }
         return event.toBuilder()
                     .setContext(resultContext)
