@@ -23,15 +23,19 @@ package io.spine.server.event;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
 import io.spine.core.Event;
+import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.core.EventId;
 import io.spine.core.Events;
+import io.spine.core.RejectionContext;
 import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.storage.Column;
 import io.spine.type.TypeName;
 
 import javax.annotation.Nullable;
 import java.util.Comparator;
+
+import static io.spine.validate.Validate.isDefault;
 
 /**
  * Stores an event.
@@ -84,7 +88,8 @@ public class EEntity extends AbstractEntity<EventId, Event> {
 
     EEntity(Event event) {
         this(event.getId());
-        updateState(event);
+        final Event optimizedEvent = optimizeContext(event);
+        updateState(optimizedEvent);
     }
 
     /**
@@ -123,5 +128,38 @@ public class EEntity extends AbstractEntity<EventId, Event> {
                                     .getTypeName();
         }
         return typeName.value();
+    }
+
+    /**
+     * Obtains the specified event with the optimized {@link EventContext}.
+     *
+     * <p>Removes the following items:
+     * <ul>
+     *     <li>the enrichment from the event context</li>
+     *     <li>the enrichment from the origin</li>
+     *     <li>nested origins if the origin is {@link EventContext}</li>
+     * </ul>
+     *
+     * @param event the event to optimize
+     * @return the optimized event
+     */
+    private static Event optimizeContext(Event event) {
+        final EventContext context = event.getContext();
+        final EventContext.Builder resultContext = context.toBuilder()
+                                                          .clearEnrichment();
+        final EventContext originEventContext = context.getEventContext();
+        if (!isDefault(originEventContext)) {
+            resultContext.setEventContext(originEventContext.toBuilder()
+                                                            .clearOrigin()
+                                                            .clearEnrichment());
+        }
+        final RejectionContext originRejectionContext = context.getRejectionContext();
+        if (!isDefault(originRejectionContext)) {
+            resultContext.setRejectionContext(originRejectionContext.toBuilder()
+                                                                    .clearEnrichment());
+        }
+        return event.toBuilder()
+                    .setContext(resultContext)
+                    .build();
     }
 }
