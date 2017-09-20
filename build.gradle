@@ -158,7 +158,8 @@ subprojects {
         }
     }
 
-    // Specific setup for a Travis build, which removes irrelevant messages from a build log.
+    // Specific setup for a Travis build,
+    // which prevents appearing of irrelevant messages in build logs.
     if (isTravis) {
 
         // Disable code style checks, which may produce many errors.
