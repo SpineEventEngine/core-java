@@ -159,7 +159,9 @@ subprojects {
     }
 
     // Specific setup for a Travis build,
-    // which prevents appearing of irrelevant messages in build logs.
+    // which prevents appearing of warning messages in build logs.
+    //
+    // It is expected that warnings are viewed and analyzed in the local build logs.
     if (isTravis) {
 
         // Disable code style checks, which may produce many errors.
