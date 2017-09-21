@@ -98,6 +98,8 @@ allprojects {
     version = spineVersion
 }
 
+final boolean isTravis = System.env.TRAVIS == 'true'
+
 subprojects {
 
     configurations {
@@ -153,6 +155,25 @@ subprojects {
         // Finds and reports about the lines of a code with length above threshold.
         rightMarginWrappingChecker {
             maxTextWidth = 100
+        }
+    }
+
+    // Specific setup for a Travis build,
+    // which prevents appearing of warning messages in build logs.
+    //
+    // It is expected that warnings are viewed and analyzed in the local build logs.
+    if (isTravis) {
+
+        // Disable code style checks, which may produce many errors.
+        tasks.findByPath('checkRightMarginWrapping').enabled = false
+        tasks.findByPath('checkJavadocLink').enabled = false
+
+        javadoc {
+
+            // Set the maximum number of Javadoc warnings to print.
+            //
+            // If the parameter value is zero, all warnings will be printed.
+            options.addStringOption('Xmaxwarns', '1')
         }
     }
 
