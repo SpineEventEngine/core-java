@@ -24,6 +24,7 @@ import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.core.Subscribe;
 import io.spine.core.Version;
+import io.spine.core.Versions;
 import io.spine.server.entity.ThrowingValidatingBuilder;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionListener;
@@ -33,12 +34,16 @@ import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.event.PrjProjectCreated;
 import io.spine.test.projection.event.PrjTaskAdded;
 import io.spine.validate.ConstraintViolation;
+import org.junit.Ignore;
+import org.junit.Test;
 
 import javax.annotation.Nullable;
+import java.util.Collections;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.protobuf.AnyPacker.unpack;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -138,6 +143,23 @@ public class ProjectionTransactionShould
             RuntimeException toThrow) {
         entity.getBuilder()
               .setShouldThrow(toThrow);
+    }
+
+    @Ignore // The behavior is changed. See increment_version_on_event
+    @Test
+    @Override
+    public void advance_version_from_event() {
+        super.advance_version_from_event();
+    }
+
+    @Test
+    public void increment_version_on_event() {
+        final Projection<ProjectId, Project, PatchedProjectBuilder> entity = createEntity();
+        final Version oldVersion = entity.getVersion();
+        final Event event = createEvent(createEventMessage());
+        Projection.play(entity, Collections.singleton(event));
+        final Version expected = Versions.increment(oldVersion);
+        assertEquals(expected.getNumber(), entity.getVersion().getNumber());
     }
 
     @SuppressWarnings({"MethodMayBeStatic", "unused"})  // Methods accessed via reflection.

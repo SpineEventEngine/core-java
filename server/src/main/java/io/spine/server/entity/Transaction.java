@@ -243,7 +243,7 @@ public abstract class Transaction<I,
      *
      * @return the pending Entity version
      */
-    protected Version getVersion() {
+    Version getVersion() {
         return version;
     }
 
