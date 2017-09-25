@@ -71,6 +71,7 @@ import static io.spine.server.TestRejectionClasses.assertContains;
 import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.ID;
 import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.addTask;
 import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.createProject;
+import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.doNothing;
 import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.projectCreated;
 import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.projectStarted;
 import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.startProject;
@@ -125,16 +126,16 @@ public class ProcessManagerRepositoryShould
         return procmans;
     }
 
-    /*
-     * Tests
-     *************/
-
     @Override
     protected ProjectId createId(int value) {
         return ProjectId.newBuilder()
                         .setId(format("procman-number-%s", value))
                         .build();
     }
+
+    /*
+     * Tests
+     *************/
 
     @Override
     @Before
@@ -157,6 +158,13 @@ public class ProcessManagerRepositoryShould
 
     ProcessManagerRepository<?, ?, ?> repository() {
         return (ProcessManagerRepository<?, ?, ?>) repository;
+    }
+
+    private void testDispatchCommand(Message cmdMsg) throws InvocationTargetException {
+        final Command cmd = requestFactory.command()
+                                          .create(cmdMsg);
+        repository().dispatchCommand(CommandEnvelope.of(cmd));
+        assertTrue(TestProcessManager.processed(cmdMsg));
     }
 
     private void testDispatchEvent(Message eventMessage) {
@@ -189,12 +197,10 @@ public class ProcessManagerRepositoryShould
         testDispatchCommand(startProject());
     }
 
-    private void testDispatchCommand(Message cmdMsg) throws InvocationTargetException {
-        final Command cmd = requestFactory.command()
-                                          .create(cmdMsg);
-
-        repository().dispatchCommand(CommandEnvelope.of(cmd));
-        assertTrue(TestProcessManager.processed(cmdMsg));
+    @Test
+    public void allow_ProcessManager_have_unmodified_state_after_command_handling()
+            throws InvocationTargetException {
+        testDispatchCommand(doNothing());
     }
 
     @Test

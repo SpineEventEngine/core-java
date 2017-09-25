@@ -42,3 +42,7 @@ message PmAddTask {
 message PmStartProject {
     ProjectId project_id = 1;
 }
+
+message PmDoNothing {
+    ProjectId project_id = 1;
+}

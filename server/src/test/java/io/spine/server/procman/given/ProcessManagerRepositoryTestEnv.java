@@ -40,11 +40,16 @@ import io.spine.test.procman.ProjectVBuilder;
 import io.spine.test.procman.Task;
 import io.spine.test.procman.command.PmAddTask;
 import io.spine.test.procman.command.PmCreateProject;
+import io.spine.test.procman.command.PmDoNothing;
 import io.spine.test.procman.command.PmStartProject;
 import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.event.PmTaskAdded;
 import io.spine.testdata.Sample;
+
+import java.util.List;
+
+import static java.util.Collections.emptyList;
 
 public class ProcessManagerRepositoryTestEnv {
 
@@ -88,14 +93,6 @@ public class ProcessManagerRepositoryTestEnv {
             messagesDelivered.put(getState().getId(), commandOrEventMsg);
         }
 
-        @React
-        public Empty on(PmProjectCreated event, EventContext ignored) {
-            keep(event);
-
-            handleProjectCreated(event.getProjectId());
-            return withNothing();
-        }
-
         private static Empty withNothing() {
             return Empty.getDefaultInstance();
         }
@@ -108,28 +105,11 @@ public class ProcessManagerRepositoryTestEnv {
             getBuilder().mergeFrom(newState);
         }
 
-        @React
-        public Empty on(PmTaskAdded event) {
-            keep(event);
-
-            final Task task = event.getTask();
-            handleTaskAdded(task);
-            return withNothing();
-        }
-
         private void handleTaskAdded(Task task) {
             final Project newState = getState().toBuilder()
                                                .addTask(task)
                                                .build();
             getBuilder().mergeFrom(newState);
-        }
-
-        @React
-        public Empty on(PmProjectStarted event) {
-            keep(event);
-
-            handleProjectStarted();
-            return withNothing();
         }
 
         private void handleProjectStarted() {
@@ -177,6 +157,12 @@ public class ProcessManagerRepositoryTestEnv {
                     .routeAll();
         }
 
+        @Assign
+        List<Message> handle(PmDoNothing command, CommandContext ignored) {
+            keep(command);
+            return emptyList();
+        }
+
         @React
         Empty on(EntityAlreadyArchived rejection) {
             keep(rejection);
@@ -186,6 +172,31 @@ public class ProcessManagerRepositoryTestEnv {
         @React
         Empty on(EntityAlreadyDeleted rejection) {
             keep(rejection);
+            return withNothing();
+        }
+
+        @React
+        public Empty on(PmTaskAdded event) {
+            keep(event);
+
+            final Task task = event.getTask();
+            handleTaskAdded(task);
+            return withNothing();
+        }
+
+        @React
+        public Empty on(PmProjectStarted event) {
+            keep(event);
+
+            handleProjectStarted();
+            return withNothing();
+        }
+
+        @React
+        public Empty on(PmProjectCreated event, EventContext ignored) {
+            keep(event);
+
+            handleProjectCreated(event.getProjectId());
             return withNothing();
         }
 
@@ -216,6 +227,12 @@ public class ProcessManagerRepositoryTestEnv {
 
         public static PmAddTask addTask() {
             return ((PmAddTask.Builder) Sample.builderForType(PmAddTask.class))
+                    .setProjectId(ID)
+                    .build();
+        }
+
+        public static PmDoNothing doNothing() {
+            return ((PmDoNothing.Builder) Sample.builderForType(PmDoNothing.class))
                     .setProjectId(ID)
                     .build();
         }
