@@ -232,17 +232,7 @@ public abstract class Transaction<I,
         return entity;
     }
 
-    /**
-     * Retrieves the pending version of the Entity.
-     *
-     * <p>In case of a successful transaction, this version will be set to to the Entity.
-     *
-     * <p>This method is <b>consistent</b>, i.e. the returned value is the same for all
-     * the invocations on a single instance of {@code Transaction}. More formally, for any
-     * {@code Transaction tx}, {@code tx.getValue().equals(tx.getValue())} is always {@code true}.
-     *
-     * @return the pending Entity version
-     */
+    @VisibleForTesting
     Version getVersion() {
         return version;
     }
