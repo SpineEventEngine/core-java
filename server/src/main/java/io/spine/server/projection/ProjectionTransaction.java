@@ -63,6 +63,11 @@ class ProjectionTransaction<I,
         projection.apply(event.getMessage(), event.getEventContext());
     }
 
+    @Override
+    protected VersionAdvancementStrategy versioningStrategy() {
+        return VersionAdvancementStrategy.INCREMENT;
+    }
+
     /**
      * {@inheritDoc}
      *

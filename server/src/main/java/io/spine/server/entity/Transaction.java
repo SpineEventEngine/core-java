@@ -26,6 +26,7 @@ import io.spine.annotation.Internal;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Version;
+import io.spine.core.Versions;
 import io.spine.server.entity.TransactionListener.SilentWitness;
 import io.spine.validate.AbstractValidatingBuilder;
 import io.spine.validate.ValidatingBuilder;
@@ -37,6 +38,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.core.Versions.checkIsIncrement;
 import static io.spine.server.entity.InvalidEntityStateException.onConstraintViolations;
+import static io.spine.server.entity.Transaction.VersionAdvancementStrategy.INJECT;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static java.lang.String.format;
 
@@ -230,8 +232,18 @@ public abstract class Transaction<I,
         return entity;
     }
 
-    @VisibleForTesting
-    Version getVersion() {
+    /**
+     * Retrieves the pending version of the Entity.
+     *
+     * <p>In case of a successful transaction, this version will be set to to the Entity.
+     *
+     * <p>This method is <b>consistent</b>, i.e. the returned value is the same for all
+     * the invocations on a single instance of {@code Transaction}. More formally, for any
+     * {@code Transaction tx}, {@code tx.getValue().equals(tx.getValue())} is always {@code true}.
+     *
+     * @return the pending Entity version
+     */
+    protected Version getVersion() {
         return version;
     }
 
@@ -249,6 +261,7 @@ public abstract class Transaction<I,
 
         final TransactionListener<I, E, S, B> listener = getListener();
         final B builder = getBuilder();
+        final Version pendingVersion = getVersion();
 
         // The state is only updated, if at least some changes were made to the builder.
         if (builder.isDirty()) {
@@ -257,9 +270,9 @@ public abstract class Transaction<I,
                 markStateChanged();
 
                 listener.onBeforeCommit(getEntity(), newState,
-                                        getVersion(), getLifecycleFlags());
+                                        pendingVersion, getLifecycleFlags());
 
-                entity.updateState(newState, getVersion());
+                entity.updateState(newState, pendingVersion);
                 commitAttributeChanges();
             } catch (ValidationException exception) {  /* Could only happen if the state
                                                                    has been injected not using
@@ -277,7 +290,7 @@ public abstract class Transaction<I,
         } else {
             // The state isn't modified, but other attributes may have been modified.
             listener.onBeforeCommit(getEntity(), getEntity().getState(),
-                                    getVersion(), getLifecycleFlags());
+                                    pendingVersion, getLifecycleFlags());
             commitAttributeChanges();
             releaseTx();
         }
@@ -302,7 +315,7 @@ public abstract class Transaction<I,
      * Creates a new {@linkplain Phase transaction phase} for the given event
      * and propagates the phase.
      *
-     * <p>If case of an exception, the {@linkplain #rollback(Throwable) transaction rollback}
+     * <p>In case of an exception, the {@linkplain #rollback(Throwable) transaction rollback}
      * is performed.
      *
      * @param event the envelope with the event
@@ -386,12 +399,6 @@ public abstract class Transaction<I,
         entity.injectTransaction(tx);
     }
 
-    private void advanceVersion(Version newVersion) {
-        checkNotNull(newVersion);
-        checkIsIncrement(this.version, newVersion);
-        setVersion(newVersion);
-    }
-
     private void setVersion(Version version) {
         checkNotNull(version);
         this.version = version;
@@ -405,9 +412,6 @@ public abstract class Transaction<I,
      *
      * <p>One of the usages for this method is for creating an entity instance
      * from a storage.
-     *
-     * <p>To set a new version which is several numbers ahead please use
-     * {@link #advanceVersion(Version)}.
      *
      * @param version the version to set.
      */
@@ -444,6 +448,31 @@ public abstract class Transaction<I,
         lifecycleFlags = lifecycleFlags.toBuilder().setDeleted(deleted).build();
     }
 
+    protected VersionAdvancementStrategy versioningStrategy() {
+        return INJECT;
+    }
+
+    protected enum VersionAdvancementStrategy {
+
+        INJECT {
+            @Override
+            Version advanceUpon(Phase<?, ?, ?, ?> phase) {
+                final Version fromEvent = phase.getContext().getVersion();
+                return fromEvent;
+            }
+        },
+        INCREMENT {
+            @Override
+            Version advanceUpon(Phase<?, ?, ?, ?> phase) {
+                final Version current = phase.getUnderlyingTransaction().getVersion();
+                final Version newVersion = Versions.increment(current);
+                return newVersion;
+            }
+        };
+
+        abstract Version advanceUpon(Phase<?, ?, ?, ?> phase);
+    }
+
     /**
      * A stage of transaction, which is created by applying a single event (i.e. its message along
      * with the context) to the entity.
@@ -457,8 +486,10 @@ public abstract class Transaction<I,
      * @param <S> the type of entity state
      * @param <B> the type of a {@code ValidatingBuilder} for the entity state
      */
-    protected static class Phase<I, E extends EventPlayingEntity<I, S, B>, S extends Message,
-                                 B extends ValidatingBuilder<S, ? extends Message.Builder>> {
+    static class Phase<I,
+                       E extends EventPlayingEntity<I, S, B>,
+                       S extends Message,
+                       B extends ValidatingBuilder<S, ? extends Message.Builder>> {
 
         private final Transaction<I, E, S, B> underlyingTransaction;
         private final EventEnvelope event;
@@ -478,9 +509,20 @@ public abstract class Transaction<I,
          */
         private Phase<I, E, S, B> propagate() {
             underlyingTransaction.dispatch(underlyingTransaction.getEntity(), event);
-            underlyingTransaction.advanceVersion(getContext().getVersion());
+            advanceVersion();
             markSuccessful();
             return this;
+        }
+
+        private void advanceVersion() {
+            final Version version = underlyingTransaction.versioningStrategy()
+                                                         .advanceUpon(this);
+            checkIsIncrement(underlyingTransaction.getVersion(), version);
+            underlyingTransaction.setVersion(version);
+        }
+
+        private Transaction<I, E, S, B> getUnderlyingTransaction() {
+            return underlyingTransaction;
         }
 
         private void markSuccessful() {
