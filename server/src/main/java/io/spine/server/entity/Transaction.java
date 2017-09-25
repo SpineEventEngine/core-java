@@ -506,10 +506,10 @@ public abstract class Transaction<I,
      * @param <S> the type of entity state
      * @param <B> the type of a {@code ValidatingBuilder} for the entity state
      */
-    static class Phase<I,
-                       E extends EventPlayingEntity<I, S, B>,
-                       S extends Message,
-                       B extends ValidatingBuilder<S, ? extends Message.Builder>> {
+    protected static class Phase<I,
+                                 E extends EventPlayingEntity<I, S, B>,
+                                 S extends Message,
+                                 B extends ValidatingBuilder<S, ? extends Message.Builder>> {
 
         private final Transaction<I, E, S, B> underlyingTransaction;
         private final EventEnvelope event;
