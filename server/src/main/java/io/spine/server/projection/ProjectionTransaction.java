@@ -63,6 +63,13 @@ class ProjectionTransaction<I,
         projection.apply(event.getMessage(), event.getEventContext());
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The {@code ProjectionTransaction} uses the
+     * {@link VersionAdvancementStrategy#INCREMENT INCREMENT} strategy as the event versions are
+     * irrelevant to the projection version.
+     */
     @Override
     protected VersionAdvancementStrategy versioningStrategy() {
         return VersionAdvancementStrategy.INCREMENT;

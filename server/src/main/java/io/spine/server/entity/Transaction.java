@@ -448,12 +448,28 @@ public abstract class Transaction<I,
         lifecycleFlags = lifecycleFlags.toBuilder().setDeleted(deleted).build();
     }
 
+    /**
+     * Retrieves the {@link VersionAdvancementStrategy} of current {@code Transaction}.
+     *
+     * <p>The value should be constant along all the instances of a certain (runtime) type.
+     *
+     * <p>The default value is {@link VersionAdvancementStrategy#INJECT INJECT}.
+     */
     protected VersionAdvancementStrategy versioningStrategy() {
         return INJECT;
     }
 
+    /**
+     * The strategy of advancing the version of a {@code Transaction} upon the given {@link Phase}.
+     */
     protected enum VersionAdvancementStrategy {
 
+        /**
+         * Retrieves the version from the {@linkplain EventContext event}, which caused
+         * the transaction phase.
+         *
+         * @see EventContext#getVersion()
+         */
         INJECT {
             @Override
             Version advanceUpon(Phase<?, ?, ?, ?> phase) {
@@ -461,6 +477,12 @@ public abstract class Transaction<I,
                 return fromEvent;
             }
         },
+
+        /**
+         * Retrieves the current version of the {@code Transaction} incremented by one.
+         *
+         * @see Transaction#getVersion()
+         */
         INCREMENT {
             @Override
             Version advanceUpon(Phase<?, ?, ?, ?> phase) {
@@ -470,6 +492,14 @@ public abstract class Transaction<I,
             }
         };
 
+        /**
+         * Creates an advanced version upon the given {@link Phase}.
+         *
+         * <p>This method has no side effects, i.e. doesn't set the version to the transaction etc.
+         *
+         * @param phase the transaction phase that causes the version change
+         * @return the advanced version
+         */
         abstract Version advanceUpon(Phase<?, ?, ?, ?> phase);
     }
 
