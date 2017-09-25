@@ -20,6 +20,7 @@
 
 package io.spine.server.entity;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
@@ -173,6 +174,7 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
      *
      * @param newState a new state to set
      */
+    @VisibleForTesting
     void incrementState(S newState) {
         updateState(newState, incrementedVersion());
     }
