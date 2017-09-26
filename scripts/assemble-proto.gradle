@@ -1,0 +1,106 @@
+import com.google.common.base.Predicate
+import com.google.common.collect.Iterables
+import com.google.common.io.Files
+
+/*
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
+ *
+ * Redistribution and use in source and/or binary forms, with or without
+ * modification, must retain the above copyright notice and the following
+ * disclaimer.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+buildscript {
+    repositories {
+        mavenCentral()
+        mavenLocal()
+    }
+
+    dependencies {
+        classpath "com.google.guava:guava:$guavaVersion"
+    }
+}
+
+def collectProto() {
+    final def dependencies = configurations.compile.files
+    final def jarFiles = dependencies.collect { it.name }
+    final def result = new HashSet<>()
+    for (final File jarFile in dependencies) {
+        final def zipTree = zipTree(jarFile)
+        for (final File file in zipTree) {
+            if (IsProtoFile.PREDICATE.apply(file)) {
+                result.add(getProtoPackage(file, jarFiles))
+            }
+        }
+    }
+    result.addAll(sourceSets.main.proto.srcDirs)
+    return result
+}
+
+File getProtoPackage(File member, Collection<String> jars) {
+    File pkg = member
+    while (!jars.contains(jarName(pkg.parentFile))) {
+        pkg = pkg.parentFile
+    }
+    return pkg.parentFile
+}
+
+String jarName(final File jar) {
+    final String unpackedJarInfix = ".jar"
+    final String name = jar.name
+    final int index = name.lastIndexOf(unpackedJarInfix)
+    if (index < 0) {
+        return name
+    } else {
+        return name.substring(0, index + unpackedJarInfix.length())
+    }
+}
+
+task assembleProto(type: Jar) {
+    description "Assembles a JAR artifact with all Proto definitions from the classpath."
+    from { collectProto() }
+    include {
+        final File file = it.file
+        return IsProtoFile.PREDICATE.apply(file) ||
+                Iterables.any(Files.fileTreeTraverser().children(file), IsProtoFile.PREDICATE)
+    }
+}
+
+final String artifactIdForPublishing = "spine-${project.name}"
+publishing {
+    publications {
+        mavenProto(MavenPublication) {
+            groupId = "${group}"
+            artifactId = "${artifactIdForPublishing}"
+            version = "${version}"
+
+            from components.java
+
+            artifact assembleProto {
+                classifier = "proto"
+            }
+        }
+    }
+}
+
+enum IsProtoFile implements Predicate<File> {
+
+    PREDICATE
+
+    @Override
+    boolean apply(final File input) {
+        return (input?.isDirectory() && input.list().length != 0) ||
+                (input?.isFile() && input?.name?.endsWith(".proto"))
+    }
+}
