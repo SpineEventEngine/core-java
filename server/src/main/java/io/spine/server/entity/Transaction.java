@@ -443,8 +443,8 @@ public abstract class Transaction<I,
      *
      * <p>The value should be constant among all the instances of a certain (runtime) type.
      *
-     * <p>The default value is the Event Sourcing-fashioned
-     * {@link EntityVersioning#FROM_EVENT FROM_EVENT} strategy.
+     * <p>By default the version is taken from
+     * the {@linkplain EntityVersioning#FROM_EVENT latest event applied}.
      */
     protected EntityVersioning versioningStrategy() {
         return FROM_EVENT;
