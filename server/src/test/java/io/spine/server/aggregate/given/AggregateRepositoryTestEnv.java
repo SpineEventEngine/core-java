@@ -26,6 +26,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.FloatValue;
+import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
@@ -79,6 +80,7 @@ import java.util.Set;
 
 import static io.spine.core.Events.nothing;
 import static io.spine.server.aggregate.AggregateMessageDispatcher.dispatchCommand;
+import static java.util.Collections.emptyList;
 
 /**
  * @author Alexander Yevsyukov
@@ -316,6 +318,7 @@ public class AggregateRepositoryTestEnv {
             return (long) Math.abs(floatValue);
         }
 
+        /** Rejects a negative value via command rejection. */
         @Assign
         Timestamp on(UInt32Value value) {
             if (value.getValue() < 0) {
@@ -331,6 +334,12 @@ public class AggregateRepositoryTestEnv {
                 throw new CannotModifyArchivedEntity(Identifier.pack(getId()));
             }
             return Time.getCurrentTime();
+        }
+
+        /** Invalid command handler, which does not produce events. */
+        @Assign
+        List<Message> on(Int32Value value) {
+            return emptyList();
         }
 
         @Apply
