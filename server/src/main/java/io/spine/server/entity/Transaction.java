@@ -467,7 +467,7 @@ public abstract class Transaction<I,
          */
         FROM_EVENT {
             @Override
-            Version advance(Phase<?, ?, ?, ?> phase) {
+            Version nextVersion(Phase<?, ?, ?, ?> phase) {
                 final Version fromEvent = phase.getContext().getVersion();
                 return fromEvent;
             }
@@ -477,7 +477,7 @@ public abstract class Transaction<I,
          * This strategy is applied to the {@link Entity} types which are not the pure Event
          * Sourcing entities, such as {@link io.spine.server.projection.Projection Projection}s.
          *
-         * <p>A {@code Projection} represents some joined chunk of data in a specific moment in
+         * <p>A {@code Projection} represents an arbitrary cast of data in a specific moment in
          * time. The events applied to a {@code Projection} are random, i.e. are produced by
          * different {@code Entities} and have no common versioning. Thus, a {@code Projection} has
          * its own versioning system. Each event makes a {@code Projection} <i>increment</i> its
@@ -485,7 +485,7 @@ public abstract class Transaction<I,
          */
         AUTO_INCREMENT {
             @Override
-            Version advance(Phase<?, ?, ?, ?> phase) {
+            Version nextVersion(Phase<?, ?, ?, ?> phase) {
                 final Version current = phase.getUnderlyingTransaction().getVersion();
                 final Version newVersion = Versions.increment(current);
                 return newVersion;
@@ -501,7 +501,7 @@ public abstract class Transaction<I,
          * @param phase the transaction phase that causes the version change
          * @return the advanced version
          */
-        abstract Version advance(Phase<?, ?, ?, ?> phase);
+        abstract Version nextVersion(Phase<?, ?, ?, ?> phase);
     }
 
     /**
@@ -547,7 +547,7 @@ public abstract class Transaction<I,
 
         private void advanceVersion() {
             final Version version = underlyingTransaction.versioningStrategy()
-                                                         .advance(this);
+                                                         .nextVersion(this);
             checkIsIncrement(underlyingTransaction.getVersion(), version);
             underlyingTransaction.setVersion(version);
         }
