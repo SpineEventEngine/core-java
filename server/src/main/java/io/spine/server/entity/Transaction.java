@@ -38,7 +38,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.core.Versions.checkIsIncrement;
 import static io.spine.server.entity.InvalidEntityStateException.onConstraintViolations;
-import static io.spine.server.entity.Transaction.VersionAdvancementStrategy.INJECT;
+import static io.spine.server.entity.Transaction.EntityVersioning.FROM_EVENT;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static java.lang.String.format;
 
@@ -439,43 +439,54 @@ public abstract class Transaction<I,
     }
 
     /**
-     * Retrieves the {@link VersionAdvancementStrategy} of current {@code Transaction}.
+     * Retrieves the {@link EntityVersioning} of current {@code Transaction}.
      *
-     * <p>The value should be constant along all the instances of a certain (runtime) type.
+     * <p>The value should be constant among all the instances of a certain (runtime) type.
      *
-     * <p>The default value is {@link VersionAdvancementStrategy#INJECT INJECT}.
+     * <p>The default value is {@link EntityVersioning#FROM_EVENT FROM_EVENT}, as it works for
+     * most types of {@link Entity}.
      */
-    protected VersionAdvancementStrategy versioningStrategy() {
-        return INJECT;
+    protected EntityVersioning versioningStrategy() {
+        return FROM_EVENT;
     }
 
     /**
-     * The strategy of advancing the version of a {@code Transaction} upon the given {@link Phase}.
+     * The strategy of versioning of {@linkplain Entity entities} during a {@link Phase} of a
+     * certain {@code Transaction}.
      */
-    protected enum VersionAdvancementStrategy {
+    protected enum EntityVersioning {
 
         /**
-         * Retrieves the version from the {@linkplain EventContext event}, which caused
-         * the transaction phase.
+         * This strategy is applied to the {@link Entity} types which represent a sequence of
+         * events.
          *
-         * @see EventContext#getVersion()
+         * <p>One example of such entity is {@link io.spine.server.aggregate.Aggregate Aggregate}.
+         * As a sequence of events, an {@code Aggregate} has no own versioning system, thus
+         * inherits the versions of the {@linkplain io.spine.server.aggregate.Apply applied}
+         * events. In other words, the current version of an {@code Aggregate} is
+         * the {@linkplain EventContext#getVersion() version} of last applied event.
          */
-        INJECT {
+        FROM_EVENT {
             @Override
-            Version advanceUpon(Phase<?, ?, ?, ?> phase) {
+            Version advance(Phase<?, ?, ?, ?> phase) {
                 final Version fromEvent = phase.getContext().getVersion();
                 return fromEvent;
             }
         },
 
         /**
-         * Retrieves the current version of the {@code Transaction} incremented by one.
+         * This strategy is applied to the {@link Entity} types which are not the pure Event
+         * Sourcing entities, such as {@link io.spine.server.projection.Projection Projection}s.
          *
-         * @see Transaction#getVersion()
+         * <p>A {@code Projection} represents some joined chunk of data in a specific moment in
+         * time. The events applied to a {@code Projection} are random, i.e. are produced by
+         * different {@code Entities} and have no common versioning. Thus, a {@code Projection} has
+         * its own versioning system. Each event makes a {@code Projection} <i>increment</i> its
+         * version by one.
          */
-        INCREMENT {
+        AUTO_INCREMENT {
             @Override
-            Version advanceUpon(Phase<?, ?, ?, ?> phase) {
+            Version advance(Phase<?, ?, ?, ?> phase) {
                 final Version current = phase.getUnderlyingTransaction().getVersion();
                 final Version newVersion = Versions.increment(current);
                 return newVersion;
@@ -483,14 +494,15 @@ public abstract class Transaction<I,
         };
 
         /**
-         * Creates an advanced version upon the given {@link Phase}.
+         * Creates the {@link Entity} version which is set after the given {@link Phase} is
+         * complete successfully.
          *
          * <p>This method has no side effects, i.e. doesn't set the version to the transaction etc.
          *
          * @param phase the transaction phase that causes the version change
          * @return the advanced version
          */
-        abstract Version advanceUpon(Phase<?, ?, ?, ?> phase);
+        abstract Version advance(Phase<?, ?, ?, ?> phase);
     }
 
     /**
@@ -536,7 +548,7 @@ public abstract class Transaction<I,
 
         private void advanceVersion() {
             final Version version = underlyingTransaction.versioningStrategy()
-                                                         .advanceUpon(this);
+                                                         .advance(this);
             checkIsIncrement(underlyingTransaction.getVersion(), version);
             underlyingTransaction.setVersion(version);
         }
@@ -549,7 +561,7 @@ public abstract class Transaction<I,
             this.successful = true;
         }
 
-        protected boolean isSuccessful() {
+        boolean isSuccessful() {
             return successful;
         }
 
