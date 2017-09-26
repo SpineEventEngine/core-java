@@ -174,7 +174,7 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
      *
      * @param newState a new state to set
      */
-    @VisibleForTesting
+    @VisibleForTesting // Used in tests only.
     void incrementState(S newState) {
         updateState(newState, incrementedVersion());
     }
