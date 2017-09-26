@@ -123,7 +123,6 @@ public class ProcessManagerRepositoryTestEnv {
         PmProjectCreated handle(PmCreateProject command, CommandContext ignored) {
             keep(command);
 
-            handleProjectCreated(command.getProjectId());
             final PmProjectCreated event = ((PmProjectCreated.Builder)
                     Sample.builderForType(PmProjectCreated.class))
                           .setProjectId(command.getProjectId())
@@ -135,7 +134,6 @@ public class ProcessManagerRepositoryTestEnv {
         PmTaskAdded handle(PmAddTask command, CommandContext ignored) {
             keep(command);
 
-            handleTaskAdded(command.getTask());
             final PmTaskAdded event = ((PmTaskAdded.Builder)
                     Sample.builderForType(PmTaskAdded.class))
                           .setProjectId(command.getProjectId())
@@ -147,7 +145,6 @@ public class ProcessManagerRepositoryTestEnv {
         CommandRouted handle(PmStartProject command, CommandContext context) {
             keep(command);
 
-            handleProjectStarted();
             final Message addTask = ((PmAddTask.Builder)
                     Sample.builderForType(PmAddTask.class))
                           .setProjectId(command.getProjectId())

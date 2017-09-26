@@ -25,6 +25,7 @@ import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.protobuf.FloatValue;
+import com.google.protobuf.Int32Value;
 import com.google.protobuf.UInt32Value;
 import com.google.protobuf.UInt64Value;
 import io.grpc.stub.StreamObserver;
@@ -268,9 +269,9 @@ public class AggregateRepositoryShould {
 
         final TestEventFactory factory = TestEventFactory.newInstance(getClass());
         final AggProjectArchived msg = AggProjectArchived.newBuilder()
-                                                   .setProjectId(parent.getId())
-                                                   .addChildProjectId(child.getId())
-                                                   .build();
+                                                         .setProjectId(parent.getId())
+                                                         .addChildProjectId(child.getId())
+                                                         .build();
         final Event event = factory.createEvent(msg);
 
         boundedContext.getEventBus()
@@ -421,7 +422,6 @@ public class AggregateRepositoryShould {
         final ProjectId childId2 = givenAggregateId("acceptingChild-2");
         final ProjectId childId3 = givenAggregateId("acceptingChild-3");
 
-
         final StreamObserver<Ack> observer = StreamObservers.noOpObserver();
         final CommandBus commandBus = boundedContext.getCommandBus();
 
@@ -456,6 +456,18 @@ public class AggregateRepositoryShould {
                                          .getValue();
             assertEquals(RejectionReactingAggregate.PARENT_ARCHIVED, value);
         }
+    }
+
+    @Test
+    public void not_allow_empty_event_list_after_command_handling() {
+        final FailingAggregateRepository repository = new FailingAggregateRepository();
+        boundedContext.register(repository);
+        final Command command = requestFactory.createCommand(Int32Value.newBuilder()
+                                                                       .setValue(5)
+                                                                       .build());
+        boundedContext.getCommandBus()
+                      .post(command, StreamObservers.<Ack>noOpObserver());
+        assertTrue(repository.isErrorLogged());
     }
 
     /*

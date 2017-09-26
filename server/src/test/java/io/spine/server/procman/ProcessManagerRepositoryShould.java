@@ -198,7 +198,7 @@ public class ProcessManagerRepositoryShould
     }
 
     @Test
-    public void allow_ProcessManager_have_unmodified_state_after_command_handling()
+    public void allow_ProcMan_have_unmodified_state_after_command_handling()
             throws InvocationTargetException {
         testDispatchCommand(doNothing());
     }
