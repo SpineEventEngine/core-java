@@ -162,7 +162,7 @@ public abstract class Transaction<I,
      * Acts similar to
      * {@linkplain Transaction#Transaction(EventPlayingEntity, TransactionListener)
      * Transaction(EventPlayingEntity, TransactionListener)}, but passes an instance of
-     * {@linkplain SilentWitness SilentWitness} as a listener.
+     * {@link SilentWitness} as a listener.
      *
      * @param entity the entity to create the transaction for.
      */
@@ -191,9 +191,8 @@ public abstract class Transaction<I,
 
     /**
      * Acts similar to {@linkplain Transaction#Transaction(EventPlayingEntity,
-     * Message, Version, TransactionListener) an overloaded ctor}
-     * an overloaded ctor}, but passes an instance of
-     * {@linkplain SilentWitness SilentWitness} as a listener.
+     * Message, Version, TransactionListener) an overloaded ctor},
+     * but passes an instance of {@link SilentWitness} as a listener.
      *
      * @param entity  the target entity to modify within this transaction
      * @param state   the entity state to set
