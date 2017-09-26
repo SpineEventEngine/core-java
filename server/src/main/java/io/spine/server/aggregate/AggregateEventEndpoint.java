@@ -73,7 +73,7 @@ class AggregateEventEndpoint<I, A extends Aggregate<I, ?, ?>>
 
     /**
      * Does nothing since a state of an aggregate should not be necessarily
-     * updated during reacting on an event.
+     * updated upon reacting on an event.
      */
     @Override
     protected void onEmptyResult(A aggregate, EventEnvelope envelope) {

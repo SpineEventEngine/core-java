@@ -73,7 +73,7 @@ class PmEventEndpoint<I, P extends ProcessManager<I, ?, ?>>
 
     /**
      * Does nothing since a state of a process manager should not be necessarily
-     * updated during reacting on an event.
+     * updated upon reacting on an event.
      */
     @Override
     protected void onEmptyResult(P pm, EventEnvelope envelope) {

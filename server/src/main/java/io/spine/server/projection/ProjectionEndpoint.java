@@ -112,7 +112,7 @@ class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
 
     /**
      * Does nothing since a state of a projection should not be necessarily
-     * updated during execution of a {@linkplain io.spine.core.Subscribe subscriber} method.
+     * updated upon execution of a {@linkplain io.spine.core.Subscribe subscriber} method.
      */
     @Override
     protected void onEmptyResult(P entity, EventEnvelope event) {
