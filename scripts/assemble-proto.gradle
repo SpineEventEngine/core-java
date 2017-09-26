@@ -21,6 +21,7 @@ import com.google.common.io.Files
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 buildscript {
     repositories {
         mavenCentral()
@@ -32,7 +33,17 @@ buildscript {
     }
 }
 
-def collectProto() {
+/**
+ * Collects all the directories from current project and its dependencies (including zip tree
+ * directories) which contain {@code .proto} definitions.
+ *
+ * <p>The directories may in practice include files of other extension. The caller should take care
+ * of handling those files respectively.
+ *
+ * <p>It's guaranteed that there are no more Proto definitions in the current project classpath
+ * except those included into the returned {@code Collection}.
+ */
+Collection<File> collectProto() {
     final def dependencies = configurations.compile.files
     final def jarFiles = dependencies.collect { it.name }
     final def result = new HashSet<>()
@@ -40,7 +51,7 @@ def collectProto() {
         final def zipTree = zipTree(jarFile)
         for (final File file in zipTree) {
             if (IsProtoFile.PREDICATE.apply(file)) {
-                result.add(getProtoPackage(file, jarFiles))
+                result.add(getProtoRoot(file, jarFiles))
             }
         }
     }
@@ -48,7 +59,13 @@ def collectProto() {
     return result
 }
 
-File getProtoPackage(File member, Collection<String> jars) {
+/**
+ * Returns the root directory containing a Proto package.
+ *
+ * @param member the member File of the Proto package
+ * @param jars the full listing of the project JAR dependencies
+ */
+File getProtoRoot(File member, Collection<String> jars) {
     File pkg = member
     while (!jars.contains(jarName(pkg.parentFile))) {
         pkg = pkg.parentFile
@@ -56,6 +73,18 @@ File getProtoPackage(File member, Collection<String> jars) {
     return pkg.parentFile
 }
 
+/**
+ * Retrieves the name of the given folder trimmed by {@code ".jar"} suffix.
+ *
+ * <p>More formally, returns the name of the given {@link File} if the name does not contain
+ * {@code ".jar"} substring or the substring of the name containing the characters from the start
+ * to the {@code ".jar"} sequence (inclusively).
+ *
+ * <p>This transformation corresponds to finding the name of a JAR file which was extracted to
+ * the given directory with Gradle {@code zipTree()} API.
+ *
+ * @param jar the folder to get the JAR name for
+ */
 String jarName(final File jar) {
     final String unpackedJarInfix = ".jar"
     final String name = jar.name
@@ -94,6 +123,9 @@ publishing {
     }
 }
 
+/**
+ * A predicate checking if the given {@link File} is a {@code .proto}
+ */
 enum IsProtoFile implements Predicate<File> {
 
     PREDICATE
