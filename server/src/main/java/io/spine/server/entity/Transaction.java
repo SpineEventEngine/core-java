@@ -26,7 +26,6 @@ import io.spine.annotation.Internal;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Version;
-import io.spine.core.Versions;
 import io.spine.server.entity.TransactionListener.SilentWitness;
 import io.spine.validate.AbstractValidatingBuilder;
 import io.spine.validate.ValidatingBuilder;
@@ -38,7 +37,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.core.Versions.checkIsIncrement;
 import static io.spine.server.entity.InvalidEntityStateException.onConstraintViolations;
-import static io.spine.server.entity.Transaction.EntityVersioning.FROM_EVENT;
+import static io.spine.server.entity.EntityVersioning.FROM_EVENT;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static java.lang.String.format;
 
@@ -231,7 +230,9 @@ public abstract class Transaction<I,
         return entity;
     }
 
-    @VisibleForTesting
+    /**
+     * @return the version of the entity, modified within this transaction
+     */
     Version getVersion() {
         return version;
     }
@@ -450,61 +451,6 @@ public abstract class Transaction<I,
     }
 
     /**
-     * The strategy of versioning of {@linkplain Entity entities} during a {@link Phase} of a
-     * certain {@code Transaction}.
-     */
-    protected enum EntityVersioning {
-
-        /**
-         * This strategy is applied to the {@link Entity} types which represent a sequence of
-         * events.
-         *
-         * <p>One example of such entity is {@link io.spine.server.aggregate.Aggregate Aggregate}.
-         * As a sequence of events, an {@code Aggregate} has no own versioning system, thus
-         * inherits the versions of the {@linkplain io.spine.server.aggregate.Apply applied}
-         * events. In other words, the current version of an {@code Aggregate} is
-         * the {@linkplain EventContext#getVersion() version} of last applied event.
-         */
-        FROM_EVENT {
-            @Override
-            Version nextVersion(Phase<?, ?, ?, ?> phase) {
-                final Version fromEvent = phase.getContext().getVersion();
-                return fromEvent;
-            }
-        },
-
-        /**
-         * This strategy is applied to the {@link Entity} types which are not the pure Event
-         * Sourcing entities, such as {@link io.spine.server.projection.Projection Projection}s.
-         *
-         * <p>A {@code Projection} represents an arbitrary cast of data in a specific moment in
-         * time. The events applied to a {@code Projection} are random, i.e. are produced by
-         * different {@code Entities} and have no common versioning. Thus, a {@code Projection} has
-         * its own versioning system. Each event makes a {@code Projection} <i>increment</i> its
-         * version by one.
-         */
-        AUTO_INCREMENT {
-            @Override
-            Version nextVersion(Phase<?, ?, ?, ?> phase) {
-                final Version current = phase.getUnderlyingTransaction().getVersion();
-                final Version newVersion = Versions.increment(current);
-                return newVersion;
-            }
-        };
-
-        /**
-         * Creates the {@link Entity} version which is set after the given {@link Phase} is
-         * complete successfully.
-         *
-         * <p>This method has no side effects, i.e. doesn't set the version to the transaction etc.
-         *
-         * @param phase the transaction phase that causes the version change
-         * @return the advanced version
-         */
-        abstract Version nextVersion(Phase<?, ?, ?, ?> phase);
-    }
-
-    /**
      * A stage of transaction, which is created by applying a single event (i.e. its message along
      * with the context) to the entity.
      *
@@ -552,7 +498,7 @@ public abstract class Transaction<I,
             underlyingTransaction.setVersion(version);
         }
 
-        private Transaction<I, E, S, B> getUnderlyingTransaction() {
+        Transaction<I, E, S, B> getUnderlyingTransaction() {
             return underlyingTransaction;
         }
 

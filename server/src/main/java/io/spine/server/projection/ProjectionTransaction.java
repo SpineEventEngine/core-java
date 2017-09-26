@@ -23,6 +23,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Version;
+import io.spine.server.entity.EntityVersioning;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionListener;
 import io.spine.validate.ValidatingBuilder;
