@@ -51,14 +51,13 @@ public enum EntityVersioning {
     },
 
     /**
-     * This strategy is applied to the {@link Entity} types which are not the pure Event
-     * Sourcing entities, such as {@link io.spine.server.projection.Projection Projection}s.
+     * This strategy is applied to the {@link Entity} types which cannot use the event versions,
+     * such as {@link io.spine.server.projection.Projection Projection}s.
      *
      * <p>A {@code Projection} represents an arbitrary cast of data in a specific moment in
-     * time. The events applied to a {@code Projection} are random, i.e. are produced by
-     * different {@code Entities} and have no common versioning. Thus, a {@code Projection} has
-     * its own versioning system. Each event makes a {@code Projection} <i>increment</i> its
-     * version by one.
+     * time. The events applied to a {@code Projection} are produced by different {@code Entities}
+     * and have no common versioning. Thus, a {@code Projection} has its own versioning system.
+     * Each event <i>increments</i> the {@code Projection} version by one.
      */
     AUTO_INCREMENT {
         @Override
