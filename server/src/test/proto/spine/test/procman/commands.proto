@@ -42,3 +42,8 @@ message PmAddTask {
 message PmStartProject {
     ProjectId project_id = 1;
 }
+
+// A command, which does not modify a process manager state.
+message PmDoNothing {
+    ProjectId project_id = 1;
+}
