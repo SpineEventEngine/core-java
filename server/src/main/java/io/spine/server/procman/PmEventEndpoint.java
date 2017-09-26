@@ -46,7 +46,7 @@ class PmEventEndpoint<I, P extends ProcessManager<I, ?, ?>>
     }
 
     static <I, P extends ProcessManager<I, ?, ?>>
-    Set<I> handle (ProcessManagerRepository<I, P, ?> repository, EventEnvelope event) {
+    Set<I> handle(ProcessManagerRepository<I, P, ?> repository, EventEnvelope event) {
         final PmEventEndpoint<I, P> endpoint = of(repository, event);
         final Set<I> result = endpoint.handle();
         return result;
@@ -71,9 +71,13 @@ class PmEventEndpoint<I, P extends ProcessManager<I, ?, ?>>
         return events;
     }
 
+    /**
+     * Does nothing since a state of a process manager should not be necessarily
+     * updated upon reacting on an event.
+     */
     @Override
     protected void onEmptyResult(P pm, EventEnvelope envelope) {
-        // Do nothing. Reacting methods are allowed to return empty results.
+        // Do nothing.
     }
 
     @Override

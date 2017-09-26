@@ -72,6 +72,10 @@ class PmRejectionEndpoint<I, P extends ProcessManager<I, ?, ?>>
         return events;
     }
 
+    /**
+     * Does nothing since a state of a process manager should not be necessarily
+     * updated upon reacting on a rejection.
+     */
     @Override
     protected void onEmptyResult(P entity, RejectionEnvelope envelope) {
         // Do nothing. Reacting methods are allowed to return empty results.
