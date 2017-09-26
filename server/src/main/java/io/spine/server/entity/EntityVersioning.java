@@ -70,7 +70,7 @@ public enum EntityVersioning {
 
     /**
      * Creates the {@link Entity} version which is set after the given {@link Transaction.Phase} is
-     * complete successfully.
+     * completed successfully.
      *
      * <p>This method has no side effects, i.e. doesn't set the version to the transaction etc.
      *
