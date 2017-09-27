@@ -42,6 +42,7 @@ import static org.mockito.Mockito.verify;
 
 /**
  * @author Alexander Yevsyukov
+ * @author Dmitry Ganzha
  */
 public class DefaultStateRegistryShould {
 
@@ -54,7 +55,7 @@ public class DefaultStateRegistryShould {
         spyMap = spy(newConcurrentMap());
         registry = DefaultStateRegistry.getInstance();
         try {
-            Field defaultStates = registry.getClass()
+            final Field defaultStates = registry.getClass()
                                           .getDeclaredField(DEFAULT_STATES_FIELD_NAME);
             defaultStates.setAccessible(true);
             defaultStates.set(registry, spyMap);

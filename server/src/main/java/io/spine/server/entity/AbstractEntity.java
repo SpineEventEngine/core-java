@@ -41,6 +41,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @param <I> the type of entity identifiers
  * @param <S> the type of entity state objects
  * @author Alexander Yevsyukov
+ * @author Dmitry Ganzha
  */
 public abstract class AbstractEntity<I, S extends Message> implements Entity<I, S> {
 

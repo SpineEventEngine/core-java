@@ -33,6 +33,7 @@ import static com.google.common.collect.Maps.newConcurrentMap;
  * A wrapper for the map from entity classes to entity default states.
  *
  * @author Alexander Yevsyukov
+ * @author Dmitry Ganzha
  */
 class DefaultStateRegistry {
 
@@ -69,7 +70,8 @@ class DefaultStateRegistry {
     }
 
     /**
-     * If {@link #defaultStates} does not contain state then save state otherwise return saved state.
+     * If {@link #defaultStates} does not contain state then save state and return it otherwise
+     * return saved state.
      *
      * @param entityClass an entity class
      * @param state a default state of the entity
