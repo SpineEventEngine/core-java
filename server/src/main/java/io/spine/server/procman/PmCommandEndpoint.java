@@ -46,7 +46,7 @@ class PmCommandEndpoint<I, P extends ProcessManager<I, ?, ?>>
     }
 
     static <I, P extends ProcessManager<I, ?, ?>>
-    I handle (ProcessManagerRepository<I, P, ?> repository, CommandEnvelope cmd) {
+    I handle(ProcessManagerRepository<I, P, ?> repository, CommandEnvelope cmd) {
         final PmCommandEndpoint<I, P> endpoint = of(repository, cmd);
         final I result = endpoint.handle();
         return result;
@@ -77,18 +77,11 @@ class PmCommandEndpoint<I, P extends ProcessManager<I, ?, ?>>
     }
 
     /**
-     * Throws {@link IllegalStateException} with the message containing details of
-     * the process manager and the command in response to which empty set of event messages
-     * was generated.
-     * 
-     * @throws IllegalStateException always
+     * Does nothing since a state of a process manager should not be necessarily
+     * updated during the command handling.
      */
     @Override
-    protected void onEmptyResult(P processManager, CommandEnvelope cmd)
-            throws IllegalStateException {
-        final String format =
-                "The process manager (class: %s, id: %s) produced " +
-                        "empty response for the command (class: %s, id: %s).";
-        onUnhandledCommand(processManager, cmd, format);
+    protected void onEmptyResult(P processManager, CommandEnvelope cmd) {
+        // Do nothing.
     }
 }

@@ -74,6 +74,10 @@ class AggregateRejectionEndpoint<I, A extends Aggregate<I, ?, ?>>
         return aggregate.reactOn(envelope);
     }
 
+    /**
+     * Does nothing since a state of an aggregate should not be necessarily
+     * updated upon reacting on a rejection.
+     */
     @Override
     protected void onEmptyResult(A aggregate, RejectionEnvelope envelope) {
         // Do nothing.
