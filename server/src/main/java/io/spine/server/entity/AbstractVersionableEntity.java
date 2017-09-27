@@ -172,10 +172,10 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
     /**
      * Updates the state incrementing the version number and recording time of the modification.
      *
-     * <p>This is a test-only method convenience method. Calling this method is equivalent
-     * to calling {@link #updateState(Message, Version)} with the incremented by one version.
+     * <p>This is a test-only convenience method. Calling this method is equivalent to calling
+     * {@link #updateState(Message, Version)} with the incremented by one version.
      *
-     * <p>Please use {@link #updateState(Message, Version)} directly is the production code.
+     * <p>Please use {@link #updateState(Message, Version)} directly in the production code.
      *
      * @param newState a new state to set
      */
