@@ -24,22 +24,93 @@ import com.google.protobuf.Timestamp;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import static com.google.common.collect.Maps.newConcurrentMap;
+import static io.spine.Identifier.newUuid;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
 /**
  * @author Alexander Yevsyukov
  */
 public class DefaultStateRegistryShould {
 
+    private static final String DEFAULT_STATES_FIELD_NAME = "defaultStates";
     private DefaultStateRegistry registry;
+    private Map<Object, Object> spyMap;
 
     @Before
     public void setUp() {
-        registry = new DefaultStateRegistry();
+        spyMap = spy(newConcurrentMap());
+        registry = DefaultStateRegistry.getInstance();
+        try {
+            Field defaultStates = registry.getClass()
+                                          .getDeclaredField(DEFAULT_STATES_FIELD_NAME);
+            defaultStates.setAccessible(true);
+            defaultStates.set(registry, spyMap);
+        } catch (NoSuchFieldException | IllegalAccessException ignored) {
+        }
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void do_not_accept_same_entity_class_twice() {
-        registry.put(TimerSnapshot.class, Timestamp.getDefaultInstance());
-        registry.put(TimerSnapshot.class, Timestamp.getDefaultInstance());
+    @Test
+    public void verify_put_invoked_one_time_when_invoke_get_default_state_in_multithreaded_environment() {
+        final int numberOfEntities = 1000;
+        final Collection<Callable<Object>> tasks = new ArrayList<>();
+        for (int i = 0; i < numberOfEntities; i++) {
+            tasks.add(Executors.callable(new Runnable() {
+                @Override
+                public void run() {
+                    final TestEntity testEntity = TestEntity.newInstance(newUuid());
+                    testEntity.getDefaultState();
+                }
+            }));
+        }
+
+        executeInMultithreadedEnvironment(tasks);
+
+        final int expected = 1;
+        verify(spyMap, times(expected)).put(any(), any());
+        assertEquals(expected, spyMap.size());
+    }
+
+    @Test
+    public void verify_put_invoked_one_time_when_invoke_put_or_get_in_multithreaded_environment() {
+        final int numberOfEntities = 1000;
+        final Collection<Callable<Object>> tasks = new ArrayList<>();
+        for (int i = 0; i < numberOfEntities; i++) {
+            tasks.add(Executors.callable(new Runnable() {
+                @Override
+                public void run() {
+                    registry.putOrGet(TimerSnapshot.class, Timestamp.getDefaultInstance());
+                }
+            }));
+        }
+
+        executeInMultithreadedEnvironment(tasks);
+
+        final int expected = 1;
+        verify(spyMap, times(expected)).put(any(), any());
+        assertEquals(expected, spyMap.size());
+    }
+
+    private void executeInMultithreadedEnvironment(Collection<Callable<Object>> tasks) {
+        final ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime()
+                                                                             .availableProcessors() *
+                                                                              2);
+        try {
+            executor.invokeAll(tasks);
+        } catch (InterruptedException ignored) {
+        }
     }
 
     private static class TimerSnapshot extends AbstractEntity<Long, Timestamp> {

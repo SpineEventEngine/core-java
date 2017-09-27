@@ -32,6 +32,7 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -135,13 +136,10 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     public S getDefaultState() {
         final Class<? extends Entity> entityClass = getClass();
         final DefaultStateRegistry registry = DefaultStateRegistry.getInstance();
-        if (!registry.contains(entityClass)) {
-            final S state = createDefaultState();
-            registry.put(entityClass, state);
-        }
+        final S state = createDefaultState();
         @SuppressWarnings("unchecked")
         // cast is safe because this type of messages is saved to the map
-        final S defaultState = (S) registry.get(entityClass);
+        final S defaultState = (S) registry.putOrGet(entityClass, state);
         return defaultState;
     }
 
