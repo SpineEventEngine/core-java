@@ -69,7 +69,7 @@ buildscript {
  */
 Collection<File> collectProto() {
     final def dependencies = configurations.compile.files
-    final def jarFiles = dependencies.collect { it.name }
+    final def jarFiles = dependencies.collect { JarFileName.ofFile(it) }
     final def result = new HashSet<>()
     for (final File jarFile in dependencies) {
         if (jarFile.name.endsWith(".jar")) {
@@ -89,11 +89,11 @@ Collection<File> collectProto() {
  * Returns the root directory containing a Proto package.
  *
  * @param member the member File of the Proto package
- * @param jars the full listing of the project JAR dependencies
+ * @param jarNames the full listing of the project JAR dependencies
  */
-File getProtoRoot(File member, Collection<String> jars) {
+File getProtoRoot(final File member, final Collection<JarFileName> jarNames) {
     File pkg = member
-    while (!jars.contains(jarName(pkg.parentFile))) {
+    while (!jarNames.contains(jarName(pkg.parentFile))) {
         pkg = pkg.parentFile
     }
     return pkg.parentFile
@@ -111,14 +111,14 @@ File getProtoRoot(File member, Collection<String> jars) {
  *
  * @param jar the folder to get the JAR name for
  */
-String jarName(final File jar) {
+JarFileName jarName(final File jar) {
     final String unpackedJarInfix = ".jar"
     final String name = jar.name
     final int index = name.lastIndexOf(unpackedJarInfix)
     if (index < 0) {
-        return name
+        return null
     } else {
-        return name.substring(0, index + unpackedJarInfix.length())
+        return JarFileName.ofValue(name.substring(0, index + unpackedJarInfix.length()))
     }
 }
 
@@ -150,15 +150,52 @@ publishing {
 }
 
 /**
- * A predicate checking if the given {@link File} is a {@code .proto}
+ * A predicate checking if the given {@link File} is a {@code .proto}.
  */
 enum IsProtoFile implements Predicate<File> {
 
     PREDICATE
 
+    private static final String PROTO_EXT = ".proto"
+
     @Override
     boolean apply(final File input) {
         return (input?.isDirectory() && input.list().length != 0) ||
-                (input?.isFile() && input?.name?.endsWith(".proto"))
+                (input?.isFile() && input?.name?.endsWith(PROTO_EXT))
+    }
+}
+
+/**
+ * The filename of a JAR dependency of the project.
+ */
+final class JarFileName {
+
+    final String value
+
+    private JarFileName(final String value) {
+        this.value = value
+    }
+
+    static JarFileName ofFile(final File jar) {
+        return new JarFileName(jar.name)
+    }
+
+    static JarFileName ofValue(final String value) {
+        return new JarFileName(value)
+    }
+
+    boolean equals(o) {
+        if (this.is(o)) return true
+        if (getClass() != o.class) return false
+
+        JarFileName that = (JarFileName) o
+
+        if (value != that.value) return false
+
+        return true
+    }
+
+    int hashCode() {
+        return (value != null ? value.hashCode() : 0)
     }
 }
