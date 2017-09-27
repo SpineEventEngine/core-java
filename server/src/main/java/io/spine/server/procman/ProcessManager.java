@@ -258,4 +258,25 @@ public abstract class ProcessManager<I,
         return "ProcessManager modification is not available this way. " +
                 "Please modify the state from a command handling or event reacting method.";
     }
+
+    /**
+     * Plays the given events upon the given {@code ProcessManager}.
+     *
+     * <p>Starts an {@link PmTransaction} and plays all the given {@linkplain Event events}
+     * sequentially. Then {@linkplain io.spine.server.entity.Transaction#commit() commits}
+     * the transaction.
+     *
+     * <p>This method is test-only.
+     *
+     * @param entity the entity to apply the events onto
+     * @param events the events to play
+     */
+    @VisibleForTesting
+    static void play(ProcessManager<?, ?, ?> entity, Iterable<Event> events) {
+        checkNotNull(entity);
+        checkNotNull(events);
+        final PmTransaction<?, ?, ?> tx = PmTransaction.start(entity);
+        entity.play(events);
+        tx.commit();
+    }
 }

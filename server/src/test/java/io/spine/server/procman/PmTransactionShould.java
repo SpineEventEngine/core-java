@@ -22,6 +22,7 @@ package io.spine.server.procman;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.core.Version;
+import io.spine.core.Versions;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionListener;
 import io.spine.server.entity.TransactionShould;
@@ -32,10 +33,14 @@ import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmTaskAdded;
 import io.spine.validate.ConstraintViolation;
+import org.junit.Ignore;
+import org.junit.Test;
 
+import java.util.Collections;
 import java.util.List;
 
 import static io.spine.protobuf.AnyPacker.unpack;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -132,5 +137,22 @@ public class PmTransactionShould
             RuntimeException toThrow) {
         entity.getBuilder()
               .setShouldThrow(toThrow);
+    }
+
+    @Ignore // The behavior is changed. See increment_version_on_event
+    @Test
+    @Override
+    public void advance_version_from_event() {
+        super.advance_version_from_event();
+    }
+
+    @Test
+    public void increment_version_on_event() {
+        final ProcessManager<ProjectId, Project, PatchedProjectBuilder> entity = createEntity();
+        final Version oldVersion = entity.getVersion();
+        final Event event = createEvent(createEventMessage());
+        ProcessManager.play(entity, Collections.singleton(event));
+        final Version expected = Versions.increment(oldVersion);
+        assertEquals(expected.getNumber(), entity.getVersion().getNumber());
     }
 }
