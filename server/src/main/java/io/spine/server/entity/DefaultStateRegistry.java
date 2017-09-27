@@ -25,11 +25,9 @@ import com.google.protobuf.Message;
 import javax.annotation.CheckReturnValue;
 import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import static com.google.common.collect.Maps.newConcurrentMap;
-import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
  * A wrapper for the map from entity classes to entity default states.

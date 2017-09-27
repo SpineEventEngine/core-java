@@ -32,7 +32,6 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.locks.ReentrantLock;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
