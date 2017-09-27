@@ -140,11 +140,19 @@ public class PmTransactionShould
               .setShouldThrow(toThrow);
     }
 
-    @Ignore // The behavior is changed. See increment_version_on_event
+    @Ignore // The behavior is changed. See increment_version_on_event for the right behavior test
     @Test
     @Override
     public void advance_version_from_event() { }
 
+    /**
+     * Tests the version advancement strategy for the {@link ProcessManager}s.
+     *
+     * <p>The versioning strategy is for {@link ProcessManager} is
+     * {@link io.spine.server.entity.EntityVersioning#AUTO_INCREMENT AUTO_INCREMENT}. This test
+     * case substitutes {@link #advance_version_from_event()}, which tested the behavior of
+     * {@link io.spine.server.entity.EntityVersioning#FROM_EVENT FROM_EVENT} strategy.
+     */
     @Test
     public void increment_version_on_event() {
         final ProcessManager<ProjectId, Project, PatchedProjectBuilder> entity = createEntity();
