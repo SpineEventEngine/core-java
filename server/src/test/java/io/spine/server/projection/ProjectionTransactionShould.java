@@ -146,10 +146,17 @@ public class ProjectionTransactionShould
               .setShouldThrow(toThrow);
     }
 
-    @Ignore // The behavior is changed. See increment_version_on_event for the right behavior test
+    /**
+     * This test is ignored as the expected behavior has been changed for the projection
+     * transactions.
+     *
+     * <p>{@link #increment_version_on_event() Another test method} is created to test the new
+     * behavior. Please refer to it for more details.
+     */
+    @Ignore
     @Test
     @Override
-    public void advance_version_from_event() { }
+    public void advance_version_from_event() {}
 
     /**
      * Tests the version advancement strategy for the {@link Projection}s.

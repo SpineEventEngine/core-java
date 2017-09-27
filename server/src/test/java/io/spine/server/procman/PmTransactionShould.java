@@ -139,5 +139,5 @@ public class PmTransactionShould
     @Ignore // The behavior is changed. The version should be auto incremented.
     @Test
     @Override
-    public void advance_version_from_event() { }
+    public void advance_version_from_event() {}
 }
