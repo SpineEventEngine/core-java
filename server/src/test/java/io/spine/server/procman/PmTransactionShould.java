@@ -41,6 +41,7 @@ import java.util.List;
 
 import static io.spine.protobuf.AnyPacker.unpack;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -142,9 +143,7 @@ public class PmTransactionShould
     @Ignore // The behavior is changed. See increment_version_on_event
     @Test
     @Override
-    public void advance_version_from_event() {
-        super.advance_version_from_event();
-    }
+    public void advance_version_from_event() { }
 
     @Test
     public void increment_version_on_event() {
@@ -154,5 +153,6 @@ public class PmTransactionShould
         ProcessManager.play(entity, Collections.singleton(event));
         final Version expected = Versions.increment(oldVersion);
         assertEquals(expected.getNumber(), entity.getVersion().getNumber());
+        assertNotEquals(event.getContext().getVersion(), entity.getVersion());
     }
 }
