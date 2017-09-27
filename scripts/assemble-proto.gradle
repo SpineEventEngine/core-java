@@ -22,6 +22,30 @@ import com.google.common.io.Files
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/**
+ * This plugin enables a project to publish a JAR containing all the {@code .proto} definitions
+ * found in the project classpath, which is the definitions from {@code sourceSets.main.proto} and
+ * the proto files extracted from the JAR dependencies of the project.
+ *
+ * <p>The relative file paths are kept.
+ *
+ * <p>To depend onto such artifact of e.g. the client module, use:
+ * <pre>
+ *     {@code
+ *     dependencies {
+ *         compile "io.spine:spine-client:$version@proto"
+ *     }
+ *     }
+ * </pre>
+ *
+ * <p>To enable the artifact publishing for a project, apply this plugin to it:
+ * <pre>
+ *     {@code
+ *     apply from: "../scripts/assemble-proto.gradle"
+ *     }
+ * </pre>
+ */
+
 buildscript {
     repositories {
         mavenCentral()
