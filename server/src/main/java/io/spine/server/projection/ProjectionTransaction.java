@@ -23,6 +23,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Version;
+import io.spine.server.entity.EntityVersioning;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionListener;
 import io.spine.validate.ValidatingBuilder;
@@ -61,6 +62,18 @@ class ProjectionTransaction<I,
     @Override
     protected void dispatch(Projection projection, EventEnvelope event) {
         projection.apply(event.getMessage(), event.getEventContext());
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The {@code ProjectionTransaction} uses the
+     * {@link EntityVersioning#AUTO_INCREMENT AUTO_INCREMENT} strategy as the event versions are
+     * irrelevant to the projection version.
+     */
+    @Override
+    protected EntityVersioning versioningStrategy() {
+        return EntityVersioning.AUTO_INCREMENT;
     }
 
     /**

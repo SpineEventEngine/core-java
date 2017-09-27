@@ -32,6 +32,8 @@ import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmTaskAdded;
 import io.spine.validate.ConstraintViolation;
+import org.junit.Ignore;
+import org.junit.Test;
 
 import java.util.List;
 
@@ -133,4 +135,9 @@ public class PmTransactionShould
         entity.getBuilder()
               .setShouldThrow(toThrow);
     }
+
+    @Ignore // The behavior is changed. The version should be auto incremented.
+    @Test
+    @Override
+    public void advance_version_from_event() {}
 }
