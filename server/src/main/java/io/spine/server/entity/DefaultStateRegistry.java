@@ -24,16 +24,23 @@ import com.google.protobuf.Message;
 
 import javax.annotation.CheckReturnValue;
 import java.util.Map;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import static com.google.common.collect.Maps.newConcurrentMap;
-import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
  * A wrapper for the map from entity classes to entity default states.
  *
  * @author Alexander Yevsyukov
+ * @author Dmitry Ganzha
  */
 class DefaultStateRegistry {
+
+    /**
+     * The lock for DefaultStateRegistry's accessor methods.
+     */
+    private final ReadWriteLock lock = new ReentrantReadWriteLock();
 
     /**
      * The map from class of entity to its default state.
@@ -53,22 +60,33 @@ class DefaultStateRegistry {
      */
     @CheckReturnValue
     boolean contains(Class<? extends Entity> entityClass) {
-        final boolean result = defaultStates.containsKey(entityClass);
-        return result;
+        lock.readLock().lock();
+        try {
+            final boolean result = defaultStates.containsKey(entityClass);
+            return result;
+        } finally {
+            lock.readLock().unlock();
+        }
     }
 
     /**
-     * Saves a state.
+     * If {@link #defaultStates} does not contain state then save state and return it otherwise
+     * return saved state.
      *
      * @param entityClass an entity class
      * @param state a default state of the entity
-     * @throws IllegalArgumentException if the state of this class is already registered
      */
-    void put(Class<? extends Entity> entityClass, Message state) {
-        if (contains(entityClass)) {
-            throw newIllegalArgumentException("This class is registered already: %s", entityClass);
+    Message putOrGet(Class<? extends Entity> entityClass, Message state) {
+        lock.writeLock().lock();
+        try {
+            if (!contains(entityClass)) {
+                defaultStates.put(entityClass, state);
+            }
+            final Message result = get(entityClass);
+            return result;
+        } finally {
+            lock.writeLock().unlock();
         }
-        defaultStates.put(entityClass, state);
     }
 
     /**
@@ -78,8 +96,13 @@ class DefaultStateRegistry {
      */
     @CheckReturnValue
     Message get(Class<? extends Entity> entityClass) {
-        final Message state = defaultStates.get(entityClass);
-        return state;
+        lock.readLock().lock();
+        try {
+            final Message state = defaultStates.get(entityClass);
+            return state;
+        } finally {
+            lock.readLock().unlock();
+        }
     }
 
     static DefaultStateRegistry getInstance() {
