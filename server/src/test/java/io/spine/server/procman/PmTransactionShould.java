@@ -22,7 +22,6 @@ package io.spine.server.procman;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.core.Version;
-import io.spine.core.Versions;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionListener;
 import io.spine.server.entity.TransactionShould;
@@ -36,12 +35,9 @@ import io.spine.validate.ConstraintViolation;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import java.util.Collections;
 import java.util.List;
 
 import static io.spine.protobuf.AnyPacker.unpack;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -140,27 +136,8 @@ public class PmTransactionShould
               .setShouldThrow(toThrow);
     }
 
-    @Ignore // The behavior is changed. See increment_version_on_event for the right behavior test
+    @Ignore // The behavior is changed. The version should be auto incremented.
     @Test
     @Override
     public void advance_version_from_event() { }
-
-    /**
-     * Tests the version advancement strategy for the {@link ProcessManager}s.
-     *
-     * <p>The versioning strategy is for {@link ProcessManager} is
-     * {@link io.spine.server.entity.EntityVersioning#AUTO_INCREMENT AUTO_INCREMENT}. This test
-     * case substitutes {@link #advance_version_from_event()}, which tested the behavior of
-     * {@link io.spine.server.entity.EntityVersioning#FROM_EVENT FROM_EVENT} strategy.
-     */
-    @Test
-    public void increment_version_on_event() {
-        final ProcessManager<ProjectId, Project, PatchedProjectBuilder> entity = createEntity();
-        final Version oldVersion = entity.getVersion();
-        final Event event = createEvent(createEventMessage());
-        ProcessManager.play(entity, Collections.singleton(event));
-        final Version expected = Versions.increment(oldVersion);
-        assertEquals(expected.getNumber(), entity.getVersion().getNumber());
-        assertNotEquals(event.getContext().getVersion(), entity.getVersion());
-    }
 }
