@@ -41,6 +41,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @param <I> the type of entity identifiers
  * @param <S> the type of entity state objects
  * @author Alexander Yevsyukov
+ * @author Dmitry Ganzha
  */
 public abstract class AbstractEntity<I, S extends Message> implements Entity<I, S> {
 
@@ -135,13 +136,10 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     public S getDefaultState() {
         final Class<? extends Entity> entityClass = getClass();
         final DefaultStateRegistry registry = DefaultStateRegistry.getInstance();
-        if (!registry.contains(entityClass)) {
-            final S state = createDefaultState();
-            registry.put(entityClass, state);
-        }
+        final S state = createDefaultState();
         @SuppressWarnings("unchecked")
         // cast is safe because this type of messages is saved to the map
-        final S defaultState = (S) registry.get(entityClass);
+        final S defaultState = (S) registry.putOrGet(entityClass, state);
         return defaultState;
     }
 
