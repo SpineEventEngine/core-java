@@ -1,3 +1,6 @@
+import com.google.common.collect.Lists
+
+
 /*
  * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
@@ -135,16 +138,18 @@ task assembleProto(type: Jar) {
  * a directory containing at least one Protobuf file
  */
 boolean isProtoFileOrDir(final File candidate) {
-    if (!candidate.isDirectory()) {
-        return isProtoFile(candidate)
-    }
-    final def children = candidate.listFiles()
-    if (children.length == 0) {
+    final Deque<File> filesToCheck = Lists.newLinkedList()
+    filesToCheck.push(candidate)
+    if (candidate.isDirectory() && candidate.list().length == 0) {
         return false
     }
-    for (final def child in children) {
-        if (isProtoFileOrDir(child)) {
+    while (!filesToCheck.isEmpty()) {
+        final File file = filesToCheck.pop()
+        if (isProtoFile(file)) {
             return true
+        }
+        if (file.isDirectory()) {
+            file.listFiles().each { filesToCheck.push(it) }
         }
     }
     return false
