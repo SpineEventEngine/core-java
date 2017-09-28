@@ -135,7 +135,7 @@ task assembleProto(type: Jar) {
  *
  * @param candidate the {@link File} to check
  * @return {@code true} if the {@code candidate} {@linkplain #isProtoFile is a Protobuf file} or
- * a directory containing at least one Protobuf file
+ *         a directory containing at least one Protobuf file
  */
 boolean isProtoFileOrDir(final File candidate) {
     final Deque<File> filesToCheck = Lists.newLinkedList()
