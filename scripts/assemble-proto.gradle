@@ -1,6 +1,5 @@
-import com.google.common.base.Predicate
-import com.google.common.collect.Iterables
-import com.google.common.io.Files
+import com.google.common.collect.Lists
+
 
 /*
  * Copyright 2017, TeamDev Ltd. All rights reserved.
@@ -75,7 +74,7 @@ Collection<File> collectProto() {
         if (jarFile.name.endsWith(".jar")) {
             final def zipTree = zipTree(jarFile)
             for (final File file in zipTree) {
-                if (IsProtoFile.PREDICATE.apply(file)) {
+                if (isProtoFile(file)) {
                     result.add(getProtoRoot(file, jarFiles))
                 }
             }
@@ -125,11 +124,45 @@ JarFileName jarName(final File jar) {
 task assembleProto(type: Jar) {
     description "Assembles a JAR artifact with all Proto definitions from the classpath."
     from { collectProto() }
-    include {
-        final File file = it.file
-        return IsProtoFile.PREDICATE.apply(file) ||
-                Iterables.any(Files.fileTreeTraverser().children(file), IsProtoFile.PREDICATE)
+    include { isProtoFileOrDir(it.file) }
+}
+
+/**
+ * Checks if the given abstract pathname represents either a {@code .proto} file, or a directory
+ * containing proto files.
+ *
+ * <p>If {@code candidate} is a directory, scans its children recursively.
+ *
+ * @param candidate the {@link File} to check
+ * @return {@code true} if the {@code candidate} {@linkplain #isProtoFile is a Protobuf file} or
+ *         a directory containing at least one Protobuf file
+ */
+boolean isProtoFileOrDir(final File candidate) {
+    final Deque<File> filesToCheck = Lists.newLinkedList()
+    filesToCheck.push(candidate)
+    if (candidate.isDirectory() && candidate.list().length == 0) {
+        return false
     }
+    while (!filesToCheck.isEmpty()) {
+        final File file = filesToCheck.pop()
+        if (isProtoFile(file)) {
+            return true
+        }
+        if (file.isDirectory()) {
+            file.listFiles().each { filesToCheck.push(it) }
+        }
+    }
+    return false
+}
+
+/**
+ * Checks if the given file is a {@code .proto} file.
+ *
+ * @param file the file to check
+ * @return {@code true} if the {@code file} is a Protobuf file, {@code false} otherwise
+ */
+boolean isProtoFile(final File file) {
+    return file.isFile() && file.name.endsWith(".proto")
 }
 
 final String artifactIdForPublishing = "spine-${project.name}"
@@ -146,22 +179,6 @@ publishing {
                 classifier = "proto"
             }
         }
-    }
-}
-
-/**
- * A predicate checking if the given {@link File} is a {@code .proto}.
- */
-enum IsProtoFile implements Predicate<File> {
-
-    PREDICATE
-
-    private static final String PROTO_EXT = ".proto"
-
-    @Override
-    boolean apply(final File input) {
-        return (input?.isDirectory() && input.list().length != 0) ||
-                (input?.isFile() && input?.name?.endsWith(PROTO_EXT))
     }
 }
 
