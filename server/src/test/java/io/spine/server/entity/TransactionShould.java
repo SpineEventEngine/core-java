@@ -310,6 +310,26 @@ public abstract class TransactionShould<I,
         }
     }
 
+    @Test
+    public void advance_version_from_event() {
+        final E entity = createEntity();
+        final Transaction<I, E, S, B> tx = createTx(entity);
+        assertEquals(entity.getVersion(), tx.getVersion());
+
+        final Event event = createEvent(createEventMessage());
+        final EventEnvelope envelope = EventEnvelope.of(event);
+        tx.apply(envelope);
+
+        assertEquals(event.getContext().getVersion(), tx.getVersion());
+        tx.commit();
+        assertEquals(event.getContext().getVersion(), entity.getVersion());
+    }
+
+    protected final Event createEvent(Message eventMessage) {
+        return eventFactory.createEvent(eventMessage,
+                                        someVersion());
+    }
+
     private static ValidationException validationException() {
         final ValidationException ex = new ValidationException(Lists.<ConstraintViolation>newLinkedList());
         return ex;
@@ -350,13 +370,7 @@ public abstract class TransactionShould<I,
         tx.apply(EventEnvelope.of(event));
     }
 
-    private Event createEvent(Message eventMessage) {
-        return eventFactory.createEvent(eventMessage,
-                                        someVersion());
-    }
-
     private static Version someVersion() {
-        return newVersion(1, getCurrentTime());
+        return newVersion(42, getCurrentTime());
     }
-
 }

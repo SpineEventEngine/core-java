@@ -20,6 +20,7 @@
 
 package io.spine.server.entity;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
@@ -171,8 +172,14 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
     /**
      * Updates the state incrementing the version number and recording time of the modification.
      *
+     * <p>This is a test-only convenience method. Calling this method is equivalent to calling
+     * {@link #updateState(Message, Version)} with the incremented by one version.
+     *
+     * <p>Please use {@link #updateState(Message, Version)} directly in the production code.
+     *
      * @param newState a new state to set
      */
+    @VisibleForTesting
     void incrementState(S newState) {
         updateState(newState, incrementedVersion());
     }
