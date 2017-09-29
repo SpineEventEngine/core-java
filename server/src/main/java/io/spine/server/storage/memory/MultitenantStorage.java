@@ -64,8 +64,6 @@ abstract class MultitenantStorage<S extends TenantStorage<?, ?>> {
             @Override
             public S apply(@Nullable TenantId tenantId) {
                 checkNotNull(tenantId);
-                //TODO:2017-09-29:dmitry.ganzha: Replace lock with Map#putIfAbsent
-                // when spine will be migrated to Java 8
                 lock.lock();
                 try {
                     S storage = tenantSlices.get(tenantId);
