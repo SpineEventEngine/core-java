@@ -37,7 +37,7 @@ import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.filterValues;
-import static com.google.common.collect.Maps.newHashMap;
+import static com.google.common.collect.Maps.newConcurrentMap;
 import static com.google.common.collect.Maps.transformValues;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
@@ -49,10 +49,11 @@ import static io.spine.server.entity.FieldMasks.applyMask;
  * all storage operations available for data of a single tenant.
  *
  * @author Alexander Yevsyukov
+ * @author Dmitry Ganzha
  */
 class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
 
-    private final Map<I, EntityRecordWithColumns> records = newHashMap();
+    private final Map<I, EntityRecordWithColumns> records = newConcurrentMap();
     private final Map<I, EntityRecordWithColumns> filtered =
             filterValues(records, isRecordWithColumnsVisible());
 

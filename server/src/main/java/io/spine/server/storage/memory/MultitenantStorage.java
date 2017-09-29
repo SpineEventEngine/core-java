@@ -25,6 +25,8 @@ import io.spine.server.tenant.TenantFunction;
 
 import javax.annotation.Nullable;
 import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newConcurrentMap;
@@ -34,8 +36,12 @@ import static com.google.common.collect.Maps.newConcurrentMap;
  *
  * @param <S> the type of the storage "slice" for each tenant
  * @author Alexander Yevsyukov
+ * @author Dmitry Ganzha
  */
 abstract class MultitenantStorage<S extends TenantStorage<?, ?>> {
+
+    /** The lock for {@code MultitenantStorage} accessor methods. */
+    private final Lock lock = new ReentrantLock();
 
     /** The map from {@code TenantId} to its slice of data. */
     private final Map<TenantId, S> tenantSlices = newConcurrentMap();
@@ -58,12 +64,17 @@ abstract class MultitenantStorage<S extends TenantStorage<?, ?>> {
             @Override
             public S apply(@Nullable TenantId tenantId) {
                 checkNotNull(tenantId);
-                S storage = tenantSlices.get(tenantId);
-                if (storage == null) {
-                    storage = createSlice();
-                    tenantSlices.put(tenantId, storage);
+                lock.lock();
+                try {
+                    S storage = tenantSlices.get(tenantId);
+                    if (storage == null) {
+                        storage = createSlice();
+                        tenantSlices.put(tenantId, storage);
+                    }
+                    return storage;
+                } finally {
+                    lock.unlock();
                 }
-                return storage;
             }
         };
         final S result = func.execute();
