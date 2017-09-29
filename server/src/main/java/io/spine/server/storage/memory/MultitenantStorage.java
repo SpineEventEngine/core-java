@@ -40,7 +40,7 @@ import static com.google.common.collect.Maps.newConcurrentMap;
  */
 abstract class MultitenantStorage<S extends TenantStorage<?, ?>> {
 
-    /** The lock for MultitenantStorage's accessor methods. */
+    /** The lock for {@code MultitenantStorage} accessor methods. */
     private final Lock lock = new ReentrantLock();
 
     /** The map from {@code TenantId} to its slice of data. */
@@ -64,7 +64,8 @@ abstract class MultitenantStorage<S extends TenantStorage<?, ?>> {
             @Override
             public S apply(@Nullable TenantId tenantId) {
                 checkNotNull(tenantId);
-                //TODO: replace lock with Map#putIfAbsent when spine will be migrated to Java 8
+                //TODO:2017-09-29:dmitry.ganzha: Replace lock with Map#putIfAbsent
+                // when spine will be migrated to Java 8
                 lock.lock();
                 try {
                     S storage = tenantSlices.get(tenantId);
