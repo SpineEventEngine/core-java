@@ -36,6 +36,7 @@ import static com.google.common.collect.Maps.newConcurrentMap;
  *
  * @param <S> the type of the storage "slice" for each tenant
  * @author Alexander Yevsyukov
+ * @author Dmitry Ganzha
  */
 abstract class MultitenantStorage<S extends TenantStorage<?, ?>> {
 
