@@ -89,6 +89,9 @@ Collection<File> collectProto() {
                  * thrown by `zipTree()` indicating that the given file, which is a dependency JAR
                  * file does not exist.
                  *
+                 * Though, if this error is thrown on the execution phase, this IS an error. Thus,
+                 * we log an error message.
+                 *
                  * As a side effect, the message is shown upon `./gradlew clean build` or upon
                  * a newly created version of framework build etc.
                  */
