@@ -101,7 +101,7 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
     /**
      * Retrieves the state class of the passed entity class.
      */
-    static <S extends Message> Class<S> getStateClass(Class<? extends Entity> entityClass) {
+    public static <S extends Message> Class<S> getStateClass(Class<? extends Entity> entityClass) {
         @SuppressWarnings("unchecked") // The type is preserved by the Entity type declaration.
         final Class<S> result = (Class<S>) Entity.GenericParameter.STATE.getArgumentIn(entityClass);
         return result;

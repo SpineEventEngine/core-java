@@ -135,12 +135,9 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     @CheckReturnValue
     public S getDefaultState() {
         final Class<? extends Entity> entityClass = getClass();
-        final DefaultStateRegistry registry = DefaultStateRegistry.getInstance();
-        final S state = createDefaultState();
-        @SuppressWarnings("unchecked")
-        // cast is safe because this type of messages is saved to the map
-        final S defaultState = (S) registry.putOrGet(entityClass, state);
-        return defaultState;
+        final Message defaultState = Model.getInstance()
+                                    .getDefaultState(entityClass);
+        return (S) defaultState;
     }
 
     private S createDefaultState() {

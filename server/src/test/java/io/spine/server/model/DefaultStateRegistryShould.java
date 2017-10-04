@@ -18,15 +18,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity;
+package io.spine.server.model;
 
-import com.google.common.collect.Lists;
 import com.google.protobuf.Timestamp;
+import io.spine.server.entity.AbstractEntity;
+import io.spine.server.entity.TestEntity;
+import io.spine.server.entity.given.Given;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -35,7 +36,6 @@ import java.util.concurrent.Executors;
 
 import static com.google.common.collect.Lists.newArrayListWithExpectedSize;
 import static com.google.common.collect.Maps.newConcurrentMap;
-import static io.spine.Identifier.newUuid;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -69,7 +69,8 @@ public class DefaultStateRegistryShould {
             tasks.add(Executors.callable(new Runnable() {
                 @Override
                 public void run() {
-                    final TestEntity testEntity = TestEntity.newInstance(newUuid());
+                    final TestEntity testEntity = Given.entityOfClass(TestEntity.class)
+                                                       .build();
                     testEntity.getDefaultState();
                 }
             }));

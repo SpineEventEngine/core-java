@@ -18,9 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity;
+package io.spine.server.model;
 
 import com.google.protobuf.Message;
+import io.spine.server.entity.Entity;
 
 import javax.annotation.CheckReturnValue;
 import java.util.Map;
