@@ -99,8 +99,8 @@ public class ModelVerifierShould {
         verifier.verify(spineModel);
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void not_accept_invalid_class_names() {
+    @Test
+    public void ignore_invalid_class_names() {
         final String invalidClassname = "non.existing.class.Name";
         final CommandHandlers spineModel = CommandHandlers.newBuilder()
                                                 .addCommandHandlingTypes(invalidClassname)
