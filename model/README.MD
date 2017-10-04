@@ -3,7 +3,7 @@
 This directory contains modules that implement compile time verification of the Spine model.
 
 To enable the verification in a project, apply the following Gradle config to subprojects that may 
-contain Spine model elements:
+contain _Spine model elements_:
  ```groovy
  buildscript {
      dependencies {
@@ -21,4 +21,4 @@ contain Spine model elements:
      compileOnly group: 'io.spine.tools', name: 'spine-model-assembler', version: spineVersion
  }
  ``` 
-The Spine model elements are `Entity` classes, `.proto` definitions, etc.
+The _Spine model elements_ are Java and Protobuf declarations of Entities and the messages handled (i.e. `Command`s, `Event`s and `Rejection`s).
