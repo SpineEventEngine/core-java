@@ -85,8 +85,12 @@ Collection<File> collectProto() {
                  * configuration (and we don't have the dependencies there yet) and then upon
                  * the execution, the task should complete successfully.
                  *
-                 * The message is shown upon `./gradlew clean build` or upon a newly created version
-                 * of framework build etc.
+                 * To make sure the configuration phase passes, we suppress the GradleException
+                 * thrown by `zipTree()` indicating that the given file, which is a dependency JAR
+                 * file does not exist.
+                 *
+                 * As a side effect, the message is shown upon `./gradlew clean build` or upon
+                 * a newly created version of framework build etc.
                  */
                 logger.error(
                         "${e.message}${System.lineSeparator()}The proto artifact may be corrupted."
