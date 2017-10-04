@@ -64,7 +64,7 @@ public final class ModelVerifierPlugin extends SpinePlugin {
     private void createTask(Path rawModelStorage, Project project) {
         log().debug("Adding task {}", VERIFY_MODEL.getValue());
         newTask(VERIFY_MODEL, action(rawModelStorage)).insertBeforeTask(CLASSES)
-                                                      .insertAfterAllTasks(COMPILE_JAVA)
+                                                      .insertAfterTask(COMPILE_JAVA)
                                                       .withInputFiles(rawModelStorage)
                                                       .applyNowTo(project);
     }

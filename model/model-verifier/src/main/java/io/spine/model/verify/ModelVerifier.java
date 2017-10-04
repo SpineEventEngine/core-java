@@ -86,7 +86,11 @@ final class ModelVerifier {
                 log().debug("Trying to load class \'{}\'", commandHandlingClass);
                 cls = getModelClass(commandHandlingClass);
             } catch (ClassNotFoundException e) {
-                throw new IllegalStateException(e);
+                log().warn("Failed to load class {}." +
+                                   " Consider using io.spine.tools.spine-model-verifier plugin" +
+                                   " only for the modules with the sufficient classpath.",
+                           commandHandlingClass);
+                continue;
             }
             if (Aggregate.class.isAssignableFrom(cls)) {
                 final Class<? extends Aggregate> aggregateClass =

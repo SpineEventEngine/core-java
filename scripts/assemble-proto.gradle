@@ -73,10 +73,31 @@ Collection<File> collectProto() {
     for (final File jarFile in dependencies) {
         if (jarFile.name.endsWith(".jar")) {
             final def zipTree = zipTree(jarFile)
-            for (final File file in zipTree) {
-                if (isProtoFile(file)) {
-                    result.add(getProtoRoot(file, jarFiles))
+            try {
+                for (final File file in zipTree) {
+                    if (isProtoFile(file)) {
+                        result.add(getProtoRoot(file, jarFiles))
+                    }
                 }
+            } catch (GradleException e) {
+                /*
+                 * As the :assembleProto task configuration is resolved first upon the project
+                 * configuration (and we don't have the dependencies there yet) and then upon
+                 * the execution, the task should complete successfully.
+                 *
+                 * To make sure the configuration phase passes, we suppress the GradleException
+                 * thrown by `zipTree()` indicating that the given file, which is a dependency JAR
+                 * file does not exist.
+                 *
+                 * Though, if this error is thrown on the execution phase, this IS an error. Thus,
+                 * we log an error message.
+                 *
+                 * As a side effect, the message is shown upon `./gradlew clean build` or upon
+                 * a newly created version of framework build etc.
+                 */
+                logger.error(
+                        "${e.message}${System.lineSeparator()}The proto artifact may be corrupted."
+                )
             }
         }
     }

@@ -24,8 +24,6 @@ import com.google.protobuf.Message;
 import io.spine.Identifier;
 import io.spine.server.model.ModelClass;
 import io.spine.server.model.ModelError;
-import io.spine.type.ClassName;
-import io.spine.type.KnownTypes;
 import io.spine.type.TypeUrl;
 
 import javax.annotation.Nullable;
@@ -67,8 +65,7 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
         checkIdClass(idClass);
         this.idClass = idClass;
         this.stateClass = getStateClass(cls);
-        final ClassName stateClassName = ClassName.of(stateClass);
-        this.entityStateType = KnownTypes.getTypeUrl(stateClassName);
+        this.entityStateType = TypeUrl.of(stateClass);
     }
 
     /**
