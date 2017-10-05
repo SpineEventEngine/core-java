@@ -91,7 +91,7 @@ public class DefaultStateRegistryShould {
             tasks.add(Executors.callable(new Runnable() {
                 @Override
                 public void run() {
-                    registry.putOrGet(TimerSnapshot.class, Timestamp.getDefaultInstance());
+                    registry.putOrGet(TimerSnapshot.class);
                 }
             }));
         }

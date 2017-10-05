@@ -21,7 +21,9 @@
 package io.spine.server.model;
 
 import com.google.protobuf.Message;
+import io.spine.protobuf.Messages;
 import io.spine.server.entity.Entity;
+import io.spine.server.entity.EntityClass;
 
 import javax.annotation.CheckReturnValue;
 import java.util.Map;
@@ -75,13 +77,13 @@ class DefaultStateRegistry {
      * return saved state.
      *
      * @param entityClass an entity class
-     * @param state a default state of the entity
      */
-    Message putOrGet(Class<? extends Entity> entityClass, Message state) {
+    Message putOrGet(Class<? extends Entity> entityClass) {
         lock.writeLock().lock();
         try {
             if (!contains(entityClass)) {
-                defaultStates.put(entityClass, state);
+                final Message defaultState = createDefaultState(entityClass);
+                defaultStates.put(entityClass, defaultState);
             }
             final Message result = get(entityClass);
             return result;
@@ -104,6 +106,24 @@ class DefaultStateRegistry {
         } finally {
             lock.readLock().unlock();
         }
+    }
+
+    /**
+     * Creates default state by entity class.
+     *
+     * @return default state
+     */
+    private Message createDefaultState(Class<? extends Entity> entityClass) {
+        final Class<? extends Message> stateClass = getStateClass(entityClass);
+        final Message result = Messages.newInstance(stateClass);
+        return result;
+    }
+
+    /**
+     * Obtains the class of the entity state.
+     */
+    private Class<? extends Message> getStateClass(Class<? extends Entity> entityClass) {
+        return EntityClass.getStateClass(entityClass);
     }
 
     static DefaultStateRegistry getInstance() {

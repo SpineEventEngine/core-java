@@ -22,7 +22,6 @@ package io.spine.server.entity;
 
 import com.google.common.base.MoreObjects;
 import com.google.protobuf.Message;
-import io.spine.protobuf.Messages;
 import io.spine.server.model.Model;
 import io.spine.string.Stringifiers;
 import io.spine.validate.ConstraintViolation;

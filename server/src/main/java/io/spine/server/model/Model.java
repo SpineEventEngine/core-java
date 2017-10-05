@@ -27,7 +27,6 @@ import com.google.common.collect.Sets;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.CommandClass;
-import io.spine.protobuf.Messages;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateClass;
 import io.spine.server.aggregate.AggregatePart;
@@ -252,28 +251,15 @@ public class Model {
     }
 
     /**
-     * Obtains the default entity state.
+     * Obtains the default entity state by entity class.
      *
-     * @return default entity state.
+     * @return default entity state
      */
     public Message getDefaultState(Class<? extends Entity> cls) {
+        checkNotNull(cls);
         final DefaultStateRegistry registry = DefaultStateRegistry.getInstance();
-        final Message defaultState = createDefaultState(cls);
-        final Message result = registry.putOrGet(cls, defaultState);
+        final Message result = registry.putOrGet(cls);
         return result;
-    }
-
-    private Message createDefaultState(Class<? extends Entity> cls) {
-        final Class<? extends Message> stateClass = getStateClass(cls);
-        final Message result = Messages.newInstance(stateClass);
-        return result;
-    }
-
-    /**
-     * Obtains the class of the entity state.
-     */
-    private Class<? extends Message> getStateClass(Class<? extends Entity> cls) {
-        return EntityClass.getStateClass(cls);
     }
 
     /**
