@@ -20,6 +20,7 @@
 
 package io.spine.server.bc;
 
+import com.google.common.collect.Maps;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.core.Ack;
@@ -36,6 +37,7 @@ import io.spine.server.bc.given.BoundedContextTestEnv.SecretProjectRepository;
 import io.spine.server.bc.given.BoundedContextTestEnv.TestEventSubscriber;
 import io.spine.server.bc.given.Given;
 import io.spine.server.commandbus.CommandBus;
+import io.spine.server.entity.Entity;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventStore;
@@ -54,6 +56,7 @@ import org.junit.Test;
 import java.lang.reflect.Field;
 import java.util.Map;
 
+import static com.google.common.collect.Maps.newConcurrentMap;
 import static io.spine.core.Status.StatusCase.ERROR;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.protobuf.AnyPacker.unpack;
@@ -80,11 +83,13 @@ import static org.mockito.Mockito.when;
  *
  * @author Alexander Litus
  * @author Alexander Yevsyukov
+ * @author Dmitry Ganzha
  */
 public class BoundedContextShould {
 
     private static final String DEFAULT_STATES_FIELD_NAME = "defaultStates";
-    private static final String DEFAULT_STATE_REGISTRY_FULL_CLASS_NAME = "io.spine.server.model.DefaultStateRegistry$Singleton";
+    private static final String DEFAULT_STATE_REGISTRY_FULL_CLASS_NAME =
+            "io.spine.server.model.DefaultStateRegistry$Singleton";
     private static final String DEFAULT_STATE_REGISTRY_SINGLETON_FIELD_NAME = "value";
 
     private final TestEventSubscriber subscriber = new TestEventSubscriber();
@@ -355,7 +360,15 @@ public class BoundedContextShould {
         final Object defaultStateRegistry = getObjectFromNestedEnumField(
                 DEFAULT_STATE_REGISTRY_FULL_CLASS_NAME, DEFAULT_STATE_REGISTRY_SINGLETON_FIELD_NAME);
         injectField(defaultStateRegistry, DEFAULT_STATES_FIELD_NAME, mockMap);
-        boundedContext.register(repository);
+
+        try {
+            boundedContext.register(repository);
+        }catch (NullPointerException e) {
+            // reassigning mock map to real map, to prevent failing other tests
+            final Map<Class<? extends Entity>, Message> defaultState = newConcurrentMap();
+            injectField(defaultStateRegistry, DEFAULT_STATES_FIELD_NAME, defaultState);
+            throw e;
+        }
     }
 
     private Object getObjectFromNestedEnumField(String fullClassName, String fieldName) {
