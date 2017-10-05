@@ -37,6 +37,7 @@ import static org.junit.Assert.fail;
  * Tests of {@link Model}.
  *
  * @author Alexander Yevsyukov
+ * @author Dmitry Ganzha
  */
 @SuppressWarnings("ErrorNotRethrown")
 public class ModelShould {
