@@ -22,6 +22,7 @@ package io.spine.server.entity;
 
 import com.google.protobuf.Message;
 import io.spine.Identifier;
+import io.spine.annotation.Internal;
 import io.spine.server.model.ModelClass;
 import io.spine.server.model.ModelError;
 import io.spine.type.TypeUrl;
@@ -97,7 +98,12 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
 
     /**
      * Retrieves the state class of the passed entity class.
+     *
+     * <p>Method is public because another way to get state class is create {@code EntityClass}
+     * and execute {@link #getStateClass() getStateClass} method. it's not advantageous to create
+     * object of {@code EntityClass} to retrieve state class.
      */
+    @Internal
     public static <S extends Message> Class<S> getStateClass(Class<? extends Entity> entityClass) {
         @SuppressWarnings("unchecked") // The type is preserved by the Entity type declaration.
         final Class<S> result = (Class<S>) Entity.GenericParameter.STATE.getArgumentIn(entityClass);

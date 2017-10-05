@@ -77,7 +77,7 @@ public class ModelShould {
     }
 
     @Test
-    public void get_default_state_should_not_return_null() {
+    public void return_default_state() {
         final Message defaultState = model.getDefaultState(MAggregate.class);
         assertNotNull("Default state should not be null.", defaultState);
     }

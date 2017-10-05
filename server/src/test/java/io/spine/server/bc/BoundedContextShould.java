@@ -51,6 +51,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.lang.reflect.Field;
+import java.util.Map;
+
 import static io.spine.core.Status.StatusCase.ERROR;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.protobuf.AnyPacker.unpack;
@@ -58,12 +61,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Messages used in this test suite are defined in:
@@ -77,6 +82,10 @@ import static org.mockito.Mockito.verify;
  * @author Alexander Yevsyukov
  */
 public class BoundedContextShould {
+
+    private static final String DEFAULT_STATES_FIELD_NAME = "defaultStates";
+    private static final String DEFAULT_STATE_REGISTRY_FULL_CLASS_NAME = "io.spine.server.model.DefaultStateRegistry$Singleton";
+    private static final String DEFAULT_STATE_REGISTRY_SINGLETON_FIELD_NAME = "value";
 
     private final TestEventSubscriber subscriber = new TestEventSubscriber();
 
@@ -336,5 +345,46 @@ public class BoundedContextShould {
 
         assertFalse(boundedContext.findRepository(SecretProject.class)
                                   .isPresent());
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void throw_NPE_when_default_state_is_null() {
+        final ProjectAggregateRepository repository = new ProjectAggregateRepository();
+        final Map mockMap = mock(Map.class);
+        when(mockMap.get(any())).thenReturn(null);
+        final Object defaultStateRegistry = getObjectFromNestedEnumField(
+                DEFAULT_STATE_REGISTRY_FULL_CLASS_NAME, DEFAULT_STATE_REGISTRY_SINGLETON_FIELD_NAME);
+        injectField(defaultStateRegistry, DEFAULT_STATES_FIELD_NAME, mockMap);
+        boundedContext.register(repository);
+    }
+
+    private Object getObjectFromNestedEnumField(String fullClassName, String fieldName) {
+        Object result = null;
+        try {
+            final Class<?> aClass = Class.forName(fullClassName);
+            final Object enumConstant = aClass.getEnumConstants()[0];
+            final Field field = aClass.getDeclaredField(fieldName);
+            field.setAccessible(true);
+            result = field.get(enumConstant);
+        } catch (ClassNotFoundException e) {
+            fail("Class " + fullClassName + " not found.");
+        } catch (NoSuchFieldException e) {
+            fail("Field " + fieldName + " should exist.");
+        } catch (IllegalAccessException e) {
+            fail(e.getMessage());
+        }
+        assertNotNull(result);
+        return result;
+    }
+
+    private void injectField(Object target, String fieldName, Object injectableValue) {
+        try {
+            final Field defaultStates = target.getClass()
+                                              .getDeclaredField(fieldName);
+            defaultStates.setAccessible(true);
+            defaultStates.set(target, injectableValue);
+        } catch (NoSuchFieldException | IllegalAccessException ignored) {
+            fail("Field " + fieldName + " should exist.");
+        }
     }
 }
