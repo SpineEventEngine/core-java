@@ -66,6 +66,7 @@ import static io.spine.validate.Validate.checkNotEmptyOrBlank;
  *
  * @author Alexander Yevsyukov
  * @author Mikhail Melnik
+ * @author Dmitry Ganzha
  */
 public final class BoundedContext
         extends IntegrationEventSubscriberGrpc.IntegrationEventSubscriberImplBase
@@ -254,7 +255,7 @@ public final class BoundedContext
      * <p>If the repository does not have a storage assigned, it will be initialized
      * using the {@code StorageFactory} associated with this bounded context.
      *
-     * <p>Checks whether there is a default state for passed entity or aggregate type.
+     * <p>Checks whether there is a default state for entity or aggregate type of the repository.
      *
      * @param repository the repository to register
      * @param <I>        the type of IDs used in the repository

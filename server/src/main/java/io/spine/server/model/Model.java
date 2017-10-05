@@ -54,6 +54,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * Stores information of message handling classes.
  *
  * @author Alexander Yevsyukov
+ * @author Dmitry Ganzha
  */
 @Internal
 public class Model {
