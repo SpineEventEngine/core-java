@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.protobuf.Message;
+import io.spine.annotation.Internal;
 import io.spine.core.CommandClass;
 import io.spine.protobuf.Messages;
 import io.spine.server.aggregate.Aggregate;
@@ -55,6 +56,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alexander Yevsyukov
  */
+@Internal
 public class Model {
 
     /**
@@ -249,13 +251,16 @@ public class Model {
         return (EntityClass<?>) modelClass;
     }
 
+    /**
+     * Obtains the default entity state.
+     *
+     * @return default entity state.
+     */
     public Message getDefaultState(Class<? extends Entity> cls) {
         final DefaultStateRegistry registry = DefaultStateRegistry.getInstance();
-        final Message state = createDefaultState(cls);
-        @SuppressWarnings("unchecked")
-        // cast is safe because this type of messages is saved to the map
-        final Message defaultState = registry.putOrGet(cls, state);
-        return defaultState;
+        final Message defaultState = createDefaultState(cls);
+        final Message result = registry.putOrGet(cls, defaultState);
+        return result;
     }
 
     private Message createDefaultState(Class<? extends Entity> cls) {
@@ -268,22 +273,7 @@ public class Model {
      * Obtains the class of the entity state.
      */
     private Class<? extends Message> getStateClass(Class<? extends Entity> cls) {
-        //TODO:2017-08-21:alexander.yevsyukov: Use the below code to overcome the issue in the test
-        // environment entity, which is created with the generic type <I> variable, which is
-        // resolved only at the level of enclosed test suite (RecordStorageShould).
-        // Since there is no way to get the value of the type variable (which we need to construct
-        // model entity class), we use this type name checking and return state class via static
-        // method call. The rest of the classes should follow general declaration contract.
-        //
-        // Once these tests are reworked, eliminate the code in the if() statement below, and inline
-        // the EntityClass.getStateClass() method.
-        //
-        if (cls.getName().contains("TestCounterEntity")) {
-            return EntityClass.getStateClass(cls);
-        }
-
-        Class<? extends Message> result = asEntityClass(cls).getStateClass();
-        return result;
+        return EntityClass.getStateClass(cls);
     }
 
     /**
