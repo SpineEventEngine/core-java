@@ -77,9 +77,9 @@ public class ModelShould {
     }
 
     @Test
-    public void return_default_state() {
+    public void return_default_state_for_entity_class() {
         final Message defaultState = model.getDefaultState(MAggregate.class);
-        assertNotNull("Default state should not be null.", defaultState);
+        assertNotNull("Default state cannot be null for the entity class.", defaultState);
     }
 
     private static void assertContainsClassName(DuplicateCommandHandlerError error, Class<?> cls) {

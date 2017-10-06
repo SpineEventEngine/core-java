@@ -20,7 +20,6 @@
 
 package io.spine.server.bc;
 
-import com.google.common.collect.Maps;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.core.Ack;
@@ -352,8 +351,16 @@ public class BoundedContextShould {
                                   .isPresent());
     }
 
+    /**
+     * In the process of registering {@link Repository} in the {@link BoundedContext},
+     * method {@link io.spine.server.model.Model#getDefaultState(Class) getDefaultState} is called,
+     * which gets the default state and check is performed that the default state is not null,
+     * if it is null an exception will be thrown.
+     *
+     * <p>In this test, it is checked whether the mechanism described above works correctly.
+     */
     @Test(expected = NullPointerException.class)
-    public void throw_NPE_when_default_state_is_null() {
+    public void throw_NPE_when_register_repository_and_default_state_is_null() {
         final ProjectAggregateRepository repository = new ProjectAggregateRepository();
         final Map mockMap = mock(Map.class);
         when(mockMap.get(any())).thenReturn(null);
@@ -390,12 +397,12 @@ public class BoundedContextShould {
         return result;
     }
 
-    private void injectField(Object target, String fieldName, Object injectableValue) {
+    private void injectField(Object target, String fieldName, Object valueToInject) {
         try {
             final Field defaultStates = target.getClass()
                                               .getDeclaredField(fieldName);
             defaultStates.setAccessible(true);
-            defaultStates.set(target, injectableValue);
+            defaultStates.set(target, valueToInject);
         } catch (NoSuchFieldException | IllegalAccessException ignored) {
             fail("Field " + fieldName + " should exist.");
         }

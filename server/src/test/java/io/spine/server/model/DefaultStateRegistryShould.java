@@ -113,12 +113,12 @@ public class DefaultStateRegistryShould {
         }
     }
 
-    private void injectField(Object target, String fieldName, Object injectableValue) {
+    private void injectField(Object target, String fieldName, Object valueToInject) {
         try {
             final Field defaultStates = target.getClass()
                                                 .getDeclaredField(fieldName);
             defaultStates.setAccessible(true);
-            defaultStates.set(target, injectableValue);
+            defaultStates.set(target, valueToInject);
         } catch (NoSuchFieldException | IllegalAccessException ignored) {
             fail("Field " + fieldName + " should exist");
         }

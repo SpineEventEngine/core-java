@@ -255,7 +255,7 @@ public final class BoundedContext
      * <p>If the repository does not have a storage assigned, it will be initialized
      * using the {@code StorageFactory} associated with this bounded context.
      *
-     * <p>Checks whether there is a default state for entity or aggregate type of the repository.
+     * <p>Checks whether there is a default state for entity type.
      *
      * @param repository the repository to register
      * @param <I>        the type of IDs used in the repository
