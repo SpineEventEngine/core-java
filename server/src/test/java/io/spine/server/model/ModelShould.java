@@ -20,6 +20,7 @@
 
 package io.spine.server.model;
 
+import com.google.protobuf.Message;
 import io.spine.server.model.given.ModelTestEnv.MAggregate;
 import io.spine.server.model.given.ModelTestEnv.MCommandHandler;
 import io.spine.server.model.given.ModelTestEnv.MProcessManager;
@@ -28,6 +29,7 @@ import io.spine.test.reflect.command.RefStartProject;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -35,6 +37,7 @@ import static org.junit.Assert.fail;
  * Tests of {@link Model}.
  *
  * @author Alexander Yevsyukov
+ * @author Dmitry Ganzha
  */
 @SuppressWarnings("ErrorNotRethrown")
 public class ModelShould {
@@ -71,6 +74,12 @@ public class ModelShould {
             assertContainsClassName(error, MAggregate.class);
             assertContainsClassName(error, MProcessManager.class);
         }
+    }
+
+    @Test
+    public void return_default_state_for_entity_class() {
+        final Message defaultState = model.getDefaultState(MAggregate.class);
+        assertNotNull("Default state cannot be null for the entity class.", defaultState);
     }
 
     private static void assertContainsClassName(DuplicateCommandHandlerError error, Class<?> cls) {

@@ -40,6 +40,7 @@ import io.spine.server.event.EventFactory;
 import io.spine.server.integration.IntegrationBus;
 import io.spine.server.integration.IntegrationEvent;
 import io.spine.server.integration.grpc.IntegrationEventSubscriberGrpc;
+import io.spine.server.model.Model;
 import io.spine.server.rejection.RejectionBus;
 import io.spine.server.stand.Stand;
 import io.spine.server.stand.StandStorage;
@@ -65,6 +66,7 @@ import static io.spine.validate.Validate.checkNotEmptyOrBlank;
  *
  * @author Alexander Yevsyukov
  * @author Mikhail Melnik
+ * @author Dmitry Ganzha
  */
 public final class BoundedContext
         extends IntegrationEventSubscriberGrpc.IntegrationEventSubscriberImplBase
@@ -253,6 +255,8 @@ public final class BoundedContext
      * <p>If the repository does not have a storage assigned, it will be initialized
      * using the {@code StorageFactory} associated with this bounded context.
      *
+     * <p>Checks whether there is a default state for entity type.
+     *
      * @param repository the repository to register
      * @param <I>        the type of IDs used in the repository
      * @param <E>        the type of entities or aggregates
@@ -260,6 +264,10 @@ public final class BoundedContext
      */
     public <I, E extends Entity<I, ?>> void register(Repository<I, E> repository) {
         checkNotNull(repository);
+        final Message defaultState = Model.getInstance()
+                                          .getDefaultState(repository.getEntityClass());
+        checkNotNull(defaultState);
+
         repository.setBoundedContext(this);
         guard.register(repository);
         repository.onRegistered();
