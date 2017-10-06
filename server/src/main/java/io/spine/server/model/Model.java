@@ -24,6 +24,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.protobuf.Message;
+import io.spine.annotation.Internal;
 import io.spine.core.CommandClass;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateClass;
@@ -52,7 +54,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * Stores information of message handling classes.
  *
  * @author Alexander Yevsyukov
+ * @author Dmitry Ganzha
  */
+@Internal
 public class Model {
 
     /**
@@ -245,6 +249,18 @@ public class Model {
             classes.put(nameOf(cls), modelClass);
         }
         return (EntityClass<?>) modelClass;
+    }
+
+    /**
+     * Obtains the default entity state by entity class.
+     *
+     * @return default entity state
+     */
+    public Message getDefaultState(Class<? extends Entity> cls) {
+        checkNotNull(cls);
+        final DefaultStateRegistry registry = DefaultStateRegistry.getInstance();
+        final Message result = registry.putOrGet(cls);
+        return result;
     }
 
     /**

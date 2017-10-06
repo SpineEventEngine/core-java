@@ -22,6 +22,7 @@ package io.spine.server.entity;
 
 import com.google.protobuf.Message;
 import io.spine.Identifier;
+import io.spine.annotation.Internal;
 import io.spine.server.model.ModelClass;
 import io.spine.server.model.ModelError;
 import io.spine.type.TypeUrl;
@@ -97,8 +98,13 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
 
     /**
      * Retrieves the state class of the passed entity class.
+     *
+     * <p>Though this method is {@code public}, it is <em>not</em> considered a part of the
+     * public API. It is used internally by other framework routines and not designed for efficient
+     * execution by Spine users.
      */
-    static <S extends Message> Class<S> getStateClass(Class<? extends Entity> entityClass) {
+    @Internal
+    public static <S extends Message> Class<S> getStateClass(Class<? extends Entity> entityClass) {
         @SuppressWarnings("unchecked") // The type is preserved by the Entity type declaration.
         final Class<S> result = (Class<S>) Entity.GenericParameter.STATE.getArgumentIn(entityClass);
         return result;
