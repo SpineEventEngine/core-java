@@ -99,9 +99,9 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
     /**
      * Retrieves the state class of the passed entity class.
      *
-     * <p>Method is public because another way to get state class is create {@code EntityClass}
-     * and execute {@link #getStateClass() getStateClass} method. It's not advantageous to create
-     * object of {@code EntityClass} to retrieve state class.
+     * <p>Though this method is {@code public}, it is <em>not</em> considered a part of the
+     * public API. It is used internally by other framework routines and not designed for efficient
+     * execution by Spine users.
      */
     @Internal
     public static <S extends Message> Class<S> getStateClass(Class<? extends Entity> entityClass) {

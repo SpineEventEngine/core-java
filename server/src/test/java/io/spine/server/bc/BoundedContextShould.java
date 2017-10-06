@@ -352,15 +352,22 @@ public class BoundedContextShould {
     }
 
     /**
-     * In the process of registering {@link Repository} in the {@link BoundedContext},
-     * method {@link io.spine.server.model.Model#getDefaultState(Class) getDefaultState} is called,
-     * which gets the default state and check is performed that the default state is not null,
-     * if it is null an exception will be thrown.
+     * This test checks, whether {@code BoundedContext} properly handles the issues upon repository
+     * registration.
      *
-     * <p>In this test, it is checked whether the mechanism described above works correctly.
+     * <p>In particular, we intentionally break an interaction between {@code Model}
+     * and a {@code BoundedContext} on attempt to ensure there is an entity default state present
+     * for the given repository instance.
+     *
+     * <p>The expected behavior of {@code BoundedContext} instance is to fail fast in case such
+     * a default state is absent.
+     *
+     * <p>In real-life this use case can never happen given the current implementation of
+     * {@code Model} and {@code BoundedContext}. However, previously such an issue was caught.
+     * Therefore this test case ensures it's never happening again.
      */
     @Test(expected = NullPointerException.class)
-    public void throw_NPE_when_register_repository_and_default_state_is_null() {
+    public void throw_NPE_when_registering_repository_and_default_state_is_null() {
         final ProjectAggregateRepository repository = new ProjectAggregateRepository();
         final Map mockMap = mock(Map.class);
         when(mockMap.get(any())).thenReturn(null);
