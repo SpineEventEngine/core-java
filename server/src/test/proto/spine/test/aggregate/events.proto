@@ -56,3 +56,10 @@ message AggProjectDeleted {
     repeated ProjectId child_project_id = 2;
 }
 
+message AggProjectPaused {
+    ProjectId project_id = 1;
+}
+
+message AggProjectCancelled {
+    ProjectId project_id = 1;
+}

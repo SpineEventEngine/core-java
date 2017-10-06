@@ -22,6 +22,7 @@ package io.spine.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.Identifier;
@@ -48,10 +49,14 @@ import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.ProjectVBuilder;
 import io.spine.test.aggregate.Status;
 import io.spine.test.aggregate.command.AggAddTask;
+import io.spine.test.aggregate.command.AggCancelProject;
 import io.spine.test.aggregate.command.AggCreateProject;
+import io.spine.test.aggregate.command.AggPauseProject;
 import io.spine.test.aggregate.command.AggStartProject;
 import io.spine.test.aggregate.command.ImportEvents;
+import io.spine.test.aggregate.event.AggProjectCancelled;
 import io.spine.test.aggregate.event.AggProjectCreated;
+import io.spine.test.aggregate.event.AggProjectPaused;
 import io.spine.test.aggregate.event.AggProjectStarted;
 import io.spine.test.aggregate.event.AggTaskAdded;
 import io.spine.test.aggregate.user.User;
@@ -71,7 +76,9 @@ import static io.spine.server.TestCommandClasses.assertContains;
 import static io.spine.server.TestEventClasses.assertContains;
 import static io.spine.server.TestEventClasses.getEventClasses;
 import static io.spine.server.aggregate.AggregateMessageDispatcher.dispatchCommand;
+import static io.spine.server.aggregate.given.Given.EventMessage.projectCancelled;
 import static io.spine.server.aggregate.given.Given.EventMessage.projectCreated;
+import static io.spine.server.aggregate.given.Given.EventMessage.projectPaused;
 import static io.spine.server.aggregate.given.Given.EventMessage.projectStarted;
 import static io.spine.server.aggregate.given.Given.EventMessage.taskAdded;
 import static io.spine.server.entity.given.Given.aggregateOfClass;
@@ -99,13 +106,23 @@ public class AggregateShould {
             TestEventFactory.newInstance(Identifier.pack(ID), requestFactory);
 
     private static final AggCreateProject createProject = Given.CommandMessage.createProject(ID);
+    private static final AggPauseProject pauseProject = Given.CommandMessage.pauseProject(ID);
+    private static final AggCancelProject cancelProject = Given.CommandMessage.cancelProject(ID);
     private static final AggAddTask addTask = Given.CommandMessage.addTask(ID);
     private static final AggStartProject startProject = Given.CommandMessage.startProject(ID);
 
     private TestAggregate aggregate;
 
+    private AmishAggregate amishAggregate;
+
     private static TestAggregate newAggregate(ProjectId id) {
         final TestAggregate result = new TestAggregate(id);
+        result.init();
+        return result;
+    }
+
+    private static AmishAggregate newAmishAggregate(ProjectId id) {
+        final AmishAggregate result = new AmishAggregate(id);
         result.init();
         return result;
     }
@@ -142,6 +159,7 @@ public class AggregateShould {
     public void setUp() {
         ModelTests.clearModel();
         aggregate = newAggregate(ID);
+        amishAggregate = newAmishAggregate(ID);
     }
 
     @Test
@@ -159,6 +177,34 @@ public class AggregateShould {
         dispatchCommand(aggregate, env(createProject));
 
         assertEquals(version + 1, aggregate.versionNumber());
+    }
+
+    /**
+     * This is a most typical use-case with a single event returned in response to a command.
+     */
+    @Test
+    public void advances_the_version_by_one_with_single_event_and_with_empty_event_applier() {
+        final int version = amishAggregate.versionNumber();
+
+        final List<? extends Message> messages = dispatchCommand(amishAggregate, env(pauseProject));
+        assertEquals(1, messages.size());
+
+        assertEquals(version + 1, amishAggregate.versionNumber());
+    }
+
+    /**
+     * This tests a use-case implying returning a {@code List} of events in response to a command.
+     */
+    @Test
+    public void advances_the_version_by_number_of_events_with_several_events_and_empty_appliers() {
+        final int version = amishAggregate.versionNumber();
+
+        final List<? extends Message> eventMessages =
+                dispatchCommand(amishAggregate, env(cancelProject));
+        // Expecting to return more than one to differ from other testing scenarios.
+        assertTrue(eventMessages.size() > 1);
+
+        assertEquals(version + eventMessages.size(), amishAggregate.versionNumber());
     }
 
     @Test
@@ -657,6 +703,52 @@ public class AggregateShould {
                 final Message commandMessage = Commands.getMessage(cmd);
                 AggregateMessageDispatcher.dispatchCommand(this, env(commandMessage));
             }
+        }
+    }
+
+    /**
+     * A test-only aggregate, that handles some commands fine, but does not change own state
+     * in any of event appliers.
+     *
+     * <p>One might say, this aggregate sticks to its roots and denies changes. Hence the name.
+     */
+    private static class AmishAggregate extends Aggregate<ProjectId, Project, ProjectVBuilder> {
+
+        private AmishAggregate(ProjectId id) {
+            super(id);
+        }
+
+        /**
+         * Overrides to expose the method to the text.
+         */
+        @VisibleForTesting
+        @Override
+        public void init() {
+            super.init();
+        }
+
+        @Assign
+        AggProjectPaused handle(AggPauseProject cmd, CommandContext ctx) {
+            final AggProjectPaused event = projectPaused(cmd.getProjectId());
+            return event;
+        }
+
+        @Assign
+        List<Message> handle(AggCancelProject cmd, CommandContext ctx) {
+            final AggProjectPaused firstPaused = projectPaused(cmd.getProjectId());
+            final AggProjectCancelled thenCancelled = projectCancelled(cmd.getProjectId());
+            return Lists.<Message>newArrayList(firstPaused, thenCancelled);
+        }
+
+
+        @Apply
+        private void on(AggProjectPaused event) {
+            // do nothing.
+        }
+
+        @Apply
+        private void on(AggProjectCancelled event) {
+            // do nothing.
         }
     }
 }
