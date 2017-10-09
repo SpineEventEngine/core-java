@@ -276,6 +276,11 @@ public abstract class AggregateStorageShould
         storage.readEventCountAfterLastSnapshot(id);
     }
 
+    @Test
+    public void have_default_snapshot_trigger() {
+        assertEquals(AggregateRepository.DEFAULT_SNAPSHOT_TRIGGER, storage.getSnapshotTrigger());
+    }
+
     private static Event generateEvent() {
         final TestEventFactory eventFactory = newInstance(AggregateStorageShould.class);
         final Event result = eventFactory.createEvent(Time.getCurrentTime());

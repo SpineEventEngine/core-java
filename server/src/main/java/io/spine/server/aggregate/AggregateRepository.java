@@ -239,6 +239,19 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     /**
+     * {@inheritDoc}
+     *
+     * <p>Sets {@link #snapshotTrigger} for the assigned storage.
+     *
+     * @param factory storage factory
+     */
+    @Override
+    public void initStorage(StorageFactory factory) {
+        super.initStorage(factory);
+        aggregateStorage().setSnapshotTrigger(snapshotTrigger);
+    }
+
+    /**
      * Creates aggregate storage for the repository.
      *
      * @param factory the factory to create the storage
@@ -396,10 +409,12 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      *
      * @param snapshotTrigger a positive number of the snapshot trigger
      */
-    @SuppressWarnings("unused")
-    protected void setSnapshotTrigger(int snapshotTrigger) {
+    protected final void setSnapshotTrigger(int snapshotTrigger) {
         checkArgument(snapshotTrigger > 0);
         this.snapshotTrigger = snapshotTrigger;
+        if (isStorageAssigned()) {
+            aggregateStorage().setSnapshotTrigger(snapshotTrigger);
+        }
     }
 
     AggregateStorage<I> aggregateStorage() {

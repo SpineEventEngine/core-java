@@ -52,6 +52,18 @@ public abstract class AggregateStorage<I>
         extends AbstractStorage<I, AggregateStateRecord>
         implements StorageWithLifecycleFlags<I, AggregateStateRecord> {
 
+    /**
+     * The {@link AggregateRepository#snapshotTrigger snapshot trigger} value
+     * of the repository, to which is assigned this storage.
+     *
+     * <p>This value should be used for the {@link #historyBackward(Object) history reading}
+     * optimization. To load an aggregate in the default scenario, required only
+     * the last {@link Snapshot} and events occurred after creation of this snapshot.
+     * So instead of reading all {@linkplain AggregateEventRecord event records}, it is reasonable
+     * to read by batches equal to the snapshot trigger value.
+     */
+    private int snapshotTrigger = AggregateRepository.DEFAULT_SNAPSHOT_TRIGGER;
+
     protected AggregateStorage(boolean multitenant) {
         super(multitenant);
     }
@@ -251,4 +263,23 @@ public abstract class AggregateStorage<I>
      * @return new iterator instance
      */
     protected abstract Iterator<AggregateEventRecord> historyBackward(I id);
+
+    /**
+     * Returns the number of events until a next {@code Snapshot} is made.
+     *
+     * @return a positive integer value
+     */
+    protected int getSnapshotTrigger() {
+        return snapshotTrigger;
+    }
+
+    /**
+     * Changes the number of events between making aggregate snapshots to the passed value.
+     *
+     * @param snapshotTrigger a positive number of the snapshot trigger
+     */
+    protected void setSnapshotTrigger(int snapshotTrigger) {
+        checkArgument(snapshotTrigger > 0);
+        this.snapshotTrigger = snapshotTrigger;
+    }
 }

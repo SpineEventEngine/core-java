@@ -170,6 +170,8 @@ public class AggregateRepositoryShould {
     @Test
     public void have_default_value_for_snapshot_trigger() {
         assertEquals(AggregateRepository.DEFAULT_SNAPSHOT_TRIGGER, repository.getSnapshotTrigger());
+        assertEquals(AggregateRepository.DEFAULT_SNAPSHOT_TRIGGER, repository.aggregateStorage()
+                                                                             .getSnapshotTrigger());
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -189,6 +191,14 @@ public class AggregateRepositoryShould {
         repository.setSnapshotTrigger(newSnapshotTrigger);
 
         assertEquals(newSnapshotTrigger, repository.getSnapshotTrigger());
+        assertEquals(newSnapshotTrigger, repository.aggregateStorage()
+                                                   .getSnapshotTrigger());
+    }
+
+    @Test
+    public void not_update_snapshot_trigger_for_unassigned_storage() {
+        final ProjectAggregateRepository repoWithoutStorage = new ProjectAggregateRepository();
+        repoWithoutStorage.setSnapshotTrigger(10);
     }
 
     @Test
