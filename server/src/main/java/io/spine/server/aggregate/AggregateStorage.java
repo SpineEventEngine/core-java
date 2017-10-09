@@ -20,6 +20,7 @@
 
 package io.spine.server.aggregate;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.protobuf.Timestamp;
 import io.spine.Identifier;
@@ -269,7 +270,8 @@ public abstract class AggregateStorage<I>
      *
      * @return a positive integer value
      */
-    protected int getSnapshotTrigger() {
+    @VisibleForTesting
+    public int getSnapshotTrigger() {
         return snapshotTrigger;
     }
 
