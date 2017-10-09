@@ -36,8 +36,8 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.core.Versions.checkIsIncrement;
-import static io.spine.server.entity.InvalidEntityStateException.onConstraintViolations;
 import static io.spine.server.entity.EntityVersioning.FROM_EVENT;
+import static io.spine.server.entity.InvalidEntityStateException.onConstraintViolations;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static java.lang.String.format;
 
@@ -279,8 +279,14 @@ public abstract class Transaction<I,
             }
         } else {
             // The state isn't modified, but other attributes may have been modified.
-            listener.onBeforeCommit(getEntity(), getEntity().getState(),
+            final S unmodifiedState = getEntity().getState();
+            listener.onBeforeCommit(getEntity(), unmodifiedState,
                                     pendingVersion, getLifecycleFlags());
+
+            // Set the version if it has changed.
+            if(!pendingVersion.equals(entity.getVersion())) {
+                entity.updateState(unmodifiedState, pendingVersion);
+            }
             commitAttributeChanges();
             releaseTx();
         }

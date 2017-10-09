@@ -22,7 +22,6 @@ package io.spine.server.entity;
 
 import com.google.common.base.MoreObjects;
 import com.google.protobuf.Message;
-import io.spine.protobuf.Messages;
 import io.spine.server.model.Model;
 import io.spine.string.Stringifiers;
 import io.spine.validate.ConstraintViolation;
@@ -135,42 +134,10 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     @CheckReturnValue
     public S getDefaultState() {
         final Class<? extends Entity> entityClass = getClass();
-        final DefaultStateRegistry registry = DefaultStateRegistry.getInstance();
-        final S state = createDefaultState();
         @SuppressWarnings("unchecked")
         // cast is safe because this type of messages is saved to the map
-        final S defaultState = (S) registry.putOrGet(entityClass, state);
-        return defaultState;
-    }
-
-    private S createDefaultState() {
-        final Class<S> stateClass = getStateClass();
-        final S result = Messages.newInstance(stateClass);
-        return result;
-    }
-
-    /**
-     * Obtains the class of the entity state.
-     */
-    private Class<S> getStateClass() {
-        final Class<? extends AbstractEntity> entityClass = getClass();
-
-        //TODO:2017-08-21:alexander.yevsyukov: Use the below code to overcome the issue in the test
-        // environment entity, which is created with the generic type <I> variable, which is
-        // resolved only at the level of enclosed test suite (RecordStorageShould).
-        // Since there is no way to get the value of the type variable (which we need to construct
-        // model entity class), we use this type name checking and return state class via static
-        // method call. The rest of the classes should follow general declaration contract.
-        //
-        // Once these tests are reworked, eliminate the code in the if() statement below, and inline
-        // the EntityClass.getStateClass() method.
-        //
-        if (entityClass.getName().contains("TestCounterEntity")) {
-            return EntityClass.getStateClass(entityClass);
-        }
-
-        @SuppressWarnings("unchecked") // The cast is protected by calling code generic parameters.
-        final Class<S> result = (Class<S>) thisClass().getStateClass();
+        final S result = (S) Model.getInstance()
+                                  .getDefaultState(entityClass);
         return result;
     }
 

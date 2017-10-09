@@ -32,9 +32,13 @@ import io.spine.server.aggregate.AggregateEventRecord;
 import io.spine.server.command.TestEventFactory;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggAddTask;
+import io.spine.test.aggregate.command.AggCancelProject;
 import io.spine.test.aggregate.command.AggCreateProject;
+import io.spine.test.aggregate.command.AggPauseProject;
 import io.spine.test.aggregate.command.AggStartProject;
+import io.spine.test.aggregate.event.AggProjectCancelled;
 import io.spine.test.aggregate.event.AggProjectCreated;
+import io.spine.test.aggregate.event.AggProjectPaused;
 import io.spine.test.aggregate.event.AggProjectStarted;
 import io.spine.test.aggregate.event.AggTaskAdded;
 import io.spine.testdata.Sample;
@@ -64,6 +68,18 @@ public class Given {
                                     .setProjectId(id)
                                     .setName(projectName)
                                     .build();
+        }
+
+        public static AggProjectPaused projectPaused(ProjectId id) {
+            return AggProjectPaused.newBuilder()
+                                   .setProjectId(id)
+                                   .build();
+        }
+
+        public static AggProjectCancelled projectCancelled(ProjectId id) {
+            return AggProjectCancelled.newBuilder()
+                                      .setProjectId(id)
+                                      .build();
         }
 
         public static AggTaskAdded taskAdded(ProjectId id) {
@@ -135,20 +151,32 @@ public class Given {
 
         public static AggCreateProject createProject(ProjectId id) {
             final AggCreateProject.Builder builder = AggCreateProject.newBuilder()
-                                                               .setProjectId(id)
-                                                               .setName(projectName(id));
+                                                                     .setProjectId(id)
+                                                                     .setName(projectName(id));
+            return builder.build();
+        }
+
+        public static AggPauseProject pauseProject(ProjectId id) {
+            final AggPauseProject.Builder builder = AggPauseProject.newBuilder()
+                                                                   .setProjectId(id);
+            return builder.build();
+        }
+
+        public static AggCancelProject cancelProject(ProjectId id) {
+            final AggCancelProject.Builder builder = AggCancelProject.newBuilder()
+                                                                     .setProjectId(id);
             return builder.build();
         }
 
         public static AggAddTask addTask(ProjectId id) {
             final AggAddTask.Builder builder = AggAddTask.newBuilder()
-                                                   .setProjectId(id);
+                                                         .setProjectId(id);
             return builder.build();
         }
 
         public static AggStartProject startProject(ProjectId id) {
             final AggStartProject.Builder builder = AggStartProject.newBuilder()
-                                                             .setProjectId(id);
+                                                                   .setProjectId(id);
             return builder.build();
         }
     }
