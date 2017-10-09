@@ -55,12 +55,6 @@ public abstract class AggregateStorage<I>
     /**
      * The {@link AggregateRepository#snapshotTrigger snapshot trigger} value
      * of the repository, to which is assigned this storage.
-     *
-     * <p>This value should be used for the {@link #historyBackward(Object) history reading}
-     * optimization. To load an aggregate in the default scenario, required only
-     * the last {@link Snapshot} and events occurred after creation of this snapshot.
-     * So instead of reading all {@linkplain AggregateEventRecord event records}, it is reasonable
-     * to read by batches equal to the snapshot trigger value.
      */
     private int snapshotTrigger = AggregateRepository.DEFAULT_SNAPSHOT_TRIGGER;
 
@@ -258,6 +252,12 @@ public abstract class AggregateStorage<I>
      *
      * <p>Records are sorted by timestamp descending (from newer to older).
      * The iterator is empty if there's no history for the aggregate with passed ID
+     *
+     * <p>Use {@link #snapshotTrigger} for the history reading optimization.
+     * To load an aggregate in the default scenario, required only
+     * the last {@link Snapshot} and events occurred after creation of this snapshot.
+     * So instead of reading all {@linkplain AggregateEventRecord event records},
+     * it is reasonable to read them by batches equal to the snapshot trigger value.
      *
      * @param id aggregate ID
      * @return new iterator instance
