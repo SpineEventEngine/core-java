@@ -20,34 +20,39 @@
 
 package io.spine.server.storage;
 
-import com.google.common.base.Optional;
-import com.google.protobuf.Message;
-import io.spine.server.entity.LifecycleFlags;
+import com.google.protobuf.FieldMask;
+import io.spine.annotation.SPI;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A storage that allows to update {@linkplain LifecycleFlags lifecycle flags} of entities.
+ * A read request for {@link RecordStorage}.
  *
- * @author Alexander Yevsyukov
+ * @param <I> the type of the target ID
+ * @author Dmytro Grankin
  */
-public interface StorageWithLifecycleFlags<I, R extends Message, Q extends ReadRequest<I>>
-        extends Storage<I, R, Q> {
+@SPI
+public final class RecordReadRequest<I> implements ReadRequest<I> {
+
+    private final I id;
+    private final FieldMask fieldMask;
+
+    public RecordReadRequest(I id, FieldMask fieldMask) {
+        this.id = checkNotNull(id);
+        this.fieldMask = checkNotNull(fieldMask);
+    }
+
+    @Override
+    public I getId() {
+        return id;
+    }
 
     /**
-     * Reads the visibility status for the entity with the passed ID.
+     * Obtains the field mask to apply on the record with the {@linkplain #getId() ID}.
      *
-     * <p>This method returns {@code Optional.absent()} if none of the
-     * flags of visibility flags were set before.
-     *
-     * @param id the ID of the entity
-     * @return the aggregate visibility or {@code Optional.absent()}
+     * @return the field mask for the requested record
      */
-    Optional<LifecycleFlags> readLifecycleFlags(I id);
-
-    /**
-     * Writes the visibility status for the entity with the passed ID.
-     *
-     * @param id         the ID of the entity for which to update the status
-     * @param flags the status to write
-     */
-    void writeLifecycleFlags(I id, LifecycleFlags flags);
+    public FieldMask getFieldMask() {
+        return fieldMask;
+    }
 }

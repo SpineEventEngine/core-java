@@ -50,6 +50,7 @@ import static io.spine.Identifier.newUuid;
 import static io.spine.server.command.TestEventFactory.newInstance;
 import static io.spine.time.Durations2.seconds;
 import static io.spine.time.Time.getCurrentTime;
+import static java.lang.Integer.MAX_VALUE;
 import static java.util.Collections.reverse;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -61,6 +62,7 @@ import static org.junit.Assert.assertTrue;
 public abstract class AggregateStorageShould
         extends AbstractStorageShould<ProjectId,
                                       AggregateStateRecord,
+                                      AggregateReadRequest<ProjectId>,
                                       AggregateStorage<ProjectId>> {
 
     private final ProjectId id = Sample.messageOfType(ProjectId.class);
@@ -111,23 +113,28 @@ public abstract class AggregateStorageShould
         return Sample.messageOfType(ProjectId.class);
     }
 
+    @Override
+    protected AggregateReadRequest<ProjectId> newReadRequest(ProjectId id) {
+        return new AggregateReadRequest<>(id, MAX_VALUE);
+    }
+
     @Test
     public void return_iterator_over_empty_collection_if_read_history_from_empty_storage() {
-        final Iterator<AggregateEventRecord> iterator = storage.historyBackward(id);
+        final Iterator<AggregateEventRecord> iterator = historyBackward();
 
         assertFalse(iterator.hasNext());
     }
 
     @Test
     public void return_absent_AggregateStateRecord_if_read_history_from_empty_storage() {
-        final Optional<AggregateStateRecord> aggregateStateRecord = storage.read(id);
+        final Optional<AggregateStateRecord> aggregateStateRecord = readRecord(id);
 
         assertFalse(aggregateStateRecord.isPresent());
     }
 
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_try_to_read_history_by_null_id() {
-        storage.historyBackward(Tests.<ProjectId>nullRef());
+        storage.historyBackward(Tests.<AggregateReadRequest<ProjectId>>nullRef());
     }
 
     @Test(expected = NullPointerException.class)
@@ -185,7 +192,7 @@ public abstract class AggregateStorageShould
 
         storage.writeRecord(id, expected);
 
-        final Iterator<AggregateEventRecord> iterator = storage.historyBackward(id);
+        final Iterator<AggregateEventRecord> iterator = historyBackward();
         assertTrue(iterator.hasNext());
         final AggregateEventRecord actual = iterator.next();
         assertEquals(expected, actual);
@@ -198,7 +205,7 @@ public abstract class AggregateStorageShould
 
         writeAll(id, records);
 
-        final Iterator<AggregateEventRecord> iterator = storage.historyBackward(id);
+        final Iterator<AggregateEventRecord> iterator = historyBackward();
         final List<AggregateEventRecord> actual = newArrayList(iterator);
         reverse(records); // expected records should be in a reverse order
         assertEquals(records, actual);
@@ -210,7 +217,7 @@ public abstract class AggregateStorageShould
 
         storage.writeSnapshot(id, expected);
 
-        final Iterator<AggregateEventRecord> iterator = storage.historyBackward(id);
+        final Iterator<AggregateEventRecord> iterator = historyBackward();
         assertTrue(iterator.hasNext());
         final AggregateEventRecord actual = iterator.next();
         assertEquals(expected, actual.getSnapshot());
@@ -276,11 +283,6 @@ public abstract class AggregateStorageShould
         storage.readEventCountAfterLastSnapshot(id);
     }
 
-    @Test
-    public void have_default_snapshot_trigger() {
-        assertEquals(AggregateRepository.DEFAULT_SNAPSHOT_TRIGGER, storage.getSnapshotTrigger());
-    }
-
     private static Event generateEvent() {
         final TestEventFactory eventFactory = newInstance(AggregateStorageShould.class);
         final Event result = eventFactory.createEvent(Time.getCurrentTime());
@@ -293,7 +295,8 @@ public abstract class AggregateStorageShould
 
         storage.writeEvent(id, expectedEvent);
 
-        final AggregateStateRecord events = storage.read(id)
+        final AggregateReadRequest<I> readRequest = new AggregateReadRequest<>(id, MAX_VALUE);
+        final AggregateStateRecord events = storage.read(readRequest)
                                                    .get();
         assertEquals(1, events.getEventCount());
         final Event actualEvent = events.getEvent(0);
@@ -315,7 +318,7 @@ public abstract class AggregateStorageShould
 
         writeAll(id, records);
 
-        final AggregateStateRecord events = storage.read(id)
+        final AggregateStateRecord events = storage.read(newReadRequest(id))
                                                    .get();
         final List<Event> expectedEvents = transform(records, TO_EVENT);
         final List<Event> actualEvents = events.getEventList();
@@ -326,6 +329,11 @@ public abstract class AggregateStorageShould
         for (AggregateEventRecord record : records) {
             storage.writeRecord(id, record);
         }
+    }
+
+    private Iterator<AggregateEventRecord> historyBackward() {
+        final AggregateReadRequest<ProjectId> readRequest = new AggregateReadRequest<>(id, MAX_VALUE);
+        return storage.historyBackward(readRequest);
     }
 
     protected static final Function<AggregateEventRecord, Event> TO_EVENT =

@@ -35,6 +35,7 @@ import io.spine.client.Query;
 import io.spine.client.Target;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.EntityRecord;
+import io.spine.server.storage.RecordReadRequest;
 import io.spine.type.TypeUrl;
 
 import javax.annotation.Nullable;
@@ -124,13 +125,10 @@ class AggregateQueryProcessor implements QueryProcessor {
     }
 
     private Iterator<EntityRecord> readOne(AggregateStateId singleId, FieldMask fieldMask) {
-        final boolean shouldApplyFieldMask = !fieldMask.getPathsList()
-                                                       .isEmpty();
-
+        final RecordReadRequest<AggregateStateId> request = new RecordReadRequest<>(singleId,
+                                                                                    fieldMask);
+        final Optional<EntityRecord> singleResult = standStorage.read(request);
         Iterator<EntityRecord> result;
-        final Optional<EntityRecord> singleResult = shouldApplyFieldMask
-                ? standStorage.read(singleId, fieldMask)
-                : standStorage.read(singleId);
         if (!singleResult.isPresent()) {
             result = Collections.emptyIterator();
         } else {

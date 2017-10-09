@@ -21,7 +21,6 @@
 package io.spine.server.storage;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.Sets;
 import com.google.protobuf.Message;
 import io.spine.server.entity.Entity;
 import io.spine.test.Tests;
@@ -52,7 +51,8 @@ import static org.junit.Assert.fail;
 @SuppressWarnings("ClassWithTooManyMethods")
 public abstract class AbstractStorageShould<I,
                                             R extends Message,
-                                            S extends AbstractStorage<I, R>> {
+                                            Q extends ReadRequest<I>,
+                                            S extends AbstractStorage<I, R, Q>> {
 
     private S storage;
 
@@ -96,6 +96,9 @@ public abstract class AbstractStorageShould<I,
     /** Creates a new unique storage record ID. */
     protected abstract I newId();
 
+    /** Creates a new read request with the specified ID. */
+    protected abstract Q newReadRequest(I id);
+
     /**
      * Closes the storage and propagates an exception if any occurs.
      */
@@ -111,7 +114,7 @@ public abstract class AbstractStorageShould<I,
 
     /** Closes the storage and fails the test if any exception occurs. */
     @SuppressWarnings("CallToPrintStackTrace")
-    protected void closeAndFailIfException(AbstractStorage<I, R> storage) {
+    protected void closeAndFailIfException(AbstractStorage<I, R, Q> storage) {
         try {
             storage.close();
         } catch (Exception e) {
@@ -125,7 +128,7 @@ public abstract class AbstractStorageShould<I,
     protected void writeAndReadRecordTest(I id) {
         final R expected = writeRecord(id);
 
-        final Optional<R> actual = storage.read(id);
+        final Optional<R> actual = readRecord(id);
 
         assertTrue(actual.isPresent());
         assertEquals(expected, actual.get());
@@ -137,9 +140,14 @@ public abstract class AbstractStorageShould<I,
         return expected;
     }
 
+    protected Optional<R> readRecord(I id) {
+        final Q readRequest = newReadRequest(id);
+        return storage.read(readRequest);
+    }
+
     @Test
     public void handle_absence_of_record_with_passed_id() {
-        final Optional<R> record = storage.read(newId());
+        final Optional<R> record = readRecord(newId());
 
         assertResultForMissingId(record);
     }
@@ -151,7 +159,7 @@ public abstract class AbstractStorageShould<I,
 
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_read_by_null_id() {
-        storage.read(Tests.<I>nullRef());
+        storage.read(Tests.<Q>nullRef());
     }
 
     @Test(expected = NullPointerException.class)
@@ -262,7 +270,7 @@ public abstract class AbstractStorageShould<I,
     public void close_itself_and_throw_exception_if_read_after() throws Exception {
         closeAndFailIfException(storage);
 
-        storage.read(newId());
+        readRecord(newId());
     }
 
     @Test(expected = IllegalStateException.class)

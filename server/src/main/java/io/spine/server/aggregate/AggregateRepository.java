@@ -239,27 +239,14 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * <p>Sets {@link #snapshotTrigger} for the assigned storage.
-     *
-     * @param factory storage factory
-     */
-    @Override
-    public void initStorage(StorageFactory factory) {
-        super.initStorage(factory);
-        aggregateStorage().setSnapshotTrigger(snapshotTrigger);
-    }
-
-    /**
      * Creates aggregate storage for the repository.
      *
      * @param factory the factory to create the storage
      * @return new storage
      */
     @Override
-    protected Storage<I, ?> createStorage(StorageFactory factory) {
-        final Storage<I, ?> result = factory.createAggregateStorage(getEntityClass());
+    protected Storage<I, ?, ?> createStorage(StorageFactory factory) {
+        final Storage<I, ?, ?> result = factory.createAggregateStorage(getEntityClass());
         return result;
     }
 
@@ -292,7 +279,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      *
      * <p>The exception is logged only if the root cause of it is not a
      * {@linkplain io.spine.base.ThrowableMessage rejection} thrown by a command handling method.
-     * 
+     *
      * @param envelope  the command which caused the error
      * @param exception the error occurred during processing of the command
      */
@@ -412,9 +399,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     protected final void setSnapshotTrigger(int snapshotTrigger) {
         checkArgument(snapshotTrigger > 0);
         this.snapshotTrigger = snapshotTrigger;
-        if (isStorageAssigned()) {
-            aggregateStorage().setSnapshotTrigger(snapshotTrigger);
-        }
     }
 
     AggregateStorage<I> aggregateStorage() {
@@ -442,7 +426,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     private Optional<A> load(I id) {
-        final Optional<AggregateStateRecord> eventsFromStorage = aggregateStorage().read(id);
+        final AggregateReadRequest<I> request = new AggregateReadRequest<>(id, snapshotTrigger);
+        final Optional<AggregateStateRecord> eventsFromStorage = aggregateStorage().read(request);
 
         if (eventsFromStorage.isPresent()) {
             final A result = create(id);

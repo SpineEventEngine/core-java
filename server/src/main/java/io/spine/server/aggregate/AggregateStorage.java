@@ -20,7 +20,6 @@
 
 package io.spine.server.aggregate;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.protobuf.Timestamp;
 import io.spine.Identifier;
@@ -50,14 +49,8 @@ import static io.spine.validate.Validate.checkNotEmptyOrBlank;
  */
 @SPI
 public abstract class AggregateStorage<I>
-        extends AbstractStorage<I, AggregateStateRecord>
-        implements StorageWithLifecycleFlags<I, AggregateStateRecord> {
-
-    /**
-     * The {@link AggregateRepository#snapshotTrigger snapshot trigger} value
-     * of the repository, to which is assigned this storage.
-     */
-    private int snapshotTrigger = AggregateRepository.DEFAULT_SNAPSHOT_TRIGGER;
+        extends AbstractStorage<I, AggregateStateRecord, AggregateReadRequest<I>>
+        implements StorageWithLifecycleFlags<I, AggregateStateRecord, AggregateReadRequest<I>> {
 
     protected AggregateStorage(boolean multitenant) {
         super(multitenant);
@@ -65,22 +58,22 @@ public abstract class AggregateStorage<I>
 
     /**
      * Forms and returns an {@link AggregateStateRecord} based on the
-     * {@linkplain #historyBackward(Object) aggregate history}.
+     * {@linkplain #historyBackward(AggregateReadRequest) aggregate history}.
      *
-     * @param aggregateId the aggregate ID for which to form a record
+     * @param request the aggregate read request for which to form a record
      * @return the record instance or {@code Optional.absent()} if the
-     *         {@linkplain #historyBackward(Object) aggregate history} is empty
+     *         {@linkplain #historyBackward(AggregateReadRequest) aggregate history} is empty
      * @throws IllegalStateException if the storage was closed before
      */
     @Override
-    public Optional<AggregateStateRecord> read(I aggregateId) {
+    public Optional<AggregateStateRecord> read(AggregateReadRequest<I> request) {
         checkNotClosed();
-        checkNotNull(aggregateId);
+        checkNotNull(request);
 
         final Deque<Event> history = newLinkedList();
         Snapshot snapshot = null;
 
-        final Iterator<AggregateEventRecord> historyBackward = historyBackward(aggregateId);
+        final Iterator<AggregateEventRecord> historyBackward = historyBackward(request);
 
         if (!historyBackward.hasNext()) {
             return Optional.absent();
@@ -252,36 +245,11 @@ public abstract class AggregateStorage<I>
      * Creates iterator of aggregate event history with the reverse traversal.
      *
      * <p>Records are sorted by timestamp descending (from newer to older).
-     * The iterator is empty if there's no history for the aggregate with passed ID
+     * The iterator is empty if there's no history for the aggregate with passed ID.
      *
-     * <p>Use {@link #snapshotTrigger} for the history reading optimization.
-     * To load an aggregate in the default scenario, required only
-     * the last {@link Snapshot} and events occurred after creation of this snapshot.
-     * So instead of reading all {@linkplain AggregateEventRecord event records},
-     * it is reasonable to read them by batches equal to the snapshot trigger value.
-     *
-     * @param id aggregate ID
+     * @param request the read request
      * @return new iterator instance
      */
-    protected abstract Iterator<AggregateEventRecord> historyBackward(I id);
-
-    /**
-     * Returns the number of events until a next {@code Snapshot} is made.
-     *
-     * @return a positive integer value
-     */
-    @VisibleForTesting
-    public int getSnapshotTrigger() {
-        return snapshotTrigger;
-    }
-
-    /**
-     * Changes the number of events between making aggregate snapshots to the passed value.
-     *
-     * @param snapshotTrigger a positive number of the snapshot trigger
-     */
-    protected void setSnapshotTrigger(int snapshotTrigger) {
-        checkArgument(snapshotTrigger > 0);
-        this.snapshotTrigger = snapshotTrigger;
-    }
+    protected abstract Iterator<AggregateEventRecord> historyBackward(
+            AggregateReadRequest<I> request);
 }

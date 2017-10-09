@@ -86,7 +86,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      * initialized} or the repository was {@linkplain #close() closed}.
      */
     @Nullable
-    private Storage<I, ?> storage;
+    private Storage<I, ?, ?> storage;
 
     /** Lazily initialized logger. */
     private final Supplier<Logger> loggerSupplier = Logging.supplyFor(getClass());
@@ -260,7 +260,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      * @throws IllegalStateException if the storage is not assigned
      */
     @CheckReturnValue
-    protected final Storage<I, ?> getStorage() {
+    protected final Storage<I, ?, ?> getStorage() {
         return checkStorage(this.storage);
     }
 
@@ -306,7 +306,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      * @param factory the factory to create the storage
      * @return the created storage instance
      */
-    protected abstract Storage<I, ?> createStorage(StorageFactory factory);
+    protected abstract Storage<I, ?, ?> createStorage(StorageFactory factory);
 
     /**
      * Closes the repository by closing the underlying storage.
@@ -328,7 +328,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
         return storage != null;
     }
 
-    private Storage<I, ?> ensureStorage() {
+    private Storage<I, ?, ?> ensureStorage() {
         checkState(storage != null, "No storage assigned in repository %s", this);
         return storage;
     }

@@ -48,8 +48,8 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @param <I> the type of entity IDs
  * @author Alexander Yevsyukov
  */
-public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
-        implements StorageWithLifecycleFlags<I, EntityRecord>,
+public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord, RecordReadRequest<I>>
+        implements StorageWithLifecycleFlags<I, EntityRecord, RecordReadRequest<I>>,
                    BulkStorageOperationsMixin<I, EntityRecord> {
 
     protected RecordStorage(boolean multitenant) {
@@ -59,7 +59,6 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
     /**
      * {@inheritDoc}
      */
-    @Override
     public Optional<EntityRecord> read(I id) {
         checkNotClosed();
         checkNotNull(id);
@@ -71,19 +70,25 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
     /**
      * Reads a single item from the storage and applies a {@link FieldMask} to it.
      *
-     * @param id        ID of the item to read.
-     * @param fieldMask fields to read.
-     * @return the item with the given ID and with the {@code FieldMask} applied.
-     * @see #read(Object)
+     * @param request ID of the item to read.
      */
-    public Optional<EntityRecord> read(I id, FieldMask fieldMask) {
-        final Optional<EntityRecord> rawResult = read(id);
+    @Override
+    public Optional<EntityRecord> read(RecordReadRequest<I> request) {
+        checkNotClosed();
+        checkNotNull(request);
 
-        if (!rawResult.isPresent()) {
+        final Optional<EntityRecord> record = read(request.getId());
+
+        if (!record.isPresent()) {
             return Optional.absent();
         }
 
-        final EntityRecord.Builder builder = EntityRecord.newBuilder(rawResult.get());
+        return applyFieldMask(request.getFieldMask(), record.get());
+    }
+
+    protected Optional<EntityRecord> applyFieldMask(FieldMask fieldMask,
+                                                    EntityRecord rawResult) {
+        final EntityRecord.Builder builder = EntityRecord.newBuilder(rawResult);
         final Any state = builder.getState();
         final TypeUrl type = TypeUrl.parse(state.getTypeUrl());
         final Message stateAsMessage = AnyPacker.unpack(state);
@@ -107,7 +112,8 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
      */
     public void write(I id, EntityRecordWithColumns record) {
         checkNotNull(id);
-        checkArgument(record.getRecord().hasState(), "Record does not have state field.");
+        checkArgument(record.getRecord()
+                            .hasState(), "Record does not have state field.");
         checkNotClosed();
 
         writeRecord(id, record);
@@ -163,7 +169,7 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
                                  ? id.toString()
                                  : Identifier.toString(id);
             throw newIllegalStateException("Unable to load record for entity with ID: %s",
-                                                      idStr);
+                                           idStr);
         }
     }
 

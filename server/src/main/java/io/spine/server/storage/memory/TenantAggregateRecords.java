@@ -28,6 +28,7 @@ import com.google.common.collect.Multimaps;
 import com.google.common.collect.TreeMultimap;
 import io.spine.core.Event;
 import io.spine.server.aggregate.AggregateEventRecord;
+import io.spine.server.aggregate.AggregateReadRequest;
 import io.spine.server.entity.EntityWithLifecycle;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.time.Timestamps2;
@@ -99,7 +100,8 @@ class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEventRecord
      *
      * @return immutable list
      */
-    List<AggregateEventRecord> getHistoryBackward(I id) {
+    List<AggregateEventRecord> getHistoryBackward(AggregateReadRequest<I> request) {
+        final I id = request.getId();
         return ImmutableList.copyOf(filtered.get(id));
     }
 

@@ -91,7 +91,7 @@ import static org.mockito.Mockito.verify;
  * @author Dmytro Dashenkov
  */
 public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
-        extends AbstractStorageShould<I, EntityRecord, S> {
+        extends AbstractStorageShould<I, EntityRecord, RecordReadRequest<I>, S> {
 
     private static final Function<EntityRecordWithColumns, EntityRecord> RECORD_EXTRACTOR_FUNCTION =
             new Function<EntityRecordWithColumns, EntityRecord>() {
@@ -121,6 +121,11 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     @Override
     protected EntityRecord newStorageRecord() {
         return newStorageRecord(newState(newId()));
+    }
+
+    @Override
+    protected RecordReadRequest<I> newReadRequest(I id) {
+        return new RecordReadRequest<>(id, FieldMask.getDefaultInstance());
     }
 
     private EntityRecord newStorageRecord(I id) {
@@ -189,7 +194,8 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final Descriptors.Descriptor descriptor = newState(id).getDescriptorForType();
         final FieldMask idMask = FieldMasks.maskOf(descriptor, 1);
 
-        final Optional<EntityRecord> optional = storage.read(id, idMask);
+        final RecordReadRequest<I> readRequest = new RecordReadRequest<>(id, idMask);
+        final Optional<EntityRecord> optional = storage.read(readRequest);
         assertTrue(optional.isPresent());
         final EntityRecord entityRecord = optional.get();
 

@@ -44,7 +44,7 @@ public abstract class TenantRepository<T extends Message, E extends TenantReposi
         implements TenantIndex {
 
     private final Set<TenantId> cache = Sets.newConcurrentHashSet();
-    
+
     @Override
     public void initStorage(StorageFactory factory) {
         super.initStorage(factory.toSingleTenant());
@@ -81,6 +81,7 @@ public abstract class TenantRepository<T extends Message, E extends TenantReposi
      *
      * <p>Implementations should call this method for removing the cached value
      * for a tenant, which record was removed from the repository.
+     *
      * @param id the ID to remove from the cache
      * @return {@code true} if the value was cached before and removed, {@code false} otherwise
      */
@@ -98,7 +99,7 @@ public abstract class TenantRepository<T extends Message, E extends TenantReposi
 
     @Override
     public Set<TenantId> getAll() {
-        final Storage<TenantId, ?> storage = getStorage();
+        final Storage<TenantId, ?, ?> storage = getStorage();
         final Iterator<TenantId> index = storage != null
                                          ? storage.index()
                                          : null;

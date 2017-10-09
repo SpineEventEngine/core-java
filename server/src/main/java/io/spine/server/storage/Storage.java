@@ -31,10 +31,11 @@ import java.util.Iterator;
  *
  * @param <I> the type of identifiers
  * @param <R> the type of records
+ * @param <Q> the type of {@linkplain ReadRequest read requests}
  * @author Alexander Yevsyukov
  */
 @SPI
-public interface Storage<I, R extends Message> extends AutoCloseable {
+public interface Storage<I, R extends Message, Q extends ReadRequest<I>> extends AutoCloseable {
 
     /**
      * Verifies whether the storage is multitenant.
@@ -52,11 +53,11 @@ public interface Storage<I, R extends Message> extends AutoCloseable {
     /**
      * Reads a record from the storage by the passed ID.
      *
-     * @param id the ID of the record to read
+     * @param request the read request to the storage
      * @return a record instance or {@code Optional.absent()} if there is no record with this ID
      * @throws IllegalStateException if the storage was closed before
      */
-    Optional<R> read(I id);
+    Optional<R> read(Q request);
 
     /**
      * Writes a record into the storage.
