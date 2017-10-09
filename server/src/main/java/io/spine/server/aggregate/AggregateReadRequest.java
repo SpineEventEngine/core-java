@@ -47,6 +47,19 @@ public final class AggregateReadRequest<I> implements ReadRequest<I> {
         return id;
     }
 
+    /**
+     * Obtains the {@linkplain AggregateRepository#snapshotTrigger snapshot trigger}.
+     *
+     * <p>Use this value for the {@linkplain AggregateStorage#historyBackward(AggregateReadRequest)
+     * history} reading optimization.
+     *
+     * <p>To load an aggregate, required only the last {@link Snapshot} and events occurred after
+     * creation of this snapshot. So instead of reading all {@linkplain AggregateEventRecord
+     * aggregate event records}, it is reasonable to read them by batches, size of which is equal
+     * to the snapshot trigger value.
+     *
+     * @return the snapshot trigger value
+     */
     public int getSnapshotTrigger() {
         return snapshotTrigger;
     }
