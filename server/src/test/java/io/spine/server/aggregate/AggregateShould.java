@@ -740,7 +740,6 @@ public class AggregateShould {
             return Lists.<Message>newArrayList(firstPaused, thenCancelled);
         }
 
-
         @Apply
         private void on(AggProjectPaused event) {
             // do nothing.
