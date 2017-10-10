@@ -168,7 +168,7 @@ public class AggregateRepositoryShould {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void set_snapshotTrigger_for_AggregateReadRequest() {
+    public void pass_initial_snapshot_trigger_to_AggregateReadRequest() {
         final AggregateRepository<ProjectId, ProjectAggregate> repositorySpy = spy(repository);
         final AggregateStorage<ProjectId> storageSpy = spy(repositorySpy.aggregateStorage());
         doReturn(storageSpy).when(repositorySpy).aggregateStorage();
@@ -187,7 +187,7 @@ public class AggregateRepositoryShould {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void set_updated_snapshotTrigger_for_AggregateReadRequest() {
+    public void pass_updated_snapshot_trigger_to_AggregateReadRequest() {
         final AggregateRepository<ProjectId, ProjectAggregate> repositorySpy = spy(repository);
         final AggregateStorage<ProjectId> storageSpy = spy(repositorySpy.aggregateStorage());
         doReturn(storageSpy).when(repositorySpy).aggregateStorage();
@@ -233,12 +233,6 @@ public class AggregateRepositoryShould {
         repository.setSnapshotTrigger(newSnapshotTrigger);
 
         assertEquals(newSnapshotTrigger, repository.getSnapshotTrigger());
-    }
-
-    @Test
-    public void not_update_snapshot_trigger_for_unassigned_storage() {
-        final ProjectAggregateRepository repoWithoutStorage = new ProjectAggregateRepository();
-        repoWithoutStorage.setSnapshotTrigger(10);
     }
 
     @Test
