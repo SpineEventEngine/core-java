@@ -80,22 +80,18 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord, 
         checkNotClosed();
         checkNotNull(request);
 
-        final Optional<EntityRecord> record = read(request.getId());
+        final Optional<EntityRecord> rawResult = read(request.getId());
 
-        if (!record.isPresent()) {
+        if (!rawResult.isPresent()) {
             return Optional.absent();
         }
 
-        return applyFieldMask(request.getFieldMask(), record.get());
-    }
-
-    protected Optional<EntityRecord> applyFieldMask(FieldMask fieldMask,
-                                                    EntityRecord rawResult) {
-        final EntityRecord.Builder builder = EntityRecord.newBuilder(rawResult);
+        final EntityRecord.Builder builder = EntityRecord.newBuilder(rawResult.get());
         final Any state = builder.getState();
         final TypeUrl type = TypeUrl.parse(state.getTypeUrl());
         final Message stateAsMessage = AnyPacker.unpack(state);
 
+        final FieldMask fieldMask = request.getFieldMask();
         final Message maskedState = FieldMasks.applyMask(fieldMask, stateAsMessage, type);
 
         final Any packedState = AnyPacker.pack(maskedState);
