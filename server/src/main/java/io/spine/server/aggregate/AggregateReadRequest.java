@@ -23,6 +23,7 @@ package io.spine.server.aggregate;
 import io.spine.annotation.Internal;
 import io.spine.server.storage.ReadRequest;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -34,6 +35,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * <p>The request specifies a size of the batches as a
  * {@linkplain #getSnapshotTrigger snapshot trigger} value.
  *
+ * <p>Two requests for the aggregate with the same {@link #id} are considered equal.
+ * {@link #snapshotTrigger} is not taken into account, because it should affect only
+ * process of reading, but resulting records should be the same.
+ *
  * @param <I> the type of the record ID
  * @author Dmytro Grankin
  */
@@ -44,6 +49,7 @@ public final class AggregateReadRequest<I> implements ReadRequest<I> {
     private final int snapshotTrigger;
 
     public AggregateReadRequest(I id, int snapshotTrigger) {
+        checkArgument(snapshotTrigger > 0);
         this.id = checkNotNull(id);
         this.snapshotTrigger = snapshotTrigger;
     }
@@ -66,11 +72,10 @@ public final class AggregateReadRequest<I> implements ReadRequest<I> {
      *
      * <p>NOTE: A snapshot trigger can be changed for {@link AggregateRepository}
      * after the instantiation, so the amount of events between snapshots can be different
-     * in an aggregate history and may look like this: {@code e1, s1, e2, e3, e4, s2, e5, s3}.
+     * in an aggregate history and may look like this: {@code e1, s1, e2, e3, e4, s2, e5, e6, s3}.
      *
      * @return the snapshot trigger value
      */
-    @SuppressWarnings("unused")
     public int getSnapshotTrigger() {
         return snapshotTrigger;
     }
@@ -82,7 +87,7 @@ public final class AggregateReadRequest<I> implements ReadRequest<I> {
 
         AggregateReadRequest<?> that = (AggregateReadRequest<?>) o;
 
-        return snapshotTrigger == that.snapshotTrigger && id.equals(that.id);
+        return id.equals(that.id);
     }
 
     @Override
