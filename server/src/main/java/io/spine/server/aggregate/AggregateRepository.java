@@ -19,7 +19,6 @@
  */
 package io.spine.server.aggregate;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import io.spine.annotation.SPI;
 import io.spine.core.CommandClass;
@@ -413,7 +412,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * @param  id the ID of the aggregate
      * @return loaded or created aggregate instance
      */
-    @VisibleForTesting
     A loadOrCreate(I id) {
         final Optional<A> optional = load(id);
 

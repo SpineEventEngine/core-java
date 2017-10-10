@@ -51,10 +51,11 @@ public interface Storage<I, R extends Message, Q extends ReadRequest<I>> extends
     Iterator<I> index();
 
     /**
-     * Reads a record from the storage by the passed ID.
+     * Reads a record from the storage by the specified request.
      *
      * @param request the read request to the storage
-     * @return a record instance or {@code Optional.absent()} if there is no record with this ID
+     * @return a record instance
+     *         or {@code Optional.absent()} if there is no record matching this request
      * @throws IllegalStateException if the storage was closed before
      */
     Optional<R> read(Q request);

@@ -57,7 +57,10 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord, 
     }
 
     /**
-     * {@inheritDoc}
+     * Reads a record from the storage using the specified ID.
+     *
+     * @param id the ID of the record to read
+     * @return a record instance or {@code Optional.absent()} if there is no record with this ID
      */
     public Optional<EntityRecord> read(I id) {
         checkNotClosed();
@@ -70,7 +73,7 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord, 
     /**
      * Reads a single item from the storage and applies a {@link FieldMask} to it.
      *
-     * @param request ID of the item to read.
+     * @param request the read request to the record
      */
     @Override
     public Optional<EntityRecord> read(RecordReadRequest<I> request) {
