@@ -396,7 +396,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      *
      * @param snapshotTrigger a positive number of the snapshot trigger
      */
-    protected final void setSnapshotTrigger(int snapshotTrigger) {
+    protected void setSnapshotTrigger(int snapshotTrigger) {
         checkArgument(snapshotTrigger > 0);
         this.snapshotTrigger = snapshotTrigger;
     }

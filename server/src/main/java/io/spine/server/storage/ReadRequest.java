@@ -25,7 +25,7 @@ import io.spine.annotation.SPI;
 /**
  * A read request for {@link Storage}.
  *
- * @param <I> the type of the target ID
+ * @param <I> the type of the record ID
  * @author Dmytro Grankin
  */
 @SPI

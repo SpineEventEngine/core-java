@@ -74,6 +74,8 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord, 
      * Reads a single item from the storage and applies a {@link FieldMask} to it.
      *
      * @param request the read request to the record
+     * @return the record with the applied {@code FieldMask}.
+     * @see #read(Object)
      */
     @Override
     public Optional<EntityRecord> read(RecordReadRequest<I> request) {
