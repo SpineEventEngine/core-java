@@ -21,7 +21,6 @@
 package io.spine.server.storage;
 
 import com.google.common.testing.EqualsTester;
-import com.google.protobuf.FieldMask;
 import io.spine.test.Tests;
 import org.junit.Test;
 
@@ -30,23 +29,16 @@ import org.junit.Test;
  */
 public class RecordReadRequestShould {
 
-    private static final String ID = "ID";
-    private static final FieldMask FIELD_MASK = FieldMask.getDefaultInstance();
-
     @Test(expected = NullPointerException.class)
     public void not_accept_null_ID() {
-        RecordReadRequest.of(Tests.<String>nullRef());
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void not_accept_null_field_mask() {
-        RecordReadRequest.of(ID, Tests.<FieldMask>nullRef());
+        new RecordReadRequest<>(Tests.nullRef());
     }
 
     @Test
-    public void consider_request_with_same_id_and_field_mask_equal() {
-        final RecordReadRequest<String> first = RecordReadRequest.of(ID, FIELD_MASK);
-        final RecordReadRequest<String> second = RecordReadRequest.of(ID, FIELD_MASK);
+    public void consider_request_with_same_id_equal() {
+        final String id = "ID";
+        final RecordReadRequest<String> first = new RecordReadRequest<>(id);
+        final RecordReadRequest<String> second = new RecordReadRequest<>(id);
         new EqualsTester().addEqualityGroup(first, second)
                           .testEquals();
     }

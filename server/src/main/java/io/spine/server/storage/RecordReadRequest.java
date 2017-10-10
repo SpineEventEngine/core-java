@@ -20,21 +20,16 @@
 
 package io.spine.server.storage;
 
-import com.google.protobuf.FieldMask;
 import io.spine.annotation.Internal;
-
-import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A request to read a particular record from {@link RecordStorage}.
  *
- * <p>A result of this request is a record with the specified ID,
- * on which was applied the {@link #fieldMask}.
+ * <p>A result of this request is a record with the specified ID.
  *
- * <p>Two requests are considered equal if they have the same
- * {@linkplain #id ID} and {@linkplain #fieldMask field mask}.
+ * <p>Two requests are considered equal if they have the same {@linkplain #id ID}.
  *
  * @param <I> the type of the target ID
  * @author Dmytro Grankin
@@ -43,33 +38,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public final class RecordReadRequest<I> implements ReadRequest<I> {
 
     private final I id;
-    private final FieldMask fieldMask;
 
-    private RecordReadRequest(I id, FieldMask fieldMask) {
+    public RecordReadRequest(I id) {
         this.id = checkNotNull(id);
-        this.fieldMask = checkNotNull(fieldMask);
-    }
-
-    public static <I> RecordReadRequest<I> of(I id) {
-        return new RecordReadRequest<>(id, FieldMask.getDefaultInstance());
-    }
-
-    public static <I> RecordReadRequest<I> of(I id, FieldMask fieldMask) {
-        return new RecordReadRequest<>(id, fieldMask);
     }
 
     @Override
     public I getRecordId() {
         return id;
-    }
-
-    /**
-     * Obtains the field mask to apply on the record with the {@linkplain #getRecordId() ID}.
-     *
-     * @return the field mask for the requested record
-     */
-    public FieldMask getFieldMask() {
-        return fieldMask;
     }
 
     @Override
@@ -79,11 +55,11 @@ public final class RecordReadRequest<I> implements ReadRequest<I> {
 
         RecordReadRequest<?> that = (RecordReadRequest<?>) o;
 
-        return id.equals(that.id) && fieldMask.equals(that.fieldMask);
+        return id.equals(that.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, fieldMask);
+        return id.hashCode();
     }
 }

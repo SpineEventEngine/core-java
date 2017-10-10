@@ -164,7 +164,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      */
     private Optional<EntityRecord> findRecord(I id) {
         final RecordStorage<I> storage = recordStorage();
-        final RecordReadRequest<I> request = RecordReadRequest.of(id);
+        final RecordReadRequest<I> request = new RecordReadRequest<>(id);
         final Optional<EntityRecord> found = storage.read(request);
         if (!found.isPresent()) {
             return Optional.absent();

@@ -125,9 +125,12 @@ class AggregateQueryProcessor implements QueryProcessor {
     }
 
     private Iterator<EntityRecord> readOne(AggregateStateId singleId, FieldMask fieldMask) {
-        final RecordReadRequest<AggregateStateId> request = RecordReadRequest.of(singleId,
-                                                                                 fieldMask);
-        final Optional<EntityRecord> singleResult = standStorage.read(request);
+        final boolean shouldApplyFieldMask = !fieldMask.getPathsList()
+                                                       .isEmpty();
+        final RecordReadRequest<AggregateStateId> request = new RecordReadRequest<>(singleId);
+        final Optional<EntityRecord> singleResult = shouldApplyFieldMask
+                                                    ? standStorage.read(request, fieldMask)
+                                                    : standStorage.read(request);
         Iterator<EntityRecord> result;
         if (!singleResult.isPresent()) {
             result = Collections.emptyIterator();

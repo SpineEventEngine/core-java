@@ -53,7 +53,7 @@ public abstract class ProjectionStorage<I> extends RecordStorage<I> {
     @Override
     protected Optional<EntityRecord> readRecord(I id) {
         final RecordStorage<I> storage = recordStorage();
-        final RecordReadRequest<I> request = RecordReadRequest.of(id);
+        final RecordReadRequest<I> request = new RecordReadRequest<>(id);
         final Optional<EntityRecord> record = storage.read(request);
         return record;
     }

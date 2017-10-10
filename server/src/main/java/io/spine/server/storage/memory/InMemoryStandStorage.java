@@ -112,7 +112,7 @@ class InMemoryStandStorage extends StandStorage {
     @Nullable
     @Override
     protected Optional<EntityRecord> readRecord(AggregateStateId id) {
-        final RecordReadRequest<AggregateStateId> request = RecordReadRequest.of(id);
+        final RecordReadRequest<AggregateStateId> request = new RecordReadRequest<>(id);
         return recordStorage.read(request);
     }
 

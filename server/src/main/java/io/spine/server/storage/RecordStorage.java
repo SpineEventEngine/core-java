@@ -57,7 +57,7 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord, 
     }
 
     /**
-     * Reads a single item from the storage and applies a {@link FieldMask} to it.
+     * Reads a record from the storage matching the specified request.
      *
      * @param request the request to read the record
      * @return a record instance or {@code Optional.absent()} if there is no record with this ID
@@ -67,14 +67,36 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord, 
         checkNotClosed();
         checkNotNull(request);
 
-        final Optional<EntityRecord> rawResult = readRecord(request.getRecordId());
+        final Optional<EntityRecord> record = readRecord(request.getRecordId());
+        return record;
+    }
+
+    /**
+     * Reads a record from the storage matching the request and applies a {@link FieldMask} to it.
+     *
+     * @param request   the request to read the record
+     * @param fieldMask fields to read.
+     * @return the item with the given ID and with the {@code FieldMask} applied
+     *         or {@code Optional.absent()} if there is no record matching this request
+     * @see #read(RecordReadRequest)
+     */
+    public Optional<EntityRecord> read(RecordReadRequest<I> request, FieldMask fieldMask) {
+        final Optional<EntityRecord> rawResult = read(request);
 
         if (!rawResult.isPresent()) {
             return Optional.absent();
         }
 
-        final FieldMask fieldMask = request.getFieldMask();
-        return applyFieldMask(rawResult.get(), fieldMask);
+        final EntityRecord.Builder builder = EntityRecord.newBuilder(rawResult.get());
+        final Any state = builder.getState();
+        final TypeUrl type = TypeUrl.parse(state.getTypeUrl());
+        final Message stateAsMessage = AnyPacker.unpack(state);
+
+        final Message maskedState = FieldMasks.applyMask(fieldMask, stateAsMessage, type);
+
+        final Any packedState = AnyPacker.pack(maskedState);
+        builder.setState(packedState);
+        return Optional.of(builder.build());
     }
 
     /**
@@ -123,7 +145,7 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord, 
 
     @Override
     public Optional<LifecycleFlags> readLifecycleFlags(I id) {
-        final RecordReadRequest<I> request = RecordReadRequest.of(id);
+        final RecordReadRequest<I> request = new RecordReadRequest<>(id);
         final Optional<EntityRecord> optional = read(request);
         if (optional.isPresent()) {
             return Optional.of(optional.get()
@@ -134,7 +156,7 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord, 
 
     @Override
     public void writeLifecycleFlags(I id, LifecycleFlags flags) {
-        final RecordReadRequest<I> request = RecordReadRequest.of(id);
+        final RecordReadRequest<I> request = new RecordReadRequest<>(id);
         final Optional<EntityRecord> optional = read(request);
         if (optional.isPresent()) {
             final EntityRecord record = optional.get();
@@ -276,18 +298,4 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord, 
      * @param records an ID to record map with the entries to store
      */
     protected abstract void writeRecords(Map<I, EntityRecordWithColumns> records);
-
-    private static Optional<EntityRecord> applyFieldMask(EntityRecord record, FieldMask fieldMask) {
-        final Any state = record.getState();
-        final TypeUrl type = TypeUrl.parse(state.getTypeUrl());
-        final Message stateAsMessage = AnyPacker.unpack(state);
-
-        final Message maskedState = FieldMasks.applyMask(fieldMask, stateAsMessage, type);
-
-        final Any packedState = AnyPacker.pack(maskedState);
-        final EntityRecord modifiedRecord = record.toBuilder()
-                                                  .setState(packedState)
-                                                  .build();
-        return Optional.of(modifiedRecord);
-    }
 }

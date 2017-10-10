@@ -125,7 +125,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
 
     @Override
     protected RecordReadRequest<I> newReadRequest(I id) {
-        return RecordReadRequest.of(id);
+        return new RecordReadRequest<>(id);
     }
 
     private EntityRecord newStorageRecord(I id) {
@@ -195,8 +195,8 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final Descriptors.Descriptor descriptor = newState(id).getDescriptorForType();
         final FieldMask idMask = FieldMasks.maskOf(descriptor, 1);
 
-        final RecordReadRequest<I> readRequest = RecordReadRequest.of(id, idMask);
-        final Optional<EntityRecord> optional = storage.read(readRequest);
+        final RecordReadRequest<I> readRequest = new RecordReadRequest<>(id);
+        final Optional<EntityRecord> optional = storage.read(readRequest, idMask);
         assertTrue(optional.isPresent());
         final EntityRecord entityRecord = optional.get();
 
