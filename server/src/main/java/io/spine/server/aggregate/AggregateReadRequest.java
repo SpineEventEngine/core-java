@@ -27,15 +27,16 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A read request for {@link AggregateStorage}.
+ * A request to read events for a particular {@code Aggregate} from {@link AggregateStorage}.
  *
- * <p>A result of this request is a record with the specified id.
+ * <p>A result of processing this request is a {@linkplain AggregateStateRecord record},
+ * which satisfies the request criteria.
  *
- * <p>To organize efficient reading of an aggregate history, {@link AggregateStorage} should
- * read {@linkplain AggregateEventRecord aggregate event records} by batches.
- *
- * <p>The request specifies a size of the batches as a
- * {@linkplain #getSnapshotTrigger snapshot trigger} value.
+ * <p>To restore an aggregate, the last {@link Snapshot} and events occurred after
+ * creation of this snapshot are required. So instead of reading all
+ * {@linkplain AggregateEventRecord aggregate event records}, it is reasonable to read
+ * them by batches, while the last {@link Snapshot} will not be found. The request specifies
+ * a size of the batches as a {@linkplain #getSnapshotTrigger snapshot trigger} value.
  *
  * <p>Two requests for the aggregate with the same {@link #id} are considered equal.
  * {@link #snapshotTrigger} is not taken into account, because it should affect only
@@ -65,16 +66,10 @@ public final class AggregateReadRequest<I> implements ReadRequest<I> {
      * Obtains the {@linkplain AggregateRepository#snapshotTrigger snapshot trigger}.
      *
      * <p>Use this value for the {@linkplain AggregateStorage#historyBackward(AggregateReadRequest)
-     * history} reading optimization.
+     * history} reading optimization as a batch size.
      *
-     * <p>To load an aggregate, required only the last {@link Snapshot} and events occurred after
-     * creation of this snapshot. So instead of reading all {@linkplain AggregateEventRecord
-     * aggregate event records}, it is reasonable to read them by batches, size of which is equal
-     * to the snapshot trigger value.
-     *
-     * <p>NOTE: A snapshot trigger can be changed for {@link AggregateRepository}
-     * after the instantiation, so the amount of events between snapshots can be different
-     * in an aggregate history and may look like this: {@code e1, s1, e2, e3, e4, s2, e5, e6, s3}.
+     * <p>The value reflects the current snapshot trigger set for the {@link AggregateRepository},
+     * in which this request is created.
      *
      * @return the snapshot trigger value
      */
