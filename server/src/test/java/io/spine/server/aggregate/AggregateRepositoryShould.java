@@ -66,6 +66,7 @@ import io.spine.testdata.Sample;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 
 import java.util.Iterator;
 import java.util.Set;
@@ -162,8 +163,9 @@ public class AggregateRepositoryShould {
         assertFalse(record.hasSnapshot());
     }
 
+    @SuppressWarnings("unchecked")
     @Test
-    public void set_snapshotTrigger_for_ReadAggregateRequest() {
+    public void set_snapshotTrigger_for_AggregateReadRequest() {
         final AggregateRepository<ProjectId, ProjectAggregate> repositorySpy = spy(repository);
         final AggregateStorage<ProjectId> storageSpy = spy(repositorySpy.aggregateStorage());
         doReturn(storageSpy).when(repositorySpy).aggregateStorage();
@@ -171,10 +173,34 @@ public class AggregateRepositoryShould {
         final ProjectId id = Sample.messageOfType(ProjectId.class);
         repositorySpy.loadOrCreate(id);
 
-        final int expectedSnapshotTrigger = repositorySpy.getSnapshotTrigger();
-        final AggregateReadRequest<ProjectId> expectedRequest =
-                new AggregateReadRequest<>(id, expectedSnapshotTrigger);
-        verify(storageSpy).read(expectedRequest);
+        final ArgumentCaptor<AggregateReadRequest<ProjectId>> requestCaptor =
+                ArgumentCaptor.forClass(AggregateReadRequest.class);
+        verify(storageSpy).read(requestCaptor.capture());
+
+        final AggregateReadRequest<ProjectId> passedRequest = requestCaptor.getValue();
+        assertEquals(id, passedRequest.getId());
+        assertEquals(repositorySpy.getSnapshotTrigger(), passedRequest.getSnapshotTrigger());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void set_updated_snapshotTrigger_for_AggregateReadRequest() {
+        final AggregateRepository<ProjectId, ProjectAggregate> repositorySpy = spy(repository);
+        final AggregateStorage<ProjectId> storageSpy = spy(repositorySpy.aggregateStorage());
+        doReturn(storageSpy).when(repositorySpy).aggregateStorage();
+
+        final int nonDefaultSnapshotTrigger = DEFAULT_SNAPSHOT_TRIGGER * 2;
+        repositorySpy.setSnapshotTrigger(nonDefaultSnapshotTrigger);
+        final ProjectId id = Sample.messageOfType(ProjectId.class);
+        repositorySpy.loadOrCreate(id);
+
+        final ArgumentCaptor<AggregateReadRequest<ProjectId>> requestCaptor =
+                ArgumentCaptor.forClass(AggregateReadRequest.class);
+        verify(storageSpy).read(requestCaptor.capture());
+
+        final AggregateReadRequest<ProjectId> passedRequest = requestCaptor.getValue();
+        assertEquals(id, passedRequest.getId());
+        assertEquals(nonDefaultSnapshotTrigger, passedRequest.getSnapshotTrigger());
     }
 
     @Test
