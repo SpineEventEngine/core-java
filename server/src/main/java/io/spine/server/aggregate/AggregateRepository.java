@@ -19,6 +19,7 @@
  */
 package io.spine.server.aggregate;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import io.spine.annotation.SPI;
 import io.spine.core.CommandClass;
@@ -400,7 +401,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         this.snapshotTrigger = snapshotTrigger;
     }
 
-    AggregateStorage<I> aggregateStorage() {
+    @VisibleForTesting
+    public AggregateStorage<I> aggregateStorage() {
         @SuppressWarnings("unchecked") // We check the type on initialization.
         final AggregateStorage<I> result = (AggregateStorage<I>) getStorage();
         return result;

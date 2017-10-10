@@ -60,7 +60,23 @@ public final class AggregateReadRequest<I> implements ReadRequest<I> {
      *
      * @return the snapshot trigger value
      */
+    @SuppressWarnings("unused")
     public int getSnapshotTrigger() {
         return snapshotTrigger;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) { return true; }
+        if (o == null || getClass() != o.getClass()) { return false; }
+
+        AggregateReadRequest<?> that = (AggregateReadRequest<?>) o;
+
+        return snapshotTrigger == that.snapshotTrigger && id.equals(that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return id.hashCode();
     }
 }

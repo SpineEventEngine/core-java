@@ -77,6 +77,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 public class AggregateRepositoryShould {
 
@@ -157,6 +160,21 @@ public class AggregateRepositoryShould {
         repository.store(aggregate);
         final AggregateStateRecord record = readRecord(aggregate);
         assertFalse(record.hasSnapshot());
+    }
+
+    @Test
+    public void set_snapshotTrigger_for_ReadAggregateRequest() {
+        final AggregateRepository<ProjectId, ProjectAggregate> repositorySpy = spy(repository);
+        final AggregateStorage<ProjectId> storageSpy = spy(repositorySpy.aggregateStorage());
+        doReturn(storageSpy).when(repositorySpy).aggregateStorage();
+
+        final ProjectId id = Sample.messageOfType(ProjectId.class);
+        repositorySpy.loadOrCreate(id);
+
+        final int expectedSnapshotTrigger = repositorySpy.getSnapshotTrigger();
+        final AggregateReadRequest<ProjectId> expectedRequest =
+                new AggregateReadRequest<>(id, expectedSnapshotTrigger);
+        verify(storageSpy).read(expectedRequest);
     }
 
     @Test

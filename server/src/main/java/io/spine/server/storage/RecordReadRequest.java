@@ -55,4 +55,19 @@ public final class RecordReadRequest<I> implements ReadRequest<I> {
     public FieldMask getFieldMask() {
         return fieldMask;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) { return true; }
+        if (o == null || getClass() != o.getClass()) { return false; }
+
+        RecordReadRequest<?> that = (RecordReadRequest<?>) o;
+
+        return id.equals(that.id) && fieldMask.equals(that.fieldMask);
+    }
+
+    @Override
+    public int hashCode() {
+        return id.hashCode();
+    }
 }
