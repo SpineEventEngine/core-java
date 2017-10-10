@@ -28,12 +28,13 @@ import java.util.Objects;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A read request for {@link RecordStorage}.
+ * A request to read a particular record from {@link RecordStorage}.
  *
- * <p>A result of this request is a record with the specified id,
+ * <p>A result of this request is a record with the specified ID,
  * on which was applied the {@link #fieldMask}.
  *
- * <p>Two requests are considered equal if they have the same {@link #id} and {@link #fieldMask}.
+ * <p>Two requests are considered equal if they have the same
+ * {@linkplain #id ID} and {@linkplain #fieldMask field mask}.
  *
  * @param <I> the type of the target ID
  * @author Dmytro Grankin
@@ -44,9 +45,17 @@ public final class RecordReadRequest<I> implements ReadRequest<I> {
     private final I id;
     private final FieldMask fieldMask;
 
-    public RecordReadRequest(I id, FieldMask fieldMask) {
+    private RecordReadRequest(I id, FieldMask fieldMask) {
         this.id = checkNotNull(id);
         this.fieldMask = checkNotNull(fieldMask);
+    }
+
+    public static <I> RecordReadRequest<I> of(I id) {
+        return new RecordReadRequest<>(id, FieldMask.getDefaultInstance());
+    }
+
+    public static <I> RecordReadRequest<I> of(I id, FieldMask fieldMask) {
+        return new RecordReadRequest<>(id, fieldMask);
     }
 
     @Override
@@ -55,7 +64,7 @@ public final class RecordReadRequest<I> implements ReadRequest<I> {
     }
 
     /**
-     * Obtains the field mask to apply on the record with the {@linkplain #getId() ID}.
+     * Obtains the field mask to apply on the record with the {@linkplain #getRecordId() ID}.
      *
      * @return the field mask for the requested record
      */

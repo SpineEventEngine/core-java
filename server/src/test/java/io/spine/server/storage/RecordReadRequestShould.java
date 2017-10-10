@@ -35,18 +35,18 @@ public class RecordReadRequestShould {
 
     @Test(expected = NullPointerException.class)
     public void not_accept_null_ID() {
-        new RecordReadRequest<>(Tests.<String>nullRef(), FIELD_MASK);
+        RecordReadRequest.of(Tests.<String>nullRef());
     }
 
     @Test(expected = NullPointerException.class)
     public void not_accept_null_field_mask() {
-        new RecordReadRequest<>(ID, Tests.<FieldMask>nullRef());
+        RecordReadRequest.of(ID, Tests.<FieldMask>nullRef());
     }
 
     @Test
     public void consider_request_with_same_id_and_field_mask_equal() {
-        final RecordReadRequest<String> first = new RecordReadRequest<>(ID, FIELD_MASK);
-        final RecordReadRequest<String> second = new RecordReadRequest<>(ID, FIELD_MASK);
+        final RecordReadRequest<String> first = RecordReadRequest.of(ID, FIELD_MASK);
+        final RecordReadRequest<String> second = RecordReadRequest.of(ID, FIELD_MASK);
         new EqualsTester().addEqualityGroup(first, second)
                           .testEquals();
     }

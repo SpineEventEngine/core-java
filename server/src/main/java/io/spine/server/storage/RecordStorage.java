@@ -57,32 +57,17 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord, 
     }
 
     /**
-     * Reads a record from the storage using the specified ID.
-     *
-     * @param id the ID of the record to read
-     * @return a record instance or {@code Optional.absent()} if there is no record with this ID
-     */
-    public Optional<EntityRecord> read(I id) {
-        checkNotClosed();
-        checkNotNull(id);
-
-        final Optional<EntityRecord> record = readRecord(id);
-        return record;
-    }
-
-    /**
      * Reads a single item from the storage and applies a {@link FieldMask} to it.
      *
      * @param request the read request to the record
      * @return the record with the applied {@code FieldMask}.
-     * @see #read(Object)
      */
     @Override
     public Optional<EntityRecord> read(RecordReadRequest<I> request) {
         checkNotClosed();
         checkNotNull(request);
 
-        final Optional<EntityRecord> rawResult = read(request.getRecordId());
+        final Optional<EntityRecord> rawResult = readRecord(request.getRecordId());
 
         if (!rawResult.isPresent()) {
             return Optional.absent();
@@ -147,7 +132,8 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord, 
 
     @Override
     public Optional<LifecycleFlags> readLifecycleFlags(I id) {
-        final Optional<EntityRecord> optional = read(id);
+        final RecordReadRequest<I> request = RecordReadRequest.of(id);
+        final Optional<EntityRecord> optional = read(request);
         if (optional.isPresent()) {
             return Optional.of(optional.get()
                                        .getLifecycleFlags());
@@ -157,7 +143,8 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord, 
 
     @Override
     public void writeLifecycleFlags(I id, LifecycleFlags flags) {
-        final Optional<EntityRecord> optional = read(id);
+        final RecordReadRequest<I> request = RecordReadRequest.of(id);
+        final Optional<EntityRecord> optional = read(request);
         if (optional.isPresent()) {
             final EntityRecord record = optional.get();
             final EntityRecord updated = record.toBuilder()

@@ -127,7 +127,8 @@ public abstract class AggregateStorageShould
 
     @Test
     public void return_absent_AggregateStateRecord_if_read_history_from_empty_storage() {
-        final Optional<AggregateStateRecord> aggregateStateRecord = readRecord(id);
+        final AggregateReadRequest<ProjectId> readRequest = newReadRequest(id);
+        final Optional<AggregateStateRecord> aggregateStateRecord = storage.read(readRequest);
 
         assertFalse(aggregateStateRecord.isPresent());
     }

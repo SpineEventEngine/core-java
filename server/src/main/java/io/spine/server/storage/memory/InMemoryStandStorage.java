@@ -28,6 +28,7 @@ import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.stand.AggregateStateId;
 import io.spine.server.stand.StandStorage;
+import io.spine.server.storage.RecordReadRequest;
 import io.spine.type.TypeUrl;
 
 import javax.annotation.Nullable;
@@ -111,7 +112,8 @@ class InMemoryStandStorage extends StandStorage {
     @Nullable
     @Override
     protected Optional<EntityRecord> readRecord(AggregateStateId id) {
-        return recordStorage.read(id);
+        final RecordReadRequest<AggregateStateId> request = RecordReadRequest.of(id);
+        return recordStorage.read(request);
     }
 
     @Override

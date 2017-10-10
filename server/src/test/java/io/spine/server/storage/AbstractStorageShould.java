@@ -128,7 +128,8 @@ public abstract class AbstractStorageShould<I,
     protected void writeAndReadRecordTest(I id) {
         final R expected = writeRecord(id);
 
-        final Optional<R> actual = readRecord(id);
+        final Q readRequest = newReadRequest(id);
+        final Optional<R> actual = storage.read(readRequest);
 
         assertTrue(actual.isPresent());
         assertEquals(expected, actual.get());
@@ -140,14 +141,10 @@ public abstract class AbstractStorageShould<I,
         return expected;
     }
 
-    protected Optional<R> readRecord(I id) {
-        final Q readRequest = newReadRequest(id);
-        return storage.read(readRequest);
-    }
-
     @Test
     public void handle_absence_of_record_with_passed_id() {
-        final Optional<R> record = readRecord(newId());
+        final Q readRequest = newReadRequest(newId());
+        final Optional<R> record = storage.read(readRequest);
 
         assertResultForMissingId(record);
     }
@@ -270,7 +267,8 @@ public abstract class AbstractStorageShould<I,
     public void close_itself_and_throw_exception_if_read_after() throws Exception {
         closeAndFailIfException(storage);
 
-        readRecord(newId());
+        final Q readRequest = newReadRequest(newId());
+        storage.read(readRequest);
     }
 
     @Test(expected = IllegalStateException.class)

@@ -27,6 +27,7 @@ import io.spine.annotation.SPI;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
+import io.spine.server.storage.RecordReadRequest;
 import io.spine.server.storage.RecordStorage;
 
 import javax.annotation.Nullable;
@@ -52,7 +53,8 @@ public abstract class ProjectionStorage<I> extends RecordStorage<I> {
     @Override
     protected Optional<EntityRecord> readRecord(I id) {
         final RecordStorage<I> storage = recordStorage();
-        final Optional<EntityRecord> record = storage.read(id);
+        final RecordReadRequest<I> request = RecordReadRequest.of(id);
+        final Optional<EntityRecord> record = storage.read(request);
         return record;
     }
 
