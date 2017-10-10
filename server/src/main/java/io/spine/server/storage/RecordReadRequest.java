@@ -21,17 +21,24 @@
 package io.spine.server.storage;
 
 import com.google.protobuf.FieldMask;
-import io.spine.annotation.SPI;
+import io.spine.annotation.Internal;
+
+import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A read request for {@link RecordStorage}.
  *
+ * <p>A result of this request is a record with the specified id,
+ * on which was applied the {@link #fieldMask}.
+ *
+ * <p>Two requests are considered equal if they have the same {@link #id} and {@link #fieldMask}.
+ *
  * @param <I> the type of the target ID
  * @author Dmytro Grankin
  */
-@SPI
+@Internal
 public final class RecordReadRequest<I> implements ReadRequest<I> {
 
     private final I id;
@@ -68,6 +75,6 @@ public final class RecordReadRequest<I> implements ReadRequest<I> {
 
     @Override
     public int hashCode() {
-        return id.hashCode();
+        return Objects.hash(id, fieldMask);
     }
 }

@@ -29,6 +29,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * A read request for {@link AggregateStorage}.
  *
+ * <p>A result of this request is a record with the specified id.
+ *
  * <p>To organize efficient reading of an aggregate history, {@link AggregateStorage} should
  * read {@linkplain AggregateEventRecord aggregate event records} by batches.
  *
