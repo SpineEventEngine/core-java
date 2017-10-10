@@ -101,7 +101,7 @@ class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEventRecord
      * @return immutable list
      */
     List<AggregateEventRecord> getHistoryBackward(AggregateReadRequest<I> request) {
-        final I id = request.getId();
+        final I id = request.getRecordId();
         return ImmutableList.copyOf(filtered.get(id));
     }
 

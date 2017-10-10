@@ -50,7 +50,7 @@ public final class RecordReadRequest<I> implements ReadRequest<I> {
     }
 
     @Override
-    public I getId() {
+    public I getRecordId() {
         return id;
     }
 

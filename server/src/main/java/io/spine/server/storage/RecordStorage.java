@@ -82,7 +82,7 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord, 
         checkNotClosed();
         checkNotNull(request);
 
-        final Optional<EntityRecord> rawResult = read(request.getId());
+        final Optional<EntityRecord> rawResult = read(request.getRecordId());
 
         if (!rawResult.isPresent()) {
             return Optional.absent();

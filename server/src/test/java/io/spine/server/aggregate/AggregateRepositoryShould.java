@@ -178,7 +178,7 @@ public class AggregateRepositoryShould {
         verify(storageSpy).read(requestCaptor.capture());
 
         final AggregateReadRequest<ProjectId> passedRequest = requestCaptor.getValue();
-        assertEquals(id, passedRequest.getId());
+        assertEquals(id, passedRequest.getRecordId());
         assertEquals(repositorySpy.getSnapshotTrigger(), passedRequest.getSnapshotTrigger());
     }
 
@@ -199,7 +199,7 @@ public class AggregateRepositoryShould {
         verify(storageSpy).read(requestCaptor.capture());
 
         final AggregateReadRequest<ProjectId> passedRequest = requestCaptor.getValue();
-        assertEquals(id, passedRequest.getId());
+        assertEquals(id, passedRequest.getRecordId());
         assertEquals(nonDefaultSnapshotTrigger, passedRequest.getSnapshotTrigger());
     }
 

@@ -58,7 +58,7 @@ public final class AggregateReadRequest<I> implements ReadRequest<I> {
     }
 
     @Override
-    public I getId() {
+    public I getRecordId() {
         return id;
     }
 
