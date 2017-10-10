@@ -23,16 +23,11 @@ package io.spine.server.storage;
 import io.spine.annotation.Internal;
 
 /**
- * A read request for {@link Storage}.
+ * A request to read a particular record from {@link Storage}.
  *
- * <p>Purpose of this interface is generalization of the parameter
- * for a record {@linkplain Storage#read(ReadRequest) reading}.
- *
- * <p>This generalization is required, because {@code ID} is not always sufficient parameter
- * to read a record. Implementations may specify other filtering parameters or even
- * configuration for a read execution. E.g. to read a record, reading of which causes
- * reading of a list of other records, a batch size will be handy and it can be specified as a
- * parameter of a read request.
+ * <p>A purpose of having a general contract for such requests is to allow {@link Storage}
+ * implementations to take some additional parameters, that may help to read a record in
+ * a more optimal way, than just by an ID.
  *
  * @param <I> the type of the record ID
  * @author Dmytro Grankin
