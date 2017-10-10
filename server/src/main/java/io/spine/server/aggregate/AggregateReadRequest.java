@@ -20,7 +20,7 @@
 
 package io.spine.server.aggregate;
 
-import io.spine.annotation.SPI;
+import io.spine.annotation.Internal;
 import io.spine.server.storage.ReadRequest;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -28,10 +28,16 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * A read request for {@link AggregateStorage}.
  *
- * @param <I> the type of the target ID
- * @author dmytro.grankin
+ * <p>To organize efficient reading of an aggregate history, {@link AggregateStorage} should
+ * read {@linkplain AggregateEventRecord aggregate event records} by batches.
+ *
+ * <p>The request specifies a size of the batches as a
+ * {@linkplain #getSnapshotTrigger snapshot trigger} value.
+ *
+ * @param <I> the type of the record ID
+ * @author Dmytro Grankin
  */
-@SPI
+@Internal
 public final class AggregateReadRequest<I> implements ReadRequest<I> {
 
     private final I id;
@@ -57,6 +63,10 @@ public final class AggregateReadRequest<I> implements ReadRequest<I> {
      * creation of this snapshot. So instead of reading all {@linkplain AggregateEventRecord
      * aggregate event records}, it is reasonable to read them by batches, size of which is equal
      * to the snapshot trigger value.
+     *
+     * <p>NOTE: A snapshot trigger can be changed for {@link AggregateRepository}
+     * after the instantiation, so the amount of events between snapshots can be different
+     * in an aggregate history and may look like this: {@code e1, s1, e2, e3, e4, s2, e5, s3}.
      *
      * @return the snapshot trigger value
      */
