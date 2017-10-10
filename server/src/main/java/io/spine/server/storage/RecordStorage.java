@@ -59,8 +59,8 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord, 
     /**
      * Reads a single item from the storage and applies a {@link FieldMask} to it.
      *
-     * @param request the read request to the record
-     * @return the record with the applied {@code FieldMask}.
+     * @param request the request to read the record
+     * @return a record instance or {@code Optional.absent()} if there is no record with this ID
      */
     @Override
     public Optional<EntityRecord> read(RecordReadRequest<I> request) {
@@ -73,17 +73,8 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord, 
             return Optional.absent();
         }
 
-        final EntityRecord.Builder builder = EntityRecord.newBuilder(rawResult.get());
-        final Any state = builder.getState();
-        final TypeUrl type = TypeUrl.parse(state.getTypeUrl());
-        final Message stateAsMessage = AnyPacker.unpack(state);
-
         final FieldMask fieldMask = request.getFieldMask();
-        final Message maskedState = FieldMasks.applyMask(fieldMask, stateAsMessage, type);
-
-        final Any packedState = AnyPacker.pack(maskedState);
-        builder.setState(packedState);
-        return Optional.of(builder.build());
+        return applyFieldMask(rawResult.get(), fieldMask);
     }
 
     /**
@@ -285,4 +276,18 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord, 
      * @param records an ID to record map with the entries to store
      */
     protected abstract void writeRecords(Map<I, EntityRecordWithColumns> records);
+
+    private static Optional<EntityRecord> applyFieldMask(EntityRecord record, FieldMask fieldMask) {
+        final Any state = record.getState();
+        final TypeUrl type = TypeUrl.parse(state.getTypeUrl());
+        final Message stateAsMessage = AnyPacker.unpack(state);
+
+        final Message maskedState = FieldMasks.applyMask(fieldMask, stateAsMessage, type);
+
+        final Any packedState = AnyPacker.pack(maskedState);
+        final EntityRecord modifiedRecord = record.toBuilder()
+                                                  .setState(packedState)
+                                                  .build();
+        return Optional.of(modifiedRecord);
+    }
 }

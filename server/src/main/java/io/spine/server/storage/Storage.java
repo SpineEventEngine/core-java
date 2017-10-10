@@ -53,7 +53,7 @@ public interface Storage<I, R extends Message, Q extends ReadRequest<I>> extends
     /**
      * Reads a record from the storage by the specified request.
      *
-     * @param request the read request to the storage
+     * @param request the request to read the record
      * @return a record instance
      *         or {@code Optional.absent()} if there is no record matching this request
      * @throws IllegalStateException if the storage was closed before
