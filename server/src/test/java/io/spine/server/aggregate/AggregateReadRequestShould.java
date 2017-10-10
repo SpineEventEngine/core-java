@@ -24,9 +24,12 @@ import com.google.common.testing.EqualsTester;
 import io.spine.test.Tests;
 import org.junit.Test;
 
+/**
+ * @author Dmytro Grankin
+ */
 public class AggregateReadRequestShould {
 
-    private static final String ID = "id for an aggregate request";
+    private static final String ID = "ID";
     private static final int SNAPSHOT_TRIGGER = 10;
 
     @Test(expected = NullPointerException.class)

@@ -82,6 +82,9 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
+/**
+ * @author Alexander Yevsyukov
+ */
 public class AggregateRepositoryShould {
 
     private final TestActorRequestFactory requestFactory =

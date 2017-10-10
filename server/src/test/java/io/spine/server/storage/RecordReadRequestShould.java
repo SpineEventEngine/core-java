@@ -25,9 +25,12 @@ import com.google.protobuf.FieldMask;
 import io.spine.test.Tests;
 import org.junit.Test;
 
+/**
+ * @author Dmytro Grankin
+ */
 public class RecordReadRequestShould {
 
-    private static final String ID = "id for a record request";
+    private static final String ID = "ID";
     private static final FieldMask FIELD_MASK = FieldMask.getDefaultInstance();
 
     @Test(expected = NullPointerException.class)
