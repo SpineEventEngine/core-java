@@ -13,7 +13,7 @@ Requires Java 7 or higher.
 The project is under active ongoing development. At this stage, we do not recommend using the framework for production purposes.
 You are welcome to experiment and [provide your feedback][email-developers].
 
-The latest stable version is [0.8.0][latest-release].
+The latest stable version is [0.10.0][latest-release].
 
 Please track our release announcement to be informed about the production version (1.0.0) release.  
 
@@ -24,10 +24,10 @@ In order to add Spine to your project, please add the following code to your `bu
 ```groovy
 buildscript{
     ext {
-        spineVersion = '0.8.0'
-        spinePluginVersion = '0.7.24-SNAPSHOT'
+        spineVersion = '0.10.0'
+        spinePluginVersion = '0.9.41-SNAPSHOT'
 
-        protobufGradlePluginVersion = '0.8.0'
+        protobufGradlePluginVersion = '0.8.3'
 
         spineRepository = 'http://maven.teamdev.com/repository/spine'
         spineSnapshotsRepository = 'http://maven.teamdev.com/repository/spine-snapshots'
@@ -85,8 +85,10 @@ If you plan to contribute to the project please visit these pages:
 * [Wiki home][wiki-home]
 
 ## Important Warnings
-* The code annotated with `@Internal` are not parts of public API of the framework. 
-They can be modified without preserving backward compatibility.
+* The code annotated with `@Internal` are not parts of public API of the framework, therefore should
+not be used from outside of the framework.
+* The public API marked as `@Experimental` may be used at own risk; it can change at any time, 
+and has no guarantee of API stability or backward-compatibility.
 * The API annotated with `@SPI` is for those who intend to extend the framework, 
 or provide custom storage implementations. 
 
