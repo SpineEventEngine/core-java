@@ -25,8 +25,10 @@ import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
+import com.google.protobuf.util.Timestamps;
 import io.spine.core.Event;
-import io.spine.server.aggregate.given.Given;
+import io.spine.core.Version;
+import io.spine.server.aggregate.given.Given.StorageRecord;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.storage.AbstractStorageShould;
 import io.spine.test.Tests;
@@ -44,9 +46,13 @@ import java.util.Iterator;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.common.collect.Lists.transform;
 import static com.google.protobuf.util.Timestamps.add;
 import static io.spine.Identifier.newUuid;
+import static io.spine.core.Versions.increment;
+import static io.spine.core.Versions.zero;
+import static io.spine.server.aggregate.given.Given.StorageRecords.sequenceFor;
 import static io.spine.server.command.TestEventFactory.newInstance;
 import static io.spine.time.Durations2.seconds;
 import static io.spine.time.Time.getCurrentTime;
@@ -66,6 +72,7 @@ public abstract class AggregateStorageShould
                                       AggregateStorage<ProjectId>> {
 
     private final ProjectId id = Sample.messageOfType(ProjectId.class);
+    private final TestEventFactory eventFactory = newInstance(AggregateStorageShould.class);
 
     private AggregateStorage<ProjectId> storage;
 
@@ -99,7 +106,7 @@ public abstract class AggregateStorageShould
 
     @Override
     protected AggregateStateRecord newStorageRecord() {
-        final List<AggregateEventRecord> records = Given.StorageRecords.sequenceFor(id);
+        final List<AggregateEventRecord> records = sequenceFor(id);
         final List<Event> expectedEvents = transform(records, TO_EVENT);
         final AggregateStateRecord aggregateStateRecord =
                 AggregateStateRecord.newBuilder()
@@ -189,7 +196,7 @@ public abstract class AggregateStorageShould
 
     @Test
     public void write_and_read_one_record() {
-        final AggregateEventRecord expected = Given.StorageRecord.create(getCurrentTime());
+        final AggregateEventRecord expected = StorageRecord.create(getCurrentTime());
 
         storage.writeRecord(id, expected);
 
@@ -202,7 +209,7 @@ public abstract class AggregateStorageShould
 
     @Test
     public void write_records_and_return_sorted_by_timestamp_descending() {
-        final List<AggregateEventRecord> records = Given.StorageRecords.sequenceFor(id);
+        final List<AggregateEventRecord> records = sequenceFor(id);
 
         writeAll(id, records);
 
@@ -210,6 +217,48 @@ public abstract class AggregateStorageShould
         final List<AggregateEventRecord> actual = newArrayList(iterator);
         reverse(records); // expected records should be in a reverse order
         assertEquals(records, actual);
+    }
+
+    @Test
+    public void write_records_and_return_sorted_by_version_descending() {
+        final int eventsNumber = 5;
+        final List<AggregateEventRecord> records = newLinkedList();
+        final Timestamp timestamp = getCurrentTime();
+        Version currentVersion = zero();
+        for (int i = 0; i < eventsNumber; i++) {
+            final Project state = Project.getDefaultInstance();
+            final Event event = eventFactory.createEvent(state, currentVersion, timestamp);
+            final AggregateEventRecord record = StorageRecord.create(timestamp, event);
+            records.add(record);
+            currentVersion = increment(currentVersion);
+        }
+        writeAll(id, records);
+
+        final Iterator<AggregateEventRecord> iterator = historyBackward();
+        final List<AggregateEventRecord> actual = newArrayList(iterator);
+        reverse(records); // expected records should be in a reverse order
+        assertEquals(records, actual);
+    }
+
+    @Test
+    public void sort_by_version_rather_then_by_timestamp() {
+        final Project state = Project.getDefaultInstance();
+        final Version minVersion = zero();
+        final Version maxVersion = increment(minVersion);
+        final Timestamp minTimestamp = Timestamps.MIN_VALUE;
+        final Timestamp maxTimestamp = Timestamps.MAX_VALUE;
+
+        // The first event is an event, which is the oldest, i.e. with the minimal version.
+        final Event expectedFirst = eventFactory.createEvent(state, minVersion, maxTimestamp);
+        final Event expectedSecond = eventFactory.createEvent(state, maxVersion, minTimestamp);
+
+        storage.writeEvent(id, expectedSecond);
+        storage.writeEvent(id, expectedFirst);
+
+        final List<Event> events = storage.read(newReadRequest(id))
+                                          .get()
+                                          .getEventList();
+        assertTrue(events.indexOf(expectedFirst) < events.indexOf(expectedSecond));
     }
 
     @Test
@@ -237,7 +286,7 @@ public abstract class AggregateStorageShould
         final Timestamp time2 = add(time1, delta);
         final Timestamp time3 = add(time2, delta);
 
-        storage.writeRecord(id, Given.StorageRecord.create(time1));
+        storage.writeRecord(id, StorageRecord.create(time1));
         storage.writeSnapshot(id, newSnapshot(time2));
 
         testWriteRecordsAndLoadHistory(time3);
@@ -270,6 +319,32 @@ public abstract class AggregateStorageShould
         assertEquals(expectedValue, actualCount);
     }
 
+    @Test
+    public void continue_history_reading_if_snapshot_was_not_found_in_first_batch() {
+        Version currentVersion = zero();
+        final Snapshot snapshot = Snapshot.newBuilder()
+                                          .setVersion(currentVersion)
+                                          .build();
+        storage.writeSnapshot(id, snapshot);
+
+        final int eventCountAfterSnapshot = 10;
+        for (int i = 0; i < eventCountAfterSnapshot; i++) {
+            currentVersion = increment(currentVersion);
+            final Project state = Project.getDefaultInstance();
+            final Event event = eventFactory.createEvent(state, currentVersion);
+            storage.writeEvent(id, event);
+        }
+
+        final int batchSize = 1;
+        final AggregateReadRequest<ProjectId> request = new AggregateReadRequest<>(id, batchSize);
+        final Optional<AggregateStateRecord> optionalStateRecord = storage.read(request);
+
+        assertTrue(optionalStateRecord.isPresent());
+        final AggregateStateRecord stateRecord = optionalStateRecord.get();
+        assertEquals(snapshot, stateRecord.getSnapshot());
+        assertEquals(eventCountAfterSnapshot, stateRecord.getEventCount());
+    }
+
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_try_to_write_event_count_to_closed_storage() {
         close(storage);
@@ -284,15 +359,9 @@ public abstract class AggregateStorageShould
         storage.readEventCountAfterLastSnapshot(id);
     }
 
-    private static Event generateEvent() {
-        final TestEventFactory eventFactory = newInstance(AggregateStorageShould.class);
-        final Event result = eventFactory.createEvent(Time.getCurrentTime());
-        return result;
-    }
-
     @SuppressWarnings("OptionalGetWithoutIsPresent") // OK as we write right before we get.
     private <I> void writeAndReadEventTest(I id, AggregateStorage<I> storage) {
-        final Event expectedEvent = generateEvent();
+        final Event expectedEvent = eventFactory.createEvent(Time.getCurrentTime());
 
         storage.writeEvent(id, expectedEvent);
 
@@ -315,7 +384,7 @@ public abstract class AggregateStorageShould
     @SuppressWarnings({"OptionalGetWithoutIsPresent", "ConstantConditions"})
     // OK as we write right before we get.
     protected void testWriteRecordsAndLoadHistory(Timestamp firstRecordTime) {
-        final List<AggregateEventRecord> records = Given.StorageRecords.sequenceFor(id, firstRecordTime);
+        final List<AggregateEventRecord> records = sequenceFor(id, firstRecordTime);
 
         writeAll(id, records);
 
