@@ -248,7 +248,7 @@ public abstract class AggregateStorageShould
         final Timestamp minTimestamp = Timestamps.MIN_VALUE;
         final Timestamp maxTimestamp = Timestamps.MAX_VALUE;
 
-        // The first events is an event, which is the oldest, i.e. with the minimal version.
+        // The first event is an event, which is the oldest, i.e. with the minimal version.
         final Event expectedFirst = eventFactory.createEvent(state, minVersion, maxTimestamp);
         final Event expectedSecond = eventFactory.createEvent(state, maxVersion, minTimestamp);
 
