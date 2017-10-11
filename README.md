@@ -25,7 +25,7 @@ In order to add Spine to your project, please add the following code to your `bu
 buildscript{
     ext {
         spineVersion = '0.10.0'
-        spinePluginVersion = '0.9.41-SNAPSHOT'
+        spineModelCompilerVersion = '0.9.41-SNAPSHOT'
 
         protobufGradlePluginVersion = '0.8.3'
 
@@ -47,13 +47,14 @@ buildscript{
     dependencies {
         // ...
         classpath group: 'com.google.protobuf', name:'protobuf-gradle-plugin', version: protobufGradlePluginVersion        
-        classpath group: 'io.spine.tools', name: 'protobuf-plugin', version: spinePluginVersion
+        classpath group: 'io.spine.tools', name: 'spine-model-compiler', version: spineModelCompilerVersion
+
     }
 }
 
 apply plugin: 'java'
 apply plugin: 'com.google.protobuf'
-apply plugin: 'io.spine.tools.protobuf-plugin'
+apply plugin: 'io.spine.tools.spine-model-compiler'
 
 repositories {
     jcenter()
@@ -67,10 +68,10 @@ dependencies {
     // ...
     
     // Client-side and shared API. 
-    compile group: 'io.spine', name: 'spine-client-core', version: spineVersion
+    compile group: 'io.spine', name: 'spine-client', version: spineVersion
     
     // Add this only for server-side code. 
-    compile group: 'io.spine', name: 'spine-server-core', version: spineVersion
+    compile group: 'io.spine', name: 'spine-server', version: spineVersion
 }
 ```
 There is no Maven support at the moment. 
