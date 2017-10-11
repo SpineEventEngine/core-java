@@ -425,6 +425,16 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         return result;
     }
 
+    /**
+     * Loads an aggregate by the passed ID.
+     *
+     * <p>To read an {@link AggregateStateRecord} from an {@link AggregateStorage},
+     * a {@linkplain #snapshotTrigger snapshot trigger} is used as a
+     * {@linkplain AggregateReadRequest#getBatchSize() batch size}.
+     *
+     * @param id the ID of the aggregate
+     * @return the loaded instance or {@code Optional.absent()} if there is no record with the ID
+     */
     private Optional<A> load(I id) {
         final AggregateReadRequest<I> request = new AggregateReadRequest<>(id, snapshotTrigger);
         final Optional<AggregateStateRecord> eventsFromStorage = aggregateStorage().read(request);

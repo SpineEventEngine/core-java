@@ -182,7 +182,7 @@ public class AggregateRepositoryShould {
 
         final AggregateReadRequest<ProjectId> passedRequest = requestCaptor.getValue();
         assertEquals(id, passedRequest.getRecordId());
-        assertEquals(repositorySpy.getSnapshotTrigger(), passedRequest.getSnapshotTrigger());
+        assertEquals(repositorySpy.getSnapshotTrigger(), passedRequest.getBatchSize());
     }
 
     @SuppressWarnings("unchecked")
@@ -203,7 +203,7 @@ public class AggregateRepositoryShould {
 
         final AggregateReadRequest<ProjectId> passedRequest = requestCaptor.getValue();
         assertEquals(id, passedRequest.getRecordId());
-        assertEquals(nonDefaultSnapshotTrigger, passedRequest.getSnapshotTrigger());
+        assertEquals(nonDefaultSnapshotTrigger, passedRequest.getBatchSize());
     }
 
     @Test

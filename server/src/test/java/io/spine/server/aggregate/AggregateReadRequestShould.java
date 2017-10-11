@@ -30,24 +30,24 @@ import org.junit.Test;
 public class AggregateReadRequestShould {
 
     private static final String ID = "ID";
-    private static final int SNAPSHOT_TRIGGER = 10;
+    private static final int BATCH_SIZE = 10;
 
     @Test(expected = NullPointerException.class)
     public void not_accept_null_ID() {
-        new AggregateReadRequest<>(Tests.<String>nullRef(), SNAPSHOT_TRIGGER);
+        new AggregateReadRequest<>(Tests.<String>nullRef(), BATCH_SIZE);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void not_accept_non_positive_snapshot_trigger() {
+    public void not_accept_non_positive_batch_size() {
         new AggregateReadRequest<>(ID, 0);
     }
 
     @Test
     public void consider_request_with_same_ID_equal() {
-        final AggregateReadRequest<String> first = new AggregateReadRequest<>(ID, SNAPSHOT_TRIGGER);
-        final int differentTrigger = first.getSnapshotTrigger() * 2;
+        final AggregateReadRequest<String> first = new AggregateReadRequest<>(ID, BATCH_SIZE);
+        final int differentBatch = first.getBatchSize() * 2;
         final AggregateReadRequest<String> second = new AggregateReadRequest<>(ID,
-                                                                               differentTrigger);
+                                                                               differentBatch);
         new EqualsTester().addEqualityGroup(first, second)
                           .testEquals();
     }

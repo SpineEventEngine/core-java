@@ -32,14 +32,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * <p>A result of processing this request is a {@linkplain AggregateStateRecord record},
  * which satisfies the request criteria.
  *
- * <p>To restore an aggregate, the last {@link Snapshot} and events occurred after
- * creation of this snapshot are required. So instead of reading all
- * {@linkplain AggregateEventRecord aggregate event records}, it is reasonable to read
- * them by batches, while the last {@link Snapshot} will not be found. The request specifies
- * a size of the batches as a {@linkplain #getSnapshotTrigger snapshot trigger} value.
+ * <p>The request specifies events {@linkplain #getBatchSize() batch size}
+ * to perform an efficient reading in {@link AggregateStorage}.
  *
  * <p>Two requests for the aggregate with the same {@link #id} are considered equal.
- * {@link #snapshotTrigger} is not taken into account, because it should affect only
+ * {@link #batchSize} is not taken into account, because it should affect only
  * process of reading, but resulting records should be the same.
  *
  * @param <I> the type of the record ID
@@ -49,12 +46,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public final class AggregateReadRequest<I> implements ReadRequest<I> {
 
     private final I id;
-    private final int snapshotTrigger;
+    private final int batchSize;
 
-    public AggregateReadRequest(I id, int snapshotTrigger) {
-        checkArgument(snapshotTrigger > 0);
+    public AggregateReadRequest(I id, int batchSize) {
+        checkArgument(batchSize > 0);
         this.id = checkNotNull(id);
-        this.snapshotTrigger = snapshotTrigger;
+        this.batchSize = batchSize;
     }
 
     @Override
@@ -63,18 +60,12 @@ public final class AggregateReadRequest<I> implements ReadRequest<I> {
     }
 
     /**
-     * Obtains the {@linkplain AggregateRepository#snapshotTrigger snapshot trigger}.
+     * Obtains the number of {@linkplain AggregateEventRecord events} to read per a batch.
      *
-     * <p>Use this value for the {@linkplain AggregateStorage#historyBackward(AggregateReadRequest)
-     * history} reading optimization as a batch size.
-     *
-     * <p>The value reflects the current snapshot trigger set for the {@link AggregateRepository},
-     * in which this request is created.
-     *
-     * @return the snapshot trigger value
+     * @return the events batch size
      */
-    public int getSnapshotTrigger() {
-        return snapshotTrigger;
+    public int getBatchSize() {
+        return batchSize;
     }
 
     @Override
