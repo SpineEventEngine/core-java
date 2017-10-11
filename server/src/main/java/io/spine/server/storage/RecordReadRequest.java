@@ -29,7 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * <p>A result of this request is a record with the specified ID.
  *
- * <p>Two requests are considered equal if they have the same {@linkplain #id ID}.
+ * <p>Two requests are considered equal if they have the same {@linkplain #getRecordId() record ID}.
  *
  * @param <I> the type of the target ID
  * @author Dmytro Grankin
@@ -37,15 +37,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @Internal
 public final class RecordReadRequest<I> implements ReadRequest<I> {
 
-    private final I id;
+    private final I recordId;
 
-    public RecordReadRequest(I id) {
-        this.id = checkNotNull(id);
+    public RecordReadRequest(I recordId) {
+        this.recordId = checkNotNull(recordId);
     }
 
     @Override
     public I getRecordId() {
-        return id;
+        return recordId;
     }
 
     @Override
@@ -55,11 +55,11 @@ public final class RecordReadRequest<I> implements ReadRequest<I> {
 
         RecordReadRequest<?> that = (RecordReadRequest<?>) o;
 
-        return id.equals(that.id);
+        return recordId.equals(that.recordId);
     }
 
     @Override
     public int hashCode() {
-        return id.hashCode();
+        return recordId.hashCode();
     }
 }

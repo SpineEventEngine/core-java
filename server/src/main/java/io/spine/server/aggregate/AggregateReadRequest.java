@@ -32,11 +32,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * <p>A result of processing this request is a {@linkplain AggregateStateRecord record},
  * which satisfies the request criteria.
  *
- * <p>The request specifies events {@linkplain #getBatchSize() batch size}
- * to perform an efficient reading in {@link AggregateStorage}.
+ * <p>In addition to a record identifier, this request implementation requires
+ * the batch size for event reading to be set. Typically that would be a number of
+ * event records to read to encounter the most recent snapshot.
  *
- * <p>Two requests for the aggregate with the same {@link #id} are considered equal.
- * {@link #batchSize} is not taken into account, because it should affect only
+ * <p>Two requests with the same {@linkplain #getRecordId() record ID} are considered equal.
+ * {@linkplain #getBatchSize() Batch size} is not taken into account, because it should affect only
  * process of reading, but resulting records should be the same.
  *
  * @param <I> the type of the record ID
@@ -45,22 +46,22 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @Internal
 public final class AggregateReadRequest<I> implements ReadRequest<I> {
 
-    private final I id;
+    private final I recordId;
     private final int batchSize;
 
-    public AggregateReadRequest(I id, int batchSize) {
+    public AggregateReadRequest(I recordId, int batchSize) {
         checkArgument(batchSize > 0);
-        this.id = checkNotNull(id);
+        this.recordId = checkNotNull(recordId);
         this.batchSize = batchSize;
     }
 
     @Override
     public I getRecordId() {
-        return id;
+        return recordId;
     }
 
     /**
-     * Obtains the number of {@linkplain AggregateEventRecord events} to read per a batch.
+     * Obtains the number of {@linkplain AggregateEventRecord events} to read per batch.
      *
      * @return the events batch size
      */
@@ -75,11 +76,11 @@ public final class AggregateReadRequest<I> implements ReadRequest<I> {
 
         AggregateReadRequest<?> that = (AggregateReadRequest<?>) o;
 
-        return id.equals(that.id);
+        return recordId.equals(that.recordId);
     }
 
     @Override
     public int hashCode() {
-        return id.hashCode();
+        return recordId.hashCode();
     }
 }

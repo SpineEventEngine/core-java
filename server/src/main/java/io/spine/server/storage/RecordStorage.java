@@ -57,7 +57,7 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord, 
     }
 
     /**
-     * Reads a record from the storage matching the specified request.
+     * Reads a record, which matches the specified {@linkplain RecordReadRequest request}.
      *
      * @param request the request to read the record
      * @return a record instance or {@code Optional.absent()} if there is no record with this ID
@@ -72,7 +72,8 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord, 
     }
 
     /**
-     * Reads a record from the storage matching the request and applies a {@link FieldMask} to it.
+     * Reads a record, which matches the specified {@linkplain RecordReadRequest request}
+     * and applies a {@link FieldMask} to it.
      *
      * @param request   the request to read the record
      * @param fieldMask fields to read.

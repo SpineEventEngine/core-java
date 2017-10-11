@@ -429,7 +429,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * Loads an aggregate by the passed ID.
      *
      * <p>To read an {@link AggregateStateRecord} from an {@link AggregateStorage},
-     * a {@linkplain #snapshotTrigger snapshot trigger} is used as a
+     * a {@linkplain #getSnapshotTrigger() snapshot trigger} is used as a
      * {@linkplain AggregateReadRequest#getBatchSize() batch size}.
      *
      * @param id the ID of the aggregate
