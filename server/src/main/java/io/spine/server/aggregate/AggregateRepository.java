@@ -245,8 +245,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * @return new storage
      */
     @Override
-    protected Storage<I, ?> createStorage(StorageFactory factory) {
-        final Storage<I, ?> result = factory.createAggregateStorage(getEntityClass());
+    protected Storage<I, ?, ?> createStorage(StorageFactory factory) {
+        final Storage<I, ?, ?> result = factory.createAggregateStorage(getEntityClass());
         return result;
     }
 
@@ -279,7 +279,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      *
      * <p>The exception is logged only if the root cause of it is not a
      * {@linkplain io.spine.base.ThrowableMessage rejection} thrown by a command handling method.
-     * 
+     *
      * @param envelope  the command which caused the error
      * @param exception the error occurred during processing of the command
      */
@@ -396,13 +396,13 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      *
      * @param snapshotTrigger a positive number of the snapshot trigger
      */
-    @SuppressWarnings("unused")
     protected void setSnapshotTrigger(int snapshotTrigger) {
         checkArgument(snapshotTrigger > 0);
         this.snapshotTrigger = snapshotTrigger;
     }
 
-    AggregateStorage<I> aggregateStorage() {
+    @VisibleForTesting
+    public AggregateStorage<I> aggregateStorage() {
         @SuppressWarnings("unchecked") // We check the type on initialization.
         final AggregateStorage<I> result = (AggregateStorage<I>) getStorage();
         return result;
@@ -414,7 +414,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * @param  id the ID of the aggregate
      * @return loaded or created aggregate instance
      */
-    @VisibleForTesting
     A loadOrCreate(I id) {
         final Optional<A> optional = load(id);
 
@@ -426,8 +425,19 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         return result;
     }
 
+    /**
+     * Loads an aggregate by the passed ID.
+     *
+     * <p>To read an {@link AggregateStateRecord} from an {@link AggregateStorage},
+     * a {@linkplain #getSnapshotTrigger() snapshot trigger} is used as a
+     * {@linkplain AggregateReadRequest#getBatchSize() batch size}.
+     *
+     * @param id the ID of the aggregate
+     * @return the loaded instance or {@code Optional.absent()} if there is no record with the ID
+     */
     private Optional<A> load(I id) {
-        final Optional<AggregateStateRecord> eventsFromStorage = aggregateStorage().read(id);
+        final AggregateReadRequest<I> request = new AggregateReadRequest<>(id, snapshotTrigger);
+        final Optional<AggregateStateRecord> eventsFromStorage = aggregateStorage().read(request);
 
         if (eventsFromStorage.isPresent()) {
             final A result = create(id);

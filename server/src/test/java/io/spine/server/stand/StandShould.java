@@ -338,8 +338,6 @@ public class StandShould extends TenantAwareTest {
                                                      .build();
         when(standStorageMock.readAllByType(any(TypeUrl.class)))
                 .thenReturn(nonEmptyList.iterator());
-        when(standStorageMock.read(any(AggregateStateId.class)))
-                .thenReturn(Optional.of(someRecord));
         when(standStorageMock.readAll())
                 .thenReturn(Collections.<EntityRecord>emptyIterator());
         when(standStorageMock.readMultiple(ArgumentMatchers.<AggregateStateId>anyIterable()))

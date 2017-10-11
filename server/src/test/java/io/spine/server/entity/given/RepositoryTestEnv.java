@@ -68,7 +68,7 @@ public class RepositoryTestEnv {
         }
 
         @Override
-        protected Storage<Exception, ?> createStorage(StorageFactory factory) {
+        protected Storage<Exception, ?, ?> createStorage(StorageFactory factory) {
             return null;
         }
     }

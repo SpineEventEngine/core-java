@@ -22,6 +22,7 @@ package io.spine.server.storage.memory;
 
 import com.google.common.base.Optional;
 import io.spine.server.aggregate.AggregateEventRecord;
+import io.spine.server.aggregate.AggregateReadRequest;
 import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.entity.LifecycleFlags;
 
@@ -98,9 +99,9 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
     }
 
     @Override
-    protected Iterator<AggregateEventRecord> historyBackward(I id) {
-        checkNotNull(id);
-        final List<AggregateEventRecord> records = getStorage().getHistoryBackward(id);
+    protected Iterator<AggregateEventRecord> historyBackward(AggregateReadRequest<I> request) {
+        checkNotNull(request);
+        final List<AggregateEventRecord> records = getStorage().getHistoryBackward(request);
         return records.iterator();
     }
 }

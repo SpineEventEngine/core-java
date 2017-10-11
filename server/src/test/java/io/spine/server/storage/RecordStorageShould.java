@@ -91,7 +91,7 @@ import static org.mockito.Mockito.verify;
  * @author Dmytro Dashenkov
  */
 public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
-        extends AbstractStorageShould<I, EntityRecord, S> {
+        extends AbstractStorageShould<I, EntityRecord, RecordReadRequest<I>, S> {
 
     private static final Function<EntityRecordWithColumns, EntityRecord> RECORD_EXTRACTOR_FUNCTION =
             new Function<EntityRecordWithColumns, EntityRecord>() {
@@ -121,6 +121,11 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     @Override
     protected EntityRecord newStorageRecord() {
         return newStorageRecord(newState(newId()));
+    }
+
+    @Override
+    protected RecordReadRequest<I> newReadRequest(I id) {
+        return new RecordReadRequest<>(id);
     }
 
     private EntityRecord newStorageRecord(I id) {
@@ -155,7 +160,8 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final EntityRecord expected = newStorageRecord(id);
         storage.write(id, expected);
 
-        final EntityRecord actual = storage.read(id)
+        final RecordReadRequest<I> readRequest = newReadRequest(id);
+        final EntityRecord actual = storage.read(readRequest)
                                            .get();
 
         assertEquals(expected, actual);
@@ -189,7 +195,8 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final Descriptors.Descriptor descriptor = newState(id).getDescriptorForType();
         final FieldMask idMask = FieldMasks.maskOf(descriptor, 1);
 
-        final Optional<EntityRecord> optional = storage.read(id, idMask);
+        final RecordReadRequest<I> readRequest = new RecordReadRequest<>(id);
+        final Optional<EntityRecord> optional = storage.read(readRequest, idMask);
         assertTrue(optional.isPresent());
         final EntityRecord entityRecord = optional.get();
 
@@ -245,7 +252,8 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         assertTrue(storage.delete(id));
 
         // There's no record with such ID.
-        assertFalse(storage.read(id)
+        final RecordReadRequest<I> readRequest = newReadRequest(id);
+        assertFalse(storage.read(readRequest)
                            .isPresent());
     }
 
@@ -384,7 +392,8 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final RecordStorage<I> storage = getDefaultStorage();
 
         storage.write(id, recordWithStorageFields);
-        final Optional<EntityRecord> actualRecord = storage.read(id);
+        final RecordReadRequest<I> readRequest = newReadRequest(id);
+        final Optional<EntityRecord> actualRecord = storage.read(readRequest);
         assertTrue(actualRecord.isPresent());
         assertEquals(record, actualRecord.get());
     }
@@ -398,7 +407,8 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final S storage = getDefaultStorage();
         storage.write(id, recordWithColumns);
 
-        final Optional<EntityRecord> readRecord = storage.read(id);
+        final RecordReadRequest<I> readRequest = newReadRequest(id);
+        final Optional<EntityRecord> readRecord = storage.read(readRequest);
         assertTrue(readRecord.isPresent());
         assertEquals(record, readRecord.get());
     }

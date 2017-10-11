@@ -34,6 +34,7 @@ import io.spine.client.EntityId;
 import io.spine.server.entity.storage.EntityQueries;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
+import io.spine.server.storage.RecordReadRequest;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.type.TypeUrl;
@@ -163,7 +164,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      */
     private Optional<EntityRecord> findRecord(I id) {
         final RecordStorage<I> storage = recordStorage();
-        final Optional<EntityRecord> found = storage.read(id);
+        final RecordReadRequest<I> request = new RecordReadRequest<>(id);
+        final Optional<EntityRecord> found = storage.read(request);
         if (!found.isPresent()) {
             return Optional.absent();
         }

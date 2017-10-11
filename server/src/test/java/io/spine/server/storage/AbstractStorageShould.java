@@ -21,7 +21,6 @@
 package io.spine.server.storage;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.Sets;
 import com.google.protobuf.Message;
 import io.spine.server.entity.Entity;
 import io.spine.test.Tests;
@@ -46,13 +45,15 @@ import static org.junit.Assert.fail;
  * Abstract storage tests.
  *
  * @param <I> the type of IDs of storage records
- * @param <R> the type of records kept in the storage
+ * @param <M> the type of records kept in the storage
+ * @param <R> the type of read requests for the storage
  * @author Alexander Litus
  */
 @SuppressWarnings("ClassWithTooManyMethods")
 public abstract class AbstractStorageShould<I,
-                                            R extends Message,
-                                            S extends AbstractStorage<I, R>> {
+                                            M extends Message,
+                                            R extends ReadRequest<I>,
+                                            S extends AbstractStorage<I, M, R>> {
 
     private S storage;
 
@@ -91,10 +92,13 @@ public abstract class AbstractStorageShould<I,
     protected abstract S getStorage(Class<? extends Entity> cls);
 
     /** Creates a new storage record. */
-    protected abstract R newStorageRecord();
+    protected abstract M newStorageRecord();
 
     /** Creates a new unique storage record ID. */
     protected abstract I newId();
+
+    /** Creates a new read request with the specified ID. */
+    protected abstract R newReadRequest(I id);
 
     /**
      * Closes the storage and propagates an exception if any occurs.
@@ -111,7 +115,7 @@ public abstract class AbstractStorageShould<I,
 
     /** Closes the storage and fails the test if any exception occurs. */
     @SuppressWarnings("CallToPrintStackTrace")
-    protected void closeAndFailIfException(AbstractStorage<I, R> storage) {
+    protected void closeAndFailIfException(AbstractStorage<I, M, R> storage) {
         try {
             storage.close();
         } catch (Exception e) {
@@ -123,35 +127,37 @@ public abstract class AbstractStorageShould<I,
     /** Writes a record, reads it and asserts it is the same as the expected one. */
     @SuppressWarnings("OptionalGetWithoutIsPresent") // We do check.
     protected void writeAndReadRecordTest(I id) {
-        final R expected = writeRecord(id);
+        final M expected = writeRecord(id);
 
-        final Optional<R> actual = storage.read(id);
+        final R readRequest = newReadRequest(id);
+        final Optional<M> actual = storage.read(readRequest);
 
         assertTrue(actual.isPresent());
         assertEquals(expected, actual.get());
     }
 
-    private R writeRecord(I id) {
-        final R expected = newStorageRecord();
+    private M writeRecord(I id) {
+        final M expected = newStorageRecord();
         storage.write(id, expected);
         return expected;
     }
 
     @Test
     public void handle_absence_of_record_with_passed_id() {
-        final Optional<R> record = storage.read(newId());
+        final R readRequest = newReadRequest(newId());
+        final Optional<M> record = storage.read(readRequest);
 
         assertResultForMissingId(record);
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType") // This is the purpose of the method.
-    protected void assertResultForMissingId(Optional<R> record) {
+    protected void assertResultForMissingId(Optional<M> record) {
         assertFalse(record.isPresent());
     }
 
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_read_by_null_id() {
-        storage.read(Tests.<I>nullRef());
+        storage.read(Tests.<R>nullRef());
     }
 
     @Test(expected = NullPointerException.class)
@@ -161,7 +167,7 @@ public abstract class AbstractStorageShould<I,
 
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_write_null_record() {
-        storage.write(newId(), Tests.<R>nullRef());
+        storage.write(newId(), Tests.<M>nullRef());
     }
 
     @Test
@@ -262,7 +268,8 @@ public abstract class AbstractStorageShould<I,
     public void close_itself_and_throw_exception_if_read_after() throws Exception {
         closeAndFailIfException(storage);
 
-        storage.read(newId());
+        final R readRequest = newReadRequest(newId());
+        storage.read(readRequest);
     }
 
     @Test(expected = IllegalStateException.class)

@@ -66,17 +66,25 @@ import io.spine.testdata.Sample;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 
 import java.util.Iterator;
 import java.util.Set;
 
 import static io.spine.core.given.GivenTenantId.newUuid;
+import static io.spine.server.aggregate.AggregateRepository.DEFAULT_SNAPSHOT_TRIGGER;
 import static io.spine.validate.Validate.isNotDefault;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
+/**
+ * @author Alexander Yevsyukov
+ */
 public class AggregateRepositoryShould {
 
     private final TestActorRequestFactory requestFactory =
@@ -143,9 +151,7 @@ public class AggregateRepositoryShould {
         repository.setSnapshotTrigger(aggregate.uncommittedEventsCount());
 
         repository.store(aggregate);
-        final AggregateStateRecord record = repository.aggregateStorage()
-                                                      .read(aggregate.getId())
-                                                      .get();
+        final AggregateStateRecord record = readRecord(aggregate);
         assertTrue(record.hasSnapshot());
         assertEquals(0, repository.aggregateStorage()
                                   .readEventCountAfterLastSnapshot(aggregate.getId()));
@@ -156,10 +162,48 @@ public class AggregateRepositoryShould {
         final ProjectAggregate aggregate = GivenAggregate.withUncommittedEvents();
 
         repository.store(aggregate);
-        final AggregateStateRecord record = repository.aggregateStorage()
-                                                      .read(aggregate.getId())
-                                                      .get();
+        final AggregateStateRecord record = readRecord(aggregate);
         assertFalse(record.hasSnapshot());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void pass_initial_snapshot_trigger_to_AggregateReadRequest() {
+        final AggregateRepository<ProjectId, ProjectAggregate> repositorySpy = spy(repository);
+        final AggregateStorage<ProjectId> storageSpy = spy(repositorySpy.aggregateStorage());
+        doReturn(storageSpy).when(repositorySpy).aggregateStorage();
+
+        final ProjectId id = Sample.messageOfType(ProjectId.class);
+        repositorySpy.loadOrCreate(id);
+
+        final ArgumentCaptor<AggregateReadRequest<ProjectId>> requestCaptor =
+                ArgumentCaptor.forClass(AggregateReadRequest.class);
+        verify(storageSpy).read(requestCaptor.capture());
+
+        final AggregateReadRequest<ProjectId> passedRequest = requestCaptor.getValue();
+        assertEquals(id, passedRequest.getRecordId());
+        assertEquals(repositorySpy.getSnapshotTrigger(), passedRequest.getBatchSize());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void pass_updated_snapshot_trigger_to_AggregateReadRequest() {
+        final AggregateRepository<ProjectId, ProjectAggregate> repositorySpy = spy(repository);
+        final AggregateStorage<ProjectId> storageSpy = spy(repositorySpy.aggregateStorage());
+        doReturn(storageSpy).when(repositorySpy).aggregateStorage();
+
+        final int nonDefaultSnapshotTrigger = DEFAULT_SNAPSHOT_TRIGGER * 2;
+        repositorySpy.setSnapshotTrigger(nonDefaultSnapshotTrigger);
+        final ProjectId id = Sample.messageOfType(ProjectId.class);
+        repositorySpy.loadOrCreate(id);
+
+        final ArgumentCaptor<AggregateReadRequest<ProjectId>> requestCaptor =
+                ArgumentCaptor.forClass(AggregateReadRequest.class);
+        verify(storageSpy).read(requestCaptor.capture());
+
+        final AggregateReadRequest<ProjectId> passedRequest = requestCaptor.getValue();
+        assertEquals(id, passedRequest.getRecordId());
+        assertEquals(nonDefaultSnapshotTrigger, passedRequest.getBatchSize());
     }
 
     @Test
@@ -169,7 +213,7 @@ public class AggregateRepositoryShould {
 
     @Test
     public void have_default_value_for_snapshot_trigger() {
-        assertEquals(AggregateRepository.DEFAULT_SNAPSHOT_TRIGGER, repository.getSnapshotTrigger());
+        assertEquals(DEFAULT_SNAPSHOT_TRIGGER, repository.getSnapshotTrigger());
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -494,5 +538,13 @@ public class AggregateRepositoryShould {
         return ProjectId.newBuilder()
                         .setId(id)
                         .build();
+    }
+
+    private AggregateStateRecord readRecord(ProjectAggregate aggregate) {
+        final AggregateReadRequest<ProjectId> request =
+                new AggregateReadRequest<>(aggregate.getId(), DEFAULT_SNAPSHOT_TRIGGER);
+        return repository.aggregateStorage()
+                         .read(request)
+                         .get();
     }
 }

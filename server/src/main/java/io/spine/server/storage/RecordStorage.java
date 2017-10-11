@@ -48,8 +48,8 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @param <I> the type of entity IDs
  * @author Alexander Yevsyukov
  */
-public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
-        implements StorageWithLifecycleFlags<I, EntityRecord>,
+public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord, RecordReadRequest<I>>
+        implements StorageWithLifecycleFlags<I, EntityRecord, RecordReadRequest<I>>,
                    BulkStorageOperationsMixin<I, EntityRecord> {
 
     protected RecordStorage(boolean multitenant) {
@@ -57,27 +57,32 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
     }
 
     /**
-     * {@inheritDoc}
+     * Reads a record, which matches the specified {@linkplain RecordReadRequest request}.
+     *
+     * @param request the request to read the record
+     * @return a record instance or {@code Optional.absent()} if there is no record with this ID
      */
     @Override
-    public Optional<EntityRecord> read(I id) {
+    public Optional<EntityRecord> read(RecordReadRequest<I> request) {
         checkNotClosed();
-        checkNotNull(id);
+        checkNotNull(request);
 
-        final Optional<EntityRecord> record = readRecord(id);
+        final Optional<EntityRecord> record = readRecord(request.getRecordId());
         return record;
     }
 
     /**
-     * Reads a single item from the storage and applies a {@link FieldMask} to it.
+     * Reads a record, which matches the specified {@linkplain RecordReadRequest request}
+     * and applies a {@link FieldMask} to it.
      *
-     * @param id        ID of the item to read.
+     * @param request   the request to read the record
      * @param fieldMask fields to read.
-     * @return the item with the given ID and with the {@code FieldMask} applied.
-     * @see #read(Object)
+     * @return the item with the given ID and with the {@code FieldMask} applied
+     *         or {@code Optional.absent()} if there is no record matching this request
+     * @see #read(RecordReadRequest)
      */
-    public Optional<EntityRecord> read(I id, FieldMask fieldMask) {
-        final Optional<EntityRecord> rawResult = read(id);
+    public Optional<EntityRecord> read(RecordReadRequest<I> request, FieldMask fieldMask) {
+        final Optional<EntityRecord> rawResult = read(request);
 
         if (!rawResult.isPresent()) {
             return Optional.absent();
@@ -107,7 +112,8 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
      */
     public void write(I id, EntityRecordWithColumns record) {
         checkNotNull(id);
-        checkArgument(record.getRecord().hasState(), "Record does not have state field.");
+        checkArgument(record.getRecord()
+                            .hasState(), "Record does not have state field.");
         checkNotClosed();
 
         writeRecord(id, record);
@@ -140,7 +146,8 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
 
     @Override
     public Optional<LifecycleFlags> readLifecycleFlags(I id) {
-        final Optional<EntityRecord> optional = read(id);
+        final RecordReadRequest<I> request = new RecordReadRequest<>(id);
+        final Optional<EntityRecord> optional = read(request);
         if (optional.isPresent()) {
             return Optional.of(optional.get()
                                        .getLifecycleFlags());
@@ -150,7 +157,8 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
 
     @Override
     public void writeLifecycleFlags(I id, LifecycleFlags flags) {
-        final Optional<EntityRecord> optional = read(id);
+        final RecordReadRequest<I> request = new RecordReadRequest<>(id);
+        final Optional<EntityRecord> optional = read(request);
         if (optional.isPresent()) {
             final EntityRecord record = optional.get();
             final EntityRecord updated = record.toBuilder()
@@ -163,7 +171,7 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
                                  ? id.toString()
                                  : Identifier.toString(id);
             throw newIllegalStateException("Unable to load record for entity with ID: %s",
-                                                      idStr);
+                                           idStr);
         }
     }
 

@@ -20,34 +20,26 @@
 
 package io.spine.server.storage;
 
-import com.google.common.base.Optional;
-import com.google.protobuf.Message;
-import io.spine.server.entity.LifecycleFlags;
+import com.google.common.testing.EqualsTester;
+import io.spine.test.Tests;
+import org.junit.Test;
 
 /**
- * A storage that allows to update {@linkplain LifecycleFlags lifecycle flags} of entities.
- *
- * @author Alexander Yevsyukov
+ * @author Dmytro Grankin
  */
-public interface StorageWithLifecycleFlags<I, M extends Message, R extends ReadRequest<I>>
-        extends Storage<I, M, R> {
+public class RecordReadRequestShould {
 
-    /**
-     * Reads the visibility status for the entity with the passed ID.
-     *
-     * <p>This method returns {@code Optional.absent()} if none of the
-     * flags of visibility flags were set before.
-     *
-     * @param id the ID of the entity
-     * @return the aggregate visibility or {@code Optional.absent()}
-     */
-    Optional<LifecycleFlags> readLifecycleFlags(I id);
+    @Test(expected = NullPointerException.class)
+    public void not_accept_null_ID() {
+        new RecordReadRequest<>(Tests.nullRef());
+    }
 
-    /**
-     * Writes the visibility status for the entity with the passed ID.
-     *
-     * @param id         the ID of the entity for which to update the status
-     * @param flags the status to write
-     */
-    void writeLifecycleFlags(I id, LifecycleFlags flags);
+    @Test
+    public void consider_request_with_same_id_equal() {
+        final String id = "ID";
+        final RecordReadRequest<String> first = new RecordReadRequest<>(id);
+        final RecordReadRequest<String> second = new RecordReadRequest<>(id);
+        new EqualsTester().addEqualityGroup(first, second)
+                          .testEquals();
+    }
 }

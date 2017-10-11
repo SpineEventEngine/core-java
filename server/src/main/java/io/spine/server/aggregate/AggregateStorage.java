@@ -49,8 +49,8 @@ import static io.spine.validate.Validate.checkNotEmptyOrBlank;
  */
 @SPI
 public abstract class AggregateStorage<I>
-        extends AbstractStorage<I, AggregateStateRecord>
-        implements StorageWithLifecycleFlags<I, AggregateStateRecord> {
+        extends AbstractStorage<I, AggregateStateRecord, AggregateReadRequest<I>>
+        implements StorageWithLifecycleFlags<I, AggregateStateRecord, AggregateReadRequest<I>> {
 
     protected AggregateStorage(boolean multitenant) {
         super(multitenant);
@@ -58,22 +58,22 @@ public abstract class AggregateStorage<I>
 
     /**
      * Forms and returns an {@link AggregateStateRecord} based on the
-     * {@linkplain #historyBackward(Object) aggregate history}.
+     * {@linkplain #historyBackward(AggregateReadRequest) aggregate history}.
      *
-     * @param aggregateId the aggregate ID for which to form a record
+     * @param request the aggregate read request based on which to form a record
      * @return the record instance or {@code Optional.absent()} if the
-     *         {@linkplain #historyBackward(Object) aggregate history} is empty
+     *         {@linkplain #historyBackward(AggregateReadRequest) aggregate history} is empty
      * @throws IllegalStateException if the storage was closed before
      */
     @Override
-    public Optional<AggregateStateRecord> read(I aggregateId) {
+    public Optional<AggregateStateRecord> read(AggregateReadRequest<I> request) {
         checkNotClosed();
-        checkNotNull(aggregateId);
+        checkNotNull(request);
 
         final Deque<Event> history = newLinkedList();
         Snapshot snapshot = null;
 
-        final Iterator<AggregateEventRecord> historyBackward = historyBackward(aggregateId);
+        final Iterator<AggregateEventRecord> historyBackward = historyBackward(request);
 
         if (!historyBackward.hasNext()) {
             return Optional.absent();
@@ -245,10 +245,11 @@ public abstract class AggregateStorage<I>
      * Creates iterator of aggregate event history with the reverse traversal.
      *
      * <p>Records are sorted by timestamp descending (from newer to older).
-     * The iterator is empty if there's no history for the aggregate with passed ID
+     * The iterator is empty if there's no history for the aggregate with passed ID.
      *
-     * @param id aggregate ID
+     * @param request the read request
      * @return new iterator instance
      */
-    protected abstract Iterator<AggregateEventRecord> historyBackward(I id);
+    protected abstract Iterator<AggregateEventRecord> historyBackward(
+            AggregateReadRequest<I> request);
 }

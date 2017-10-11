@@ -20,34 +20,46 @@
 
 package io.spine.server.storage;
 
-import com.google.common.base.Optional;
-import com.google.protobuf.Message;
-import io.spine.server.entity.LifecycleFlags;
+import io.spine.annotation.Internal;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A storage that allows to update {@linkplain LifecycleFlags lifecycle flags} of entities.
+ * A request to read a particular record from {@link RecordStorage}.
  *
- * @author Alexander Yevsyukov
+ * <p>A result of this request is a record with the specified ID.
+ *
+ * <p>Two requests are considered equal if they have the same {@linkplain #getRecordId() record ID}.
+ *
+ * @param <I> the type of the target ID
+ * @author Dmytro Grankin
  */
-public interface StorageWithLifecycleFlags<I, M extends Message, R extends ReadRequest<I>>
-        extends Storage<I, M, R> {
+@Internal
+public final class RecordReadRequest<I> implements ReadRequest<I> {
 
-    /**
-     * Reads the visibility status for the entity with the passed ID.
-     *
-     * <p>This method returns {@code Optional.absent()} if none of the
-     * flags of visibility flags were set before.
-     *
-     * @param id the ID of the entity
-     * @return the aggregate visibility or {@code Optional.absent()}
-     */
-    Optional<LifecycleFlags> readLifecycleFlags(I id);
+    private final I recordId;
 
-    /**
-     * Writes the visibility status for the entity with the passed ID.
-     *
-     * @param id         the ID of the entity for which to update the status
-     * @param flags the status to write
-     */
-    void writeLifecycleFlags(I id, LifecycleFlags flags);
+    public RecordReadRequest(I recordId) {
+        this.recordId = checkNotNull(recordId);
+    }
+
+    @Override
+    public I getRecordId() {
+        return recordId;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) { return true; }
+        if (o == null || getClass() != o.getClass()) { return false; }
+
+        RecordReadRequest<?> that = (RecordReadRequest<?>) o;
+
+        return recordId.equals(that.recordId);
+    }
+
+    @Override
+    public int hashCode() {
+        return recordId.hashCode();
+    }
 }
