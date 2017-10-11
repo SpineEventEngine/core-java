@@ -30,12 +30,12 @@ import java.util.Iterator;
  * The base interface for storages.
  *
  * @param <I> the type of identifiers
- * @param <R> the type of records
- * @param <Q> the type of {@linkplain ReadRequest read requests}
+ * @param <M> the type of records
+ * @param <R> the type of {@linkplain ReadRequest read requests}
  * @author Alexander Yevsyukov
  */
 @SPI
-public interface Storage<I, R extends Message, Q extends ReadRequest<I>> extends AutoCloseable {
+public interface Storage<I, M extends Message, R extends ReadRequest<I>> extends AutoCloseable {
 
     /**
      * Verifies whether the storage is multitenant.
@@ -58,7 +58,7 @@ public interface Storage<I, R extends Message, Q extends ReadRequest<I>> extends
      *         or {@code Optional.absent()} if there is no record matching this request
      * @throws IllegalStateException if the storage was closed before
      */
-    Optional<R> read(Q request);
+    Optional<M> read(R request);
 
     /**
      * Writes a record into the storage.
@@ -69,7 +69,7 @@ public interface Storage<I, R extends Message, Q extends ReadRequest<I>> extends
      * @param record a record to store
      * @throws IllegalStateException if the storage is closed
      */
-    void write(I id, R record);
+    void write(I id, M record);
 
     /**
      * Closes the storage.

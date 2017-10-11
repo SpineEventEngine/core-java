@@ -28,12 +28,12 @@ import com.google.protobuf.Message;
  * <p>A storage can read and write messages of the given type.
  *
  * @param <I> the type of IDs of storage records
- * @param <R> the type of records kept in the storage
- * @param <Q> the type of {@linkplain ReadRequest read requests} for the storage
+ * @param <M> the type of records kept in the storage
+ * @param <R> the type of {@linkplain ReadRequest read requests} for the storage
  * @author Alexander Yevsyukov
  */
-public abstract class AbstractStorage<I, R extends Message, Q extends ReadRequest<I>>
-                implements Storage<I, R, Q> {
+public abstract class AbstractStorage<I, M extends Message, R extends ReadRequest<I>>
+                implements Storage<I, M, R> {
 
     private final boolean multitenant;
     private boolean open = true;

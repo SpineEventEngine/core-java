@@ -29,8 +29,8 @@ import io.spine.server.entity.LifecycleFlags;
  *
  * @author Alexander Yevsyukov
  */
-public interface StorageWithLifecycleFlags<I, R extends Message, Q extends ReadRequest<I>>
-        extends Storage<I, R, Q> {
+public interface StorageWithLifecycleFlags<I, M extends Message, R extends ReadRequest<I>>
+        extends Storage<I, M, R> {
 
     /**
      * Reads the visibility status for the entity with the passed ID.
