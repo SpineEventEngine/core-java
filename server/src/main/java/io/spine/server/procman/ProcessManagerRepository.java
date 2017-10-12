@@ -134,7 +134,7 @@ public abstract class ProcessManagerRepository<I,
                                                            rejDispatcher.getExternalDispatcher());
         final boolean handlesDomesticEvents = !getMessageClasses().isEmpty();
         final boolean handlesExternalEvents = !getExternalEventDispatcher().getMessageClasses()
-                                                                          .isEmpty();
+                                                                           .isEmpty();
 
         final boolean subscribesToEvents = handlesDomesticEvents || handlesExternalEvents;
         final boolean reactsUponRejections = handlesDomesticRejections || handlesExternalRejections;
