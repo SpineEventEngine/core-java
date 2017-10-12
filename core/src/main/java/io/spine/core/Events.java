@@ -36,6 +36,7 @@ import java.util.UUID;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.util.Exceptions.newIllegalStateException;
 import static io.spine.validate.Validate.checkNotEmptyOrBlank;
 
 /**
@@ -215,6 +216,52 @@ public final class Events {
     public static boolean isExternal(EventContext context) {
         checkNotNull(context);
         return context.getExternal();
+    }
+
+    /**
+     * Obtains the compacted version of the event, which should be used for storing.
+     *
+     * <p>A compacted version doesn't contain:
+     * <ul>
+     *     <li>the enrichment from the event context;</li>
+     *     <li>the enrichment from the origin;</li>
+     *     <li>nested origins if the origin is {@link EventContext}.</li>
+     * </ul>
+     *
+     * @param event the event to compact
+     * @return the compacted event
+     */
+    @Internal
+    public static Event compact(Event event) {
+        final EventContext context = event.getContext();
+        final EventContext.Builder resultContext = context.toBuilder()
+                                                          .clearEnrichment();
+        final EventContext.OriginCase originCase = resultContext.getOriginCase();
+        switch (originCase) {
+            case EVENT_CONTEXT:
+                resultContext.setEventContext(context.getEventContext()
+                                                     .toBuilder()
+                                                     .clearOrigin()
+                                                     .clearEnrichment());
+                break;
+            case REJECTION_CONTEXT:
+                resultContext.setRejectionContext(context.getRejectionContext()
+                                                         .toBuilder()
+                                                         .clearEnrichment());
+                break;
+            case COMMAND_CONTEXT:
+                // Nothing to remove.
+                break;
+            case ORIGIN_NOT_SET:
+                // Does nothing because there is no origin for this event.
+                break;
+            default:
+                throw newIllegalStateException("Unsupported origin case encountered: %s",
+                                               originCase);
+        }
+        return event.toBuilder()
+                    .setContext(resultContext)
+                    .build();
     }
 
     /**
