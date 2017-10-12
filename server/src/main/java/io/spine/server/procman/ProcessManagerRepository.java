@@ -30,6 +30,8 @@ import io.spine.core.EventEnvelope;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
 import io.spine.server.BoundedContext;
+import io.spine.server.bus.Bus;
+import io.spine.server.bus.MessageDispatcher;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcherDelegate;
@@ -52,6 +54,7 @@ import javax.annotation.CheckReturnValue;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * The abstract base for Process Managers repositories.
@@ -100,36 +103,70 @@ public abstract class ProcessManagerRepository<I,
      *
      * <p>Registers with the {@code CommandBus} for dispatching commands
      * (via {@linkplain DelegatingCommandDispatcher delegating dispatcher}).
+     *
+     * <p>Registers with the {@code IntegrationBus} for dispatching external events and rejections.
+     *
+     * <p>Ensures there is at least one message handler declared by the class of the managed
+     * process manager:
+     *
+     * <ul>
+     *     <li>command handler methods;</li>
+     *     <li>domestic or external event reactor methods;</li>
+     *     <li>domestic or external rejection reactor methods.</li>
+     * </ul>
+     *
+     * <p>Throws an {@code IllegalStateException} otherwise.
      */
+    @SuppressWarnings("MethodWithMoreThanThreeNegations")   // It's fine, as reflects the logic.
     @Override
     public void onRegistered() {
         super.onRegistered();
+
         final BoundedContext boundedContext = getBoundedContext();
-
-        final DelegatingCommandDispatcher<I> commandDispatcher =
-                DelegatingCommandDispatcher.of(this);
-
-        if (!commandDispatcher.getMessageClasses()
-                              .isEmpty()) {
-            boundedContext.getCommandBus()
-                          .register(commandDispatcher);
-        }
-
-        final DelegatingRejectionDispatcher<I> rejectionDispatcher =
+        final DelegatingRejectionDispatcher<I> rejDispatcher =
                 DelegatingRejectionDispatcher.of(this);
-        if (!rejectionDispatcher.getMessageClasses()
-                                .isEmpty()) {
-            boundedContext.getRejectionBus()
-                          .register(rejectionDispatcher);
+
+        final boolean handlesCommands = register(boundedContext.getCommandBus(),
+                                                 DelegatingCommandDispatcher.of(this));
+        final boolean handlesDomesticRejections = register(boundedContext.getRejectionBus(),
+                                                           rejDispatcher);
+        final boolean handlesExternalRejections = register(boundedContext.getIntegrationBus(),
+                                                           rejDispatcher.getExternalDispatcher());
+        final boolean handlesDomesticEvents = !getMessageClasses().isEmpty();
+        final boolean handlesExternalEvents = !getExternalEventDispatcher().getMessageClasses()
+                                                                          .isEmpty();
+
+        final boolean subscribesToEvents = handlesDomesticEvents || handlesExternalEvents;
+        final boolean reactsUponRejections = handlesDomesticRejections || handlesExternalRejections;
+
+        if (!handlesCommands && !subscribesToEvents && !reactsUponRejections) {
+            throw newIllegalStateException(
+                    "Process managers of the repository %s have no command handlers, " +
+                            "and do not react upon any rejections or events.", this);
         }
 
-        final ExternalMessageDispatcher<I> extRejectionDispatcher =
-                rejectionDispatcher.getExternalDispatcher();
-        if (!extRejectionDispatcher.getMessageClasses()
-                                   .isEmpty()) {
-            boundedContext.getIntegrationBus()
-                          .register(extRejectionDispatcher);
+    }
+
+    /**
+     * Registers the given dispatcher in the bus if there is at least one message class declared
+     * for dispatching by the dispatcher.
+     *
+     * @param bus        the bus to register dispatchers in
+     * @param dispatcher the dispatcher to register
+     * @param <D>        the type of dispatcher
+     * @return
+     * {@code true} if there are message classes to dispatch by the given dispatchers,
+     * {@code false} otherwise
+     */
+    @SuppressWarnings("unchecked")  // To avoid a long "train" of generic parameter definitions.
+    private static <D extends MessageDispatcher<?, ?, ?>> boolean register(Bus<?, ?, ?, D> bus,
+                                                                           D dispatcher) {
+        final boolean hasHandlerMethods = !dispatcher.getMessageClasses()
+                                                     .isEmpty();
+        if (hasHandlerMethods) {
+            bus.register(dispatcher);
         }
+        return hasHandlerMethods;
     }
 
     /**

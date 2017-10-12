@@ -252,4 +252,25 @@ public class ProcessManagerRepositoryTestEnv {
                     .build();
         }
     }
+
+    /**
+     * A process manager, that handles no messages.
+     *
+     * <p>It should not be able to register repositories for such classes.
+     */
+    public static class SensoryDeprivedProcessManager
+            extends ProcessManager<ProjectId, Project, ProjectVBuilder> {
+
+        protected SensoryDeprivedProcessManager(ProjectId id) {
+            super(id);
+        }
+    }
+
+    /**
+     * A repository, that cannot be registered in {@code BoundedContext},
+     * since no messages are declared to handle by the {@linkplain SensoryDeprivedProcessManager
+     * process manager class}.
+     */
+    public static class SensoryDeprivedPmRepository
+            extends ProcessManagerRepository<ProjectId, SensoryDeprivedProcessManager, Project> {}
 }
