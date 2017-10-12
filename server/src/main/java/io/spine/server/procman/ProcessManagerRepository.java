@@ -154,9 +154,8 @@ public abstract class ProcessManagerRepository<I,
      * @param bus        the bus to register dispatchers in
      * @param dispatcher the dispatcher to register
      * @param <D>        the type of dispatcher
-     * @return
-     * {@code true} if there are message classes to dispatch by the given dispatchers,
-     * {@code false} otherwise
+     * @return {@code true} if there are message classes to dispatch by the given dispatchers,
+     *         {@code false} otherwise
      */
     @SuppressWarnings("unchecked")  // To avoid a long "train" of generic parameter definitions.
     private static <D extends MessageDispatcher<?, ?, ?>> boolean register(Bus<?, ?, ?, D> bus,
