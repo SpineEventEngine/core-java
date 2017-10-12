@@ -229,4 +229,25 @@ public class ProjectionRepositoryTestEnv {
                                .build();
         }
     }
+
+    /**
+     * A projection, that handles no messages.
+     *
+     * <p>It should not be able to register repositories for such classes.
+     */
+    public static class SensoryDeprivedProjection
+            extends Projection<ProjectId, Project, ProjectVBuilder> {
+
+        protected SensoryDeprivedProjection(ProjectId id) {
+            super(id);
+        }
+    }
+
+    /**
+     * A repository, that cannot be registered in {@code BoundedContext},
+     * since no messages are declared to handle by the {@linkplain SensoryDeprivedProjection
+     * projection class}.
+     */
+    public static class SensoryDeprivedProjectionRepository
+            extends ProjectionRepository<ProjectId, SensoryDeprivedProjection, Project> {}
 }

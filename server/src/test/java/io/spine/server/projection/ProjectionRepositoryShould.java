@@ -42,6 +42,7 @@ import io.spine.server.entity.RecordBasedRepositoryShould;
 import io.spine.server.entity.given.Given;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.GivenEventMessage;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.NoOpTaskNamesRepository;
+import io.spine.server.projection.given.ProjectionRepositoryTestEnv.SensoryDeprivedProjectionRepository;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.TestProjection;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.TestProjectionRepository;
 import io.spine.server.storage.RecordStorage;
@@ -320,5 +321,15 @@ public class ProjectionRepositoryShould
     @Test
     public void expose_bounded_context_to_package() {
         assertNotNull(repository().boundedContext());
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void throw_exception_on_attempt_to_register_in_bc_with_no_messages_handled() {
+        final SensoryDeprivedProjectionRepository repo = new SensoryDeprivedProjectionRepository();
+        final BoundedContext boundedContext = BoundedContext.newBuilder()
+                                                            .setMultitenant(false)
+                                                            .build();
+        repo.setBoundedContext(boundedContext);
+        repo.onRegistered();
     }
 }
