@@ -21,7 +21,6 @@
 package io.spine.core.given;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.Message;
 import io.spine.core.Enrichment;
 
 import static com.google.protobuf.Any.pack;
@@ -40,8 +39,8 @@ public class GivenEnrichment {
     }
 
     /**
-     * Creates a non-{@linkplain io.spine.validate.Validate#isDefault(Message) default}
-     * {@link Enrichment}.
+     * Creates a non-{@linkplain io.spine.validate.Validate#isDefault(com.google.protobuf.Message)
+     * default} {@link Enrichment}.
      *
      * @return a new enrichment instance
      */
