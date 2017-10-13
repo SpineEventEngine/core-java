@@ -290,29 +290,6 @@ public class EventStoreShould {
         assertTrue(isDefault(loadedOriginContext.getEnrichment()));
     }
 
-    @Test
-    public void not_store_nested_origins_for_EventContext_origin() {
-        final EventContext.Builder context = EventContext.newBuilder()
-                                                         .setEnrichment(enabledEnrichment());
-        final EventContext originContext = EventContext.newBuilder()
-                                                       .setEventContext(context)
-                                                       .build();
-        final Event event = projectCreated(Time.getCurrentTime());
-        final Event enriched = event.toBuilder()
-                                    .setContext(event.getContext()
-                                                     .toBuilder()
-                                                     .setEventContext(originContext))
-                                    .build();
-        eventStore.append(enriched);
-        final MemoizingObserver<Event> observer = memoizingObserver();
-        eventStore.read(EventStreamQuery.getDefaultInstance(), observer);
-        final EventContext loadedOriginContext = observer.responses()
-                                                         .get(0)
-                                                         .getContext()
-                                                         .getEventContext();
-        assertTrue(isDefault(loadedOriginContext.getEventContext()));
-    }
-
     /*
      * Test environment
      *********************/

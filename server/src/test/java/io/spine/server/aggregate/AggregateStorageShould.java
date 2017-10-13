@@ -408,30 +408,6 @@ public abstract class AggregateStorageShould
         assertTrue(isDefault(loadedOrigin.getEnrichment()));
     }
 
-    @Test
-    public void not_store_nested_origin_for_EventContext_origin() {
-        final EventContext nestedOrigin = EventContext.newBuilder()
-                                                      .setEnrichment(enabledEnrichment())
-                                                      .build();
-        final EventContext origin = EventContext.newBuilder()
-                                                .setEventContext(nestedOrigin)
-                                                .build();
-        final EventContext context = EventContext.newBuilder()
-                                                 .setEventContext(origin)
-                                                 .build();
-        final Event event = Event.newBuilder()
-                                 .setContext(context)
-                                 .setMessage(Any.getDefaultInstance())
-                                 .build();
-        storage.writeEvent(id, event);
-        final EventContext loadedOrigin = storage.read(newReadRequest(id))
-                                                 .get()
-                                                 .getEvent(0)
-                                                 .getContext()
-                                                 .getEventContext();
-        assertTrue(isDefault(loadedOrigin.getEventContext()));
-    }
-
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_try_to_write_event_count_to_closed_storage() {
         close(storage);

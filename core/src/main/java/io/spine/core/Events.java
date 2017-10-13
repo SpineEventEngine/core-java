@@ -224,9 +224,11 @@ public final class Events {
      * <p>A compacted version doesn't contain:
      * <ul>
      *     <li>the enrichment from the event context;</li>
-     *     <li>the enrichment from the origin;</li>
-     *     <li>nested origins if the origin is {@link EventContext}.</li>
+     *     <li>the enrichment from the first-level origin.</li>
      * </ul>
+     *
+     * <p>Enrichments will not be removed from second-level and more deeper origins,
+     * because it's a heavy performance operation.
      *
      * @param event the event to compact
      * @return the compacted event
@@ -241,7 +243,6 @@ public final class Events {
             case EVENT_CONTEXT:
                 resultContext.setEventContext(context.getEventContext()
                                                      .toBuilder()
-                                                     .clearOrigin()
                                                      .clearEnrichment());
                 break;
             case REJECTION_CONTEXT:
