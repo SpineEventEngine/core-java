@@ -21,6 +21,7 @@
 package io.spine.core.given;
 
 import com.google.protobuf.Any;
+import com.google.protobuf.Message;
 import io.spine.core.Enrichment;
 
 import static com.google.protobuf.Any.pack;
@@ -39,16 +40,12 @@ public class GivenEnrichment {
     }
 
     /**
-     * Creates a new enabled {@link Enrichment}.
+     * Creates a non-{@linkplain io.spine.validate.Validate#isDefault(Message) default}
+     * {@link Enrichment}.
      *
-     * <p>A result will contain an enrichment {@linkplain Enrichment#getContainer() instruction}.
-     *
-     * <p>An enrichment instruction is invalid and has random values.
-     *
-     * @return an enabled enrichment
-     * @see Enrichment.ModeCase#getDoNotEnrich()
+     * @return a new enrichment instance
      */
-    public static Enrichment enabledEnrichment() {
+    public static Enrichment newEnrichment() {
         final String key = newUuid();
         final Any value = pack(toMessage(newUuid()));
         final Enrichment result = Enrichment.newBuilder()

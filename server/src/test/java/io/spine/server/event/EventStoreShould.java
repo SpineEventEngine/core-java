@@ -50,7 +50,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static com.google.common.collect.Sets.newConcurrentHashSet;
 import static com.google.protobuf.util.Timestamps.add;
 import static com.google.protobuf.util.Timestamps.subtract;
-import static io.spine.core.given.GivenEnrichment.enabledEnrichment;
+import static io.spine.core.given.GivenEnrichment.newEnrichment;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.test.Verify.assertContainsAll;
 import static io.spine.test.Verify.assertSize;
@@ -238,7 +238,7 @@ public class EventStoreShould {
         final Event enriched = event.toBuilder()
                                     .setContext(event.getContext()
                                                      .toBuilder()
-                                                     .setEnrichment(enabledEnrichment()))
+                                                     .setEnrichment(newEnrichment()))
                                     .build();
         eventStore.append(enriched);
         final MemoizingObserver<Event> observer = memoizingObserver();
@@ -252,7 +252,7 @@ public class EventStoreShould {
     @Test
     public void not_store_enrichment_for_origin_of_RejectionContext_type() {
         final RejectionContext originContext = RejectionContext.newBuilder()
-                                                               .setEnrichment(enabledEnrichment())
+                                                               .setEnrichment(newEnrichment())
                                                                .build();
         final Event event = projectCreated(Time.getCurrentTime());
         final Event enriched = event.toBuilder()
@@ -273,7 +273,7 @@ public class EventStoreShould {
     @Test
     public void not_store_enrichment_for_origin_of_EventContext_type() {
         final EventContext.Builder originContext = EventContext.newBuilder()
-                                                               .setEnrichment(enabledEnrichment());
+                                                               .setEnrichment(newEnrichment());
         final Event event = projectCreated(Time.getCurrentTime());
         final Event enriched = event.toBuilder()
                                     .setContext(event.getContext()

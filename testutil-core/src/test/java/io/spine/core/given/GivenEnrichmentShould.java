@@ -20,15 +20,11 @@
 
 package io.spine.core.given;
 
-import com.google.protobuf.Any;
 import io.spine.core.Enrichment;
 import org.junit.Test;
 
-import java.util.Map;
-
-import static io.spine.core.given.GivenEnrichment.enabledEnrichment;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
-import static io.spine.test.Verify.assertNotEmpty;
+import static io.spine.validate.Validate.isDefault;
 import static org.junit.Assert.assertFalse;
 
 /**
@@ -42,11 +38,8 @@ public class GivenEnrichmentShould {
     }
 
     @Test
-    public void create_enabled_enrichment() {
-        final Enrichment enrichment = enabledEnrichment();
-        assertFalse(enrichment.getDoNotEnrich());
-        final Map<String, Any> enrichmentInstructions = enrichment.getContainer()
-                                                                  .getItems();
-        assertNotEmpty(enrichmentInstructions);
+    public void create_non_default_enrichment() {
+        final Enrichment enrichment = enrichment();
+        assertFalse(isDefault(enrichment));
     }
 }
