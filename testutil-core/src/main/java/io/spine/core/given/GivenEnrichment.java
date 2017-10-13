@@ -51,10 +51,11 @@ public class GivenEnrichment {
     public static Enrichment enabledEnrichment() {
         final String key = newUuid();
         final Any value = pack(toMessage(newUuid()));
-        return Enrichment.newBuilder()
-                         .setContainer(Enrichment.Container.newBuilder()
-                                                           .putItems(key, value)
-                                                           .build())
-                         .build();
+        final Enrichment result = Enrichment.newBuilder()
+                                            .setContainer(Enrichment.Container.newBuilder()
+                                                                              .putItems(key, value)
+                                                                              .build())
+                                            .build();
+        return result;
     }
 }
