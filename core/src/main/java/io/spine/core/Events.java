@@ -256,7 +256,7 @@ public final class Events {
                 // Does nothing because there is no origin for this event.
                 break;
             default:
-                throw newIllegalStateException("Unsupported origin case encountered: %s",
+                throw newIllegalStateException("Unsupported origin case is encountered: %s",
                                                originCase);
         }
         return event.toBuilder()
