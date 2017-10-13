@@ -27,6 +27,8 @@ import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.spine.core.Event;
+import io.spine.core.EventContext;
+import io.spine.core.RejectionContext;
 import io.spine.core.Version;
 import io.spine.server.aggregate.given.Given.StorageRecord;
 import io.spine.server.command.TestEventFactory;
@@ -52,10 +54,12 @@ import static com.google.protobuf.util.Timestamps.add;
 import static io.spine.Identifier.newUuid;
 import static io.spine.core.Versions.increment;
 import static io.spine.core.Versions.zero;
+import static io.spine.core.given.GivenEnrichment.enabledEnrichment;
 import static io.spine.server.aggregate.given.Given.StorageRecords.sequenceFor;
 import static io.spine.server.command.TestEventFactory.newInstance;
 import static io.spine.time.Durations2.seconds;
 import static io.spine.time.Time.getCurrentTime;
+import static io.spine.validate.Validate.isDefault;
 import static java.lang.Integer.MAX_VALUE;
 import static java.util.Collections.reverse;
 import static org.junit.Assert.assertEquals;
@@ -345,6 +349,89 @@ public abstract class AggregateStorageShould
         assertEquals(eventCountAfterSnapshot, stateRecord.getEventCount());
     }
 
+    @Test
+    public void not_store_enrichment_for_EventContext() {
+        final EventContext enrichedContext = EventContext.newBuilder()
+                                                         .setEnrichment(enabledEnrichment())
+                                                         .build();
+        final Event event = Event.newBuilder()
+                                 .setContext(enrichedContext)
+                                 .setMessage(Any.getDefaultInstance())
+                                 .build();
+        storage.writeEvent(id, event);
+        final EventContext loadedContext = storage.read(newReadRequest(id))
+                                                  .get()
+                                                  .getEvent(0)
+                                                  .getContext();
+        assertTrue(isDefault(loadedContext.getEnrichment()));
+    }
+
+    @Test
+    public void not_store_enrichment_for_origin_of_RejectionContext_type() {
+        final RejectionContext origin = RejectionContext.newBuilder()
+                                                        .setEnrichment(enabledEnrichment())
+                                                        .build();
+        final EventContext context = EventContext.newBuilder()
+                                                 .setRejectionContext(origin)
+                                                 .build();
+        final Event event = Event.newBuilder()
+                                 .setContext(context)
+                                 .setMessage(Any.getDefaultInstance())
+                                 .build();
+        storage.writeEvent(id, event);
+        final RejectionContext loadedOrigin = storage.read(newReadRequest(id))
+                                                     .get()
+                                                     .getEvent(0)
+                                                     .getContext()
+                                                     .getRejectionContext();
+        assertTrue(isDefault(loadedOrigin.getEnrichment()));
+    }
+
+    @Test
+    public void not_store_enrichment_for_origin_of_EventContext_type() {
+        final EventContext origin = EventContext.newBuilder()
+                                                .setEnrichment(enabledEnrichment())
+                                                .build();
+        final EventContext context = EventContext.newBuilder()
+                                                 .setEventContext(origin)
+                                                 .build();
+        final Event event = Event.newBuilder()
+                                 .setContext(context)
+                                 .setMessage(Any.getDefaultInstance())
+                                 .build();
+        storage.writeEvent(id, event);
+        final EventContext loadedOrigin = storage.read(newReadRequest(id))
+                                                 .get()
+                                                 .getEvent(0)
+                                                 .getContext()
+                                                 .getEventContext();
+        assertTrue(isDefault(loadedOrigin.getEnrichment()));
+    }
+
+    @Test
+    public void not_store_nested_origin_for_EventContext_origin() {
+        final EventContext nestedOrigin = EventContext.newBuilder()
+                                                      .setEnrichment(enabledEnrichment())
+                                                      .build();
+        final EventContext origin = EventContext.newBuilder()
+                                                .setEventContext(nestedOrigin)
+                                                .build();
+        final EventContext context = EventContext.newBuilder()
+                                                 .setEventContext(origin)
+                                                 .build();
+        final Event event = Event.newBuilder()
+                                 .setContext(context)
+                                 .setMessage(Any.getDefaultInstance())
+                                 .build();
+        storage.writeEvent(id, event);
+        final EventContext loadedOrigin = storage.read(newReadRequest(id))
+                                                 .get()
+                                                 .getEvent(0)
+                                                 .getContext()
+                                                 .getEventContext();
+        assertTrue(isDefault(loadedOrigin.getEventContext()));
+    }
+
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_try_to_write_event_count_to_closed_storage() {
         close(storage);
@@ -402,18 +489,18 @@ public abstract class AggregateStorageShould
     }
 
     private Iterator<AggregateEventRecord> historyBackward() {
-        final AggregateReadRequest<ProjectId> readRequest = new AggregateReadRequest<>(id, MAX_VALUE);
+        final AggregateReadRequest<ProjectId> readRequest = newReadRequest(id);
         return storage.historyBackward(readRequest);
     }
 
     protected static final Function<AggregateEventRecord, Event> TO_EVENT =
             new Function<AggregateEventRecord, Event>() {
-        @Nullable // return null because an exception won't be propagated in this case
-        @Override
-        public Event apply(@Nullable AggregateEventRecord input) {
-            return (input == null) ? null : input.getEvent();
-        }
-    };
+                @Nullable // return null because an exception won't be propagated in this case
+                @Override
+                public Event apply(@Nullable AggregateEventRecord input) {
+                    return (input == null) ? null : input.getEvent();
+                }
+            };
 
     private static Snapshot newSnapshot(Timestamp time) {
         return Snapshot.newBuilder()
