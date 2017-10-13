@@ -36,7 +36,9 @@ import java.util.Comparator;
 import static io.spine.core.Events.compact;
 
 /**
- * Stores an event.
+ * An entity for storing an event.
+ *
+ * <p>The entity {@linkplain Events#compact(Event) compacts} an underlying event.
  *
  * @author Alexander Yevsyukov
  * @author Dmytro Dashenkov
