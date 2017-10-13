@@ -34,7 +34,7 @@ import "google/protobuf/any.proto";
 // Attributes with additional information (enrichment) for an outer message.
 //
 // A message can be enriched with one or more messages. For example, an `Event` can be enriched with
-// information for easier building of user interface projections. A `Rejection` can be eriched with
+// information for easier building of user interface projections. A `Rejection` can be enriched with
 // additional information on why the command was rejected.
 //
 // If message enrichment should not be performed (e.g. because of performance or security
