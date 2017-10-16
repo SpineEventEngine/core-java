@@ -219,22 +219,25 @@ public final class Events {
     }
 
     /**
-     * Obtains the compacted version of the event, which should be used for storing.
+     * Clears enrichments of the specified event.
      *
-     * <p>A compacted version doesn't contain:
+     * <p>This method may be helpful to decrease a size of an event,
+     * when enrichments aren't important.
+     *
+     * <p>A result won't contain:
      * <ul>
      *     <li>the enrichment from the event context;</li>
      *     <li>the enrichment from the first-level origin.</li>
      * </ul>
      *
-     * <p>Enrichments will not be removed from second-level and more deeper origins,
+     * <p>Enrichments will not be removed from second-level and deeper origins,
      * because it's a heavy performance operation.
      *
-     * @param event the event to compact
-     * @return the compacted event
+     * @param event the event to clear enrichments
+     * @return the event without enrichments
      */
     @Internal
-    public static Event compact(Event event) {
+    public static Event clearEnrichments(Event event) {
         final EventContext context = event.getContext();
         final EventContext.Builder resultContext = context.toBuilder()
                                                           .clearEnrichment();

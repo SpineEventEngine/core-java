@@ -33,12 +33,12 @@ import io.spine.type.TypeName;
 import javax.annotation.Nullable;
 import java.util.Comparator;
 
-import static io.spine.core.Events.compact;
+import static io.spine.core.Events.clearEnrichments;
 
 /**
  * An entity for storing an event.
  *
- * <p>The entity {@linkplain Events#compact(Event) compacts} an underlying event.
+ * <p>An underlying event doesn't contain {@linkplain Events#clearEnrichments(Event) enrichments}.
  *
  * @author Alexander Yevsyukov
  * @author Dmytro Dashenkov
@@ -88,8 +88,8 @@ public class EEntity extends AbstractEntity<EventId, Event> {
 
     EEntity(Event event) {
         this(event.getId());
-        final Event compactedEvent = compact(event);
-        updateState(compactedEvent);
+        final Event eventWithoutEnrichments = clearEnrichments(event);
+        updateState(eventWithoutEnrichments);
     }
 
     /**
