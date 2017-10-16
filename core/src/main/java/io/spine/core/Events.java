@@ -221,8 +221,7 @@ public final class Events {
     /**
      * Clears enrichments of the specified event.
      *
-     * <p>This method may be helpful to decrease a size of an event,
-     * when enrichments aren't important.
+     * <p>Use this method to decrease a size of an event, if enrichments aren't important.
      *
      * <p>A result won't contain:
      * <ul>
