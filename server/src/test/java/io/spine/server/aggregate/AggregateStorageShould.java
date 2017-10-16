@@ -54,7 +54,7 @@ import static com.google.protobuf.util.Timestamps.add;
 import static io.spine.Identifier.newUuid;
 import static io.spine.core.Versions.increment;
 import static io.spine.core.Versions.zero;
-import static io.spine.core.given.GivenEnrichment.newEnrichment;
+import static io.spine.core.given.GivenEnrichment.withOneAttribute;
 import static io.spine.server.aggregate.given.Given.StorageRecords.sequenceFor;
 import static io.spine.server.command.TestEventFactory.newInstance;
 import static io.spine.time.Durations2.seconds;
@@ -352,7 +352,7 @@ public abstract class AggregateStorageShould
     @Test
     public void not_store_enrichment_for_EventContext() {
         final EventContext enrichedContext = EventContext.newBuilder()
-                                                         .setEnrichment(newEnrichment())
+                                                         .setEnrichment(withOneAttribute())
                                                          .build();
         final Event event = Event.newBuilder()
                                  .setContext(enrichedContext)
@@ -369,7 +369,7 @@ public abstract class AggregateStorageShould
     @Test
     public void not_store_enrichment_for_origin_of_RejectionContext_type() {
         final RejectionContext origin = RejectionContext.newBuilder()
-                                                        .setEnrichment(newEnrichment())
+                                                        .setEnrichment(withOneAttribute())
                                                         .build();
         final EventContext context = EventContext.newBuilder()
                                                  .setRejectionContext(origin)
@@ -390,7 +390,7 @@ public abstract class AggregateStorageShould
     @Test
     public void not_store_enrichment_for_origin_of_EventContext_type() {
         final EventContext origin = EventContext.newBuilder()
-                                                .setEnrichment(newEnrichment())
+                                                .setEnrichment(withOneAttribute())
                                                 .build();
         final EventContext context = EventContext.newBuilder()
                                                  .setEventContext(origin)

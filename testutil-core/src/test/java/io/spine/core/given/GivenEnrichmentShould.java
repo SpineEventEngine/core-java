@@ -20,13 +20,15 @@
 
 package io.spine.core.given;
 
+import com.google.protobuf.Any;
 import io.spine.core.Enrichment;
 import org.junit.Test;
 
-import static io.spine.core.given.GivenEnrichment.newEnrichment;
+import java.util.Map;
+
+import static io.spine.core.given.GivenEnrichment.withOneAttribute;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
-import static io.spine.validate.Validate.isDefault;
-import static org.junit.Assert.assertFalse;
+import static io.spine.test.Verify.assertSize;
 
 /**
  * @author Dmytro Grankin
@@ -39,8 +41,10 @@ public class GivenEnrichmentShould {
     }
 
     @Test
-    public void create_non_default_enrichment() {
-        final Enrichment enrichment = newEnrichment();
-        assertFalse(isDefault(enrichment));
+    public void create_enrichment_with_one_attribute() {
+        final Enrichment enrichment = withOneAttribute();
+        final Map<String, Any> enrichmentAttributes = enrichment.getContainer()
+                                                                .getItems();
+        assertSize(1, enrichmentAttributes);
     }
 }

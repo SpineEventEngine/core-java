@@ -28,7 +28,7 @@ import static io.spine.Identifier.newUuid;
 import static io.spine.protobuf.TypeConverter.toMessage;
 
 /**
- * Factory methods to create {@code Enrichment} instances for test purposes.
+ * Factory methods to create {@code Enrichment} instances in test purposes.
  *
  * @author Dmytro Grankin
  */
@@ -39,12 +39,13 @@ public class GivenEnrichment {
     }
 
     /**
-     * Creates a non-{@linkplain io.spine.validate.Validate#isDefault(com.google.protobuf.Message)
-     * default} {@link Enrichment}.
+     * Creates a new {@link Enrichment} with one {@linkplain Enrichment#getContainer() attribute}.
+     *
+     * <p>An enrichment attribute is invalid and has random values.
      *
      * @return a new enrichment instance
      */
-    public static Enrichment newEnrichment() {
+    public static Enrichment withOneAttribute() {
         final String key = newUuid();
         final Any value = pack(toMessage(newUuid()));
         final Enrichment result = Enrichment.newBuilder()
