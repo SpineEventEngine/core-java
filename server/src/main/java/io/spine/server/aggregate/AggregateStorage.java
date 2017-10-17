@@ -38,6 +38,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.protobuf.TextFormat.shortDebugString;
 import static com.google.protobuf.util.Timestamps.checkValid;
+import static io.spine.core.Events.clearEnrichments;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static io.spine.validate.Validate.checkNotEmptyOrBlank;
 
@@ -156,13 +157,17 @@ public abstract class AggregateStorage<I>
     /**
      * Writes an event to the storage by an aggregate ID.
      *
+     * <p>Before the storing, {@linkplain io.spine.core.Events#clearEnrichments(Event) enrichments}
+     * will be removed from the event.
+     *
      * @param id    the aggregate ID
      * @param event the event to write
      */
     void writeEvent(I id, Event event) {
         checkNotClosedAndArguments(id, event);
 
-        final AggregateEventRecord record = toStorageRecord(event);
+        final Event eventWithoutEnrichments = clearEnrichments(event);
+        final AggregateEventRecord record = toStorageRecord(eventWithoutEnrichments);
         writeRecord(id, record);
     }
 
