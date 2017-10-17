@@ -34,9 +34,8 @@ import static io.spine.protobuf.TypeConverter.toMessage;
  */
 public class GivenEnrichment {
 
-    private GivenEnrichment() {
-        // Prevent instantiation of this utility class.
-    }
+    /** Prevents instantiation of this utility class. */
+    private GivenEnrichment() {}
 
     /**
      * Creates a new {@link Enrichment} with one {@linkplain Enrichment#getContainer() attribute}.
