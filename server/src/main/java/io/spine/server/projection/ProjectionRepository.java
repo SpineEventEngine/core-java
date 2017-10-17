@@ -49,6 +49,7 @@ import javax.annotation.Nullable;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * Abstract base for repositories managing {@link Projection}s.
@@ -88,6 +89,28 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     protected final ProjectionClass<P> getModelClass(Class<P> cls) {
         return (ProjectionClass<P>) Model.getInstance()
                                          .asProjectionClass(cls);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Ensures there is at least one event subscriber method (external or domestic) declared
+     * by the class of the projection. Throws an {@code IllegalStateException} otherwise.
+     */
+    @Override
+    public void onRegistered() {
+        super.onRegistered();
+
+        final boolean noEventSubscriptions = getMessageClasses().isEmpty();
+        if (noEventSubscriptions) {
+            final boolean noExternalSubscriptions = getExternalEventDispatcher().getMessageClasses()
+                                                                                .isEmpty();
+            if (noExternalSubscriptions) {
+                throw newIllegalStateException(
+                        "Projections of the repository %s have neither domestic nor external " +
+                                "event subscriptions.", this);
+            }
+        }
     }
 
     /**

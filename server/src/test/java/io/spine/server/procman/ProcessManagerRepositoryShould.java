@@ -45,6 +45,7 @@ import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived
 import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyDeleted;
 import io.spine.server.event.EventSubscriber;
 import io.spine.server.procman.given.ProcessManagerRepositoryTestEnv;
+import io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.SensoryDeprivedPmRepository;
 import io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.TestProcessManager;
 import io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.TestProcessManagerRepository;
 import io.spine.test.procman.Project;
@@ -270,6 +271,16 @@ public class ProcessManagerRepositoryShould
         assertTrue(delivered.contains(id));
 
         assertTrue(TestProcessManager.processed(rejectionMessage));
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void throw_exception_on_attempt_to_register_in_bc_with_no_messages_handled() {
+        final SensoryDeprivedPmRepository repo = new SensoryDeprivedPmRepository();
+        final BoundedContext boundedContext = BoundedContext.newBuilder()
+                                                   .setMultitenant(false)
+                                                   .build();
+        repo.setBoundedContext(boundedContext);
+        repo.onRegistered();
     }
 
     /**

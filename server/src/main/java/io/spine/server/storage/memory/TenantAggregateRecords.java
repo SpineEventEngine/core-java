@@ -177,19 +177,20 @@ class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEventRecord
         }
     }
 
-    /** Used for sorting by timestamp descending (from newer to older). */
+    /** Used for sorting by version descending (from newer to older). */
     private static class AggregateStorageRecordReverseComparator
             implements Comparator<AggregateEventRecord>, Serializable {
         private static final long serialVersionUID = 0L;
 
         @Override
         public int compare(AggregateEventRecord first, AggregateEventRecord second) {
-            int result = compareTimestamps(first, second);
+            int result = compareVersions(first, second);
 
-            // In case the wall-clock isn't accurate enough, the timestamps may be the same.
-            // In this case, compare the version in a similar fashion.
             if (result == 0) {
-                result = compareVersions(first, second);
+                result = compareTimestamps(first, second);
+
+                // In case the wall-clock isn't accurate enough, the timestamps may be the same.
+                // In this case, compare the record type in a similar fashion.
                 if(result == 0) {
                     result = compareSimilarRecords(first, second);
                 }

@@ -36,6 +36,7 @@ import java.util.UUID;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.util.Exceptions.newIllegalStateException;
 import static io.spine.validate.Validate.checkNotEmptyOrBlank;
 
 /**
@@ -215,6 +216,56 @@ public final class Events {
     public static boolean isExternal(EventContext context) {
         checkNotNull(context);
         return context.getExternal();
+    }
+
+    /**
+     * Clears enrichments of the specified event.
+     *
+     * <p>Use this method to decrease a size of an event, if enrichments aren't important.
+     *
+     * <p>A result won't contain:
+     * <ul>
+     *     <li>the enrichment from the event context;</li>
+     *     <li>the enrichment from the first-level origin.</li>
+     * </ul>
+     *
+     * <p>Enrichments will not be removed from second-level and deeper origins,
+     * because it's a heavy performance operation.
+     *
+     * @param event the event to clear enrichments
+     * @return the event without enrichments
+     */
+    @Internal
+    public static Event clearEnrichments(Event event) {
+        final EventContext context = event.getContext();
+        final EventContext.Builder resultContext = context.toBuilder()
+                                                          .clearEnrichment();
+        final EventContext.OriginCase originCase = resultContext.getOriginCase();
+        switch (originCase) {
+            case EVENT_CONTEXT:
+                resultContext.setEventContext(context.getEventContext()
+                                                     .toBuilder()
+                                                     .clearEnrichment());
+                break;
+            case REJECTION_CONTEXT:
+                resultContext.setRejectionContext(context.getRejectionContext()
+                                                         .toBuilder()
+                                                         .clearEnrichment());
+                break;
+            case COMMAND_CONTEXT:
+                // Nothing to remove.
+                break;
+            case ORIGIN_NOT_SET:
+                // Does nothing because there is no origin for this event.
+                break;
+            default:
+                throw newIllegalStateException("Unsupported origin case is encountered: %s",
+                                               originCase);
+        }
+        final Event result = event.toBuilder()
+                                  .setContext(resultContext)
+                                  .build();
+        return result;
     }
 
     /**
