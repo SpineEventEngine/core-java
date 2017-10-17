@@ -13,7 +13,7 @@ Requires Java 7 or higher.
 The project is under active ongoing development. At this stage, we do not recommend using the framework for production purposes.
 You are welcome to experiment and [provide your feedback][email-developers].
 
-The latest stable version is [0.8.0][latest-release].
+The latest stable version is [0.10.0][latest-release].
 
 Please track our release announcement to be informed about the production version (1.0.0) release.  
 
@@ -24,10 +24,10 @@ In order to add Spine to your project, please add the following code to your `bu
 ```groovy
 buildscript{
     ext {
-        spineVersion = '0.8.0'
-        spinePluginVersion = '0.7.24-SNAPSHOT'
+        spineVersion = '0.10.0'
+        spineModelCompilerVersion = '0.9.41-SNAPSHOT'
 
-        protobufGradlePluginVersion = '0.8.0'
+        protobufGradlePluginVersion = '0.8.3'
 
         spineRepository = 'http://maven.teamdev.com/repository/spine'
         spineSnapshotsRepository = 'http://maven.teamdev.com/repository/spine-snapshots'
@@ -47,13 +47,14 @@ buildscript{
     dependencies {
         // ...
         classpath group: 'com.google.protobuf', name:'protobuf-gradle-plugin', version: protobufGradlePluginVersion        
-        classpath group: 'io.spine.tools', name: 'protobuf-plugin', version: spinePluginVersion
+        classpath group: 'io.spine.tools', name: 'spine-model-compiler', version: spineModelCompilerVersion
+
     }
 }
 
 apply plugin: 'java'
 apply plugin: 'com.google.protobuf'
-apply plugin: 'io.spine.tools.protobuf-plugin'
+apply plugin: 'io.spine.tools.spine-model-compiler'
 
 repositories {
     jcenter()
@@ -67,10 +68,10 @@ dependencies {
     // ...
     
     // Client-side and shared API. 
-    compile group: 'io.spine', name: 'spine-client-core', version: spineVersion
+    compile group: 'io.spine', name: 'spine-client', version: spineVersion
     
     // Add this only for server-side code. 
-    compile group: 'io.spine', name: 'spine-server-core', version: spineVersion
+    compile group: 'io.spine', name: 'spine-server', version: spineVersion
 }
 ```
 There is no Maven support at the moment. 
@@ -85,8 +86,10 @@ If you plan to contribute to the project please visit these pages:
 * [Wiki home][wiki-home]
 
 ## Important Warnings
-* The code annotated with `@Internal` are not parts of public API of the framework. 
-They can be modified without preserving backward compatibility.
+* The code annotated with `@Internal` are not parts of public API of the framework, therefore should
+not be used from outside of the framework.
+* The public API marked as `@Experimental` may be used at own risk; it can change at any time, 
+and has no guarantee of API stability or backward-compatibility.
 * The API annotated with `@SPI` is for those who intend to extend the framework, 
 or provide custom storage implementations. 
 
