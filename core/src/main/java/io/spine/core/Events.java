@@ -262,9 +262,10 @@ public final class Events {
                 throw newIllegalStateException("Unsupported origin case is encountered: %s",
                                                originCase);
         }
-        return event.toBuilder()
-                    .setContext(resultContext)
-                    .build();
+        final Event result = event.toBuilder()
+                                  .setContext(resultContext)
+                                  .build();
+        return result;
     }
 
     /**
