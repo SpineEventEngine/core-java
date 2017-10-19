@@ -96,8 +96,8 @@ or provide custom storage implementations.
 If you need to use API with one of these annotations, please [contact us][email-developers].
 
 [email-developers]: mailto:spine-developers@teamdev.com
-[latest-release]: https://github.com/SpineEventEngine/core-java/releases/tag/0.8.0 
-[spine-site]: https://spine3.org/
+[latest-release]: https://github.com/SpineEventEngine/core-java/releases/tag/0.10.0 
+[spine-site]: https://spine.io/
 [spine-git-book]: https://docs.spine3.org/
 [wiki-home]: https://github.com/SpineEventEngine/core-java/wiki
 [java-code-style]: https://github.com/SpineEventEngine/core-java/wiki/Java-Code-Style 
