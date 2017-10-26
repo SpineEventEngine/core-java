@@ -19,23 +19,24 @@
  */
 package io.spine.server.integration.memory;
 
-import io.spine.server.integration.ExternalMessageClass;
+import io.spine.server.integration.ChannelId;
 import io.spine.server.integration.MessageChannel;
 
 /**
  * An abstract base for in-memory {@linkplain MessageChannel message channels}.
  *
  * @author Alex Tymchenko
+ * @author Dmitriy Ganzha
  */
 abstract class AbstractInMemoryChannel implements MessageChannel {
 
     /**
-     * Message class that defines what messages travel through this channel.
+     * Channel identifier that defines this channel.
      */
-    private final ExternalMessageClass messageClass;
+    private final ChannelId channelId;
 
-    AbstractInMemoryChannel(ExternalMessageClass messageClass) {
-        this.messageClass = messageClass;
+    AbstractInMemoryChannel(ChannelId channelId) {
+        this.channelId = channelId;
     }
 
     /**
@@ -50,7 +51,7 @@ abstract class AbstractInMemoryChannel implements MessageChannel {
     }
 
     @Override
-    public ExternalMessageClass getMessageClass() {
-        return messageClass;
+    public ChannelId getChannelId() {
+        return channelId;
     }
 }

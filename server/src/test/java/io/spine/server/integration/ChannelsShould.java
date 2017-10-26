@@ -17,27 +17,31 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package io.spine.server.integration;
 
+import io.spine.core.Event;
+import io.spine.core.EventClass;
+import org.junit.Test;
+
+import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.junit.Assert.assertEquals;
+
 /**
- * A channel dedicated to exchanging the messages.
- *
- * @author Alex Tymchenko
  * @author Dmitry Ganzha
  */
-public interface MessageChannel extends AutoCloseable {
+public class ChannelsShould {
 
-    /**
-     * Returns the channel identifier.
-     *
-     * @return the channel identifier
-     */
-    ChannelId getChannelId();
+    @Test
+    public void have_private_constructor() {
+        assertHasPrivateParameterlessCtor(Channels.class);
+    }
 
-    /**
-     * Allows to understand whether this channel is stale and can be closed.
-     *
-     * @return {@code true} if the channel is stale, {@code false} otherwise
-     */
-    boolean isStale();
+    @Test
+    public void return_same_channel_id_for_same_message_class() {
+        final EventClass eventClass = EventClass.of(Event.class);
+        final ChannelId firstChannelId = Channels.forMessageType(eventClass);
+        final ChannelId secondChannelId = Channels.forMessageType(eventClass);
+        assertEquals(firstChannelId, secondChannelId);
+    }
 }

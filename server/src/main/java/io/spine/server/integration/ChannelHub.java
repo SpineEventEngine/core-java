@@ -22,7 +22,6 @@ package io.spine.server.integration;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import io.spine.annotation.SPI;
-import io.spine.type.MessageClass;
 
 import java.util.Map;
 import java.util.Set;
@@ -38,13 +37,14 @@ import static java.util.Collections.synchronizedMap;
  * an entity repository.
  *
  * @author Alex Tymchenko
+ * @author Dmitry Ganzha
  */
 @SPI
 public abstract class ChannelHub<C extends MessageChannel> implements AutoCloseable {
 
     private final TransportFactory transportFactory;
-    private final Map<ExternalMessageClass, C> channels =
-            synchronizedMap(Maps.<ExternalMessageClass, C>newHashMap());
+    private final Map<ChannelId, C> channels =
+            synchronizedMap(Maps.<ChannelId, C>newHashMap());
 
     protected ChannelHub(TransportFactory transportFactory) {
         this.transportFactory = transportFactory;
@@ -56,9 +56,9 @@ public abstract class ChannelHub<C extends MessageChannel> implements AutoClosea
      * @param channelKey the channel key to use
      * @return the created channel.
      */
-    protected abstract C newChannel(MessageClass channelKey);
+    protected abstract C newChannel(ChannelId channelKey);
 
-    public synchronized Set<ExternalMessageClass> keys() {
+    public synchronized Set<ChannelId> keys() {
         return ImmutableSet.copyOf(channels.keySet());
     }
 
@@ -71,36 +71,35 @@ public abstract class ChannelHub<C extends MessageChannel> implements AutoClosea
      * @param channelKey the channel key to obtain a channel with
      * @return a channel with the key
      */
-    public synchronized C get(MessageClass channelKey) {
-        final ExternalMessageClass key = ExternalMessageClass.of(channelKey);
-        if(!channels.containsKey(key)) {
-            final C newChannel = newChannel(key);
-            channels.put(key, newChannel);
+    public synchronized C get(ChannelId channelKey) {
+        if(!channels.containsKey(channelKey)) {
+            final C newChannel = newChannel(channelKey);
+            channels.put(channelKey, newChannel);
         }
-        return channels.get(key);
+        return channels.get(channelKey);
     }
 
     /**
      * Closes the stale channels and removes those from the hub.
      */
     public void closeStaleChannels() {
-        final Set<ExternalMessageClass> staleChannels = detectStale();
-        for (ExternalMessageClass cls : staleChannels) {
-            channels.remove(cls);
+        final Set<ChannelId> staleChannels = detectStale();
+        for (ChannelId channelId : staleChannels) {
+            channels.remove(channelId);
         }
     }
 
-    private Set<ExternalMessageClass> detectStale() {
-        final Set<ExternalMessageClass> toRemove = newHashSet();
-        for (ExternalMessageClass cls : channels.keySet()) {
-            final C channel = channels.get(cls);
+    private Set<ChannelId> detectStale() {
+        final Set<ChannelId> toRemove = newHashSet();
+        for (ChannelId channelId : channels.keySet()) {
+            final C channel = channels.get(channelId);
             if(channel.isStale()) {
                 try {
                     channel.close();
                 } catch (Exception e) {
                     throw illegalStateWithCauseOf(e);
                 } finally {
-                    toRemove.add(cls);
+                    toRemove.add(channelId);
                 }
             }
         }

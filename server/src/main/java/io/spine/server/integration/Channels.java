@@ -17,27 +17,35 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package io.spine.server.integration;
 
+import io.spine.type.MessageClass;
+import io.spine.type.TypeUrl;
+
 /**
- * A channel dedicated to exchanging the messages.
+ * Utilities for generating {@link ChannelId channel identifiers} for various objects.
  *
- * @author Alex Tymchenko
  * @author Dmitry Ganzha
  */
-public interface MessageChannel extends AutoCloseable {
+public class Channels {
+
+    /** Prevents instantiation on this utility class. */
+    private Channels() {
+    }
 
     /**
-     * Returns the channel identifier.
+     * Generates the {@code ChannelId} for the passed {@code MessageClass}.
      *
-     * @return the channel identifier
+     * @param messageClass a message class for which channel identifier generates
+     * @return a channel identifier
      */
-    ChannelId getChannelId();
-
-    /**
-     * Allows to understand whether this channel is stale and can be closed.
-     *
-     * @return {@code true} if the channel is stale, {@code false} otherwise
-     */
-    boolean isStale();
+    public static ChannelId forMessageType(MessageClass messageClass) {
+        final String messageTypeUrl = TypeUrl.of(messageClass.value())
+                                             .value();
+        final ChannelId channelId = ChannelId.newBuilder()
+                                             .setMessageTypeUrl(messageTypeUrl)
+                                             .build();
+        return channelId;
+    }
 }
