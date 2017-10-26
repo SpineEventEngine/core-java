@@ -242,15 +242,16 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
         super.register(dispatcher);
 
         // Remember the channels, that we have been subscribed before.
+        // The channel ID contains a type of messages which is passed through the message channel.
         final Set<ChannelId> requestedBefore = subscriberHub.keys();
 
-        // Subscribe to incoming messages from the requested channels.
+        // Subscribe to incoming messages of requested types.
         subscribeToIncoming(dispatcher);
 
         final Set<ChannelId> currentlyRequested = subscriberHub.keys();
         if (!currentlyRequested.equals(requestedBefore)) {
 
-            // Notify others that the requested channels has been changed.
+            // Notify others that the requested message types have been changed.
             notifyOfNeeds(currentlyRequested);
         }
     }
@@ -266,15 +267,16 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
         super.unregister(dispatcher);
 
         // Remember the channels, that we have been subscribed before.
+        // The channel ID contains a type of messages which is passed through the message channel.
         final Set<ChannelId> requestedBefore = subscriberHub.keys();
 
-        // Unsubscribe from incoming messages from the requested channels.
+        // Unsubscribe from incoming messages of requested types.
         unsubscribeFromIncoming(dispatcher);
 
         final Set<ChannelId> currentlyRequested = subscriberHub.keys();
         if (!currentlyRequested.equals(requestedBefore)) {
 
-            // Notify others that the requested channels has been changed.
+            // Notify others that the requested message types have been changed.
             notifyOfNeeds(currentlyRequested);
         }
     }

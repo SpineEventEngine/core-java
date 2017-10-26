@@ -22,6 +22,7 @@ package io.spine.server.integration;
 
 import io.spine.core.Event;
 import io.spine.core.EventClass;
+import io.spine.type.TypeUrl;
 import org.junit.Test;
 
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
@@ -35,6 +36,17 @@ public class ChannelsShould {
     @Test
     public void have_private_constructor() {
         assertHasPrivateParameterlessCtor(Channels.class);
+    }
+
+    @Test
+    public void construct_channel_id_correctly_for_message_class() {
+        final EventClass eventClass = EventClass.of(Event.class);
+        final ChannelId channelId = Channels.newId(eventClass);
+
+        final String expectedMessageTypeUrl = TypeUrl.of(eventClass.value()).value();
+        final String actualMessageTypeUrl = channelId.getMessageTypeUrl();
+
+        assertEquals(expectedMessageTypeUrl, actualMessageTypeUrl);
     }
 
     @Test

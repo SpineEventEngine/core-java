@@ -29,13 +29,13 @@ option java_multiple_files = true;
 option java_outer_classname = "MessageChannelProto";
 option java_generate_equals_and_hash = true;
 
-// The message which is used to identify message channel.
+// The message which is used to identify the message channel.
 message ChannelId {
 
-    // Identifier of message channel, it used for grouping messages by various characteristics.
-    oneof channel_id {
+    // The kind that identifies messages in the message channel.
+    oneof kind {
 
-        // The message type url can be used to group messages by the message type
+        // The message type URL can be used to identify messages by the message type.
         string message_type_url = 1;
     }
 }

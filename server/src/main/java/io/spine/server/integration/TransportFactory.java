@@ -35,7 +35,8 @@ import io.spine.annotation.SPI;
 public interface TransportFactory {
 
     /**
-     * Creates a {@link Publisher} for the messages of given channel identifier.
+     * Creates a {@link Publisher} for the messages that belong to the kind
+     * presented in the channel ID.
      *
      * @param channelId the identifier of the channel
      * @return a new {@code Publisher} instance
@@ -43,7 +44,8 @@ public interface TransportFactory {
     Publisher createPublisher(ChannelId channelId);
 
     /**
-     * Creates a {@link Subscriber} for the messages of given channel identifier.
+     * Creates a {@link Subscriber} for the messages that belong to the kind
+     * presented in the channel ID.
      *
      * @param channelId the identifier of the channel
      * @return a new {@code Subscriber} instance

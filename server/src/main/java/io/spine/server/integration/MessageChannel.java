@@ -20,7 +20,9 @@
 package io.spine.server.integration;
 
 /**
- * A channel dedicated to exchanging the messages.
+ * A channel dedicated to exchanging the messages which grouped by some rule.
+ *
+ * <p>The rule is determined by the kind specified in {@linkplain ChannelId channel ID}.
  *
  * @author Alex Tymchenko
  * @author Dmitry Ganzha
