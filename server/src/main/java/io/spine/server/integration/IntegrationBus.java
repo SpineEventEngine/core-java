@@ -242,7 +242,8 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
         super.register(dispatcher);
 
         // Remember the channels, that we have been subscribed before.
-        // The channel ID contains a type of messages which is passed through the message channel.
+        // The channel ID contains a type of messages which can be passed through the
+        // message channel.
         final Set<ChannelId> requestedBefore = subscriberHub.keys();
 
         // Subscribe to incoming messages of requested types.
@@ -267,7 +268,8 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
         super.unregister(dispatcher);
 
         // Remember the channels, that we have been subscribed before.
-        // The channel ID contains a type of messages which is passed through the message channel.
+        // The channel ID contains a type of messages which can be passed through the
+        // message channel.
         final Set<ChannelId> requestedBefore = subscriberHub.keys();
 
         // Unsubscribe from incoming messages of requested types.
