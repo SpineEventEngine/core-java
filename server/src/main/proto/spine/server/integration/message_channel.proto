@@ -34,7 +34,7 @@ message ChannelId {
 
     // Identifier of message channel, it used for grouping messages by various characteristics.
     oneof channel_id {
-        
+
         // The message type url can be used to group messages by the message type
         string message_type_url = 1;
     }
