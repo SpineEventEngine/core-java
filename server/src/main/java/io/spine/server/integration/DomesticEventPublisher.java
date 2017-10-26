@@ -31,7 +31,7 @@ import io.spine.server.event.EventSubscriber;
 import java.util.Objects;
 import java.util.Set;
 
-import static io.spine.server.integration.Channels.forMessageType;
+import static io.spine.server.integration.Channels.newId;
 
 /**
  * A subscriber to local {@code EventBus}, which publishes each matching domestic event to
@@ -71,7 +71,7 @@ final class DomesticEventPublisher extends EventSubscriber {
         final ExternalMessage msg = ExternalMessages.of(event, boundedContextName);
         final ExternalMessageClass messageClass =
                 ExternalMessageClass.of(envelope.getMessageClass());
-        final ChannelId channelId = forMessageType(messageClass);
+        final ChannelId channelId = newId(messageClass);
         final Publisher channel = publisherHub.get(channelId);
         channel.publish(AnyPacker.pack(envelope.getId()), msg);
 

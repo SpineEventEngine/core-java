@@ -40,8 +40,8 @@ public class ChannelsShould {
     @Test
     public void return_same_channel_id_for_same_message_class() {
         final EventClass eventClass = EventClass.of(Event.class);
-        final ChannelId firstChannelId = Channels.forMessageType(eventClass);
-        final ChannelId secondChannelId = Channels.forMessageType(eventClass);
+        final ChannelId firstChannelId = Channels.newId(eventClass);
+        final ChannelId secondChannelId = Channels.newId(eventClass);
         assertEquals(firstChannelId, secondChannelId);
     }
 }

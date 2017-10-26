@@ -53,7 +53,7 @@ import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.Identifier.newUuid;
 import static io.spine.Identifier.pack;
 import static io.spine.server.bus.Buses.acknowledge;
-import static io.spine.server.integration.Channels.forMessageType;
+import static io.spine.server.integration.Channels.newId;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static io.spine.validate.Validate.checkNotDefault;
 import static java.lang.String.format;
@@ -133,7 +133,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
         this.publisherHub = new PublisherHub(builder.transportFactory);
         this.localBusAdapters = createAdapters(builder, publisherHub);
         configurationChangeObserver = observeConfigurationChanges();
-        final ChannelId channelId = forMessageType(
+        final ChannelId channelId = newId(
                 ExternalMessageClass.of(RequestForExternalMessages.class));
         subscriberHub.get(channelId)
                      .addObserver(configurationChangeObserver);
@@ -299,7 +299,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
         }
         final RequestForExternalMessages result = resultBuilder.build();
         final ExternalMessage externalMessage = ExternalMessages.of(result, boundedContextName);
-        final ChannelId channelId = forMessageType(ExternalMessageClass.of(result.getClass()));
+        final ChannelId channelId = newId(ExternalMessageClass.of(result.getClass()));
 
         publisherHub.get(channelId)
                     .publish(pack(newUuid()), externalMessage);
@@ -355,7 +355,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
         final IntegrationBus integrationBus = this;
         final Iterable<ExternalMessageClass> transformed = dispatcher.getMessageClasses();
         for (final ExternalMessageClass imClass : transformed) {
-            final ChannelId channelId = forMessageType(imClass);
+            final ChannelId channelId = newId(imClass);
             final Subscriber subscriber = subscriberHub.get(channelId);
             subscriber.addObserver(new ExternalMessageObserver(boundedContextName,
                                                                imClass.value(),
@@ -367,7 +367,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
         final IntegrationBus integrationBus = this;
         final Iterable<ExternalMessageClass> transformed = dispatcher.getMessageClasses();
         for (final ExternalMessageClass imClass : transformed) {
-            final ChannelId channelId = forMessageType(imClass);
+            final ChannelId channelId = newId(imClass);
             final Subscriber subscriber = subscriberHub.get(channelId);
             subscriber.removeObserver(new ExternalMessageObserver(boundedContextName,
                                                                   imClass.value(),

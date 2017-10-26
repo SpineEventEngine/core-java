@@ -24,23 +24,22 @@ import io.spine.type.MessageClass;
 import io.spine.type.TypeUrl;
 
 /**
- * Utilities for generating {@link ChannelId channel identifiers} for various objects.
+ * Utilities for working with message channels.
  *
  * @author Dmitry Ganzha
  */
-public class Channels {
+public final class Channels {
 
     /** Prevents instantiation on this utility class. */
-    private Channels() {
-    }
+    private Channels() {}
 
     /**
      * Generates the {@code ChannelId} for the passed {@code MessageClass}.
      *
-     * @param messageClass a message class for which channel identifier generates
+     * @param messageClass a message class for which a channel identifier is generated
      * @return a channel identifier
      */
-    public static ChannelId forMessageType(MessageClass messageClass) {
+    public static ChannelId newId(MessageClass messageClass) {
         final String messageTypeUrl = TypeUrl.of(messageClass.value())
                                              .value();
         final ChannelId channelId = ChannelId.newBuilder()
