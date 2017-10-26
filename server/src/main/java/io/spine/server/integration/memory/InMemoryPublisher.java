@@ -43,9 +43,9 @@ final class InMemoryPublisher extends AbstractInMemoryChannel implements Publish
      */
     private final Function<ChannelId, Iterable<InMemorySubscriber>> subscriberProvider;
 
-    InMemoryPublisher(ChannelId messageClass,
+    InMemoryPublisher(ChannelId channelId,
                       Function<ChannelId, Iterable<InMemorySubscriber>> provider) {
-        super(messageClass);
+        super(channelId);
         this.subscriberProvider = provider;
     }
 
