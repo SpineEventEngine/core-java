@@ -432,6 +432,10 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * a {@linkplain #getSnapshotTrigger() snapshot trigger} is used as a
      * {@linkplain AggregateReadRequest#getBatchSize() batch size}.
      *
+     * <p>This method is exposed into the {@code io.spine.server.aggregate} package for the only
+     * reason of making it overridable. Consider calling {@link #loadOrCreate loadOrCreate()} or
+     * {@link #find find()} instead.
+     *
      * @param id the ID of the aggregate
      * @return the loaded instance or {@code Optional.absent()} if there is no record with the ID
      */
