@@ -435,7 +435,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * @param id the ID of the aggregate
      * @return the loaded instance or {@code Optional.absent()} if there is no record with the ID
      */
-    private Optional<A> load(I id) {
+    Optional<A> load(I id) {
         final AggregateReadRequest<I> request = new AggregateReadRequest<>(id, snapshotTrigger);
         final Optional<AggregateStateRecord> eventsFromStorage = aggregateStorage().read(request);
 
