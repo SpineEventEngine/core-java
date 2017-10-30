@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.integration.command;
+package io.spine.server.integration.validator;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
@@ -29,25 +29,27 @@ import io.spine.server.integration.RequestForExternalMessages;
 import io.spine.type.TypeUrl;
 
 /**
- * The command which checks if the message is suitable for the channel by the message type.
+ * The {@code MessageTypeChannelValidator} checks if the message is suitable for the channel by the
+ * message type.
  *
  * @author Dmitry Ganzha
  */
-public class MessageSuitableByMessageType implements ChannelCommand {
+public class MessageTypeChannelValidator implements ChannelValidator {
 
     private static final String MESSAGE_FIELD_NAME = "message";
 
     @Override
-    public Boolean isSuitable(ChannelId channelId, ExternalMessage message) {
+    public boolean validate(ChannelId channelId, ExternalMessage message) {
         final String typeUrlOfChannel = channelId.getMessageTypeUrl();
         final Message originalMessage = AnyPacker.unpack(message.getOriginalMessage());
 
+        // instanceof is needed because the process of getting type URL differs for document messages
+        // and other types of messages(e.g. events, rejections).
         if (originalMessage instanceof RequestForExternalMessages) {
-            RequestForExternalMessages request =
-                    (RequestForExternalMessages) originalMessage;
-            return typeUrlOfChannel.equals(TypeUrl.of(request)
+            return typeUrlOfChannel.equals(TypeUrl.of(originalMessage)
                                                   .value());
         }
+
         final Message eventOrRejection = AnyPacker.unpack(
                 (Any) originalMessage.getField(
                         originalMessage.getDescriptorForType()

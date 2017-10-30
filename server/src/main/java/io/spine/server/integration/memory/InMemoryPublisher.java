@@ -61,7 +61,7 @@ final class InMemoryPublisher extends AbstractInMemoryChannel implements Publish
 
     @Override
     public Ack publish(Any messageId, ExternalMessage message) {
-        final Boolean messageSuitable = messageSuitabilitySpecification.isSatisfiedBy(message);
+        final boolean messageSuitable = messageSuitabilitySpecification.isSatisfiedBy(message);
         if (!messageSuitable) {
             throw newIllegalArgumentException("The message is not suitable for this channel.");
         }

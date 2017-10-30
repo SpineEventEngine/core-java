@@ -22,8 +22,8 @@ package io.spine.server.integration.specification;
 
 import io.spine.server.integration.ChannelId;
 import io.spine.server.integration.ExternalMessage;
-import io.spine.server.integration.command.ChannelCommand;
-import io.spine.server.integration.command.MessageSuitableByMessageType;
+import io.spine.server.integration.validator.ChannelValidator;
+import io.spine.server.integration.validator.MessageTypeChannelValidator;
 
 import java.util.Map;
 
@@ -37,14 +37,14 @@ import static com.google.common.collect.Maps.newHashMap;
 public class MessageSuitabilitySpecification implements Specification<ExternalMessage> {
 
     /**
-     * The map contains a kind related to a {@code ChannelCommand}.
+     * The map contains a kind related to a {@code ChannelValidator}.
      */
-    private static final Map<ChannelId.KindCase, ChannelCommand>
-            COMMANDS_FOR_CHANNEL_KIND = newHashMap();
+    private static final Map<ChannelId.KindCase, ChannelValidator>
+            VALIDATORS_BY_CHANNEL_KIND = newHashMap();
 
     static {
-        COMMANDS_FOR_CHANNEL_KIND.put(ChannelId.KindCase.MESSAGE_TYPE_URL,
-                                      new MessageSuitableByMessageType());
+        VALIDATORS_BY_CHANNEL_KIND.put(ChannelId.KindCase.MESSAGE_TYPE_URL,
+                                       new MessageTypeChannelValidator());
     }
 
     private final ChannelId channelId;
@@ -55,10 +55,10 @@ public class MessageSuitabilitySpecification implements Specification<ExternalMe
 
     @Override
     public boolean isSatisfiedBy(ExternalMessage candidate) {
-        final ChannelCommand messageChannelCommand = COMMANDS_FOR_CHANNEL_KIND.get(
+        final ChannelValidator messageChannelValidator = VALIDATORS_BY_CHANNEL_KIND.get(
                 channelId.getKindCase());
 
-        final Boolean result = messageChannelCommand.isSuitable(channelId, candidate);
+        final boolean result = messageChannelValidator.validate(channelId, candidate);
 
         return result;
     }

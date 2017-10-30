@@ -24,8 +24,8 @@ import io.spine.core.BoundedContextName;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.protobuf.AnyPacker;
-import io.spine.server.integration.command.ChannelCommand;
-import io.spine.server.integration.command.MessageSuitableByMessageType;
+import io.spine.server.integration.validator.ChannelValidator;
+import io.spine.server.integration.validator.MessageTypeChannelValidator;
 import io.spine.test.integration.event.ItgProjectCreated;
 import io.spine.test.integration.event.ItgProjectStarted;
 import org.junit.Test;
@@ -36,10 +36,10 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Dmitry Ganzha
  */
-public class ChannelCommandShould {
+public class ChannelValidatorShould {
 
     @Test
-    public void return_false_if_message_is_not_suitable_for_message_channel_by_kind() {
+    public void return_false_if_message_is_not_suitable_for_message_channel_by_message_type() {
         final EventClass eventClass = EventClass.of(ItgProjectStarted.class);
         final ChannelId channelId = Channels.newId(eventClass);
         final ItgProjectCreated itgProjectCreated = ItgProjectCreated.getDefaultInstance();
@@ -49,13 +49,13 @@ public class ChannelCommandShould {
         final BoundedContextName boundedContextName = BoundedContextName.getDefaultInstance();
         final ExternalMessage notSuitableMessage = ExternalMessages.of(projectCreatedEvent,
                                                                        boundedContextName);
-        final ChannelCommand messageSuitableForChannel = new MessageSuitableByMessageType();
-        final Boolean result = messageSuitableForChannel.isSuitable(channelId, notSuitableMessage);
+        final ChannelValidator channelValidator = new MessageTypeChannelValidator();
+        final boolean result = channelValidator.validate(channelId, notSuitableMessage);
         assertFalse(result);
     }
 
     @Test
-    public void return_true_if_message_is_suitable_for_message_channel_by_kind() {
+    public void return_true_if_message_is_suitable_for_message_channel_by_message_type() {
         final EventClass eventClass = EventClass.of(ItgProjectCreated.class);
         final ChannelId channelId = Channels.newId(eventClass);
         final ItgProjectCreated itgProjectCreated = ItgProjectCreated.getDefaultInstance();
@@ -65,8 +65,8 @@ public class ChannelCommandShould {
         final BoundedContextName boundedContextName = BoundedContextName.getDefaultInstance();
         final ExternalMessage suitableMessage = ExternalMessages.of(projectCreatedEvent,
                                                                        boundedContextName);
-        final ChannelCommand messageSuitableForChannel = new MessageSuitableByMessageType();
-        final Boolean result = messageSuitableForChannel.isSuitable(channelId, suitableMessage);
+        final ChannelValidator channelValidator = new MessageTypeChannelValidator();
+        final boolean result = channelValidator.validate(channelId, suitableMessage);
         assertTrue(result);
     }
 }

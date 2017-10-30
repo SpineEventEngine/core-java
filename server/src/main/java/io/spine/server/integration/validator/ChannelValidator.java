@@ -18,16 +18,28 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.integration.command;
+package io.spine.server.integration.validator;
 
 import io.spine.server.integration.ChannelId;
 import io.spine.server.integration.ExternalMessage;
+import io.spine.server.integration.specification.Specification;
 
 /**
- * The base interface for message channel commands.
+ * The base interface for message channel validators. The validators are used in
+ * {@linkplain Specification specifications} to verify if the message suitable for the channel.
  *
  * @author Dmitry Ganzha
  */
-public interface ChannelCommand {
-    Boolean isSuitable(ChannelId channelId, ExternalMessage message);
+public interface ChannelValidator {
+
+    /**
+     * Checks whether the passed {@code message} is suitable for the message channel.
+     * Performs validation as a part of {@link Specification#isSatisfiedBy(Object)}.
+     *
+     * @param channelId an instance of {@code ChannelId}
+     * @param message   an instance of {@code ExternalMessage}
+     * @return {@code true} if the message is valid according to the channel's kind,
+     * {@code false} otherwise
+     */
+    boolean validate(ChannelId channelId, ExternalMessage message);
 }

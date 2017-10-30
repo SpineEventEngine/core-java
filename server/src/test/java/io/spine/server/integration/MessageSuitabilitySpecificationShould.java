@@ -51,7 +51,7 @@ public class MessageSuitabilitySpecificationShould {
                                                                        boundedContextName);
         final Specification<ExternalMessage> specification = new MessageSuitabilitySpecification(
                 channelId);
-        final Boolean result = specification.isSatisfiedBy(notSuitableMessage);
+        final boolean result = specification.isSatisfiedBy(notSuitableMessage);
         assertFalse(result);
     }
 
@@ -68,7 +68,7 @@ public class MessageSuitabilitySpecificationShould {
                                                                     boundedContextName);
         final Specification<ExternalMessage> specification = new MessageSuitabilitySpecification(
                 channelId);
-        final Boolean result = specification.isSatisfiedBy(suitableMessage);
+        final boolean result = specification.isSatisfiedBy(suitableMessage);
         assertTrue(result);
     }
 }
