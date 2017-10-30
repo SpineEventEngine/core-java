@@ -39,7 +39,7 @@ import static org.junit.Assert.assertTrue;
 public class MessageSuitabilitySpecificationShould {
 
     @Test
-    public void return_false_if_message_is_not_suitable_for_message_channel_by_kind() {
+    public void return_false_if_message_is_not_satisfy_specification() {
         final EventClass eventClass = EventClass.of(ItgProjectStarted.class);
         final ChannelId channelId = Channels.newId(eventClass);
         final ItgProjectCreated itgProjectCreated = ItgProjectCreated.getDefaultInstance();
@@ -56,7 +56,7 @@ public class MessageSuitabilitySpecificationShould {
     }
 
     @Test
-    public void return_true_if_message_is_suitable_for_message_channel_by_kind() {
+    public void return_true_if_message_is_satisfy_specification() {
         final EventClass eventClass = EventClass.of(ItgProjectCreated.class);
         final ChannelId channelId = Channels.newId(eventClass);
         final ItgProjectCreated itgProjectCreated = ItgProjectCreated.getDefaultInstance();
