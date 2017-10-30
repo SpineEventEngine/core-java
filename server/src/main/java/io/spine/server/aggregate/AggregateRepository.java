@@ -428,8 +428,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     /**
      * Loads an aggregate by the passed ID.
      *
-     * <p>This method defines the basic flow of an {@code Aggregate} loading. First
-     * the {@linkplain AggregateStateRecord Aggregate State} is {@linkplain #loadOrCreate loaded}
+     * <p>This method defines the basic flow of an {@code Aggregate} loading. First,
+     * the {@linkplain AggregateStateRecord Aggregate state} is {@linkplain #loadOrCreate loaded}
      * from the storage. Then the {@code Aggregate} is {@linkplain #reify reified} from it's state.
      *
      * @param id the ID of the aggregate
