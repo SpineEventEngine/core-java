@@ -43,7 +43,8 @@ public class ChannelsShould {
         final EventClass eventClass = EventClass.of(Event.class);
         final ChannelId channelId = Channels.newId(eventClass);
 
-        final String expectedMessageTypeUrl = TypeUrl.of(eventClass.value()).value();
+        final String expectedMessageTypeUrl = TypeUrl.of(eventClass.value())
+                                                     .value();
         final String actualMessageTypeUrl = channelId.getMessageTypeUrl();
 
         assertEquals(expectedMessageTypeUrl, actualMessageTypeUrl);

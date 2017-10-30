@@ -27,6 +27,10 @@ import io.spine.server.bus.Buses;
 import io.spine.server.integration.ChannelId;
 import io.spine.server.integration.ExternalMessage;
 import io.spine.server.integration.Publisher;
+import io.spine.server.integration.specification.MessageSuitabilitySpecification;
+import io.spine.server.integration.specification.Specification;
+
+import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
  * An in-memory implementation of the {@link Publisher}.
@@ -43,14 +47,25 @@ final class InMemoryPublisher extends AbstractInMemoryChannel implements Publish
      */
     private final Function<ChannelId, Iterable<InMemorySubscriber>> subscriberProvider;
 
+    /**
+     * The specification which checks if the message is suitable for the channel.
+     */
+    private final Specification<ExternalMessage> messageSuitabilitySpecification;
+
     InMemoryPublisher(ChannelId channelId,
                       Function<ChannelId, Iterable<InMemorySubscriber>> provider) {
         super(channelId);
         this.subscriberProvider = provider;
+        this.messageSuitabilitySpecification = new MessageSuitabilitySpecification(getChannelId());
     }
 
     @Override
     public Ack publish(Any messageId, ExternalMessage message) {
+        final Boolean messageSuitable = messageSuitabilitySpecification.isSatisfiedBy(message);
+        if (!messageSuitable) {
+            throw newIllegalArgumentException("The message is not suitable for this channel.");
+        }
+
         final Iterable<InMemorySubscriber> localSubscribers = getSubscribers(getChannelId());
         for (InMemorySubscriber localSubscriber : localSubscribers) {
             callSubscriber(message, localSubscriber);

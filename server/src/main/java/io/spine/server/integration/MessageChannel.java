@@ -20,12 +20,18 @@
 package io.spine.server.integration;
 
 /**
- * A channel dedicated to exchanging the messages which grouped by some rule.
+ * A channel for exchanging the {@link com.google.protobuf.Message Message}s.
  *
- * <p>The rule is determined by the kind specified in {@linkplain ChannelId channel ID}.
+ * <p>Identified by a {@linkplain ChannelId channel ID}, which must be unique in scope of the
+ * underlying messaging system.
+ *
+ * <p>The identifier is also used to specify the set of {@code com.google.protobuf.Message}s,
+ * suitable for this channel. The definition of the matching criterion is done according to the
+ * {@linkplain ChannelId#getKindCase() kind} value.
  *
  * @author Alex Tymchenko
  * @author Dmitry Ganzha
+ * @see ChannelId
  */
 public interface MessageChannel extends AutoCloseable {
 

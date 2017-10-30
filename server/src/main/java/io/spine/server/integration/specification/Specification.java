@@ -18,33 +18,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.integration;
-
-import io.spine.type.MessageClass;
-import io.spine.type.TypeUrl;
+package io.spine.server.integration.specification;
 
 /**
- * Utilities for working with {@linkplain MessageChannel message channels}.
+ * The base interface for specifications.
  *
+ * <p>Inspired by <a href="https://martinfowler.com/apsupp/spec.pdf">Specification pattern.</a>
+ *
+ * @param <T> The type of entity for which the specification is defined.
  * @author Dmitry Ganzha
  */
-public final class Channels {
-
-    /** Prevents instantiation of this utility class. */
-    private Channels() {}
+public interface Specification<T> {
 
     /**
-     * Generates the {@code ChannelId} for the passed {@code MessageClass}.
+     * Check if {@code candidate} is satisfied by the specification.
      *
-     * @param messageClass a message class for which a channel identifier is generated
-     * @return a channel identifier
+     * @param candidate candidate an object to test
+     * @return {@code true} if the candidate satisfies the specification otherwise {@code false}
      */
-    public static ChannelId newId(MessageClass messageClass) {
-        final String messageTypeUrl = TypeUrl.of(messageClass.value())
-                                             .value();
-        final ChannelId channelId = ChannelId.newBuilder()
-                                             .setMessageTypeUrl(messageTypeUrl)
-                                             .build();
-        return channelId;
-    }
+    boolean isSatisfiedBy(T candidate);
 }

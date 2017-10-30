@@ -242,8 +242,8 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
         super.register(dispatcher);
 
         // Remember the channels, that we have been subscribed before.
-        // The channel ID contains a type of messages which can be passed through the
-        // message channel.
+        // The channel ID corresponds to the type of messages,
+        // that are being served through the channel.
         final Set<ChannelId> requestedBefore = subscriberHub.keys();
 
         // Subscribe to incoming messages of requested types.
@@ -268,8 +268,8 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
         super.unregister(dispatcher);
 
         // Remember the channels, that we have been subscribed before.
-        // The channel ID contains a type of messages which can be passed through the
-        // message channel.
+        // The channel ID corresponds to the type of messages,
+        // that are being served through the channel.
         final Set<ChannelId> requestedBefore = subscriberHub.keys();
 
         // Unsubscribe from incoming messages of requested types.
@@ -290,9 +290,8 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
      * <p>Sends out an instance of {@linkplain RequestForExternalMessages
      * request for external messages} for that purpose.
      *
-     * @param  currentlyRequested
-     *         the set of channel identifiers containing message types that are now requested
-     *         by this instance of integration bus
+     * @param  currentlyRequested the set of channel IDs, which correspond to the currently
+     *                            requested types of messages.
      */
     private void notifyOfNeeds(Iterable<ChannelId> currentlyRequested) {
         final RequestForExternalMessages.Builder resultBuilder =

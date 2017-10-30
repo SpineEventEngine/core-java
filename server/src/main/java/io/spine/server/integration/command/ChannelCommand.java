@@ -18,33 +18,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.integration;
+package io.spine.server.integration.command;
 
-import io.spine.type.MessageClass;
-import io.spine.type.TypeUrl;
+import io.spine.server.integration.ChannelId;
+import io.spine.server.integration.ExternalMessage;
 
 /**
- * Utilities for working with {@linkplain MessageChannel message channels}.
+ * The base interface for message channel commands.
  *
  * @author Dmitry Ganzha
  */
-public final class Channels {
-
-    /** Prevents instantiation of this utility class. */
-    private Channels() {}
-
-    /**
-     * Generates the {@code ChannelId} for the passed {@code MessageClass}.
-     *
-     * @param messageClass a message class for which a channel identifier is generated
-     * @return a channel identifier
-     */
-    public static ChannelId newId(MessageClass messageClass) {
-        final String messageTypeUrl = TypeUrl.of(messageClass.value())
-                                             .value();
-        final ChannelId channelId = ChannelId.newBuilder()
-                                             .setMessageTypeUrl(messageTypeUrl)
-                                             .build();
-        return channelId;
-    }
+public interface ChannelCommand {
+    Boolean isSuitable(ChannelId channelId, ExternalMessage message);
 }

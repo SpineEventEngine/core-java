@@ -20,6 +20,7 @@
 package io.spine.server.integration;
 
 import io.spine.annotation.SPI;
+import io.spine.server.integration.specification.Specification;
 
 /**
  * A factory for creating channel-based transport for {@code Message} inter-exchange between the
@@ -35,8 +36,8 @@ import io.spine.annotation.SPI;
 public interface TransportFactory {
 
     /**
-     * Creates a {@link Publisher} for the messages that belong to the kind
-     * presented in the channel ID.
+     * Creates a {@link Publisher} for the messages that
+     * {@linkplain Specification#isSatisfiedBy(Object) correspond} to the passed channel ID.
      *
      * @param channelId the identifier of the channel
      * @return a new {@code Publisher} instance
@@ -44,8 +45,7 @@ public interface TransportFactory {
     Publisher createPublisher(ChannelId channelId);
 
     /**
-     * Creates a {@link Subscriber} for the messages that belong to the kind
-     * presented in the channel ID.
+     * Creates a {@link Subscriber} for the messages that correspond to the passed channel ID.
      *
      * @param channelId the identifier of the channel
      * @return a new {@code Subscriber} instance
