@@ -464,12 +464,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     /**
-     * Plays the given {@linkplain AggregateStateRecord Aggregate history} onto an instance
+     * Plays the given {@linkplain AggregateStateRecord Aggregate history} for an instance
      * of {@link Aggregate} with the given ID.
-     *
-     * <p>Creates an instance of {@code Aggregate} with the given ID, restores its state from
-     * the {@link Snapshot} present in the {@code history} and applies the events from
-     * the {@code history}.
      *
      * @param id      the ID of the {@code Aggregate} to load
      * @param history the state record of the {@code Aggregate} to load
