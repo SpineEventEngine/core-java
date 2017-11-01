@@ -163,7 +163,7 @@ public class ProcessManagerRepositoryTestEnv {
         }
 
         @Assign
-        Empty handle(PmThrowEntityAlreadyArchived command) throws EntityAlreadyArchived {
+        List<Message> handle(PmThrowEntityAlreadyArchived command) throws EntityAlreadyArchived {
             keep(command);
             throw new EntityAlreadyArchived(pack(command.getProjectId()));
         }
