@@ -195,8 +195,8 @@ public final class Rejections {
     }
 
     /**
-     * Verifies if the exception has command rejection as its
-     * {@linkplain Throwables#getRootCause(Throwable) root cause} .
+     * Verifies if the exception was {@linkplain Throwables#getRootCause(Throwable) caused} by
+     * a command rejection.
      *
      * @param exception the exception to analyze
      * @return {@code true} if the exception was created because of a command rejection thrown,
