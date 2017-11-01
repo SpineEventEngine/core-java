@@ -46,7 +46,7 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.getRootCause;
-import static io.spine.core.Commands.causedByRejection;
+import static io.spine.core.Rejections.causedByRejection;
 import static io.spine.core.Rejections.toRejection;
 import static io.spine.server.bus.Buses.acknowledge;
 import static io.spine.server.bus.Buses.reject;

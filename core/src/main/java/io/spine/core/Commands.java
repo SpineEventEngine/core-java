@@ -22,7 +22,6 @@ package io.spine.core;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Predicate;
-import com.google.common.base.Throwables;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
@@ -226,36 +225,24 @@ public final class Commands {
     }
 
     /**
-     * Verifies if the exception has command rejection as its
-     * {@linkplain Throwables#getRootCause(Throwable) root cause} .
+     * Produces a {@link Rejection} for the given {@link Command} based on the given
+     * {@linkplain ThrowableMessage cause}.
      *
-     * @param exception the exception to analyze
-     * @return {@code true} if the exception was created because of a command rejection thrown,
-     *         {@code false} otherwise
+     * <p>The given {@link Throwable} should be
+     * {@linkplain Rejections#causedByRejection caused by a Rejection} or
+     * an {@link IllegalArgumentException} is thrown.
+     *
+     * @param command the command to reject
+     * @param cause the rejection cause (may be wrapped into other kinds of {@code Throwable})
+     * @return a {@link Rejection} for the given command
+     * @throws IllegalArgumentException upon an invalid rejection cause
      */
-    public static boolean causedByRejection(Throwable exception) {
-        //TODO:2017-07-26:alexander.yevsyukov: Check against CommandRejection
-        // instead of ThrowableMessage when code generation allows customizing a custom
-        // rejection types instead of `ThrowableMessage`.
-        // See: https://github.com/SpineEventEngine/base/issues/20
-        final Throwable rootCause = Throwables.getRootCause(exception);
-        final boolean result = rootCause instanceof ThrowableMessage;
-        return result;
-    }
-
-    public static ThrowableMessage getCauseRejection(Throwable throwable) {
-        checkNotNull(throwable);
-        checkArgument(causedByRejection(throwable));
-        final Throwable cause = Throwables.getRootCause(throwable);
-        return (ThrowableMessage) cause;
-    }
-
     @Internal
-    public static Rejection reject(Command command, Throwable cause) {
+    public static Rejection reject(Command command, Throwable cause) throws IllegalStateException {
         checkNotNull(command);
         checkNotNull(cause);
 
-        final ThrowableMessage rejectionThrowable = getCauseRejection(cause);
+        final ThrowableMessage rejectionThrowable = Rejections.getCauseRejection(cause);
         final Rejection rejection = Rejections.toRejection(rejectionThrowable, command);
         return rejection;
     }

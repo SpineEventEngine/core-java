@@ -33,6 +33,7 @@ import io.spine.time.Time;
 import org.junit.Before;
 import org.junit.Test;
 
+import static io.spine.core.Rejections.causedByRejection;
 import static io.spine.core.Rejections.getProducer;
 import static io.spine.core.Rejections.isRejection;
 import static io.spine.core.Rejections.toRejection;
@@ -44,6 +45,12 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**
+ * Tests for {@link Rejections} utility class.
+ *
+ * <p>The test suite is located under the "server" module since actor request generation
+ * and {@linkplain io.spine.server.entity.rejection.StandardRejections standard rejections} are
+ * required. So we want to avoid circular dependencies between "core" and "server" modules.
+ *
  * @author Alexander Yevsyukov
  */
 public class RejectionsShould {
@@ -122,6 +129,23 @@ public class RejectionsShould {
         final TestThrowableMessage freshThrowable = new TestThrowableMessage(rejectionMessage);
         final Rejection freshRejection = toRejection(freshThrowable, command);
         assertFalse(getProducer(freshRejection.getContext()).isPresent());
+    }
+
+    @SuppressWarnings({
+            "NewExceptionWithoutArguments" /* No need to have a message for this test. */,
+            "SerializableInnerClassWithNonSerializableOuterClass" /* Does not refer anything. */
+    })
+    @Test
+    public void say_if_RuntimeException_was_called_by_command_rejection() {
+        assertFalse(causedByRejection(new RuntimeException()));
+        final ThrowableMessage throwableMessage = new ThrowableMessage(Time.getCurrentTime()) {
+            private static final long serialVersionUID = 0L;
+        };
+        assertTrue(causedByRejection(new IllegalStateException(throwableMessage)));
+
+        // Check that root cause is analyzed.
+        assertTrue(causedByRejection(
+                new RuntimeException(new IllegalStateException(throwableMessage))));
     }
 
     /**

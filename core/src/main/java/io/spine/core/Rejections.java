@@ -29,6 +29,7 @@ import io.spine.Identifier;
 import io.spine.annotation.Internal;
 import io.spine.base.ThrowableMessage;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
@@ -191,5 +192,43 @@ public final class Rejections {
     public static boolean isExternal(RejectionContext context) {
         checkNotNull(context);
         return context.getExternal();
+    }
+
+    /**
+     * Verifies if the exception has command rejection as its
+     * {@linkplain Throwables#getRootCause(Throwable) root cause} .
+     *
+     * @param exception the exception to analyze
+     * @return {@code true} if the exception was created because of a command rejection thrown,
+     *         {@code false} otherwise
+     */
+    public static boolean causedByRejection(Throwable exception) {
+        //TODO:2017-07-26:alexander.yevsyukov: Check against CommandRejection
+        // instead of ThrowableMessage when code generation allows customizing a custom
+        // rejection types instead of `ThrowableMessage`.
+        // See: https://github.com/SpineEventEngine/base/issues/20
+        final Throwable rootCause = Throwables.getRootCause(exception);
+        final boolean result = rootCause instanceof ThrowableMessage;
+        return result;
+    }
+
+    /**
+     * Retrieves the {@linkplain Throwables#getRootCause root cause} of the given {@link Throwable}
+     * as a {@link ThrowableMessage}.
+     *
+     * <p>Throws an {@link IllegalArgumentException} if the root cause is not
+     * a {@code ThrowableMessage}.
+     *
+     * @param throwable the {@link Throwable} wrapping a {@link ThrowableMessage}
+     * @return the wrapped {@link ThrowableMessage}
+     * @throws IllegalArgumentException upon an invalid {@link Throwable}
+     *                                  {@linkplain Throwables#getRootCause root cause}
+     */
+    static ThrowableMessage getCauseRejection(Throwable throwable)
+            throws IllegalArgumentException {
+        checkNotNull(throwable);
+        checkArgument(causedByRejection(throwable));
+        final Throwable cause = Throwables.getRootCause(throwable);
+        return (ThrowableMessage) cause;
     }
 }
