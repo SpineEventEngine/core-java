@@ -27,6 +27,7 @@ import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.Identifier;
+import io.spine.annotation.Internal;
 import io.spine.base.ThrowableMessage;
 import io.spine.protobuf.AnyPacker;
 import io.spine.string.Stringifier;
@@ -232,7 +233,7 @@ public final class Commands {
      * @return {@code true} if the exception was created because of a command rejection thrown,
      *         {@code false} otherwise
      */
-    public static boolean causedByRejection(RuntimeException exception) {
+    public static boolean causedByRejection(Throwable exception) {
         //TODO:2017-07-26:alexander.yevsyukov: Check against CommandRejection
         // instead of ThrowableMessage when code generation allows customizing a custom
         // rejection types instead of `ThrowableMessage`.
@@ -240,6 +241,23 @@ public final class Commands {
         final Throwable rootCause = Throwables.getRootCause(exception);
         final boolean result = rootCause instanceof ThrowableMessage;
         return result;
+    }
+
+    public static ThrowableMessage getCauseRejection(Throwable throwable) {
+        checkNotNull(throwable);
+        checkArgument(causedByRejection(throwable));
+        final Throwable cause = Throwables.getRootCause(throwable);
+        return (ThrowableMessage) cause;
+    }
+
+    @Internal
+    public static Rejection reject(Command command, Throwable cause) {
+        checkNotNull(command);
+        checkNotNull(cause);
+
+        final ThrowableMessage rejectionThrowable = getCauseRejection(cause);
+        final Rejection rejection = Rejections.toRejection(rejectionThrowable, command);
+        return rejection;
     }
 
     /**
