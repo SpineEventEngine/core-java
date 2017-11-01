@@ -29,8 +29,8 @@ import io.spine.core.EventContext;
 import io.spine.core.React;
 import io.spine.server.command.Assign;
 import io.spine.server.entity.TestEntityWithStringColumn;
-import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived;
-import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyDeleted;
+import io.spine.server.entity.rejection.EntityAlreadyArchived;
+import io.spine.server.entity.rejection.StandardRejections;
 import io.spine.server.procman.CommandRouted;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
@@ -42,6 +42,7 @@ import io.spine.test.procman.command.PmAddTask;
 import io.spine.test.procman.command.PmCreateProject;
 import io.spine.test.procman.command.PmDoNothing;
 import io.spine.test.procman.command.PmStartProject;
+import io.spine.test.procman.command.PmThrowEntityAlreadyArchived;
 import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.event.PmTaskAdded;
@@ -49,6 +50,7 @@ import io.spine.testdata.Sample;
 
 import java.util.List;
 
+import static io.spine.protobuf.AnyPacker.pack;
 import static java.util.Collections.emptyList;
 
 public class ProcessManagerRepositoryTestEnv {
@@ -160,14 +162,20 @@ public class ProcessManagerRepositoryTestEnv {
             return emptyList();
         }
 
+        @Assign
+        Empty handle(PmThrowEntityAlreadyArchived command) throws EntityAlreadyArchived {
+            keep(command);
+            throw new EntityAlreadyArchived(pack(command.getProjectId()));
+        }
+
         @React
-        Empty on(EntityAlreadyArchived rejection) {
+        Empty on(StandardRejections.EntityAlreadyArchived rejection) {
             keep(rejection);
             return withNothing();
         }
 
         @React
-        Empty on(EntityAlreadyDeleted rejection) {
+        Empty on(StandardRejections.EntityAlreadyDeleted rejection) {
             keep(rejection);
             return withNothing();
         }
