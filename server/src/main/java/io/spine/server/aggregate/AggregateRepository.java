@@ -20,6 +20,7 @@
 package io.spine.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import io.spine.annotation.SPI;
 import io.spine.core.CommandClass;
@@ -27,12 +28,12 @@ import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
-import io.spine.core.Rejection;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandDispatcher;
+import io.spine.server.commandbus.CommandErrorHandler;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.DelegatingEventDispatcher;
@@ -53,12 +54,12 @@ import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
 
 import javax.annotation.CheckReturnValue;
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.server.command.CommandDispatchingErrors.onDispatchingError;
 import static io.spine.server.entity.EntityWithLifecycle.Predicates.isEntityVisible;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
@@ -103,6 +104,14 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     /** The routing schema for rejections to which aggregates react. */
     private final RejectionRouting<I> rejectionRouting =
             RejectionRouting.withDefault(RejectionProducers.<I>fromContext());
+
+    /**
+     * The {@link CommandDispatcher} delegate tackling the dispatching errors.
+     *
+     * <p>This field is not {@code final} only because it is initialized in {@link #onRegistered()}
+     * method.
+     */
+    private CommandDispatcher<I> commandDispatcherDelegate;
 
     /** The number of events to store between snapshots. */
     private int snapshotTrigger = DEFAULT_SNAPSHOT_TRIGGER;
@@ -156,6 +165,11 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
         registerExtMessageDispatcher(boundedContext, extEventDispatcher, extEventClasses);
         registerExtMessageDispatcher(boundedContext, extRejectionDispatcher, extRejectionClasses);
+
+        this.commandDispatcherDelegate = new CommandErrorHandler<>(
+                new CommandHandler(),
+                boundedContext.getRejectionBus()
+        );
     }
 
     private void registerExtMessageDispatcher(BoundedContext boundedContext,
@@ -271,8 +285,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     @Override
     public I dispatch(final CommandEnvelope envelope) {
-        checkNotNull(envelope);
-        return AggregateCommandEndpoint.handle(this, envelope);
+        return commandDispatcherDelegate.dispatch(envelope);
     }
 
     /**
@@ -286,9 +299,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     @Override
     public void onError(CommandEnvelope envelope, RuntimeException exception) {
-        final Rejection rejection = onDispatchingError(exception, envelope);
-        getBoundedContext().getRejectionBus()
-                           .post(rejection);
+        commandDispatcherDelegate.onError(envelope, exception);
     }
 
     @Override
@@ -576,5 +587,14 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     protected AggregateEndpointDelivery<I, A, CommandEnvelope> getCommandEndpointDelivery() {
         return AggregateCommandDelivery.directDelivery(this);
+    }
+
+    private class CommandHandler implements Function<CommandEnvelope, I> {
+
+        @Override
+        public I apply(@Nullable CommandEnvelope input) {
+            checkNotNull(input);
+            return AggregateCommandEndpoint.handle(AggregateRepository.this, input);
+        }
     }
 }

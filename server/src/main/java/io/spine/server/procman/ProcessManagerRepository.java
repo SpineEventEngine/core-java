@@ -20,6 +20,7 @@
 
 package io.spine.server.procman;
 
+import com.google.common.base.Function;
 import com.google.protobuf.Message;
 import io.spine.annotation.SPI;
 import io.spine.core.CommandClass;
@@ -27,7 +28,6 @@ import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
-import io.spine.core.Rejection;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
 import io.spine.server.BoundedContext;
@@ -35,7 +35,9 @@ import io.spine.server.bus.Bus;
 import io.spine.server.bus.MessageDispatcher;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.commandbus.CommandBus;
+import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.commandbus.CommandDispatcherDelegate;
+import io.spine.server.commandbus.CommandErrorHandler;
 import io.spine.server.commandbus.DelegatingCommandDispatcher;
 import io.spine.server.entity.EventDispatchingRepository;
 import io.spine.server.event.EventBus;
@@ -52,10 +54,10 @@ import io.spine.server.route.RejectionProducers;
 import io.spine.server.route.RejectionRouting;
 
 import javax.annotation.CheckReturnValue;
+import javax.annotation.Nullable;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.server.command.CommandDispatchingErrors.onDispatchingError;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -81,6 +83,14 @@ public abstract class ProcessManagerRepository<I,
     /** The rejection routing schema used by this repository. */
     private final RejectionRouting<I> rejectionRouting =
             RejectionRouting.withDefault(RejectionProducers.<I>fromContext());
+
+    /**
+     * The {@link CommandDispatcher} delegate tackling the dispatching errors.
+     *
+     * <p>This field is not {@code final} only because it is initialized in {@link #onRegistered()}
+     * method.
+     */
+    private CommandDispatcher<I> commandDispatcherDelegate;
 
     /** {@inheritDoc} */
     protected ProcessManagerRepository() {
@@ -147,6 +157,10 @@ public abstract class ProcessManagerRepository<I,
                             "and do not react upon any rejections or events.", this);
         }
 
+        this.commandDispatcherDelegate = new CommandErrorHandler<>(
+                new CommandHandler(),
+                boundedContext.getRejectionBus()
+        );
     }
 
     /**
@@ -254,8 +268,7 @@ public abstract class ProcessManagerRepository<I,
      */
     @Override
     public I dispatchCommand(final CommandEnvelope command) {
-        final I result = PmCommandEndpoint.handle(this, command);
-        return result;
+        return commandDispatcherDelegate.dispatch(command);
     }
 
     /**
@@ -286,9 +299,7 @@ public abstract class ProcessManagerRepository<I,
 
     @Override
     public void onError(CommandEnvelope envelope, RuntimeException exception) {
-        final Rejection rejection = onDispatchingError(exception, envelope);
-        getBoundedContext().getRejectionBus()
-                           .post(rejection);
+        commandDispatcherDelegate.onError(envelope, exception);
     }
 
     @Override
@@ -410,6 +421,15 @@ public abstract class ProcessManagerRepository<I,
             logError("Error dispatching external event to process manager" +
                              " (class: %s, id: %s)",
                      envelope, exception);
+        }
+    }
+
+    private class CommandHandler implements Function<CommandEnvelope, I> {
+
+        @Override
+        public I apply(@Nullable CommandEnvelope input) {
+            checkNotNull(input);
+            return PmCommandEndpoint.handle(ProcessManagerRepository.this, input);
         }
     }
 }
