@@ -47,25 +47,14 @@ final class InMemoryPublisher extends AbstractInMemoryChannel implements Publish
      */
     private final Function<ChannelId, Iterable<InMemorySubscriber>> subscriberProvider;
 
-    /**
-     * The specification which checks if the message is suitable for the channel.
-     */
-    private final Specification<ExternalMessage> messageSuitabilitySpecification;
-
     InMemoryPublisher(ChannelId channelId,
                       Function<ChannelId, Iterable<InMemorySubscriber>> provider) {
         super(channelId);
         this.subscriberProvider = provider;
-        this.messageSuitabilitySpecification = new MessageSuitabilitySpecification(getChannelId());
     }
 
     @Override
     public Ack publish(Any messageId, ExternalMessage message) {
-        final boolean messageSuitable = messageSuitabilitySpecification.isSatisfiedBy(message);
-        if (!messageSuitable) {
-            throw newIllegalArgumentException("The message is not suitable for this channel.");
-        }
-
         final Iterable<InMemorySubscriber> localSubscribers = getSubscribers(getChannelId());
         for (InMemorySubscriber localSubscriber : localSubscribers) {
             callSubscriber(message, localSubscriber);

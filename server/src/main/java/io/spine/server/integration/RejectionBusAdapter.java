@@ -85,7 +85,7 @@ final class RejectionBusAdapter extends BusAdapter<RejectionEnvelope, RejectionD
     RejectionDispatcher<?> createDispatcher(Class<? extends Message> messageClass) {
         final DomesticRejectionPublisher result =
                 new DomesticRejectionPublisher(getBoundedContextName(),
-                                               getPublisherHub(),
+                                               getRouter(),
                                                RejectionClass.of(messageClass));
         return result;
     }

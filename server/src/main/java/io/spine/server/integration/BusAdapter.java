@@ -24,6 +24,7 @@ import io.spine.core.BoundedContextName;
 import io.spine.core.MessageEnvelope;
 import io.spine.server.bus.Bus;
 import io.spine.server.bus.MessageDispatcher;
+import io.spine.server.integration.route.DynamicRouter;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -54,11 +55,11 @@ abstract class BusAdapter<E extends MessageEnvelope<?, ?, ?>,
      * The publisher hub, used publish the messages dispatched from the local buses to external
      * collaborators.
      */
-    private final PublisherHub publisherHub;
+    private final DynamicRouter router;
 
     BusAdapter(AbstractBuilder<?, E, D> builder) {
         this.targetBus = builder.targetBus;
-        this.publisherHub = builder.publisherHub;
+        this.router = builder.router;
         this.boundedContextName = builder.boundedContextName;
     }
 
@@ -112,8 +113,8 @@ abstract class BusAdapter<E extends MessageEnvelope<?, ?, ?>,
         targetBus.unregister(dispatcher);
     }
 
-    PublisherHub getPublisherHub() {
-        return publisherHub;
+    DynamicRouter getRouter() {
+        return router;
     }
 
     BoundedContextName getBoundedContextName() {
@@ -134,15 +135,15 @@ abstract class BusAdapter<E extends MessageEnvelope<?, ?, ?>,
         private final Bus<?, E, ?, D> targetBus;
         private final BoundedContextName boundedContextName;
 
-        private PublisherHub publisherHub;
+        private DynamicRouter router;
 
         AbstractBuilder(Bus<?, E, ?, D> targetBus, BoundedContextName boundedContextName) {
             this.targetBus = checkNotNull(targetBus);
             this.boundedContextName = boundedContextName;
         }
 
-        public B setPublisherHub(PublisherHub publisherHub) {
-            this.publisherHub = checkNotNull(publisherHub);
+        public B setRouter(DynamicRouter router) {
+            this.router = checkNotNull(router);
             return self();
         }
 
@@ -151,7 +152,7 @@ abstract class BusAdapter<E extends MessageEnvelope<?, ?, ?>,
         protected abstract B self();
 
         public BusAdapter<E, D> build() {
-            checkNotNull(publisherHub, "PublisherHub must be set");
+            checkNotNull(router, "PublisherHub must be set");
 
             final BusAdapter<E, D> result = doBuild();
             return result;

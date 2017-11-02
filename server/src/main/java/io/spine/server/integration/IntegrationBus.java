@@ -22,6 +22,7 @@ package io.spine.server.integration;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.core.Ack;
@@ -37,7 +38,12 @@ import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.bus.MulticastBus;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventSubscriber;
+import io.spine.server.integration.memory.InMemoryRouteHolder;
 import io.spine.server.integration.memory.InMemoryTransportFactory;
+import io.spine.server.integration.route.ChannelRoute;
+import io.spine.server.integration.route.DynamicRouter;
+import io.spine.server.integration.route.Route;
+import io.spine.server.integration.route.RouteHolder;
 import io.spine.server.rejection.RejectionBus;
 import io.spine.server.rejection.RejectionSubscriber;
 import io.spine.type.TypeUrl;
@@ -50,7 +56,6 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Lists.newLinkedList;
-import static io.spine.Identifier.newUuid;
 import static io.spine.Identifier.pack;
 import static io.spine.server.bus.Buses.acknowledge;
 import static io.spine.server.integration.Channels.newId;
@@ -123,15 +128,15 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
     private final Iterable<BusAdapter<?, ?>> localBusAdapters;
     private final BoundedContextName boundedContextName;
     private final SubscriberHub subscriberHub;
-    private final PublisherHub publisherHub;
     private final ConfigurationChangeObserver configurationChangeObserver;
+    private final DynamicRouter router;
 
     private IntegrationBus(Builder builder) {
         super(builder.getDelivery());
         this.boundedContextName = builder.boundedContextName;
         this.subscriberHub = new SubscriberHub(builder.transportFactory);
-        this.publisherHub = new PublisherHub(builder.transportFactory);
-        this.localBusAdapters = createAdapters(builder, publisherHub);
+        this.router = new DynamicRouter(new PublisherHub(builder.transportFactory), builder.getRouteHolder());
+        this.localBusAdapters = createAdapters(builder, router);
         configurationChangeObserver = observeConfigurationChanges();
         final ChannelId channelId = newId(
                 ExternalMessageClass.of(RequestForExternalMessages.class));
@@ -156,13 +161,13 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
     }
 
     private static ImmutableSet<BusAdapter<?, ?>> createAdapters(Builder builder,
-                                                                 PublisherHub publisherHub) {
+                                                                 DynamicRouter router) {
         return ImmutableSet.<BusAdapter<?, ?>>of(
                 EventBusAdapter.builderWith(builder.eventBus, builder.boundedContextName)
-                               .setPublisherHub(publisherHub)
+                               .setRouter(router)
                                .build(),
                 RejectionBusAdapter.builderWith(builder.rejectionBus, builder.boundedContextName)
-                                   .setPublisherHub(publisherHub)
+                                   .setRouter(router)
                                    .build()
         );
     }
@@ -304,8 +309,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
         final ExternalMessage externalMessage = ExternalMessages.of(result, boundedContextName);
         final ChannelId channelId = newId(ExternalMessageClass.of(result.getClass()));
 
-        publisherHub.get(channelId)
-                    .publish(pack(newUuid()), externalMessage);
+        router.route(externalMessage);
     }
 
     private static ExternalMessageType toExternalMessageType(ChannelId channelId) {
@@ -315,9 +319,9 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
         final String wrapperTypeUrl = isRejection ? TypeUrl.of(Rejection.class).value()
                                                   : TypeUrl.of(Event.class).value();
         return ExternalMessageType.newBuilder()
-                                                            .setMessageTypeUrl(typeUrl.value())
-                                                            .setWrapperTypeUrl(wrapperTypeUrl)
-                                                            .build();
+                                  .setMessageTypeUrl(typeUrl.value())
+                                  .setWrapperTypeUrl(wrapperTypeUrl)
+                                  .build();
     }
 
     /**
@@ -391,7 +395,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
         notifyOfNeeds(ImmutableSet.<ChannelId>of());
 
         subscriberHub.close();
-        publisherHub.close();
+        router.close();
     }
 
     @Override
@@ -427,6 +431,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
         private DomesticDelivery delivery;
         private BoundedContextName boundedContextName;
         private TransportFactory transportFactory;
+        private RouteHolder<ChannelId> routeHolder;
 
         public Optional<EventBus> getEventBus() {
             return Optional.fromNullable(eventBus);
@@ -465,6 +470,19 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
 
         public Optional<TransportFactory> getTransportFactory() {
             return Optional.fromNullable(transportFactory);
+        }
+
+        public RouteHolder<ChannelId> getRouteHolder() {
+            if(routeHolder == null) {
+                Set<Route<ChannelId>> routes = Sets.newConcurrentHashSet();
+                routeHolder = new InMemoryRouteHolder(routes);
+            }
+            return routeHolder;
+        }
+
+        public Builder setRouteHolder(RouteHolder<ChannelId> routeHolder) {
+            this.routeHolder = checkNotNull(routeHolder);
+            return self();
         }
 
         private DomesticDelivery getDelivery() {

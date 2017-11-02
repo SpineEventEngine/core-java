@@ -20,6 +20,7 @@
 package io.spine.server.integration.given;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Sets;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
@@ -27,10 +28,12 @@ import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
+import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.core.React;
 import io.spine.core.Rejection;
+import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
 import io.spine.core.Subscribe;
 import io.spine.protobuf.AnyPacker;
@@ -39,8 +42,16 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.event.EventSubscriber;
+import io.spine.server.integration.ChannelId;
+import io.spine.server.integration.Channels;
+import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.IntegrationBus;
+import io.spine.server.integration.RequestForExternalMessages;
 import io.spine.server.integration.TransportFactory;
+import io.spine.server.integration.memory.InMemoryRouteHolder;
+import io.spine.server.integration.route.ChannelRoute;
+import io.spine.server.integration.route.Route;
+import io.spine.server.integration.route.RouteHolder;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.server.projection.Projection;
@@ -54,12 +65,14 @@ import io.spine.test.integration.event.ItgProjectCreated;
 import io.spine.test.integration.event.ItgProjectStarted;
 import io.spine.test.integration.rejection.IntegrationRejections.ItgCannotStartArchivedProject;
 import io.spine.test.integration.rejection.IntegrationRejections.ItgProjectAlreadyExists;
+import io.spine.type.MessageClass;
 import io.spine.validate.Int32ValueVBuilder;
 import io.spine.validate.StringValueVBuilder;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.Identifier.newUuid;
@@ -110,13 +123,33 @@ public class IntegrationBusTestEnv {
     }
 
     public static BoundedContext contextWithTransport(TransportFactory transportFactory) {
+        final RouteHolder<ChannelId> routeHolder = routeHolderWithRoutes();
         final IntegrationBus.Builder builder = IntegrationBus.newBuilder()
-                                                             .setTransportFactory(transportFactory);
+                                                             .setTransportFactory(transportFactory)
+                                                             .setRouteHolder(routeHolder);
         final BoundedContext result = BoundedContext.newBuilder()
                                                     .setName(newUuid())
                                                     .setIntegrationBus(builder)
                                                     .build();
         return result;
+    }
+
+    private static RouteHolder<ChannelId> routeHolderWithRoutes() {
+        final Set<Route<ChannelId>> routes = Sets.newConcurrentHashSet();
+        final Set<MessageClass> messageClasses = Sets.newConcurrentHashSet();
+
+        //messageClasses.add(EventClass.of(ItgProjectCreated.class));
+        //messageClasses.add(EventClass.of(ItgProjectStarted.class));
+        //messageClasses.add(RejectionClass.of(ItgCannotStartArchivedProject.class));
+        //messageClasses.add(RejectionClass.of(ItgProjectAlreadyExists.class));
+        messageClasses.add(ExternalMessageClass.of(RequestForExternalMessages.class));
+
+        for (MessageClass messageClass : messageClasses) {
+            routes.add(new ChannelRoute(Channels.newId(messageClass)));
+        }
+
+        final RouteHolder<ChannelId> routeHolder = new InMemoryRouteHolder(routes);
+        return routeHolder;
     }
 
     public static BoundedContext contextWithProjectCreatedNeeds(TransportFactory factory) {

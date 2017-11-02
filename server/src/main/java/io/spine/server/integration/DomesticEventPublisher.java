@@ -19,19 +19,20 @@
  */
 package io.spine.server.integration;
 
+import com.google.common.base.Function;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableSet;
 import io.spine.core.BoundedContextName;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
-import io.spine.protobuf.AnyPacker;
 import io.spine.server.event.EventSubscriber;
+import io.spine.server.integration.route.DynamicRouter;
 
 import java.util.Objects;
 import java.util.Set;
 
-import static io.spine.server.integration.Channels.newId;
+import static com.google.common.collect.FluentIterable.from;
 
 /**
  * A subscriber to local {@code EventBus}, which publishes each matching domestic event to
@@ -47,15 +48,15 @@ import static io.spine.server.integration.Channels.newId;
 final class DomesticEventPublisher extends EventSubscriber {
 
     private final BoundedContextName boundedContextName;
-    private final PublisherHub publisherHub;
+    private final DynamicRouter router;
     private final Set<EventClass> eventClasses;
 
     DomesticEventPublisher(BoundedContextName boundedContextName,
-                           PublisherHub publisherHub,
+                           DynamicRouter router,
                            EventClass messageClass) {
         super();
         this.boundedContextName = boundedContextName;
-        this.publisherHub = publisherHub;
+        this.router = router;
         this.eventClasses = ImmutableSet.of(messageClass);
     }
 
@@ -69,13 +70,18 @@ final class DomesticEventPublisher extends EventSubscriber {
     public Set<String> dispatch(EventEnvelope envelope) {
         final Event event = envelope.getOuterObject();
         final ExternalMessage msg = ExternalMessages.of(event, boundedContextName);
-        final ExternalMessageClass messageClass =
-                ExternalMessageClass.of(envelope.getMessageClass());
-        final ChannelId channelId = newId(messageClass);
-        final Publisher channel = publisherHub.get(channelId);
-        channel.publish(AnyPacker.pack(envelope.getId()), msg);
-
-        return ImmutableSet.of(channel.toString());
+        Iterable<Publisher> channels = router.route(msg);
+        final ImmutableSet<String> result =
+                from(channels)
+                        .transform(
+                                new Function<Publisher, String>() {
+                                    @Override
+                                    public String apply(Publisher input) {
+                                        return input.toString();
+                                    }
+                                })
+                        .toSet();
+        return result;
     }
 
     @SuppressWarnings("DuplicateStringLiteralInspection")
