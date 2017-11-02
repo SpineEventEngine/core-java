@@ -138,10 +138,10 @@ public class IntegrationBusTestEnv {
         final Set<Route<ChannelId>> routes = Sets.newConcurrentHashSet();
         final Set<MessageClass> messageClasses = Sets.newConcurrentHashSet();
 
-        //messageClasses.add(EventClass.of(ItgProjectCreated.class));
-        //messageClasses.add(EventClass.of(ItgProjectStarted.class));
-        //messageClasses.add(RejectionClass.of(ItgCannotStartArchivedProject.class));
-        //messageClasses.add(RejectionClass.of(ItgProjectAlreadyExists.class));
+        messageClasses.add(EventClass.of(ItgProjectCreated.class));
+        messageClasses.add(EventClass.of(ItgProjectStarted.class));
+        messageClasses.add(RejectionClass.of(ItgCannotStartArchivedProject.class));
+        messageClasses.add(RejectionClass.of(ItgProjectAlreadyExists.class));
         messageClasses.add(ExternalMessageClass.of(RequestForExternalMessages.class));
 
         for (MessageClass messageClass : messageClasses) {
