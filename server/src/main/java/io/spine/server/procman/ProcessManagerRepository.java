@@ -24,7 +24,6 @@ import com.google.protobuf.Message;
 import io.spine.annotation.SPI;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
-import io.spine.core.Commands;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
@@ -56,7 +55,7 @@ import javax.annotation.CheckReturnValue;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.core.Rejections.causedByRejection;
+import static io.spine.server.command.CommandDispatchingErrors.onDispatchingError;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -287,17 +286,9 @@ public abstract class ProcessManagerRepository<I,
 
     @Override
     public void onError(CommandEnvelope envelope, RuntimeException exception) {
-        checkNotNull(envelope);
-        checkNotNull(exception);
-        if (causedByRejection(exception)) {
-            final Rejection rejection = Commands.rejectWithCause(envelope.getCommand(), exception);
-            getBoundedContext().getRejectionBus()
-                               .post(rejection);
-
-        } else {
-            logError("Command dispatching caused error (class: %s, id: %s)", envelope, exception);
-            throw exception;
-        }
+        final Rejection rejection = onDispatchingError(exception, envelope);
+        getBoundedContext().getRejectionBus()
+                           .post(rejection);
     }
 
     @Override
