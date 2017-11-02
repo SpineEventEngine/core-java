@@ -238,11 +238,12 @@ public final class Commands {
      * @throws IllegalArgumentException upon an invalid rejection cause
      */
     @Internal
-    public static Rejection reject(Command command, Throwable cause) throws IllegalStateException {
+    public static Rejection rejectWithCause(Command command, Throwable cause)
+            throws IllegalArgumentException {
         checkNotNull(command);
         checkNotNull(cause);
 
-        final ThrowableMessage rejectionThrowable = Rejections.getCauseRejection(cause);
+        final ThrowableMessage rejectionThrowable = Rejections.getCause(cause);
         final Rejection rejection = Rejections.toRejection(rejectionThrowable, command);
         return rejection;
     }

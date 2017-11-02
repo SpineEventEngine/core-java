@@ -290,7 +290,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         checkNotNull(envelope);
         checkNotNull(exception);
         if (causedByRejection(exception)) {
-            final Rejection rejection = Commands.reject(envelope.getCommand(), exception);
+            final Rejection rejection = Commands.rejectWithCause(envelope.getCommand(), exception);
             getBoundedContext().getRejectionBus()
                                .post(rejection);
 

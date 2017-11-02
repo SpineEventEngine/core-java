@@ -209,7 +209,7 @@ public class CommandBus extends Bus<Command,
                 final Rejection rejection = toRejection(throwableMessage, envelope.getCommand());
                 final Class<?> rejectionClass = AnyPacker.unpack(rejection.getMessage())
                                                          .getClass();
-                Log.log().info("Posting rejection {} to RejectionBus.", rejectionClass.getName());
+                Log.log().trace("Posting rejection {} to RejectionBus.", rejectionClass.getName());
                 rejectionBus().post(rejection);
                 result = reject(envelope.getId(), rejection);
             } else {

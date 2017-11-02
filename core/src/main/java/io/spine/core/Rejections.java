@@ -224,7 +224,7 @@ public final class Rejections {
      * @throws IllegalArgumentException upon an invalid {@link Throwable}
      *                                  {@linkplain Throwables#getRootCause root cause}
      */
-    static ThrowableMessage getCauseRejection(Throwable throwable)
+    static ThrowableMessage getCause(Throwable throwable)
             throws IllegalArgumentException {
         checkNotNull(throwable);
         checkArgument(causedByRejection(throwable));
