@@ -42,7 +42,7 @@ import static com.google.common.collect.Maps.newHashMap;
 public class ChannelRoute implements Route {
 
     /**
-     * The map contains a kind related to a {@code ChannelSuitableAction}.
+     * The map contains a kind related to a {@code ChannelAction}.
      */
     private static final Map<KindCase, ChannelAction> ACTIONS_BY_CHANNEL_KIND = newHashMap();
 

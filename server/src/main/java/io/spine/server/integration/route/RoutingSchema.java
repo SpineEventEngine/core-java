@@ -21,8 +21,8 @@
 package io.spine.server.integration.route;
 
 /**
- * The base interface for a routing schema. The {@code RoutingSchema} is designed to store
- * {@linkplain Route channel routes}.
+ * The base interface for a routing schema. Should be used with a {@linkplain Router message router}
+ * as an entity that able to store {@linkplain Route channel routes}.
  *
  * @author Dmitry Ganzha
  */
