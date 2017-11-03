@@ -22,12 +22,13 @@ package io.spine.server.integration.route.action;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import io.spine.protobuf.AnyPacker;
 import io.spine.server.integration.ChannelId;
 import io.spine.server.integration.ExternalMessage;
 import io.spine.server.integration.MessageSuitable;
 import io.spine.server.integration.RequestForExternalMessages;
 import io.spine.type.TypeUrl;
+
+import static io.spine.protobuf.AnyPacker.unpack;
 
 /**
  * The {@code SuitableByMessageTypeAction} checks if the message is suitable for the message channel
@@ -56,7 +57,7 @@ public class SuitableByMessageTypeAction implements ChannelAction {
     @Override
     public MessageSuitable perform(ChannelId channelId, ExternalMessage message) {
         final String typeUrlOfChannel = channelId.getMessageTypeUrl();
-        final Message originalMessage = AnyPacker.unpack(message.getOriginalMessage());
+        final Message originalMessage = unpack(message.getOriginalMessage());
 
         // instanceof is needed because the process of getting type URL differs for document messages
         // and other types of messages(e.g. events, rejections).
@@ -67,10 +68,9 @@ public class SuitableByMessageTypeAction implements ChannelAction {
             return constructResult(isTypeUrlsSame);
         }
 
-        final Message eventOrRejection = AnyPacker.unpack(
-                (Any) originalMessage.getField(
-                        originalMessage.getDescriptorForType()
-                                       .findFieldByName(MESSAGE_FIELD_NAME)));
+        final Message eventOrRejection = unpack(
+                (Any) originalMessage.getField(originalMessage.getDescriptorForType()
+                                                              .findFieldByName(MESSAGE_FIELD_NAME)));
         final String typeUrlOfMessage = TypeUrl.of(eventOrRejection)
                                                .value();
         final boolean isTypeUrlsSame = typeUrlOfChannel.equals(typeUrlOfMessage);

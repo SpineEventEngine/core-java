@@ -42,7 +42,7 @@ message ChannelId {
     }
 }
 
-// The message which is used to identify if a message can be routed by a route.
+// The message which is used to identify if the message can be routed by the route.
 message MessageRouted {
 
     // ExternalMessage received by the Router.
@@ -51,11 +51,11 @@ message MessageRouted {
     MessageSuitable messageSuitable = 2 [(required) = true];
 }
 
-// The message which is used to identify if a message suitable for a message channel.
+// The message which is used to identify if the message suitable for the message channel.
 message MessageSuitable {
 
     bool suitable = 1 [(required) = true];
 
-    // Description shows why a message is not suitable for the a message channel
+    // Description shows why the message is not suitable for the message channel
     string description = 2;
 }
