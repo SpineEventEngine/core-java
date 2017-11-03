@@ -18,43 +18,62 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.integration.validator;
+package io.spine.server.integration.route.action;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.integration.ChannelId;
 import io.spine.server.integration.ExternalMessage;
+import io.spine.server.integration.MessageSuitable;
 import io.spine.server.integration.RequestForExternalMessages;
 import io.spine.type.TypeUrl;
 
 /**
- * The {@code MessageTypeChannelValidator} checks if the message is suitable for the channel by the
+ * The {@code MessageTypeAction} checks if the message is suitable for the channel by the
  * message type.
  *
  * @author Dmitry Ganzha
  */
-public class MessageTypeChannelValidator implements ChannelValidator {
+public class MessageTypeAction implements ChannelSuitableAction {
 
     private static final String MESSAGE_FIELD_NAME = "message";
+    private static final String ERROR_MESSAGE =
+            "The message type URL does not match the type URL of messages which " +
+                    "the message channel can transport.";
+
+    private static MessageSuitable constructResult(boolean isTypeUrlsSame) {
+        final MessageSuitable.Builder builder = MessageSuitable.newBuilder();
+        if (isTypeUrlsSame) {
+            builder.setSuitable(true);
+        } else {
+            builder.setSuitable(false);
+            builder.setDescription(ERROR_MESSAGE);
+        }
+        return builder.build();
+    }
 
     @Override
-    public boolean validate(ChannelId channelId, ExternalMessage message) {
+    public MessageSuitable perform(ChannelId channelId, ExternalMessage message) {
         final String typeUrlOfChannel = channelId.getMessageTypeUrl();
         final Message originalMessage = AnyPacker.unpack(message.getOriginalMessage());
 
         // instanceof is needed because the process of getting type URL differs for document messages
         // and other types of messages(e.g. events, rejections).
         if (originalMessage instanceof RequestForExternalMessages) {
-            return typeUrlOfChannel.equals(TypeUrl.of(originalMessage)
-                                                  .value());
+            final String typeUrlOfMessage = TypeUrl.of(originalMessage)
+                                                   .value();
+            final boolean isTypeUrlsSame = typeUrlOfChannel.equals(typeUrlOfMessage);
+            return constructResult(isTypeUrlsSame);
         }
 
         final Message eventOrRejection = AnyPacker.unpack(
                 (Any) originalMessage.getField(
                         originalMessage.getDescriptorForType()
                                        .findFieldByName(MESSAGE_FIELD_NAME)));
-        return typeUrlOfChannel.equals(TypeUrl.of(eventOrRejection)
-                                              .value());
+        final String typeUrlOfMessage = TypeUrl.of(eventOrRejection)
+                                               .value();
+        final boolean isTypeUrlsSame = typeUrlOfChannel.equals(typeUrlOfMessage);
+        return constructResult(isTypeUrlsSame);
     }
 }

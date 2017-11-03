@@ -24,7 +24,7 @@ import io.spine.core.BoundedContextName;
 import io.spine.core.MessageEnvelope;
 import io.spine.server.bus.Bus;
 import io.spine.server.bus.MessageDispatcher;
-import io.spine.server.integration.route.DynamicRouter;
+import io.spine.server.integration.route.Router;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -37,6 +37,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @param <E> the type of envelopes which are handled by the local bus, which is being adapted
  * @param <D> the type of dispatchers suitable for the local bus, which is being adapted
  * @author Alex Tymchenko
+ * @author Dmitry Ganzha
  */
 abstract class BusAdapter<E extends MessageEnvelope<?, ?, ?>,
         D extends MessageDispatcher<?, E, ?>> {
@@ -52,10 +53,10 @@ abstract class BusAdapter<E extends MessageEnvelope<?, ?, ?>,
     private final BoundedContextName boundedContextName;
 
     /**
-     * The publisher hub, used publish the messages dispatched from the local buses to external
+     * The message router used to route the messages dispatched from the local buses to external
      * collaborators.
      */
-    private final DynamicRouter router;
+    private final Router router;
 
     BusAdapter(AbstractBuilder<?, E, D> builder) {
         this.targetBus = builder.targetBus;
@@ -113,7 +114,7 @@ abstract class BusAdapter<E extends MessageEnvelope<?, ?, ?>,
         targetBus.unregister(dispatcher);
     }
 
-    DynamicRouter getRouter() {
+    Router getRouter() {
         return router;
     }
 
@@ -134,15 +135,14 @@ abstract class BusAdapter<E extends MessageEnvelope<?, ?, ?>,
 
         private final Bus<?, E, ?, D> targetBus;
         private final BoundedContextName boundedContextName;
-
-        private DynamicRouter router;
+        private Router router;
 
         AbstractBuilder(Bus<?, E, ?, D> targetBus, BoundedContextName boundedContextName) {
             this.targetBus = checkNotNull(targetBus);
             this.boundedContextName = boundedContextName;
         }
 
-        public B setRouter(DynamicRouter router) {
+        public B setRouter(Router router) {
             this.router = checkNotNull(router);
             return self();
         }

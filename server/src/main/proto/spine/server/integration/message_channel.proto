@@ -24,7 +24,6 @@ package spine.server.integration;
 import "spine/options.proto";
 import "spine/server/integration/integration_bus.proto";
 import "google/protobuf/empty.proto";
-import "spine/base/error.proto";
 
 option (type_url_prefix) = "type.spine.io";
 option java_package = "io.spine.server.integration";
@@ -43,16 +42,20 @@ message ChannelId {
     }
 }
 
+// The message which is used to identify if a message can be routed by a route.
 message MessageRouted {
-    // Original command received by the Process Manager.
+
+    // ExternalMessage received by the Router.
     ExternalMessage source = 1 [(required) = true];
 
-    bool routed = 2 [(required) = true];
+    MessageSuitable messageSuitable = 2 [(required) = true];
+}
 
-    oneof status {
-        // The message was routed.
-        google.protobuf.Empty ok = 3;
+// The message which is used to identify if a message suitable for a message channel.
+message MessageSuitable {
 
-        base.Error error = 4;
-    }
+    bool suitable = 1 [(required) = true];
+
+    // Description shows why a message is not suitable for the a message channel
+    string description = 2;
 }

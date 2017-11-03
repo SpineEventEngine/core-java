@@ -21,25 +21,33 @@
 package io.spine.server.integration.route;
 
 import io.spine.server.integration.ChannelId;
+import io.spine.server.integration.ChannelId.KindCase;
 import io.spine.server.integration.ExternalMessage;
 import io.spine.server.integration.MessageRouted;
-import io.spine.server.integration.validator.ChannelValidator;
-import io.spine.server.integration.validator.MessageTypeChannelValidator;
+import io.spine.server.integration.MessageSuitable;
+import io.spine.server.integration.route.action.ChannelSuitableAction;
+import io.spine.server.integration.route.action.MessageTypeAction;
 
 import java.util.Map;
+import java.util.Objects;
 
 import static com.google.common.collect.Maps.newHashMap;
 
-public class ChannelRoute implements Route<ChannelId> {
+/**
+ * The {@code ChannelRoute} checks if the {@code ExternalMessage} is suitable for the
+ * {@code MessageChannel} assigned to this route.
+ *
+ * @author Dmitry Ganzha
+ */
+public class ChannelRoute implements Route {
+
     /**
-     * The map contains a kind related to a {@code ChannelValidator}.
+     * The map contains a kind related to a {@code ChannelSuitableAction}.
      */
-    private static final Map<ChannelId.KindCase, ChannelValidator>
-            VALIDATORS_BY_CHANNEL_KIND = newHashMap();
+    private static final Map<KindCase, ChannelSuitableAction> ACTIONS_BY_CHANNEL_KIND = newHashMap();
 
     static {
-        VALIDATORS_BY_CHANNEL_KIND.put(ChannelId.KindCase.MESSAGE_TYPE_URL,
-                                       new MessageTypeChannelValidator());
+        ACTIONS_BY_CHANNEL_KIND.put(KindCase.MESSAGE_TYPE_URL, new MessageTypeAction());
     }
 
     private final ChannelId channelId;
@@ -50,17 +58,31 @@ public class ChannelRoute implements Route<ChannelId> {
 
     @Override
     public MessageRouted accept(ExternalMessage message) {
-        final ChannelId.KindCase kind = channelId.getKindCase();
-        final ChannelValidator channelValidator = VALIDATORS_BY_CHANNEL_KIND.get(kind);
-        final boolean isValid = channelValidator.validate(channelId, message);
+        final KindCase kind = channelId.getKindCase();
+        final ChannelSuitableAction action = ACTIONS_BY_CHANNEL_KIND.get(
+                kind);
+        final MessageSuitable messageSuitable = action.perform(channelId, message);
         return MessageRouted.newBuilder()
                             .setSource(message)
-                            .setRouted(isValid)
+                            .setMessageSuitable(messageSuitable)
                             .build();
     }
 
     @Override
     public ChannelId getChannelIdentifier() {
         return channelId;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(channelId);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) { return true; }
+        if (o == null || getClass() != o.getClass()) { return false; }
+        ChannelRoute that = (ChannelRoute) o;
+        return Objects.equals(channelId, that.channelId);
     }
 }

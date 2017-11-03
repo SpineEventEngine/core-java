@@ -22,7 +22,6 @@ package io.spine.server.integration;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.core.Ack;
@@ -38,12 +37,12 @@ import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.bus.MulticastBus;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventSubscriber;
-import io.spine.server.integration.memory.InMemoryRouteHolder;
+import io.spine.server.integration.memory.InMemoryRoutingSchema;
 import io.spine.server.integration.memory.InMemoryTransportFactory;
 import io.spine.server.integration.route.ChannelRoute;
 import io.spine.server.integration.route.DynamicRouter;
-import io.spine.server.integration.route.Route;
-import io.spine.server.integration.route.RouteHolder;
+import io.spine.server.integration.route.Router;
+import io.spine.server.integration.route.RoutingSchema;
 import io.spine.server.rejection.RejectionBus;
 import io.spine.server.rejection.RejectionSubscriber;
 import io.spine.type.TypeUrl;
@@ -129,17 +128,19 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
     private final BoundedContextName boundedContextName;
     private final SubscriberHub subscriberHub;
     private final ConfigurationChangeObserver configurationChangeObserver;
-    private final DynamicRouter router;
+    private final Router router;
 
     private IntegrationBus(Builder builder) {
         super(builder.getDelivery());
         this.boundedContextName = builder.boundedContextName;
         this.subscriberHub = new SubscriberHub(builder.transportFactory);
-        this.router = new DynamicRouter(new PublisherHub(builder.transportFactory), builder.getRouteHolder());
+        this.router = new DynamicRouter<>(new PublisherHub(builder.transportFactory),
+                                          builder.getRoutingSchema());
         this.localBusAdapters = createAdapters(builder, router);
         configurationChangeObserver = observeConfigurationChanges();
         final ChannelId channelId = newId(
                 ExternalMessageClass.of(RequestForExternalMessages.class));
+        router.register(new ChannelRoute(channelId));
         subscriberHub.get(channelId)
                      .addObserver(configurationChangeObserver);
     }
@@ -161,7 +162,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
     }
 
     private static ImmutableSet<BusAdapter<?, ?>> createAdapters(Builder builder,
-                                                                 DynamicRouter router) {
+                                                                 Router router) {
         return ImmutableSet.<BusAdapter<?, ?>>of(
                 EventBusAdapter.builderWith(builder.eventBus, builder.boundedContextName)
                                .setRouter(router)
@@ -307,7 +308,6 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
         }
         final RequestForExternalMessages result = resultBuilder.build();
         final ExternalMessage externalMessage = ExternalMessages.of(result, boundedContextName);
-        final ChannelId channelId = newId(ExternalMessageClass.of(result.getClass()));
 
         router.route(externalMessage);
     }
@@ -431,7 +431,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
         private DomesticDelivery delivery;
         private BoundedContextName boundedContextName;
         private TransportFactory transportFactory;
-        private RouteHolder<ChannelId> routeHolder;
+        private RoutingSchema routingSchema;
 
         public Optional<EventBus> getEventBus() {
             return Optional.fromNullable(eventBus);
@@ -472,16 +472,12 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
             return Optional.fromNullable(transportFactory);
         }
 
-        public RouteHolder<ChannelId> getRouteHolder() {
-            if(routeHolder == null) {
-                Set<Route<ChannelId>> routes = Sets.newConcurrentHashSet();
-                routeHolder = new InMemoryRouteHolder(routes);
-            }
-            return routeHolder;
+        public RoutingSchema getRoutingSchema() {
+            return routingSchema;
         }
 
-        public Builder setRouteHolder(RouteHolder<ChannelId> routeHolder) {
-            this.routeHolder = checkNotNull(routeHolder);
+        public Builder setRoutingSchema(RoutingSchema routingSchema) {
+            this.routingSchema = checkNotNull(routingSchema);
             return self();
         }
 
@@ -503,6 +499,10 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
                 transportFactory = initTransportFactory();
             }
 
+            if (routingSchema == null) {
+                routingSchema = initRoutingSchema();
+            }
+
             this.delivery = new DomesticDelivery();
 
             return new IntegrationBus(this);
@@ -510,6 +510,10 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
 
         private static TransportFactory initTransportFactory() {
             return InMemoryTransportFactory.newInstance();
+        }
+
+        private static RoutingSchema initRoutingSchema() {
+            return InMemoryRoutingSchema.newInstance();
         }
 
         @Override

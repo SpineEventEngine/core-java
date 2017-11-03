@@ -18,23 +18,47 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.integration.specification;
+package io.spine.server.integration.memory;
+
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
+import io.spine.server.integration.route.Route;
+import io.spine.server.integration.route.RoutingSchema;
+
+import java.util.Set;
 
 /**
- * The base interface for specifications.
+ * An in-memory implementation of the {@link RoutingSchema}.
  *
- * <p>Inspired by <a href="https://martinfowler.com/apsupp/spec.pdf">Specification pattern.</a>
- *
- * @param <T> The type of entity for which the specification is defined.
  * @author Dmitry Ganzha
  */
-public interface Specification<T> {
+public class InMemoryRoutingSchema implements RoutingSchema {
+    private final Set<Route> routes;
+
+    /** Prevent direct instantiation from the outside. */
+    private InMemoryRoutingSchema() {
+        this.routes = Sets.newConcurrentHashSet();
+    }
 
     /**
-     * Check if {@code candidate} is satisfied by the specification.
-     *
-     * @param candidate candidate an object to test
-     * @return {@code true} if the candidate satisfies the specification otherwise {@code false}
+     * Creates a new instance of {@code InMemoryRoutingSchema}.
      */
-    boolean isSatisfiedBy(T candidate);
+    public static InMemoryRoutingSchema newInstance() {
+        return new InMemoryRoutingSchema();
+    }
+
+    @Override
+    public void add(Route route) {
+        routes.add(route);
+    }
+
+    @Override
+    public void remove(Route route) {
+        routes.remove(route);
+    }
+
+    @Override
+    public Iterable<Route> getAll() {
+        return ImmutableSet.copyOf(routes);
+    }
 }

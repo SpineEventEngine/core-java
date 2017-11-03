@@ -20,10 +20,30 @@
 
 package io.spine.server.integration.route;
 
-public interface RouteHolder<I> {
-    void addRoute(Route<I> route);
+/**
+ * The base interface for a routing schema. The {@code RoutingSchema} is designed to store
+ * {@linkplain Route channel routes}.
+ *
+ * @author Dmitry Ganzha
+ */
+public interface RoutingSchema {
 
-    void removeRoute(Route<I> route);
+    /**
+     * Adds route to the routing schema.
+     *
+     * @param route the route to be added
+     */
+    void add(Route route);
 
-    Iterable<Route<I>> getRoutes();
+    /**
+     * Removes route from the routing schema.
+     *
+     * @param route the route to be removed
+     */
+    void remove(Route route);
+
+    /**
+     * Returns the routes defined in routing schema
+     */
+    Iterable<Route> getAll();
 }

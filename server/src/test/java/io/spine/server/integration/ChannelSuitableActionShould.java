@@ -24,22 +24,24 @@ import io.spine.core.BoundedContextName;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.protobuf.AnyPacker;
-import io.spine.server.integration.specification.MessageSuitabilitySpecification;
-import io.spine.server.integration.specification.Specification;
+import io.spine.server.integration.route.action.ChannelSuitableAction;
+import io.spine.server.integration.route.action.MessageTypeAction;
 import io.spine.test.integration.event.ItgProjectCreated;
 import io.spine.test.integration.event.ItgProjectStarted;
 import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 /**
  * @author Dmitry Ganzha
  */
-public class MessageSuitabilitySpecificationShould {
+public class ChannelSuitableActionShould {
 
     @Test
-    public void return_false_if_message_is_not_satisfy_specification() {
+    public void return_false_if_message_is_not_suitable_for_message_channel_by_message_type() {
         final EventClass eventClass = EventClass.of(ItgProjectStarted.class);
         final ChannelId channelId = Channels.newId(eventClass);
         final ItgProjectCreated itgProjectCreated = ItgProjectCreated.getDefaultInstance();
@@ -49,14 +51,13 @@ public class MessageSuitabilitySpecificationShould {
         final BoundedContextName boundedContextName = BoundedContextName.getDefaultInstance();
         final ExternalMessage notSuitableMessage = ExternalMessages.of(projectCreatedEvent,
                                                                        boundedContextName);
-        final Specification<ExternalMessage> specification = new MessageSuitabilitySpecification(
-                channelId);
-        final boolean result = specification.isSatisfiedBy(notSuitableMessage);
-        assertFalse(result);
+        final ChannelSuitableAction action = new MessageTypeAction();
+        final MessageSuitable result = action.perform(channelId, notSuitableMessage);
+        assertFalse(result.getSuitable());
     }
 
     @Test
-    public void return_true_if_message_is_satisfy_specification() {
+    public void return_true_if_message_is_suitable_for_message_channel_by_message_type() {
         final EventClass eventClass = EventClass.of(ItgProjectCreated.class);
         final ChannelId channelId = Channels.newId(eventClass);
         final ItgProjectCreated itgProjectCreated = ItgProjectCreated.getDefaultInstance();
@@ -66,9 +67,8 @@ public class MessageSuitabilitySpecificationShould {
         final BoundedContextName boundedContextName = BoundedContextName.getDefaultInstance();
         final ExternalMessage suitableMessage = ExternalMessages.of(projectCreatedEvent,
                                                                     boundedContextName);
-        final Specification<ExternalMessage> specification = new MessageSuitabilitySpecification(
-                channelId);
-        final boolean result = specification.isSatisfiedBy(suitableMessage);
-        assertTrue(result);
+        final ChannelSuitableAction action = new MessageTypeAction();
+        final MessageSuitable result = action.perform(channelId, suitableMessage);
+        assertTrue(result.getSuitable());
     }
 }

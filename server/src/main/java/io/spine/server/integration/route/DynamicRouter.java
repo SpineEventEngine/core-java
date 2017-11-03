@@ -21,23 +21,31 @@
 package io.spine.server.integration.route;
 
 import com.google.common.base.Function;
+import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 import io.spine.server.integration.ChannelHub;
-import io.spine.server.integration.ChannelId;
 import io.spine.server.integration.ExternalMessage;
+import io.spine.server.integration.MessageRouted;
 import io.spine.server.integration.Publisher;
-import io.spine.server.integration.memory.InMemoryRouteHolder;
-
-import java.util.Set;
 
 import static com.google.common.collect.FluentIterable.from;
 
-public class DynamicRouter extends AbstractMessageRouter<Publisher, ChannelId> {
+/**
+ * The {@code DynamicRouter} routes messages to suitable {@code MessageChannel}s
+ * based on various rules.
+ *
+ * @param <P> the type of the publisher message channel
+ * @author Dmitry Ganzha
+ */
+public class DynamicRouter<P extends Publisher> implements Router {
 
-    public DynamicRouter(ChannelHub<Publisher> channelHub,
-                         RouteHolder<ChannelId> routeHolder) {
-        super(channelHub, routeHolder);
+    private final ChannelHub<P> channelHub;
+
+    private final RoutingSchema routingSchema;
+
+    public DynamicRouter(ChannelHub<P> channelHub, RoutingSchema routingSchema) {
+        this.channelHub = channelHub;
+        this.routingSchema = routingSchema;
     }
 
     @Override
@@ -50,19 +58,48 @@ public class DynamicRouter extends AbstractMessageRouter<Publisher, ChannelId> {
     }
 
     @Override
-    protected Iterable<Publisher> determineTargetChannels(ExternalMessage message) {
-        final Iterable<Route<ChannelId>> suitableRoutes = findSuitableRoutes(message);
+    public void register(Route route) {
+        routingSchema.add(route);
+    }
+
+    @Override
+    public void unregister(Route route) {
+        routingSchema.remove(route);
+    }
+
+    private Iterable<Publisher> determineTargetChannels(ExternalMessage message) {
+        final Iterable<Route> suitableRoutes = findSuitableRoutes(message);
         final ImmutableSet<Publisher> targetChannels =
                 from(suitableRoutes)
-                        .transform(new Function<Route<ChannelId>, Publisher>() {
+                        .transform(new Function<Route, Publisher>() {
                             @Override
-                            public Publisher apply(Route<ChannelId> input) {
-                                final Publisher publisher = getChannelHub().get(
-                                        input.getChannelIdentifier());
+                            public Publisher apply(Route input) {
+                                final Publisher publisher =
+                                        channelHub.get(input.getChannelIdentifier());
                                 return publisher;
                             }
                         })
                         .toSet();
         return targetChannels;
+    }
+
+    private Iterable<Route> findSuitableRoutes(final ExternalMessage message) {
+        final ImmutableSet<Route> suitableRoutes =
+                from(routingSchema.getAll())
+                        .filter(new Predicate<Route>() {
+                            @Override
+                            public boolean apply(Route input) {
+                                final MessageRouted messageRouted = input.accept(message);
+                                return messageRouted.getMessageSuitable()
+                                                    .getSuitable();
+                            }
+                        })
+                        .toSet();
+        return suitableRoutes;
+    }
+
+    @Override
+    public void close() throws Exception {
+        channelHub.close();
     }
 }

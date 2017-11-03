@@ -27,10 +27,6 @@ import io.spine.server.bus.Buses;
 import io.spine.server.integration.ChannelId;
 import io.spine.server.integration.ExternalMessage;
 import io.spine.server.integration.Publisher;
-import io.spine.server.integration.specification.MessageSuitabilitySpecification;
-import io.spine.server.integration.specification.Specification;
-
-import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
  * An in-memory implementation of the {@link Publisher}.

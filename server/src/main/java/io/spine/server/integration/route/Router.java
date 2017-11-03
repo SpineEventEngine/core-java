@@ -18,28 +18,42 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.integration.validator;
+package io.spine.server.integration.route;
 
-import io.spine.server.integration.ChannelId;
 import io.spine.server.integration.ExternalMessage;
-import io.spine.server.integration.specification.Specification;
+import io.spine.server.integration.MessageChannel;
+import io.spine.server.integration.Publisher;
 
 /**
- * The base interface for message channel validators. The validators are used in
- * {@linkplain Specification specifications} to verify if the message suitable for the channel.
+ * The base interface for a message router. The {@code Router} is designed for routing
+ * messages to {@linkplain MessageChannel message channels} based on predefined routes.
+ *
+ * Inspired by <a href="http://www.enterpriseintegrationpatterns.com/patterns/messaging/DynamicRouter.html">
+ * Dynamic Router pattern.</a>
  *
  * @author Dmitry Ganzha
  */
-public interface ChannelValidator {
+public interface Router extends AutoCloseable {
 
     /**
-     * Checks whether the passed {@code message} is suitable for the message channel.
-     * Performs validation as a part of {@link Specification#isSatisfiedBy(Object)}.
+     * Routes the message to corresponding {@code MessageChannel}s and returns them.
      *
-     * @param channelId an instance of {@code ChannelId}
-     * @param message   an instance of {@code ExternalMessage}
-     * @return {@code true} if the message is valid according to the channel's kind,
-     * {@code false} otherwise
+     * @param message the message to be routed
+     * @return returns the message channels to which the message was routed.
      */
-    boolean validate(ChannelId channelId, ExternalMessage message);
+    Iterable<Publisher> route(ExternalMessage message);
+
+    /**
+     * Registers the passed route.
+     *
+     * @param route the route to register
+     */
+    void register(Route route);
+
+    /**
+     * Unregisters the passed route.
+     *
+     * @param route the route to unregister
+     */
+    void unregister(Route route);
 }

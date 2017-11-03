@@ -27,7 +27,8 @@ import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.server.event.EventSubscriber;
-import io.spine.server.integration.route.DynamicRouter;
+import io.spine.server.integration.route.ChannelRoute;
+import io.spine.server.integration.route.Router;
 
 import java.util.Objects;
 import java.util.Set;
@@ -48,16 +49,17 @@ import static com.google.common.collect.FluentIterable.from;
 final class DomesticEventPublisher extends EventSubscriber {
 
     private final BoundedContextName boundedContextName;
-    private final DynamicRouter router;
+    private final Router router;
     private final Set<EventClass> eventClasses;
 
     DomesticEventPublisher(BoundedContextName boundedContextName,
-                           DynamicRouter router,
+                           Router router,
                            EventClass messageClass) {
         super();
         this.boundedContextName = boundedContextName;
         this.router = router;
         this.eventClasses = ImmutableSet.of(messageClass);
+        router.register(new ChannelRoute(Channels.newId(messageClass)));
     }
 
     @SuppressWarnings("ReturnOfCollectionOrArrayField")     // Returning an immutable impl.

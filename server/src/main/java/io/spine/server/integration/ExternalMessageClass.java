@@ -55,7 +55,7 @@ public final class ExternalMessageClass extends MessageClass {
         return of(messageClass.value());
     }
 
-    public static ExternalMessageClass of(Class<? extends Message> clazz) {
+    static ExternalMessageClass of(Class<? extends Message> clazz) {
         checkNotNull(clazz);
         return new ExternalMessageClass(clazz);
     }

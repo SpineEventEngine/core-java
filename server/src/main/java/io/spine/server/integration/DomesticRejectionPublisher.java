@@ -26,7 +26,8 @@ import io.spine.core.BoundedContextName;
 import io.spine.core.Rejection;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
-import io.spine.server.integration.route.DynamicRouter;
+import io.spine.server.integration.route.ChannelRoute;
+import io.spine.server.integration.route.Router;
 import io.spine.server.rejection.RejectionSubscriber;
 
 import java.util.Objects;
@@ -48,16 +49,17 @@ import static com.google.common.collect.FluentIterable.from;
 final class DomesticRejectionPublisher extends RejectionSubscriber {
 
     private final BoundedContextName boundedContextName;
-    private final DynamicRouter router;
+    private final Router router;
     private final Set<RejectionClass> rejectionClasses;
 
     DomesticRejectionPublisher(BoundedContextName boundedContextName,
-                               DynamicRouter router,
+                               Router router,
                                RejectionClass rejectionClass) {
         super();
         this.boundedContextName = boundedContextName;
         this.router = router;
         this.rejectionClasses = ImmutableSet.of(rejectionClass);
+        router.register(new ChannelRoute(Channels.newId(rejectionClass)));
     }
 
     @SuppressWarnings("ReturnOfCollectionOrArrayField")    // Returning an immutable impl.

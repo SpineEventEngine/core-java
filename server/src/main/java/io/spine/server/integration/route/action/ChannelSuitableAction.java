@@ -18,34 +18,28 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.integration.memory;
+package io.spine.server.integration.route.action;
 
-import com.google.common.collect.ImmutableSet;
 import io.spine.server.integration.ChannelId;
+import io.spine.server.integration.ExternalMessage;
+import io.spine.server.integration.MessageSuitable;
 import io.spine.server.integration.route.Route;
-import io.spine.server.integration.route.RouteHolder;
 
-import java.util.Set;
+/**
+ * The base interface for message channel actions. The actions are used in
+ * {@linkplain Route#accept(ExternalMessage)} to verify if the message suitable for the channel.
+ *
+ * @author Dmitry Ganzha
+ */
+public interface ChannelSuitableAction {
 
-public class InMemoryRouteHolder implements RouteHolder<ChannelId> {
-    private final Set<Route<ChannelId>> routes;
-
-    public InMemoryRouteHolder(Set<Route<ChannelId>> routes) {
-        this.routes = routes;
-    }
-
-    @Override
-    public void addRoute(Route<ChannelId> route) {
-        routes.add(route);
-    }
-
-    @Override
-    public void removeRoute(Route<ChannelId> route) {
-        routes.remove(route);
-    }
-
-    @Override
-    public Iterable<Route<ChannelId>> getRoutes() {
-        return ImmutableSet.copyOf(routes);
-    }
+    /**
+     * Checks whether the passed {@code message} is suitable for the message channel.
+     *
+     * @param id      an instance of {@code ChannelId}
+     * @param message an instance of {@code ExternalMessage}
+     * @return an instance of {@code MessageSuitable} which shows if the message is suitable
+     * according to the channel's kind
+     */
+    MessageSuitable perform(ChannelId id, ExternalMessage message);
 }

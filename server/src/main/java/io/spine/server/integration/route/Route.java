@@ -20,11 +20,38 @@
 
 package io.spine.server.integration.route;
 
+import io.spine.server.integration.ChannelId;
 import io.spine.server.integration.ExternalMessage;
+import io.spine.server.integration.MessageChannel;
 import io.spine.server.integration.MessageRouted;
 
-public interface Route<I> {
+/**
+ * The base interface for a route. The route is an entity that connects
+ * {@linkplain MessageChannel message channels} and a
+ * {@linkplain Router message router}.
+ *
+ * @author Dmitry Ganzha
+ */
+public interface Route {
+
+    /**
+     * Checks if the message can be routed by this route.
+     *
+     * <p>A route can:
+     * <ul>
+     * <li>accept the message (by returning {@code MessageRouted} which will indicate that
+     * the message can be routed by this route);
+     * <li>reject the message with description why the message is not suitable for this route;
+     * </ul>
+     *
+     * @param message the message to be checked whether the route is suitable or not
+     * @return an instance of {@code MessageRouted} which shows if the message is can be routed
+     * by this route
+     */
     MessageRouted accept(ExternalMessage message);
 
-    I getChannelIdentifier();
+    /**
+     * Obtains {@code MessageChannel}'s ID assigned to this route.
+     */
+    ChannelId getChannelIdentifier();
 }

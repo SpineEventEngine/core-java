@@ -20,7 +20,7 @@
 package io.spine.server.integration;
 
 import io.spine.annotation.SPI;
-import io.spine.server.integration.specification.Specification;
+import io.spine.server.integration.route.action.ChannelSuitableAction;
 
 /**
  * A factory for creating channel-based transport for {@code Message} inter-exchange between the
@@ -37,7 +37,8 @@ public interface TransportFactory {
 
     /**
      * Creates a {@link Publisher} for the messages that
-     * {@linkplain Specification#isSatisfiedBy(Object) correspond} to the passed channel ID.
+     * {@linkplain ChannelSuitableAction#perform(ChannelId, ExternalMessage)}  correspond}
+     * to the passed channel ID.
      *
      * @param channelId the identifier of the channel
      * @return a new {@code Publisher} instance
