@@ -30,7 +30,7 @@ import io.spine.server.integration.RequestForExternalMessages;
 import io.spine.type.TypeUrl;
 
 /**
- * The {@code MessageTypeAction} checks if the message is suitable for the channel by the
+ * The {@code MessageTypeAction} checks if the message is suitable for the message channel by the
  * message type.
  *
  * @author Dmitry Ganzha

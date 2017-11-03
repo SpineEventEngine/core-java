@@ -34,7 +34,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import static com.google.common.collect.FluentIterable.from;
-import static io.spine.server.integration.Channels.*;
+import static io.spine.server.integration.Channels.newId;
 
 /**
  * A subscriber to local {@code EventBus}, which publishes each matching domestic event to
