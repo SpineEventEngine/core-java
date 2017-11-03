@@ -33,6 +33,7 @@ import java.util.Set;
  * @author Dmitry Ganzha
  */
 public class InMemoryRoutingSchema implements RoutingSchema {
+
     private final Set<Route> routes;
 
     /** Prevent direct instantiation from the outside. */

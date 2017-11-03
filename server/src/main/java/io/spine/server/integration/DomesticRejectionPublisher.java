@@ -34,6 +34,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import static com.google.common.collect.FluentIterable.from;
+import static io.spine.server.integration.Channels.*;
 
 /**
  * A subscriber to local {@code RejectionBus}, which publishes each matching domestic rejection to
@@ -59,7 +60,7 @@ final class DomesticRejectionPublisher extends RejectionSubscriber {
         this.boundedContextName = boundedContextName;
         this.router = router;
         this.rejectionClasses = ImmutableSet.of(rejectionClass);
-        router.register(new ChannelRoute(Channels.newId(rejectionClass)));
+        router.register(new ChannelRoute(newId(rejectionClass)));
     }
 
     @SuppressWarnings("ReturnOfCollectionOrArrayField")    // Returning an immutable impl.

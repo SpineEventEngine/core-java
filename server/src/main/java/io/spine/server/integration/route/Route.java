@@ -35,7 +35,7 @@ import io.spine.server.integration.MessageRouted;
 public interface Route {
 
     /**
-     * Checks if the message can be routed by this route.
+     * Checks if the message can be routed via this route.
      *
      * <p>A route can:
      * <ul>
@@ -44,9 +44,9 @@ public interface Route {
      * <li>reject the message with description why the message is not suitable for this route;
      * </ul>
      *
-     * @param message the message to be checked whether the route is suitable or not
-     * @return an instance of {@code MessageRouted} which shows if the message is can be routed
-     * by this route
+     * @param message an instance of {@code ExternalMessage}
+     * @return an instance of {@code MessageRouted} which shows if the message can be routed
+     * via this route
      */
     MessageRouted accept(ExternalMessage message);
 

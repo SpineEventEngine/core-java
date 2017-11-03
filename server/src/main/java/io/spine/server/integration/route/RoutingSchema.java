@@ -29,21 +29,21 @@ package io.spine.server.integration.route;
 public interface RoutingSchema {
 
     /**
-     * Adds route to the routing schema.
+     * Adds the {@code Route} to the {@code RoutingSchema}.
      *
      * @param route the route to be added
      */
     void add(Route route);
 
     /**
-     * Removes route from the routing schema.
+     * Removes the {@code Route} from the {@code RoutingSchema}.
      *
      * @param route the route to be removed
      */
     void remove(Route route);
 
     /**
-     * Returns the routes defined in routing schema
+     * Returns {@code Route}s defined in the {@code RoutingSchema}
      */
     Iterable<Route> getAll();
 }

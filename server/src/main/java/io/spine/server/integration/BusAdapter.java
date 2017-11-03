@@ -152,7 +152,7 @@ abstract class BusAdapter<E extends MessageEnvelope<?, ?, ?>,
         protected abstract B self();
 
         public BusAdapter<E, D> build() {
-            checkNotNull(router, "PublisherHub must be set");
+            checkNotNull(router, "Message Router must be set");
 
             final BusAdapter<E, D> result = doBuild();
             return result;

@@ -34,6 +34,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import static com.google.common.collect.FluentIterable.from;
+import static io.spine.server.integration.Channels.*;
 
 /**
  * A subscriber to local {@code EventBus}, which publishes each matching domestic event to
@@ -59,7 +60,7 @@ final class DomesticEventPublisher extends EventSubscriber {
         this.boundedContextName = boundedContextName;
         this.router = router;
         this.eventClasses = ImmutableSet.of(messageClass);
-        router.register(new ChannelRoute(Channels.newId(messageClass)));
+        router.register(new ChannelRoute(newId(messageClass)));
     }
 
     @SuppressWarnings("ReturnOfCollectionOrArrayField")     // Returning an immutable impl.

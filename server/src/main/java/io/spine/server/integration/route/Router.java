@@ -26,9 +26,10 @@ import io.spine.server.integration.Publisher;
 
 /**
  * The base interface for a message router. The {@code Router} is designed for routing
- * messages to {@linkplain MessageChannel message channels} based on predefined routes.
+ * messages to {@linkplain MessageChannel message channels} based on predefined
+ * {@linkplain Route channel routes}.
  *
- * Inspired by <a href="http://www.enterpriseintegrationpatterns.com/patterns/messaging/DynamicRouter.html">
+ * <p>Inspired by <a href="http://www.enterpriseintegrationpatterns.com/patterns/messaging/DynamicRouter.html">
  * Dynamic Router pattern.</a>
  *
  * @author Dmitry Ganzha
@@ -44,14 +45,14 @@ public interface Router extends AutoCloseable {
     Iterable<Publisher> route(ExternalMessage message);
 
     /**
-     * Registers the passed route.
+     * Registers the passed {@code Route}.
      *
      * @param route the route to register
      */
     void register(Route route);
 
     /**
-     * Unregisters the passed route.
+     * Unregisters the passed {@code Route}.
      *
      * @param route the route to unregister
      */
