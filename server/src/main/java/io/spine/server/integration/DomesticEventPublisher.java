@@ -76,13 +76,12 @@ final class DomesticEventPublisher extends EventSubscriber {
         Iterable<Publisher> channels = router.route(msg);
         final ImmutableSet<String> result =
                 from(channels)
-                        .transform(
-                                new Function<Publisher, String>() {
-                                    @Override
-                                    public String apply(Publisher input) {
-                                        return input.toString();
-                                    }
-                                })
+                        .transform(new Function<Publisher, String>() {
+                            @Override
+                            public String apply(Publisher input) {
+                                return input.toString();
+                            }
+                        })
                         .toSet();
         return result;
     }

@@ -77,13 +77,12 @@ final class DomesticRejectionPublisher extends RejectionSubscriber {
         final Iterable<Publisher> channels = router.route(message);
         final ImmutableSet<String> result =
                 from(channels)
-                        .transform(
-                                new Function<Publisher, String>() {
-                                    @Override
-                                    public String apply(Publisher input) {
-                                        return input.toString();
-                                    }
-                                })
+                        .transform(new Function<Publisher, String>() {
+                            @Override
+                            public String apply(Publisher input) {
+                                return input.toString();
+                            }
+                        })
                         .toSet();
         return result;
     }

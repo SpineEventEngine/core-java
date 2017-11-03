@@ -27,11 +27,12 @@ import io.spine.server.integration.route.Route;
 
 /**
  * The base interface for message channel actions. The actions are used in
- * {@linkplain Route#accept(ExternalMessage)} to verify if the message suitable for the channel.
+ * {@linkplain Route#accept(ExternalMessage)} to verify if the message acceptable
+ * for the {@code Route}.
  *
  * @author Dmitry Ganzha
  */
-public interface ChannelSuitableAction {
+public interface ChannelAction {
 
     /**
      * Checks whether the passed {@code message} is suitable for the message channel.

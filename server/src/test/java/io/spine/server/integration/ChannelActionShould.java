@@ -24,8 +24,8 @@ import io.spine.core.BoundedContextName;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.protobuf.AnyPacker;
-import io.spine.server.integration.route.action.ChannelSuitableAction;
-import io.spine.server.integration.route.action.MessageTypeAction;
+import io.spine.server.integration.route.action.ChannelAction;
+import io.spine.server.integration.route.action.SuitableByMessageTypeAction;
 import io.spine.test.integration.event.ItgProjectCreated;
 import io.spine.test.integration.event.ItgProjectStarted;
 import org.junit.Test;
@@ -38,7 +38,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Dmitry Ganzha
  */
-public class ChannelSuitableActionShould {
+public class ChannelActionShould {
 
     @Test
     public void return_false_if_message_is_not_suitable_for_message_channel_by_message_type() {
@@ -51,7 +51,7 @@ public class ChannelSuitableActionShould {
         final BoundedContextName boundedContextName = BoundedContextName.getDefaultInstance();
         final ExternalMessage notSuitableMessage = ExternalMessages.of(projectCreatedEvent,
                                                                        boundedContextName);
-        final ChannelSuitableAction action = new MessageTypeAction();
+        final ChannelAction action = new SuitableByMessageTypeAction();
         final MessageSuitable result = action.perform(channelId, notSuitableMessage);
         assertFalse(result.getSuitable());
     }
@@ -67,7 +67,7 @@ public class ChannelSuitableActionShould {
         final BoundedContextName boundedContextName = BoundedContextName.getDefaultInstance();
         final ExternalMessage suitableMessage = ExternalMessages.of(projectCreatedEvent,
                                                                     boundedContextName);
-        final ChannelSuitableAction action = new MessageTypeAction();
+        final ChannelAction action = new SuitableByMessageTypeAction();
         final MessageSuitable result = action.perform(channelId, suitableMessage);
         assertTrue(result.getSuitable());
     }

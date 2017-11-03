@@ -25,8 +25,8 @@ import io.spine.server.integration.ChannelId.KindCase;
 import io.spine.server.integration.ExternalMessage;
 import io.spine.server.integration.MessageRouted;
 import io.spine.server.integration.MessageSuitable;
-import io.spine.server.integration.route.action.ChannelSuitableAction;
-import io.spine.server.integration.route.action.MessageTypeAction;
+import io.spine.server.integration.route.action.ChannelAction;
+import io.spine.server.integration.route.action.SuitableByMessageTypeAction;
 
 import java.util.Map;
 import java.util.Objects;
@@ -44,10 +44,10 @@ public class ChannelRoute implements Route {
     /**
      * The map contains a kind related to a {@code ChannelSuitableAction}.
      */
-    private static final Map<KindCase, ChannelSuitableAction> ACTIONS_BY_CHANNEL_KIND = newHashMap();
+    private static final Map<KindCase, ChannelAction> ACTIONS_BY_CHANNEL_KIND = newHashMap();
 
     static {
-        ACTIONS_BY_CHANNEL_KIND.put(KindCase.MESSAGE_TYPE_URL, new MessageTypeAction());
+        ACTIONS_BY_CHANNEL_KIND.put(KindCase.MESSAGE_TYPE_URL, new SuitableByMessageTypeAction());
     }
 
     private final ChannelId channelId;
@@ -59,8 +59,7 @@ public class ChannelRoute implements Route {
     @Override
     public MessageRouted accept(ExternalMessage message) {
         final KindCase kind = channelId.getKindCase();
-        final ChannelSuitableAction action = ACTIONS_BY_CHANNEL_KIND.get(
-                kind);
+        final ChannelAction action = ACTIONS_BY_CHANNEL_KIND.get(kind);
         final MessageSuitable messageSuitable = action.perform(channelId, message);
         return MessageRouted.newBuilder()
                             .setSource(message)
