@@ -428,27 +428,55 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     /**
      * Loads an aggregate by the passed ID.
      *
+     * <p>This method defines the basic flow of an {@code Aggregate} loading. First,
+     * the {@linkplain AggregateStateRecord Aggregate history} is
+     * {@linkplain #fetchHistory fetched} from the storage. Then the {@code Aggregate} is
+     * {@linkplain #play restored} from its state history.
+     *
+     * @param id the ID of the aggregate
+     * @return the loaded instance or {@code Optional.absent()} if there is no {@code Aggregate}
+     *         with the ID
+     */
+    private Optional<A> load(I id) {
+        final Optional<AggregateStateRecord> eventsFromStorage = fetchHistory(id);
+        if (eventsFromStorage.isPresent()) {
+            final A result = play(id, eventsFromStorage.get());
+            return Optional.of(result);
+        }
+        return Optional.absent();
+    }
+
+    /**
+     * Fetches the history of the {@code Aggregate} with the given ID.
+     *
      * <p>To read an {@link AggregateStateRecord} from an {@link AggregateStorage},
      * a {@linkplain #getSnapshotTrigger() snapshot trigger} is used as a
      * {@linkplain AggregateReadRequest#getBatchSize() batch size}.
      *
-     * @param id the ID of the aggregate
-     * @return the loaded instance or {@code Optional.absent()} if there is no record with the ID
+     * @param id the ID of the {@code Aggregate} to fetch
+     * @return the {@link AggregateStateRecord} for the {@code Aggregate} or
+     *         {@code Optional.absent()} if there is no record with the ID
      */
-    private Optional<A> load(I id) {
+    protected Optional<AggregateStateRecord> fetchHistory(I id) {
         final AggregateReadRequest<I> request = new AggregateReadRequest<>(id, snapshotTrigger);
         final Optional<AggregateStateRecord> eventsFromStorage = aggregateStorage().read(request);
+        return eventsFromStorage;
+    }
 
-        if (eventsFromStorage.isPresent()) {
-            final A result = create(id);
-            final AggregateStateRecord aggregateStateRecord = eventsFromStorage.get();
-            final AggregateTransaction tx = AggregateTransaction.start(result);
-            result.play(aggregateStateRecord);
-            tx.commit();
-            return Optional.of(result);
-        }
-
-        return Optional.absent();
+    /**
+     * Plays the given {@linkplain AggregateStateRecord Aggregate history} for an instance
+     * of {@link Aggregate} with the given ID.
+     *
+     * @param id      the ID of the {@code Aggregate} to load
+     * @param history the state record of the {@code Aggregate} to load
+     * @return an instance of {@link Aggregate}
+     */
+    protected A play(I id, AggregateStateRecord history) {
+        final A result = create(id);
+        final AggregateTransaction tx = AggregateTransaction.start(result);
+        result.play(history);
+        tx.commit();
+        return result;
     }
 
     /**
