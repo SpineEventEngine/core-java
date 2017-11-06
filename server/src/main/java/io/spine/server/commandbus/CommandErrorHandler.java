@@ -33,10 +33,10 @@ import static io.spine.core.Rejections.causedByRejection;
 import static java.lang.String.format;
 
 /**
- * A supervisor watching the command dispatcher process.
+ * The handler of the errors thrown while command dispatching.
  *
  * <p>The {@linkplain CommandDispatcher command dispatchers} may delegate
- * the {@linkplain CommandDispatcher#onError command handling} to an instance of
+ * the {@linkplain CommandDispatcher#onError error handling} to an instance of
  * {@code CommandErrorHandler}.
  *
  * @author Dmytro Dashenkov
@@ -63,7 +63,7 @@ public final class CommandErrorHandler {
     }
 
     /**
-     * Handles an error occurred during dispatching a command.
+     * Handles an error occurred during dispatching of a command.
      *
      * <p>If the given {@code exception} has been caused by
      * a {@linkplain io.spine.base.ThrowableMessage command rejection}, the {@link Rejection} is
