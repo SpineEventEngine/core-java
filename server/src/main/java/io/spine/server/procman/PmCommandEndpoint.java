@@ -73,7 +73,6 @@ class PmCommandEndpoint<I, P extends ProcessManager<I, ?, ?>>
     @Override
     protected void onError(CommandEnvelope envelope, RuntimeException exception) {
         repository().onError(envelope, exception);
-        throw exception;
     }
 
     /**
