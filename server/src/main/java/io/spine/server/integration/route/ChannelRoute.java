@@ -34,7 +34,7 @@ import java.util.Objects;
 import static com.google.common.collect.Maps.newHashMap;
 
 /**
- * The {@code ChannelRoute} checks if the {@code ExternalMessage} is match for the
+ * The {@code ChannelRoute} checks if the {@code ExternalMessage} matches the
  * {@code MessageChannel} assigned to this route.
  *
  * @author Dmitry Ganzha
@@ -42,7 +42,7 @@ import static com.google.common.collect.Maps.newHashMap;
 public class ChannelRoute implements Route {
 
     /**
-     * The map contains a kind related to a {@code ChannelAction}.
+     * The map contains a kind related to a {@code ChannelMatcher}.
      */
     private static final Map<KindCase, ChannelMatcher> MATCHERS_BY_CHANNEL_KIND = newHashMap();
 
