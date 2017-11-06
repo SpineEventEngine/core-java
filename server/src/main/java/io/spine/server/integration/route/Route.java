@@ -42,7 +42,7 @@ public interface Route {
      * <ul>
      * <li>accept the message (by returning {@code MessageRouted} which will indicate that
      * the message can be routed by this route);
-     * <li>reject the message with description why the message is not suitable for this route;
+     * <li>reject the message with the description why the message cannot be routed by this route;
      * </ul>
      *
      * @param message an instance of {@code ExternalMessage}
