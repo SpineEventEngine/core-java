@@ -136,7 +136,7 @@ public class RejectionsShould {
             "SerializableInnerClassWithNonSerializableOuterClass" /* Does not refer anything. */
     })
     @Test
-    public void say_if_RuntimeException_was_called_by_command_rejection() {
+    public void tell_if_RuntimeException_was_called_by_command_rejection() {
         assertFalse(causedByRejection(new RuntimeException()));
         final ThrowableMessage throwableMessage = new ThrowableMessage(Time.getCurrentTime()) {
             private static final long serialVersionUID = 0L;
