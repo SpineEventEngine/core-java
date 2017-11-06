@@ -32,7 +32,7 @@ import io.spine.core.RejectionEnvelope;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandDispatcher;
-import io.spine.server.commandbus.CommandDispatchingSupervisor;
+import io.spine.server.commandbus.CommandErrorHandler;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.DelegatingEventDispatcher;
@@ -104,12 +104,12 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
             RejectionRouting.withDefault(RejectionProducers.<I>fromContext());
 
     /**
-     * The {@link CommandDispatchingSupervisor} tackling the dispatching errors.
+     * The {@link CommandErrorHandler} tackling the dispatching errors.
      *
      * <p>This field is not {@code final} only because it is initialized in {@link #onRegistered()}
      * method.
      */
-    private CommandDispatchingSupervisor commandDispatchingSupervisor;
+    private CommandErrorHandler commandErrorHandler;
 
     /** The number of events to store between snapshots. */
     private int snapshotTrigger = DEFAULT_SNAPSHOT_TRIGGER;
@@ -164,8 +164,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         registerExtMessageDispatcher(boundedContext, extEventDispatcher, extEventClasses);
         registerExtMessageDispatcher(boundedContext, extRejectionDispatcher, extRejectionClasses);
 
-        this.commandDispatchingSupervisor =
-                new CommandDispatchingSupervisor(boundedContext.getRejectionBus());
+        this.commandErrorHandler = CommandErrorHandler.with(boundedContext.getRejectionBus());
     }
 
     private void registerExtMessageDispatcher(BoundedContext boundedContext,
@@ -296,7 +295,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     @Override
     public void onError(CommandEnvelope envelope, RuntimeException exception) {
-        commandDispatchingSupervisor.onError(envelope, exception);
+        commandErrorHandler.handleError(envelope, exception);
     }
 
     @Override

@@ -37,18 +37,29 @@ import static java.lang.String.format;
  *
  * <p>The {@linkplain CommandDispatcher command dispatchers} may delegate
  * the {@linkplain CommandDispatcher#onError command handling} to an instance of
- * {@code CommandDispatchingSupervisor}.
+ * {@code CommandErrorHandler}.
  *
  * @author Dmytro Dashenkov
- * @see #onError(CommandEnvelope, RuntimeException)
+ * @see #handleError(CommandEnvelope, RuntimeException)
  */
 @Internal
-public final class CommandDispatchingSupervisor {
+public final class CommandErrorHandler {
 
     private final RejectionBus rejectionBus;
 
-    public CommandDispatchingSupervisor(RejectionBus rejectionBus) {
+    private CommandErrorHandler(RejectionBus rejectionBus) {
         this.rejectionBus = rejectionBus;
+    }
+
+    /**
+     * Creates new instance of {@code CommandErrorHandler} with the given {@link RejectionBus}.
+     *
+     * @param rejectionBus the {@link RejectionBus} to post the command rejections into
+     * @return a new instance of {@code CommandErrorHandler}
+     */
+    public static CommandErrorHandler with(RejectionBus rejectionBus) {
+        checkNotNull(rejectionBus);
+        return new CommandErrorHandler(rejectionBus);
     }
 
     /**
@@ -59,7 +70,7 @@ public final class CommandDispatchingSupervisor {
      * {@linkplain RejectionBus#post(Rejection) posted} to the {@code RejectionBus}. Otherwise,
      * the given {@code exception} is thrown.
      */
-    public void onError(CommandEnvelope envelope, RuntimeException exception) {
+    public void handleError(CommandEnvelope envelope, RuntimeException exception) {
         checkNotNull(envelope);
         checkNotNull(exception);
         if (causedByRejection(exception)) {
@@ -81,6 +92,6 @@ public final class CommandDispatchingSupervisor {
     private enum LogSingleton {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(CommandDispatchingSupervisor.class);
+        private final Logger value = LoggerFactory.getLogger(CommandErrorHandler.class);
     }
 }

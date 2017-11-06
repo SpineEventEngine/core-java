@@ -35,7 +35,7 @@ import io.spine.server.bus.MessageDispatcher;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcherDelegate;
-import io.spine.server.commandbus.CommandDispatchingSupervisor;
+import io.spine.server.commandbus.CommandErrorHandler;
 import io.spine.server.commandbus.DelegatingCommandDispatcher;
 import io.spine.server.entity.EventDispatchingRepository;
 import io.spine.server.event.EventBus;
@@ -82,12 +82,12 @@ public abstract class ProcessManagerRepository<I,
             RejectionRouting.withDefault(RejectionProducers.<I>fromContext());
 
     /**
-     * The {@link CommandDispatchingSupervisor} tackling the dispatching errors.
+     * The {@link CommandErrorHandler} tackling the dispatching errors.
      *
      * <p>This field is not {@code final} only because it is initialized in {@link #onRegistered()}
      * method.
      */
-    private CommandDispatchingSupervisor commandDispatchingSupervisor;
+    private CommandErrorHandler commandErrorHandler;
 
     /** {@inheritDoc} */
     protected ProcessManagerRepository() {
@@ -153,8 +153,7 @@ public abstract class ProcessManagerRepository<I,
                     "Process managers of the repository %s have no command handlers, " +
                             "and do not react upon any rejections or events.", this);
         }
-        this.commandDispatchingSupervisor =
-                new CommandDispatchingSupervisor(boundedContext.getRejectionBus());
+        this.commandErrorHandler = CommandErrorHandler.with(boundedContext.getRejectionBus());
     }
 
     /**
@@ -294,7 +293,7 @@ public abstract class ProcessManagerRepository<I,
 
     @Override
     public void onError(CommandEnvelope envelope, RuntimeException exception) {
-        commandDispatchingSupervisor.onError(envelope, exception);
+        commandErrorHandler.handleError(envelope, exception);
     }
 
     @Override
