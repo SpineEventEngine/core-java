@@ -51,8 +51,8 @@ public class ChannelMatcherShould {
         final BoundedContextName boundedContextName = BoundedContextName.getDefaultInstance();
         final ExternalMessage notSuitableMessage = ExternalMessages.of(projectCreatedEvent,
                                                                        boundedContextName);
-        final ChannelMatcher action = new MessageTypeMatcher();
-        final MessageMatched result = action.match(channelId, notSuitableMessage);
+        final ChannelMatcher matcher = new MessageTypeMatcher();
+        final MessageMatched result = matcher.match(channelId, notSuitableMessage);
         assertFalse(result.getMatched());
         assertFalse(result.getDescription().isEmpty());
     }
@@ -68,8 +68,8 @@ public class ChannelMatcherShould {
         final BoundedContextName boundedContextName = BoundedContextName.getDefaultInstance();
         final ExternalMessage suitableMessage = ExternalMessages.of(projectCreatedEvent,
                                                                     boundedContextName);
-        final ChannelMatcher action = new MessageTypeMatcher();
-        final MessageMatched result = action.match(channelId, suitableMessage);
+        final ChannelMatcher matcher = new MessageTypeMatcher();
+        final MessageMatched result = matcher.match(channelId, suitableMessage);
         assertTrue(result.getMatched());
     }
 }
