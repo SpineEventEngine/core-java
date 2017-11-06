@@ -20,67 +20,50 @@
 
 package io.spine.server.commandbus;
 
-import com.google.common.base.Function;
-import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
-import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
-import io.spine.core.Commands;
 import io.spine.core.Rejection;
 import io.spine.server.rejection.RejectionBus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Set;
-
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.core.Commands.rejectWithCause;
 import static io.spine.core.Rejections.causedByRejection;
 import static java.lang.String.format;
 
 /**
- * A {@link CommandDispatcher} which handles the dispatching errors.
+ * A supervisor watching the command dispatcher process.
+ *
+ * <p>The {@linkplain CommandDispatcher command dispatchers} may delegate
+ * the {@linkplain CommandDispatcher#onError command handling} to an instance of
+ * {@code CommandDispatchingSupervisor}.
  *
  * @author Dmytro Dashenkov
  * @see #onError(CommandEnvelope, RuntimeException)
  */
 @Internal
-public final class CommandErrorHandler<I> implements CommandDispatcher<I> {
+public final class CommandDispatchingSupervisor {
 
-    private final Function<CommandEnvelope, I> handler;
     private final RejectionBus rejectionBus;
 
-    public CommandErrorHandler(Function<CommandEnvelope, I> handler,
-                               RejectionBus rejectionBus) {
-        this.handler = handler;
+    public CommandDispatchingSupervisor(RejectionBus rejectionBus) {
         this.rejectionBus = rejectionBus;
     }
 
-    @SuppressWarnings("ReturnOfCollectionOrArrayField") // Immutable Collection impl.
-    @Override
-    public Set<CommandClass> getMessageClasses() {
-        return ImmutableSet.of();
-    }
-
-    @Override
-    public I dispatch(CommandEnvelope envelope) {
-        checkNotNull(envelope);
-        return handler.apply(envelope);
-    }
-
     /**
-     * {@inheritDoc}
+     * Handles an error occurred during dispatching a command.
      *
      * <p>If the given {@code exception} has been caused by
      * a {@linkplain io.spine.base.ThrowableMessage command rejection}, the {@link Rejection} is
      * {@linkplain RejectionBus#post(Rejection) posted} to the {@code RejectionBus}. Otherwise,
      * the given {@code exception} is thrown.
      */
-    @Override
     public void onError(CommandEnvelope envelope, RuntimeException exception) {
         checkNotNull(envelope);
         checkNotNull(exception);
         if (causedByRejection(exception)) {
-            final Rejection rejection = Commands.rejectWithCause(envelope.getCommand(), exception);
+            final Rejection rejection = rejectWithCause(envelope.getCommand(), exception);
             rejectionBus.post(rejection);
         } else {
             log().error(format("Error dispatching command (class: %s id: %s).",
@@ -98,6 +81,6 @@ public final class CommandErrorHandler<I> implements CommandDispatcher<I> {
     private enum LogSingleton {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(CommandErrorHandler.class);
+        private final Logger value = LoggerFactory.getLogger(CommandDispatchingSupervisor.class);
     }
 }

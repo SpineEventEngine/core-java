@@ -20,7 +20,6 @@
 package io.spine.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import io.spine.annotation.SPI;
 import io.spine.core.CommandClass;
@@ -33,7 +32,7 @@ import io.spine.core.RejectionEnvelope;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandDispatcher;
-import io.spine.server.commandbus.CommandErrorHandler;
+import io.spine.server.commandbus.CommandDispatchingSupervisor;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.DelegatingEventDispatcher;
@@ -54,7 +53,6 @@ import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
 
 import javax.annotation.CheckReturnValue;
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Set;
 
@@ -106,12 +104,12 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
             RejectionRouting.withDefault(RejectionProducers.<I>fromContext());
 
     /**
-     * The {@link CommandDispatcher} delegate tackling the dispatching errors.
+     * The {@link CommandDispatchingSupervisor} tackling the dispatching errors.
      *
      * <p>This field is not {@code final} only because it is initialized in {@link #onRegistered()}
      * method.
      */
-    private CommandDispatcher<I> commandDispatcherDelegate;
+    private CommandDispatchingSupervisor commandDispatchingSupervisor;
 
     /** The number of events to store between snapshots. */
     private int snapshotTrigger = DEFAULT_SNAPSHOT_TRIGGER;
@@ -166,10 +164,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         registerExtMessageDispatcher(boundedContext, extEventDispatcher, extEventClasses);
         registerExtMessageDispatcher(boundedContext, extRejectionDispatcher, extRejectionClasses);
 
-        this.commandDispatcherDelegate = new CommandErrorHandler<>(
-                new CommandHandler(),
-                boundedContext.getRejectionBus()
-        );
+        this.commandDispatchingSupervisor =
+                new CommandDispatchingSupervisor(boundedContext.getRejectionBus());
     }
 
     private void registerExtMessageDispatcher(BoundedContext boundedContext,
@@ -285,7 +281,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     @Override
     public I dispatch(final CommandEnvelope envelope) {
-        return commandDispatcherDelegate.dispatch(envelope);
+        checkNotNull(envelope);
+        return AggregateCommandEndpoint.handle(this, envelope);
     }
 
     /**
@@ -299,7 +296,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     @Override
     public void onError(CommandEnvelope envelope, RuntimeException exception) {
-        commandDispatcherDelegate.onError(envelope, exception);
+        commandDispatchingSupervisor.onError(envelope, exception);
     }
 
     @Override
@@ -587,14 +584,5 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     protected AggregateEndpointDelivery<I, A, CommandEnvelope> getCommandEndpointDelivery() {
         return AggregateCommandDelivery.directDelivery(this);
-    }
-
-    private class CommandHandler implements Function<CommandEnvelope, I> {
-
-        @Override
-        public I apply(@Nullable CommandEnvelope input) {
-            checkNotNull(input);
-            return AggregateCommandEndpoint.handle(AggregateRepository.this, input);
-        }
     }
 }
