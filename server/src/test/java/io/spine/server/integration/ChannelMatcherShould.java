@@ -41,7 +41,7 @@ import static org.junit.Assert.assertTrue;
 public class ChannelMatcherShould {
 
     @Test
-    public void return_false_if_message_is_not_match_message_channel_by_message_type() {
+    public void return_false_if_message_does_not_match_message_channel_by_message_type() {
         final EventClass eventClass = EventClass.of(ItgProjectStarted.class);
         final ChannelId channelId = Channels.newId(eventClass);
         final ItgProjectCreated itgProjectCreated = ItgProjectCreated.getDefaultInstance();
@@ -58,7 +58,7 @@ public class ChannelMatcherShould {
     }
 
     @Test
-    public void return_true_if_message_is_match_message_channel_by_message_type() {
+    public void return_true_if_message_matches_message_channel_by_message_type() {
         final EventClass eventClass = EventClass.of(ItgProjectCreated.class);
         final ChannelId channelId = Channels.newId(eventClass);
         final ItgProjectCreated itgProjectCreated = ItgProjectCreated.getDefaultInstance();
