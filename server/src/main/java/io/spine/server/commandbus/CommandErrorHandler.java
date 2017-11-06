@@ -24,6 +24,7 @@ import io.spine.annotation.Internal;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Rejection;
 import io.spine.server.rejection.RejectionBus;
+import io.spine.string.Stringifiers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,7 +80,7 @@ public final class CommandErrorHandler {
         } else {
             log().error(format("Error dispatching command (class: %s id: %s).",
                                envelope.getMessage().getClass(),
-                               envelope.getId().getUuid()),
+                               Stringifiers.toString(envelope.getId())),
                         exception);
             throw exception;
         }
