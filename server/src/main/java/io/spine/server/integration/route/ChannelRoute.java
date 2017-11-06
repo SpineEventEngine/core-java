@@ -44,10 +44,10 @@ public class ChannelRoute implements Route {
     /**
      * The map contains a kind related to a {@code ChannelAction}.
      */
-    private static final Map<KindCase, ChannelMatcher> ACTIONS_BY_CHANNEL_KIND = newHashMap();
+    private static final Map<KindCase, ChannelMatcher> MATCHERS_BY_CHANNEL_KIND = newHashMap();
 
     static {
-        ACTIONS_BY_CHANNEL_KIND.put(KindCase.MESSAGE_TYPE_URL, new MessageTypeMatcher());
+        MATCHERS_BY_CHANNEL_KIND.put(KindCase.MESSAGE_TYPE_URL, new MessageTypeMatcher());
     }
 
     private final ChannelId channelId;
@@ -59,8 +59,8 @@ public class ChannelRoute implements Route {
     @Override
     public MessageRouted accept(ExternalMessage message) {
         final KindCase kind = channelId.getKindCase();
-        final ChannelMatcher action = ACTIONS_BY_CHANNEL_KIND.get(kind);
-        final MessageMatched messageMatched = action.match(channelId, message);
+        final ChannelMatcher matcher = MATCHERS_BY_CHANNEL_KIND.get(kind);
+        final MessageMatched messageMatched = matcher.match(channelId, message);
         return MessageRouted.newBuilder()
                             .setSource(message)
                             .setMessageMatched(messageMatched)

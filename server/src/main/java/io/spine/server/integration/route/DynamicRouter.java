@@ -34,7 +34,7 @@ import static com.google.common.collect.FluentIterable.from;
 import static com.google.common.collect.Sets.newConcurrentHashSet;
 
 /**
- * The {@code DynamicRouter} routes messages to match {@code MessageChannel}s
+ * The {@code DynamicRouter} routes messages to suitable {@code MessageChannel}s
  * based on various rules.
  *
  * @param <P> the type of the publisher message channel
