@@ -39,10 +39,8 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.event.EventSubscriber;
-import io.spine.server.integration.ChannelId;
 import io.spine.server.integration.IntegrationBus;
 import io.spine.server.integration.TransportFactory;
-import io.spine.server.integration.route.RoutingSchema;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.server.projection.Projection;
@@ -79,9 +77,8 @@ public class IntegrationBusTestEnv {
         // Prevent instantiation of this utility class.
     }
 
-    public static BoundedContext contextWithExtEntitySubscribers(TransportFactory transportFactory,
-                                                                 RoutingSchema routingSchema) {
-        final BoundedContext boundedContext = contextWithTransport(transportFactory, routingSchema);
+    public static BoundedContext contextWithExtEntitySubscribers(TransportFactory transportFactory) {
+        final BoundedContext boundedContext = contextWithTransport(transportFactory);
         boundedContext.register(new ProjectDetailsRepository());
         boundedContext.register(new ProjectWizardRepository());
         boundedContext.register(new ProjectCountAggregateRepository());
@@ -89,15 +86,14 @@ public class IntegrationBusTestEnv {
     }
 
     public static BoundedContext contextWithContextAwareEntitySubscriber(
-            TransportFactory transportFactory, RoutingSchema routingSchema) {
-        final BoundedContext boundedContext = contextWithTransport(transportFactory, routingSchema);
+            TransportFactory transportFactory) {
+        final BoundedContext boundedContext = contextWithTransport(transportFactory);
         boundedContext.register(new ContextAwareProjectDetailsRepository());
         return boundedContext;
     }
 
-    public static BoundedContext contextWithExternalSubscribers(TransportFactory transportFactory,
-                                                                RoutingSchema routingSchema) {
-        final BoundedContext boundedContext = contextWithTransport(transportFactory, routingSchema);
+    public static BoundedContext contextWithExternalSubscribers(TransportFactory transportFactory) {
+        final BoundedContext boundedContext = contextWithTransport(transportFactory);
         final EventSubscriber eventSubscriber = new ProjectEventsSubscriber();
         boundedContext.getIntegrationBus()
                       .register(eventSubscriber);
@@ -113,11 +109,9 @@ public class IntegrationBusTestEnv {
         return boundedContext;
     }
 
-    public static BoundedContext contextWithTransport(TransportFactory transportFactory,
-                                                      RoutingSchema routingSchema) {
+    public static BoundedContext contextWithTransport(TransportFactory transportFactory) {
         final IntegrationBus.Builder builder = IntegrationBus.newBuilder()
-                                                             .setTransportFactory(transportFactory)
-                                                             .setRoutingSchema(routingSchema);
+                                                             .setTransportFactory(transportFactory);
         final BoundedContext result = BoundedContext.newBuilder()
                                                     .setName(newUuid())
                                                     .setIntegrationBus(builder)
@@ -125,17 +119,15 @@ public class IntegrationBusTestEnv {
         return result;
     }
 
-    public static BoundedContext contextWithProjectCreatedNeeds(TransportFactory factory,
-                                                                RoutingSchema routingSchema) {
-        final BoundedContext result = contextWithTransport(factory, routingSchema);
+    public static BoundedContext contextWithProjectCreatedNeeds(TransportFactory factory) {
+        final BoundedContext result = contextWithTransport(factory);
         result.getIntegrationBus()
               .register(new ProjectEventsSubscriber());
         return result;
     }
 
-    public static BoundedContext contextWithProjectStartedNeeds(TransportFactory factory,
-                                                                RoutingSchema routingSchema) {
-        final BoundedContext result = contextWithTransport(factory, routingSchema);
+    public static BoundedContext contextWithProjectStartedNeeds(TransportFactory factory) {
+        final BoundedContext result = contextWithTransport(factory);
         result.getIntegrationBus()
               .register(new ProjectStartedExtSubscriber());
         return result;

@@ -18,29 +18,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.integration.route.action;
+package io.spine.server.integration.route.matcher;
 
 import io.spine.server.integration.ChannelId;
 import io.spine.server.integration.ExternalMessage;
-import io.spine.server.integration.MessageSuitable;
+import io.spine.server.integration.MessageMatched;
 import io.spine.server.integration.route.Route;
 
 /**
- * The base interface for message channel actions. The actions are used in
+ * The base interface for message channel matchers. The matchers are used in
  * {@linkplain Route#accept(ExternalMessage)} to verify if the message acceptable
  * for the {@code Route}.
  *
  * @author Dmitry Ganzha
  */
-public interface ChannelAction {
+public interface ChannelMatcher {
 
     /**
-     * Checks whether the passed {@code message} is suitable for the message channel.
+     * Checks whether the passed {@code ExternalMessage} matches the {@code MessageChannel}.
      *
      * @param id      an instance of {@code ChannelId}
      * @param message an instance of {@code ExternalMessage}
-     * @return an instance of {@code MessageSuitable} which shows if the message is suitable
-     * according to the channel's kind
+     * @return an instance of {@code MessageMatched} which shows if the message matches the
+     * {@code MessageChannel} by the channel's kind
      */
-    MessageSuitable perform(ChannelId id, ExternalMessage message);
+    MessageMatched match(ChannelId id, ExternalMessage message);
 }

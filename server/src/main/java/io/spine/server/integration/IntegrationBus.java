@@ -37,12 +37,10 @@ import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.bus.MulticastBus;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventSubscriber;
-import io.spine.server.integration.memory.InMemoryRoutingSchema;
 import io.spine.server.integration.memory.InMemoryTransportFactory;
 import io.spine.server.integration.route.ChannelRoute;
 import io.spine.server.integration.route.DynamicRouter;
 import io.spine.server.integration.route.Router;
-import io.spine.server.integration.route.RoutingSchema;
 import io.spine.server.rejection.RejectionBus;
 import io.spine.server.rejection.RejectionSubscriber;
 import io.spine.type.TypeUrl;
@@ -134,8 +132,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
         super(builder.getDelivery());
         this.boundedContextName = builder.boundedContextName;
         this.subscriberHub = new SubscriberHub(builder.transportFactory);
-        this.router = new DynamicRouter<>(new PublisherHub(builder.transportFactory),
-                                          builder.routingSchema);
+        this.router = new DynamicRouter<>(new PublisherHub(builder.transportFactory));
         this.localBusAdapters = createAdapters(builder, router);
         configurationChangeObserver = observeConfigurationChanges();
         final ChannelId channelId = newId(
@@ -431,7 +428,6 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
         private DomesticDelivery delivery;
         private BoundedContextName boundedContextName;
         private TransportFactory transportFactory;
-        private RoutingSchema routingSchema;
 
         public Optional<EventBus> getEventBus() {
             return Optional.fromNullable(eventBus);
@@ -472,15 +468,6 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
             return Optional.fromNullable(transportFactory);
         }
 
-        public Optional<RoutingSchema> getRoutingSchema() {
-            return Optional.fromNullable(routingSchema);
-        }
-
-        public Builder setRoutingSchema(RoutingSchema routingSchema) {
-            this.routingSchema = checkNotNull(routingSchema);
-            return self();
-        }
-
         private DomesticDelivery getDelivery() {
             return delivery;
         }
@@ -499,10 +486,6 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
                 transportFactory = initTransportFactory();
             }
 
-            if (routingSchema == null) {
-                routingSchema = initRoutingSchema();
-            }
-
             this.delivery = new DomesticDelivery();
 
             return new IntegrationBus(this);
@@ -510,10 +493,6 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
 
         private static TransportFactory initTransportFactory() {
             return InMemoryTransportFactory.newInstance();
-        }
-
-        private static RoutingSchema initRoutingSchema() {
-            return InMemoryRoutingSchema.newInstance();
         }
 
         @Override

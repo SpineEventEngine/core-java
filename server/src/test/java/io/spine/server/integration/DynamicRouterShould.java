@@ -20,7 +20,6 @@
 
 package io.spine.server.integration;
 
-import com.google.common.collect.Lists;
 import io.spine.core.BoundedContextName;
 import io.spine.core.Event;
 import io.spine.core.Rejection;
@@ -28,15 +27,10 @@ import io.spine.server.BoundedContext;
 import io.spine.server.integration.memory.InMemoryTransportFactory;
 import io.spine.server.integration.route.ChannelRoute;
 import io.spine.server.integration.route.DynamicRouter;
-import io.spine.server.integration.route.Route;
 import io.spine.server.integration.route.Router;
-import io.spine.server.integration.route.RoutingSchema;
 import io.spine.test.integration.event.ItgProjectCreated;
 import io.spine.test.integration.event.ItgProjectStarted;
 import org.junit.Test;
-import org.mockito.Mockito;
-
-import java.util.List;
 
 import static com.google.common.collect.FluentIterable.from;
 import static io.spine.core.EventClass.of;
@@ -46,25 +40,21 @@ import static io.spine.server.integration.given.IntegrationBusTestEnv.projectCre
 import static io.spine.server.integration.given.IntegrationBusTestEnv.projectStarted;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.when;
 
 /**
  * @author Dmitry Ganzha
  */
 public class DynamicRouterShould {
+
     @Test
     public void route_the_message_to_suitable_routes() {
         final BoundedContextName boundedContextName = BoundedContext.newName("External context ID");
 
-        final List<Route> routes = Lists.newArrayList();
-        routes.add(new ChannelRoute(newId(of(ItgProjectStarted.class))));
-        routes.add(new ChannelRoute(newId(of(ItgProjectCreated.class))));
-
-        final RoutingSchema mockRoutingSchema = Mockito.mock(RoutingSchema.class);
-        when(mockRoutingSchema.getAll()).thenReturn(routes);
-
         final PublisherHub publisherHub = new PublisherHub(InMemoryTransportFactory.newInstance());
-        final Router router = new DynamicRouter<>(publisherHub, mockRoutingSchema);
+        final Router router = new DynamicRouter<>(publisherHub);
+
+        router.register(new ChannelRoute(newId(of(ItgProjectStarted.class))));
+        router.register(new ChannelRoute(newId(of(ItgProjectCreated.class))));
 
         final Event projectCreated = projectCreated();
         final Event projectStarted = projectStarted();

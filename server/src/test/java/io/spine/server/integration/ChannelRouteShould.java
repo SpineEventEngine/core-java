@@ -50,9 +50,9 @@ public class ChannelRouteShould {
 
         final MessageRouted messageRouted = route.accept(externalProjectStarted);
 
-        assertTrue(messageRouted.getMessageSuitable()
-                                .getSuitable());
-        assertTrue(messageRouted.getMessageSuitable()
+        assertTrue(messageRouted.getMessageMatched()
+                                .getMatched());
+        assertTrue(messageRouted.getMessageMatched()
                                 .getDescription()
                                 .isEmpty());
     }
@@ -67,9 +67,9 @@ public class ChannelRouteShould {
 
         final MessageRouted messageRouted = route.accept(externalProjectCreated);
 
-        assertFalse(messageRouted.getMessageSuitable()
-                                 .getSuitable());
-        assertFalse(messageRouted.getMessageSuitable()
+        assertFalse(messageRouted.getMessageMatched()
+                                 .getMatched());
+        assertFalse(messageRouted.getMessageMatched()
                                  .getDescription()
                                  .isEmpty());
     }

@@ -37,9 +37,7 @@ import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectEventsSubs
 import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectRejectionsExtSubscriber;
 import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectStartedExtSubscriber;
 import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectWizard;
-import io.spine.server.integration.memory.InMemoryRoutingSchema;
 import io.spine.server.integration.memory.InMemoryTransportFactory;
-import io.spine.server.integration.route.RoutingSchema;
 import io.spine.server.rejection.RejectionBus;
 import io.spine.validate.Validate;
 import org.junit.Before;
@@ -82,10 +80,9 @@ public class IntegrationBusShould {
     @Test
     public void dispatch_events_from_one_BC_to_entities_with_ext_subscribers_of_another_BC() {
         final InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
-        final RoutingSchema routingSchema = InMemoryRoutingSchema.newInstance();
 
-        final BoundedContext sourceContext = contextWithTransport(transportFactory, routingSchema);
-        contextWithExtEntitySubscribers(transportFactory, routingSchema);
+        final BoundedContext sourceContext = contextWithTransport(transportFactory);
+        contextWithExtEntitySubscribers(transportFactory);
 
         assertNull(ProjectDetails.getExternalEvent());
         assertNull(ProjectWizard.getExternalEvent());
@@ -104,11 +101,9 @@ public class IntegrationBusShould {
     @Test
     public void avoid_dispatching_events_from_one_BC_to_domestic_entity_subscribers_of_another_BC() {
         final InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
-        final RoutingSchema routingSchema = InMemoryRoutingSchema.newInstance();
 
-        final BoundedContext sourceContext = contextWithTransport(transportFactory, routingSchema);
-        final BoundedContext destContext = contextWithExtEntitySubscribers(transportFactory,
-                                                                           routingSchema);
+        final BoundedContext sourceContext = contextWithTransport(transportFactory);
+        final BoundedContext destContext = contextWithExtEntitySubscribers(transportFactory);
 
         assertNull(ProjectDetails.getDomesticEvent());
 
@@ -127,10 +122,9 @@ public class IntegrationBusShould {
     @Test
     public void dispatch_events_from_one_BC_to_external_subscribers_of_another_BC() {
         final InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
-        final RoutingSchema routingSchema = InMemoryRoutingSchema.newInstance();
 
-        final BoundedContext sourceContext = contextWithTransport(transportFactory, routingSchema);
-        contextWithExternalSubscribers(transportFactory, routingSchema);
+        final BoundedContext sourceContext = contextWithTransport(transportFactory);
+        contextWithExternalSubscribers(transportFactory);
 
         assertNull(ProjectEventsSubscriber.getExternalEvent());
 
@@ -144,11 +138,9 @@ public class IntegrationBusShould {
     @Test
     public void avoid_dispatching_events_from_one_BC_to_domestic_standalone_subscribers_of_another_BC() {
         final InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
-        final RoutingSchema routingSchema = InMemoryRoutingSchema.newInstance();
 
-        final BoundedContext sourceContext = contextWithTransport(transportFactory, routingSchema);
-        final BoundedContext destContext = contextWithExternalSubscribers(transportFactory,
-                                                                          routingSchema);
+        final BoundedContext sourceContext = contextWithTransport(transportFactory);
+        final BoundedContext destContext = contextWithExternalSubscribers(transportFactory);
 
         assertNull(ProjectEventsSubscriber.getDomesticEvent());
 
@@ -169,13 +161,12 @@ public class IntegrationBusShould {
     @Test
     public void dispatch_events_from_one_BC_to_entities_with_ext_subscribers_of_multiple_BCs() {
         final InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
-        final RoutingSchema routingSchema = InMemoryRoutingSchema.newInstance();
 
         final Set<BoundedContextName> destinationNames = newHashSet();
-        final BoundedContext sourceContext = contextWithTransport(transportFactory, routingSchema);
+        final BoundedContext sourceContext = contextWithTransport(transportFactory);
         for (int i = 0; i < 42; i++) {
             final BoundedContext destinationCtx =
-                    contextWithContextAwareEntitySubscriber(transportFactory, routingSchema);
+                    contextWithContextAwareEntitySubscriber(transportFactory);
             final BoundedContextName name = destinationCtx.getName();
             destinationNames.add(name);
         }
@@ -201,11 +192,10 @@ public class IntegrationBusShould {
     @Test
     public void dispatch_events_from_one_BC_to_two_BCs_with_different_needs() {
         final InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
-        final RoutingSchema routingSchema = InMemoryRoutingSchema.newInstance();
 
-        final BoundedContext sourceContext = contextWithTransport(transportFactory, routingSchema);
-        final BoundedContext destA = contextWithProjectCreatedNeeds(transportFactory, routingSchema);
-        final BoundedContext destB = contextWithProjectStartedNeeds(transportFactory, routingSchema);
+        final BoundedContext sourceContext = contextWithTransport(transportFactory);
+        final BoundedContext destA = contextWithProjectCreatedNeeds(transportFactory);
+        final BoundedContext destB = contextWithProjectStartedNeeds(transportFactory);
 
         assertNull(ProjectStartedExtSubscriber.getExternalEvent());
         assertNull(ProjectEventsSubscriber.getExternalEvent());
@@ -226,10 +216,9 @@ public class IntegrationBusShould {
     @Test
     public void update_local_subscriptions_upon_repeated_RequestedMessageTypes() {
         final InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
-        final RoutingSchema routingSchema = InMemoryRoutingSchema.newInstance();
 
-        final BoundedContext sourceContext = contextWithTransport(transportFactory, routingSchema);
-        final BoundedContext destinationCtx = contextWithTransport(transportFactory, routingSchema);
+        final BoundedContext sourceContext = contextWithTransport(transportFactory);
+        final BoundedContext destinationCtx = contextWithTransport(transportFactory);
 
         // Prepare two external subscribers for the different events in the the `destinationCtx`.
         final ProjectEventsSubscriber projectCreatedSubscriber
@@ -283,10 +272,9 @@ public class IntegrationBusShould {
     @Test
     public void dispatch_rejections_from_one_BC_to_external_subscribers_of_another_BC() {
         final InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
-        final RoutingSchema routingSchema = InMemoryRoutingSchema.newInstance();
 
-        final BoundedContext sourceContext = contextWithTransport(transportFactory, routingSchema);
-        contextWithExternalSubscribers(transportFactory, routingSchema);
+        final BoundedContext sourceContext = contextWithTransport(transportFactory);
+        contextWithExternalSubscribers(transportFactory);
 
         assertNull(ProjectRejectionsExtSubscriber.getExternalRejection());
         assertNull(ProjectCountAggregate.getExternalRejection());
@@ -305,10 +293,8 @@ public class IntegrationBusShould {
     @Test
     public void not_dispatch_events_to_domestic_subscribers_if_they_requested_external() {
         final InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
-        final RoutingSchema routingSchema = InMemoryRoutingSchema.newInstance();
 
-        final BoundedContext context = contextWithExtEntitySubscribers(transportFactory,
-                                                                       routingSchema);
+        final BoundedContext context = contextWithExtEntitySubscribers(transportFactory);
         final ProjectEventsSubscriber eventSubscriber = new ProjectEventsSubscriber();
         final EventBus eventBus = context.getEventBus();
         eventBus.register(eventSubscriber);
@@ -330,10 +316,8 @@ public class IntegrationBusShould {
     @Test
     public void not_dispatch_rejections_to_domestic_subscribers_if_they_requested_external() {
         final InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
-        final RoutingSchema routingSchema = InMemoryRoutingSchema.newInstance();
 
-        final BoundedContext sourceContext = contextWithExtEntitySubscribers(transportFactory,
-                                                                             routingSchema);
+        final BoundedContext sourceContext = contextWithExtEntitySubscribers(transportFactory);
         final ProjectRejectionsExtSubscriber standaloneSubscriber =
                 new ProjectRejectionsExtSubscriber();
 
@@ -355,8 +339,7 @@ public class IntegrationBusShould {
     @Test
     public void emit_unsupported_external_message_exception_if_message_type_is_unknown() {
         final InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
-        final RoutingSchema routingSchema = InMemoryRoutingSchema.newInstance();
-        final BoundedContext boundedContext = contextWithTransport(transportFactory, routingSchema);
+        final BoundedContext boundedContext = contextWithTransport(transportFactory);
 
         final Event event = projectCreated();
         final BoundedContextName boundedContextName = BoundedContext.newName("External context ID");

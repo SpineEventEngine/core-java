@@ -23,7 +23,6 @@ import io.spine.core.BoundedContextName;
 import io.spine.server.BoundedContext;
 import io.spine.server.bus.BusBuilderShould;
 import io.spine.server.event.EventBus;
-import io.spine.server.integration.route.RoutingSchema;
 import io.spine.server.rejection.RejectionBus;
 import io.spine.test.Tests;
 import org.junit.Test;
@@ -62,11 +61,6 @@ public class IntegrationBusBuilderShould
         builder().setBoundedContextName(Tests.<BoundedContextName>nullRef());
     }
 
-    @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_RoutingSchema() {
-        builder().setRoutingSchema(Tests.<RoutingSchema>nullRef());
-    }
-
     @Test
     public void return_previously_set_TransportFactory() {
         final TransportFactory mock = mock(TransportFactory.class);
@@ -97,14 +91,6 @@ public class IntegrationBusBuilderShould
                 BoundedContext.newName("Name that is expected back from the Builder");
         assertEquals(name, builder().setBoundedContextName(name)
                                     .getBoundedContextName()
-                                    .get());
-    }
-
-    @Test
-    public void return_previously_set_RoutingSchema() {
-        final RoutingSchema mock = mock(RoutingSchema.class);
-        assertEquals(mock, builder().setRoutingSchema(mock)
-                                    .getRoutingSchema()
                                     .get());
     }
 }

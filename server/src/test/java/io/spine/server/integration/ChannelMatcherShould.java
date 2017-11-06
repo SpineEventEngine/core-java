@@ -24,8 +24,8 @@ import io.spine.core.BoundedContextName;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.protobuf.AnyPacker;
-import io.spine.server.integration.route.action.ChannelAction;
-import io.spine.server.integration.route.action.SuitableByMessageTypeAction;
+import io.spine.server.integration.route.matcher.ChannelMatcher;
+import io.spine.server.integration.route.matcher.MessageTypeMatcher;
 import io.spine.test.integration.event.ItgProjectCreated;
 import io.spine.test.integration.event.ItgProjectStarted;
 import org.junit.Test;
@@ -38,10 +38,10 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Dmitry Ganzha
  */
-public class ChannelActionShould {
+public class ChannelMatcherShould {
 
     @Test
-    public void return_false_if_message_is_not_suitable_for_message_channel_by_message_type() {
+    public void return_false_if_message_is_not_match_message_channel_by_message_type() {
         final EventClass eventClass = EventClass.of(ItgProjectStarted.class);
         final ChannelId channelId = Channels.newId(eventClass);
         final ItgProjectCreated itgProjectCreated = ItgProjectCreated.getDefaultInstance();
@@ -51,13 +51,14 @@ public class ChannelActionShould {
         final BoundedContextName boundedContextName = BoundedContextName.getDefaultInstance();
         final ExternalMessage notSuitableMessage = ExternalMessages.of(projectCreatedEvent,
                                                                        boundedContextName);
-        final ChannelAction action = new SuitableByMessageTypeAction();
-        final MessageSuitable result = action.perform(channelId, notSuitableMessage);
-        assertFalse(result.getSuitable());
+        final ChannelMatcher action = new MessageTypeMatcher();
+        final MessageMatched result = action.match(channelId, notSuitableMessage);
+        assertFalse(result.getMatched());
+        assertFalse(result.getDescription().isEmpty());
     }
 
     @Test
-    public void return_true_if_message_is_suitable_for_message_channel_by_message_type() {
+    public void return_true_if_message_is_match_message_channel_by_message_type() {
         final EventClass eventClass = EventClass.of(ItgProjectCreated.class);
         final ChannelId channelId = Channels.newId(eventClass);
         final ItgProjectCreated itgProjectCreated = ItgProjectCreated.getDefaultInstance();
@@ -67,8 +68,8 @@ public class ChannelActionShould {
         final BoundedContextName boundedContextName = BoundedContextName.getDefaultInstance();
         final ExternalMessage suitableMessage = ExternalMessages.of(projectCreatedEvent,
                                                                     boundedContextName);
-        final ChannelAction action = new SuitableByMessageTypeAction();
-        final MessageSuitable result = action.perform(channelId, suitableMessage);
-        assertTrue(result.getSuitable());
+        final ChannelMatcher action = new MessageTypeMatcher();
+        final MessageMatched result = action.match(channelId, suitableMessage);
+        assertTrue(result.getMatched());
     }
 }

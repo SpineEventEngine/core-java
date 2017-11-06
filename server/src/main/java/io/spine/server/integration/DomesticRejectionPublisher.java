@@ -19,7 +19,6 @@
  */
 package io.spine.server.integration;
 
-import com.google.common.base.Function;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableSet;
 import io.spine.core.BoundedContextName;
@@ -33,7 +32,7 @@ import io.spine.server.rejection.RejectionSubscriber;
 import java.util.Objects;
 import java.util.Set;
 
-import static com.google.common.collect.FluentIterable.from;
+import static io.spine.server.integration.Channels.from;
 import static io.spine.server.integration.Channels.newId;
 
 /**
@@ -73,17 +72,8 @@ final class DomesticRejectionPublisher extends RejectionSubscriber {
     public Set<String> dispatch(RejectionEnvelope envelope) {
         final Rejection rejection = envelope.getOuterObject();
         final ExternalMessage message = ExternalMessages.of(rejection, boundedContextName);
-
         final Iterable<Publisher> channels = router.route(message);
-        final ImmutableSet<String> result =
-                from(channels)
-                        .transform(new Function<Publisher, String>() {
-                            @Override
-                            public String apply(Publisher input) {
-                                return input.toString();
-                            }
-                        })
-                        .toSet();
+        final Set<String> result = from(channels);
         return result;
     }
 

@@ -26,7 +26,7 @@ import io.spine.server.integration.Publisher;
 
 /**
  * The base interface for a message router. The {@code Router} is designed for routing
- * messages to {@linkplain MessageChannel message channels} based on predefined
+ * messages to {@linkplain MessageChannel message channels} based on registered
  * {@linkplain Route channel routes}.
  *
  * <p>Inspired by <a href="http://www.enterpriseintegrationpatterns.com/patterns/messaging/DynamicRouter.html">

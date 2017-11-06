@@ -26,7 +26,7 @@ import io.spine.server.integration.MessageChannel;
 import io.spine.server.integration.MessageRouted;
 
 /**
- * The base interface for a route. The route is an entity that connects
+ * The base interface for a route. The route is an abstraction that connects
  * {@linkplain MessageChannel message channels} and a
  * {@linkplain Router message router}. Also {@code Route} is designed for checking if the message
  * acceptable by the route or not.
@@ -40,9 +40,10 @@ public interface Route {
      *
      * <p>A route can:
      * <ul>
-     * <li>accept the message (by returning {@code MessageRouted} which will indicate that
-     * the message can be routed by this route);
-     * <li>reject the message with the description why the message cannot be routed by this route;
+     *     <li>accept the message (by returning {@code MessageRouted} which will indicate that
+     *     the message can be routed by this route);
+     *     <li>reject the message with the description why the message cannot be routed by this
+     *     route.
      * </ul>
      *
      * @param message an instance of {@code ExternalMessage}

@@ -20,6 +20,7 @@
 
 package io.spine.server.integration;
 
+import com.google.common.testing.NullPointerTester;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.type.TypeUrl;
@@ -56,5 +57,10 @@ public class ChannelsShould {
         final ChannelId firstChannelId = Channels.newId(eventClass);
         final ChannelId secondChannelId = Channels.newId(eventClass);
         assertEquals(firstChannelId, secondChannelId);
+    }
+
+    @Test
+    public void pass_the_null_tolerance_check() {
+        new NullPointerTester().testAllPublicStaticMethods(Channels.class);
     }
 }

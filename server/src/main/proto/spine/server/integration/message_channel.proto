@@ -48,14 +48,14 @@ message MessageRouted {
     // ExternalMessage received by the Router.
     ExternalMessage source = 1 [(required) = true];
 
-    MessageSuitable messageSuitable = 2 [(required) = true];
+    MessageMatched messageMatched = 2 [(required) = true];
 }
 
-// The message which is used to identify if the message suitable for the message channel.
-message MessageSuitable {
+// The message which is used to identify if the message matches the message channel.
+message MessageMatched {
 
-    bool suitable = 1 [(required) = true];
+    bool matched = 1 [(required) = true];
 
-    // Description shows why the message is not suitable for the message channel
+    // The description shows why the message does not match for the message channel.
     string description = 2;
 }

@@ -23,10 +23,10 @@ package io.spine.server.integration.route;
 import io.spine.server.integration.ChannelId;
 import io.spine.server.integration.ChannelId.KindCase;
 import io.spine.server.integration.ExternalMessage;
+import io.spine.server.integration.MessageMatched;
 import io.spine.server.integration.MessageRouted;
-import io.spine.server.integration.MessageSuitable;
-import io.spine.server.integration.route.action.ChannelAction;
-import io.spine.server.integration.route.action.SuitableByMessageTypeAction;
+import io.spine.server.integration.route.matcher.ChannelMatcher;
+import io.spine.server.integration.route.matcher.MessageTypeMatcher;
 
 import java.util.Map;
 import java.util.Objects;
@@ -34,7 +34,7 @@ import java.util.Objects;
 import static com.google.common.collect.Maps.newHashMap;
 
 /**
- * The {@code ChannelRoute} checks if the {@code ExternalMessage} is suitable for the
+ * The {@code ChannelRoute} checks if the {@code ExternalMessage} is match for the
  * {@code MessageChannel} assigned to this route.
  *
  * @author Dmitry Ganzha
@@ -44,10 +44,10 @@ public class ChannelRoute implements Route {
     /**
      * The map contains a kind related to a {@code ChannelAction}.
      */
-    private static final Map<KindCase, ChannelAction> ACTIONS_BY_CHANNEL_KIND = newHashMap();
+    private static final Map<KindCase, ChannelMatcher> ACTIONS_BY_CHANNEL_KIND = newHashMap();
 
     static {
-        ACTIONS_BY_CHANNEL_KIND.put(KindCase.MESSAGE_TYPE_URL, new SuitableByMessageTypeAction());
+        ACTIONS_BY_CHANNEL_KIND.put(KindCase.MESSAGE_TYPE_URL, new MessageTypeMatcher());
     }
 
     private final ChannelId channelId;
@@ -59,11 +59,11 @@ public class ChannelRoute implements Route {
     @Override
     public MessageRouted accept(ExternalMessage message) {
         final KindCase kind = channelId.getKindCase();
-        final ChannelAction action = ACTIONS_BY_CHANNEL_KIND.get(kind);
-        final MessageSuitable messageSuitable = action.perform(channelId, message);
+        final ChannelMatcher action = ACTIONS_BY_CHANNEL_KIND.get(kind);
+        final MessageMatched messageMatched = action.match(channelId, message);
         return MessageRouted.newBuilder()
                             .setSource(message)
-                            .setMessageSuitable(messageSuitable)
+                            .setMessageMatched(messageMatched)
                             .build();
     }
 

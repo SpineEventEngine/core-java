@@ -28,10 +28,13 @@ import io.spine.server.integration.ExternalMessage;
 import io.spine.server.integration.MessageRouted;
 import io.spine.server.integration.Publisher;
 
+import java.util.Set;
+
 import static com.google.common.collect.FluentIterable.from;
+import static com.google.common.collect.Sets.newConcurrentHashSet;
 
 /**
- * The {@code DynamicRouter} routes messages to suitable {@code MessageChannel}s
+ * The {@code DynamicRouter} routes messages to match {@code MessageChannel}s
  * based on various rules.
  *
  * @param <P> the type of the publisher message channel
@@ -41,11 +44,11 @@ public class DynamicRouter<P extends Publisher> implements Router {
 
     private final ChannelHub<P> channelHub;
 
-    private final RoutingSchema routingSchema;
+    private final Set<Route> routes;
 
-    public DynamicRouter(ChannelHub<P> channelHub, RoutingSchema routingSchema) {
+    public DynamicRouter(ChannelHub<P> channelHub) {
         this.channelHub = channelHub;
-        this.routingSchema = routingSchema;
+        this.routes = newConcurrentHashSet();
     }
 
     @Override
@@ -59,12 +62,12 @@ public class DynamicRouter<P extends Publisher> implements Router {
 
     @Override
     public void register(Route route) {
-        routingSchema.add(route);
+        routes.add(route);
     }
 
     @Override
     public void unregister(Route route) {
-        routingSchema.remove(route);
+        routes.remove(route);
     }
 
     private Iterable<Publisher> determineTargetChannels(ExternalMessage message) {
@@ -85,13 +88,13 @@ public class DynamicRouter<P extends Publisher> implements Router {
 
     private Iterable<Route> findSuitableRoutes(final ExternalMessage message) {
         final ImmutableSet<Route> suitableRoutes =
-                from(routingSchema.getAll())
+                from(routes)
                         .filter(new Predicate<Route>() {
                             @Override
                             public boolean apply(Route input) {
                                 final MessageRouted messageRouted = input.accept(message);
-                                return messageRouted.getMessageSuitable()
-                                                    .getSuitable();
+                                return messageRouted.getMessageMatched()
+                                                    .getMatched();
                             }
                         })
                         .toSet();
