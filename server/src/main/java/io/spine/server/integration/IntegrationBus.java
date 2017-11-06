@@ -135,7 +135,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
         this.boundedContextName = builder.boundedContextName;
         this.subscriberHub = new SubscriberHub(builder.transportFactory);
         this.router = new DynamicRouter<>(new PublisherHub(builder.transportFactory),
-                                          builder.getRoutingSchema());
+                                          builder.routingSchema);
         this.localBusAdapters = createAdapters(builder, router);
         configurationChangeObserver = observeConfigurationChanges();
         final ChannelId channelId = newId(
@@ -472,8 +472,8 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
             return Optional.fromNullable(transportFactory);
         }
 
-        public RoutingSchema getRoutingSchema() {
-            return routingSchema;
+        public Optional<RoutingSchema> getRoutingSchema() {
+            return Optional.fromNullable(routingSchema);
         }
 
         public Builder setRoutingSchema(RoutingSchema routingSchema) {

@@ -28,7 +28,8 @@ import io.spine.server.integration.MessageRouted;
 /**
  * The base interface for a route. The route is an entity that connects
  * {@linkplain MessageChannel message channels} and a
- * {@linkplain Router message router}.
+ * {@linkplain Router message router}. Also {@code Route} is designed for checking if the message
+ * acceptable by the route or not.
  *
  * @author Dmitry Ganzha
  */
