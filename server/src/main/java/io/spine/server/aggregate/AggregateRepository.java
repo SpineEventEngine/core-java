@@ -187,6 +187,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * <p>By default, this method returns {@code this} reference.
      *
      * <p>Override this method to change the way the repository acts upon the dispatched commands.
+     * Note that the custom implementations might want to call
+     * {@link #dispatch AggregateRepository.dispatch()}. Otherwise, the basic features of
+     * the framework may not function properly.
      *
      * @return a new instance of {@link CommandDispatcher}
      * @see #dispatch(CommandEnvelope)
@@ -207,6 +210,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * <p>By default, this method returns {@code DelegatingEventDispatcher.of(this)}.
      *
      * <p>Override this method to change the way the repository acts upon the dispatched events.
+     * Note that the custom implementations might want to call
+     * {@link #dispatchEvent AggregateRepository.dispatchEvent()}. Otherwise, the basic features of
+     * the framework may not function properly.
      *
      * @return a new instance of {@link io.spine.server.event.EventDispatcher EventDispatcher}
      * @see #dispatchEvent(EventEnvelope)
@@ -228,7 +234,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * <p>By default, this method returns {@code DelegatingRejectionDispatcher.of(this)}.
      *
      * <p>Override this method to change the way the repository acts upon the dispatched
-     * rejections.
+     * rejections. Note that the custom implementations might want to call
+     * {@link #dispatchRejection AggregateRepository.dispatchRejection()}. Otherwise, the basic
+     * features of the framework may not function properly.
      *
      * @return a new instance of
      *         {@link io.spine.server.rejection.RejectionDispatcher EventDispatcher}
