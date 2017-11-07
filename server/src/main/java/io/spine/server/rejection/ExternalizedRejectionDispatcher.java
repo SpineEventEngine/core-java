@@ -23,7 +23,7 @@ package io.spine.server.rejection;
 import io.spine.annotation.SPI;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
-import io.spine.server.bus.ExternalizedMessageDispatcher;
+import io.spine.server.bus.ExternalizedMulticastDispatcher;
 
 /**
  * A {@link RejectionDispatcher} capable of creating instances of
@@ -33,6 +33,6 @@ import io.spine.server.bus.ExternalizedMessageDispatcher;
  */
 @SPI
 public interface ExternalizedRejectionDispatcher<I>
-        extends ExternalizedMessageDispatcher<RejectionClass, RejectionEnvelope, I>,
+        extends ExternalizedMulticastDispatcher<RejectionClass, RejectionEnvelope, I>,
                 RejectionDispatcher<I> {
 }

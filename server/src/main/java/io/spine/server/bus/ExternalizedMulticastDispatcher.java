@@ -31,9 +31,9 @@ import io.spine.type.MessageClass;
  * @author Dmytro Dashenkov
  */
 @SPI
-public interface ExternalizedMessageDispatcher<C extends MessageClass,
-                                               E extends MessageEnvelope,
-                                               I>
+public interface ExternalizedMulticastDispatcher<C extends MessageClass,
+                                                 E extends MessageEnvelope,
+                                                 I>
         extends MulticastDispatcher<C, E, I> {
 
     /**

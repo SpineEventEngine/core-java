@@ -23,7 +23,7 @@ package io.spine.server.event;
 import io.spine.annotation.SPI;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
-import io.spine.server.bus.ExternalizedMessageDispatcher;
+import io.spine.server.bus.ExternalizedMulticastDispatcher;
 
 /**
  * An {@link EventDispatcher} capable of creating instances of
@@ -33,6 +33,6 @@ import io.spine.server.bus.ExternalizedMessageDispatcher;
  */
 @SPI
 public interface ExternalizedEventDispatcher<I>
-        extends ExternalizedMessageDispatcher<EventClass, EventEnvelope, I>,
+        extends ExternalizedMulticastDispatcher<EventClass, EventEnvelope, I>,
                 EventDispatcher<I> {
 }
