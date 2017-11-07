@@ -37,10 +37,12 @@ import io.spine.core.RejectionEnvelope;
 import io.spine.core.Subscribe;
 import io.spine.core.TenantId;
 import io.spine.core.given.GivenEvent;
+import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.RecordBasedRepositoryShould;
 import io.spine.server.entity.given.Given;
+import io.spine.server.entity.rejection.StandardRejections;
 import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived;
 import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyDeleted;
 import io.spine.server.event.EventSubscriber;
@@ -52,6 +54,7 @@ import io.spine.test.procman.Project;
 import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.command.PmCreateProject;
 import io.spine.test.procman.command.PmStartProject;
+import io.spine.test.procman.command.PmThrowEntityAlreadyArchived;
 import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.event.PmTaskAdded;
@@ -145,7 +148,6 @@ public class ProcessManagerRepositoryShould
         boundedContext = BoundedContext.newBuilder()
                                        .setMultitenant(true)
                                        .build();
-
         boundedContext.register(repository);
         TestProcessManager.clearMessageDeliveryHistory();
     }
@@ -247,6 +249,24 @@ public class ProcessManagerRepositoryShould
 
         assertContains(rejectionClasses,
                        EntityAlreadyArchived.class, EntityAlreadyDeleted.class);
+    }
+
+    @Test
+    public void post_command_rejections() {
+        final ProjectId id = ProjectId.newBuilder()
+                                      .setId(newUuid())
+                                      .build();
+        final PmThrowEntityAlreadyArchived commandMsg =
+                PmThrowEntityAlreadyArchived.newBuilder()
+                                            .setProjectId(id)
+                                            .build();
+        final Command command = requestFactory.createCommand(commandMsg);
+        repository().dispatchCommand(CommandEnvelope.of(command));
+        final StandardRejections.EntityAlreadyArchived expected =
+                StandardRejections.EntityAlreadyArchived.newBuilder()
+                                                        .setEntityId(AnyPacker.pack(id))
+                                                        .build();
+        assertTrue(TestProcessManager.processed(expected));
     }
 
     @Test

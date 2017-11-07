@@ -32,6 +32,7 @@ import io.spine.core.RejectionEnvelope;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandDispatcher;
+import io.spine.server.commandbus.CommandErrorHandler;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.DelegatingEventDispatcher;
@@ -57,7 +58,6 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.core.Commands.causedByRejection;
 import static io.spine.server.entity.EntityWithLifecycle.Predicates.isEntityVisible;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
@@ -102,6 +102,14 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     /** The routing schema for rejections to which aggregates react. */
     private final RejectionRouting<I> rejectionRouting =
             RejectionRouting.withDefault(RejectionProducers.<I>fromContext());
+
+    /**
+     * The {@link CommandErrorHandler} tackling the dispatching errors.
+     *
+     * <p>This field is not {@code final} only because it is initialized in {@link #onRegistered()}
+     * method.
+     */
+    private CommandErrorHandler commandErrorHandler;
 
     /** The number of events to store between snapshots. */
     private int snapshotTrigger = DEFAULT_SNAPSHOT_TRIGGER;
@@ -155,6 +163,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
         registerExtMessageDispatcher(boundedContext, extEventDispatcher, extEventClasses);
         registerExtMessageDispatcher(boundedContext, extRejectionDispatcher, extRejectionClasses);
+
+        this.commandErrorHandler = CommandErrorHandler.with(boundedContext.getRejectionBus());
     }
 
     private void registerExtMessageDispatcher(BoundedContext boundedContext,
@@ -285,11 +295,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     @Override
     public void onError(CommandEnvelope envelope, RuntimeException exception) {
-        checkNotNull(envelope);
-        checkNotNull(exception);
-        if (!causedByRejection(exception)) {
-            logError("Error dispatching command (class: %s id: %s).", envelope, exception);
-        }
+        commandErrorHandler.handleError(envelope, exception);
     }
 
     @Override

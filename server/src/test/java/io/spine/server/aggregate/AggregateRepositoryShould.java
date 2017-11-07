@@ -25,8 +25,6 @@ import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.protobuf.FloatValue;
-import com.google.protobuf.Int32Value;
-import com.google.protobuf.UInt32Value;
 import com.google.protobuf.UInt64Value;
 import io.grpc.stub.StreamObserver;
 import io.spine.Identifier;
@@ -332,36 +330,6 @@ public class AggregateRepositoryShould {
     }
 
     @Test
-    public void log_error_when_command_dispatching_fails() {
-        final FailingAggregateRepository repository = new FailingAggregateRepository();
-        boundedContext.register(repository);
-
-        // Passing negative value to `FailingAggregate` should cause exception.
-        final CommandEnvelope ce = CommandEnvelope.of(
-                requestFactory.createCommand(UInt32Value.newBuilder()
-                                                        .setValue(-100)
-                                                        .build()));
-
-        boundedContext.getCommandBus()
-                      .post(ce.getCommand(), StreamObservers.<Ack>noOpObserver());
-
-        assertTrue(repository.isErrorLogged());
-        final RuntimeException lastException = repository.getLastException();
-        assertTrue(lastException instanceof HandlerMethodFailedException);
-
-        final HandlerMethodFailedException methodFailedException =
-                (HandlerMethodFailedException) lastException;
-
-        assertEquals(ce.getMessage(), methodFailedException.getDispatchedMessage());
-        assertEquals(ce.getCommandContext(), methodFailedException.getMessageContext());
-
-        final MessageEnvelope lastErrorEnvelope = repository.getLastErrorEnvelope();
-        assertNotNull(lastErrorEnvelope);
-        assertTrue(lastErrorEnvelope instanceof CommandEnvelope);
-        assertEquals(ce.getMessage(), lastErrorEnvelope.getMessage());
-    }
-
-    @Test
     public void log_error_when_event_reaction_fails() {
         final FailingAggregateRepository repository = new FailingAggregateRepository();
         boundedContext.register(repository);
@@ -500,18 +468,6 @@ public class AggregateRepositoryShould {
                                          .getValue();
             assertEquals(RejectionReactingAggregate.PARENT_ARCHIVED, value);
         }
-    }
-
-    @Test
-    public void not_allow_empty_event_list_after_command_handling() {
-        final FailingAggregateRepository repository = new FailingAggregateRepository();
-        boundedContext.register(repository);
-        final Command command = requestFactory.createCommand(Int32Value.newBuilder()
-                                                                       .setValue(5)
-                                                                       .build());
-        boundedContext.getCommandBus()
-                      .post(command, StreamObservers.<Ack>noOpObserver());
-        assertTrue(repository.isErrorLogged());
     }
 
     /*

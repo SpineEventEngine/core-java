@@ -35,6 +35,7 @@ import io.spine.server.bus.MessageDispatcher;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcherDelegate;
+import io.spine.server.commandbus.CommandErrorHandler;
 import io.spine.server.commandbus.DelegatingCommandDispatcher;
 import io.spine.server.entity.EventDispatchingRepository;
 import io.spine.server.event.EventBus;
@@ -79,6 +80,14 @@ public abstract class ProcessManagerRepository<I,
     /** The rejection routing schema used by this repository. */
     private final RejectionRouting<I> rejectionRouting =
             RejectionRouting.withDefault(RejectionProducers.<I>fromContext());
+
+    /**
+     * The {@link CommandErrorHandler} tackling the dispatching errors.
+     *
+     * <p>This field is not {@code final} only because it is initialized in {@link #onRegistered()}
+     * method.
+     */
+    private CommandErrorHandler commandErrorHandler;
 
     /** {@inheritDoc} */
     protected ProcessManagerRepository() {
@@ -144,7 +153,7 @@ public abstract class ProcessManagerRepository<I,
                     "Process managers of the repository %s have no command handlers, " +
                             "and do not react upon any rejections or events.", this);
         }
-
+        this.commandErrorHandler = CommandErrorHandler.with(boundedContext.getRejectionBus());
     }
 
     /**
@@ -252,8 +261,8 @@ public abstract class ProcessManagerRepository<I,
      */
     @Override
     public I dispatchCommand(final CommandEnvelope command) {
-        final I result = PmCommandEndpoint.handle(this, command);
-        return result;
+        checkNotNull(command);
+        return PmCommandEndpoint.handle(this, command);
     }
 
     /**
@@ -284,7 +293,7 @@ public abstract class ProcessManagerRepository<I,
 
     @Override
     public void onError(CommandEnvelope envelope, RuntimeException exception) {
-        logError("Command dispatching caused error (class: %s, id: %s)", envelope, exception);
+        commandErrorHandler.handleError(envelope, exception);
     }
 
     @Override
