@@ -34,8 +34,8 @@ import java.util.Objects;
 import static com.google.common.collect.Maps.newHashMap;
 
 /**
- * The {@code ChannelRoute} checks if the {@code ExternalMessage} matches the
- * {@code MessageChannel} assigned to this route.
+ * The {@code ChannelRoute} checks whether the {@code ExternalMessage} is acceptable by the route
+ * or not. For this check, {@linkplain ChannelMatcher channel matchers} are used.
  *
  * @author Dmitry Ganzha
  */
