@@ -28,7 +28,7 @@ import io.spine.server.integration.Publisher;
  *
  * @author Dmitry Ganzha
  */
-public class DeadMessageHandler implements ChannelErrorHandler {
+public class DeadMessageHandler implements RouterErrorHandler {
 
     private final Publisher deadMessageChannel;
 

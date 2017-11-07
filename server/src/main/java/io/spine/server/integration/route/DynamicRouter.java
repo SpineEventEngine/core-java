@@ -45,7 +45,7 @@ public class DynamicRouter implements Router {
     private final ChannelHub<Publisher> channelHub;
     private final Set<Route> routes;
     private final Publisher deadMessageChannel;
-    private final ChannelErrorHandler deadMessageHandler;
+    private final RouterErrorHandler deadMessageHandler;
 
     public DynamicRouter(ChannelHub<Publisher> channelHub, ChannelId deadMessageChannelId) {
         this.channelHub = channelHub;

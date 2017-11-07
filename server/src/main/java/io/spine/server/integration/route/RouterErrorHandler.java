@@ -26,11 +26,11 @@ import io.spine.server.integration.ExternalMessage;
  * A definition of a handler for a dead message in the {@code Router}.
  *
  * If a message is not acceptable by any {@code Route} in the {@code Router}, it will result in a call
- * to {@link ChannelErrorHandler#handle ChannelErrorHandler.handle(ExternalMessage)}.
+ * to {@link RouterErrorHandler#handle RouterErrorHandler.handle(ExternalMessage)}.
  *
  * @author Dmitry Ganzha
  */
-public interface ChannelErrorHandler {
+public interface RouterErrorHandler {
 
     /**
      * Handles a message which was not acceptable by any {@code Route}
