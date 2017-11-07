@@ -39,6 +39,9 @@ message ChannelId {
 
         // The message type URL can be used to identify messages by the message type.
         string message_type_url = 1;
+
+        // The dead message is used to identify messages for the dead message channel.
+        string dead_message = 2;
     }
 }
 

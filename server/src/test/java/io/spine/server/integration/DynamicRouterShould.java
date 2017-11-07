@@ -34,24 +34,29 @@ import org.junit.Test;
 
 import static com.google.common.collect.FluentIterable.from;
 import static io.spine.core.EventClass.of;
+import static io.spine.server.integration.Channels.newDeadMessageId;
 import static io.spine.server.integration.Channels.newId;
 import static io.spine.server.integration.given.IntegrationBusTestEnv.cannotStartArchivedProject;
 import static io.spine.server.integration.given.IntegrationBusTestEnv.projectCreated;
 import static io.spine.server.integration.given.IntegrationBusTestEnv.projectStarted;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Dmitry Ganzha
  */
 public class DynamicRouterShould {
 
+    private static final String DEAD_MESSAGE_CHANNEL_NAME = "test_dead_message_channel_name";
+
     @Test
     public void route_the_message_to_suitable_routes() {
         final BoundedContextName boundedContextName = BoundedContext.newName("External context ID");
 
         final PublisherHub publisherHub = new PublisherHub(InMemoryTransportFactory.newInstance());
-        final Router router = new DynamicRouter<>(publisherHub);
+        final ChannelId deadMessageChannelId = newDeadMessageId(DEAD_MESSAGE_CHANNEL_NAME);
+        final Router router = new DynamicRouter<>(publisherHub, deadMessageChannelId);
 
         router.register(new ChannelRoute(newId(of(ItgProjectStarted.class))));
         router.register(new ChannelRoute(newId(of(ItgProjectCreated.class))));
@@ -67,17 +72,26 @@ public class DynamicRouterShould {
         final ExternalMessage externalNotRegistered = ExternalMessages.of(notRegisteredRejection,
                                                                           boundedContextName);
 
-        Iterable<Publisher> projectCreatedChannels = router.route(externalProjectCreated);
-        Iterable<Publisher> projectStartedChannels = router.route(externalProjectStarted);
-        Iterable<Publisher> channelsForNotRegistered = router.route(externalNotRegistered);
+        final Iterable<Publisher> projectCreatedChannels = router.route(externalProjectCreated);
+        final Iterable<Publisher> projectStartedChannels = router.route(externalProjectStarted);
+        final Iterable<Publisher> channelsForNotRegistered = router.route(externalNotRegistered);
+
+        final int expectedSizeNotRegistered = 1;
 
         assertFalse(from(projectCreatedChannels)
                             .isEmpty());
         assertFalse(from(projectStartedChannels)
                             .isEmpty());
-        assertTrue(from(channelsForNotRegistered)
-                           .isEmpty());
 
+        assertNotNull(from(channelsForNotRegistered).first()
+                                                    .get()
+                                                    .getChannelId()
+                                                    .getDeadMessage());
+        assertEquals(expectedSizeNotRegistered, from(channelsForNotRegistered).size());
+        assertEquals(DEAD_MESSAGE_CHANNEL_NAME, from(channelsForNotRegistered).first()
+                                                                              .get()
+                                                                              .getChannelId()
+                                                                              .getDeadMessage());
     }
 
 }

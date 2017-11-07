@@ -24,6 +24,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
 import io.spine.server.integration.ChannelHub;
+import io.spine.server.integration.ChannelId;
 import io.spine.server.integration.ExternalMessage;
 import io.spine.server.integration.MessageRouted;
 import io.spine.server.integration.Publisher;
@@ -40,20 +41,28 @@ import static com.google.common.collect.Sets.newConcurrentHashSet;
  * @param <P> the type of the publisher message channel
  * @author Dmitry Ganzha
  */
-public class DynamicRouter<P extends Publisher> implements Router {
+public class DynamicRouter<P extends Publisher> extends Router {
 
     private final ChannelHub<P> channelHub;
-
     private final Set<Route> routes;
+    private final ChannelId deadMessageChannelId;
 
-    public DynamicRouter(ChannelHub<P> channelHub) {
+    public DynamicRouter(ChannelHub<P> channelHub, ChannelId deadMessageChannelId) {
         this.channelHub = channelHub;
         this.routes = newConcurrentHashSet();
+        this.deadMessageChannelId = deadMessageChannelId;
     }
 
     @Override
     public Iterable<Publisher> route(ExternalMessage message) {
         final Iterable<Publisher> messageChannels = determineTargetChannels(message);
+
+        if (from(messageChannels).isEmpty()) {
+            Publisher deadMessageChannel = deadMessageChannel();
+            deadMessageChannel.publish(message.getId(), message);
+            return ImmutableSet.of(deadMessageChannel);
+        }
+
         for (Publisher messageChannel : messageChannels) {
             messageChannel.publish(message.getId(), message);
         }
@@ -68,6 +77,16 @@ public class DynamicRouter<P extends Publisher> implements Router {
     @Override
     public void unregister(Route route) {
         routes.remove(route);
+    }
+
+    @Override
+    protected Publisher deadMessageChannel() {
+        return channelHub.get(deadMessageChannelId);
+    }
+
+    @Override
+    public void close() throws Exception {
+        channelHub.close();
     }
 
     private Iterable<Publisher> determineTargetChannels(ExternalMessage message) {
@@ -99,10 +118,5 @@ public class DynamicRouter<P extends Publisher> implements Router {
                         })
                         .toSet();
         return suitableRoutes;
-    }
-
-    @Override
-    public void close() throws Exception {
-        channelHub.close();
     }
 }

@@ -36,7 +36,8 @@ import java.util.Set;
 public final class Channels {
 
     /** Prevents instantiation of this utility class. */
-    private Channels() {}
+    private Channels() {
+    }
 
     /**
      * Generates the {@code ChannelId} for the passed {@code MessageClass}.
@@ -70,5 +71,18 @@ public final class Channels {
                               })
                               .toSet();
         return result;
+    }
+
+    /**
+     * Generates the dead message {@code ChannelId} for the passed dead message channel name.
+     *
+     * @param channelName a channel name for which a channel identifier is generated
+     * @return a dead message channel identifier
+     */
+    public static ChannelId newDeadMessageId(String channelName) {
+        final ChannelId deadMessageChannelId = ChannelId.newBuilder()
+                                                        .setDeadMessage(channelName)
+                                                        .build();
+        return deadMessageChannelId;
     }
 }

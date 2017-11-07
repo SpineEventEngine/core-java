@@ -55,6 +55,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.Identifier.pack;
 import static io.spine.server.bus.Buses.acknowledge;
+import static io.spine.server.integration.Channels.newDeadMessageId;
 import static io.spine.server.integration.Channels.newId;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static io.spine.validate.Validate.checkNotDefault;
@@ -128,11 +129,15 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
     private final ConfigurationChangeObserver configurationChangeObserver;
     private final Router router;
 
+    private static final String DEAD_MESSAGE_CHANNEL_NAME = "integration_bus_dead_message_channel";
+
     private IntegrationBus(Builder builder) {
         super(builder.getDelivery());
         this.boundedContextName = builder.boundedContextName;
         this.subscriberHub = new SubscriberHub(builder.transportFactory);
-        this.router = new DynamicRouter<>(new PublisherHub(builder.transportFactory));
+        final ChannelId deadMessageChannelId = newDeadMessageId(DEAD_MESSAGE_CHANNEL_NAME);
+        this.router = new DynamicRouter<>(new PublisherHub(builder.transportFactory),
+                                          deadMessageChannelId);
         this.localBusAdapters = createAdapters(builder, router);
         configurationChangeObserver = observeConfigurationChanges();
         final ChannelId channelId = newId(

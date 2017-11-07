@@ -28,6 +28,8 @@ import org.junit.Test;
 
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Dmitry Ganzha
@@ -37,6 +39,16 @@ public class ChannelsShould {
     @Test
     public void have_private_constructor() {
         assertHasPrivateParameterlessCtor(Channels.class);
+    }
+
+    @Test
+    public void construct_channel_id_correctly_for_dead_message_channel() {
+        final String deadMessageChannelName = "test";
+        final ChannelId channelId = Channels.newDeadMessageId(deadMessageChannelName);
+        assertTrue(channelId.getMessageTypeUrl()
+                            .isEmpty());
+        assertFalse(channelId.getDeadMessage()
+                             .isEmpty());
     }
 
     @Test
