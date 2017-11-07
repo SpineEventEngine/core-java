@@ -33,8 +33,8 @@ import io.spine.server.integration.ExternalMessage;
 public interface RouterErrorHandler {
 
     /**
-     * Handles a message which was not acceptable by any {@code Route}
-     * during routing the message (e.g. publish the message to the dead message channel).
+     * Handles a message (e.g. publish the message to the dead message channel) which was not
+     * acceptable by any {@code Route} during routing the message.
      *
      * @param message the dead message
      */
