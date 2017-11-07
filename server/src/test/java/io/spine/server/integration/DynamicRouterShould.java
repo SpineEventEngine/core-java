@@ -48,15 +48,14 @@ import static org.junit.Assert.assertNotNull;
  */
 public class DynamicRouterShould {
 
-    private static final String DEAD_MESSAGE_CHANNEL_NAME = "test_dead_message_channel_name";
-
     @Test
     public void route_the_message_to_suitable_routes() {
         final BoundedContextName boundedContextName = BoundedContext.newName("External context ID");
+        final String deadMessageChannelName = "test_dead_message_channel_name";
 
         final PublisherHub publisherHub = new PublisherHub(InMemoryTransportFactory.newInstance());
-        final ChannelId deadMessageChannelId = newDeadMessageId(DEAD_MESSAGE_CHANNEL_NAME);
-        final Router router = new DynamicRouter<>(publisherHub, deadMessageChannelId);
+        final ChannelId deadMessageChannelId = newDeadMessageId(deadMessageChannelName);
+        final Router router = new DynamicRouter(publisherHub, deadMessageChannelId);
 
         router.register(new ChannelRoute(newId(of(ItgProjectStarted.class))));
         router.register(new ChannelRoute(newId(of(ItgProjectCreated.class))));
@@ -88,10 +87,10 @@ public class DynamicRouterShould {
                                                     .getChannelId()
                                                     .getDeadMessage());
         assertEquals(expectedSizeNotRegistered, from(channelsForNotRegistered).size());
-        assertEquals(DEAD_MESSAGE_CHANNEL_NAME, from(channelsForNotRegistered).first()
-                                                                              .get()
-                                                                              .getChannelId()
-                                                                              .getDeadMessage());
+        assertEquals(deadMessageChannelName, from(channelsForNotRegistered).first()
+                                                                           .get()
+                                                                           .getChannelId()
+                                                                           .getDeadMessage());
     }
 
 }

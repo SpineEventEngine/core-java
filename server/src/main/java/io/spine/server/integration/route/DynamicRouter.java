@@ -38,20 +38,20 @@ import static com.google.common.collect.Sets.newConcurrentHashSet;
  * The {@code DynamicRouter} routes messages to suitable {@code MessageChannel}s
  * based on various rules.
  *
- * @param <P> the type of the publisher message channel
  * @author Dmitry Ganzha
  */
-public class DynamicRouter<P extends Publisher> extends Router {
+public class DynamicRouter implements Router {
 
-    private final ChannelHub<P> channelHub;
+    private final ChannelHub<Publisher> channelHub;
     private final Set<Route> routes;
-    private final ChannelId deadMessageChannelId;
+    private final Publisher deadMessageChannel;
+    private final ChannelErrorHandler deadMessageHandler;
 
-    public DynamicRouter(ChannelHub<P> channelHub, ChannelId deadMessageChannelId) {
-        super();
+    public DynamicRouter(ChannelHub<Publisher> channelHub, ChannelId deadMessageChannelId) {
         this.channelHub = channelHub;
         this.routes = newConcurrentHashSet();
-        this.deadMessageChannelId = deadMessageChannelId;
+        this.deadMessageChannel = deadMessageChannel(deadMessageChannelId);
+        this.deadMessageHandler = new DeadMessageHandler(deadMessageChannel);
     }
 
     @Override
@@ -59,8 +59,7 @@ public class DynamicRouter<P extends Publisher> extends Router {
         final Iterable<Publisher> messageChannels = determineTargetChannels(message);
 
         if (from(messageChannels).isEmpty()) {
-            Publisher deadMessageChannel = deadMessageChannel();
-            deadMessageChannel.publish(message.getId(), message);
+            deadMessageHandler.handle(message);
             return ImmutableSet.of(deadMessageChannel);
         }
 
@@ -81,11 +80,6 @@ public class DynamicRouter<P extends Publisher> extends Router {
     }
 
     @Override
-    protected Publisher deadMessageChannel() {
-        return channelHub.get(deadMessageChannelId);
-    }
-
-    @Override
     public void close() throws Exception {
         channelHub.close();
     }
@@ -103,6 +97,7 @@ public class DynamicRouter<P extends Publisher> extends Router {
                             }
                         })
                         .toSet();
+
         return targetChannels;
     }
 
@@ -119,5 +114,13 @@ public class DynamicRouter<P extends Publisher> extends Router {
                         })
                         .toSet();
         return suitableRoutes;
+    }
+
+    /**
+     * Returns the dead message channel. Which will be used for messages that were not acceptable
+     * by any {@code Route}.
+     */
+    private Publisher deadMessageChannel(ChannelId deadMessageChannelId) {
+        return channelHub.get(deadMessageChannelId);
     }
 }

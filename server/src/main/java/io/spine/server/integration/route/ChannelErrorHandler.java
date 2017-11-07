@@ -21,40 +21,22 @@
 package io.spine.server.integration.route;
 
 import io.spine.server.integration.ExternalMessage;
-import io.spine.server.integration.MessageChannel;
-import io.spine.server.integration.Publisher;
 
 /**
- * The base interface for a message router. The {@code Router} is designed for routing
- * messages to {@linkplain MessageChannel message channels} based on registered
- * {@linkplain Route channel routes}.
+ * A definition of a handler for a dead message in the {@code Router}.
  *
- * <p>Inspired by <a href="http://www.enterpriseintegrationpatterns.com/patterns/messaging/DynamicRouter.html">
- * Dynamic Router pattern.</a>
+ * If a message is not acceptable by any {@code Route} in the {@code Router}, it will result in a call
+ * to {@link ChannelErrorHandler#handle ChannelErrorHandler.handle(ExternalMessage)}.
  *
  * @author Dmitry Ganzha
  */
-public interface Router extends AutoCloseable {
+public interface ChannelErrorHandler {
 
     /**
-     * Routes the message to corresponding {@code MessageChannel}s and returns them.
+     * Handles a message which was not acceptable by any {@code Route}
+     * during routing the message (e.g. publish the message to the dead message channel).
      *
-     * @param message the message to be routed
-     * @return returns the message channels to which the message was routed.
+     * @param message the dead message
      */
-    Iterable<Publisher> route(ExternalMessage message);
-
-    /**
-     * Registers the passed {@code Route}.
-     *
-     * @param route the route to register
-     */
-    void register(Route route);
-
-    /**
-     * Unregisters the passed {@code Route}.
-     *
-     * @param route the route to unregister
-     */
-    void unregister(Route route);
+    void handle(ExternalMessage message);
 }

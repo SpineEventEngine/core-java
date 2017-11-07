@@ -21,40 +21,23 @@
 package io.spine.server.integration.route;
 
 import io.spine.server.integration.ExternalMessage;
-import io.spine.server.integration.MessageChannel;
 import io.spine.server.integration.Publisher;
 
 /**
- * The base interface for a message router. The {@code Router} is designed for routing
- * messages to {@linkplain MessageChannel message channels} based on registered
- * {@linkplain Route channel routes}.
- *
- * <p>Inspired by <a href="http://www.enterpriseintegrationpatterns.com/patterns/messaging/DynamicRouter.html">
- * Dynamic Router pattern.</a>
+ * A handler for a dead message which sends the dead message to the dedicated dead message channel.
  *
  * @author Dmitry Ganzha
  */
-public interface Router extends AutoCloseable {
+public class DeadMessageHandler implements ChannelErrorHandler {
 
-    /**
-     * Routes the message to corresponding {@code MessageChannel}s and returns them.
-     *
-     * @param message the message to be routed
-     * @return returns the message channels to which the message was routed.
-     */
-    Iterable<Publisher> route(ExternalMessage message);
+    private final Publisher deadMessageChannel;
 
-    /**
-     * Registers the passed {@code Route}.
-     *
-     * @param route the route to register
-     */
-    void register(Route route);
+    public DeadMessageHandler(Publisher deadMessageChannel) {
+        this.deadMessageChannel = deadMessageChannel;
+    }
 
-    /**
-     * Unregisters the passed {@code Route}.
-     *
-     * @param route the route to unregister
-     */
-    void unregister(Route route);
+    @Override
+    public void handle(ExternalMessage message) {
+        deadMessageChannel.publish(message.getId(), message);
+    }
 }

@@ -136,7 +136,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
         this.boundedContextName = builder.boundedContextName;
         this.subscriberHub = new SubscriberHub(builder.transportFactory);
         final ChannelId deadMessageChannelId = newDeadMessageId(DEAD_MESSAGE_CHANNEL_NAME);
-        this.router = new DynamicRouter<>(new PublisherHub(builder.transportFactory),
+        this.router = new DynamicRouter(new PublisherHub(builder.transportFactory),
                                           deadMessageChannelId);
         this.localBusAdapters = createAdapters(builder, router);
         configurationChangeObserver = observeConfigurationChanges();
