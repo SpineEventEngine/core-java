@@ -50,7 +50,7 @@ import static java.lang.String.format;
  * @see EventDispatcherDelegate
  */
 @Internal
-public final class DelegatingEventDispatcher<I> implements EventDispatcher<I> {
+public final class DelegatingEventDispatcher<I> implements ExternalizedEventDispatcher<I> {
 
     /**
      * A target delegate.
@@ -91,11 +91,7 @@ public final class DelegatingEventDispatcher<I> implements EventDispatcher<I> {
         delegate.onError(envelope, exception);
     }
 
-    /**
-     * Wraps this dispatcher to an external event dispatcher.
-     *
-     * @return the external rejection dispatcher proxying calls to the underlying instance
-     */
+    @Override
     public ExternalMessageDispatcher<I> getExternalDispatcher() {
         return new ExternalMessageDispatcher<I>() {
             @Override
