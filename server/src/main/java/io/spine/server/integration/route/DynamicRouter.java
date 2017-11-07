@@ -48,6 +48,7 @@ public class DynamicRouter<P extends Publisher> extends Router {
     private final ChannelId deadMessageChannelId;
 
     public DynamicRouter(ChannelHub<P> channelHub, ChannelId deadMessageChannelId) {
+        super();
         this.channelHub = channelHub;
         this.routes = newConcurrentHashSet();
         this.deadMessageChannelId = deadMessageChannelId;
