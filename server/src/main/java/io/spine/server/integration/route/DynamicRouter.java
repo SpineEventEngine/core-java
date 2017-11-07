@@ -50,7 +50,7 @@ public class DynamicRouter implements Router {
     public DynamicRouter(ChannelHub<Publisher> channelHub, ChannelId deadMessageChannelId) {
         this.channelHub = channelHub;
         this.routes = newConcurrentHashSet();
-        this.deadMessageChannel = deadMessageChannel(deadMessageChannelId);
+        this.deadMessageChannel = createDeadMessageChannel(deadMessageChannelId);
         this.deadMessageHandler = new DeadMessageHandler(deadMessageChannel);
     }
 
@@ -120,7 +120,7 @@ public class DynamicRouter implements Router {
      * Returns the dead message channel. Which will be used for messages that were not acceptable
      * by any {@code Route}.
      */
-    private Publisher deadMessageChannel(ChannelId deadMessageChannelId) {
+    private Publisher createDeadMessageChannel(ChannelId deadMessageChannelId) {
         return channelHub.get(deadMessageChannelId);
     }
 }
