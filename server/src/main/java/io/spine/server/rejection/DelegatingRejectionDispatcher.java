@@ -51,7 +51,7 @@ import static java.lang.String.format;
  * @see RejectionDispatcherDelegate
  */
 @Internal
-public final class DelegatingRejectionDispatcher<I> implements RejectionDispatcher<I> {
+public final class DelegatingRejectionDispatcher<I> implements ExternalizedRejectionDispatcher<I> {
 
     /** A target delegate. */
     private final RejectionDispatcherDelegate<I> delegate;
@@ -99,11 +99,7 @@ public final class DelegatingRejectionDispatcher<I> implements RejectionDispatch
                           .toString();
     }
 
-    /**
-     * Wraps this dispatcher to an external rejection dispatcher.
-     *
-     * @return the external rejection dispatcher proxying calls to the underlying instance
-     */
+    @Override
     public ExternalMessageDispatcher<I> getExternalDispatcher() {
         return new ExternalMessageDispatcher<I>() {
             @Override

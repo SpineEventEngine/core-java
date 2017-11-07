@@ -36,7 +36,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @param <I> the type of IDs of entities to which messages are dispatched
  * @author Alexander Yevsyukov
  */
-public interface MulticastDispatcher <C extends MessageClass, E extends MessageEnvelope, I>
+public interface MulticastDispatcher<C extends MessageClass, E extends MessageEnvelope, I>
         extends MessageDispatcher<C, E, Set<I>> {
 
     class Identity {

@@ -21,16 +21,20 @@ package io.spine.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
+import com.google.protobuf.Message;
 import io.spine.annotation.SPI;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
+import io.spine.core.MessageEnvelope;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
+import io.spine.server.bus.Bus;
+import io.spine.server.bus.MessageDispatcher;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.commandbus.CommandErrorHandler;
 import io.spine.server.entity.LifecycleFlags;
@@ -38,10 +42,14 @@ import io.spine.server.entity.Repository;
 import io.spine.server.event.DelegatingEventDispatcher;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcherDelegate;
+import io.spine.server.event.ExternalizedEventDispatcher;
 import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
+import io.spine.server.integration.IntegrationBus;
 import io.spine.server.model.Model;
 import io.spine.server.rejection.DelegatingRejectionDispatcher;
+import io.spine.server.rejection.ExternalizedRejectionDispatcher;
+import io.spine.server.rejection.RejectionBus;
 import io.spine.server.rejection.RejectionDispatcherDelegate;
 import io.spine.server.route.CommandRouting;
 import io.spine.server.route.EventProducers;
@@ -51,6 +59,7 @@ import io.spine.server.route.RejectionRouting;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
+import io.spine.type.MessageClass;
 
 import javax.annotation.CheckReturnValue;
 import java.util.List;
@@ -133,20 +142,18 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
         final Set<CommandClass> commandClasses = getMessageClasses();
 
-        final DelegatingEventDispatcher<I> eventDispatcher;
-        eventDispatcher = DelegatingEventDispatcher.of(this);
+        final ExternalizedEventDispatcher<?> eventDispatcher = createEventDispatcher();
         final Set<EventClass> eventClasses = eventDispatcher.getMessageClasses();
 
-        final ExternalMessageDispatcher<I> extEventDispatcher;
-        extEventDispatcher = eventDispatcher.getExternalDispatcher();
+        final ExternalMessageDispatcher<?> extEventDispatcher =
+                eventDispatcher.getExternalDispatcher();
         final Set<ExternalMessageClass> extEventClasses = extEventDispatcher.getMessageClasses();
 
-        final DelegatingRejectionDispatcher<I> rejectionDispatcher;
-        rejectionDispatcher = DelegatingRejectionDispatcher.of(this);
+        final ExternalizedRejectionDispatcher<?> rejectionDispatcher = createRejectionDispatcher();
         final Set<RejectionClass> rejectionClasses = rejectionDispatcher.getMessageClasses();
 
-        final ExternalMessageDispatcher<I> extRejectionDispatcher;
-        extRejectionDispatcher = rejectionDispatcher.getExternalDispatcher();
+        final ExternalMessageDispatcher<?> extRejectionDispatcher =
+                rejectionDispatcher.getExternalDispatcher();
         final Set<ExternalMessageClass> extRejectionClasses =
                 extRejectionDispatcher.getMessageClasses();
 
@@ -157,48 +164,96 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
                             " nor react on events or rejections.", this);
         }
 
-        registerInCommandBus(boundedContext, commandClasses);
-        registerInEventBus(boundedContext, eventDispatcher, eventClasses);
-        registerInRejectionBus(boundedContext, rejectionDispatcher, rejectionClasses);
+        final CommandDispatcher<?> commandDispatcher = createCommandDispatcher();
+        final RejectionBus rejectionBus = boundedContext.getRejectionBus();
+        registerDispatcher(boundedContext.getCommandBus(), commandDispatcher, commandClasses);
+        registerDispatcher(boundedContext.getEventBus(), eventDispatcher, eventClasses);
+        registerDispatcher(rejectionBus, rejectionDispatcher, rejectionClasses);
 
-        registerExtMessageDispatcher(boundedContext, extEventDispatcher, extEventClasses);
-        registerExtMessageDispatcher(boundedContext, extRejectionDispatcher, extRejectionClasses);
+        final IntegrationBus integrationBus = boundedContext.getIntegrationBus();
+        registerDispatcher(integrationBus, extEventDispatcher, extEventClasses);
+        registerDispatcher(integrationBus, extRejectionDispatcher, extRejectionClasses);
 
-        this.commandErrorHandler = CommandErrorHandler.with(boundedContext.getRejectionBus());
+        this.commandErrorHandler = CommandErrorHandler.with(rejectionBus);
     }
 
-    private void registerExtMessageDispatcher(BoundedContext boundedContext,
-                                              ExternalMessageDispatcher<I> extEventDispatcher,
-                                              Set<ExternalMessageClass> extEventClasses) {
-        if (!extEventClasses.isEmpty()) {
-            boundedContext.getIntegrationBus()
-                          .register(extEventDispatcher);
-        }
+    /**
+     * Creates an instance of {@link CommandDispatcher}.
+     *
+     * <p>The created instance is
+     * {@linkplain io.spine.server.commandbus.CommandBus#register registered} in
+     * the {@code CommandBus} upon the repository {@linkplain #onRegistered() registration}.
+     *
+     * <p>By default, this method returns {@code this} reference.
+     *
+     * <p>Override this method to change the way the repository acts upon the dispatched commands.
+     * Note that the custom implementations might want to call
+     * {@link #dispatch AggregateRepository.dispatch()}. Otherwise, the basic features of
+     * the framework may not function properly.
+     *
+     * @return a new instance of {@link CommandDispatcher}
+     * @see #dispatch(CommandEnvelope)
+     */
+    @SPI
+    protected CommandDispatcher<?> createCommandDispatcher() {
+        return this;
     }
 
-    private void registerInRejectionBus(BoundedContext boundedContext,
-                                        DelegatingRejectionDispatcher<I> rejectionDispatcher,
-                                        Set<RejectionClass> rejectionClasses) {
-        if (!rejectionClasses.isEmpty()) {
-            boundedContext.getRejectionBus()
-                          .register(rejectionDispatcher);
-        }
+    /**
+     * Creates an instance of {@link io.spine.server.event.EventDispatcher EventDispatcher} capable
+     * of creating {@linkplain ExternalMessageDispatcher external message dispatchers}.
+     *
+     * <p>The created instance is
+     * {@linkplain io.spine.server.event.EventBus#register registered} in
+     * the {@code EventBus} upon the repository {@linkplain #onRegistered() registration}.
+     *
+     * <p>By default, this method returns {@code DelegatingEventDispatcher.of(this)}.
+     *
+     * <p>Override this method to change the way the repository acts upon the dispatched events.
+     * Note that the custom implementations might want to call
+     * {@link #dispatchEvent AggregateRepository.dispatchEvent()}. Otherwise, the basic features of
+     * the framework may not function properly.
+     *
+     * @return a new instance of {@link io.spine.server.event.EventDispatcher EventDispatcher}
+     * @see #dispatchEvent(EventEnvelope)
+     */
+    @SPI
+    protected ExternalizedEventDispatcher<?> createEventDispatcher() {
+        return DelegatingEventDispatcher.of(this);
     }
 
-    private void registerInEventBus(BoundedContext boundedContext,
-                                    DelegatingEventDispatcher<I> eventDispatcher,
-                                    Set<EventClass> eventClasses) {
-        if (!eventClasses.isEmpty()) {
-            boundedContext.getEventBus()
-                          .register(eventDispatcher);
-        }
+    /**
+     * Creates an instance of
+     * {@link io.spine.server.rejection.RejectionDispatcher RejectionDispatcher} capable of
+     * creating {@linkplain ExternalMessageDispatcher external message dispatchers}.
+     *
+     * <p>The created instance is
+     * {@linkplain io.spine.server.rejection.RejectionBus#register registered} in
+     * the {@code RejectionBus} upon the repository {@linkplain #onRegistered() registration}.
+     *
+     * <p>By default, this method returns {@code DelegatingRejectionDispatcher.of(this)}.
+     *
+     * <p>Override this method to change the way the repository acts upon the dispatched
+     * rejections. Note that the custom implementations might want to call
+     * {@link #dispatchRejection AggregateRepository.dispatchRejection()}. Otherwise, the basic
+     * features of the framework may not function properly.
+     *
+     * @return a new instance of
+     *         {@link io.spine.server.rejection.RejectionDispatcher EventDispatcher}
+     * @see #dispatchRejection(RejectionEnvelope)
+     */
+    @SPI
+    protected ExternalizedRejectionDispatcher<?> createRejectionDispatcher() {
+        return DelegatingRejectionDispatcher.of(this);
     }
 
-    private void registerInCommandBus(BoundedContext boundedContext,
-                                      Set<CommandClass> commandClasses) {
-        if (!commandClasses.isEmpty()) {
-            boundedContext.getCommandBus()
-                          .register(this);
+    private static <M extends Message,
+                    E extends MessageEnvelope<?, M, ?>,
+                    D extends MessageDispatcher<C, E, ?>,
+                    C extends MessageClass>
+    void registerDispatcher(Bus<M, E, C, D> bus, D dispatcher, Set<? extends C> msgClasses) {
+        if (!msgClasses.isEmpty()) {
+            bus.register(dispatcher);
         }
     }
 
