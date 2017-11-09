@@ -22,7 +22,6 @@ package io.spine.server.integration;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
-import io.spine.string.Stringifiers;
 import io.spine.type.MessageClass;
 import io.spine.type.TypeUrl;
 
@@ -69,8 +68,7 @@ public final class Channels {
                     @Override
                     public String apply(@Nullable MessageChannel input) {
                         checkNotNull(input);
-                        final String result = Stringifiers.toString(input);
-                        return result;
+                        return input.toString();
                     }
                 });
         return transformed;
