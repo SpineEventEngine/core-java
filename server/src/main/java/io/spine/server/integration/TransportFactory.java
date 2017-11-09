@@ -37,7 +37,7 @@ public interface TransportFactory {
 
     /**
      * Creates a {@link Publisher} for the messages that
-     * {@linkplain ChannelMatcher#match(ChannelId, ExternalMessage)}  correspond}
+     * {@linkplain ChannelMatcher#match(ChannelId, ExternalMessage)} correspond}
      * to the passed channel ID.
      *
      * @param channelId the identifier of the channel
