@@ -29,6 +29,7 @@ import io.spine.type.TypeUrl;
 import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.validate.Validate.checkNotEmptyOrBlank;
 
 /**
  * Utilities for working with {@linkplain MessageChannel message channels}.
@@ -82,6 +83,7 @@ public final class Channels {
      * @return a dead message channel identifier
      */
     public static ChannelId newDeadMessageId(String channelName) {
+        checkNotEmptyOrBlank(channelName, "channel name");
         final ChannelId deadMessageChannelId = ChannelId.newBuilder()
                                                         .setDeadMessage(channelName)
                                                         .build();
