@@ -36,8 +36,7 @@ import java.util.Set;
 public final class Channels {
 
     /** Prevents instantiation of this utility class. */
-    private Channels() {
-    }
+    private Channels() {}
 
     /**
      * Generates the {@code ChannelId} for the passed {@code MessageClass}.
