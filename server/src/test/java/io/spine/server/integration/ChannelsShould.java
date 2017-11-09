@@ -75,4 +75,9 @@ public class ChannelsShould {
     public void pass_the_null_tolerance_check() {
         new NullPointerTester().testAllPublicStaticMethods(Channels.class);
     }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void not_accept_empty_dead_channel_name() {
+        Channels.newDeadMessageId("");
+    }
 }
