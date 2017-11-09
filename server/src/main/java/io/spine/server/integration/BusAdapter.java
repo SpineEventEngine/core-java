@@ -30,9 +30,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * An abstract base for adapters of local buses (such as {@code EventBus})
- * to {@code IntegrationBus}.
+ * to {@link IntegrationBus}.
  *
- * <p>Provides an API for routines, performed by the {@code IntegrationBus} lifecycle.
+ * <p>Makes the target bus suitable for messages of types, that require preliminary conversion.
+ * In particular, serves as an adapter for external messages served from {@code IntegrationBus},
+ * deciding on the conversion approach from their types, such as {@code Event} or {@code Rejection}.
  *
  * @param <E> the type of envelopes which are handled by the local bus, which is being adapted
  * @param <D> the type of dispatchers suitable for the local bus, which is being adapted
