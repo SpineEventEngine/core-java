@@ -32,7 +32,6 @@ import io.spine.server.rejection.RejectionSubscriber;
 import java.util.Objects;
 import java.util.Set;
 
-import static io.spine.server.integration.Channels.from;
 import static io.spine.server.integration.Channels.newId;
 
 /**
@@ -73,7 +72,7 @@ final class DomesticRejectionPublisher extends RejectionSubscriber {
         final Rejection rejection = envelope.getOuterObject();
         final ExternalMessage message = ExternalMessages.of(rejection, boundedContextName);
         final Iterable<Publisher> channels = router.route(message);
-        final Set<String> result = from(channels);
+        final Set<String> result = ImmutableSet.copyOf(Channels.toString(channels));
         return result;
     }
 

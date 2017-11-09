@@ -21,12 +21,14 @@
 package io.spine.server.integration;
 
 import com.google.common.base.Function;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
+import io.spine.string.Stringifiers;
 import io.spine.type.MessageClass;
 import io.spine.type.TypeUrl;
 
-import java.util.Set;
+import javax.annotation.Nullable;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Utilities for working with {@linkplain MessageChannel message channels}.
@@ -59,17 +61,18 @@ public final class Channels {
      * @param messageChannels message channels for which string representations are generated
      * @return the string representations for the passed message channels
      */
-    public static Set<String> from(Iterable<? extends MessageChannel> messageChannels) {
-        final ImmutableSet<String> result =
-                FluentIterable.from(messageChannels)
-                              .transform(new Function<MessageChannel, String>() {
-                                  @Override
-                                  public String apply(MessageChannel input) {
-                                      return input.toString();
-                                  }
-                              })
-                              .toSet();
-        return result;
+    public static Iterable<String> toString(Iterable<? extends MessageChannel> messageChannels) {
+        checkNotNull(messageChannels);
+        final Iterable<String> transformed =
+                Iterables.transform(messageChannels, new Function<MessageChannel, String>() {
+                    @Override
+                    public String apply(@Nullable MessageChannel input) {
+                        checkNotNull(input);
+                        final String result = Stringifiers.toString(input);
+                        return result;
+                    }
+                });
+        return transformed;
     }
 
     /**

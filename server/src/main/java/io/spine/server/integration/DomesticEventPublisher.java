@@ -32,7 +32,6 @@ import io.spine.server.integration.route.Router;
 import java.util.Objects;
 import java.util.Set;
 
-import static io.spine.server.integration.Channels.from;
 import static io.spine.server.integration.Channels.newId;
 
 /**
@@ -73,7 +72,7 @@ final class DomesticEventPublisher extends EventSubscriber {
         final Event event = envelope.getOuterObject();
         final ExternalMessage msg = ExternalMessages.of(event, boundedContextName);
         final Iterable<Publisher> channels = router.route(msg);
-        final Set<String> result = from(channels);
+        final Set<String> result = ImmutableSet.copyOf(Channels.toString(channels));
         return result;
     }
 
