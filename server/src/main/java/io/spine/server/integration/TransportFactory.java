@@ -20,7 +20,7 @@
 package io.spine.server.integration;
 
 import io.spine.annotation.SPI;
-import io.spine.type.MessageClass;
+import io.spine.server.integration.route.matcher.ChannelMatcher;
 
 /**
  * A factory for creating channel-based transport for {@code Message} inter-exchange between the
@@ -30,25 +30,26 @@ import io.spine.type.MessageClass;
  * Publish-Subscriber Channel pattern.</a>
  *
  * @author Alex Tymchenko
+ * @author Dmitry Ganzha
  */
 @SPI
 public interface TransportFactory {
 
     /**
-     * Creates a {@link Publisher} for the messages of given class.
+     * Creates a {@link Publisher} for the messages that
+     * {@linkplain ChannelMatcher#match(ChannelId, ExternalMessage)} correspond}
+     * to the passed channel ID.
      *
-     * @param messageClass the class of messages that will be published
-     *                     via a created {@code Publisher}
+     * @param channelId the identifier of the channel
      * @return a new {@code Publisher} instance
      */
-    Publisher createPublisher(MessageClass messageClass);
+    Publisher createPublisher(ChannelId channelId);
 
     /**
-     * Creates a {@link Subscriber} for the messages of given class.
+     * Creates a {@link Subscriber} for the messages that correspond to the passed channel ID.
      *
-     * @param messageClass the class of messages that will be received
-     *                     via a created {@code Subscriber}
+     * @param channelId the identifier of the channel
      * @return a new {@code Subscriber} instance
      */
-    Subscriber createSubscriber(MessageClass messageClass);
+    Subscriber createSubscriber(ChannelId channelId);
 }

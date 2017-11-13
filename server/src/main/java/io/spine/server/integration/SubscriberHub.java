@@ -19,8 +19,6 @@
  */
 package io.spine.server.integration;
 
-import io.spine.type.MessageClass;
-
 /**
  * The hub of {@link Subscriber}s.
  *
@@ -28,6 +26,7 @@ import io.spine.type.MessageClass;
  * in the given {@linkplain TransportFactory}.
  *
  * @author Alex Tymchenko
+ * @author Dmitry Ganzha
  */
 public class SubscriberHub extends ChannelHub<Subscriber> {
 
@@ -36,7 +35,7 @@ public class SubscriberHub extends ChannelHub<Subscriber> {
     }
 
     @Override
-    protected Subscriber newChannel(MessageClass channelKey) {
+    protected Subscriber newChannel(ChannelId channelKey) {
         return transportFactory().createSubscriber(channelKey);
     }
 }

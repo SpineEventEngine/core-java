@@ -24,10 +24,9 @@ import com.google.protobuf.Any;
 import io.grpc.stub.StreamObserver;
 import io.spine.core.Ack;
 import io.spine.server.bus.Buses;
+import io.spine.server.integration.ChannelId;
 import io.spine.server.integration.ExternalMessage;
-import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.Publisher;
-import io.spine.type.MessageClass;
 
 /**
  * An in-memory implementation of the {@link Publisher}.
@@ -35,23 +34,24 @@ import io.spine.type.MessageClass;
  * <p>To use only in scope of the same JVM as {@linkplain InMemorySubscriber subscribers}.
  *
  * @author Alex Tymchenko
+ * @author Dmitry Ganzha
  */
 final class InMemoryPublisher extends AbstractInMemoryChannel implements Publisher {
 
     /**
-     * A provider of subscribers, to which a message of the specified message type should be headed.
+     * A provider of subscribers, to which a message should be headed.
      */
-    private final Function<MessageClass, Iterable<InMemorySubscriber>> subscriberProvider;
+    private final Function<ChannelId, Iterable<InMemorySubscriber>> subscriberProvider;
 
-    InMemoryPublisher(ExternalMessageClass messageClass,
-                      Function<MessageClass, Iterable<InMemorySubscriber>> provider) {
-        super(messageClass);
+    InMemoryPublisher(ChannelId channelId,
+                      Function<ChannelId, Iterable<InMemorySubscriber>> provider) {
+        super(channelId);
         this.subscriberProvider = provider;
     }
 
     @Override
     public Ack publish(Any messageId, ExternalMessage message) {
-        final Iterable<InMemorySubscriber> localSubscribers = getSubscribers(getMessageClass());
+        final Iterable<InMemorySubscriber> localSubscribers = getSubscribers(getChannelId());
         for (InMemorySubscriber localSubscriber : localSubscribers) {
             callSubscriber(message, localSubscriber);
         }
@@ -65,8 +65,8 @@ final class InMemoryPublisher extends AbstractInMemoryChannel implements Publish
         }
     }
 
-    private Iterable<InMemorySubscriber> getSubscribers(MessageClass genericCls) {
-        return subscriberProvider.apply(genericCls);
+    private Iterable<InMemorySubscriber> getSubscribers(ChannelId channelId) {
+        return subscriberProvider.apply(channelId);
     }
 
     /**

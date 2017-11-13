@@ -21,8 +21,8 @@ package io.spine.server.integration.memory;
 
 import com.google.common.collect.ImmutableSet;
 import io.grpc.stub.StreamObserver;
+import io.spine.server.integration.ChannelId;
 import io.spine.server.integration.ExternalMessage;
-import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.Subscriber;
 
 import java.util.Set;
@@ -36,6 +36,7 @@ import static com.google.common.collect.Sets.newConcurrentHashSet;
  * <p>To use only in scope of the same JVM as {@linkplain InMemoryPublisher publishers}.
  *
  * @author Alex Tymchenko
+ * @author Dmitry Ganzha
  */
 final class InMemorySubscriber extends AbstractInMemoryChannel implements Subscriber {
 
@@ -44,8 +45,8 @@ final class InMemorySubscriber extends AbstractInMemoryChannel implements Subscr
      */
     private final Set<StreamObserver<ExternalMessage>> observers = newConcurrentHashSet();
 
-    InMemorySubscriber(ExternalMessageClass messageClass) {
-        super(messageClass);
+    InMemorySubscriber(ChannelId channelId) {
+        super(channelId);
     }
 
     @Override

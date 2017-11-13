@@ -24,18 +24,22 @@ import io.spine.core.BoundedContextName;
 import io.spine.core.MessageEnvelope;
 import io.spine.server.bus.Bus;
 import io.spine.server.bus.MessageDispatcher;
+import io.spine.server.integration.route.Router;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * An abstract base for adapters of local buses (such as {@code EventBus})
- * to {@code IntegrationBus}.
+ * to {@link IntegrationBus}.
  *
- * <p>Provides an API for routines, performed by the {@code IntegrationBus} lifecycle.
+ * <p>Makes the target bus suitable for messages of types, that require preliminary conversion.
+ * In particular, serves as an adapter for external messages served from {@code IntegrationBus},
+ * deciding on the conversion approach from their types, such as {@code Event} or {@code Rejection}.
  *
  * @param <E> the type of envelopes which are handled by the local bus, which is being adapted
  * @param <D> the type of dispatchers suitable for the local bus, which is being adapted
  * @author Alex Tymchenko
+ * @author Dmitry Ganzha
  */
 abstract class BusAdapter<E extends MessageEnvelope<?, ?, ?>,
         D extends MessageDispatcher<?, E, ?>> {
@@ -51,14 +55,14 @@ abstract class BusAdapter<E extends MessageEnvelope<?, ?, ?>,
     private final BoundedContextName boundedContextName;
 
     /**
-     * The publisher hub, used publish the messages dispatched from the local buses to external
+     * The message router used to route the messages dispatched from the local buses to external
      * collaborators.
      */
-    private final PublisherHub publisherHub;
+    private final Router router;
 
     BusAdapter(AbstractBuilder<?, E, D> builder) {
         this.targetBus = builder.targetBus;
-        this.publisherHub = builder.publisherHub;
+        this.router = builder.router;
         this.boundedContextName = builder.boundedContextName;
     }
 
@@ -112,8 +116,8 @@ abstract class BusAdapter<E extends MessageEnvelope<?, ?, ?>,
         targetBus.unregister(dispatcher);
     }
 
-    PublisherHub getPublisherHub() {
-        return publisherHub;
+    Router getRouter() {
+        return router;
     }
 
     BoundedContextName getBoundedContextName() {
@@ -133,16 +137,15 @@ abstract class BusAdapter<E extends MessageEnvelope<?, ?, ?>,
 
         private final Bus<?, E, ?, D> targetBus;
         private final BoundedContextName boundedContextName;
-
-        private PublisherHub publisherHub;
+        private Router router;
 
         AbstractBuilder(Bus<?, E, ?, D> targetBus, BoundedContextName boundedContextName) {
             this.targetBus = checkNotNull(targetBus);
             this.boundedContextName = boundedContextName;
         }
 
-        public B setPublisherHub(PublisherHub publisherHub) {
-            this.publisherHub = checkNotNull(publisherHub);
+        public B setRouter(Router router) {
+            this.router = checkNotNull(router);
             return self();
         }
 
@@ -151,7 +154,7 @@ abstract class BusAdapter<E extends MessageEnvelope<?, ?, ?>,
         protected abstract B self();
 
         public BusAdapter<E, D> build() {
-            checkNotNull(publisherHub, "PublisherHub must be set");
+            checkNotNull(router, "Message Router must be set");
 
             final BusAdapter<E, D> result = doBuild();
             return result;

@@ -17,35 +17,26 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.integration;
+
+package io.spine.server.integration.route;
+
+import io.spine.server.integration.ExternalMessage;
 
 /**
- * A channel for exchanging the {@link com.google.protobuf.Message Message}s.
+ * A definition of a handler for a dead message in the {@code Router}.
  *
- * <p>Identified by a {@linkplain ChannelId channel ID}, which must be unique in scope of the
- * underlying messaging system.
+ * If a message is not acceptable by any {@code Route} in the {@code Router}, it will result in a call
+ * to {@link RouterErrorHandler#handle RouterErrorHandler.handle(ExternalMessage)}.
  *
- * <p>The identifier is also used to specify the set of {@code com.google.protobuf.Message}s,
- * suitable for this channel. The definition of the matching criterion is done according to the
- * {@linkplain ChannelId#getKindCase() kind} value.
- *
- * @author Alex Tymchenko
  * @author Dmitry Ganzha
- * @see ChannelId
  */
-public interface MessageChannel extends AutoCloseable {
+public interface RouterErrorHandler {
 
     /**
-     * Returns the channel identifier.
+     * Handles a message (e.g. publish the message to the dead message channel) which was not
+     * acceptable by any {@code Route} during routing the message.
      *
-     * @return the channel identifier
+     * @param message the dead message
      */
-    ChannelId getChannelId();
-
-    /**
-     * Allows to understand whether this channel is stale and can be closed.
-     *
-     * @return {@code true} if the channel is stale, {@code false} otherwise
-     */
-    boolean isStale();
+    void handle(ExternalMessage message);
 }

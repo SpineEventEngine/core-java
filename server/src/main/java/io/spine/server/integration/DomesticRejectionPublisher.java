@@ -25,11 +25,14 @@ import io.spine.core.BoundedContextName;
 import io.spine.core.Rejection;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
-import io.spine.protobuf.AnyPacker;
+import io.spine.server.integration.route.ChannelRoute;
+import io.spine.server.integration.route.Router;
 import io.spine.server.rejection.RejectionSubscriber;
 
 import java.util.Objects;
 import java.util.Set;
+
+import static io.spine.server.integration.Channels.newId;
 
 /**
  * A subscriber to local {@code RejectionBus}, which publishes each matching domestic rejection to
@@ -40,20 +43,22 @@ import java.util.Set;
  * configuration messages}, received by this instance of {@code IntegrationBus}.
  *
  * @author Alex Tymchenko
+ * @author Dmitry Ganzha
  */
 final class DomesticRejectionPublisher extends RejectionSubscriber {
 
     private final BoundedContextName boundedContextName;
-    private final PublisherHub publisherHub;
+    private final Router router;
     private final Set<RejectionClass> rejectionClasses;
 
     DomesticRejectionPublisher(BoundedContextName boundedContextName,
-                               PublisherHub publisherHub,
+                               Router router,
                                RejectionClass rejectionClass) {
         super();
         this.boundedContextName = boundedContextName;
-        this.publisherHub = publisherHub;
+        this.router = router;
         this.rejectionClasses = ImmutableSet.of(rejectionClass);
+        router.register(new ChannelRoute(newId(rejectionClass)));
     }
 
     @SuppressWarnings("ReturnOfCollectionOrArrayField")    // Returning an immutable impl.
@@ -66,12 +71,9 @@ final class DomesticRejectionPublisher extends RejectionSubscriber {
     public Set<String> dispatch(RejectionEnvelope envelope) {
         final Rejection rejection = envelope.getOuterObject();
         final ExternalMessage message = ExternalMessages.of(rejection, boundedContextName);
-        final ExternalMessageClass messageClass =
-                ExternalMessageClass.of(envelope.getMessageClass());
-        final Publisher channel = publisherHub.get(messageClass);
-        channel.publish(AnyPacker.pack(envelope.getId()), message);
-
-        return ImmutableSet.of(channel.toString());
+        final Iterable<Publisher> channels = router.route(message);
+        final Set<String> result = ImmutableSet.copyOf(Channels.toString(channels));
+        return result;
     }
 
     @SuppressWarnings("DuplicateStringLiteralInspection")

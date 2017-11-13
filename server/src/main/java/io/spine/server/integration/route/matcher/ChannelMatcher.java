@@ -17,35 +17,30 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.integration;
+
+package io.spine.server.integration.route.matcher;
+
+import io.spine.server.integration.ChannelId;
+import io.spine.server.integration.ExternalMessage;
+import io.spine.server.integration.MessageMatched;
+import io.spine.server.integration.route.Route;
 
 /**
- * A channel for exchanging the {@link com.google.protobuf.Message Message}s.
+ * The base interface for message channel matchers. The matchers are used in
+ * {@linkplain Route#accept(ExternalMessage)} to verify if the message acceptable
+ * for the {@code Route}.
  *
- * <p>Identified by a {@linkplain ChannelId channel ID}, which must be unique in scope of the
- * underlying messaging system.
- *
- * <p>The identifier is also used to specify the set of {@code com.google.protobuf.Message}s,
- * suitable for this channel. The definition of the matching criterion is done according to the
- * {@linkplain ChannelId#getKindCase() kind} value.
- *
- * @author Alex Tymchenko
  * @author Dmitry Ganzha
- * @see ChannelId
  */
-public interface MessageChannel extends AutoCloseable {
+public interface ChannelMatcher {
 
     /**
-     * Returns the channel identifier.
+     * Checks whether the passed {@code ExternalMessage} matches the {@code MessageChannel}.
      *
-     * @return the channel identifier
+     * @param id      an instance of {@code ChannelId}
+     * @param message an instance of {@code ExternalMessage}
+     * @return an instance of {@code MessageMatched} which shows if the message matches the
+     * {@code MessageChannel} by the channel's kind
      */
-    ChannelId getChannelId();
-
-    /**
-     * Allows to understand whether this channel is stale and can be closed.
-     *
-     * @return {@code true} if the channel is stale, {@code false} otherwise
-     */
-    boolean isStale();
+    MessageMatched match(ChannelId id, ExternalMessage message);
 }

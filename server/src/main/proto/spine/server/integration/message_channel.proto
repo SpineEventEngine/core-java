@@ -1,0 +1,64 @@
+//
+// Copyright 2017, TeamDev Ltd. All rights reserved.
+//
+// Redistribution and use in source and/or binary forms, with or without
+// modification, must retain the above copyright notice and the following
+// disclaimer.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+syntax = "proto3";
+
+package spine.server.integration;
+
+import "spine/options.proto";
+import "spine/server/integration/integration_bus.proto";
+import "google/protobuf/empty.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.server.integration";
+option java_multiple_files = true;
+option java_outer_classname = "MessageChannelProto";
+option java_generate_equals_and_hash = true;
+
+// The message which is used to identify the message channel.
+message ChannelId {
+
+    // The kind that identifies messages in the message channel.
+    oneof kind {
+
+        // The message type URL can be used to identify messages by the message type.
+        string message_type_url = 1;
+
+        // The dead message is used to identify messages for the dead message channel.
+        string dead_message = 2;
+    }
+}
+
+// The message which is used to identify if the message can be routed by the route.
+message MessageRouted {
+
+    // ExternalMessage received by the Router.
+    ExternalMessage source = 1 [(required) = true];
+
+    MessageMatched messageMatched = 2 [(required) = true];
+}
+
+// The message which is used to identify if the message matches the message channel.
+message MessageMatched {
+
+    bool matched = 1 [(required) = true];
+
+    // The description shows why the message does not match for the message channel.
+    string description = 2;
+}

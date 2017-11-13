@@ -17,35 +17,27 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.integration;
+
+package io.spine.server.integration.route;
+
+import io.spine.server.integration.ExternalMessage;
+import io.spine.server.integration.Publisher;
 
 /**
- * A channel for exchanging the {@link com.google.protobuf.Message Message}s.
+ * A handler for a dead message which sends the dead message to the dedicated dead message channel.
  *
- * <p>Identified by a {@linkplain ChannelId channel ID}, which must be unique in scope of the
- * underlying messaging system.
- *
- * <p>The identifier is also used to specify the set of {@code com.google.protobuf.Message}s,
- * suitable for this channel. The definition of the matching criterion is done according to the
- * {@linkplain ChannelId#getKindCase() kind} value.
- *
- * @author Alex Tymchenko
  * @author Dmitry Ganzha
- * @see ChannelId
  */
-public interface MessageChannel extends AutoCloseable {
+public class DeadMessageHandler implements RouterErrorHandler {
 
-    /**
-     * Returns the channel identifier.
-     *
-     * @return the channel identifier
-     */
-    ChannelId getChannelId();
+    private final Publisher deadMessageChannel;
 
-    /**
-     * Allows to understand whether this channel is stale and can be closed.
-     *
-     * @return {@code true} if the channel is stale, {@code false} otherwise
-     */
-    boolean isStale();
+    public DeadMessageHandler(Publisher deadMessageChannel) {
+        this.deadMessageChannel = deadMessageChannel;
+    }
+
+    @Override
+    public void handle(ExternalMessage message) {
+        deadMessageChannel.publish(message.getId(), message);
+    }
 }

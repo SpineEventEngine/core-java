@@ -17,41 +17,44 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.integration.memory;
 
-import io.spine.server.integration.ChannelId;
+package io.spine.server.integration.route;
+
+import io.spine.server.integration.ExternalMessage;
 import io.spine.server.integration.MessageChannel;
+import io.spine.server.integration.Publisher;
 
 /**
- * An abstract base for in-memory {@linkplain MessageChannel message channels}.
+ * The base interface for a message router. The {@code Router} is designed for routing
+ * messages to {@linkplain MessageChannel message channels} based on registered
+ * {@linkplain Route channel routes}.
  *
- * @author Alex Tymchenko
- * @author Dmitriy Ganzha
+ * <p>Inspired by <a href="http://www.enterpriseintegrationpatterns.com/patterns/messaging/DynamicRouter.html">
+ * Dynamic Router pattern.</a>
+ *
+ * @author Dmitry Ganzha
  */
-abstract class AbstractInMemoryChannel implements MessageChannel {
+public interface Router extends AutoCloseable {
 
     /**
-     * Channel identifier that defines this channel.
-     */
-    private final ChannelId channelId;
-
-    AbstractInMemoryChannel(ChannelId channelId) {
-        this.channelId = channelId;
-    }
-
-    /**
-     * Does nothing as there is nothing to close in the in-memory local channel implementation.
+     * Routes the message to corresponding {@code MessageChannel}s and returns them.
      *
-     * @throws Exception never
+     * @param message the message to be routed
+     * @return returns the message channels to which the message was routed.
      */
-    @SuppressWarnings("NoopMethodInAbstractClass")  // See the Javadoc for the explanation.
-    @Override
-    public void close() throws Exception {
-        /* Do nothing. */
-    }
+    Iterable<Publisher> route(ExternalMessage message);
 
-    @Override
-    public ChannelId getChannelId() {
-        return channelId;
-    }
+    /**
+     * Registers the passed {@code Route}.
+     *
+     * @param route the route to register
+     */
+    void register(Route route);
+
+    /**
+     * Unregisters the passed {@code Route}.
+     *
+     * @param route the route to unregister
+     */
+    void unregister(Route route);
 }

@@ -19,8 +19,6 @@
  */
 package io.spine.server.integration;
 
-import io.spine.type.MessageClass;
-
 /**
  * The hub of {@link Publisher}s.
  *
@@ -28,6 +26,7 @@ import io.spine.type.MessageClass;
  * in the given {@linkplain TransportFactory}.
  *
  * @author Alex Tymchenko
+ * @author Dmitry Ganzha
  */
 public class PublisherHub extends ChannelHub<Publisher> {
 
@@ -36,7 +35,7 @@ public class PublisherHub extends ChannelHub<Publisher> {
     }
 
     @Override
-    protected Publisher newChannel(MessageClass channelKey) {
+    protected Publisher newChannel(ChannelId channelKey) {
         return transportFactory().createPublisher(channelKey);
     }
 }
