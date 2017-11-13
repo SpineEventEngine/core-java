@@ -92,7 +92,7 @@ public abstract class AggregateStorageShould
 
     @Override
     public AggregateStorage<ProjectId> newDefaultStorage() {
-        return getStorage(ProjectId.class, TestAggregate.class);
+        return newStorage(TestAggregate.class);
     }
 
     /**
