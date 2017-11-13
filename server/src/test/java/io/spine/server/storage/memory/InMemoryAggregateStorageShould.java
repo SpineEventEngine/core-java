@@ -34,7 +34,7 @@ import io.spine.validate.ValidatingBuilder;
 public class InMemoryAggregateStorageShould extends AggregateStorageShould {
 
     @Override
-    protected AggregateStorage<ProjectId> getStorage(Class<? extends Entity> cls) {
+    protected AggregateStorage<ProjectId> newStorage(Class<? extends Entity> cls) {
         return InMemoryAggregateStorage.newInstance();
     }
 

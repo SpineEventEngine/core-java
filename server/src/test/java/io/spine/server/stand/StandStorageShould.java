@@ -30,17 +30,14 @@ import com.google.protobuf.Message;
 import io.spine.Identifier;
 import io.spine.core.given.GivenVersion;
 import io.spine.protobuf.AnyPacker;
-import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.FieldMasks;
-import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.RecordStorageShould;
 import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectId;
 import io.spine.test.storage.Task;
 import io.spine.test.storage.TaskId;
 import io.spine.type.TypeUrl;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.annotation.Nullable;
@@ -60,7 +57,7 @@ import static java.lang.String.format;
  * @author Dmytro Dashenkov
  */
 public abstract class StandStorageShould extends RecordStorageShould<AggregateStateId,
-                                                                     RecordStorage<AggregateStateId>> {
+                                                                     StandStorage> {
 
     protected static final Supplier<AggregateStateId<ProjectId>> DEFAULT_ID_SUPPLIER
             = new Supplier<AggregateStateId<ProjectId>>() {
@@ -86,12 +83,9 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
         return project;
     }
 
-    @Override
-    protected abstract StandStorage getStorage(Class<? extends Entity> cls);
-
     @Test
     public void retrieve_all_records() {
-        final StandStorage storage = getStorage(TestCounterEntity.class);
+        final StandStorage storage = newStorage(TestCounterEntity.class);
         final List<AggregateStateId> ids = fill(storage, 10, DEFAULT_ID_SUPPLIER);
 
         final Iterator<EntityRecord> allRecords = storage.readAll();
@@ -100,7 +94,7 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
 
     @Test
     public void retrieve_records_by_ids() {
-        final StandStorage storage = getStorage(TestCounterEntity.class);
+        final StandStorage storage = newStorage(TestCounterEntity.class);
         // Use a subset of IDs
         final List<AggregateStateId> ids = fill(storage, 10, DEFAULT_ID_SUPPLIER).subList(0, 5);
 
@@ -122,7 +116,7 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
     @SuppressWarnings({"MethodWithMultipleLoops", "ConstantConditions"}) // OK for this test.
     private void checkByTypeRead(FieldMask fieldMask) {
         final boolean withFieldMask = !fieldMask.equals(FieldMask.getDefaultInstance());
-        final StandStorage storage = getStorage(TestCounterEntity.class);
+        final StandStorage storage = newStorage(TestCounterEntity.class);
         final TypeUrl type = TypeUrl.from(Project.getDescriptor());
 
         final int projectsCount = 4;

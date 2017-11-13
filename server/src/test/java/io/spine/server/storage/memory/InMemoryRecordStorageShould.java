@@ -43,7 +43,7 @@ public class InMemoryRecordStorageShould
         extends RecordStorageShould<ProjectId, RecordStorage<ProjectId>> {
 
     @Override
-    protected RecordStorage<ProjectId> getStorage(Class<? extends Entity> cls) {
+    protected RecordStorage<ProjectId> newStorage(Class<? extends Entity> cls) {
         final StorageSpec<ProjectId> spec = StorageSpec.of(newName(getClass().getSimpleName()),
                                                            TypeUrl.of(Project.class),
                                                            ProjectId.class);
@@ -72,7 +72,7 @@ public class InMemoryRecordStorageShould
 
     @Test
     public void return_storage_spec() {
-        final StorageSpec spec = ((InMemoryRecordStorage) getStorage(Entity.class)).getSpec();
+        final StorageSpec spec = ((InMemoryRecordStorage) newStorage(Entity.class)).getSpec();
         assertEquals(ProjectId.class, spec.getIdClass());
     }
 }

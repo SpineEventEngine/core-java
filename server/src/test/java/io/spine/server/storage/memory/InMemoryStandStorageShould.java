@@ -32,7 +32,7 @@ import static io.spine.server.BoundedContext.newName;
 public class InMemoryStandStorageShould extends StandStorageShould {
 
     @Override
-    protected StandStorage getStorage(Class<? extends Entity> cls) {
+    protected StandStorage newStorage(Class<? extends Entity> cls) {
         return InMemoryStandStorage.newBuilder()
                                    .setBoundedContextName(newName(getClass().getSimpleName()))
                                    .setMultitenant(false)

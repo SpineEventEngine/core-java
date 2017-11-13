@@ -59,7 +59,7 @@ public abstract class AbstractStorageShould<I,
 
     @Before
     public void setUpAbstractStorageTest() {
-        storage = getDefaultStorage();
+        storage = newDefaultStorage();
     }
 
     @After
@@ -77,9 +77,9 @@ public abstract class AbstractStorageShould<I,
      * <p>NOTE: the storage is closed after each test.
      *
      * @return an empty storage instance
-     * @see #getDefaultStorage() for a storage instance for a specific {@link Entity}
+     * @see #newDefaultStorage() for a storage instance for a specific {@link Entity}
      */
-    protected abstract S getDefaultStorage();
+    protected abstract S newDefaultStorage();
 
     /**
      * Used to initialize the storage before each test.
@@ -89,7 +89,7 @@ public abstract class AbstractStorageShould<I,
      * @return an empty storage instance
      * @see AbstractStorage#close()
      */
-    protected abstract S getStorage(Class<? extends Entity> cls);
+    protected abstract S newStorage(Class<? extends Entity> cls);
 
     /** Creates a new storage record. */
     protected abstract M newStorageRecord();

@@ -82,7 +82,7 @@ public abstract class AggregateStorageShould
 
     @Before
     public void setUpAggregateStorageTest() {
-        storage = getDefaultStorage();
+        storage = newDefaultStorage();
     }
 
     @After
@@ -91,7 +91,7 @@ public abstract class AggregateStorageShould
     }
 
     @Override
-    public AggregateStorage<ProjectId> getDefaultStorage() {
+    public AggregateStorage<ProjectId> newDefaultStorage() {
         return getStorage(ProjectId.class, TestAggregate.class);
     }
 
