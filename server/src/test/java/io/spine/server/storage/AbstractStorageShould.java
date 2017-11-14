@@ -42,7 +42,17 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 /**
- * Abstract storage tests.
+ * An abstract test suites testing storages.
+ *
+ * <p>The suit manages creation and closing of the {@linkplain #getStorage() storage}
+ * for the {@linkplain #getDefaultEntityClass() entity class}.
+ *
+ * <p>In case, if the storage for different entity class should be tested,
+ * it can be {@linkplain #newStorage(Class) created} manually, but closing of this storage
+ * is a responsibility of a caller.
+ *
+ * <p>All storages should be {@linkplain #close(AbstractStorage) closed} after a test
+ * to avoid the issues, which may occur due to unreleased resources.
  *
  * @param <I> the type of IDs of storage records
  * @param <M> the type of records kept in the storage
