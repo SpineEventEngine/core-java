@@ -59,7 +59,7 @@ public abstract class AbstractStorageShould<I,
 
     @Before
     public void setUpAbstractStorageTest() {
-        storage = newDefaultStorage();
+        storage = newStorage(getDefaultEntityClass());
     }
 
     @After
@@ -68,24 +68,13 @@ public abstract class AbstractStorageShould<I,
     }
 
     /**
-     * @return the storage, which will be closed after a test automatically
+     * Obtains the storage for the {@linkplain #getDefaultEntityClass() default entity class}.
+     *
+     * @return the storage, which will be closed automatically after a test
      */
     protected final S getStorage() {
         return storage;
     }
-
-    /**
-     * Creates the default instance of {@link Storage} for this test suite.
-     *
-     * <p>This method should be used only for creation of a storage.
-     *
-     * <p>Use {@linkplain #getStorage() existing storage} if the default storage
-     * is required in a test.
-     *
-     * @return an empty storage instance
-     * @see #newDefaultStorage() for a storage instance for a specific {@link Entity}
-     */
-    protected abstract S newDefaultStorage();
 
     /**
      * Creates the storage for the specified entity class.
@@ -93,8 +82,8 @@ public abstract class AbstractStorageShould<I,
      * <p>The resulting storage should be {@linkplain #close(AbstractStorage) closed} manually to
      * release resources, which may be used by the storage.
      *
-     * <p>Use this method to test non-{@linkplain #newDefaultStorage() default storage},
-     * otherwise {@link #getStorage() existing storage} is more appropriate for the usage.
+     * <p>Use {@linkplain #getStorage() existing storage} if the storage may be tested for
+     * {@linkplain #getDefaultEntityClass() default entity class}.
      *
      * @return an empty storage instance
      * @see AbstractStorage#close()
@@ -109,6 +98,9 @@ public abstract class AbstractStorageShould<I,
 
     /** Creates a new read request with the specified ID. */
     protected abstract R newReadRequest(I id);
+
+    /** Returns the class of the default test {@link Entity}. */
+    protected abstract Class<? extends Entity> getDefaultEntityClass();
 
     /**
      * Closes the storage and propagates an exception if any occurs.

@@ -39,8 +39,6 @@ import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.ProjectVBuilder;
 import io.spine.testdata.Sample;
 import io.spine.time.Time;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 import javax.annotation.Nullable;
@@ -80,19 +78,15 @@ public abstract class AggregateStorageShould
 
     private AggregateStorage<ProjectId> storage;
 
-    @Before
-    public void setUpAggregateStorageTest() {
-        storage = newDefaultStorage();
-    }
-
-    @After
-    public void tearDownAggregateStorageTest() {
-        close(storage);
+    @Override
+    public void setUpAbstractStorageTest() {
+        super.setUpAbstractStorageTest();
+        storage = getStorage();
     }
 
     @Override
-    public AggregateStorage<ProjectId> newDefaultStorage() {
-        return newStorage(TestAggregate.class);
+    protected Class<? extends TestAggregate> getDefaultEntityClass() {
+        return TestAggregate.class;
     }
 
     /**
@@ -485,7 +479,7 @@ public abstract class AggregateStorageShould
                        .build();
     }
 
-    private static class TestAggregate extends Aggregate<ProjectId, Project, ProjectVBuilder> {
+    public static class TestAggregate extends Aggregate<ProjectId, Project, ProjectVBuilder> {
         protected TestAggregate(ProjectId id) {
             super(id);
         }

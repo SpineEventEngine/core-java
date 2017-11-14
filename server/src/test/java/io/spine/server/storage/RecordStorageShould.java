@@ -114,11 +114,6 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     protected abstract Message newState(I id);
 
     @Override
-    protected S newDefaultStorage() {
-        return newStorage(getTestEntityClass());
-    }
-
-    @Override
     protected EntityRecord newStorageRecord() {
         return newStorageRecord(newState(newId()));
     }
@@ -168,7 +163,8 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         close(storage);
     }
 
-    protected Class<? extends TestCounterEntity> getTestEntityClass() {
+    @Override
+    protected Class<? extends TestCounterEntity> getDefaultEntityClass() {
         return TestCounterEntity.class;
     }
 
@@ -434,7 +430,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final EntityFilters filters = EntityFilters.newBuilder()
                                                    .addFilter(aggregatingFilter)
                                                    .build();
-        final EntityQuery<I> query = EntityQueries.from(filters, getTestEntityClass());
+        final EntityQuery<I> query = EntityQueries.from(filters, getDefaultEntityClass());
         final I idMatching = newId();
         final I idWrong1 = newId();
         final I idWrong2 = newId();
@@ -487,7 +483,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final EntityFilters filters = EntityFilters.newBuilder()
                                                    .addFilter(aggregatingFilter)
                                                    .build();
-        final EntityQuery<I> query = EntityQueries.from(filters, getTestEntityClass());
+        final EntityQuery<I> query = EntityQueries.from(filters, getDefaultEntityClass());
 
         final I id = newId();
         final TestCounterEntity<I> entity = new TestCounterEntity<>(id);
@@ -550,7 +546,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final EntityFilters filters = EntityFilters.newBuilder()
                                                    .setIdFilter(idFilter)
                                                    .build();
-        final EntityQuery<I> query = EntityQueries.from(filters, getTestEntityClass());
+        final EntityQuery<I> query = EntityQueries.from(filters, getDefaultEntityClass());
 
         // Perform the query
         final Iterator<EntityRecord> readRecords = storage.readAll(query,
