@@ -67,6 +67,9 @@ public abstract class AbstractStorageShould<I,
         close(storage);
     }
 
+    /**
+     * @return the storage, which will be closed after a test automatically
+     */
     protected final S getStorage() {
         return storage;
     }
@@ -74,7 +77,10 @@ public abstract class AbstractStorageShould<I,
     /**
      * Creates the default instance of {@link Storage} for this test suite.
      *
-     * <p>NOTE: the storage is closed after each test.
+     * <p>This method should be used only for creation of a storage.
+     *
+     * <p>Use {@linkplain #getStorage() existing storage} if the default storage
+     * is required in a test.
      *
      * @return an empty storage instance
      * @see #newDefaultStorage() for a storage instance for a specific {@link Entity}
@@ -82,9 +88,13 @@ public abstract class AbstractStorageShould<I,
     protected abstract S newDefaultStorage();
 
     /**
-     * Used to initialize the storage before each test.
+     * Creates the storage for the specified entity class.
      *
-     * <p>NOTE: the storage is closed after each test.
+     * <p>The resulting storage should be {@linkplain #close(AbstractStorage) closed} manually to
+     * release resources, which may be used by the storage.
+     *
+     * <p>Use this method to test non-{@linkplain #newDefaultStorage() default storage},
+     * otherwise {@link #getStorage() existing storage} is more appropriate for the usage.
      *
      * @return an empty storage instance
      * @see AbstractStorage#close()
