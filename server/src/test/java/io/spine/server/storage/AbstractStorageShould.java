@@ -42,12 +42,12 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 /**
- * An abstract test suites testing storages.
+ * An abstract base for test suites testing storages.
  *
- * <p>The suit manages creation and closing of the {@linkplain #getStorage() storage}
+ * <p>Manages creation and closing of the {@linkplain #getStorage() storage}
  * for the {@linkplain #getTestEntityClass() test entity class}.
  *
- * <p>In case, if the storage for different entity class should be tested,
+ * <p>In case if the storage for different entity class should be tested,
  * it can be {@linkplain #newStorage(Class) created} manually, but closing of this storage
  * is a responsibility of a caller.
  *
