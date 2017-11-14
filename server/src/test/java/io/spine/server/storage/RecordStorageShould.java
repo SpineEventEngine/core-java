@@ -164,7 +164,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     }
 
     @Override
-    protected Class<? extends TestCounterEntity> getDefaultEntityClass() {
+    protected Class<? extends TestCounterEntity> getTestEntityClass() {
         return TestCounterEntity.class;
     }
 
@@ -430,7 +430,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final EntityFilters filters = EntityFilters.newBuilder()
                                                    .addFilter(aggregatingFilter)
                                                    .build();
-        final EntityQuery<I> query = EntityQueries.from(filters, getDefaultEntityClass());
+        final EntityQuery<I> query = EntityQueries.from(filters, getTestEntityClass());
         final I idMatching = newId();
         final I idWrong1 = newId();
         final I idWrong2 = newId();
@@ -483,7 +483,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final EntityFilters filters = EntityFilters.newBuilder()
                                                    .addFilter(aggregatingFilter)
                                                    .build();
-        final EntityQuery<I> query = EntityQueries.from(filters, getDefaultEntityClass());
+        final EntityQuery<I> query = EntityQueries.from(filters, getTestEntityClass());
 
         final I id = newId();
         final TestCounterEntity<I> entity = new TestCounterEntity<>(id);
@@ -546,7 +546,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final EntityFilters filters = EntityFilters.newBuilder()
                                                    .setIdFilter(idFilter)
                                                    .build();
-        final EntityQuery<I> query = EntityQueries.from(filters, getDefaultEntityClass());
+        final EntityQuery<I> query = EntityQueries.from(filters, getTestEntityClass());
 
         // Perform the query
         final Iterator<EntityRecord> readRecords = storage.readAll(query,

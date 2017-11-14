@@ -85,7 +85,7 @@ public abstract class AggregateStorageShould
     }
 
     @Override
-    protected Class<? extends TestAggregate> getDefaultEntityClass() {
+    protected Class<? extends TestAggregate> getTestEntityClass() {
         return TestAggregate.class;
     }
 

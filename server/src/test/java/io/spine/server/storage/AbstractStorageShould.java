@@ -45,7 +45,7 @@ import static org.junit.Assert.fail;
  * An abstract test suites testing storages.
  *
  * <p>The suit manages creation and closing of the {@linkplain #getStorage() storage}
- * for the {@linkplain #getDefaultEntityClass() entity class}.
+ * for the {@linkplain #getTestEntityClass() test entity class}.
  *
  * <p>In case, if the storage for different entity class should be tested,
  * it can be {@linkplain #newStorage(Class) created} manually, but closing of this storage
@@ -69,7 +69,7 @@ public abstract class AbstractStorageShould<I,
 
     @Before
     public void setUpAbstractStorageTest() {
-        storage = newStorage(getDefaultEntityClass());
+        storage = newStorage(getTestEntityClass());
     }
 
     @After
@@ -78,7 +78,7 @@ public abstract class AbstractStorageShould<I,
     }
 
     /**
-     * Obtains the storage for the {@linkplain #getDefaultEntityClass() default entity class}.
+     * Obtains the storage for the {@linkplain #getTestEntityClass() entity class}.
      *
      * @return the storage, which will be closed automatically after a test
      */
@@ -93,7 +93,7 @@ public abstract class AbstractStorageShould<I,
      * release resources, which may be used by the storage.
      *
      * <p>Use {@linkplain #getStorage() existing storage} if the storage may be tested for
-     * {@linkplain #getDefaultEntityClass() default entity class}.
+     * the {@linkplain #getTestEntityClass() entity class}.
      *
      * @return an empty storage instance
      * @see AbstractStorage#close()
@@ -109,8 +109,8 @@ public abstract class AbstractStorageShould<I,
     /** Creates a new read request with the specified ID. */
     protected abstract R newReadRequest(I id);
 
-    /** Returns the class of the default test {@link Entity}. */
-    protected abstract Class<? extends Entity> getDefaultEntityClass();
+    /** Returns the class of the test entity. */
+    protected abstract Class<? extends Entity> getTestEntityClass();
 
     /**
      * Closes the storage and propagates an exception if any occurs.
