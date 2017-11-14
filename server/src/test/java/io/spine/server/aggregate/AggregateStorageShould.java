@@ -96,7 +96,7 @@ public abstract class AggregateStorageShould
     }
 
     /**
-     * Creates the storage for the specified ID and aggregate classes.
+     * Creates the storage for the specified ID and aggregate class.
      *
      * <p>The created storage should be closed manually.
      *
