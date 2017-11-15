@@ -42,7 +42,17 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 /**
- * Abstract storage tests.
+ * An abstract base for test suites testing storages.
+ *
+ * <p>Manages creation and closing of the {@linkplain #getStorage() storage}
+ * for the {@linkplain #getTestEntityClass() test entity class}.
+ *
+ * <p>In case if the storage for different entity class should be tested,
+ * it can be {@linkplain #newStorage(Class) created} manually, but closing of this storage
+ * is a responsibility of a caller.
+ *
+ * <p>All storages should be {@linkplain #close(AbstractStorage) closed} after a test
+ * to avoid the issues, which may occur due to unreleased resources.
  *
  * @param <I> the type of IDs of storage records
  * @param <M> the type of records kept in the storage
@@ -59,7 +69,7 @@ public abstract class AbstractStorageShould<I,
 
     @Before
     public void setUpAbstractStorageTest() {
-        storage = getDefaultStorage();
+        storage = newStorage(getTestEntityClass());
     }
 
     @After
@@ -67,29 +77,28 @@ public abstract class AbstractStorageShould<I,
         close(storage);
     }
 
+    /**
+     * Obtains the storage for the {@linkplain #getTestEntityClass() entity class}.
+     *
+     * @return the storage, which will be closed automatically after a test
+     */
     protected final S getStorage() {
         return storage;
     }
 
     /**
-     * Creates the default instance of {@link Storage} for this test suite.
+     * Creates the storage for the specified entity class.
      *
-     * <p>NOTE: the storage is closed after each test.
+     * <p>The resulting storage should be {@linkplain #close(AbstractStorage) closed} manually to
+     * release resources, which may be used by the storage.
      *
-     * @return an empty storage instance
-     * @see #getDefaultStorage() for a storage instance for a specific {@link Entity}
-     */
-    protected abstract S getDefaultStorage();
-
-    /**
-     * Used to initialize the storage before each test.
-     *
-     * <p>NOTE: the storage is closed after each test.
+     * <p>Use {@linkplain #getStorage() existing storage} if the storage may be tested for
+     * the {@linkplain #getTestEntityClass() entity class}.
      *
      * @return an empty storage instance
      * @see AbstractStorage#close()
      */
-    protected abstract S getStorage(Class<? extends Entity> cls);
+    protected abstract S newStorage(Class<? extends Entity> cls);
 
     /** Creates a new storage record. */
     protected abstract M newStorageRecord();
@@ -99,6 +108,9 @@ public abstract class AbstractStorageShould<I,
 
     /** Creates a new read request with the specified ID. */
     protected abstract R newReadRequest(I id);
+
+    /** Returns the class of the test entity. */
+    protected abstract Class<? extends Entity> getTestEntityClass();
 
     /**
      * Closes the storage and propagates an exception if any occurs.

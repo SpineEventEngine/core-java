@@ -34,7 +34,7 @@ import static io.spine.server.BoundedContext.newName;
 public class InMemoryProjectionStorageShould extends ProjectionStorageShould {
 
     @Override
-    protected ProjectionStorage<ProjectId> getStorage(Class<? extends Entity> cls) {
+    protected ProjectionStorage<ProjectId> newStorage(Class<? extends Entity> cls) {
         final StorageSpec<ProjectId> spec =
                 StorageSpec.of(newName(getClass().getSimpleName()),
                                TypeUrl.of(io.spine.test.projection.Project.class),

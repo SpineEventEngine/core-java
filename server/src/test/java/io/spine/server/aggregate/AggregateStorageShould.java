@@ -39,8 +39,6 @@ import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.ProjectVBuilder;
 import io.spine.testdata.Sample;
 import io.spine.time.Time;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 import javax.annotation.Nullable;
@@ -80,32 +78,28 @@ public abstract class AggregateStorageShould
 
     private AggregateStorage<ProjectId> storage;
 
-    @Before
-    public void setUpAggregateStorageTest() {
-        storage = getDefaultStorage();
-    }
-
-    @After
-    public void tearDownAggregateStorageTest() {
-        close(storage);
+    @Override
+    public void setUpAbstractStorageTest() {
+        super.setUpAbstractStorageTest();
+        storage = getStorage();
     }
 
     @Override
-    public AggregateStorage<ProjectId> getDefaultStorage() {
-        return getStorage(ProjectId.class, TestAggregate.class);
+    protected Class<? extends TestAggregate> getTestEntityClass() {
+        return TestAggregate.class;
     }
 
     /**
-     * Used to get a storage in tests with different ID types.
+     * Creates the storage for the specified ID and aggregate class.
      *
-     * <p>NOTE: the storage is closed after each test.
+     * <p>The created storage should be closed manually.
      *
-     * @param idClass        class of aggregate ID
-     * @param aggregateClass aggregate class
+     * @param idClass        the class of aggregate ID
+     * @param aggregateClass the aggregate class
      * @param <I>            the type of aggregate IDs
-     * @return an empty storage instance
+     * @return a new storage instance
      */
-    protected abstract <I> AggregateStorage<I> getStorage(Class<? extends I> idClass,
+    protected abstract <I> AggregateStorage<I> newStorage(Class<? extends I> idClass,
                                                           Class<? extends Aggregate<I, ?, ?>> aggregateClass);
 
     @Override
@@ -176,7 +170,7 @@ public abstract class AggregateStorageShould
 
     @Test
     public void write_and_read_event_by_String_id() {
-        final AggregateStorage<String> storage = getStorage(String.class,
+        final AggregateStorage<String> storage = newStorage(String.class,
                                                             TestAggregateWithIdString.class);
         final String id = newUuid();
         writeAndReadEventTest(id, storage);
@@ -184,7 +178,7 @@ public abstract class AggregateStorageShould
 
     @Test
     public void write_and_read_event_by_Long_id() {
-        final AggregateStorage<Long> storage = getStorage(Long.class,
+        final AggregateStorage<Long> storage = newStorage(Long.class,
                                                           TestAggregateWithIdLong.class);
         final long id = 10L;
         writeAndReadEventTest(id, storage);
@@ -192,7 +186,7 @@ public abstract class AggregateStorageShould
 
     @Test
     public void write_and_read_event_by_Integer_id() {
-        final AggregateStorage<Integer> storage = getStorage(Integer.class,
+        final AggregateStorage<Integer> storage = newStorage(Integer.class,
                                                              TestAggregateWithIdInteger.class);
         final int id = 10;
         writeAndReadEventTest(id, storage);
@@ -485,7 +479,7 @@ public abstract class AggregateStorageShould
                        .build();
     }
 
-    private static class TestAggregate extends Aggregate<ProjectId, Project, ProjectVBuilder> {
+    public static class TestAggregate extends Aggregate<ProjectId, Project, ProjectVBuilder> {
         protected TestAggregate(ProjectId id) {
             super(id);
         }
