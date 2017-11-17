@@ -125,6 +125,7 @@ subprojects {
         generateDescriptorSetScript = "${rootDir}/scripts/generate-descriptor-set.gradle"
         filterInternalJavadocsScript = "${rootDir}/scripts/no-internal-javadoc.gradle"
         gRpcScript = "${rootDir}/scripts/grpc.gradle"
+        updateDocsPlugin = "$rootDir/scripts/update-gh-pages.gradle"
     }
 
     apply plugin: 'com.google.protobuf'
@@ -247,7 +248,6 @@ subprojects {
         }
     }
 
-
     protobuf {
         // The below suppressions `GroovyAssignabilityCheck` is a workaround for the IDEA bug.
         // See: https://youtrack.jetbrains.com/issue/IDEA-141744
@@ -307,10 +307,6 @@ subprojects {
         classifier "javadoc"
     }
 
-    if (!project.name.startsWith("testutil")) {
-        apply from: "$rootDir/scripts/update-gh-pages.gradle"
-    }
-
     // Apply the same IDEA module configuration for each of sub-projects.
     idea {
         module {
@@ -329,6 +325,8 @@ subprojects {
             }
         }
     }
+
+    apply from: updateDocsPlugin
 }
 
 // IDEA project configuration.

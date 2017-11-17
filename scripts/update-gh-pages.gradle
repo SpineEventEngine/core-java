@@ -73,7 +73,6 @@ String execute(final String... command) {
     }
 }
 
-
 updateGitHubPages.doLast {
     final def GH_PAGES_BRANCH = "gh-pages"
     final def CURRENT_BRANCH_PATTERN = Pattern.compile("(?<=\\*\\s).*")

@@ -25,8 +25,8 @@ script:
 
   # The publishing script should be executed in `script` section in order to
   # fail the Travis build if execution of this script is failed.
-  - chmod +x ./scripts/publish-artifacts.sh
-  - ./scripts/publish-artifacts.sh
+  - chmod +x ./scripts/publish.sh
+  - ./scripts/publish.sh
 
 after_success:
   # See: https://github.com/codecov/example-java/blob/master/.travis.yml
