@@ -307,7 +307,7 @@ subprojects {
         classifier "javadoc"
     }
 
-    apply from: filterInternalJavadocsScript
+    apply from: "$rootDir/scripts/update-gh-pages.gradle"
 
     // Apply the same IDEA module configuration for each of sub-projects.
     idea {
