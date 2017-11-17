@@ -102,7 +102,7 @@ String execute(final String... command) {
 }
 
 final String gitHost = "git@github.com:SpineEventEngine/core-java.git"
-final String gitHubAccessKey = "$rootDir/deploy" as File
+final String gitHubAccessKey = "$rootDir/deploy_key_rsa" as File
 
 updateGitHubPages.doLast {
     final def GH_PAGES_BRANCH = "gh-pages"
