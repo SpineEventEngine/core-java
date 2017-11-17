@@ -111,8 +111,7 @@ updateGitHubPages.doLast {
     final def javaDocDirPostfix = "javadoc/$project.name"
     final def javaDocDir = "$repoBaseDir/$javaDocDirPostfix" as File
 
-    "ssh-agent -s".execute()
-    execute "ssh-add", gitHubAccessKey
+    execute "$rootDir/scripts/add-to-ssh.sh", gitHubAccessKey
     execute "git", "clone", gitHost, "$repoBaseDir"
     execute repoBaseDir, "git", "checkout", GH_PAGES_BRANCH
     logger.debug("Updating JavaDoc on GitHub Pages in directory `$javaDocDir`")
