@@ -40,16 +40,33 @@ ext {
     javaDocFolder = Files.createTempDir()
 }
 
+/**
+ * Copies the JavaDoc produced by {@code :noInternalJavadoc} task into a temporary folder.
+ */
 task copyJavaDoc(type: Copy) {
     from noInternalJavadoc
     into javaDocFolder
 }
 
+/**
+ * Updates the JavaDoc documentation on the {@code gh-pages} Git branch.
+ *
+ * <p>Run this task when it is required to update the JavaDoc e.g. when merging a branch into
+ * {@code master}.
+ */
 task updateGitHubPages {
     description "Updates the JavaDoc published to GitHub Pages Web site."
     dependsOn copyJavaDoc
 }
 
+/**
+ * Waits for the given {@code process} to finish and retrieves the result of execution.
+ *
+ * @param process the process to execute
+ * @return a tuple of format: [exitCode:<Process exit code integer>,
+ *                             out: <Process stdout output as a String>,
+ *                             error: <Process stderr output as a String>]
+ */
 static def executeForResult(final Process process) {
     final def outWriter = new StringWriter()
     final def errWriter = new StringWriter()
@@ -60,6 +77,17 @@ static def executeForResult(final Process process) {
     return result
 }
 
+/**
+ * Executes the given command and retrieves the command output.
+ *
+ * <p>{@link Runtime#exec(String[], String[], File) Executes} the given {@code String} array as
+ * a CLI command. If the execution is successful, returns the command output. Thrown
+ * an {@link IllegalStateException} otherwise.
+ *
+ * @param command the command to execute
+ * @return the command line output
+ * @throws IllegalStateException upon an execution error
+ */
 String execute(final String... command) {
     final Runtime runtime = Runtime.getRuntime()
     final Process proc = runtime.exec(command, /*env=*/(String[]) null, project.rootDir)
