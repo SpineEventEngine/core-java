@@ -3,6 +3,10 @@ language: java
 # To increase the memory size available during Travis build.
 sudo: required
 
+branches:
+  only:
+  - gh-pages
+
 env:
   global:
     # Encrypted `CODACY_PROJECT_TOKEN` variable according to:
