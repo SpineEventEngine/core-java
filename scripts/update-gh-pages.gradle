@@ -111,7 +111,7 @@ updateGitHubPages.doLast {
     final def javaDocDirPostfix = "javadoc/$project.name"
     final def javaDocDir = "$repoBaseDir/$javaDocDirPostfix" as File
 
-    execute "$rootDir/scripts/add-to-ssh.sh", gitHubAccessKey
+    execute "$rootDir/scripts/add-to-ssh.sh", gitHubAccessKey.absolutePath
     copy {
         from "$rootDir/.travis_ssh_config"
         into "~/.ssh/"
