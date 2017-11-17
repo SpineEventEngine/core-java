@@ -307,7 +307,9 @@ subprojects {
         classifier "javadoc"
     }
 
-    apply from: "$rootDir/scripts/update-gh-pages.gradle"
+    if (!project.name.startsWith("testutil")) {
+        apply from: "$rootDir/scripts/update-gh-pages.gradle"
+    }
 
     // Apply the same IDEA module configuration for each of sub-projects.
     idea {
