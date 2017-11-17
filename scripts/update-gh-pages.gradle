@@ -1,4 +1,6 @@
 import com.google.common.io.Files
+import org.apache.tools.ant.filters.ReplaceTokens
+
 /*
  * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
