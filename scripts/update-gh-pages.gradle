@@ -82,13 +82,14 @@ static def executeForResult(final Process process) {
  * a CLI command. If the execution is successful, returns the command output. Thrown
  * an {@link IllegalStateException} otherwise.
  *
+ * @param fromDir the directory of the command execution
  * @param command the command to execute
  * @return the command line output
  * @throws IllegalStateException upon an execution error
  */
-String execute(final File fromFile, final String... command) {
+String execute(final File fromDir, final String... command) {
     final Runtime runtime = Runtime.getRuntime()
-    final Process proc = runtime.exec(command, /*env=*/ (String[]) null, fromFile)
+    final Process proc = runtime.exec(command, /*env=*/ (String[]) null, fromDir)
     final def result = executeForResult(proc)
     if (result.exitCode == 0) {
         return result.out
@@ -99,11 +100,27 @@ String execute(final File fromFile, final String... command) {
     }
 }
 
+/**
+ * Executes the given command and retrieves the command output.
+ *
+ * <p>This is a convenience method. Acts as if {@code execute(project.rootDir, command)}
+ */
 String execute(final String... command) {
     return execute(rootDir, command)
 }
 
+/**
+ * The GitHub URL to the {@code core-java} project.
+ *
+ * <p>The host name is {@code github.com-publish}, though resolved to {@code github.com} by SSH on
+ * Travis due to the {@code .travis_ssh_config} configuration. This is used to make it possible
+ * to have multiple SSH private keys on Travis (since there is one already on Travis).
+ */
 final String gitHost = "git@github.com-publish:SpineEventEngine/core-java.git"
+
+/**
+ * The GitHub deploy key used to push the JavaDoc changes to {@code gh-pages}.
+ */
 final File gitHubAccessKey = "$rootDir/deploy_key_rsa" as File
 
 updateGitHubPages.doLast {
@@ -132,6 +149,13 @@ updateGitHubPages.doLast {
 
     execute repoBaseDir, "git", "add", javaDocDirPostfix
 
+    /*
+     * Publish the changes under "UpdateGitHubPages Plugin" Git user name and email stored in
+     * "FORMAL_GIT_HUB_PAGES_AUTHOR" env variable.
+     *
+     * When changing the value of "FORMAL_GIT_HUB_PAGES_AUTHOR", also change the SSH private
+      * (deploy_key_rsa.enc) and public ("GitHub Pages publisher (Travis CI)" on GitHub) keys.
+     */
     execute repoBaseDir, "git", "config", "user.name", "\"UpdateGitHubPages Plugin\""
     execute repoBaseDir, "git", "config", "user.eamil", System.env.FORMAL_GIT_HUB_PAGES_AUTHOR
 
