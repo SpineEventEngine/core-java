@@ -1,0 +1,91 @@
+import com.google.common.io.Files
+/*
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
+ *
+ * Redistribution and use in source and/or binary forms, with or without
+ * modification, must retain the above copyright notice and the following
+ * disclaimer.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath group: 'com.google.guava', name: 'guava', version: guavaVersion
+    }
+}
+
+apply from: "$rootDir/scripts/no-internal-javadoc.gradle"
+
+ext {
+    javaDocFolder = Files.createTempDir()
+}
+
+task copyJavaDoc(type: Copy) {
+    from noInternalJavadoc
+    into javaDocFolder
+}
+
+task updateGitHubPages {
+    description "Updates the JavaDoc published to GitHub Pages Web site."
+    dependsOn copyJavaDoc
+}
+
+static def executeForResult(final Process process) {
+    final def outWriter = new StringWriter()
+    final def errWriter = new StringWriter()
+    process.consumeProcessOutputStream(outWriter)
+    process.consumeProcessErrorStream(errWriter)
+    final int exitCode = process.waitFor()
+    final def result = [out: outWriter.toString(), error: errWriter.toString(), exitCode: exitCode]
+    return result
+}
+
+String execute(final String command) {
+    final Process proc = command.execute(/*env=*/(List) null, project.rootDir)
+    final def result = executeForResult(proc)
+    if (result.exitCode == 0) {
+        return result.out
+    } else {
+        final String errorMsg = "Command `$command` finished with exit code $result.exitCode:" +
+                " ${System.lineSeparator()}${result.error}"
+        throw IllegalStateException(errorMsg)
+    }
+}
+
+
+updateGitHubPages.doLast {
+    final def GH_PAGES_BRANCH = "gh-pages"
+    final def currentBranch = execute("git branch | grep \\*").replace('\\* ', '')
+    logger.debug("At branch $currentBranch")
+
+    execute "git checkout $GH_PAGES_BRANCH"
+    final def javaDocDir = "$rootDir/javadoc/$project.name" as File
+    logger.debug("Updating JavaDoc on GitHub Pages in directory `$javaDocDir`")
+    delete(javaDocDir)
+    javaDocDir.mkdir()
+
+    copy {
+        from javaDocFolder
+        into javaDocDir
+    }
+
+    execute "git commit -am \"Update JavaDoc for module $project.name as for version $project.version\""
+    execute "git push"
+    execute "git checkout $currentBranch"
+    logger.debug("Updated JavaDoc on GitHub Pages in directory `$javaDocDir` sucessfully")
+}
