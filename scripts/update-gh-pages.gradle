@@ -96,7 +96,7 @@ updateGitHubPages.doLast {
     }
 
     execute "git add $javaDocDirPostfix"
-    execute "git commit -m \"Update JavaDoc for module $project.name as for version $project.version\""
+    execute "git commit --message=\"Update JavaDoc for module $project.name as for version $project.version\""
     execute "git push"
     execute "git checkout $currentBranch"
     logger.debug("Updated JavaDoc on GitHub Pages in directory `$javaDocDir` sucessfully")
