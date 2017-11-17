@@ -100,6 +100,10 @@ allprojects {
 
 final boolean isTravis = System.env.TRAVIS == 'true'
 
+static boolean shouldPublishJavaDoc(final Project project) {
+    return !project.name.startsWith('testutil') && !project.name.startsWith("model")
+}
+
 subprojects {
 
     configurations {
@@ -326,7 +330,9 @@ subprojects {
         }
     }
 
-    apply from: updateDocsPlugin
+    if (shouldPublishJavaDoc(project)) {
+        apply from: updateDocsPlugin
+    }
 }
 
 // IDEA project configuration.
