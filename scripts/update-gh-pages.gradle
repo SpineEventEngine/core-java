@@ -115,7 +115,7 @@ updateGitHubPages.doLast {
 
     copy {
         from "$rootDir/.travis_ssh_config"
-        into "~/.ssh/"
+        into "${System.getProperty("user.home")}/.ssh/"
         rename { 'config' }
         filter(ReplaceTokens, tokens: [rsakey: gitHubAccessKey.absolutePath])
     }
