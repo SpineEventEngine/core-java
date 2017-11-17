@@ -26,6 +26,12 @@ group 'io.spine.tools'
 
 repositories {
     mavenCentral()
+    maven {
+        url = spineRepository
+    }
+    maven {
+        url = spineSnapshotsRepository
+    }
 }
 
 sourceSets {
