@@ -84,7 +84,8 @@ updateGitHubPages.doLast {
     logger.debug("At branch `$currentBranch`")
 
     execute "git checkout $GH_PAGES_BRANCH"
-    final def javaDocDir = "$rootDir/javadoc/$project.name" as File
+    final def javaDocDirPostfix = "javadoc/$project.name"
+    final def javaDocDir = "$rootDir/$javaDocDirPostfix" as File
     logger.debug("Updating JavaDoc on GitHub Pages in directory `$javaDocDir`")
     delete(javaDocDir)
     javaDocDir.mkdir()
@@ -94,6 +95,7 @@ updateGitHubPages.doLast {
         into javaDocDir
     }
 
+    execute "git add $javaDocDirPostfix"
     execute "git commit -am \"Update JavaDoc for module $project.name as for version $project.version\""
     execute "git push"
     execute "git checkout $currentBranch"
