@@ -101,7 +101,8 @@ String execute(final String... command) {
     return execute(rootDir, command)
 }
 
-final String gitHost = "https://github.com/SpineEventEngine/core-java.git"
+final String gitHost = "git@github.com:SpineEventEngine/core-java.git"
+final String gitHubAccessKey = "$rootDir/deploy" as File
 
 updateGitHubPages.doLast {
     final def GH_PAGES_BRANCH = "gh-pages"
@@ -110,6 +111,8 @@ updateGitHubPages.doLast {
     final def javaDocDirPostfix = "javadoc/$project.name"
     final def javaDocDir = "$repoBaseDir/$javaDocDirPostfix" as File
 
+    execute "ssh-agent", "-s"
+    execute "ssh-add", gitHubAccessKey
     execute "git", "clone", gitHost, "$repoBaseDir"
     execute repoBaseDir, "git", "checkout", GH_PAGES_BRANCH
     logger.debug("Updating JavaDoc on GitHub Pages in directory `$javaDocDir`")
@@ -121,6 +124,10 @@ updateGitHubPages.doLast {
     }
 
     execute repoBaseDir, "git", "add", javaDocDirPostfix
+
+    execute repoBaseDir, "git", "config", "user.name", "\"UpdateGitHubPages Plugin\""
+    execute repoBaseDir, "git", "config", "user.eamil", System.env.FORMAL_GIT_HUB_PAGES_AUTHOR
+
     execute repoBaseDir, "git", "commit", "--message=\"Update JavaDoc for module $project.name as for version $project.version\""
     execute repoBaseDir, "git", "push"
     logger.debug("Updated JavaDoc on GitHub Pages in directory `$javaDocDir` sucessfully")
