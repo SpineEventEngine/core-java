@@ -27,6 +27,8 @@ script:
   # fail the Travis build if execution of this script is failed.
   - chmod +x ./scripts/publish.sh
   - ./scripts/publish.sh
+  # TODO:2017-11-17:dmytro.dashenkov: Delete before merging this branch into `master`.
+  - ./gradlew updateGitHubPages
 
 after_success:
   # See: https://github.com/codecov/example-java/blob/master/.travis.yml
