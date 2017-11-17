@@ -101,8 +101,8 @@ String execute(final String... command) {
     return execute(rootDir, command)
 }
 
-final String gitHost = "git@github.com:SpineEventEngine/core-java.git"
-final String gitHubAccessKey = "$rootDir/deploy_key_rsa" as File
+final String gitHost = "git@github.com-publish:SpineEventEngine/core-java.git"
+final File gitHubAccessKey = "$rootDir/deploy_key_rsa" as File
 
 updateGitHubPages.doLast {
     final def GH_PAGES_BRANCH = "gh-pages"
@@ -112,6 +112,12 @@ updateGitHubPages.doLast {
     final def javaDocDir = "$repoBaseDir/$javaDocDirPostfix" as File
 
     execute "$rootDir/scripts/add-to-ssh.sh", gitHubAccessKey
+    copy {
+        from "$rootDir/.travis_ssh_config"
+        into "~/.ssh/"
+        rename { 'config' }
+        filter(ReplaceTokens, tokens: [rsakey: gitHubAccessKey.absolutePath])
+    }
     execute "git", "clone", gitHost, "$repoBaseDir"
     execute repoBaseDir, "git", "checkout", GH_PAGES_BRANCH
     logger.debug("Updating JavaDoc on GitHub Pages in directory `$javaDocDir`")
