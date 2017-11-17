@@ -1,9 +1,4 @@
-import com.google.common.base.Preconditions
 import com.google.common.io.Files
-
-import java.util.regex.Pattern
-
-
 /*
  * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
@@ -38,6 +33,7 @@ apply from: "$rootDir/scripts/no-internal-javadoc.gradle"
 
 ext {
     javaDocFolder = Files.createTempDir()
+    repositoryTempDir = Files.createTempDir()
 }
 
 /**
@@ -88,9 +84,9 @@ static def executeForResult(final Process process) {
  * @return the command line output
  * @throws IllegalStateException upon an execution error
  */
-String execute(final String... command) {
+String execute(final File fromFile, final String... command) {
     final Runtime runtime = Runtime.getRuntime()
-    final Process proc = runtime.exec(command, /*env=*/(String[]) null, project.rootDir)
+    final Process proc = runtime.exec(command, /*env=*/ (String[]) null, fromFile)
     final def result = executeForResult(proc)
     if (result.exitCode == 0) {
         return result.out
@@ -101,22 +97,22 @@ String execute(final String... command) {
     }
 }
 
+String execute(final String... command) {
+    return execute(rootDir, command)
+}
+
+final String gitHost = "https://github.com/SpineEventEngine/core-java.git"
+
 updateGitHubPages.doLast {
     final def GH_PAGES_BRANCH = "gh-pages"
-    final def CURRENT_BRANCH_PATTERN = Pattern.compile("(?<=\\*\\s).*")
-    final def localBranches = execute("git", "branch")
-    final def matcher = CURRENT_BRANCH_PATTERN.matcher(localBranches)
-    Preconditions.checkState(matcher.find())
-    final def currentBranch = matcher.group()
 
-    logger.debug("At branch `$currentBranch`")
-
-    execute "git", "fetch", "--unshallow"
-    execute "git", "checkout", GH_PAGES_BRANCH
+    final def repoBaseDir = "$repositoryTempDir/$GH_PAGES_BRANCH" as File
     final def javaDocDirPostfix = "javadoc/$project.name"
-    final def javaDocDir = "$rootDir/$javaDocDirPostfix" as File
+    final def javaDocDir = "$repoBaseDir/$javaDocDirPostfix" as File
+
+    execute "git", "clone", gitHost, "$repoBaseDir"
+    execute repoBaseDir, "git", "checkout", GH_PAGES_BRANCH
     logger.debug("Updating JavaDoc on GitHub Pages in directory `$javaDocDir`")
-    delete(javaDocDir)
     javaDocDir.mkdir()
 
     copy {
@@ -124,9 +120,8 @@ updateGitHubPages.doLast {
         into javaDocDir
     }
 
-    execute "git", "add", javaDocDirPostfix
-    execute "git", "commit", "--message=\"Update JavaDoc for module $project.name as for version $project.version\""
-    execute "git", "push"
-    execute "git", "checkout", currentBranch
+    execute repoBaseDir, "git", "add", javaDocDirPostfix
+    execute repoBaseDir, "git", "commit", "--message=\"Update JavaDoc for module $project.name as for version $project.version\""
+    execute repoBaseDir, "git", "push"
     logger.debug("Updated JavaDoc on GitHub Pages in directory `$javaDocDir` sucessfully")
 }
