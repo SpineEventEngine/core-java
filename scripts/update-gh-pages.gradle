@@ -60,8 +60,9 @@ static def executeForResult(final Process process) {
     return result
 }
 
-String execute(final String command) {
-    final Process proc = command.execute(/*env=*/(List) null, project.rootDir)
+String execute(final String... command) {
+    final Runtime runtime = Runtime.getRuntime()
+    final Process proc = runtime.exec(command, /*env=*/(String[]) null, project.rootDir)
     final def result = executeForResult(proc)
     if (result.exitCode == 0) {
         return result.out
@@ -76,14 +77,14 @@ String execute(final String command) {
 updateGitHubPages.doLast {
     final def GH_PAGES_BRANCH = "gh-pages"
     final def CURRENT_BRANCH_PATTERN = Pattern.compile("(?<=\\*\\s).*")
-    final def localBranches = execute("git branch")
+    final def localBranches = execute("git", "branch")
     final def matcher = CURRENT_BRANCH_PATTERN.matcher(localBranches)
     Preconditions.checkState(matcher.find())
     final def currentBranch = matcher.group()
 
     logger.debug("At branch `$currentBranch`")
 
-    execute "git checkout $GH_PAGES_BRANCH"
+    execute "git", "checkout", GH_PAGES_BRANCH
     final def javaDocDirPostfix = "javadoc/$project.name"
     final def javaDocDir = "$rootDir/$javaDocDirPostfix" as File
     logger.debug("Updating JavaDoc on GitHub Pages in directory `$javaDocDir`")
@@ -95,9 +96,9 @@ updateGitHubPages.doLast {
         into javaDocDir
     }
 
-    execute "git add $javaDocDirPostfix"
-    execute "git commit --message=\"Update JavaDoc for module $project.name as for version $project.version\""
-    execute "git push"
-    execute "git checkout $currentBranch"
+    execute "git", "add", javaDocDirPostfix
+    execute "git", "commit", "--message=\"Update JavaDoc for module $project.name as for version $project.version\""
+    execute "git", "push"
+    execute "git", "checkout", currentBranch
     logger.debug("Updated JavaDoc on GitHub Pages in directory `$javaDocDir` sucessfully")
 }
