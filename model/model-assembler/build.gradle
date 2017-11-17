@@ -26,10 +26,14 @@ group 'io.spine.tools'
 
 repositories {
     mavenCentral()
+    maven {
+        url = spineRepository
+    }
+    maven {
+        url = spineSnapshotsRepository
+    }
 }
 
 dependencies {
     compile project(':server')
-
-    testCompile group: 'junit', name: 'junit', version: '4.12'
 }
