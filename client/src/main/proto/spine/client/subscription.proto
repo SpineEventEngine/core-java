@@ -97,11 +97,11 @@ message SubscriptionUpdate {
     //
     repeated EntityStateUpdate entity_state_updates = 9 [(valid) = true];
 
-    // Deprecated field for the entity state updates.
+    // Deleted field `updates`.
     //
     // Use `entity_state_updates` instead.
     //
-    repeated google.protobuf.Any OBSOLETE_updates = 10 [deprecated = true];
+    reserved 10;
 }
 
 // The pair of the entity ID and the entity state both packed as Any.
