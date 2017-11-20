@@ -86,7 +86,13 @@ message SubscriptionUpdate {
     core.Response response = 2 [(required) = true];
 
     // Reserved for more subscription update attributes.
-    reserved 3 to 8;
+    reserved 3 to 9;
+
+    // Deleted field `updates`.
+    //
+    // Use `entity_state_updates` instead.
+    //
+    reserved 10;
 
     // The updates of the entity states.
     //
@@ -95,13 +101,7 @@ message SubscriptionUpdate {
     // Each of the update state messages is affected by the field mask set for the current
     // subscription.
     //
-    repeated EntityStateUpdate entity_state_updates = 9 [(valid) = true];
-
-    // Deleted field `updates`.
-    //
-    // Use `entity_state_updates` instead.
-    //
-    reserved 10;
+    repeated EntityStateUpdate entity_state_updates = 11 [(valid) = true];
 }
 
 // The pair of the entity ID and the entity state both packed as Any.
