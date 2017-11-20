@@ -506,14 +506,14 @@ public class Stand implements AutoCloseable {
             @Override
             public void run() {
                 final EntityUpdateCallback callback = subscriptionRecord.getCallback();
-                if (callback != null) {
-                    final Any entityId = toAny(id);
-                    final EntityStateUpdate stateUpdate = EntityStateUpdate.newBuilder()
-                                                                           .setId(entityId)
-                                                                           .setState(entityState)
-                                                                           .build();
-                    callback.onStateChanged(stateUpdate);
-                }
+                checkNotNull(callback, "Notifying by a non-activated subscription.");
+                final Any entityId = toAny(id);
+                final EntityStateUpdate stateUpdate = EntityStateUpdate.newBuilder()
+                                                                       .setId(entityId)
+                                                                       .setState(entityState)
+                                                                       .build();
+                callback.onStateChanged(stateUpdate);
+
             }
         };
         return result;
