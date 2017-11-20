@@ -34,6 +34,7 @@ import io.grpc.stub.StreamObserver;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.EntityFilters;
 import io.spine.client.EntityId;
+import io.spine.client.EntityStateUpdate;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
 import io.spine.client.Subscription;
@@ -490,7 +491,7 @@ public class StandShould extends TenantAwareTest {
         final Any packedState = AnyPacker.pack(customer);
         for (MemoizeEntityUpdateCallback callback : callbacks) {
             assertEquals(packedState, callback.newEntityState);
-            verify(callback, times(1)).onStateChanged(any(Any.class));
+            verify(callback, times(1)).onStateChanged(any(EntityStateUpdate.class));
         }
     }
 
@@ -508,7 +509,7 @@ public class StandShould extends TenantAwareTest {
         final Version stateVersion = GivenVersion.withNumber(1);
         stand.update(asEnvelope(customerId, customer, stateVersion));
 
-        verify(callback, never()).onStateChanged(any(Any.class));
+        verify(callback, never()).onStateChanged(any(EntityStateUpdate.class));
     }
 
     @Test
@@ -521,9 +522,9 @@ public class StandShould extends TenantAwareTest {
         final Set<Customer> callbackStates = newHashSet();
         final MemoizeEntityUpdateCallback callback = new MemoizeEntityUpdateCallback() {
             @Override
-            public void onStateChanged(Any newEntityState) {
+            public void onStateChanged(EntityStateUpdate newEntityState) {
                 super.onStateChanged(newEntityState);
-                final Customer customerInCallback = AnyPacker.unpack(newEntityState);
+                final Customer customerInCallback = AnyPacker.unpack(newEntityState.getState());
                 callbackStates.add(customerInCallback);
             }
         };
@@ -1444,7 +1445,7 @@ public class StandShould extends TenantAwareTest {
     private static Stand.EntityUpdateCallback emptyUpdateCallback() {
         return new Stand.EntityUpdateCallback() {
             @Override
-            public void onStateChanged(Any newEntityState) {
+            public void onStateChanged(EntityStateUpdate newEntityState) {
                 //do nothing
             }
         };
@@ -1515,8 +1516,8 @@ public class StandShould extends TenantAwareTest {
         private Any newEntityState = null;
 
         @Override
-        public void onStateChanged(Any newEntityState) {
-            this.newEntityState = newEntityState;
+        public void onStateChanged(EntityStateUpdate newEntityState) {
+            this.newEntityState = newEntityState.getState();
         }
 
         @Nullable

@@ -86,12 +86,35 @@ message SubscriptionUpdate {
     core.Response response = 2 [(required) = true];
 
     // Reserved for more subscription update attributes.
-    reserved 3 to 9;
+    reserved 3 to 8;
 
-    // Entity updates packed as Any.
+    // The updates of the Entity states.
     //
-    // Each of the update messages is affected by the field mask set for the current subscription.
-    repeated google.protobuf.Any updates = 10;
+    // Each update is a pair of an Entity ID and state.
+    //
+    // Each of the update state messages is affected by the field mask set for the current
+    // subscription.
+    //
+    repeated EntityStateUpdate entity_state_updates = 9 [(valid) = true];
+
+    // Deprecated field for the Entity state updates.
+    //
+    // Use `entity_state_updates` instead.
+    //
+    repeated google.protobuf.Any OBSOLETE_updates = 10 [deprecated = true];
+}
+
+// The pair of the entity ID and the Entity state both packed as Any.
+message EntityStateUpdate {
+
+    // The Entity ID packed as Any.
+    google.protobuf.Any id = 1 [(required) = true];
+
+    // The Entity state packed as Any.
+    //
+    // May be affected by a field mask specified in the subscription Topic.
+    //
+    google.protobuf.Any state = 2 [(required) = true];
 }
 
 

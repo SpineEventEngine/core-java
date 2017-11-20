@@ -28,6 +28,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
+import io.spine.client.EntityStateUpdate;
 import io.spine.client.Queries;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
@@ -38,6 +39,7 @@ import io.spine.core.Responses;
 import io.spine.core.TenantId;
 import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
+import io.spine.protobuf.TypeConverter;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.entity.Entity;
@@ -384,7 +386,9 @@ public class Stand implements AutoCloseable {
         op.execute();
     }
 
-    private void notifyMatchingSubscriptions(Object id, final Any entityState, TypeUrl typeUrl) {
+    private void notifyMatchingSubscriptions(final Object id,
+                                             final Any entityState,
+                                             TypeUrl typeUrl) {
         if (subscriptionRegistry.hasType(typeUrl)) {
             final Set<SubscriptionRecord> allRecords = subscriptionRegistry.byType(typeUrl);
 
@@ -398,7 +402,12 @@ public class Stand implements AutoCloseable {
                         public void run() {
                             final EntityUpdateCallback callback = subscriptionRecord.getCallback();
                             if (callback != null) {
-                                callback.onStateChanged(entityState);
+                                final Any entityId = TypeConverter.toAny(id);
+                                final EntityStateUpdate stateUpdate = EntityStateUpdate.newBuilder()
+                                                                                       .setId(entityId)
+                                                                                       .setState(entityState)
+                                                                                       .build();
+                                callback.onStateChanged(stateUpdate);
                             }
                         }
                     });
@@ -450,7 +459,7 @@ public class Stand implements AutoCloseable {
          *
          * @param newEntityState new state of the entity
          */
-        void onStateChanged(Any newEntityState);
+        void onStateChanged(EntityStateUpdate newEntityState);
     }
 
     /**
