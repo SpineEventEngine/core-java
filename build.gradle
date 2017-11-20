@@ -101,15 +101,15 @@ allprojects {
 final boolean isTravis = System.env.TRAVIS == 'true'
 
 /**
- * Defines whether the given {@code project} should expose its JavaDoc to spine.io Web site.
+ * Determines whether the given {@code project} should expose its Javadoc to spine.io website.
  *
- * <p>Currently, the {@code testutil} projects are excluded from publishing, as well as the model
- * compile time checking modules.
+ * <p>Currently, the {@code testutil} projects are excluded from publishing, as well as the modules
+ * that perform the model compile-time checks.
  *
  * @param project the project to check
- * @return {@code true} is the project JavaDoc should be published, {@code false} otherwise
+ * @return {@code true} is the project Javadoc should be published, {@code false} otherwise
  */
-static boolean shouldPublishJavaDoc(final Project project) {
+static boolean shouldPublishJavadoc(final Project project) {
     return !project.name.startsWith('testutil') && !project.name.startsWith("model")
 }
 
@@ -341,9 +341,10 @@ subprojects {
         }
     }
 
-    // Apply the JavaDoc publishing plugin.
+    // Apply the Javadoc publishing plugin.
     // This plugin *must* be applied here, not in the module `build.gradle` files.
-    if (shouldPublishJavaDoc(project)) {
+    //
+    if (shouldPublishJavadoc(project)) {
         apply from: updateDocsPlugin
     }
 }

@@ -39,22 +39,22 @@ ext {
 }
 
 /**
- * Copies the JavaDoc produced by {@code :noInternalJavadoc} task into a temporary folder.
+ * Copies the Javadoc produced by {@code :noInternalJavadoc} task into a temporary folder.
  */
-task copyJavaDoc(type: Copy) {
+task copyJavadoc(type: Copy) {
     from noInternalJavadoc
     into javaDocFolder
 }
 
 /**
- * Updates the JavaDoc documentation on the {@code gh-pages} Git branch.
+ * Updates the Javadoc documentation on the {@code gh-pages} Git branch.
  *
- * <p>Run this task when it is required to update the JavaDoc e.g. when merging a branch into
+ * <p>Run this task when it is required to update the Javadoc e.g. when merging a branch into
  * {@code master}.
  */
 task updateGitHubPages {
-    description "Updates the JavaDoc published to GitHub Pages Web site."
-    dependsOn copyJavaDoc
+    description "Updates the Javadoc published to GitHub Pages website."
+    dependsOn copyJavadoc
 }
 
 /**
@@ -76,7 +76,7 @@ static def executeForResult(final Process process) {
 }
 
 /**
- * Executes the given command and retrieves the command output.
+ * Executes the given terminal command and retrieves the command output.
  *
  * <p>{@link Runtime#exec(String[], String[], File) Executes} the given {@code String} array as
  * a CLI command. If the execution is successful, returns the command output. Thrown
@@ -101,9 +101,10 @@ String execute(final File fromDir, final String... command) {
 }
 
 /**
- * Executes the given command and retrieves the command output.
+ * Executes the given terminal command and retrieves the command output.
  *
- * <p>This is a convenience method. Acts as if {@code execute(project.rootDir, command)}
+ * <p>This is a convenience method. Calling this method is equivalent to calling
+ * {@code execute(project.rootDir, command)}.
  */
 String execute(final String... command) {
     return execute(rootDir, command)
@@ -119,7 +120,7 @@ String execute(final String... command) {
 final String gitHost = "git@github.com-publish:SpineEventEngine/core-java.git"
 
 /**
- * The GitHub deploy key used to push the JavaDoc changes to {@code gh-pages}.
+ * The GitHub deploy key used to push the Javadoc changes to {@code gh-pages}.
  */
 final File gitHubAccessKey = "$rootDir/deploy_key_rsa" as File
 
@@ -139,7 +140,7 @@ updateGitHubPages.doLast {
     execute "$rootDir/scripts/add-to-ssh.sh", gitHubAccessKey.absolutePath
     execute "git", "clone", gitHost, "$repoBaseDir"
     execute repoBaseDir, "git", "checkout", GH_PAGES_BRANCH
-    logger.debug("Updating JavaDoc on GitHub Pages in directory `$javaDocDir`")
+    logger.debug("Updating Javadoc on GitHub Pages in directory `$javaDocDir`")
     javaDocDir.mkdir()
 
     copy {
@@ -154,12 +155,12 @@ updateGitHubPages.doLast {
      * "FORMAL_GIT_HUB_PAGES_AUTHOR" env variable.
      *
      * When changing the value of "FORMAL_GIT_HUB_PAGES_AUTHOR", also change the SSH private
-      * (deploy_key_rsa.enc) and public ("GitHub Pages publisher (Travis CI)" on GitHub) keys.
+     * (deploy_key_rsa.enc) and public ("GitHub Pages publisher (Travis CI)" on GitHub) keys.
      */
     execute repoBaseDir, "git", "config", "user.name", "\"UpdateGitHubPages Plugin\""
     execute repoBaseDir, "git", "config", "user.eamil", System.env.FORMAL_GIT_HUB_PAGES_AUTHOR
 
-    execute repoBaseDir, "git", "commit", "--message=\"Update JavaDoc for module $project.name as for version $project.version\""
+    execute repoBaseDir, "git", "commit", "--message=\"Update Javadoc for module $project.name as for version $project.version\""
     execute repoBaseDir, "git", "push"
-    logger.debug("Updated JavaDoc on GitHub Pages in directory `$javaDocDir` sucessfully")
+    logger.debug("Updated Javadoc on GitHub Pages in directory `$javaDocDir` sucessfully")
 }
