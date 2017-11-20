@@ -28,6 +28,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
+import io.spine.client.EntityStateUpdate;
 import io.spine.client.Queries;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
@@ -61,6 +62,7 @@ import java.util.concurrent.Executor;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static io.spine.grpc.StreamObservers.ack;
+import static io.spine.protobuf.TypeConverter.toAny;
 
 /**
  * A container for storing the latest {@link io.spine.server.aggregate.Aggregate Aggregate}
@@ -384,7 +386,7 @@ public class Stand implements AutoCloseable {
         op.execute();
     }
 
-    private void notifyMatchingSubscriptions(Object id, final Any entityState, TypeUrl typeUrl) {
+    private void notifyMatchingSubscriptions(Object id, Any entityState, TypeUrl typeUrl) {
         if (subscriptionRegistry.hasType(typeUrl)) {
             final Set<SubscriptionRecord> allRecords = subscriptionRegistry.byType(typeUrl);
 
@@ -393,15 +395,9 @@ public class Stand implements AutoCloseable {
                 final boolean subscriptionIsActive = subscriptionRecord.isActive();
                 final boolean stateMatches = subscriptionRecord.matches(typeUrl, id, entityState);
                 if (subscriptionIsActive && stateMatches) {
-                    callbackExecutor.execute(new Runnable() {
-                        @Override
-                        public void run() {
-                            final EntityUpdateCallback callback = subscriptionRecord.getCallback();
-                            if (callback != null) {
-                                callback.onStateChanged(entityState);
-                            }
-                        }
-                    });
+                    final Runnable action = notifySubscriptionAction(subscriptionRecord,
+                                                                     id, entityState);
+                    callbackExecutor.execute(action);
                 }
             }
         }
@@ -450,7 +446,7 @@ public class Stand implements AutoCloseable {
          *
          * @param newEntityState new state of the entity
          */
-        void onStateChanged(Any newEntityState);
+        void onStateChanged(EntityStateUpdate newEntityState);
     }
 
     /**
@@ -491,6 +487,35 @@ public class Stand implements AutoCloseable {
     private StandStorage getStorage() {
         checkState(storage != null, "Stand %s does not have a storage assigned", this);
         return storage;
+    }
+
+    /**
+     * Creates the subscribers notification action.
+     *
+     * <p>The resulting action retrieves the {@linkplain EntityUpdateCallback subscriber callback}
+     * and invokes it with the given Entity ID and state.
+     *
+     * @param subscriptionRecord the attributes of the target subscription
+     * @param id                 the ID of the updated Entity
+     * @param entityState        the new state of the updated Entity
+     * @return a routine delivering the subscription update to the target subscriber
+     */
+    private static Runnable notifySubscriptionAction(final SubscriptionRecord subscriptionRecord,
+                                                     final Object id, final Any entityState) {
+        final Runnable result = new Runnable() {
+            @Override
+            public void run() {
+                final EntityUpdateCallback callback = subscriptionRecord.getCallback();
+                checkNotNull(callback, "Notifying by a non-activated subscription.");
+                final Any entityId = toAny(id);
+                final EntityStateUpdate stateUpdate = EntityStateUpdate.newBuilder()
+                                                                       .setId(entityId)
+                                                                       .setState(entityState)
+                                                                       .build();
+                callback.onStateChanged(stateUpdate);
+            }
+        };
+        return result;
     }
 
     public static class Builder {
