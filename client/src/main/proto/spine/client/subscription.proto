@@ -117,7 +117,6 @@ message EntityStateUpdate {
     google.protobuf.Any state = 2 [(required) = true];
 }
 
-
 // Subscription identifier.
 message SubscriptionId {
 
