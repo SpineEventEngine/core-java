@@ -39,7 +39,6 @@ import io.spine.core.Responses;
 import io.spine.core.TenantId;
 import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
-import io.spine.protobuf.TypeConverter;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.entity.Entity;
@@ -63,6 +62,7 @@ import java.util.concurrent.Executor;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static io.spine.grpc.StreamObservers.ack;
+import static io.spine.protobuf.TypeConverter.toAny;
 
 /**
  * A container for storing the latest {@link io.spine.server.aggregate.Aggregate Aggregate}
@@ -397,20 +397,8 @@ public class Stand implements AutoCloseable {
                 final boolean subscriptionIsActive = subscriptionRecord.isActive();
                 final boolean stateMatches = subscriptionRecord.matches(typeUrl, id, entityState);
                 if (subscriptionIsActive && stateMatches) {
-                    callbackExecutor.execute(new Runnable() {
-                        @Override
-                        public void run() {
-                            final EntityUpdateCallback callback = subscriptionRecord.getCallback();
-                            if (callback != null) {
-                                final Any entityId = TypeConverter.toAny(id);
-                                final EntityStateUpdate stateUpdate = EntityStateUpdate.newBuilder()
-                                                                                       .setId(entityId)
-                                                                                       .setState(entityState)
-                                                                                       .build();
-                                callback.onStateChanged(stateUpdate);
-                            }
-                        }
-                    });
+                    callbackExecutor.execute(subscribersUpdateAction(subscriptionRecord,
+                                                                     id, entityState));
                 }
             }
         }
@@ -500,6 +488,36 @@ public class Stand implements AutoCloseable {
     private StandStorage getStorage() {
         checkState(storage != null, "Stand %s does not have a storage assigned", this);
         return storage;
+    }
+
+    /**
+     * Creates the subscribers notification action.
+     *
+     * <p>The resulting action retrieves the {@linkplain EntityUpdateCallback subscriber callback}
+     * and invokes it with the given Entity ID and state.
+     *
+     * @param subscriptionRecord the attributes of the target subscription
+     * @param id                 the ID of the updated Entity
+     * @param entityState        the new state of the updates Entity
+     * @return a routine delivering the subscription update to the target subscriber
+     */
+    private static Runnable subscribersUpdateAction(final SubscriptionRecord subscriptionRecord,
+                                                    final Object id,
+                                                    final Any entityState) {
+        return new Runnable() {
+            @Override
+            public void run() {
+                final EntityUpdateCallback callback = subscriptionRecord.getCallback();
+                if (callback != null) {
+                    final Any entityId = toAny(id);
+                    final EntityStateUpdate stateUpdate = EntityStateUpdate.newBuilder()
+                                                                           .setId(entityId)
+                                                                           .setState(entityState)
+                                                                           .build();
+                    callback.onStateChanged(stateUpdate);
+                }
+            }
+        };
     }
 
     public static class Builder {
