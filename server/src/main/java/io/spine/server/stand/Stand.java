@@ -386,9 +386,7 @@ public class Stand implements AutoCloseable {
         op.execute();
     }
 
-    private void notifyMatchingSubscriptions(final Object id,
-                                             final Any entityState,
-                                             TypeUrl typeUrl) {
+    private void notifyMatchingSubscriptions(Object id, Any entityState, TypeUrl typeUrl) {
         if (subscriptionRegistry.hasType(typeUrl)) {
             final Set<SubscriptionRecord> allRecords = subscriptionRegistry.byType(typeUrl);
 
@@ -397,8 +395,9 @@ public class Stand implements AutoCloseable {
                 final boolean subscriptionIsActive = subscriptionRecord.isActive();
                 final boolean stateMatches = subscriptionRecord.matches(typeUrl, id, entityState);
                 if (subscriptionIsActive && stateMatches) {
-                    callbackExecutor.execute(subscribersUpdateAction(subscriptionRecord,
-                                                                     id, entityState));
+                    final Runnable action = subscribersNotificationAction(subscriptionRecord,
+                                                                          id, entityState);
+                    callbackExecutor.execute(action);
                 }
             }
         }
@@ -498,13 +497,13 @@ public class Stand implements AutoCloseable {
      *
      * @param subscriptionRecord the attributes of the target subscription
      * @param id                 the ID of the updated Entity
-     * @param entityState        the new state of the updates Entity
+     * @param entityState        the new state of the updated Entity
      * @return a routine delivering the subscription update to the target subscriber
      */
-    private static Runnable subscribersUpdateAction(final SubscriptionRecord subscriptionRecord,
-                                                    final Object id,
-                                                    final Any entityState) {
-        return new Runnable() {
+    private static Runnable subscribersNotificationAction(
+            final SubscriptionRecord subscriptionRecord,
+            final Object id, final Any entityState) {
+        final Runnable result = new Runnable() {
             @Override
             public void run() {
                 final EntityUpdateCallback callback = subscriptionRecord.getCallback();
@@ -518,6 +517,7 @@ public class Stand implements AutoCloseable {
                 }
             }
         };
+        return result;
     }
 
     public static class Builder {
