@@ -12,7 +12,7 @@ env:
     - secure: MDtkG8hUJtC67lf3jYwS4nkCScTTWq2kNGvOK5KaRYgvLKAVd6pIxE0OSUR7IJALLu5O4xAWhJH26TU5QcVrmnRMY4MrhLDgjDfcYCxoclPzTRzxlsGvZz2For02kaHxMF7CXzdtr13zr8EZR5nQI6uQoY39R6w01/xD7lWYAz5WEwlCy700AuOcZ5u4I4Me+9vhu2BO1fYCp1Enq4xkk6ARGXqF7MTm4fMuZeMLOA6PlQ94RaM+XMQ8VKqyYamv46O5P95/SwtNKfeFUCe+NIKVOX23VcS1om02KRNhYmVoABco0BNX3oNRqbVcXkubvAAgg5OHM+k5DbRk306WnMxvlhMitNQeJQ0xGuEPIjCREoZw3AXh+iV5xmaQ1EUa8tsJHMpLishsu9S/towRjtM+r/ODiLFWh+caBqKyDyExwrM79XOuv1/UpV9ZB5/eoz5oqyrO9NNJpJVmDkffh3NYXavE0Zb48g+1NLCvUPgIu7i76JCtK7y5BwYQQZqhOlU/QfF8TDekFv31JecSMpg3zwTGcec8a9F19J+G8bliheDSzpQ6l1AaRL6glzBWrGdGHMLRYJDYi8bHz/uYqavb8GMg61+kMTkXxgtSFCs47voJ/7HyMTOLNGJ+DCBb94GkqWcGrjsO3W1lNoKTmgLWXGU8ALMvqYDVTDolvEI=
     # The email attached to the commits which update the Javadoc hosted on GitHub Pages.
     # See `scripts/update-gh-pages.gradle`
-    - FORMAL_GIT_HUB_PAGES_AUTHOR: "dmitry.dashenkov@teamdev.com"
+    - FORMAL_GIT_HUB_PAGES_AUTHOR: "spine-developers@teamdev.com"
 
 before_install:
   - chmod +x gradlew
