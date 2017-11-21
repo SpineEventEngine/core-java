@@ -101,7 +101,8 @@ allprojects {
 final boolean isTravis = System.env.TRAVIS == 'true'
 
 /**
- * Determines whether the given {@code project} should expose its Javadoc to spine.io website.
+ * Determines whether the given {@code project} should expose its Javadoc to
+ * SpineEventEngine.github.io website.
  *
  * <p>Currently, the {@code testutil} projects are excluded from publishing, as well as the modules
  * that perform the model compile-time checks.
