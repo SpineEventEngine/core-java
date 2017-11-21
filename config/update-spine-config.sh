@@ -34,7 +34,7 @@ fi
     scripts/generate-descriptor-set.gradle \
     scripts/jacoco.gradle \
     scripts/no-internal-javadoc.gradle \
-    scripts/publish-artifacts.sh \
+    scripts/publish.sh \
     scripts/report-coverage.sh \
     scripts/test-artifacts.gradle \
     \

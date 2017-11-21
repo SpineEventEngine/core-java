@@ -13,6 +13,9 @@ if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; th
         echo " ------ Publishing the artifacts to the repository..."
         ./gradlew publish -x test
         echo " ------ Artifacts published."
+        echo " ------ Updating GitHub pages doc..."
+        ./gradlew updateGitHubPages
+        echo " ------ GitHub Pages docs updated."
     else
         echo " ------ The build is broken. Publishing will not be performed."
     fi
