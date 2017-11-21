@@ -158,7 +158,7 @@ updateGitHubPages.doLast {
      * (deploy_key_rsa.enc) and public ("GitHub Pages publisher (Travis CI)" on GitHub) keys.
      */
     execute repoBaseDir, "git", "config", "user.name", "\"UpdateGitHubPages Plugin\""
-    execute repoBaseDir, "git", "config", "user.eamil", System.env.FORMAL_GIT_HUB_PAGES_AUTHOR
+    execute repoBaseDir, "git", "config", "user.email", System.env.FORMAL_GIT_HUB_PAGES_AUTHOR
 
     execute repoBaseDir, "git", "commit", "--message=\"Update Javadoc for module $project.name as for version $project.version\""
     execute repoBaseDir, "git", "push"
