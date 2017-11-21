@@ -23,8 +23,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-import com.google.protobuf.Any;
 import io.grpc.stub.StreamObserver;
+import io.spine.client.EntityStateUpdate;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionUpdate;
 import io.spine.client.Target;
@@ -92,13 +92,13 @@ public class SubscriptionService extends SubscriptionServiceGrpc.SubscriptionSer
 
             final Stand.EntityUpdateCallback updateCallback = new Stand.EntityUpdateCallback() {
                 @Override
-                public void onStateChanged(Any newEntityState) {
+                public void onStateChanged(EntityStateUpdate stateUpdate) {
                     checkNotNull(subscription);
                     final SubscriptionUpdate update =
                             SubscriptionUpdate.newBuilder()
                                               .setSubscription(subscription)
                                               .setResponse(Responses.ok())
-                                              .addUpdates(newEntityState)
+                                              .addEntityStateUpdates(stateUpdate)
                                               .build();
                     responseObserver.onNext(update);
                 }

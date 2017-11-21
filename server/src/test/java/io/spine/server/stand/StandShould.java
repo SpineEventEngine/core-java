@@ -34,6 +34,7 @@ import io.grpc.stub.StreamObserver;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.EntityFilters;
 import io.spine.client.EntityId;
+import io.spine.client.EntityStateUpdate;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
 import io.spine.client.Subscription;
@@ -99,6 +100,7 @@ import static io.spine.client.TopicValidationError.UNSUPPORTED_TOPIC_TARGET;
 import static io.spine.core.given.GivenUserId.of;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.grpc.StreamObservers.noOpObserver;
+import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.stand.Given.StandTestProjection;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -490,7 +492,7 @@ public class StandShould extends TenantAwareTest {
         final Any packedState = AnyPacker.pack(customer);
         for (MemoizeEntityUpdateCallback callback : callbacks) {
             assertEquals(packedState, callback.newEntityState);
-            verify(callback, times(1)).onStateChanged(any(Any.class));
+            verify(callback, times(1)).onStateChanged(any(EntityStateUpdate.class));
         }
     }
 
@@ -508,7 +510,7 @@ public class StandShould extends TenantAwareTest {
         final Version stateVersion = GivenVersion.withNumber(1);
         stand.update(asEnvelope(customerId, customer, stateVersion));
 
-        verify(callback, never()).onStateChanged(any(Any.class));
+        verify(callback, never()).onStateChanged(any(EntityStateUpdate.class));
     }
 
     @Test
@@ -517,14 +519,17 @@ public class StandShould extends TenantAwareTest {
 
         final Map<CustomerId, Customer> sampleCustomers = fillSampleCustomers(10);
 
-        final Topic someCustomers = requestFactory.topic().someOf(Customer.class, sampleCustomers.keySet());
-        final Set<Customer> callbackStates = newHashSet();
+        final Topic someCustomers = requestFactory.topic()
+                                                  .someOf(Customer.class,
+                                                          sampleCustomers.keySet());
+        final Map<CustomerId, Customer> callbackStates = newHashMap();
         final MemoizeEntityUpdateCallback callback = new MemoizeEntityUpdateCallback() {
             @Override
-            public void onStateChanged(Any newEntityState) {
-                super.onStateChanged(newEntityState);
-                final Customer customerInCallback = AnyPacker.unpack(newEntityState);
-                callbackStates.add(customerInCallback);
+            public void onStateChanged(EntityStateUpdate update) {
+                super.onStateChanged(update);
+                final Customer customerInCallback = unpack(update.getState());
+                final CustomerId customerIdInCallback = unpack(update.getId());
+                callbackStates.put(customerIdInCallback, customerInCallback);
             }
         };
         subscribeAndActivate(stand, someCustomers, callback);
@@ -536,11 +541,11 @@ public class StandShould extends TenantAwareTest {
             stand.update(asEnvelope(customerId, customer, stateVersion));
         }
 
-        assertEquals(newHashSet(sampleCustomers.values()), callbackStates);
+        assertEquals(newHashMap(sampleCustomers), callbackStates);
     }
 
     private MemoizeEntityUpdateCallback subscribeWithCallback(Stand stand,
-                                                                     Target subscriptionTarget) {
+                                                              Target subscriptionTarget) {
         final MemoizeEntityUpdateCallback callback = spy(new MemoizeEntityUpdateCallback());
         final Topic topic = requestFactory.topic().forTarget(subscriptionTarget);
         subscribeAndActivate(stand, topic, callback);
@@ -579,7 +584,7 @@ public class StandShould extends TenantAwareTest {
                 final List<Any> messages = value.getMessagesList();
                 assertFalse(messages.isEmpty());
 
-                final Customer customer = AnyPacker.unpack(messages.get(0));
+                final Customer customer = unpack(messages.get(0));
                 for (Descriptors.FieldDescriptor field : customer.getDescriptorForType()
                                                                  .getFields()) {
                     assertTrue(customer.getField(field)
@@ -604,7 +609,7 @@ public class StandShould extends TenantAwareTest {
                 assertFalse(messages.isEmpty());
 
                 final Customer sampleCustomer = getSampleCustomer();
-                final Customer customer = AnyPacker.unpack(messages.get(0));
+                final Customer customer = unpack(messages.get(0));
                 assertTrue(customer.getName()
                                    .equals(sampleCustomer.getName()));
                 assertFalse(customer.hasId());
@@ -627,7 +632,7 @@ public class StandShould extends TenantAwareTest {
                         assertFalse(messages.isEmpty());
 
                         final Customer sampleCustomer = getSampleCustomer();
-                        final Customer customer = AnyPacker.unpack(messages.get(0));
+                        final Customer customer = unpack(messages.get(0));
                         assertEquals(customer.getNicknamesList(),
                                      sampleCustomer.getNicknamesList());
 
@@ -652,7 +657,7 @@ public class StandShould extends TenantAwareTest {
                         assertFalse(messages.isEmpty());
 
                         final Customer sampleCustomer = getSampleCustomer();
-                        final Customer customer = AnyPacker.unpack(messages.get(0));
+                        final Customer customer = unpack(messages.get(0));
                         assertEquals(customer.getNicknamesList(),
                                      sampleCustomer.getNicknamesList());
 
@@ -703,7 +708,7 @@ public class StandShould extends TenantAwareTest {
         final List<Any> read = observer.responseHandled.getMessagesList();
         Verify.assertSize(1, read);
 
-        final Customer customer = AnyPacker.unpack(read.get(0));
+        final Customer customer = unpack(read.get(0));
         assertMatches(customer, fieldMask);
         assertTrue(ids.contains(customer.getId()));
 
@@ -733,7 +738,7 @@ public class StandShould extends TenantAwareTest {
                 final List<Any> messages = value.getMessagesList();
                 assertFalse(messages.isEmpty());
 
-                final Customer customer = AnyPacker.unpack(messages.get(0));
+                final Customer customer = unpack(messages.get(0));
 
                 assertNotEquals(customer, null);
 
@@ -1027,7 +1032,7 @@ public class StandShould extends TenantAwareTest {
                 final List<Any> messages = value.getMessagesList();
                 assertFalse(messages.isEmpty());
 
-                final Customer customer = AnyPacker.unpack(messages.get(0));
+                final Customer customer = unpack(messages.get(0));
                 final Customer sampleCustomer = getSampleCustomer();
 
                 assertEquals(sampleCustomer.getName(), customer.getName());
@@ -1119,7 +1124,7 @@ public class StandShould extends TenantAwareTest {
         assertEquals(sampleProjects.size(), messageList.size());
         final Collection<Project> allCustomers = sampleProjects.values();
         for (Any singleRecord : messageList) {
-            final Project unpackedSingleResult = AnyPacker.unpack(singleRecord);
+            final Project unpackedSingleResult = unpack(singleRecord);
             assertTrue(allCustomers.contains(unpackedSingleResult));
         }
     }
@@ -1156,7 +1161,7 @@ public class StandShould extends TenantAwareTest {
                 Verify.assertSize(ids.size(), messages);
 
                 for (Any message : messages) {
-                    final Customer customer = AnyPacker.unpack(message);
+                    final Customer customer = unpack(message);
 
                     assertNotEquals(customer, null);
 
@@ -1193,7 +1198,7 @@ public class StandShould extends TenantAwareTest {
         assertEquals(sampleCustomers.size(), messageList.size());
         final Collection<Customer> allCustomers = sampleCustomers.values();
         for (Any singleRecord : messageList) {
-            final Customer unpackedSingleResult = AnyPacker.unpack(singleRecord);
+            final Customer unpackedSingleResult = unpack(singleRecord);
             assertTrue(allCustomers.contains(unpackedSingleResult));
         }
         return stand;
@@ -1265,7 +1270,7 @@ public class StandShould extends TenantAwareTest {
                 for (EntityId entityId : argument.getIdFilter()
                                                  .getIdsList()) {
                     final Any idAsAny = entityId.getId();
-                    final Message rawId = AnyPacker.unpack(idAsAny);
+                    final Message rawId = unpack(idAsAny);
                     if (rawId instanceof ProjectId) {
                         final ProjectId convertedProjectId = (ProjectId) rawId;
                         everyElementPresent = everyElementPresent
@@ -1444,7 +1449,7 @@ public class StandShould extends TenantAwareTest {
     private static Stand.EntityUpdateCallback emptyUpdateCallback() {
         return new Stand.EntityUpdateCallback() {
             @Override
-            public void onStateChanged(Any newEntityState) {
+            public void onStateChanged(EntityStateUpdate newEntityState) {
                 //do nothing
             }
         };
@@ -1515,8 +1520,8 @@ public class StandShould extends TenantAwareTest {
         private Any newEntityState = null;
 
         @Override
-        public void onStateChanged(Any newEntityState) {
-            this.newEntityState = newEntityState;
+        public void onStateChanged(EntityStateUpdate newEntityState) {
+            this.newEntityState = newEntityState.getState();
         }
 
         @Nullable
