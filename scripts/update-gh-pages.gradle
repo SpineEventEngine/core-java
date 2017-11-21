@@ -79,17 +79,17 @@ static def executeForResult(final Process process) {
  * Executes the given terminal command and retrieves the command output.
  *
  * <p>{@link Runtime#exec(String[], String[], File) Executes} the given {@code String} array as
- * a CLI command. If the execution is successful, returns the command output. Thrown
+ * a CLI command. If the execution is successful, returns the command output. Throws
  * an {@link IllegalStateException} otherwise.
  *
- * @param fromDir the directory of the command execution
+ * @param baseDir the directory of the command execution
  * @param command the command to execute
  * @return the command line output
  * @throws IllegalStateException upon an execution error
  */
-String execute(final File fromDir, final String... command) {
+String execute(final File baseDir, final String... command) {
     final Runtime runtime = Runtime.getRuntime()
-    final Process proc = runtime.exec(command, /*env=*/ (String[]) null, fromDir)
+    final Process proc = runtime.exec(command, /*env=*/ (String[]) null, baseDir)
     final def result = executeForResult(proc)
     if (result.exitCode == 0) {
         return result.out
@@ -117,10 +117,10 @@ String execute(final String... command) {
  * Travis due to the {@code .travis_ssh_config} configuration. This is used to make it possible
  * to have multiple SSH private keys on Travis (since there is one already on Travis).
  */
-final String gitHost = "git@github.com-publish:SpineEventEngine/core-java.git"
+final String GIT_HOST = "git@github.com-publish:SpineEventEngine/core-java.git"
 
 /**
- * The GitHub deploy key used to push the Javadoc changes to {@code gh-pages}.
+ * The GitHub deploy key used to push the Javadoc changes to the {@code gh-pages} branch.
  */
 final File gitHubAccessKey = "$rootDir/deploy_key_rsa" as File
 
@@ -138,7 +138,7 @@ updateGitHubPages.doLast {
         filter(ReplaceTokens, tokens: [rsakey: gitHubAccessKey.absolutePath])
     }
     execute "$rootDir/scripts/add-to-ssh.sh", gitHubAccessKey.absolutePath
-    execute "git", "clone", gitHost, "$repoBaseDir"
+    execute "git", "clone", GIT_HOST, "$repoBaseDir"
     execute repoBaseDir, "git", "checkout", GH_PAGES_BRANCH
     logger.debug("Updating Javadoc on GitHub Pages in directory `$javaDocDir`")
     javaDocDir.mkdir()
