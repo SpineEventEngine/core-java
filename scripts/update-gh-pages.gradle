@@ -150,11 +150,11 @@ updateGitHubPages.doLast {
 
     execute repoBaseDir, "git", "add", javaDocDirPostfix
 
-    /*
+    /**
      * Publish the changes under "UpdateGitHubPages Plugin" Git user name and email stored in
      * "FORMAL_GIT_HUB_PAGES_AUTHOR" env variable.
      *
-     * When changing the value of "FORMAL_GIT_HUB_PAGES_AUTHOR", also change the SSH private
+     * <p>When changing the value of "FORMAL_GIT_HUB_PAGES_AUTHOR", also change the SSH private
      * (deploy_key_rsa.enc) and public ("GitHub Pages publisher (Travis CI)" on GitHub) keys.
      */
     execute repoBaseDir, "git", "config", "user.name", "\"UpdateGitHubPages Plugin\""
