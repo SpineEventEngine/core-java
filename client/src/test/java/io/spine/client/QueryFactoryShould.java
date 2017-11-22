@@ -25,7 +25,7 @@ import com.google.protobuf.ProtocolStringList;
 import io.spine.protobuf.AnyPacker;
 import io.spine.test.client.TestEntity;
 import io.spine.test.client.TestEntityId;
-import io.spine.type.TypeName;
+import io.spine.type.TypeUrl;
 import org.junit.Test;
 
 import java.util.Collection;
@@ -306,8 +306,8 @@ public class QueryFactoryShould extends ActorRequestFactoryShould {
         final Target entityTarget = query.getTarget();
         assertNotNull(entityTarget);
 
-        final String expectedTypeName = TypeName.of(targetEntityClass)
-                                                .value();
+        final String expectedTypeName = TypeUrl.of(targetEntityClass)
+                                               .value();
         assertEquals(expectedTypeName, entityTarget.getType());
         return entityTarget;
     }

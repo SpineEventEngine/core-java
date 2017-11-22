@@ -23,14 +23,15 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.Identifier;
 import io.spine.annotation.Internal;
-import io.spine.type.TypeName;
 import io.spine.type.TypeUrl;
 
 import javax.annotation.Nullable;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static io.spine.client.Targets.composeTarget;
+import static io.spine.type.KnownTypes.getAllUrls;
 import static java.lang.String.format;
 
 /**
@@ -70,9 +71,10 @@ public final class Queries {
         checkNotNull(query);
 
         final Target target = query.getTarget();
-        final TypeName typeName = TypeName.of(target.getType());
-        final TypeUrl type = typeName.toUrl();
-        return type;
+        final String type = target.getType();
+        final TypeUrl typeUrl = TypeUrl.parse(type);
+        checkState(getAllUrls().contains(typeUrl), "Unknown type URL: `%s`.", type);
+        return typeUrl;
     }
 
     static Query.Builder queryBuilderFor(Class<? extends Message> entityClass,

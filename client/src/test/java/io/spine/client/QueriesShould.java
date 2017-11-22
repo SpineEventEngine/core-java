@@ -61,7 +61,7 @@ public class QueriesShould {
     @Test(expected = IllegalStateException.class)
     public void throw_ISE_for_unknown_type() {
         final Target target = Target.newBuilder()
-                                    .setType("Nonexistent Message Type")
+                                    .setType("nonexistent.org/message.type")
                                     .build();
         final Query query = Query.newBuilder()
                                  .setTarget(target)

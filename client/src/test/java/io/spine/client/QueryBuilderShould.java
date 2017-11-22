@@ -30,7 +30,7 @@ import com.google.protobuf.Timestamp;
 import io.spine.protobuf.AnyPacker;
 import io.spine.test.client.TestEntity;
 import io.spine.test.queries.ProjectId;
-import io.spine.type.TypeName;
+import io.spine.type.TypeUrl;
 import org.junit.Test;
 
 import javax.annotation.Nullable;
@@ -89,8 +89,7 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
         final Target target = query.getTarget();
         assertTrue(target.getIncludeAll());
 
-        assertEquals(TypeName.of(testEntityClass)
-                             .value(), target.getType());
+        assertEquals(TypeUrl.of(testEntityClass).value(), target.getType());
     }
 
     @Test
