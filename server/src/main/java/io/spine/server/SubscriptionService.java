@@ -34,7 +34,6 @@ import io.spine.core.Response;
 import io.spine.core.Responses;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.stand.Stand;
-import io.spine.type.TypeName;
 import io.spine.type.TypeUrl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -128,17 +127,13 @@ public class SubscriptionService extends SubscriptionServiceGrpc.SubscriptionSer
     }
 
     private BoundedContext selectBoundedContext(Subscription subscription) {
-        final TypeName typeName = TypeName.of(subscription.getTopic()
-                                                          .getTarget()
-                                                          .getType());
-        final TypeUrl type = typeName.toUrl();
-        final BoundedContext result = typeToContextMap.get(type);
-        return result;
+        final Target target = subscription.getTopic().getTarget();
+        final BoundedContext context = selectBoundedContext(target);
+        return context;
     }
 
     private BoundedContext selectBoundedContext(Target target) {
-        final TypeName typeName = TypeName.of(target.getType());
-        final TypeUrl type = typeName.toUrl();
+        final TypeUrl type = TypeUrl.parse(target.getType());
         final BoundedContext result = typeToContextMap.get(type);
         return result;
     }

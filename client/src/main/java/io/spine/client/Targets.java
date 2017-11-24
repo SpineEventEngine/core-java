@@ -24,7 +24,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.protobuf.AnyPacker;
-import io.spine.type.TypeName;
+import io.spine.type.TypeUrl;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -99,10 +99,10 @@ public final class Targets {
                                                    .setIdFilter(idFilter)
                                                    .addAllFilter(entityColumnValues)
                                                    .build();
-        final String typeName = TypeName.of(entityClass)
-                                        .value();
+        final String typeUrl = TypeUrl.of(entityClass)
+                                      .value();
         final Target.Builder builder = Target.newBuilder()
-                                             .setType(typeName);
+                                             .setType(typeUrl);
         if (includeAll) {
             builder.setIncludeAll(true);
         } else {

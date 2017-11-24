@@ -21,7 +21,6 @@ package io.spine.server.stand;
 
 import com.google.protobuf.Message;
 import io.spine.client.Target;
-import io.spine.type.TypeName;
 import io.spine.type.TypeUrl;
 
 /**
@@ -47,9 +46,7 @@ abstract class AbstractTargetValidator<M extends Message> extends RequestValidat
     }
 
     static TypeUrl getTypeOf(Target target) {
-        final String typeAsString = target
-                .getType();
-        return TypeName.of(typeAsString)
-                       .toUrl();
+        final String typeAsString = target.getType();
+        return TypeUrl.parse(typeAsString);
     }
 }
