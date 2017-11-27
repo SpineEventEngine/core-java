@@ -22,7 +22,6 @@ package io.spine.server.tenant;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 import com.google.protobuf.Message;
 import io.spine.core.TenantId;
 import io.spine.server.entity.AbstractEntity;
@@ -34,6 +33,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Sets.newConcurrentHashSet;
 
 /**
  * Abstract base for repositories storing information about tenants.
@@ -45,8 +45,8 @@ public abstract class TenantRepository<T extends Message, E extends TenantReposi
         extends DefaultRecordBasedRepository<TenantId, E, T>
         implements TenantIndex {
 
-    private final Set<TenantId> cache = Sets.newConcurrentHashSet();
-    private final Set<TenantIdConsumer> callbacks = Sets.newConcurrentHashSet();
+    private final Set<TenantId> cache = newConcurrentHashSet();
+    private final Set<TenantIdConsumer> callbacks = newConcurrentHashSet();
 
     @Override
     public void initStorage(StorageFactory factory) {
@@ -66,7 +66,6 @@ public abstract class TenantRepository<T extends Message, E extends TenantReposi
         if (cache.contains(id)) {
             return;
         }
-
         final Optional<E> optional = find(id);
         if (!optional.isPresent()) {
             final E newEntity = create(id);
@@ -117,8 +116,8 @@ public abstract class TenantRepository<T extends Message, E extends TenantReposi
     @Override
     public void forEachTenant(TenantIdConsumer operation) {
         checkNotNull(operation);
-        final Set<TenantId> ids = getAll();
         callbacks.add(operation);
+        final Set<TenantId> ids = getAll();
         for (TenantId tenantId : ids) {
             operation.accept(tenantId);
         }
