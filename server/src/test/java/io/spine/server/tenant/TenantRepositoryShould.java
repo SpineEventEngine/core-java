@@ -26,7 +26,14 @@ import io.spine.server.BoundedContext;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Collection;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+
+import static com.google.common.collect.ImmutableList.of;
 import static io.spine.core.given.GivenTenantId.newUuid;
+import static java.util.concurrent.Executors.newFixedThreadPool;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.spy;
@@ -36,16 +43,13 @@ import static org.mockito.Mockito.verify;
 /**
  * @author Alexander Yevsyukov
  */
-public class TenantRepositoryShould {
+public class TenantRepositoryShould extends TenantIndexShould {
 
     private TenantRepository<?, ?> repository;
 
     @Before
     public void setUp() {
-        final BoundedContext bc = BoundedContext.newBuilder().build();
-        TenantRepository<?, ?> impl = new TenantRepositoryImpl();
-        impl.initStorage(bc.getStorageFactory());
-        repository = spy(impl);
+        this.repository = createIndex();
     }
 
     @Test
@@ -78,6 +82,48 @@ public class TenantRepositoryShould {
         assertFalse(repository.unCache(tenantId));
     }
 
+    @Override
+    protected TenantRepository<?, ?> createIndex() {
+        final BoundedContext bc = BoundedContext.newBuilder().build();
+        TenantRepository<?, ?> impl = new TenantRepositoryImpl();
+        impl.initStorage(bc.getStorageFactory());
+        return spy(impl);
+    }
+
+    @Test
+    public void apply_operation_for_each_tenant() {
+        final MemoizingConsumer operation = new MemoizingConsumer();
+        final Set<TenantId> current = repository.getAll();
+        assertTrue(current.isEmpty());
+
+        final TenantId first = newUuid();
+        final TenantId second = newUuid();
+        repository.keep(first);
+        repository.forEachTenant(operation);
+
+        operation.assertContains(of(first));
+        repository.keep(second);
+        operation.assertContains(of(first, second));
+    }
+
+    @Test
+    public void apply_operation_for_each_tenant_concurrently() throws InterruptedException {
+        final int parallelism = 5;
+        final Collection<TenantId> tenants = generate(parallelism);
+        final MemoizingConsumer operation = new MemoizingConsumer();
+        repository.forEachTenant(operation);
+        final ExecutorService executor = newFixedThreadPool(parallelism);
+        for (final TenantId tenant : tenants) {
+            executor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    repository.keep(tenant);
+                }
+            });
+        }
+        executor.awaitTermination(2, SECONDS);
+        operation.assertContainsInAnyOrder(tenants);
+    }
 
     private static class TenantRepositoryImpl
             extends TenantRepository<Timestamp, DefaultTenantRepository.Entity> {
