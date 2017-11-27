@@ -20,13 +20,14 @@
 
 package io.spine.server.tenant;
 
-import com.google.common.collect.ImmutableSet;
+import io.spine.annotation.SPI;
 import io.spine.core.TenantId;
 import io.spine.server.storage.StorageFactory;
 
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.ImmutableSet.of;
 
 /**
  * The index of tenant IDs in a multi-tenant application.
@@ -46,6 +47,18 @@ public interface TenantIndex extends AutoCloseable {
     Set<TenantId> getAll();
 
     /**
+     * Applies the given {@code operation} onto all the tenant IDs, currently present and added
+     * in future.
+     *
+     * <p>The operation is applied to {@linkplain #getAll() all present tenant IDs} at once. When
+     * new IDs are {@linkplain #keep(TenantId) added} to the index, the operation is applied
+     * to them as well.
+     *
+     * @param operation the operation to apply to all the tenant IDs
+     */
+    void forEachTenant(TenantIdConsumer operation);
+
+    /**
      * Closes the index for further read or write operations.
      *
      * <p>Implementations may throw specific exceptions.
@@ -57,26 +70,6 @@ public interface TenantIndex extends AutoCloseable {
      * Provides default implementations of {@code TenantIndex}.
      */
     class Factory {
-
-        private static final ImmutableSet<TenantId> singleTenantIndexSet =
-                ImmutableSet.of(CurrentTenant.singleTenant());
-
-        private static final TenantIndex singleTenantIndex = new TenantIndex() {
-            @Override
-            public void keep(TenantId id) {
-                // Do nothing.
-            }
-
-            @Override
-            public Set<TenantId> getAll() {
-                return singleTenantIndexSet;
-            }
-
-            @Override
-            public void close() {
-                // Do nothing.
-            }
-        };
 
         private Factory() {
             // Prevent instantiation of this utility class.
@@ -102,7 +95,55 @@ public interface TenantIndex extends AutoCloseable {
          * Creates an {@code TenantIndex} to be used in single-tenant context.
          */
         public static TenantIndex singleTenant() {
-            return singleTenantIndex;
+            return SingleTenantIndex.INSTANCE;
         }
+
+        /**
+         * The single-tenant {@code TenantIndex} implementation.
+         */
+        private enum SingleTenantIndex implements TenantIndex {
+
+            INSTANCE;
+
+            private final Set<TenantId> singleTenantIndexSet = of(CurrentTenant.singleTenant());
+
+            @Override
+            public void keep(TenantId id) {
+                // Do nothing.
+            }
+
+            @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK for an immutable collection.
+            @Override
+            public Set<TenantId> getAll() {
+                return singleTenantIndexSet;
+            }
+
+            @Override
+            public void forEachTenant(TenantIdConsumer operation) {
+                checkNotNull(operation);
+                operation.accept(CurrentTenant.singleTenant());
+            }
+
+            @Override
+            public void close() {
+                // Do nothing.
+            }
+        }
+    }
+
+    /**
+     * A function interface of a operation on {@code TenantId}.
+     *
+     * @see #forEachTenant(TenantIdConsumer)
+     */
+    @SPI
+    interface TenantIdConsumer {
+
+        /**
+         * Accepts a {@code TenantId} and performs an operation upon it.
+         *
+         * @param tenantId the operation argument
+         */
+        void accept(TenantId tenantId);
     }
 }

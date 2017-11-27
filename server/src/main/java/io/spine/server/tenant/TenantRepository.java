@@ -33,6 +33,8 @@ import io.spine.server.storage.StorageFactory;
 import java.util.Iterator;
 import java.util.Set;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * Abstract base for repositories storing information about tenants.
  *
@@ -44,6 +46,7 @@ public abstract class TenantRepository<T extends Message, E extends TenantReposi
         implements TenantIndex {
 
     private final Set<TenantId> cache = Sets.newConcurrentHashSet();
+    private final Set<TenantIdConsumer> callbacks = Sets.newConcurrentHashSet();
 
     @Override
     public void initStorage(StorageFactory factory) {
@@ -68,6 +71,7 @@ public abstract class TenantRepository<T extends Message, E extends TenantReposi
         if (!optional.isPresent()) {
             final E newEntity = create(id);
             store(newEntity);
+            invokeCallbacks(id);
         }
         cache(id);
     }
@@ -108,6 +112,22 @@ public abstract class TenantRepository<T extends Message, E extends TenantReposi
                                      : ImmutableSet.<TenantId>of();
         cache.addAll(result);
         return result;
+    }
+
+    @Override
+    public void forEachTenant(TenantIdConsumer operation) {
+        checkNotNull(operation);
+        final Set<TenantId> ids = getAll();
+        callbacks.add(operation);
+        for (TenantId tenantId : ids) {
+            operation.accept(tenantId);
+        }
+    }
+
+    private void invokeCallbacks(TenantId newTenantId) {
+        for (TenantIdConsumer operation : callbacks) {
+            operation.accept(newTenantId);
+        }
     }
 
     /**
