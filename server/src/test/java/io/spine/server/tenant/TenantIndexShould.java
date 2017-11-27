@@ -20,23 +20,47 @@
 
 package io.spine.server.tenant;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.testing.NullPointerTester;
 import io.spine.core.TenantId;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
+import io.spine.server.tenant.TenantIndex.TenantIdConsumer;
+import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 
+import static com.google.common.collect.Lists.newArrayListWithExpectedSize;
+import static io.spine.core.given.GivenTenantId.newUuid;
 import static io.spine.server.BoundedContext.newName;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
-import static org.junit.Assert.assertEquals;
+import static java.util.Collections.synchronizedList;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 
 /**
  * @author Alexander Yevsyukov
  */
-public class TenantIndexShould {
+public abstract class TenantIndexShould {
+
+    private static final TenantId[] EMPTY_ARRAY = {};
+
+    private TenantIndex index;
+
+    protected final TenantIndex getIndex() {
+        return index;
+    }
+
+    protected abstract TenantIndex createIndex();
+
+    @Before
+    public void beforeEach() {
+        index = createIndex();
+    }
 
     @Test
     public void provide_utility_factory() {
@@ -52,13 +76,30 @@ public class TenantIndexShould {
                 .testAllPublicStaticMethods(TenantIndex.Factory.class);
     }
 
-    @Test
-    public void provide_tenant_index_for_single_tenant_context() {
-        final TenantIndex index = TenantIndex.Factory.singleTenant();
+    static Collection<TenantId> generate(int count) {
+        final Collection<TenantId> tenants = newArrayListWithExpectedSize(count);
+        for (int i = 0; i < count; i++) {
+            tenants.add(newUuid());
+        }
+        return tenants;
+    }
 
-        final List<TenantId> items = ImmutableList.copyOf(index.getAll());
+    static class MemoizingConsumer implements TenantIdConsumer {
 
-        assertEquals(1, items.size());
-        assertEquals(CurrentTenant.singleTenant(), items.get(0));
+        private final List<TenantId> accepted = synchronizedList(new LinkedList<TenantId>());
+
+        void assertContainsInAnyOrder(Collection<TenantId> expected) {
+            assertThat(accepted, containsInAnyOrder(expected.toArray(EMPTY_ARRAY)));
+        }
+
+        void assertContains(Collection<TenantId> expected) {
+            assertThat(accepted, contains(expected.toArray(EMPTY_ARRAY)));
+        }
+
+        @Override
+        public void accept(TenantId tenantId) {
+            assertNotNull(tenantId);
+            accepted.add(tenantId);
+        }
     }
 }
