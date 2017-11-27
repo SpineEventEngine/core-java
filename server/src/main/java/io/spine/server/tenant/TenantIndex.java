@@ -47,12 +47,15 @@ public interface TenantIndex extends AutoCloseable {
     Set<TenantId> getAll();
 
     /**
-     * Applies the given {@code operation} onto all the tenant IDs, currently present and added
-     * in future.
+     * Applies the given {@code operation} to all the tenant IDs currently present in the index
+     * and those added in future.
      *
      * <p>The operation is applied to {@linkplain #getAll() all present tenant IDs} at once. When
      * new IDs are {@linkplain #keep(TenantId) added} to the index, the operation is applied
      * to them as well.
+     *
+     * <p>Note that the operation may be applied to a single {@code TenantId} more then once. In
+     * general, the caller may rely on at-least-once behavior.
      *
      * @param operation the operation to apply to all the tenant IDs
      */
@@ -132,7 +135,7 @@ public interface TenantIndex extends AutoCloseable {
     }
 
     /**
-     * A function interface of a operation on {@code TenantId}.
+     * A functional interface of an operation on {@code TenantId}.
      *
      * @see #forEachTenant(TenantIdConsumer)
      */
@@ -140,7 +143,7 @@ public interface TenantIndex extends AutoCloseable {
     interface TenantIdConsumer {
 
         /**
-         * Accepts a {@code TenantId} and performs an operation upon it.
+         * Accepts a {@code TenantId} and performs an operation on it.
          *
          * @param tenantId the operation argument
          */
