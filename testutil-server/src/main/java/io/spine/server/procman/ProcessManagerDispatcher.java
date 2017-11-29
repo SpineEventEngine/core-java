@@ -67,7 +67,7 @@ public class ProcessManagerDispatcher {
         checkNotNull(event);
 
         final PmTransaction<?, ?, ?> tx = PmTransaction.start(pm);
-        List<Event> eventMessages = pm.dispatchEvent(event);
+        final List<Event> eventMessages = pm.dispatchEvent(event);
         tx.commit();
 
         return eventMessages;
