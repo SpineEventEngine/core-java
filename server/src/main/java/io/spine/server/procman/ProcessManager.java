@@ -109,11 +109,11 @@ public abstract class ProcessManager<I,
     /**
      * {@inheritDoc}
      *
-     * <p>In {@code ProcessManager}, this method must be called from either an event applier or
+     * <p>In {@code ProcessManager}, this method must be called from an event/rejection reactor or
      * a command handler.
      *
-     * @throws IllegalStateException if the method is called from outside an event applier or
-     *                               a command handler.
+     * @throws IllegalStateException if the method is called from outside an event/rejection reactor
+     *                               or a command handler.
      */
     @Override
     @VisibleForTesting
