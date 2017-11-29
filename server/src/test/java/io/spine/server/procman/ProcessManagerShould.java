@@ -70,6 +70,7 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 
@@ -122,7 +123,11 @@ public class ProcessManagerShould {
 
     @Test
     public void dispatch_event() {
-        testDispatchEvent(Sample.messageOfType(PmProjectStarted.class));
+        final List<? extends Message> eventMessages = testDispatchEvent(
+                Sample.messageOfType(PmProjectStarted.class));
+
+        assertEquals(1, eventMessages.size());
+        assertTrue(eventMessages.get(0) instanceof Event);
     }
 
     @Test
@@ -132,10 +137,11 @@ public class ProcessManagerShould {
         testDispatchEvent(Sample.messageOfType(PmProjectStarted.class));
     }
 
-    private void testDispatchEvent(Message eventMessage) {
+    private List<? extends Message> testDispatchEvent(Message eventMessage) {
         final Event event = eventFactory.createEvent(eventMessage);
-        dispatch(processManager, EventEnvelope.of(event));
+        final List<Event> result = dispatch(processManager, EventEnvelope.of(event));
         assertEquals(pack(eventMessage), processManager.getState());
+        return result;
     }
 
     @Test
