@@ -123,8 +123,8 @@ public class ProcessManagerShould {
 
     @Test
     public void dispatch_event() {
-        final List<? extends Message> eventMessages = testDispatchEvent(
-                Sample.messageOfType(PmProjectStarted.class));
+        final List<? extends Message> eventMessages =
+                testDispatchEvent(Sample.messageOfType(PmProjectStarted.class));
 
         assertEquals(1, eventMessages.size());
         assertTrue(eventMessages.get(0) instanceof Event);
