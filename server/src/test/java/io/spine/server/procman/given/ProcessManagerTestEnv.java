@@ -38,6 +38,7 @@ import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.command.PmAddTask;
 import io.spine.test.procman.command.PmCreateProject;
 import io.spine.test.procman.command.PmStartProject;
+import io.spine.test.procman.event.PmNotificationSent;
 import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.event.PmTaskAdded;
@@ -137,9 +138,9 @@ public class ProcessManagerTestEnv {
         }
 
         @React
-        public Empty on(PmProjectStarted event, EventContext ignored) {
+        public Message on(PmProjectStarted event, EventContext ignored) {
             getBuilder().mergeFrom(pack(event));
-            return Empty.getDefaultInstance();
+            return Sample.messageOfType(PmNotificationSent.class);
         }
 
 
