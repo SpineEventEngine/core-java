@@ -39,6 +39,11 @@ message PmTaskAdded {
     Task task = 2;
 }
 
+message PmNotificationSent {
+    ProjectId project_id = 1;
+    Task task = 2;
+}
+
 message PmProjectStarted {
     ProjectId project_id = 1;
 }
