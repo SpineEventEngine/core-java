@@ -106,8 +106,17 @@ public abstract class ProcessManager<I,
         return commandBus;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>In {@code ProcessManager}, this method must be called from an event reactor, a rejection reactor,
+     * or a command handler.
+     *
+     * @throws IllegalStateException if the method is called from outside an event/rejection reactor
+     *                               or a command handler.
+     */
     @Override
-    @VisibleForTesting      // Overridden to expose this method to tests.
+    @VisibleForTesting
     protected B getBuilder() {
         return super.getBuilder();
     }

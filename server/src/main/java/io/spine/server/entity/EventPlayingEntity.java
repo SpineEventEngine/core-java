@@ -92,10 +92,10 @@ public abstract class EventPlayingEntity <I,
     /**
      * Obtains the instance of the state builder.
      *
-     * <p>This method must be called only from within an event applier.
+     * <p>This method must be called only from within an active transaction.
      *
      * @return the instance of the new state builder
-     * @throws IllegalStateException if the method is called from outside an event applier
+     * @throws IllegalStateException if the method is called not within a transaction
      */
     protected B getBuilder() {
         return tx().getBuilder();
