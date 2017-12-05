@@ -20,20 +20,21 @@
 package io.spine.server.integration;
 
 /**
- * A channel dedicated to exchanging the messages of a single message type.
+ * A channel dedicated to exchanging the messages.
  *
- * <p>The class of message serves as a channel key.
+ * <p>Equipped with a channel identifier, serving to distinguish this channel among other channels
+ * in the application.
  *
  * @author Alex Tymchenko
  */
 public interface MessageChannel extends AutoCloseable {
 
     /**
-     * Returns a class of messages that are being exchanged within this channel.
+     * An identifier of this channel.
      *
-     * @return the message class
+     * @return the value of the channel identifier
      */
-    ExternalMessageClass getMessageClass();
+    ChannelId getId();
 
     /**
      * Allows to understand whether this channel is stale and can be closed.

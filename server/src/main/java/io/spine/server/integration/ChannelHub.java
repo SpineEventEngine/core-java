@@ -22,7 +22,6 @@ package io.spine.server.integration;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import io.spine.annotation.SPI;
-import io.spine.type.MessageClass;
 
 import java.util.Map;
 import java.util.Set;
@@ -34,7 +33,7 @@ import static java.util.Collections.synchronizedMap;
 /**
  * The hub of channels, grouped in some logical way.
  *
- * <p>Serves for channel creation and storage-per-key, which in a way makes the hub similar to
+ * <p>Serves for channel creation and storage-per-ID, which in a way makes the hub similar to
  * an entity repository.
  *
  * @author Alex Tymchenko
@@ -43,64 +42,68 @@ import static java.util.Collections.synchronizedMap;
 public abstract class ChannelHub<C extends MessageChannel> implements AutoCloseable {
 
     private final TransportFactory transportFactory;
-    private final Map<ExternalMessageClass, C> channels =
-            synchronizedMap(Maps.<ExternalMessageClass, C>newHashMap());
+    private final Map<ChannelId, C> channels =
+            synchronizedMap(Maps.<ChannelId, C>newHashMap());
 
     protected ChannelHub(TransportFactory transportFactory) {
         this.transportFactory = transportFactory;
     }
 
     /**
-     * Creates a new channel under the specified key
+     * Creates a new channel under the specified ID
      *
-     * @param channelKey the channel key to use
+     * @param channelId the channel ID to use
      * @return the created channel.
      */
-    protected abstract C newChannel(MessageClass channelKey);
+    protected abstract C newChannel(ChannelId channelId);
 
-    public synchronized Set<ExternalMessageClass> keys() {
+    /**
+     * Returns a set of channel identifiers, that are already served by this hub.
+     *
+     * @return a set of channel IDs served by this instance of channel hub
+     */
+    public synchronized Set<ChannelId> ids() {
         return ImmutableSet.copyOf(channels.keySet());
     }
 
     /**
-     * Obtains a channel from this hub according to the channel key.
+     * Obtains a channel from this hub according to the channel ID.
      *
-     * <p>If there is no channel with this key in this hub, creates it and adds to the hub
+     * <p>If there is no channel with this ID in this hub, creates it and adds to the hub
      * prior to returning it as a result of this method call.
      *
-     * @param channelKey the channel key to obtain a channel with
+     * @param channelId the channel ID to obtain a channel with
      * @return a channel with the key
      */
-    public synchronized C get(MessageClass channelKey) {
-        final ExternalMessageClass key = ExternalMessageClass.of(channelKey);
-        if(!channels.containsKey(key)) {
-            final C newChannel = newChannel(key);
-            channels.put(key, newChannel);
+    public synchronized C get(ChannelId channelId) {
+        if(!channels.containsKey(channelId)) {
+            final C newChannel = newChannel(channelId);
+            channels.put(channelId, newChannel);
         }
-        return channels.get(key);
+        return channels.get(channelId);
     }
 
     /**
      * Closes the stale channels and removes those from the hub.
      */
     public void closeStaleChannels() {
-        final Set<ExternalMessageClass> staleChannels = detectStale();
-        for (ExternalMessageClass cls : staleChannels) {
-            channels.remove(cls);
+        final Set<ChannelId> staleChannels = detectStale();
+        for (ChannelId id : staleChannels) {
+            channels.remove(id);
         }
     }
 
-    private Set<ExternalMessageClass> detectStale() {
-        final Set<ExternalMessageClass> toRemove = newHashSet();
-        for (ExternalMessageClass cls : channels.keySet()) {
-            final C channel = channels.get(cls);
+    private Set<ChannelId> detectStale() {
+        final Set<ChannelId> toRemove = newHashSet();
+        for (ChannelId id : channels.keySet()) {
+            final C channel = channels.get(id);
             if(channel.isStale()) {
                 try {
                     channel.close();
                 } catch (Exception e) {
                     throw illegalStateWithCauseOf(e);
                 } finally {
-                    toRemove.add(cls);
+                    toRemove.add(id);
                 }
             }
         }

@@ -23,15 +23,14 @@ import com.google.common.base.Function;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
+import io.spine.server.integration.ChannelId;
 import io.spine.server.integration.Publisher;
 import io.spine.server.integration.Subscriber;
 import io.spine.server.integration.TransportFactory;
-import io.spine.type.MessageClass;
 
 import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.server.integration.ExternalMessageClass.of;
 
 /**
  * In-memory implementation of the {@link TransportFactory}.
@@ -46,8 +45,8 @@ public final class InMemoryTransportFactory implements TransportFactory {
     /**
      * An in-memory storage of subscribers per message class.
      */
-    private final Multimap<MessageClass, InMemorySubscriber> subscribers =
-            Multimaps.synchronizedMultimap(HashMultimap.<MessageClass, InMemorySubscriber>create());
+    private final Multimap<ChannelId, InMemorySubscriber> subscribers =
+            Multimaps.synchronizedMultimap(HashMultimap.<ChannelId, InMemorySubscriber>create());
 
     /** Prevent direct instantiation from the outside. */
     private InMemoryTransportFactory() {}
@@ -62,33 +61,33 @@ public final class InMemoryTransportFactory implements TransportFactory {
     }
 
     @Override
-    public Publisher createPublisher(MessageClass messageClass) {
-        final InMemoryPublisher result = new InMemoryPublisher(of(messageClass),
+    public Publisher createPublisher(ChannelId channelId) {
+        final InMemoryPublisher result = new InMemoryPublisher(channelId,
                                                                providerOf(subscribers));
         return result;
     }
 
     @Override
-    public Subscriber createSubscriber(MessageClass messageClass) {
-        final InMemorySubscriber subscriber = new InMemorySubscriber(of(messageClass));
-        subscribers.put(messageClass, subscriber);
+    public Subscriber createSubscriber(ChannelId channelId) {
+        final InMemorySubscriber subscriber = new InMemorySubscriber(channelId);
+        subscribers.put(channelId, subscriber);
         return subscriber;
     }
 
     /**
      * Wraps currently registered in-memory subscribers into a function, that returns a subset
-     * of subscribers per message.
+     * of subscribers per channel ID.
      *
-     * @param subscribers currently registered subscribers and classes of messages they serve
-     * @return a provider function allowing to fetch subscribers per message class.
+     * @param subscribers currently registered subscribers and their channel identifiers
+     * @return a provider function allowing to fetch subscribers by the channel ID.
      */
-    private static Function<MessageClass, Iterable<InMemorySubscriber>>
-    providerOf(final Multimap<MessageClass, InMemorySubscriber> subscribers) {
-        return new Function<MessageClass, Iterable<InMemorySubscriber>>() {
+    private static Function<ChannelId, Iterable<InMemorySubscriber>>
+    providerOf(final Multimap<ChannelId, InMemorySubscriber> subscribers) {
+        return new Function<ChannelId, Iterable<InMemorySubscriber>>() {
             @Override
-            public Iterable<InMemorySubscriber> apply(@Nullable MessageClass input) {
-                checkNotNull(input);
-                return subscribers.get(input);
+            public Iterable<InMemorySubscriber> apply(@Nullable ChannelId channelId) {
+                checkNotNull(channelId);
+                return subscribers.get(channelId);
             }
         };
     }

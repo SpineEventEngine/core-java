@@ -68,7 +68,8 @@ final class DomesticRejectionPublisher extends RejectionSubscriber {
         final ExternalMessage message = ExternalMessages.of(rejection, boundedContextName);
         final ExternalMessageClass messageClass =
                 ExternalMessageClass.of(envelope.getMessageClass());
-        final Publisher channel = publisherHub.get(messageClass);
+        final ChannelId channelId = IntegrationChannels.toId(messageClass);
+        final Publisher channel = publisherHub.get(channelId);
         channel.publish(AnyPacker.pack(envelope.getId()), message);
 
         return ImmutableSet.of(channel.toString());

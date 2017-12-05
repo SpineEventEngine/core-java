@@ -35,20 +35,18 @@ import io.spine.type.MessageClass;
 public interface TransportFactory {
 
     /**
-     * Creates a {@link Publisher} for the messages of given class.
+     * Creates a {@link Publisher} channel with the given ID.
      *
-     * @param messageClass the class of messages that will be published
-     *                     via a created {@code Publisher}
+     * @param channelId the ID of the channel.
      * @return a new {@code Publisher} instance
      */
-    Publisher createPublisher(MessageClass messageClass);
+    Publisher createPublisher(ChannelId channelId);
 
     /**
-     * Creates a {@link Subscriber} for the messages of given class.
+     * Creates a {@link Subscriber} channel with the given ID.
      *
-     * @param messageClass the class of messages that will be received
-     *                     via a created {@code Subscriber}
+     * @param messageClass the ID of the channel.
      * @return a new {@code Subscriber} instance
      */
-    Subscriber createSubscriber(MessageClass messageClass);
+    Subscriber createSubscriber(ChannelId messageClass);
 }

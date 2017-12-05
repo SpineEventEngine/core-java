@@ -54,6 +54,8 @@ import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.Identifier.newUuid;
 import static io.spine.Identifier.pack;
 import static io.spine.server.bus.Buses.acknowledge;
+import static io.spine.server.integration.IntegrationChannels.fromId;
+import static io.spine.server.integration.IntegrationChannels.toId;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static io.spine.validate.Validate.checkNotDefault;
 import static java.lang.String.format;
@@ -119,6 +121,14 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
                                                  ExternalMessageClass,
                                                  ExternalMessageDispatcher<?>> {
 
+    /**
+     * An identification of the channel, serving to exchange {@linkplain RequestForExternalMessages
+     * configuration messages} with other parties, such as instances of {@code IntegrationBus}
+     * from other {@code BoundedContext}s.
+     */
+    private static final ChannelId CONFIG_EXCHANGE_CHANNEL_ID =
+            toId(RequestForExternalMessages.class);
+
     private final Iterable<BusAdapter<?, ?>> localBusAdapters;
     private final BoundedContextName boundedContextName;
     private final SubscriberHub subscriberHub;
@@ -132,7 +142,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
         this.publisherHub = new PublisherHub(builder.transportFactory);
         this.localBusAdapters = createAdapters(builder, publisherHub);
         configurationChangeObserver = observeConfigurationChanges();
-        subscriberHub.get(ExternalMessageClass.of(RequestForExternalMessages.class))
+        subscriberHub.get(CONFIG_EXCHANGE_CHANNEL_ID)
                      .addObserver(configurationChangeObserver);
     }
 
@@ -238,13 +248,13 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
     public void register(ExternalMessageDispatcher<?> dispatcher) {
         super.register(dispatcher);
 
-        // Remember the message types, that we have been subscribed before.
-        final Set<ExternalMessageClass> requestedBefore = subscriberHub.keys();
+        // Remember the channel IDs, that we have been subscribed before.
+        final Set<ChannelId> requestedBefore = subscriberHub.ids();
 
         // Subscribe to incoming messages of requested types.
         subscribeToIncoming(dispatcher);
 
-        final Set<ExternalMessageClass> currentlyRequested = subscriberHub.keys();
+        final Set<ChannelId> currentlyRequested = subscriberHub.ids();
         if (!currentlyRequested.equals(requestedBefore)) {
 
             // Notify others that the requested message set has been changed.
@@ -262,13 +272,13 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
     public void unregister(ExternalMessageDispatcher<?> dispatcher) {
         super.unregister(dispatcher);
 
-        // Remember the message types, that we have been subscribed before.
-        final Set<ExternalMessageClass> requestedBefore = subscriberHub.keys();
+        // Remember the IDs of channels, that we have been subscribed before.
+        final Set<ChannelId> requestedBefore = subscriberHub.ids();
 
-        // Subscribe to incoming messages of requested types.
+        // Unsubscribe from the types requested by this dispatcher.
         unsubscribeFromIncoming(dispatcher);
 
-        final Set<ExternalMessageClass> currentlyRequested = subscriberHub.keys();
+        final Set<ChannelId> currentlyRequested = subscriberHub.ids();
         if (!currentlyRequested.equals(requestedBefore)) {
             notifyOfNeeds(currentlyRequested);
         }
@@ -285,18 +295,17 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
      *         the set of message types that are now requested by this instance of
      *         integration bus
      */
-    private void notifyOfNeeds(Iterable<ExternalMessageClass> currentlyRequested) {
+    private void notifyOfNeeds(Iterable<ChannelId> currentlyRequested) {
         final RequestForExternalMessages.Builder resultBuilder =
                 RequestForExternalMessages.newBuilder();
-        for (ExternalMessageClass messageClass : currentlyRequested) {
-            final ExternalMessageType type = toExternalMessageType(messageClass);
+        for (ChannelId channelId : currentlyRequested) {
+            final ExternalMessageType type = fromId(channelId);
             resultBuilder.addRequestedMessageTypes(type);
         }
         final RequestForExternalMessages result = resultBuilder.build();
         final ExternalMessage externalMessage = ExternalMessages.of(result,
                                                                     boundedContextName);
-        final ExternalMessageClass channelId = ExternalMessageClass.of(result.getClass());
-        publisherHub.get(channelId)
+        publisherHub.get(CONFIG_EXCHANGE_CHANNEL_ID)
                     .publish(pack(newUuid()), externalMessage);
     }
 
@@ -349,7 +358,8 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
         final IntegrationBus integrationBus = this;
         final Iterable<ExternalMessageClass> transformed = dispatcher.getMessageClasses();
         for (final ExternalMessageClass imClass : transformed) {
-            final Subscriber subscriber = subscriberHub.get(imClass);
+            final ChannelId channelId = toId(imClass);
+            final Subscriber subscriber = subscriberHub.get(channelId);
             subscriber.addObserver(new ExternalMessageObserver(boundedContextName,
                                                                imClass.value(),
                                                                integrationBus));
@@ -360,7 +370,8 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
         final IntegrationBus integrationBus = this;
         final Iterable<ExternalMessageClass> transformed = dispatcher.getMessageClasses();
         for (final ExternalMessageClass imClass : transformed) {
-            final Subscriber subscriber = subscriberHub.get(imClass);
+            final ChannelId channelId = toId(imClass);
+            final Subscriber subscriber = subscriberHub.get(channelId);
             subscriber.removeObserver(new ExternalMessageObserver(boundedContextName,
                                                                   imClass.value(),
                                                                   integrationBus));
@@ -377,7 +388,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
 
         configurationChangeObserver.close();
         // Declare that this instance has no needs.
-        notifyOfNeeds(ImmutableSet.<ExternalMessageClass>of());
+        notifyOfNeeds(ImmutableSet.<ChannelId>of());
 
         subscriberHub.close();
         publisherHub.close();

@@ -36,7 +36,7 @@ public class SubscriberHub extends ChannelHub<Subscriber> {
     }
 
     @Override
-    protected Subscriber newChannel(MessageClass channelKey) {
-        return transportFactory().createSubscriber(channelKey);
+    protected Subscriber newChannel(ChannelId channelId) {
+        return transportFactory().createSubscriber(channelId);
     }
 }

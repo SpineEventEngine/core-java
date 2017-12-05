@@ -36,7 +36,7 @@ public class PublisherHub extends ChannelHub<Publisher> {
     }
 
     @Override
-    protected Publisher newChannel(MessageClass channelKey) {
-        return transportFactory().createPublisher(channelKey);
+    protected Publisher newChannel(ChannelId channelId) {
+        return transportFactory().createPublisher(channelId);
     }
 }
