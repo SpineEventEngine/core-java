@@ -27,6 +27,9 @@ import io.grpc.stub.StreamObserver;
 import io.spine.core.Ack;
 import io.spine.core.MessageEnvelope;
 import io.spine.core.Rejection;
+import io.spine.server.transport.PublisherHub;
+import io.spine.server.transport.SubscriberHub;
+import io.spine.server.transport.TransportFactory;
 import io.spine.type.MessageClass;
 
 import javax.annotation.Nullable;
@@ -36,6 +39,7 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Iterables.isEmpty;
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Lists.newLinkedList;
@@ -72,6 +76,21 @@ public abstract class Bus<T extends Message,
      */
     @Nullable
     private FilterChain<E, ?> filterChain;
+
+    /**
+     * A hub of channels, used to publish messages, when delivering them to dispatchers.
+     */
+    private PublisherHub publisherHub;
+
+    /**
+     * A hub of channels, used to subscribe dispatchers to the messages of their interest.
+     */
+    private SubscriberHub subscriberHub;
+
+    protected Bus(AbstractBuilder<E, T, ?, ?> builder) {
+        this.publisherHub = new PublisherHub(builder.transportFactory);
+        this.subscriberHub = new SubscriberHub(builder.transportFactory);
+    }
 
     /**
      * Registers the passed dispatcher.
@@ -342,9 +361,12 @@ public abstract class Bus<T extends Message,
      */
     public abstract static class AbstractBuilder<E extends MessageEnvelope<?, T, ?>,
                                                  T extends Message,
-                                                 B extends AbstractBuilder<E, T, B>> {
+                                                 B extends AbstractBuilder<E, T, B, ?>,
+                                                 R extends Bus<T, E, ?, ?>> {
 
         private final Deque<BusFilter<E>> filters;
+
+        private TransportFactory transportFactory;
 
         /**
          * Creates a new instance of the bus builder.
@@ -389,13 +411,31 @@ public abstract class Bus<T extends Message,
             return new ConcurrentLinkedDeque<>(filters);
         }
 
+        public B setTransportFactory(TransportFactory transportFactory) {
+            checkNotNull(transportFactory);
+            this.transportFactory = transportFactory;
+            return self();
+        }
+
+        public Optional<TransportFactory> getTransportFactory() {
+            return Optional.fromNullable(transportFactory);
+        }
+
         /**
          * Creates new instance of {@code Bus} with the set parameters.
          *
          * <p>It is recommended to specify the exact resulting type of the bus in the return type
          * when overriding this method.
          */
-        public abstract Bus<?, E, ?, ?> build();
+        public R build() {
+            checkState(transportFactory != null,
+                       "`transportFactory` must be set for the Bus builder.");
+
+            final R bus = doBuild();
+            return bus;
+        }
+
+        protected abstract R doBuild();
 
         /**
          * @return {@code this} reference to avoid redundant casts

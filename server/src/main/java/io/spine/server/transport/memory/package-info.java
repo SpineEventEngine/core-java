@@ -17,36 +17,15 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.integration;
-
-import io.spine.annotation.SPI;
-import io.spine.type.MessageClass;
 
 /**
- * A factory for creating channel-based transport for {@code Message} inter-exchange between the
- * current deployment component and other application parts.
+ * This package provides implementation of in-memory
+ * {@link io.spine.server.transport.TransportFactory} routines.
  *
- * Inspired by <a href="http://www.enterpriseintegrationpatterns.com/patterns/messaging/PublishSubscribeChannel.html">
- * Publish-Subscriber Channel pattern.</a>
- *
- * @author Alex Tymchenko
+ * <p>Should be used in test purposes only.
  */
-@SPI
-public interface TransportFactory {
 
-    /**
-     * Creates a {@link Publisher} channel with the given ID.
-     *
-     * @param channelId the ID of the channel.
-     * @return a new {@code Publisher} instance
-     */
-    Publisher createPublisher(ChannelId channelId);
+@ParametersAreNonnullByDefault
+package io.spine.server.transport.memory;
 
-    /**
-     * Creates a {@link Subscriber} channel with the given ID.
-     *
-     * @param messageClass the ID of the channel.
-     * @return a new {@code Subscriber} instance
-     */
-    Subscriber createSubscriber(ChannelId messageClass);
-}
+import javax.annotation.ParametersAreNonnullByDefault;

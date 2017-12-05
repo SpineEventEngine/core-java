@@ -17,7 +17,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.integration.memory;
+package io.spine.server.transport.memory;
 
 import com.google.common.base.Function;
 import com.google.protobuf.Any;
@@ -26,9 +26,7 @@ import io.spine.core.Ack;
 import io.spine.server.bus.Buses;
 import io.spine.server.integration.ChannelId;
 import io.spine.server.integration.ExternalMessage;
-import io.spine.server.integration.ExternalMessageClass;
-import io.spine.server.integration.Publisher;
-import io.spine.type.MessageClass;
+import io.spine.server.transport.Publisher;
 
 /**
  * An in-memory implementation of the {@link Publisher}.

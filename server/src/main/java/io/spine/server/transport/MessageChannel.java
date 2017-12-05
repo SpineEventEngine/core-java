@@ -17,15 +17,31 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package io.spine.server.transport;
+
+import io.spine.server.integration.ChannelId;
 
 /**
- * This package provides implementation of in-memory
- * {@link io.spine.server.integration.TransportFactory} routines.
+ * A channel dedicated to exchanging the messages.
  *
- * <p>Should be used in test purposes only.
+ * <p>Equipped with a channel identifier, serving to distinguish this channel among other channels
+ * in the application.
+ *
+ * @author Alex Tymchenko
  */
+public interface MessageChannel extends AutoCloseable {
 
-@ParametersAreNonnullByDefault
-package io.spine.server.integration.memory;
+    /**
+     * An identifier of this channel.
+     *
+     * @return the value of the channel identifier
+     */
+    ChannelId getId();
 
-import javax.annotation.ParametersAreNonnullByDefault;
+    /**
+     * Allows to understand whether this channel is stale and can be closed.
+     *
+     * @return {@code true} if the channel is stale, {@code false} otherwise
+     */
+    boolean isStale();
+}

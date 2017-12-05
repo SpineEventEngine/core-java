@@ -24,6 +24,7 @@ import io.spine.core.BoundedContextName;
 import io.spine.core.MessageEnvelope;
 import io.spine.server.bus.Bus;
 import io.spine.server.bus.MessageDispatcher;
+import io.spine.server.transport.PublisherHub;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

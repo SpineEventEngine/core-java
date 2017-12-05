@@ -40,6 +40,7 @@ import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandstore.CommandStore;
 import io.spine.server.entity.given.Given;
 import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived;
+import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.server.model.ModelTests;
 import io.spine.server.procman.given.ProcessManagerTestEnv.AddTaskDispatcher;
 import io.spine.server.procman.given.ProcessManagerTestEnv.TestProcessManager;
@@ -108,6 +109,7 @@ public class ProcessManagerShould {
 
         commandBus = spy(CommandBus.newBuilder()
                                    .setCommandStore(commandStore)
+                                   .setTransportFactory(InMemoryTransportFactory.newInstance())
                                    .build());
         processManager = Given.processManagerOfClass(TestProcessManager.class)
                               .withId(ID)

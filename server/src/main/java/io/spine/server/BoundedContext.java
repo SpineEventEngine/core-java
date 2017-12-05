@@ -47,6 +47,8 @@ import io.spine.server.stand.StandStorage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.server.tenant.TenantIndex;
+import io.spine.server.transport.TransportFactory;
+import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.type.TypeName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -343,6 +345,7 @@ public final class BoundedContext
         private boolean multitenant;
         private TenantIndex tenantIndex;
         private Supplier<StorageFactory> storageFactorySupplier;
+        private TransportFactory transportFactory;
 
         private CommandBus.Builder commandBus;
         private EventBus.Builder eventBus;
@@ -447,14 +450,21 @@ public final class BoundedContext
             return this;
         }
 
+        public Builder setTransportFactory(TransportFactory transportFactory) {
+            this.transportFactory = checkNotNull(transportFactory);
+            return this;
+        }
+
         public BoundedContext build() {
             final StorageFactory storageFactory = getStorageFactory();
 
+            final TransportFactory transportFactory = getTransportFactory();
+
             initTenantIndex(storageFactory);
-            initCommandBus(storageFactory);
-            initEventBus(storageFactory);
+            initCommandBus(storageFactory, transportFactory);
+            initEventBus(storageFactory, transportFactory);
             initStand(storageFactory);
-            initIntegrationBus();
+            initIntegrationBus(transportFactory);
 
             final BoundedContext result = new BoundedContext(this);
             result.init();
@@ -464,7 +474,8 @@ public final class BoundedContext
 
         private StorageFactory getStorageFactory() {
             if (storageFactorySupplier == null) {
-                storageFactorySupplier = StorageFactorySwitch.newInstance(newName(name), multitenant);
+                storageFactorySupplier = StorageFactorySwitch.newInstance(newName(name),
+                                                                          multitenant);
             }
 
             final StorageFactory storageFactory = storageFactorySupplier.get();
@@ -478,6 +489,13 @@ public final class BoundedContext
             return storageFactory;
         }
 
+        private TransportFactory getTransportFactory() {
+            if (transportFactory == null) {
+                transportFactory = InMemoryTransportFactory.newInstance();
+            }
+            return transportFactory;
+        }
+
         private void initTenantIndex(StorageFactory factory) {
             if (tenantIndex == null) {
                 tenantIndex = multitenant
@@ -486,11 +504,12 @@ public final class BoundedContext
             }
         }
 
-        private void initCommandBus(StorageFactory factory) {
+        private void initCommandBus(StorageFactory factory, TransportFactory transportFactory) {
             if (commandBus == null) {
                 final CommandStore commandStore = createCommandStore(factory, tenantIndex);
                 commandBus = CommandBus.newBuilder()
                                        .setMultitenant(this.multitenant)
+                                       .setTransportFactory(transportFactory)
                                        .setCommandStore(commandStore);
             } else {
                 final Boolean commandBusMultitenancy = commandBus.isMultitenant();
@@ -506,18 +525,26 @@ public final class BoundedContext
                     final CommandStore commandStore = createCommandStore(factory, tenantIndex);
                     commandBus.setCommandStore(commandStore);
                 }
+                if(!commandBus.getTransportFactory().isPresent()) {
+                    commandBus.setTransportFactory(transportFactory);
+                }
             }
         }
 
-        private void initEventBus(StorageFactory storageFactory) {
+        private void initEventBus(StorageFactory storageFactory,
+                                  TransportFactory transportFactory) {
             if (eventBus == null) {
                 eventBus = EventBus.newBuilder()
-                                   .setStorageFactory(storageFactory);
+                                   .setStorageFactory(storageFactory)
+                                   .setTransportFactory(transportFactory);
             } else {
                 final boolean eventStoreConfigured = eventBus.getEventStore()
                                                              .isPresent();
                 if (!eventStoreConfigured) {
                     eventBus.setStorageFactory(storageFactory);
+                }
+                if(!eventBus.getTransportFactory().isPresent()) {
+                    eventBus.setTransportFactory(transportFactory);
                 }
             }
         }
@@ -538,9 +565,14 @@ public final class BoundedContext
             }
         }
 
-        private void initIntegrationBus() {
-            if(integrationBus == null) {
-                integrationBus = IntegrationBus.newBuilder();
+        private void initIntegrationBus(TransportFactory transportFactory) {
+            if (integrationBus == null) {
+                integrationBus = IntegrationBus.newBuilder()
+                                               .setTransportFactory(transportFactory);
+            }
+            if (!integrationBus.getTransportFactory()
+                               .isPresent()) {
+                integrationBus.setTransportFactory(transportFactory);
             }
         }
 

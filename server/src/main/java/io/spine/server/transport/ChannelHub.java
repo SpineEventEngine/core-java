@@ -17,11 +17,12 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.integration;
+package io.spine.server.transport;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import io.spine.annotation.SPI;
+import io.spine.server.integration.ChannelId;
 
 import java.util.Map;
 import java.util.Set;

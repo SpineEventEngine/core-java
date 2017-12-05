@@ -37,9 +37,13 @@ import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.bus.MulticastBus;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventSubscriber;
-import io.spine.server.integration.memory.InMemoryTransportFactory;
 import io.spine.server.rejection.RejectionBus;
 import io.spine.server.rejection.RejectionSubscriber;
+import io.spine.server.transport.PublisherHub;
+import io.spine.server.transport.Subscriber;
+import io.spine.server.transport.SubscriberHub;
+import io.spine.server.transport.TransportFactory;
+import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.type.KnownTypes;
 import io.spine.type.TypeUrl;
 import io.spine.validate.Validate;
@@ -135,11 +139,12 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
     private final PublisherHub publisherHub;
     private final ConfigurationChangeObserver configurationChangeObserver;
 
+    @SuppressWarnings("ConstantConditions")     // `TransportFactory` has already been initialized.
     private IntegrationBus(Builder builder) {
-        super(builder.getDelivery());
+        super(builder.getDelivery(), builder);
         this.boundedContextName = builder.boundedContextName;
-        this.subscriberHub = new SubscriberHub(builder.transportFactory);
-        this.publisherHub = new PublisherHub(builder.transportFactory);
+        this.subscriberHub = new SubscriberHub(builder.getTransportFactory().get());
+        this.publisherHub = new PublisherHub(builder.getTransportFactory().get());
         this.localBusAdapters = createAdapters(builder, publisherHub);
         configurationChangeObserver = observeConfigurationChanges();
         subscriberHub.get(CONFIG_EXCHANGE_CHANNEL_ID)
@@ -411,8 +416,8 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
     /**
      * A {@code Builder} for {@code IntegrationBus} instances.
      */
-    public static class Builder
-            extends Bus.AbstractBuilder<ExternalMessageEnvelope, ExternalMessage, Builder> {
+    public static class Builder extends
+            Bus.AbstractBuilder<ExternalMessageEnvelope, ExternalMessage, Builder, IntegrationBus> {
 
         /**
          * Buses that act inside the bounded context, e.g. {@code EventBus}, and which allow
@@ -426,7 +431,6 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
         private RejectionBus rejectionBus;
         private DomesticDelivery delivery;
         private BoundedContextName boundedContextName;
-        private TransportFactory transportFactory;
 
         public Optional<EventBus> getEventBus() {
             return Optional.fromNullable(eventBus);
@@ -458,21 +462,12 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
             return self();
         }
 
-        public Builder setTransportFactory(TransportFactory transportFactory) {
-            this.transportFactory = checkNotNull(transportFactory);
-            return self();
-        }
-
-        public Optional<TransportFactory> getTransportFactory() {
-            return Optional.fromNullable(transportFactory);
-        }
-
         private DomesticDelivery getDelivery() {
             return delivery;
         }
 
         @Override
-        public IntegrationBus build() {
+        public IntegrationBus doBuild() {
 
             checkState(eventBus != null,
                        "`eventBus` must be set for IntegrationBus.");
@@ -481,9 +476,6 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
             checkNotDefault(boundedContextName,
                             "`boundedContextName` must be set for IntegrationBus.");
 
-            if (transportFactory == null) {
-                transportFactory = initTransportFactory();
-            }
 
             this.delivery = new DomesticDelivery();
 

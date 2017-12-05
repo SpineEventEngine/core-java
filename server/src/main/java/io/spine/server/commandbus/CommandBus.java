@@ -37,6 +37,7 @@ import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.DeadMessageTap;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.commandstore.CommandStore;
+import io.spine.server.transport.TransportFactory;
 import io.spine.server.rejection.RejectionBus;
 
 import javax.annotation.Nullable;
@@ -50,6 +51,7 @@ import static io.spine.core.Rejections.causedByRejection;
 import static io.spine.core.Rejections.toRejection;
 import static io.spine.server.bus.Buses.acknowledge;
 import static io.spine.server.bus.Buses.reject;
+import static io.spine.util.Exceptions.newIllegalStateException;
 import static io.spine.util.Exceptions.toError;
 import static java.lang.String.format;
 
@@ -78,7 +80,7 @@ public class CommandBus extends Bus<Command,
     private final Log log;
 
     /**
-     * Is true, if the {@code BoundedContext} (to which this {@code CommandBus} belongs)
+     * Is {@code true}, if the {@code BoundedContext} (to which this {@code CommandBus} belongs)
      * is multi-tenant.
      *
      * <p>If the {@code CommandBus} is multi-tenant, the commands posted must have the
@@ -111,7 +113,7 @@ public class CommandBus extends Bus<Command,
      */
     @SuppressWarnings("ThisEscapedInObjectConstruction") // OK as nested objects only
     private CommandBus(Builder builder) {
-        super();
+        super(builder);
         this.multitenant = builder.multitenant != null
                 ? builder.multitenant
                 : false;
@@ -314,7 +316,8 @@ public class CommandBus extends Bus<Command,
     /**
      * The {@code Builder} for {@code CommandBus}.
      */
-    public static class Builder extends AbstractBuilder<CommandEnvelope, Command, Builder> {
+    public static class Builder
+            extends AbstractBuilder<CommandEnvelope, Command, Builder, CommandBus> {
 
         /**
          * The multi-tenancy flag for the {@code CommandBus} to build.
@@ -454,7 +457,7 @@ public class CommandBus extends Bus<Command,
          */
         @Override
         @Internal
-        public CommandBus build() {
+        protected CommandBus doBuild() {
             checkState(
                     commandStore != null,
                     "CommandStore must be set. Please call CommandBus.Builder.setCommandStore()."
@@ -469,7 +472,13 @@ public class CommandBus extends Bus<Command,
             }
 
             if (rejectionBus == null) {
+                if(!getTransportFactory().isPresent()) {
+                    throw newIllegalStateException(
+                            "`TransportFactory` is required to initialize a `RejectionBus`.");
+                }
+                final TransportFactory transportFactory = getTransportFactory().get();
                 rejectionBus = RejectionBus.newBuilder()
+                                           .setTransportFactory(transportFactory)
                                            .build();
             }
 

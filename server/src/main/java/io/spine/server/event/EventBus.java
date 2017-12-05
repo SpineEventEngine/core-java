@@ -123,7 +123,7 @@ public class EventBus
 
     /** Creates new instance by the passed builder. */
     private EventBus(Builder builder) {
-        super(checkNotNull(builder.dispatcherEventDelivery));
+        super(checkNotNull(builder.dispatcherEventDelivery), builder);
         this.eventStore = builder.eventStore;
         this.enricher = builder.enricher;
         this.eventMessageValidator = builder.eventValidator;
@@ -256,7 +256,7 @@ public class EventBus
     }
 
     /** The {@code Builder} for {@code EventBus}. */
-    public static class Builder extends AbstractBuilder<EventEnvelope, Event, Builder> {
+    public static class Builder extends AbstractBuilder<EventEnvelope, Event, Builder, EventBus> {
 
         private static final String MSG_EVENT_STORE_CONFIGURED = "EventStore already configured.";
 
@@ -466,7 +466,7 @@ public class EventBus
          */
         @Override
         @Internal
-        public EventBus build() {
+        protected EventBus doBuild() {
             final String message = "Either storageFactory or eventStore must be " +
                                    "set to build the EventBus instance";
             checkState(storageFactory != null || eventStore != null, message);

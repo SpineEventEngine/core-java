@@ -17,26 +17,29 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.integration;
+package io.spine.server.transport;
 
-import io.spine.type.MessageClass;
+import com.google.protobuf.Any;
+import io.spine.core.Ack;
+import io.spine.server.integration.ExternalMessage;
 
 /**
- * The hub of {@link Publisher}s.
+ * Publisher for messages of a specific type.
  *
- * <p>Creates and manages the existing publisher channels born
- * in the given {@linkplain TransportFactory}.
+ * <p>There can be many publishers per message type.
  *
  * @author Alex Tymchenko
  */
-public class PublisherHub extends ChannelHub<Publisher> {
+public interface Publisher extends MessageChannel {
 
-    public PublisherHub(TransportFactory transportFactory) {
-        super(transportFactory);
-    }
-
-    @Override
-    protected Publisher newChannel(ChannelId channelId) {
-        return transportFactory().createPublisher(channelId);
-    }
+    /**
+     * Publishes a given {@code ExternalMessage} to the channel under a given ID.
+     *
+     * @param id      an ID of the message packed into {@linkplain Any}.
+     * @param message the message to publish
+     * @return an acknowledgment of message publishing
+     * @see Ack
+     */
+    @SuppressWarnings("UnusedReturnValue")      // Return value is planned for future use.
+    Ack publish(Any id, ExternalMessage message);
 }

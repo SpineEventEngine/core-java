@@ -26,6 +26,7 @@ import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
+import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.test.Tests;
 import io.spine.time.Durations2;
 import org.junit.Test;
@@ -128,6 +129,7 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
         // Create CommandBus specific for this test.
         final CommandBus commandBus = CommandBus.newBuilder()
                                                 .setCommandStore(commandStore)
+                                                .setTransportFactory(transportFactory)
                                                 .setCommandScheduler(scheduler)
                                                 .setThreadSpawnAllowed(true)
                                                 .setAutoReschedule(true)
@@ -162,6 +164,7 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
         // Create CommandBus specific for this test.
         final CommandBus commandBus = CommandBus.newBuilder()
                                                 .setCommandStore(commandStore)
+                                                .setTransportFactory(transportFactory)
                                                 .setCommandScheduler(scheduler)
                                                 .setThreadSpawnAllowed(false)
                                                 .setAutoReschedule(true)

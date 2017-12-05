@@ -17,28 +17,36 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.integration;
+package io.spine.server.transport;
 
-import com.google.protobuf.Any;
-import io.spine.core.Ack;
+import io.spine.annotation.SPI;
+import io.spine.server.integration.ChannelId;
 
 /**
- * Publisher for messages of a specific type.
+ * A factory for creating channel-based transport for {@code Message} inter-exchange between the
+ * current deployment component and other application parts.
  *
- * <p>There can be many publishers per message type.
+ * Inspired by <a href="http://www.enterpriseintegrationpatterns.com/patterns/messaging/PublishSubscribeChannel.html">
+ * Publish-Subscriber Channel pattern.</a>
  *
  * @author Alex Tymchenko
  */
-public interface Publisher extends MessageChannel {
+@SPI
+public interface TransportFactory {
 
     /**
-     * Publishes a given {@code ExternalMessage} to the channel under a given ID.
+     * Creates a {@link Publisher} channel with the given ID.
      *
-     * @param id      an ID of the message packed into {@linkplain Any}.
-     * @param message the message to publish
-     * @return an acknowledgment of message publishing
-     * @see Ack
+     * @param channelId the ID of the channel.
+     * @return a new {@code Publisher} instance
      */
-    @SuppressWarnings("UnusedReturnValue")      // Return value is planned for future use.
-    Ack publish(Any id, ExternalMessage message);
+    Publisher createPublisher(ChannelId channelId);
+
+    /**
+     * Creates a {@link Subscriber} channel with the given ID.
+     *
+     * @param messageClass the ID of the channel.
+     * @return a new {@code Subscriber} instance
+     */
+    Subscriber createSubscriber(ChannelId messageClass);
 }

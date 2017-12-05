@@ -26,6 +26,7 @@ import io.spine.core.Enrichment;
 import io.spine.core.Enrichments;
 import io.spine.core.Rejection;
 import io.spine.core.RejectionContext;
+import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.server.rejection.given.RejectionEnrichmentConsumer;
 import io.spine.test.rejection.ProjectId;
 import io.spine.test.rejection.ProjectRejections;
@@ -62,6 +63,7 @@ public class RejectionEnricherShould {
 
         rejectionBus = RejectionBus.newBuilder()
                                    .setEnricher(enricher)
+                                   .setTransportFactory(InMemoryTransportFactory.newInstance())
                                    .build();
     }
 

@@ -25,6 +25,8 @@ import io.spine.core.EventEnvelope;
 import io.spine.grpc.LoggingObserver;
 import io.spine.server.BoundedContext;
 import io.spine.server.bus.BusBuilderShould;
+import io.spine.server.transport.TransportFactory;
+import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.test.Tests;
@@ -52,6 +54,8 @@ public class EventBusBuilderShould extends BusBuilderShould<EventBus.Builder,
 
     private StorageFactory storageFactory;
 
+    private TransportFactory transportFactory;
+
     @Override
     protected EventBus.Builder builder() {
         return EventBus.newBuilder();
@@ -63,6 +67,7 @@ public class EventBusBuilderShould extends BusBuilderShould<EventBus.Builder,
                                                 .setMultitenant(true)
                                                 .build();
         this.storageFactory = bc.getStorageFactory();
+        this.transportFactory = InMemoryTransportFactory.newInstance();
     }
 
     @Test(expected = NullPointerException.class)
@@ -134,6 +139,7 @@ public class EventBusBuilderShould extends BusBuilderShould<EventBus.Builder,
     @Test
     public void set_direct_DispatcherEventDelivery_if_not_set_explicitly() {
         final DispatcherEventDelivery actualValue = builder().setStorageFactory(storageFactory)
+                                                             .setTransportFactory(transportFactory)
                                                              .build()
                                                              .delivery();
         assertTrue(actualValue instanceof DispatcherEventDelivery.DirectDelivery);
@@ -142,6 +148,7 @@ public class EventBusBuilderShould extends BusBuilderShould<EventBus.Builder,
     @Test
     public void set_event_validator_if_not_set_explicitly() {
         assertNotNull(builder().setStorageFactory(storageFactory)
+                               .setTransportFactory(transportFactory)
                                .build()
                                .getMessageValidator());
     }
@@ -158,6 +165,7 @@ public class EventBusBuilderShould extends BusBuilderShould<EventBus.Builder,
         final EventEnricher enricher = mock(EventEnricher.class);
 
         assertEquals(enricher, builder().setStorageFactory(storageFactory)
+                                        .setTransportFactory(transportFactory)
                                         .setEnricher(enricher)
                                         .getEnricher()
                                         .get());
@@ -184,13 +192,15 @@ public class EventBusBuilderShould extends BusBuilderShould<EventBus.Builder,
 
     @Test(expected = IllegalStateException.class)
     public void not_accept_EventStoreStreamExecutor_if_EventStore_already_specified() {
-        final EventBus.Builder builder = builder().setEventStore(mock(EventStore.class));
+        final EventBus.Builder builder = builder().setEventStore(mock(EventStore.class))
+                                                  .setTransportFactory(transportFactory);
         builder.setEventStoreStreamExecutor(mock(Executor.class));
     }
 
     @Test
     public void use_directExecutor_if_EventStoreStreamExecutor_not_set() {
-        final EventBus.Builder builder = builder().setStorageFactory(storageFactory);
+        final EventBus.Builder builder = builder().setStorageFactory(storageFactory)
+                                                  .setTransportFactory(transportFactory);
         final EventBus build = builder.build();
         final Executor streamExecutor = build.getEventStore()
                                              .getStreamExecutor();
@@ -209,6 +219,7 @@ public class EventBusBuilderShould extends BusBuilderShould<EventBus.Builder,
             }
         };
         final EventBus.Builder builder = builder().setStorageFactory(storageFactory)
+                                                  .setTransportFactory(transportFactory)
                                                   .setEventStoreStreamExecutor(simpleExecutor);
         final EventBus build = builder.build();
         final Executor streamExecutor = build.getEventStore()
@@ -233,6 +244,7 @@ public class EventBusBuilderShould extends BusBuilderShould<EventBus.Builder,
         final MessageValidator validator = mock(MessageValidator.class);
         final EventBus eventBus = builder().setEventValidator(validator)
                                            .setStorageFactory(storageFactory)
+                                           .setTransportFactory(transportFactory)
                                            .build();
         assertEquals(validator, eventBus.getMessageValidator());
     }

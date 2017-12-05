@@ -17,38 +17,26 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.integration.memory;
+package io.spine.server.transport;
 
 import io.spine.server.integration.ChannelId;
-import io.spine.server.integration.ExternalMessageClass;
-import io.spine.server.integration.MessageChannel;
 
 /**
- * An abstract base for in-memory {@linkplain MessageChannel message channels}.
+ * The hub of {@link Subscriber}s.
+ *
+ * <p>Creates and manages the existing subscriber channels born
+ * in the given {@linkplain TransportFactory}.
  *
  * @author Alex Tymchenko
  */
-abstract class AbstractInMemoryChannel implements MessageChannel {
+public class SubscriberHub extends ChannelHub<Subscriber> {
 
-    private final ChannelId channelId;
-
-    protected AbstractInMemoryChannel(ChannelId channelId) {
-        this.channelId = channelId;
-    }
-
-    /**
-     * Does nothing as there is nothing to close in the in-memory local channel implementation.
-     *
-     * @throws Exception never
-     */
-    @SuppressWarnings("NoopMethodInAbstractClass")  // See the Javadoc for the explanation.
-    @Override
-    public void close() throws Exception {
-        /* Do nothing. */
+    public SubscriberHub(TransportFactory transportFactory) {
+        super(transportFactory);
     }
 
     @Override
-    public ChannelId getId() {
-        return channelId;
+    protected Subscriber newChannel(ChannelId channelId) {
+        return transportFactory().createSubscriber(channelId);
     }
 }

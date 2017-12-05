@@ -24,6 +24,7 @@ import io.spine.server.BoundedContext;
 import io.spine.server.bus.BusBuilderShould;
 import io.spine.server.event.EventBus;
 import io.spine.server.rejection.RejectionBus;
+import io.spine.server.transport.TransportFactory;
 import io.spine.test.Tests;
 import org.junit.Test;
 

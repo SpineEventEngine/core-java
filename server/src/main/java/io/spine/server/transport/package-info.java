@@ -19,10 +19,10 @@
  */
 
 /**
- * This package contains classes and interfaces defining data transport options between Spine apps
- * and the outer world.
+ * This package contains classes and interfaces that connect Spine with the infrastructure of the
+ * outer world.
  *
- * <p>Typical transport options include gRPC servers, Firebase adapters etc.
+ * <p>Typical transport options include gRPC servers, messaging system integration etc.
  */
 @ParametersAreNonnullByDefault
 package io.spine.server.transport;

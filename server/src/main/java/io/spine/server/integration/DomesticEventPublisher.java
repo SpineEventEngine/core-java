@@ -27,6 +27,8 @@ import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.event.EventSubscriber;
+import io.spine.server.transport.Publisher;
+import io.spine.server.transport.PublisherHub;
 
 import java.util.Objects;
 import java.util.Set;

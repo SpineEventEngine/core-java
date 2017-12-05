@@ -58,8 +58,9 @@ public abstract class CommandOutputBus<M extends Message,
                                        D extends MessageDispatcher<C, E, ?>>
         extends MulticastBus<M, E, C, D> {
 
-    protected CommandOutputBus(MulticastDelivery<E, C, D> delivery) {
-        super(delivery);
+    protected CommandOutputBus(MulticastDelivery<E, C, D> delivery,
+                               AbstractBuilder<E, M, ?, ?> builder) {
+        super(delivery, builder);
     }
 
     /**

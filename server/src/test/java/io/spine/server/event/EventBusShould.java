@@ -34,6 +34,8 @@ import io.spine.server.BoundedContext;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.delivery.Consumers;
 import io.spine.server.event.given.EventBusTestEnv.GivenEvent;
+import io.spine.server.transport.TransportFactory;
+import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.test.event.ProjectCreated;
@@ -71,6 +73,7 @@ public class EventBusShould {
     private PostponedDispatcherEventDelivery postponedDispatcherDelivery;
     private Executor delegateDispatcherExecutor;
     private StorageFactory storageFactory;
+    private TransportFactory transportFactory;
 
     @Before
     public void setUp() {
@@ -82,6 +85,7 @@ public class EventBusShould {
                                                 .setMultitenant(true)
                                                 .build();
         this.storageFactory = bc.getStorageFactory();
+        this.transportFactory = InMemoryTransportFactory.newInstance();
         /**
          * Cannot use {@link com.google.common.util.concurrent.MoreExecutors#directExecutor()
          * MoreExecutors.directExecutor()} because it's impossible to spy on {@code final} classes.
@@ -107,7 +111,8 @@ public class EventBusShould {
         final EventBus.Builder busBuilder =
                 EventBus.newBuilder()
                         .setStorageFactory(storageFactory)
-                        .setDispatcherEventDelivery(postponedDispatcherDelivery);
+                        .setDispatcherEventDelivery(postponedDispatcherDelivery)
+                        .setTransportFactory(transportFactory);
 
         if (enricher != null) {
             busBuilder.setEnricher(enricher);
@@ -117,7 +122,8 @@ public class EventBusShould {
 
     private void buildEventBus(@Nullable EventEnricher enricher) {
         final EventBus.Builder busBuilder = EventBus.newBuilder()
-                                                    .setStorageFactory(storageFactory);
+                                                    .setStorageFactory(storageFactory)
+                                                    .setTransportFactory(transportFactory);
         if (enricher != null) {
             busBuilder.setEnricher(enricher);
         }
@@ -134,6 +140,7 @@ public class EventBusShould {
         final EventStore eventStore = mock(EventStore.class);
         final EventBus result = EventBus.newBuilder()
                                         .setEventStore(eventStore)
+                                        .setTransportFactory(transportFactory)
                                         .build();
         assertEquals(eventStore, result.getEventStore());
     }
@@ -307,6 +314,7 @@ public class EventBusShould {
         final EventStore eventStore = spy(mock(EventStore.class));
         final EventBus eventBus = EventBus.newBuilder()
                                           .setEventStore(eventStore)
+                                          .setTransportFactory(transportFactory)
                                           .build();
         eventBus.register(new BareDispatcher());
         eventBus.register(new ProjectCreatedSubscriber());

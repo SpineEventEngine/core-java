@@ -23,6 +23,7 @@ import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.SPI;
 import io.spine.core.BoundedContextName;
+import io.spine.server.transport.Subscriber;
 
 import java.util.Objects;
 

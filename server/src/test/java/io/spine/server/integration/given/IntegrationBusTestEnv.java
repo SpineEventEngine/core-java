@@ -40,7 +40,7 @@ import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.event.EventSubscriber;
 import io.spine.server.integration.IntegrationBus;
-import io.spine.server.integration.TransportFactory;
+import io.spine.server.transport.TransportFactory;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.server.projection.Projection;

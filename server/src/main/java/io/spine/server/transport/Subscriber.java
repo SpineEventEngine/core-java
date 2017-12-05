@@ -17,9 +17,10 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.integration;
+package io.spine.server.transport;
 
 import io.grpc.stub.StreamObserver;
+import io.spine.server.integration.ExternalMessage;
 
 /**
  * Subscriber for messages of a specific type.

@@ -26,6 +26,7 @@ import io.spine.core.Event;
 import io.spine.core.Rejection;
 import io.spine.core.Rejections;
 import io.spine.protobuf.AnyPacker;
+import io.spine.server.transport.MessageChannel;
 import io.spine.type.TypeUrl;
 
 import static com.google.common.base.Preconditions.checkNotNull;

@@ -17,16 +17,16 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.integration.memory;
+package io.spine.server.transport.memory;
 
 import com.google.common.base.Function;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import io.spine.server.integration.ChannelId;
-import io.spine.server.integration.Publisher;
-import io.spine.server.integration.Subscriber;
-import io.spine.server.integration.TransportFactory;
+import io.spine.server.transport.Publisher;
+import io.spine.server.transport.Subscriber;
+import io.spine.server.transport.TransportFactory;
 
 import javax.annotation.Nullable;
 

@@ -63,6 +63,7 @@ public class MultiTenantCommandBusShould extends AbstractCommandBusTestSuite {
         final RejectionBus expectedRejectionBus = mock(RejectionBus.class);
         final CommandBus commandBus = CommandBus.newBuilder()
                                                 .setCommandStore(commandStore)
+                                                .setTransportFactory(transportFactory)
                                                 .setRejectionBus(expectedRejectionBus)
                                                 .build();
         assertNotNull(commandBus);
@@ -79,8 +80,9 @@ public class MultiTenantCommandBusShould extends AbstractCommandBusTestSuite {
     @Test
     public void have_rejection_bus_if_no_custom_set() {
         final CommandBus bus = CommandBus.newBuilder()
-                                           .setCommandStore(commandStore)
-                                           .build();
+                                         .setCommandStore(commandStore)
+                                         .setTransportFactory(transportFactory)
+                                         .build();
         assertNotNull(bus.rejectionBus());
     }
 

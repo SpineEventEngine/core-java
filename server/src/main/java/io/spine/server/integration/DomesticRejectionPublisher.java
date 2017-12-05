@@ -27,6 +27,8 @@ import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.rejection.RejectionSubscriber;
+import io.spine.server.transport.Publisher;
+import io.spine.server.transport.PublisherHub;
 
 import java.util.Objects;
 import java.util.Set;

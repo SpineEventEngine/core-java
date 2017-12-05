@@ -26,6 +26,8 @@ import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.delivery.Consumers;
+import io.spine.server.transport.TransportFactory;
+import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.server.rejection.given.AnotherInvalidProjectNameDelegate;
 import io.spine.server.rejection.given.BareDispatcher;
 import io.spine.server.rejection.given.CommandAwareSubscriber;
@@ -70,13 +72,16 @@ import static org.mockito.Mockito.verify;
 public class RejectionBusShould {
 
     private RejectionBus rejectionBus;
+    private TransportFactory transportFactory;
     private PostponedDispatcherRejectionDelivery postponedDelivery;
     private Executor delegateDispatcherExecutor;
     private RejectionBus rejectionBusWithPostponedExecution;
 
     @Before
     public void setUp() {
+        this.transportFactory = InMemoryTransportFactory.newInstance();
         this.rejectionBus = RejectionBus.newBuilder()
+                                        .setTransportFactory(transportFactory)
                                         .build();
         this.delegateDispatcherExecutor = spy(directExecutor());
         this.postponedDelivery =
@@ -84,6 +89,7 @@ public class RejectionBusShould {
         this.rejectionBusWithPostponedExecution =
                 RejectionBus.newBuilder()
                             .setDispatcherRejectionDelivery(postponedDelivery)
+                            .setTransportFactory(transportFactory)
                             .build();
     }
 
@@ -107,6 +113,7 @@ public class RejectionBusShould {
         final DispatcherRejectionDelivery delivery = mock(DispatcherRejectionDelivery.class);
         final RejectionBus result = RejectionBus.newBuilder()
                                                 .setDispatcherRejectionDelivery(delivery)
+                                                .setTransportFactory(transportFactory)
                                                 .build();
         assertEquals(delivery, result.delivery());
     }
@@ -307,6 +314,7 @@ public class RejectionBusShould {
     @Test
     public void unregister_registries_on_close() throws Exception {
         final RejectionBus rejectionBus = RejectionBus.newBuilder()
+                                                      .setTransportFactory(transportFactory)
                                                       .build();
         rejectionBus.register(new BareDispatcher());
         rejectionBus.register(new InvalidProjectNameSubscriber());

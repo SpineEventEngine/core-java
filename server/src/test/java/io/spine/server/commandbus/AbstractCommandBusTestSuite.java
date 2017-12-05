@@ -40,6 +40,8 @@ import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.commandstore.CommandStore;
 import io.spine.server.event.EventBus;
+import io.spine.server.transport.TransportFactory;
+import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.server.model.ModelTests;
 import io.spine.server.rejection.RejectionBus;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
@@ -87,6 +89,7 @@ public abstract class AbstractCommandBusTestSuite {
 
     protected CommandBus commandBus;
     protected CommandStore commandStore;
+    protected TransportFactory transportFactory;
     protected Log log;
     protected EventBus eventBus;
     protected RejectionBus rejectionBus;
@@ -179,13 +182,16 @@ public abstract class AbstractCommandBusTestSuite {
         final TenantIndex tenantIndex = TenantAwareTest.createTenantIndex(this.multitenant,
                                                                           storageFactory);
         commandStore = spy(new CommandStore(storageFactory, tenantIndex));
+        transportFactory = InMemoryTransportFactory.newInstance();
         scheduler = spy(new ExecutorCommandScheduler());
         log = spy(new Log());
         rejectionBus = spy(RejectionBus.newBuilder()
+                                       .setTransportFactory(transportFactory)
                                        .build());
         commandBus = CommandBus.newBuilder()
                                .setMultitenant(this.multitenant)
                                .setCommandStore(commandStore)
+                               .setTransportFactory(transportFactory)
                                .setCommandScheduler(scheduler)
                                .setRejectionBus(rejectionBus)
                                .setThreadSpawnAllowed(false)
@@ -194,6 +200,7 @@ public abstract class AbstractCommandBusTestSuite {
                                .build();
         eventBus = EventBus.newBuilder()
                            .setStorageFactory(storageFactory)
+                           .setTransportFactory(transportFactory)
                            .build();
         requestFactory = this.multitenant
                             ? TestActorRequestFactory.newInstance(getClass(), newUuid())

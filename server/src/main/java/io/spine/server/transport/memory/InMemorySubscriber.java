@@ -17,14 +17,13 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.integration.memory;
+package io.spine.server.transport.memory;
 
 import com.google.common.collect.ImmutableSet;
 import io.grpc.stub.StreamObserver;
 import io.spine.server.integration.ChannelId;
 import io.spine.server.integration.ExternalMessage;
-import io.spine.server.integration.ExternalMessageClass;
-import io.spine.server.integration.Subscriber;
+import io.spine.server.transport.Subscriber;
 
 import java.util.Set;
 

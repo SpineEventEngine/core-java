@@ -47,8 +47,9 @@ public abstract class MulticastBus<M extends Message,
      */
     private final MulticastDelivery<E, C, D> delivery;
 
-    protected MulticastBus(MulticastDelivery<E, C, D> delivery) {
-        super();
+    protected MulticastBus(MulticastDelivery<E, C, D> delivery,
+                           AbstractBuilder<E, M, ?, ?> builder) {
+        super(builder);
         this.delivery = delivery;
         injectDispatcherProvider();
     }
