@@ -36,7 +36,7 @@ ext {
     spineBaseVersion = '0.10.1-SNAPSHOT'
 
     // We use Spine tools in the build process.
-    spineToolsVersion = '0.9.51-SNAPSHOT'
+    spineToolsVersion = '0.10.0'
 
     guavaVersion = '20.0'
 
