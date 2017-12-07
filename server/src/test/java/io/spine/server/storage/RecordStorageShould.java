@@ -30,6 +30,7 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import io.spine.Identifier;
 import io.spine.client.ColumnFilter;
 import io.spine.client.CompositeColumnFilter;
 import io.spine.client.EntityFilters;
@@ -38,6 +39,7 @@ import io.spine.client.EntityIdFilter;
 import io.spine.core.Version;
 import io.spine.core.given.GivenVersion;
 import io.spine.protobuf.TypeConverter;
+import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.EventPlayingEntity;
 import io.spine.server.entity.FieldMasks;
@@ -78,6 +80,8 @@ import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.test.Tests.assertMatchesMask;
 import static io.spine.test.Verify.assertIteratorsEqual;
 import static io.spine.test.Verify.assertSize;
+import static io.spine.test.storage.Project.Status.CANCELLED;
+import static io.spine.test.storage.Project.Status.DONE;
 import static io.spine.validate.Validate.isDefault;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -414,7 +418,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     @SuppressWarnings("OverlyLongMethod") // Complex test case (still tests a single operation)
     @Test
     public void filter_records_by_columns() {
-        final Project.Status requiredValue = Project.Status.DONE;
+        final Project.Status requiredValue = DONE;
         final Int32Value wrappedValue = Int32Value.newBuilder()
                                                   .setValue(requiredValue.getNumber())
                                                   .build();
@@ -444,7 +448,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         // 2 of 3 have required values
         matchingEntity.setStatus(requiredValue);
         wrongEntity1.setStatus(requiredValue);
-        wrongEntity2.setStatus(Project.Status.CANCELLED);
+        wrongEntity2.setStatus(CANCELLED);
 
         // Change internal Entity state
         wrongEntity1.getCounter();
@@ -472,8 +476,8 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
 
     @Test
     public void update_entity_column_values() {
-        final Project.Status initialStatus = Project.Status.DONE;
-        final Project.Status statusAfterUpdate = Project.Status.CANCELLED;
+        final Project.Status initialStatus = DONE;
+        final Project.Status statusAfterUpdate = CANCELLED;
         final Int32Value initialStatusValue = Int32Value.newBuilder()
                                                         .setValue(initialStatus.getNumber())
                                                         .build();
@@ -616,6 +620,45 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         assertSingleRecord(activeRecord, read);
     }
 
+    @Test
+    public void read_both_by_columns_and_IDs() {
+        final I targetId = newId();
+        final TestCounterEntity<I> targetEntity = new TestCounterEntity<>(targetId);
+        final TestCounterEntity<I> noMatchEntity = new TestCounterEntity<>(newId());
+        final TestCounterEntity<I> noMatchIdEntity = new TestCounterEntity<>(newId());
+        final TestCounterEntity<I> deletedEntity = new TestCounterEntity<>(newId());
+
+        targetEntity.setStatus(CANCELLED);
+        deletedEntity.setStatus(CANCELLED);
+        deletedEntity.delete();
+        noMatchIdEntity.setStatus(CANCELLED);
+        noMatchEntity.setStatus(DONE);
+
+        write(targetEntity);
+        write(noMatchEntity);
+        write(noMatchIdEntity);
+        write(deletedEntity);
+
+        final EntityIdFilter idFilter = EntityIdFilter.newBuilder()
+                                                      .addIds(toEntityId(targetId))
+                                                      .build();
+        final CompositeColumnFilter columnFilter = all(eq("projectStatusValue",
+                                                          CANCELLED.getNumber()));
+        final EntityFilters filters = EntityFilters.newBuilder()
+                                                   .setIdFilter(idFilter)
+                                                   .addFilter(columnFilter)
+                                                   .build();
+        final EntityQuery<I> query = EntityQueries.<I>from(filters, TestCounterEntity.class)
+                                                  .withLifecycleFlags(TestCounterEntity.class);
+        final RecordStorage<I> storage = getStorage();
+        final Iterator<EntityRecord> read = storage.readAll(query, FieldMask.getDefaultInstance());
+        final List<EntityRecord> readRecords = newArrayList(read);
+        assertEquals(1, readRecords.size());
+        final EntityRecord readRecord = readRecords.get(0);
+        assertEquals(targetEntity.getState(), unpack(readRecord.getState()));
+        assertEquals(targetId, unpack(readRecord.getEntityId()));
+    }
+
     @SuppressWarnings("MismatchedQueryAndUpdateOfCollection"/* Storing of generated objects and
                                                                checking via #contains(Object). */)
     @Test
@@ -650,11 +693,17 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     }
 
     private EntityId toEntityId(I id) {
-        final Any packed = pack(id);
+        final Any packed = Identifier.pack(id);
         final EntityId entityId = EntityId.newBuilder()
                                           .setId(packed)
                                           .build();
         return entityId;
+    }
+
+    private void write(Entity<I, ?> entity) {
+        final RecordStorage<I> storage = getStorage();
+        final EntityRecord record = newStorageRecord(entity.getId(), entity.getState());
+        storage.write(entity.getId(), create(record, entity));
     }
 
     @SuppressWarnings("unused") // Reflective access
