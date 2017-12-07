@@ -66,6 +66,7 @@ import java.util.Set;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 import static io.spine.Identifier.pack;
+import static io.spine.client.ColumnFilters.all;
 import static io.spine.client.ColumnFilters.eq;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
 import static io.spine.protobuf.AnyPacker.pack;
@@ -73,6 +74,7 @@ import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.TestTransaction.injectState;
 import static io.spine.server.entity.given.GivenLifecycleFlags.archived;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
+import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.test.Tests.assertMatchesMask;
 import static io.spine.test.Verify.assertIteratorsEqual;
 import static io.spine.test.Verify.assertSize;
@@ -553,6 +555,31 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
                                                                    FieldMask.getDefaultInstance());
         // Check results
         assertSingleRecord(fineRecord, readRecords);
+    }
+
+    @Test
+    public void read_archived_records_if_required() {
+        final I activeRecordId = newId();
+        final I archivedRecordId = newId();
+
+        final EntityRecord activeRecord = newStorageRecord(activeRecordId,
+                                                           newState(activeRecordId));
+        final EntityRecord archivedRecord = newStorageRecord(archivedRecordId,
+                                                             newState(archivedRecordId));
+        final TestCounterEntity<I> activeEntity = new TestCounterEntity<>(activeRecordId);
+        final TestCounterEntity<I> archivedEntity = new TestCounterEntity<>(archivedRecordId);
+        archivedEntity.archive();
+
+        final RecordStorage<I> storage = getStorage();
+        storage.write(activeRecordId, create(activeRecord, activeEntity));
+        storage.write(archivedRecordId, create(archivedRecord, archivedEntity));
+
+        final EntityFilters filters = EntityFilters.newBuilder()
+                                                   .addFilter(all(eq(archived.toString(), true)))
+                                                   .build();
+        final EntityQuery<I> query = EntityQueries.from(filters, TestCounterEntity.class);
+        final Iterator<EntityRecord> read = storage.readAll(query, FieldMask.getDefaultInstance());
+        assertSingleRecord(archivedRecord, read);
     }
 
     @SuppressWarnings("MismatchedQueryAndUpdateOfCollection"/* Storing of generated objects and
