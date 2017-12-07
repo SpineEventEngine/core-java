@@ -582,6 +582,40 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         assertSingleRecord(archivedRecord, read);
     }
 
+    @Test
+    public void filter_archived_or_deleted_records_on_by_ID_bulk_read() {
+        final I activeId = newId();
+        final I archivedId = newId();
+        final I deletedId = newId();
+
+        final TestCounterEntity<I> activeEntity = new TestCounterEntity<>(activeId);
+        final TestCounterEntity<I> archivedEntity = new TestCounterEntity<>(archivedId);
+        archivedEntity.archive();
+        final TestCounterEntity<I> deletedEntity = new TestCounterEntity<>(deletedId);
+        deletedEntity.delete();
+
+        final EntityRecord activeRecord = newStorageRecord(activeId, activeEntity.getState());
+        final EntityRecord archivedRecord = newStorageRecord(archivedId, archivedEntity.getState());
+        final EntityRecord deletedRecord = newStorageRecord(deletedId, deletedEntity.getState());
+
+        final RecordStorage<I> storage = getStorage();
+        storage.write(deletedId, create(deletedRecord, deletedEntity));
+        storage.write(activeId, create(activeRecord, activeEntity));
+        storage.write(archivedId, create(archivedRecord, archivedEntity));
+        final EntityIdFilter idFilter = EntityIdFilter.newBuilder()
+                                                      .addIds(toEntityId(activeId))
+                                                      .addIds(toEntityId(archivedId))
+                                                      .addIds(toEntityId(deletedId))
+                                                      .build();
+        final EntityFilters filters = EntityFilters.newBuilder()
+                                                   .setIdFilter(idFilter)
+                                                   .build();
+        final EntityQuery<I> query = EntityQueries.<I>from(filters, TestCounterEntity.class)
+                                                  .withLifecycleFlags(TestCounterEntity.class);
+        final Iterator<EntityRecord> read = storage.readAll(query, FieldMask.getDefaultInstance());
+        assertSingleRecord(activeRecord, read);
+    }
+
     @SuppressWarnings("MismatchedQueryAndUpdateOfCollection"/* Storing of generated objects and
                                                                checking via #contains(Object). */)
     @Test
@@ -613,6 +647,14 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final EntityRecord singleRecord = actual.next();
         assertFalse(actual.hasNext());
         assertEquals(expected, singleRecord);
+    }
+
+    private EntityId toEntityId(I id) {
+        final Any packed = pack(id);
+        final EntityId entityId = EntityId.newBuilder()
+                                          .setId(packed)
+                                          .build();
+        return entityId;
     }
 
     @SuppressWarnings("unused") // Reflective access
