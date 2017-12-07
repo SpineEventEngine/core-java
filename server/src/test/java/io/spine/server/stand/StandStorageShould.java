@@ -156,9 +156,17 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
         }
     }
 
+    /*
+     * Disabled test cases from `RecordStorageShould`.
+     *
+     * These tests check the entity column reads and writes, which are not applicable to
+     * `StandStorage`.
+     *
+     * These checks include the `LifecycleFlags`-related checks (`archived` and `deleted`).
+     */
+
     @SuppressWarnings("NoopMethodInAbstractClass") // Overrides the behavior for all the inheritors.
     @Override
-    @Test
     public void filter_records_by_columns() {
         // Stand storage does not support entity columns.
     }
