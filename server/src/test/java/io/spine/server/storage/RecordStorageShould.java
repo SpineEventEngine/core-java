@@ -562,7 +562,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     }
 
     @Test
-    public void read_archived_records_if_required() {
+    public void read_archived_records_if_specified() {
         final I activeRecordId = newId();
         final I archivedRecordId = newId();
 

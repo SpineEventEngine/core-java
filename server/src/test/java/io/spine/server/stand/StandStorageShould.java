@@ -179,7 +179,7 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
 
     @SuppressWarnings("NoopMethodInAbstractClass") // Overrides the behavior for all the inheritors.
     @Override
-    public void read_archived_records_if_required() {
+    public void read_archived_records_if_specified() {
         // Stand storage does not support entity columns.
     }
 
