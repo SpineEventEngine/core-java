@@ -12,6 +12,7 @@
       <w>datastores</w>
       <w>deserialized</w>
       <w>dirham</w>
+      <w>enrichable</w>
       <w>enrichments</w>
       <w>escaper</w>
       <w>flushables</w>
@@ -23,6 +24,8 @@
       <w>liskov</w>
       <w>melnik</w>
       <w>memoized</w>
+      <w>memoizes</w>
+      <w>memoizing</w>
       <w>mergeable</w>
       <w>mikhaylov</w>
       <w>millisecs</w>
@@ -42,6 +45,7 @@
       <w>stderr</w>
       <w>stringifier</w>
       <w>stringifiers</w>
+      <w>switchman</w>
       <w>testutil</w>
       <w>threeten</w>
       <w>unregister</w>
