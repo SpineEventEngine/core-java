@@ -47,9 +47,9 @@ import static io.spine.validate.Validate.isDefault;
  * annotation) and writes them into the {@code ${spineDirRoot}/.spine/spine_model.ser} file, where
  * "{@code spineDirRoot}" is the value of the <b>spineDirRoot</b> annotator option.
  *
- * <p><b>spineDirRoot</b> is the only supported option of the processor. Use
- * {@code javac -AspineDirRoot=/path/to/project/root [...]} to set the value of the option. If none
- * is set, the option will default to current directory (denoted with "{@code ./}").
+ * <p><b>spineDirRoot</b> is the only supported option of the processor.
+ * Use {@code javac -AspineDirRoot=/path/to/project/root [...]} to set the value of the option.
+ * If none is set, the option will default to current directory (denoted with "{@code ./}").
  *
  * @author Dmytro Dashenkov
  */
@@ -92,11 +92,13 @@ public class AssignLookup extends SpineAnnotationProcessor {
     }
 
     /**
-     * Merges the currently built {@linkplain CommandHandlers commandHandlers} with the pre-built one.
+     * Merges the currently built {@linkplain CommandHandlers commandHandlers}
+     * with the pre-built one.
      *
-     * <p>If the file exists and is not empty, the message of type {@link CommandHandlers} is read from
-     * it and merged with the current commandHandlers by the rules of
-     * {@link com.google.protobuf.Message.Builder#mergeFrom(com.google.protobuf.Message) Message.Builder.mergeFrom()}.
+     * <p>If the file exists and is not empty, the message of type {@link CommandHandlers} is
+     * read from it and merged with the current commandHandlers by the rules of
+     * {@link com.google.protobuf.Message.Builder#mergeFrom(com.google.protobuf.Message)
+     * Message.Builder.mergeFrom()}.
      *
      * @param file the file which may or may not contain the pre-assembled commandHandlers
      */
@@ -135,8 +137,8 @@ public class AssignLookup extends SpineAnnotationProcessor {
     /**
      * Cleans the currently built commandHandlers from the duplicates.
      *
-     * <p>Calling this method will cause the {@linkplain #commandHandlers current commandHandlers} not to contain
-     * duplicate entries in any {@code repeated} field.
+     * <p>Calling this method will cause the {@linkplain #commandHandlers current commandHandlers}
+     * not to contain duplicate entries in any {@code repeated} field.
      */
     private void removeDuplicates() {
         final Set<String> commandHandlingTypes = newTreeSet(commandHandlers.getCommandHandlingTypesList());
@@ -174,7 +176,8 @@ public class AssignLookup extends SpineAnnotationProcessor {
      * <p>The given file should exist.
      *
      * <p>If the given file is empty,
-     * the {@link CommandHandlers#getDefaultInstance() CommandHandlers.getDefaultInstance()} is returned.
+     * the {@link CommandHandlers#getDefaultInstance() CommandHandlers.getDefaultInstance()} is
+     * returned.
      *
      * @param file an existing file with a {@link CommandHandlers} message
      * @return the read commandHandlers
