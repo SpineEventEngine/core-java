@@ -25,17 +25,29 @@ import com.google.common.testing.NullPointerTester;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.server.command.TestEventFactory;
+import org.junit.Before;
 import org.junit.Test;
 
+import javax.annotation.Nullable;
 import java.util.Set;
 
 import static io.spine.test.TestValues.newUuidValue;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
  * @author Alexander Yevsyukov
  */
 public class DelegatingEventDispatcherShould {
+
+    private EmptyEventDispatcherDelegate delegate;
+    private DelegatingEventDispatcher<String> delegatingDispatcher;
+
+    @Before
+    public void setUp() {
+        delegate = new EmptyEventDispatcherDelegate();
+        delegatingDispatcher = DelegatingEventDispatcher.of(delegate);
+    }
 
     @Test
     public void pass_null_tolerance_test() {
@@ -46,22 +58,27 @@ public class DelegatingEventDispatcherShould {
 
     @Test
     public void delegate_onError() {
-        final EmptyEventDispatcherDelegate delegate = new EmptyEventDispatcherDelegate();
-        final DelegatingEventDispatcher<String> delegatingDispatcher =
-                DelegatingEventDispatcher.of(delegate);
-
         final TestEventFactory factory = TestEventFactory.newInstance(getClass());
         EventEnvelope envelope = EventEnvelope.of(factory.createEvent(newUuidValue()));
 
-        delegatingDispatcher.onError(envelope, new RuntimeException("test delegating onError"));
+        final RuntimeException exception = new RuntimeException("test delegating onError");
+        delegatingDispatcher.onError(envelope, exception);
 
         assertTrue(delegate.onErrorCalled());
+        assertEquals(exception, delegate.getLastException());
     }
+
+    /*
+     * Test environment
+     */
 
     private static final class EmptyEventDispatcherDelegate
             implements EventDispatcherDelegate<String> {
 
         private boolean onErrorCalled;
+
+        @Nullable
+        private RuntimeException lastException;
 
         @Override
         public Set<EventClass> getEventClasses() {
@@ -82,10 +99,16 @@ public class DelegatingEventDispatcherShould {
         @Override
         public void onError(EventEnvelope envelope, RuntimeException exception) {
             onErrorCalled = true;
+            lastException = exception;
         }
 
         private boolean onErrorCalled() {
             return onErrorCalled;
+        }
+
+        @Nullable
+        private RuntimeException getLastException() {
+            return lastException;
         }
     }
 }
