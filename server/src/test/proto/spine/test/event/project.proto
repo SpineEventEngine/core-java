@@ -36,9 +36,11 @@ message ProjectId {
 message Project {
     ProjectId id = 1;
 
-    string name = 2;
+    string name = 2 [(required) = true];
 
-    repeated Task task = 3;
+    string description = 3;
+
+    repeated Task task = 4;
 
     enum Status {
         UNDEFINED = 0;
@@ -48,9 +50,9 @@ message Project {
         CANCELLED = 4;
     }
 
-    Status status = 4;
+    Status status = 5;
 
-    core.UserId owner_id = 5;
+    spine.core.UserId owner_id = 6;
 }
 
 message TaskId {
@@ -59,6 +61,6 @@ message TaskId {
 
 message Task {
     TaskId task_id = 1;
-    string title = 2;
+    string title = 2 [(required) = true];
     string description = 3;
 }
