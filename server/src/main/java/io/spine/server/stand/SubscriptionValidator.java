@@ -74,7 +74,8 @@ class SubscriptionValidator extends RequestValidator<Subscription> {
 
     private static RequestNotSupported<Subscription> missingInRegistry() {
         return new RequestNotSupported<Subscription>(
-                SubscriptionValidationError.UNKNOWN_SUBSCRIPTION, "Cannot find the subscription in the registry") {
+                SubscriptionValidationError.UNKNOWN_SUBSCRIPTION,
+                "Cannot find the subscription in the registry") {
 
             @Override
             protected InvalidRequestException createException(String errorMessage,

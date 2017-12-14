@@ -152,7 +152,7 @@ class RejectionHandlerMethod extends HandlerMethod<RejectionContext> {
          * A rejection handler method which receives a rejection message
          * as a single parameter.
          *
-         * <p>The signature of such a method is following:
+         * <p>The signature of such a method is:
          * <pre>
          * [{@literal @}HandlerAnnotation]
          * public void on(RejectionMessage rejection);
@@ -165,7 +165,7 @@ class RejectionHandlerMethod extends HandlerMethod<RejectionContext> {
          * A rejection handler method which receives a rejection message as the first parameter,
          * and {@link io.spine.core.RejectionContext RejectionContext} as the second.
          *
-         * <p>The signature of such a method is following:
+         * <p>The signature of such a method is:
          * <pre>
          * [{@literal @}HandlerAnnotation]
          * public void on(RejectionMessage rejection, RejectionContext context);
@@ -177,7 +177,7 @@ class RejectionHandlerMethod extends HandlerMethod<RejectionContext> {
         /**
          * A rejection handler method aware of the {@link CommandContext}.
          *
-         * <p>The signature of such a method is following:
+         * <p>The signature of such a method is:
          * <pre>
          * [{@literal @}HandlerAnnotation]
          * public void on(RejectionMessage rejection, CommandContext context);
@@ -189,7 +189,7 @@ class RejectionHandlerMethod extends HandlerMethod<RejectionContext> {
         /**
          * A rejection handler method aware of the command message.
          *
-         * <p>The signature of such a method is following:
+         * <p>The signature of such a method is:
          * <pre>
          * [{@literal @}HandlerAnnotation]
          * public void on(RejectionMessage rejection, CommandMessage command);
@@ -203,10 +203,10 @@ class RejectionHandlerMethod extends HandlerMethod<RejectionContext> {
          * A rejection handler method aware of both the command message and
          * the {@link CommandContext}.
          *
-         * <p>The signature of such a method is following:
+         * <p>The signature of such a method is:
          * <pre>
          * [{@literal @}HandlerAnnotation]
-         * public void on(RejectionMessage rejection, CommandMessage command, CommandContext context);
+         * public void on(RejectionMessage rejection, CommandMessage command, CommandContext ctx);
          * </pre>
          * where {@code RejectionMessage} is a specific generated rejection message class, and
          * {@code CommandMessage} is a specific generated command message class.

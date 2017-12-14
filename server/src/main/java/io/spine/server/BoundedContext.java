@@ -195,7 +195,7 @@ public final class BoundedContext
     /**
      * Closes all repositories and clears {@link TenantIndex}.
      */
-    private void shutDownRepositories() throws Exception {
+    private void shutDownRepositories() {
         guard.shutDownRepositories();
 
         if (tenantIndex != null) {
@@ -465,7 +465,8 @@ public final class BoundedContext
 
         private StorageFactory getStorageFactory() {
             if (storageFactorySupplier == null) {
-                storageFactorySupplier = StorageFactorySwitch.newInstance(newName(name), multitenant);
+                storageFactorySupplier =
+                        StorageFactorySwitch.newInstance(newName(name), multitenant);
             }
 
             final StorageFactory storageFactory = storageFactorySupplier.get();
