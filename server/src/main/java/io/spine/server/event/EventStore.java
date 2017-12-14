@@ -334,7 +334,8 @@ public class EventStore implements AutoCloseable {
     /**
      * The builder of {@code EventStore} instance exposed as gRPC service.
      *
-     * @see EventStoreGrpc.EventStoreImplBase
+     * @see io.spine.server.event.grpc.EventStoreGrpc.EventStoreImplBase
+     *      EventStoreGrpc.EventStoreImplBase
      */
     public static class ServiceBuilder
             extends AbstractBuilder<ServerServiceDefinition, ServiceBuilder> {

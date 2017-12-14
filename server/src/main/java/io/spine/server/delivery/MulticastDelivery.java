@@ -55,12 +55,15 @@ public abstract class MulticastDelivery<E extends MessageEnvelope,
     @Nullable
     private Function<T, Set<C>> consumerProvider;
 
-    /** {@inheritDoc} */
+    /**
+     * Creates a new delivery instance which performs its actions using
+     * the passed {@code Executor}.
+     */
     protected MulticastDelivery(Executor delegate) {
         super(delegate);
     }
 
-    /** {@inheritDoc} */
+    /** Creates a new direct delivery instance. */
     protected MulticastDelivery() {
         super();
     }

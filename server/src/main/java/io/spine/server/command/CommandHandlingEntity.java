@@ -54,8 +54,6 @@ import java.util.List;
  * because of a {@linkplain Rejections#toRejection(ThrowableMessage, io.spine.core.Command)
  * rejection}.
  *
- * {@inheritDoc}
- *
  * @author Alexander Yevsyukov
  */
 public abstract
@@ -68,7 +66,7 @@ class CommandHandlingEntity<I,
     private final Any idAsAny;
 
     /**
-     * {@inheritDoc}
+     * Creates a new entity with the passed ID.
      */
     protected CommandHandlingEntity(I id) {
         super(id);

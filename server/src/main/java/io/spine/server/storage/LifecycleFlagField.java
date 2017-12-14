@@ -30,13 +30,13 @@ package io.spine.server.storage;
 public enum LifecycleFlagField implements StorageField {
 
     /**
-     * A {@linkplain boolean} field representing whether
+     * A {@code boolean} field representing whether
      * the relevant record is {@code archived} or not.
      */
     archived,
 
     /**
-     * A {@linkplain boolean} field representing whether
+     * A {@code boolean} field representing whether
      * the relevant record is {@code deleted} or not.
      */
     deleted

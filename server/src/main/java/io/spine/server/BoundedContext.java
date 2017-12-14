@@ -239,7 +239,8 @@ public final class BoundedContext
      * Obtains a tenant index of this Bounded Context.
      *
      * <p>If the Bounded Context is single-tenant returns
-     * {@linkplain TenantIndex.Factory#singleTenant() null-object} implementation.
+     * {@linkplain io.spine.server.tenant.TenantIndex.Factory#singleTenant() null-object}
+     * implementation.
      */
     @Internal
     public TenantIndex getTenantIndex() {
