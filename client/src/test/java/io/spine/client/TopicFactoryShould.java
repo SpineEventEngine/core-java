@@ -25,7 +25,7 @@ import io.spine.core.ActorContext;
 import io.spine.protobuf.AnyPacker;
 import io.spine.test.client.TestEntity;
 import io.spine.test.client.TestEntityId;
-import io.spine.type.TypeName;
+import io.spine.type.TypeUrl;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -45,7 +45,7 @@ public class TopicFactoryShould
 
     // See {@code client_requests.proto} for declaration.
     private static final Class<TestEntity> TARGET_ENTITY_CLASS = TestEntity.class;
-    private static final TypeName TARGET_ENTITY_TYPE_NAME = TypeName.of(TARGET_ENTITY_CLASS);
+    private static final TypeUrl TARGET_ENTITY_TYPE_NAME = TypeUrl.of(TARGET_ENTITY_CLASS);
 
     @Test
     public void create_topic_for_all_entities_of_kind() {

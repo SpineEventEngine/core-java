@@ -25,7 +25,7 @@ import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
-import io.spine.server.entity.EntityWithLifecycle;
+import io.spine.server.entity.Entity;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -141,7 +141,7 @@ public final class EntityQuery<I> implements Serializable {
      * @return new instance of {@code EntityQuery}
      */
     @Internal
-    public EntityQuery<I> withLifecycleFlags(Class<? extends EntityWithLifecycle<I, ?>> cls) {
+    public EntityQuery<I> withLifecycleFlags(Class<? extends Entity> cls) {
         checkState(!isLifecycleAttributesSet(),
                    "The query overrides Lifecycle Flags default values.");
         final EntityColumn archivedColumn = findColumn(cls, archived.name());

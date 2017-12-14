@@ -28,6 +28,7 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
+import io.spine.core.EventId;
 import io.spine.core.RejectionContext;
 import io.spine.core.Version;
 import io.spine.server.aggregate.given.Given.StorageRecord;
@@ -349,6 +350,7 @@ public abstract class AggregateStorageShould
                                                          .setEnrichment(withOneAttribute())
                                                          .build();
         final Event event = Event.newBuilder()
+                                 .setId(newEventId())
                                  .setContext(enrichedContext)
                                  .setMessage(Any.getDefaultInstance())
                                  .build();
@@ -369,6 +371,7 @@ public abstract class AggregateStorageShould
                                                  .setRejectionContext(origin)
                                                  .build();
         final Event event = Event.newBuilder()
+                                 .setId(newEventId())
                                  .setContext(context)
                                  .setMessage(Any.getDefaultInstance())
                                  .build();
@@ -390,6 +393,7 @@ public abstract class AggregateStorageShould
                                                  .setEventContext(origin)
                                                  .build();
         final Event event = Event.newBuilder()
+                                 .setId(newEventId())
                                  .setContext(context)
                                  .setMessage(Any.getDefaultInstance())
                                  .build();
@@ -477,6 +481,12 @@ public abstract class AggregateStorageShould
                        .setState(Any.getDefaultInstance())
                        .setTimestamp(time)
                        .build();
+    }
+
+    private static EventId newEventId() {
+        return EventId.newBuilder()
+                      .setValue(newUuid())
+                      .build();
     }
 
     public static class TestAggregate extends Aggregate<ProjectId, Project, ProjectVBuilder> {

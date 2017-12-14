@@ -26,7 +26,6 @@ import io.spine.client.Target;
 import io.spine.client.Topic;
 import io.spine.core.TenantId;
 import io.spine.server.tenant.TenantFunction;
-import io.spine.type.TypeName;
 import io.spine.type.TypeUrl;
 
 import javax.annotation.Nullable;
@@ -151,10 +150,8 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
         public synchronized Subscription add(Topic topic) {
             final SubscriptionId subscriptionId = Subscriptions.generateId();
             final Target target = topic.getTarget();
-            final String typeAsString = target
-                    .getType();
-            final TypeUrl type = TypeName.of(typeAsString)
-                                         .toUrl();
+            final String typeAsString = target.getType();
+            final TypeUrl type = TypeUrl.parse(typeAsString);
             final Subscription subscription = Subscription.newBuilder()
                                                           .setId(subscriptionId)
                                                           .setTopic(topic)

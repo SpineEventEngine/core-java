@@ -100,6 +100,20 @@ allprojects {
 
 final boolean isTravis = System.env.TRAVIS == 'true'
 
+/**
+ * Determines whether the given {@code project} should expose its Javadoc to
+ * SpineEventEngine.github.io website.
+ *
+ * <p>Currently, the {@code testutil} projects are excluded from publishing, as well as the modules
+ * that perform the model compile-time checks.
+ *
+ * @param project the project to check
+ * @return {@code true} is the project Javadoc should be published, {@code false} otherwise
+ */
+static boolean shouldPublishJavadoc(final Project project) {
+    return !project.name.startsWith('testutil') && !project.name.startsWith("model")
+}
+
 subprojects {
 
     configurations {
@@ -125,6 +139,7 @@ subprojects {
         generateDescriptorSetScript = "${rootDir}/scripts/generate-descriptor-set.gradle"
         filterInternalJavadocsScript = "${rootDir}/scripts/no-internal-javadoc.gradle"
         gRpcScript = "${rootDir}/scripts/grpc.gradle"
+        updateDocsPlugin = "$rootDir/scripts/update-gh-pages.gradle"
     }
 
     apply plugin: 'com.google.protobuf'
@@ -192,6 +207,8 @@ subprojects {
         maven { url = googleMavenCentralMirror }
         mavenCentral()
         mavenLocal()
+        maven { url = spineRepository }
+        maven { url = spineSnapshotsRepository }
     }
 
     dependencies {
@@ -246,7 +263,6 @@ subprojects {
             //        org.gradle.api.tasks.testing.logging.TestLogEvent.STANDARD_ERROR,
         }
     }
-
 
     protobuf {
         // The below suppressions `GroovyAssignabilityCheck` is a workaround for the IDEA bug.
@@ -307,8 +323,6 @@ subprojects {
         classifier "javadoc"
     }
 
-    apply from: filterInternalJavadocsScript
-
     // Apply the same IDEA module configuration for each of sub-projects.
     idea {
         module {
@@ -326,6 +340,13 @@ subprojects {
                 }
             }
         }
+    }
+
+    // Apply the Javadoc publishing plugin.
+    // This plugin *must* be applied here, not in the module `build.gradle` files.
+    //
+    if (shouldPublishJavadoc(project)) {
+        apply from: updateDocsPlugin
     }
 }
 

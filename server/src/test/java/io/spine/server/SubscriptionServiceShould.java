@@ -156,7 +156,7 @@ public class SubscriptionServiceShould {
                                           .getExposedTypes()
                                           .iterator()
                                           .next()
-                                          .getTypeName();
+                                          .value();
         final Target target = getProjectQueryTarget();
 
         assertEquals(type, target.getType());

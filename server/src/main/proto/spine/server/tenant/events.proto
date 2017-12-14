@@ -17,33 +17,28 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
+syntax = "proto3";
 
-configurations {
-    excludeInternalDoclet
-}
+package spine.server.tenant;
 
-dependencies {
-    excludeInternalDoclet group: 'io.spine.tools', name: 'spine-javadoc', version: spineToolsVersion
-    //TODO:2017-03-01:dmytro.grankin: Remove dependency after update guava to 22.0.
-    // We need this in order to generate Javadoc correctly.
-    // Details: https://github.com/google/guava/issues/2721
-    compile group: 'com.google.errorprone', name: 'error_prone_annotations', version: '2.0.15'
-}
+import "spine/options.proto";
 
-task noInternalJavadoc(type: Javadoc) {
-    source = sourceSets.main.allJava.filter {
-        !it.absolutePath.contains('generated')
-    }
-    classpath = javadoc.getClasspath()
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.server.tenant";
+option java_generate_equals_and_hash = true;
+option java_multiple_files = true;
+option java_outer_classname = "TenantEventsProto";
 
-    options {
-        // Doclet fully qualified name.
-        doclet = 'io.spine.tools.javadoc.ExcludeInternalDoclet'
+import "google/protobuf/any.proto";
 
-        // Path to the JAR containing the doclet.
-        docletpath = configurations.excludeInternalDoclet.files.asType(List)
+import "spine/core/tenant_id.proto";
 
-        // Encoding of the source files.
-        encoding = 'UTF8'
-    }
+// An event telling that a new tenant has been added to a multi-tenant application.
+//
+// This event is never fired in a single-tenant system.
+//
+message TenantAdded {
+
+    // The new tenant ID.
+    spine.core.TenantId id = 1 [(required) = true, (valid) = true];
 }
