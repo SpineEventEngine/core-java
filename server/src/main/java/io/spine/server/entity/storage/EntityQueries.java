@@ -40,6 +40,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.HashMultimap.create;
 import static com.google.common.primitives.Primitives.wrap;
 import static io.spine.protobuf.TypeConverter.toObject;
+import static io.spine.server.entity.storage.Columns.findColumn;
 
 /**
  * A utility class for working with {@link EntityQuery} instances.
@@ -50,16 +51,16 @@ import static io.spine.protobuf.TypeConverter.toObject;
 @Internal
 public final class EntityQueries {
 
+    /** Prevents instantiation of this utility class. */
     private EntityQueries() {
-        // Prevent utility class initialization
     }
 
     /**
      * Creates a new instance of {@link EntityQuery} from the given {@link EntityFilters} targeting
      * the given Entity class.
      *
-     * @param entityFilters the filters for the Entities specifying the query predicate
-     * @param entityClass   the Entity class specifying the query target
+     * @param  entityFilters the filters for the Entities specifying the query predicate
+     * @param  entityClass   the Entity class specifying the query target
      * @return new instance of the {@code EntityQuery} with the specified attributes
      */
     public static <I> EntityQuery<I> from(EntityFilters entityFilters,
@@ -79,8 +80,8 @@ public final class EntityQueries {
         final QueryParameters.Builder builder = QueryParameters.newBuilder();
 
         for (CompositeColumnFilter filter : entityFilters.getFilterList()) {
-            final Multimap<EntityColumn, ColumnFilter> columnFilters = splitFilters(filter,
-                                                                                    entityClass);
+            final Multimap<EntityColumn, ColumnFilter> columnFilters =
+                    splitFilters(filter, entityClass);
             final CompositeOperator operator = filter.getOperator();
             final CompositeQueryParameter parameter =
                     CompositeQueryParameter.from(columnFilters, operator);
@@ -92,10 +93,10 @@ public final class EntityQueries {
     private static Multimap<EntityColumn, ColumnFilter> splitFilters(
             CompositeColumnFilter filter,
             Class<? extends Entity> entityClass) {
-        final Multimap<EntityColumn, ColumnFilter> columnFilters = create(filter.getFilterCount(),
-                                                                          1);
+        final Multimap<EntityColumn, ColumnFilter> columnFilters =
+                create(filter.getFilterCount(), 1);
         for (ColumnFilter columnFilter : filter.getFilterList()) {
-            final EntityColumn column = Columns.findColumn(entityClass, columnFilter.getColumnName());
+            final EntityColumn column = findColumn(entityClass, columnFilter.getColumnName());
             checkFilterType(column, columnFilter);
             columnFilters.put(column, columnFilter);
         }
