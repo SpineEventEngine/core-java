@@ -87,6 +87,6 @@ final class FilterChain<E extends MessageEnvelope<?, ?, ?>, F extends BusFilter<
     }
 
     private void checkNotClosed() {
-        checkState(!closed, "The FilterChain is already closed.");
+        checkState(!closed, "The `FilterChain` is already closed.");
     }
 }
