@@ -39,7 +39,6 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static java.lang.String.format;
 
 /**
  * A {@link EventDispatcher} which delegates the responsibilities to an aggregated {@link
@@ -114,12 +113,10 @@ public final class DelegatingEventDispatcher<I> implements EventDispatcher<I> {
 
             @Override
             public void onError(ExternalMessageEnvelope envelope, RuntimeException exception) {
-
                 final MessageClass messageClass = envelope.getMessageClass();
                 final String messageId = Stringifiers.toString(envelope.getId());
                 final String errorMessage =
-                        format("Error dispatching external event (class: %s, id: %s)",
-                               messageClass, messageId);
+                        Error.DISPATCHING_EXTERNAL_EVENT.format(messageClass, messageId);
                 log().error(errorMessage, exception);
             }
         };

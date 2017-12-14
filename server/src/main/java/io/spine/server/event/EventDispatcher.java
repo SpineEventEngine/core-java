@@ -31,4 +31,23 @@ import io.spine.server.bus.MulticastDispatcher;
  * @author Alexander Yevsyukov
  */
 public interface EventDispatcher<I> extends MulticastDispatcher<EventClass, EventEnvelope, I> {
+
+    enum Error {
+
+        DISPATCHING_EXTERNAL_EVENT("Error dispatching external event (class: %s, id: %s)");
+
+        private final String messageFormat;
+
+        Error(String messageFormat) {
+            this.messageFormat = messageFormat;
+        }
+
+        public String getMessageFormat() {
+            return messageFormat;
+        }
+
+        public String format(Object... args) {
+            return String.format(messageFormat, args);
+        }
+    }
 }

@@ -134,7 +134,7 @@ public abstract class EventDispatchingRepository<I,
 
             @Override
             public void onError(ExternalMessageEnvelope envelope, RuntimeException exception) {
-                logError("Error dispatching external event (class: %s, id: %s", envelope, exception);
+                logError(Error.DISPATCHING_EXTERNAL_EVENT.getMessageFormat(), envelope, exception);
             }
         };
     }
