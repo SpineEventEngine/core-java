@@ -89,7 +89,9 @@ public abstract class ProcessManagerRepository<I,
      */
     private CommandErrorHandler commandErrorHandler;
 
-    /** {@inheritDoc} */
+    /**
+     * Creates a new instance with the event routing by the first message field.
+     */
     protected ProcessManagerRepository() {
         super(EventProducers.<I>fromFirstMessageField());
     }

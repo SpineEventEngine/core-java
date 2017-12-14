@@ -23,6 +23,7 @@ build/
 out/
 
 # Spine temporary artifact storage
+.spine/
 */.spine/
 model/*/.spine/
 

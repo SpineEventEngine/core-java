@@ -67,7 +67,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends Message>
                 extends Repository<I, E> {
 
-    /** {@inheritDoc} */
+    /** Creates a new instance. */
     protected RecordBasedRepository() {
         super();
     }

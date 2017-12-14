@@ -36,7 +36,7 @@ public abstract class AggregatePartRepository<I,
                       extends AggregateRepository<I, A> {
 
     /**
-     * {@inheritDoc}
+     * Creates a new instance.
      */
     protected AggregatePartRepository() {
         super();

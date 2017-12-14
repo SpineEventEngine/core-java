@@ -444,7 +444,8 @@ public class EventBus
         /**
          * Sets logging level for post operations.
          *
-         * <p>If not set directly, {@link LoggingObserver.Level#TRACE} will be used.
+         * <p>If not set directly, {@link io.spine.grpc.LoggingObserver.Level#TRACE Level.TRACE}
+         * will be used.
          */
         public Builder setLogLevelForPost(Level level) {
             this.logLevelForPost = level;

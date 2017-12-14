@@ -61,7 +61,9 @@ public abstract class AggregatePart<I,
     private final R root;
 
     /**
-     * {@inheritDoc}
+     * Creates a new instance of the aggregate part.
+     *
+     * @param root a root of the aggregate to which this part belongs
      */
     protected AggregatePart(R root) {
         super(root.getId());
