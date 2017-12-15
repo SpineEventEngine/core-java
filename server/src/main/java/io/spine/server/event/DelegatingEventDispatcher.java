@@ -21,7 +21,6 @@
 package io.spine.server.event;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Supplier;
 import io.spine.annotation.Internal;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
@@ -30,8 +29,6 @@ import io.spine.server.integration.ExternalMessage;
 import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
-import io.spine.util.Logging;
-import org.slf4j.Logger;
 
 import java.util.Set;
 
@@ -53,9 +50,6 @@ public final class DelegatingEventDispatcher<I> implements EventDispatcher<I> {
      * A target delegate.
      */
     private final EventDispatcherDelegate<I> delegate;
-
-    /** Lazily initialized logger. */
-    private final Supplier<Logger> loggerSupplier = Logging.supplyFor(getClass());
 
     /**
      * Creates a new instance of {@code DelegatingCommandDispatcher}, proxying the calls
