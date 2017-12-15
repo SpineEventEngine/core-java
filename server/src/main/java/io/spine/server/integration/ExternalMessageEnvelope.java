@@ -59,6 +59,20 @@ public final class ExternalMessageEnvelope
 
     }
 
+    /**
+     * Creates a new instance of {@code ExternalMessageEnvelope} from the {@link ExternalMessage}
+     * instance and the message transferred inside the {@code ExternalMessage}, such as
+     * a {@code io.spine.sample.TaskCreated} event message.
+     *
+     * <p>This factory method provides an optimal performance of
+     * the {@code ExternalMessageEnvelope} creation. It allows to avoid unpacking the original
+     * message from the {@code ExternalMessage} instance.
+     *
+     * @param externalMessage the instance of {@code ExternalMessage} to wrap into an envelope
+     * @param originalMessage the message instance, which was originally transferred inside the
+     *                        {@code externalMessage}
+     * @return the new instance of external message envelope.
+     */
     public static ExternalMessageEnvelope of(ExternalMessage externalMessage,
                                              Message originalMessage) {
         checkNotNull(externalMessage);
