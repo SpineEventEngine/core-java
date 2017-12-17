@@ -18,36 +18,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event;
+package io.spine.server.bus;
 
-import io.spine.core.EventClass;
+import com.google.common.collect.Lists;
 import io.spine.core.EventEnvelope;
-import io.spine.server.bus.MulticastDispatcher;
+import org.junit.Test;
 
 /**
- * {@code EventDispatcher} delivers events to subscribers.
- *
- * @param <I> the type of entity IDs
  * @author Alexander Yevsyukov
  */
-public interface EventDispatcher<I> extends MulticastDispatcher<EventClass, EventEnvelope, I> {
+public class FilterChainShould {
 
-    enum Error {
+    @Test(expected = IllegalStateException.class)
+    public void not_allow_closing_twice() throws Exception {
+        FilterChain<EventEnvelope, BusFilter<EventEnvelope>> chain =
+                new FilterChain<>(Lists.<BusFilter<EventEnvelope>>newArrayList());
 
-        DISPATCHING_EXTERNAL_EVENT("Error dispatching external event (class: %s, id: %s)");
-
-        private final String messageFormat;
-
-        Error(String messageFormat) {
-            this.messageFormat = messageFormat;
-        }
-
-        public String getMessageFormat() {
-            return messageFormat;
-        }
-
-        public String format(Object... args) {
-            return String.format(messageFormat, args);
-        }
+        chain.close();
+        chain.close();
     }
 }
