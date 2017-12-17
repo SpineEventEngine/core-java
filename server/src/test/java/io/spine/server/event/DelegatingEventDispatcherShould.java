@@ -70,7 +70,7 @@ public class DelegatingEventDispatcherShould {
 
     /*
      * Test environment
-     */
+     ********************/
 
     private static final class EmptyEventDispatcherDelegate
             implements EventDispatcherDelegate<String> {
