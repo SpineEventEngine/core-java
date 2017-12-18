@@ -154,13 +154,13 @@ class RejectionHandlerMethod extends HandlerMethod<RejectionContext> {
          *
          * <p>The signature of such a method is as follows, if used in {@link RejectionSubscriber}:
          * <pre>
-         * [{@literal @}Subscribe]
+         * {@literal @}Subscribe
          * public void on(RejectionMessage rejection);
          * </pre>
          *
          * Or if it is an {@code Entity} reactor method, it is declared as:
          * <pre>
-         * [{@literal @}React]
+         * {@literal @}React
          * public void on(RejectionMessage rejection);
          * </pre>
          *
@@ -174,13 +174,13 @@ class RejectionHandlerMethod extends HandlerMethod<RejectionContext> {
          *
          * <p>The signature of such a method is as follows, if used in {@link RejectionSubscriber}:
          * <pre>
-         * [{@literal @}Subscribe]
+         * {@literal @}Subscribe
          * public void on(RejectionMessage rejection, RejectionContext context);
          * </pre>
          *
          * Or if it is an {@code Entity} reactor method, it is declared as:
          * <pre>
-         * [{@literal @}React]
+         * {@literal @}React
          * public void on(RejectionMessage rejection, RejectionContext context);
          * </pre>
          *
@@ -193,13 +193,13 @@ class RejectionHandlerMethod extends HandlerMethod<RejectionContext> {
          *
          * <p>The signature of such a method is as follows, if used in {@link RejectionSubscriber}:
          * <pre>
-         * [{@literal @}Subscribe]
+         * {@literal @}Subscribe
          * public void on(RejectionMessage rejection, CommandContext context);
          * </pre>
          *
          * Or if it is an {@code Entity} reactor method, it is declared as:
          * <pre>
-         * [{@literal @}React]
+         * {@literal @}React
          * public void on(RejectionMessage rejection, CommandContext context);
          * </pre>
          *
@@ -212,13 +212,13 @@ class RejectionHandlerMethod extends HandlerMethod<RejectionContext> {
          *
          * <p>The signature of such a method is as follows, if used in {@link RejectionSubscriber}:
          * <pre>
-         * [{@literal @}Subscribe]
+         * {@literal @}Subscribe
          * public void on(RejectionMessage rejection, CommandMessage command);
          * </pre>
          *
          * Or if it is an {@code Entity} reactor method, it is declared as:
          * <pre>
-         * [{@literal @}React]
+         * {@literal @}React
          * public void on(RejectionMessage rejection, CommandMessage command);
          * </pre>
          *
@@ -233,13 +233,13 @@ class RejectionHandlerMethod extends HandlerMethod<RejectionContext> {
          *
          * <p>The signature of such a method is as follows, if used in {@link RejectionSubscriber}:
          * <pre>
-         * [{@literal @}Subscribe]
+         * {@literal @}Subscribe
          * public void on(RejectionMessage rejection, CommandMessage command, CommandContext ctx);
          * </pre>
          *
          * Or if it is an {@code Entity} reactor method, it is declared as:
          * <pre>
-         * [{@literal @}React]
+         * {@literal @}React
          * public void on(RejectionMessage rejection, CommandMessage command, CommandContext ctx);
          * </pre>
          *
