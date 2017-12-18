@@ -21,6 +21,7 @@
 package io.spine.model.assemble;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.protobuf.ProtocolStringList;
 import io.spine.annotation.Internal;
 import io.spine.model.CommandHandlers;
 import io.spine.server.command.Assign;
@@ -141,7 +142,8 @@ public class AssignLookup extends SpineAnnotationProcessor {
      * not to contain duplicate entries in any {@code repeated} field.
      */
     private void removeDuplicates() {
-        final Set<String> commandHandlingTypes = newTreeSet(commandHandlers.getCommandHandlingTypesList());
+        final ProtocolStringList handlingTypesList = commandHandlers.getCommandHandlingTypesList();
+        final Set<String> commandHandlingTypes = newTreeSet(handlingTypesList);
         commandHandlers.clearCommandHandlingTypes()
                        .addAllCommandHandlingTypes(commandHandlingTypes);
     }

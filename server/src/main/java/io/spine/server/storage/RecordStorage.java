@@ -47,8 +47,11 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *
  * @param <I> the type of entity IDs
  * @author Alexander Yevsyukov
+ * @author Dmytro Grankin
+ * @author Dmytro Dashenkov
  */
-public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord, RecordReadRequest<I>>
+public abstract class RecordStorage<I>
+        extends AbstractStorage<I, EntityRecord, RecordReadRequest<I>>
         implements StorageWithLifecycleFlags<I, EntityRecord, RecordReadRequest<I>>,
                    BulkStorageOperationsMixin<I, EntityRecord> {
 
@@ -59,7 +62,7 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord, 
     /**
      * Reads a record, which matches the specified {@linkplain RecordReadRequest request}.
      *
-     * @param request the request to read the record
+     * @param  request the request to read the record
      * @return a record instance or {@code Optional.absent()} if there is no record with this ID
      */
     @Override
@@ -75,11 +78,11 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord, 
      * Reads a record, which matches the specified {@linkplain RecordReadRequest request}
      * and applies a {@link FieldMask} to it.
      *
-     * @param request   the request to read the record
-     * @param fieldMask fields to read.
+     * @param  request   the request to read the record
+     * @param  fieldMask fields to read.
      * @return the item with the given ID and with the {@code FieldMask} applied
      *         or {@code Optional.absent()} if there is no record matching this request
-     * @see #read(RecordReadRequest)
+     * @see    #read(RecordReadRequest)
      */
     public Optional<EntityRecord> read(RecordReadRequest<I> request, FieldMask fieldMask) {
         final Optional<EntityRecord> rawResult = read(request);
@@ -105,10 +108,10 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord, 
      *
      * <p>Rewrites it if a record with this ID already exists in the storage.
      *
-     * @param id     the ID for the record
-     * @param record a record to store
+     * @param  id     the ID for the record
+     * @param  record a record to store
      * @throws IllegalStateException if the storage is closed
-     * @see #write(Object, EntityRecord)
+     * @see   #write(Object, EntityRecord)
      */
     public void write(I id, EntityRecordWithColumns record) {
         checkNotNull(id);
@@ -134,7 +137,7 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord, 
      *
      * <p>Rewrites it if a record with this ID already exists in the storage.
      *
-     * @param records an ID to record map with the entries to store
+     * @param  records an ID to record map with the entries to store
      * @throws IllegalStateException if the storage is closed
      */
     public void write(Map<I, EntityRecordWithColumns> records) {
@@ -238,8 +241,8 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord, 
      * supports them, all the resulting records are active. Otherwise the records obey
      * the constraints provided by the query.
      *
-     * @param query     the query to execute
-     * @param fieldMask the fields to retrieve
+     * @param  query     the query to execute
+     * @param  fieldMask the fields to retrieve
      * @return the matching records mapped upon their IDs
      */
     public Iterator<EntityRecord> readAll(EntityQuery<I> query, FieldMask fieldMask) {

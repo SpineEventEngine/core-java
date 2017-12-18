@@ -71,7 +71,7 @@ public abstract class AggregatePartRepository<I,
         return (AggregatePartClass<A>) entityClass();
     }
 
-    //TODO:2017-06-06:alexander.yevsyukov: Have cache of aggregate roots shared among part repositories
+    //TODO:2017-06-06:alexander.yevsyukov: Cache aggregate roots shared among part repositories
     private AggregateRoot<I> createAggregateRoot(I id) {
         final AggregateRoot<I> result = aggregatePartClass().createRoot(getBoundedContext(), id);
         return result;

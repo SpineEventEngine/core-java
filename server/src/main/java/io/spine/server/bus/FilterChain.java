@@ -21,6 +21,7 @@
 package io.spine.server.bus;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Queues;
 import io.spine.core.Ack;
 import io.spine.core.MessageEnvelope;
 
@@ -40,14 +41,15 @@ import static com.google.common.base.Preconditions.checkState;
  *
  * @author Dmytro Dashenkov
  */
-final class FilterChain<E extends MessageEnvelope<?, ?, ?>, F extends BusFilter<E>> implements BusFilter<E> {
+final class FilterChain<E extends MessageEnvelope<?, ?, ?>, F extends BusFilter<E>>
+        implements BusFilter<E> {
 
     private final Deque<F> chain;
 
     private volatile boolean closed;
 
-    FilterChain(Deque<F> chain) {
-        this.chain = chain;
+    FilterChain(Iterable<F> chain) {
+        this.chain = Queues.newLinkedBlockingDeque(chain);
     }
 
     @Override
@@ -68,8 +70,10 @@ final class FilterChain<E extends MessageEnvelope<?, ?, ?>, F extends BusFilter<
      *
      * <p>The filters are closed in the reversed order comparing to the invocation order.
      *
-     * @throws IllegalStateException on a repetitive call
-     * @throws Exception             if a filter throws an {@link Exception}
+     * @throws IllegalStateException
+     *         on a repetitive call
+     * @throws Exception
+     *         if a filter throws an {@link Exception}
      */
     @Override
     public void close() throws Exception {
@@ -83,6 +87,6 @@ final class FilterChain<E extends MessageEnvelope<?, ?, ?>, F extends BusFilter<
     }
 
     private void checkNotClosed() {
-        checkState(!closed, "The Filter chain is already closed.");
+        checkState(!closed, "The `FilterChain` is already closed.");
     }
 }

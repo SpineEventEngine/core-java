@@ -55,7 +55,9 @@ import static java.lang.String.format;
  * <a href="http://download.oracle.com/otndocs/jcp/7224-javabeans-1.01-fr-spec-oth-JSpec/">
  * the Java Bean</a> getter spec and annotated with {@link Column}
  * are considered {@linkplain EntityColumn columns}.
- * Inherited columns are taken into account either.
+ *
+ * <p>Inherited columns are taken into account too, but building entity hierarchies is strongly
+ * discouraged.
  *
  * <p>Note that the returned type of a {@link EntityColumn} getter must either be primitive or
  * serializable, otherwise a runtime exception is thrown when trying to get an instance of
@@ -86,8 +88,10 @@ public class Columns {
             synchronizedListMultimap(
                     LinkedListMultimap.<Class<? extends Entity>, EntityColumn>create());
 
+    /**
+     * Prevents initialization of this class from outside.
+     */
     private Columns() {
-        // Prevent initialization of a utility class
     }
 
     /**
@@ -109,8 +113,8 @@ public class Columns {
      *
      * @param entity an {@link Entity} to get the {@linkplain EntityColumn columns} from
      * @param <E>    the type of the {@link Entity}
-     * @return a {@link Map} of the column {@linkplain EntityColumn#getStoredName() names for storing}
-     *         to their {@linkplain MemoizedValue memoized values}.
+     * @return a {@link Map} of the column {@linkplain EntityColumn#getStoredName()
+     *         names for storing} to their {@linkplain MemoizedValue memoized values}.
      * @see MemoizedValue
      */
     static <E extends Entity<?, ?>> Map<String, MemoizedValue> from(E entity) {
@@ -183,10 +187,10 @@ public class Columns {
      */
     private static Map<String, MemoizedValue> extractColumns(Class<? extends Entity> entityType,
                                                              Entity entity) {
-        final Collection<EntityColumn> storageFieldProperties = knownEntityProperties.get(entityType);
-        final Map<String, MemoizedValue> values = new HashMap<>(storageFieldProperties.size());
+        final Collection<EntityColumn> columns = knownEntityProperties.get(entityType);
+        final Map<String, MemoizedValue> values = new HashMap<>(columns.size());
 
-        for (EntityColumn column : storageFieldProperties) {
+        for (EntityColumn column : columns) {
             final String name = column.getStoredName();
             final MemoizedValue value = column.memoizeFor(entity);
             values.put(name, value);
@@ -238,8 +242,10 @@ public class Columns {
         for (EntityColumn column : columns) {
             final String columnName = column.getStoredName();
             if (checkedNames.contains(columnName)) {
-                final String msg = "The entity `%s` has columns with the same name for storing `%s`.";
-                throw newIllegalStateException(msg, entityClass.getName(), columnName);
+                throw newIllegalStateException(
+                        "The entity `%s` has columns with the same name for storing `%s`.",
+                        entityClass.getName(),
+                        columnName);
             }
             checkedNames.add(columnName);
         }

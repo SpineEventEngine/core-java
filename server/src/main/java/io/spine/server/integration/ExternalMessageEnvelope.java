@@ -56,7 +56,6 @@ public final class ExternalMessageEnvelope
         this.message = originalMessage;
         this.messageClass = ExternalMessageClass.of(this.message.getClass());
         this.actorContext = externalMessage.getActorContext();
-
     }
 
     /**

@@ -70,9 +70,9 @@ import static io.spine.server.storage.LifecycleFlagField.deleted;
  *
  * <p>If the query specifies the values of
  * the {@linkplain io.spine.server.entity.LifecycleFlags Entity lifecycle Columns}, then
- * the {@linkplain io.spine.server.storage.RecordStorage#readAll(EntityQuery, com.google.protobuf.FieldMask)
- * default behavior} will be overridden i.e. the records resulting to such query may or may not be
- * active.
+ * the {@linkplain io.spine.server.storage.RecordStorage#readAll(EntityQuery,
+ * com.google.protobuf.FieldMask) default behavior} will be overridden i.e. the records resulting
+ * to such query may or may not be active.
  *
  * @param <I> the type of the IDs of the query target
  * @author Dmytro Dashenkov
