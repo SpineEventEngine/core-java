@@ -96,7 +96,6 @@ public class DelegatingEventDispatcherShould {
         assertTrue(delegate.onErrorCalled());
     }
 
-
     /*
      * Test environment
      ********************/
