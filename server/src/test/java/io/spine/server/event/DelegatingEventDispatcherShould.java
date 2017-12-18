@@ -77,10 +77,8 @@ public class DelegatingEventDispatcherShould {
 
     @Test
     public void expose_external_dispatcher_that_delegates_onError() {
-        final EmptyEventDispatcherDelegate delegate = new EmptyEventDispatcherDelegate();
         final ExternalMessageDispatcher<String> extMessageDispatcher =
-                DelegatingEventDispatcher.of(delegate)
-                                         .getExternalDispatcher();
+                delegatingDispatcher.getExternalDispatcher();
 
         final TestEventFactory factory = TestEventFactory.newInstance(getClass());
         final StringValue eventMsg = newUuidValue();
