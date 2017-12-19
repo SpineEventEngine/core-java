@@ -70,7 +70,7 @@ class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
 
     @Override
     protected void deliverNowTo(I entityId) {
-        final P projection = repository().findWithAnyVisibilityOrCreate(entityId);
+        final P projection = repository().findOrCreate(entityId);
         final ProjectionTransaction<I, ?, ?> tx =
                 ProjectionTransaction.start((Projection<I, ?, ?>) projection);
         projection.handle(envelope());

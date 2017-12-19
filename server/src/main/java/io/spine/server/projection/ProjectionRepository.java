@@ -253,16 +253,6 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         return super.findOrCreate(id);
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Overrides to expose the method to the package.
-     */
-    @Override
-    protected P findWithAnyVisibilityOrCreate(I id) {
-        return super.findWithAnyVisibilityOrCreate(id);
-    }
-
     /** Exposes routing to the package. */
     EventRouting<I> eventRouting() {
         return getEventRouting();

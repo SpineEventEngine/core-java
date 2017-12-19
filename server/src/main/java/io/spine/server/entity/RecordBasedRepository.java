@@ -141,7 +141,14 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         store(entity);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * Finds an entity with the passed ID if this entity is
+     * {@linkplain EntityWithLifecycle.Predicates#isEntityVisible() visible}.
+     *
+     * @param id the ID of the entity to load
+     * @return the entity or {@link Optional#absent()} if there's no entity with such ID
+     *         or this entity is not visible
+     */
     @Override
     @CheckReturnValue
     public Optional<E> find(I id) {
@@ -191,32 +198,13 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     /**
      * Loads an entity by the passed ID or creates a new one, if the entity was not found.
      *
-     * <p>If the entity exists, but has non-default {@link LifecycleFlags}
-     * a newly created entity will be returned.
-     */
-    @CheckReturnValue
-    protected E findOrCreate(I id) {
-        final Optional<E> loaded = find(id);
-
-        if (!loaded.isPresent()) {
-            final E result = create(id);
-            return result;
-        }
-
-        final E result = loaded.get();
-        return result;
-    }
-
-    /**
-     * Loads an entity by the passed ID or creates a new one, if the entity was not found.
-     *
      * <p>An entity will be loaded despite its {@linkplain LifecycleFlags visibility}.
      *
      * @param id the ID of the entity to load
      * @return the entity with the specified ID
      */
     @CheckReturnValue
-    protected E findWithAnyVisibilityOrCreate(I id) {
+    protected E findOrCreate(I id) {
         Optional<EntityRecord> optional = findRecord(id);
         if (!optional.isPresent()) {
             return create(id);

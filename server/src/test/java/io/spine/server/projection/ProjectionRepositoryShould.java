@@ -212,12 +212,12 @@ public class ProjectionRepositoryShould
                 GivenEventMessage.projectLifecycleChanged(archivedEntityFlags);
         checkDispatchesEvent(lifecycleChanged);
         final ProjectId projectId = lifecycleChanged.getProjectId();
-        TestProjection projection = repository().findWithAnyVisibilityOrCreate(projectId);
+        TestProjection projection = repository().findOrCreate(projectId);
         assertTrue(projection.isArchived());
 
         // Dispatch an event to the archived projection.
         checkDispatchesEvent(GivenEventMessage.taskAdded());
-        projection = repository().findWithAnyVisibilityOrCreate(projectId);
+        projection = repository().findOrCreate(projectId);
         final List<Task> addedTasks = projection.getState()
                                                       .getTaskList();
         assertFalse(addedTasks.isEmpty());
@@ -235,12 +235,12 @@ public class ProjectionRepositoryShould
                 GivenEventMessage.projectLifecycleChanged(deletedEntityFlags);
         checkDispatchesEvent(lifecycleChanged);
         final ProjectId projectId = lifecycleChanged.getProjectId();
-        TestProjection projection = repository().findWithAnyVisibilityOrCreate(projectId);
+        TestProjection projection = repository().findOrCreate(projectId);
         assertTrue(projection.isDeleted());
 
         // Dispatch an event to the deleted projection.
         checkDispatchesEvent(GivenEventMessage.taskAdded());
-        projection = repository().findWithAnyVisibilityOrCreate(projectId);
+        projection = repository().findOrCreate(projectId);
         final List<Task> addedTasks = projection.getState()
                                                       .getTaskList();
         assertTrue(projection.isDeleted());
