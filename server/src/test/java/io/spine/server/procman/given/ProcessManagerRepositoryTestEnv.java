@@ -28,6 +28,7 @@ import io.spine.core.CommandContext;
 import io.spine.core.EventContext;
 import io.spine.core.React;
 import io.spine.server.command.Assign;
+import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.TestEntityWithStringColumn;
 import io.spine.server.entity.rejection.EntityAlreadyArchived;
 import io.spine.server.entity.rejection.StandardRejections;
@@ -39,6 +40,7 @@ import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.ProjectVBuilder;
 import io.spine.test.procman.Task;
 import io.spine.test.procman.command.PmAddTask;
+import io.spine.test.procman.command.PmChangeLifecycle;
 import io.spine.test.procman.command.PmCreateProject;
 import io.spine.test.procman.command.PmDoNothing;
 import io.spine.test.procman.command.PmStartProject;
@@ -51,6 +53,7 @@ import io.spine.testdata.Sample;
 import java.util.List;
 
 import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.addTask;
 import static java.util.Collections.emptyList;
 
 public class ProcessManagerRepositoryTestEnv {
@@ -157,6 +160,17 @@ public class ProcessManagerRepositoryTestEnv {
         }
 
         @Assign
+        Empty handle(PmChangeLifecycle command) {
+            keep(command);
+
+            final LifecycleFlags lifecycleFlagsToSet = command.getLifecycleFlags();
+            setArchived(lifecycleFlagsToSet.getArchived());
+            setDeleted(lifecycleFlagsToSet.getDeleted());
+            getBuilder().addTask(addTask().getTask());
+            return Empty.getDefaultInstance();
+        }
+
+        @Assign
         List<Message> handle(PmDoNothing command, CommandContext ignored) {
             keep(command);
             return emptyList();
@@ -234,6 +248,13 @@ public class ProcessManagerRepositoryTestEnv {
             return ((PmAddTask.Builder) Sample.builderForType(PmAddTask.class))
                     .setProjectId(ID)
                     .build();
+        }
+
+        public static PmChangeLifecycle changeProjectLifecycle(LifecycleFlags newFlags) {
+            return PmChangeLifecycle.newBuilder()
+                                    .setProjectId(ID)
+                                    .setLifecycleFlags(newFlags)
+                                    .build();
         }
 
         public static PmDoNothing doNothing() {

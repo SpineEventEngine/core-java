@@ -22,6 +22,7 @@ syntax = "proto3";
 package spine.test.procman.command;
 
 import "spine/options.proto";
+import "spine/server/entity/entity.proto";
 
 option (type_url_prefix) = "type.spine.io";
 option java_package="io.spine.test.procman.command";
@@ -51,4 +52,9 @@ message PmDoNothing {
 // A command, which always causes StandardRejections.EntityAlreadyArchived to be thrown.
 message PmThrowEntityAlreadyArchived {
     ProjectId project_id = 1;
+}
+
+message PmChangeLifecycle {
+    ProjectId project_id = 1;
+    spine.server.entity.LifecycleFlags lifecycleFlags = 2;
 }

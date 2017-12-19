@@ -39,6 +39,7 @@ import io.spine.core.TenantId;
 import io.spine.core.given.GivenEvent;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
+import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.RecordBasedRepositoryShould;
 import io.spine.server.entity.given.Given;
@@ -52,6 +53,8 @@ import io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.TestProcess
 import io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.TestProcessManagerRepository;
 import io.spine.test.procman.Project;
 import io.spine.test.procman.ProjectId;
+import io.spine.test.procman.Task;
+import io.spine.test.procman.command.PmChangeLifecycle;
 import io.spine.test.procman.command.PmCreateProject;
 import io.spine.test.procman.command.PmStartProject;
 import io.spine.test.procman.command.PmThrowEntityAlreadyArchived;
@@ -74,6 +77,7 @@ import static io.spine.server.TestEventClasses.assertContains;
 import static io.spine.server.TestRejectionClasses.assertContains;
 import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.ID;
 import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.addTask;
+import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.changeProjectLifecycle;
 import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.createProject;
 import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.doNothing;
 import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.projectCreated;
@@ -82,6 +86,7 @@ import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.Give
 import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.taskAdded;
 import static java.lang.String.format;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -145,6 +150,7 @@ public class ProcessManagerRepositoryShould
     @Before
     public void setUp() {
         super.setUp();
+        setCurrentTenant(requestFactory.getTenantId());
         boundedContext = BoundedContext.newBuilder()
                                        .setMultitenant(true)
                                        .build();
@@ -159,8 +165,8 @@ public class ProcessManagerRepositoryShould
         super.tearDown();
     }
 
-    ProcessManagerRepository<?, ?, ?> repository() {
-        return (ProcessManagerRepository<?, ?, ?>) repository;
+    ProcessManagerRepository<ProjectId, TestProcessManager, Project> repository() {
+        return (ProcessManagerRepository<ProjectId, TestProcessManager, Project>) repository;
     }
 
     private void testDispatchCommand(Message cmdMsg) throws InvocationTargetException {
@@ -189,6 +195,28 @@ public class ProcessManagerRepositoryShould
     }
 
     @Test
+    public void dispatch_event_to_non_visible_process_manager() throws InvocationTargetException {
+        final LifecycleFlags archivedEntityFlags = LifecycleFlags.newBuilder()
+                                                                 .setArchived(true)
+                                                                 .build();
+        final PmChangeLifecycle changeLifecycle = changeProjectLifecycle(archivedEntityFlags);
+        testDispatchCommand(changeLifecycle);
+        final ProjectId projectId = changeLifecycle.getProjectId();
+        TestProcessManager processManager = repository().findOrCreate(projectId);
+        assertTrue(processManager.isArchived());
+
+        // Dispatch an event to the archived process manager.
+        testDispatchEvent(taskAdded());
+        processManager = repository().findOrCreate(projectId);
+        final List<Task> addedTasks = processManager.getState()
+                                                    .getTaskList();
+        assertFalse(addedTasks.isEmpty());
+
+        // Check that the process manager was not re-created before dispatching.
+        assertTrue(processManager.isArchived());
+    }
+
+    @Test
     public void dispatch_command() throws InvocationTargetException {
         testDispatchCommand(addTask());
     }
@@ -198,6 +226,28 @@ public class ProcessManagerRepositoryShould
         testDispatchCommand(createProject());
         testDispatchCommand(addTask());
         testDispatchCommand(startProject());
+    }
+
+    @Test
+    public void dispatch_command_to_non_visible_process_manager() throws InvocationTargetException {
+        final LifecycleFlags archivedEntityFlags = LifecycleFlags.newBuilder()
+                                                                 .setArchived(true)
+                                                                 .build();
+        final PmChangeLifecycle changeLifecycle = changeProjectLifecycle(archivedEntityFlags);
+        testDispatchCommand(changeLifecycle);
+        final ProjectId projectId = changeLifecycle.getProjectId();
+        TestProcessManager processManager = repository().findOrCreate(projectId);
+        assertTrue(processManager.isArchived());
+
+        // Dispatch a command to the non-visible process manager.
+        testDispatchCommand(addTask());
+        processManager = repository().findOrCreate(projectId);
+        final List<Task> addedTasks = processManager.getState()
+                                                    .getTaskList();
+        assertFalse(addedTasks.isEmpty());
+
+        // Check that the process manager was not re-created before dispatching.
+        assertTrue(processManager.isArchived());
     }
 
     @Test
@@ -297,8 +347,8 @@ public class ProcessManagerRepositoryShould
     public void throw_exception_on_attempt_to_register_in_bc_with_no_messages_handled() {
         final SensoryDeprivedPmRepository repo = new SensoryDeprivedPmRepository();
         final BoundedContext boundedContext = BoundedContext.newBuilder()
-                                                   .setMultitenant(false)
-                                                   .build();
+                                                            .setMultitenant(false)
+                                                            .build();
         repo.setBoundedContext(boundedContext);
         repo.onRegistered();
     }
