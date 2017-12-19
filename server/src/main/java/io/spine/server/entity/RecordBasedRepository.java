@@ -159,22 +159,6 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     }
 
     /**
-     * Finds an entity with the passed ID despite its {@linkplain LifecycleFlags visibility}.
-     *
-     * @param id the ID of the entity to load
-     * @return the entity or {@link Optional#absent()} if there is no entity with the ID
-     */
-    protected Optional<E> findWithAnyVisibility(I id) {
-        Optional<EntityRecord> optional = findRecord(id);
-        if (!optional.isPresent()) {
-            return Optional.absent();
-        }
-        final EntityRecord record = optional.get();
-        final E entity = toEntity(record);
-        return Optional.of(entity);
-    }
-
-    /**
      * Finds a record and returns it if its {@link LifecycleFlags} don't make it
      * {@linkplain EntityWithLifecycle.Predicates#isEntityVisible()}.
      */
@@ -206,6 +190,9 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
 
     /**
      * Loads an entity by the passed ID or creates a new one, if the entity was not found.
+     *
+     * <p>If the entity exists, but has non-default {@link LifecycleFlags}
+     * a newly created entity will be returned.
      */
     @CheckReturnValue
     protected E findOrCreate(I id) {
@@ -218,6 +205,25 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
 
         final E result = loaded.get();
         return result;
+    }
+
+    /**
+     * Loads an entity by the passed ID or creates a new one, if the entity was not found.
+     *
+     * <p>An entity will be loaded despite its {@linkplain LifecycleFlags visibility}.
+     *
+     * @param id the ID of the entity to load
+     * @return the entity with the specified ID
+     */
+    @CheckReturnValue
+    protected E findWithAnyVisibilityOrCreate(I id) {
+        Optional<EntityRecord> optional = findRecord(id);
+        if (!optional.isPresent()) {
+            return create(id);
+        }
+        final EntityRecord record = optional.get();
+        final E entity = toEntity(record);
+        return entity;
     }
 
     /**

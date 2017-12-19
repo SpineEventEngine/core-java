@@ -212,17 +212,15 @@ public class ProjectionRepositoryShould
                 GivenEventMessage.projectLifecycleChanged(archivedEntityFlags);
         checkDispatchesEvent(lifecycleChanged);
         final ProjectId projectId = lifecycleChanged.getProjectId();
-        TestProjection storedProjection = repository().findWithAnyVisibility(projectId)
-                                                      .get();
-        assertTrue(storedProjection.isArchived());
+        TestProjection projection = repository().findWithAnyVisibilityOrCreate(projectId);
+        assertTrue(projection.isArchived());
 
-        // Dispatch an event to the archived projection.
+        // D9ispatch an event to the archived projection.
         checkDispatchesEvent(GivenEventMessage.taskAdded());
-        storedProjection = repository().findWithAnyVisibility(projectId)
-                                       .get();
-        final List<Task> addedTasks = storedProjection.getState()
+        projection = repository().findWithAnyVisibilityOrCreate(projectId);
+        final List<Task> addedTasks = projection.getState()
                                                       .getTaskList();
-        assertTrue(storedProjection.isArchived());
+        assertTrue(projection.isArchived());
         assertFalse(addedTasks.isEmpty());
     }
 
@@ -235,17 +233,15 @@ public class ProjectionRepositoryShould
                 GivenEventMessage.projectLifecycleChanged(deletedEntityFlags);
         checkDispatchesEvent(lifecycleChanged);
         final ProjectId projectId = lifecycleChanged.getProjectId();
-        TestProjection storedProjection = repository().findWithAnyVisibility(projectId)
-                                                      .get();
-        assertTrue(storedProjection.isDeleted());
+        TestProjection projection = repository().findWithAnyVisibilityOrCreate(projectId);
+        assertTrue(projection.isDeleted());
 
         // Dispatch an event to the deleted projection.
         checkDispatchesEvent(GivenEventMessage.taskAdded());
-        storedProjection = repository().findWithAnyVisibility(projectId)
-                                       .get();
-        final List<Task> addedTasks = storedProjection.getState()
+        projection = repository().findWithAnyVisibilityOrCreate(projectId);
+        final List<Task> addedTasks = projection.getState()
                                                       .getTaskList();
-        assertTrue(storedProjection.isDeleted());
+        assertTrue(projection.isDeleted());
         assertFalse(addedTasks.isEmpty());
     }
 

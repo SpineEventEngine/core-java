@@ -20,6 +20,7 @@
 
 package io.spine.server.projection;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
@@ -69,7 +70,7 @@ class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
 
     @Override
     protected void deliverNowTo(I entityId) {
-        final P projection = repository().findOrCreate(entityId);
+        final P projection = repository().findWithAnyVisibilityOrCreate(entityId);
         final ProjectionTransaction<I, ?, ?> tx =
                 ProjectionTransaction.start((Projection<I, ?, ?>) projection);
         projection.handle(envelope());
