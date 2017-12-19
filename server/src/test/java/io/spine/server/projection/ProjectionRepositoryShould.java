@@ -215,13 +215,15 @@ public class ProjectionRepositoryShould
         TestProjection projection = repository().findWithAnyVisibilityOrCreate(projectId);
         assertTrue(projection.isArchived());
 
-        // D9ispatch an event to the archived projection.
+        // Dispatch an event to the archived projection.
         checkDispatchesEvent(GivenEventMessage.taskAdded());
         projection = repository().findWithAnyVisibilityOrCreate(projectId);
         final List<Task> addedTasks = projection.getState()
                                                       .getTaskList();
-        assertTrue(projection.isArchived());
         assertFalse(addedTasks.isEmpty());
+
+        // Check that the projection was not re-created before dispatching.
+        assertTrue(projection.isArchived());
     }
 
     @Test
@@ -242,6 +244,8 @@ public class ProjectionRepositoryShould
         final List<Task> addedTasks = projection.getState()
                                                       .getTaskList();
         assertTrue(projection.isDeleted());
+
+        // Check that the projection was not re-created before dispatching.
         assertFalse(addedTasks.isEmpty());
     }
 
