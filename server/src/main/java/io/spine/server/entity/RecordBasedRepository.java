@@ -150,10 +150,26 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
             return Optional.absent();
         }
         final EntityRecord record = optional.get();
-        final boolean recordVisible = !isEntityVisible().apply(record.getLifecycleFlags());
-        if (recordVisible) {
+        final boolean recordVisible = isEntityVisible().apply(record.getLifecycleFlags());
+        if (!recordVisible) {
             return Optional.absent();
         }
+        final E entity = toEntity(record);
+        return Optional.of(entity);
+    }
+
+    /**
+     * Finds an entity with the passed ID despite its {@linkplain LifecycleFlags visibility}.
+     *
+     * @param id the ID of the entity to load
+     * @return the entity or {@link Optional#absent()} if there is no entity with the ID
+     */
+    protected Optional<E> findWithAnyVisibility(I id) {
+        Optional<EntityRecord> optional = findRecord(id);
+        if (!optional.isPresent()) {
+            return Optional.absent();
+        }
+        final EntityRecord record = optional.get();
         final E entity = toEntity(record);
         return Optional.of(entity);
     }

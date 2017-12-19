@@ -37,6 +37,7 @@ import io.spine.core.given.GivenEvent;
 import io.spine.server.BoundedContext;
 import io.spine.server.TestEventClasses;
 import io.spine.server.command.TestEventFactory;
+import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.RecordBasedRepositoryShould;
 import io.spine.server.entity.given.Given;
@@ -48,7 +49,9 @@ import io.spine.server.projection.given.ProjectionRepositoryTestEnv.TestProjecti
 import io.spine.server.storage.RecordStorage;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
+import io.spine.test.projection.Task;
 import io.spine.test.projection.event.PrjProjectCreated;
+import io.spine.test.projection.event.PrjProjectLifecycleChanged;
 import io.spine.test.projection.event.PrjProjectStarted;
 import io.spine.test.projection.event.PrjTaskAdded;
 import io.spine.time.Time;
@@ -198,6 +201,52 @@ public class ProjectionRepositoryShould
         checkDispatchesEvent(GivenEventMessage.projectCreated());
         checkDispatchesEvent(GivenEventMessage.taskAdded());
         checkDispatchesEvent(GivenEventMessage.projectStarted());
+    }
+
+    @Test
+    public void dispatch_event_to_archived_projection() {
+        final LifecycleFlags archivedEntityFlags = LifecycleFlags.newBuilder()
+                                                                 .setArchived(true)
+                                                                 .build();
+        final PrjProjectLifecycleChanged lifecycleChanged =
+                GivenEventMessage.projectLifecycleChanged(archivedEntityFlags);
+        checkDispatchesEvent(lifecycleChanged);
+        final ProjectId projectId = lifecycleChanged.getProjectId();
+        TestProjection storedProjection = repository().findWithAnyVisibility(projectId)
+                                                      .get();
+        assertTrue(storedProjection.isArchived());
+
+        // Dispatch an event to the archived projection.
+        checkDispatchesEvent(GivenEventMessage.taskAdded());
+        storedProjection = repository().findWithAnyVisibility(projectId)
+                                       .get();
+        final List<Task> addedTasks = storedProjection.getState()
+                                                      .getTaskList();
+        assertTrue(storedProjection.isArchived());
+        assertFalse(addedTasks.isEmpty());
+    }
+
+    @Test
+    public void dispatch_event_to_deleted_projection() {
+        final LifecycleFlags deletedEntityFlags = LifecycleFlags.newBuilder()
+                                                                .setDeleted(true)
+                                                                .build();
+        final PrjProjectLifecycleChanged lifecycleChanged =
+                GivenEventMessage.projectLifecycleChanged(deletedEntityFlags);
+        checkDispatchesEvent(lifecycleChanged);
+        final ProjectId projectId = lifecycleChanged.getProjectId();
+        TestProjection storedProjection = repository().findWithAnyVisibility(projectId)
+                                                      .get();
+        assertTrue(storedProjection.isDeleted());
+
+        // Dispatch an event to the deleted projection.
+        checkDispatchesEvent(GivenEventMessage.taskAdded());
+        storedProjection = repository().findWithAnyVisibility(projectId)
+                                       .get();
+        final List<Task> addedTasks = storedProjection.getState()
+                                                      .getTaskList();
+        assertTrue(storedProjection.isDeleted());
+        assertFalse(addedTasks.isEmpty());
     }
 
     private void checkDispatchesEvent(Message eventMessage) {

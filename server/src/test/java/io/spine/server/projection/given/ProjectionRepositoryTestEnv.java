@@ -27,6 +27,7 @@ import com.google.protobuf.Message;
 import io.spine.core.EventContext;
 import io.spine.core.MessageEnvelope;
 import io.spine.core.Subscribe;
+import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.TestEntityWithStringColumn;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
@@ -36,6 +37,7 @@ import io.spine.test.projection.ProjectTaskNames;
 import io.spine.test.projection.ProjectTaskNamesVBuilder;
 import io.spine.test.projection.ProjectVBuilder;
 import io.spine.test.projection.event.PrjProjectCreated;
+import io.spine.test.projection.event.PrjProjectLifecycleChanged;
 import io.spine.test.projection.event.PrjProjectStarted;
 import io.spine.test.projection.event.PrjTaskAdded;
 
@@ -195,6 +197,14 @@ public class ProjectionRepositoryTestEnv {
             getBuilder().mergeFrom(newState);
         }
 
+        @Subscribe
+        public void on(PrjProjectLifecycleChanged event) {
+            keep(event);
+            final LifecycleFlags newLifecycleFlags = event.getLifecycleFlags();
+            setArchived(newLifecycleFlags.getArchived());
+            setDeleted(newLifecycleFlags.getDeleted());
+        }
+
         @Override
         public String getIdString() {
             return getId().toString();
@@ -227,6 +237,13 @@ public class ProjectionRepositoryTestEnv {
             return PrjTaskAdded.newBuilder()
                                .setProjectId(ENTITY_ID)
                                .build();
+        }
+
+        public static PrjProjectLifecycleChanged projectLifecycleChanged(LifecycleFlags newFlags) {
+            return PrjProjectLifecycleChanged.newBuilder()
+                                             .setProjectId(ENTITY_ID)
+                                             .setLifecycleFlags(newFlags)
+                                             .build();
         }
     }
 

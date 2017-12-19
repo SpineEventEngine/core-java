@@ -21,6 +21,7 @@
 package io.spine.server.projection;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
@@ -251,6 +252,16 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     @Override
     protected P findOrCreate(I id) {
         return super.findOrCreate(id);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Overrides to expose the method to the package.
+     */
+    @Override
+    protected Optional<P> findWithAnyVisibility(I id) {
+        return super.findWithAnyVisibility(id);
     }
 
     /** Exposes routing to the package. */
