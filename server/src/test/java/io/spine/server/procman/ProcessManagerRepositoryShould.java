@@ -27,9 +27,11 @@ import io.spine.Identifier;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;
 import io.spine.core.CommandClass;
+import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
+import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Rejection;
 import io.spine.core.RejectionClass;
@@ -39,7 +41,6 @@ import io.spine.core.TenantId;
 import io.spine.core.given.GivenEvent;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
-import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.RecordBasedRepositoryShould;
 import io.spine.server.entity.given.Given;
@@ -54,7 +55,8 @@ import io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.TestProcess
 import io.spine.test.procman.Project;
 import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.Task;
-import io.spine.test.procman.command.PmChangeLifecycle;
+import io.spine.test.procman.command.ArchivePm;
+import io.spine.test.procman.command.DeletePm;
 import io.spine.test.procman.command.PmCreateProject;
 import io.spine.test.procman.command.PmStartProject;
 import io.spine.test.procman.command.PmThrowEntityAlreadyArchived;
@@ -77,8 +79,9 @@ import static io.spine.server.TestEventClasses.assertContains;
 import static io.spine.server.TestRejectionClasses.assertContains;
 import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.ID;
 import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.addTask;
-import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.changeProjectLifecycle;
+import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.archivePm;
 import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.createProject;
+import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.deletePm;
 import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.doNothing;
 import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.projectCreated;
 import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.projectStarted;
@@ -177,7 +180,18 @@ public class ProcessManagerRepositoryShould
     }
 
     private void testDispatchEvent(Message eventMessage) {
-        final Event event = GivenEvent.withMessage(eventMessage);
+        final CommandContext commandContext = requestFactory.createCommandContext();
+
+        // EventContext should have CommandContext with appropriate TenantId to avoid usage
+        // of different storages during command and event dispatching.
+        final EventContext eventContextWithTenantId = GivenEvent.context()
+                                                                .toBuilder()
+                                                                .setCommandContext(commandContext)
+                                                                .build();
+        final Event event = GivenEvent.withMessage(eventMessage)
+                                      .toBuilder()
+                                      .setContext(eventContextWithTenantId)
+                                      .build();
         repository().dispatch(EventEnvelope.of(event));
         assertTrue(TestProcessManager.processed(eventMessage));
     }
@@ -195,13 +209,10 @@ public class ProcessManagerRepositoryShould
     }
 
     @Test
-    public void dispatch_event_to_non_visible_process_manager() throws InvocationTargetException {
-        final LifecycleFlags archivedEntityFlags = LifecycleFlags.newBuilder()
-                                                                 .setArchived(true)
-                                                                 .build();
-        final PmChangeLifecycle changeLifecycle = changeProjectLifecycle(archivedEntityFlags);
-        testDispatchCommand(changeLifecycle);
-        final ProjectId projectId = changeLifecycle.getProjectId();
+    public void dispatch_event_to_archived_process_manager() throws InvocationTargetException {
+        final ArchivePm archivePm = archivePm();
+        testDispatchCommand(archivePm);
+        final ProjectId projectId = archivePm.getProjectId();
         TestProcessManager processManager = repository().findOrCreate(projectId);
         assertTrue(processManager.isArchived());
 
@@ -217,6 +228,25 @@ public class ProcessManagerRepositoryShould
     }
 
     @Test
+    public void dispatch_event_to_deleted_process_manager() throws InvocationTargetException {
+        final DeletePm deletePm = deletePm();
+        testDispatchCommand(deletePm);
+        final ProjectId projectId = deletePm.getProjectId();
+        TestProcessManager processManager = repository().findOrCreate(projectId);
+        assertTrue(processManager.isDeleted());
+
+        // Dispatch an event to the deleted process manager.
+        testDispatchEvent(taskAdded());
+        processManager = repository().findOrCreate(projectId);
+        final List<Task> addedTasks = processManager.getState()
+                                                    .getTaskList();
+        assertFalse(addedTasks.isEmpty());
+
+        // Check that the process manager was not re-created before dispatching.
+        assertTrue(processManager.isDeleted());
+    }
+
+    @Test
     public void dispatch_command() throws InvocationTargetException {
         testDispatchCommand(addTask());
     }
@@ -229,17 +259,33 @@ public class ProcessManagerRepositoryShould
     }
 
     @Test
-    public void dispatch_command_to_non_visible_process_manager() throws InvocationTargetException {
-        final LifecycleFlags archivedEntityFlags = LifecycleFlags.newBuilder()
-                                                                 .setArchived(true)
-                                                                 .build();
-        final PmChangeLifecycle changeLifecycle = changeProjectLifecycle(archivedEntityFlags);
-        testDispatchCommand(changeLifecycle);
-        final ProjectId projectId = changeLifecycle.getProjectId();
+    public void dispatch_command_to_archived_process_manager() throws InvocationTargetException {
+        final DeletePm deletePm = deletePm();
+        testDispatchCommand(deletePm);
+        final ProjectId projectId = deletePm.getProjectId();
+        TestProcessManager processManager = repository().findOrCreate(projectId);
+        assertTrue(processManager.isDeleted());
+
+        // Dispatch a command to the deleted process manager.
+        testDispatchCommand(addTask());
+        processManager = repository().findOrCreate(projectId);
+        final List<Task> addedTasks = processManager.getState()
+                                                    .getTaskList();
+        assertFalse(addedTasks.isEmpty());
+
+        // Check that the process manager was not re-created before dispatching.
+        assertTrue(processManager.isDeleted());
+    }
+
+    @Test
+    public void dispatch_command_to_deleted_process_manager() throws InvocationTargetException {
+        final ArchivePm archivePm = archivePm();
+        testDispatchCommand(archivePm);
+        final ProjectId projectId = archivePm.getProjectId();
         TestProcessManager processManager = repository().findOrCreate(projectId);
         assertTrue(processManager.isArchived());
 
-        // Dispatch a command to the non-visible process manager.
+        // Dispatch a command to the archived process manager.
         testDispatchCommand(addTask());
         processManager = repository().findOrCreate(projectId);
         final List<Task> addedTasks = processManager.getState()

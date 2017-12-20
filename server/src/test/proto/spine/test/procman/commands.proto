@@ -54,6 +54,14 @@ message PmThrowEntityAlreadyArchived {
     ProjectId project_id = 1;
 }
 
+message ArchivePm {
+    ProjectId project_id = 1;
+}
+
+message DeletePm {
+    ProjectId project_id = 1;
+}
+
 message PmChangeLifecycle {
     ProjectId project_id = 1;
     spine.server.entity.LifecycleFlags lifecycleFlags = 2;

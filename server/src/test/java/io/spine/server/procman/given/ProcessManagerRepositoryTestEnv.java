@@ -39,6 +39,8 @@ import io.spine.test.procman.Project;
 import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.ProjectVBuilder;
 import io.spine.test.procman.Task;
+import io.spine.test.procman.command.ArchivePm;
+import io.spine.test.procman.command.DeletePm;
 import io.spine.test.procman.command.PmAddTask;
 import io.spine.test.procman.command.PmChangeLifecycle;
 import io.spine.test.procman.command.PmCreateProject;
@@ -53,7 +55,6 @@ import io.spine.testdata.Sample;
 import java.util.List;
 
 import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.addTask;
 import static java.util.Collections.emptyList;
 
 public class ProcessManagerRepositoryTestEnv {
@@ -160,14 +161,17 @@ public class ProcessManagerRepositoryTestEnv {
         }
 
         @Assign
-        Empty handle(PmChangeLifecycle command) {
+        Empty handle(ArchivePm command) {
             keep(command);
+            setArchived(true);
+            return withNothing();
+        }
 
-            final LifecycleFlags lifecycleFlagsToSet = command.getLifecycleFlags();
-            setArchived(lifecycleFlagsToSet.getArchived());
-            setDeleted(lifecycleFlagsToSet.getDeleted());
-            getBuilder().addTask(addTask().getTask());
-            return Empty.getDefaultInstance();
+        @Assign
+        Empty handle(DeletePm command) {
+            keep(command);
+            setDeleted(true);
+            return withNothing();
         }
 
         @Assign
@@ -230,7 +234,8 @@ public class ProcessManagerRepositoryTestEnv {
         public static final ProjectId ID = Sample.messageOfType(ProjectId.class);
 
         /** Prevents instantiation on this utility class. */
-        private GivenCommandMessage() {}
+        private GivenCommandMessage() {
+        }
 
         public static PmCreateProject createProject() {
             return ((PmCreateProject.Builder) Sample.builderForType(PmCreateProject.class))
@@ -248,6 +253,18 @@ public class ProcessManagerRepositoryTestEnv {
             return ((PmAddTask.Builder) Sample.builderForType(PmAddTask.class))
                     .setProjectId(ID)
                     .build();
+        }
+
+        public static ArchivePm archivePm() {
+            return ArchivePm.newBuilder()
+                            .setProjectId(ID)
+                            .build();
+        }
+
+        public static DeletePm deletePm() {
+            return DeletePm.newBuilder()
+                           .setProjectId(ID)
+                           .build();
         }
 
         public static PmChangeLifecycle changeProjectLifecycle(LifecycleFlags newFlags) {
