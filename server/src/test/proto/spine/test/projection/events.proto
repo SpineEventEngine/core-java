@@ -44,7 +44,10 @@ message PrjProjectStarted {
     ProjectId project_id = 1;
 }
 
-message PrjProjectLifecycleChanged {
+message PrjProjectArchived {
     ProjectId project_id = 1;
-    spine.server.entity.LifecycleFlags lifecycleFlags = 2;
+}
+
+message PrjProjectDeleted {
+    ProjectId project_id = 1;
 }

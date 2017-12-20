@@ -27,7 +27,6 @@ import com.google.protobuf.Message;
 import io.spine.core.EventContext;
 import io.spine.core.MessageEnvelope;
 import io.spine.core.Subscribe;
-import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.TestEntityWithStringColumn;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
@@ -36,8 +35,9 @@ import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.ProjectTaskNames;
 import io.spine.test.projection.ProjectTaskNamesVBuilder;
 import io.spine.test.projection.ProjectVBuilder;
+import io.spine.test.projection.event.PrjProjectArchived;
 import io.spine.test.projection.event.PrjProjectCreated;
-import io.spine.test.projection.event.PrjProjectLifecycleChanged;
+import io.spine.test.projection.event.PrjProjectDeleted;
 import io.spine.test.projection.event.PrjProjectStarted;
 import io.spine.test.projection.event.PrjTaskAdded;
 
@@ -198,11 +198,15 @@ public class ProjectionRepositoryTestEnv {
         }
 
         @Subscribe
-        public void on(PrjProjectLifecycleChanged event) {
+        public void on(PrjProjectArchived event) {
             keep(event);
-            final LifecycleFlags newLifecycleFlags = event.getLifecycleFlags();
-            setArchived(newLifecycleFlags.getArchived());
-            setDeleted(newLifecycleFlags.getDeleted());
+            setArchived(true);
+        }
+
+        @Subscribe
+        public void on(PrjProjectDeleted event) {
+            keep(event);
+            setDeleted(true);
         }
 
         @Override
@@ -239,11 +243,16 @@ public class ProjectionRepositoryTestEnv {
                                .build();
         }
 
-        public static PrjProjectLifecycleChanged projectLifecycleChanged(LifecycleFlags newFlags) {
-            return PrjProjectLifecycleChanged.newBuilder()
-                                             .setProjectId(ENTITY_ID)
-                                             .setLifecycleFlags(newFlags)
-                                             .build();
+        public static PrjProjectArchived projectArchived() {
+            return PrjProjectArchived.newBuilder()
+                                     .setProjectId(ENTITY_ID)
+                                     .build();
+        }
+
+        public static PrjProjectDeleted projectDeleted() {
+            return PrjProjectDeleted.newBuilder()
+                                    .setProjectId(ENTITY_ID)
+                                    .build();
         }
     }
 

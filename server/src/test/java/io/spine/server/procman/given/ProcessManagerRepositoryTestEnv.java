@@ -28,7 +28,6 @@ import io.spine.core.CommandContext;
 import io.spine.core.EventContext;
 import io.spine.core.React;
 import io.spine.server.command.Assign;
-import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.TestEntityWithStringColumn;
 import io.spine.server.entity.rejection.EntityAlreadyArchived;
 import io.spine.server.entity.rejection.StandardRejections;
@@ -42,7 +41,6 @@ import io.spine.test.procman.Task;
 import io.spine.test.procman.command.ArchivePm;
 import io.spine.test.procman.command.DeletePm;
 import io.spine.test.procman.command.PmAddTask;
-import io.spine.test.procman.command.PmChangeLifecycle;
 import io.spine.test.procman.command.PmCreateProject;
 import io.spine.test.procman.command.PmDoNothing;
 import io.spine.test.procman.command.PmStartProject;
@@ -265,13 +263,6 @@ public class ProcessManagerRepositoryTestEnv {
             return DeletePm.newBuilder()
                            .setProjectId(ID)
                            .build();
-        }
-
-        public static PmChangeLifecycle changeProjectLifecycle(LifecycleFlags newFlags) {
-            return PmChangeLifecycle.newBuilder()
-                                    .setProjectId(ID)
-                                    .setLifecycleFlags(newFlags)
-                                    .build();
         }
 
         public static PmDoNothing doNothing() {

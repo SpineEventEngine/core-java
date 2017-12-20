@@ -37,7 +37,6 @@ import io.spine.core.given.GivenEvent;
 import io.spine.server.BoundedContext;
 import io.spine.server.TestEventClasses;
 import io.spine.server.command.TestEventFactory;
-import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.RecordBasedRepositoryShould;
 import io.spine.server.entity.given.Given;
@@ -50,8 +49,9 @@ import io.spine.server.storage.RecordStorage;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.Task;
+import io.spine.test.projection.event.PrjProjectArchived;
 import io.spine.test.projection.event.PrjProjectCreated;
-import io.spine.test.projection.event.PrjProjectLifecycleChanged;
+import io.spine.test.projection.event.PrjProjectDeleted;
 import io.spine.test.projection.event.PrjProjectStarted;
 import io.spine.test.projection.event.PrjTaskAdded;
 import io.spine.time.Time;
@@ -205,13 +205,9 @@ public class ProjectionRepositoryShould
 
     @Test
     public void dispatch_event_to_archived_projection() {
-        final LifecycleFlags archivedEntityFlags = LifecycleFlags.newBuilder()
-                                                                 .setArchived(true)
-                                                                 .build();
-        final PrjProjectLifecycleChanged lifecycleChanged =
-                GivenEventMessage.projectLifecycleChanged(archivedEntityFlags);
-        checkDispatchesEvent(lifecycleChanged);
-        final ProjectId projectId = lifecycleChanged.getProjectId();
+        final PrjProjectArchived projectArchived = GivenEventMessage.projectArchived();
+        checkDispatchesEvent(projectArchived);
+        final ProjectId projectId = projectArchived.getProjectId();
         TestProjection projection = repository().findOrCreate(projectId);
         assertTrue(projection.isArchived());
 
@@ -228,13 +224,9 @@ public class ProjectionRepositoryShould
 
     @Test
     public void dispatch_event_to_deleted_projection() {
-        final LifecycleFlags deletedEntityFlags = LifecycleFlags.newBuilder()
-                                                                .setDeleted(true)
-                                                                .build();
-        final PrjProjectLifecycleChanged lifecycleChanged =
-                GivenEventMessage.projectLifecycleChanged(deletedEntityFlags);
-        checkDispatchesEvent(lifecycleChanged);
-        final ProjectId projectId = lifecycleChanged.getProjectId();
+        final PrjProjectDeleted projectDeleted = GivenEventMessage.projectDeleted();
+        checkDispatchesEvent(projectDeleted);
+        final ProjectId projectId = projectDeleted.getProjectId();
         TestProjection projection = repository().findOrCreate(projectId);
         assertTrue(projection.isDeleted());
 
