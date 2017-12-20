@@ -20,7 +20,6 @@
 
 package io.spine.server.projection;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
