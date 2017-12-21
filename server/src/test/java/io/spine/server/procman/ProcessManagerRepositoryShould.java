@@ -55,9 +55,9 @@ import io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.TestProcess
 import io.spine.test.procman.Project;
 import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.Task;
-import io.spine.test.procman.command.ArchivePm;
-import io.spine.test.procman.command.DeletePm;
+import io.spine.test.procman.command.PmArchiveProcess;
 import io.spine.test.procman.command.PmCreateProject;
+import io.spine.test.procman.command.PmDeleteProcess;
 import io.spine.test.procman.command.PmStartProject;
 import io.spine.test.procman.command.PmThrowEntityAlreadyArchived;
 import io.spine.test.procman.event.PmProjectCreated;
@@ -79,9 +79,9 @@ import static io.spine.server.TestEventClasses.assertContains;
 import static io.spine.server.TestRejectionClasses.assertContains;
 import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.ID;
 import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.addTask;
-import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.archivePm;
+import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.archiveProcess;
 import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.createProject;
-import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.deletePm;
+import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.deleteProcess;
 import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.doNothing;
 import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.projectCreated;
 import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.projectStarted;
@@ -210,9 +210,9 @@ public class ProcessManagerRepositoryShould
 
     @Test
     public void dispatch_event_to_archived_process_manager() throws InvocationTargetException {
-        final ArchivePm archivePm = archivePm();
-        testDispatchCommand(archivePm);
-        final ProjectId projectId = archivePm.getProjectId();
+        final PmArchiveProcess archiveProcess = archiveProcess();
+        testDispatchCommand(archiveProcess);
+        final ProjectId projectId = archiveProcess.getProjectId();
         TestProcessManager processManager = repository().findOrCreate(projectId);
         assertTrue(processManager.isArchived());
 
@@ -229,9 +229,9 @@ public class ProcessManagerRepositoryShould
 
     @Test
     public void dispatch_event_to_deleted_process_manager() throws InvocationTargetException {
-        final DeletePm deletePm = deletePm();
-        testDispatchCommand(deletePm);
-        final ProjectId projectId = deletePm.getProjectId();
+        final PmDeleteProcess deleteProcess = deleteProcess();
+        testDispatchCommand(deleteProcess);
+        final ProjectId projectId = deleteProcess.getProjectId();
         TestProcessManager processManager = repository().findOrCreate(projectId);
         assertTrue(processManager.isDeleted());
 
@@ -260,9 +260,9 @@ public class ProcessManagerRepositoryShould
 
     @Test
     public void dispatch_command_to_archived_process_manager() throws InvocationTargetException {
-        final DeletePm deletePm = deletePm();
-        testDispatchCommand(deletePm);
-        final ProjectId projectId = deletePm.getProjectId();
+        final PmDeleteProcess deleteProcess = deleteProcess();
+        testDispatchCommand(deleteProcess);
+        final ProjectId projectId = deleteProcess.getProjectId();
         TestProcessManager processManager = repository().findOrCreate(projectId);
         assertTrue(processManager.isDeleted());
 
@@ -279,9 +279,9 @@ public class ProcessManagerRepositoryShould
 
     @Test
     public void dispatch_command_to_deleted_process_manager() throws InvocationTargetException {
-        final ArchivePm archivePm = archivePm();
-        testDispatchCommand(archivePm);
-        final ProjectId projectId = archivePm.getProjectId();
+        final PmArchiveProcess archiveProcess = archiveProcess();
+        testDispatchCommand(archiveProcess);
+        final ProjectId projectId = archiveProcess.getProjectId();
         TestProcessManager processManager = repository().findOrCreate(projectId);
         assertTrue(processManager.isArchived());
 

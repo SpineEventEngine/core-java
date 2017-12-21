@@ -38,10 +38,10 @@ import io.spine.test.procman.Project;
 import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.ProjectVBuilder;
 import io.spine.test.procman.Task;
-import io.spine.test.procman.command.ArchivePm;
-import io.spine.test.procman.command.DeletePm;
 import io.spine.test.procman.command.PmAddTask;
+import io.spine.test.procman.command.PmArchiveProcess;
 import io.spine.test.procman.command.PmCreateProject;
+import io.spine.test.procman.command.PmDeleteProcess;
 import io.spine.test.procman.command.PmDoNothing;
 import io.spine.test.procman.command.PmStartProject;
 import io.spine.test.procman.command.PmThrowEntityAlreadyArchived;
@@ -159,14 +159,14 @@ public class ProcessManagerRepositoryTestEnv {
         }
 
         @Assign
-        Empty handle(ArchivePm command) {
+        Empty handle(PmArchiveProcess command) {
             keep(command);
             setArchived(true);
             return withNothing();
         }
 
         @Assign
-        Empty handle(DeletePm command) {
+        Empty handle(PmDeleteProcess command) {
             keep(command);
             setDeleted(true);
             return withNothing();
@@ -253,16 +253,16 @@ public class ProcessManagerRepositoryTestEnv {
                     .build();
         }
 
-        public static ArchivePm archivePm() {
-            return ArchivePm.newBuilder()
-                            .setProjectId(ID)
-                            .build();
+        public static PmArchiveProcess archiveProcess() {
+            return PmArchiveProcess.newBuilder()
+                                   .setProjectId(ID)
+                                   .build();
         }
 
-        public static DeletePm deletePm() {
-            return DeletePm.newBuilder()
-                           .setProjectId(ID)
-                           .build();
+        public static PmDeleteProcess deleteProcess() {
+            return PmDeleteProcess.newBuilder()
+                                  .setProjectId(ID)
+                                  .build();
         }
 
         public static PmDoNothing doNothing() {
