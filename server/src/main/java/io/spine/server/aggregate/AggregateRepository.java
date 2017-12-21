@@ -443,7 +443,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * @return the loaded instance or {@code Optional.absent()} if there is no {@code Aggregate}
      *         with the ID
      */
-    private Optional<A> load(I id) {
+    public Optional<A> load(I id) {
         final Optional<AggregateStateRecord> eventsFromStorage = fetchHistory(id);
         if (eventsFromStorage.isPresent()) {
             final A result = play(id, eventsFromStorage.get());

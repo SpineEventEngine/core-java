@@ -33,6 +33,7 @@ import io.spine.core.RejectionContext;
 import io.spine.core.Version;
 import io.spine.server.aggregate.given.Given.StorageRecord;
 import io.spine.server.command.TestEventFactory;
+import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.storage.AbstractStorageShould;
 import io.spine.test.Tests;
 import io.spine.test.aggregate.Project;
@@ -195,6 +196,10 @@ public abstract class AggregateStorageShould
 
     @Test
     public void write_and_read_one_record() {
+        assertWrittenRecordWasRead(id, storage);
+    }
+
+    private <I> void assertWrittenRecordWasRead(I id, AggregateStorage<I> storage) {
         final AggregateEventRecord expected = StorageRecord.create(getCurrentTime());
 
         storage.writeRecord(id, expected);
@@ -204,6 +209,46 @@ public abstract class AggregateStorageShould
         final AggregateEventRecord actual = iterator.next();
         assertEquals(expected, actual);
         assertFalse(iterator.hasNext());
+    }
+
+    @Test
+    public void read_history_of_archived_aggregate() {
+        final LifecycleFlags archivedRecordFlags = LifecycleFlags.newBuilder()
+                                                                 .setArchived(true)
+                                                                 .build();
+        storage.writeLifecycleFlags(id, archivedRecordFlags);
+        writeAndReadEventTest(id, storage);
+    }
+
+    @Test
+    public void read_history_of_deleted_aggregate() {
+        final LifecycleFlags deletedRecordFlags = LifecycleFlags.newBuilder()
+                                                                .setDeleted(true)
+                                                                .build();
+        storage.writeLifecycleFlags(id, deletedRecordFlags);
+        writeAndReadEventTest(id, storage);
+    }
+
+    @Test
+    public void index_archived_aggregate() {
+        final LifecycleFlags archivedRecordFlags = LifecycleFlags.newBuilder()
+                                                                 .setArchived(true)
+                                                                 .build();
+        storage.writeRecord(id, StorageRecord.create(getCurrentTime()));
+        storage.writeLifecycleFlags(id, archivedRecordFlags);
+        assertTrue(storage.index()
+                          .hasNext());
+    }
+
+    @Test
+    public void index_deleted_aggregate() {
+        final LifecycleFlags deletedRecordFlags = LifecycleFlags.newBuilder()
+                                                                .setDeleted(true)
+                                                                .build();
+        storage.writeRecord(id, StorageRecord.create(getCurrentTime()));
+        storage.writeLifecycleFlags(id, deletedRecordFlags);
+        assertTrue(storage.index()
+                          .hasNext());
     }
 
     @Test
