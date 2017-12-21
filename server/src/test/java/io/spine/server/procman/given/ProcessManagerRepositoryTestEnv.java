@@ -39,7 +39,9 @@ import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.ProjectVBuilder;
 import io.spine.test.procman.Task;
 import io.spine.test.procman.command.PmAddTask;
+import io.spine.test.procman.command.PmArchiveProcess;
 import io.spine.test.procman.command.PmCreateProject;
+import io.spine.test.procman.command.PmDeleteProcess;
 import io.spine.test.procman.command.PmDoNothing;
 import io.spine.test.procman.command.PmStartProject;
 import io.spine.test.procman.command.PmThrowEntityAlreadyArchived;
@@ -157,6 +159,20 @@ public class ProcessManagerRepositoryTestEnv {
         }
 
         @Assign
+        Empty handle(PmArchiveProcess command) {
+            keep(command);
+            setArchived(true);
+            return withNothing();
+        }
+
+        @Assign
+        Empty handle(PmDeleteProcess command) {
+            keep(command);
+            setDeleted(true);
+            return withNothing();
+        }
+
+        @Assign
         List<Message> handle(PmDoNothing command, CommandContext ignored) {
             keep(command);
             return emptyList();
@@ -216,7 +232,8 @@ public class ProcessManagerRepositoryTestEnv {
         public static final ProjectId ID = Sample.messageOfType(ProjectId.class);
 
         /** Prevents instantiation on this utility class. */
-        private GivenCommandMessage() {}
+        private GivenCommandMessage() {
+        }
 
         public static PmCreateProject createProject() {
             return ((PmCreateProject.Builder) Sample.builderForType(PmCreateProject.class))
@@ -234,6 +251,18 @@ public class ProcessManagerRepositoryTestEnv {
             return ((PmAddTask.Builder) Sample.builderForType(PmAddTask.class))
                     .setProjectId(ID)
                     .build();
+        }
+
+        public static PmArchiveProcess archiveProcess() {
+            return PmArchiveProcess.newBuilder()
+                                   .setProjectId(ID)
+                                   .build();
+        }
+
+        public static PmDeleteProcess deleteProcess() {
+            return PmDeleteProcess.newBuilder()
+                                  .setProjectId(ID)
+                                  .build();
         }
 
         public static PmDoNothing doNothing() {
