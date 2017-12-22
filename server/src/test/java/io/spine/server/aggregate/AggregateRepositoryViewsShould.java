@@ -40,9 +40,6 @@ import static org.junit.Assert.assertTrue;
  */
 public class AggregateRepositoryViewsShould {
 
-    private static final String ARCHIVE_COMMAND = "archive";
-    private static final String DELETE_COMMAND = "delete";
-
     /** The Aggregate ID used in all tests */
     private static final Long id = 100L;
     private final ActorRequestFactory requestFactory =
@@ -89,38 +86,10 @@ public class AggregateRepositoryViewsShould {
     }
 
     @Test
-    public void not_find_aggregates_with_archived_status() {
-        postCommand(ARCHIVE_COMMAND);
+    public void find_aggregates_with_archived_status() {
+        postCommand("archive");
 
         aggregate = repository.find(id);
-
-        assertFalse(aggregate.isPresent());
-    }
-
-    @Test
-    public void not_find_aggregates_with_deleted_status() {
-        postCommand(DELETE_COMMAND);
-
-        aggregate = repository.find(id);
-
-        assertFalse(aggregate.isPresent());
-    }
-
-    @Test
-    public void load_aggregate_if_no_status_flags_set() {
-        aggregate = repository.load(id);
-
-        assertTrue(aggregate.isPresent());
-        final AggregateWithLifecycle agg = aggregate.get();
-        assertFalse(agg.isArchived());
-        assertFalse(agg.isDeleted());
-    }
-
-    @Test
-    public void load_aggregates_with_archived_status() {
-        postCommand(ARCHIVE_COMMAND);
-
-        aggregate = repository.load(id);
 
         assertTrue(aggregate.isPresent());
         final AggregateWithLifecycle agg = aggregate.get();
@@ -129,10 +98,10 @@ public class AggregateRepositoryViewsShould {
     }
 
     @Test
-    public void load_aggregates_with_deleted_status() {
-        postCommand(DELETE_COMMAND);
+    public void find_aggregates_with_deleted_status() {
+        postCommand("delete");
 
-        aggregate = repository.load(id);
+        aggregate = repository.find(id);
 
         assertTrue(aggregate.isPresent());
         final AggregateWithLifecycle agg = aggregate.get();
