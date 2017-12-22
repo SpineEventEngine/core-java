@@ -196,10 +196,6 @@ public abstract class AggregateStorageShould
 
     @Test
     public void write_and_read_one_record() {
-        assertWrittenRecordWasRead(id, storage);
-    }
-
-    private <I> void assertWrittenRecordWasRead(I id, AggregateStorage<I> storage) {
         final AggregateEventRecord expected = StorageRecord.create(getCurrentTime());
 
         storage.writeRecord(id, expected);
