@@ -328,8 +328,8 @@ public class AggregateRepositoryShould {
         // child aggregates from the `ProjectArchived` event.
         final Optional<ProjectAggregate> parentAfterArchive = repository.find(parent.getId());
         assertTrue(parentAfterArchive.isPresent());
-        assertFalse(childAfterArchive.get()
-                                     .isArchived());
+        assertFalse(parentAfterArchive.get()
+                                      .isArchived());
     }
 
     @Test
