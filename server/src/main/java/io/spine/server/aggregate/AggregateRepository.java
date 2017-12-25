@@ -501,7 +501,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * Loads an aggregate by the passed ID.
      *
      * <p>An aggregate will be loaded despite its {@linkplain LifecycleFlags visibility}.
-     * I.e. even if the aggregate is either
+     * I.e. even if the aggregate is
      * {@linkplain io.spine.server.entity.EntityWithLifecycle#isArchived() archived}
      * or {@linkplain io.spine.server.entity.EntityWithLifecycle#isDeleted() deleted},
      * it is loaded and returned.
