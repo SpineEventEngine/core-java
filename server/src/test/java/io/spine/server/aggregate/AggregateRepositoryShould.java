@@ -245,7 +245,7 @@ public class AggregateRepositoryShould {
     }
 
     @Test
-    public void not_find_archived_aggregates() {
+    public void find_archived_aggregates() {
         final ProjectAggregate aggregate = givenStoredAggregate();
 
         final AggregateTransaction tx = AggregateTransaction.start(aggregate);
@@ -253,12 +253,12 @@ public class AggregateRepositoryShould {
         tx.commit();
         repository.store(aggregate);
 
-        assertFalse(repository.find(aggregate.getId())
+        assertTrue(repository.find(aggregate.getId())
                               .isPresent());
     }
 
     @Test
-    public void not_find_deleted_aggregates() {
+    public void find_deleted_aggregates() {
         final ProjectAggregate aggregate = givenStoredAggregate();
 
         final AggregateTransaction tx = AggregateTransaction.start(aggregate);
@@ -267,7 +267,7 @@ public class AggregateRepositoryShould {
 
         repository.store(aggregate);
 
-        assertFalse(repository.find(aggregate.getId())
+        assertTrue(repository.find(aggregate.getId())
                               .isPresent());
     }
 
@@ -320,13 +320,16 @@ public class AggregateRepositoryShould {
                       .post(event);
 
         // Check that the child aggregate was archived.
-        assertFalse(repository.find(child.getId())
-                              .isPresent());
-
+        final Optional<ProjectAggregate> childAfterArchive = repository.find(child.getId());
+        assertTrue(childAfterArchive.isPresent());
+        assertTrue(childAfterArchive.get()
+                                    .isArchived());
         // The parent should not be archived since the dispatch route uses only
         // child aggregates from the `ProjectArchived` event.
-        assertTrue(repository.find(parent.getId())
-                             .isPresent());
+        final Optional<ProjectAggregate> parentAfterArchive = repository.find(parent.getId());
+        assertTrue(parentAfterArchive.isPresent());
+        assertFalse(parentAfterArchive.get()
+                                      .isArchived());
     }
 
     @Test
