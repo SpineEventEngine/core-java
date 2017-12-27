@@ -58,7 +58,6 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.server.entity.EntityWithLifecycle.Predicates.isEntityVisible;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -501,14 +500,14 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     /**
      * Loads an aggregate by the passed ID.
      *
-     * <p>The method returns {@link Optional#absent()} if:
-     * <ul>
-     *     <li>there are no events stored for the aggregate with the passed ID, or
-     *     <li>the aggregate has at least one {@linkplain LifecycleFlags lifecycle flag} set.
-     * </ul>
+     * <p>An aggregate will be loaded despite its {@linkplain LifecycleFlags visibility}.
+     * I.e. even if the aggregate is
+     * {@linkplain io.spine.server.entity.EntityWithLifecycle#isArchived() archived}
+     * or {@linkplain io.spine.server.entity.EntityWithLifecycle#isDeleted() deleted},
+     * it is loaded and returned.
      *
      * @param  id the ID of the aggregate to load
-     * @return the loaded object or {@link Optional#absent()}
+     * @return the loaded object or {@link Optional#absent()} if there are no events for the aggregate
      * @throws IllegalStateException
      *         if the storage of the repository is not {@linkplain #initStorage(StorageFactory)
      *         initialized} prior to this call
@@ -516,14 +515,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     @Override
     public Optional<A> find(I id) throws IllegalStateException {
-        final Optional<LifecycleFlags> loadedFlags = aggregateStorage().readLifecycleFlags(id);
-        if (loadedFlags.isPresent()) {
-            final boolean isVisible = isEntityVisible().apply(loadedFlags.get());
-            // If there is a flag that hides the aggregate, return nothing.
-            if (!isVisible) {
-                return Optional.absent();
-            }
-        }
         final Optional<A> result = load(id);
         return result;
     }

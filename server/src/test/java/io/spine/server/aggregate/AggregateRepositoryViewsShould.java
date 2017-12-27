@@ -76,7 +76,7 @@ public class AggregateRepositoryViewsShould {
     }
 
     @Test
-    public void load_aggregate_if_no_status_flags_set() {
+    public void find_aggregate_if_no_status_flags_set() {
         aggregate = repository.find(id);
 
         assertTrue(aggregate.isPresent());
@@ -86,20 +86,26 @@ public class AggregateRepositoryViewsShould {
     }
 
     @Test
-    public void not_load_aggregates_with_archived_status() {
+    public void find_aggregates_with_archived_status() {
         postCommand("archive");
 
         aggregate = repository.find(id);
 
-        assertFalse(aggregate.isPresent());
+        assertTrue(aggregate.isPresent());
+        final AggregateWithLifecycle agg = aggregate.get();
+        assertTrue(agg.isArchived());
+        assertFalse(agg.isDeleted());
     }
 
     @Test
-    public void not_load_aggregates_with_deleted_status() {
+    public void find_aggregates_with_deleted_status() {
         postCommand("delete");
 
         aggregate = repository.find(id);
 
-        assertFalse(aggregate.isPresent());
+        assertTrue(aggregate.isPresent());
+        final AggregateWithLifecycle agg = aggregate.get();
+        assertFalse(agg.isArchived());
+        assertTrue(agg.isDeleted());
     }
 }

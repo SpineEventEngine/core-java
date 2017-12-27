@@ -21,15 +21,12 @@
 package io.spine.server.storage.memory;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
 import com.google.common.collect.TreeMultimap;
 import io.spine.core.Event;
 import io.spine.server.aggregate.AggregateEventRecord;
 import io.spine.server.aggregate.AggregateReadRequest;
-import io.spine.server.entity.EntityWithLifecycle;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.time.Timestamps2;
 
@@ -58,27 +55,12 @@ class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEventRecord
     );
 
     private final Map<I, LifecycleFlags> statuses = newHashMap();
-
-    private final Predicate<I> isVisible = new Predicate<I>() {
-        @Override
-        public boolean apply(@Nullable I input) {
-            final LifecycleFlags entityStatus = statuses.get(input);
-
-            return entityStatus == null
-                   || EntityWithLifecycle.Predicates.isEntityVisible()
-                                                    .apply(entityStatus);
-        }
-    };
-
-    private final Multimap<I, AggregateEventRecord> filtered =
-            Multimaps.filterKeys(records, isVisible);
-
     private final Map<I, Integer> eventCounts = newHashMap();
 
     @Override
     public Iterator<I> index() {
-        final Iterator<I> result = filtered.keySet()
-                                           .iterator();
+        final Iterator<I> result = records.keySet()
+                                          .iterator();
         return result;
     }
 
@@ -102,7 +84,7 @@ class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEventRecord
      */
     List<AggregateEventRecord> getHistoryBackward(AggregateReadRequest<I> request) {
         final I id = request.getRecordId();
-        return ImmutableList.copyOf(filtered.get(id));
+        return ImmutableList.copyOf(records.get(id));
     }
 
     /**
@@ -153,7 +135,7 @@ class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEventRecord
 
     @Override
     public boolean isEmpty() {
-        return filtered.isEmpty();
+        return records.isEmpty();
     }
 
     /** Used for sorting keys by the key hash codes. */
