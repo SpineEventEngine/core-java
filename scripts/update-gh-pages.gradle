@@ -1,8 +1,5 @@
-import com.google.common.io.Files
-import org.apache.tools.ant.filters.ReplaceTokens
-
 /*
- * Copyright 2017, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,6 +17,9 @@ import org.apache.tools.ant.filters.ReplaceTokens
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+import com.google.common.io.Files
+import org.apache.tools.ant.filters.ReplaceTokens
 
 buildscript {
     repositories {
