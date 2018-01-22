@@ -30,6 +30,9 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
+/**
+ * @author Alexander Yevsyukov
+ */
 @SuppressWarnings("LocalVariableNamingConvention") // OK for tuple entry values
 public class PairShould {
 
@@ -51,14 +54,14 @@ public class PairShould {
         Pair.of(BoolValue.of(true), StringValue.getDefaultInstance());
     }
 
-    @Test
-    public void allow_empty_value() {
+    @Test(expected = IllegalArgumentException.class)
+    public void prohibit_Empty_A() {
         Pair.of(Empty.getDefaultInstance(), BoolValue.of(true));
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void prohibit_all_Empty_instances() {
-        Pair.of(Empty.getDefaultInstance(), Empty.getDefaultInstance());
+    public void prohibit_Empty_B() {
+        Pair.of(BoolValue.of(true), Empty.getDefaultInstance());
     }
 
     @Test

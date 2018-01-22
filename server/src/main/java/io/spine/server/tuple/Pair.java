@@ -49,8 +49,14 @@ public final class Pair<A extends Message, B>
      * Creates a new pair of values.
      */
     public static <A extends Message, B extends Message> Pair<A, B> of(A a, B b) {
+        checkNotEmpty(a);
+        checkNotEmpty(b);
         final Pair<A, B> result = new Pair<>(a, b);
         return result;
+    }
+
+    private static void checkNotEmpty(Message value) {
+        checkNotEmpty(value, "A `Pair` cannot have `Empty` entries. Use `Optional` instead");
     }
 
     /**
