@@ -44,11 +44,6 @@
  *    <li>{@code Triplet<A, B, C>}
  *    <li>{@code Quartet<A, B, C, D>}
  *    <li>{@code Quintet<A, B, C, D, E>}
- *    <li>{@code Sextet<A, B, C, D, E, F>}
- *    <li>{@code Septet<A, B, C, D, E, F, G>}
- *    <li>{@code Octet<A, B, C, D, E, F, G, H>}
- *    <li>{@code Ennead<A, B, C, D, E, F, G, H, I>}
- *    <li>{@code Decade<A, B, C, D, E, F, G, H, I, J>}
  * </ul>
  *
  * <p>Each of the generic type is a specific class derived from
