@@ -20,7 +20,9 @@
 
 package io.spine.server.tuple;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.UnmodifiableIterator;
 import com.google.protobuf.Empty;
 import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Message;
@@ -34,6 +36,7 @@ import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
  * Abstract base for tuple classes.
@@ -46,37 +49,50 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
 
     /**
      * Immutable list of tuple values.
+     *
+     * <p>The first entry must be a {@link GeneratedMessageV3}.
+     *
+     * <p>Other entries can be either {@link GeneratedMessageV3} or {@link Optional}.
      */
     @SuppressWarnings("NonSerializableFieldInSerializableClass") // ensured in constructor
-    private final List<Message> values;
+    private final List<Object> values;
 
     /**
      * Creates a new instance with the passed values.
      *
      * <p>Values must extend {@link GeneratedMessageV3}.
      */
-    protected Tuple(Message... values) {
+    @SuppressWarnings("ChainOfInstanceofChecks") // Need for supporting optional entries.
+    protected Tuple(Object... values) {
         super();
 
-        final ImmutableList.Builder<Message> builder = ImmutableList.builder();
+        final ImmutableList.Builder<Object> builder = ImmutableList.builder();
         boolean nonEmptyFound = false;
-        for (Message value : values) {
+        for (Object value : values) {
             checkNotNull(value);
-            checkArgument(
-                    value instanceof GeneratedMessageV3,
-                    "Unsupported Message class encountered: %s. " +
-                            "Please create tuples with classes extending `GeneratedMessageV3`",
-                    value.getClass()
-                         .getName());
 
-            final boolean isEmpty = checkNotDefaultOrEmpty(value);
-            if (!isEmpty) {
-                nonEmptyFound = true;
+            if (value instanceof Optional) {
+                Optional optional = (Optional)value;
+                if (optional.isPresent()) {
+                    nonEmptyFound = true;
+                }
+            } else if (value instanceof GeneratedMessageV3) {
+                GeneratedMessageV3 messageV3 = (GeneratedMessageV3) value;
+
+                final boolean isEmpty = checkNotDefaultOrEmpty(messageV3);
+                if (!isEmpty) {
+                    nonEmptyFound = true;
+                }
+            } else {
+                throw newIllegalArgumentException(
+                        "Unsupported tuple entry encountered: %s.", value
+                );
             }
 
             builder.add(value);
         }
-        checkArgument(nonEmptyFound, "Tuple cannot be all Empty");
+
+        checkArgument(nonEmptyFound, "A tuple cannot be empty");
 
         this.values = builder.build();
     }
@@ -102,7 +118,7 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
     @Nonnull
     @Override
     public final Iterator<Message> iterator() {
-        final Iterator<Message> result = values.iterator();
+        final Iterator<Message> result = new ExtractingIterator(values);
         return result;
     }
 
@@ -113,8 +129,8 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
      * @return the value at the index
      * @throws IndexOutOfBoundsException if the index is out of range
      */
-    protected Message get(int index) {
-        final Message result = values.get(index);
+    protected Object get(int index) {
+        final Object result = values.get(index);
         return result;
     }
 
@@ -131,6 +147,42 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
         return Objects.equals(this.values, other.values);
     }
 
+    /**
+     * Polymorphically traverses through objects that can be either {@code Message} or
+     * {@code Optional}.
+     *
+     * <p>If an entry is {@code Message} returns it.
+     *
+     * <p>If an entry is {@code Optional}, extracts its value, if there is one, and
+     * returns {@code Empty} otherwise.
+     */
+    private static class ExtractingIterator extends UnmodifiableIterator<Message> {
+
+        private final Iterator<Object> source;
+
+        private ExtractingIterator(Iterable<Object> source) {
+            this.source = source.iterator();
+        }
+
+        @Override
+        public boolean hasNext() {
+            return source.hasNext();
+        }
+
+        @Override
+        public Message next() {
+            final Object next = source.next();
+            if (next instanceof Optional) {
+                Optional optional = (Optional) next;
+                Message result = optional.isPresent()
+                        ? (Message) optional.get()
+                        : Empty.getDefaultInstance();
+                return result;
+            }
+            return (Message) next;
+        }
+    }
+
     /*
      * Interfaces for obtaining tuple values.
      *****************************************/
@@ -139,7 +191,16 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
         T getA();
     }
 
-    interface BValue<T extends Message> {
+    /**
+     * A commmon interface for optional entries.
+     *
+     * @param <T> either {@link Message} or {@link Optional}.
+     */
+    @SuppressWarnings("unused") // The type is used for documentation purposes.
+    interface OptionalEntry<T> {
+    }
+
+    interface BValue<T> extends OptionalEntry<T> {
         T getB();
     }
 }

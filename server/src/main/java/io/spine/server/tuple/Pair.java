@@ -20,9 +20,12 @@
 
 package io.spine.server.tuple;
 
+import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import io.spine.server.tuple.Tuple.AValue;
 import io.spine.server.tuple.Tuple.BValue;
+
+import javax.annotation.Nullable;
 
 /**
  * A pair of event messages.
@@ -32,7 +35,7 @@ import io.spine.server.tuple.Tuple.BValue;
  *
  * @author Alexander Yevsyukov
  */
-public final class Pair<A extends Message, B extends Message>
+public final class Pair<A extends Message, B>
         extends Tuple
         implements AValue<A>, BValue<B> {
 
@@ -47,6 +50,15 @@ public final class Pair<A extends Message, B extends Message>
      */
     public static <A extends Message, B extends Message> Pair<A, B> of(A a, B b) {
         final Pair<A, B> result = new Pair<>(a, b);
+        return result;
+    }
+
+    /**
+     * Creates a pair with optionally present second value.
+     */
+    public static <A extends Message, B extends Message> Pair<A, Optional<B>>
+        withNullable(A a, @Nullable B b) {
+        final Pair<A, Optional<B>> result = new Pair<>(a, Optional.fromNullable(b));
         return result;
     }
 

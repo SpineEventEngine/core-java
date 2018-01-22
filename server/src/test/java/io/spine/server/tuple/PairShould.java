@@ -20,6 +20,7 @@
 
 package io.spine.server.tuple;
 
+import com.google.common.base.Optional;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Empty;
 import com.google.protobuf.StringValue;
@@ -66,6 +67,28 @@ public class PairShould {
         BoolValue b = BoolValue.of(true);
 
         Pair<StringValue, BoolValue> pair = Pair.of(a, b);
+
+        assertEquals(a, pair.getA());
+        assertEquals(b, pair.getB());
+    }
+
+    @Test
+    public void allow_optional_B_absent() {
+        StringValue a = TestValues.newUuidValue();
+        Optional<BoolValue> b = Optional.absent();
+
+        Pair<StringValue, Optional<BoolValue>> pair = Pair.withNullable(a, null);
+
+        assertEquals(a, pair.getA());
+        assertEquals(b, pair.getB());
+    }
+
+    @Test
+    public void allow_optional_B_present() {
+        StringValue a = TestValues.newUuidValue();
+        Optional<BoolValue> b = Optional.of(BoolValue.of(true));
+
+        Pair<StringValue, Optional<BoolValue>> pair = Pair.withNullable(a, b.get());
 
         assertEquals(a, pair.getA());
         assertEquals(b, pair.getB());
