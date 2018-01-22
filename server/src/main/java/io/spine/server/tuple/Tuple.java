@@ -80,6 +80,18 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
         return result;
     }
 
+    /**
+     * Obtains a value at the specified index.
+     *
+     * @param  index a zero-based index value
+     * @return the value at the index
+     * @throws IndexOutOfBoundsException if the index is out of range
+     */
+    protected Message get(int index) {
+        final Message result = values.get(index);
+        return result;
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(values);
@@ -124,5 +136,13 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
             }
             return result;
         }
+    }
+
+    interface AValue<T extends Message> {
+        T getA();
+    }
+
+    interface BValue<T extends Message> {
+        T getB();
     }
 }

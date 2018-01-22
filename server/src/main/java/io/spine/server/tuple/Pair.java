@@ -21,6 +21,8 @@
 package io.spine.server.tuple;
 
 import com.google.protobuf.Message;
+import io.spine.server.tuple.Tuple.AValue;
+import io.spine.server.tuple.Tuple.BValue;
 
 /**
  * A pair of event messages.
@@ -30,7 +32,9 @@ import com.google.protobuf.Message;
  *
  * @author Alexander Yevsyukov
  */
-public final class Pair<A extends Message, B extends Message> extends Tuple {
+public final class Pair<A extends Message, B extends Message>
+        extends Tuple
+        implements AValue<A>, BValue<B> {
 
     private static final long serialVersionUID = 0L;
 
@@ -44,5 +48,19 @@ public final class Pair<A extends Message, B extends Message> extends Tuple {
     public static <A extends Message, B extends Message> Pair<A, B> of(A a, B b) {
         final Pair<A, B> result = new Pair<>(a, b);
         return result;
+    }
+
+    @Override
+    public A getA() {
+        @SuppressWarnings("unchecked") // the cast is protected by the order of generic parameters.
+        final A val = (A) get(0);
+        return val;
+    }
+
+    @Override
+    public B getB() {
+        @SuppressWarnings("unchecked") // the cast is protected by the order of generic parameters.
+        final B val = (B) get(1);
+        return val;
     }
 }
