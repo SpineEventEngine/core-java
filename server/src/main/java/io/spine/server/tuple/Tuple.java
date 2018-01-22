@@ -115,7 +115,10 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
         return isEmpty;
     }
 
-    protected static Message checkNotEmpty(Message value, String errorMessage) {
+    /**
+     * Ensures that the passed message is not {@link Empty}.
+     */
+    protected static <M extends Message> M checkNotEmpty(M value, String errorMessage) {
         checkArgument(! (value instanceof Empty), errorMessage);
         return value;
     }

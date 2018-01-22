@@ -38,6 +38,20 @@
  *     Pair<TaskCreated, TaskAssigned> on(CreateTask cmd) { ... }
  * }</pre>
  *
+ * <h2>Generic Types</h2>
+ *
+ * <p>Classes provided by this package can support up to 5 generic parameters. They are named from
+ * {@code <A>} through {@code <E>}. Methods obtaining these values are named after the types:
+ * {@code getA()}, {@code getB()} and so on.
+ *
+ * <p>The first generic parameter {@code <A>} must always be a specific
+ * {@link com.google.protobuf.Message Message} class.
+ *
+ * <p>Types from {@code <B>} through {@code <E>} can be either {@code Message} or
+ * {@link com.google.common.base.Optional Optional}. See sections below for details.
+ *
+ * <h2>Basic Tuples</h2>
+ *
  * <p>The following tuple classes are provided:
  * <ul>
  *    <li>{@code Pair<A, B>}
@@ -46,8 +60,9 @@
  *    <li>{@code Quintet<A, B, C, D, E>}
  * </ul>
  *
- * <p>Each of the generic type is a specific class derived from
- * {@link com.google.protobuf.Message Message}.
+ * <p>Basic tuple classes allow {@link com.google.common.base.Optional Optional} generic types.
+ *
+ * <h2>Alternatives</h2>
  *
  * <p>In order to define alternatively returned values, please use the following classes:
  * <ul>
@@ -56,6 +71,8 @@
  *     <li>{@code EitherOfFour<A, B, C, D>}
  *     <li>{@code EitherOfFive<A, B, C, D, E>}
  * </ul>
+ *
+ * <p>Generic parameters for alternatives can be only {@link com.google.protobuf.Message Message}.
  *
  * <p>We believe that a list of alternatives longer than five is hard to understand.
  * If you face a such a need, consider splitting a command into two or more independent commands
