@@ -65,26 +65,34 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
         super();
 
         final ImmutableList.Builder<GeneratedMessageV3> builder = ImmutableList.builder();
+        boolean nonEmptyFound = false;
         for (Message value : values) {
             checkNotNull(value);
-            checkNotDefaultOrEmpty(value);
+            final boolean isEmpty = checkNotDefaultOrEmpty(value);
+            if (!isEmpty) {
+                nonEmptyFound = true;
+            }
 
             GeneratedMessageV3 valueToPut;
             valueToPut = value instanceof GeneratedMessageV3
                          ? (GeneratedMessageV3) value
                          : AnyPacker.pack(value);
 
-
             builder.add(valueToPut);
         }
+        checkArgument(nonEmptyFound, "Tuple cannot be all Empty");
+
         this.values = builder.build();
     }
 
     /**
      * Ensures that the passed message is not in default or is an instance of {@link Empty}.
+     *
+     * @return {@code true} if {@link Empty} is passed
      */
-    private static void checkNotDefaultOrEmpty(Message value) {
-        if (!(value instanceof Empty)) {
+    private static boolean checkNotDefaultOrEmpty(Message value) {
+        final boolean isEmpty = value instanceof Empty;
+        if (!isEmpty) {
             final String valueClass = value.getClass()
                                            .getName();
             checkArgument(
@@ -92,6 +100,7 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
                     "Tuples cannot contain default values. Default value of %s encountered.",
                     valueClass);
         }
+        return isEmpty;
     }
 
     @Nonnull

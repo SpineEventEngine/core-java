@@ -55,6 +55,11 @@ public class PairShould {
         Pair.of(Empty.getDefaultInstance(), BoolValue.of(true));
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void prohibit_all_Empty_instances() {
+        Pair.of(Empty.getDefaultInstance(), Empty.getDefaultInstance());
+    }
+
     @Test
     public void return_values() {
         StringValue a = TestValues.newUuidValue();
