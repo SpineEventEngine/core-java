@@ -21,6 +21,7 @@
 package io.spine.server.tuple;
 
 import com.google.protobuf.BoolValue;
+import com.google.protobuf.Empty;
 import com.google.protobuf.StringValue;
 import io.spine.test.TestValues;
 import io.spine.test.Tests;
@@ -47,6 +48,11 @@ public class PairShould {
     @Test(expected = IllegalArgumentException.class)
     public void prohibit_default_values() {
         Pair.of(BoolValue.of(true), StringValue.getDefaultInstance());
+    }
+
+    @Test
+    public void allow_empty_value() {
+        Pair.of(Empty.getDefaultInstance(), BoolValue.of(true));
     }
 
     @Test
