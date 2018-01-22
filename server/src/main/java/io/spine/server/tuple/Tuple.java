@@ -72,7 +72,7 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
             checkNotNull(value);
 
             if (value instanceof Optional) {
-                Optional optional = (Optional)value;
+                Optional optional = (Optional) value;
                 if (optional.isPresent()) {
                     nonEmptyFound = true;
                 }
@@ -119,7 +119,7 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
      * Ensures that the passed message is not {@link Empty}.
      */
     protected static <M extends Message> M checkNotEmpty(M value, String errorMessage) {
-        checkArgument(! (value instanceof Empty), errorMessage);
+        checkArgument(!(value instanceof Empty), errorMessage);
         return value;
     }
 
@@ -133,7 +133,7 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
     /**
      * Obtains a value at the specified index.
      *
-     * @param  index a zero-based index value
+     * @param index a zero-based index value
      * @return the value at the index
      * @throws IndexOutOfBoundsException if the index is out of range
      */
@@ -149,10 +149,36 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) {return true;}
-        if (obj == null || getClass() != obj.getClass()) {return false;}
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
         final Tuple other = (Tuple) obj;
         return Objects.equals(this.values, other.values);
+    }
+
+    interface AValue<T extends Message> {
+        T getA();
+    }
+
+    /*
+     * Interfaces for obtaining tuple values.
+     *****************************************/
+
+    /**
+     * A common interface for a tuple element which can be optional.
+     *
+     * @param <T> either {@link Message} or {@link Optional}.
+     */
+    @SuppressWarnings("unused")
+            // The type is used for documentation purposes.
+    interface OptionalElement<T> {
+    }
+
+    interface BValue<T> extends OptionalElement<T> {
+        T getB();
     }
 
     /**
@@ -183,32 +209,11 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
             if (next instanceof Optional) {
                 Optional optional = (Optional) next;
                 Message result = optional.isPresent()
-                        ? (Message) optional.get()
-                        : Empty.getDefaultInstance();
+                                 ? (Message) optional.get()
+                                 : Empty.getDefaultInstance();
                 return result;
             }
             return (Message) next;
         }
-    }
-
-    /*
-     * Interfaces for obtaining tuple values.
-     *****************************************/
-
-    interface AValue<T extends Message> {
-        T getA();
-    }
-
-    /**
-     * A common interface for a tuple element which can be optional.
-     *
-     * @param <T> either {@link Message} or {@link Optional}.
-     */
-    @SuppressWarnings("unused") // The type is used for documentation purposes.
-    interface OptionalElement<T> {
-    }
-
-    interface BValue<T> extends OptionalElement<T> {
-        T getB();
     }
 }
