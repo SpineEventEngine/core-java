@@ -23,9 +23,11 @@ package io.spine.server.tuple;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.UnmodifiableIterator;
 import com.google.protobuf.Any;
+import com.google.protobuf.Empty;
 import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Message;
 import io.spine.protobuf.AnyPacker;
+import io.spine.validate.Validate;
 
 import javax.annotation.Nonnull;
 import java.io.Serializable;
@@ -33,6 +35,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -64,13 +67,31 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
         final ImmutableList.Builder<GeneratedMessageV3> builder = ImmutableList.builder();
         for (Message value : values) {
             checkNotNull(value);
+            checkNotDefaultOrEmpty(value);
+
             GeneratedMessageV3 valueToPut;
             valueToPut = value instanceof GeneratedMessageV3
                          ? (GeneratedMessageV3) value
                          : AnyPacker.pack(value);
+
+
             builder.add(valueToPut);
         }
         this.values = builder.build();
+    }
+
+    /**
+     * Ensures that the passed message is not in default or is an instance of {@link Empty}.
+     */
+    private static void checkNotDefaultOrEmpty(Message value) {
+        if (!(value instanceof Empty)) {
+            final String valueClass = value.getClass()
+                                           .getName();
+            checkArgument(
+                    Validate.isNotDefault(value),
+                    "Tuples cannot contain default values. Default value of %s encountered.",
+                    valueClass);
+        }
     }
 
     @Nonnull
@@ -137,6 +158,10 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
             return result;
         }
     }
+
+    /*
+     * Interfaces for obtaining tuple values.
+     *****************************************/
 
     interface AValue<T extends Message> {
         T getA();

@@ -44,6 +44,11 @@ public class PairShould {
         assertEquals(Pair.of(v1, v2), Pair.of(v1, v2));
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void prohibit_default_values() {
+        Pair.of(BoolValue.of(true), StringValue.getDefaultInstance());
+    }
+
     @Test
     public void return_values() {
         StringValue a = TestValues.newUuidValue();
