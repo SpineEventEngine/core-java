@@ -200,15 +200,15 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
     }
 
     /**
-     * A commmon interface for optional entries.
+     * A common interface for a tuple element which can be optional.
      *
      * @param <T> either {@link Message} or {@link Optional}.
      */
     @SuppressWarnings("unused") // The type is used for documentation purposes.
-    interface OptionalEntry<T> {
+    interface OptionalElement<T> {
     }
 
-    interface BValue<T> extends OptionalEntry<T> {
+    interface BValue<T> extends OptionalElement<T> {
         T getB();
     }
 }

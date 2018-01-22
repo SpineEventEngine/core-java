@@ -23,12 +23,16 @@ package io.spine.server.tuple;
 import com.google.common.base.Optional;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Empty;
+import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.test.TestValues;
 import io.spine.test.Tests;
 import org.junit.Test;
 
+import java.util.Iterator;
+
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 /**
  * @author Alexander Yevsyukov
@@ -95,5 +99,17 @@ public class PairShould {
 
         assertEquals(a, pair.getA());
         assertEquals(b, pair.getB());
+    }
+
+    @Test
+    public void return_Empty_for_absent_Optional_in_iterator() {
+        StringValue a = TestValues.newUuidValue();
+        Pair<StringValue, Optional<BoolValue>> pair = Pair.withNullable(a, null);
+
+        final Iterator<Message> iterator = pair.iterator();
+
+        assertEquals(a, iterator.next());
+        assertEquals(Empty.getDefaultInstance(), iterator.next());
+        assertFalse(iterator.hasNext());
     }
 }
