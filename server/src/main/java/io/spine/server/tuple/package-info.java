@@ -63,8 +63,8 @@
  * </ul>
  *
  * <p>We believe that a list of alternatives longer than five is hard to understand.
- * If you face a such a need, consider to splitting a command into two or more so that their outcome
- * is more obvious.
+ * If you face a such a need, consider splitting a command into two or more independent commands
+ * so that their outcome is more obvious.
  */
 
 @ParametersAreNonnullByDefault
