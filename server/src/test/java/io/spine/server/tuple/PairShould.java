@@ -22,6 +22,7 @@ package io.spine.server.tuple;
 
 import com.google.common.base.Optional;
 import com.google.common.testing.EqualsTester;
+import com.google.common.testing.SerializableTester;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
@@ -118,5 +119,15 @@ public class PairShould {
         assertEquals(a, iterator.next());
         assertEquals(Empty.getDefaultInstance(), iterator.next());
         assertFalse(iterator.hasNext());
+    }
+
+    @Test
+    public void serialize() {
+        StringValue a = TestValues.newUuidValue();
+        BoolValue b = BoolValue.of(true);
+
+        SerializableTester.reserializeAndAssert(Pair.of(a, b));
+        SerializableTester.reserializeAndAssert(Pair.withNullable(a, b));
+        SerializableTester.reserializeAndAssert(Pair.withNullable(a, null));
     }
 }
