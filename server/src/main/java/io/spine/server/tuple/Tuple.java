@@ -98,7 +98,7 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
     }
 
     /**
-     * Ensures that the passed message is not in default or is an instance of {@link Empty}.
+     * Ensures that the passed message is not default or is an instance of {@link Empty}.
      *
      * @return {@code true} if {@link Empty} is passed
      */
