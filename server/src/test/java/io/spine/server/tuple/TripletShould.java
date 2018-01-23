@@ -20,6 +20,7 @@
 
 package io.spine.server.tuple;
 
+import com.google.common.testing.EqualsTester;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.UInt32Value;
@@ -54,4 +55,14 @@ public class TripletShould {
         Triplet.of(a, b, Tests.<BoolValue>nullRef());
     }
 
+    @Test
+    public void support_equality() {
+        final Triplet<StringValue, BoolValue, UInt32Value> t1 = Triplet.of(a, b, c);
+        final Triplet<StringValue, BoolValue, UInt32Value> t2 = Triplet.of(a, b, c);
+        final Triplet<BoolValue, StringValue, UInt32Value> t3 = Triplet.of(b, a, c);
+
+        new EqualsTester().addEqualityGroup(t1, t2)
+                          .addEqualityGroup(t3)
+                          .testEquals();
+    }
 }
