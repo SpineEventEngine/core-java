@@ -29,6 +29,7 @@ import com.google.protobuf.Message;
 import io.spine.validate.Validate;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.Iterator;
 import java.util.List;
@@ -118,10 +119,15 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
     /**
      * Ensures that the passed message is not an instance of {@link Empty}.
      *
+     * <p>If the passed
      * @return the passed value
      * @throws IllegalArgumentException if the passed value is {@link Empty}
      */
-    static <M extends Message, T extends Tuple> M checkNotEmpty(Class<T> checkingClass, M value) {
+    @Nullable static <M extends Message, T extends Tuple>
+    M checkNotEmpty(Class<T> checkingClass, @Nullable M value) {
+        if (value == null) {
+            return null;
+        }
         final boolean isEmpty = value instanceof Empty;
         if (isEmpty) {
             final String shortClassName = checkingClass.getSimpleName();
@@ -130,6 +136,12 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
                     shortClassName);
         }
         return value;
+    }
+
+    static <M extends Message, T extends Tuple>
+    M checkNotNullOrEmpty(Class<T> checkingClass, M value) {
+        checkNotNull(value);
+        return checkNotEmpty(checkingClass, value);
     }
 
     @Nonnull

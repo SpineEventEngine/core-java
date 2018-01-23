@@ -20,6 +20,7 @@
 
 package io.spine.server.tuple;
 
+import com.google.common.base.Optional;
 import com.google.common.testing.EqualsTester;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.StringValue;
@@ -90,5 +91,25 @@ public class TripletShould {
         assertEquals(a, triplet.getA());
         assertEquals(b, triplet.getB());
         assertEquals(c, triplet.getC());
+    }
+
+    @Test
+    public void allow_optional_elements_present() {
+        Triplet<StringValue, Optional<BoolValue>, Optional<UInt32Value>> optTriplet =
+                Triplet.withNullable(a, b, c);
+
+        assertEquals(a, optTriplet.getA());
+        assertEquals(Optional.of(b), optTriplet.getB());
+        assertEquals(Optional.of(c), optTriplet.getC());
+    }
+
+    @Test
+    public void allow_optional_elements_absent() {
+        Triplet<StringValue, Optional<BoolValue>, Optional<UInt32Value>> optTriplet =
+                Triplet.withNullable(a, null, null);
+
+        assertEquals(a, optTriplet.getA());
+        assertEquals(Optional.absent(), optTriplet.getB());
+        assertEquals(Optional.absent(), optTriplet.getC());
     }
 }

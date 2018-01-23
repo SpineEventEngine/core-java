@@ -20,10 +20,13 @@
 
 package io.spine.server.tuple;
 
+import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import io.spine.server.tuple.Element.AValue;
 import io.spine.server.tuple.Element.BValue;
 import io.spine.server.tuple.Element.CValue;
+
+import javax.annotation.Nullable;
 
 /**
  * A tuple with three elements.
@@ -49,9 +52,22 @@ public class Triplet<A extends Message, B, C>
      */
     public static <A extends Message, B extends Message, C extends Message>
     Triplet<A, B, C> of(A a, B b, C c) {
-        final Triplet<A, B, C> result = new Triplet<>(checkNotEmpty(Triplet.class, a),
-                                                      checkNotEmpty(Triplet.class, b),
-                                                      checkNotEmpty(Triplet.class, c));
+        final Triplet<A, B, C> result = new Triplet<>(checkNotNullOrEmpty(Triplet.class, a),
+                                                      checkNotNullOrEmpty(Triplet.class, b),
+                                                      checkNotNullOrEmpty(Triplet.class, c));
+        return result;
+    }
+
+    /**
+     * Creates a new triplet with optional second and third elements.
+     */
+    public static <A extends Message, B extends Message, C extends Message>
+    Triplet<A, Optional<B>, Optional<C>> withNullable(A a, @Nullable B b, @Nullable C c) {
+        checkNotNullOrEmpty(Triplet.class, a);
+        checkNotEmpty(Triplet.class, b);
+        checkNotEmpty(Triplet.class, c);
+        final Triplet<A, Optional<B>, Optional<C>> result =
+                new Triplet<>(a, Optional.fromNullable(b), Optional.fromNullable(c));
         return result;
     }
 
