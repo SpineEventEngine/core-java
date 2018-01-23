@@ -31,9 +31,11 @@ import javax.annotation.Nullable;
 /**
  * A tuple with three elements.
  *
- * @param <A> the type of the first entry
- * @param <B> the type of the second entry
- * @param <C> the type of the third entry
+ * <p>The second and third elements are optional.
+ *
+ * @param <A> the type of the first element
+ * @param <B> the type of the second element
+ * @param <C> the type of the third element
  *
  * @author Alexander Yevsyukov
  */

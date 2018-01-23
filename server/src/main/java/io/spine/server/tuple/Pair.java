@@ -30,8 +30,10 @@ import javax.annotation.Nullable;
 /**
  * A tuple with two elements.
  *
- * @param <A> the type of the first entry
- * @param <B> the type of the second entry
+ * <p>The second element is optional.
+ *
+ * @param <A> the type of the first element
+ * @param <B> the type of the second element
  *
  * @author Alexander Yevsyukov
  */
