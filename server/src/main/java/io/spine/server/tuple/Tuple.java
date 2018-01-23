@@ -182,8 +182,7 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
     }
 
     /**
-     * Polymorphically traverses through objects that can be either {@code Message} or
-     * {@code Optional}.
+     * Traverses through objects that can be either {@code Message} or {@code Optional}.
      *
      * <p>If an entry is {@code Message} returns it.
      *
