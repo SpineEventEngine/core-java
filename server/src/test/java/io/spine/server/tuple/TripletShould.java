@@ -30,6 +30,7 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.UInt32Value;
 import io.spine.test.TestValues;
 import io.spine.test.Tests;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Iterator;
@@ -46,10 +47,15 @@ public class TripletShould {
     private final StringValue a = TestValues.newUuidValue();
     private final BoolValue b = BoolValue.of(true);
     private final UInt32Value c = UInt32Value.newBuilder()
-                                             .setValue(TestValues.random(100))
+                                             .setValue(128)
                                              .build();
 
-    private final Triplet<StringValue, BoolValue, UInt32Value> triplet = Triplet.of(a, b, c);
+    private Triplet<StringValue, BoolValue, UInt32Value> triplet;
+
+    @Before
+    public void setUp() {
+        triplet = Triplet.of(a, b, c);
+    }
 
     @Test(expected = NullPointerException.class)
     public void prohibit_null_A_value() {
@@ -129,6 +135,29 @@ public class TripletShould {
         assertEquals(a, iterator.next());
         assertEquals(Empty.getDefaultInstance(), iterator.next());
         assertEquals(Empty.getDefaultInstance(), iterator.next());
+        assertFalse(iterator.hasNext());
+    }
+
+    @Test
+    public void return_values_in_iteration() {
+        final Iterator<Message> iterator = triplet.iterator();
+
+        assertEquals(a, iterator.next());
+        assertEquals(b, iterator.next());
+        assertEquals(c, iterator.next());
+        assertFalse(iterator.hasNext());
+    }
+
+    @Test
+    public void return_values_from_optional_in_iteration() {
+        Triplet<StringValue, Optional<BoolValue>, Optional<UInt32Value>> optTriplet =
+                Triplet.withNullable(a, b, c);
+
+        final Iterator<Message> iterator = optTriplet.iterator();
+
+        assertEquals(a, iterator.next());
+        assertEquals(b, iterator.next());
+        assertEquals(c, iterator.next());
         assertFalse(iterator.hasNext());
     }
 
