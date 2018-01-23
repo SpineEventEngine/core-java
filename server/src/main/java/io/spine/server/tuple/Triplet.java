@@ -24,48 +24,54 @@ import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import io.spine.server.tuple.Element.AValue;
 import io.spine.server.tuple.Element.BValue;
+import io.spine.server.tuple.Element.CValue;
 
 import javax.annotation.Nullable;
 
 import static io.spine.server.tuple.Tuple.GetElement.value;
 
 /**
- * A tuple with two elements.
+ * A tuple with three elements.
  *
- * <p>The second element is optional.
+ * <p>The second and third elements are optional.
  *
  * @param <A> the type of the first element
  * @param <B> the type of the second element
+ * @param <C> the type of the third element
  *
  * @author Alexander Yevsyukov
  */
-public final class Pair<A extends Message, B>
+public class Triplet<A extends Message, B, C>
         extends Tuple
-        implements AValue<A>, BValue<B> {
+        implements AValue<A>, BValue<B>, CValue<C> {
 
     private static final long serialVersionUID = 0L;
 
-    private Pair(A a, B b) {
-        super(a, b);
+    private Triplet(A a, B b, C c) {
+        super(a, b, c);
     }
 
     /**
-     * Creates a new pair of values.
+     * Creates new triplet with the passed values.
      */
-    public static <A extends Message, B extends Message> Pair<A, B> of(A a, B b) {
-        final Pair<A, B> result = new Pair<>(checkNotNullOrEmpty(Pair.class, a),
-                                             checkNotNullOrEmpty(Pair.class, b));
+    public static <A extends Message, B extends Message, C extends Message>
+    Triplet<A, B, C> of(A a, B b, C c) {
+        final Triplet<A, B, C> result = new Triplet<>(checkNotNullOrEmpty(Triplet.class, a),
+                                                      checkNotNullOrEmpty(Triplet.class, b),
+                                                      checkNotNullOrEmpty(Triplet.class, c));
         return result;
     }
 
     /**
-     * Creates a pair with optionally present second value.
+     * Creates a new triplet with optional second and third elements.
      */
-    public static <A extends Message, B extends Message>
-    Pair<A, Optional<B>> withNullable(A a, @Nullable B b) {
-        checkNotNullOrEmpty(Pair.class, a);
-        checkNotEmpty(Pair.class, b);
-        final Pair<A, Optional<B>> result = new Pair<>(a, Optional.fromNullable(b));
+    public static <A extends Message, B extends Message, C extends Message>
+    Triplet<A, Optional<B>, Optional<C>> withNullable(A a, @Nullable B b, @Nullable C c) {
+        checkNotNullOrEmpty(Triplet.class, a);
+        checkNotEmpty(Triplet.class, b);
+        checkNotEmpty(Triplet.class, c);
+        final Triplet<A, Optional<B>, Optional<C>> result =
+                new Triplet<>(a, Optional.fromNullable(b), Optional.fromNullable(c));
         return result;
     }
 
@@ -77,5 +83,10 @@ public final class Pair<A extends Message, B>
     @Override
     public B getB() {
         return value(this, 1);
+    }
+
+    @Override
+    public C getC() {
+        return value(this, 2);
     }
 }

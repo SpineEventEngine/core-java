@@ -39,11 +39,16 @@ import static org.junit.Assert.assertFalse;
 /**
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings("LocalVariableNamingConvention") // OK for tuple entry values
+@SuppressWarnings("LocalVariableNamingConvention") // OK for tuple element values
 public class PairShould {
 
     @Test(expected = NullPointerException.class)
-    public void prohibit_null_input() {
+    public void prohibit_null_A_value() {
+        Pair.of(Tests.<BoolValue>nullRef(), TestValues.newUuidValue());
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void prohibit_null_B_value() {
         Pair.of(TestValues.newUuidValue(), Tests.<BoolValue>nullRef());
     }
 
@@ -62,8 +67,13 @@ public class PairShould {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void prohibit_default_values() {
-        Pair.of(BoolValue.of(true), StringValue.getDefaultInstance());
+    public void prohibit_default_A_value() {
+        Pair.of(StringValue.getDefaultInstance(), BoolValue.of(true));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void prohibit_default_B_value() {
+        Pair.of(BoolValue.of(false), TestValues.newUuidValue());
     }
 
     @Test(expected = IllegalArgumentException.class)

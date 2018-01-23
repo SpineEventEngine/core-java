@@ -29,6 +29,7 @@ import com.google.protobuf.Message;
 import io.spine.validate.Validate;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.Iterator;
 import java.util.List;
@@ -59,8 +60,6 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
 
     /**
      * Creates a new instance with the passed values.
-     *
-     * <p>Values must extend {@link GeneratedMessageV3}.
      */
     @SuppressWarnings("ChainOfInstanceofChecks") // Need for supporting optional entries.
     protected Tuple(Object... values) {
@@ -116,11 +115,33 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
     }
 
     /**
-     * Ensures that the passed message is not {@link Empty}.
+     * Ensures that the passed message is not an instance of {@link Empty}.
+     *
+     * <p>If the passed
+     *
+     * @return the passed value
+     * @throws IllegalArgumentException if the passed value is {@link Empty}
      */
-    protected static <M extends Message> M checkNotEmpty(M value, String errorMessage) {
-        checkArgument(!(value instanceof Empty), errorMessage);
+    @Nullable
+    static <M extends Message, T extends Tuple>
+    M checkNotEmpty(Class<T> checkingClass, @Nullable M value) {
+        if (value == null) {
+            return null;
+        }
+        final boolean isEmpty = value instanceof Empty;
+        if (isEmpty) {
+            final String shortClassName = checkingClass.getSimpleName();
+            throw newIllegalArgumentException(
+                    "`%s` cannot have `Empty` elements. Use `Optional` instead",
+                    shortClassName);
+        }
         return value;
+    }
+
+    static <M extends Message, T extends Tuple>
+    M checkNotNullOrEmpty(Class<T> checkingClass, M value) {
+        checkNotNull(value);
+        return checkNotEmpty(checkingClass, value);
     }
 
     @Nonnull
@@ -159,28 +180,6 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
         return Objects.equals(this.values, other.values);
     }
 
-    interface AValue<T extends Message> {
-        T getA();
-    }
-
-    /*
-     * Interfaces for obtaining tuple values.
-     *****************************************/
-
-    /**
-     * A common interface for a tuple element which can be optional.
-     *
-     * @param <T> either {@link Message} or {@link Optional}.
-     */
-    @SuppressWarnings("unused")
-            // The type is used for documentation purposes.
-    interface OptionalElement<T> {
-    }
-
-    interface BValue<T> extends OptionalElement<T> {
-        T getB();
-    }
-
     /**
      * Traverses through objects that can be either {@code Message} or {@code Optional}.
      *
@@ -189,7 +188,7 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
      * <p>If an entry is {@code Optional}, extracts its value, if there is one, and
      * returns {@code Empty} otherwise.
      */
-    private static class ExtractingIterator extends UnmodifiableIterator<Message> {
+    private static final class ExtractingIterator extends UnmodifiableIterator<Message> {
 
         private final Iterator<Object> source;
 
@@ -214,6 +213,26 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
                 return result;
             }
             return (Message) next;
+        }
+    }
+
+    /**
+     * Obtains the value from an element and casts it to the type {@code <T>}
+     */
+    static final class GetElement {
+
+        /**
+         * Prevents instantiation of this utility class.
+         */
+        private GetElement() {}
+
+        /**
+         * Obtains the value of the element by its index and casts it to the type {@code <T>}.
+         */
+        static <T> T value(Tuple tuple, int index) {
+            @SuppressWarnings("unchecked") // The caller is responsible for the correct type.
+            final T value = (T) tuple.get(index);
+            return value;
         }
     }
 }
