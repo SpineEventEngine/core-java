@@ -32,8 +32,7 @@ class Element {
     /**
      * Prevent instantiation of this utility class.
      */
-    private Element() {
-    }
+    private Element() {}
 
     interface AValue<T extends Message> {
         /**
@@ -46,8 +45,7 @@ class Element {
      * A marker interface for a tuple element which value can be
      * {@link com.google.common.base.Optional Optional}.
      */
-    interface OptionalValue {
-    }
+    interface OptionalValue {}
 
     interface BValue<T> extends OptionalValue {
         /**

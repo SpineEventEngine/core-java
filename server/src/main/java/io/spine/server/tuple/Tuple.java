@@ -118,10 +118,12 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
      * Ensures that the passed message is not an instance of {@link Empty}.
      *
      * <p>If the passed
+     *
      * @return the passed value
      * @throws IllegalArgumentException if the passed value is {@link Empty}
      */
-    @Nullable static <M extends Message, T extends Tuple>
+    @Nullable
+    static <M extends Message, T extends Tuple>
     M checkNotEmpty(Class<T> checkingClass, @Nullable M value) {
         if (value == null) {
             return null;
@@ -222,15 +224,14 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
         /**
          * Prevents instantiation of this utility class.
          */
-        private GetElement() {
-        }
+        private GetElement() {}
 
         /**
          * Obtains the value of the element by its index and casts it to the type {@code <T>}.
          */
         static <T> T value(Tuple tuple, int index) {
             @SuppressWarnings("unchecked") // The caller is responsible for the correct type.
-            final T value = (T)tuple.get(index);
+            final T value = (T) tuple.get(index);
             return value;
         }
     }
