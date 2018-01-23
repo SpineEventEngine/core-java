@@ -23,13 +23,18 @@ package io.spine.server.tuple;
 import com.google.common.base.Optional;
 import com.google.common.testing.EqualsTester;
 import com.google.protobuf.BoolValue;
+import com.google.protobuf.Empty;
+import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.UInt32Value;
 import io.spine.test.TestValues;
 import io.spine.test.Tests;
 import org.junit.Test;
 
+import java.util.Iterator;
+
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 /**
  * @author Alexander Yevsyukov
@@ -111,5 +116,18 @@ public class TripletShould {
         assertEquals(a, optTriplet.getA());
         assertEquals(Optional.absent(), optTriplet.getB());
         assertEquals(Optional.absent(), optTriplet.getC());
+    }
+
+    @Test
+    public void return_Empty_for_absent_Optional_in_iterator() {
+        Triplet<StringValue, Optional<BoolValue>, Optional<UInt32Value>> optTriplet =
+                Triplet.withNullable(a, null, null);
+
+        final Iterator<Message> iterator = optTriplet.iterator();
+
+        assertEquals(a, iterator.next());
+        assertEquals(Empty.getDefaultInstance(), iterator.next());
+        assertEquals(Empty.getDefaultInstance(), iterator.next());
+        assertFalse(iterator.hasNext());
     }
 }
