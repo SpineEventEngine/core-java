@@ -159,28 +159,6 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
         return Objects.equals(this.values, other.values);
     }
 
-    interface AValue<T extends Message> {
-        T getA();
-    }
-
-    /*
-     * Interfaces for obtaining tuple values.
-     *****************************************/
-
-    /**
-     * A common interface for a tuple element which can be optional.
-     *
-     * @param <T> either {@link Message} or {@link Optional}.
-     */
-    @SuppressWarnings("unused")
-            // The type is used for documentation purposes.
-    interface OptionalElement<T> {
-    }
-
-    interface BValue<T> extends OptionalElement<T> {
-        T getB();
-    }
-
     /**
      * Polymorphically traverses through objects that can be either {@code Message} or
      * {@code Optional}.

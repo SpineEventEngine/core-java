@@ -22,8 +22,8 @@ package io.spine.server.tuple;
 
 import com.google.common.base.Optional;
 import com.google.protobuf.Message;
-import io.spine.server.tuple.Tuple.AValue;
-import io.spine.server.tuple.Tuple.BValue;
+import io.spine.server.tuple.Element.AValue;
+import io.spine.server.tuple.Element.BValue;
 
 import javax.annotation.Nullable;
 
