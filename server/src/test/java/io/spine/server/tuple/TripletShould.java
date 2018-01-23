@@ -20,46 +20,38 @@
 
 package io.spine.server.tuple;
 
-import com.google.protobuf.Message;
+import com.google.protobuf.BoolValue;
+import com.google.protobuf.StringValue;
+import com.google.protobuf.UInt32Value;
+import io.spine.test.TestValues;
+import io.spine.test.Tests;
+import org.junit.Test;
 
 /**
- * A group of interfaces for obtaining tuple element values.
- *
  * @author Alexander Yevsyukov
  */
-class Element {
+@SuppressWarnings("FieldNamingConvention") // short vars are OK for tuple tests.
+public class TripletShould {
 
-    /**
-     * Prevent instantiation of this utility class.
-     */
-    private Element() {
+    private final StringValue a = TestValues.newUuidValue();
+    private final BoolValue b = BoolValue.of(true);
+    private final UInt32Value c = UInt32Value.newBuilder()
+                                             .setValue(TestValues.random(100))
+                                             .build();
+
+    @Test(expected = NullPointerException.class)
+    public void prohibit_null_A_value() {
+        Triplet.of(Tests.<BoolValue>nullRef(), b, c);
     }
 
-    interface AValue<T extends Message> {
-        /**
-         * Obtains the first element of the tuple.
-         */
-        T getA();
+    @Test(expected = NullPointerException.class)
+    public void prohibit_null_B_value() {
+        Triplet.of(a, Tests.<BoolValue>nullRef(), c);
     }
 
-    /**
-     * A marker interface for a tuple element which value can be
-     * {@link com.google.common.base.Optional Optional}.
-     */
-    interface OptionalValue {
+    @Test(expected = NullPointerException.class)
+    public void prohibit_null_C_value() {
+        Triplet.of(a, b, Tests.<BoolValue>nullRef());
     }
 
-    interface BValue<T> extends OptionalValue {
-        /**
-         * Obtains the second element of the tuple.
-         */
-        T getB();
-    }
-
-    interface CValue<T> extends OptionalValue {
-        /**
-         * Obtains the third element of the tuple.
-         */
-        T getC();
-    }
 }

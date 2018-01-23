@@ -116,10 +116,19 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
     }
 
     /**
-     * Ensures that the passed message is not {@link Empty}.
+     * Ensures that the passed message is not an instance of {@link Empty}.
+     *
+     * @return the passed value
+     * @throws IllegalArgumentException if the passed value is {@link Empty}
      */
-    protected static <M extends Message> M checkNotEmpty(M value, String errorMessage) {
-        checkArgument(!(value instanceof Empty), errorMessage);
+    static <M extends Message, T extends Tuple> M checkNotEmpty(Class<T> checkingClass, M value) {
+        final boolean isEmpty = value instanceof Empty;
+        if (isEmpty) {
+            final String shortClassName = checkingClass.getSimpleName();
+            throw newIllegalArgumentException(
+                    "`%s` cannot have `Empty` elements. Use `Optional` instead",
+                    shortClassName);
+        }
         return value;
     }
 

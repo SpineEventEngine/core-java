@@ -43,7 +43,12 @@ import static org.junit.Assert.assertFalse;
 public class PairShould {
 
     @Test(expected = NullPointerException.class)
-    public void prohibit_null_input() {
+    public void prohibit_null_A_value() {
+        Pair.of(Tests.<BoolValue>nullRef(), TestValues.newUuidValue());
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void prohibit_null_B_value() {
         Pair.of(TestValues.newUuidValue(), Tests.<BoolValue>nullRef());
     }
 
