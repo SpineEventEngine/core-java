@@ -28,6 +28,8 @@ import io.spine.server.tuple.Element.CValue;
 
 import javax.annotation.Nullable;
 
+import static io.spine.server.tuple.Tuple.GetElement.value;
+
 /**
  * A tuple with three elements.
  *
@@ -75,22 +77,16 @@ public class Triplet<A extends Message, B, C>
 
     @Override
     public A getA() {
-        @SuppressWarnings("unchecked") // the cast is protected by the order of generic parameters.
-        final A val = (A) get(0);
-        return val;
+        return value(this, 0);
     }
 
     @Override
     public B getB() {
-        @SuppressWarnings("unchecked") // the cast is protected by the order of generic parameters.
-        final B val = (B) get(1);
-        return val;
+        return value(this, 1);
     }
 
     @Override
     public C getC() {
-        @SuppressWarnings("unchecked") // the cast is protected by the order of generic parameters.
-        final C val = (C) get(2);
-        return val;
+        return value(this, 2);
     }
 }

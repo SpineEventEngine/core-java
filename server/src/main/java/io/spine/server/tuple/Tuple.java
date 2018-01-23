@@ -186,7 +186,7 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
      * <p>If an entry is {@code Optional}, extracts its value, if there is one, and
      * returns {@code Empty} otherwise.
      */
-    private static class ExtractingIterator extends UnmodifiableIterator<Message> {
+    private static final class ExtractingIterator extends UnmodifiableIterator<Message> {
 
         private final Iterator<Object> source;
 
@@ -211,6 +211,27 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
                 return result;
             }
             return (Message) next;
+        }
+    }
+
+    /**
+     * Obtains the value from an element and casts it to the type {@code <T>}
+     */
+    static final class GetElement {
+
+        /**
+         * Prevents instantiation of this utility class.
+         */
+        private GetElement() {
+        }
+
+        /**
+         * Obtains the value of the element by its index and casts it to the type {@code <T>}.
+         */
+        static <T> T value(Tuple tuple, int index) {
+            @SuppressWarnings("unchecked") // The caller is responsible for the correct type.
+            final T value = (T)tuple.get(index);
+            return value;
         }
     }
 }

@@ -27,6 +27,8 @@ import io.spine.server.tuple.Element.BValue;
 
 import javax.annotation.Nullable;
 
+import static io.spine.server.tuple.Tuple.GetElement.value;
+
 /**
  * A tuple with two elements.
  *
@@ -69,15 +71,11 @@ public final class Pair<A extends Message, B>
 
     @Override
     public A getA() {
-        @SuppressWarnings("unchecked") // the cast is protected by the order of generic parameters.
-        final A val = (A) get(0);
-        return val;
+        return value(this, 0);
     }
 
     @Override
     public B getB() {
-        @SuppressWarnings("unchecked") // the cast is protected by the order of generic parameters.
-        final B val = (B) get(1);
-        return val;
+        return value(this, 1);
     }
 }
