@@ -21,6 +21,7 @@
 package io.spine.server.tuple;
 
 import com.google.common.base.Optional;
+import com.google.common.testing.EqualsTester;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
@@ -47,10 +48,16 @@ public class PairShould {
 
     @Test
     public void support_equality() {
-        StringValue v1 = TestValues.newUuidValue();
-        StringValue v2 = TestValues.newUuidValue();
+        final StringValue v1 = TestValues.newUuidValue();
+        final StringValue v2 = TestValues.newUuidValue();
 
-        assertEquals(Pair.of(v1, v2), Pair.of(v1, v2));
+        final Pair<StringValue, StringValue> p1 = Pair.of(v1, v2);
+        final Pair<StringValue, StringValue> p1a = Pair.of(v1, v2);
+        final Pair<StringValue, StringValue> p2 = Pair.of(v2, v1);
+
+        new EqualsTester().addEqualityGroup(p1, p1a)
+                          .addEqualityGroup(p2)
+                          .testEquals();
     }
 
     @Test(expected = IllegalArgumentException.class)
