@@ -22,6 +22,7 @@ package io.spine.server.tuple;
 
 import com.google.common.base.Optional;
 import com.google.common.testing.EqualsTester;
+import com.google.common.testing.SerializableTester;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
@@ -129,5 +130,13 @@ public class TripletShould {
         assertEquals(Empty.getDefaultInstance(), iterator.next());
         assertEquals(Empty.getDefaultInstance(), iterator.next());
         assertFalse(iterator.hasNext());
+    }
+
+    @Test
+    public void serialize() {
+        SerializableTester.reserializeAndAssert(Triplet.of(a, b, c));
+        SerializableTester.reserializeAndAssert(Triplet.withNullable(a, null, null));
+        SerializableTester.reserializeAndAssert(Triplet.withNullable(a, b, null));
+        SerializableTester.reserializeAndAssert(Triplet.withNullable(a, null, c));
     }
 }
