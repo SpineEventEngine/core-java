@@ -65,4 +65,19 @@ public class TripletShould {
                           .addEqualityGroup(t3)
                           .testEquals();
     }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void prohibit_default_A_value() {
+        Triplet.of(StringValue.getDefaultInstance(), b, c);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void prohibit_default_B_value() {
+        Triplet.of(a, StringValue.getDefaultInstance(), c);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void prohibit_default_C_value() {
+        Triplet.of(a, b, StringValue.getDefaultInstance());
+    }
 }
