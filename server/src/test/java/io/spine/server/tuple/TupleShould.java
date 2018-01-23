@@ -23,8 +23,9 @@ package io.spine.server.tuple;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
-import io.spine.server.tuple.Tuple.AValue;
-import io.spine.server.tuple.Tuple.BValue;
+import io.spine.server.tuple.Element.AValue;
+import io.spine.server.tuple.Element.BValue;
+import io.spine.test.Tests;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -34,6 +35,11 @@ import static org.junit.Assert.assertEquals;
  */
 @SuppressWarnings("LocalVariableNamingConvention") // OK for tuple entry values
 public class TupleShould {
+
+    @Test
+    public void have_utility_GetElement_class() {
+        Tests.assertHasPrivateParameterlessCtor(Tuple.GetElement.class);
+    }
 
     @Test
     public void allow_empty_value() {
