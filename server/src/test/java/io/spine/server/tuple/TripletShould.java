@@ -28,6 +28,8 @@ import io.spine.test.TestValues;
 import io.spine.test.Tests;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
+
 /**
  * @author Alexander Yevsyukov
  */
@@ -39,6 +41,8 @@ public class TripletShould {
     private final UInt32Value c = UInt32Value.newBuilder()
                                              .setValue(TestValues.random(100))
                                              .build();
+
+    private final Triplet<StringValue, BoolValue, UInt32Value> triplet = Triplet.of(a, b, c);
 
     @Test(expected = NullPointerException.class)
     public void prohibit_null_A_value() {
@@ -79,5 +83,12 @@ public class TripletShould {
     @Test(expected = IllegalArgumentException.class)
     public void prohibit_default_C_value() {
         Triplet.of(a, b, StringValue.getDefaultInstance());
+    }
+
+    @Test
+    public void return_values() {
+        assertEquals(a, triplet.getA());
+        assertEquals(b, triplet.getB());
+        assertEquals(c, triplet.getC());
     }
 }

@@ -72,7 +72,7 @@ public class Triplet<A extends Message, B, C>
     @Override
     public C getC() {
         @SuppressWarnings("unchecked") // the cast is protected by the order of generic parameters.
-        final C val = (C) get(3);
+        final C val = (C) get(2);
         return val;
     }
 }
