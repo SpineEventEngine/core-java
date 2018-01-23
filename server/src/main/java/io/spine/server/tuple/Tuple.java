@@ -195,6 +195,7 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
         private final Iterator<Object> source;
 
         private ExtractingIterator(Iterable<Object> source) {
+            super();
             this.source = source.iterator();
         }
 
