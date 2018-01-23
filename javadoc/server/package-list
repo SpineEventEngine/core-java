@@ -22,3 +22,4 @@ io.spine.server.storage
 io.spine.server.storage.memory
 io.spine.server.tenant
 io.spine.server.transport
+io.spine.server.tuple
