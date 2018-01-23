@@ -60,8 +60,6 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
 
     /**
      * Creates a new instance with the passed values.
-     *
-     * <p>Values must extend {@link GeneratedMessageV3}.
      */
     @SuppressWarnings("ChainOfInstanceofChecks") // Need for supporting optional entries.
     protected Tuple(Object... values) {
