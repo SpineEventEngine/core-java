@@ -88,6 +88,9 @@ message EventContext {
     // When the event occurred.
     google.protobuf.Timestamp timestamp = 1 [(required) = true];
 
+    // An id of the original command which spawned this event.
+    google.protobuf.Any origin_id = 9 [(required) = true];
+
     oneof origin {
         // The context of the command which generated this event.
         CommandContext command_context = 2 [(required) = true];
