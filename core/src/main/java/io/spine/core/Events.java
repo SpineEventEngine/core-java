@@ -163,6 +163,20 @@ public final class Events {
     }
 
     /**
+     * Obtains origin ID of the Event — the id of the original message that spawned this event.
+     *
+     * @param event the event to get the origin ID for
+     * @param <I>   the type of the origin ID
+     * @return the origin ID
+     */
+    public static <I> I getOriginId(Event event) {
+        checkNotNull(event);
+        final I id = Identifier.unpack(event.getContext()
+                                            .getOriginId());
+        return id;
+    }
+
+    /**
      * Obtains the stringifier for event IDs.
      */
     public static Stringifier<EventId> idStringifier() {
