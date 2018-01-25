@@ -20,18 +20,33 @@
 
 package io.spine.server.aggregate.given;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.protobuf.Message;
 import io.spine.core.CommandContext;
+import io.spine.core.EventClass;
+import io.spine.core.EventEnvelope;
+import io.spine.core.React;
 import io.spine.server.aggregate.Aggregate;
+import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
+import io.spine.server.event.EventDispatcher;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.ProjectVBuilder;
 import io.spine.test.aggregate.Status;
 import io.spine.test.aggregate.command.AggCreateProject;
+import io.spine.test.aggregate.event.AggProjectArchived;
 import io.spine.test.aggregate.event.AggProjectCreated;
 import io.spine.test.aggregate.user.User;
 import io.spine.test.aggregate.user.UserVBuilder;
+
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
 import static io.spine.server.aggregate.given.Given.EventMessage.projectCreated;
 
@@ -119,6 +134,65 @@ public class AggregateTestEnv {
     public static class UserAggregate extends Aggregate<String, User, UserVBuilder> {
         private UserAggregate(String id) {
             super(id);
+        }
+    }
+
+    public static class ProjectArchivedDispatcher implements EventDispatcher<Message> {
+
+        private final Collection<EventEnvelope> events = new LinkedList<>();
+
+        @Override
+        public Set<EventClass> getMessageClasses() {
+            return ImmutableSet.of(EventClass.of(AggProjectArchived.class));
+        }
+
+        @Override
+        public Set<Message> dispatch(EventEnvelope event) {
+            events.add(event);
+            final Message message = event.getMessage();
+            return ImmutableSet.of(message);
+        }
+
+        @Override
+        public void onError(EventEnvelope envelope, RuntimeException exception) {
+            // Do nothing.
+        }
+
+        public List<EventEnvelope> getEvents() {
+            return ImmutableList.copyOf(events);
+        }
+    }
+
+    public static class ProjectArchivedReactingRepository
+            extends AggregateRepository<ProjectId, ProjectArchivedReactingAggregate> {
+    }
+
+    public static class ProjectArchivedReactingAggregate
+            extends Aggregate<ProjectId, Project, ProjectVBuilder> {
+
+        private ProjectArchivedReactingAggregate(ProjectId id) {
+            super(id);
+        }
+
+        /**
+         * Overrides to expose the method to the text.
+         */
+        @VisibleForTesting
+        @Override
+        public void init() {
+            super.init();
+        }
+
+        @React
+        AggProjectArchived on(AggProjectCreated event) {
+            return AggProjectArchived.newBuilder()
+                                     .addAllChildProjectId(event.getChildProjectIdList())
+                                     .build();
+        }
+
+        @Apply
+        private void event(AggProjectArchived event) {
+            // Do nothing.
         }
     }
 }

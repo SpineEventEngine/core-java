@@ -289,6 +289,30 @@ public class ProcessManagerShould {
                                            .getContext());
     }
 
+    @Test
+    public void set_an_origin_id_to_an_assigned_event() {
+        final Command command = requestFactory.command()
+                                              .create(createProject());
+        final CommandEnvelope envelope = CommandEnvelope.of(command);
+        final List<Event> events = dispatch(processManager, envelope);
+
+        final Event event = events.get(0);
+
+        assertEquals(command.getId(), Events.getOriginId(event));
+    }
+
+    @Test
+    public void set_an_origin_id_to_a_react_event() {
+        final PmProjectStarted message = Sample.messageOfType(PmProjectStarted.class);
+        final Event event = eventFactory.createEvent(message);
+        final EventEnvelope envelope = EventEnvelope.of(event);
+        final List<Event> events = dispatch(processManager, envelope);
+
+        final Event reaction = events.get(0);
+
+        assertEquals(Events.getOriginId(event), Events.getOriginId(reaction));
+    }
+
     private static PmCreateProject createProject() {
         return ((PmCreateProject.Builder) Sample.builderForType(PmCreateProject.class))
                 .setProjectId(ID)

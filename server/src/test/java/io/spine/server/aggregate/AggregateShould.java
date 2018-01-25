@@ -31,16 +31,22 @@ import io.spine.core.Command;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
+import io.spine.core.CommandId;
 import io.spine.core.Commands;
 import io.spine.core.Event;
+import io.spine.core.Events;
+import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.given.AggregateTestEnv;
 import io.spine.server.aggregate.given.AggregateTestEnv.AggregateWithMissingApplier;
 import io.spine.server.aggregate.given.AggregateTestEnv.FaultyAggregate;
 import io.spine.server.aggregate.given.AggregateTestEnv.IntAggregate;
+import io.spine.server.aggregate.given.AggregateTestEnv.ProjectArchivedDispatcher;
+import io.spine.server.aggregate.given.AggregateTestEnv.ProjectArchivedReactingRepository;
 import io.spine.server.aggregate.given.Given;
 import io.spine.server.command.Assign;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.entity.InvalidEntityStateException;
+import io.spine.server.event.EventBus;
 import io.spine.server.model.Model;
 import io.spine.server.model.ModelTests;
 import io.spine.test.TimeTests;
@@ -604,6 +610,49 @@ public class AggregateShould {
                                                               .withVersion(1)
                                                               .withState(user)
                                                               .build();
+    }
+
+    @Test
+    public void set_an_origin_id_to_an_assigned_event() {
+        final CommandEnvelope command = env(createProject);
+        final CommandId targetOriginId = command.getCommand()
+                                                .getId();
+
+        dispatchCommand(aggregate, command);
+
+        // Get the first event since the command handler produces only one event message.
+        final Event event = aggregate.getUncommittedEvents()
+                                     .get(0);
+
+        assertEquals(targetOriginId, Events.getOriginId(event));
+    }
+
+    @Test
+    public void set_an_origin_id_to_a_react_event() {
+        final ProjectArchivedDispatcher dispatcher = new ProjectArchivedDispatcher();
+        final EventBus eventBus = reactingEventBus(dispatcher);
+        final String projectName = AggregateShould.class.getSimpleName();
+        final Event event = event(projectCreated(ID, projectName), 5);
+
+        eventBus.post(event);
+        final Event reaction = dispatcher.getEvents()
+                                         .get(0)
+                                         .getOuterObject();
+
+        assertEquals(Events.getOriginId(event), Events.getOriginId(reaction));
+    }
+
+    private static EventBus reactingEventBus(ProjectArchivedDispatcher dispatcher) {
+        final BoundedContext boundedContext = BoundedContext.newBuilder()
+                                                            .build();
+
+        final ProjectArchivedReactingRepository repository = new ProjectArchivedReactingRepository();
+        boundedContext.register(repository);
+
+        final EventBus eventBus = boundedContext.getEventBus();
+        eventBus.register(dispatcher);
+
+        return eventBus;
     }
 
     /**
