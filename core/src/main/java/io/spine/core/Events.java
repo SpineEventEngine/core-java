@@ -169,10 +169,10 @@ public final class Events {
      * @param <I>   the type of the origin ID
      * @return the origin ID
      */
-    public static <I> I getOriginId(Event event) {
+    public static <I> I getRootCommandId(Event event) {
         checkNotNull(event);
         final I id = Identifier.unpack(event.getContext()
-                                            .getOriginId());
+                                            .getRootCommandId());
         return id;
     }
 

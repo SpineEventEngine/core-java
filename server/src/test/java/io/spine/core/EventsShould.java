@@ -199,13 +199,13 @@ public class EventsShould {
     }
 
     @Test
-    public void obtain_origin_id() {
+    public void obtain_root_command_id() {
         final CommandEnvelope command = requestFactory.generateEnvelope();
         final StringValue producerId = toMessage(getClass().getSimpleName());
         final EventFactory ef = EventFactory.on(command, Identifier.pack(producerId));
         final Event event = ef.createEvent(Time.getCurrentTime(), Tests.<Version>nullRef());
         
-        assertEquals(command.getId(), Events.getOriginId(event));
+        assertEquals(command.getId(), Events.getRootCommandId(event));
     }
 
     @Test
