@@ -22,6 +22,7 @@ package io.spine.server.tuple;
 
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
+import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.spine.test.TestValues;
@@ -29,7 +30,10 @@ import io.spine.time.Time;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Iterator;
+
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 /**
  * @author Alexander Yevsyukov
@@ -65,5 +69,13 @@ public class EitherOfTwoShould {
     public void return_values() {
         assertEquals(a, eitherWithA.getA());
         assertEquals(b, eitherWithB.getB());
+    }
+
+    @Test
+    public void return_only_one_value_in_iteration() {
+        final Iterator<Message> iteratorA = eitherWithA.iterator();
+
+        assertEquals(a, iteratorA.next());
+        assertFalse(iteratorA.hasNext());
     }
 }
