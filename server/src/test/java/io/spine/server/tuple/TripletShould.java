@@ -22,6 +22,7 @@ package io.spine.server.tuple;
 
 import com.google.common.base.Optional;
 import com.google.common.testing.EqualsTester;
+import com.google.common.testing.NullPointerTester;
 import com.google.common.testing.SerializableTester;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Empty;
@@ -29,7 +30,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.UInt32Value;
 import io.spine.test.TestValues;
-import io.spine.test.Tests;
+import io.spine.time.Time;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -57,19 +58,11 @@ public class TripletShould {
         triplet = Triplet.of(a, b, c);
     }
 
-    @Test(expected = NullPointerException.class)
-    public void prohibit_null_A_value() {
-        Triplet.of(Tests.<BoolValue>nullRef(), b, c);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void prohibit_null_B_value() {
-        Triplet.of(a, Tests.<BoolValue>nullRef(), c);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void prohibit_null_C_value() {
-        Triplet.of(a, b, Tests.<BoolValue>nullRef());
+    @Test
+    public void pass_null_tolerance_check() {
+        new NullPointerTester().setDefault(Message.class, TestValues.newUuidValue())
+                               .setDefault(Optional.class, Optional.of(Time.getCurrentTime()))
+                               .testAllPublicStaticMethods(Triplet.class);
     }
 
     @Test

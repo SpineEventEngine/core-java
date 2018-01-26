@@ -38,6 +38,7 @@ import java.util.Objects;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * Abstract base for tuple classes.
@@ -142,6 +143,16 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
     M checkNotNullOrEmpty(Class<T> checkingClass, M value) {
         checkNotNull(value);
         return checkNotEmpty(checkingClass, value);
+    }
+
+    protected static <T> T get(EitherOfTwo either, int index) {
+        final Object value = either.get(index);
+        if (value instanceof Optional) {
+            throw newIllegalStateException("No value available at index %s", String.valueOf(index));
+        }
+        @SuppressWarnings("unchecked") // It's the caller responsibility to ensure correct type.
+        final T result = (T) value;
+        return result;
     }
 
     @Nonnull
