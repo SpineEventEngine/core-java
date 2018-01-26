@@ -101,5 +101,4 @@ public class EitherOfTwoShould {
         SerializableTester.reserializeAndAssert(eitherWithA);
         SerializableTester.reserializeAndAssert(eitherWithB);
     }
-    
 }
