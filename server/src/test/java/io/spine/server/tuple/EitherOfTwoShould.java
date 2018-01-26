@@ -72,10 +72,26 @@ public class EitherOfTwoShould {
     }
 
     @Test
+    public void return_value_index() {
+        assertEquals(0, eitherWithA.getIndex());
+        assertEquals(1, eitherWithB.getIndex());
+    }
+
+    @Test
     public void return_only_one_value_in_iteration() {
         final Iterator<Message> iteratorA = eitherWithA.iterator();
 
         assertEquals(a, iteratorA.next());
         assertFalse(iteratorA.hasNext());
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void prohibit_obtaining_the_other_value_B() {
+        eitherWithA.getB();
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void prohibit_obtaining_the_other_value_A() {
+        eitherWithB.getA();
     }
 }

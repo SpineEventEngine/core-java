@@ -63,10 +63,12 @@ public abstract class Either implements Iterable<Message>, Serializable {
     }
 
     protected static <T> T get(Either either, int index) {
-        if (index > either.getIndex()) {
+        if (index != either.getIndex()) {
             final String errMsg =
-                    format("Index in `Either` is %d. Requested: %d", either.getIndex(), index);
-            throw new IndexOutOfBoundsException(errMsg);
+                    format("`Either` instance has value of a different type than requested. " +
+                                   "Value index in `Either` is %d. Requested index: %d",
+                           either.getIndex(), index);
+            throw new IllegalStateException(errMsg);
         }
 
         @SuppressWarnings("unchecked") // It's the caller responsibility to ensure correct type.
