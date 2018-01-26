@@ -54,11 +54,17 @@ public abstract class Either implements Iterable<Message>, Serializable {
         this.index = index;
     }
 
-    public Message getValue() {
+    /**
+     * Obtains the stored value.
+     */
+    protected Message getValue() {
         return value;
     }
 
-    public int getIndex() {
+    /**
+     * Obtains a zero-based index of the value.
+     */
+    protected int getIndex() {
         return index;
     }
 
