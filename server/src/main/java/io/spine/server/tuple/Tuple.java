@@ -158,18 +158,18 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
      * @return the value at the index
      * @throws IndexOutOfBoundsException if the index is out of range
      */
-    protected Object get(int index) {
+    protected final Object get(int index) {
         final Object result = values.get(index);
         return result;
     }
 
     @Override
-    public int hashCode() {
+    public final int hashCode() {
         return Objects.hash(values);
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public final boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }

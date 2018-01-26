@@ -57,14 +57,14 @@ public abstract class Either implements Iterable<Message>, Serializable {
     /**
      * Obtains the stored value.
      */
-    protected Message getValue() {
+    protected final Message getValue() {
         return value;
     }
 
     /**
      * Obtains a zero-based index of the value.
      */
-    protected int getIndex() {
+    protected final int getIndex() {
         return index;
     }
 
@@ -83,21 +83,25 @@ public abstract class Either implements Iterable<Message>, Serializable {
     }
 
     @Override
-    public int hashCode() {
+    public final int hashCode() {
         return Objects.hash(value, index);
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {return true;}
-        if (obj == null || getClass() != obj.getClass()) {return false;}
+    public final boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
         final Either other = (Either) obj;
         return Objects.equals(this.value, other.value)
                 && Objects.equals(this.index, other.index);
     }
 
     @Override
-    public Iterator<Message> iterator() {
+    public final Iterator<Message> iterator() {
         final Set<Message> singleton = Collections.singleton((Message) value);
         return singleton.iterator();
     }
