@@ -61,11 +61,23 @@ public final class EitherOfTwo<A extends Message, B extends Message>
         return result;
     }
 
+    /**
+     * Obtains the value of the first alternative.
+     *
+     * @throws IllegalStateException if the {@code <B>} value is stored instead.
+     * @return the stored value.
+     */
     @Override
     public A getA() {
         return get(this, 0);
     }
 
+    /**
+     * Obtains the value of the second alternative.
+     *
+     * @throws IllegalStateException if the {@code <A>} value is stored instead.
+     * @return the stored value.
+     */
     @Override
     public B getB() {
         return get(this, 1);

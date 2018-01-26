@@ -22,6 +22,7 @@ package io.spine.server.tuple;
 
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
+import com.google.common.testing.SerializableTester;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
@@ -94,4 +95,11 @@ public class EitherOfTwoShould {
     public void prohibit_obtaining_the_other_value_A() {
         eitherWithB.getA();
     }
+
+    @Test
+    public void serialize() {
+        SerializableTester.reserializeAndAssert(eitherWithA);
+        SerializableTester.reserializeAndAssert(eitherWithB);
+    }
+    
 }
