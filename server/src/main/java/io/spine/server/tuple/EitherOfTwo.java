@@ -20,12 +20,9 @@
 
 package io.spine.server.tuple;
 
-import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import io.spine.server.tuple.Element.AValue;
 import io.spine.server.tuple.Element.BValue;
-
-import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -42,12 +39,8 @@ public final class EitherOfTwo<A extends Message, B extends Message>
 
     private static final long serialVersionUID = 0L;
 
-    private EitherOfTwo(@Nullable A a, @Nullable B b) {
-        super(a == null ? Optional.absent() : a,
-              b == null ? Optional.absent() : b);
-        if (a == null && b == null) {
-            throw new NullPointerException("Both values cannot be null");
-        }
+    private EitherOfTwo(Message value, int index) {
+        super(value, index);
     }
 
     /**
@@ -55,7 +48,7 @@ public final class EitherOfTwo<A extends Message, B extends Message>
      */
     public static <A extends Message, B extends Message> EitherOfTwo<A, B> withA(A a) {
         checkNotNull(a);
-        final EitherOfTwo<A, B> result = new EitherOfTwo<>(a, null);
+        final EitherOfTwo<A, B> result = new EitherOfTwo<>(a, 0);
         return result;
     }
 
@@ -64,7 +57,7 @@ public final class EitherOfTwo<A extends Message, B extends Message>
      */
     public static <A extends Message, B extends Message> EitherOfTwo<A, B> withB(B b) {
         checkNotNull(b);
-        final EitherOfTwo<A, B> result = new EitherOfTwo<>(null, b);
+        final EitherOfTwo<A, B> result = new EitherOfTwo<>(b, 1);
         return result;
     }
 

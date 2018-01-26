@@ -20,16 +20,50 @@
 
 package io.spine.server.tuple;
 
+import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
+import com.google.protobuf.StringValue;
+import com.google.protobuf.Timestamp;
+import io.spine.test.TestValues;
+import io.spine.time.Time;
+import org.junit.Before;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Alexander Yevsyukov
  */
+@SuppressWarnings("FieldNamingConvention") // short vars are OK for tuple tests.
 public class EitherOfTwoShould {
+
+    private final StringValue a = TestValues.newUuidValue();
+    private final Timestamp b = Time.getCurrentTime();
+
+    private EitherOfTwo<StringValue, Timestamp> eitherWithA;
+    private EitherOfTwo<StringValue, Timestamp> eitherWithB;
+
+    @Before
+    public void setUp() {
+        eitherWithA = EitherOfTwo.withA(a);
+        eitherWithB = EitherOfTwo.withB(b);
+    }
+
+    @Test
+    public void support_equality() {
+        new EqualsTester().addEqualityGroup(eitherWithA, EitherOfTwo.withA(a))
+                          .addEqualityGroup(eitherWithB)
+                          .testEquals();
+    }
 
     @Test
     public void pass_null_tolerance_check() {
         new NullPointerTester().testAllPublicStaticMethods(EitherOfTwo.class);
+    }
+
+    @Test
+    public void return_values() {
+        assertEquals(a, eitherWithA.getA());
+        assertEquals(b, eitherWithB.getB());
     }
 }
