@@ -115,7 +115,7 @@ public final class ExternalMessageEnvelope
     }
 
     @Override
-    public void setOriginContext(EventContext.Builder builder) {
+    public void passToEventContext(EventContext.Builder builder) {
         /*
          * This should never happen, as no event is caused directly by an {@code ExternalMessage}.
          *

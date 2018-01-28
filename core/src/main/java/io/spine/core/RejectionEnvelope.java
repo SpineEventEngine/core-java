@@ -100,12 +100,12 @@ public class RejectionEnvelope
     }
 
     /**
-     * Sets the context of the rejection as the context origin of the event being built.
+     * Passes the rejection data to an event context being built.
      *
      * @param builder event context builder into which set the event origin context
      */
     @Override
-    public void setOriginContext(EventContext.Builder builder) {
+    public void passToEventContext(EventContext.Builder builder) {
         builder.setRejectionContext(getOuterObject().getContext());
     }
 

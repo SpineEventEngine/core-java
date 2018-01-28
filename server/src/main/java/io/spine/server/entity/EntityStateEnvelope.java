@@ -144,7 +144,7 @@ public final class EntityStateEnvelope<I, S extends Message>
      * @throws UnsupportedOperationException always
      */
     @Override
-    public void setOriginContext(EventContext.Builder builder)
+    public void passToEventContext(EventContext.Builder builder)
             throws UnsupportedOperationException {
         throw unsupported("An entity state cannot originate other messages");
     }

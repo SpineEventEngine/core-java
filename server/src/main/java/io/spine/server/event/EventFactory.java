@@ -158,7 +158,7 @@ public class EventFactory {
         final EventContext.Builder builder = EventContext.newBuilder()
                                                          .setTimestamp(timestamp)
                                                          .setProducerId(producerId);
-        origin.setOriginContext(builder);
+        origin.passToEventContext(builder);
         if (version != null) {
             builder.setVersion(version);
         }

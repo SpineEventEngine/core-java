@@ -24,6 +24,7 @@ import com.google.protobuf.Message;
 import io.spine.type.TypeName;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.Identifier.pack;
 
 /**
  * The holder of a {@code Command}, which provides convenient access to its properties.
@@ -113,13 +114,18 @@ public final class CommandEnvelope
     }
 
     /**
-     * Sets the context of the enclosed command as the origin for the event being built.
+     * Passes data from the enclosed command to event context being built.
+     *
+     * <p>In particular it sets a root command identifier and an event context origin. 
+     * The commands identifier is set as a root command identifier.
+     * The origin is set to the context of the enclosed event.
      *
      * @param builder event context builder into which set the event origin context
      */
     @Override
-    public void setOriginContext(EventContext.Builder builder) {
+    public void passToEventContext(EventContext.Builder builder) {
         builder.setCommandContext(getCommandContext());
+        builder.setRootCommandId(pack(getId()));
     }
 
     /**

@@ -97,14 +97,19 @@ public final class EventEnvelope extends EnrichableMessageEnvelope<EventId, Even
     }
 
     /**
-     * Sets the context of the enclosed event as origin for the event which context
-     * is being built.
+     * Passes data from the enclosed event to event context being built.
+     * 
+     * <p>In particular it sets a root command identifier and an event context origin. 
+     * The root command identifier replicates the one defined in an enclosed event.
+     * The origin is set to the context of the enclosed event.
      *
      * @param builder event context builder into which set the event origin context
      */
     @Override
-    public void setOriginContext(EventContext.Builder builder) {
-        builder.setEventContext(getEventContext());
+    public void passToEventContext(EventContext.Builder builder) {
+        final EventContext context = getEventContext();
+        builder.setEventContext(context);
+        builder.setRootCommandId(context.getRootCommandId());
     }
 
     /**
