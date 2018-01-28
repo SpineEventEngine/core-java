@@ -44,6 +44,7 @@ import io.spine.test.event.TeamProjectAdded;
 import io.spine.test.event.TeamVBuilder;
 import io.spine.test.event.command.AddTasks;
 import io.spine.test.event.command.CreateProject;
+import io.spine.testdata.Sample;
 
 import java.util.Collection;
 import java.util.List;
@@ -59,26 +60,18 @@ import static org.junit.Assert.fail;
  */
 public class EventRootCommandIdTestEnv {
 
-    private static final TeamId TEAM_ID = teamId(EventRootCommandIdTestEnv.class.getSimpleName());
-
     private EventRootCommandIdTestEnv() {
         // Prevent instantiation.
     }
 
-    public static ProjectId projectId(String id) {
-        checkNotNull(id);
-
-        return ProjectId.newBuilder()
-                        .setId(id)
-                        .build();
+    public static ProjectId projectId() {
+        return (ProjectId) Sample.builderForType(ProjectId.class)
+                                 .build();
     }
 
-    public static TeamId teamId(String id) {
-        checkNotNull(id);
-
-        return TeamId.newBuilder()
-                     .setId(id)
-                     .build();
+    public static TeamId teamId() {
+        return (TeamId) Sample.builderForType(TeamId.class)
+                              .build();
     }
 
     public static CreateProject createProject(ProjectId projectId, TeamId teamId) {
@@ -92,7 +85,7 @@ public class EventRootCommandIdTestEnv {
     }
 
     public static CreateProject createProject(ProjectId id) {
-        return createProject(id, TEAM_ID);
+        return createProject(id, teamId());
     }
 
     public static AddTasks addTasks(ProjectId id, int count) {
@@ -103,8 +96,9 @@ public class EventRootCommandIdTestEnv {
             final Task task = Task.getDefaultInstance();
             builder.addTask(task);
         }
-        return builder.setProjectId(id)
-                      .build();
+        final AddTasks command = builder.setProjectId(id)
+                                        .build();
+        return command;
     }
 
     public static EventStreamQuery newStreamQuery() {

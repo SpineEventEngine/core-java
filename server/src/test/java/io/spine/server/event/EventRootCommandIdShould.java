@@ -53,9 +53,8 @@ public class EventRootCommandIdShould {
     private static final TestActorRequestFactory requestFactory =
             TestActorRequestFactory.newInstance(EventRootCommandIdShould.class);
 
-    private static final ProjectId ID = projectId(EventRootCommandIdShould.class.getSimpleName());
-    private static final TeamId TEAM_ID = teamId(EventRootCommandIdShould.class.getSimpleName());
-
+    private static final ProjectId PROJECT_ID = projectId();
+    private static final TeamId TEAM_ID = teamId();
 
     private BoundedContext boundedContext;
 
@@ -63,8 +62,10 @@ public class EventRootCommandIdShould {
     public void setUp() {
         boundedContext = BoundedContext.newBuilder()
                                        .build();
+        
         final ProjectAggregateRepository projectRepository = new ProjectAggregateRepository();
         final TeamAggregateRepository teamRepository = new TeamAggregateRepository();
+        
         boundedContext.register(projectRepository);
         boundedContext.register(teamRepository);
     }
@@ -76,22 +77,26 @@ public class EventRootCommandIdShould {
 
     @Test
     public void match_the_id_of_a_command_handled_by_an_aggregate() {
-        final Command command = command(createProject(ID));
-        
+        final Command command = command(createProject(PROJECT_ID));
+
         postCommand(command);
 
         final List<Event> events = readEvents();
+        // Two events should be created: one in the `ProjectAggregate` and one in the `TeamAggregate`.
+        assertEquals(2, events.size());
+
         final Event event = events.get(0);
         assertEquals(command.getId(), getRootCommandId(event));
     }
 
     @Test
     public void match_the_id_of_a_command_handled_by_an_aggregate_for_multiple_events() {
-        final Command command = command(addTasks(ID, 3));
-        
+        final Command command = command(addTasks(PROJECT_ID, 3));
+
         postCommand(command);
 
         final List<Event> events = readEvents();
+        assertEquals(3, events.size());
         assertEquals(command.getId(), getRootCommandId(events.get(0)));
         assertEquals(command.getId(), getRootCommandId(events.get(1)));
         assertEquals(command.getId(), getRootCommandId(events.get(2)));
@@ -99,11 +104,14 @@ public class EventRootCommandIdShould {
 
     @Test
     public void match_the_id_of_an_external_event_handled_by_an_aggregate() {
-        final Command command = command(createProject(ID, TEAM_ID));
+        final Command command = command(createProject(PROJECT_ID, TEAM_ID));
 
         postCommand(command);
 
         final List<Event> events = readEvents();
+        // Two events should be created: one in the `ProjectAggregate` and one in the `TeamAggregate`.
+        assertEquals(2, events.size());
+
         final Event reaction = events.get(1);
         assertEquals(command.getId(), getRootCommandId(reaction));
     }
