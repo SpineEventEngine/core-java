@@ -39,6 +39,11 @@ message AddTask {
     Task task = 2;
 }
 
+message AddTasks {
+    ProjectId project_id = 1;
+    repeated Task task = 2;
+}
+
 message StartProject {
     ProjectId project_id = 1;
 }
