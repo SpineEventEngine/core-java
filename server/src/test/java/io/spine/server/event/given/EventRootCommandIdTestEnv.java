@@ -21,21 +21,27 @@
 package io.spine.server.event.given;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import io.grpc.stub.StreamObserver;
 import io.spine.core.CommandContext;
 import io.spine.core.Event;
+import io.spine.core.EventContext;
+import io.spine.core.React;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.event.EventStreamQuery;
+import io.spine.server.route.EventRoute;
 import io.spine.test.event.Project;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.ProjectId;
 import io.spine.test.event.ProjectVBuilder;
 import io.spine.test.event.Task;
 import io.spine.test.event.TaskAdded;
+import io.spine.test.event.Team;
+import io.spine.test.event.TeamId;
+import io.spine.test.event.TeamProjectAdded;
+import io.spine.test.event.TeamVBuilder;
 import io.spine.test.event.command.AddTasks;
 import io.spine.test.event.command.CreateProject;
 
@@ -45,12 +51,15 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Collections.singleton;
 import static org.junit.Assert.fail;
 
 /**
  * @author Mykhailo Drachuk
  */
 public class EventRootCommandIdTestEnv {
+
+    private static final TeamId TEAM_ID = teamId(EventRootCommandIdTestEnv.class.getSimpleName());
 
     private EventRootCommandIdTestEnv() {
         // Prevent instantiation.
@@ -64,12 +73,26 @@ public class EventRootCommandIdTestEnv {
                         .build();
     }
 
-    public static CreateProject createProject(ProjectId id) {
+    public static TeamId teamId(String id) {
         checkNotNull(id);
 
+        return TeamId.newBuilder()
+                     .setId(id)
+                     .build();
+    }
+
+    public static CreateProject createProject(ProjectId projectId, TeamId teamId) {
+        checkNotNull(projectId);
+        checkNotNull(teamId);
+
         return CreateProject.newBuilder()
-                            .setProjectId(id)
+                            .setProjectId(projectId)
+                            .setTeamId(teamId)
                             .build();
+    }
+
+    public static CreateProject createProject(ProjectId id) {
+        return createProject(id, TEAM_ID);
     }
 
     public static AddTasks addTasks(ProjectId id, int count) {
@@ -125,11 +148,26 @@ public class EventRootCommandIdTestEnv {
     }
 
     public static class ProjectAggregateRepository
-            extends AggregateRepository<ProjectId, ProjectAggregate> {
+            extends AggregateRepository<ProjectId, ProjectAggregate> { }
+
+    @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
+    public static class TeamAggregateRepository
+            extends AggregateRepository<TeamId, TeamAggregate> {
+        public TeamAggregateRepository() {
+            getEventRouting()
+                    .route(ProjectCreated.class,
+                           new EventRoute<TeamId, ProjectCreated>() {
+                               private static final long serialVersionUID = 0L;
+
+                               @Override
+                               public Set<TeamId> apply(ProjectCreated msg, EventContext ctx) {
+                                   return singleton(msg.getTeamId());
+                               }
+                           });
+        }
     }
 
-    static class ProjectAggregate
-            extends Aggregate<ProjectId, Project, ProjectVBuilder> {
+    static class ProjectAggregate extends Aggregate<ProjectId, Project, ProjectVBuilder> {
 
         private ProjectAggregate(ProjectId id) {
             super(id);
@@ -179,6 +217,28 @@ public class EventRootCommandIdTestEnv {
             getBuilder()
                     .setId(event.getProjectId())
                     .addTask(event.getTask());
+        }
+    }
+
+    static class TeamAggregate extends Aggregate<TeamId, Team, TeamVBuilder> {
+
+        private TeamAggregate(TeamId id) {
+            super(id);
+        }
+
+        @React
+        Iterable<TeamProjectAdded> on(ProjectCreated cmd, EventContext ctx) {
+            final TeamProjectAdded event = TeamProjectAdded.newBuilder()
+                                                           .setProjectId(cmd.getProjectId())
+                                                           .build();
+            return singleton(event);
+        }
+
+        @Apply
+        private void event(TeamProjectAdded event) {
+            getBuilder()
+                    .setId(event.getTeamId())
+                    .addProjectId(event.getProjectId());
         }
     }
 }

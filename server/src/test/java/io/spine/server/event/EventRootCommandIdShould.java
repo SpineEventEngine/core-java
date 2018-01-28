@@ -29,20 +29,23 @@ import io.spine.core.Event;
 import io.spine.server.BoundedContext;
 import io.spine.server.event.given.EventRootCommandIdTestEnv.ProjectAggregateRepository;
 import io.spine.server.event.given.EventRootCommandIdTestEnv.ResponseObserver;
+import io.spine.server.event.given.EventRootCommandIdTestEnv.TeamAggregateRepository;
 import io.spine.test.event.ProjectId;
+import io.spine.test.event.TeamId;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
 
-import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.core.Events.getRootCommandId;
+import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.addTasks;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.createProject;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.newStreamObserver;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.newStreamQuery;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.projectId;
+import static io.spine.server.event.given.EventRootCommandIdTestEnv.teamId;
 import static org.junit.Assert.assertEquals;
 
 public class EventRootCommandIdShould {
@@ -51,6 +54,8 @@ public class EventRootCommandIdShould {
             TestActorRequestFactory.newInstance(EventRootCommandIdShould.class);
 
     private static final ProjectId ID = projectId(EventRootCommandIdShould.class.getSimpleName());
+    private static final TeamId TEAM_ID = teamId(EventRootCommandIdShould.class.getSimpleName());
+
 
     private BoundedContext boundedContext;
 
@@ -58,8 +63,10 @@ public class EventRootCommandIdShould {
     public void setUp() {
         boundedContext = BoundedContext.newBuilder()
                                        .build();
-        final ProjectAggregateRepository repository = new ProjectAggregateRepository();
-        boundedContext.register(repository);
+        final ProjectAggregateRepository projectRepository = new ProjectAggregateRepository();
+        final TeamAggregateRepository teamRepository = new TeamAggregateRepository();
+        boundedContext.register(projectRepository);
+        boundedContext.register(teamRepository);
     }
 
     @After
@@ -92,7 +99,13 @@ public class EventRootCommandIdShould {
 
     @Test
     public void match_the_id_of_an_external_event_handled_by_an_aggregate() {
+        final Command command = command(createProject(ID, TEAM_ID));
 
+        postCommand(command);
+
+        final List<Event> events = readEvents();
+        final Event reaction = events.get(1);
+        assertEquals(command.getId(), getRootCommandId(reaction));
     }
 
     @Test

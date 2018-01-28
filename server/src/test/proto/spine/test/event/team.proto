@@ -19,33 +19,24 @@
 //
 syntax = "proto3";
 
-package spine.test.event.command;
+package spine.test.event;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package = "io.spine.test.event.command";
-option java_outer_classname = "EventCommandsProto";
+option java_package = "io.spine.test.event";
 option java_multiple_files = true;
 
+import "spine/core/user_id.proto";
 import "spine/test/event/project.proto";
-import "spine/test/event/team.proto";
 
-message CreateProject {
-    ProjectId project_id = 1;
-    TeamId team_id = 2;
+message TeamId {
+    string id = 1;
 }
 
-message AddTask {
-    ProjectId project_id = 1;
-    Task task = 2;
+message Team {
+    TeamId id = 1;
+
+    repeated ProjectId project_id = 3;
 }
 
-message AddTasks {
-    ProjectId project_id = 1;
-    repeated Task task = 2;
-}
-
-message StartProject {
-    ProjectId project_id = 1;
-}
