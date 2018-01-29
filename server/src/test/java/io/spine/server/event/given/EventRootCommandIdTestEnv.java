@@ -102,8 +102,18 @@ public class EventRootCommandIdTestEnv {
                             .build();
     }
 
-    public static CreateProject createProject(ProjectId id) {
-        return createProject(id, teamId());
+    public static AddTasks addTasks(ProjectId id, int count) {
+        checkNotNull(id);
+
+        final AddTasks.Builder builder = AddTasks.newBuilder();
+        for (int i = 0; i < count; i++) {
+            final Task task = (Task) Sample.builderForType(Task.class)
+                                           .build();
+            builder.addTask(task);
+        }
+
+        return builder.setProjectId(id)
+                      .build();
     }
 
     public static AddTeamMember addTeamMember(TeamId teamId) {
@@ -117,15 +127,9 @@ public class EventRootCommandIdTestEnv {
     public static AcceptInvitation acceptInvitation(TeamId teamId) {
         checkNotNull(teamId);
 
-        final MemberInvitation invitation = newInvitation(teamId);
+        final MemberInvitation invitation = memberInvitation(teamId);
         return ((AcceptInvitation.Builder) Sample.builderForType(AcceptInvitation.class))
                 .setInvitation(invitation)
-                .build();
-    }
-
-    private static MemberInvitation newInvitation(TeamId teamId) {
-        return ((MemberInvitation.Builder) Sample.builderForType(MemberInvitation.class))
-                .setTeamId(teamId)
                 .build();
     }
 
@@ -143,18 +147,10 @@ public class EventRootCommandIdTestEnv {
                       .build();
     }
 
-    public static AddTasks addTasks(ProjectId id, int count) {
-        checkNotNull(id);
-
-        final AddTasks.Builder builder = AddTasks.newBuilder();
-        for (int i = 0; i < count; i++) {
-            final Task task = (Task) Sample.builderForType(Task.class)
-                                           .build();
-            builder.addTask(task);
-        }
-
-        return builder.setProjectId(id)
-                      .build();
+    private static MemberInvitation memberInvitation(TeamId teamId) {
+        return ((MemberInvitation.Builder) Sample.builderForType(MemberInvitation.class))
+                .setTeamId(teamId)
+                .build();
     }
 
     public static EventStreamQuery newStreamQuery() {

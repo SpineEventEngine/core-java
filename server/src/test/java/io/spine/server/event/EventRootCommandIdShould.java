@@ -86,7 +86,7 @@ public class EventRootCommandIdShould {
 
     @Test
     public void match_the_id_of_a_command_handled_by_an_aggregate() {
-        final Command command = command(createProject(PROJECT_ID));
+        final Command command = command(createProject(PROJECT_ID, TEAM_ID));
 
         postCommand(command);
 
