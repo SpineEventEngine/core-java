@@ -26,6 +26,7 @@ import com.google.common.testing.SerializableTester;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
+import com.google.protobuf.UInt32Value;
 import io.spine.test.TestValues;
 import io.spine.time.Time;
 import org.junit.Before;
@@ -40,42 +41,50 @@ import static org.junit.Assert.assertFalse;
  * @author Alexander Yevsyukov
  */
 @SuppressWarnings("FieldNamingConvention") // short vars are OK for tuple tests.
-public class EitherOfTwoShould {
+public class EitherOfThreeShould {
 
     private final StringValue a = TestValues.newUuidValue();
-    private final Timestamp b = Time.getCurrentTime();
+    private final UInt32Value b = UInt32Value.newBuilder()
+                                             .setValue(42)
+                                             .build();
+    private final Timestamp c = Time.getCurrentTime();
 
-    private EitherOfTwo<StringValue, Timestamp> eitherWithA;
-    private EitherOfTwo<StringValue, Timestamp> eitherWithB;
+    private EitherOfThree<StringValue, UInt32Value, Timestamp> eitherWithA;
+    private EitherOfThree<StringValue, UInt32Value, Timestamp> eitherWithB;
+    private EitherOfThree<StringValue, UInt32Value, Timestamp> eitherWithC;
 
     @Before
     public void setUp() {
-        eitherWithA = EitherOfTwo.withA(a);
-        eitherWithB = EitherOfTwo.withB(b);
+        eitherWithA = EitherOfThree.withA(a);
+        eitherWithB = EitherOfThree.withB(b);
+        eitherWithC = EitherOfThree.withC(c);
     }
 
     @Test
     public void support_equality() {
-        new EqualsTester().addEqualityGroup(eitherWithA, EitherOfTwo.withA(a))
+        new EqualsTester().addEqualityGroup(eitherWithA, EitherOfThree.withA(a))
                           .addEqualityGroup(eitherWithB)
+                          .addEqualityGroup(eitherWithC)
                           .testEquals();
     }
 
     @Test
     public void pass_null_tolerance_check() {
-        new NullPointerTester().testAllPublicStaticMethods(EitherOfTwo.class);
+        new NullPointerTester().testAllPublicStaticMethods(EitherOfThree.class);
     }
 
     @Test
     public void return_values() {
         assertEquals(a, eitherWithA.getA());
         assertEquals(b, eitherWithB.getB());
+        assertEquals(c, eitherWithC.getC());
     }
 
     @Test
     public void return_value_index() {
         assertEquals(0, eitherWithA.getIndex());
         assertEquals(1, eitherWithB.getIndex());
+        assertEquals(2, eitherWithC.getIndex());
     }
 
     @Test
@@ -89,21 +98,47 @@ public class EitherOfTwoShould {
 
         assertEquals(b, iteratorB.next());
         assertFalse(iteratorA.hasNext());
+
+        final Iterator<Message> iteratorC = eitherWithC.iterator();
+
+        assertEquals(c, iteratorC.next());
+        assertFalse(iteratorA.hasNext());
     }
 
     @Test(expected = IllegalStateException.class)
-    public void prohibit_obtaining_the_other_value_B() {
+    public void prohibit_obtaining_the_other_value_A_B() {
         eitherWithA.getB();
     }
 
     @Test(expected = IllegalStateException.class)
-    public void prohibit_obtaining_the_other_value_A() {
+    public void prohibit_obtaining_the_other_value_A_C() {
+        eitherWithA.getC();
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void prohibit_obtaining_the_other_value_B_A() {
         eitherWithB.getA();
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void prohibit_obtaining_the_other_value_B_C() {
+        eitherWithB.getC();
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void prohibit_obtaining_the_other_value_C_A() {
+        eitherWithC.getA();
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void prohibit_obtaining_the_other_value_C_B() {
+        eitherWithC.getB();
     }
 
     @Test
     public void serialize() {
         SerializableTester.reserializeAndAssert(eitherWithA);
         SerializableTester.reserializeAndAssert(eitherWithB);
+        SerializableTester.reserializeAndAssert(eitherWithC);
     }
 }
