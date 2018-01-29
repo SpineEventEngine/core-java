@@ -46,7 +46,6 @@ import io.spine.test.event.ProjectVBuilder;
 import io.spine.test.event.Task;
 import io.spine.test.event.TaskAdded;
 import io.spine.test.event.Team;
-import io.spine.test.event.TeamCreated;
 import io.spine.test.event.TeamCreation;
 import io.spine.test.event.TeamCreationVBuilder;
 import io.spine.test.event.TeamId;
@@ -60,7 +59,6 @@ import io.spine.test.event.command.AcceptInvitation;
 import io.spine.test.event.command.AddTasks;
 import io.spine.test.event.command.AddTeamMember;
 import io.spine.test.event.command.CreateProject;
-import io.spine.test.event.command.CreateTeam;
 import io.spine.test.event.command.InviteTeamMembers;
 import io.spine.testdata.Sample;
 
@@ -153,17 +151,28 @@ public class EventRootCommandIdTestEnv {
                 .build();
     }
 
+    /**
+     * Creates a new {@link EventStreamQuery} without any filters. 
+     */
     public static EventStreamQuery newStreamQuery() {
         return EventStreamQuery.newBuilder()
                                .build();
     }
 
+    /**
+     * Creates a new {@link StreamObserver} instance, which keeps all observed events.
+     *
+     * <p>The observed events can be accessed using {@link ResponseObserver#getResults()}.
+     */
     public static ResponseObserver newStreamObserver() {
         return new ResponseObserver();
     }
 
     /**
-     * A stream observer for store querying.
+     * A {@link StreamObserver} implemented to query {@link io.spine.server.event.EventStore}.
+     *
+     * <p>It keeps all of the observed events, allowing access to the using
+     * {@link ResponseObserver#getResults()}.
      */
     public static class ResponseObserver implements StreamObserver<Event> {
 
@@ -344,16 +353,9 @@ public class EventRootCommandIdTestEnv {
             return events.build();
         }
 
-        @Assign
-        TeamCreated on(CreateTeam command, CommandContext ctx) {
-            final TeamCreation result = getBuilder().build();
-            final TeamCreated event = teamCreated(result);
-            return event;
-        }
-
         @React
         TeamMemberAdded on(InvitationAccepted event, EventContext ctx) {
-            final Member member = newMember(event.getUserId());
+            final Member member = member(event.getUserId());
             final TeamMemberAdded newEvent = memberAdded(member);
             return newEvent;
         }
@@ -372,19 +374,13 @@ public class EventRootCommandIdTestEnv {
                                     .build();
         }
 
-        private static TeamCreated teamCreated(TeamCreation result) {
-            return TeamCreated.newBuilder()
-                              .mergeFrom(result)
-                              .build();
-        }
-
         private static MemberInvitation memberInvitation(EmailAddress email) {
             return MemberInvitation.newBuilder()
                                    .setEmail(email)
                                    .build();
         }
 
-        private static Member newMember(UserId userId) {
+        private static Member member(UserId userId) {
             return ((Member.Builder) Sample.builderForType(Member.class))
                     .setUserId(userId)
                     .build();
