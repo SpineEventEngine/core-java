@@ -53,6 +53,9 @@ import static io.spine.server.event.given.EventRootCommandIdTestEnv.projectId;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.teamId;
 import static org.junit.Assert.assertEquals;
 
+/**
+ * @author Mykhailo Drachuk
+ */
 public class EventRootCommandIdShould {
 
     private static final TestActorRequestFactory requestFactory =
