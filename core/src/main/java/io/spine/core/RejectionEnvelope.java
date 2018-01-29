@@ -100,9 +100,9 @@ public class RejectionEnvelope
     }
 
     /**
-     * Passes the rejection data to an event context being built.
+     * Passes the rejection data to the event context being built.
      *
-     * @param builder event context builder into which set the event origin context
+     * @param builder event context builder which is filled with the enclosed message data
      */
     @Override
     public void passToEventContext(EventContext.Builder builder) {

@@ -114,13 +114,13 @@ public final class CommandEnvelope
     }
 
     /**
-     * Passes data from the enclosed command to event context being built.
+     * Passes data from the enclosed command to the event context being built.
      *
-     * <p>In particular it sets a root command identifier and an event context origin. 
-     * The commands identifier is set as a root command identifier.
+     * <p>In particular it sets the root command identifier and the event context origin. 
+     * The commands identifier is set as the root command identifier.
      * The origin is set to the context of the enclosed event.
      *
-     * @param builder event context builder into which set the event origin context
+     * @param builder event context builder which is filled with the enclosed message data
      */
     @Override
     public void passToEventContext(EventContext.Builder builder) {

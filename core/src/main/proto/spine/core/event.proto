@@ -88,9 +88,6 @@ message EventContext {
     // When the event occurred.
     google.protobuf.Timestamp timestamp = 1 [(required) = true];
 
-    // An id of the original command which spawned this event.
-    google.protobuf.Any root_command_id = 9 [(required) = true];
-
     oneof origin {
         // The context of the command which generated this event.
         CommandContext command_context = 2 [(required) = true];
@@ -101,6 +98,9 @@ message EventContext {
         // The context of a rejection which generated this event.
         RejectionContext rejection_context = 7 [(required) = true];
     }
+
+    // An id of the root command which caused this event being spawned.
+    google.protobuf.Any root_command_id = 9 [(required) = true];
 
     // The ID of the entity which generated the event.
     //
