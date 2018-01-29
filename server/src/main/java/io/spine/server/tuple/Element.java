@@ -170,4 +170,11 @@ class Element implements Serializable {
          */
         T getC();
     }
+
+    interface DValue<T> extends OptionalValue {
+        /**
+         * Obtains the fourth element of the tuple.
+         */
+        T getD();
+    }
 }

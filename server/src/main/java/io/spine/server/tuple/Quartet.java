@@ -25,6 +25,7 @@ import com.google.protobuf.Message;
 import io.spine.server.tuple.Element.AValue;
 import io.spine.server.tuple.Element.BValue;
 import io.spine.server.tuple.Element.CValue;
+import io.spine.server.tuple.Element.DValue;
 
 import javax.annotation.Nullable;
 
@@ -32,45 +33,43 @@ import static com.google.common.base.Optional.fromNullable;
 import static io.spine.server.tuple.Element.value;
 
 /**
- * A tuple with three elements.
+ * A tuple with four elements.
  *
  * <p>The second and third elements are optional.
  *
  * @param <A> the type of the first element
  * @param <B> the type of the second element
  * @param <C> the type of the third element
+ * @param <D> the type of the fourth element
  *
  * @author Alexander Yevsyukov
  */
-public final class Triplet<A extends Message, B, C>
+public final class Quartet<A extends Message, B, C, D>
         extends Tuple
-        implements AValue<A>, BValue<B>, CValue<C> {
+        implements AValue<A>, BValue<B>, CValue<C>, DValue<D> {
 
     private static final long serialVersionUID = 0L;
 
-    private Triplet(A a, B b, C c) {
-        super(a, b, c);
+    private Quartet(A a, B b, C c, D d) {
+        super(a, b, c, d);
     }
 
-    /**
-     * Creates new triplet with the passed values.
-     */
-    public static <A extends Message, B extends Message, C extends Message>
-    Triplet<A, B, C> of(A a, B b, C c) {
-        checkAllAreNotNullOrEmpty(Triplet.class, a, b, c);
-        final Triplet<A, B, C> result = new Triplet<>(a, b, c);
+    public static <A extends Message, B extends Message, C extends Message, D extends Message>
+    Quartet<A, B, C, D> of(A a, B b, C c, D d) {
+        checkAllAreNotNullOrEmpty(Quartet.class, a, b, c, d);
+        final Quartet<A, B, C, D> result = new Quartet<>(a, b, c, d);
         return result;
     }
 
-    /**
-     * Creates a new triplet with optional second and third elements.
-     */
-    public static <A extends Message, B extends Message, C extends Message>
-    Triplet<A, Optional<B>, Optional<C>> withNullable(A a, @Nullable B b, @Nullable C c) {
+    public static <A extends Message, B extends Message, C extends Message, D extends Message>
+    Quartet<A, Optional<B>, Optional<C>, Optional<D>> withNullable(A a,
+                                                                   @Nullable B b,
+                                                                   @Nullable C c,
+                                                                   @Nullable D d) {
         checkNotNullOrEmpty(Triplet.class, a);
-        checkAllNotEmpty(Triplet.class, b, c);
-        final Triplet<A, Optional<B>, Optional<C>> result =
-                new Triplet<>(a, fromNullable(b), fromNullable(c));
+        checkAllNotEmpty(Quartet.class, b, c, d);
+        final Quartet<A, Optional<B>, Optional<C>, Optional<D>> result =
+                new Quartet<>(a, fromNullable(b), fromNullable(c), fromNullable(d));
         return result;
     }
 
@@ -87,5 +86,10 @@ public final class Triplet<A extends Message, B, C>
     @Override
     public C getC() {
         return value(this, 2);
+    }
+
+    @Override
+    public D getD() {
+        return value(this, 3);
     }
 }

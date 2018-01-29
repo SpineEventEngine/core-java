@@ -27,6 +27,7 @@ import io.spine.server.tuple.Element.BValue;
 
 import javax.annotation.Nullable;
 
+import static com.google.common.base.Optional.fromNullable;
 import static io.spine.server.tuple.Element.value;
 
 /**
@@ -65,7 +66,7 @@ public final class Pair<A extends Message, B>
     Pair<A, Optional<B>> withNullable(A a, @Nullable B b) {
         checkNotNullOrEmpty(Pair.class, a);
         checkNotEmpty(Pair.class, b);
-        final Pair<A, Optional<B>> result = new Pair<>(a, Optional.fromNullable(b));
+        final Pair<A, Optional<B>> result = new Pair<>(a, fromNullable(b));
         return result;
     }
 
