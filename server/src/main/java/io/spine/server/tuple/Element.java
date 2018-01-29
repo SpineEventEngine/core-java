@@ -110,8 +110,9 @@ class Element implements Serializable {
                                  : Empty.getDefaultInstance();
                 return result;
             }
+            default:
+                throw uncoveredType();
         }
-        throw uncoveredType();
     }
 
     private IllegalStateException uncoveredType() {
