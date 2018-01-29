@@ -64,7 +64,6 @@
           <item value="java.lang.Throwable" />
           <item value="java.lang.Exception" />
           <item value="java.lang.Error" />
-          <item value="java.lang.NullPointerException" />
           <item value="java.lang.ClassCastException" />
           <item value="java.lang.ArrayIndexOutOfBoundsException" />
         </value>

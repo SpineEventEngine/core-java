@@ -18,12 +18,46 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.server.tuple;
+
+import com.google.protobuf.Message;
+
 /**
- * This package contains classes and interfaces for server-side code
- * managing access of users and tenants.
+ * A group of interfaces for obtaining tuple element values.
+ *
+ * @author Alexander Yevsyukov
  */
+class Element {
 
-@ParametersAreNonnullByDefault
-package io.spine.server.users;
+    /**
+     * Prevent instantiation of this utility class.
+     */
+    private Element() {}
 
-import javax.annotation.ParametersAreNonnullByDefault;
+    interface AValue<T extends Message> {
+        /**
+         * Obtains the first element of the tuple.
+         */
+        T getA();
+    }
+
+    /**
+     * A marker interface for a tuple element which value can be
+     * {@link com.google.common.base.Optional Optional}.
+     */
+    interface OptionalValue {}
+
+    interface BValue<T> extends OptionalValue {
+        /**
+         * Obtains the second element of the tuple.
+         */
+        T getB();
+    }
+
+    interface CValue<T> extends OptionalValue {
+        /**
+         * Obtains the third element of the tuple.
+         */
+        T getC();
+    }
+}
