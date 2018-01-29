@@ -26,6 +26,7 @@ import io.spine.core.CommandContext;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.React;
+import io.spine.core.UserId;
 import io.spine.net.EmailAddress;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
@@ -35,6 +36,8 @@ import io.spine.server.event.EventStreamQuery;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.server.route.EventRoute;
+import io.spine.test.event.InvitationAccepted;
+import io.spine.test.event.Member;
 import io.spine.test.event.MemberInvitation;
 import io.spine.test.event.Project;
 import io.spine.test.event.ProjectCreated;
@@ -51,6 +54,9 @@ import io.spine.test.event.TeamMemberAdded;
 import io.spine.test.event.TeamMemberInvited;
 import io.spine.test.event.TeamProjectAdded;
 import io.spine.test.event.TeamVBuilder;
+import io.spine.test.event.UserSignUp;
+import io.spine.test.event.UserSignUpVBuilder;
+import io.spine.test.event.command.AcceptInvitation;
 import io.spine.test.event.command.AddTasks;
 import io.spine.test.event.command.AddTeamMember;
 import io.spine.test.event.command.CreateProject;
@@ -104,6 +110,21 @@ public class EventRootCommandIdTestEnv {
         checkNotNull(teamId);
 
         return ((AddTeamMember.Builder) Sample.builderForType(AddTeamMember.class))
+                .setTeamId(teamId)
+                .build();
+    }
+
+    public static AcceptInvitation acceptInvitation(TeamId teamId) {
+        checkNotNull(teamId);
+
+        final MemberInvitation invitation = newInvitation(teamId);
+        return ((AcceptInvitation.Builder) Sample.builderForType(AcceptInvitation.class))
+                .setInvitation(invitation)
+                .build();
+    }
+
+    private static MemberInvitation newInvitation(TeamId teamId) {
+        return ((MemberInvitation.Builder) Sample.builderForType(MemberInvitation.class))
                 .setTeamId(teamId)
                 .build();
     }
@@ -179,12 +200,10 @@ public class EventRootCommandIdTestEnv {
     public static class ProjectAggregateRepository
             extends AggregateRepository<ProjectId, ProjectAggregate> { }
 
-    public static class TeamCreationProcessManagerRepository
-            extends ProcessManagerRepository<TeamId, TeamCreationProcessManager, TeamCreation> { }
-
     @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
     public static class TeamAggregateRepository
             extends AggregateRepository<TeamId, TeamAggregate> {
+
         public TeamAggregateRepository() {
             getEventRouting()
                     .route(ProjectCreated.class,
@@ -198,6 +217,28 @@ public class EventRootCommandIdTestEnv {
                            });
         }
     }
+
+    @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
+    public static class TeamCreationRepository
+            extends ProcessManagerRepository<TeamId, TeamCreationProcessManager, TeamCreation> {
+
+        public TeamCreationRepository() {
+            getEventRouting()
+                    .route(InvitationAccepted.class,
+                           new EventRoute<TeamId, InvitationAccepted>() {
+                               private static final long serialVersionUID = 0L;
+
+                               @Override
+                               public Set<TeamId> apply(InvitationAccepted msg, EventContext ctx) {
+                                   return singleton(msg.getInvitation()
+                                                       .getTeamId());
+                               }
+                           });
+        }
+    }
+
+    public static class UserSignUpRepository
+            extends ProcessManagerRepository<UserId, UserSignUpProcessManager, UserSignUp> { }
 
     static class ProjectAggregate extends Aggregate<ProjectId, Project, ProjectVBuilder> {
 
@@ -287,7 +328,7 @@ public class EventRootCommandIdTestEnv {
         TeamMemberAdded on(AddTeamMember command, CommandContext ctx) {
             getBuilder().addMember(command.getMember());
 
-            final TeamMemberAdded event = memberAdded(command);
+            final TeamMemberAdded event = memberAdded(command.getMember());
             return event;
         }
 
@@ -314,10 +355,17 @@ public class EventRootCommandIdTestEnv {
             return event;
         }
 
-        private TeamMemberAdded memberAdded(AddTeamMember command) {
+        @React
+        TeamMemberAdded on(InvitationAccepted event, EventContext ctx) {
+            final Member member = newMember(event.getUserId());
+            final TeamMemberAdded newEvent = memberAdded(member);
+            return newEvent;
+        }
+
+        private TeamMemberAdded memberAdded(Member member) {
             return TeamMemberAdded.newBuilder()
                                   .setTeamId(getId())
-                                  .setMember(command.getMember())
+                                  .setMember(member)
                                   .build();
         }
 
@@ -338,6 +386,33 @@ public class EventRootCommandIdTestEnv {
             return MemberInvitation.newBuilder()
                                    .setEmail(email)
                                    .build();
+        }
+
+        private static Member newMember(UserId userId) {
+            return ((Member.Builder) Sample.builderForType(Member.class))
+                    .setUserId(userId)
+                    .build();
+        }
+    }
+
+    static class UserSignUpProcessManager extends ProcessManager<UserId, UserSignUp, UserSignUpVBuilder> {
+
+        private UserSignUpProcessManager(UserId id) {
+            super(id);
+        }
+
+        @Assign
+        InvitationAccepted on(AcceptInvitation command, CommandContext ctx) {
+            getBuilder().setInvitation(command.getInvitation());
+            final InvitationAccepted event = invitationAccepted(command.getInvitation());
+            return event;
+        }
+
+        private InvitationAccepted invitationAccepted(MemberInvitation invitation) {
+            return InvitationAccepted.newBuilder()
+                                     .setInvitation(invitation)
+                                     .setUserId(getId())
+                                     .build();
         }
     }
 }

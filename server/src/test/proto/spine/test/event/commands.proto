@@ -29,6 +29,7 @@ option java_outer_classname = "EventCommandsProto";
 option java_multiple_files = true;
 
 import "spine/net/email_address.proto";
+import "spine/core/user_id.proto";
 import "spine/test/event/project.proto";
 import "spine/test/event/team.proto";
 
@@ -60,7 +61,7 @@ message CreateTeam {
 
 message AddTeamMember {
     TeamId team_id = 1;
-    
+
     Member member = 2;
 }
 
@@ -68,4 +69,14 @@ message InviteTeamMembers {
     TeamId team_id = 1;
 
     repeated spine.net.EmailAddress email = 2;
+}
+
+message AcceptInvitation {
+    spine.core.UserId user_id = 1;
+
+    MemberInvitation invitation = 2;
+}
+
+message FinishSignUp {
+    spine.core.UserId user_id = 1;
 }

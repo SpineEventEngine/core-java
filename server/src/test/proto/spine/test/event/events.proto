@@ -133,3 +133,13 @@ message TeamMemberInvited {
 
     spine.net.EmailAddress email = 2;
 }
+
+message InvitationAccepted {
+    spine.core.UserId user_id = 1;
+
+    MemberInvitation invitation = 2;
+}
+
+message UserSignedUp {
+    spine.core.UserId user_id = 1;
+}

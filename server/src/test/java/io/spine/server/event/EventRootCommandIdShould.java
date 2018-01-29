@@ -30,7 +30,8 @@ import io.spine.server.BoundedContext;
 import io.spine.server.event.given.EventRootCommandIdTestEnv.ProjectAggregateRepository;
 import io.spine.server.event.given.EventRootCommandIdTestEnv.ResponseObserver;
 import io.spine.server.event.given.EventRootCommandIdTestEnv.TeamAggregateRepository;
-import io.spine.server.event.given.EventRootCommandIdTestEnv.TeamCreationProcessManagerRepository;
+import io.spine.server.event.given.EventRootCommandIdTestEnv.TeamCreationRepository;
+import io.spine.server.event.given.EventRootCommandIdTestEnv.UserSignUpRepository;
 import io.spine.test.event.ProjectId;
 import io.spine.test.event.TeamId;
 import org.junit.After;
@@ -41,6 +42,7 @@ import java.util.List;
 
 import static io.spine.core.Events.getRootCommandId;
 import static io.spine.grpc.StreamObservers.noOpObserver;
+import static io.spine.server.event.given.EventRootCommandIdTestEnv.acceptInvitation;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.addTasks;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.addTeamMember;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.createProject;
@@ -68,11 +70,13 @@ public class EventRootCommandIdShould {
 
         final ProjectAggregateRepository projectRepository = new ProjectAggregateRepository();
         final TeamAggregateRepository teamRepository = new TeamAggregateRepository();
-        final TeamCreationProcessManagerRepository teamCreationRepository = new TeamCreationProcessManagerRepository();
+        final TeamCreationRepository teamCreationRepository = new TeamCreationRepository();
+        final UserSignUpRepository userSignUpRepository = new UserSignUpRepository();
 
         boundedContext.register(projectRepository);
-        boundedContext.register(teamCreationRepository);
         boundedContext.register(teamRepository);
+        boundedContext.register(teamCreationRepository);
+        boundedContext.register(userSignUpRepository);
     }
 
     @After
@@ -149,7 +153,16 @@ public class EventRootCommandIdShould {
 
     @Test
     public void match_the_id_of_an_external_event_handled_by_a_process_manager() {
+        final Command command = command(acceptInvitation(TEAM_ID));
 
+        postCommand(command);
+
+        final List<Event> events = readEvents();
+        // Two events should be created: the `InvitationAccepted` and the `TeamMemberAdded`.
+        assertEquals(2, events.size());
+
+        final Event reaction = events.get(1);
+        assertEquals(command.getId(), getRootCommandId(reaction));
     }
 
     private static Command command(Message message) {
@@ -163,7 +176,7 @@ public class EventRootCommandIdShould {
     }
 
     /**
-     * Reads events from the bounded context event store.
+     * Reads all events from the bounded context event store.
      */
     private List<Event> readEvents() {
         final EventStreamQuery query = newStreamQuery();

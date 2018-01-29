@@ -37,6 +37,8 @@ message TeamId {
 
 message MemberInvitation {
     spine.net.EmailAddress email = 1;
+
+    TeamId team_id = 2;
 }
 
 message Team {
@@ -61,4 +63,10 @@ message TeamCreation {
     repeated Member member = 2;
 
     repeated MemberInvitation invitation = 3;
+}
+
+message UserSignUp {
+    spine.core.UserId user_id = 1;
+
+    MemberInvitation invitation = 2;
 }
