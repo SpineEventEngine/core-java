@@ -27,6 +27,7 @@ option (type_url_prefix) = "type.spine.io";
 option java_package = "io.spine.test.event";
 option java_multiple_files = true;
 
+import "spine/net/email_address.proto";
 import "spine/core/user_id.proto";
 import "spine/test/event/project.proto";
 
@@ -34,9 +35,30 @@ message TeamId {
     string id = 1;
 }
 
+message MemberInvitation {
+    spine.net.EmailAddress email = 1;
+}
+
 message Team {
     TeamId id = 1;
 
-    repeated ProjectId project_id = 3;
+    repeated ProjectId project_id = 2;
+
+    repeated Member member = 3;
+
+    repeated MemberInvitation invitation = 4;
 }
 
+message Member {
+    spine.core.UserId user_id = 1;
+
+    string name = 2;
+}
+
+message TeamCreation {
+    TeamId id = 1;
+
+    repeated Member member = 2;
+
+    repeated MemberInvitation invitation = 3;
+}

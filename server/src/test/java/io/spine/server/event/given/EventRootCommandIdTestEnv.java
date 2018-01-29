@@ -26,12 +26,16 @@ import io.spine.core.CommandContext;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.React;
+import io.spine.net.EmailAddress;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.event.EventStreamQuery;
+import io.spine.server.procman.ProcessManager;
+import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.server.route.EventRoute;
+import io.spine.test.event.MemberInvitation;
 import io.spine.test.event.Project;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.ProjectId;
@@ -39,11 +43,19 @@ import io.spine.test.event.ProjectVBuilder;
 import io.spine.test.event.Task;
 import io.spine.test.event.TaskAdded;
 import io.spine.test.event.Team;
+import io.spine.test.event.TeamCreated;
+import io.spine.test.event.TeamCreation;
+import io.spine.test.event.TeamCreationVBuilder;
 import io.spine.test.event.TeamId;
+import io.spine.test.event.TeamMemberAdded;
+import io.spine.test.event.TeamMemberInvited;
 import io.spine.test.event.TeamProjectAdded;
 import io.spine.test.event.TeamVBuilder;
 import io.spine.test.event.command.AddTasks;
+import io.spine.test.event.command.AddTeamMember;
 import io.spine.test.event.command.CreateProject;
+import io.spine.test.event.command.CreateTeam;
+import io.spine.test.event.command.InviteTeamMembers;
 import io.spine.testdata.Sample;
 
 import java.util.Collection;
@@ -65,13 +77,13 @@ public class EventRootCommandIdTestEnv {
     }
 
     public static ProjectId projectId() {
-        return (ProjectId) Sample.builderForType(ProjectId.class)
-                                 .build();
+        return ((ProjectId.Builder) Sample.builderForType(ProjectId.class))
+                .build();
     }
 
     public static TeamId teamId() {
-        return (TeamId) Sample.builderForType(TeamId.class)
-                              .build();
+        return ((TeamId.Builder) Sample.builderForType(TeamId.class))
+                .build();
     }
 
     public static CreateProject createProject(ProjectId projectId, TeamId teamId) {
@@ -88,17 +100,40 @@ public class EventRootCommandIdTestEnv {
         return createProject(id, teamId());
     }
 
+    public static AddTeamMember addTeamMember(TeamId teamId) {
+        checkNotNull(teamId);
+
+        return ((AddTeamMember.Builder) Sample.builderForType(AddTeamMember.class))
+                .setTeamId(teamId)
+                .build();
+    }
+
+    public static InviteTeamMembers inviteTeamMembers(TeamId teamId, int count) {
+        checkNotNull(teamId);
+
+        final InviteTeamMembers.Builder builder = InviteTeamMembers.newBuilder();
+        for (int i = 0; i < count; i++) {
+            final EmailAddress task = (EmailAddress) Sample.builderForType(EmailAddress.class)
+                                                           .build();
+            builder.addEmail(task);
+        }
+
+        return builder.setTeamId(teamId)
+                      .build();
+    }
+
     public static AddTasks addTasks(ProjectId id, int count) {
         checkNotNull(id);
 
         final AddTasks.Builder builder = AddTasks.newBuilder();
         for (int i = 0; i < count; i++) {
-            final Task task = Task.getDefaultInstance();
+            final Task task = (Task) Sample.builderForType(Task.class)
+                                           .build();
             builder.addTask(task);
         }
-        final AddTasks command = builder.setProjectId(id)
-                                        .build();
-        return command;
+
+        return builder.setProjectId(id)
+                      .build();
     }
 
     public static EventStreamQuery newStreamQuery() {
@@ -144,6 +179,9 @@ public class EventRootCommandIdTestEnv {
     public static class ProjectAggregateRepository
             extends AggregateRepository<ProjectId, ProjectAggregate> { }
 
+    public static class TeamCreationProcessManagerRepository
+            extends ProcessManagerRepository<TeamId, TeamCreationProcessManager, TeamCreation> { }
+
     @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
     public static class TeamAggregateRepository
             extends AggregateRepository<TeamId, TeamAggregate> {
@@ -181,18 +219,17 @@ public class EventRootCommandIdTestEnv {
         }
 
         @Assign
-        ProjectCreated on(CreateProject cmd, CommandContext ctx) {
-            final ProjectCreated event = projectCreated(cmd.getProjectId());
+        ProjectCreated on(CreateProject command, CommandContext ctx) {
+            final ProjectCreated event = projectCreated(command.getProjectId());
             return event;
         }
 
         @Assign
-        List<TaskAdded> on(AddTasks cmd, CommandContext ctx) {
-            final List<Task> tasks = cmd.getTaskList();
+        List<TaskAdded> on(AddTasks command, CommandContext ctx) {
             final ImmutableList.Builder<TaskAdded> events = ImmutableList.builder();
 
-            for (Task task : tasks) {
-                final TaskAdded event = taskAdded(cmd.getProjectId(), task);
+            for (Task task : command.getTaskList()) {
+                final TaskAdded event = taskAdded(command.getProjectId(), task);
                 events.add(event);
             }
 
@@ -221,11 +258,9 @@ public class EventRootCommandIdTestEnv {
         }
 
         @React
-        Iterable<TeamProjectAdded> on(ProjectCreated cmd, EventContext ctx) {
-            final TeamProjectAdded event = TeamProjectAdded.newBuilder()
-                                                           .setProjectId(cmd.getProjectId())
-                                                           .build();
-            return singleton(event);
+        TeamProjectAdded on(ProjectCreated command, EventContext ctx) {
+            final TeamProjectAdded event = projectAdded(command);
+            return event;
         }
 
         @Apply
@@ -233,6 +268,76 @@ public class EventRootCommandIdTestEnv {
             getBuilder()
                     .setId(event.getTeamId())
                     .addProjectId(event.getProjectId());
+        }
+
+        private static TeamProjectAdded projectAdded(ProjectCreated command) {
+            return TeamProjectAdded.newBuilder()
+                                   .setProjectId(command.getProjectId())
+                                   .build();
+        }
+    }
+
+    static class TeamCreationProcessManager extends ProcessManager<TeamId, TeamCreation, TeamCreationVBuilder> {
+
+        private TeamCreationProcessManager(TeamId id) {
+            super(id);
+        }
+
+        @Assign
+        TeamMemberAdded on(AddTeamMember command, CommandContext ctx) {
+            getBuilder().addMember(command.getMember());
+
+            final TeamMemberAdded event = memberAdded(command);
+            return event;
+        }
+
+        @Assign
+        List<TeamMemberInvited> on(InviteTeamMembers command, CommandContext ctx) {
+            final ImmutableList.Builder<TeamMemberInvited> events = ImmutableList.builder();
+
+            for (EmailAddress email : command.getEmailList()) {
+
+                final MemberInvitation invitation = memberInvitation(email);
+                getBuilder().addInvitation(invitation);
+
+                final TeamMemberInvited event = teamMemberInvited(email);
+                events.add(event);
+            }
+
+            return events.build();
+        }
+
+        @Assign
+        TeamCreated on(CreateTeam command, CommandContext ctx) {
+            final TeamCreation result = getBuilder().build();
+            final TeamCreated event = teamCreated(result);
+            return event;
+        }
+
+        private TeamMemberAdded memberAdded(AddTeamMember command) {
+            return TeamMemberAdded.newBuilder()
+                                  .setTeamId(getId())
+                                  .setMember(command.getMember())
+                                  .build();
+        }
+
+        private TeamMemberInvited teamMemberInvited(EmailAddress email) {
+            return TeamMemberInvited.newBuilder()
+                                    .setTeamId(getId())
+                                    .setEmail(email)
+                                    .build();
+        }
+
+        private static TeamCreated teamCreated(TeamCreation result) {
+            return TeamCreated.newBuilder()
+                              .mergeFrom(result)
+                              .build();
+        }
+
+        private static MemberInvitation memberInvitation(EmailAddress email) {
+            return MemberInvitation.newBuilder()
+                                   .setEmail(email)
+                                   .build();
         }
     }
 }

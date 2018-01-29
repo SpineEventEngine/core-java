@@ -24,11 +24,12 @@ package spine.test.event;
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package="io.spine.test.event";
+option java_package = "io.spine.test.event";
 option java_outer_classname = "EventEventsProto";
 option java_multiple_files = true;
 
 import "spine/core/user_id.proto";
+import "spine/net/email_address.proto";
 import "spine/test/event/project.proto";
 import "spine/test/event/team.proto";
 
@@ -111,5 +112,24 @@ message SeparateEnrichmentForMultipleProjectEvents {
 
 message TeamProjectAdded {
     TeamId team_id = 1;
+
     ProjectId project_id = 2;
+}
+
+message TeamCreated {
+    TeamId team_id = 1;
+
+    repeated Member member = 2;
+}
+
+message TeamMemberAdded {
+    TeamId team_id = 1;
+
+    Member member = 2;
+}
+
+message TeamMemberInvited {
+    TeamId team_id = 1;
+
+    spine.net.EmailAddress email = 2;
 }

@@ -30,6 +30,7 @@ import io.spine.server.BoundedContext;
 import io.spine.server.event.given.EventRootCommandIdTestEnv.ProjectAggregateRepository;
 import io.spine.server.event.given.EventRootCommandIdTestEnv.ResponseObserver;
 import io.spine.server.event.given.EventRootCommandIdTestEnv.TeamAggregateRepository;
+import io.spine.server.event.given.EventRootCommandIdTestEnv.TeamCreationProcessManagerRepository;
 import io.spine.test.event.ProjectId;
 import io.spine.test.event.TeamId;
 import org.junit.After;
@@ -41,7 +42,9 @@ import java.util.List;
 import static io.spine.core.Events.getRootCommandId;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.addTasks;
+import static io.spine.server.event.given.EventRootCommandIdTestEnv.addTeamMember;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.createProject;
+import static io.spine.server.event.given.EventRootCommandIdTestEnv.inviteTeamMembers;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.newStreamObserver;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.newStreamQuery;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.projectId;
@@ -62,11 +65,13 @@ public class EventRootCommandIdShould {
     public void setUp() {
         boundedContext = BoundedContext.newBuilder()
                                        .build();
-        
+
         final ProjectAggregateRepository projectRepository = new ProjectAggregateRepository();
         final TeamAggregateRepository teamRepository = new TeamAggregateRepository();
-        
+        final TeamCreationProcessManagerRepository teamCreationRepository = new TeamCreationProcessManagerRepository();
+
         boundedContext.register(projectRepository);
+        boundedContext.register(teamCreationRepository);
         boundedContext.register(teamRepository);
     }
 
@@ -118,12 +123,28 @@ public class EventRootCommandIdShould {
 
     @Test
     public void match_the_id_of_a_command_handled_by_a_process_manager() {
+        final Command command = command(addTeamMember(TEAM_ID));
 
+        postCommand(command);
+
+        final List<Event> events = readEvents();
+        assertEquals(1, events.size());
+
+        final Event event = events.get(0);
+        assertEquals(command.getId(), getRootCommandId(event));
     }
 
     @Test
     public void match_the_id_of_a_command_handled_by_a_process_manager_for_multiple_events() {
+        final Command command = command(inviteTeamMembers(TEAM_ID, 3));
 
+        postCommand(command);
+
+        final List<Event> events = readEvents();
+        assertEquals(3, events.size());
+        assertEquals(command.getId(), getRootCommandId(events.get(0)));
+        assertEquals(command.getId(), getRootCommandId(events.get(1)));
+        assertEquals(command.getId(), getRootCommandId(events.get(2)));
     }
 
     @Test
