@@ -28,6 +28,7 @@ import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.test.TestValues;
+import io.spine.time.Time;
 import org.junit.Test;
 
 import java.util.Iterator;
@@ -135,5 +136,8 @@ public class PairShould {
         reserializeAndAssert(Pair.of(a, b));
         reserializeAndAssert(Pair.withNullable(a, b));
         reserializeAndAssert(Pair.withNullable(a, null));
+
+        reserializeAndAssert(Pair.withEither(a, EitherOfTwo.withA(Time.getCurrentTime())));
+        reserializeAndAssert(Pair.withEither(a, EitherOfTwo.withB(TestValues.newUuidValue())));
     }
 }

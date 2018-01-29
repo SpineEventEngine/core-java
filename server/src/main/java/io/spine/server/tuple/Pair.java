@@ -28,6 +28,7 @@ import io.spine.server.tuple.Element.BValue;
 import javax.annotation.Nullable;
 
 import static com.google.common.base.Optional.fromNullable;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.tuple.Element.value;
 
 /**
@@ -67,6 +68,16 @@ public final class Pair<A extends Message, B>
         checkNotNullOrEmpty(Pair.class, a);
         checkNotEmpty(Pair.class, b);
         final Pair<A, Optional<B>> result = new Pair<>(a, fromNullable(b));
+        return result;
+    }
+
+    /**
+     * Creates a pair with the second element of a type descending from {@link Either}.
+     */
+    public static <A extends Message, B extends Either> Pair<A, B> withEither(A a, B b) {
+        checkNotNullOrEmpty(Pair.class, a);
+        checkNotNull(b);
+        final Pair<A, B> result = new Pair<>(a, b);
         return result;
     }
 
