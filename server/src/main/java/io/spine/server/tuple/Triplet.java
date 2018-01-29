@@ -41,7 +41,7 @@ import static io.spine.server.tuple.Tuple.GetElement.value;
  *
  * @author Alexander Yevsyukov
  */
-public class Triplet<A extends Message, B, C>
+public final class Triplet<A extends Message, B, C>
         extends Tuple
         implements AValue<A>, BValue<B>, CValue<C> {
 

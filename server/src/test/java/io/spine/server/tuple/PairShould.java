@@ -22,13 +22,13 @@ package io.spine.server.tuple;
 
 import com.google.common.base.Optional;
 import com.google.common.testing.EqualsTester;
+import com.google.common.testing.NullPointerTester;
 import com.google.common.testing.SerializableTester;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.test.TestValues;
-import io.spine.test.Tests;
 import org.junit.Test;
 
 import java.util.Iterator;
@@ -42,14 +42,10 @@ import static org.junit.Assert.assertFalse;
 @SuppressWarnings("LocalVariableNamingConvention") // OK for tuple element values
 public class PairShould {
 
-    @Test(expected = NullPointerException.class)
-    public void prohibit_null_A_value() {
-        Pair.of(Tests.<BoolValue>nullRef(), TestValues.newUuidValue());
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void prohibit_null_B_value() {
-        Pair.of(TestValues.newUuidValue(), Tests.<BoolValue>nullRef());
+    @Test
+    public void pass_null_tolerance_check() {
+        new NullPointerTester().setDefault(Message.class, TestValues.newUuidValue())
+                               .testAllPublicStaticMethods(Pair.class);
     }
 
     @Test
