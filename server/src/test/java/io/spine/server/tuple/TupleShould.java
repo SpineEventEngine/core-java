@@ -23,38 +23,55 @@ package io.spine.server.tuple;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
+import com.google.protobuf.StringValue;
+import com.google.protobuf.Timestamp;
 import io.spine.server.tuple.Element.AValue;
 import io.spine.server.tuple.Element.BValue;
-import io.spine.test.Tests;
+import io.spine.test.TestValues;
+import io.spine.time.Time;
+import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Iterator;
+
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 /**
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings("LocalVariableNamingConvention") // OK for tuple entry values
+@SuppressWarnings({"LocalVariableNamingConvention", "FieldNamingConvention"})
+// OK for tuple entry values
 public class TupleShould {
 
-    @Test
-    public void have_utility_GetElement_class() {
-        Tests.assertHasPrivateParameterlessCtor(Tuple.GetElement.class);
+    private final StringValue a = TestValues.newUuidValue();
+    private final EitherOfTwo<Timestamp, BoolValue> b = EitherOfTwo.withA(Time.getCurrentTime());
+
+    private TTuple<StringValue, EitherOfTwo<Timestamp, BoolValue>> tuple;
+
+    @Before
+    public void setUp() {
+        tuple = new TTuple<>(a, b);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void prohibit_Empty_values() {
+        new TTuple<>(TestValues.newUuidValue(), Empty.getDefaultInstance());
     }
 
     @Test
-    public void allow_empty_value() {
-        final Empty a = Empty.getDefaultInstance();
-        final BoolValue b = BoolValue.of(true);
-
-        final TTuple<Empty, BoolValue> tuple = new TTuple<>(a, b);
-
+    public void allow_Either_argument() {
         assertEquals(a, tuple.getA());
         assertEquals(b, tuple.getB());
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void prohibit_all_Empty_instances() {
-        new TTuple<>(Empty.getDefaultInstance(), Empty.getDefaultInstance());
+    @Test
+    public void return_value_from_Either_on_iteration() {
+        final Iterator<Message> iterator = tuple.iterator();
+
+        assertEquals(a, iterator.next());
+        assertEquals(b.getA(), iterator.next());
+        assertFalse(iterator.hasNext());
     }
 
     /**

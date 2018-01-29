@@ -27,7 +27,7 @@ import io.spine.server.tuple.Element.BValue;
 
 import javax.annotation.Nullable;
 
-import static io.spine.server.tuple.Tuple.GetElement.value;
+import static io.spine.server.tuple.Element.value;
 
 /**
  * A tuple with two elements.

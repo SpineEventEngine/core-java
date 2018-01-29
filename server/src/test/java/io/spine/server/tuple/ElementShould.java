@@ -20,8 +20,13 @@
 
 package io.spine.server.tuple;
 
-import io.spine.test.Tests;
+import com.google.common.base.Optional;
+import com.google.common.testing.EqualsTester;
+import io.spine.test.TestValues;
+import io.spine.time.Time;
 import org.junit.Test;
+
+import static com.google.common.testing.SerializableTester.reserializeAndAssert;
 
 /**
  * @author Alexander Yevsyukov
@@ -29,7 +34,23 @@ import org.junit.Test;
 public class ElementShould {
 
     @Test
-    public void have_private_ctor() {
-        Tests.assertHasPrivateParameterlessCtor(Element.class);
+    public void support_equality() {
+        new EqualsTester().addEqualityGroup(new Element(Time.getCurrentTime()),
+                                            new Element(Time.getCurrentTime()))
+                          .addEqualityGroup(new Element(TestValues.newUuidValue()))
+                          .addEqualityGroup(new Element(Optional.absent()))
+                          .testEquals();
+    }
+
+    @Test
+    public void serialize() {
+        reserializeAndAssert(new Element(Time.getCurrentTime()));
+        reserializeAndAssert(new Element(Optional.of(Time.getCurrentTime())));
+        reserializeAndAssert(new Element(Optional.absent()));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void restrict_possible_value_types() {
+        new Element(getClass());
     }
 }
