@@ -125,6 +125,16 @@ public class EitherOfThreeShould {
         eitherWithB.getC();
     }
 
+    @Test(expected = IllegalStateException.class)
+    public void prohibit_obtaining_the_other_value_C_A() {
+        eitherWithC.getA();
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void prohibit_obtaining_the_other_value_C_B() {
+        eitherWithC.getB();
+    }
+
     @Test
     public void serialize() {
         SerializableTester.reserializeAndAssert(eitherWithA);
