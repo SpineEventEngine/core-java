@@ -54,6 +54,9 @@ public final class Quartet<A extends Message, B, C, D>
         super(a, b, c, d);
     }
 
+    /**
+     * Creates a quartet with all values present.
+     */
     public static <A extends Message, B extends Message, C extends Message, D extends Message>
     Quartet<A, B, C, D> of(A a, B b, C c, D d) {
         checkAllAreNotNullOrEmpty(Quartet.class, a, b, c, d);
@@ -61,12 +64,38 @@ public final class Quartet<A extends Message, B, C, D>
         return result;
     }
 
+    /**
+     * Creates a quartet with one optional value.
+     */
     public static <A extends Message, B extends Message, C extends Message, D extends Message>
-    Quartet<A, Optional<B>, Optional<C>, Optional<D>> withNullable(A a,
-                                                                   @Nullable B b,
-                                                                   @Nullable C c,
-                                                                   @Nullable D d) {
-        checkNotNullOrEmpty(Triplet.class, a);
+    Quartet<A, B, C, Optional<D>> withNullable(A a, B b, C c, @Nullable D d) {
+        checkAllAreNotNullOrEmpty(Quartet.class, a, b, c);
+        checkNotEmpty(Quartet.class, d);
+        final Quartet<A, B, C, Optional<D>> result = new Quartet<>(a, b, c, fromNullable(d));
+        return result;
+    }
+
+    /**
+     * Creates a quartet with two optional values.
+     */
+    public static <A extends Message, B extends Message, C extends Message, D extends Message>
+    Quartet<A, B, Optional<C>, Optional<D>> withNullable2(A a, B b, @Nullable C c, @Nullable D d) {
+        checkAllAreNotNullOrEmpty(Quartet.class, a, b);
+        checkAllNotEmpty(Quartet.class, c, d);
+        final Quartet<A, B, Optional<C>, Optional<D>> result =
+                new Quartet<>(a, b, fromNullable(c), fromNullable(d));
+        return result;
+    }
+
+    /**
+     * Creates a quartet with three optional values.
+     */
+    public static <A extends Message, B extends Message, C extends Message, D extends Message>
+    Quartet<A, Optional<B>, Optional<C>, Optional<D>> withNullable3(A a,
+                                                                    @Nullable B b,
+                                                                    @Nullable C c,
+                                                                    @Nullable D d) {
+        checkNotNullOrEmpty(Quartet.class, a);
         checkAllNotEmpty(Quartet.class, b, c, d);
         final Quartet<A, Optional<B>, Optional<C>, Optional<D>> result =
                 new Quartet<>(a, fromNullable(b), fromNullable(c), fromNullable(d));
