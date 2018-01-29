@@ -1,5 +1,5 @@
 /*
- * Copyright 2017, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -62,7 +62,8 @@ public final class Queries {
     /**
      * Extract the type of {@link Target} for the given {@link Query}.
      *
-     * <p>Returns null if the {@code Target} type is unknown to the application.
+     * <p>Throws an {@link IllegalStateException} if the {@code Target} type is unknown to
+     * the application.
      *
      * @param query the query of interest.
      * @return the URL of the type of the query {@linkplain Query#getTarget() target}
