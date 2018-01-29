@@ -59,7 +59,7 @@ public final class Quartet<A extends Message, B, C, D>
      */
     public static <A extends Message, B extends Message, C extends Message, D extends Message>
     Quartet<A, B, C, D> of(A a, B b, C c, D d) {
-        checkAllAreNotNullOrEmpty(Quartet.class, a, b, c, d);
+        checkAllNotNullOrEmpty(Quartet.class, a, b, c, d);
         final Quartet<A, B, C, D> result = new Quartet<>(a, b, c, d);
         return result;
     }
@@ -69,7 +69,7 @@ public final class Quartet<A extends Message, B, C, D>
      */
     public static <A extends Message, B extends Message, C extends Message, D extends Message>
     Quartet<A, B, C, Optional<D>> withNullable(A a, B b, C c, @Nullable D d) {
-        checkAllAreNotNullOrEmpty(Quartet.class, a, b, c);
+        checkAllNotNullOrEmpty(Quartet.class, a, b, c);
         checkNotEmpty(Quartet.class, d);
         final Quartet<A, B, C, Optional<D>> result = new Quartet<>(a, b, c, fromNullable(d));
         return result;
@@ -80,7 +80,7 @@ public final class Quartet<A extends Message, B, C, D>
      */
     public static <A extends Message, B extends Message, C extends Message, D extends Message>
     Quartet<A, B, Optional<C>, Optional<D>> withNullable2(A a, B b, @Nullable C c, @Nullable D d) {
-        checkAllAreNotNullOrEmpty(Quartet.class, a, b);
+        checkAllNotNullOrEmpty(Quartet.class, a, b);
         checkAllNotEmpty(Quartet.class, c, d);
         final Quartet<A, B, Optional<C>, Optional<D>> result =
                 new Quartet<>(a, b, fromNullable(c), fromNullable(d));

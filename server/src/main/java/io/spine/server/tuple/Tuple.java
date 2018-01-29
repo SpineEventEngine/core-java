@@ -104,7 +104,7 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
     }
 
     static <T extends Tuple>
-    void checkAllAreNotNullOrEmpty(Class<T> checkingClass, Message... values) {
+    void checkAllNotNullOrEmpty(Class<T> checkingClass, Message... values) {
         for (Message value : values) {
             checkNotNullOrEmpty(checkingClass, value);
         }
