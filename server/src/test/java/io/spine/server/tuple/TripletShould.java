@@ -23,7 +23,6 @@ package io.spine.server.tuple;
 import com.google.common.base.Optional;
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
-import com.google.common.testing.SerializableTester;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
@@ -36,6 +35,7 @@ import org.junit.Test;
 
 import java.util.Iterator;
 
+import static com.google.common.testing.SerializableTester.reserializeAndAssert;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
@@ -156,9 +156,9 @@ public class TripletShould {
 
     @Test
     public void serialize() {
-        SerializableTester.reserializeAndAssert(Triplet.of(a, b, c));
-        SerializableTester.reserializeAndAssert(Triplet.withNullable(a, null, null));
-        SerializableTester.reserializeAndAssert(Triplet.withNullable(a, b, null));
-        SerializableTester.reserializeAndAssert(Triplet.withNullable(a, null, c));
+        reserializeAndAssert(Triplet.of(a, b, c));
+        reserializeAndAssert(Triplet.withNullable(a, null, null));
+        reserializeAndAssert(Triplet.withNullable(a, b, null));
+        reserializeAndAssert(Triplet.withNullable(a, null, c));
     }
 }

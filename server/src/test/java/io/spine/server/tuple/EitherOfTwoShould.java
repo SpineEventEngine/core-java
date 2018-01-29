@@ -22,7 +22,6 @@ package io.spine.server.tuple;
 
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
-import com.google.common.testing.SerializableTester;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
@@ -33,6 +32,7 @@ import org.junit.Test;
 
 import java.util.Iterator;
 
+import static com.google.common.testing.SerializableTester.reserializeAndAssert;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
@@ -103,7 +103,7 @@ public class EitherOfTwoShould {
 
     @Test
     public void serialize() {
-        SerializableTester.reserializeAndAssert(eitherWithA);
-        SerializableTester.reserializeAndAssert(eitherWithB);
+        reserializeAndAssert(eitherWithA);
+        reserializeAndAssert(eitherWithB);
     }
 }
