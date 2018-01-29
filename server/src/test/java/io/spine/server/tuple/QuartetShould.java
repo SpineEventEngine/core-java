@@ -97,7 +97,9 @@ public class QuartetShould {
     public void support_equality() {
         new EqualsTester().addEqualityGroup(Quartet.of(monkey, donkey, goat, bear),
                                             Quartet.of(monkey, donkey, goat, bear))
-                          
+
+                          .addEqualityGroup(Quartet.of(bear, donkey, monkey, goat))
+
                           .addEqualityGroup(Quartet.withNullable(monkey, donkey, goat, bear))
                           .addEqualityGroup(Quartet.withNullable(monkey, donkey, goat, null))
 
