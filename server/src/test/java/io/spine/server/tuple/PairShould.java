@@ -46,6 +46,7 @@ public class PairShould {
     @Test
     public void pass_null_tolerance_check() {
         new NullPointerTester().setDefault(Message.class, TestValues.newUuidValue())
+                               .setDefault(Either.class, EitherOfTwo.withB(Time.getCurrentTime()))
                                .testAllPublicStaticMethods(Pair.class);
     }
 
