@@ -19,7 +19,7 @@
 //
 syntax = "proto3";
 
-package spine.test.tuple;
+package spine.test.tuple.quartet;
 
 import "spine/options.proto";
 
