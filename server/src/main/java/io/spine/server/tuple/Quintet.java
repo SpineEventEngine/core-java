@@ -20,6 +20,7 @@
 
 package io.spine.server.tuple;
 
+import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import io.spine.server.tuple.Element.AValue;
 import io.spine.server.tuple.Element.BValue;
@@ -27,6 +28,9 @@ import io.spine.server.tuple.Element.CValue;
 import io.spine.server.tuple.Element.DValue;
 import io.spine.server.tuple.Element.EValue;
 
+import javax.annotation.Nullable;
+
+import static com.google.common.base.Optional.fromNullable;
 import static io.spine.server.tuple.Element.value;
 
 /**
@@ -64,6 +68,61 @@ public final class Quintet<A extends Message, B, C, D, E>
     Quintet<A, B, C, D, E> of(A a, B b, C c, D d, E e) {
         checkAllNotNullOrEmpty(Quintet.class, a, b, c, d, e);
         final Quintet<A, B, C, D, E> result = new Quintet<>(a, b, c, d, e);
+        return result;
+    }
+
+    /**
+     * Creates a quintet with one optional value.
+     */
+    public static
+    <A extends Message, B extends Message, C extends Message, D extends Message, E extends Message>
+    Quintet<A, B, C, D, Optional<E>>
+    withNullable(A a, B b, C c, D d, @Nullable E e) {
+        checkAllNotNullOrEmpty(Quintet.class, a, b, c, d);
+        checkNotEmpty(Quintet.class, e);
+        final Quintet<A, B, C, D, Optional<E>> result = new Quintet<>(a, b, c, d, fromNullable(e));
+        return result;
+    }
+
+    /**
+     * Creates a quintet with two optional values.
+     */
+    public static
+    <A extends Message, B extends Message, C extends Message, D extends Message, E extends Message>
+    Quintet<A, B, C, Optional<D>, Optional<E>>
+    withNullable2(A a, B b, C c, @Nullable D d, @Nullable E e) {
+        checkAllNotNullOrEmpty(Quintet.class, a, b, c);
+        checkAllNotEmpty(Quintet.class, e, d);
+        final Quintet<A, B, C, Optional<D>, Optional<E>> result =
+                new Quintet<>(a, b, c, fromNullable(d), fromNullable(e));
+        return result;
+    }
+
+    /**
+     * Creates a quintet with three optional values.
+     */
+    public static
+    <A extends Message, B extends Message, C extends Message, D extends Message, E extends Message>
+    Quintet<A, B, Optional<C>, Optional<D>, Optional<E>>
+    withNullable3(A a, B b, @Nullable C c, @Nullable D d, @Nullable E e) {
+        checkAllNotNullOrEmpty(Quintet.class, a, b);
+        checkAllNotEmpty(Quintet.class, c, d, e);
+        final Quintet<A, B, Optional<C>, Optional<D>, Optional<E>> result =
+                new Quintet<>(a, b, fromNullable(c), fromNullable(d), fromNullable(e));
+        return result;
+    }
+
+    /**
+     * Creates a quintet with four optional values.
+     */
+    public static
+    <A extends Message, B extends Message, C extends Message, D extends Message, E extends Message>
+    Quintet<A, Optional<B>, Optional<C>, Optional<D>, Optional<E>>
+    withNullable4(A a, @Nullable B b, @Nullable C c, @Nullable D d, @Nullable E e) {
+        checkNotNullOrEmpty(Quintet.class, a);
+        checkAllNotEmpty(Quintet.class, b, c, d, e);
+        final Quintet<A, Optional<B>, Optional<C>, Optional<D>, Optional<E>> result =
+                new Quintet<>(a, fromNullable(b), fromNullable(c), fromNullable(d), fromNullable(e));
         return result;
     }
 

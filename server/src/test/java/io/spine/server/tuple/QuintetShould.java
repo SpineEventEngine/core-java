@@ -67,6 +67,22 @@ public class QuintetShould {
     public void serialize() {
         reserializeAndAssert(celloQuintet);
         reserializeAndAssert(violaQuintet);
+
+        reserializeAndAssert(
+                Quintet.withNullable(newViola(), newViola(), newViola(), newViola(), null)
+        );
+
+        reserializeAndAssert(
+                Quintet.withNullable2(newViola(), newViola(), newViola(), null, null)
+        );
+
+        reserializeAndAssert(
+                Quintet.withNullable3(newViola(), newViola(), null, null, null)
+        );
+
+        reserializeAndAssert(
+                Quintet.withNullable4(newViola(), null, null, null, null)
+        );
     }
 
     @Test
