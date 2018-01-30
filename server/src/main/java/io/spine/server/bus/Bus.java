@@ -142,7 +142,7 @@ public abstract class Bus<T extends Message,
 
         final Iterable<T> filteredMessages = filter(messages, observer);
         if (!isEmpty(filteredMessages)) {
-            store(filteredMessages);
+            store(messages);
             final Iterable<E> envelopes = transform(filteredMessages, toEnvelope());
             doPost(envelopes, observer);
         }
