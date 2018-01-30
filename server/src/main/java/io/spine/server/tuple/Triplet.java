@@ -63,7 +63,7 @@ public final class Triplet<A extends Message, B, C>
     }
 
     /**
-     * Creates a triplet with last element optional.
+     * Creates a triplet with the last element optional.
      */
     public static <A extends Message, B extends Message, C extends Message>
     Triplet<A, B, Optional<C>> withNullable(A a, B b, @Nullable C c) {
