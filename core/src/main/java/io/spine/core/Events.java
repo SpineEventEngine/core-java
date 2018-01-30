@@ -163,7 +163,10 @@ public final class Events {
     }
 
     /**
-     * Obtains origin ID of the Event — the id of the original message that spawned this event.
+     * Obtains the ID of the root command, which lead to this event.
+     * 
+     * <p> In case the passed {@code Event} instance is a reaction to another {@code Event}, 
+     * the identifier of the very first command in this chain is returned.
      *
      * @param event the event to get the origin ID for
      * @param <I>   the type of the origin ID
