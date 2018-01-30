@@ -32,8 +32,6 @@ import io.spine.server.event.given.EventRootCommandIdTestEnv.ResponseObserver;
 import io.spine.server.event.given.EventRootCommandIdTestEnv.TeamAggregateRepository;
 import io.spine.server.event.given.EventRootCommandIdTestEnv.TeamCreationRepository;
 import io.spine.server.event.given.EventRootCommandIdTestEnv.UserSignUpRepository;
-import io.spine.test.event.ProjectId;
-import io.spine.test.event.TeamId;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -61,9 +59,6 @@ public class EventRootCommandIdShould {
     private static final TestActorRequestFactory requestFactory =
             TestActorRequestFactory.newInstance(EventRootCommandIdShould.class);
 
-    private static final ProjectId PROJECT_ID = projectId();
-    private static final TeamId TEAM_ID = teamId();
-
     private BoundedContext boundedContext;
 
     @Before
@@ -89,7 +84,7 @@ public class EventRootCommandIdShould {
 
     @Test
     public void match_the_id_of_a_command_handled_by_an_aggregate() {
-        final Command command = command(createProject(PROJECT_ID, TEAM_ID));
+        final Command command = command(createProject(projectId(), teamId()));
 
         postCommand(command);
 
@@ -103,7 +98,7 @@ public class EventRootCommandIdShould {
 
     @Test
     public void match_the_id_of_a_command_handled_by_an_aggregate_for_multiple_events() {
-        final Command command = command(addTasks(PROJECT_ID, 3));
+        final Command command = command(addTasks(projectId(), 3));
 
         postCommand(command);
 
@@ -116,7 +111,7 @@ public class EventRootCommandIdShould {
 
     @Test
     public void match_the_id_of_an_external_event_handled_by_an_aggregate() {
-        final Command command = command(createProject(PROJECT_ID, TEAM_ID));
+        final Command command = command(createProject(projectId(), teamId()));
 
         postCommand(command);
 
@@ -130,7 +125,7 @@ public class EventRootCommandIdShould {
 
     @Test
     public void match_the_id_of_a_command_handled_by_a_process_manager() {
-        final Command command = command(addTeamMember(TEAM_ID));
+        final Command command = command(addTeamMember(teamId()));
 
         postCommand(command);
 
@@ -143,7 +138,7 @@ public class EventRootCommandIdShould {
 
     @Test
     public void match_the_id_of_a_command_handled_by_a_process_manager_for_multiple_events() {
-        final Command command = command(inviteTeamMembers(TEAM_ID, 3));
+        final Command command = command(inviteTeamMembers(teamId(), 3));
 
         postCommand(command);
 
@@ -156,7 +151,7 @@ public class EventRootCommandIdShould {
 
     @Test
     public void match_the_id_of_an_external_event_handled_by_a_process_manager() {
-        final Command command = command(acceptInvitation(TEAM_ID));
+        final Command command = command(acceptInvitation(teamId()));
 
         postCommand(command);
 
