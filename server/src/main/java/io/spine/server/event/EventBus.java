@@ -130,11 +130,12 @@ public class EventBus
     private EventBus(Builder builder) {
         super(checkNotNull(builder.dispatcherEventDelivery));
         this.eventStore = builder.eventStore;
-        this.deadMessageHandler = newDeadEventTap();
         this.enricher = builder.enricher;
         this.eventMessageValidator = builder.eventValidator;
         this.filterChain = builder.getFilters();
         this.streamObserver = LoggingObserver.forClass(getClass(), builder.logLevelForPost);
+
+        this.deadMessageHandler = new DeadEventTap();
     }
 
     /** Creates a builder for new {@code EventBus}. */
@@ -155,27 +156,6 @@ public class EventBus
     @Override
     protected DeadMessageTap<EventEnvelope> getDeadMessageHandler() {
         return deadMessageHandler;
-    }
-
-    /**
-     * Creates a {@link DeadMessageTap} instance to handle a dead event by producing an 
-     * {@link UnsupportedEventException}, and saving the event to the Event Store.
-     *
-     * <p>An event gets into this tap if it does not pass the {@link io.spine.server.bus.DeadMessageFilter}.
-     * Although, this stops the Event Bus from handling the event, it still must be added to the Event Store.
-     */
-    private DeadMessageTap<EventEnvelope> newDeadEventTap() {
-        return new DeadMessageTap<EventEnvelope>() {
-            @Override
-            public MessageUnhandled capture(EventEnvelope envelope) {
-
-                final Event event = envelope.getOuterObject();
-                store(of(event));
-
-                final Message message = envelope.getMessage();
-                return new UnsupportedEventException(message);
-            }
-        };
     }
 
     @Override
@@ -527,6 +507,25 @@ public class EventBus
         @Override
         protected Builder self() {
             return this;
+        }
+    }
+
+    /**
+     * Handles a dead event by saving the event to the {@link EventStore} and producing an 
+     * {@link UnsupportedEventException}.
+     *
+     * <p>We must store dead events, as they are still emitted by some entity and therefore are 
+     * a part of the history for the current bounded context.
+     */
+    private class DeadEventTap implements DeadMessageTap<EventEnvelope> {
+        @Override
+        public MessageUnhandled capture(EventEnvelope envelope) {
+
+            final Event event = envelope.getOuterObject();
+            store(of(event));
+
+            final Message message = envelope.getMessage();
+            return new UnsupportedEventException(message);
         }
     }
 }
