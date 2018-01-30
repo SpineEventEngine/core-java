@@ -32,6 +32,14 @@ import io.spine.validate.Validate;
 import org.junit.Test;
 
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
+import static io.spine.server.tuple.QuintetShould.InstrumentFactory.newViola;
+import static io.spine.server.tuple.QuintetShould.InstrumentFactory.newViolin;
+import static io.spine.server.tuple.QuintetShould.InstrumentFactory.newViolinCello;
+import static io.spine.server.tuple.QuintetShould.QuintetFactory.NUM_1;
+import static io.spine.server.tuple.QuintetShould.QuintetFactory.NUM_2;
+import static io.spine.server.tuple.QuintetShould.QuintetFactory.newCelloQuintet;
+import static io.spine.server.tuple.QuintetShould.QuintetFactory.newViolaQuintet;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Tests {@link Quintet} tuple.
@@ -45,15 +53,13 @@ import static com.google.common.testing.SerializableTester.reserializeAndAssert;
  */
 public class QuintetShould {
 
-    private final Quintet celloQuintet = QuintetFactory.newCelloQuintet();
-    private final Quintet violaQuintet = QuintetFactory.newViolaQuintet();
+    private final Quintet celloQuintet = newCelloQuintet();
+    private final Quintet violaQuintet = newViolaQuintet();
 
     @Test
     public void pass_null_tolerance_check() {
-        new NullPointerTester().setDefault(Message.class,
-                                           InstrumentFactory.newViola())
-                               .setDefault(Optional.class,
-                                           Optional.of(InstrumentFactory.newViolinCello()))
+        new NullPointerTester().setDefault(Message.class, newViola())
+                               .setDefault(Optional.class, Optional.of(newViolinCello()))
                                .testAllPublicStaticMethods(Quintet.class);
     }
 
@@ -65,10 +71,18 @@ public class QuintetShould {
 
     @Test
     public void support_equality() {
-        new EqualsTester().addEqualityGroup(QuintetFactory.newCelloQuintet(),
-                                            QuintetFactory.newCelloQuintet())
-                          .addEqualityGroup(QuintetFactory.newViolaQuintet())
+        new EqualsTester().addEqualityGroup(newCelloQuintet(), newCelloQuintet())
+                          .addEqualityGroup(newViolaQuintet())
                           .testEquals();
+    }
+
+    @Test
+    public void return_elements() {
+        assertEquals(newViolin(NUM_1), celloQuintet.getA());
+        assertEquals(newViolin(NUM_2), celloQuintet.getB());
+        assertEquals(newViola(), celloQuintet.getC());
+        assertEquals(newViolinCello(NUM_1), celloQuintet.getD());
+        assertEquals(newViolinCello(NUM_2), celloQuintet.getE());
     }
 
     /*
@@ -78,47 +92,47 @@ public class QuintetShould {
     /**
      * Creates typical <a href="https://en.wikipedia.org/wiki/String_quintet">String quintets</a>.
      */
-    private static class QuintetFactory {
+    static class QuintetFactory {
 
-        private static final InstrumentNumber NUM_1 = InstrumentNumber.newBuilder()
-                                                                      .setValue(1)
-                                                                      .build();
+        static final InstrumentNumber NUM_1 = InstrumentNumber.newBuilder()
+                                                              .setValue(1)
+                                                              .build();
 
-        private static final InstrumentNumber NUM_2 = InstrumentNumber.newBuilder()
-                                                                      .setValue(2)
-                                                                      .build();
+        static final InstrumentNumber NUM_2 = InstrumentNumber.newBuilder()
+                                                              .setValue(2)
+                                                              .build();
 
         /** Prevents instantiation of this utility class. */
         private QuintetFactory() {
         }
 
         static Quintet<Violin, Violin, Viola, ViolinCello, ViolinCello> newCelloQuintet() {
-            return Quintet.of(InstrumentFactory.newViolin(NUM_1),
-                              InstrumentFactory.newViolin(NUM_2),
-                              InstrumentFactory.newViola(),
-                              InstrumentFactory.newViolinCello(NUM_1),
-                              InstrumentFactory.newViolinCello(NUM_2));
+            return Quintet.of(newViolin(NUM_1),
+                              newViolin(NUM_2),
+                              newViola(),
+                              newViolinCello(NUM_1),
+                              newViolinCello(NUM_2));
         }
 
         static Quintet<Violin, Violin, Viola, Viola, ViolinCello> newViolaQuintet() {
-            return Quintet.of(InstrumentFactory.newViolin(NUM_1),
-                              InstrumentFactory.newViolin(NUM_2),
-                              InstrumentFactory.newViola(NUM_1),
-                              InstrumentFactory.newViola(NUM_2),
-                              InstrumentFactory.newViolinCello());
+            return Quintet.of(newViolin(NUM_1),
+                              newViolin(NUM_2),
+                              newViola(NUM_1),
+                              newViola(NUM_2),
+                              newViolinCello());
         }
     }
 
     /**
      * Creates instruments.
      */
-    private static class InstrumentFactory {
+    static class InstrumentFactory {
 
         /** Prevents instantiation of this utility class. */
         private InstrumentFactory() {
         }
 
-        private static Violin newViolin(InstrumentNumber number) {
+        static Violin newViolin(InstrumentNumber number) {
             final Violin result = Violin.newBuilder()
                                         .setNumber(number)
                                         .build();
@@ -126,7 +140,7 @@ public class QuintetShould {
             return result;
         }
 
-        private static Viola newViola() {
+        static Viola newViola() {
             final Viola result = Viola.newBuilder()
                                       .setSingle(true)
                                       .build();
@@ -134,7 +148,7 @@ public class QuintetShould {
             return result;
         }
 
-        private static Viola newViola(InstrumentNumber number) {
+        static Viola newViola(InstrumentNumber number) {
             final Viola result = Viola.newBuilder()
                                       .setNumber(number)
                                       .build();
@@ -142,7 +156,7 @@ public class QuintetShould {
             return result;
         }
 
-        private static ViolinCello newViolinCello(InstrumentNumber number) {
+        static ViolinCello newViolinCello(InstrumentNumber number) {
             final ViolinCello result = ViolinCello.newBuilder()
                                                   .setNumber(number)
                                                   .build();
@@ -150,7 +164,7 @@ public class QuintetShould {
             return result;
         }
 
-        private static ViolinCello newViolinCello() {
+        static ViolinCello newViolinCello() {
             final ViolinCello result = ViolinCello.newBuilder()
                                                   .setSingle(true)
                                                   .build();
