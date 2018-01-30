@@ -22,6 +22,7 @@ package io.spine.server.event.given;
 
 import io.spine.core.Event;
 import io.spine.server.command.TestEventFactory;
+import io.spine.server.event.EventStreamQuery;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.ProjectId;
 import io.spine.test.event.ProjectStarted;
@@ -37,6 +38,15 @@ public class EventBusTestEnv {
     private static final ProjectId PROJECT_ID = ProjectId.newBuilder()
                                                          .setId(newUuid())
                                                          .build();
+
+
+    /**
+     * Creates a new {@link EventStreamQuery} without any filters.
+     */
+    public static EventStreamQuery allEventsQuery() {
+        return EventStreamQuery.newBuilder()
+                               .build();
+    }
 
     private EventBusTestEnv() {}
 

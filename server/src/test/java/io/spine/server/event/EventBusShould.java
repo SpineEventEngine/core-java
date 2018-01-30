@@ -30,6 +30,8 @@ import io.spine.core.EventEnvelope;
 import io.spine.core.EventId;
 import io.spine.core.Events;
 import io.spine.core.Subscribe;
+import io.spine.grpc.MemoizingObserver;
+import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.delivery.Consumers;
@@ -43,6 +45,7 @@ import org.junit.Test;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
@@ -51,7 +54,10 @@ import java.util.concurrent.Executors;
 
 import static com.google.common.collect.Maps.newHashMap;
 import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.BoundedContext.newName;
+import static io.spine.server.event.given.EventBusTestEnv.allEventsQuery;
+import static io.spine.test.Verify.assertSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -79,7 +85,7 @@ public class EventBusShould {
 
     private void setUp(@Nullable EventEnricher enricher) {
         final BoundedContext bc = BoundedContext.newBuilder()
-                                                .setMultitenant(true)
+                                                .setMultitenant(false)
                                                 .build();
         this.storageFactory = bc.getStorageFactory();
         /**
@@ -353,6 +359,54 @@ public class EventBusShould {
         final EnvelopeValidator<EventEnvelope> validator = eventBus.getValidator();
         assertNotNull(validator);
         assertSame(validator, eventBus.getValidator());
+    }
+
+    @Test
+    public void store_a_valid_event_which_is_not_dead() {
+        final Event event = GivenEvent.projectCreated();
+        final ProjectCreatedSubscriber subscriber = new ProjectCreatedSubscriber();
+
+        eventBus.register(subscriber);
+        eventBus.post(event);
+
+        final List<Event> events = readEvents();
+        final Event storedEvent = events.get(0);
+        assertSize(1, events);
+        assertEquals(subscriber.getEventMessage(), unpack(storedEvent.getMessage()));
+    }
+
+    @Test
+    public void store_a_dead_event() {
+        final Event event = GivenEvent.projectCreated();
+
+        eventBus.post(event);
+
+        final List<Event> events = readEvents();
+        assertSize(1, events);
+    }
+
+    @Test
+    public void not_store_an_invalid_event_which_is_not_dead() {
+
+    }
+
+    @Test
+    public void not_store_an_invalid_dead_event() {
+
+    }
+
+    /**
+     * Reads all events from the event bus event store.
+     */
+    private List<Event> readEvents() {
+        final EventStreamQuery query = allEventsQuery();
+        final MemoizingObserver<Event> observer = StreamObservers.memoizingObserver();
+
+        eventBus.getEventStore()
+                .read(query, observer);
+
+        final List<Event> results = observer.responses();
+        return results;
     }
 
     /**
