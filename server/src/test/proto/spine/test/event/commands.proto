@@ -76,7 +76,3 @@ message AcceptInvitation {
 
     MemberInvitation invitation = 2;
 }
-
-message FinishSignUp {
-    spine.core.UserId user_id = 1;
-}

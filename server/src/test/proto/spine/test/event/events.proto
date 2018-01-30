@@ -139,7 +139,3 @@ message InvitationAccepted {
 
     MemberInvitation invitation = 2;
 }
-
-message UserSignedUp {
-    spine.core.UserId user_id = 1;
-}
