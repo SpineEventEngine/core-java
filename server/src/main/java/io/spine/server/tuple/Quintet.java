@@ -21,6 +21,13 @@
 package io.spine.server.tuple;
 
 import com.google.protobuf.Message;
+import io.spine.server.tuple.Element.AValue;
+import io.spine.server.tuple.Element.BValue;
+import io.spine.server.tuple.Element.CValue;
+import io.spine.server.tuple.Element.DValue;
+import io.spine.server.tuple.Element.EValue;
+
+import static io.spine.server.tuple.Element.value;
 
 /**
  * A tuple of five elements.
@@ -39,6 +46,49 @@ import com.google.protobuf.Message;
  *
  * @author Alexander Yevsyukov
  */
-public class Quintet<A extends Message, B, C, D, E>
-    extends Tuple {
+public final class Quintet<A extends Message, B, C, D, E>
+    extends Tuple
+    implements AValue<A>, BValue<B>, CValue<C>, DValue<D>, EValue<E> {
+
+    private static final long serialVersionUID = 0L;
+
+    private Quintet(A a, B b, C c, D d, E e) {
+        super(a, b, c, d, e);
+    }
+
+    /**
+     * Creates a quintet with all values present.
+     */
+    public static
+    <A extends Message, B extends Message, C extends Message, D extends Message, E extends Message>
+    Quintet<A, B, C, D, E> of(A a, B b, C c, D d, E e) {
+        checkAllNotNullOrEmpty(Quintet.class, a, b, c, d, e);
+        final Quintet<A, B, C, D, E> result = new Quintet<>(a, b, c, d, e);
+        return result;
+    }
+
+    @Override
+    public A getA() {
+        return value(this, 0);
+    }
+
+    @Override
+    public B getB() {
+        return value(this, 1);
+    }
+
+    @Override
+    public C getC() {
+        return value(this, 2);
+    }
+
+    @Override
+    public D getD() {
+        return value(this, 3);
+    }
+
+    @Override
+    public E getE() {
+        return value(this, 4);
+    }
 }

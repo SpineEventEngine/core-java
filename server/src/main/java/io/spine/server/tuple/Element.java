@@ -177,4 +177,11 @@ class Element implements Serializable {
          */
         T getD();
     }
+
+    interface EValue<T> extends OptionalValue {
+        /**
+         * Obtains the fifth element of the tuple.
+         */
+        T getE();
+    }
 }

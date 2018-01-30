@@ -47,6 +47,9 @@ message Viola {
     InstrumentNumber number = 1;
         // Since we do not put `valid` option here, the validation framework would accept
         // the default value when validating the instrument.
+
+    // Must be `true` if `number` is not set.
+    bool single = 2;
 }
 
 message Violin {
@@ -62,4 +65,7 @@ message ViolinCello {
     InstrumentNumber number = 1;
         // Since we do not put `valid` option here, the validation framework would accept
         // the default value when validating the instrument.
+
+    // Must be `true` if `number` is not set.
+    bool single = 2;
 }
