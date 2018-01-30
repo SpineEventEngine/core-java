@@ -21,9 +21,7 @@
 package io.spine.server.event.given;
 
 import com.google.common.collect.ImmutableList;
-import io.grpc.stub.StreamObserver;
 import io.spine.core.CommandContext;
-import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.React;
 import io.spine.core.UserId;
@@ -62,14 +60,11 @@ import io.spine.test.event.command.CreateProject;
 import io.spine.test.event.command.InviteTeamMembers;
 import io.spine.testdata.Sample;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.singleton;
-import static org.junit.Assert.fail;
 
 /**
  * @author Mykhailo Drachuk
@@ -152,54 +147,11 @@ public class EventRootCommandIdTestEnv {
     }
 
     /**
-     * Creates a new {@link EventStreamQuery} without any filters. 
+     * Creates a new {@link EventStreamQuery} without any filters.
      */
-    public static EventStreamQuery newStreamQuery() {
+    public static EventStreamQuery allEventsQuery() {
         return EventStreamQuery.newBuilder()
                                .build();
-    }
-
-    /**
-     * Creates a new {@link StreamObserver} instance, which keeps all observed events.
-     *
-     * <p>The observed events can be accessed using {@link ResponseObserver#getResults()}.
-     */
-    public static ResponseObserver newStreamObserver() {
-        return new ResponseObserver();
-    }
-
-    /**
-     * A {@link StreamObserver} implemented to query {@link io.spine.server.event.EventStore}.
-     *
-     * <p>It keeps all of the observed events, allowing access to the using
-     * {@link ResponseObserver#getResults()}.
-     */
-    public static class ResponseObserver implements StreamObserver<Event> {
-
-        private final Collection<Event> resultStorage;
-
-        private ResponseObserver() {
-            this.resultStorage = newArrayList();
-        }
-
-        @Override
-        public void onNext(Event value) {
-            resultStorage.add(value);
-        }
-
-        @Override
-        public void onError(Throwable t) {
-            fail(t.getMessage());
-        }
-
-        @Override
-        public void onCompleted() {
-            // Do nothing.
-        }
-
-        public List<Event> getResults() {
-            return ImmutableList.copyOf(resultStorage);
-        }
     }
 
     public static class ProjectAggregateRepository

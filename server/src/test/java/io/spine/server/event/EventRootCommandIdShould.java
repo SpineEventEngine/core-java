@@ -26,9 +26,10 @@ import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.Event;
+import io.spine.grpc.MemoizingObserver;
+import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
 import io.spine.server.event.given.EventRootCommandIdTestEnv.ProjectAggregateRepository;
-import io.spine.server.event.given.EventRootCommandIdTestEnv.ResponseObserver;
 import io.spine.server.event.given.EventRootCommandIdTestEnv.TeamAggregateRepository;
 import io.spine.server.event.given.EventRootCommandIdTestEnv.TeamCreationRepository;
 import io.spine.server.event.given.EventRootCommandIdTestEnv.UserSignUpRepository;
@@ -43,10 +44,9 @@ import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.acceptInvitation;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.addTasks;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.addTeamMember;
+import static io.spine.server.event.given.EventRootCommandIdTestEnv.allEventsQuery;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.createProject;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.inviteTeamMembers;
-import static io.spine.server.event.given.EventRootCommandIdTestEnv.newStreamObserver;
-import static io.spine.server.event.given.EventRootCommandIdTestEnv.newStreamQuery;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.projectId;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.teamId;
 import static org.junit.Assert.assertEquals;
@@ -177,14 +177,14 @@ public class EventRootCommandIdShould {
      * Reads all events from the bounded context event store.
      */
     private List<Event> readEvents() {
-        final EventStreamQuery query = newStreamQuery();
-        final ResponseObserver observer = newStreamObserver();
+        final EventStreamQuery query = allEventsQuery();
+        final MemoizingObserver<Event> observer = StreamObservers.memoizingObserver();
 
         boundedContext.getEventBus()
                       .getEventStore()
                       .read(query, observer);
 
-        final List<Event> results = observer.getResults();
+        final List<Event> results = observer.responses();
         return results;
     }
 
