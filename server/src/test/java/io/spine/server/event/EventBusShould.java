@@ -61,6 +61,7 @@ import static io.spine.test.Verify.assertSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.any;
@@ -387,12 +388,25 @@ public class EventBusShould {
 
     @Test
     public void not_store_an_invalid_event_which_is_not_dead() {
+        final Event event = GivenEvent.projectArchived();
+        final ProjectCreatedSubscriber subscriber = new ProjectCreatedSubscriber();
 
+        eventBus.register(subscriber);
+        eventBus.post(event);
+
+        final List<Event> events = readEvents();
+        assertSize(0, events);
+        assertNull(subscriber.getEventMessage());
     }
 
     @Test
     public void not_store_an_invalid_dead_event() {
+        final Event event = GivenEvent.projectArchived();
 
+        eventBus.post(event);
+
+        final List<Event> events = readEvents();
+        assertSize(0, events);
     }
 
     /**

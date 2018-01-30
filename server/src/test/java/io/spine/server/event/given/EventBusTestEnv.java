@@ -23,6 +23,7 @@ package io.spine.server.event.given;
 import io.spine.core.Event;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.event.EventStreamQuery;
+import io.spine.test.event.ProjectArchived;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.ProjectId;
 import io.spine.test.event.ProjectStarted;
@@ -39,7 +40,6 @@ public class EventBusTestEnv {
                                                          .setId(newUuid())
                                                          .build();
 
-
     /**
      * Creates a new {@link EventStreamQuery} without any filters.
      */
@@ -48,13 +48,15 @@ public class EventBusTestEnv {
                                .build();
     }
 
-    private EventBusTestEnv() {}
+    private EventBusTestEnv() {
+    }
 
     private static class EventMessage {
 
         private static final ProjectStarted PROJECT_STARTED = projectStarted(PROJECT_ID);
 
-        private EventMessage() {}
+        private EventMessage() {
+        }
 
         private static ProjectStarted projectStarted() {
             return PROJECT_STARTED;
@@ -71,6 +73,15 @@ public class EventBusTestEnv {
                                  .setProjectId(id)
                                  .build();
         }
+
+        /**
+         * Returns an event message with an unfilled required field.
+         */
+        private static ProjectArchived projectArchived(ProjectId id) {
+            return ProjectArchived.newBuilder()
+                                  .setProjectId(id)
+                                  .build();
+        }
     }
 
     public static class GivenEvent {
@@ -78,7 +89,8 @@ public class EventBusTestEnv {
         private static final TestEventFactory factory =
                 TestEventFactory.newInstance(pack(PROJECT_ID), GivenEvent.class);
 
-        private GivenEvent() {}
+        private GivenEvent() {
+        }
 
         private static TestEventFactory eventFactory() {
             return factory;
@@ -99,5 +111,17 @@ public class EventBusTestEnv {
             final Event event = eventFactory().createEvent(msg);
             return event;
         }
+
+        /**
+         * Returns an event with an unfilled required field.
+         */
+        public static Event projectArchived() {
+            final ProjectArchived msg = EventMessage.projectArchived(PROJECT_ID);
+            final Event event = Event.newBuilder()
+                                     .setMessage(pack(msg))
+                                     .build();
+            return event;
+        }
+
     }
 }

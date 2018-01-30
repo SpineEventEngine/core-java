@@ -45,6 +45,12 @@ message ProjectCreated {
     }
 }
 
+message ProjectArchived {
+    ProjectId project_id = 1;
+
+    string reason = 2 [(required) = true];
+}
+
 message ProjectCreatedSeparateEnrichment {
     option (enrichment_for) = "ProjectCreated";
 
