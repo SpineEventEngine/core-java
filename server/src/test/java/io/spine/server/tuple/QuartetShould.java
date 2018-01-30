@@ -24,11 +24,11 @@ import com.google.common.base.Optional;
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Message;
-import io.spine.test.tuple.Bear;
-import io.spine.test.tuple.Donkey;
-import io.spine.test.tuple.Goat;
-import io.spine.test.tuple.Instrument;
-import io.spine.test.tuple.Monkey;
+import io.spine.test.tuple.quartet.Bear;
+import io.spine.test.tuple.quartet.Donkey;
+import io.spine.test.tuple.quartet.Goat;
+import io.spine.test.tuple.quartet.Instrument;
+import io.spine.test.tuple.quartet.Monkey;
 import org.junit.Before;
 import org.junit.Test;
 
