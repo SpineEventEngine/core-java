@@ -76,6 +76,10 @@ public class BusesTestEnv {
         // Prevents instantiation.
     }
 
+    public static TestMessageBus.Builder busBuilder() {
+        return TestMessageBus.newBuilder();
+    }
+
     public static TestMessageContents testContents() {
         return TestMessageContents.newBuilder()
                                   .build();
@@ -164,7 +168,7 @@ public class BusesTestEnv {
 
         /**
          * A {@link TestMessageBus} builder that returns a a bus instance that successfully dispatches messages by default.
-         * This default behavior can be modified to make the bus err using builder settings. 
+         * This default behavior can be modified to make the bus err using builder settings.
          */
         public static class Builder {
             private final List<BusFilter<TestEnvelope>> filters;
@@ -436,7 +440,8 @@ public class BusesTestEnv {
         }
     }
 
-    interface TestMessageDispatcher 
-            extends MessageDispatcher<TestMessageClass, TestEnvelope, BusMessageId> { }
+    interface TestMessageDispatcher
+            extends MessageDispatcher<TestMessageClass, TestEnvelope, BusMessageId> {
+    }
 
 }
