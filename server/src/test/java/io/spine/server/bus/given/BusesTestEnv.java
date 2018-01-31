@@ -313,11 +313,11 @@ public class BusesTestEnv {
         /**
          * An exception for {@link Validators.FailingValidator}.
          */
-        public static class FailedValidationException extends RuntimeException implements MessageInvalid {
+        public static class FailingValidationException extends RuntimeException implements MessageInvalid {
 
             private static final long serialVersionUID = 0L;
 
-            public static final String TYPE = FailedValidationException.class.getCanonicalName();
+            public static final String TYPE = FailingValidationException.class.getCanonicalName();
 
             @Override
             public Error asError() {
@@ -369,13 +369,13 @@ public class BusesTestEnv {
         }
 
         /**
-         * A validator which always fails validation returning an {@link Optional} with {@link Exceptions.FailedValidationException}.
+         * A validator which always fails validation returning an {@link Optional} with {@link Exceptions.FailingValidationException}.
          */
         public static class FailingValidator implements EnvelopeValidator<TestEnvelope> {
 
             @Override
             public Optional<MessageInvalid> validate(TestEnvelope envelope) {
-                final MessageInvalid error = new Exceptions.FailedValidationException();
+                final MessageInvalid error = new Exceptions.FailingValidationException();
                 return Optional.of(error);
             }
         }
