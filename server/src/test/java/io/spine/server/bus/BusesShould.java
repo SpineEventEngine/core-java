@@ -33,10 +33,7 @@ import io.spine.server.bus.given.BusesTestEnv.Exceptions.FailingFilterException;
 import io.spine.server.bus.given.BusesTestEnv.Filters.FailingFilter;
 import io.spine.server.bus.given.BusesTestEnv.Filters.PassingFilter;
 import io.spine.server.bus.given.BusesTestEnv.TestMessageBus;
-import io.spine.server.bus.given.BusesTestEnv.TestMessageContentsDispatcher;
 import io.spine.test.bus.BusMessage;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
@@ -55,36 +52,6 @@ import static org.junit.Assert.assertTrue;
  * @author Dmytro Dashenkov
  */
 public class BusesShould {
-
-    private TestMessageBus bus;
-    private TestMessageBus deadBus;
-    private TestMessageBus invalidatableBus;
-    private TestMessageBus invalidatableDeadBus;
-
-    @Before
-    public void setUp() {
-        deadBus = TestMessageBus.newInstance();
-
-        final TestMessageContentsDispatcher dispatcher = new TestMessageContentsDispatcher();
-
-        bus = TestMessageBus.newInstance();
-        bus.register(dispatcher);
-
-        invalidatableDeadBus = TestMessageBus.newInstance();
-        invalidatableDeadBus.setInvalidValidator();
-
-        invalidatableBus = TestMessageBus.newInstance();
-        invalidatableBus.setInvalidValidator();
-        invalidatableBus.register(dispatcher);
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        bus.close();
-        deadBus.close();
-        invalidatableBus.close();
-        invalidatableDeadBus.close();
-    }
 
     @Test
     public void have_private_util_ctor() {
@@ -106,6 +73,7 @@ public class BusesShould {
 
     @Test
     public void deliver_a_valid_message_with_registered_dispatcher() {
+        final TestMessageBus bus = busBuilder().build();
         final BusMessage message = busMessage(testContents());
         final MemoizingObserver<Ack> observer = memoizingObserver();
 
@@ -120,24 +88,35 @@ public class BusesShould {
 
     @Test
     public void apply_the_validating_filter_prior_to_the_dead_message_filter() {
-        testBusForError(invalidatableDeadBus, FailedValidationException.TYPE);
+        final TestMessageBus deadBusFailingValidation = busBuilder().withNoDispatchers()
+                                                                    .failingValidation()
+                                                                    .build();
+
+        testBusForError(deadBusFailingValidation, FailedValidationException.TYPE);
     }
 
     @Test
     public void apply_registered_filters_prior_to_the_validating_filter() {
-        invalidatableDeadBus.register(new FailingFilter());
+        final TestMessageBus deadBusFailingValidation = busBuilder().withNoDispatchers()
+                                                                    .failingValidation()
+                                                                    .addFilter(new FailingFilter())
+                                                                    .build();
 
-        testBusForError(invalidatableDeadBus, FailingFilterException.TYPE);
+        testBusForError(deadBusFailingValidation, FailingFilterException.TYPE);
     }
 
     @Test
     public void apply_the_validating_filter() {
-        testBusForError(invalidatableBus, FailedValidationException.TYPE);
+        final TestMessageBus busFailingValidation = busBuilder().failingValidation()
+                                                                .build();
+
+        testBusForError(busFailingValidation, FailedValidationException.TYPE);
     }
 
     @Test
     public void apply_a_registered_filter() {
-        bus.register(new FailingFilter());
+        final TestMessageBus bus = busBuilder().addFilter(new FailingFilter())
+                                               .build();
 
         testBusForError(bus, FailingFilterException.TYPE);
     }
@@ -146,9 +125,11 @@ public class BusesShould {
     public void apply_registered_filters() {
         final PassingFilter filter1 = new PassingFilter();
         final PassingFilter filter2 = new PassingFilter();
-        bus.register(filter1);
-        bus.register(filter2);
-        bus.register(new FailingFilter());
+
+        final TestMessageBus bus = busBuilder().addFilter(filter1)
+                                               .addFilter(filter2)
+                                               .addFilter(new FailingFilter())
+                                               .build();
 
         testBusForError(bus, FailingFilterException.TYPE);
 
@@ -158,21 +139,31 @@ public class BusesShould {
 
     @Test
     public void apply_the_dead_message_filter() {
+        final TestMessageBus deadBus = busBuilder().withNoDispatchers()
+                                                   .build();
+
         testBusForError(deadBus, DeadMessageException.TYPE);
     }
 
-    private static void testBusForError(TestMessageBus invalidatableDeadBus, String type) {
+    private static TestMessageBus.Builder busBuilder() {
+        return TestMessageBus.newBuilder();
+    }
+
+    /**
+     * Asserts that bus acknowledges the error when posting a single message.
+     */
+    private static void testBusForError(TestMessageBus bus, String type) {
         final BusMessage message = busMessage(testContents());
         final MemoizingObserver<Ack> observer = memoizingObserver();
 
-        invalidatableDeadBus.post(message, observer);
+        bus.post(message, observer);
 
         final List<Ack> responses = observer.responses();
         assertSize(1, responses);
 
         final Ack response = responses.get(0);
         assertEquals(type, errorType(response));
-        assertSize(0, invalidatableDeadBus.storedMessages());
+        assertSize(0, bus.storedMessages());
     }
 
 }

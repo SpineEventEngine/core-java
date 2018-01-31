@@ -107,13 +107,14 @@ public class BusesTestEnv {
 
     public static class TestMessageBus extends Bus<BusMessage, TestEnvelope, TestMessageClass, TestMessageDispatcher> {
 
-        private EnvelopeValidator<TestEnvelope> validator;
+        private final EnvelopeValidator<TestEnvelope> validator;
         private final List<BusFilter<TestEnvelope>> filters;
         private final List storedMessages;
 
-        private TestMessageBus() {
+        private TestMessageBus(Builder builder) {
             storedMessages = Lists.newArrayList();
-            filters = Lists.newArrayList();
+            filters = builder.filters;
+            validator = builder.validator;
         }
 
         @Override
@@ -153,38 +154,60 @@ public class BusesTestEnv {
             Iterables.addAll(storedMessages, messages);
         }
 
-        public static TestMessageBus newInstance() {
-            final TestMessageBus bus = new TestMessageBus();
-            bus.setValidValidator();
-            return bus;
-        }
-
-        private void setValidator(EnvelopeValidator<TestEnvelope> validator) {
-            this.validator = validator;
-        }
-
-        public void setValidValidator() {
-            setValidator(new Validators.PassingValidator());
-        }
-
-        public void setInvalidValidator() {
-            setValidator(new Validators.FailingValidator());
-        }
-
         public Collection<?> storedMessages() {
             return ImmutableList.copyOf(storedMessages);
         }
 
-        public void register(BusFilter<TestEnvelope> filter) {
-            filters.add(filter);
+        public static Builder newBuilder() {
+            return new Builder();
         }
 
-        static class TestDeadMessageTap implements DeadMessageTap<TestEnvelope> {
+        /**
+         * A {@link TestMessageBus} builder that returns a a bus instance that successfully dispatches messages by default.
+         * This default behavior can be modified to make the bus err using builder settings. 
+         */
+        public static class Builder {
+            private final List<BusFilter<TestEnvelope>> filters;
+            private EnvelopeValidator<TestEnvelope> validator;
+            private boolean addDefaultDispatcher;
+
+            private Builder() {
+                validator = new Validators.PassingValidator();
+                filters = Lists.newArrayList();
+                addDefaultDispatcher = true;
+            }
+
+            public Builder failingValidation() {
+                validator = new Validators.FailingValidator();
+                return this;
+            }
+
+            public Builder withNoDispatchers() {
+                addDefaultDispatcher = false;
+                return this;
+            }
+
+            public Builder addFilter(BusFilter<TestEnvelope> filter) {
+                filters.add(filter);
+                return this;
+            }
+
+            public TestMessageBus build() {
+                final TestMessageBus bus = new TestMessageBus(this);
+                if (addDefaultDispatcher) {
+                    bus.register(new TestMessageContentsDispatcher());
+                }
+                return bus;
+            }
+        }
+
+        private static class TestDeadMessageTap implements DeadMessageTap<TestEnvelope> {
             @Override
             public MessageUnhandled capture(TestEnvelope message) {
                 return new Exceptions.DeadMessageException();
             }
         }
+
     }
 
     public static class Filters {
@@ -293,7 +316,7 @@ public class BusesTestEnv {
         }
     }
 
-    public static class Validators {
+    static class Validators {
 
         private Validators() {
             // Prevents instantiation.
@@ -302,7 +325,7 @@ public class BusesTestEnv {
         /**
          * A validator which always passes validation returning an {@link Optional#absent()}.
          */
-        static class PassingValidator implements EnvelopeValidator<TestEnvelope> {
+        public static class PassingValidator implements EnvelopeValidator<TestEnvelope> {
 
             @Override
             public Optional<MessageInvalid> validate(TestEnvelope envelope) {
@@ -313,7 +336,7 @@ public class BusesTestEnv {
         /**
          * A validator which always fails validation returning an {@link Optional} with {@link Exceptions.FailedValidationException}.
          */
-        static class FailingValidator implements EnvelopeValidator<TestEnvelope> {
+        public static class FailingValidator implements EnvelopeValidator<TestEnvelope> {
 
             @Override
             public Optional<MessageInvalid> validate(TestEnvelope envelope) {
@@ -413,8 +436,7 @@ public class BusesTestEnv {
         }
     }
 
-    interface TestMessageDispatcher extends MessageDispatcher<TestMessageClass, TestEnvelope, BusMessageId> {
-
-    }
+    interface TestMessageDispatcher 
+            extends MessageDispatcher<TestMessageClass, TestEnvelope, BusMessageId> { }
 
 }
