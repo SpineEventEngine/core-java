@@ -24,15 +24,56 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.Error;
+import io.spine.core.Ack;
 import io.spine.core.Rejection;
+import io.spine.grpc.MemoizingObserver;
+import io.spine.server.bus.given.BusesTestEnv.DeadMessageException;
+import io.spine.server.bus.given.BusesTestEnv.TestMessageBus;
+import io.spine.server.bus.given.BusesTestEnv.TestMessageContentsDispatcher;
+import io.spine.test.bus.BusMessage;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
+import java.util.List;
+
+import static io.spine.grpc.StreamObservers.memoizingObserver;
+import static io.spine.server.bus.given.BusesTestEnv.STATUS_OK;
+import static io.spine.server.bus.given.BusesTestEnv.busMessage;
+import static io.spine.server.bus.given.BusesTestEnv.errorType;
+import static io.spine.server.bus.given.BusesTestEnv.testContents;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static io.spine.test.Verify.assertSize;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Dmytro Dashenkov
  */
 public class BusesShould {
+
+    private TestMessageBus deadBus;
+    private TestMessageBus bus;
+    private TestMessageBus invalidatableBus;
+
+    @Before
+    public void setUp() {
+        deadBus = TestMessageBus.newInstance();
+
+        final TestMessageContentsDispatcher dispatcher = new TestMessageContentsDispatcher();
+        bus = TestMessageBus.newInstance();
+        bus.register(dispatcher);
+
+        invalidatableBus = TestMessageBus.newInstance();
+        invalidatableBus.setInvalidValidator();
+        invalidatableBus.register(dispatcher);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        deadBus.close();
+        bus.close();
+        invalidatableBus.close();
+    }
 
     @Test
     public void have_private_util_ctor() {
@@ -64,12 +105,30 @@ public class BusesShould {
 
     @Test
     public void deliver_a_valid_message_with_registered_dispatcher() {
+        final BusMessage message = busMessage(testContents());
+        final MemoizingObserver<Ack> observer = memoizingObserver();
 
+        bus.post(message, observer);
+
+        final List<Ack> responses = observer.responses();
+        assertSize(1, responses);
+
+        final Ack response = responses.get(0);
+        assertEquals(STATUS_OK, response.getStatus());
     }
 
     @Test
     public void apply_validating_filter_prior_to_dead_message_filter() {
+        final BusMessage message = busMessage(testContents());
+        final MemoizingObserver<Ack> observer = memoizingObserver();
 
+        deadBus.post(message, observer);
+
+        final List<Ack> responses = observer.responses();
+        assertSize(1, responses);
+
+        final Ack response = responses.get(0);
+        assertEquals(DeadMessageException.TYPE, errorType(response));
     }
 
     @Test
