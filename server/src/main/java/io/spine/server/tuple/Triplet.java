@@ -34,7 +34,11 @@ import static io.spine.server.tuple.Element.value;
 /**
  * A tuple with three elements.
  *
- * <p>The second and third elements are optional.
+ * <p>The first element must be a non-default {@link Message}
+ * (and not {@link com.google.protobuf.Empty Empty}).
+ *
+ * <p>Other two can be {@code Message}, {@link com.google.common.base.Optional Optional} or
+ * {@link Either}.
  *
  * @param <A> the type of the first element
  * @param <B> the type of the second element
