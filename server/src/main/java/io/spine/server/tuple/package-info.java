@@ -54,22 +54,23 @@
  *
  * <p>The following tuple classes are provided:
  * <ul>
- *    <li>{@code Pair<A, B>}
- *    <li>{@code Triplet<A, B, C>}
- *    <li>{@code Quartet<A, B, C, D>}
- *    <li>{@code Quintet<A, B, C, D, E>}
+ *    <li>{@link io.spine.server.tuple.Pair Pair&lt;A, B&gt;}
+ *    <li>{@link io.spine.server.tuple.Triplet Triplet&lt;A, B, C&gt;}
+ *    <li>{@link io.spine.server.tuple.Quartet Quartet&lt;A, B, C, D&gt;}
+ *    <li>{@link io.spine.server.tuple.Quintet Quintet&lt;A, B, C, D, E&gt;}
  * </ul>
  *
- * <p>Basic tuple classes allow {@link com.google.common.base.Optional Optional} generic types.
+ * <p>Basic tuple classes allow {@link com.google.common.base.Optional Optional} and 
+ * {@link io.spine.server.tuple.Either} types, starting from the second generic argument.
  *
  * <h2>Alternatives</h2>
  *
  * <p>In order to define alternatively returned values, please use the following classes:
  * <ul>
- *     <li>{@code Either<A, B>}
- *     <li>{@code EitherOfThree<A, B, C>}
- *     <li>{@code EitherOfFour<A, B, C, D>}
- *     <li>{@code EitherOfFive<A, B, C, D, E>}
+ *     <li>{@link io.spine.server.tuple.EitherOfTwo EitherOfTwo&lt;A, B&gt;}
+ *     <li>{@link io.spine.server.tuple.EitherOfThree EitherOfThree&lt;A, B, C&gt;}
+ *     <li>{@code EitherOfFour&lt;A, B, C, D&gt;}
+ *     <li>{@code EitherOfFive&lt;A, B, C, D, E&gt;}
  * </ul>
  *
  * <p>Generic parameters for alternatives can be only {@link com.google.protobuf.Message Message}.
