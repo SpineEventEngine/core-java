@@ -25,7 +25,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Queues;
 import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
@@ -52,13 +51,14 @@ import io.spine.test.bus.TestMessageContents;
 import io.spine.testdata.Sample;
 import io.spine.type.MessageClass;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Queues.newArrayDeque;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.bus.Buses.acknowledge;
@@ -108,7 +108,7 @@ public class BusesTestEnv {
     public static class TestMessageBus extends Bus<BusMessage, TestEnvelope, TestMessageClass, TestMessageDispatcher> {
 
         private EnvelopeValidator<TestEnvelope> validator;
-        private final ArrayList<BusFilter<TestEnvelope>> filters;
+        private final List<BusFilter<TestEnvelope>> filters;
         private final List storedMessages;
 
         private TestMessageBus() {
@@ -133,7 +133,7 @@ public class BusesTestEnv {
 
         @Override
         protected Deque<BusFilter<TestEnvelope>> createFilterChain() {
-            return Queues.newArrayDeque(filters);
+            return newArrayDeque(filters);
         }
 
         @Override
@@ -164,11 +164,11 @@ public class BusesTestEnv {
         }
 
         public void setValidValidator() {
-            setValidator(new ValidValidator());
+            setValidator(new Validators.PassingValidator());
         }
 
         public void setInvalidValidator() {
-            setValidator(new InvalidValidator());
+            setValidator(new Validators.FailingValidator());
         }
 
         public Collection<?> storedMessages() {
@@ -182,14 +182,127 @@ public class BusesTestEnv {
         static class TestDeadMessageTap implements DeadMessageTap<TestEnvelope> {
             @Override
             public MessageUnhandled capture(TestEnvelope message) {
-                return new DeadMessageException();
+                return new Exceptions.DeadMessageException();
+            }
+        }
+    }
+
+    public static class Filters {
+
+        private Filters() {
+            // Prevents instantiation.
+        }
+
+        /**
+         * A filter which always rejects the message with {@link Exceptions.FailingFilterException}.
+         */
+        public static class FailingFilter extends AbstractBusFilter<TestEnvelope> {
+
+            @Override
+            public Optional<Ack> accept(TestEnvelope envelope) {
+                final MessageRejection exception = new Exceptions.FailingFilterException();
+                final Any packedId = Identifier.pack(envelope.getId());
+                final Ack result = reject(packedId, exception.asError());
+                return Optional.of(result);
             }
         }
 
         /**
-         * A validator which always returns an {@link Optional#absent()}.
+         * A filter which always passes successfully.
          */
-        static class ValidValidator implements EnvelopeValidator<TestEnvelope> {
+        public static class PassingFilter extends AbstractBusFilter<TestEnvelope> {
+
+            private boolean passed = false;
+
+            @Override
+            public Optional<Ack> accept(TestEnvelope envelope) {
+                passed = true;
+                return Optional.absent();
+            }
+
+            public boolean passed() {
+                return passed;
+            }
+        }
+    }
+
+    public static class Exceptions {
+
+        private Exceptions() {
+            // Prevents instantiation.
+        }
+
+        /**
+         * An exception returned by a {@link TestMessageBus.TestDeadMessageTap} in case the message is dead.
+         */
+        public static class DeadMessageException extends RuntimeException implements MessageUnhandled {
+
+            private static final long serialVersionUID = 0L;
+
+            public static final String TYPE = DeadMessageException.class.getCanonicalName();
+
+            @Override
+            public Error asError() {
+                return error(TYPE);
+            }
+
+            @Override
+            public Throwable asThrowable() {
+                return this;
+            }
+        }
+
+        /**
+         * An exception for {@link Validators.FailingValidator}.
+         */
+        public static class FailedValidationException extends RuntimeException implements MessageInvalid {
+
+            private static final long serialVersionUID = 0L;
+
+            public static final String TYPE = FailedValidationException.class.getCanonicalName();
+
+            @Override
+            public Error asError() {
+                return error(TYPE);
+            }
+
+            @Override
+            public Throwable asThrowable() {
+                return this;
+            }
+        }
+
+        /**
+         * An exception for {@link Filters.FailingFilter}.
+         */
+        public static class FailingFilterException extends RuntimeException implements MessageInvalid {
+
+            private static final long serialVersionUID = 0L;
+
+            public static final String TYPE = FailingFilterException.class.getCanonicalName();
+
+            @Override
+            public Error asError() {
+                return error(TYPE);
+            }
+
+            @Override
+            public Throwable asThrowable() {
+                return this;
+            }
+        }
+    }
+
+    public static class Validators {
+
+        private Validators() {
+            // Prevents instantiation.
+        }
+
+        /**
+         * A validator which always passes validation returning an {@link Optional#absent()}.
+         */
+        static class PassingValidator implements EnvelopeValidator<TestEnvelope> {
 
             @Override
             public Optional<MessageInvalid> validate(TestEnvelope envelope) {
@@ -198,24 +311,23 @@ public class BusesTestEnv {
         }
 
         /**
-         * A validator which always returns an {@link Optional} with {@link TestValidatorException}.
+         * A validator which always fails validation returning an {@link Optional} with {@link Exceptions.FailedValidationException}.
          */
-        static class InvalidValidator implements EnvelopeValidator<TestEnvelope> {
+        static class FailingValidator implements EnvelopeValidator<TestEnvelope> {
 
             @Override
             public Optional<MessageInvalid> validate(TestEnvelope envelope) {
-                final MessageInvalid error = new TestValidatorException();
+                final MessageInvalid error = new Exceptions.FailedValidationException();
                 return Optional.of(error);
             }
         }
-
     }
 
     public static class TestMessageContentsDispatcher implements TestMessageDispatcher {
 
         @Override
         public Set<TestMessageClass> getMessageClasses() {
-            return ImmutableSet.of(TestMessageClass.of(TestMessageContents.class));
+            return TestMessageClass.setOf(TestMessageContents.class);
         }
 
         @Override
@@ -226,83 +338,6 @@ public class BusesTestEnv {
         @Override
         public void onError(TestEnvelope envelope, RuntimeException exception) {
             // Do nothing.
-        }
-    }
-
-    public static class FailingFilter extends AbstractBusFilter<TestEnvelope> {
-
-        @Override
-        public Optional<Ack> accept(TestEnvelope envelope) {
-            final MessageRejection exception = new CustomFilterException();
-            final Any packedId = Identifier.pack(envelope.getId());
-            final Ack result = reject(packedId, exception.asError());
-            return Optional.of(result);
-        }
-    }
-
-    public static class SuccessfulFilter extends AbstractBusFilter<TestEnvelope> {
-
-        private boolean passed = false;
-
-        @Override
-        public Optional<Ack> accept(TestEnvelope envelope) {
-            passed = true;
-            return Optional.absent();
-        }
-
-        public boolean passed() {
-            return passed;
-        }
-    }
-
-    public static class DeadMessageException extends RuntimeException implements MessageUnhandled {
-
-        private static final long serialVersionUID = 0L;
-
-        public static final String TYPE = DeadMessageException.class.getCanonicalName();
-
-        @Override
-        public Error asError() {
-            return error(TYPE);
-        }
-
-        @Override
-        public Throwable asThrowable() {
-            return this;
-        }
-    }
-
-    public static class TestValidatorException extends RuntimeException implements MessageInvalid {
-
-        private static final long serialVersionUID = 0L;
-
-        public static final String TYPE = TestValidatorException.class.getCanonicalName();
-
-        @Override
-        public Error asError() {
-            return error(TYPE);
-        }
-
-        @Override
-        public Throwable asThrowable() {
-            return this;
-        }
-    }
-
-    public static class CustomFilterException extends RuntimeException implements MessageInvalid {
-
-        private static final long serialVersionUID = 0L;
-
-        public static final String TYPE = CustomFilterException.class.getCanonicalName();
-
-        @Override
-        public Error asError() {
-            return error(TYPE);
-        }
-
-        @Override
-        public Throwable asThrowable() {
-            return this;
         }
     }
 
@@ -348,7 +383,7 @@ public class BusesTestEnv {
         }
     }
 
-    static final class TestMessageClass extends MessageClass {
+    static class TestMessageClass extends MessageClass {
 
         private static final long serialVersionUID = 0L;
 
@@ -362,6 +397,19 @@ public class BusesTestEnv {
 
         public static TestMessageClass of(Message message) {
             return of(message.getClass());
+        }
+
+        public static Set<TestMessageClass> setOf(Iterable<Class<? extends Message>> classes) {
+            final ImmutableSet.Builder<TestMessageClass> builder = ImmutableSet.builder();
+            for (Class<? extends Message> cls : classes) {
+                builder.add(of(cls));
+            }
+            return builder.build();
+        }
+
+        @SafeVarargs
+        public static Set<TestMessageClass> setOf(Class<? extends Message>... classes) {
+            return setOf(Arrays.asList(classes));
         }
     }
 
