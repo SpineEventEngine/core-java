@@ -60,8 +60,8 @@
  *    <li>{@link io.spine.server.tuple.Quintet Quintet&lt;A, B, C, D, E&gt;}
  * </ul>
  *
- * <p>Basic tuple classes allow {@link com.google.common.base.Optional Optional} and 
- * {@link io.spine.server.tuple.Either} types, starting from the second generic argument.
+ * <p>Basic tuple classes allow {@link com.google.common.base.Optional Optional} starting from
+ * the second generic argument.
  *
  * <h2>Alternatives</h2>
  *
