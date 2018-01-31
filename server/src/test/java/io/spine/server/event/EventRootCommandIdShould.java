@@ -49,6 +49,7 @@ import static io.spine.server.event.given.EventRootCommandIdTestEnv.createProjec
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.inviteTeamMembers;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.projectId;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.teamId;
+import static io.spine.test.Verify.assertSize;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -90,7 +91,7 @@ public class EventRootCommandIdShould {
 
         final List<Event> events = readEvents();
         // Two events should be created: one in the `ProjectAggregate` and one in the `TeamAggregate`.
-        assertEquals(2, events.size());
+        assertSize(2, events);
 
         final Event event = events.get(0);
         assertEquals(command.getId(), getRootCommandId(event));
@@ -103,7 +104,7 @@ public class EventRootCommandIdShould {
         postCommand(command);
 
         final List<Event> events = readEvents();
-        assertEquals(3, events.size());
+        assertSize(3, events);
         assertEquals(command.getId(), getRootCommandId(events.get(0)));
         assertEquals(command.getId(), getRootCommandId(events.get(1)));
         assertEquals(command.getId(), getRootCommandId(events.get(2)));
@@ -117,7 +118,7 @@ public class EventRootCommandIdShould {
 
         final List<Event> events = readEvents();
         // Two events should be created: one in the `ProjectAggregate` and one in the `TeamAggregate`.
-        assertEquals(2, events.size());
+        assertSize(2, events);
 
         final Event reaction = events.get(1);
         assertEquals(command.getId(), getRootCommandId(reaction));
@@ -130,7 +131,7 @@ public class EventRootCommandIdShould {
         postCommand(command);
 
         final List<Event> events = readEvents();
-        assertEquals(1, events.size());
+        assertSize(1, events);
 
         final Event event = events.get(0);
         assertEquals(command.getId(), getRootCommandId(event));
@@ -143,7 +144,7 @@ public class EventRootCommandIdShould {
         postCommand(command);
 
         final List<Event> events = readEvents();
-        assertEquals(3, events.size());
+        assertSize(3, events);
         assertEquals(command.getId(), getRootCommandId(events.get(0)));
         assertEquals(command.getId(), getRootCommandId(events.get(1)));
         assertEquals(command.getId(), getRootCommandId(events.get(2)));
@@ -157,7 +158,7 @@ public class EventRootCommandIdShould {
 
         final List<Event> events = readEvents();
         // Two events should be created: the `InvitationAccepted` and the `TeamMemberAdded`.
-        assertEquals(2, events.size());
+        assertSize(2, events);
 
         final Event reaction = events.get(1);
         assertEquals(command.getId(), getRootCommandId(reaction));
