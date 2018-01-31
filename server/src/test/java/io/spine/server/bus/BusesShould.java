@@ -27,9 +27,13 @@ import io.spine.base.Error;
 import io.spine.core.Ack;
 import io.spine.core.Rejection;
 import io.spine.grpc.MemoizingObserver;
+import io.spine.server.bus.given.BusesTestEnv.CustomFilterException;
 import io.spine.server.bus.given.BusesTestEnv.DeadMessageException;
+import io.spine.server.bus.given.BusesTestEnv.FailingFilter;
+import io.spine.server.bus.given.BusesTestEnv.SuccessfulFilter;
 import io.spine.server.bus.given.BusesTestEnv.TestMessageBus;
 import io.spine.server.bus.given.BusesTestEnv.TestMessageContentsDispatcher;
+import io.spine.server.bus.given.BusesTestEnv.TestValidatorException;
 import io.spine.test.bus.BusMessage;
 import org.junit.After;
 import org.junit.Before;
@@ -45,23 +49,29 @@ import static io.spine.server.bus.given.BusesTestEnv.testContents;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Verify.assertSize;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Dmytro Dashenkov
  */
 public class BusesShould {
 
-    private TestMessageBus deadBus;
     private TestMessageBus bus;
+    private TestMessageBus deadBus;
     private TestMessageBus invalidatableBus;
+    private TestMessageBus invalidatableDeadBus;
 
     @Before
     public void setUp() {
         deadBus = TestMessageBus.newInstance();
 
         final TestMessageContentsDispatcher dispatcher = new TestMessageContentsDispatcher();
+
         bus = TestMessageBus.newInstance();
         bus.register(dispatcher);
+
+        invalidatableDeadBus = TestMessageBus.newInstance();
+        invalidatableDeadBus.setInvalidValidator();
 
         invalidatableBus = TestMessageBus.newInstance();
         invalidatableBus.setInvalidValidator();
@@ -70,9 +80,10 @@ public class BusesShould {
 
     @After
     public void tearDown() throws Exception {
-        deadBus.close();
         bus.close();
+        deadBus.close();
         invalidatableBus.close();
+        invalidatableDeadBus.close();
     }
 
     @Test
@@ -94,16 +105,6 @@ public class BusesShould {
     }
 
     @Test
-    public void not_post_a_filtered_message_to_observer() {
-
-    }
-
-    @Test
-    public void not_store_a_filtered_message() {
-
-    }
-
-    @Test
     public void deliver_a_valid_message_with_registered_dispatcher() {
         final BusMessage message = busMessage(testContents());
         final MemoizingObserver<Ack> observer = memoizingObserver();
@@ -118,7 +119,95 @@ public class BusesShould {
     }
 
     @Test
-    public void apply_validating_filter_prior_to_dead_message_filter() {
+    public void apply_the_validating_filter_prior_to_the_dead_message_filter() {
+        final BusMessage message = busMessage(testContents());
+        final MemoizingObserver<Ack> observer = memoizingObserver();
+
+        invalidatableDeadBus.post(message, observer);
+
+        final List<Ack> responses = observer.responses();
+        assertSize(1, responses);
+
+        final Ack response = responses.get(0);
+        assertEquals(TestValidatorException.TYPE, errorType(response));
+        assertSize(0, invalidatableDeadBus.storedMessages());
+    }
+
+    @Test
+    public void apply_registered_filters_prior_to_the_validating_filter() {
+        final BusMessage message = busMessage(testContents());
+        final MemoizingObserver<Ack> observer = memoizingObserver();
+
+        invalidatableDeadBus.register(new FailingFilter());
+
+        invalidatableDeadBus.post(message, observer);
+
+        final List<Ack> responses = observer.responses();
+        assertSize(1, responses);
+
+        final Ack response = responses.get(0);
+        assertEquals(CustomFilterException.TYPE, errorType(response));
+        assertSize(0, invalidatableDeadBus.storedMessages());
+    }
+
+    @Test
+    public void apply_the_validating_filter() {
+        final BusMessage message = busMessage(testContents());
+        final MemoizingObserver<Ack> observer = memoizingObserver();
+
+        invalidatableBus.post(message, observer);
+
+        final List<Ack> responses = observer.responses();
+        assertSize(1, responses);
+
+        final Ack response = responses.get(0);
+        assertEquals(TestValidatorException.TYPE, errorType(response));
+        assertSize(0, invalidatableBus.storedMessages());
+    }
+
+    @Test
+    public void apply_a_registered_filter() {
+        final BusMessage message = busMessage(testContents());
+        final MemoizingObserver<Ack> observer = memoizingObserver();
+
+        bus.register(new FailingFilter());
+
+        bus.post(message, observer);
+
+        final List<Ack> responses = observer.responses();
+        assertSize(1, responses);
+
+        final Ack response = responses.get(0);
+        assertEquals(CustomFilterException.TYPE, errorType(response));
+        assertSize(0, bus.storedMessages());
+    }
+
+    @Test
+    public void apply_registered_filters() {
+        final BusMessage message = busMessage(testContents());
+        final MemoizingObserver<Ack> observer = memoizingObserver();
+
+        final SuccessfulFilter filter1 = new SuccessfulFilter();
+        final SuccessfulFilter filter2 = new SuccessfulFilter();
+        bus.register(filter1);
+        bus.register(filter2);
+        bus.register(new FailingFilter());
+
+        bus.post(message, observer);
+
+        assertTrue(filter1.passed());
+        assertTrue(filter2.passed());
+
+        final List<Ack> responses = observer.responses();
+        assertSize(1, responses);
+
+        final Ack response = responses.get(0);
+        assertEquals(CustomFilterException.TYPE, errorType(response));
+        assertSize(0, bus.storedMessages());
+    }
+
+    @Test
+    public void apply_the_dead_message_filter() {
         final BusMessage message = busMessage(testContents());
         final MemoizingObserver<Ack> observer = memoizingObserver();
 
@@ -129,11 +218,7 @@ public class BusesShould {
 
         final Ack response = responses.get(0);
         assertEquals(DeadMessageException.TYPE, errorType(response));
-    }
-
-    @Test
-    public void apply_registered_filters_prior_to_validating_filter() {
-
+        assertSize(0, deadBus.storedMessages());
     }
 
 }

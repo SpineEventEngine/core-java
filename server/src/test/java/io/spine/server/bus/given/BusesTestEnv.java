@@ -35,7 +35,9 @@ import io.spine.core.AbstractMessageEnvelope;
 import io.spine.core.Ack;
 import io.spine.core.EventContext;
 import io.spine.core.MessageInvalid;
+import io.spine.core.MessageRejection;
 import io.spine.core.Status;
+import io.spine.server.bus.AbstractBusFilter;
 import io.spine.server.bus.Bus;
 import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.DeadMessageTap;
@@ -50,6 +52,7 @@ import io.spine.test.bus.TestMessageContents;
 import io.spine.testdata.Sample;
 import io.spine.type.MessageClass;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.List;
@@ -59,6 +62,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.bus.Buses.acknowledge;
+import static io.spine.server.bus.Buses.reject;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -72,21 +76,15 @@ public class BusesTestEnv {
         // Prevents instantiation.
     }
 
-    public static BusMessage busMessage(Message message) {
-        return ((BusMessage.Builder) Sample.builderForType(BusMessage.class))
-                .setContents(pack(message))
-                .build();
-    }
-
     public static TestMessageContents testContents() {
         return TestMessageContents.newBuilder()
                                   .build();
     }
 
-    private static Status statusOk() {
-        return Status.newBuilder()
-                     .setOk(Empty.getDefaultInstance())
-                     .build();
+    public static BusMessage busMessage(Message message) {
+        return ((BusMessage.Builder) Sample.builderForType(BusMessage.class))
+                .setContents(pack(message))
+                .build();
     }
 
     public static String errorType(Ack response) {
@@ -95,8 +93,16 @@ public class BusesTestEnv {
                        .getType();
     }
 
-    interface TestMessageDispatcher extends MessageDispatcher<TestMessageClass, TestEnvelope, BusMessageId> {
+    private static Error error(String type) {
+        return Error.newBuilder()
+                    .setType(type)
+                    .build();
+    }
 
+    private static Status statusOk() {
+        return Status.newBuilder()
+                     .setOk(Empty.getDefaultInstance())
+                     .build();
     }
 
     public static class TestMessageContentsDispatcher implements TestMessageDispatcher {
@@ -120,10 +126,12 @@ public class BusesTestEnv {
     public static class TestMessageBus extends Bus<BusMessage, TestEnvelope, TestMessageClass, TestMessageDispatcher> {
 
         private EnvelopeValidator<TestEnvelope> validator;
+        private final ArrayList<BusFilter<TestEnvelope>> filters;
         private final List storedMessages;
 
         private TestMessageBus() {
             storedMessages = Lists.newArrayList();
+            filters = Lists.newArrayList();
         }
 
         @Override
@@ -143,7 +151,7 @@ public class BusesTestEnv {
 
         @Override
         protected Deque<BusFilter<TestEnvelope>> createFilterChain() {
-            return Queues.newArrayDeque();
+            return Queues.newArrayDeque(filters);
         }
 
         @Override
@@ -185,6 +193,10 @@ public class BusesTestEnv {
             return ImmutableList.copyOf(storedMessages);
         }
 
+        public void register(BusFilter<TestEnvelope> filter) {
+            filters.add(filter);
+        }
+
         static class TestDeadMessageTap implements DeadMessageTap<TestEnvelope> {
             @Override
             public MessageUnhandled capture(TestEnvelope message) {
@@ -215,6 +227,83 @@ public class BusesTestEnv {
             }
         }
 
+    }
+
+    public static class FailingFilter extends AbstractBusFilter<TestEnvelope> {
+
+        @Override
+        public Optional<Ack> accept(TestEnvelope envelope) {
+            final MessageRejection exception = new CustomFilterException();
+            final Any packedId = Identifier.pack(envelope.getId());
+            final Ack result = reject(packedId, exception.asError());
+            return Optional.of(result);
+        }
+    }
+
+    public static class SuccessfulFilter extends AbstractBusFilter<TestEnvelope> {
+
+        private boolean passed = false;
+
+        @Override
+        public Optional<Ack> accept(TestEnvelope envelope) {
+            passed = true;
+            return Optional.absent();
+        }
+
+        public boolean passed() {
+            return passed;
+        }
+    }
+
+    public static class DeadMessageException extends RuntimeException implements MessageUnhandled {
+
+        private static final long serialVersionUID = 0L;
+
+        public static final String TYPE = DeadMessageException.class.getCanonicalName();
+
+        @Override
+        public Error asError() {
+            return error(TYPE);
+        }
+
+        @Override
+        public Throwable asThrowable() {
+            return this;
+        }
+    }
+
+    public static class TestValidatorException extends RuntimeException implements MessageInvalid {
+
+        private static final long serialVersionUID = 0L;
+
+        public static final String TYPE = TestValidatorException.class.getCanonicalName();
+
+        @Override
+        public Error asError() {
+            return error(TYPE);
+        }
+
+        @Override
+        public Throwable asThrowable() {
+            return this;
+        }
+    }
+
+    public static class CustomFilterException extends RuntimeException implements MessageInvalid {
+
+        private static final long serialVersionUID = 0L;
+
+        public static final String TYPE = CustomFilterException.class.getCanonicalName();
+
+        @Override
+        public Error asError() {
+            return error(TYPE);
+        }
+
+        @Override
+        public Throwable asThrowable() {
+            return this;
+        }
     }
 
     static class TestEnvelope extends AbstractMessageEnvelope<BusMessageId, BusMessage, BusMessageContext> {
@@ -276,42 +365,8 @@ public class BusesTestEnv {
         }
     }
 
-    public static class DeadMessageException extends RuntimeException implements MessageUnhandled {
+    interface TestMessageDispatcher extends MessageDispatcher<TestMessageClass, TestEnvelope, BusMessageId> {
 
-        private static final long serialVersionUID = 0L;
-
-        public static final String TYPE = DeadMessageException.class.getCanonicalName();
-
-        @Override
-        public Error asError() {
-            return Error.newBuilder()
-                        .setType(TYPE)
-                        .build();
-        }
-
-        @Override
-        public Throwable asThrowable() {
-            return this;
-        }
-    }
-
-    public static class TestValidatorException extends RuntimeException implements MessageInvalid {
-
-        private static final long serialVersionUID = 0L;
-
-        public static final String TYPE = TestValidatorException.class.getCanonicalName();
-
-        @Override
-        public Error asError() {
-            return Error.newBuilder()
-                        .setType(TYPE)
-                        .build();
-        }
-
-        @Override
-        public Throwable asThrowable() {
-            return this;
-        }
     }
 
 }
