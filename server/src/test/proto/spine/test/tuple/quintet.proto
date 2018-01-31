@@ -28,7 +28,13 @@ option java_package="io.spine.test.tuple.quintet";
 option java_outer_classname = "QuintentProto";
 option java_multiple_files = true;
 
-// See https://en.wikipedia.org/wiki/String_quintet for string quartet definitions.
+// Test environment data classes for testing `Quintet` tuple.
+//
+// These types are defined to have test data other than default Protobuf types, and for some fun.
+// In real life `Quintet` should contain event messages, and not value objects of some kind.
+//
+// See https://en.wikipedia.org/wiki/String_quintet for string quintet definitions.
+//
 
 //
 // A number of instrument in a quintet.
