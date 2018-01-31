@@ -51,4 +51,30 @@ public class BusesShould {
                                                       .build())
                 .testAllPublicStaticMethods(Buses.class);
     }
+
+    @Test
+    public void not_post_a_filtered_message_to_observer() {
+
+    }
+
+    @Test
+    public void not_store_a_filtered_message() {
+
+    }
+
+    @Test
+    public void deliver_a_valid_message_with_registered_dispatcher() {
+
+    }
+
+    @Test
+    public void apply_validating_filter_prior_to_dead_message_filter() {
+
+    }
+
+    @Test
+    public void apply_registered_filters_prior_to_validating_filter() {
+
+    }
+
 }
