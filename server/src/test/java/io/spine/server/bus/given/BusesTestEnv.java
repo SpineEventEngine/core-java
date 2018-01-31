@@ -105,24 +105,6 @@ public class BusesTestEnv {
                      .build();
     }
 
-    public static class TestMessageContentsDispatcher implements TestMessageDispatcher {
-
-        @Override
-        public Set<TestMessageClass> getMessageClasses() {
-            return ImmutableSet.of(TestMessageClass.of(TestMessageContents.class));
-        }
-
-        @Override
-        public BusMessageId dispatch(TestEnvelope envelope) {
-            return envelope.getId();
-        }
-
-        @Override
-        public void onError(TestEnvelope envelope, RuntimeException exception) {
-            // Do nothing.
-        }
-    }
-
     public static class TestMessageBus extends Bus<BusMessage, TestEnvelope, TestMessageClass, TestMessageDispatcher> {
 
         private EnvelopeValidator<TestEnvelope> validator;
@@ -227,6 +209,24 @@ public class BusesTestEnv {
             }
         }
 
+    }
+
+    public static class TestMessageContentsDispatcher implements TestMessageDispatcher {
+
+        @Override
+        public Set<TestMessageClass> getMessageClasses() {
+            return ImmutableSet.of(TestMessageClass.of(TestMessageContents.class));
+        }
+
+        @Override
+        public BusMessageId dispatch(TestEnvelope envelope) {
+            return envelope.getId();
+        }
+
+        @Override
+        public void onError(TestEnvelope envelope, RuntimeException exception) {
+            // Do nothing.
+        }
     }
 
     public static class FailingFilter extends AbstractBusFilter<TestEnvelope> {
