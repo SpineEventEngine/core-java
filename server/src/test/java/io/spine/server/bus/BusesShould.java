@@ -92,7 +92,7 @@ public class BusesShould {
                                                                     .failingValidation()
                                                                     .build();
 
-        testBusForError(deadBusFailingValidation, FailedValidationException.TYPE);
+        assertBusPostErrs(deadBusFailingValidation, FailedValidationException.TYPE);
     }
 
     @Test
@@ -102,7 +102,7 @@ public class BusesShould {
                                                                     .addFilter(new FailingFilter())
                                                                     .build();
 
-        testBusForError(deadBusFailingValidation, FailingFilterException.TYPE);
+        assertBusPostErrs(deadBusFailingValidation, FailingFilterException.TYPE);
     }
 
     @Test
@@ -110,7 +110,7 @@ public class BusesShould {
         final TestMessageBus busFailingValidation = busBuilder().failingValidation()
                                                                 .build();
 
-        testBusForError(busFailingValidation, FailedValidationException.TYPE);
+        assertBusPostErrs(busFailingValidation, FailedValidationException.TYPE);
     }
 
     @Test
@@ -118,23 +118,23 @@ public class BusesShould {
         final TestMessageBus bus = busBuilder().addFilter(new FailingFilter())
                                                .build();
 
-        testBusForError(bus, FailingFilterException.TYPE);
+        assertBusPostErrs(bus, FailingFilterException.TYPE);
     }
 
     @Test
     public void apply_registered_filters() {
-        final PassingFilter filter1 = new PassingFilter();
-        final PassingFilter filter2 = new PassingFilter();
+        final PassingFilter passingFilter = new PassingFilter();
+        final PassingFilter passingFilter2 = new PassingFilter();
 
-        final TestMessageBus bus = busBuilder().addFilter(filter1)
-                                               .addFilter(filter2)
+        final TestMessageBus bus = busBuilder().addFilter(passingFilter)
+                                               .addFilter(passingFilter2)
                                                .addFilter(new FailingFilter())
                                                .build();
 
-        testBusForError(bus, FailingFilterException.TYPE);
+        assertBusPostErrs(bus, FailingFilterException.TYPE);
 
-        assertTrue(filter1.passed());
-        assertTrue(filter2.passed());
+        assertTrue(passingFilter.passed());
+        assertTrue(passingFilter2.passed());
     }
 
     @Test
@@ -142,7 +142,7 @@ public class BusesShould {
         final TestMessageBus deadBus = busBuilder().withNoDispatchers()
                                                    .build();
 
-        testBusForError(deadBus, DeadMessageException.TYPE);
+        assertBusPostErrs(deadBus, DeadMessageException.TYPE);
     }
 
     private static TestMessageBus.Builder busBuilder() {
@@ -152,7 +152,7 @@ public class BusesShould {
     /**
      * Asserts that bus acknowledges the error when posting a single message.
      */
-    private static void testBusForError(TestMessageBus bus, String type) {
+    private static void assertBusPostErrs(TestMessageBus bus, String type) {
         final BusMessage message = busMessage(testContents());
         final MemoizingObserver<Ack> observer = memoizingObserver();
 
