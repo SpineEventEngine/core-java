@@ -24,21 +24,16 @@ import com.google.common.base.Optional;
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Message;
-import io.spine.test.tuple.quintet.InstrumentNumber;
-import io.spine.test.tuple.quintet.Viola;
-import io.spine.test.tuple.quintet.Violin;
-import io.spine.test.tuple.quintet.ViolinCello;
-import io.spine.validate.Validate;
 import org.junit.Test;
 
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
-import static io.spine.server.tuple.QuintetShould.InstrumentFactory.newViola;
-import static io.spine.server.tuple.QuintetShould.InstrumentFactory.newViolin;
-import static io.spine.server.tuple.QuintetShould.InstrumentFactory.newViolinCello;
-import static io.spine.server.tuple.QuintetShould.QuintetFactory.NUM_1;
-import static io.spine.server.tuple.QuintetShould.QuintetFactory.NUM_2;
-import static io.spine.server.tuple.QuintetShould.QuintetFactory.newCelloQuintet;
-import static io.spine.server.tuple.QuintetShould.QuintetFactory.newViolaQuintet;
+import static io.spine.server.tuple.given.QuintetTestEnv.InstrumentFactory.newViola;
+import static io.spine.server.tuple.given.QuintetTestEnv.InstrumentFactory.newViolin;
+import static io.spine.server.tuple.given.QuintetTestEnv.InstrumentFactory.newViolinCello;
+import static io.spine.server.tuple.given.QuintetTestEnv.QuintetFactory.NUM_1;
+import static io.spine.server.tuple.given.QuintetTestEnv.QuintetFactory.NUM_2;
+import static io.spine.server.tuple.given.QuintetTestEnv.QuintetFactory.newCelloQuintet;
+import static io.spine.server.tuple.given.QuintetTestEnv.QuintetFactory.newViolaQuintet;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -71,18 +66,9 @@ public class QuintetShould {
         reserializeAndAssert(
                 Quintet.withNullable(newViola(), newViola(), newViola(), newViola(), null)
         );
-
-        reserializeAndAssert(
-                Quintet.withNullable2(newViola(), newViola(), newViola(), null, null)
-        );
-
-        reserializeAndAssert(
-                Quintet.withNullable3(newViola(), newViola(), null, null, null)
-        );
-
-        reserializeAndAssert(
-                Quintet.withNullable4(newViola(), null, null, null, null)
-        );
+        reserializeAndAssert(Quintet.withNullable2(newViola(), newViola(), newViola(), null, null));
+        reserializeAndAssert(Quintet.withNullable3(newViola(), newViola(), null, null, null));
+        reserializeAndAssert(Quintet.withNullable4(newViola(), null, null, null, null));
     }
 
     @Test
@@ -99,93 +85,5 @@ public class QuintetShould {
         assertEquals(newViola(), celloQuintet.getC());
         assertEquals(newViolinCello(NUM_1), celloQuintet.getD());
         assertEquals(newViolinCello(NUM_2), celloQuintet.getE());
-    }
-
-    /*
-     * Test environment
-     *********************/
-
-    /**
-     * Creates typical <a href="https://en.wikipedia.org/wiki/String_quintet">String quintets</a>.
-     */
-    static class QuintetFactory {
-
-        static final InstrumentNumber NUM_1 = InstrumentNumber.newBuilder()
-                                                              .setValue(1)
-                                                              .build();
-
-        static final InstrumentNumber NUM_2 = InstrumentNumber.newBuilder()
-                                                              .setValue(2)
-                                                              .build();
-
-        /** Prevents instantiation of this utility class. */
-        private QuintetFactory() {
-        }
-
-        static Quintet<Violin, Violin, Viola, ViolinCello, ViolinCello> newCelloQuintet() {
-            return Quintet.of(newViolin(NUM_1),
-                              newViolin(NUM_2),
-                              newViola(),
-                              newViolinCello(NUM_1),
-                              newViolinCello(NUM_2));
-        }
-
-        static Quintet<Violin, Violin, Viola, Viola, ViolinCello> newViolaQuintet() {
-            return Quintet.of(newViolin(NUM_1),
-                              newViolin(NUM_2),
-                              newViola(NUM_1),
-                              newViola(NUM_2),
-                              newViolinCello());
-        }
-    }
-
-    /**
-     * Creates instruments.
-     */
-    static class InstrumentFactory {
-
-        /** Prevents instantiation of this utility class. */
-        private InstrumentFactory() {
-        }
-
-        static Violin newViolin(InstrumentNumber number) {
-            final Violin result = Violin.newBuilder()
-                                        .setNumber(number)
-                                        .build();
-            Validate.checkValid(result);
-            return result;
-        }
-
-        static Viola newViola() {
-            final Viola result = Viola.newBuilder()
-                                      .setSingle(true)
-                                      .build();
-            Validate.checkValid(result);
-            return result;
-        }
-
-        static Viola newViola(InstrumentNumber number) {
-            final Viola result = Viola.newBuilder()
-                                      .setNumber(number)
-                                      .build();
-            Validate.checkValid(result);
-            return result;
-        }
-
-        static ViolinCello newViolinCello(InstrumentNumber number) {
-            final ViolinCello result = ViolinCello.newBuilder()
-                                                  .setNumber(number)
-                                                  .build();
-            Validate.checkValid(result);
-            return result;
-        }
-
-        static ViolinCello newViolinCello() {
-            final ViolinCello result = ViolinCello.newBuilder()
-                                                  .setSingle(true)
-                                                  .build();
-            Validate.checkValid(result);
-            return result;
-        }
     }
 }
