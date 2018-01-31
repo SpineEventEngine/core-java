@@ -63,6 +63,7 @@ import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.bus.Buses.acknowledge;
 import static io.spine.server.bus.Buses.reject;
+import static io.spine.server.bus.given.BusesTestEnv.TestMessageClass.TEST_MESSAGE_CONTENTS_CLASS;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -82,6 +83,12 @@ public class BusesTestEnv {
 
     public static TestMessageContents testContents() {
         return TestMessageContents.newBuilder()
+                                  .build();
+    }
+
+    public static TestMessageContents testContents(boolean flag) {
+        return TestMessageContents.newBuilder()
+                                  .setFlag(flag)
                                   .build();
     }
 
@@ -221,7 +228,7 @@ public class BusesTestEnv {
         }
 
         /**
-         * A filter which always rejects the message with {@link Exceptions.FailingFilterException}.
+         * A filter which always rejects the message with a {@link Exceptions.FailingFilterException}.
          */
         public static class FailingFilter extends AbstractBusFilter<TestEnvelope> {
 
@@ -249,6 +256,30 @@ public class BusesTestEnv {
 
             public boolean passed() {
                 return passed;
+            }
+        }
+
+        /**
+         * A filter which rejects only {@link TestMessageContents} messages with
+         * {@link TestMessageContents#getFlag()} set to {@code false} with a
+         * {@link Exceptions.FailingFilterException}.
+         */
+        public static class ContentsFlagFilter extends AbstractBusFilter<TestEnvelope> {
+
+            @Override
+            public Optional<Ack> accept(TestEnvelope envelope) {
+                final Message message = envelope.getMessage();
+                if (!TEST_MESSAGE_CONTENTS_CLASS.equals(TestMessageClass.of(message))) {
+                    return Optional.absent();
+                }
+                final TestMessageContents contents = (TestMessageContents) message;
+                if (contents.getFlag()) {
+                    return Optional.absent();
+                }
+                final MessageRejection exception = new Exceptions.FailingFilterException();
+                final Any packedId = Identifier.pack(envelope.getId());
+                final Ack result = reject(packedId, exception.asError());
+                return Optional.of(result);
             }
         }
     }
@@ -411,6 +442,7 @@ public class BusesTestEnv {
     }
 
     static class TestMessageClass extends MessageClass {
+        static final TestMessageClass TEST_MESSAGE_CONTENTS_CLASS = of(TestMessageContents.class);
 
         private static final long serialVersionUID = 0L;
 

@@ -54,5 +54,5 @@ message BusMessageContext {
 }
 
 message TestMessageContents {
-    
+    bool flag = 1;
 }
