@@ -48,15 +48,13 @@ public class EventBusTestEnv {
                                .build();
     }
 
-    private EventBusTestEnv() {
-    }
+    private EventBusTestEnv() {}
 
     private static class EventMessage {
 
         private static final ProjectStarted PROJECT_STARTED = projectStarted(PROJECT_ID);
 
-        private EventMessage() {
-        }
+        private EventMessage() {}
 
         private static ProjectStarted projectStarted() {
             return PROJECT_STARTED;
@@ -89,8 +87,7 @@ public class EventBusTestEnv {
         private static final TestEventFactory factory =
                 TestEventFactory.newInstance(pack(PROJECT_ID), GivenEvent.class);
 
-        private GivenEvent() {
-        }
+        private GivenEvent() {}
 
         private static TestEventFactory eventFactory() {
             return factory;
