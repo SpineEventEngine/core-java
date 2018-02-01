@@ -28,8 +28,8 @@ option java_package = "io.spine.test.event.command";
 option java_outer_classname = "EventCommandsProto";
 option java_multiple_files = true;
 
-import "spine/net/email_address.proto";
 import "spine/core/user_id.proto";
+import "spine/net/email_address.proto";
 import "spine/test/event/project.proto";
 import "spine/test/event/team.proto";
 
