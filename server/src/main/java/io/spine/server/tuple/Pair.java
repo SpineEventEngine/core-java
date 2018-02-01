@@ -27,12 +27,18 @@ import io.spine.server.tuple.Element.BValue;
 
 import javax.annotation.Nullable;
 
+import static com.google.common.base.Optional.fromNullable;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.tuple.Element.value;
 
 /**
  * A tuple with two elements.
  *
- * <p>The second element is optional.
+ * <p>The first element must be a non-default {@link Message}
+ * (and not {@link com.google.protobuf.Empty Empty}).
+ *
+ * <p>The second element can be {@code Message}, {@link com.google.common.base.Optional Optional} or
+ * {@link Either}.
  *
  * @param <A> the type of the first element
  * @param <B> the type of the second element
@@ -65,7 +71,17 @@ public final class Pair<A extends Message, B>
     Pair<A, Optional<B>> withNullable(A a, @Nullable B b) {
         checkNotNullOrEmpty(Pair.class, a);
         checkNotEmpty(Pair.class, b);
-        final Pair<A, Optional<B>> result = new Pair<>(a, Optional.fromNullable(b));
+        final Pair<A, Optional<B>> result = new Pair<>(a, fromNullable(b));
+        return result;
+    }
+
+    /**
+     * Creates a pair with the second element of a type descending from {@link Either}.
+     */
+    public static <A extends Message, B extends Either> Pair<A, B> withEither(A a, B b) {
+        checkNotNullOrEmpty(Pair.class, a);
+        checkNotNull(b);
+        final Pair<A, B> result = new Pair<>(a, b);
         return result;
     }
 

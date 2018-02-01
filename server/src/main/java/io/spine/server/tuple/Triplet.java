@@ -28,12 +28,17 @@ import io.spine.server.tuple.Element.CValue;
 
 import javax.annotation.Nullable;
 
+import static com.google.common.base.Optional.fromNullable;
 import static io.spine.server.tuple.Element.value;
 
 /**
  * A tuple with three elements.
  *
- * <p>The second and third elements are optional.
+ * <p>The first element must be a non-default {@link Message}
+ * (and not {@link com.google.protobuf.Empty Empty}).
+ *
+ * <p>Other two can be {@code Message}, {@link com.google.common.base.Optional Optional} or
+ * {@link Either}.
  *
  * @param <A> the type of the first element
  * @param <B> the type of the second element
@@ -56,9 +61,19 @@ public final class Triplet<A extends Message, B, C>
      */
     public static <A extends Message, B extends Message, C extends Message>
     Triplet<A, B, C> of(A a, B b, C c) {
-        final Triplet<A, B, C> result = new Triplet<>(checkNotNullOrEmpty(Triplet.class, a),
-                                                      checkNotNullOrEmpty(Triplet.class, b),
-                                                      checkNotNullOrEmpty(Triplet.class, c));
+        checkAllNotNullOrEmpty(Triplet.class, a, b, c);
+        final Triplet<A, B, C> result = new Triplet<>(a, b, c);
+        return result;
+    }
+
+    /**
+     * Creates a triplet with the last element optional.
+     */
+    public static <A extends Message, B extends Message, C extends Message>
+    Triplet<A, B, Optional<C>> withNullable(A a, B b, @Nullable C c) {
+        checkAllNotNullOrEmpty(Triplet.class, a, b);
+        checkNotEmpty(Triplet.class, c);
+        final Triplet<A, B, Optional<C>> result = new Triplet<>(a, b, fromNullable(c));
         return result;
     }
 
@@ -66,12 +81,11 @@ public final class Triplet<A extends Message, B, C>
      * Creates a new triplet with optional second and third elements.
      */
     public static <A extends Message, B extends Message, C extends Message>
-    Triplet<A, Optional<B>, Optional<C>> withNullable(A a, @Nullable B b, @Nullable C c) {
+    Triplet<A, Optional<B>, Optional<C>> withNullable2(A a, @Nullable B b, @Nullable C c) {
         checkNotNullOrEmpty(Triplet.class, a);
-        checkNotEmpty(Triplet.class, b);
-        checkNotEmpty(Triplet.class, c);
+        checkAllNotEmpty(Triplet.class, b, c);
         final Triplet<A, Optional<B>, Optional<C>> result =
-                new Triplet<>(a, Optional.fromNullable(b), Optional.fromNullable(c));
+                new Triplet<>(a, fromNullable(b), fromNullable(c));
         return result;
     }
 

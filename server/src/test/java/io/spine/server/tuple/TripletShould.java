@@ -67,12 +67,15 @@ public class TripletShould {
 
     @Test
     public void support_equality() {
-        final Triplet<StringValue, BoolValue, UInt32Value> t1 = Triplet.of(a, b, c);
-        final Triplet<StringValue, BoolValue, UInt32Value> t2 = Triplet.of(a, b, c);
-        final Triplet<BoolValue, StringValue, UInt32Value> t3 = Triplet.of(b, a, c);
+        new EqualsTester().addEqualityGroup(Triplet.of(a, b, c), Triplet.of(a, b, c))
 
-        new EqualsTester().addEqualityGroup(t1, t2)
-                          .addEqualityGroup(t3)
+                          .addEqualityGroup(Triplet.withNullable(a, b, c))
+                          .addEqualityGroup(Triplet.withNullable(a, b, null))
+
+                          .addEqualityGroup(Triplet.withNullable2(a, b, c))
+                          .addEqualityGroup(Triplet.withNullable2(a, b, null))
+                          .addEqualityGroup(Triplet.withNullable2(a, null, c))
+                          .addEqualityGroup(Triplet.withNullable2(a, null, null))
                           .testEquals();
     }
 
@@ -101,7 +104,7 @@ public class TripletShould {
     @Test
     public void allow_optional_elements_present() {
         Triplet<StringValue, Optional<BoolValue>, Optional<UInt32Value>> optTriplet =
-                Triplet.withNullable(a, b, c);
+                Triplet.withNullable2(a, b, c);
 
         assertEquals(a, optTriplet.getA());
         assertEquals(Optional.of(b), optTriplet.getB());
@@ -111,7 +114,7 @@ public class TripletShould {
     @Test
     public void allow_optional_elements_absent() {
         Triplet<StringValue, Optional<BoolValue>, Optional<UInt32Value>> optTriplet =
-                Triplet.withNullable(a, null, null);
+                Triplet.withNullable2(a, null, null);
 
         assertEquals(a, optTriplet.getA());
         assertEquals(Optional.absent(), optTriplet.getB());
@@ -121,7 +124,7 @@ public class TripletShould {
     @Test
     public void return_Empty_for_absent_Optional_in_iterator() {
         Triplet<StringValue, Optional<BoolValue>, Optional<UInt32Value>> optTriplet =
-                Triplet.withNullable(a, null, null);
+                Triplet.withNullable2(a, null, null);
 
         final Iterator<Message> iterator = optTriplet.iterator();
 
@@ -144,7 +147,7 @@ public class TripletShould {
     @Test
     public void return_values_from_optional_in_iteration() {
         Triplet<StringValue, Optional<BoolValue>, Optional<UInt32Value>> optTriplet =
-                Triplet.withNullable(a, b, c);
+                Triplet.withNullable2(a, b, c);
 
         final Iterator<Message> iterator = optTriplet.iterator();
 
@@ -157,8 +160,12 @@ public class TripletShould {
     @Test
     public void serialize() {
         reserializeAndAssert(Triplet.of(a, b, c));
-        reserializeAndAssert(Triplet.withNullable(a, null, null));
+
+        reserializeAndAssert(Triplet.withNullable(a, b, c));
         reserializeAndAssert(Triplet.withNullable(a, b, null));
-        reserializeAndAssert(Triplet.withNullable(a, null, c));
+
+        reserializeAndAssert(Triplet.withNullable2(a, null, null));
+        reserializeAndAssert(Triplet.withNullable2(a, b, null));
+        reserializeAndAssert(Triplet.withNullable2(a, null, c));
     }
 }
