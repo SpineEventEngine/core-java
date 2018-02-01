@@ -146,6 +146,24 @@ public class BusesShould {
         assertSize(0, bus.storedMessages());
     }
 
+
+    @Test
+    public void store_multiple_messages_passing_filters() {
+        final TestMessageBus bus = busBuilder().addFilter(new ContentsFlagFilter())
+                                               .build();
+        final BusMessage message = busMessage(testContents(true));
+        final BusMessage message2 = busMessage(testContents(true));
+
+        final List<BusMessage> messages = asList(message, message2);
+        final MemoizingObserver<Ack> observer = memoizingObserver();
+
+        bus.post(messages, observer);
+
+        final List<Ack> responses = observer.responses();
+        assertSize(2, responses);
+        assertSize(2, bus.storedMessages());
+    }
+
     @Test
     public void store_only_messages_passing_filters() {
         final TestMessageBus bus = busBuilder().addFilter(new ContentsFlagFilter())
