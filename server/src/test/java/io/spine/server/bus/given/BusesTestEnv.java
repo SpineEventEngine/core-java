@@ -477,5 +477,4 @@ public class BusesTestEnv {
     interface TestMessageDispatcher
             extends MessageDispatcher<TestMessageClass, TestEnvelope, BusMessageId> {
     }
-
 }

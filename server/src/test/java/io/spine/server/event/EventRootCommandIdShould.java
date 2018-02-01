@@ -188,5 +188,4 @@ public class EventRootCommandIdShould {
         final List<Event> results = observer.responses();
         return results;
     }
-
 }

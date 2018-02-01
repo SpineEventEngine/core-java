@@ -208,5 +208,4 @@ public class BusesShould {
         assertSize(3, responses);
         assertSize(0, bus.storedMessages());
     }
-
 }
