@@ -18,19 +18,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.command;
+package io.spine.server.commandbus;
 
 import org.junit.Test;
 
-public class CommandShould {
+public class CommandBusShould {
 
     @Test
-    public void be_applied() {
+    public void dispatch_a_command() {
 
     }
-    
+
     @Test
-    public void not_be_applied_when_reused() {
-        
+    public void filter_out_a_reused_command() {
+
     }
 }
