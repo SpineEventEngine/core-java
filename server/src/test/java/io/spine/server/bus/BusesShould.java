@@ -27,20 +27,19 @@ import io.spine.base.Error;
 import io.spine.core.Ack;
 import io.spine.core.Rejection;
 import io.spine.grpc.MemoizingObserver;
-import io.spine.server.bus.given.BusesTestEnv.Exceptions.DeadMessageException;
-import io.spine.server.bus.given.BusesTestEnv.Exceptions.FailingFilterException;
-import io.spine.server.bus.given.BusesTestEnv.Exceptions.FailingValidationException;
+import io.spine.server.bus.given.BusesTestEnv.Exceptions.ErrorType;
 import io.spine.server.bus.given.BusesTestEnv.Filters.ContentsFlagFilter;
 import io.spine.server.bus.given.BusesTestEnv.Filters.FailingFilter;
 import io.spine.server.bus.given.BusesTestEnv.Filters.PassingFilter;
 import io.spine.server.bus.given.BusesTestEnv.TestMessageBus;
 import io.spine.test.bus.BusMessage;
+import io.spine.test.bus.TestMessageContents;
 import org.junit.Test;
 
-import java.util.Arrays;
 import java.util.List;
 
 import static io.spine.grpc.StreamObservers.memoizingObserver;
+import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.bus.given.BusesTestEnv.STATUS_OK;
 import static io.spine.server.bus.given.BusesTestEnv.busBuilder;
 import static io.spine.server.bus.given.BusesTestEnv.busMessage;
@@ -48,6 +47,7 @@ import static io.spine.server.bus.given.BusesTestEnv.errorType;
 import static io.spine.server.bus.given.BusesTestEnv.testContents;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Verify.assertSize;
+import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -75,7 +75,7 @@ public class BusesShould {
     }
 
     @Test
-    public void deliver_a_valid_message_with_registered_dispatcher() {
+    public void acknowledged_valid_message_delivery() {
         final TestMessageBus bus = busBuilder().build();
         final BusMessage message = busMessage(testContents());
         final MemoizingObserver<Ack> observer = memoizingObserver();
@@ -90,30 +90,19 @@ public class BusesShould {
     }
 
     @Test
-    public void apply_the_registered_filters_prior_to_the_dead_message_filter() {
-        final TestMessageBus bus = busBuilder().withNoDispatchers()
-                                               .addFilter(new FailingFilter())
-                                               .build();
-
-        assertBusPostErrs(bus, FailingFilterException.TYPE);
-    }
-
-    @Test
-    public void apply_the_validating_filter_prior_to_registered_filters() {
-        final TestMessageBus bus = busBuilder().withNoDispatchers()
-                                               .failingValidation()
-                                               .addFilter(new FailingFilter())
-                                               .build();
-
-        assertBusPostErrs(bus, FailingValidationException.TYPE);
-    }
-
-    @Test
     public void apply_the_validating_filter() {
         final TestMessageBus bus = busBuilder().failingValidation()
                                                .build();
 
-        assertBusPostErrs(bus, FailingValidationException.TYPE);
+        assertBusPostErrs(bus, ErrorType.FAILING_VALIDATION);
+    }
+
+    @Test
+    public void apply_the_dead_message_filter() {
+        final TestMessageBus bus = busBuilder().withNoDispatchers()
+                                               .build();
+
+        assertBusPostErrs(bus, ErrorType.DEAD_MESSAGE);
     }
 
     @Test
@@ -121,7 +110,7 @@ public class BusesShould {
         final TestMessageBus bus = busBuilder().addFilter(new FailingFilter())
                                                .build();
 
-        assertBusPostErrs(bus, FailingFilterException.TYPE);
+        assertBusPostErrs(bus, ErrorType.FAILING_FILTER);
     }
 
     @Test
@@ -134,24 +123,16 @@ public class BusesShould {
                                                .addFilter(new FailingFilter())
                                                .build();
 
-        assertBusPostErrs(bus, FailingFilterException.TYPE);
+        assertBusPostErrs(bus, ErrorType.FAILING_FILTER);
 
         assertTrue(passingFilter.passed());
         assertTrue(passingFilter2.passed());
     }
 
-    @Test
-    public void apply_the_dead_message_filter() {
-        final TestMessageBus bus = busBuilder().withNoDispatchers()
-                                               .build();
-
-        assertBusPostErrs(bus, DeadMessageException.TYPE);
-    }
-
     /**
      * Asserts that bus acknowledges the error when posting a single message.
      */
-    private static void assertBusPostErrs(TestMessageBus bus, String type) {
+    private static void assertBusPostErrs(TestMessageBus bus, ErrorType type) {
         final BusMessage message = busMessage(testContents());
         final MemoizingObserver<Ack> observer = memoizingObserver();
 
@@ -161,26 +142,53 @@ public class BusesShould {
         assertSize(1, responses);
 
         final Ack response = responses.get(0);
-        assertEquals(type, errorType(response));
+        assertEquals(type.toString(), errorType(response));
         assertSize(0, bus.storedMessages());
     }
 
     @Test
-    public void store_only_filtered_events() {
+    public void store_only_messages_passing_filters() {
         final TestMessageBus bus = busBuilder().addFilter(new ContentsFlagFilter())
                                                .build();
         final BusMessage message = busMessage(testContents(true));
-        final BusMessage message2 = busMessage(testContents(true));
+        final BusMessage message2 = busMessage(testContents(false));
+        final BusMessage message3 = busMessage(testContents(true));
+        final BusMessage message4 = busMessage(testContents(false));
+        final BusMessage message5 = busMessage(testContents(false));
+
+        final List<BusMessage> messages = asList(message, message2, message3, message4, message5);
+        final MemoizingObserver<Ack> observer = memoizingObserver();
+
+        bus.post(messages, observer);
+
+        final List<Ack> responses = observer.responses();
+        assertSize(5, responses);
+
+        final List<BusMessage> storedMessages = bus.storedMessages();
+        assertSize(2, storedMessages);
+
+        for (BusMessage storedMessage : storedMessages) {
+            final TestMessageContents contents = unpack(storedMessage.getContents());
+            assertTrue(contents.getFlag());
+        }
+    }
+
+    @Test
+    public void not_store_any_messages_when_they_are_failing_filtering() {
+        final TestMessageBus bus = busBuilder().addFilter(new ContentsFlagFilter())
+                                               .build();
+        final BusMessage message = busMessage(testContents(false));
+        final BusMessage message2 = busMessage(testContents(false));
         final BusMessage message3 = busMessage(testContents(false));
 
-        final List<BusMessage> messages = Arrays.asList(message, message2, message3);
+        final List<BusMessage> messages = asList(message, message2, message3);
         final MemoizingObserver<Ack> observer = memoizingObserver();
 
         bus.post(messages, observer);
 
         final List<Ack> responses = observer.responses();
         assertSize(3, responses);
-        assertSize(2, bus.storedMessages());
+        assertSize(0, bus.storedMessages());
     }
 
 }

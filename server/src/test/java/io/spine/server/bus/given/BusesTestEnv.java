@@ -21,10 +21,8 @@
 package io.spine.server.bus.given;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
@@ -52,12 +50,13 @@ import io.spine.testdata.Sample;
 import io.spine.type.MessageClass;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Deque;
 import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.ImmutableList.copyOf;
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Queues.newArrayDeque;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
@@ -116,14 +115,17 @@ public class BusesTestEnv {
                      .build();
     }
 
+    /**
+     * A valid message bus that stores the messages to a list.
+     */
     public static class TestMessageBus extends Bus<BusMessage, TestEnvelope, TestMessageClass, TestMessageDispatcher> {
 
         private final EnvelopeValidator<TestEnvelope> validator;
         private final List<BusFilter<TestEnvelope>> filters;
-        private final List storedMessages;
+        private final List<BusMessage> storedMessages;
 
         private TestMessageBus(Builder builder) {
-            storedMessages = Lists.newArrayList();
+            storedMessages = newArrayList();
             filters = builder.filters;
             validator = builder.validator;
         }
@@ -155,18 +157,18 @@ public class BusesTestEnv {
 
         @Override
         protected Ack doPost(TestEnvelope envelope) {
-            final Any packedId = Identifier.pack(envelope.getId());
+            final Any packedId = pack(envelope.getId());
             final Ack result = acknowledge(packedId);
             return result;
         }
 
         @Override
-        protected void store(Iterable messages) {
+        protected void store(Iterable<BusMessage> messages) {
             Iterables.addAll(storedMessages, messages);
         }
 
-        public Collection<?> storedMessages() {
-            return ImmutableList.copyOf(storedMessages);
+        public List<BusMessage> storedMessages() {
+            return copyOf(storedMessages);
         }
 
         public static Builder newBuilder() {
@@ -184,7 +186,7 @@ public class BusesTestEnv {
 
             private Builder() {
                 validator = new Validators.PassingValidator();
-                filters = Lists.newArrayList();
+                filters = newArrayList();
                 addDefaultDispatcher = true;
             }
 
@@ -290,6 +292,12 @@ public class BusesTestEnv {
             // Prevents instantiation.
         }
 
+        public enum ErrorType {
+            DEAD_MESSAGE,
+            FAILING_VALIDATION,
+            FAILING_FILTER
+        }
+
         /**
          * An exception returned by a {@link TestMessageBus.TestDeadMessageTap} in case the message is dead.
          */
@@ -297,11 +305,9 @@ public class BusesTestEnv {
 
             private static final long serialVersionUID = 0L;
 
-            public static final String TYPE = DeadMessageException.class.getCanonicalName();
-
             @Override
             public Error asError() {
-                return error(TYPE);
+                return error(ErrorType.DEAD_MESSAGE.toString());
             }
 
             @Override
@@ -317,11 +323,9 @@ public class BusesTestEnv {
 
             private static final long serialVersionUID = 0L;
 
-            public static final String TYPE = FailingValidationException.class.getCanonicalName();
-
             @Override
             public Error asError() {
-                return error(TYPE);
+                return error(ErrorType.FAILING_VALIDATION.toString());
             }
 
             @Override
@@ -337,11 +341,9 @@ public class BusesTestEnv {
 
             private static final long serialVersionUID = 0L;
 
-            public static final String TYPE = FailingFilterException.class.getCanonicalName();
-
             @Override
             public Error asError() {
-                return error(TYPE);
+                return error(ErrorType.FAILING_FILTER.toString());
             }
 
             @Override
