@@ -511,7 +511,7 @@ public class EventBus
     }
 
     /**
-     * Handles a dead event by saving the event to the {@link EventStore} and producing an 
+     * Handles a dead event by saving it to the {@link EventStore} and producing an 
      * {@link UnsupportedEventException}.
      *
      * <p>We must store dead events, as they are still emitted by some entity and therefore are 
@@ -519,13 +519,14 @@ public class EventBus
      */
     private class DeadEventTap implements DeadMessageTap<EventEnvelope> {
         @Override
-        public MessageUnhandled capture(EventEnvelope envelope) {
+        public UnsupportedEventException capture(EventEnvelope envelope) {
 
             final Event event = envelope.getOuterObject();
             store(of(event));
 
             final Message message = envelope.getMessage();
-            return new UnsupportedEventException(message);
+            final UnsupportedEventException exception = new UnsupportedEventException(message);
+            return exception;
         }
     }
 }
