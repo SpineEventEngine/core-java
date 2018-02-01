@@ -46,7 +46,6 @@ message BusMessage {
     google.protobuf.Any contents = 2 [(required) = true];
     
     BusMessageContext context = 3;
-    
 }
 
 message BusMessageContext {
