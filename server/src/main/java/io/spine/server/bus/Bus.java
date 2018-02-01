@@ -200,8 +200,8 @@ public abstract class Bus<T extends Message,
             final BusFilter<E> deadMsgFilter = new DeadMessageFilter<>(getDeadMessageHandler(),
                                                                        registry());
             final BusFilter<E> validatingFilter = new ValidatingFilter<>(getValidator());
-            filters.addFirst(validatingFilter);
-            filters.addLast(deadMsgFilter);
+            filters.push(validatingFilter);
+            filters.push(deadMsgFilter);
             filterChain = new FilterChain<>(filters);
         }
         return filterChain;
