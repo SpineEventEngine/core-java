@@ -157,7 +157,7 @@ public class EventRootCommandIdShould {
         postCommand(command);
 
         final List<Event> events = readEvents();
-        // Two events should be created: the `InvitationAccepted` and the `TeamMemberAdded`.
+        // Two events should be created: the `EvInvitationAccepted` and the `EvTeamMemberAdded`.
         assertSize(2, events);
 
         final Event reaction = events.get(1);

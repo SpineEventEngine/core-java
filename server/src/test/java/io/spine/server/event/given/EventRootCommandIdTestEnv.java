@@ -35,30 +35,30 @@ import io.spine.server.event.EventStreamQuery;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.server.route.EventRoute;
-import io.spine.test.event.InvitationAccepted;
-import io.spine.test.event.Member;
-import io.spine.test.event.MemberInvitation;
+import io.spine.test.event.EvInvitationAccepted;
+import io.spine.test.event.EvMember;
+import io.spine.test.event.EvMemberInvitation;
+import io.spine.test.event.EvTeam;
+import io.spine.test.event.EvTeamCreation;
+import io.spine.test.event.EvTeamId;
+import io.spine.test.event.EvTeamMemberAdded;
+import io.spine.test.event.EvTeamMemberInvited;
+import io.spine.test.event.EvTeamProjectAdded;
+import io.spine.test.event.EvUserSignUp;
 import io.spine.test.event.Project;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.ProjectId;
 import io.spine.test.event.ProjectVBuilder;
 import io.spine.test.event.Task;
 import io.spine.test.event.TaskAdded;
-import io.spine.test.event.Team;
-import io.spine.test.event.TeamCreation;
-import io.spine.test.event.TeamCreationVBuilder;
-import io.spine.test.event.TeamId;
-import io.spine.test.event.TeamMemberAdded;
-import io.spine.test.event.TeamMemberInvited;
-import io.spine.test.event.TeamProjectAdded;
-import io.spine.test.event.TeamVBuilder;
-import io.spine.test.event.UserSignUp;
-import io.spine.test.event.UserSignUpVBuilder;
-import io.spine.test.event.command.AcceptInvitation;
+import io.spine.test.event.EvTeamCreationVBuilder;
+import io.spine.test.event.EvTeamVBuilder;
+import io.spine.test.event.EvUserSignUpVBuilder;
+import io.spine.test.event.command.EvAcceptInvitation;
 import io.spine.test.event.command.AddTasks;
-import io.spine.test.event.command.AddTeamMember;
+import io.spine.test.event.command.EvAddTeamMember;
 import io.spine.test.event.command.CreateProject;
-import io.spine.test.event.command.InviteTeamMembers;
+import io.spine.test.event.command.EvInviteTeamMembers;
 import io.spine.testdata.Sample;
 
 import java.util.List;
@@ -81,12 +81,12 @@ public class EventRootCommandIdTestEnv {
                 .build();
     }
 
-    public static TeamId teamId() {
-        return ((TeamId.Builder) Sample.builderForType(TeamId.class))
+    public static EvTeamId teamId() {
+        return ((EvTeamId.Builder) Sample.builderForType(EvTeamId.class))
                 .build();
     }
 
-    public static CreateProject createProject(ProjectId projectId, TeamId teamId) {
+    public static CreateProject createProject(ProjectId projectId, EvTeamId teamId) {
         checkNotNull(projectId);
         checkNotNull(teamId);
 
@@ -110,27 +110,27 @@ public class EventRootCommandIdTestEnv {
                       .build();
     }
 
-    public static AddTeamMember addTeamMember(TeamId teamId) {
+    public static EvAddTeamMember addTeamMember(EvTeamId teamId) {
         checkNotNull(teamId);
 
-        return ((AddTeamMember.Builder) Sample.builderForType(AddTeamMember.class))
+        return ((EvAddTeamMember.Builder) Sample.builderForType(EvAddTeamMember.class))
                 .setTeamId(teamId)
                 .build();
     }
 
-    public static AcceptInvitation acceptInvitation(TeamId teamId) {
+    public static EvAcceptInvitation acceptInvitation(EvTeamId teamId) {
         checkNotNull(teamId);
 
-        final MemberInvitation invitation = memberInvitation(teamId);
-        return ((AcceptInvitation.Builder) Sample.builderForType(AcceptInvitation.class))
+        final EvMemberInvitation invitation = memberInvitation(teamId);
+        return ((EvAcceptInvitation.Builder) Sample.builderForType(EvAcceptInvitation.class))
                 .setInvitation(invitation)
                 .build();
     }
 
-    public static InviteTeamMembers inviteTeamMembers(TeamId teamId, int count) {
+    public static EvInviteTeamMembers inviteTeamMembers(EvTeamId teamId, int count) {
         checkNotNull(teamId);
 
-        final InviteTeamMembers.Builder builder = InviteTeamMembers.newBuilder();
+        final EvInviteTeamMembers.Builder builder = EvInviteTeamMembers.newBuilder();
         for (int i = 0; i < count; i++) {
             final EmailAddress task = (EmailAddress) Sample.builderForType(EmailAddress.class)
                                                            .build();
@@ -141,8 +141,8 @@ public class EventRootCommandIdTestEnv {
                       .build();
     }
 
-    private static MemberInvitation memberInvitation(TeamId teamId) {
-        return ((MemberInvitation.Builder) Sample.builderForType(MemberInvitation.class))
+    private static EvMemberInvitation memberInvitation(EvTeamId teamId) {
+        return ((EvMemberInvitation.Builder) Sample.builderForType(EvMemberInvitation.class))
                 .setTeamId(teamId)
                 .build();
     }
@@ -166,16 +166,16 @@ public class EventRootCommandIdTestEnv {
      */
     @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
     public static class TeamAggregateRepository
-            extends AggregateRepository<TeamId, TeamAggregate> {
+            extends AggregateRepository<EvTeamId, TeamAggregate> {
 
         public TeamAggregateRepository() {
             getEventRouting()
                     .route(ProjectCreated.class,
-                           new EventRoute<TeamId, ProjectCreated>() {
+                           new EventRoute<EvTeamId, ProjectCreated>() {
                                private static final long serialVersionUID = 0L;
 
                                @Override
-                               public Set<TeamId> apply(ProjectCreated msg, EventContext ctx) {
+                               public Set<EvTeamId> apply(ProjectCreated msg, EventContext ctx) {
                                    return singleton(msg.getTeamId());
                                }
                            });
@@ -183,23 +183,23 @@ public class EventRootCommandIdTestEnv {
     }
 
     /**
-     * Routes the {@link InvitationAccepted} event to the {@link TeamCreationProcessManager} which 
+     * Routes the {@link EvInvitationAccepted} event to the {@link TeamCreationProcessManager} which 
      * created the invitation. This is done for the purposes of the 
      * {@linkplain EventRootCommandIdShould#match_the_id_of_an_external_event_handled_by_a_process_manager()} 
      * test.
      */
     @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
     public static class TeamCreationRepository
-            extends ProcessManagerRepository<TeamId, TeamCreationProcessManager, TeamCreation> {
+            extends ProcessManagerRepository<EvTeamId, TeamCreationProcessManager, EvTeamCreation> {
 
         public TeamCreationRepository() {
             getEventRouting()
-                    .route(InvitationAccepted.class,
-                           new EventRoute<TeamId, InvitationAccepted>() {
+                    .route(EvInvitationAccepted.class,
+                           new EventRoute<EvTeamId, EvInvitationAccepted>() {
                                private static final long serialVersionUID = 0L;
 
                                @Override
-                               public Set<TeamId> apply(InvitationAccepted msg, EventContext ctx) {
+                               public Set<EvTeamId> apply(EvInvitationAccepted msg, EventContext ctx) {
                                    return singleton(msg.getInvitation()
                                                        .getTeamId());
                                }
@@ -208,7 +208,7 @@ public class EventRootCommandIdTestEnv {
     }
 
     public static class UserSignUpRepository
-            extends ProcessManagerRepository<UserId, UserSignUpProcessManager, UserSignUp> { }
+            extends ProcessManagerRepository<UserId, UserSignUpProcessManager, EvUserSignUp> { }
 
     static class ProjectAggregate extends Aggregate<ProjectId, Project, ProjectVBuilder> {
 
@@ -262,56 +262,56 @@ public class EventRootCommandIdTestEnv {
         }
     }
 
-    static class TeamAggregate extends Aggregate<TeamId, Team, TeamVBuilder> {
+    static class TeamAggregate extends Aggregate<EvTeamId, EvTeam, EvTeamVBuilder> {
 
-        private TeamAggregate(TeamId id) {
+        private TeamAggregate(EvTeamId id) {
             super(id);
         }
 
         @React
-        TeamProjectAdded on(ProjectCreated command, EventContext ctx) {
-            final TeamProjectAdded event = projectAdded(command);
+        EvTeamProjectAdded on(ProjectCreated command, EventContext ctx) {
+            final EvTeamProjectAdded event = projectAdded(command);
             return event;
         }
 
         @Apply
-        private void event(TeamProjectAdded event) {
+        private void event(EvTeamProjectAdded event) {
             getBuilder()
                     .setId(event.getTeamId())
                     .addProjectId(event.getProjectId());
         }
 
-        private static TeamProjectAdded projectAdded(ProjectCreated command) {
-            return TeamProjectAdded.newBuilder()
-                                   .setProjectId(command.getProjectId())
-                                   .build();
+        private static EvTeamProjectAdded projectAdded(ProjectCreated command) {
+            return EvTeamProjectAdded.newBuilder()
+                                     .setProjectId(command.getProjectId())
+                                     .build();
         }
     }
 
-    static class TeamCreationProcessManager extends ProcessManager<TeamId, TeamCreation, TeamCreationVBuilder> {
+    static class TeamCreationProcessManager extends ProcessManager<EvTeamId, EvTeamCreation, EvTeamCreationVBuilder> {
 
-        private TeamCreationProcessManager(TeamId id) {
+        private TeamCreationProcessManager(EvTeamId id) {
             super(id);
         }
 
         @Assign
-        TeamMemberAdded on(AddTeamMember command, CommandContext ctx) {
+        EvTeamMemberAdded on(EvAddTeamMember command, CommandContext ctx) {
             getBuilder().addMember(command.getMember());
 
-            final TeamMemberAdded event = memberAdded(command.getMember());
+            final EvTeamMemberAdded event = memberAdded(command.getMember());
             return event;
         }
 
         @Assign
-        List<TeamMemberInvited> on(InviteTeamMembers command, CommandContext ctx) {
-            final ImmutableList.Builder<TeamMemberInvited> events = ImmutableList.builder();
+        List<EvTeamMemberInvited> on(EvInviteTeamMembers command, CommandContext ctx) {
+            final ImmutableList.Builder<EvTeamMemberInvited> events = ImmutableList.builder();
 
             for (EmailAddress email : command.getEmailList()) {
 
-                final MemberInvitation invitation = memberInvitation(email);
+                final EvMemberInvitation invitation = memberInvitation(email);
                 getBuilder().addInvitation(invitation);
 
-                final TeamMemberInvited event = teamMemberInvited(email);
+                final EvTeamMemberInvited event = teamMemberInvited(email);
                 events.add(event);
             }
 
@@ -319,57 +319,57 @@ public class EventRootCommandIdTestEnv {
         }
 
         @React
-        TeamMemberAdded on(InvitationAccepted event, EventContext ctx) {
-            final Member member = member(event.getUserId());
-            final TeamMemberAdded newEvent = memberAdded(member);
+        EvTeamMemberAdded on(EvInvitationAccepted event, EventContext ctx) {
+            final EvMember member = member(event.getUserId());
+            final EvTeamMemberAdded newEvent = memberAdded(member);
             return newEvent;
         }
 
-        private TeamMemberAdded memberAdded(Member member) {
-            return TeamMemberAdded.newBuilder()
-                                  .setTeamId(getId())
-                                  .setMember(member)
-                                  .build();
-        }
-
-        private TeamMemberInvited teamMemberInvited(EmailAddress email) {
-            return TeamMemberInvited.newBuilder()
+        private EvTeamMemberAdded memberAdded(EvMember member) {
+            return EvTeamMemberAdded.newBuilder()
                                     .setTeamId(getId())
-                                    .setEmail(email)
+                                    .setMember(member)
                                     .build();
         }
 
-        private static MemberInvitation memberInvitation(EmailAddress email) {
-            return MemberInvitation.newBuilder()
-                                   .setEmail(email)
-                                   .build();
+        private EvTeamMemberInvited teamMemberInvited(EmailAddress email) {
+            return EvTeamMemberInvited.newBuilder()
+                                      .setTeamId(getId())
+                                      .setEmail(email)
+                                      .build();
         }
 
-        private static Member member(UserId userId) {
-            return ((Member.Builder) Sample.builderForType(Member.class))
+        private static EvMemberInvitation memberInvitation(EmailAddress email) {
+            return EvMemberInvitation.newBuilder()
+                                     .setEmail(email)
+                                     .build();
+        }
+
+        private static EvMember member(UserId userId) {
+            return ((EvMember.Builder) Sample.builderForType(EvMember.class))
                     .setUserId(userId)
                     .build();
         }
     }
 
-    static class UserSignUpProcessManager extends ProcessManager<UserId, UserSignUp, UserSignUpVBuilder> {
+    static class UserSignUpProcessManager extends ProcessManager<UserId, EvUserSignUp, EvUserSignUpVBuilder> {
 
         private UserSignUpProcessManager(UserId id) {
             super(id);
         }
 
         @Assign
-        InvitationAccepted on(AcceptInvitation command, CommandContext ctx) {
+        EvInvitationAccepted on(EvAcceptInvitation command, CommandContext ctx) {
             getBuilder().setInvitation(command.getInvitation());
-            final InvitationAccepted event = invitationAccepted(command.getInvitation());
+            final EvInvitationAccepted event = invitationAccepted(command.getInvitation());
             return event;
         }
 
-        private InvitationAccepted invitationAccepted(MemberInvitation invitation) {
-            return InvitationAccepted.newBuilder()
-                                     .setInvitation(invitation)
-                                     .setUserId(getId())
-                                     .build();
+        private EvInvitationAccepted invitationAccepted(EvMemberInvitation invitation) {
+            return EvInvitationAccepted.newBuilder()
+                                       .setInvitation(invitation)
+                                       .setUserId(getId())
+                                       .build();
         }
     }
 }

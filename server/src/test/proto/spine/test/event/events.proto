@@ -36,7 +36,7 @@ import "spine/test/event/team.proto";
 message ProjectCreated {
     ProjectId project_id = 1;
 
-    TeamId team_id = 2;
+    EvTeamId team_id = 2;
 
     message Enrichment {
         string project_name = 1 [(by) = "project_id"];
@@ -116,32 +116,32 @@ message SeparateEnrichmentForMultipleProjectEvents {
 }
 
 
-message TeamProjectAdded {
-    TeamId team_id = 1;
+message EvTeamProjectAdded {
+    EvTeamId team_id = 1;
 
     ProjectId project_id = 2;
 }
 
-message TeamCreated {
-    TeamId team_id = 1;
+message EvTeamCreated {
+    EvTeamId team_id = 1;
 
-    repeated Member member = 2;
+    repeated EvMember member = 2;
 }
 
-message TeamMemberAdded {
-    TeamId team_id = 1;
+message EvTeamMemberAdded {
+    EvTeamId team_id = 1;
 
-    Member member = 2;
+    EvMember member = 2;
 }
 
-message TeamMemberInvited {
-    TeamId team_id = 1;
+message EvTeamMemberInvited {
+    EvTeamId team_id = 1;
 
     spine.net.EmailAddress email = 2;
 }
 
-message InvitationAccepted {
+message EvInvitationAccepted {
     spine.core.UserId user_id = 1;
 
-    MemberInvitation invitation = 2;
+    EvMemberInvitation invitation = 2;
 }

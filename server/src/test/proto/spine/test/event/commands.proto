@@ -36,7 +36,7 @@ import "spine/test/event/team.proto";
 message CreateProject {
     ProjectId project_id = 1;
 
-    TeamId team_id = 2;
+    EvTeamId team_id = 2;
 }
 
 message AddTask {
@@ -55,24 +55,24 @@ message StartProject {
     ProjectId project_id = 1;
 }
 
-message CreateTeam {
-    TeamId team_id = 1;
+message EvCreateTeam {
+    EvTeamId team_id = 1;
 }
 
-message AddTeamMember {
-    TeamId team_id = 1;
+message EvAddTeamMember {
+    EvTeamId team_id = 1;
 
-    Member member = 2;
+    EvMember member = 2;
 }
 
-message InviteTeamMembers {
-    TeamId team_id = 1;
+message EvInviteTeamMembers {
+    EvTeamId team_id = 1;
 
     repeated spine.net.EmailAddress email = 2;
 }
 
-message AcceptInvitation {
+message EvAcceptInvitation {
     spine.core.UserId user_id = 1;
 
-    MemberInvitation invitation = 2;
+    EvMemberInvitation invitation = 2;
 }
