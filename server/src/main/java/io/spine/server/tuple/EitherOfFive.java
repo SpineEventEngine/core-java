@@ -25,69 +25,87 @@ import io.spine.server.tuple.Element.AValue;
 import io.spine.server.tuple.Element.BValue;
 import io.spine.server.tuple.Element.CValue;
 import io.spine.server.tuple.Element.DValue;
+import io.spine.server.tuple.Element.EValue;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A value which can be of one of four possible types.
+ * A value which can be of one of five possible types.
  *
  * @param <A> the type for the first alternative
  * @param <B> the type of the second alternative
  * @param <C> the type of the third alternative
  * @param <D> the type of the fourth alternative
+ * @param <E> the type of the fifth alternative
  *
  * @author Alexander Yevsyukov
  */
-public final class EitherOfFour<A extends Message,
-                                B extends Message,
-                                C extends Message,
-                                D extends Message>
+public class EitherOfFive <A extends Message,
+                           B extends Message,
+                           C extends Message,
+                           D extends Message,
+                           E extends Message>
         extends Either
-        implements AValue<A>, BValue<B>, CValue<C>, DValue<D> {
+        implements AValue<A>, BValue<B>, CValue<C>, DValue<D>, EValue<E> {
 
     private static final long serialVersionUID = 0L;
 
-    private EitherOfFour(Message value, int index) {
+    private EitherOfFive(Message value, int index) {
         super(value, index);
     }
 
     /**
      * Creates a new instance with {@code <A>} value.
      */
-    public static <A extends Message, B extends Message, C extends Message, D extends Message>
-    EitherOfFour<A, B, C, D> withA(A a) {
+    public static
+    <A extends Message, B extends Message, C extends Message, D extends Message, E extends Message>
+    EitherOfFive<A, B, C, D, E> withA(A a) {
         checkNotNull(a);
-        final EitherOfFour<A, B, C, D> result = new EitherOfFour<>(a, 0);
+        final EitherOfFive<A, B, C, D, E> result = new EitherOfFive<>(a, 0);
         return result;
     }
 
     /**
      * Creates a new instance with {@code <B>} value.
      */
-    public static <A extends Message, B extends Message, C extends Message, D extends Message>
-    EitherOfFour<A, B, C, D> withB(B b) {
+    public static
+    <A extends Message, B extends Message, C extends Message, D extends Message, E extends Message>
+    EitherOfFive<A, B, C, D, E> withB(B b) {
         checkNotNull(b);
-        final EitherOfFour<A, B, C, D> result = new EitherOfFour<>(b, 1);
+        final EitherOfFive<A, B, C, D, E> result = new EitherOfFive<>(b, 1);
         return result;
     }
 
     /**
      * Creates a new instance with {@code <C>} value.
      */
-    public static <A extends Message, B extends Message, C extends Message, D extends Message>
-    EitherOfFour<A, B, C, D> withC(C c) {
+    public static
+    <A extends Message, B extends Message, C extends Message, D extends Message, E extends Message>
+    EitherOfFive<A, B, C, D, E> withC(C c) {
         checkNotNull(c);
-        final EitherOfFour<A, B, C, D> result = new EitherOfFour<>(c, 2);
+        final EitherOfFive<A, B, C, D, E> result = new EitherOfFive<>(c, 2);
         return result;
     }
 
     /**
-     * Creates a new instance with {@code <C>} value.
+     * Creates a new instance with {@code <D>} value.
      */
-    public static <A extends Message, B extends Message, C extends Message, D extends Message>
-    EitherOfFour<A, B, C, D> withD(D d) {
+    public static
+    <A extends Message, B extends Message, C extends Message, D extends Message, E extends Message>
+    EitherOfFive<A, B, C, D, E> withD(D d) {
         checkNotNull(d);
-        final EitherOfFour<A, B, C, D> result = new EitherOfFour<>(d, 3);
+        final EitherOfFive<A, B, C, D, E> result = new EitherOfFive<>(d, 3);
+        return result;
+    }
+
+    /**
+     * Creates a new instance with {@code <E>} value.
+     */
+    public static
+    <A extends Message, B extends Message, C extends Message, D extends Message, E extends Message>
+    EitherOfFive<A, B, C, D, E> withE(E e) {
+        checkNotNull(e);
+        final EitherOfFive<A, B, C, D, E> result = new EitherOfFive<>(e, 4);
         return result;
     }
 
@@ -133,5 +151,10 @@ public final class EitherOfFour<A extends Message,
     @Override
     public D getD() {
         return get(this, 3);
+    }
+
+    @Override
+    public E getE() {
+        return get(this, 4);
     }
 }

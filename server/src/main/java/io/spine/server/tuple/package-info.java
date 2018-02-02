@@ -69,8 +69,8 @@
  * <ul>
  *     <li>{@link io.spine.server.tuple.EitherOfTwo EitherOfTwo&lt;A, B&gt;}
  *     <li>{@link io.spine.server.tuple.EitherOfThree EitherOfThree&lt;A, B, C&gt;}
- *     <li>{@code EitherOfFour&lt;A, B, C, D&gt;}
- *     <li>{@code EitherOfFive&lt;A, B, C, D, E&gt;}
+ *     <li>{@link io.spine.server.tuple.EitherOfFour EitherOfFour&lt;A, B, C, D&gt;}
+ *     <li>{@link io.spine.server.tuple.EitherOfFive EitherOfFive&lt;A, B, C, D, E&gt;}
  * </ul>
  *
  * <p>Generic parameters for alternatives can be only {@link com.google.protobuf.Message Message}.
