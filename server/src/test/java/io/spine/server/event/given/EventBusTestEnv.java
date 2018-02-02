@@ -119,6 +119,5 @@ public class EventBusTestEnv {
                                      .build();
             return event;
         }
-
     }
 }
