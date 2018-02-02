@@ -78,6 +78,13 @@
  * <p>We believe that a list of alternatives longer than five is hard to understand.
  * If you face a such a need, consider splitting a command into two or more independent commands
  * so that their outcome is more obvious.
+ *
+ * <h2>Using Tuples with Alternatives</h2>
+ *
+ * <p>A {@link io.spine.server.tuple.Pair Pair} can be defined with the second parameter being on
+ * of the {@link io.spine.server.tuple.Either Either} subclasses, and created using
+ * {@link io.spine.server.tuple.Pair#withEither(com.google.protobuf.Message,
+ * io.spine.server.tuple.Either) Pair.withEither()}.
  */
 
 @ParametersAreNonnullByDefault
