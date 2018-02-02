@@ -39,13 +39,21 @@ message CreateProject {
     EvTeamId team_id = 2;
 }
 
+message EvArchiveProject {
+    
+    ProjectId project_id = 1;
+
+    string reason = 2 [(required) = true];
+}
+
 message AddTask {
     ProjectId project_id = 1;
 
     Task task = 2;
 }
 
-message AddTasks {
+message EvAddTasks {
+
     ProjectId project_id = 1;
 
     repeated Task task = 2;
@@ -60,18 +68,21 @@ message EvCreateTeam {
 }
 
 message EvAddTeamMember {
+    
     EvTeamId team_id = 1;
 
     EvMember member = 2;
 }
 
 message EvInviteTeamMembers {
+    
     EvTeamId team_id = 1;
 
     repeated spine.net.EmailAddress email = 2;
 }
 
 message EvAcceptInvitation {
+
     spine.core.UserId user_id = 1;
 
     EvMemberInvitation invitation = 2;

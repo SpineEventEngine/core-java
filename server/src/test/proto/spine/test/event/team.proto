@@ -36,12 +36,14 @@ message EvTeamId {
 }
 
 message EvMemberInvitation {
+
     spine.net.EmailAddress email = 1;
 
     EvTeamId team_id = 2;
 }
 
 message EvTeam {
+
     EvTeamId id = 1;
 
     repeated ProjectId project_id = 2;
@@ -52,12 +54,14 @@ message EvTeam {
 }
 
 message EvMember {
+
     spine.core.UserId user_id = 1;
 
     string name = 2;
 }
 
 message EvTeamCreation {
+
     EvTeamId id = 1;
 
     repeated EvMember member = 2;
@@ -66,6 +70,7 @@ message EvTeamCreation {
 }
 
 message EvUserSignUp {
+
     spine.core.UserId user_id = 1;
 
     EvMemberInvitation invitation = 2;

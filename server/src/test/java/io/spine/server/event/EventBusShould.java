@@ -23,6 +23,8 @@ package io.spine.server.event;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
+import io.spine.core.Ack;
+import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
@@ -30,15 +32,18 @@ import io.spine.core.EventEnvelope;
 import io.spine.core.EventId;
 import io.spine.core.Events;
 import io.spine.core.Subscribe;
-import io.spine.grpc.MemoizingObserver;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
 import io.spine.server.bus.EnvelopeValidator;
+import io.spine.server.commandbus.CommandBus;
 import io.spine.server.delivery.Consumers;
+import io.spine.server.event.given.EventBusTestEnv;
 import io.spine.server.event.given.EventBusTestEnv.GivenEvent;
+import io.spine.server.event.given.EventBusTestEnv.ProjectRepository;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.test.event.ProjectCreated;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -54,9 +59,9 @@ import java.util.concurrent.Executors;
 
 import static com.google.common.collect.Maps.newHashMap;
 import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.BoundedContext.newName;
-import static io.spine.server.event.given.EventBusTestEnv.allEventsQuery;
+import static io.spine.server.event.given.EventBusTestEnv.createProject;
+import static io.spine.server.event.given.EventBusTestEnv.invalidArchiveProject;
 import static io.spine.test.Verify.assertSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -77,7 +82,8 @@ public class EventBusShould {
     private EventBus eventBusWithPosponedExecution;
     private PostponedDispatcherEventDelivery postponedDispatcherDelivery;
     private Executor delegateDispatcherExecutor;
-    private StorageFactory storageFactory;
+    private CommandBus commandBus;
+    private BoundedContext bc;
 
     @Before
     public void setUp() {
@@ -85,10 +91,6 @@ public class EventBusShould {
     }
 
     private void setUp(@Nullable EventEnricher enricher) {
-        final BoundedContext bc = BoundedContext.newBuilder()
-                                                .setMultitenant(false)
-                                                .build();
-        this.storageFactory = bc.getStorageFactory();
         /**
          * Cannot use {@link com.google.common.util.concurrent.MoreExecutors#directExecutor()
          * MoreExecutors.directExecutor()} because it's impossible to spy on {@code final} classes.
@@ -96,8 +98,27 @@ public class EventBusShould {
         this.delegateDispatcherExecutor = spy(directExecutor());
         this.postponedDispatcherDelivery =
                 new PostponedDispatcherEventDelivery(delegateDispatcherExecutor);
-        buildEventBus(enricher);
-        buildEventBusWithPostponedExecution(enricher);
+
+        final EventBus.Builder eventBusBuilder = eventBusBuilder(enricher);
+
+        bc = BoundedContext.newBuilder()
+                           .setEventBus(eventBusBuilder)
+                           .setMultitenant(true)
+                           .build();
+
+        final ProjectRepository projectRepository = new ProjectRepository();
+        bc.register(projectRepository);
+
+        this.commandBus = bc.getCommandBus();
+        this.eventBus = bc.getEventBus();
+
+        this.eventBusWithPosponedExecution =
+                buildEventBusWithPostponedExecution(enricher, bc.getStorageFactory());
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        bc.close();
     }
 
     @SuppressWarnings("MethodMayBeStatic")   /* it cannot, as its result is used in {@code org.mockito.Mockito.spy() */
@@ -110,7 +131,8 @@ public class EventBusShould {
         };
     }
 
-    private void buildEventBusWithPostponedExecution(@Nullable EventEnricher enricher) {
+    private EventBus buildEventBusWithPostponedExecution(@Nullable EventEnricher enricher,
+                                                         StorageFactory storageFactory) {
         final EventBus.Builder busBuilder =
                 EventBus.newBuilder()
                         .setStorageFactory(storageFactory)
@@ -119,16 +141,15 @@ public class EventBusShould {
         if (enricher != null) {
             busBuilder.setEnricher(enricher);
         }
-        this.eventBusWithPosponedExecution = busBuilder.build();
+        return busBuilder.build();
     }
 
-    private void buildEventBus(@Nullable EventEnricher enricher) {
-        final EventBus.Builder busBuilder = EventBus.newBuilder()
-                                                    .setStorageFactory(storageFactory);
+    private EventBus.Builder eventBusBuilder(@Nullable EventEnricher enricher) {
+        final EventBus.Builder busBuilder = EventBus.newBuilder();
         if (enricher != null) {
             busBuilder.setEnricher(enricher);
         }
-        this.eventBus = busBuilder.build();
+        return busBuilder;
     }
 
     @Test
@@ -363,64 +384,50 @@ public class EventBusShould {
     }
 
     @Test
-    public void store_a_valid_event_which_is_not_dead() {
-        final Event event = GivenEvent.projectCreated();
+    public void store_an_event() {
+        final Command command = EventBusTestEnv.command(createProject());
         final ProjectCreatedSubscriber subscriber = new ProjectCreatedSubscriber();
-
+        // Register an event subscribe for the event to pass the `DeadEventFilter`
         eventBus.register(subscriber);
-        eventBus.post(event);
 
-        final List<Event> events = readEvents();
-        final Event storedEvent = events.get(0);
+        commandBus.post(command, StreamObservers.<Ack>noOpObserver());
+
+        final List<Event> events = EventBusTestEnv.readEvents(eventBus);
         assertSize(1, events);
-        assertEquals(subscriber.getEventMessage(), unpack(storedEvent.getMessage()));
     }
 
     @Test
     public void store_a_dead_event() {
-        final Event event = GivenEvent.projectCreated();
+        final Command command = EventBusTestEnv.command(createProject());
 
-        eventBus.post(event);
+        commandBus.post(command, StreamObservers.<Ack>noOpObserver());
 
-        final List<Event> events = readEvents();
+        final List<Event> events = EventBusTestEnv.readEvents(eventBus);
         assertSize(1, events);
     }
 
     @Test
-    public void not_store_an_invalid_event_which_is_not_dead() {
-        final Event event = GivenEvent.projectArchived();
+    public void not_store_an_invalid_event() {
+        final Command command = EventBusTestEnv.command(invalidArchiveProject());
         final ProjectCreatedSubscriber subscriber = new ProjectCreatedSubscriber();
-
+        // Register an event subscribe for the event to pass the `DeadEventFilter`
         eventBus.register(subscriber);
-        eventBus.post(event);
 
-        final List<Event> events = readEvents();
+        commandBus.post(command, StreamObservers.<Ack>noOpObserver());
+
+        final List<Event> events = EventBusTestEnv.readEvents(eventBus);
         assertSize(0, events);
         assertNull(subscriber.getEventMessage());
     }
 
     @Test
     public void not_store_an_invalid_dead_event() {
-        final Event event = GivenEvent.projectArchived();
+        final Command command = EventBusTestEnv.command(invalidArchiveProject());
 
-        eventBus.post(event);
+        commandBus.post(command, StreamObservers.<Ack>noOpObserver());
 
-        final List<Event> events = readEvents();
+        final List<Event> events = EventBusTestEnv.readEvents(eventBus);
         assertSize(0, events);
-    }
-
-    /**
-     * Reads all events from the event bus event store.
-     */
-    private List<Event> readEvents() {
-        final EventStreamQuery query = allEventsQuery();
-        final MemoizingObserver<Event> observer = StreamObservers.memoizingObserver();
-
-        eventBus.getEventStore()
-                .read(query, observer);
-
-        final List<Event> results = observer.responses();
-        return results;
     }
 
     /**
@@ -438,8 +445,8 @@ public class EventBusShould {
      */
     @SuppressWarnings("MethodWithMultipleLoops") // OK for such test case.
     @Ignore // This test is used only to diagnose EventBus malfunctions in concurrent environment.
-            // It's too long to execute this test per each build, so we leave it as is for now.
-            // Please see build log to find out if there were some errors during the test execution.
+    // It's too long to execute this test per each build, so we leave it as is for now.
+    // Please see build log to find out if there were some errors during the test execution.
     @Test
     public void store_filters_regarding_possible_concurrent_modifications()
             throws InterruptedException {
@@ -447,13 +454,15 @@ public class EventBusShould {
 
         // "Random" more or less valid Event.
         final Event event = Event.newBuilder()
-                                 .setId(EventId.newBuilder().setValue("123-1"))
+                                 .setId(EventId.newBuilder()
+                                               .setValue("123-1"))
                                  .setMessage(pack(Int32Value.newBuilder()
                                                             .setValue(42)
                                                             .build()))
                                  .build();
         final StorageFactory storageFactory =
-                StorageFactorySwitch.newInstance(newName("baz"), false).get();
+                StorageFactorySwitch.newInstance(newName("baz"), false)
+                                    .get();
         final ExecutorService executor = Executors.newFixedThreadPool(threadCount);
         // Catch non-easily reproducible bugs.
         for (int i = 0; i < 300; i++) {

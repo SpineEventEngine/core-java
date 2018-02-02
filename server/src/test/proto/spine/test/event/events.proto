@@ -45,7 +45,8 @@ message ProjectCreated {
     }
 }
 
-message ProjectArchived {
+message EvProjectArchived {
+
     ProjectId project_id = 1;
 
     string reason = 2 [(required) = true];
@@ -117,30 +118,35 @@ message SeparateEnrichmentForMultipleProjectEvents {
 
 
 message EvTeamProjectAdded {
+
     EvTeamId team_id = 1;
 
     ProjectId project_id = 2;
 }
 
 message EvTeamCreated {
+
     EvTeamId team_id = 1;
 
     repeated EvMember member = 2;
 }
 
 message EvTeamMemberAdded {
+
     EvTeamId team_id = 1;
 
     EvMember member = 2;
 }
 
 message EvTeamMemberInvited {
+
     EvTeamId team_id = 1;
 
     spine.net.EmailAddress email = 2;
 }
 
 message EvInvitationAccepted {
+
     spine.core.UserId user_id = 1;
 
     EvMemberInvitation invitation = 2;

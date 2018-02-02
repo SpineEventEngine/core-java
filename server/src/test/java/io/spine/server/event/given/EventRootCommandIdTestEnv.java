@@ -40,24 +40,24 @@ import io.spine.test.event.EvMember;
 import io.spine.test.event.EvMemberInvitation;
 import io.spine.test.event.EvTeam;
 import io.spine.test.event.EvTeamCreation;
+import io.spine.test.event.EvTeamCreationVBuilder;
 import io.spine.test.event.EvTeamId;
 import io.spine.test.event.EvTeamMemberAdded;
 import io.spine.test.event.EvTeamMemberInvited;
 import io.spine.test.event.EvTeamProjectAdded;
+import io.spine.test.event.EvTeamVBuilder;
 import io.spine.test.event.EvUserSignUp;
+import io.spine.test.event.EvUserSignUpVBuilder;
 import io.spine.test.event.Project;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.ProjectId;
 import io.spine.test.event.ProjectVBuilder;
 import io.spine.test.event.Task;
 import io.spine.test.event.TaskAdded;
-import io.spine.test.event.EvTeamCreationVBuilder;
-import io.spine.test.event.EvTeamVBuilder;
-import io.spine.test.event.EvUserSignUpVBuilder;
-import io.spine.test.event.command.EvAcceptInvitation;
-import io.spine.test.event.command.AddTasks;
-import io.spine.test.event.command.EvAddTeamMember;
 import io.spine.test.event.command.CreateProject;
+import io.spine.test.event.command.EvAcceptInvitation;
+import io.spine.test.event.command.EvAddTasks;
+import io.spine.test.event.command.EvAddTeamMember;
 import io.spine.test.event.command.EvInviteTeamMembers;
 import io.spine.testdata.Sample;
 
@@ -96,10 +96,10 @@ public class EventRootCommandIdTestEnv {
                             .build();
     }
 
-    public static AddTasks addTasks(ProjectId id, int count) {
+    public static EvAddTasks addTasks(ProjectId id, int count) {
         checkNotNull(id);
 
-        final AddTasks.Builder builder = AddTasks.newBuilder();
+        final EvAddTasks.Builder builder = EvAddTasks.newBuilder();
         for (int i = 0; i < count; i++) {
             final Task task = (Task) Sample.builderForType(Task.class)
                                            .build();
@@ -160,8 +160,8 @@ public class EventRootCommandIdTestEnv {
 
     /**
      * Routes the {@link ProjectCreated} event to the {@link TeamAggregate} the project belongs to.
-     * This is done for the purposes of the 
-     * {@linkplain EventRootCommandIdShould#match_the_id_of_an_external_event_handled_by_an_aggregate()} 
+     * This is done for the purposes of the
+     * {@linkplain EventRootCommandIdShould#match_the_id_of_an_external_event_handled_by_an_aggregate()}
      * test.
      */
     @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
@@ -183,9 +183,9 @@ public class EventRootCommandIdTestEnv {
     }
 
     /**
-     * Routes the {@link EvInvitationAccepted} event to the {@link TeamCreationProcessManager} which 
-     * created the invitation. This is done for the purposes of the 
-     * {@linkplain EventRootCommandIdShould#match_the_id_of_an_external_event_handled_by_a_process_manager()} 
+     * Routes the {@link EvInvitationAccepted} event to the {@link TeamCreationProcessManager} which
+     * created the invitation. This is done for the purposes of the
+     * {@linkplain EventRootCommandIdShould#match_the_id_of_an_external_event_handled_by_a_process_manager()}
      * test.
      */
     @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
@@ -199,7 +199,8 @@ public class EventRootCommandIdTestEnv {
                                private static final long serialVersionUID = 0L;
 
                                @Override
-                               public Set<EvTeamId> apply(EvInvitationAccepted msg, EventContext ctx) {
+                               public Set<EvTeamId> apply(EvInvitationAccepted msg,
+                                                          EventContext ctx) {
                                    return singleton(msg.getInvitation()
                                                        .getTeamId());
                                }
@@ -236,7 +237,7 @@ public class EventRootCommandIdTestEnv {
         }
 
         @Assign
-        List<TaskAdded> on(AddTasks command, CommandContext ctx) {
+        List<TaskAdded> on(EvAddTasks command, CommandContext ctx) {
             final ImmutableList.Builder<TaskAdded> events = ImmutableList.builder();
 
             for (Task task : command.getTaskList()) {
