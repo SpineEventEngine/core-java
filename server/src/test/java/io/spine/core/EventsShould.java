@@ -127,7 +127,7 @@ public class EventsShould {
         assertTrue(comparator.compare(event2, event1) > 0);
         assertTrue(comparator.compare(event1, event1) == 0);
     }
- 
+
    @Test
     public void get_message_from_event() {
         createEventAndAssertReturnedMessageFor(stringValue);
