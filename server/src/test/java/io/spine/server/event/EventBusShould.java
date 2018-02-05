@@ -500,8 +500,8 @@ public class EventBusShould {
      */
     @SuppressWarnings("MethodWithMultipleLoops") // OK for such test case.
     @Ignore // This test is used only to diagnose EventBus malfunctions in concurrent environment.
-    // It's too long to execute this test per each build, so we leave it as is for now.
-    // Please see build log to find out if there were some errors during the test execution.
+            // It's too long to execute this test per each build, so we leave it as is for now.
+            // Please see build log to find out if there were some errors during the test execution.
     @Test
     public void store_filters_regarding_possible_concurrent_modifications()
             throws InterruptedException {
@@ -509,15 +509,13 @@ public class EventBusShould {
 
         // "Random" more or less valid Event.
         final Event event = Event.newBuilder()
-                                 .setId(EventId.newBuilder()
-                                               .setValue("123-1"))
+                                 .setId(EventId.newBuilder().setValue("123-1"))
                                  .setMessage(pack(Int32Value.newBuilder()
                                                             .setValue(42)
                                                             .build()))
                                  .build();
         final StorageFactory storageFactory =
-                StorageFactorySwitch.newInstance(newName("baz"), false)
-                                    .get();
+                StorageFactorySwitch.newInstance(newName("baz"), false).get();
         final ExecutorService executor = Executors.newFixedThreadPool(threadCount);
         // Catch non-easily reproducible bugs.
         for (int i = 0; i < 300; i++) {

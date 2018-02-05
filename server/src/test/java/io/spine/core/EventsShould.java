@@ -88,7 +88,7 @@ public class EventsShould {
         final StringValue producerId = toMessage(getClass().getSimpleName());
         EventFactory eventFactory = EventFactory.on(cmd, Identifier.pack(producerId));
         event = eventFactory.createEvent(Time.getCurrentTime(),
-                                         Tests.<Version>nullRef());
+                                                     Tests.<Version>nullRef());
         context = event.getContext();
     }
 
@@ -127,8 +127,8 @@ public class EventsShould {
         assertTrue(comparator.compare(event2, event1) > 0);
         assertTrue(comparator.compare(event1, event1) == 0);
     }
-
-    @Test
+ 
+   @Test
     public void get_message_from_event() {
         createEventAndAssertReturnedMessageFor(stringValue);
         createEventAndAssertReturnedMessageFor(boolValue);
@@ -158,6 +158,7 @@ public class EventsShould {
         assertEquals(msg.getValue(), id);
     }
 
+
     @Test
     public void pass_the_null_tolerance_check() {
         new NullPointerTester()
@@ -169,7 +170,7 @@ public class EventsShould {
     @Test
     public void provide_EventId_stringifier() {
         final EventId id = event.getId();
-
+        
         final String str = Stringifiers.toString(id);
         final EventId convertedBack = Stringifiers.fromString(str, EventId.class);
 
