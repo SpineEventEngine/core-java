@@ -88,7 +88,7 @@ public class EitherOfTwoShould {
         final Iterator<Message> iteratorB = eitherWithB.iterator();
 
         assertEquals(b, iteratorB.next());
-        assertFalse(iteratorA.hasNext());
+        assertFalse(iteratorB.hasNext());
     }
 
     @Test(expected = IllegalStateException.class)
