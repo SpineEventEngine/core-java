@@ -157,6 +157,7 @@ message EBProjectArchived {
 }
 
 message EBTaskAdded {
+
     ProjectId project_id = 1;
 
     Task task = 2 [(required) = true];

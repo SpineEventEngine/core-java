@@ -34,12 +34,14 @@ import "spine/test/event/project.proto";
 import "spine/test/event/team.proto";
 
 message CreateProject {
+
     ProjectId project_id = 1;
 
     EvTeamId team_id = 2;
 }
 
 message AddTask {
+
     ProjectId project_id = 1;
 
     Task task = 2;
@@ -61,14 +63,14 @@ message EvCreateTeam {
 }
 
 message EvAddTeamMember {
-    
+
     EvTeamId team_id = 1;
 
     EvMember member = 2;
 }
 
 message EvInviteTeamMembers {
-    
+
     EvTeamId team_id = 1;
 
     repeated spine.net.EmailAddress email = 2;
