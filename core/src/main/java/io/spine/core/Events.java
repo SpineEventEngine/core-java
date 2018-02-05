@@ -175,8 +175,8 @@ public final class Events {
      */
     public static <I> I getRootCommandId(Event event) {
         checkNotNull(event);
-        final I id = Identifier.unpack(event.getContext()
-                                            .getRootCommandId());
+        final EventContext context = event.getContext();
+        final I id = Identifier.unpack(context.getRootCommandId());
         return id;
     }
 
