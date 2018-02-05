@@ -169,9 +169,9 @@ public final class Events {
      * <p> In case the passed {@code Event} instance is a reaction to another {@code Event}, 
      * the identifier of the very first command in this chain is returned.
      *
-     * @param event the event to get the origin ID for
-     * @param <I>   the type of the origin ID
-     * @return the origin ID
+     * @param event the event to get the root command ID for
+     * @param <I>   the type of the root command ID
+     * @return the root command ID
      */
     public static <I> I getRootCommandId(Event event) {
         checkNotNull(event);
