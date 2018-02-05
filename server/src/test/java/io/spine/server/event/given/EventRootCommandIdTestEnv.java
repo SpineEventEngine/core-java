@@ -21,9 +21,13 @@
 package io.spine.server.event.given;
 
 import com.google.common.collect.ImmutableList;
+import com.google.protobuf.Message;
+import io.spine.client.TestActorRequestFactory;
+import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.EventContext;
 import io.spine.core.React;
+import io.spine.core.TenantId;
 import io.spine.core.UserId;
 import io.spine.net.EmailAddress;
 import io.spine.server.aggregate.Aggregate;
@@ -72,6 +76,11 @@ import static java.util.Collections.singleton;
  */
 public class EventRootCommandIdTestEnv {
 
+    public static final TenantId TENANT_ID = tenantId();
+
+    private static final TestActorRequestFactory requestFactory =
+            TestActorRequestFactory.newInstance(EventRootCommandIdShould.class, TENANT_ID);
+
     private EventRootCommandIdTestEnv() {
         // Prevent instantiation.
     }
@@ -84,6 +93,18 @@ public class EventRootCommandIdTestEnv {
     public static EvTeamId teamId() {
         return ((EvTeamId.Builder) Sample.builderForType(EvTeamId.class))
                 .build();
+    }
+
+    private static TenantId tenantId() {
+        final String value = EventRootCommandIdTestEnv.class.getName();
+        final TenantId id = TenantId.newBuilder()
+                                    .setValue(value)
+                                    .build();
+        return id;
+    }
+
+    public static Command command(Message message) {
+        return requestFactory.createCommand(message);
     }
 
     public static CreateProject createProject(ProjectId projectId, EvTeamId teamId) {

@@ -20,9 +20,7 @@
 
 package io.spine.server.event;
 
-import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
-import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.Event;
@@ -33,6 +31,7 @@ import io.spine.server.event.given.EventRootCommandIdTestEnv.ProjectAggregateRep
 import io.spine.server.event.given.EventRootCommandIdTestEnv.TeamAggregateRepository;
 import io.spine.server.event.given.EventRootCommandIdTestEnv.TeamCreationRepository;
 import io.spine.server.event.given.EventRootCommandIdTestEnv.UserSignUpRepository;
+import io.spine.server.tenant.TenantAwareOperation;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,10 +40,12 @@ import java.util.List;
 
 import static io.spine.core.Events.getRootCommandId;
 import static io.spine.grpc.StreamObservers.noOpObserver;
+import static io.spine.server.event.given.EventRootCommandIdTestEnv.TENANT_ID;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.acceptInvitation;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.addTasks;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.addTeamMember;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.allEventsQuery;
+import static io.spine.server.event.given.EventRootCommandIdTestEnv.command;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.createProject;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.inviteTeamMembers;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.projectId;
@@ -57,14 +58,12 @@ import static org.junit.Assert.assertEquals;
  */
 public class EventRootCommandIdShould {
 
-    private static final TestActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(EventRootCommandIdShould.class);
-
     private BoundedContext boundedContext;
 
     @Before
     public void setUp() {
         boundedContext = BoundedContext.newBuilder()
+                                       .setMultitenant(true)
                                        .build();
 
         final ProjectAggregateRepository projectRepository = new ProjectAggregateRepository();
@@ -164,10 +163,6 @@ public class EventRootCommandIdShould {
         assertEquals(command.getId(), getRootCommandId(reaction));
     }
 
-    private static Command command(Message message) {
-        return requestFactory.createCommand(message);
-    }
-
     private void postCommand(Command command) {
         final StreamObserver<Ack> observer = noOpObserver();
         boundedContext.getCommandBus()
@@ -178,12 +173,17 @@ public class EventRootCommandIdShould {
      * Reads all events from the bounded context event store.
      */
     private List<Event> readEvents() {
-        final EventStreamQuery query = allEventsQuery();
         final MemoizingObserver<Event> observer = StreamObservers.memoizingObserver();
 
-        boundedContext.getEventBus()
-                      .getEventStore()
-                      .read(query, observer);
+        final TenantAwareOperation operation = new TenantAwareOperation(TENANT_ID) {
+            @Override
+            public void run() {
+                boundedContext.getEventBus()
+                              .getEventStore()
+                              .read(allEventsQuery(), observer);
+            }
+        };
+        operation.execute();
 
         final List<Event> results = observer.responses();
         return results;

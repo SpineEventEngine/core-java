@@ -89,7 +89,7 @@ public class EventBusTestEnv {
         return id;
     }
 
-    public static TenantId tenantId() {
+    private static TenantId tenantId() {
         final String value = EventBusTestEnv.class.getName();
         final TenantId id = TenantId.newBuilder()
                                     .setValue(value)
