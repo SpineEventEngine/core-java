@@ -201,6 +201,10 @@ public final class Events {
 
     /**
      * Obtains the {@link TenantId} from the given {@link Event}.
+     * 
+     * <p>The {@code TenantId} is retrieved by traversing the passed {@code Event}s context. It is
+     * stored in the initial {@link CommandContext} and can be retrieved from the events origin 
+     * command or rejection context. 
      */
     @Internal
     public static TenantId getTenantId(Event event) {
@@ -215,11 +219,11 @@ public final class Events {
     }
 
     /**
-     * Obtains the Tenant ID from the Command Context.
+     * Obtains the {@link TenantId} from the {@link CommandContext}.
      * 
-     * <p>The Command Context is accessible from the Event if the Event was created as a result of 
-     * some command or its rejection. This make Command Context a valid Tenant ID source inside of 
-     * the Event.</p>
+     * <p>The {@link CommandContext} is accessible from the {@link Event} if the {@code Event} was 
+     * created as a result of some command or its rejection. This makes the {@code CommandContext} 
+     * a valid {@code TenantId} source inside of the {@code Event}.
      */
     private static TenantId getTenantId(CommandContext context) {
         return context.getActorContext()
@@ -236,7 +240,7 @@ public final class Events {
      *     <li>The command set as a rejection property.</li>
      * </ol>
      * 
-     * <p>If at some point the event origin is not set the {@link Optional#absent()} is returned</p>
+     * <p>If at some point the event origin is not set the {@link Optional#absent()} is returned.
      */
     private static Optional<CommandContext> getCommandContext(Event event) {
         CommandContext commandContext = null;
