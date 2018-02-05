@@ -19,6 +19,7 @@
  */
 package io.spine.core;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
@@ -203,11 +204,69 @@ public final class Events {
      */
     @Internal
     public static TenantId getTenantId(Event event) {
-        final TenantId result = event.getContext()
-                                     .getCommandContext()
-                                     .getActorContext()
-                                     .getTenantId();
+        final Optional<CommandContext> commandContext = getCommandContext(event);
+
+        if (!commandContext.isPresent()) {
+            return TenantId.getDefaultInstance();
+        }
+
+        final TenantId result = getTenantId(commandContext.get());
         return result;
+    }
+
+    /**
+     * Obtains the Tenant ID from the Command Context.
+     * 
+     * <p>The Command Context is accessible from the Event if the Event was created as a result of 
+     * some command or its rejection. This make Command Context a valid Tenant ID source inside of 
+     * the Event.</p>
+     */
+    private static TenantId getTenantId(CommandContext context) {
+        return context.getActorContext()
+                      .getTenantId();
+    }
+
+    /**
+     * Obtains the context of the command, which lead to this event.
+     * 
+     * <p> The context is obtained by traversing the events origin for a valid context source. 
+     * There are can be two sources for the command context:
+     * <ol>
+     *     <li>The command context set as the event origin.</li>
+     *     <li>The command set as a rejection property.</li>
+     * </ol>
+     * 
+     * <p>If at some point the event origin is not set the {@link Optional#absent()} is returned</p>
+     */
+    private static Optional<CommandContext> getCommandContext(Event event) {
+        CommandContext commandContext = null;
+        EventContext eventContext = event.getContext();
+
+        while (commandContext == null) {
+
+            switch (eventContext.getOriginCase()) {
+
+                case EVENT_CONTEXT:
+                    eventContext = eventContext.getEventContext();
+                    break;
+
+                case COMMAND_CONTEXT:
+                    commandContext = eventContext.getCommandContext();
+                    break;
+
+                case REJECTION_CONTEXT:
+                    commandContext = eventContext.getRejectionContext()
+                                                 .getCommand()
+                                                 .getContext();
+                    break;
+
+                case ORIGIN_NOT_SET:
+                default:
+                    return Optional.absent();
+            }
+        }
+
+        return Optional.of(commandContext);
     }
 
     /**
