@@ -37,12 +37,14 @@ import io.spine.server.BoundedContext;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.delivery.Consumers;
-import io.spine.server.event.given.EventBusTestEnv;
 import io.spine.server.event.given.EventBusTestEnv.GivenEvent;
 import io.spine.server.event.given.EventBusTestEnv.ProjectRepository;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.StorageFactorySwitch;
+import io.spine.test.event.EBProjectCreated;
+import io.spine.test.event.EBTaskAdded;
 import io.spine.test.event.ProjectCreated;
+import io.spine.test.event.Task;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -59,9 +61,15 @@ import java.util.concurrent.Executors;
 
 import static com.google.common.collect.Maps.newHashMap;
 import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.BoundedContext.newName;
+import static io.spine.server.event.given.EventBusTestEnv.TaskCreatedFilter;
+import static io.spine.server.event.given.EventBusTestEnv.addTasks;
+import static io.spine.server.event.given.EventBusTestEnv.command;
 import static io.spine.server.event.given.EventBusTestEnv.createProject;
 import static io.spine.server.event.given.EventBusTestEnv.invalidArchiveProject;
+import static io.spine.server.event.given.EventBusTestEnv.newTask;
+import static io.spine.server.event.given.EventBusTestEnv.readEvents;
 import static io.spine.test.Verify.assertSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -144,8 +152,9 @@ public class EventBusShould {
         return busBuilder.build();
     }
 
-    private EventBus.Builder eventBusBuilder(@Nullable EventEnricher enricher) {
-        final EventBus.Builder busBuilder = EventBus.newBuilder();
+    private static EventBus.Builder eventBusBuilder(@Nullable EventEnricher enricher) {
+        final EventBus.Builder busBuilder = EventBus.newBuilder()
+                                                    .appendFilter(new TaskCreatedFilter());
         if (enricher != null) {
             busBuilder.setEnricher(enricher);
         }
@@ -385,49 +394,95 @@ public class EventBusShould {
 
     @Test
     public void store_an_event() {
-        final Command command = EventBusTestEnv.command(createProject());
-        final ProjectCreatedSubscriber subscriber = new ProjectCreatedSubscriber();
+        final Command command = command(createProject());
+        final EBProjectCreatedSubscriber subscriber = new EBProjectCreatedSubscriber();
         // Register an event subscribe for the event to pass the `DeadEventFilter`
         eventBus.register(subscriber);
 
         commandBus.post(command, StreamObservers.<Ack>noOpObserver());
 
-        final List<Event> events = EventBusTestEnv.readEvents(eventBus);
+        final List<Event> events = readEvents(eventBus);
         assertSize(1, events);
     }
 
     @Test
     public void store_a_dead_event() {
-        final Command command = EventBusTestEnv.command(createProject());
+        final Command command = command(createProject());
 
         commandBus.post(command, StreamObservers.<Ack>noOpObserver());
 
-        final List<Event> events = EventBusTestEnv.readEvents(eventBus);
+        final List<Event> events = readEvents(eventBus);
         assertSize(1, events);
     }
 
     @Test
     public void not_store_an_invalid_event() {
-        final Command command = EventBusTestEnv.command(invalidArchiveProject());
-        final ProjectCreatedSubscriber subscriber = new ProjectCreatedSubscriber();
+        final Command command = command(invalidArchiveProject());
+        final EBProjectCreatedSubscriber subscriber = new EBProjectCreatedSubscriber();
         // Register an event subscribe for the event to pass the `DeadEventFilter`
         eventBus.register(subscriber);
 
         commandBus.post(command, StreamObservers.<Ack>noOpObserver());
 
-        final List<Event> events = EventBusTestEnv.readEvents(eventBus);
+        final List<Event> events = readEvents(eventBus);
         assertSize(0, events);
         assertNull(subscriber.getEventMessage());
     }
 
     @Test
     public void not_store_an_invalid_dead_event() {
-        final Command command = EventBusTestEnv.command(invalidArchiveProject());
+        final Command command = command(invalidArchiveProject());
 
         commandBus.post(command, StreamObservers.<Ack>noOpObserver());
 
-        final List<Event> events = EventBusTestEnv.readEvents(eventBus);
+        final List<Event> events = readEvents(eventBus);
         assertSize(0, events);
+    }
+
+    @Test
+    public void store_multiple_messages_passing_filters() {
+        // Register an event subscribe for the event to pass the `DeadEventFilter` to the `TaskCreatedFilter`
+        eventBus.register(new TaskAddedNoOpSubscriber());
+        // The `EBTaskAdded` events with `done` set to `true` are filtered out by `TaskCreatedFilter`
+        final Command command = command(addTasks(newTask(false), newTask(false), newTask(false)));
+
+        commandBus.post(command, StreamObservers.<Ack>noOpObserver());
+
+        final List<Event> storedEvents = readEvents(eventBus);
+        assertSize(3, storedEvents);
+    }
+
+    @Test
+    public void store_only_messages_passing_filters() {
+        // Register an event subscribe for the event to pass the `DeadEventFilter` to the `TaskCreatedFilter`
+        eventBus.register(new TaskAddedNoOpSubscriber());
+        // The `EBTaskAdded` events with `done` set to `true` are filtered out by `TaskCreatedFilter`
+        final Command command = command(addTasks(newTask(false), newTask(true), newTask(false),
+                                                 newTask(true), newTask(true)));
+
+        commandBus.post(command, StreamObservers.<Ack>noOpObserver());
+
+        final List<Event> storedEvents = readEvents(eventBus);
+        assertSize(2, storedEvents);
+
+        for (Event event : storedEvents) {
+            final EBTaskAdded contents = unpack(event.getMessage());
+            final Task task = contents.getTask();
+            assertFalse(task.getDone());
+         }
+    }
+
+    @Test
+    public void not_store_any_messages_when_they_are_failing_filtering() {
+        // Register an event subscribe for the event to pass the `DeadEventFilter` to the `TaskCreatedFilter`
+        eventBus.register(new TaskAddedNoOpSubscriber());
+        // The `EBTaskAdded` events with `done` set to `true` are filtered out by `TaskCreatedFilter`
+        final Command command = command(addTasks(newTask(true), newTask(true), newTask(true)));
+        
+        commandBus.post(command, StreamObservers.<Ack>noOpObserver());
+
+        final List<Event> storedEvents = readEvents(eventBus);
+        assertSize(0, storedEvents);
     }
 
     /**
@@ -482,6 +537,22 @@ public class EventBusShould {
         }
         executor.shutdownNow();
     }
+    
+    private static class EBProjectCreatedSubscriber extends EventSubscriber {
+
+        private Message eventMessage;
+        private EventContext eventContext;
+
+        @Subscribe
+        public void on(EBProjectCreated message, EventContext context) {
+            this.eventMessage = message;
+            this.eventContext = context;
+        }
+
+        public Message getEventMessage() {
+            return eventMessage;
+        }
+    }
 
     private static class ProjectCreatedSubscriber extends EventSubscriber {
 
@@ -498,8 +569,20 @@ public class EventBusShould {
             return eventMessage;
         }
 
-        public EventContext getEventContext() {
+        private EventContext getEventContext() {
             return eventContext;
+        }
+    }
+
+    /**
+     * {@link EBTaskAdded} subscriber that does nothing. Can be used for the event to get pass the
+     * {@link io.spine.server.bus.DeadMessageFilter}.
+     */
+    private static class TaskAddedNoOpSubscriber extends EventSubscriber {
+
+        @Subscribe
+        public void on(EBTaskAdded message, EventContext context) {
+            // Does nothing
         }
     }
 

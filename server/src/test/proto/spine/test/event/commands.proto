@@ -39,13 +39,6 @@ message CreateProject {
     EvTeamId team_id = 2;
 }
 
-message EvArchiveProject {
-    
-    ProjectId project_id = 1;
-
-    string reason = 2 [(required) = true];
-}
-
 message AddTask {
     ProjectId project_id = 1;
 
@@ -86,4 +79,22 @@ message EvAcceptInvitation {
     spine.core.UserId user_id = 1;
 
     EvMemberInvitation invitation = 2;
+}
+
+message EBCreateProject {
+    ProjectId project_id = 1;
+}
+
+message EBArchiveProject {
+
+    ProjectId project_id = 1;
+
+    string reason = 2 [(required) = true];
+}
+
+message EBAddTasks {
+
+    ProjectId project_id = 1;
+
+    repeated Task task = 2;
 }

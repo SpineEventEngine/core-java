@@ -20,41 +20,52 @@
 
 package io.spine.server.event.given;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.Identifier;
+import io.spine.base.Error;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.TestActorRequestFactory;
+import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.Event;
+import io.spine.core.EventClass;
+import io.spine.core.EventEnvelope;
 import io.spine.core.TenantId;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
+import io.spine.server.bus.AbstractBusFilter;
 import io.spine.server.command.Assign;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventBusShould;
 import io.spine.server.event.EventStreamQuery;
 import io.spine.server.tenant.TenantAwareOperation;
+import io.spine.test.event.EBProjectCreated;
+import io.spine.test.event.EBTaskAdded;
 import io.spine.test.event.Project;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.ProjectId;
 import io.spine.test.event.ProjectStarted;
 import io.spine.test.event.ProjectVBuilder;
 import io.spine.test.event.Task;
-import io.spine.test.event.TaskAdded;
-import io.spine.test.event.command.CreateProject;
-import io.spine.test.event.command.EvAddTasks;
-import io.spine.test.event.command.EvArchiveProject;
+import io.spine.test.event.command.EBAddTasks;
+import io.spine.test.event.command.EBArchiveProject;
+import io.spine.test.event.command.EBCreateProject;
 import io.spine.testdata.Sample;
 
 import java.util.List;
 
+import static com.google.common.base.Optional.absent;
 import static io.spine.Identifier.newUuid;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.server.bus.Buses.reject;
 
 /**
  * Test environment classes for the {@code server.event} package.
@@ -86,21 +97,40 @@ public class EventBusTestEnv {
         return id;
     }
 
-    public static CreateProject createProject() {
-        final CreateProject command =
-                ((CreateProject.Builder) Sample.builderForType(CreateProject.class))
+    public static EBCreateProject createProject() {
+        final EBCreateProject command =
+                ((EBCreateProject.Builder) Sample.builderForType(EBCreateProject.class))
                         .setProjectId(PROJECT_ID)
                         .build();
         return command;
     }
 
+    public static EBAddTasks addTasks(Task... tasks) {
+        final EBAddTasks.Builder builder =
+                ((EBAddTasks.Builder) Sample.builderForType(EBAddTasks.class))
+                        .setProjectId(PROJECT_ID)
+                        .clearTask();
+        for (Task task : tasks) {
+            builder.addTask(task);
+        }
+        final EBAddTasks command = builder.build();
+        return command;
+    }
+
+    public static Task newTask(boolean done) {
+        final Task task = ((Task.Builder) Sample.builderForType(Task.class))
+                .setDone(done)
+                .build();
+        return task;
+    }
+
     /**
-     * Returns an {@link EvArchiveProject} command with an unfilled required 
-     * {@link EvArchiveProject#getReason()} field.
+     * Returns an {@link EBArchiveProject} command with an unfilled required
+     * {@link EBArchiveProject#getReason()} field.
      */
-    public static EvArchiveProject invalidArchiveProject() {
-        final EvArchiveProject command =
-                ((EvArchiveProject.Builder) Sample.builderForType(EvArchiveProject.class))
+    public static EBArchiveProject invalidArchiveProject() {
+        final EBArchiveProject command =
+                ((EBArchiveProject.Builder) Sample.builderForType(EBArchiveProject.class))
                         .setProjectId(PROJECT_ID)
                         .build();
         return command;
@@ -139,32 +169,19 @@ public class EventBusTestEnv {
         private ProjectAggregate(ProjectId id) {
             super(id);
         }
-
-        private static ProjectCreated projectCreated(ProjectId projectId) {
-            return ProjectCreated.newBuilder()
-                                 .setProjectId(projectId)
-                                 .build();
-        }
-
-        private static TaskAdded taskAdded(ProjectId projectId, Task task) {
-            return TaskAdded.newBuilder()
-                            .setProjectId(projectId)
-                            .setTask(task)
-                            .build();
-        }
-
+        
         @Assign
-        ProjectCreated on(CreateProject command, CommandContext ctx) {
-            final ProjectCreated event = projectCreated(command.getProjectId());
+        EBProjectCreated on(EBCreateProject command, CommandContext ctx) {
+            final EBProjectCreated event = projectCreated(command.getProjectId());
             return event;
         }
 
         @Assign
-        List<TaskAdded> on(EvAddTasks command, CommandContext ctx) {
-            final ImmutableList.Builder<TaskAdded> events = ImmutableList.builder();
+        List<EBTaskAdded> on(EBAddTasks command, CommandContext ctx) {
+            final ImmutableList.Builder<EBTaskAdded> events = ImmutableList.builder();
 
             for (Task task : command.getTaskList()) {
-                final TaskAdded event = taskAdded(command.getProjectId(), task);
+                final EBTaskAdded event = taskAdded(command.getProjectId(), task);
                 events.add(event);
             }
 
@@ -172,26 +189,70 @@ public class EventBusTestEnv {
         }
 
         @Apply
-        private void event(ProjectCreated event) {
+        private void event(EBProjectCreated event) {
             getBuilder()
                     .setId(event.getProjectId())
                     .setStatus(Project.Status.CREATED);
         }
 
         @Apply
-        private void event(TaskAdded event) {
+        private void event(EBTaskAdded event) {
             getBuilder()
                     .setId(event.getProjectId())
                     .addTask(event.getTask());
         }
+        
+        private static EBProjectCreated projectCreated(ProjectId projectId) {
+            return EBProjectCreated.newBuilder()
+                                   .setProjectId(projectId)
+                                   .build();
+        }
+
+        private static EBTaskAdded taskAdded(ProjectId projectId, Task task) {
+            return EBTaskAdded.newBuilder()
+                              .setProjectId(projectId)
+                              .setTask(task)
+                              .build();
+        }
+
     }
 
     /**
      * Creates a new {@link EventStreamQuery} without any filters.
      */
-    public static EventStreamQuery allEventsQuery() {
+    private static EventStreamQuery allEventsQuery() {
         return EventStreamQuery.newBuilder()
                                .build();
+    }
+
+    /**
+     * Filters out the {@link EBTaskAdded} events which have their {@link Task#getDone()} 
+     * property set to {@code true}.
+     */
+    public static class TaskCreatedFilter extends AbstractBusFilter<EventEnvelope> {
+
+        private static final EventClass TASK_ADDED_CLASS = EventClass.of(EBTaskAdded.class);
+
+        @Override
+        public Optional<Ack> accept(EventEnvelope envelope) {
+            if (TASK_ADDED_CLASS.equals(envelope.getMessageClass())) {
+                final EBTaskAdded message = (EBTaskAdded) envelope.getMessage();
+                final Task task = message.getTask();
+                if (task.getDone()) {
+                    final Error error = error();
+                    final Any packedId = Identifier.pack(envelope.getId());
+                    final Ack result = reject(packedId, error);
+                    return Optional.of(result);
+                }
+            }
+            return absent();
+        }
+
+        private static Error error() {
+            return Error.newBuilder()
+                        .setMessage("Task can not be created done.")
+                        .build();
+        }
     }
 
     private static class EventMessage {

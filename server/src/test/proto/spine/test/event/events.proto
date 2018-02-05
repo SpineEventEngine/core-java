@@ -45,13 +45,6 @@ message ProjectCreated {
     }
 }
 
-message EvProjectArchived {
-
-    ProjectId project_id = 1;
-
-    string reason = 2 [(required) = true];
-}
-
 message ProjectCreatedSeparateEnrichment {
     option (enrichment_for) = "ProjectCreated";
 
@@ -150,4 +143,21 @@ message EvInvitationAccepted {
     spine.core.UserId user_id = 1;
 
     EvMemberInvitation invitation = 2;
+}
+
+message EBProjectCreated {
+    ProjectId project_id = 1;
+}
+
+message EBProjectArchived {
+
+    ProjectId project_id = 1;
+
+    string reason = 2 [(required) = true];
+}
+
+message EBTaskAdded {
+    ProjectId project_id = 1;
+
+    Task task = 2 [(required) = true];
 }
