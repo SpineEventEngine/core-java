@@ -440,9 +440,12 @@ public class EventBusShould {
     /**
      * Ensures that events are stored when all of them pass the filters.
      *
-     * <p> To filter the {@link EBTaskAdded} events the {@linkplain EventBus} has a custom filter. The 
-     * {@link TaskCreatedFilter} filters out {@link EBTaskAdded} events with {@link Task#getDone()}
-     * set to {@code true}.
+     * <p> To filter the {@link EBTaskAdded} events the {@linkplain EventBus} has a custom filter. 
+     * The {@link TaskCreatedFilter} filters out {@link EBTaskAdded} events with 
+     * {@link Task#getDone()} set to {@code true}.
+     *
+     * <p> The {@link EBTaskAddedNoOpSubscriber} is registered so that the event would not get 
+     * filtered out by the {@link io.spine.server.bus.DeadMessageFilter}.
      */
     @Test
     public void store_multiple_messages_passing_filters() {
@@ -459,9 +462,13 @@ public class EventBusShould {
      * Ensures that events which pass filters and the ones that don’t are treated independently when
      * sent in batch.
      *
-     * <p> To filter the {@link EBTaskAdded} events the {@linkplain EventBus} has a custom filter. The
-     * {@link TaskCreatedFilter} filters out {@link EBTaskAdded} events with {@link Task#getDone()}
-     * set to {@code true}.
+     * <p> To filter the {@link EBTaskAdded} events the {@linkplain EventBus} has a custom filter. 
+     * The {@link TaskCreatedFilter} filters out {@link EBTaskAdded} events with 
+     * {@link Task#getDone()} set to {@code true}.
+     * 
+     * <p> The {@link EBTaskAddedNoOpSubscriber} is registered so that the event would not get 
+     * filtered out by the {@link io.spine.server.bus.DeadMessageFilter}.
+     * 
      */
     @Test
     public void store_only_events_passing_filters() {
@@ -484,9 +491,12 @@ public class EventBusShould {
     /**
      * Ensures that events are not stored when none of them pass the filters.
      *
-     * <p> To filter the {@link EBTaskAdded} events the {@linkplain EventBus} has a custom filter. The
-     * {@link TaskCreatedFilter} filters out {@link EBTaskAdded} events with {@link Task#getDone()}
-     * set to {@code true}.
+     * <p> To filter the {@link EBTaskAdded} events the {@linkplain EventBus} has a custom filter. 
+     * The {@link TaskCreatedFilter} filters out {@link EBTaskAdded} events with 
+     * {@link Task#getDone()} set to {@code true}.
+     *
+     * <p> The {@link EBTaskAddedNoOpSubscriber} is registered so that the event would not get 
+     * filtered out by the {@link io.spine.server.bus.DeadMessageFilter}.
      */
     @Test
     public void not_store_any_events_when_they_are_failing_filtering() {

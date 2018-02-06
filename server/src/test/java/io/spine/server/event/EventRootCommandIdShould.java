@@ -32,6 +32,10 @@ import io.spine.server.event.given.EventRootCommandIdTestEnv.TeamAggregateReposi
 import io.spine.server.event.given.EventRootCommandIdTestEnv.TeamCreationRepository;
 import io.spine.server.event.given.EventRootCommandIdTestEnv.UserSignUpRepository;
 import io.spine.server.tenant.TenantAwareOperation;
+import io.spine.test.event.EvInvitationAccepted;
+import io.spine.test.event.EvTeamMemberAdded;
+import io.spine.test.event.EvTeamProjectAdded;
+import io.spine.test.event.ProjectCreated;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -89,11 +93,7 @@ public class EventRootCommandIdShould {
         postCommand(command);
 
         final List<Event> events = readEvents();
-        // Two events should be created: one in the `ProjectAggregate` and one in the `TeamAggregate`.
-        assertSize(2, events);
-
-        final Event event = events.get(0);
-        assertEquals(command.getId(), getRootCommandId(event));
+        assertEquals(command.getId(), getRootCommandId(events.get(0)));
     }
 
     @Test
@@ -109,6 +109,19 @@ public class EventRootCommandIdShould {
         assertEquals(command.getId(), getRootCommandId(events.get(2)));
     }
 
+    /**
+     * Ensures root command ID is matched by the property of the event which is created as 
+     * a reaction to another event.
+     *
+     * <p> Two events are expected to be found in the {@linkplain EventStore} created by different 
+     * aggregates:
+     * <ol>
+     *     <li>{@link io.spine.server.event.given.EventRootCommandIdTestEnv.ProjectAggregate} — 
+     *     {@link ProjectCreated}</li>
+     *     <li>{@link io.spine.server.event.given.EventRootCommandIdTestEnv.TeamAggregate} — 
+     *     {@link EvTeamProjectAdded} created as a reaction to {@link ProjectCreated}</li>
+     * </ol>
+     */
     @Test
     public void match_the_id_of_an_external_event_handled_by_an_aggregate() {
         final Command command = command(createProject(projectId(), teamId()));
@@ -116,7 +129,6 @@ public class EventRootCommandIdShould {
         postCommand(command);
 
         final List<Event> events = readEvents();
-        // Two events should be created: one in the `ProjectAggregate` and one in the `TeamAggregate`.
         assertSize(2, events);
 
         final Event reaction = events.get(1);
@@ -149,6 +161,19 @@ public class EventRootCommandIdShould {
         assertEquals(command.getId(), getRootCommandId(events.get(2)));
     }
 
+    /**
+     * Ensures root command ID is matched by the property of the event which is created as 
+     * a reaction to another event.
+     *
+     * <p> Two events are expected to be found in the {@linkplain EventStore} created by different 
+     * process managers:
+     * <ol>
+     *     <li>{@link io.spine.server.event.given.EventRootCommandIdTestEnv.UserSignUpProcessManager} — 
+     *     {@link EvInvitationAccepted}</li>
+     *     <li>{@link io.spine.server.event.given.EventRootCommandIdTestEnv.TeamCreationProcessManager} — 
+     *     {@link EvTeamMemberAdded} created as a reaction to {@link EvInvitationAccepted}</li>
+     * </ol>
+     */
     @Test
     public void match_the_id_of_an_external_event_handled_by_a_process_manager() {
         final Command command = command(acceptInvitation(teamId()));
@@ -156,7 +181,6 @@ public class EventRootCommandIdShould {
         postCommand(command);
 
         final List<Event> events = readEvents();
-        // Two events should be created: the `EvInvitationAccepted` and the `EvTeamMemberAdded`.
         assertSize(2, events);
 
         final Event reaction = events.get(1);
