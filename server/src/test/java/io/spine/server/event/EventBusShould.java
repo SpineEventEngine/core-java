@@ -41,6 +41,7 @@ import io.spine.server.event.given.EventBusTestEnv.GivenEvent;
 import io.spine.server.event.given.EventBusTestEnv.ProjectRepository;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.StorageFactorySwitch;
+import io.spine.test.event.EBProjectArchived;
 import io.spine.test.event.EBProjectCreated;
 import io.spine.test.event.EBTaskAdded;
 import io.spine.test.event.ProjectCreated;
@@ -421,7 +422,7 @@ public class EventBusShould {
     @Test
     public void not_store_an_invalid_event() {
         final Command command = command(invalidArchiveProject());
-        final EBProjectCreatedSubscriber subscriber = new EBProjectCreatedSubscriber();
+        final EBProjectArchivedSubscriber subscriber = new EBProjectArchivedSubscriber();
         // Register an event subscribe for the event to pass the `DeadEventFilter`
         eventBus.register(subscriber);
 
@@ -545,6 +546,21 @@ public class EventBusShould {
 
         @Subscribe
         public void on(EBProjectCreated message, EventContext ignored) {
+            this.eventMessage = message;
+        }
+
+        public Message getEventMessage() {
+            return eventMessage;
+        }
+    }
+
+    
+    private static class EBProjectArchivedSubscriber extends EventSubscriber {
+
+        private Message eventMessage;
+
+        @Subscribe
+        public void on(EBProjectArchived message, EventContext ignored) {
             this.eventMessage = message;
         }
 
