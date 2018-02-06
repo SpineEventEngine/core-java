@@ -461,7 +461,7 @@ public class EventBusShould {
      *
      * <p> To filter the {@link EBTaskAdded} events the {@linkplain EventBus} has a custom filter. The
      * {@link TaskCreatedFilter} filters out {@link EBTaskAdded} events with {@link Task#getDone()}
-     * set to {@code true}.
+     * set to {@code true}
      */
     @Test
     public void store_only_events_passing_filters() {
