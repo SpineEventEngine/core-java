@@ -208,6 +208,8 @@ public final class Events {
      */
     @Internal
     public static TenantId getTenantId(Event event) {
+        checkNotNull(event);
+        
         final Optional<CommandContext> commandContext = getCommandContext(event);
 
         if (!commandContext.isPresent()) {

@@ -32,8 +32,6 @@ import io.spine.core.TenantId;
  * @author Mykhailo Drachuk
  */
 public class EventsTestEnv {
-    
-    public static final String TEST_TENANT_NAME = "test-tenant";
 
     private EventsTestEnv() { }
 
@@ -63,7 +61,8 @@ public class EventsTestEnv {
         return result;
     }
 
-    public static TenantId tenantId(String value) {
+    public static TenantId tenantId() {
+        final String value = EventsTestEnv.class.getName();
         return TenantId.newBuilder()
                        .setValue(value)
                        .build();

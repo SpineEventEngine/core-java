@@ -49,7 +49,7 @@ import static io.spine.core.Events.getProducer;
 import static io.spine.core.Events.getTimestamp;
 import static io.spine.core.Events.nothing;
 import static io.spine.core.Events.sort;
-import static io.spine.core.given.EventsTestEnv.TEST_TENANT_NAME;
+import static io.spine.core.given.EventsTestEnv.tenantId;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
@@ -218,6 +218,11 @@ public class EventsShould {
         }
     }
 
+    @Test(expected = NullPointerException.class)
+    public void throw_NPE_when_getting_tenant_id_of_null_event() {
+        Events.getTenantId(Tests.<Event>nullRef());
+    }
+
     @Test
     public void provide_a_default_tenant_id_for_an_event_without_origin() {
         final EventContext context = contextWithoutOrigin().build();
@@ -231,10 +236,9 @@ public class EventsShould {
 
     @Test
     public void provide_a_tenant_id_for_an_event_with_command_context() {
-        final TenantId targetTenantId = EventsTestEnv.tenantId(TEST_TENANT_NAME);
+        final TenantId targetTenantId = tenantId();
         final CommandContext commandContext = EventsTestEnv.commandContext(targetTenantId);
-        final EventContext context = contextWithoutOrigin().setCommandContext(commandContext)
-                                                           .build();
+        final EventContext context = contextWithoutOrigin().setCommandContext(commandContext).build();
         final Event event = EventsTestEnv.event(context);
 
         final TenantId tenantId = Events.getTenantId(event);
@@ -245,7 +249,7 @@ public class EventsShould {
 
     @Test
     public void provide_a_tenant_id_for_an_event_with_rejection_context() {
-        final TenantId targetTenantId = EventsTestEnv.tenantId(TEST_TENANT_NAME);
+        final TenantId targetTenantId = tenantId();
         final RejectionContext rejectionContext = EventsTestEnv.rejectionContext(targetTenantId);
         final EventContext context = contextWithoutOrigin().setRejectionContext(rejectionContext)
                                                            .build();
@@ -283,7 +287,7 @@ public class EventsShould {
 
     @Test
     public void provide_a_tenant_id_for_an_event_with_event_context_with_command_context() {
-        final TenantId targetTenantId = EventsTestEnv.tenantId(TEST_TENANT_NAME);
+        final TenantId targetTenantId = tenantId();
         final CommandContext commandContext = EventsTestEnv.commandContext(targetTenantId);
         final EventContext outerContext = contextWithoutOrigin().setCommandContext(commandContext)
                                                                 .build();
@@ -298,7 +302,7 @@ public class EventsShould {
 
     @Test
     public void provide_a_tenant_id_for_an_event_with_event_context_with_rejection_context() {
-        final TenantId targetTenantId = EventsTestEnv.tenantId(TEST_TENANT_NAME);
+        final TenantId targetTenantId = tenantId();
         final RejectionContext rejectionContext = EventsTestEnv.rejectionContext(targetTenantId);
         final EventContext outerContext =
                 contextWithoutOrigin().setRejectionContext(rejectionContext)
