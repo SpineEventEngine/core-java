@@ -250,7 +250,7 @@ public class EventBusTestEnv {
 
         private static Error error() {
             return Error.newBuilder()
-                        .setMessage("Task can not be created done.")
+                        .setMessage("The task cannot be created in a 'completed' state.")
                         .build();
         }
     }
