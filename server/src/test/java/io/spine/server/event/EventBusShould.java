@@ -400,7 +400,7 @@ public class EventBusShould {
     public void store_an_event() {
         final Command command = command(createProject());
         final EBProjectCreatedSubscriber subscriber = new EBProjectCreatedSubscriber();
-        // Register an event subscribe for the event to pass the `DeadEventFilter`
+        // Register an event subscriber for the event to pass the `DeadEventFilter`
         eventBus.register(subscriber);
 
         commandBus.post(command, StreamObservers.<Ack>noOpObserver());
@@ -423,7 +423,7 @@ public class EventBusShould {
     public void not_store_an_invalid_event() {
         final Command command = command(invalidArchiveProject());
         final EBProjectArchivedSubscriber subscriber = new EBProjectArchivedSubscriber();
-        // Register an event subscribe for the event to pass the `DeadEventFilter`
+        // Register an event subscriber for the event to pass the `DeadEventFilter`
         eventBus.register(subscriber);
 
         commandBus.post(command, StreamObservers.<Ack>noOpObserver());
@@ -445,7 +445,7 @@ public class EventBusShould {
 
     @Test
     public void store_multiple_messages_passing_filters() {
-        // Register an event subscribe for the event to pass the `DeadEventFilter` to the `TaskCreatedFilter`
+        // Register an event subscriber for the event to pass the `DeadEventFilter` to the `TaskCreatedFilter`
         eventBus.register(new TaskAddedNoOpSubscriber());
         // The `EBTaskAdded` events with `done` set to `true` are filtered out by `TaskCreatedFilter`
         final Command command = command(addTasks(newTask(false), newTask(false), newTask(false)));
@@ -458,7 +458,7 @@ public class EventBusShould {
 
     @Test
     public void store_only_messages_passing_filters() {
-        // Register an event subscribe for the event to pass the `DeadEventFilter` to the `TaskCreatedFilter`
+        // Register an event subscriber for the event to pass the `DeadEventFilter` to the `TaskCreatedFilter`
         eventBus.register(new TaskAddedNoOpSubscriber());
         // The `EBTaskAdded` events with `done` set to `true` are filtered out by `TaskCreatedFilter`
         final Command command = command(addTasks(newTask(false), newTask(true), newTask(false),
@@ -478,7 +478,7 @@ public class EventBusShould {
 
     @Test
     public void not_store_any_messages_when_they_are_failing_filtering() {
-        // Register an event subscribe for the event to pass the `DeadEventFilter` to the `TaskCreatedFilter`
+        // Register an event subscriber for the event to pass the `DeadEventFilter` to the `TaskCreatedFilter`
         eventBus.register(new TaskAddedNoOpSubscriber());
         // The `EBTaskAdded` events with `done` set to `true` are filtered out by `TaskCreatedFilter`
         final Command command = command(addTasks(newTask(true), newTask(true), newTask(true)));
