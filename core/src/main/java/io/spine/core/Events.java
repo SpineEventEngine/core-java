@@ -19,6 +19,7 @@
  */
 package io.spine.core;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
@@ -168,14 +169,14 @@ public final class Events {
      * <p> In case the passed {@code Event} instance is a reaction to another {@code Event}, 
      * the identifier of the very first command in this chain is returned.
      *
-     * @param event the event to get the origin ID for
-     * @param <I>   the type of the origin ID
-     * @return the origin ID
+     * @param event the event to get the root command ID for
+     * @param <I>   the type of the root command ID
+     * @return the root command ID
      */
     public static <I> I getRootCommandId(Event event) {
         checkNotNull(event);
-        final I id = Identifier.unpack(event.getContext()
-                                            .getRootCommandId());
+        final EventContext context = event.getContext();
+        final I id = Identifier.unpack(context.getRootCommandId());
         return id;
     }
 
@@ -200,14 +201,78 @@ public final class Events {
 
     /**
      * Obtains the {@link TenantId} from the given {@link Event}.
+     * 
+     * <p>The {@code TenantId} is retrieved by traversing the passed {@code Event}s context. It is
+     * stored in the initial {@link CommandContext} and can be retrieved from the events origin 
+     * command or rejection context. 
      */
     @Internal
     public static TenantId getTenantId(Event event) {
-        final TenantId result = event.getContext()
-                                     .getCommandContext()
-                                     .getActorContext()
-                                     .getTenantId();
+        checkNotNull(event);
+        
+        final Optional<CommandContext> commandContext = getCommandContext(event);
+
+        if (!commandContext.isPresent()) {
+            return TenantId.getDefaultInstance();
+        }
+
+        final TenantId result = getTenantId(commandContext.get());
         return result;
+    }
+
+    /**
+     * Obtains the {@link TenantId} from the {@link CommandContext}.
+     * 
+     * <p>The {@link CommandContext} is accessible from the {@link Event} if the {@code Event} was 
+     * created as a result of some command or its rejection. This makes the {@code CommandContext} 
+     * a valid {@code TenantId} source inside of the {@code Event}.
+     */
+    private static TenantId getTenantId(CommandContext context) {
+        return context.getActorContext()
+                      .getTenantId();
+    }
+
+    /**
+     * Obtains the context of the command, which lead to this event.
+     * 
+     * <p> The context is obtained by traversing the events origin for a valid context source. 
+     * There are can be two sources for the command context:
+     * <ol>
+     *     <li>The command context set as the event origin.</li>
+     *     <li>The command set as a rejection property.</li>
+     * </ol>
+     * 
+     * <p>If at some point the event origin is not set the {@link Optional#absent()} is returned.
+     */
+    private static Optional<CommandContext> getCommandContext(Event event) {
+        CommandContext commandContext = null;
+        EventContext eventContext = event.getContext();
+
+        while (commandContext == null) {
+
+            switch (eventContext.getOriginCase()) {
+
+                case EVENT_CONTEXT:
+                    eventContext = eventContext.getEventContext();
+                    break;
+
+                case COMMAND_CONTEXT:
+                    commandContext = eventContext.getCommandContext();
+                    break;
+
+                case REJECTION_CONTEXT:
+                    commandContext = eventContext.getRejectionContext()
+                                                 .getCommand()
+                                                 .getContext();
+                    break;
+
+                case ORIGIN_NOT_SET:
+                default:
+                    return Optional.absent();
+            }
+        }
+
+        return Optional.of(commandContext);
     }
 
     /**

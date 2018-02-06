@@ -20,9 +20,7 @@
 
 package io.spine.server.event;
 
-import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
-import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.Event;
@@ -33,6 +31,11 @@ import io.spine.server.event.given.EventRootCommandIdTestEnv.ProjectAggregateRep
 import io.spine.server.event.given.EventRootCommandIdTestEnv.TeamAggregateRepository;
 import io.spine.server.event.given.EventRootCommandIdTestEnv.TeamCreationRepository;
 import io.spine.server.event.given.EventRootCommandIdTestEnv.UserSignUpRepository;
+import io.spine.server.tenant.TenantAwareOperation;
+import io.spine.test.event.EvInvitationAccepted;
+import io.spine.test.event.EvTeamMemberAdded;
+import io.spine.test.event.EvTeamProjectAdded;
+import io.spine.test.event.ProjectCreated;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,10 +44,12 @@ import java.util.List;
 
 import static io.spine.core.Events.getRootCommandId;
 import static io.spine.grpc.StreamObservers.noOpObserver;
+import static io.spine.server.event.given.EventRootCommandIdTestEnv.TENANT_ID;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.acceptInvitation;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.addTasks;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.addTeamMember;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.allEventsQuery;
+import static io.spine.server.event.given.EventRootCommandIdTestEnv.command;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.createProject;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.inviteTeamMembers;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.projectId;
@@ -57,14 +62,12 @@ import static org.junit.Assert.assertEquals;
  */
 public class EventRootCommandIdShould {
 
-    private static final TestActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(EventRootCommandIdShould.class);
-
     private BoundedContext boundedContext;
 
     @Before
     public void setUp() {
         boundedContext = BoundedContext.newBuilder()
+                                       .setMultitenant(true)
                                        .build();
 
         final ProjectAggregateRepository projectRepository = new ProjectAggregateRepository();
@@ -90,11 +93,7 @@ public class EventRootCommandIdShould {
         postCommand(command);
 
         final List<Event> events = readEvents();
-        // Two events should be created: one in the `ProjectAggregate` and one in the `TeamAggregate`.
-        assertSize(2, events);
-
-        final Event event = events.get(0);
-        assertEquals(command.getId(), getRootCommandId(event));
+        assertEquals(command.getId(), getRootCommandId(events.get(0)));
     }
 
     @Test
@@ -110,6 +109,19 @@ public class EventRootCommandIdShould {
         assertEquals(command.getId(), getRootCommandId(events.get(2)));
     }
 
+    /**
+     * Ensures root command ID is matched by the property of the event which is created as 
+     * a reaction to another event.
+     *
+     * <p> Two events are expected to be found in the {@linkplain EventStore} created by different 
+     * aggregates:
+     * <ol>
+     *     <li>{@link io.spine.server.event.given.EventRootCommandIdTestEnv.ProjectAggregate} — 
+     *     {@link ProjectCreated}</li>
+     *     <li>{@link io.spine.server.event.given.EventRootCommandIdTestEnv.TeamAggregate} — 
+     *     {@link EvTeamProjectAdded} created as a reaction to {@link ProjectCreated}</li>
+     * </ol>
+     */
     @Test
     public void match_the_id_of_an_external_event_handled_by_an_aggregate() {
         final Command command = command(createProject(projectId(), teamId()));
@@ -117,7 +129,6 @@ public class EventRootCommandIdShould {
         postCommand(command);
 
         final List<Event> events = readEvents();
-        // Two events should be created: one in the `ProjectAggregate` and one in the `TeamAggregate`.
         assertSize(2, events);
 
         final Event reaction = events.get(1);
@@ -150,6 +161,19 @@ public class EventRootCommandIdShould {
         assertEquals(command.getId(), getRootCommandId(events.get(2)));
     }
 
+    /**
+     * Ensures root command ID is matched by the property of the event which is created as 
+     * a reaction to another event.
+     *
+     * <p> Two events are expected to be found in the {@linkplain EventStore} created by different 
+     * process managers:
+     * <ol>
+     *     <li>{@link io.spine.server.event.given.EventRootCommandIdTestEnv.UserSignUpProcessManager} — 
+     *     {@link EvInvitationAccepted}</li>
+     *     <li>{@link io.spine.server.event.given.EventRootCommandIdTestEnv.TeamCreationProcessManager} — 
+     *     {@link EvTeamMemberAdded} created as a reaction to {@link EvInvitationAccepted}</li>
+     * </ol>
+     */
     @Test
     public void match_the_id_of_an_external_event_handled_by_a_process_manager() {
         final Command command = command(acceptInvitation(teamId()));
@@ -157,15 +181,10 @@ public class EventRootCommandIdShould {
         postCommand(command);
 
         final List<Event> events = readEvents();
-        // Two events should be created: the `InvitationAccepted` and the `TeamMemberAdded`.
         assertSize(2, events);
 
         final Event reaction = events.get(1);
         assertEquals(command.getId(), getRootCommandId(reaction));
-    }
-
-    private static Command command(Message message) {
-        return requestFactory.createCommand(message);
     }
 
     private void postCommand(Command command) {
@@ -178,15 +197,19 @@ public class EventRootCommandIdShould {
      * Reads all events from the bounded context event store.
      */
     private List<Event> readEvents() {
-        final EventStreamQuery query = allEventsQuery();
         final MemoizingObserver<Event> observer = StreamObservers.memoizingObserver();
 
-        boundedContext.getEventBus()
-                      .getEventStore()
-                      .read(query, observer);
+        final TenantAwareOperation operation = new TenantAwareOperation(TENANT_ID) {
+            @Override
+            public void run() {
+                boundedContext.getEventBus()
+                              .getEventStore()
+                              .read(allEventsQuery(), observer);
+            }
+        };
+        operation.execute();
 
         final List<Event> results = observer.responses();
         return results;
     }
-
 }

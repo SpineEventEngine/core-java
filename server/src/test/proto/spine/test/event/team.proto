@@ -1,5 +1,5 @@
 //
-// Copyright 2017, TeamDev Ltd. All rights reserved.
+// Copyright 2018, TeamDev Ltd. All rights reserved.
 //
 // Redistribution and use in source and/or binary forms, with or without
 // modification, must retain the above copyright notice and the following
@@ -31,42 +31,47 @@ import "spine/core/user_id.proto";
 import "spine/net/email_address.proto";
 import "spine/test/event/project.proto";
 
-message TeamId {
+message EvTeamId {
     string id = 1;
 }
 
-message MemberInvitation {
+message EvMemberInvitation {
+
     spine.net.EmailAddress email = 1;
 
-    TeamId team_id = 2;
+    EvTeamId team_id = 2;
 }
 
-message Team {
-    TeamId id = 1;
+message EvTeam {
+
+    EvTeamId id = 1;
 
     repeated ProjectId project_id = 2;
 
-    repeated Member member = 3;
+    repeated EvMember member = 3;
 
-    repeated MemberInvitation invitation = 4;
+    repeated EvMemberInvitation invitation = 4;
 }
 
-message Member {
+message EvMember {
+
     spine.core.UserId user_id = 1;
 
     string name = 2;
 }
 
-message TeamCreation {
-    TeamId id = 1;
+message EvTeamCreation {
 
-    repeated Member member = 2;
+    EvTeamId id = 1;
 
-    repeated MemberInvitation invitation = 3;
+    repeated EvMember member = 2;
+
+    repeated EvMemberInvitation invitation = 3;
 }
 
-message UserSignUp {
+message EvUserSignUp {
+
     spine.core.UserId user_id = 1;
 
-    MemberInvitation invitation = 2;
+    EvMemberInvitation invitation = 2;
 }

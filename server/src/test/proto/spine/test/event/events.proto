@@ -36,19 +36,13 @@ import "spine/test/event/team.proto";
 message ProjectCreated {
     ProjectId project_id = 1;
 
-    TeamId team_id = 2;
+    EvTeamId team_id = 2;
 
     message Enrichment {
         string project_name = 1 [(by) = "project_id"];
 
         core.UserId owner_id = 2 [(by) = "project_id"];
     }
-}
-
-message ProjectArchived {
-    ProjectId project_id = 1;
-
-    string reason = 2 [(required) = true];
 }
 
 message ProjectCreatedSeparateEnrichment {
@@ -116,32 +110,55 @@ message SeparateEnrichmentForMultipleProjectEvents {
 }
 
 
-message TeamProjectAdded {
-    TeamId team_id = 1;
+message EvTeamProjectAdded {
+
+    EvTeamId team_id = 1;
 
     ProjectId project_id = 2;
 }
 
-message TeamCreated {
-    TeamId team_id = 1;
+message EvTeamCreated {
 
-    repeated Member member = 2;
+    EvTeamId team_id = 1;
+
+    repeated EvMember member = 2;
 }
 
-message TeamMemberAdded {
-    TeamId team_id = 1;
+message EvTeamMemberAdded {
 
-    Member member = 2;
+    EvTeamId team_id = 1;
+
+    EvMember member = 2;
 }
 
-message TeamMemberInvited {
-    TeamId team_id = 1;
+message EvTeamMemberInvited {
+
+    EvTeamId team_id = 1;
 
     spine.net.EmailAddress email = 2;
 }
 
-message InvitationAccepted {
+message EvInvitationAccepted {
+
     spine.core.UserId user_id = 1;
 
-    MemberInvitation invitation = 2;
+    EvMemberInvitation invitation = 2;
+}
+
+message EBProjectCreated {
+    ProjectId project_id = 1;
+}
+
+message EBProjectArchived {
+
+    ProjectId project_id = 1;
+
+    string reason = 2 [(required) = true];
+}
+
+message EBTaskAdded {
+
+    ProjectId project_id = 1;
+
+    Task task = 2 [(required) = true];
 }
