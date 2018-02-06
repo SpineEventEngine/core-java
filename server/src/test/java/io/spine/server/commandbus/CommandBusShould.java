@@ -28,6 +28,7 @@ import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.given.CommandBusTestEnv.ProjectAggregateRepository;
+import io.spine.server.tenant.TenantAwareFunction;
 import io.spine.test.commandbus.CProject;
 import io.spine.test.commandbus.CProjectId;
 import org.junit.After;
@@ -38,20 +39,22 @@ import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.server.commandbus.given.CommandBusTestEnv.ProjectAggregate;
 import static io.spine.server.commandbus.given.CommandBusTestEnv.addTask;
 import static io.spine.server.commandbus.given.CommandBusTestEnv.projectId;
+import static io.spine.server.commandbus.given.CommandBusTestEnv.tenantId;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class CommandBusShould {
 
-    private static final TestActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(CommandBusShould.class);
-
     private BoundedContext boundedContext;
     private ProjectAggregateRepository projectRepository;
+
+    private static final TestActorRequestFactory requestFactory =
+            TestActorRequestFactory.newInstance(CommandBusShould.class, tenantId());
 
     @Before
     public void setUp() {
         boundedContext = BoundedContext.newBuilder()
+                                       .setMultitenant(true)
                                        .build();
         projectRepository = new ProjectAggregateRepository();
         boundedContext.register(projectRepository);
@@ -83,7 +86,7 @@ public class CommandBusShould {
         assertEquals(1, taskCountForProject(projectId));
     }
 
-    private static Command command(Message message) {
+    public static Command command(Message message) {
         return requestFactory.createCommand(message);
     }
 
@@ -94,12 +97,17 @@ public class CommandBusShould {
     }
 
     private int taskCountForProject(CProjectId id) {
-        final Optional<ProjectAggregate> projectAggregateOptional = projectRepository.find(id);
-        assertTrue(projectAggregateOptional.isPresent());
+        final Integer taskCount = new TenantAwareFunction<CProjectId, Integer>(tenantId()) {
+            @Override
+            public Integer apply(CProjectId id) {
+                final Optional<ProjectAggregate> optional = projectRepository.find(id);
+                assertTrue(optional.isPresent());
 
-        final ProjectAggregate aggregate = projectAggregateOptional.get();
-        final CProject project = aggregate.getState();
-        final int taskCount = project.getTaskCount();
+                final ProjectAggregate aggregate = optional.get();
+                final CProject project = aggregate.getState();
+                return project.getTaskCount();
+            }
+        }.execute(id);
 
         return taskCount;
     }

@@ -21,6 +21,7 @@
 package io.spine.server.commandbus.given;
 
 import io.spine.core.CommandContext;
+import io.spine.core.TenantId;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
@@ -43,6 +44,13 @@ public class CommandBusTestEnv {
     public static CProjectId projectId() {
         return ((CProjectId.Builder) Sample.builderForType(CProjectId.class))
                 .build();
+    }
+    
+    public static TenantId tenantId() {
+        final String value = CommandBusTestEnv.class.getName();
+        return TenantId.newBuilder()
+                       .setValue(value)
+                       .build();
     }
 
     public static CAddTask addTask(CProjectId id) {
