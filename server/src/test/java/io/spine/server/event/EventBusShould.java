@@ -75,7 +75,6 @@ import static io.spine.test.Verify.assertSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.any;
@@ -399,9 +398,7 @@ public class EventBusShould {
     @Test
     public void store_an_event() {
         final Command command = command(createProject());
-        final EBProjectCreatedSubscriber subscriber = new EBProjectCreatedSubscriber();
-        // Register an event subscriber for the event to pass the `DeadEventFilter`
-        eventBus.register(subscriber);
+        eventBus.register(new EBProjectCreatedNoOpSubscriber());
 
         commandBus.post(command, StreamObservers.<Ack>noOpObserver());
 
@@ -422,15 +419,12 @@ public class EventBusShould {
     @Test
     public void not_store_an_invalid_event() {
         final Command command = command(invalidArchiveProject());
-        final EBProjectArchivedSubscriber subscriber = new EBProjectArchivedSubscriber();
-        // Register an event subscriber for the event to pass the `DeadEventFilter`
-        eventBus.register(subscriber);
+        eventBus.register(new EBProjectArchivedSubscriber());
 
         commandBus.post(command, StreamObservers.<Ack>noOpObserver());
 
         final List<Event> events = readEvents(eventBus);
         assertSize(0, events);
-        assertNull(subscriber.getEventMessage());
     }
 
     @Test
@@ -443,11 +437,16 @@ public class EventBusShould {
         assertSize(0, events);
     }
 
+    /**
+     * Ensures that events are stored when all of them pass the filters.
+     *
+     * <p> To filter the {@link EBTaskAdded} events the {@linkplain EventBus} has a custom filter. The 
+     * {@link TaskCreatedFilter} filters out {@link EBTaskAdded} events with {@link Task#getDone()}
+     * set to {@code true}.
+     */
     @Test
     public void store_multiple_messages_passing_filters() {
-        // Register an event subscriber for the event to pass the `DeadEventFilter` to the `TaskCreatedFilter`
-        eventBus.register(new TaskAddedNoOpSubscriber());
-        // The `EBTaskAdded` events with `done` set to `true` are filtered out by `TaskCreatedFilter`
+        eventBus.register(new EBTaskAddedNoOpSubscriber());
         final Command command = command(addTasks(newTask(false), newTask(false), newTask(false)));
 
         commandBus.post(command, StreamObservers.<Ack>noOpObserver());
@@ -456,11 +455,17 @@ public class EventBusShould {
         assertSize(3, storedEvents);
     }
 
+    /**
+     * Ensures that events which pass filters and the ones that don’t are treated independently when
+     * sent in batch.
+     *
+     * <p> To filter the {@link EBTaskAdded} events the {@linkplain EventBus} has a custom filter. The
+     * {@link TaskCreatedFilter} filters out {@link EBTaskAdded} events with {@link Task#getDone()}
+     * set to {@code true}.
+     */
     @Test
-    public void store_only_messages_passing_filters() {
-        // Register an event subscriber for the event to pass the `DeadEventFilter` to the `TaskCreatedFilter`
-        eventBus.register(new TaskAddedNoOpSubscriber());
-        // The `EBTaskAdded` events with `done` set to `true` are filtered out by `TaskCreatedFilter`
+    public void store_only_events_passing_filters() {
+        eventBus.register(new EBTaskAddedNoOpSubscriber());
         final Command command = command(addTasks(newTask(false), newTask(true), newTask(false),
                                                  newTask(true), newTask(true)));
 
@@ -473,16 +478,21 @@ public class EventBusShould {
             final EBTaskAdded contents = unpack(event.getMessage());
             final Task task = contents.getTask();
             assertFalse(task.getDone());
-         }
+        }
     }
 
+    /**
+     * Ensures that events are not stored when none of them pass the filters.
+     *
+     * <p> To filter the {@link EBTaskAdded} events the {@linkplain EventBus} has a custom filter. The
+     * {@link TaskCreatedFilter} filters out {@link EBTaskAdded} events with {@link Task#getDone()}
+     * set to {@code true}.
+     */
     @Test
-    public void not_store_any_messages_when_they_are_failing_filtering() {
-        // Register an event subscriber for the event to pass the `DeadEventFilter` to the `TaskCreatedFilter`
-        eventBus.register(new TaskAddedNoOpSubscriber());
-        // The `EBTaskAdded` events with `done` set to `true` are filtered out by `TaskCreatedFilter`
+    public void not_store_any_events_when_they_are_failing_filtering() {
+        eventBus.register(new EBTaskAddedNoOpSubscriber());
         final Command command = command(addTasks(newTask(true), newTask(true), newTask(true)));
-        
+
         commandBus.post(command, StreamObservers.<Ack>noOpObserver());
 
         final List<Event> storedEvents = readEvents(eventBus);
@@ -539,18 +549,16 @@ public class EventBusShould {
         }
         executor.shutdownNow();
     }
-    
-    private static class EBProjectCreatedSubscriber extends EventSubscriber {
 
-        private Message eventMessage;
+    /**
+     * {@link EBProjectCreated} subscriber that does nothing. Can be used for the event to get pass the
+     * {@link io.spine.server.bus.DeadMessageFilter}.
+     */
+    private static class EBProjectCreatedNoOpSubscriber extends EventSubscriber {
 
         @Subscribe
-        public void on(EBProjectCreated message, EventContext ignored) {
-            this.eventMessage = message;
-        }
-
-        public Message getEventMessage() {
-            return eventMessage;
+        public void on(EBProjectCreated message, EventContext context) {
+            // Do nothing.
         }
     }
 
@@ -593,11 +601,11 @@ public class EventBusShould {
      * {@link EBTaskAdded} subscriber that does nothing. Can be used for the event to get pass the
      * {@link io.spine.server.bus.DeadMessageFilter}.
      */
-    private static class TaskAddedNoOpSubscriber extends EventSubscriber {
+    private static class EBTaskAddedNoOpSubscriber extends EventSubscriber {
 
         @Subscribe
         public void on(EBTaskAdded message, EventContext context) {
-            // Does nothing
+            // Do nothing.
         }
     }
 
