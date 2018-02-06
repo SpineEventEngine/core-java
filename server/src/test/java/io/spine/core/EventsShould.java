@@ -66,6 +66,7 @@ import static org.junit.Assert.fail;
  *
  * @author Alexander Litus
  * @author Alexander Yevsyukov
+ * @author Mykhailo Drachuk
  */
 public class EventsShould {
 

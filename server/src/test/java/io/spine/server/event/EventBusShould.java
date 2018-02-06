@@ -84,6 +84,9 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
+/**
+ * @author Mykhailo Drachuk
+ */
 public class EventBusShould {
 
     private EventBus eventBus;
@@ -539,12 +542,10 @@ public class EventBusShould {
     private static class EBProjectCreatedSubscriber extends EventSubscriber {
 
         private Message eventMessage;
-        private EventContext eventContext;
 
         @Subscribe
-        public void on(EBProjectCreated message, EventContext context) {
+        public void on(EBProjectCreated message, EventContext ignored) {
             this.eventMessage = message;
-            this.eventContext = context;
         }
 
         public Message getEventMessage() {
