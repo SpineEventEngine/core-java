@@ -20,10 +20,19 @@
 
 package io.spine.server.aggregate;
 
+import com.google.common.base.Objects;
+import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
+import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
+import io.spine.core.Event;
+import io.spine.server.commandbus.DuplicateCommandException;
 
 import java.util.List;
+
+import static io.spine.core.Events.getRootCommandId;
+import static java.lang.Integer.MAX_VALUE;
 
 /**
  * Dispatches commands to aggregates of the associated {@code AggregateRepository}.
@@ -46,11 +55,48 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
         return endpoint.handle();
     }
 
-
     static <I, A extends Aggregate<I, ?, ?>>
     AggregateCommandEndpoint<I, A>
     of(AggregateRepository<I, A> repository, CommandEnvelope command) {
         return new AggregateCommandEndpoint<>(repository, command);
+    }
+
+    @Override
+    protected void deliverNowTo(I aggregateId) {
+        ensureNotDuplicate(aggregateId);
+        super.deliverNowTo(aggregateId);
+    }
+
+    /**
+     * Ensures the aggregate did not receive the enclosed command yet.
+     *
+     * <p> The check is performed by looking for an event with matching root command ID which
+     * occurred since last snapshot.
+     *
+     * @param aggregateId the id of the aggregate to check
+     * @throws DuplicateCommandException if the command already received by the aggregate since last snapshot
+     */
+    private void ensureNotDuplicate(I aggregateId) {
+        final List<Event> events = readEventsSinceLastSnapshot(aggregateId);
+        for (Event event : events) {
+            final CommandEnvelope commandEnvelope = envelope();
+            if (Objects.equal(getRootCommandId(event), commandEnvelope.getId())) {
+                final Command command = commandEnvelope.getOuterObject();
+                throw DuplicateCommandException.of(command);
+            }
+        }
+    }
+
+    private List<Event> readEventsSinceLastSnapshot(I aggregateId) {
+        final AggregateReadRequest<I> request = new AggregateReadRequest<>(aggregateId, MAX_VALUE);
+        final Optional<AggregateStateRecord> optional = repository().aggregateStorage()
+                                                                    .read(request);
+        if (!optional.isPresent()) {
+            return ImmutableList.of();
+        }
+        final AggregateStateRecord record = optional.get();
+        final List<Event> events = record.getEventList();
+        return events;
     }
 
     @Override

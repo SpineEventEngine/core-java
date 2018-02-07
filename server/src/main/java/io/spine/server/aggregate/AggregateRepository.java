@@ -406,8 +406,13 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         this.snapshotTrigger = snapshotTrigger;
     }
 
-    @VisibleForTesting
-    public AggregateStorage<I> aggregateStorage() {
+    /**
+     * Returns the storage ensuring that it exists
+     *
+     * @return storage instance
+     * @throws IllegalStateException if the storage is null
+     */
+    protected AggregateStorage<I> aggregateStorage() {
         @SuppressWarnings("unchecked") // We check the type on initialization.
         final AggregateStorage<I> result = (AggregateStorage<I>) getStorage();
         return result;
