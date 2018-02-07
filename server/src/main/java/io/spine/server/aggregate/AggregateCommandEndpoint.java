@@ -71,10 +71,11 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
      * Ensures the aggregate did not receive the enclosed command yet.
      *
      * <p> The check is performed by looking for an event with matching root command ID which
-     * occurred since last snapshot.
+     * occurred since last snapshot event.
      *
      * @param aggregateId the id of the aggregate to check
-     * @throws DuplicateCommandException if the command already received by the aggregate since last snapshot
+     * @throws DuplicateCommandException if the command already received by the aggregate since
+     *                                   last snapshot
      */
     private void ensureNotDuplicate(I aggregateId) {
         final List<Event> events = readEventsSinceLastSnapshot(aggregateId);
@@ -88,9 +89,9 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
     }
 
     private List<Event> readEventsSinceLastSnapshot(I aggregateId) {
+        final AggregateStorage<I> storage = repository().aggregateStorage();
         final AggregateReadRequest<I> request = new AggregateReadRequest<>(aggregateId, MAX_VALUE);
-        final Optional<AggregateStateRecord> optional = repository().aggregateStorage()
-                                                                    .read(request);
+        final Optional<AggregateStateRecord> optional = storage.read(request);
         if (!optional.isPresent()) {
             return ImmutableList.of();
         }
