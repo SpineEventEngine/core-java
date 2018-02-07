@@ -170,13 +170,12 @@ public final class Events {
      * the identifier of the very first command in this chain is returned.
      *
      * @param event the event to get the root command ID for
-     * @param <I>   the type of the root command ID
      * @return the root command ID
      */
-    public static <I> I getRootCommandId(Event event) {
+    public static CommandId getRootCommandId(Event event) {
         checkNotNull(event);
         final EventContext context = event.getContext();
-        final I id = Identifier.unpack(context.getRootCommandId());
+        final CommandId id = context.getRootCommandId();
         return id;
     }
 

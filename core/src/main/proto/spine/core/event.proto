@@ -101,10 +101,10 @@ message EventContext {
 
     // An ID of the root command, which lead to this event.
     //
-    // If the `Event` is a reaction to another `Event`, then this attribute holds the identifier 
+    // If the event is a reaction to another event, then this attribute holds the identifier 
     // of the very first command in this chain.
     //
-    google.protobuf.Any root_command_id = 9 [(required) = true];
+    CommandId root_command_id = 9 [(required) = true];
 
     // The ID of the entity which generated the event.
     //

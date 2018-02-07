@@ -127,7 +127,7 @@ public final class CommandEnvelope
     @Override
     public void passToEventContext(EventContext.Builder builder) {
         builder.setCommandContext(getCommandContext());
-        builder.setRootCommandId(pack(getId()));
+        builder.setRootCommandId(getId());
     }
 
     /**
