@@ -407,7 +407,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     /**
-     * Returns the storage ensuring that it exists.
+     * Returns the storage assigned to this aggregate ensuring that it exists.
      *
      * @return storage instance
      * @throws IllegalStateException if the storage is null
