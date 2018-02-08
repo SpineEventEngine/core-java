@@ -107,7 +107,7 @@ public final class EventEnvelope extends EnrichableMessageEnvelope<EventId, Even
      *     <li>the context of the enclosed event is set as the origin.</li>
      * </ul>
      *
-     * @param builder event context builder which is filled with the enclosed message data
+     * @param builder event context builder into which the origin related fields are set
      */
     @Override
     public void setOriginFields(EventContext.Builder builder) {
