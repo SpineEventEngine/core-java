@@ -24,7 +24,6 @@ import com.google.protobuf.Message;
 import io.spine.type.TypeName;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.Identifier.pack;
 
 /**
  * The holder of a {@code Command}, which provides convenient access to its properties.
