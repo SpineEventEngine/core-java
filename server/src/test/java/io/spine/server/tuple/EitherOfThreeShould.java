@@ -97,12 +97,12 @@ public class EitherOfThreeShould {
         final Iterator<Message> iteratorB = eitherWithB.iterator();
 
         assertEquals(b, iteratorB.next());
-        assertFalse(iteratorA.hasNext());
+        assertFalse(iteratorB.hasNext());
 
         final Iterator<Message> iteratorC = eitherWithC.iterator();
 
         assertEquals(c, iteratorC.next());
-        assertFalse(iteratorA.hasNext());
+        assertFalse(iteratorC.hasNext());
     }
 
     @Test(expected = IllegalStateException.class)
