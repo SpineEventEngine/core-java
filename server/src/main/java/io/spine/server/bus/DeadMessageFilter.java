@@ -46,12 +46,12 @@ final class DeadMessageFilter<T extends Message,
                               D extends MessageDispatcher<C, E, ?>>
         extends AbstractBusFilter<E> {
 
-    private final DeadMessageTap<E> deadMessageTap;
+    private final DeadMessageHandler<E> deadMessageHandler;
     private final DispatcherRegistry<C, D> registry;
 
-    DeadMessageFilter(DeadMessageTap<E> deadMessageTap, DispatcherRegistry<C, D> registry) {
+    DeadMessageFilter(DeadMessageHandler<E> deadMessageHandler, DispatcherRegistry<C, D> registry) {
         super();
-        this.deadMessageTap = checkNotNull(deadMessageTap);
+        this.deadMessageHandler = checkNotNull(deadMessageHandler);
         this.registry = checkNotNull(registry);
     }
 
@@ -61,7 +61,7 @@ final class DeadMessageFilter<T extends Message,
         final C cls = (C) envelope.getMessageClass();
         final Collection<D> dispatchers = registry.getDispatchers(cls);
         if (dispatchers.isEmpty()) {
-            final MessageUnhandled report = deadMessageTap.capture(envelope);
+            final MessageUnhandled report = deadMessageHandler.handle(envelope);
             final Error error = report.asError();
             final Any packedId = Identifier.pack(envelope.getId());
             final Ack result = reject(packedId, error);

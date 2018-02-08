@@ -33,7 +33,7 @@ import io.spine.core.EventEnvelope;
 import io.spine.grpc.LoggingObserver;
 import io.spine.grpc.LoggingObserver.Level;
 import io.spine.server.bus.BusFilter;
-import io.spine.server.bus.DeadMessageTap;
+import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.outbus.CommandOutputBus;
 import io.spine.server.outbus.OutputDispatcherRegistry;
@@ -109,7 +109,7 @@ public class EventBus
     private final MessageValidator eventMessageValidator;
 
     /** The handler for dead events. */
-    private final DeadMessageTap<EventEnvelope> deadMessageHandler;
+    private final DeadMessageHandler<EventEnvelope> deadMessageHandler;
 
     /** Filters applied when an event is posted. */
     private final Deque<BusFilter<EventEnvelope>> filterChain;
@@ -153,7 +153,7 @@ public class EventBus
     }
 
     @Override
-    protected DeadMessageTap<EventEnvelope> getDeadMessageHandler() {
+    protected DeadMessageHandler<EventEnvelope> getDeadMessageHandler() {
         return deadMessageHandler;
     }
 
@@ -513,12 +513,12 @@ public class EventBus
      * Handles a dead event by saving it to the {@link EventStore} and producing an 
      * {@link UnsupportedEventException}.
      *
-     * <p>We must store dead events, as they are still emitted by some entity and therefore are 
+     * <p> We must store dead events, as they are still emitted by some entity and therefore are 
      * a part of the history for the current bounded context.
      */
-    private class DeadEventTap implements DeadMessageTap<EventEnvelope> {
+    private class DeadEventTap implements DeadMessageHandler<EventEnvelope> {
         @Override
-        public UnsupportedEventException capture(EventEnvelope envelope) {
+        public UnsupportedEventException handle(EventEnvelope envelope) {
 
             final Event event = envelope.getOuterObject();
             store(of(event));
