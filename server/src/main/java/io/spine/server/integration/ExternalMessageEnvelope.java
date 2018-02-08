@@ -114,14 +114,19 @@ public final class ExternalMessageEnvelope
         return actorContext;
     }
 
+    /**
+     * This method is not supported and always throws {@link UnsupportedOperationException}.
+     *
+     * <p> This should never happen, as no event is caused directly by an {@code ExternalMessage}.
+     *
+     * <p> Instead, the external messages are consumed by an anti-corruption layer, such as
+     * external reactor or subscriber methods in the destination bounded context.
+     * 
+     * @param builder not used
+     * @throws UnsupportedOperationException always
+     */
     @Override
-    public void passToEventContext(EventContext.Builder builder) {
-        /*
-         * This should never happen, as no event is caused directly by an {@code ExternalMessage}.
-         *
-         * Instead, the external messages are consumed by an anti-corruption layer, such as
-         * external reactor or subscriber methods in the destination bounded context.
-         */
+    public void setOriginFields(EventContext.Builder builder) {
         throw newIllegalStateException(
                 "An external message like this (%s) may not be a direct origin of any event.",
                 this);
