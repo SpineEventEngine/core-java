@@ -26,6 +26,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
+import io.spine.core.CommandId;
 import io.spine.core.Event;
 import io.spine.server.commandbus.DuplicateCommandException;
 
@@ -79,10 +80,10 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
      */
     private void ensureNotDuplicate(I aggregateId) {
         final List<Event> events = readEventsSinceLastSnapshot(aggregateId);
+        final CommandId newCommandId = envelope().getId();
         for (Event event : events) {
-            final CommandEnvelope commandEnvelope = envelope();
-            if (Objects.equal(getRootCommandId(event), commandEnvelope.getId())) {
-                final Command command = commandEnvelope.getOuterObject();
+            if (newCommandId.equals(getRootCommandId(event))) {
+                final Command command = envelope().getOuterObject();
                 throw DuplicateCommandException.of(command);
             }
         }
