@@ -122,7 +122,7 @@ public final class Commands {
     public static TenantId getTenantId(Event event) {
         checkNotNull(event);
 
-        final Optional<CommandContext> commandContext = getCommandContext(event);
+        final Optional<CommandContext> commandContext = getOriginCommandContext(event);
 
         if (!commandContext.isPresent()) {
             return TenantId.getDefaultInstance();
@@ -156,7 +156,7 @@ public final class Commands {
      *
      * <p>If at some point the event origin is not set the {@link Optional#absent()} is returned.
      */
-    private static Optional<CommandContext> getCommandContext(Event event) {
+    private static Optional<CommandContext> getOriginCommandContext(Event event) {
         CommandContext commandContext = null;
         EventContext eventContext = event.getContext();
 
