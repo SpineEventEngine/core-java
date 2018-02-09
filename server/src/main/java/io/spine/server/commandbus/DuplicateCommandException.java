@@ -24,9 +24,7 @@ import com.google.protobuf.Message;
 import io.spine.Identifier;
 import io.spine.base.Error;
 import io.spine.core.Command;
-import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
-import io.spine.core.CommandId;
 import io.spine.core.CommandValidationError;
 import io.spine.core.MessageInvalid;
 import io.spine.type.TypeName;
@@ -34,9 +32,9 @@ import io.spine.type.TypeName;
 import static java.lang.String.format;
 
 /**
- * The exception for reporting duplicate commands.
+ * Reports a command which was delivered more than once.
  *
- * <p> A command is considered a duplicate when it’s ID matches the ID of a command already
+ * <p> A command is considered a duplicate when its ID matches the ID of a command already
  * dispatched.
  *
  * @author Mykhailo Drachuk
@@ -55,7 +53,7 @@ public class DuplicateCommandException extends CommandException implements Messa
     public static DuplicateCommandException of(Command command) {
         final CommandEnvelope envelope = CommandEnvelope.of(command);
         final Message commandMessage = envelope.getMessage();
-        final String errMsg = errorMessage(envelope.getId(), commandMessage);
+        final String errMsg = errorMessage(envelope);
         final Error error = error(commandMessage, errMsg);
         return new DuplicateCommandException(errMsg, command, error);
     }
@@ -74,17 +72,17 @@ public class DuplicateCommandException extends CommandException implements Messa
     }
 
     /**
-     * Generates a formatted duplicate command error message. 
+     * Generates a formatted duplicate command error message.
      */
-    private static String errorMessage(CommandId id, Message commandMessage) {
+    private static String errorMessage(CommandEnvelope envelope) {
         return format(
                 "The command (class: `%s`, type: `%s`, id: `%s`) was already handled by " +
-                "a Command Bus.",
-                CommandClass.of(commandMessage)
-                            .value()
-                            .getName(),
-                TypeName.of(commandMessage),
-                Identifier.toString(id));
+                        "a Command Bus.",
+                envelope.getMessageClass()
+                        .value()
+                        .getName(),
+                TypeName.of(envelope.getMessage()),
+                Identifier.toString(envelope.getId()));
     }
 
 }
