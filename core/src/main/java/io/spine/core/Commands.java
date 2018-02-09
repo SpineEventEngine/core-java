@@ -21,6 +21,7 @@
 package io.spine.core;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
@@ -106,11 +107,86 @@ public final class Commands {
      */
     public static TenantId getTenantId(Command command) {
         checkNotNull(command);
-        final TenantId result = command.getContext()
-                                       .getActorContext()
-                                       .getTenantId();
+        final TenantId result = getTenantId(command.getContext());
         return result;
     }
+
+    /**
+     * Obtains a {@link TenantId} from the given {@link Event}.
+     *
+     * <p>The {@code TenantId} is retrieved by traversing the passed {@code Event}s context. It is
+     * stored in the initial {@link CommandContext} and can be retrieved from the events origin 
+     * command or rejection context. 
+     */
+    @Internal
+    public static TenantId getTenantId(Event event) {
+        checkNotNull(event);
+
+        final Optional<CommandContext> commandContext = getCommandContext(event);
+
+        if (!commandContext.isPresent()) {
+            return TenantId.getDefaultInstance();
+        }
+
+        final TenantId result = getTenantId(commandContext.get());
+        return result;
+    }
+
+    /**
+     * Obtains a {@link TenantId} from the {@link CommandContext}.
+     *
+     * <p>The {@link CommandContext} is accessible from the {@link Event} if the {@code Event} was 
+     * created as a result of some command or its rejection. This makes the {@code CommandContext}
+     * a valid {@code TenantId} source inside of the {@code Event}.
+     */
+    private static TenantId getTenantId(CommandContext context) {
+        return context.getActorContext()
+                      .getTenantId();
+    }
+
+    /**
+     * Obtains a context of the command, which lead to this event.
+     *
+     * <p> The context is obtained by traversing the events origin for a valid context source. 
+     * There are can be two sources for the command context:
+     * <ol>
+     *     <li>The command context set as the event origin.</li>
+     *     <li>The command set as a rejection property.</li>
+     * </ol>
+     *
+     * <p>If at some point the event origin is not set the {@link Optional#absent()} is returned.
+     */
+    private static Optional<CommandContext> getCommandContext(Event event) {
+        CommandContext commandContext = null;
+        EventContext eventContext = event.getContext();
+
+        while (commandContext == null) {
+
+            switch (eventContext.getOriginCase()) {
+
+                case EVENT_CONTEXT:
+                    eventContext = eventContext.getEventContext();
+                    break;
+
+                case COMMAND_CONTEXT:
+                    commandContext = eventContext.getCommandContext();
+                    break;
+
+                case REJECTION_CONTEXT:
+                    commandContext = eventContext.getRejectionContext()
+                                                 .getCommand()
+                                                 .getContext();
+                    break;
+
+                case ORIGIN_NOT_SET:
+                default:
+                    return Optional.absent();
+            }
+        }
+
+        return Optional.of(commandContext);
+    }
+
 
     /**
      * Creates a predicate for filtering commands created after the passed timestamp.

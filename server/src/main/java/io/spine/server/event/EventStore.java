@@ -45,7 +45,7 @@ import java.util.concurrent.Executor;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Iterables.tryFind;
-import static io.spine.core.Events.getTenantId;
+import static io.spine.core.Commands.getTenantId;
 
 /**
  * A store of all events in a bounded context.
