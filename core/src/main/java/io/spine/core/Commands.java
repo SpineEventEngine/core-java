@@ -148,10 +148,11 @@ public final class Commands {
      * Obtains a context of the command, which lead to this event.
      *
      * <p> The context is obtained by traversing the events origin for a valid context source. 
-     * There are can be two sources for the command context:
+     * There can be two sources for the command context:
      * <ol>
      *     <li>The command context set as the event origin.</li>
-     *     <li>The command set as a rejection property.</li>
+     *     <li>The command set as a field of a rejection context if an event was generated in a 
+     *     response to a rejection.</li>
      * </ol>
      *
      * <p>If at some point the event origin is not set the {@link Optional#absent()} is returned.
