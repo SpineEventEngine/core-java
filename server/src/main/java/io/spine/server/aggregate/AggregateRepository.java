@@ -19,7 +19,6 @@
  */
 package io.spine.server.aggregate;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import io.spine.annotation.SPI;
 import io.spine.core.CommandClass;
@@ -234,7 +233,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
             storage.writeEvent(id, event);
             ++eventCount;
             if (eventCount >= snapshotTrigger) {
-                final Snapshot snapshot = aggregate.toSnapshot();
+                final Snapshot snapshot = aggregate.makeSnapshot();
                 storage.writeSnapshot(id, snapshot);
                 eventCount = 0;
             }

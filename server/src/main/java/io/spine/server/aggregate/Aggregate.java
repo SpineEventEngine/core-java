@@ -27,6 +27,7 @@ import com.google.protobuf.Message;
 import io.grpc.Internal;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
+import io.spine.core.CommandId;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
@@ -50,6 +51,7 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static io.spine.core.Events.getMessage;
+import static io.spine.core.Events.getRootCommandId;
 import static io.spine.time.Time.getCurrentTime;
 import static io.spine.validate.Validate.isNotDefault;
 
@@ -128,6 +130,13 @@ public abstract class Aggregate<I,
      * @see #commitEvents()
      */
     private final List<Event> uncommittedEvents = Lists.newLinkedList();
+
+    /**
+     * Events handled since the last snapshot.
+     * 
+     * @see #didHandleSinceLastSnapshot(CommandEnvelope) 
+     */
+    private final List<Event> eventsSinceLastSnapshot = Lists.newLinkedList();
 
     /**
      * Creates a new instance.
@@ -247,6 +256,7 @@ public abstract class Aggregate<I,
         final List<Event> events = aggregateStateRecord.getEventList();
 
         play(events);
+        eventsSinceLastSnapshot.addAll(events);
     }
 
     /**
@@ -378,6 +388,7 @@ public abstract class Aggregate<I,
     List<Event> commitEvents() {
         final List<Event> result = ImmutableList.copyOf(uncommittedEvents);
         uncommittedEvents.clear();
+        eventsSinceLastSnapshot.addAll(result);
         return result;
     }
 
@@ -392,17 +403,45 @@ public abstract class Aggregate<I,
 
     /**
      * Transforms the current state of the aggregate into the {@link Snapshot} instance.
+     * 
+     * <p> The aggregate is aware of the snapshot being made. For example, this information is used 
+     * by {@link #didHandleSinceLastSnapshot}.
      *
      * @return new snapshot
      */
     @CheckReturnValue
-    Snapshot toSnapshot() {
+    Snapshot makeSnapshot() {
         final Any state = AnyPacker.pack(getState());
         final Snapshot.Builder builder = Snapshot.newBuilder()
                 .setState(state)
                 .setVersion(getVersion())
                 .setTimestamp(getCurrentTime());
-        return builder.build();
+        final Snapshot snapshot = builder.build();
+        eventsSinceLastSnapshot.clear();
+        return snapshot;
+    }
+
+    /**
+     * Checks if the command was already handled by the aggregate since last snapshot.
+     *
+     * <p> The check is performed by searching for an event caused by this command that was
+     * committed since last snapshot.
+     *
+     * <p> This functionality support the ability to stop duplicate commands from being dispatched
+     * to the aggregate.
+     *
+     * @param command the command to check
+     * @return {@code true} if the command was handled since last snapshot, {@code false} otherwise
+     */
+    public boolean didHandleSinceLastSnapshot(CommandEnvelope command) {
+        final CommandId newCommandId = command.getId();
+        for (Event event : eventsSinceLastSnapshot) {
+            final CommandId eventRootCommandId = getRootCommandId(event);
+            if (newCommandId.equals(eventRootCommandId)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

@@ -366,7 +366,7 @@ public class AggregateShould {
     public void restore_snapshot_during_play() {
         dispatchCommand(aggregate, env(createProject));
 
-        final Snapshot snapshot = aggregate.toSnapshot();
+        final Snapshot snapshot = aggregate.makeSnapshot();
 
         final TestAggregate anotherAggregate = newAggregate(aggregate.getId());
 
@@ -435,7 +435,7 @@ public class AggregateShould {
 
         dispatchCommand(aggregate, env(createProject));
 
-        final Snapshot snapshot = aggregate.toSnapshot();
+        final Snapshot snapshot = aggregate.makeSnapshot();
         final Project state = unpack(snapshot.getState());
 
         assertEquals(ID, state.getId());
@@ -447,7 +447,7 @@ public class AggregateShould {
 
         dispatchCommand(aggregate, env(createProject));
 
-        final Snapshot snapshotNewProject = aggregate.toSnapshot();
+        final Snapshot snapshotNewProject = aggregate.makeSnapshot();
 
         final TestAggregate anotherAggregate = newAggregate(aggregate.getId());
 

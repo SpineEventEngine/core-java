@@ -50,6 +50,10 @@ abstract class AggregateMessageEndpoint<I,
     @Override
     protected void deliverNowTo(I aggregateId) {
         final A aggregate = repository().loadOrCreate(aggregateId);
+        deliverNowTo(aggregate);
+    }
+    
+    protected void deliverNowTo(A aggregate) {
         final LifecycleFlags flagsBefore = aggregate.getLifecycleFlags();
 
         final List<? extends Message> eventMessages = doDispatch(aggregate, envelope());
@@ -60,7 +64,7 @@ abstract class AggregateMessageEndpoint<I,
         // Update lifecycle flags only if the message was handled successfully and flags changed.
         final LifecycleFlags flagsAfter = aggregate.getLifecycleFlags();
         if (flagsAfter != null && !flagsBefore.equals(flagsAfter)) {
-            storage().writeLifecycleFlags(aggregateId, flagsAfter);
+            storage().writeLifecycleFlags(aggregate.getId(), flagsAfter);
         }
 
         store(aggregate);
