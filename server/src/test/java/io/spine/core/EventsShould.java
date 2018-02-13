@@ -221,7 +221,7 @@ public class EventsShould {
 
     @Test(expected = NullPointerException.class)
     public void throw_NPE_when_getting_tenant_id_of_null_event() {
-        Commands.getTenantId(Tests.<Event>nullRef());
+        Events.getTenantId(Tests.<Event>nullRef());
     }
 
     @Test
@@ -229,7 +229,7 @@ public class EventsShould {
         final EventContext context = contextWithoutOrigin().build();
         final Event event = EventsTestEnv.event(context);
 
-        final TenantId tenantId = Commands.getTenantId(event);
+        final TenantId tenantId = Events.getTenantId(event);
 
         final TenantId defaultTenantId = TenantId.getDefaultInstance();
         assertEquals(defaultTenantId, tenantId);
@@ -242,7 +242,7 @@ public class EventsShould {
         final EventContext context = contextWithoutOrigin().setCommandContext(commandContext).build();
         final Event event = EventsTestEnv.event(context);
 
-        final TenantId tenantId = Commands.getTenantId(event);
+        final TenantId tenantId = Events.getTenantId(event);
 
         assertEquals(targetTenantId, tenantId);
 
@@ -256,7 +256,7 @@ public class EventsShould {
                                                            .build();
         final Event event = EventsTestEnv.event(context);
 
-        final TenantId tenantId = Commands.getTenantId(event);
+        final TenantId tenantId = Events.getTenantId(event);
 
         assertEquals(targetTenantId, tenantId);
     }
@@ -268,7 +268,7 @@ public class EventsShould {
                                                            .build();
         final Event event = EventsTestEnv.event(context);
 
-        final TenantId tenantId = Commands.getTenantId(event);
+        final TenantId tenantId = Events.getTenantId(event);
 
         final TenantId defaultTenantId = TenantId.getDefaultInstance();
         assertEquals(defaultTenantId, tenantId);
@@ -280,7 +280,7 @@ public class EventsShould {
                                                            .build();
         final Event event = EventsTestEnv.event(context);
 
-        final TenantId tenantId = Commands.getTenantId(event);
+        final TenantId tenantId = Events.getTenantId(event);
 
         final TenantId defaultTenantId = TenantId.getDefaultInstance();
         assertEquals(defaultTenantId, tenantId);
@@ -296,7 +296,7 @@ public class EventsShould {
                                                            .build();
         final Event event = EventsTestEnv.event(context);
 
-        final TenantId tenantId = Commands.getTenantId(event);
+        final TenantId tenantId = Events.getTenantId(event);
 
         assertEquals(targetTenantId, tenantId);
     }
@@ -312,7 +312,7 @@ public class EventsShould {
                                                            .build();
         final Event event = EventsTestEnv.event(context);
 
-        final TenantId tenantId = Commands.getTenantId(event);
+        final TenantId tenantId = Events.getTenantId(event);
 
         assertEquals(targetTenantId, tenantId);
     }
