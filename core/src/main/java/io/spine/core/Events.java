@@ -240,9 +240,7 @@ public final class Events {
         EventContext eventContext = event.getContext();
 
         while (commandContext == null) {
-
             switch (eventContext.getOriginCase()) {
-
                 case EVENT_CONTEXT:
                     eventContext = eventContext.getEventContext();
                     break;
