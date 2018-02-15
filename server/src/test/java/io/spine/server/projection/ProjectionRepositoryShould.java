@@ -1,5 +1,5 @@
 /*
- * Copyright 2017, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -48,7 +48,10 @@ import io.spine.server.projection.given.ProjectionRepositoryTestEnv.TestProjecti
 import io.spine.server.storage.RecordStorage;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
+import io.spine.test.projection.Task;
+import io.spine.test.projection.event.PrjProjectArchived;
 import io.spine.test.projection.event.PrjProjectCreated;
+import io.spine.test.projection.event.PrjProjectDeleted;
 import io.spine.test.projection.event.PrjProjectStarted;
 import io.spine.test.projection.event.PrjTaskAdded;
 import io.spine.time.Time;
@@ -198,6 +201,44 @@ public class ProjectionRepositoryShould
         checkDispatchesEvent(GivenEventMessage.projectCreated());
         checkDispatchesEvent(GivenEventMessage.taskAdded());
         checkDispatchesEvent(GivenEventMessage.projectStarted());
+    }
+
+    @Test
+    public void dispatch_event_to_archived_projection() {
+        final PrjProjectArchived projectArchived = GivenEventMessage.projectArchived();
+        checkDispatchesEvent(projectArchived);
+        final ProjectId projectId = projectArchived.getProjectId();
+        TestProjection projection = repository().findOrCreate(projectId);
+        assertTrue(projection.isArchived());
+
+        // Dispatch an event to the archived projection.
+        checkDispatchesEvent(GivenEventMessage.taskAdded());
+        projection = repository().findOrCreate(projectId);
+        final List<Task> addedTasks = projection.getState()
+                                                      .getTaskList();
+        assertFalse(addedTasks.isEmpty());
+
+        // Check that the projection was not re-created before dispatching.
+        assertTrue(projection.isArchived());
+    }
+
+    @Test
+    public void dispatch_event_to_deleted_projection() {
+        final PrjProjectDeleted projectDeleted = GivenEventMessage.projectDeleted();
+        checkDispatchesEvent(projectDeleted);
+        final ProjectId projectId = projectDeleted.getProjectId();
+        TestProjection projection = repository().findOrCreate(projectId);
+        assertTrue(projection.isDeleted());
+
+        // Dispatch an event to the deleted projection.
+        checkDispatchesEvent(GivenEventMessage.taskAdded());
+        projection = repository().findOrCreate(projectId);
+        final List<Task> addedTasks = projection.getState()
+                                                      .getTaskList();
+        assertTrue(projection.isDeleted());
+
+        // Check that the projection was not re-created before dispatching.
+        assertFalse(addedTasks.isEmpty());
     }
 
     private void checkDispatchesEvent(Message eventMessage) {

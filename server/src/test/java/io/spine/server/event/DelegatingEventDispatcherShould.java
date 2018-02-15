@@ -1,5 +1,5 @@
 /*
- * Copyright 2017, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -22,20 +22,39 @@ package io.spine.server.event;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.testing.NullPointerTester;
+import com.google.protobuf.StringValue;
+import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
+import io.spine.server.BoundedContext;
 import io.spine.server.command.TestEventFactory;
+import io.spine.server.integration.ExternalMessage;
+import io.spine.server.integration.ExternalMessageDispatcher;
+import io.spine.server.integration.ExternalMessageEnvelope;
+import io.spine.server.integration.ExternalMessages;
+import org.junit.Before;
 import org.junit.Test;
 
+import javax.annotation.Nullable;
 import java.util.Set;
 
 import static io.spine.test.TestValues.newUuidValue;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
  * @author Alexander Yevsyukov
  */
 public class DelegatingEventDispatcherShould {
+
+    private EmptyEventDispatcherDelegate delegate;
+    private DelegatingEventDispatcher<String> delegatingDispatcher;
+
+    @Before
+    public void setUp() {
+        delegate = new EmptyEventDispatcherDelegate();
+        delegatingDispatcher = DelegatingEventDispatcher.of(delegate);
+    }
 
     @Test
     public void pass_null_tolerance_test() {
@@ -46,22 +65,48 @@ public class DelegatingEventDispatcherShould {
 
     @Test
     public void delegate_onError() {
-        final EmptyEventDispatcherDelegate delegate = new EmptyEventDispatcherDelegate();
-        final DelegatingEventDispatcher<String> delegatingDispatcher =
-                DelegatingEventDispatcher.of(delegate);
+        final TestEventFactory factory = TestEventFactory.newInstance(getClass());
+        final EventEnvelope envelope = EventEnvelope.of(factory.createEvent(newUuidValue()));
+
+        final RuntimeException exception = new RuntimeException("test delegating onError");
+        delegatingDispatcher.onError(envelope, exception);
+
+        assertTrue(delegate.onErrorCalled());
+        assertEquals(exception, delegate.getLastException());
+    }
+
+    @Test
+    public void expose_external_dispatcher_that_delegates_onError() {
+        final ExternalMessageDispatcher<String> extMessageDispatcher =
+                delegatingDispatcher.getExternalDispatcher();
 
         final TestEventFactory factory = TestEventFactory.newInstance(getClass());
-        EventEnvelope envelope = EventEnvelope.of(factory.createEvent(newUuidValue()));
+        final StringValue eventMsg = newUuidValue();
+        final Event event = factory.createEvent(eventMsg);
+        final ExternalMessage externalMessage =
+                ExternalMessages.of(event, BoundedContext.newName(getClass().getName()));
 
-        delegatingDispatcher.onError(envelope, new RuntimeException("test delegating onError"));
+        final ExternalMessageEnvelope externalMessageEnvelope =
+                ExternalMessageEnvelope.of(externalMessage, eventMsg);
+
+        final RuntimeException exception =
+                new RuntimeException("test external dispatcher delegating onError");
+        extMessageDispatcher.onError(externalMessageEnvelope,exception);
 
         assertTrue(delegate.onErrorCalled());
     }
+
+    /*
+     * Test environment
+     ********************/
 
     private static final class EmptyEventDispatcherDelegate
             implements EventDispatcherDelegate<String> {
 
         private boolean onErrorCalled;
+
+        @Nullable
+        private RuntimeException lastException;
 
         @Override
         public Set<EventClass> getEventClasses() {
@@ -82,10 +127,16 @@ public class DelegatingEventDispatcherShould {
         @Override
         public void onError(EventEnvelope envelope, RuntimeException exception) {
             onErrorCalled = true;
+            lastException = exception;
         }
 
         private boolean onErrorCalled() {
             return onErrorCalled;
+        }
+
+        @Nullable
+        private RuntimeException getLastException() {
+            return lastException;
         }
     }
 }

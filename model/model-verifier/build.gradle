@@ -1,5 +1,5 @@
 /*
- * Copyright 2017, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -43,7 +43,7 @@ dependencies {
     compile project(':server')
     compile project(':model-assembler')
 
-    testCompile group: 'junit', name: 'junit', version: '4.12'
+    testCompile group: 'junit', name: 'junit', version: jUnitVersion
     testCompile gradleTestKit()
     testCompile group: 'io.spine.tools', name: 'spine-plugin-base', version: spineBaseVersion, classifier: 'test'
 }

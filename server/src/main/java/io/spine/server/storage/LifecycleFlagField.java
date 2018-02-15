@@ -1,5 +1,5 @@
 /*
- * Copyright 2017, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -30,13 +30,13 @@ package io.spine.server.storage;
 public enum LifecycleFlagField implements StorageField {
 
     /**
-     * A {@linkplain boolean} field representing whether
+     * A {@code boolean} field representing whether
      * the relevant record is {@code archived} or not.
      */
     archived,
 
     /**
-     * A {@linkplain boolean} field representing whether
+     * A {@code boolean} field representing whether
      * the relevant record is {@code deleted} or not.
      */
     deleted

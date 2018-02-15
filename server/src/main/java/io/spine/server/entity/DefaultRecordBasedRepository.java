@@ -1,5 +1,5 @@
 /*
- * Copyright 2017, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -40,11 +40,16 @@ public abstract class DefaultRecordBasedRepository<I,
     private final EntityFactory<I, E> entityFactory;
     private final EntityStorageConverter<I, E, S> storageConverter;
 
-    /** {@inheritDoc} */
-    @SuppressWarnings("OverriddenMethodCallDuringObjectConstruction") // for getting generic params
+    /**
+     * Creates a new instance with the {@linkplain #entityFactory() factory} of entities of class
+     * specified as the {@code <E>} generic parameter, and with the default
+     * {@linkplain #entityConverter() entity storage converter}.
+     */
     protected DefaultRecordBasedRepository() {
         super();
-        this.entityFactory = new DefaultEntityFactory<>(getEntityClass());
+        @SuppressWarnings("OverridableMethodCallDuringObjectConstruction") // get generic param
+        final Class<E> entityClass = getEntityClass();
+        this.entityFactory = new DefaultEntityFactory<>(entityClass);
         final TypeUrl stateType = entityClass().getStateType();
         this.storageConverter = DefaultEntityStorageConverter.forAllFields(stateType,
                                                                            this.entityFactory);

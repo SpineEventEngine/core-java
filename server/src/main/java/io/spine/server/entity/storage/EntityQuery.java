@@ -1,5 +1,5 @@
 /*
- * Copyright 2017, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -25,7 +25,7 @@ import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
-import io.spine.server.entity.EntityWithLifecycle;
+import io.spine.server.entity.Entity;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -70,9 +70,9 @@ import static io.spine.server.storage.LifecycleFlagField.deleted;
  *
  * <p>If the query specifies the values of
  * the {@linkplain io.spine.server.entity.LifecycleFlags Entity lifecycle Columns}, then
- * the {@linkplain io.spine.server.storage.RecordStorage#readAll(EntityQuery, com.google.protobuf.FieldMask)
- * default behavior} will be overridden i.e. the records resulting to such query may or may not be
- * active.
+ * the {@linkplain io.spine.server.storage.RecordStorage#readAll(EntityQuery,
+ * com.google.protobuf.FieldMask) default behavior} will be overridden i.e. the records resulting
+ * to such query may or may not be active.
  *
  * @param <I> the type of the IDs of the query target
  * @author Dmytro Dashenkov
@@ -141,7 +141,7 @@ public final class EntityQuery<I> implements Serializable {
      * @return new instance of {@code EntityQuery}
      */
     @Internal
-    public EntityQuery<I> withLifecycleFlags(Class<? extends EntityWithLifecycle<I, ?>> cls) {
+    public EntityQuery<I> withLifecycleFlags(Class<? extends Entity> cls) {
         checkState(!isLifecycleAttributesSet(),
                    "The query overrides Lifecycle Flags default values.");
         final EntityColumn archivedColumn = findColumn(cls, archived.name());

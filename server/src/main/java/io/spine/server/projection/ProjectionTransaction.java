@@ -1,5 +1,5 @@
 /*
- * Copyright 2017, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -119,14 +119,15 @@ class ProjectionTransaction<I,
     static <I,
             M extends Message,
             B extends ValidatingBuilder<M, ? extends Message.Builder>>
-    ProjectionTransaction<I, M, B> startWith(Projection<I, M, B> projection, M state, Version version) {
+    ProjectionTransaction<I, M, B> startWith(Projection<I, M, B> projection,
+                                             M state,
+                                             Version version) {
         checkNotNull(projection);
         checkNotNull(state);
         checkNotNull(version);
 
-        final ProjectionTransaction<I, M, B> tx = new ProjectionTransaction<>(projection,
-                                                                              state,
-                                                                              version);
+        final ProjectionTransaction<I, M, B> tx =
+                new ProjectionTransaction<>(projection, state, version);
         return tx;
     }
 }

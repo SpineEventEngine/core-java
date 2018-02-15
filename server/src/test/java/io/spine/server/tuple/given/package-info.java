@@ -1,5 +1,5 @@
 /*
- * Copyright 2017, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -19,11 +19,11 @@
  */
 
 /**
- * This package contains classes and interfaces for server-side code
- * managing access of users and tenants.
+ * Test environments for the {@link io.spine.server.tuple}.
+ *
+ * @author Alexander Yevsyukov
  */
-
 @ParametersAreNonnullByDefault
-package io.spine.server.users;
+package io.spine.server.tuple.given;
 
 import javax.annotation.ParametersAreNonnullByDefault;

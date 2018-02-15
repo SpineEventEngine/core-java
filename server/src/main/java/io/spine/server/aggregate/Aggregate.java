@@ -1,5 +1,5 @@
 /*
- * Copyright 2017, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -168,8 +168,15 @@ public abstract class Aggregate<I,
                     .asAggregateClass(getClass());
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>In {@code Aggregate}, this method must be called only from within an event applier.
+     *
+     * @throws IllegalStateException if the method is called from outside an event applier
+     */
     @Override
-    @VisibleForTesting      // Overridden to expose this method to tests.
+    @VisibleForTesting
     protected B getBuilder() {
         return super.getBuilder();
     }

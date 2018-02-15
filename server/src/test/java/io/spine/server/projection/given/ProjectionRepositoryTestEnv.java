@@ -1,5 +1,5 @@
 /*
- * Copyright 2017, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -35,7 +35,9 @@ import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.ProjectTaskNames;
 import io.spine.test.projection.ProjectTaskNamesVBuilder;
 import io.spine.test.projection.ProjectVBuilder;
+import io.spine.test.projection.event.PrjProjectArchived;
 import io.spine.test.projection.event.PrjProjectCreated;
+import io.spine.test.projection.event.PrjProjectDeleted;
 import io.spine.test.projection.event.PrjProjectStarted;
 import io.spine.test.projection.event.PrjTaskAdded;
 
@@ -195,6 +197,18 @@ public class ProjectionRepositoryTestEnv {
             getBuilder().mergeFrom(newState);
         }
 
+        @Subscribe
+        public void on(PrjProjectArchived event) {
+            keep(event);
+            setArchived(true);
+        }
+
+        @Subscribe
+        public void on(PrjProjectDeleted event) {
+            keep(event);
+            setDeleted(true);
+        }
+
         @Override
         public String getIdString() {
             return getId().toString();
@@ -227,6 +241,18 @@ public class ProjectionRepositoryTestEnv {
             return PrjTaskAdded.newBuilder()
                                .setProjectId(ENTITY_ID)
                                .build();
+        }
+
+        public static PrjProjectArchived projectArchived() {
+            return PrjProjectArchived.newBuilder()
+                                     .setProjectId(ENTITY_ID)
+                                     .build();
+        }
+
+        public static PrjProjectDeleted projectDeleted() {
+            return PrjProjectDeleted.newBuilder()
+                                    .setProjectId(ENTITY_ID)
+                                    .build();
         }
     }
 

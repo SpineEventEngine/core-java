@@ -1,5 +1,5 @@
 /*
- * Copyright 2017, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -28,10 +28,12 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
+import io.spine.core.EventId;
 import io.spine.core.RejectionContext;
 import io.spine.core.Version;
 import io.spine.server.aggregate.given.Given.StorageRecord;
 import io.spine.server.command.TestEventFactory;
+import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.storage.AbstractStorageShould;
 import io.spine.test.Tests;
 import io.spine.test.aggregate.Project;
@@ -206,6 +208,46 @@ public abstract class AggregateStorageShould
     }
 
     @Test
+    public void read_history_of_archived_aggregate() {
+        final LifecycleFlags archivedRecordFlags = LifecycleFlags.newBuilder()
+                                                                 .setArchived(true)
+                                                                 .build();
+        storage.writeLifecycleFlags(id, archivedRecordFlags);
+        writeAndReadEventTest(id, storage);
+    }
+
+    @Test
+    public void read_history_of_deleted_aggregate() {
+        final LifecycleFlags deletedRecordFlags = LifecycleFlags.newBuilder()
+                                                                .setDeleted(true)
+                                                                .build();
+        storage.writeLifecycleFlags(id, deletedRecordFlags);
+        writeAndReadEventTest(id, storage);
+    }
+
+    @Test
+    public void index_archived_aggregate() {
+        final LifecycleFlags archivedRecordFlags = LifecycleFlags.newBuilder()
+                                                                 .setArchived(true)
+                                                                 .build();
+        storage.writeRecord(id, StorageRecord.create(getCurrentTime()));
+        storage.writeLifecycleFlags(id, archivedRecordFlags);
+        assertTrue(storage.index()
+                          .hasNext());
+    }
+
+    @Test
+    public void index_deleted_aggregate() {
+        final LifecycleFlags deletedRecordFlags = LifecycleFlags.newBuilder()
+                                                                .setDeleted(true)
+                                                                .build();
+        storage.writeRecord(id, StorageRecord.create(getCurrentTime()));
+        storage.writeLifecycleFlags(id, deletedRecordFlags);
+        assertTrue(storage.index()
+                          .hasNext());
+    }
+
+    @Test
     public void write_records_and_return_sorted_by_timestamp_descending() {
         final List<AggregateEventRecord> records = sequenceFor(id);
 
@@ -349,6 +391,7 @@ public abstract class AggregateStorageShould
                                                          .setEnrichment(withOneAttribute())
                                                          .build();
         final Event event = Event.newBuilder()
+                                 .setId(newEventId())
                                  .setContext(enrichedContext)
                                  .setMessage(Any.getDefaultInstance())
                                  .build();
@@ -369,6 +412,7 @@ public abstract class AggregateStorageShould
                                                  .setRejectionContext(origin)
                                                  .build();
         final Event event = Event.newBuilder()
+                                 .setId(newEventId())
                                  .setContext(context)
                                  .setMessage(Any.getDefaultInstance())
                                  .build();
@@ -390,6 +434,7 @@ public abstract class AggregateStorageShould
                                                  .setEventContext(origin)
                                                  .build();
         final Event event = Event.newBuilder()
+                                 .setId(newEventId())
                                  .setContext(context)
                                  .setMessage(Any.getDefaultInstance())
                                  .build();
@@ -477,6 +522,12 @@ public abstract class AggregateStorageShould
                        .setState(Any.getDefaultInstance())
                        .setTimestamp(time)
                        .build();
+    }
+
+    private static EventId newEventId() {
+        return EventId.newBuilder()
+                      .setValue(newUuid())
+                      .build();
     }
 
     public static class TestAggregate extends Aggregate<ProjectId, Project, ProjectVBuilder> {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -152,11 +152,18 @@ class RejectionHandlerMethod extends HandlerMethod<RejectionContext> {
          * A rejection handler method which receives a rejection message
          * as a single parameter.
          *
-         * <p>The signature of such a method is following:
+         * <p>The signature of such a method is as follows, if used in {@link RejectionSubscriber}:
          * <pre>
-         * [{@literal @}HandlerAnnotation]
+         * {@literal @}Subscribe
          * public void on(RejectionMessage rejection);
          * </pre>
+         *
+         * Or if it is an {@code Entity} reactor method, it is declared as:
+         * <pre>
+         * {@literal @}React
+         * public void on(RejectionMessage rejection);
+         * </pre>
+         *
          * where {@code RejectionMessage} is a specific generated rejection message class.
          */
         REJECTION_MESSAGE_AWARE,
@@ -165,11 +172,18 @@ class RejectionHandlerMethod extends HandlerMethod<RejectionContext> {
          * A rejection handler method which receives a rejection message as the first parameter,
          * and {@link io.spine.core.RejectionContext RejectionContext} as the second.
          *
-         * <p>The signature of such a method is following:
+         * <p>The signature of such a method is as follows, if used in {@link RejectionSubscriber}:
          * <pre>
-         * [{@literal @}HandlerAnnotation]
+         * {@literal @}Subscribe
          * public void on(RejectionMessage rejection, RejectionContext context);
          * </pre>
+         *
+         * Or if it is an {@code Entity} reactor method, it is declared as:
+         * <pre>
+         * {@literal @}React
+         * public void on(RejectionMessage rejection, RejectionContext context);
+         * </pre>
+         *
          * where {@code RejectionMessage} is a specific generated rejection message class.
          */
         REJECTION_CONTEXT_AWARE,
@@ -177,11 +191,18 @@ class RejectionHandlerMethod extends HandlerMethod<RejectionContext> {
         /**
          * A rejection handler method aware of the {@link CommandContext}.
          *
-         * <p>The signature of such a method is following:
+         * <p>The signature of such a method is as follows, if used in {@link RejectionSubscriber}:
          * <pre>
-         * [{@literal @}HandlerAnnotation]
+         * {@literal @}Subscribe
          * public void on(RejectionMessage rejection, CommandContext context);
          * </pre>
+         *
+         * Or if it is an {@code Entity} reactor method, it is declared as:
+         * <pre>
+         * {@literal @}React
+         * public void on(RejectionMessage rejection, CommandContext context);
+         * </pre>
+         *
          * where {@code RejectionMessage} is a specific generated rejection message class.
          */
         COMMAND_CONTEXT_AWARE,
@@ -189,11 +210,18 @@ class RejectionHandlerMethod extends HandlerMethod<RejectionContext> {
         /**
          * A rejection handler method aware of the command message.
          *
-         * <p>The signature of such a method is following:
+         * <p>The signature of such a method is as follows, if used in {@link RejectionSubscriber}:
          * <pre>
-         * [{@literal @}HandlerAnnotation]
+         * {@literal @}Subscribe
          * public void on(RejectionMessage rejection, CommandMessage command);
          * </pre>
+         *
+         * Or if it is an {@code Entity} reactor method, it is declared as:
+         * <pre>
+         * {@literal @}React
+         * public void on(RejectionMessage rejection, CommandMessage command);
+         * </pre>
+         *
          * where {@code RejectionMessage} is a specific generated rejection message class, and
          * {@code CommandMessage} is a specific generated command message class.
          */
@@ -203,11 +231,18 @@ class RejectionHandlerMethod extends HandlerMethod<RejectionContext> {
          * A rejection handler method aware of both the command message and
          * the {@link CommandContext}.
          *
-         * <p>The signature of such a method is following:
+         * <p>The signature of such a method is as follows, if used in {@link RejectionSubscriber}:
          * <pre>
-         * [{@literal @}HandlerAnnotation]
-         * public void on(RejectionMessage rejection, CommandMessage command, CommandContext context);
+         * {@literal @}Subscribe
+         * public void on(RejectionMessage rejection, CommandMessage command, CommandContext ctx);
          * </pre>
+         *
+         * Or if it is an {@code Entity} reactor method, it is declared as:
+         * <pre>
+         * {@literal @}React
+         * public void on(RejectionMessage rejection, CommandMessage command, CommandContext ctx);
+         * </pre>
+         *
          * where {@code RejectionMessage} is a specific generated rejection message class, and
          * {@code CommandMessage} is a specific generated command message class.
          */

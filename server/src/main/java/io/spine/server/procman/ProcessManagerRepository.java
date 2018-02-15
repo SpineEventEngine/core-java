@@ -1,5 +1,5 @@
 /*
- * Copyright 2017, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -89,7 +89,9 @@ public abstract class ProcessManagerRepository<I,
      */
     private CommandErrorHandler commandErrorHandler;
 
-    /** {@inheritDoc} */
+    /**
+     * Creates a new instance with the event routing by the first message field.
+     */
     protected ProcessManagerRepository() {
         super(EventProducers.<I>fromFirstMessageField());
     }

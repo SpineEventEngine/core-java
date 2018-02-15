@@ -1,5 +1,5 @@
 /*
- * Copyright 2017, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -54,8 +54,6 @@ import java.util.List;
  * because of a {@linkplain Rejections#toRejection(ThrowableMessage, io.spine.core.Command)
  * rejection}.
  *
- * {@inheritDoc}
- *
  * @author Alexander Yevsyukov
  */
 public abstract
@@ -68,7 +66,7 @@ class CommandHandlingEntity<I,
     private final Any idAsAny;
 
     /**
-     * {@inheritDoc}
+     * Creates a new entity with the passed ID.
      */
     protected CommandHandlingEntity(I id) {
         super(id);

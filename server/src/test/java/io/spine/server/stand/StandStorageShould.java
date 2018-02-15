@@ -1,5 +1,5 @@
 /*
- * Copyright 2017, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -156,9 +156,17 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
         }
     }
 
+    /*
+     * Disabled test cases from `RecordStorageShould`.
+     *
+     * These tests check the entity column reads and writes, which are not applicable to
+     * `StandStorage`.
+     *
+     * These checks include the `LifecycleFlags`-related checks (`archived` and `deleted`).
+     */
+
     @SuppressWarnings("NoopMethodInAbstractClass") // Overrides the behavior for all the inheritors.
     @Override
-    @Test
     public void filter_records_by_columns() {
         // Stand storage does not support entity columns.
     }
@@ -171,7 +179,25 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
 
     @SuppressWarnings("NoopMethodInAbstractClass") // Overrides the behavior for all the inheritors.
     @Override
+    public void read_archived_records_if_specified() {
+        // Stand storage does not support entity columns.
+    }
+
+    @SuppressWarnings("NoopMethodInAbstractClass") // Overrides the behavior for all the inheritors.
+    @Override
+    public void filter_archived_or_deleted_records_on_by_ID_bulk_read() {
+        // Stand storage does not support entity columns.
+    }
+
+    @SuppressWarnings("NoopMethodInAbstractClass") // Overrides the behavior for all the inheritors.
+    @Override
     public void update_entity_column_values() {
+        // Stand storage does not support entity columns.
+    }
+
+    @SuppressWarnings("NoopMethodInAbstractClass") // Overrides the behavior for all the inheritors.
+    @Override
+    public void read_both_by_columns_and_IDs() {
         // Stand storage does not support entity columns.
     }
 

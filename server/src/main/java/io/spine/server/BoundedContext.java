@@ -1,5 +1,5 @@
 /*
- * Copyright 2017, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -197,7 +197,7 @@ public final class BoundedContext
     /**
      * Closes all repositories and clears {@link TenantIndex}.
      */
-    private void shutDownRepositories() throws Exception {
+    private void shutDownRepositories() {
         guard.shutDownRepositories();
 
         if (tenantIndex != null) {
@@ -241,7 +241,8 @@ public final class BoundedContext
      * Obtains a tenant index of this Bounded Context.
      *
      * <p>If the Bounded Context is single-tenant returns
-     * {@linkplain TenantIndex.Factory#singleTenant() null-object} implementation.
+     * {@linkplain io.spine.server.tenant.TenantIndex.Factory#singleTenant() null-object}
+     * implementation.
      */
     @Internal
     public TenantIndex getTenantIndex() {
@@ -474,8 +475,8 @@ public final class BoundedContext
 
         private StorageFactory getStorageFactory() {
             if (storageFactorySupplier == null) {
-                storageFactorySupplier = StorageFactorySwitch.newInstance(newName(name),
-                                                                          multitenant);
+                storageFactorySupplier =
+                        StorageFactorySwitch.newInstance(newName(name), multitenant);
             }
 
             final StorageFactory storageFactory = storageFactorySupplier.get();

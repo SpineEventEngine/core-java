@@ -1,5 +1,5 @@
 /*
- * Copyright 2017, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -55,12 +55,15 @@ public abstract class MulticastDelivery<E extends MessageEnvelope,
     @Nullable
     private Function<T, Set<C>> consumerProvider;
 
-    /** {@inheritDoc} */
+    /**
+     * Creates a new delivery instance which performs its actions using
+     * the passed {@code Executor}.
+     */
     protected MulticastDelivery(Executor delegate) {
         super(delegate);
     }
 
-    /** {@inheritDoc} */
+    /** Creates a new direct delivery instance. */
     protected MulticastDelivery() {
         super();
     }

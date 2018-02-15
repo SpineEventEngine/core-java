@@ -1,5 +1,5 @@
 /*
- * Copyright 2017, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -67,7 +67,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends Message>
                 extends Repository<I, E> {
 
-    /** {@inheritDoc} */
+    /** Creates a new instance. */
     protected RecordBasedRepository() {
         super();
     }
@@ -141,7 +141,14 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         store(entity);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * Finds an entity with the passed ID if this entity is
+     * {@linkplain EntityWithLifecycle.Predicates#isEntityVisible() visible}.
+     *
+     * @param id the ID of the entity to find
+     * @return the entity or {@link Optional#absent()} if there is no entity with such ID
+     *         or this entity is not visible
+     */
     @Override
     @CheckReturnValue
     public Optional<E> find(I id) {
@@ -150,8 +157,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
             return Optional.absent();
         }
         final EntityRecord record = optional.get();
-        final boolean recordVisible = !isEntityVisible().apply(record.getLifecycleFlags());
-        if (recordVisible) {
+        final boolean recordVisible = isEntityVisible().apply(record.getLifecycleFlags());
+        if (!recordVisible) {
             return Optional.absent();
         }
         final E entity = toEntity(record);
@@ -190,18 +197,25 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
 
     /**
      * Loads an entity by the passed ID or creates a new one, if the entity was not found.
+     *
+     * <p>An entity will be loaded despite its {@linkplain LifecycleFlags visibility}.
+     * I.e. even if the entity is either {@linkplain EntityWithLifecycle#isArchived()  archived} or
+     * {@linkplain EntityWithLifecycle#isDeleted() deleted}, it is loaded and returned.
+     *
+     * <p>The new entity is created if and only if there is no record with the corresponding ID.
+     *
+     * @param id the ID of the entity to load
+     * @return the entity with the specified ID
      */
     @CheckReturnValue
     protected E findOrCreate(I id) {
-        final Optional<E> loaded = find(id);
-
-        if (!loaded.isPresent()) {
-            final E result = create(id);
-            return result;
+        Optional<EntityRecord> optional = findRecord(id);
+        if (!optional.isPresent()) {
+            return create(id);
         }
-
-        final E result = loaded.get();
-        return result;
+        final EntityRecord record = optional.get();
+        final E entity = toEntity(record);
+        return entity;
     }
 
     /**

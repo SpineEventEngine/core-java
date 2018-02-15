@@ -1,5 +1,5 @@
 /*
- * Copyright 2017, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -334,7 +334,8 @@ public class EventStore implements AutoCloseable {
     /**
      * The builder of {@code EventStore} instance exposed as gRPC service.
      *
-     * @see EventStoreGrpc.EventStoreImplBase
+     * @see io.spine.server.event.grpc.EventStoreGrpc.EventStoreImplBase
+     *      EventStoreGrpc.EventStoreImplBase
      */
     public static class ServiceBuilder
             extends AbstractBuilder<ServerServiceDefinition, ServiceBuilder> {

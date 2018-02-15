@@ -1,5 +1,5 @@
 /*
- * Copyright 2017, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -23,6 +23,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.Identifier;
+import io.spine.annotation.Internal;
 import io.spine.core.BoundedContextName;
 import io.spine.core.Event;
 import io.spine.core.Rejection;
@@ -35,7 +36,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alex Tymchenko
  */
-final class ExternalMessages {
+@Internal
+public final class ExternalMessages {
 
     /** Prevents instantiation on this utility class. */
     private ExternalMessages() {}
@@ -47,7 +49,7 @@ final class ExternalMessages {
      * @param boundedContextName the name of the bounded context in which the event was created
      * @return the external message wrapping the given event
      */
-    static ExternalMessage of(Event event, BoundedContextName boundedContextName) {
+    public static ExternalMessage of(Event event, BoundedContextName boundedContextName) {
         checkNotNull(event);
 
         final ExternalMessage result = of(event.getId(), event, boundedContextName);

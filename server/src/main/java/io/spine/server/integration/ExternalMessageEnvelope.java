@@ -1,5 +1,5 @@
 /*
- * Copyright 2017, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -56,9 +56,23 @@ public final class ExternalMessageEnvelope
         this.message = originalMessage;
         this.messageClass = ExternalMessageClass.of(this.message.getClass());
         this.actorContext = externalMessage.getActorContext();
-
     }
 
+    /**
+     * Creates a new instance of {@code ExternalMessageEnvelope} from the {@link ExternalMessage}
+     * instance and the message transferred inside the {@code ExternalMessage}, such as
+     * a {@code io.spine.sample.TaskCreated} event message.
+     *
+     * <p>This factory method provides an optimal performance of
+     * the {@code ExternalMessageEnvelope} creation. It allows to avoid unpacking the original
+     * message from the {@code ExternalMessage} instance.
+     *
+     * @param externalMessage the instance of {@code ExternalMessage} to wrap into an envelope
+     * @param originalMessage the message instance, which was originally transferred inside the
+     *                        {@code externalMessage}, such as a {@code io.spine.sample.TaskCreated}
+     *                        event message.
+     * @return the new instance of external message envelope.
+     */
     public static ExternalMessageEnvelope of(ExternalMessage externalMessage,
                                              Message originalMessage) {
         checkNotNull(externalMessage);
@@ -70,11 +84,26 @@ public final class ExternalMessageEnvelope
         return id;
     }
 
+    /**
+     * Obtains an originally transferred message. For instance, {@code io.spine.sample.TaskCreated}
+     * event message may returned for an external event, transferred inside
+     * of this envelope instance.
+     *
+     * @return the instance of origin message
+     */
     @Override
     public Message getMessage() {
         return message;
     }
 
+    /**
+     * Obtains a message class of an originally transferred message, such as
+     * {@code io.spine.sample.TaskCreated} class.
+     *
+     * @return the event message
+     * @see #getMessage()
+     * @see #of(ExternalMessage, Message)
+     */
     @Override
     public MessageClass getMessageClass() {
         return messageClass;
