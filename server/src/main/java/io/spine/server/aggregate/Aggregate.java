@@ -23,6 +23,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
+import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.grpc.Internal;
 import io.spine.core.CommandContext;
@@ -45,6 +46,7 @@ import io.spine.server.rejection.RejectionReactorMethod;
 import io.spine.validate.ValidatingBuilder;
 
 import javax.annotation.CheckReturnValue;
+import java.util.Collection;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -122,6 +124,8 @@ public abstract class Aggregate<I,
                                 B extends ValidatingBuilder<S, ? extends Message.Builder>>
                 extends CommandHandlingEntity<I, S, B> {
 
+    private static final Empty EMPTY = Empty.getDefaultInstance();
+
     /**
      * Events generated in the process of handling commands that were not yet committed.
      *
@@ -183,17 +187,25 @@ public abstract class Aggregate<I,
 
     /**
      * Obtains a method for the passed command and invokes it.
+     *
+     * <p>All the {@link Empty} messages are filtered out from the result.
+     * 
+     * @param  command the envelope with the command to dispatch
+     * @return a list with event messages that the aggregate produces in reaction to the event or
+     *         an empty list if the aggregate state does not change in reaction to the event
      */
     @Override
     protected List<? extends Message> dispatchCommand(CommandEnvelope command) {
         final CommandHandlerMethod method = thisClass().getHandler(command.getMessageClass());
-        final List<? extends Message> result =
+        final List<? extends Message> messages =
                 method.invoke(this, command.getMessage(), command.getCommandContext());
-        return result;
+        return filterEmpty(messages);
     }
 
     /**
      * Dispatches the event on which the aggregate reacts.
+     *
+     * <p>All the {@link Empty} messages are filtered out from the result.
      *
      * @param  event the envelope with the event to dispatch
      * @return a list with event messages that the aggregate produces in reaction to the event or
@@ -201,11 +213,15 @@ public abstract class Aggregate<I,
      */
     List<? extends Message> reactOn(EventEnvelope event) {
         final EventReactorMethod method = thisClass().getReactor(event.getMessageClass());
-        return method.invoke(this, event.getMessage(), event.getEventContext());
+        final List<? extends Message> messages =
+                method.invoke(this, event.getMessage(), event.getEventContext());
+        return filterEmpty(messages);
     }
 
     /**
      * Dispatches the rejection to which the aggregate reacts.
+     * 
+     * <p>All the {@link Empty} messages are filtered out from the result.
      *
      * @param  rejection the envelope with the rejection
      * @return a list with event messages that the aggregate produces in reaction to
@@ -214,7 +230,26 @@ public abstract class Aggregate<I,
      */
     List<? extends Message> reactOn(RejectionEnvelope rejection) {
         final RejectionReactorMethod method = thisClass().getReactor(rejection.getMessageClass());
-        return method.invoke(this, rejection.getMessage(), rejection.getRejectionContext());
+        final List<? extends Message> messages =
+                method.invoke(this, rejection.getMessage(), rejection.getRejectionContext());
+        return filterEmpty(messages);
+    }
+
+    /**
+     * Creates a new list without {@link Empty} messages.
+     *
+     * @param  messages a list of messages to be filtered
+     * @return a new list with all the items of the passed {@code messages}
+     *         except for {@link Empty}
+     */
+    private static List<? extends Message> filterEmpty(Collection<? extends Message> messages) {
+        final ImmutableList.Builder<Message> list = ImmutableList.builder();
+        for (Message message : messages) {
+            if (!message.equals(EMPTY)) {
+                list.add(message);
+            }
+        }
+        return list.build();
     }
 
     /**
