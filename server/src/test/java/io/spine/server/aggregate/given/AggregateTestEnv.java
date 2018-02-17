@@ -64,6 +64,7 @@ import static io.spine.server.aggregate.given.Given.EventMessage.projectCreated;
 
 /**
  * @author Alexander Yevsyukov
+ * @author Mykhailo Drachuk
  */
 public class AggregateTestEnv {
 
