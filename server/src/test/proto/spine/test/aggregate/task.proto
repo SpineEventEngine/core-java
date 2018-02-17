@@ -19,71 +19,24 @@
 //
 syntax = "proto3";
 
-package spine.test.aggregate.command;
+package spine.test.aggregate;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package="io.spine.test.aggregate.command";
-option java_outer_classname = "AggregateCommandsProto";
+option java_package="io.spine.test.aggregate.task";
 option java_multiple_files = true;
-option java_generate_equals_and_hash = true;
 
-import "spine/core/event.proto";
 import "spine/core/user_id.proto";
 
-import "spine/test/aggregate/project.proto";
-import "spine/test/aggregate/task.proto";
-
-message AggCreateProject {
-    ProjectId project_id = 1;
-    string name = 2;
+message AggTaskId {
+    string id = 1;
 }
 
-message AggCreateProjectWithChildren {
-    ProjectId project_id = 1;
-    string name = 2;
-    repeated ProjectId child_project_id = 3;
-}
+message AggTask {
 
-message AggStartProjectWithChildren {
-    ProjectId project_id = 1;
-}
-
-message AggAddTask {
-    ProjectId project_id = 1;
-    Task task = 2;
-}
-
-message AggStartProject {
-    ProjectId project_id = 1;
-    repeated ProjectId child_project_id = 3;
-}
-
-message ImportEvents {
-    ProjectId project_id = 1;
-    repeated core.Event event = 2;
-}
-
-message AggPauseProject {
-    ProjectId project_id = 1;
-}
-
-message AggCancelProject {
-    ProjectId project_id = 1;
-}
-
-message AggCreateTask {
-    AggTaskId task_id = 1;
+    AggTaskId id = 1;
+    
     spine.core.UserId assignee = 2;
 }
 
-message AggAssignTask {
-    AggTaskId task_id = 1;
-    spine.core.UserId assignee = 2;
-}
-
-message AggReassignTask {
-    AggTaskId task_id = 1;
-    spine.core.UserId assignee = 2;
-}

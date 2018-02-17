@@ -26,13 +26,18 @@ import com.google.common.collect.Lists;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.Identifier;
+import io.spine.base.Error;
 import io.spine.client.TestActorRequestFactory;
+import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Commands;
 import io.spine.core.Event;
+import io.spine.core.Rejection;
+import io.spine.grpc.MemoizingObserver;
+import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.given.AggregateTestEnv;
 import io.spine.server.aggregate.given.AggregateTestEnv.AggregateWithMissingApplier;
 import io.spine.server.aggregate.given.AggregateTestEnv.FaultyAggregate;
@@ -49,9 +54,11 @@ import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.ProjectVBuilder;
 import io.spine.test.aggregate.Status;
 import io.spine.test.aggregate.command.AggAddTask;
+import io.spine.test.aggregate.command.AggAssignTask;
 import io.spine.test.aggregate.command.AggCancelProject;
 import io.spine.test.aggregate.command.AggCreateProject;
 import io.spine.test.aggregate.command.AggPauseProject;
+import io.spine.test.aggregate.command.AggReassignTask;
 import io.spine.test.aggregate.command.AggStartProject;
 import io.spine.test.aggregate.command.ImportEvents;
 import io.spine.test.aggregate.event.AggProjectCancelled;
@@ -59,8 +66,12 @@ import io.spine.test.aggregate.event.AggProjectCreated;
 import io.spine.test.aggregate.event.AggProjectPaused;
 import io.spine.test.aggregate.event.AggProjectStarted;
 import io.spine.test.aggregate.event.AggTaskAdded;
+import io.spine.test.aggregate.event.AggTaskAssigned;
+import io.spine.test.aggregate.event.AggUserNotified;
+import io.spine.test.aggregate.rejection.Rejections;
 import io.spine.test.aggregate.user.User;
 import io.spine.time.Time;
+import io.spine.type.TypeUrl;
 import io.spine.validate.ConstraintViolation;
 import org.junit.Before;
 import org.junit.Test;
@@ -71,11 +82,18 @@ import java.util.Set;
 import static com.google.common.base.Throwables.getRootCause;
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.core.given.GivenVersion.withNumber;
+import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.TestCommandClasses.assertContains;
 import static io.spine.server.TestEventClasses.assertContains;
 import static io.spine.server.TestEventClasses.getEventClasses;
 import static io.spine.server.aggregate.AggregateMessageDispatcher.dispatchCommand;
+import static io.spine.server.aggregate.given.AggregateTestEnv.assignTask;
+import static io.spine.server.aggregate.given.AggregateTestEnv.newTaskBoundedContext;
+import static io.spine.server.aggregate.given.AggregateTestEnv.createTask;
+import static io.spine.server.aggregate.given.AggregateTestEnv.typeUrlOf;
+import static io.spine.server.aggregate.given.AggregateTestEnv.readAllEvents;
+import static io.spine.server.aggregate.given.AggregateTestEnv.reassignTask;
 import static io.spine.server.aggregate.given.Given.EventMessage.projectCancelled;
 import static io.spine.server.aggregate.given.Given.EventMessage.projectCreated;
 import static io.spine.server.aggregate.given.Given.EventMessage.projectPaused;
@@ -86,6 +104,7 @@ import static io.spine.test.Verify.assertSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -604,6 +623,119 @@ public class AggregateShould {
                                                               .withVersion(1)
                                                               .withState(user)
                                                               .build();
+    }
+
+    /**
+     * Ensures that a {@link io.spine.server.tuple.Pair} with an empty second optional value
+     * returned from a command handler stores a single event.
+     *
+     * <p>The command handler that should return a pair is
+     * {@link io.spine.server.aggregate.given.AggregateTestEnv.TaskAggregate#handle(AggAssignTask, CommandContext)}.
+     */
+    @Test
+    public void create_single_event_for_a_pair_of_events_with_empty_for_a_command_dispatch() {
+        final Command command = command(createTask());
+        final MemoizingObserver<Ack> observer = memoizingObserver();
+        final BoundedContext boundedContext = newTaskBoundedContext();
+
+        boundedContext.getCommandBus()
+                      .post(command, observer);
+
+        assertNull(observer.getError());
+
+        final List<Ack> responses = observer.responses();
+        assertSize(1, responses);
+
+        final Ack response = responses.get(0);
+        final io.spine.core.Status status = response.getStatus();
+        final Error emptyError = Error.getDefaultInstance();
+        assertEquals(emptyError, status.getError());
+
+        final Rejection emptyRejection = Rejection.getDefaultInstance();
+        assertEquals(emptyRejection, status.getRejection());
+
+        final List<Event> events = readAllEvents(boundedContext);
+        assertSize(1, events);
+    }
+
+    /**
+     * Ensures that a {@link io.spine.server.tuple.Pair} with an empty second optional value
+     * returned from a reaction on an event stores a single event.
+     *
+     * <p>The first event is produced while handling a command by the
+     * {@link io.spine.server.aggregate.given.AggregateTestEnv.TaskAggregate#handle(AggAssignTask, CommandContext)}.
+     * Then as a reaction to this event a single event should be fired as part of the pair by
+     * {@link io.spine.server.aggregate.given.AggregateTestEnv.TaskAggregate#on(AggTaskAssigned)}.
+     */
+    @Test
+    public void create_single_event_for_a_pair_of_events_with_empty_for_an_event_react() {
+        final Command command = command(assignTask());
+        final MemoizingObserver<Ack> observer = memoizingObserver();
+        final BoundedContext boundedContext = newTaskBoundedContext();
+
+        boundedContext.getCommandBus()
+                      .post(command, observer);
+
+        assertNull(observer.getError());
+
+        final List<Ack> responses = observer.responses();
+        assertSize(1, responses);
+
+        final Ack response = responses.get(0);
+        final io.spine.core.Status status = response.getStatus();
+        final Error emptyError = Error.getDefaultInstance();
+        assertEquals(emptyError, status.getError());
+
+        final Rejection emptyRejection = Rejection.getDefaultInstance();
+        assertEquals(emptyRejection, status.getRejection());
+
+        final List<Event> events = readAllEvents(boundedContext);
+        assertSize(2, events);
+
+        final Event sourceEvent = events.get(0);
+        final TypeUrl taskAssignedType = TypeUrl.from(AggTaskAssigned.getDescriptor());
+        assertEquals(typeUrlOf(sourceEvent), taskAssignedType);
+
+        final Event reactionEvent = events.get(1);
+        final TypeUrl userNotifiedType = TypeUrl.from(AggUserNotified.getDescriptor());
+        assertEquals(typeUrlOf(reactionEvent), userNotifiedType);
+    }
+
+    /**
+     * Ensures that a {@link io.spine.server.tuple.Pair} with an empty second optional value
+     * returned from a reaction on a rejection stores a single event.
+     *
+     * <p>The rejection is fired by the {@link io.spine.server.aggregate.given.AggregateTestEnv.TaskAggregate#handle(AggReassignTask, CommandContext)}
+     * and handled by the {@link io.spine.server.aggregate.given.AggregateTestEnv.TaskAggregate#on(Rejections.AggCannotReassignUnassignedTask)}.
+     */
+    @Test
+    public void create_single_event_for_a_pair_of_events_with_empty_for_a_rejection_react() {
+        final Command command = command(reassignTask());
+        final MemoizingObserver<Ack> observer = memoizingObserver();
+        final BoundedContext boundedContext = newTaskBoundedContext();
+
+        boundedContext.getCommandBus()
+                      .post(command, observer);
+
+        assertNull(observer.getError());
+
+        final List<Ack> responses = observer.responses();
+        assertSize(1, responses);
+
+        final Ack response = responses.get(0);
+        final io.spine.core.Status status = response.getStatus();
+        final Error emptyError = Error.getDefaultInstance();
+        assertEquals(emptyError, status.getError());
+
+        final Rejection emptyRejection = Rejection.getDefaultInstance();
+        assertEquals(emptyRejection, status.getRejection());
+
+        final List<Event> events = readAllEvents(boundedContext);
+        assertSize(1, events);
+
+        final Event reactionEvent = events.get(0);
+        final TypeUrl userNotifiedType = TypeUrl.from(AggUserNotified.getDescriptor());
+        assertEquals(typeUrlOf(reactionEvent), userNotifiedType);
     }
 
     /**

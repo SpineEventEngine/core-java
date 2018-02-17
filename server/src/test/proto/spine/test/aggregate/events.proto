@@ -29,7 +29,10 @@ option java_outer_classname = "AggregateEventsProto";
 option java_multiple_files = true;
 option java_generate_equals_and_hash = true;
 
+import "spine/core/user_id.proto";
+
 import "spine/test/aggregate/project.proto";
+import "spine/test/aggregate/task.proto";
 
 message AggProjectCreated {
     ProjectId project_id = 1;
@@ -62,4 +65,23 @@ message AggProjectPaused {
 
 message AggProjectCancelled {
     ProjectId project_id = 1;
+}
+
+message AggTaskCreated {
+    AggTaskId task_id = 1;
+}
+
+message AggTaskAssigned {
+    AggTaskId task_id = 1;
+    spine.core.UserId previousAssignee = 2;
+    spine.core.UserId newAssignee = 3;
+}
+
+message AggTaskStarted {
+    AggTaskId task_id = 1;
+}
+
+message AggUserNotified {
+    AggTaskId task_id = 1;
+    spine.core.UserId user_id = 2;
 }
