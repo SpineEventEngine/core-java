@@ -101,12 +101,6 @@ public class AggregateTestEnv {
                                .build();
     }
 
-    public static AggCreateTask createTask() {
-        return AggCreateTask.newBuilder()
-                            .setTaskId(newTaskId())
-                            .build();
-    }
-
     private static AggTaskId newTaskId() {
         return AggTaskId.newBuilder()
                         .setId(newUuid())
@@ -134,6 +128,12 @@ public class AggregateTestEnv {
                                                             .build();
         boundedContext.register(new TaskAggregateRepository());
         return boundedContext;
+    }
+
+    public static AggCreateTask createTask() {
+        return AggCreateTask.newBuilder()
+                            .setTaskId(newTaskId())
+                            .build();
     }
 
     public static AggAssignTask assignTask() {
