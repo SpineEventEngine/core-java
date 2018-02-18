@@ -36,6 +36,7 @@ import io.spine.core.CommandEnvelope;
 import io.spine.core.Commands;
 import io.spine.core.Event;
 import io.spine.core.Rejection;
+import io.spine.core.TenantId;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.given.AggregateTestEnv;
@@ -89,11 +90,11 @@ import static io.spine.server.TestEventClasses.assertContains;
 import static io.spine.server.TestEventClasses.getEventClasses;
 import static io.spine.server.aggregate.AggregateMessageDispatcher.dispatchCommand;
 import static io.spine.server.aggregate.given.AggregateTestEnv.assignTask;
-import static io.spine.server.aggregate.given.AggregateTestEnv.newTaskBoundedContext;
 import static io.spine.server.aggregate.given.AggregateTestEnv.createTask;
-import static io.spine.server.aggregate.given.AggregateTestEnv.typeUrlOf;
+import static io.spine.server.aggregate.given.AggregateTestEnv.newTaskBoundedContext;
 import static io.spine.server.aggregate.given.AggregateTestEnv.readAllEvents;
 import static io.spine.server.aggregate.given.AggregateTestEnv.reassignTask;
+import static io.spine.server.aggregate.given.AggregateTestEnv.typeUrlOf;
 import static io.spine.server.aggregate.given.Given.EventMessage.projectCancelled;
 import static io.spine.server.aggregate.given.Given.EventMessage.projectCreated;
 import static io.spine.server.aggregate.given.Given.EventMessage.projectPaused;
@@ -152,6 +153,13 @@ public class AggregateShould {
     }
 
     private static Command command(Message commandMessage) {
+        return requestFactory.command()
+                             .create(commandMessage);
+    }
+
+    private static Command command(Message commandMessage, TenantId tenantId) {
+        final TestActorRequestFactory requestFactory =
+                TestActorRequestFactory.newInstance(AggregateShould.class, tenantId);
         return requestFactory.command()
                              .create(commandMessage);
     }
@@ -634,9 +642,11 @@ public class AggregateShould {
      */
     @Test
     public void create_single_event_for_a_pair_of_events_with_empty_for_a_command_dispatch() {
-        final Command command = command(createTask());
-        final MemoizingObserver<Ack> observer = memoizingObserver();
         final BoundedContext boundedContext = newTaskBoundedContext();
+
+        final TenantId tenantId = AggregateTestEnv.newTenantId();
+        final Command command = command(createTask(), tenantId);
+        final MemoizingObserver<Ack> observer = memoizingObserver();
 
         boundedContext.getCommandBus()
                       .post(command, observer);
@@ -654,7 +664,7 @@ public class AggregateShould {
         final Rejection emptyRejection = Rejection.getDefaultInstance();
         assertEquals(emptyRejection, status.getRejection());
 
-        final List<Event> events = readAllEvents(boundedContext);
+        final List<Event> events = readAllEvents(boundedContext, tenantId);
         assertSize(1, events);
     }
 
@@ -669,9 +679,11 @@ public class AggregateShould {
      */
     @Test
     public void create_single_event_for_a_pair_of_events_with_empty_for_an_event_react() {
-        final Command command = command(assignTask());
-        final MemoizingObserver<Ack> observer = memoizingObserver();
         final BoundedContext boundedContext = newTaskBoundedContext();
+
+        final TenantId tenantId = AggregateTestEnv.newTenantId();
+        final Command command = command(assignTask(), tenantId);
+        final MemoizingObserver<Ack> observer = memoizingObserver();
 
         boundedContext.getCommandBus()
                       .post(command, observer);
@@ -689,7 +701,7 @@ public class AggregateShould {
         final Rejection emptyRejection = Rejection.getDefaultInstance();
         assertEquals(emptyRejection, status.getRejection());
 
-        final List<Event> events = readAllEvents(boundedContext);
+        final List<Event> events = readAllEvents(boundedContext, tenantId);
         assertSize(2, events);
 
         final Event sourceEvent = events.get(0);
@@ -710,9 +722,11 @@ public class AggregateShould {
      */
     @Test
     public void create_single_event_for_a_pair_of_events_with_empty_for_a_rejection_react() {
-        final Command command = command(reassignTask());
-        final MemoizingObserver<Ack> observer = memoizingObserver();
         final BoundedContext boundedContext = newTaskBoundedContext();
+
+        final TenantId tenantId = AggregateTestEnv.newTenantId();
+        final Command command = command(reassignTask(), tenantId);
+        final MemoizingObserver<Ack> observer = memoizingObserver();
 
         boundedContext.getCommandBus()
                       .post(command, observer);
@@ -730,7 +744,7 @@ public class AggregateShould {
         final Rejection emptyRejection = Rejection.getDefaultInstance();
         assertEquals(emptyRejection, status.getRejection());
 
-        final List<Event> events = readAllEvents(boundedContext);
+        final List<Event> events = readAllEvents(boundedContext, tenantId);
         assertSize(1, events);
 
         final Event reactionEvent = events.get(0);

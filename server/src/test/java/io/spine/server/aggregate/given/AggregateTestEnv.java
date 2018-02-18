@@ -25,6 +25,7 @@ import com.google.protobuf.Any;
 import io.spine.core.CommandContext;
 import io.spine.core.Event;
 import io.spine.core.React;
+import io.spine.core.TenantId;
 import io.spine.core.UserId;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.BoundedContext;
@@ -33,6 +34,7 @@ import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.event.EventStreamQuery;
+import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.server.tuple.Pair;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
@@ -73,14 +75,22 @@ public class AggregateTestEnv {
     }
 
     /**
-     * Reads all events from the bounded context.
+     * Reads all events from the bounded context for the provided tenant.
      */
-    public static List<Event> readAllEvents(BoundedContext boundedContext) {
+    public static List<Event> readAllEvents(final BoundedContext boundedContext, TenantId tenantId) {
         final MemoizingObserver<Event> queryObserver = memoizingObserver();
-        boundedContext.getEventBus()
-                      .getEventStore()
-                      .read(allEventsQuery(), queryObserver);
-        return queryObserver.responses();
+        final TenantAwareOperation operation = new TenantAwareOperation(tenantId) {
+            @Override
+            public void run() {
+                boundedContext.getEventBus()
+                              .getEventStore()
+                              .read(allEventsQuery(), queryObserver);
+            }
+        };
+        operation.execute();
+
+        final List<Event> responses = queryObserver.responses();
+        return responses;
     }
 
     /**
@@ -108,12 +118,19 @@ public class AggregateTestEnv {
                      .setValue(newUuid())
                      .build();
     }
+ 
+    public static TenantId newTenantId() {
+        return TenantId.newBuilder()
+                       .setValue(newUuid())
+                       .build();
+    }
 
     /**
-     * Creates a new bounded context with a registered {@link TaskAggregateRepository}.
+     * Creates a new multitenant bounded context with a registered {@link TaskAggregateRepository}.
      */
     public static BoundedContext newTaskBoundedContext() {
         final BoundedContext boundedContext = BoundedContext.newBuilder()
+                                                            .setMultitenant(true)
                                                             .build();
         boundedContext.register(new TaskAggregateRepository());
         return boundedContext;
