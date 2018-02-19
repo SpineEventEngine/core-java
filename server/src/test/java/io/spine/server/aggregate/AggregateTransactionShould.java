@@ -168,7 +168,7 @@ public class AggregateTransactionShould
         }
 
         @Apply
-        private void event(AggProjectCreated event) {
+        void event(AggProjectCreated event) {
             receivedEvents.add(event);
             final Project newState = Project.newBuilder(getState())
                                             .setId(event.getProjectId())
@@ -178,7 +178,7 @@ public class AggregateTransactionShould
         }
 
         @Apply
-        private void event(AggTaskAdded event) {
+        void event(AggTaskAdded event) {
             throw new RuntimeException("that tests the tx behaviour");
         }
 
