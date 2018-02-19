@@ -20,14 +20,12 @@
 
 package io.spine.server.aggregate;
 
-import java.util.List;
-
 import static io.spine.validate.Validate.checkPositive;
 
 /**
  * Specifies the filtering criteria for {@link AggregateEventRecord} queries.
  * 
- * <p>A result of executing such a query is a {@linkplain List<AggregateEventRecord>} which 
+ * <p>A result of executing such a query is a {@linkplain java.util.List<AggregateEventRecord>} which 
  * satisfies the query criteria.
  *
  * @author Mykhailo Drachuk
