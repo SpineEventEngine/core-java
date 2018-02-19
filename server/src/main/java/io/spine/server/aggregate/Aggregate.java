@@ -524,6 +524,7 @@ public abstract class Aggregate<I,
                 case SNAPSHOT:
                     return false;
                 case KIND_NOT_SET:
+                default:
                     throw newIllegalStateException("Aggregate record with kind not set.");
             }
         }
