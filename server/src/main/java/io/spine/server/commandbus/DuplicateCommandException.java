@@ -76,8 +76,7 @@ public class DuplicateCommandException extends CommandException implements Messa
      */
     private static String errorMessage(CommandEnvelope envelope) {
         return format(
-                "The command (class: `%s`, type: `%s`, id: `%s`) was already handled by " +
-                        "a Command Bus.",
+                "The command (class: `%s`, type: `%s`, id: `%s`) cannot be dispatched twice.",
                 envelope.getMessageClass()
                         .value()
                         .getName(),
