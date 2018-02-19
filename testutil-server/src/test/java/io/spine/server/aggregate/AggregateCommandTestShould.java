@@ -98,7 +98,7 @@ public class AggregateCommandTestShould {
         }
 
         @Apply
-        private void on(Timestamp timestamp) {
+        void on(Timestamp timestamp) {
             getBuilder().setValue(Timestamps.toString(timestamp));
         }
     }

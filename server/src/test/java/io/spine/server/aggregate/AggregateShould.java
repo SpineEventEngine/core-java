@@ -675,7 +675,7 @@ public class AggregateShould {
         }
 
         @Apply
-        private void event(AggProjectCreated event) {
+        void event(AggProjectCreated event) {
             getBuilder()
                     .setId(event.getProjectId())
                     .setStatus(Status.CREATED);
@@ -684,13 +684,13 @@ public class AggregateShould {
         }
 
         @Apply
-        private void event(AggTaskAdded event) {
+        void event(AggTaskAdded event) {
             isTaskAddedEventApplied = true;
             getBuilder().addTask(event.getTask());
         }
 
         @Apply
-        private void event(AggProjectStarted event) {
+        void event(AggProjectStarted event) {
             getBuilder()
                     .setId(event.getProjectId())
                     .setStatus(Status.STARTED);
@@ -741,12 +741,12 @@ public class AggregateShould {
         }
 
         @Apply
-        private void on(AggProjectPaused event) {
+        void on(AggProjectPaused event) {
             // do nothing.
         }
 
         @Apply
-        private void on(AggProjectCancelled event) {
+        void on(AggProjectCancelled event) {
             // do nothing.
         }
     }

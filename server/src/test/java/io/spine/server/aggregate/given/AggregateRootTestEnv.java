@@ -67,7 +67,7 @@ public class AggregateRootTestEnv {
         }
 
         @Apply
-        private void apply(AggProjectCreated event) {
+        void apply(AggProjectCreated event) {
             getBuilder().setId(event.getProjectId())
                         .setName(event.getName());
         }
@@ -95,7 +95,7 @@ public class AggregateRootTestEnv {
         }
 
         @Apply
-        private void apply(AggProjectStarted event) {
+        void apply(AggProjectStarted event) {
             getBuilder().setStatus(Status.STARTED);
         }
     }
