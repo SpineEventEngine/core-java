@@ -21,7 +21,6 @@ package io.spine.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.grpc.Internal;
@@ -46,14 +45,23 @@ import io.spine.server.rejection.RejectionReactorMethod;
 import io.spine.validate.ValidatingBuilder;
 
 import javax.annotation.CheckReturnValue;
+import java.util.Collection;
+import java.util.Deque;
+import java.util.Iterator;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
+import static com.google.common.collect.Lists.newLinkedList;
+import static com.google.common.collect.Queues.newArrayDeque;
 import static io.spine.core.Events.getMessage;
 import static io.spine.core.Events.getRootCommandId;
 import static io.spine.time.Time.getCurrentTime;
+import static io.spine.util.Exceptions.newIllegalStateException;
+import static io.spine.validate.Validate.checkPositive;
 import static io.spine.validate.Validate.isNotDefault;
+import static java.lang.Integer.MAX_VALUE;
 
 /**
  * Abstract base for aggregates.
@@ -113,7 +121,6 @@ import static io.spine.validate.Validate.isNotDefault;
  * @param <I> the type for IDs of this class of aggregates
  * @param <S> the type of the state held by the aggregate
  * @param <B> the type of the aggregate state builder
- *
  * @author Alexander Yevsyukov
  * @author Alexander Litus
  * @author Mikhail Melnik
@@ -129,14 +136,14 @@ public abstract class Aggregate<I,
      *
      * @see #commitEvents()
      */
-    private final List<Event> uncommittedEvents = Lists.newLinkedList();
+    private final List<Event> uncommittedEvents = newLinkedList();
 
     /**
-     * Events handled since the last snapshot.
-     * 
-     * @see #didHandleSinceLastSnapshot(CommandEnvelope) 
+     * Holds the history of all events which happened to the aggregate since the last snapshot.
+     *
+     * @see #didHandleSinceLastSnapshot(CommandEnvelope)
      */
-    private final List<Event> eventsSinceLastSnapshot = Lists.newLinkedList();
+    private final Deque<AggregateEventRecord> historySinceLastSnapshot = newArrayDeque();
 
     /**
      * Creates a new instance.
@@ -256,7 +263,8 @@ public abstract class Aggregate<I,
         final List<Event> events = aggregateStateRecord.getEventList();
 
         play(events);
-        eventsSinceLastSnapshot.addAll(events);
+        final List<AggregateEventRecord> records = toAggregateEventRecords(events);
+        historySinceLastSnapshot.addAll(records);
     }
 
     /**
@@ -386,10 +394,11 @@ public abstract class Aggregate<I,
      * @return the list of events
      */
     List<Event> commitEvents() {
-        final List<Event> result = ImmutableList.copyOf(uncommittedEvents);
+        final List<Event> events = ImmutableList.copyOf(uncommittedEvents);
         uncommittedEvents.clear();
-        eventsSinceLastSnapshot.addAll(result);
-        return result;
+        final List<AggregateEventRecord> records = toAggregateEventRecords(events);
+        historySinceLastSnapshot.addAll(records);
+        return events;
     }
 
     /**
@@ -417,8 +426,73 @@ public abstract class Aggregate<I,
                 .setVersion(getVersion())
                 .setTimestamp(getCurrentTime());
         final Snapshot snapshot = builder.build();
-        eventsSinceLastSnapshot.clear();
+        historySinceLastSnapshot.clear();
         return snapshot;
+    }
+
+    /**
+     * Creates an iterator of the aggregate event history with reverse traversal.
+     *
+     * <p>The records are returned sorted by timestamp in a descending order (from newer to older).
+     * 
+     * <p>The iterator is empty if there's no history for the aggregate.
+     *
+     * @param  criteria specifies the filters the data should pass and how the query 
+     *                  should be performed
+     * @return new iterator instance
+     */
+    public Iterator<AggregateEventRecord> historyBackward(AggregateRecordQueryCriteria criteria) {
+        checkNotNull(criteria);
+        final int batchSize = criteria.batchSize();
+        final List<AggregateEventRecord> items = queryBatch(batchSize);
+        return items.iterator();
+    }
+
+    /**
+     * Obtains a batch of aggregate records specified by the batch size.
+     * 
+     * @param batchSize the amount of events that must be retrieved
+     */
+    private List<AggregateEventRecord> queryBatch(int batchSize) {
+        checkPositive(batchSize);
+
+        final ImmutableList.Builder<AggregateEventRecord> builder = ImmutableList.builder();
+        int selectedCount = 0;
+
+        for (AggregateEventRecord record : historySinceLastSnapshot) {
+            builder.add(record);
+
+            selectedCount++;
+            if (selectedCount == batchSize) {
+                return builder.build();
+            }
+        }
+
+        return builder.build();
+    }
+
+    /**
+     * Creates a new list mapping every {@link Event} in the provided collection to a newly created 
+     * {@link AggregateEventRecord}.
+     */
+    private static List<AggregateEventRecord> toAggregateEventRecords(Collection<Event> events) {
+        final ImmutableList.Builder<AggregateEventRecord> items = ImmutableList.builder();
+        for (Event event : events) {
+            final AggregateEventRecord record = newAggregateEventRecord(event);
+            items.add(record);
+        }
+        return items.build();
+    }
+
+    /**
+     * Creates a new {@link AggregateEventRecord} holding the specified {@link Event}.
+     */
+    private static AggregateEventRecord newAggregateEventRecord(Event event) {
+        final EventContext context = event.getContext();
+        return AggregateEventRecord.newBuilder()
+                                   .setTimestamp(context.getTimestamp())
+                                   .setEvent(event)
+                                   .build();
     }
 
     /**
@@ -435,10 +509,22 @@ public abstract class Aggregate<I,
      */
     public boolean didHandleSinceLastSnapshot(CommandEnvelope command) {
         final CommandId newCommandId = command.getId();
-        for (Event event : eventsSinceLastSnapshot) {
-            final CommandId eventRootCommandId = getRootCommandId(event);
-            if (newCommandId.equals(eventRootCommandId)) {
-                return true;
+        final AggregateRecordQueryCriteria query = new AggregateRecordQueryCriteria(MAX_VALUE);
+        final Iterator<AggregateEventRecord> iterator = historyBackward(query);
+        while (iterator.hasNext()) {
+            final AggregateEventRecord record = iterator.next();
+            switch (record.getKindCase()) {
+                case EVENT:
+                    final Event event = record.getEvent();
+                    final CommandId eventRootCommandId = getRootCommandId(event);
+                    if (newCommandId.equals(eventRootCommandId)) {
+                        return true;
+                    }
+                    break;
+                case SNAPSHOT:
+                    return false;
+                case KIND_NOT_SET:
+                    throw newIllegalStateException("Aggregate record with kind not set.");
             }
         }
         return false;
