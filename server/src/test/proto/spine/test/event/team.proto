@@ -19,84 +19,59 @@
 //
 syntax = "proto3";
 
-package spine.test.event.command;
+package spine.test.event;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package = "io.spine.test.event.command";
-option java_outer_classname = "EventCommandsProto";
+option java_package = "io.spine.test.event";
 option java_multiple_files = true;
 
 import "spine/core/user_id.proto";
 import "spine/net/email_address.proto";
 import "spine/test/event/project.proto";
-import "spine/test/event/team.proto";
 
-message CreateProject {
+message EvTeamId {
+    string id = 1;
+}
 
-    ProjectId project_id = 1;
+message EvMemberInvitation {
+
+    spine.net.EmailAddress email = 1;
 
     EvTeamId team_id = 2;
 }
 
-message AddTask {
+message EvTeam {
 
-    ProjectId project_id = 1;
+    EvTeamId id = 1;
 
-    Task task = 2;
+    repeated ProjectId project_id = 2;
+
+    repeated EvMember member = 3;
+
+    repeated EvMemberInvitation invitation = 4;
 }
 
-message EvAddTasks {
+message EvMember {
 
-    ProjectId project_id = 1;
+    spine.core.UserId user_id = 1;
 
-    repeated Task task = 2;
+    string name = 2;
 }
 
-message StartProject {
-    ProjectId project_id = 1;
+message EvTeamCreation {
+
+    EvTeamId id = 1;
+
+    repeated EvMember member = 2;
+
+    repeated EvMemberInvitation invitation = 3;
 }
 
-message EvCreateTeam {
-    EvTeamId team_id = 1;
-}
-
-message EvAddTeamMember {
-
-    EvTeamId team_id = 1;
-
-    EvMember member = 2;
-}
-
-message EvInviteTeamMembers {
-
-    EvTeamId team_id = 1;
-
-    repeated spine.net.EmailAddress email = 2;
-}
-
-message EvAcceptInvitation {
+message EvUserSignUp {
 
     spine.core.UserId user_id = 1;
 
     EvMemberInvitation invitation = 2;
-}
-
-message EBCreateProject {
-    ProjectId project_id = 1;
-}
-
-message EBArchiveProject {
-
-    ProjectId project_id = 1;
-
-    string reason = 2 [(required) = true];
-}
-
-message EBAddTasks {
-
-    ProjectId project_id = 1;
-
-    repeated Task task = 2;
 }

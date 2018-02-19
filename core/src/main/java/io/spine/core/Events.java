@@ -19,6 +19,7 @@
  */
 package io.spine.core;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
@@ -163,6 +164,22 @@ public final class Events {
     }
 
     /**
+     * Obtains the ID of the root command, which lead to this event.
+     * 
+     * <p> In case the passed {@code Event} instance is a reaction to another {@code Event}, 
+     * the identifier of the very first command in this chain is returned.
+     *
+     * @param event the event to get the root command ID for
+     * @return the root command ID
+     */
+    public static CommandId getRootCommandId(Event event) {
+        checkNotNull(event);
+        final EventContext context = event.getContext();
+        final CommandId id = context.getRootCommandId();
+        return id;
+    }
+
+    /**
      * Obtains the stringifier for event IDs.
      */
     public static Stringifier<EventId> idStringifier() {
@@ -182,15 +199,69 @@ public final class Events {
     }
 
     /**
-     * Obtains the {@link TenantId} from the given {@link Event}.
+     * Obtains a {@link TenantId} from the given {@link Event}.
+     *
+     * <p>The {@code TenantId} is retrieved by traversing the passed {@code Event}s context. It is
+     * stored in the initial {@link CommandContext} and can be retrieved from the events origin 
+     * command or rejection context. 
+     *
+     * @return a tenant ID available by traversing event context back to original command context or 
+     *         a default empty tenant ID if no tenant ID is found this way  
      */
     @Internal
     public static TenantId getTenantId(Event event) {
-        final TenantId result = event.getContext()
-                                     .getCommandContext()
-                                     .getActorContext()
-                                     .getTenantId();
+        checkNotNull(event);
+
+        final Optional<CommandContext> commandContext = getOriginCommandContext(event);
+
+        if (!commandContext.isPresent()) {
+            return TenantId.getDefaultInstance();
+        }
+
+        final TenantId result = Commands.getTenantId(commandContext.get());
         return result;
+    }
+
+    /**
+     * Obtains a context of the command, which lead to this event.
+     *
+     * <p> The context is obtained by traversing the events origin for a valid context source. 
+     * There can be two sources for the command context:
+     * <ol>
+     *     <li>The command context set as the event origin.</li>
+     *     <li>The command set as a field of a rejection context if an event was generated in a 
+     *     response to a rejection.</li>
+     * </ol>
+     *
+     * <p>If at some point the event origin is not set the {@link Optional#absent()} is returned.
+     */
+    private static Optional<CommandContext> getOriginCommandContext(Event event) {
+        CommandContext commandContext = null;
+        EventContext eventContext = event.getContext();
+
+        while (commandContext == null) {
+            switch (eventContext.getOriginCase()) {
+                case EVENT_CONTEXT:
+                    eventContext = eventContext.getEventContext();
+                    break;
+
+                case COMMAND_CONTEXT:
+                    commandContext = eventContext.getCommandContext();
+                    break;
+
+                case REJECTION_CONTEXT:
+                    commandContext = eventContext.getRejectionContext()
+                                                 .getCommand()
+                                                 .getContext();
+                    break;
+
+                case ORIGIN_NOT_SET:
+                default:
+                    return Optional.absent();
+            }
+        }
+
+        return Optional.of(commandContext);
     }
 
     /**

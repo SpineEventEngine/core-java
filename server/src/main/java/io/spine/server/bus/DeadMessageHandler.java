@@ -17,25 +17,32 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.integration;
 
-import com.google.protobuf.Message;
-import io.spine.server.bus.DeadMessageTap;
+package io.spine.server.bus;
+
+import io.spine.annotation.Internal;
+import io.spine.core.MessageEnvelope;
 
 /**
- * Produces an {@link UnsupportedExternalMessageException} upon capturing an external message,
- * which has no targets to be dispatched to.
+ * A definition of a handler for a dead message.
  *
- * @author Alex Tymchenko
+ * <p> If no target dispatchers are found for a message passed to the bus, it will result in a call
+ * to {@link DeadMessageHandler#handle DeadMessageHandler.handle(MessageEnvelope)}. The method 
+ * produces {@link MessageUnhandled} instance describing the dead message. It may also process the 
+ * given message (e.g. store it into the bus store).
+ *
+ * @author Dmytro Dashenkov
  */
-enum DeadExternalMessageTap implements DeadMessageTap<ExternalMessageEnvelope> {
-    INSTANCE;
+@Internal
+public interface DeadMessageHandler<E extends MessageEnvelope<?, ?, ?>> {
 
-    @Override
-    public UnsupportedExternalMessageException capture(ExternalMessageEnvelope envelope) {
-        final Message message = envelope.getMessage();
-        final UnsupportedExternalMessageException exception =
-                new UnsupportedExternalMessageException(message);
-        return exception;
-    }
+    /**
+     * Handles the dead message in a bus-specific way and produces an {@link MessageUnhandled} 
+     * which may be converted to a {@link Error} for notifying the poster about the absence of
+     * dispatchers.
+     *
+     * @param message the dead message
+     * @return the {@link MessageUnhandled} instance describing the dead message
+     */
+    MessageUnhandled handle(E message);
 }

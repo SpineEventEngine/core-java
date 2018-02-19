@@ -142,7 +142,7 @@ public abstract class Bus<T extends Message,
 
         final Iterable<T> filteredMessages = filter(messages, observer);
         if (!isEmpty(filteredMessages)) {
-            store(messages);
+            store(filteredMessages);
             final Iterable<E> envelopes = transform(filteredMessages, toEnvelope());
             doPost(envelopes, observer);
         }
@@ -162,9 +162,9 @@ public abstract class Bus<T extends Message,
     }
 
     /**
-     * Obtains the instance of {@link DeadMessageTap} for this bus.
+     * Obtains the instance of {@link DeadMessageHandler} for this bus.
      */
-    protected abstract DeadMessageTap<E> getDeadMessageHandler();
+    protected abstract DeadMessageHandler<E> getDeadMessageHandler();
 
     /**
      * Obtains the instance of {@link EnvelopeValidator} for this bus.

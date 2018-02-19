@@ -31,7 +31,7 @@ import io.spine.core.RejectionEnvelope;
 import io.spine.core.Rejections;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.bus.BusFilter;
-import io.spine.server.bus.DeadMessageTap;
+import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.outbus.CommandOutputBus;
 import io.spine.server.outbus.OutputDispatcherRegistry;
@@ -120,8 +120,8 @@ public class RejectionBus extends CommandOutputBus<Rejection,
     }
 
     @Override
-    protected DeadMessageTap<RejectionEnvelope> getDeadMessageHandler() {
-        return DeadRejectionTap.INSTANCE;
+    protected DeadMessageHandler<RejectionEnvelope> getDeadMessageHandler() {
+        return DeadRejectionHandler.INSTANCE;
     }
 
     @Override
@@ -248,14 +248,13 @@ public class RejectionBus extends CommandOutputBus<Rejection,
     }
 
     /**
-     * Generates an {@link UnhandledRejectionException} upon a dead
-     * message.
+     * Generates an {@link UnhandledRejectionException} upon a dead message.
      */
-    private enum DeadRejectionTap implements DeadMessageTap<RejectionEnvelope> {
+    private enum DeadRejectionHandler implements DeadMessageHandler<RejectionEnvelope> {
         INSTANCE;
 
         @Override
-        public UnhandledRejectionException capture(RejectionEnvelope envelope) {
+        public UnhandledRejectionException handle(RejectionEnvelope envelope) {
             final Message message = envelope.getMessage();
             final UnhandledRejectionException exception = new UnhandledRejectionException(message);
             return exception;
