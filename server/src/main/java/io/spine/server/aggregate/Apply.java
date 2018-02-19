@@ -28,13 +28,13 @@ import java.lang.annotation.Target;
 /**
  * Marks a method of an aggregate as one that modifies the state of the aggregate with data
  * from the passed event.
-
+ *
  * <p>As we apply the event to the aggregate state, we call such method <i>Event Applier</i>.
  *
  * <p>An event applier method:
  * <ul>
  *     <li>is annotated with {@link Apply};
- *     <li>is {@code private};
+ *     <li>has package-private visibility;
  *     <li>is {@code void};
  *     <li>accepts an event derived from {@link com.google.protobuf.Message Message}
  *         as the only parameter.

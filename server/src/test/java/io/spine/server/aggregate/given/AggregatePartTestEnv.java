@@ -86,7 +86,7 @@ public class AggregatePartTestEnv {
         }
 
         @Apply
-        private void apply(AggTaskAdded event) {
+        void apply(AggTaskAdded event) {
             getBuilder().setDescription(TASK_DESCRIPTION);
         }
     }
@@ -110,7 +110,7 @@ public class AggregatePartTestEnv {
         }
 
         @Apply
-        private void apply(AggTaskAdded event) {
+        void apply(AggTaskAdded event) {
             getBuilder().setValue("Description value");
         }
     }

@@ -87,7 +87,7 @@ public class EventApplierMethodShould {
 
     @Test
     public void check_method_access_modifier() {
-        final Method method = new ValidApplierButNotPrivate().getMethod();
+        final Method method = new ValidApplierButNotPackagePrivate().getMethod();
 
         factory.checkAccessModifier(method);
     }
@@ -101,7 +101,7 @@ public class EventApplierMethodShould {
 
     @Test
     public void consider_not_private_applier_valid() {
-        final Method method = new ValidApplierButNotPrivate().getMethod();
+        final Method method = new ValidApplierButNotPackagePrivate().getMethod();
 
         assertIsEventApplier(method);
     }
@@ -158,12 +158,12 @@ public class EventApplierMethodShould {
         private RefProjectCreated eventApplied;
 
         @Apply
-        private void apply(RefProjectCreated event) {
+        void apply(RefProjectCreated event) {
             this.eventApplied = event;
         }
     }
 
-    private static class ValidApplierButNotPrivate extends TestEventApplier {
+    private static class ValidApplierButNotPackagePrivate extends TestEventApplier {
         @Apply
         public void apply(RefProjectCreated event) {
         }
