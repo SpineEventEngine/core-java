@@ -81,19 +81,19 @@ public class BoundedContextTestEnv {
         }
 
         @Apply
-        private void event(BcProjectCreated event) {
+        void event(BcProjectCreated event) {
             getBuilder()
                     .setId(event.getProjectId())
                     .setStatus(Project.Status.CREATED);
         }
 
         @Apply
-        private void event(BcTaskAdded event) {
+        void event(BcTaskAdded event) {
             // NOP
         }
 
         @Apply
-        private void event(BcProjectStarted event) {
+        void event(BcProjectStarted event) {
             getBuilder()
                     .setId(event.getProjectId())
                     .setStatus(Project.Status.STARTED)

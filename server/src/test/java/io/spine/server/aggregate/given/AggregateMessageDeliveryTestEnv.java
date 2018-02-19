@@ -144,7 +144,7 @@ public class AggregateMessageDeliveryTestEnv {
 
         @SuppressWarnings("unused")     // an applier is required by the framework.
         @Apply
-        private void the(AggProjectCreated event) {
+        void the(AggProjectCreated event) {
             // do nothing.
         }
 
