@@ -41,6 +41,7 @@ import io.spine.server.event.EventDispatcherDelegate;
 import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.model.Model;
+import io.spine.server.model.ModelClass;
 import io.spine.server.rejection.DelegatingRejectionDispatcher;
 import io.spine.server.rejection.RejectionDispatcherDelegate;
 import io.spine.server.route.CommandRouting;
@@ -48,6 +49,8 @@ import io.spine.server.route.EventProducers;
 import io.spine.server.route.EventRouting;
 import io.spine.server.route.RejectionProducers;
 import io.spine.server.route.RejectionRouting;
+import io.spine.server.sharding.Shardable;
+import io.spine.server.sharding.Sharding;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
@@ -86,7 +89,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         extends Repository<I, A>
         implements CommandDispatcher<I>,
                    EventDispatcherDelegate<I>,
-                   RejectionDispatcherDelegate<I> {
+                   RejectionDispatcherDelegate<I>,
+                   Shardable<A> {
 
     /** The default number of events to be stored before a next snapshot is made. */
     static final int DEFAULT_SNAPSHOT_TRIGGER = 100;
@@ -574,5 +578,15 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     protected AggregateEndpointDelivery<I, A, CommandEnvelope> getCommandEndpointDelivery() {
         return AggregateCommandDelivery.directDelivery(this);
+    }
+
+    @Override
+    public Sharding.Strategy getShardingStrategy() {
+        return Sharding.Strategy.ALL_TARGETS_OF_TYPE;
+    }
+
+    @Override
+    public ModelClass<A> getModelClass() {
+        return aggregateClass();
     }
 }

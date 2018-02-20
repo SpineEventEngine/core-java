@@ -31,12 +31,19 @@ public class ShardingKey implements Serializable {
     private static final long serialVersionUID = 0L;
 
     private final ModelClass<?> modelClass;
+    private final IdPredicate idPredicate;
 
-    ShardingKey(ModelClass<?> modelClass) {
+
+    ShardingKey(ModelClass<?> modelClass, IdPredicate idPredicate) {
         this.modelClass = modelClass;
+        this.idPredicate = idPredicate;
     }
 
     public ModelClass<?> getModelClass() {
         return modelClass;
+    }
+
+    public IdPredicate getIdPredicate() {
+        return idPredicate;
     }
 }

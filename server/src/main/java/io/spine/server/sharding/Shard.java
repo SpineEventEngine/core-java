@@ -19,8 +19,27 @@
  */
 package io.spine.server.sharding;
 
+import io.spine.server.integration.ChannelId;
+
 /**
  * @author Alex Tymchenko
  */
 public class Shard {
+
+    private final ShardingKey key;
+
+    private final ChannelId channelId;
+
+    public Shard(ShardingKey key, ChannelId channelId) {
+        this.key = key;
+        this.channelId = channelId;
+    }
+
+    public ShardingKey getKey() {
+        return key;
+    }
+
+    public ChannelId getChannelId() {
+        return channelId;
+    }
 }

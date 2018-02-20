@@ -24,9 +24,9 @@ import io.spine.server.model.ModelClass;
 /**
  * @author Alex Tymchenko
  */
-public interface Shardable {
+public interface Shardable<E> {
 
-    Sharding.Strategy getStrategy();
+    Sharding.Strategy getShardingStrategy();
 
-    ModelClass<?> getModelClass();
+    ModelClass<E> getModelClass();
 }
