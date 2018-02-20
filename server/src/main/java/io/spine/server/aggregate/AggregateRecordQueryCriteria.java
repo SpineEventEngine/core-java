@@ -25,8 +25,8 @@ import static io.spine.validate.Validate.checkPositive;
 /**
  * Specifies the filtering criteria for {@link AggregateEventRecord} queries.
  * 
- * <p>A result of executing such a query is a {@linkplain java.util.List<AggregateEventRecord>} which 
- * satisfies the query criteria.
+ * <p>A result of executing such a query is a list of {@linkplain AggregateEventRecord records} 
+ * which satisfy the query criteria.
  *
  * @author Mykhailo Drachuk
  */

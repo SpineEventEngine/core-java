@@ -34,8 +34,8 @@ import static java.lang.String.format;
 /**
  * Reports an attempt to dispatch a command more than once.
  *
- * <p>A command is considered a duplicate when its ID matches the ID of a command 
- * already dispatched.
+ * <p>A command is considered a duplicate when its ID matches the ID of a command which was
+ * already dispatched emitting events in a target aggregate.
  *
  * @author Mykhailo Drachuk
  */
@@ -49,17 +49,24 @@ public class DuplicateCommandException extends CommandException implements Messa
 
     /**
      * Creates an exception for a duplicate command.
+     *
+     * @param command the duplicate command
+     * @return a newly constructed {@link DuplicateCommandException} instance
      */
     public static DuplicateCommandException of(Command command) {
         final CommandEnvelope envelope = CommandEnvelope.of(command);
         final Message commandMessage = envelope.getMessage();
-        final String errMsg = errorMessage(envelope);
-        final Error error = error(commandMessage, errMsg);
-        return new DuplicateCommandException(errMsg, command, error);
+        final String errorMessage = errorMessage(envelope);
+        final Error error = error(commandMessage, errorMessage);
+        return new DuplicateCommandException(errorMessage, command, error);
     }
 
     /**
      * Creates a duplicate command error.
+     *
+     * @param commandMessage the domain message that ended up a duplicate
+     * @param errorText      the text to be set as the error message
+     * @return a newly constructed {@link Error} instance
      */
     public static Error error(Message commandMessage, String errorText) {
         final Error.Builder error =
@@ -73,6 +80,9 @@ public class DuplicateCommandException extends CommandException implements Messa
 
     /**
      * Generates a formatted duplicate command error message.
+     *
+     * @param envelope the envelope with a command which is considered a duplicate
+     * @return a string with details on what happened
      */
     private static String errorMessage(CommandEnvelope envelope) {
         return format(

@@ -438,7 +438,7 @@ public abstract class Aggregate<I,
      * 
      * <p>The iterator is empty if there's no history for the aggregate.
      *
-     * @param  criteria specifies the filters the data should pass and how the query 
+     * @param  criteria specifies the filters the returned data should pass and how the query 
      *                  should be performed
      * @return new iterator instance
      */
