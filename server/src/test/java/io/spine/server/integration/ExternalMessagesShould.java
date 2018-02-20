@@ -21,6 +21,7 @@ package io.spine.server.integration;
 
 import com.google.common.testing.NullPointerTester;
 import io.spine.core.BoundedContextName;
+import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.Rejection;
 import org.junit.Test;
@@ -44,6 +45,7 @@ public class ExternalMessagesShould {
                 .setDefault(BoundedContextName.class, BoundedContextName.getDefaultInstance())
                 .setDefault(Event.class, Event.getDefaultInstance())
                 .setDefault(Rejection.class, Rejection.getDefaultInstance())
+                .setDefault(Command.class, Command.getDefaultInstance())
                 .setDefault(RequestForExternalMessages.class,
                             RequestForExternalMessages.getDefaultInstance())
                 .testStaticMethods(ExternalMessages.class, PACKAGE);
