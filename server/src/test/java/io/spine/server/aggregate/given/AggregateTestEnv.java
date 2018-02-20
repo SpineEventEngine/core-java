@@ -237,7 +237,10 @@ public class AggregateTestEnv {
         }
     }
 
-    public static class TaskAggregateRepository
+    /**
+     * A repository that manages {@link TaskAggregate} instances.
+     */
+    private static class TaskAggregateRepository
             extends AggregateRepository<AggTaskId, TaskAggregate> { }
 
     /**
