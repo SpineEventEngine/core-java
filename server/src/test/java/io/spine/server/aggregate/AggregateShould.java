@@ -87,6 +87,7 @@ import static io.spine.server.TestEventClasses.assertContains;
 import static io.spine.server.TestEventClasses.getEventClasses;
 import static io.spine.server.aggregate.AggregateMessageDispatcher.dispatchCommand;
 import static io.spine.server.aggregate.given.AggregateTestEnv.UserAggregate;
+import static io.spine.server.aggregate.given.AggregateTestEnv.getRootCommandId;
 import static io.spine.server.aggregate.given.AggregateTestEnv.newRequestFactory;
 import static io.spine.server.aggregate.given.AggregateTestEnv.newTenantId;
 import static io.spine.server.aggregate.given.Given.EventMessage.projectCancelled;
@@ -651,10 +652,10 @@ public class AggregateShould {
 
         final Iterator<AggregateEventRecord> history = aggregate.historyBackward(query);
 
-        assertEquals(startCommand.getId(), AggregateTestEnv.getRootCommandId(history.next()));
-        assertEquals(addTaskCommand2.getId(), AggregateTestEnv.getRootCommandId(history.next()));
-        assertEquals(addTaskCommand.getId(), AggregateTestEnv.getRootCommandId(history.next()));
-        assertEquals(createCommand.getId(), AggregateTestEnv.getRootCommandId(history.next()));
+        assertEquals(startCommand.getId(), getRootCommandId(history.next()));
+        assertEquals(addTaskCommand2.getId(), getRootCommandId(history.next()));
+        assertEquals(addTaskCommand.getId(), getRootCommandId(history.next()));
+        assertEquals(createCommand.getId(), getRootCommandId(history.next()));
         assertFalse(history.hasNext());
     }
 
@@ -677,9 +678,9 @@ public class AggregateShould {
 
         final Iterator<AggregateEventRecord> history = aggregate.historyBackward(query);
 
-        assertEquals(addTaskCommand2.getId(), AggregateTestEnv.getRootCommandId(history.next()));
-        assertEquals(startCommand.getId(), AggregateTestEnv.getRootCommandId(history.next()));
-        assertEquals(addTaskCommand.getId(), AggregateTestEnv.getRootCommandId(history.next()));
+        assertEquals(addTaskCommand2.getId(), getRootCommandId(history.next()));
+        assertEquals(startCommand.getId(), getRootCommandId(history.next()));
+        assertEquals(addTaskCommand.getId(), getRootCommandId(history.next()));
         assertFalse(history.hasNext());
     }
 
@@ -704,7 +705,7 @@ public class AggregateShould {
 
         final Iterator<AggregateEventRecord> history = aggregate.historyBackward(query);
 
-        assertEquals(addTaskCommand2.getId(), AggregateTestEnv.getRootCommandId(history.next()));
+        assertEquals(addTaskCommand2.getId(), getRootCommandId(history.next()));
         assertFalse(history.hasNext());
     }
 
