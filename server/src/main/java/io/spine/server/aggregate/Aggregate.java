@@ -395,11 +395,11 @@ public abstract class Aggregate<I,
      * @return the list of events
      */
     List<Event> commitEvents() {
-        final List<Event> events = ImmutableList.copyOf(uncommittedEvents);
+        final List<Event> result = ImmutableList.copyOf(uncommittedEvents);
         uncommittedEvents.clear();
-        final List<AggregateEventRecord> records = toAggregateEventRecords(events);
+        final List<AggregateEventRecord> records = toAggregateEventRecords(result);
         historySinceLastSnapshot.addAll(records);
-        return events;
+        return result;
     }
 
     /**
