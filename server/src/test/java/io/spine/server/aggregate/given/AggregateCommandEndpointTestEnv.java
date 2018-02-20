@@ -89,7 +89,8 @@ public class AggregateCommandEndpointTestEnv {
 
         @Apply
         void apply(AggTaskAdded event) {
-            getBuilder().setId(event.getProjectId());
+            getBuilder().setId(event.getProjectId())
+                        .addTask(event.getTask());
         }
 
         @Assign
