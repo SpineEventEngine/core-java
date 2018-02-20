@@ -20,8 +20,15 @@
 
 package io.spine.server.aggregate.given;
 
+import io.spine.client.TestActorRequestFactory;
 import io.spine.core.CommandContext;
+import io.spine.core.CommandId;
+import io.spine.core.Event;
+import io.spine.core.Events;
+import io.spine.core.TenantId;
 import io.spine.server.aggregate.Aggregate;
+import io.spine.server.aggregate.AggregateEventRecord;
+import io.spine.server.aggregate.AggregateShould;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.test.aggregate.Project;
@@ -33,6 +40,7 @@ import io.spine.test.aggregate.event.AggProjectCreated;
 import io.spine.test.aggregate.user.User;
 import io.spine.test.aggregate.user.UserVBuilder;
 
+import static io.spine.Identifier.newUuid;
 import static io.spine.server.aggregate.given.Given.EventMessage.projectCreated;
 
 /**
@@ -42,6 +50,21 @@ public class AggregateTestEnv {
 
     private AggregateTestEnv() {
         // Prevent instantiation of this utility class.
+    }
+
+    public static TenantId newTenantId() {
+        return TenantId.newBuilder()
+                       .setValue(newUuid())
+                       .build();
+    }
+
+    public static TestActorRequestFactory newRequestFactory(TenantId tenantId) {
+        return TestActorRequestFactory.newInstance(AggregateShould.class, tenantId);
+    }
+
+    public static CommandId getRootCommandId(AggregateEventRecord record) {
+        final Event event = record.getEvent();
+        return Events.getRootCommandId(event);
     }
 
     /**
