@@ -92,6 +92,7 @@ import static io.spine.server.aggregate.AggregateMessageDispatcher.dispatchComma
 import static io.spine.server.aggregate.given.AggregateTestEnv.assignTask;
 import static io.spine.server.aggregate.given.AggregateTestEnv.createTask;
 import static io.spine.server.aggregate.given.AggregateTestEnv.newTaskBoundedContext;
+import static io.spine.server.aggregate.given.AggregateTestEnv.newTenantId;
 import static io.spine.server.aggregate.given.AggregateTestEnv.readAllEvents;
 import static io.spine.server.aggregate.given.AggregateTestEnv.reassignTask;
 import static io.spine.server.aggregate.given.AggregateTestEnv.typeUrlOf;
@@ -644,7 +645,7 @@ public class AggregateShould {
     public void create_single_event_for_a_pair_of_events_with_empty_for_a_command_dispatch() {
         final BoundedContext boundedContext = newTaskBoundedContext();
 
-        final TenantId tenantId = AggregateTestEnv.newTenantId();
+        final TenantId tenantId = newTenantId();
         final Command command = command(createTask(), tenantId);
         final MemoizingObserver<Ack> observer = memoizingObserver();
 
@@ -681,7 +682,7 @@ public class AggregateShould {
     public void create_single_event_for_a_pair_of_events_with_empty_for_an_event_react() {
         final BoundedContext boundedContext = newTaskBoundedContext();
 
-        final TenantId tenantId = AggregateTestEnv.newTenantId();
+        final TenantId tenantId = newTenantId();
         final Command command = command(assignTask(), tenantId);
         final MemoizingObserver<Ack> observer = memoizingObserver();
 
@@ -724,7 +725,7 @@ public class AggregateShould {
     public void create_single_event_for_a_pair_of_events_with_empty_for_a_rejection_react() {
         final BoundedContext boundedContext = newTaskBoundedContext();
 
-        final TenantId tenantId = AggregateTestEnv.newTenantId();
+        final TenantId tenantId = newTenantId();
         final Command command = command(reassignTask(), tenantId);
         final MemoizingObserver<Ack> observer = memoizingObserver();
 
