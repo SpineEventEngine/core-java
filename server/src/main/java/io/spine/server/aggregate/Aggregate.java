@@ -20,6 +20,7 @@
 package io.spine.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
@@ -124,8 +125,6 @@ public abstract class Aggregate<I,
                                 B extends ValidatingBuilder<S, ? extends Message.Builder>>
                 extends CommandHandlingEntity<I, S, B> {
 
-    private static final Empty EMPTY = Empty.getDefaultInstance();
-
     /**
      * Events generated in the process of handling commands that were not yet committed.
      *
@@ -199,7 +198,7 @@ public abstract class Aggregate<I,
         final CommandHandlerMethod method = thisClass().getHandler(command.getMessageClass());
         final List<? extends Message> messages =
                 method.invoke(this, command.getMessage(), command.getCommandContext());
-        return filterEmpty(messages);
+        return EmptyFilter.INSTANCE.apply(messages);
     }
 
     /**
@@ -215,7 +214,7 @@ public abstract class Aggregate<I,
         final EventReactorMethod method = thisClass().getReactor(event.getMessageClass());
         final List<? extends Message> messages =
                 method.invoke(this, event.getMessage(), event.getEventContext());
-        return filterEmpty(messages);
+        return EmptyFilter.INSTANCE.apply(messages);
     }
 
     /**
@@ -232,24 +231,7 @@ public abstract class Aggregate<I,
         final RejectionReactorMethod method = thisClass().getReactor(rejection.getMessageClass());
         final List<? extends Message> messages =
                 method.invoke(this, rejection.getMessage(), rejection.getRejectionContext());
-        return filterEmpty(messages);
-    }
-
-    /**
-     * Creates a new list without {@link Empty} messages.
-     *
-     * @param  messages a list of messages to be filtered
-     * @return a new list with all the items of the passed {@code messages}
-     *         except for {@link Empty}
-     */
-    private static List<? extends Message> filterEmpty(Collection<? extends Message> messages) {
-        final ImmutableList.Builder<Message> list = ImmutableList.builder();
-        for (Message message : messages) {
-            if (!message.equals(EMPTY)) {
-                list.add(message);
-            }
-        }
-        return list.build();
+        return EmptyFilter.INSTANCE.apply(messages);
     }
 
     /**
@@ -449,5 +431,29 @@ public abstract class Aggregate<I,
     @VisibleForTesting
     protected int versionNumber() {
         return super.versionNumber();
+    }
+    
+    private enum EmptyFilter implements Function<Collection<? extends Message>, List<? extends Message>> {
+        INSTANCE;
+
+        private static final Empty EMPTY = Empty.getDefaultInstance();
+
+        /**
+         * Creates a new collection without {@link Empty} messages.
+         *
+         * @param  messages a list of messages to be filtered
+         * @return a new list with all the items of the passed {@code messages}
+         *         except for {@link Empty}
+         */
+        @Override
+        public List<? extends Message> apply(Collection<? extends Message> messages) {
+            final ImmutableList.Builder<Message> list = ImmutableList.builder();
+            for (Message message : messages) {
+                if (!message.equals(EMPTY)) {
+                    list.add(message);
+                }
+            }
+            return list.build();
+        }
     }
 }
