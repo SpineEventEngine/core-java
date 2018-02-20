@@ -25,6 +25,7 @@ import com.google.protobuf.StringValue;
 import io.spine.Identifier;
 import io.spine.annotation.Internal;
 import io.spine.core.BoundedContextName;
+import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.Rejection;
 import io.spine.protobuf.AnyPacker;
@@ -51,9 +52,19 @@ public final class ExternalMessages {
      */
     public static ExternalMessage of(Event event, BoundedContextName boundedContextName) {
         checkNotNull(event);
+        checkNotNull(boundedContextName);
 
         final ExternalMessage result = of(event.getId(), event, boundedContextName);
         return result;
+    }
+
+    public static ExternalMessage of(Command command, BoundedContextName boundedContextName) {
+        checkNotNull(command);
+        checkNotNull(boundedContextName);
+
+        final ExternalMessage result = of(command.getId(), command, boundedContextName);
+        return result;
+
     }
 
     /**
