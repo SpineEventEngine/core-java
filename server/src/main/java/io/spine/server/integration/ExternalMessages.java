@@ -76,6 +76,7 @@ public final class ExternalMessages {
      */
     static ExternalMessage of(Rejection rejection, BoundedContextName boundedContextName) {
         checkNotNull(rejection);
+        checkNotNull(boundedContextName);
 
         final ExternalMessage result = of(rejection.getId(), rejection, boundedContextName);
         return result;
@@ -91,6 +92,8 @@ public final class ExternalMessages {
     static ExternalMessage of(RequestForExternalMessages request,
                               BoundedContextName boundedContextName) {
         checkNotNull(request);
+        checkNotNull(boundedContextName);
+
         final String idString = Identifier.newUuid();
         final ExternalMessage result = of(StringValue.newBuilder()
                                                      .setValue(idString)
