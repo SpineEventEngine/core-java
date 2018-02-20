@@ -198,7 +198,7 @@ public abstract class Aggregate<I,
         final CommandHandlerMethod method = thisClass().getHandler(command.getMessageClass());
         final List<? extends Message> messages =
                 method.invoke(this, command.getMessage(), command.getCommandContext());
-        return EmptyFilter.INSTANCE.apply(messages);
+        return emptyFilter().apply(messages);
     }
 
     /**
@@ -214,7 +214,7 @@ public abstract class Aggregate<I,
         final EventReactorMethod method = thisClass().getReactor(event.getMessageClass());
         final List<? extends Message> messages =
                 method.invoke(this, event.getMessage(), event.getEventContext());
-        return EmptyFilter.INSTANCE.apply(messages);
+        return emptyFilter().apply(messages);
     }
 
     /**
@@ -231,7 +231,7 @@ public abstract class Aggregate<I,
         final RejectionReactorMethod method = thisClass().getReactor(rejection.getMessageClass());
         final List<? extends Message> messages =
                 method.invoke(this, rejection.getMessage(), rejection.getRejectionContext());
-        return EmptyFilter.INSTANCE.apply(messages);
+        return emptyFilter().apply(messages);
     }
 
     /**
@@ -432,14 +432,26 @@ public abstract class Aggregate<I,
     protected int versionNumber() {
         return super.versionNumber();
     }
-    
-    private enum EmptyFilter implements Function<Collection<? extends Message>, List<? extends Message>> {
+
+    /**
+     * @return an instance of an {@linkplain EmptyFilter empty filter}
+     */
+    private static EmptyFilter emptyFilter() {
+        return EmptyFilter.INSTANCE;
+    }
+
+    /**
+     * Removes all {@linkplain Empty empty} messages from a collection.
+     */
+    private enum EmptyFilter implements Function<Collection<? extends Message>, 
+                                                 List<? extends Message>> {
         INSTANCE;
 
         private static final Empty EMPTY = Empty.getDefaultInstance();
 
         /**
-         * Creates a new collection without {@linkplain Empty empty} messages.
+         * Creates a new list copying all the elements of a collection except for
+         * {@linkplain Empty empty}.
          *
          * @param  messages a list of messages to be filtered
          * @return a new list with all the items of the passed {@code messages}
