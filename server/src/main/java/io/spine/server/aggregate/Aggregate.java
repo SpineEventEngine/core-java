@@ -187,7 +187,7 @@ public abstract class Aggregate<I,
     /**
      * Obtains a method for the passed command and invokes it.
      *
-     * <p>All the {@link Empty} messages are filtered out from the result.
+     * <p>All the {@linkplain Empty empty} messages are filtered out from the result.
      * 
      * @param  command the envelope with the command to dispatch
      * @return a list with event messages that the aggregate produces in reaction to the event or
@@ -204,7 +204,7 @@ public abstract class Aggregate<I,
     /**
      * Dispatches the event on which the aggregate reacts.
      *
-     * <p>All the {@link Empty} messages are filtered out from the result.
+     * <p>All the {@linkplain Empty empty} messages are filtered out from the result.
      *
      * @param  event the envelope with the event to dispatch
      * @return a list with event messages that the aggregate produces in reaction to the event or
@@ -220,7 +220,7 @@ public abstract class Aggregate<I,
     /**
      * Dispatches the rejection to which the aggregate reacts.
      * 
-     * <p>All the {@link Empty} messages are filtered out from the result.
+     * <p>All the {@linkplain Empty empty} messages are filtered out from the result.
      *
      * @param  rejection the envelope with the rejection
      * @return a list with event messages that the aggregate produces in reaction to
@@ -439,7 +439,7 @@ public abstract class Aggregate<I,
         private static final Empty EMPTY = Empty.getDefaultInstance();
 
         /**
-         * Creates a new collection without {@link Empty} messages.
+         * Creates a new collection without {@linkplain Empty empty} messages.
          *
          * @param  messages a list of messages to be filtered
          * @return a new list with all the items of the passed {@code messages}

@@ -634,7 +634,7 @@ public class AggregateShould {
     }
 
     /**
-     * Ensures that a {@link io.spine.server.tuple.Pair} with an empty second optional value
+     * Ensures that a {@linkplain io.spine.server.tuple.Pair pair} with an empty second optional value
      * returned from a command handler stores a single event.
      *
      * <p>The command handler that should return a pair is
@@ -669,7 +669,7 @@ public class AggregateShould {
     }
 
     /**
-     * Ensures that a {@link io.spine.server.tuple.Pair} with an empty second optional value
+     * Ensures that a {@linkplain io.spine.server.tuple.Pair pair} with an empty second optional value
      * returned from a reaction on an event stores a single event.
      *
      * <p>The first event is produced while handling a command by the
@@ -714,7 +714,7 @@ public class AggregateShould {
     }
 
     /**
-     * Ensures that a {@link io.spine.server.tuple.Pair} with an empty second optional value
+     * Ensures that a {@linkplain io.spine.server.tuple.Pair pair} with an empty second optional value
      * returned from a reaction on a rejection stores a single event.
      *
      * <p>The rejection is fired by the {@link io.spine.server.aggregate.given.AggregateTestEnv.TaskAggregate#handle(AggReassignTask, CommandContext)}

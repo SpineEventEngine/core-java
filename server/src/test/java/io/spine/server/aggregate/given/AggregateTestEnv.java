@@ -241,8 +241,8 @@ public class AggregateTestEnv {
             extends AggregateRepository<AggTaskId, TaskAggregate> { }
 
     /**
-     * An aggregate that fires a {@link Pair} with an optional upon handling a command, an event
-     * or a rejection.
+     * An aggregate that fires a {@linkplain Pair pair} with an optional upon handling a command, 
+     * an event or a rejection.
      *
      * @see io.spine.server.aggregate.AggregateShould#create_single_event_for_a_pair_of_events_with_empty_for_a_command_dispatch
      * @see io.spine.server.aggregate.AggregateShould#create_single_event_for_a_pair_of_events_with_empty_for_an_event_react
@@ -260,11 +260,10 @@ public class AggregateTestEnv {
          * A command handler that returns a pair with an optional second element.
          *
          * <p>{@link AggTaskAssigned} is present when the command contains an
-         * {@link AggCreateTask#getAssignee()}.
+         * {@link AggCreateTask#getAssignee() assignee}.
          */
         @Assign
-        Pair<AggTaskCreated, Optional<AggTaskAssigned>> handle(AggCreateTask command,
-                                                               CommandContext context) {
+        Pair<AggTaskCreated, Optional<AggTaskAssigned>> handle(AggCreateTask command) {
             final AggTaskId id = command.getTaskId();
             final AggTaskCreated createdEvent = taskCreated(id);
 
@@ -282,7 +281,7 @@ public class AggregateTestEnv {
 
         /**
          * Creates a new {@link AggTaskAssigned} event message with provided values. If the
-         * {@link UserId} is a default empty instance returns {@code null}ю
+         * {@link UserId assignee} is a default empty instance returns {@code null}.
          */
         @Nullable
         private static AggTaskAssigned taskAssignedOrNull(AggTaskId id, UserId assignee) {
@@ -299,7 +298,7 @@ public class AggregateTestEnv {
         }
 
         @Assign
-        AggTaskAssigned handle(AggAssignTask command, CommandContext context) {
+        AggTaskAssigned handle(AggAssignTask command) {
             final AggTaskId id = command.getTaskId();
             final UserId newAssignee = command.getAssignee();
             final UserId previousAssignee = getState().getAssignee();
@@ -309,7 +308,7 @@ public class AggregateTestEnv {
         }
 
         @Assign
-        AggTaskAssigned handle(AggReassignTask command, CommandContext context)
+        AggTaskAssigned handle(AggReassignTask command)
                 throws AggCannotReassignUnassignedTask {
             final AggTaskId id = command.getTaskId();
             final UserId newAssignee = command.getAssignee();
