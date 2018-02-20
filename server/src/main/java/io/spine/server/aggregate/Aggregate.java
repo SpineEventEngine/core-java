@@ -49,6 +49,7 @@ import java.util.Collection;
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
@@ -264,8 +265,7 @@ public abstract class Aggregate<I,
         final List<Event> events = aggregateStateRecord.getEventList();
 
         play(events);
-        final List<AggregateEventRecord> records = toAggregateEventRecords(events);
-        historySinceLastSnapshot.addAll(records);
+        addToHistory(events);
     }
 
     /**
@@ -397,9 +397,20 @@ public abstract class Aggregate<I,
     List<Event> commitEvents() {
         final List<Event> result = ImmutableList.copyOf(uncommittedEvents);
         uncommittedEvents.clear();
-        final List<AggregateEventRecord> records = toAggregateEventRecords(result);
-        historySinceLastSnapshot.addAll(records);
+        addToHistory(result);
         return result;
+    }
+
+    /**
+     * Adds events to the aggregate history.
+     *
+     *  @param events the list of the events
+     */
+    private void addToHistory(Collection<Event> events) {
+        final List<AggregateEventRecord> records = toAggregateEventRecords(events);
+        for (AggregateEventRecord record : records) {
+            historySinceLastSnapshot.addFirst(record);
+        }
     }
 
     /**
