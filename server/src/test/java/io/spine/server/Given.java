@@ -223,7 +223,7 @@ public class Given {
         }
 
         @Apply
-        private void event(AggProjectCreated event) {
+        void event(AggProjectCreated event) {
             getBuilder()
                     .setId(event.getProjectId())
                     .setStatus(Status.CREATED)
@@ -231,11 +231,11 @@ public class Given {
         }
 
         @Apply
-        private void event(AggTaskAdded event) {
+        void event(AggTaskAdded event) {
         }
 
         @Apply
-        private void event(AggProjectStarted event) {
+        void event(AggProjectStarted event) {
             getBuilder()
                     .setId(event.getProjectId())
                     .setStatus(Status.STARTED)
@@ -269,7 +269,7 @@ public class Given {
         }
 
         @Apply
-        private void event(CustomerCreated event) {
+        void event(CustomerCreated event) {
             getBuilder().mergeFrom(event.getCustomer());
         }
     }
