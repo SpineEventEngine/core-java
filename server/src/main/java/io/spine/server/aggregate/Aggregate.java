@@ -121,6 +121,7 @@ import static java.lang.Integer.MAX_VALUE;
  * @param <I> the type for IDs of this class of aggregates
  * @param <S> the type of the state held by the aggregate
  * @param <B> the type of the aggregate state builder
+ *
  * @author Alexander Yevsyukov
  * @author Alexander Litus
  * @author Mikhail Melnik
