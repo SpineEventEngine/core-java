@@ -605,6 +605,41 @@ public class AggregateShould {
                                                               .withState(user)
                                                               .build();
     }
+    
+    @Test
+    public void traverse_the_history_iterating_through_newest_events_first() {
+        
+    }
+
+    @Test
+    public void traverse_the_history_for_the_specified_batch_size_only() {
+
+    }
+
+    @Test
+    public void traverse_the_history_up_to_the_latest_snapshot() {
+
+    }
+    
+    @Test
+    public void return_true_when_the_command_was_handled_since_last_snapshot() {
+        
+    }
+
+    @Test
+    public void return_false_when_the_command_was_handled_but_the_snapshot_was_made() {
+
+    }
+
+    @Test
+    public void return_false_if_the_command_was_not_handled() {
+
+    }
+
+    @Test
+    public void return_false_if_another_command_was_handled() {
+
+    }
 
     /**
      * Helper class for invoking {@link Aggregate#play(AggregateStateRecord)}.
