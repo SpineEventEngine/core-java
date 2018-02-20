@@ -638,7 +638,7 @@ public class AggregateShould {
      * returned from a command handler stores a single event.
      *
      * <p>The command handler that should return a pair is
-     * {@link io.spine.server.aggregate.given.AggregateTestEnv.TaskAggregate#handle(AggAssignTask, CommandContext)}.
+     * {@link io.spine.server.aggregate.given.AggregateTestEnv.TaskAggregate#handle(AggAssignTask) TaskAggregate#handle(AggAssignTask)}.
      */
     @Test
     public void create_single_event_for_a_pair_of_events_with_empty_for_a_command_dispatch() {
@@ -673,9 +673,9 @@ public class AggregateShould {
      * returned from a reaction on an event stores a single event.
      *
      * <p>The first event is produced while handling a command by the
-     * {@link io.spine.server.aggregate.given.AggregateTestEnv.TaskAggregate#handle(AggAssignTask, CommandContext)}.
+     * {@link io.spine.server.aggregate.given.AggregateTestEnv.TaskAggregate#handle(AggAssignTask) TaskAggregate#handle(AggAssignTask)}.
      * Then as a reaction to this event a single event should be fired as part of the pair by
-     * {@link io.spine.server.aggregate.given.AggregateTestEnv.TaskAggregate#on(AggTaskAssigned)}.
+     * {@link io.spine.server.aggregate.given.AggregateTestEnv.TaskAggregate#on(AggTaskAssigned) TaskAggregate#on(AggTaskAssigned)}.
      */
     @Test
     public void create_single_event_for_a_pair_of_events_with_empty_for_an_event_react() {
@@ -717,8 +717,8 @@ public class AggregateShould {
      * Ensures that a {@linkplain io.spine.server.tuple.Pair pair} with an empty second optional value
      * returned from a reaction on a rejection stores a single event.
      *
-     * <p>The rejection is fired by the {@link io.spine.server.aggregate.given.AggregateTestEnv.TaskAggregate#handle(AggReassignTask, CommandContext)}
-     * and handled by the {@link io.spine.server.aggregate.given.AggregateTestEnv.TaskAggregate#on(Rejections.AggCannotReassignUnassignedTask)}.
+     * <p>The rejection is fired by the {@link io.spine.server.aggregate.given.AggregateTestEnv.TaskAggregate#handle(AggReassignTask) TaskAggregate#handle(AggReassignTask)}
+     * and handled by the {@link io.spine.server.aggregate.given.AggregateTestEnv.TaskAggregate#on(Rejections.AggCannotReassignUnassignedTask) TaskAggregate#on(AggCannotReassignUnassignedTask)}.
      */
     @Test
     public void create_single_event_for_a_pair_of_events_with_empty_for_a_rejection_react() {
