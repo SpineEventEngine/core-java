@@ -120,7 +120,8 @@ public class AggregateTestEnv {
     }
 
     /**
-     * Creates a new multitenant bounded context with a registered {@link TaskAggregateRepository}.
+     * Creates a new multitenant bounded context with a registered 
+     * {@linkplain TaskAggregateRepository task repository}.
      */
     public static BoundedContext newTaskBoundedContext() {
         final BoundedContext boundedContext = BoundedContext.newBuilder()
@@ -263,7 +264,7 @@ public class AggregateTestEnv {
          * A command handler that returns a pair with an optional second element.
          *
          * <p>{@link AggTaskAssigned} is present when the command contains an
-         * {@link AggCreateTask#getAssignee() assignee}.
+         * {@linkplain AggCreateTask#getAssignee() assignee}.
          */
         @Assign
         Pair<AggTaskCreated, Optional<AggTaskAssigned>> handle(AggCreateTask command) {
@@ -284,7 +285,7 @@ public class AggregateTestEnv {
 
         /**
          * Creates a new {@link AggTaskAssigned} event message with provided values. If the
-         * {@link UserId assignee} is a default empty instance returns {@code null}.
+         * {@linkplain UserId assignee} is a default empty instance returns {@code null}.
          */
         @Nullable
         private static AggTaskAssigned taskAssignedOrNull(AggTaskId id, UserId assignee) {
