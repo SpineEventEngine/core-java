@@ -20,6 +20,7 @@
 
 package io.spine.server.command.given;
 
+import com.google.protobuf.Message;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.spine.client.TestActorRequestFactory;
@@ -80,7 +81,12 @@ public class DuplicateCommandTestEnv {
                         .build();
     }
 
-    public static TestActorRequestFactory newRequestFactory(TenantId tenantId) {
+    public static Command command(Message commandMessage, TenantId tenantId) {
+        return newRequestFactory(tenantId).command()
+                                          .create(commandMessage);
+    }
+
+    private static TestActorRequestFactory newRequestFactory(TenantId tenantId) {
         return TestActorRequestFactory.newInstance(AggregateShould.class, tenantId);
     }
 
@@ -153,7 +159,7 @@ public class DuplicateCommandTestEnv {
 
         /**
          * Posts the provided command to a remote server.
-         * 
+         *
          * @param command a command to be posted to the server
          * @return acknowledgement of the command dispatch
          */
@@ -174,7 +180,7 @@ public class DuplicateCommandTestEnv {
     }
 
     /**
-     * A test implementation of a server accepting commands with a registered 
+     * A test implementation of a server accepting commands with a registered
      * {@link DCmdProjectAggregateRepository project repository}.
      */
     public static class TestServer {
@@ -207,6 +213,7 @@ public class DuplicateCommandTestEnv {
 
         /**
          * Starts the gRPC container.
+         *
          * @throws IOException if unable to bind to a port
          */
         public void start() throws IOException {

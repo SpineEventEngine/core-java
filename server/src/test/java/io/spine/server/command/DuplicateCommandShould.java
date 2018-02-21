@@ -20,12 +20,12 @@
 
 package io.spine.server.command;
 
-import com.google.protobuf.Message;
 import io.spine.base.Error;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.Status;
 import io.spine.core.TenantId;
+import io.spine.server.command.given.DuplicateCommandTestEnv;
 import io.spine.server.command.given.DuplicateCommandTestEnv.TestClient;
 import io.spine.server.command.given.DuplicateCommandTestEnv.TestServer;
 import io.spine.server.commandbus.DuplicateCommandException;
@@ -35,8 +35,8 @@ import org.junit.Test;
 
 import static io.spine.client.ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT;
 import static io.spine.server.command.given.DuplicateCommandTestEnv.SERVICE_HOST;
+import static io.spine.server.command.given.DuplicateCommandTestEnv.command;
 import static io.spine.server.command.given.DuplicateCommandTestEnv.createProject;
-import static io.spine.server.command.given.DuplicateCommandTestEnv.newRequestFactory;
 import static io.spine.server.command.given.DuplicateCommandTestEnv.newTenantId;
 import static io.spine.server.command.given.DuplicateCommandTestEnv.runServer;
 import static org.junit.Assert.assertEquals;
@@ -62,11 +62,6 @@ public class DuplicateCommandShould {
     public void tearDown() throws Exception {
         client.shutdown();
         server.shutdown();
-    }
-
-    private static Command command(Message commandMessage, TenantId tenantId) {
-        return newRequestFactory(tenantId).command()
-                                          .create(commandMessage);
     }
 
     @Test
