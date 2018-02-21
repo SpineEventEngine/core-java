@@ -49,7 +49,6 @@ import java.util.Collection;
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
