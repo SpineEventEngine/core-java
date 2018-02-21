@@ -791,7 +791,7 @@ public class AggregateShould {
         }
     }
 
-    private static class TestAggregateRepository 
+    private static class TestAggregateRepository
             extends AggregateRepository<ProjectId, TestAggregate> {
     }
 
