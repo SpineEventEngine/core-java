@@ -187,7 +187,8 @@ public abstract class Aggregate<I,
     /**
      * Obtains a method for the passed command and invokes it.
      *
-     * <p>All the {@linkplain Empty empty} messages are filtered out from the result.
+     * <p>Dispatching the commands results in emitting event messages. All the 
+     * {@linkplain Empty empty} messages are filtered out from the result.
      * 
      * @param  command the envelope with the command to dispatch
      * @return a list of event messages that the aggregate produces by handling the command
@@ -203,7 +204,8 @@ public abstract class Aggregate<I,
     /**
      * Dispatches the event on which the aggregate reacts.
      *
-     * <p>All the {@linkplain Empty empty} messages are filtered out from the result.
+     * <p>Reacting on a event may result in emitting event messages. All the {@linkplain Empty empty} 
+     * messages are filtered out from the result.
      *
      * @param  event the envelope with the event to dispatch
      * @return a list of event messages that the aggregate produces in reaction to the event or
@@ -219,7 +221,8 @@ public abstract class Aggregate<I,
     /**
      * Dispatches the rejection to which the aggregate reacts.
      * 
-     * <p>All the {@linkplain Empty empty} messages are filtered out from the result.
+     * <p>Reacting on a rejection may result in emitting event messages. All the 
+     * {@linkplain Empty empty} messages are filtered out from the result.
      *
      * @param  rejection the envelope with the rejection
      * @return a list of event messages that the aggregate produces in reaction to
