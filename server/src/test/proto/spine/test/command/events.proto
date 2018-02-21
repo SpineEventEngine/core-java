@@ -46,3 +46,8 @@ message CmdProjectStarted {
 message MandatoryFieldEvent {
     ProjectId project_id = 1 [(required) = true];
 }
+
+
+message DCmdProjectCreated {
+    ProjectId project_id = 1;
+}

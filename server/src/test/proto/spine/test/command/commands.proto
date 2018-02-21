@@ -42,3 +42,7 @@ message CmdAddTask {
 message CmdStartProject {
     ProjectId project_id = 1;
 }
+
+message DCmdCreateProject {
+    ProjectId project_id = 1;
+}
