@@ -70,7 +70,7 @@ public class DuplicateCommandShould {
     }
 
     @Test
-    public void not_be_acknowledged_when_not_sent() {
+    public void not_be_acknowledged_on_client_when_not_sent() {
         final TenantId tenantId = newTenantId();
 
         final Command command = command(createProject(), tenantId);
@@ -82,7 +82,7 @@ public class DuplicateCommandShould {
     }
 
     @Test
-    public void be_acknowledged_when_send_to_the_server() {
+    public void be_acknowledged_on_client_when_posted_to_an_aggregate() {
         final TenantId tenantId = newTenantId();
 
         final Command command = command(createProject(), tenantId);
