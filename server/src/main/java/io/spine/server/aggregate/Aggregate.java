@@ -190,8 +190,7 @@ public abstract class Aggregate<I,
      * <p>All the {@linkplain Empty empty} messages are filtered out from the result.
      * 
      * @param  command the envelope with the command to dispatch
-     * @return a list with event messages that the aggregate produces in reaction to the event or
-     *         an empty list if the aggregate state does not change in reaction to the event
+     * @return a list of event messages that the aggregate produces by handling the command
      */
     @Override
     protected List<? extends Message> dispatchCommand(CommandEnvelope command) {
@@ -207,7 +206,7 @@ public abstract class Aggregate<I,
      * <p>All the {@linkplain Empty empty} messages are filtered out from the result.
      *
      * @param  event the envelope with the event to dispatch
-     * @return a list with event messages that the aggregate produces in reaction to the event or
+     * @return a list of event messages that the aggregate produces in reaction to the event or
      *         an empty list if the aggregate state does not change in reaction to the event
      */
     List<? extends Message> reactOn(EventEnvelope event) {
@@ -223,7 +222,7 @@ public abstract class Aggregate<I,
      * <p>All the {@linkplain Empty empty} messages are filtered out from the result.
      *
      * @param  rejection the envelope with the rejection
-     * @return a list with event messages that the aggregate produces in reaction to
+     * @return a list of event messages that the aggregate produces in reaction to
      *         the rejection, or an empty list if the aggregate state does not change in
      *         response to this rejection
      */
