@@ -47,7 +47,8 @@ message MandatoryFieldEvent {
     ProjectId project_id = 1 [(required) = true];
 }
 
-
+// An event emitted when a project is created for duplicate command tests.
+//
 message DCmdProjectCreated {
     ProjectId project_id = 1;
 }

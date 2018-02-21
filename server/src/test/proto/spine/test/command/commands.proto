@@ -43,6 +43,8 @@ message CmdStartProject {
     ProjectId project_id = 1;
 }
 
+// A command to create a project for duplicate command tests.
+//
 message DCmdCreateProject {
     ProjectId project_id = 1;
 }
