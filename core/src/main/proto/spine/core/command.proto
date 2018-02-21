@@ -149,6 +149,9 @@ enum CommandValidationError {
     EXPIRED = 5;
 
     // The command is a duplicate of the command that was already dispatched.
+    //
+    // A command is considered a duplicate if its ID matches the id of another command.
+    //
     DUPLICATE = 6;
 }
 
