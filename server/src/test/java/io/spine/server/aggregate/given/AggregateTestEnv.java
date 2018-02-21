@@ -22,7 +22,11 @@ package io.spine.server.aggregate.given;
 
 import com.google.common.base.Optional;
 import com.google.protobuf.Any;
+import com.google.protobuf.Message;
+import io.spine.client.TestActorRequestFactory;
+import io.spine.core.Command;
 import io.spine.core.CommandContext;
+import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.React;
 import io.spine.core.TenantId;
@@ -33,6 +37,7 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
+import io.spine.server.command.TestEventFactory;
 import io.spine.server.event.EventStreamQuery;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.server.tuple.Pair;
@@ -61,6 +66,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 import static io.spine.Identifier.newUuid;
+import static io.spine.core.given.GivenVersion.withNumber;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.server.aggregate.given.Given.EventMessage.projectCreated;
 
@@ -77,7 +83,8 @@ public class AggregateTestEnv {
     /**
      * Reads all events from the bounded context for the provided tenant.
      */
-    public static List<Event> readAllEvents(final BoundedContext boundedContext, TenantId tenantId) {
+    public static List<Event> readAllEvents(final BoundedContext boundedContext,
+                                            TenantId tenantId) {
         final MemoizingObserver<Event> queryObserver = memoizingObserver();
         final TenantAwareOperation operation = new TenantAwareOperation(tenantId) {
             @Override
@@ -112,7 +119,7 @@ public class AggregateTestEnv {
                      .setValue(newUuid())
                      .build();
     }
- 
+
     public static TenantId newTenantId() {
         return TenantId.newBuilder()
                        .setValue(newUuid())
@@ -120,7 +127,7 @@ public class AggregateTestEnv {
     }
 
     /**
-     * Creates a new multitenant bounded context with a registered 
+     * Creates a new multitenant bounded context with a registered
      * {@linkplain TaskAggregateRepository task repository}.
      */
     public static BoundedContext newTaskBoundedContext() {
@@ -146,9 +153,9 @@ public class AggregateTestEnv {
 
     public static AggReassignTask reassignTask() {
         return AggReassignTask.newBuilder()
-                            .setTaskId(newTaskId())
-                            .setAssignee(newUserId())
-                            .build();
+                              .setTaskId(newTaskId())
+                              .setAssignee(newUserId())
+                              .build();
     }
 
     /**
@@ -158,6 +165,36 @@ public class AggregateTestEnv {
         final Any message = event.getMessage();
         final TypeUrl result = TypeUrl.parse(message.getTypeUrl());
         return result;
+    }
+
+    public static Command command(Message commandMessage, TenantId tenantId) {
+        return requestFactory(tenantId).command()
+                                       .create(commandMessage);
+    }
+
+    public static Command command(Message commandMessage) {
+        return requestFactory().command()
+                               .create(commandMessage);
+    }
+
+    public static CommandEnvelope env(Message commandMessage) {
+        return CommandEnvelope.of(command(commandMessage));
+    }
+
+    public static Event event(Message eventMessage, int versionNumber) {
+        return eventFactory().createEvent(eventMessage, withNumber(versionNumber));
+    }
+
+    private static TestActorRequestFactory requestFactory(TenantId tenantId) {
+        return TestActorRequestFactory.newInstance(AggregateTestEnv.class, tenantId);
+    }
+
+    public static TestActorRequestFactory requestFactory() {
+        return TestActorRequestFactory.newInstance(AggregateTestEnv.class);
+    }
+
+    public static TestEventFactory eventFactory() {
+        return TestEventFactory.newInstance(requestFactory());
     }
 
     /**
@@ -242,10 +279,11 @@ public class AggregateTestEnv {
      * A repository that manages {@link TaskAggregate} instances.
      */
     private static class TaskAggregateRepository
-            extends AggregateRepository<AggTaskId, TaskAggregate> { }
+            extends AggregateRepository<AggTaskId, TaskAggregate> {
+    }
 
     /**
-     * An aggregate that fires a {@linkplain Pair pair} with an optional upon handling a command, 
+     * An aggregate that fires a {@linkplain Pair pair} with an optional upon handling a command,
      * an event or a rejection.
      *
      * @see io.spine.server.aggregate.AggregateShould#create_single_event_for_a_pair_of_events_with_empty_for_a_command_dispatch
@@ -306,7 +344,7 @@ public class AggregateTestEnv {
             final AggTaskId id = command.getTaskId();
             final UserId newAssignee = command.getAssignee();
             final UserId previousAssignee = getState().getAssignee();
-            
+
             final AggTaskAssigned event = taskAssigned(id, previousAssignee, newAssignee);
             return event;
         }
@@ -379,11 +417,11 @@ public class AggregateTestEnv {
         @React
         Pair<AggUserNotified, Optional<AggUserNotified>>
         on(Rejections.AggCannotReassignUnassignedTask rejection) {
-            final AggUserNotified event = userNotified(rejection.getTaskId(), 
+            final AggUserNotified event = userNotified(rejection.getTaskId(),
                                                        rejection.getUserId());
             return Pair.withNullable(event, null);
         }
-        
+
         @Apply
         void event(AggUserNotified event) {
             // Do nothing.

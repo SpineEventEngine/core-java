@@ -25,14 +25,11 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import io.spine.Identifier;
 import io.spine.base.Error;
-import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.Commands;
 import io.spine.core.Event;
 import io.spine.core.Rejection;
@@ -45,7 +42,6 @@ import io.spine.server.aggregate.given.AggregateTestEnv.FaultyAggregate;
 import io.spine.server.aggregate.given.AggregateTestEnv.IntAggregate;
 import io.spine.server.aggregate.given.Given;
 import io.spine.server.command.Assign;
-import io.spine.server.command.TestEventFactory;
 import io.spine.server.entity.InvalidEntityStateException;
 import io.spine.server.model.Model;
 import io.spine.server.model.ModelTests;
@@ -82,7 +78,6 @@ import java.util.Set;
 
 import static com.google.common.base.Throwables.getRootCause;
 import static com.google.common.collect.Lists.newArrayList;
-import static io.spine.core.given.GivenVersion.withNumber;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.TestCommandClasses.assertContains;
@@ -90,7 +85,9 @@ import static io.spine.server.TestEventClasses.assertContains;
 import static io.spine.server.TestEventClasses.getEventClasses;
 import static io.spine.server.aggregate.AggregateMessageDispatcher.dispatchCommand;
 import static io.spine.server.aggregate.given.AggregateTestEnv.assignTask;
+import static io.spine.server.aggregate.given.AggregateTestEnv.command;
 import static io.spine.server.aggregate.given.AggregateTestEnv.createTask;
+import static io.spine.server.aggregate.given.AggregateTestEnv.env;
 import static io.spine.server.aggregate.given.AggregateTestEnv.newTaskBoundedContext;
 import static io.spine.server.aggregate.given.AggregateTestEnv.newTenantId;
 import static io.spine.server.aggregate.given.AggregateTestEnv.readAllEvents;
@@ -117,14 +114,9 @@ import static org.junit.Assert.fail;
 @SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
 public class AggregateShould {
 
-    private static final TestActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(AggregateShould.class);
     private static final ProjectId ID = ProjectId.newBuilder()
                                                  .setId("prj-01")
                                                  .build();
-
-    private static final TestEventFactory eventFactory =
-            TestEventFactory.newInstance(Identifier.pack(ID), requestFactory);
 
     private static final AggCreateProject createProject = Given.CommandMessage.createProject(ID);
     private static final AggPauseProject pauseProject = Given.CommandMessage.pauseProject(ID);
@@ -148,37 +140,16 @@ public class AggregateShould {
         return result;
     }
 
-    private static CommandEnvelope env(Message commandMessage) {
-        return CommandEnvelope.of(requestFactory.command()
-                                                .create(commandMessage));
-    }
-
-    private static Command command(Message commandMessage) {
-        return requestFactory.command()
-                             .create(commandMessage);
-    }
-
-    private static Command command(Message commandMessage, TenantId tenantId) {
-        final TestActorRequestFactory requestFactory =
-                TestActorRequestFactory.newInstance(AggregateShould.class, tenantId);
-        return requestFactory.command()
-                             .create(commandMessage);
-    }
-
     private static void failNotThrows() {
         fail("Should have thrown RuntimeException.");
-    }
-
-    private static Event event(Message eventMessage, int versionNumber) {
-        return eventFactory.createEvent(eventMessage, withNumber(versionNumber));
     }
 
     private static List<Event> generateProjectEvents() {
         final String projectName = AggregateShould.class.getSimpleName();
         final List<Event> events = ImmutableList.<Event>builder()
-                .add(event(projectCreated(ID, projectName), 1))
-                .add(event(taskAdded(ID), 3))
-                .add(event(projectStarted(ID), 4))
+                .add(AggregateTestEnv.event(projectCreated(ID, projectName), 1))
+                .add(AggregateTestEnv.event(taskAdded(ID), 3))
+                .add(AggregateTestEnv.event(projectStarted(ID), 4))
                 .build();
         return events;
     }
@@ -495,8 +466,8 @@ public class AggregateShould {
         final ImportEvents importCmd =
                 ImportEvents.newBuilder()
                             .setProjectId(id)
-                            .addEvent(event(projectCreated(id, projectName), 1))
-                            .addEvent(event(taskAdded(id), 2))
+                            .addEvent(AggregateTestEnv.event(projectCreated(id, projectName), 1))
+                            .addEvent(AggregateTestEnv.event(taskAdded(id), 2))
                             .build();
         aggregate.dispatchCommands(command(importCmd));
 
@@ -579,7 +550,7 @@ public class AggregateShould {
         final FaultyAggregate faultyAggregate =
                 new FaultyAggregate(ID, false, true);
         try {
-            final Event event = event(projectCreated(ID, getClass().getSimpleName()), 1);
+            final Event event = AggregateTestEnv.event(projectCreated(ID, getClass().getSimpleName()), 1);
 
             final AggregateTransaction tx = AggregateTransaction.start(faultyAggregate);
             AggregatePlayer.play(faultyAggregate, AggregateStateRecord.newBuilder()
