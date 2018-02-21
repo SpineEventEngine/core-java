@@ -59,7 +59,7 @@ public class DuplicateCommandTestEnv {
      * Prevents instantiation of this class.
      */
     private DuplicateCommandTestEnv() {
-        // Does nothing
+        // Does nothing.
     }
 
     public static TenantId newTenantId() {
