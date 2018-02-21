@@ -48,15 +48,15 @@ public class DuplicateCommandException extends CommandException implements Messa
     }
 
     /**
-     * Creates an exception for a duplicate command.
+     * Creates an exception for a duplicate command dispatched to aggregate.
      *
      * @param command the duplicate command
      * @return a newly constructed {@link DuplicateCommandException} instance
      */
-    public static DuplicateCommandException of(Command command) {
+    public static DuplicateCommandException forAggregate(Command command) {
         final CommandEnvelope envelope = CommandEnvelope.of(command);
         final Message commandMessage = envelope.getMessage();
-        final String errorMessage = errorMessage(envelope);
+        final String errorMessage = aggregateErrorMessage(envelope);
         final Error error = error(commandMessage, errorMessage);
         return new DuplicateCommandException(errorMessage, command, error);
     }
@@ -79,15 +79,15 @@ public class DuplicateCommandException extends CommandException implements Messa
     }
 
     /**
-     * Generates a formatted duplicate command error message.
+     * Generates a formatted duplicate aggregate command error message.
      *
      * @param envelope the envelope with a command which is considered a duplicate
      * @return a string with details on what happened
      */
-    private static String errorMessage(CommandEnvelope envelope) {
+    private static String aggregateErrorMessage(CommandEnvelope envelope) {
         return format(
-                "The command (class: `%s`, type: `%s`, id: `%s`) cannot be dispatched twice a " +
-                        "single aggregate.",
+                "The command (class: `%s`, type: `%s`, id: `%s`) cannot be dispatched twice to a "
+                        + "single aggregate.",
                 envelope.getMessageClass()
                         .value()
                         .getName(),

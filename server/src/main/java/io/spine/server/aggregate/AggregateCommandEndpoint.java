@@ -70,7 +70,7 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
     private void ensureNotDuplicate(Aggregate aggregate) {
         final CommandEnvelope command = envelope();
         if (aggregate.didHandleSinceLastSnapshot(command)) {
-            throw DuplicateCommandException.of(command.getOuterObject());
+            throw DuplicateCommandException.forAggregate(command.getOuterObject());
         }
     }
 
