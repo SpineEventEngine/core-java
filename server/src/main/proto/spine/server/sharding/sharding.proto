@@ -30,6 +30,34 @@ option java_multiple_files = true;
 option java_outer_classname = "ShardingProto";
 option java_generate_equals_and_hash = true;
 
+import "google/protobuf/any.proto";
+import "google/protobuf/timestamp.proto";
+
+
+// An identifier of the sharded message.
+//
+// This is a string representation of the original message ID. E.g. if the sharded message
+// is an instance of `Command`, this is a stringified `CommandId` for that command instance.
+//
+// Such an approach is chosen in order to improve the readability of identifiers, when browsed
+// via a management console, specific to the environment (e.g. Google PubSub management console).
+//
+message ShardedMessageId {
+
+    string value = 1 [(required) = true];
+}
+
+message ShardedMessage {
+
+    ShardedMessageId id = 1 [(required) = true, (valid) = true];
+
+    google.protobuf.Any target_id = 2 [(required) = true];
+
+    google.protobuf.Any original_message = 3 [(required) = true];
+
+    google.protobuf.Timestamp when_sharded = 4 [(required) = true];
+}
+
 message IdPredicate {
 
     oneof predicate {

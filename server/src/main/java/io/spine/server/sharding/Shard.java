@@ -19,27 +19,24 @@
  */
 package io.spine.server.sharding;
 
-import io.spine.server.integration.ChannelId;
+import io.grpc.stub.StreamObserver;
 
 /**
  * @author Alex Tymchenko
  */
-public class Shard {
+public abstract class Shard {
 
     private final ShardingKey key;
 
-    private final ChannelId channelId;
-
-    public Shard(ShardingKey key, ChannelId channelId) {
+    protected Shard(ShardingKey key) {
         this.key = key;
-        this.channelId = channelId;
     }
 
     public ShardingKey getKey() {
         return key;
     }
 
-    public ChannelId getChannelId() {
-        return channelId;
-    }
+    public abstract void post(ShardedMessage message);
+
+    public abstract void addConsumer(StreamObserver<ShardedMessage> consumer);
 }

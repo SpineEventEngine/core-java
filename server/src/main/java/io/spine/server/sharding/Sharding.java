@@ -19,12 +19,18 @@
  */
 package io.spine.server.sharding;
 
+import com.google.protobuf.Message;
+
+import java.util.Set;
+
 /**
  * @author Alex Tymchenko
  */
 public interface Sharding {
 
-    Shard register(Shardable shardable) throws NoShardAvailableException;
+    Shard ofDestination(Shardable shardable) throws NoShardAvailableException;
+
+    Set<Shard> find(Object targetId, Message message) throws NoShardAvailableException;
 
     enum Strategy {
 

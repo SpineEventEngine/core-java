@@ -22,8 +22,14 @@ package io.spine.server;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
+import com.google.protobuf.Message;
+import io.spine.server.sharding.NoShardAvailableException;
+import io.spine.server.sharding.Shard;
+import io.spine.server.sharding.Shardable;
+import io.spine.server.sharding.Sharding;
 
 import javax.annotation.Nullable;
+import java.util.Set;
 
 @SuppressWarnings("AccessOfSystemProperties") // OK as we need system properties for this class.
 public class ServerEnvironment {
@@ -37,8 +43,25 @@ public class ServerEnvironment {
     private static final String appEngineRuntimeVersion =
             System.getProperty(ENV_KEY_APP_ENGINE_RUNTIME_VERSION);
 
+    /** A sharding strategy for this server environment. */
+    private Sharding sharding;
+
     /** Prevents instantiation of this utility class. */
-    private ServerEnvironment() {}
+    private ServerEnvironment() {
+        //TODO:2018-02-22:alex.tymchenko: supply an in-process implementation instead.
+        this.sharding = new Sharding() {
+            @Override
+            public Shard ofDestination(Shardable shardable) throws NoShardAvailableException {
+                return null;
+            }
+
+            @Override
+            public Set<Shard> find(Object targetId, Message message)
+                    throws NoShardAvailableException {
+                return null;
+            }
+        };
+    }
 
     /**
      * Returns a singleton instance.
@@ -63,6 +86,10 @@ public class ServerEnvironment {
      */
     public Optional<String> appEngineVersion() {
         return Optional.fromNullable(appEngineRuntimeVersion);
+    }
+
+    public Sharding getSharding() {
+        return sharding;
     }
 
     /**

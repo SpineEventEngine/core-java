@@ -580,6 +580,19 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         return AggregateCommandDelivery.directDelivery(this);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Overridden to expose to {@link ShardedAggregateCommandDelivery sharded aggregate command
+     * delivery} implementation, which requires this for its sharding routines.
+     *
+     * @return the class of the identifiers used by this repository.
+     */
+    @Override
+    protected Class<I> getIdClass() {
+        return super.getIdClass();
+    }
+
     @Override
     public Sharding.Strategy getShardingStrategy() {
         return Sharding.Strategy.ALL_TARGETS_OF_TYPE;
