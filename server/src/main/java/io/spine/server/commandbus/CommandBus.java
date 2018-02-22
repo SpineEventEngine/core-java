@@ -37,8 +37,8 @@ import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.DeadMessageTap;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.commandstore.CommandStore;
-import io.spine.server.transport.TransportFactory;
 import io.spine.server.rejection.RejectionBus;
+import io.spine.server.transport.TransportFactory;
 
 import javax.annotation.Nullable;
 import java.util.Deque;
@@ -356,7 +356,7 @@ public class CommandBus extends Bus<Command,
          * the current runtime environment.
          */
         private static boolean detectThreadsAllowed() {
-            final boolean appEngine = ServerEnvironment.isAppEngine();
+            final boolean appEngine = ServerEnvironment.getInstance().isAppEngine();
             return !appEngine;
         }
 

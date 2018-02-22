@@ -41,10 +41,17 @@ public class ServerEnvironment {
     private ServerEnvironment() {}
 
     /**
+     * Returns a singleton instance.
+     */
+    public static ServerEnvironment getInstance() {
+        return Singleton.INSTANCE.value;
+    }
+
+    /**
      * Returns {@code true} if the code is running on the Google AppEngine,
      * {@code false} otherwise.
      */
-    public static boolean isAppEngine() {
+    public boolean isAppEngine() {
         final boolean isVersionPresent = (appEngineRuntimeVersion != null) &&
                 !appEngineRuntimeVersion.isEmpty();
         return isVersionPresent;
@@ -54,7 +61,20 @@ public class ServerEnvironment {
      * Returns the current Google AppEngine version
      * or {@code null} if the program is running not on the AppEngine.
      */
-    public static Optional<String> appEngineVersion() {
+    public Optional<String> appEngineVersion() {
         return Optional.fromNullable(appEngineRuntimeVersion);
+    }
+
+    /**
+     * A singleton holder.
+     *
+     * <p>Server environment is a singleton in scope of JVM.
+     */
+    private enum Singleton {
+
+        INSTANCE;
+
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final ServerEnvironment value = new ServerEnvironment();
     }
 }
