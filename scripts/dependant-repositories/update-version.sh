@@ -27,8 +27,8 @@ readonly PULL_REQUEST_ASSIGNEE='dmitrykuzmin'
 # Github token (need to pass as cmd)
 readonly GITHUB_TOKEN='test token'
 
-# Status checks timeout for PR is 10 minutes, then script abandons the idea to merge it.
-readonly STATUS_CHECKS_TIMEOUT_SECONDS=600
+# Status checks timeout for PR is 20 minutes, then script abandons the idea to merge it.
+readonly STATUS_CHECKS_TIMEOUT_SECONDS=1200
 
 # In the following functions we use 'echo' to stdout and command substitution on call to emulate return value.
 
