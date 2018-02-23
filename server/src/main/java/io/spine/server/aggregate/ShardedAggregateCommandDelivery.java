@@ -38,11 +38,11 @@ import static java.lang.String.format;
 
 /**
  * An abstract base for {@code Aggregate} {@linkplain AggregateCommandDelivery command
- * delivery strategies}, which use {@linkplain io.spine.server.transport.MessageChannel channels}
- * to bring command messages to the aggregate instances.
+ * delivery strategies}.
  *
- * <p>The implementations of this class provide their strategy on how to define the channel IDs
- * per message per target entity ID.
+ * <p>The delivery strategy uses {@linkplain Sharding.Strategy sharding} as an approach
+ * to group command messages and deliver them to the aggregate instances to a single consumer,
+ * process them within a single JVM and thus avoid potential concurrent modification.
  *
  * @author Alex Tymchenko
  */
@@ -60,7 +60,7 @@ public abstract class ShardedAggregateCommandDelivery<I, A extends Aggregate<I, 
      * {@inheritDoc}
      *
      * <p>Always postpone the message from the immediate delivery and forward them to one or more
-     * channels instead.
+     * shards instead.
      *
      * @param id       the ID of the entity the envelope is going to be dispatched.
      * @param envelope the envelope to be dispatched — now or later
