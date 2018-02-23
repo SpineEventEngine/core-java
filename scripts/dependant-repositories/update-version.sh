@@ -27,6 +27,9 @@ readonly PULL_REQUEST_ASSIGNEE='dmitrykuzmin'
 # Github token (need to pass as cmd)
 readonly GITHUB_TOKEN='test token'
 
+# Status checks timeout for PR is 10 minutes, then script abandons the idea to merge it.
+readonly STATUS_CHECKS_TIMEOUT_SECONDS=600
+
 # In the following functions we use 'echo' to stdout and command substitution on call to emulate return value.
 
 search_for_string() {
@@ -50,7 +53,7 @@ read_json_field() {
     local fieldName="$1"
     local jsonData="$2"
 
-    echo "$(grep -o '"'${fieldName}'": *"[^"]*"' <<< "${jsonData}" \
+    echo "$(grep -o -m 1 '"'${fieldName}'": *"[^"]*"' <<< "${jsonData}" \
         | grep -o '"[^"]*"$')"
 }
 
@@ -194,6 +197,21 @@ delete_branch() {
         "${repositoryUrl}/git/refs/heads/${branchName}"
 }
 
+get_status_check_result() {
+    local branchName="$1"
+    local repositoryUrl="$2"
+
+    local statusData="$(curl -H "Authorization: token ${GITHUB_TOKEN}" \
+        "${repositoryUrl}/commits/heads/${branchName}/status")"
+
+    local statusCheckResult="$(read_json_field 'state' "${statusData}")"
+
+    # Remove all quotes from the result.
+    statusCheckResult="${statusCheckResult//\"/}"
+
+    echo "${statusCheckResult}"
+}
+
 get_file_data() {
     local fileUrl="$1"
     echo "$(curl -H "Authorization: token ${GITHUB_TOKEN}" "${fileUrl}")"
@@ -259,7 +277,6 @@ assign_pull_request() {
 merge_pull_request() {
     local pullRequestNumber="$1"
     local repositoryUrl="$2"
-    local mergeCommitMessage="$3"
 
     local httpStatusLabel='HTTP_STATUS:'
 
@@ -342,18 +359,44 @@ update_version() {
                 "${PULL_REQUEST_BODY}" \
                 "${repositoryUrl}")"
 
-            # todo check pull request mergeable
-#            local mergeSuccessful="$(merge_pull_request "${pullRequestNumber}" \
-#                "${repositoryUrl}" \
-#                "${MERGE_COMMIT_MESSAGE}")"
-            local mergeSuccessful='false'
-            if [ "${mergeSuccessful}" = 'true' ]; then
-                delete_branch "${branch}" "${repositoryUrl}"
-            else
-                assign_pull_request "${pullRequestNumber}" \
-                    "${repositoryUrl}" \
-                    "${PULL_REQUEST_ASSIGNEE}"
+            local statusCheckResult='pending'
+
+            echo 'Requesting status checks result...'
+            local secondsElapsed=0
+
+            # Emulate do...while loop.
+            while true; do
+                statusCheckResult="$(get_status_check_result \
+                    "${branch}" \
+                    "${repositoryUrl}")"
+
+                [ "${statusCheckResult}" = 'pending' ] && \
+                    [ ${secondsElapsed} -lt ${STATUS_CHECKS_TIMEOUT_SECONDS} ] \
+                    || break
+
+                # Wait before the next request.
+                local secondsToWait=10
+                sleep ${secondsToWait}
+
+                # Use arithmetic context for integer addition.
+                secondsElapsed=$((${secondsElapsed} + 10))
+            done
+
+            echo "Status checks result: ${statusCheckResult}"
+
+            if [ "${statusCheckResult}" = 'success' ]; then
+                local mergeSuccessful="$(merge_pull_request "${pullRequestNumber}" \
+                "${repositoryUrl}")"
+                if [ "${mergeSuccessful}" = 'true' ]; then
+                    delete_branch "${branch}" "${repositoryUrl}"
+                    return 0
+                fi
             fi
+
+            # If status checks indicated failure or merge was unsuccessful assign the PR to the assignee.
+            assign_pull_request "${pullRequestNumber}" \
+                        "${repositoryUrl}" \
+                        "${PULL_REQUEST_ASSIGNEE}"
         fi
     fi
 }
