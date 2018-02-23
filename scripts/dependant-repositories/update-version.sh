@@ -29,8 +29,6 @@ readonly GITHUB_TOKEN='test token'
 
 # In the following functions we use 'echo' to stdout and command substitution on call to emulate return value.
 
-# todo reformat all strings that are too long
-
 search_for_string() {
     local string="$1"
     local text="$2"
