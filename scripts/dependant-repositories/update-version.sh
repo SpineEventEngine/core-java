@@ -318,23 +318,7 @@ update_version() {
 
         # Use string with deleted version instead of just version label to preserve all indents.
         local labelString="$(remove_version "${version}" "${stringWithVersion}")"
-
-        echo 'OLD VERSION:'
-        echo "${version}"
-
-        echo 'NEW VERSION:'
-        echo "${inputVersion}"
-
-        echo 'LABEL STRING:'
-        echo "${labelString}"
-
-        echo 'DECODED CONTENT:'
-        echo "${fileContentDecoded}"
-
         local newText="$(substitute_version "${version}" "${inputVersion}" "${labelString}" "${fileContentDecoded}")"
-
-        echo 'NEW TEXT:'
-        echo "${newText}"
 
         local encodedNewText="$(encode "${newText}")"
         local fileSha="$(obtain_file_sha "${fileData}")"
@@ -361,9 +345,6 @@ update_version() {
 
 main() {
     inputVersion="$(obtain_version "${INPUT_FILE_PATH}" "${INPUT_VERSION_LABEL}")"
-
-    echo 'INPUT VERSION'
-    echo "${inputVersion}"
 
     update_version "${inputVersion}" \
         "${REPOSITORY_1_URL}" \
