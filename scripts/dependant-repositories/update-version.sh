@@ -145,7 +145,7 @@ substitute_version() {
     local oldStringWithVersion="${versionLabel}${oldVersion}"
     local newStringWithVersion="${versionLabel}${newVersion}"
     local newText="$(sed "s/${oldStringWithVersion}/${newStringWithVersion}/g" \
-                        <<< "${text}")"
+        <<< "${text}")"
 
     echo "${newText}"
 }
@@ -160,9 +160,8 @@ check_branch_exists() {
         --write-out "${httpStatusLabel}%{http_code}" \
         "${repositoryUrl}/git/refs/heads/${branchName}")"
 
-    local branchRequestStatusCode="$(retrieve_labeled_value \
-                                    "${httpStatusLabel}" \
-                                    "${responseBody}")"
+    local branchRequestStatusCode="$(retrieve_labeled_value "${httpStatusLabel}" \
+        "${responseBody}")"
 
     echo "$(check_status_code "${branchRequestStatusCode}" '200')"
 }
@@ -228,14 +227,19 @@ create_pull_request() {
     local body="$4"
     local repositoryUrl="$5"
 
-    local requestData="{\"title\":\"${pullRequestName}\",\"head\":\"${head}\",\"base\":\"${base}\",\"body\":\"${body}\"}"
+    local requestData="{\"title\":\"${pullRequestName}\",
+                        \"head\":\"${head}\",
+                        \"base\":\"${base}\",
+                        \"body\":\"${body}\"}"
 
     local creationResponse="$(curl -H "Authorization: token ${GITHUB_TOKEN}" \
         -H "Content-Type: application/json" \
         --data "$requestData" \
         "${repositoryUrl}/pulls")"
 
-    local pullRequestNumber="$(read_json_field_numeric 'number' "${creationResponse}")"
+    local pullRequestNumber="$(read_json_field_numeric \
+        'number' \
+        "${creationResponse}")"
 
     echo "${pullRequestNumber}"
 }
@@ -267,7 +271,8 @@ merge_pull_request() {
         --write-out "${httpStatusLabel}%{http_code}" \
         "${repositoryUrl}/pulls/${pullRequestNumber}/merge")"
 
-    local mergeRequestStatusCode="$(retrieve_labeled_value "${httpStatusLabel}" "${mergeResponse}")"
+    local mergeRequestStatusCode="$(retrieve_labeled_value "${httpStatusLabel}" \
+        "${mergeResponse}")"
 
     echo "$(check_status_code "${mergeRequestStatusCode}" '200')"
 }
@@ -280,7 +285,8 @@ obtain_version() {
     local fileContent="$(read_file_content "${fileData}")"
     local fileContentDecoded="$(decode "${fileContent}")"
 
-    local stringWithVersion="$(search_for_string_assignment "${versionLabel}" "${fileContentDecoded}")"
+    local stringWithVersion="$(search_for_string_assignment "${versionLabel}" \
+        "${fileContentDecoded}")"
     local inputVersion="$(remove_label "${versionLabel}" "${stringWithVersion}")"
 
     echo "${inputVersion}"
@@ -306,7 +312,8 @@ update_version() {
     local fileContent="$(read_file_content "${fileData}")"
     local fileContentDecoded="$(decode "${fileContent}")"
 
-    local stringWithVersion="$(search_for_string_assignment "${versionLabel}" "${fileContentDecoded}")"
+    local stringWithVersion="$(search_for_string_assignment "${versionLabel}" \
+        "${fileContentDecoded}")"
 
     local version="$(remove_label "${versionLabel}" "${stringWithVersion}")"
 
@@ -318,11 +325,18 @@ update_version() {
 
         # Use string with deleted version instead of just version label to preserve all indents.
         local labelString="$(remove_version "${version}" "${stringWithVersion}")"
-        local newText="$(substitute_version "${version}" "${inputVersion}" "${labelString}" "${fileContentDecoded}")"
+        local newText="$(substitute_version "${version}" \
+            "${inputVersion}" \
+            "${labelString}" \
+            "${fileContentDecoded}")"
 
         local encodedNewText="$(encode "${newText}")"
         local fileSha="$(obtain_file_sha "${fileData}")"
-        commit_file "${COMMIT_MESSAGE}" "${fullFilePath}" "${encodedNewText}" "${fileSha}" "${branch}"
+        commit_file "${COMMIT_MESSAGE}" \
+            "${fullFilePath}" \
+            "${encodedNewText}" \
+            "${fileSha}" \
+            "${branch}"
 
         if [ "$branchExists" = false ]; then
             local pullRequestNumber="$(create_pull_request "${PULL_REQUEST_TITLE}" \
@@ -332,12 +346,16 @@ update_version() {
                 "${repositoryUrl}")"
 
             # todo check pull request mergeable
-#            local mergeSuccessful="$(merge_pull_request "${pullRequestNumber}" "${repositoryUrl}" "${MERGE_COMMIT_MESSAGE}")"
+#            local mergeSuccessful="$(merge_pull_request "${pullRequestNumber}" \
+#                "${repositoryUrl}" \
+#                "${MERGE_COMMIT_MESSAGE}")"
             local mergeSuccessful='false'
             if [ "${mergeSuccessful}" = 'true' ]; then
                 delete_branch "${branch}" "${repositoryUrl}"
             else
-                assign_pull_request "${pullRequestNumber}" "${repositoryUrl}" "${PULL_REQUEST_ASSIGNEE}"
+                assign_pull_request "${pullRequestNumber}" \
+                    "${repositoryUrl}" \
+                    "${PULL_REQUEST_ASSIGNEE}"
             fi
         fi
     fi
