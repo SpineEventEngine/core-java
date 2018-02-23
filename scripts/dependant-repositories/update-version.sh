@@ -321,7 +321,6 @@ update_version() {
             create_branch "${branch}" "${defaultBranch}" "${repositoryUrl}"
         fi
 
-        # Use string with deleted version instead of just version label to preserve all indents.
         local labelString="$(remove_version "${version}" "${stringWithVersion}")"
         local newText="$(substitute_version "${version}" \
             "${inputVersion}" \
