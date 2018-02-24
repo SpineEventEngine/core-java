@@ -21,10 +21,11 @@ readonly PULL_REQUEST_ASSIGNEE='armiol'
 readonly STATUS_CHECK_TIMEOUT_SECONDS=1200
 
 main() {
-    local githubToken="$1"
+    local gitAuthorizationToken="$1"
 
-    chmod +x ./scripts/dependant-repositories/update-version.sh
-    ./scripts/dependant-repositories/update-version.sh "${githubToken}" \
+    chmod +x ./scripts/dependant-repositories/update-dependency-version.sh
+    ./scripts/dependant-repositories/update-dependency-version.sh \
+        "${gitAuthorizationToken}" \
         "${SOURCE_REPOSITORY}" \
         "${SOURCE_FILE_WITH_VERSION}" \
         "${SOURCE_VERSION_LABEL}" \
