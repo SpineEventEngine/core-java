@@ -1,40 +1,20 @@
 #!/bin/bash
 
-# Input repository parameters
-readonly INPUT_FILE_PATH=https://api.github.com/repos/dmitrykuzmin/chat/contents/testfileinput.gradle
-readonly INPUT_VERSION_LABEL='TEST_VERSION'
-
-# Repository 1 parameters
-readonly REPOSITORY_1_URL='https://api.github.com/repos/dmitrykuzmin/chat'
-readonly FILE_WITH_VERSION_1_PATH='testfileoutput1.gradle'
-readonly BRANCH_TO_CREATE_1='update-1'
-readonly REPOSITORY_1_DEFAULT_BRANCH='master'
-readonly FILE_1_VERSION_LABEL='toBeSetVersion'
-
-# Repository 2 parameters
-readonly REPOSITORY_2_URL='https://api.github.com/repos/dmitrykuzmin/chat'
-readonly FILE_WITH_VERSION_2_PATH='testfileoutput2.gradle'
-readonly BRANCH_TO_CREATE_2='update-2'
-readonly REPOSITORY_2_DEFAULT_BRANCH='master'
-readonly FILE_2_VERSION_LABEL='inputVersion'
-
-# Common
-readonly COMMIT_MESSAGE='Test commit'
-readonly PULL_REQUEST_TITLE='Test PR'
-readonly PULL_REQUEST_BODY='Test'
-readonly PULL_REQUEST_ASSIGNEE='dmitrykuzmin'
-
-# Github token (need to pass as cmd)
-readonly GITHUB_TOKEN='test token'
-
-# Status checks timeout for PR is 20 minutes, then script abandons the idea to merge it.
-readonly STATUS_CHECKS_TIMEOUT_SECONDS=1200
+GITHUB_REQUEST_HEADER=''
 
 # In the following functions we use 'echo' to stdout and command substitution on call to emulate return value.
+
+obtain_full_file_path() {
+    local relativeFilePath="$1"
+    local repositoryUrl="$2"
+
+    echo "${repositoryUrl}/contents/${relativeFilePath}"
+}
 
 search_for_string() {
     local string="$1"
     local text="$2"
+
     echo "$(grep "${string}" <<< "${text}")"
 }
 
@@ -157,7 +137,7 @@ check_branch_exists() {
 
     local httpStatusLabel='HTTP_STATUS:'
 
-    local responseBody="$(curl -H "Authorization: token ${GITHUB_TOKEN}" \
+    local responseBody="$(curl -H "${GITHUB_REQUEST_HEADER}" \
         --write-out "${httpStatusLabel}%{http_code}" \
         "${repositoryUrl}/git/refs/heads/${branchName}")"
 
@@ -174,7 +154,7 @@ create_branch() {
 
     local repositoryRefsUrl="${repositoryUrl}/git/refs"
 
-    local masterBranchData="$(curl -H "Authorization: token ${GITHUB_TOKEN}" \
+    local masterBranchData="$(curl -H "${GITHUB_REQUEST_HEADER}" \
         "${repositoryRefsUrl}/heads/${defaultBranchName}")"
 
     local lastCommitSha="$(read_json_field 'sha' "${masterBranchData}")"
@@ -182,7 +162,7 @@ create_branch() {
     local requestData="{\"ref\":\"refs/heads/${branchName}\",
                         \"sha\":${lastCommitSha}}"
 
-    curl -H "Authorization: token ${GITHUB_TOKEN}" \
+    curl -H "${GITHUB_REQUEST_HEADER}" \
         -H "Content-Type: application/json" \
         --data "${requestData}" \
         "${repositoryRefsUrl}"
@@ -192,7 +172,7 @@ delete_branch() {
     local branchName="$1"
     local repositoryUrl="$2"
 
-    curl -H "Authorization: token ${GITHUB_TOKEN}" \
+    curl -H "${GITHUB_REQUEST_HEADER}" \
         -X DELETE \
         "${repositoryUrl}/git/refs/heads/${branchName}"
 }
@@ -201,7 +181,7 @@ get_status_check_result() {
     local branchName="$1"
     local repositoryUrl="$2"
 
-    local statusData="$(curl -H "Authorization: token ${GITHUB_TOKEN}" \
+    local statusData="$(curl -H "${GITHUB_REQUEST_HEADER}" \
         "${repositoryUrl}/commits/heads/${branchName}/status")"
 
     local statusCheckResult="$(read_json_field 'state' "${statusData}")"
@@ -214,7 +194,7 @@ get_status_check_result() {
 
 get_file_data() {
     local fileUrl="$1"
-    echo "$(curl -H "Authorization: token ${GITHUB_TOKEN}" "${fileUrl}")"
+    echo "$(curl -H "${GITHUB_REQUEST_HEADER}" "${fileUrl}")"
 }
 
 commit_file() {
@@ -229,7 +209,7 @@ commit_file() {
                         \"sha\":${fileSha},
                         \"branch\":\"${branch}\"}"
 
-    curl -H "Authorization: token ${GITHUB_TOKEN}" \
+    curl -H "${GITHUB_REQUEST_HEADER}" \
         -H "Content-Type: application/json" \
         -X PUT \
         --data "${requestData}" \
@@ -248,7 +228,7 @@ create_pull_request() {
                         \"base\":\"${base}\",
                         \"body\":\"${body}\"}"
 
-    local creationResponse="$(curl -H "Authorization: token ${GITHUB_TOKEN}" \
+    local creationResponse="$(curl -H "${GITHUB_REQUEST_HEADER}" \
         -H "Content-Type: application/json" \
         --data "$requestData" \
         "${repositoryUrl}/pulls")"
@@ -267,7 +247,7 @@ assign_pull_request() {
 
     local requestData="{\"assignees\":[\"${assignee}\"]}"
 
-    curl -H "Authorization: token ${GITHUB_TOKEN}" \
+    curl -H "${GITHUB_REQUEST_HEADER}" \
         -H "Content-Type: application/json" \
         -X PATCH \
         --data "${requestData}" \
@@ -280,7 +260,7 @@ merge_pull_request() {
 
     local httpStatusLabel='HTTP_STATUS:'
 
-    local mergeResponse="$(curl -H "Authorization: token ${GITHUB_TOKEN}" \
+    local mergeResponse="$(curl -H "${GITHUB_REQUEST_HEADER}" \
         -H "Content-Type: application/json" \
         -X PUT \
         --write-out "${httpStatusLabel}%{http_code}" \
@@ -293,8 +273,12 @@ merge_pull_request() {
 }
 
 obtain_version() {
-    local fullFilePath="$1"
-    local versionLabel="$2"
+    local repositoryUrl="$1"
+    local fileWithVersion="$2"
+    local versionLabel="$3"
+
+    local fullFilePath="$(obtain_full_file_path "${fileWithVersion}" \
+        "${repositoryUrl}")"
 
     local fileData="$(get_file_data ${fullFilePath})"
     local fileContent="$(read_file_content "${fileData}")"
@@ -302,25 +286,35 @@ obtain_version() {
 
     local stringWithVersion="$(search_for_string_assignment "${versionLabel}" \
         "${fileContentDecoded}")"
-    local inputVersion="$(remove_label "${versionLabel}" "${stringWithVersion}")"
+    local version="$(remove_label "${versionLabel}" "${stringWithVersion}")"
 
-    echo "${inputVersion}"
+    echo "${version}"
 }
 
 update_version() {
-    local inputVersion="$1"
+    local targetVersion="$1"
+
     local repositoryUrl="$2"
-    local filePath="$3"
+    local fileWithVersion="$3"
     local versionLabel="$4"
-    local branch="$5"
-    local defaultBranch="$6"
 
-    local fullFilePath="${repositoryUrl}/contents/${filePath}"
+    local newBranchName="$5"
+    local branchToMergeInto="$6"
 
-    local branchExists="$(check_branch_exists "${branch}" "${repositoryUrl}")"
+    local commitMessage="$7"
+    local pullRequestTitle="$8"
+    local pullRequestBody="$9"
+    local pullRequestAssignee="${10}"
+
+    local statusCheckTimeoutSeconds="${11}"
+
+    local fullFilePath="$(obtain_full_file_path "${fileWithVersion}" \
+        "${repositoryUrl}")"
+
+    local branchExists="$(check_branch_exists "${newBranchName}" "${repositoryUrl}")"
 
     if [ "${branchExists}" = 'true' ]; then
-        fullFilePath="${fullFilePath}?ref=${branch}"
+        fullFilePath="${fullFilePath}?ref=${newBranchName}"
     fi
 
     local fileData="$(get_file_data ${fullFilePath})"
@@ -332,31 +326,36 @@ update_version() {
 
     local version="$(remove_label "${versionLabel}" "${stringWithVersion}")"
 
-    if [ "${inputVersion}" != "${version}" ]; then
-
+    if [ "${targetVersion}" != "${version}" ]; then
         if [ "${branchExists}" = 'false' ]; then
-            create_branch "${branch}" "${defaultBranch}" "${repositoryUrl}"
+            create_branch "${newBranchName}" \
+                "${branchToMergeInto}" \
+                "${repositoryUrl}"
         fi
 
         local labelString="$(remove_version "${version}" "${stringWithVersion}")"
         local newText="$(substitute_version "${version}" \
-            "${inputVersion}" \
+            "${targetVersion}" \
             "${labelString}" \
             "${fileContentDecoded}")"
 
         local encodedNewText="$(encode "${newText}")"
         local fileSha="$(obtain_file_sha "${fileData}")"
-        commit_file "${COMMIT_MESSAGE}" \
+        commit_file "${commitMessage}" \
             "${fullFilePath}" \
             "${encodedNewText}" \
             "${fileSha}" \
-            "${branch}"
+            "${newBranchName}"
+
+        # Wait so Travis pull request build doesn't auto-cancel Travis push build.
+        # This leads to status check being failed and PR not being able to merge.
+        sleep 10
 
         if [ "$branchExists" = false ]; then
-            local pullRequestNumber="$(create_pull_request "${PULL_REQUEST_TITLE}" \
-                "${branch}" \
-                "${defaultBranch}" \
-                "${PULL_REQUEST_BODY}" \
+            local pullRequestNumber="$(create_pull_request "${pullRequestTitle}" \
+                "${newBranchName}" \
+                "${branchToMergeInto}" \
+                "${pullRequestBody}" \
                 "${repositoryUrl}")"
 
             local statusCheckResult='pending'
@@ -367,11 +366,11 @@ update_version() {
             # Emulate do...while loop.
             while true; do
                 statusCheckResult="$(get_status_check_result \
-                    "${branch}" \
+                    "${newBranchName}" \
                     "${repositoryUrl}")"
 
                 [ "${statusCheckResult}" = 'pending' ] && \
-                    [ ${secondsElapsed} -lt ${STATUS_CHECKS_TIMEOUT_SECONDS} ] \
+                    [ ${secondsElapsed} -lt ${statusCheckTimeoutSeconds} ] \
                     || break
 
                 # Wait before the next request.
@@ -380,6 +379,8 @@ update_version() {
 
                 # Use arithmetic context for integer addition.
                 secondsElapsed=$((${secondsElapsed} + 10))
+
+                echo "Time elapsed: ${secondsElapsed}s"
             done
 
             echo "Status checks result: ${statusCheckResult}"
@@ -388,7 +389,7 @@ update_version() {
                 local mergeSuccessful="$(merge_pull_request "${pullRequestNumber}" \
                 "${repositoryUrl}")"
                 if [ "${mergeSuccessful}" = 'true' ]; then
-                    delete_branch "${branch}" "${repositoryUrl}"
+                    delete_branch "${newBranchName}" "${repositoryUrl}"
                     return 0
                 fi
             fi
@@ -396,27 +397,49 @@ update_version() {
             # If status checks indicated failure or merge was unsuccessful assign the PR to the assignee.
             assign_pull_request "${pullRequestNumber}" \
                         "${repositoryUrl}" \
-                        "${PULL_REQUEST_ASSIGNEE}"
+                        "${pullRequestAssignee}"
         fi
     fi
 }
 
 main() {
-    inputVersion="$(obtain_version "${INPUT_FILE_PATH}" "${INPUT_VERSION_LABEL}")"
+    local githubToken="$1"
 
-    update_version "${inputVersion}" \
-        "${REPOSITORY_1_URL}" \
-        "${FILE_WITH_VERSION_1_PATH}" \
-        "${FILE_1_VERSION_LABEL}" \
-        "${BRANCH_TO_CREATE_1}" \
-        "${REPOSITORY_1_DEFAULT_BRANCH}"
+    local sourceRepository="$2"
+    local sourceFileWithVersion="$3"
+    local sourceVersionLabel="$4"
 
-    update_version "${inputVersion}" \
-        "${REPOSITORY_2_URL}" \
-        "${FILE_WITH_VERSION_2_PATH}" \
-        "${FILE_2_VERSION_LABEL}" \
-        "${BRANCH_TO_CREATE_2}" \
-        "${REPOSITORY_2_DEFAULT_BRANCH}"
+    local targetRepository="$5"
+    local targetFileWithVersion="$6"
+    local targetVersionLabel="$7"
+
+    local newBranchName="$8"
+    local branchToMergeInto="$9"
+
+    local commitMessage="${10}"
+    local pullRequestTitle="${11}"
+    local pullRequestBody="${12}"
+    local pullRequestAssignee="${13}"
+
+    local statusCheckTimeoutSeconds="${14}"
+
+    GITHUB_REQUEST_HEADER="Authorization: token ${githubToken}"
+
+    local targetVersion="$(obtain_version "${sourceRepository}" \
+        "${sourceFileWithVersion}" \
+        "${sourceVersionLabel}")"
+
+    update_version "${targetVersion}" \
+        "${targetRepository}" \
+        "${targetFileWithVersion}" \
+        "${targetVersionLabel}" \
+        "${newBranchName}" \
+        "${branchToMergeInto}" \
+        "${commitMessage}" \
+        "${pullRequestTitle}" \
+        "${pullRequestBody}" \
+        "${pullRequestAssignee}" \
+        "${statusCheckTimeoutSeconds}"
 }
 
 main "$@"
