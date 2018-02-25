@@ -29,6 +29,8 @@ import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.Rejection;
 import io.spine.protobuf.AnyPacker;
+import io.spine.server.sharding.ShardedMessage;
+import io.spine.server.sharding.ShardedMessageId;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -103,16 +105,34 @@ public final class ExternalMessages {
         return result;
     }
 
+    public static ExternalMessage of(ShardedMessage message,
+                                     BoundedContextName boundedContextName) {
+        checkNotNull(message);
+        checkNotNull(boundedContextName);
+
+        final ShardedMessageId id = message.getId();
+        final ExternalMessage result = of(id, message, boundedContextName);
+        return result;
+    }
+
+    public static ShardedMessage asShardedMessage(ExternalMessage value) {
+        checkNotNull(value);
+        final Any originalMessage = value.getOriginalMessage();
+        final ShardedMessage result = AnyPacker.unpack(originalMessage);
+        return result;
+    }
+
     private static ExternalMessage of(Message messageId,
                                       Message message,
                                       BoundedContextName boundedContextName) {
         final Any packedId = Identifier.pack(messageId);
         final Any packedMessage = AnyPacker.pack(message);
 
-        return ExternalMessage.newBuilder()
-                              .setId(packedId)
-                              .setOriginalMessage(packedMessage)
-                              .setBoundedContextName(boundedContextName)
-                              .build();
+        final ExternalMessage result = ExternalMessage.newBuilder()
+                                                      .setId(packedId)
+                                                      .setOriginalMessage(packedMessage)
+                                                      .setBoundedContextName(boundedContextName)
+                                                      .build();
+        return result;
     }
 }

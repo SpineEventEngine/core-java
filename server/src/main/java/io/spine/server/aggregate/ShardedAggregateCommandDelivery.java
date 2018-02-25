@@ -24,9 +24,9 @@ import io.grpc.stub.StreamObserver;
 import io.spine.annotation.SPI;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.ServerEnvironment;
-import io.spine.server.sharding.Shard;
 import io.spine.server.sharding.ShardedMessage;
 import io.spine.server.sharding.ShardedMessages;
+import io.spine.server.sharding.ShardedStream;
 import io.spine.server.sharding.Sharding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,8 +52,8 @@ public abstract class ShardedAggregateCommandDelivery<I, A extends Aggregate<I, 
 
     protected ShardedAggregateCommandDelivery(AggregateRepository<I, A> repository) {
         super(repository);
-        final Shard shard = sharding().ofDestination(repository);
-        shard.addConsumer(new Consumer());
+        final ShardedStream shardedStream = sharding().ofDestination(repository);
+        shardedStream.setConsumer(new Consumer());
     }
 
     /**
@@ -74,13 +74,13 @@ public abstract class ShardedAggregateCommandDelivery<I, A extends Aggregate<I, 
 
     private void sendToShards(I id, CommandEnvelope envelope) {
         final Message commandMessage = envelope.getMessage();
-        final Set<Shard> shards = sharding().find(id, commandMessage);
+        final Set<ShardedStream> shardedStreams = sharding().find(id, commandMessage);
 
         final Message idAsMessage = toMessage(id);
         final ShardedMessage shardedMessage = ShardedMessages.of(idAsMessage, envelope);
 
-        for (Shard shard : shards) {
-            shard.post(shardedMessage);
+        for (ShardedStream shardedStream : shardedStreams) {
+            shardedStream.post(shardedMessage);
         }
     }
 

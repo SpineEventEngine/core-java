@@ -28,9 +28,9 @@ import java.util.Set;
  */
 public interface Sharding {
 
-    Shard ofDestination(Shardable shardable) throws NoShardAvailableException;
+    ShardedStream ofDestination(Shardable shardable) throws NoShardAvailableException;
 
-    Set<Shard> find(Object targetId, Message message) throws NoShardAvailableException;
+    Set<ShardedStream> find(Object targetId, Message message) throws NoShardAvailableException;
 
     enum Strategy {
 

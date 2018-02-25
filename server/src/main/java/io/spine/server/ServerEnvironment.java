@@ -24,8 +24,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import io.spine.server.sharding.NoShardAvailableException;
-import io.spine.server.sharding.Shard;
 import io.spine.server.sharding.Shardable;
+import io.spine.server.sharding.ShardedStream;
 import io.spine.server.sharding.Sharding;
 
 import javax.annotation.Nullable;
@@ -51,12 +51,12 @@ public class ServerEnvironment {
         //TODO:2018-02-22:alex.tymchenko: supply an in-process implementation instead.
         this.sharding = new Sharding() {
             @Override
-            public Shard ofDestination(Shardable shardable) throws NoShardAvailableException {
+            public ShardedStream ofDestination(Shardable shardable) throws NoShardAvailableException {
                 return null;
             }
 
             @Override
-            public Set<Shard> find(Object targetId, Message message)
+            public Set<ShardedStream> find(Object targetId, Message message)
                     throws NoShardAvailableException {
                 return null;
             }
