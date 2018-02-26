@@ -22,7 +22,6 @@ package io.spine.server.transport.memory;
 import com.google.common.base.Function;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
 import io.spine.server.integration.ChannelId;
 import io.spine.server.transport.Publisher;
 import io.spine.server.transport.Subscriber;
@@ -31,6 +30,7 @@ import io.spine.server.transport.TransportFactory;
 import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Multimaps.synchronizedMultimap;
 
 /**
  * In-memory implementation of the {@link TransportFactory}.
@@ -46,7 +46,7 @@ public final class InMemoryTransportFactory implements TransportFactory {
      * An in-memory storage of subscribers per message class.
      */
     private final Multimap<ChannelId, InMemorySubscriber> subscribers =
-            Multimaps.synchronizedMultimap(HashMultimap.<ChannelId, InMemorySubscriber>create());
+            synchronizedMultimap(HashMultimap.<ChannelId, InMemorySubscriber>create());
 
     /** Prevent direct instantiation from the outside. */
     private InMemoryTransportFactory() {}
