@@ -13,12 +13,12 @@
 function main() {
     local gitAuthorizationToken="$1"
 
-    chmod +x ./scripts/dependant-repositories/gae-update-core-version.sh
-    ./scripts/dependant-repositories/gae-update-core-version.sh \
+    chmod +x ./scripts/dependent-repositories/gae-update-core-version.sh
+    ./scripts/dependent-repositories/gae-update-core-version.sh \
         "${gitAuthorizationToken}"
 
-    chmod +x ./scripts/dependant-repositories/jdbc-update-core-version.sh
-    ./scripts/dependant-repositories/jdbc-update-core-version.sh \
+    chmod +x ./scripts/dependent-repositories/jdbc-update-core-version.sh
+    ./scripts/dependent-repositories/jdbc-update-core-version.sh \
         "${gitAuthorizationToken}"
 }
 

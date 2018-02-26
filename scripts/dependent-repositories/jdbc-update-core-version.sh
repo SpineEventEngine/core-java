@@ -1,14 +1,14 @@
 #!/bin/bash
 #
-# Update core library dependency of the gae-java repository to the latest version.
+# Update core library dependency of the jdbc-storage repository to the latest version.
 
 readonly SOURCE_REPOSITORY=https://api.github.com/repos/SpineEventEngine/core-java
 readonly SOURCE_FILE_WITH_VERSION='ext.gradle'
 readonly SOURCE_VERSION_VARIABLE='SPINE_VERSION'
 
-readonly TARGET_REPOSITORY=https://api.github.com/repos/SpineEventEngine/gae-java
+readonly TARGET_REPOSITORY=https://api.github.com/repos/SpineEventEngine/jdbc-storage
 readonly TARGET_FILE_WITH_VERSION='ext.gradle'
-readonly TARGET_VERSION_VARIABLE='spineVersion'
+readonly TARGET_VERSION_VARIABLE='coreVersion'
 
 readonly NEW_BRANCH_NAME='update-core-version'
 readonly BRANCH_TO_MERGE_INTO='master'
@@ -21,8 +21,8 @@ readonly PULL_REQUEST_ASSIGNEE='armiol'
 function main() {
     local gitAuthorizationToken="$1"
 
-    chmod +x ./scripts/dependant-repositories/update-dependency-version.sh
-    ./scripts/dependant-repositories/update-dependency-version.sh \
+    chmod +x ./scripts/dependent-repositories/update-dependency-version.sh
+    ./scripts/dependent-repositories/update-dependency-version.sh \
         "${gitAuthorizationToken}" \
         "${SOURCE_REPOSITORY}" \
         "${SOURCE_FILE_WITH_VERSION}" \
