@@ -2,9 +2,9 @@
 #
 # Make all repositories dependant on the core library have its latest version as the dependency.
 #
-# This script accept a single command line parameter - "gitAuthorizationToken".
+# This script accepts a single command line argument - "gitAuthorizationToken".
 # Such token can be generated in the "Settings/Developer settings/Personal access tokens" page on the GitHub website.
-# It allows to perform all requests to GitHub API on behalf of the token owner.
+# It allows to perform all requests to the GitHub API on behalf of the token owner.
 #
 # To store such token for the usage in the ".travis.yml" file, call 'travis encrypt GITHUB_TOKEN=*your token*'.
 # Then copy-paste the result in the "env: global" section of the ".travis.yml" in place of the old encrypted token.
