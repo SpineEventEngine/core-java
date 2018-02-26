@@ -107,7 +107,7 @@ function readJsonFieldNumeric() {
 #######################################
 # Obtain 'content' field from the file JSON data and strip it from the line breaks and quotes.
 #
-# Function is primarily used for the JSON data returned by the file acquisition GitHub API.
+# The function is primarily used for the JSON data returned by the file acquisition GitHub API.
 # Content is supposed to be encoded so line breaks and quotes can spoil the decoding process.
 #
 # Arguments:
@@ -128,7 +128,7 @@ function obtainFileContent() {
 #######################################
 # Obtain 'sha' field value from the file JSON data.
 #
-# Function is primarily used for the JSON data returned by the file acquisition GitHub API.
+# The function is primarily used for the JSON data returned by the file acquisition GitHub API.
 #
 # Arguments:
 #   fileData - file JSON data
@@ -144,7 +144,8 @@ function obtainFileSha() {
 #######################################
 # Obtain value preceded by the exact label in the text.
 #
-# Can be useful with the commands like "curl --write-out" where it is known exactly what precedes the searched value.
+# The function can be useful when it is known exactly what precedes the searched value in the text.
+# For example, with the commands like "curl --write-out".
 #
 # Arguments:
 #   label - exact string preceding the searched value
@@ -216,7 +217,7 @@ function decode() {
 #
 # Arguments:
 #   label - substring to which the value is assigned
-#   string - string with value assignment
+#   string - string with the value assignment
 #
 # Returns:
 #   Value assigned to the label.
@@ -233,11 +234,11 @@ function retrieveAssignedValue() {
 #######################################
 # Remove the assigned value from the string of kind "*label* = *value*".
 #
-# This is helper function to retrieve the desired substring of kind "*label* = " to later assign a new value to it.
+# This is a helper function to retrieve the desired substring of kind "*label* = " to later assign a new value to it.
 #
 # Arguments:
 #   value - value assigned
-#   string - string with value assignment
+#   string - string with the value assignment
 #
 # Returns:
 #   String without the value assigned.
@@ -252,16 +253,16 @@ function removeAssignedValue() {
 }
 
 #######################################
-# Substitute the value assigned to some label in text.
+# Substitute the value assigned to some label in the text.
 #
 # Arguments:
 #   oldValue - value to substitute
 #   newValue - value to assign to the label
-#   labelString - string in form "*label* = "
+#   labelString - string in the form "*label* = "
 #   text - text in which the value assigned is replaced
 #
 # Returns:
-#   New text where the label is assigned the new value.
+#   New text where the new value is assigned to the label.
 function substituteValue() {
     local oldValue="$1"
     local newValue="$2"
@@ -313,7 +314,7 @@ function checkBranchExists() {
 #   GIT_AUTHORIZATION_HEADER
 #
 # Arguments:
-#   branchName - name of the branch, without "heads" prefix
+#   branchName - name of the new branch, without "heads" prefix
 #   baseBranchName - name of the branch to derive from, without "heads" prefix
 #   repositoryUrl - URL of the repository via GitHub API
 #
@@ -400,7 +401,7 @@ function commitAndPushFile() {
 # Arguments:
 #   pullRequestName - title for the pull request
 #   head - branch to be merged
-#   base - branch to merge to
+#   base - branch to merge into
 #   body - text of the pull request body
 #   repositoryUrl - URL of the repository via GitHub API
 #
@@ -512,13 +513,13 @@ function obtainVersion() {
 #   targetVersion - new version to be set for the specified library
 #   repositoryUrl - URL of the repository via GitHub API
 #   fileWithVersion - relative path to the configuration file containing version assignment
-#   versionVariable - name of the variable representing the version of the library of interest
+#   versionVariable - name of the variable representing the version of the library
 #   newBranchName - name of the branch for the updated file
 #   branchToMergeInto - name of the branch to merge the updated version of the file into
 #   commitMessage - title of the commit with the updated version of the file
 #   pullRequestTitle - title of the pull request for the new branch
 #   pullRequestBody - body of the pull request for the new branch
-#   pullRequestAssignee - default assignee of the pull request if it can't be merged immediately
+#   pullRequestAssignee - assignee of the created pull request
 #
 # Returns:
 #   None.
@@ -603,16 +604,16 @@ function updateVersion() {
 #   githubToken - secret token for the GitHub authorization
 #   sourceRepository - source repository URL via GitHub API
 #   sourceFileWithVersion - relative path to the configuration file containing source version
-#   sourceVersionVariable - name of the variable representing the source version of the library of interest
+#   sourceVersionVariable - name of the variable representing the source version of the library
 #   targetRepository - target repository URL via GitHub API
 #   targetFileWithVersion - relative path to the configuration file containing target version
-#   targetVersionVariable - name of the variable representing the target version of the library of interest
+#   targetVersionVariable - name of the variable representing the target version of the library
 #   newBranchName - name of the branch for the updated file
 #   branchToMergeInto - name of the branch to merge the updated version of the file into
 #   commitMessage - title of the commit with the updated version of the file
 #   pullRequestTitle - title of the pull request for the new branch
 #   pullRequestBody - body of the pull request for the new branch
-#   pullRequestAssignee - default assignee of the pull request if it can't be merged immediately
+#   pullRequestAssignee - assignee of the created pull request
 #
 # Returns:
 #   None.
