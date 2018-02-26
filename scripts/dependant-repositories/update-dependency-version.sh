@@ -114,7 +114,7 @@ function readJsonFieldNumeric() {
 #   fileData - file JSON data
 #
 # Returns:
-#   File's content, which is most probably encoded.
+#   File's content.
 function obtainFileContent() {
     local fileData="$1"
 
