@@ -33,7 +33,7 @@ GIT_AUTHORIZATION_HEADER=''
 # Log the message into the stdout.
 #
 # The usual 'echo' command doesn't allow normal indentation for the line-wrapped log strings.
-# This function strips all the spaces in the message, allowing it to have the same indentation as the rest of the code.
+# This function squeezes all the spaces in the message, allowing it to have the same indentation as the rest of the code.
 #
 # The last-line 'echo' of this function is not supposed to be used as a return value.
 # Instead it's used to write the stripped message directly to the stdout.
