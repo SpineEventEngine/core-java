@@ -43,10 +43,10 @@ function searchForString() {
 }
 
 #######################################
-# Search for strings containing specified substring assignment in text.
+# Search for strings containing specified substring assignment in the text.
 #
 # This function searches for the pattern "*substring* = ..." with an arbitrary amount of spaces.
-# It can be used to search for the variable assignment in the code.
+# The primary usage of the function is to search for the variable assignment in the code.
 #
 # Arguments:
 #   string - substring whose assignment is searched
@@ -65,10 +65,10 @@ function searchForValueAssignment() {
 }
 
 #######################################
-# Acquire JSON field value from the JSON data.
+# Acquire JSON field string value from the JSON data.
 #
 # This function searches for the pattern "field": "value".
-# This function is not suitable for the numeric JSON values as they have no quotes around them.
+# This function is not suitable for the numeric or other JSON values as they have no quotes around them.
 #
 # Arguments:
 #   fieldName - name of the JSON field
@@ -77,7 +77,7 @@ function searchForValueAssignment() {
 # Returns:
 #   Field value or an empty string if the field is not found in the data or has the wrong format.
 #######################################
-function readJsonField() {
+function readJsonFieldString() {
     local fieldName="$1"
     local jsonData="$2"
 
@@ -118,7 +118,7 @@ function readJsonFieldNumeric() {
 function obtainFileContent() {
     local fileData="$1"
 
-    local fileContent="$(readJsonField 'content' "${fileData}")"
+    local fileContent="$(readJsonFieldString 'content' "${fileData}")"
     fileContent="${fileContent//\\n/}"
     fileContent="${fileContent//\"/}"
 
@@ -138,7 +138,7 @@ function obtainFileContent() {
 function obtainFileSha() {
     local fileData="$1"
 
-    echo "$(readJsonField 'sha' "${fileData}")"
+    echo "$(readJsonFieldString 'sha' "${fileData}")"
 }
 
 #######################################
@@ -329,7 +329,7 @@ function createBranch() {
     local baseBranchData="$(curl -H "${GIT_AUTHORIZATION_HEADER}" \
         "${repositoryRefsUrl}/heads/${baseBranchName}")"
 
-    local lastCommitSha="$(readJsonField 'sha' "${baseBranchData}")"
+    local lastCommitSha="$(readJsonFieldString 'sha' "${baseBranchData}")"
 
     local requestData="{\"ref\":\"refs/heads/${branchName}\",
                         \"sha\":${lastCommitSha}}"
