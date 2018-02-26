@@ -341,63 +341,6 @@ function createBranch() {
 }
 
 #######################################
-# Delete a branch with the specified name from the git repository.
-#
-# If the branch does not exist, this function does nothing.
-#
-# Globals:
-#   GIT_AUTHORIZATION_HEADER
-#
-# Arguments:
-#   branchName - name of the branch, without "heads" prefix
-#   repositoryUrl - URL of the repository via GitHub API
-#
-# Returns:
-#   None.
-function deleteBranch() {
-    local branchName="$1"
-    local repositoryUrl="$2"
-
-    curl -H "${GIT_AUTHORIZATION_HEADER}" \
-        -X DELETE \
-        "${repositoryUrl}/git/refs/heads/${branchName}"
-}
-
-#######################################
-# Get combined status check result for the branch.
-#
-# This function is primarily used for the branches that have pull request open to know if it can be already merged.
-#
-# The combined status check result can be: 'pending', 'success' or 'failure'.
-# The 'failure' status means that one or more of status checks have already failed.
-# The 'success' status means that all status checks have ended with the 'success' status.
-# The 'pending' status means that some checks are still calculated and none of them have failed yet.
-#
-# Globals:
-#   GIT_AUTHORIZATION_HEADER
-#
-# Arguments:
-#   branchName - name of the branch, without "heads" prefix
-#   repositoryUrl - URL of the repository via GitHub API
-#
-# Returns:
-#   Combined result of status checks for the specified branch or nothing if the branch is not found.
-function getStatusCheckResult() {
-    local branchName="$1"
-    local repositoryUrl="$2"
-
-    local statusData="$(curl -H "${GIT_AUTHORIZATION_HEADER}" \
-        "${repositoryUrl}/commits/heads/${branchName}/status")"
-
-    local statusCheckResult="$(readJsonField 'state' "${statusData}")"
-
-    # Remove all quotes from the result.
-    statusCheckResult="${statusCheckResult//\"/}"
-
-    echo "${statusCheckResult}"
-}
-
-#######################################
 # Request the file data from the git repository.
 #
 # Globals:
@@ -512,36 +455,6 @@ function assignPullRequest() {
         -X PATCH \
         --data "${requestData}" \
         "${repositoryUrl}/issues/${pullRequestNumber}"
-}
-
-#######################################
-# Merge pull request in the git repository.
-#
-# Globals:
-#   GIT_AUTHORIZATION_HEADER
-#
-# Arguments:
-#   pullRequestNumber - number of the pull request
-#   repositoryUrl - URL of the repository via GitHub API
-#
-# Returns:
-#   'true' if the merge was successful and 'false' otherwise.
-function mergePullRequest() {
-    local pullRequestNumber="$1"
-    local repositoryUrl="$2"
-
-    local httpStatusLabel='HTTP_STATUS:'
-
-    local mergeResponse="$(curl -H "${GIT_AUTHORIZATION_HEADER}" \
-        -H "Content-Type: application/json" \
-        -X PUT \
-        --write-out "${httpStatusLabel}%{http_code}" \
-        "${repositoryUrl}/pulls/${pullRequestNumber}/merge")"
-
-    local mergeRequestStatusCode="$(retrieveLabeledValue "${httpStatusLabel}" \
-        "${mergeResponse}")"
-
-    echo "$(checkStatusCode "${mergeRequestStatusCode}" '200')"
 }
 
 #######################################
