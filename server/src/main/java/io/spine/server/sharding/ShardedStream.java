@@ -33,8 +33,6 @@ import io.spine.server.transport.TransportFactory;
 import io.spine.string.Stringifiers;
 import io.spine.type.ClassName;
 
-import javax.annotation.Nullable;
-
 import static com.google.common.base.Joiner.on;
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -45,9 +43,6 @@ public class ShardedStream {
 
     private final TransportFactory transportFactory;
     private final BoundedContextName boundedContextName;
-
-    @Nullable
-    private StreamObserver<ShardedMessage> consumer;
 
     private final ShardingKey key;
 
