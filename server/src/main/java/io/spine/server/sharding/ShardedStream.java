@@ -45,6 +45,7 @@ public class ShardedStream {
     private final BoundedContextName boundedContextName;
 
     private final ShardingKey key;
+    private final ChannelId channelId;
 
     protected ShardedStream(ShardingKey key,
                             TransportFactory transportFactory,
@@ -52,6 +53,7 @@ public class ShardedStream {
         this.transportFactory = transportFactory;
         this.boundedContextName = boundedContextName;
         this.key = key;
+        this.channelId = getChannelId(key);
     }
 
     public ShardingKey getKey() {
@@ -86,7 +88,17 @@ public class ShardedStream {
         });
     }
 
-    private ChannelId getChannelId() {
+    private Publisher getPublisher() {
+        final Publisher result = transportFactory.createPublisher(channelId);
+        return result;
+    }
+
+    private Subscriber getSubscriber() {
+        final Subscriber result = transportFactory.createSubscriber(channelId);
+        return result;
+    }
+
+    private static ChannelId getChannelId(ShardingKey key) {
         final ClassName className = key.getModelClass()
                                        .getClassName();
         final IdPredicate idPredicate = key.getIdPredicate();
@@ -98,18 +110,6 @@ public class ShardedStream {
         final ChannelId result = ChannelId.newBuilder()
                                           .setIdentifier(asAny)
                                           .build();
-        return result;
-    }
-
-    private Publisher getPublisher() {
-        final ChannelId channelId = getChannelId();
-        final Publisher result = transportFactory.createPublisher(channelId);
-        return result;
-    }
-
-    private Subscriber getSubscriber() {
-        final ChannelId channelId = getChannelId();
-        final Subscriber result = transportFactory.createSubscriber(channelId);
         return result;
     }
 }
