@@ -746,7 +746,7 @@ update_version() {
 #   None.
 #
 # See:
-#   obtain_version(), update_version() for the detailed implementation explanation.
+#   obtain_version(), update_version() for the implementation details.
 main() {
     local gitAuthorizationToken="$1"
 
