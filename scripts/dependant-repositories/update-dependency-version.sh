@@ -18,7 +18,7 @@ GIT_AUTHORIZATION_HEADER=''
 # Returns:
 #   Full path to the file via GitHub API.
 #######################################
-obtainFullFilePath() {
+function obtainFullFilePath() {
     local relativeFilePath="$1"
     local repositoryUrl="$2"
 
@@ -35,7 +35,7 @@ obtainFullFilePath() {
 # Returns:
 #   All strings of the text containing the specified substring.
 #######################################
-searchForString() {
+function searchForString() {
     local string="$1"
     local text="$2"
 
@@ -55,7 +55,7 @@ searchForString() {
 # Returns:
 #   All strings of the text that contain the specified substring assignment.
 #######################################
-searchForValueAssignment() {
+function searchForValueAssignment() {
     local string="$1"
     local text="$2"
 
@@ -77,7 +77,7 @@ searchForValueAssignment() {
 # Returns:
 #   Field value or an empty string if the field is not found in the data or has the wrong format.
 #######################################
-readJsonField() {
+function readJsonField() {
     local fieldName="$1"
     local jsonData="$2"
 
@@ -96,7 +96,7 @@ readJsonField() {
 #
 # Returns:
 #   Field value or an empty string if the field is not found in the data or has the wrong format.
-readJsonFieldNumeric() {
+function readJsonFieldNumeric() {
     local fieldName="$1"
     local jsonData="$2"
 
@@ -115,7 +115,7 @@ readJsonFieldNumeric() {
 #
 # Returns:
 #   File's content, which is most probably encoded.
-obtainFileContent() {
+function obtainFileContent() {
     local fileData="$1"
 
     local fileContent="$(readJsonField 'content' "${fileData}")"
@@ -135,7 +135,7 @@ obtainFileContent() {
 #
 # Returns:
 #   File's sha data.
-obtainFileSha() {
+function obtainFileSha() {
     local fileData="$1"
 
     echo "$(readJsonField 'sha' "${fileData}")"
@@ -152,7 +152,7 @@ obtainFileSha() {
 #
 # Returns:
 #   Value preceded by the specified label.
-retrieveLabeledValue() {
+function retrieveLabeledValue() {
     local label="$1"
     local text="$2"
 
@@ -168,7 +168,7 @@ retrieveLabeledValue() {
 #
 # Returns:
 #   'true' if the code matches the value and 'false' otherwise.
-checkStatusCode() {
+function checkStatusCode() {
     local code="$1"
     local expectedValue="$2"
 
@@ -189,7 +189,7 @@ checkStatusCode() {
 #
 # Returns:
 #   Encoded text.
-encode() {
+function encode() {
     local text="$1"
 
     echo "$(base64 --wrap=0 <<< "${text}")"
@@ -203,7 +203,7 @@ encode() {
 #
 # Returns:
 #   Decoded text or an error message if it can't be decoded.
-decode() {
+function decode() {
     local text="$1"
 
     echo "$(base64 -d <<< "${text}")"
@@ -220,7 +220,7 @@ decode() {
 #
 # Returns:
 #   Value assigned to the label.
-retrieveAssignedValue() {
+function retrieveAssignedValue() {
     local label="$1"
     local string="$2"
 
@@ -241,7 +241,7 @@ retrieveAssignedValue() {
 #
 # Returns:
 #   String without the value assigned.
-removeAssignedValue() {
+function removeAssignedValue() {
     local value="$1"
     local stringWithVersion="$2"
 
@@ -262,7 +262,7 @@ removeAssignedValue() {
 #
 # Returns:
 #   New text where the label is assigned the new value.
-substituteValue() {
+function substituteValue() {
     local oldValue="$1"
     local newValue="$2"
     local labelString="$3"
@@ -288,7 +288,7 @@ substituteValue() {
 #
 # Returns:
 #   'true' if the branch exists and 'false' otherwise.
-checkBranchExists() {
+function checkBranchExists() {
     local branchName="$1"
     local repositoryUrl="$2"
 
@@ -319,7 +319,7 @@ checkBranchExists() {
 #
 # Returns:
 #   None.
-createBranch() {
+function createBranch() {
     local branchName="$1"
     local baseBranchName="$2"
     local repositoryUrl="$3"
@@ -354,7 +354,7 @@ createBranch() {
 #
 # Returns:
 #   None.
-deleteBranch() {
+function deleteBranch() {
     local branchName="$1"
     local repositoryUrl="$2"
 
@@ -382,7 +382,7 @@ deleteBranch() {
 #
 # Returns:
 #   Combined result of status checks for the specified branch or nothing if the branch is not found.
-getStatusCheckResult() {
+function getStatusCheckResult() {
     local branchName="$1"
     local repositoryUrl="$2"
 
@@ -408,7 +408,7 @@ getStatusCheckResult() {
 #
 # Returns:
 #   File JSON data or an error if the file is not found.
-getFileData() {
+function getFileData() {
     local fileUrl="$1"
 
     echo "$(curl -H "${GIT_AUTHORIZATION_HEADER}" "${fileUrl}")"
@@ -429,7 +429,7 @@ getFileData() {
 #
 # Returns:
 #   None.
-commitAndPushFile() {
+function commitAndPushFile() {
     local commitMessage="$1"
     local fileUrl="$2"
     local newFileContents="$3"
@@ -463,7 +463,7 @@ commitAndPushFile() {
 #
 # Returns:
 #   Number of the newly created pull request or nothing if its creation failed.
-createPullRequest() {
+function createPullRequest() {
     local pullRequestName="$1"
     local head="$2"
     local base="$3"
@@ -500,7 +500,7 @@ createPullRequest() {
 #
 # Returns:
 #   None.
-assignPullRequest() {
+function assignPullRequest() {
     local pullRequestNumber="$1"
     local repositoryUrl="$2"
     local assignee="$3"
@@ -526,7 +526,7 @@ assignPullRequest() {
 #
 # Returns:
 #   'true' if the merge was successful and 'false' otherwise.
-mergePullRequest() {
+function mergePullRequest() {
     local pullRequestNumber="$1"
     local repositoryUrl="$2"
 
@@ -561,7 +561,7 @@ mergePullRequest() {
 #
 # Returns:
 #   Value assigned to the specified version variable.
-obtainVersion() {
+function obtainVersion() {
     local repositoryUrl="$1"
     local fileWithVersion="$2"
     local versionVariable="$3"
@@ -611,7 +611,7 @@ obtainVersion() {
 #
 # Returns:
 #   None.
-updateVersion() {
+function updateVersion() {
     local targetVersion="$1"
     local repositoryUrl="$2"
     local fileWithVersion="$3"
@@ -751,7 +751,7 @@ updateVersion() {
 #
 # See:
 #   obtainVersion(), updateVersion() for the implementation details.
-main() {
+function main() {
     local gitAuthorizationToken="$1"
 
     local sourceRepository="$2"

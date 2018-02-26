@@ -20,7 +20,7 @@ readonly PULL_REQUEST_ASSIGNEE='armiol'
 
 readonly STATUS_CHECK_TIMEOUT_SECONDS=1200
 
-main() {
+function main() {
     local gitAuthorizationToken="$1"
 
     chmod +x ./scripts/dependant-repositories/update-dependency-version.sh
