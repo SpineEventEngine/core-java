@@ -668,11 +668,11 @@ function updateVersion() {
             "${fileSha}" \
             "${newBranchName}"
 
-        if [ "$branchExists" = false ]; then
+        if [ "${branchExists}" = 'false' ]; then
 
             # Wait so Travis pull request build doesn't auto-cancel Travis push build.
             # This leads to the push build status check being failed and PR not being able to merge.
-            sleep 10
+            sleep 60
 
             local pullRequestNumber="$(createPullRequest "${pullRequestTitle}" \
                 "${newBranchName}" \
