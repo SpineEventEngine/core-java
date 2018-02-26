@@ -234,6 +234,8 @@ function decode() {
 #
 # This function is primarily used to obtain the value assigned to some variable in the code.
 #
+# The number of spaces between the label/value and the equality sign doesn't make a difference.
+#
 # Arguments:
 #   label - substring to which the value is assigned
 #   string - string with the value assignment
@@ -254,6 +256,8 @@ function retrieveAssignedValue() {
 # Remove the assigned value from the string of kind "*label* = *value*".
 #
 # This is a helper function to retrieve the desired substring of kind "*label* = " to later assign a new value to it.
+#
+# The number of spaces between the label/value and the equality sign doesn't make a difference.
 #
 # Arguments:
 #   value - value assigned
@@ -277,7 +281,7 @@ function removeAssignedValue() {
 # Arguments:
 #   oldValue - value to substitute
 #   newValue - value to assign to the label
-#   labelString - string in the form "*label* = "
+#   labelString - string in the form "*label* = " with an arbitrary amount of spaces before and after "="
 #   text - text in which the value assigned is replaced
 #
 # Returns:
@@ -482,6 +486,8 @@ function assignPullRequest() {
 #
 # This function searches for the value assignment in the specified file of the git repository.
 # From the string of the type "*versionVariable* = *value*" it returns the 'value' to the caller.
+# The number of spaces between the variable/value and the equality sign doesn't make a difference.
+#
 # This way it is possible to search for the specific library version in the Gradle configuration files.
 #
 # Globals:
@@ -519,6 +525,7 @@ function obtainVersion() {
 #
 # This function searches for the value assignment in the specified file of the git repository.
 # For the string of the type "*versionVariable* = *value*" it replaces the 'value' with the specified 'targetVersion'.
+# The number of spaces between the variable/value and the equality sign doesn't make a difference.
 #
 # After the new value is assigned to the version variable, the file is committed to a new branch of the repository.
 # A pull request is then opened for the new branch and assigned to the specified *pullRequestAssignee*.
