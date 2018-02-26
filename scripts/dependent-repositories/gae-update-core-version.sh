@@ -13,8 +13,8 @@ readonly TARGET_VERSION_VARIABLE='spineVersion'
 readonly NEW_BRANCH_NAME='update-core-version'
 readonly BRANCH_TO_MERGE_INTO='master'
 
-readonly COMMIT_MESSAGE='Update the dependency to `core-java` /version/.'
-readonly PULL_REQUEST_TITLE='Update the dependency to `core-java` /version/.'
+readonly COMMIT_MESSAGE="Update the dependency to \`core-java\` *version*."
+readonly PULL_REQUEST_TITLE="Update the dependency to \`core-java\` *version*."
 readonly PULL_REQUEST_BODY='Auto-generated PR to update core library dependency to the latest version.'
 readonly PULL_REQUEST_ASSIGNEE='armiol'
 
