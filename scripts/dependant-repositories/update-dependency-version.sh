@@ -548,7 +548,7 @@ merge_pull_request() {
 # Obtain the version of the specified library from the git repository.
 #
 # This function searches for the value assignment in the specified file of the git repository.
-# From the string of the type "*versionLabel* = *value*" it returns the 'value' to the caller.
+# From the string of the type "*versionVariable* = *value*" it returns the 'value' to the caller.
 # This way it is possible to search for the specific library version in the Gradle configuration files.
 #
 # Globals:
@@ -557,14 +557,14 @@ merge_pull_request() {
 # Arguments:
 #   repositoryUrl - URL of the repository via GitHub API
 #   fileWithVersion - relative path to the configuration file containing version assignment
-#   versionLabel - name of the variable representing the version of the library
+#   versionVariable - name of the variable representing the version of the library
 #
 # Returns:
-#   Value assigned to the specified version label.
+#   Value assigned to the specified version variable.
 obtain_version() {
     local repositoryUrl="$1"
     local fileWithVersion="$2"
-    local versionLabel="$3"
+    local versionVariable="$3"
 
     local fullFilePath="$(obtain_full_file_path "${fileWithVersion}" \
         "${repositoryUrl}")"
@@ -573,9 +573,10 @@ obtain_version() {
     local fileContent="$(obtain_file_content "${fileData}")"
     local fileContentDecoded="$(decode "${fileContent}")"
 
-    local stringWithVersion="$(search_for_value_assignment "${versionLabel}" \
+    local stringWithVersion="$(search_for_value_assignment "${versionVariable}" \
         "${fileContentDecoded}")"
-    local version="$(retrieve_assigned_value "${versionLabel}" "${stringWithVersion}")"
+    local version="$(retrieve_assigned_value "${versionVariable}" \
+        "${stringWithVersion}")"
 
     echo "${version}"
 }
@@ -584,7 +585,7 @@ obtain_version() {
 # Update version of the specified library in the git repository.
 #
 # This function searches for the value assignment in the specified file of the git repository.
-# For the string of the type "*versionLabel* = *value*" it replaces the 'value' with the specified 'targetVersion'.
+# For the string of the type "*versionVariable* = *value*" it replaces the 'value' with the specified 'targetVersion'.
 #
 # After the new value is assigned to the version variable, the file is committed to a new branch of the repository.
 # A pull request is then opened for the new branch and, if all status checks are successful, immediately merged.
@@ -599,7 +600,7 @@ obtain_version() {
 #   targetVersion - new version to be set for the specified library
 #   repositoryUrl - URL of the repository via GitHub API
 #   fileWithVersion - relative path to the configuration file containing version assignment
-#   versionLabel - name of the variable representing the version of the library of interest
+#   versionVariable - name of the variable representing the version of the library of interest
 #   newBranchName - name of the branch for the updated file
 #   branchToMergeInto - name of the branch to merge the updated version of the file into
 #   commitMessage - title of the commit with the updated version of the file
@@ -614,7 +615,7 @@ update_version() {
     local targetVersion="$1"
     local repositoryUrl="$2"
     local fileWithVersion="$3"
-    local versionLabel="$4"
+    local versionVariable="$4"
     local newBranchName="$5"
     local branchToMergeInto="$6"
     local commitMessage="$7"
@@ -626,7 +627,8 @@ update_version() {
     local fullFilePath="$(obtain_full_file_path "${fileWithVersion}" \
         "${repositoryUrl}")"
 
-    local branchExists="$(check_branch_exists "${newBranchName}" "${repositoryUrl}")"
+    local branchExists="$(check_branch_exists "${newBranchName}" \
+        "${repositoryUrl}")"
 
     if [ "${branchExists}" = 'true' ]; then
 
@@ -638,10 +640,11 @@ update_version() {
     local fileContent="$(obtain_file_content "${fileData}")"
     local fileContentDecoded="$(decode "${fileContent}")"
 
-    local stringWithVersion="$(search_for_value_assignment "${versionLabel}" \
+    local stringWithVersion="$(search_for_value_assignment "${versionVariable}" \
         "${fileContentDecoded}")"
 
-    local version="$(retrieve_assigned_value "${versionLabel}" "${stringWithVersion}")"
+    local version="$(retrieve_assigned_value "${versionVariable}" \
+        "${stringWithVersion}")"
 
     if [ "${targetVersion}" != "${version}" ]; then
         if [ "${branchExists}" = 'false' ]; then
@@ -650,7 +653,8 @@ update_version() {
                 "${repositoryUrl}"
         fi
 
-        local labelString="$(remove_assigned_value "${version}" "${stringWithVersion}")"
+        local labelString="$(remove_assigned_value "${version}" \
+            "${stringWithVersion}")"
         local newText="$(substitute_value "${version}" \
             "${targetVersion}" \
             "${labelString}" \
@@ -730,10 +734,10 @@ update_version() {
 #   githubToken - secret token for the GitHub authorization
 #   sourceRepository - source repository URL via GitHub API
 #   sourceFileWithVersion - relative path to the configuration file containing source version
-#   sourceVersionLabel - name of the variable representing the source version of the library of interest
+#   sourceVersionVariable - name of the variable representing the source version of the library of interest
 #   targetRepository - target repository URL via GitHub API
 #   targetFileWithVersion - relative path to the configuration file containing target version
-#   targetVersionLabel - name of the variable representing the target version of the library of interest
+#   targetVersionVariable - name of the variable representing the target version of the library of interest
 #   newBranchName - name of the branch for the updated file
 #   branchToMergeInto - name of the branch to merge the updated version of the file into
 #   commitMessage - title of the commit with the updated version of the file
@@ -752,11 +756,11 @@ main() {
 
     local sourceRepository="$2"
     local sourceFileWithVersion="$3"
-    local sourceVersionLabel="$4"
+    local sourceVersionVariable="$4"
 
     local targetRepository="$5"
     local targetFileWithVersion="$6"
-    local targetVersionLabel="$7"
+    local targetVersionVariable="$7"
 
     local newBranchName="$8"
     local branchToMergeInto="$9"
@@ -770,12 +774,12 @@ main() {
 
     local targetVersion="$(obtain_version "${sourceRepository}" \
         "${sourceFileWithVersion}" \
-        "${sourceVersionLabel}")"
+        "${sourceVersionVariable}")"
 
     update_version "${targetVersion}" \
         "${targetRepository}" \
         "${targetFileWithVersion}" \
-        "${targetVersionLabel}" \
+        "${targetVersionVariable}" \
         "${newBranchName}" \
         "${branchToMergeInto}" \
         "${commitMessage}" \
