@@ -65,6 +65,25 @@ function searchForValueAssignment() {
 }
 
 #######################################
+# Replace some pattern in the text by another substring.
+#
+# Arguments:
+#   pattern - pattern or substring to replace
+#   replacement - string with which to replace the pattern
+#   text - text, i.e. string with or without line breaks, in which to perform the replacement
+#
+# Returns:
+#   Text with the *pattern* replaced by *replacement*.
+#######################################
+function replace() {
+    local pattern="$1"
+    local replacement="$2"
+    local text="$3"
+
+    echo "${text//${pattern}/${replacement}}"
+}
+
+#######################################
 # Acquire JSON field string value from the JSON data.
 #
 # This function searches for the pattern "field": "value".
@@ -119,8 +138,8 @@ function obtainFileContent() {
     local fileData="$1"
 
     local fileContent="$(readJsonFieldString 'content' "${fileData}")"
-    fileContent="${fileContent//\\n/}"
-    fileContent="${fileContent//\"/}"
+    fileContent="$(replace "\\\n" "" "${fileContent}")"
+    fileContent="$(replace "\"" "" "${fileContent}")"
 
     echo "${fileContent}"
 }
@@ -573,15 +592,26 @@ function updateVersion() {
 
         local newFileContentEncoded="$(encode "${newFileContent}")"
         local fileSha="$(obtainFileSha "${fileData}")"
-        commitAndPushFile "${commitMessage}" \
+
+        local targetVersionNoQuotes="$(replace "\'" "" "${targetVersion}")"
+
+        local commitMessageWithVersion="$(replace "\*version\*" \
+            "${targetVersionNoQuotes}" \
+            "${commitMessage}")"
+
+        commitAndPushFile "${commitMessageWithVersion}" \
             "${fullFilePath}" \
             "${newFileContentEncoded}" \
             "${fileSha}" \
             "${newBranchName}"
 
         if [ "${branchExists}" = 'false' ]; then
+            local pullRequestTitleWithVersion="$(replace "\*version\*" \
+                "${targetVersionNoQuotes}" \
+                "${pullRequestTitle}")"
 
-            local pullRequestNumber="$(createPullRequest "${pullRequestTitle}" \
+            local pullRequestNumber="$(createPullRequest \
+                "${pullRequestTitleWithVersion}" \
                 "${newBranchName}" \
                 "${branchToMergeInto}" \
                 "${pullRequestBody}" \
@@ -610,8 +640,8 @@ function updateVersion() {
 #   targetVersionVariable - name of the variable representing the target version of the library
 #   newBranchName - name of the branch for the updated file
 #   branchToMergeInto - name of the branch to merge the updated version of the file into
-#   commitMessage - title of the commit with the updated version of the file
-#   pullRequestTitle - title of the pull request for the new branch
+#   commitMessage - title of the commit with the updated file; use "*version*" placeholder to insert the new version into it
+#   pullRequestTitle - title of the new pull request; use "*version*" placeholder to insert the new version into it
 #   pullRequestBody - body of the pull request for the new branch
 #   pullRequestAssignee - assignee of the created pull request
 #
