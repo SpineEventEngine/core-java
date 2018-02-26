@@ -18,7 +18,7 @@ GIT_AUTHORIZATION_HEADER=''
 # Returns:
 #   Full path to the file via GitHub API.
 #######################################
-obtain_full_file_path() {
+obtainFullFilePath() {
     local relativeFilePath="$1"
     local repositoryUrl="$2"
 
@@ -35,7 +35,7 @@ obtain_full_file_path() {
 # Returns:
 #   All strings of the text containing the specified substring.
 #######################################
-search_for_string() {
+searchForString() {
     local string="$1"
     local text="$2"
 
@@ -55,13 +55,13 @@ search_for_string() {
 # Returns:
 #   All strings of the text that contain the specified substring assignment.
 #######################################
-search_for_value_assignment() {
+searchForValueAssignment() {
     local string="$1"
     local text="$2"
 
     local patternToSearch="${string} *= *"
 
-    echo "$(search_for_string "${patternToSearch}" "${text}")"
+    echo "$(searchForString "${patternToSearch}" "${text}")"
 }
 
 #######################################
@@ -77,7 +77,7 @@ search_for_value_assignment() {
 # Returns:
 #   Field value or an empty string if the field is not found in the data or has the wrong format.
 #######################################
-read_json_field() {
+readJsonField() {
     local fieldName="$1"
     local jsonData="$2"
 
@@ -96,7 +96,7 @@ read_json_field() {
 #
 # Returns:
 #   Field value or an empty string if the field is not found in the data or has the wrong format.
-read_json_field_numeric() {
+readJsonFieldNumeric() {
     local fieldName="$1"
     local jsonData="$2"
 
@@ -115,10 +115,10 @@ read_json_field_numeric() {
 #
 # Returns:
 #   File's content, which is most probably encoded.
-obtain_file_content() {
+obtainFileContent() {
     local fileData="$1"
 
-    local fileContent="$(read_json_field 'content' "${fileData}")"
+    local fileContent="$(readJsonField 'content' "${fileData}")"
     fileContent="${fileContent//\\n/}"
     fileContent="${fileContent//\"/}"
 
@@ -135,10 +135,10 @@ obtain_file_content() {
 #
 # Returns:
 #   File's sha data.
-obtain_file_sha() {
+obtainFileSha() {
     local fileData="$1"
 
-    echo "$(read_json_field 'sha' "${fileData}")"
+    echo "$(readJsonField 'sha' "${fileData}")"
 }
 
 #######################################
@@ -152,7 +152,7 @@ obtain_file_sha() {
 #
 # Returns:
 #   Value preceded by the specified label.
-retrieve_labeled_value() {
+retrieveLabeledValue() {
     local label="$1"
     local text="$2"
 
@@ -168,7 +168,7 @@ retrieve_labeled_value() {
 #
 # Returns:
 #   'true' if the code matches the value and 'false' otherwise.
-check_status_code() {
+checkStatusCode() {
     local code="$1"
     local expectedValue="$2"
 
@@ -220,7 +220,7 @@ decode() {
 #
 # Returns:
 #   Value assigned to the label.
-retrieve_assigned_value() {
+retrieveAssignedValue() {
     local label="$1"
     local string="$2"
 
@@ -241,7 +241,7 @@ retrieve_assigned_value() {
 #
 # Returns:
 #   String without the value assigned.
-remove_assigned_value() {
+removeAssignedValue() {
     local value="$1"
     local stringWithVersion="$2"
 
@@ -262,7 +262,7 @@ remove_assigned_value() {
 #
 # Returns:
 #   New text where the label is assigned the new value.
-substitute_value() {
+substituteValue() {
     local oldValue="$1"
     local newValue="$2"
     local labelString="$3"
@@ -288,7 +288,7 @@ substitute_value() {
 #
 # Returns:
 #   'true' if the branch exists and 'false' otherwise.
-check_branch_exists() {
+checkBranchExists() {
     local branchName="$1"
     local repositoryUrl="$2"
 
@@ -298,10 +298,10 @@ check_branch_exists() {
         --write-out "${httpStatusLabel}%{http_code}" \
         "${repositoryUrl}/git/refs/heads/${branchName}")"
 
-    local branchRequestStatusCode="$(retrieve_labeled_value "${httpStatusLabel}" \
+    local branchRequestStatusCode="$(retrieveLabeledValue "${httpStatusLabel}" \
         "${responseBody}")"
 
-    echo "$(check_status_code "${branchRequestStatusCode}" '200')"
+    echo "$(checkStatusCode "${branchRequestStatusCode}" '200')"
 }
 
 #######################################
@@ -319,7 +319,7 @@ check_branch_exists() {
 #
 # Returns:
 #   None.
-create_branch() {
+createBranch() {
     local branchName="$1"
     local baseBranchName="$2"
     local repositoryUrl="$3"
@@ -329,7 +329,7 @@ create_branch() {
     local baseBranchData="$(curl -H "${GIT_AUTHORIZATION_HEADER}" \
         "${repositoryRefsUrl}/heads/${baseBranchName}")"
 
-    local lastCommitSha="$(read_json_field 'sha' "${baseBranchData}")"
+    local lastCommitSha="$(readJsonField 'sha' "${baseBranchData}")"
 
     local requestData="{\"ref\":\"refs/heads/${branchName}\",
                         \"sha\":${lastCommitSha}}"
@@ -354,7 +354,7 @@ create_branch() {
 #
 # Returns:
 #   None.
-delete_branch() {
+deleteBranch() {
     local branchName="$1"
     local repositoryUrl="$2"
 
@@ -382,14 +382,14 @@ delete_branch() {
 #
 # Returns:
 #   Combined result of status checks for the specified branch or nothing if the branch is not found.
-get_status_check_result() {
+getStatusCheckResult() {
     local branchName="$1"
     local repositoryUrl="$2"
 
     local statusData="$(curl -H "${GIT_AUTHORIZATION_HEADER}" \
         "${repositoryUrl}/commits/heads/${branchName}/status")"
 
-    local statusCheckResult="$(read_json_field 'state' "${statusData}")"
+    local statusCheckResult="$(readJsonField 'state' "${statusData}")"
 
     # Remove all quotes from the result.
     statusCheckResult="${statusCheckResult//\"/}"
@@ -408,7 +408,7 @@ get_status_check_result() {
 #
 # Returns:
 #   File JSON data or an error if the file is not found.
-get_file_data() {
+getFileData() {
     local fileUrl="$1"
 
     echo "$(curl -H "${GIT_AUTHORIZATION_HEADER}" "${fileUrl}")"
@@ -429,7 +429,7 @@ get_file_data() {
 #
 # Returns:
 #   None.
-commit_and_push_file() {
+commitAndPushFile() {
     local commitMessage="$1"
     local fileUrl="$2"
     local newFileContents="$3"
@@ -463,7 +463,7 @@ commit_and_push_file() {
 #
 # Returns:
 #   Number of the newly created pull request or nothing if its creation failed.
-create_pull_request() {
+createPullRequest() {
     local pullRequestName="$1"
     local head="$2"
     local base="$3"
@@ -480,7 +480,7 @@ create_pull_request() {
         --data "$requestData" \
         "${repositoryUrl}/pulls")"
 
-    local pullRequestNumber="$(read_json_field_numeric \
+    local pullRequestNumber="$(readJsonFieldNumeric \
         'number' \
         "${creationResponse}")"
 
@@ -500,7 +500,7 @@ create_pull_request() {
 #
 # Returns:
 #   None.
-assign_pull_request() {
+assignPullRequest() {
     local pullRequestNumber="$1"
     local repositoryUrl="$2"
     local assignee="$3"
@@ -526,7 +526,7 @@ assign_pull_request() {
 #
 # Returns:
 #   'true' if the merge was successful and 'false' otherwise.
-merge_pull_request() {
+mergePullRequest() {
     local pullRequestNumber="$1"
     local repositoryUrl="$2"
 
@@ -538,10 +538,10 @@ merge_pull_request() {
         --write-out "${httpStatusLabel}%{http_code}" \
         "${repositoryUrl}/pulls/${pullRequestNumber}/merge")"
 
-    local mergeRequestStatusCode="$(retrieve_labeled_value "${httpStatusLabel}" \
+    local mergeRequestStatusCode="$(retrieveLabeledValue "${httpStatusLabel}" \
         "${mergeResponse}")"
 
-    echo "$(check_status_code "${mergeRequestStatusCode}" '200')"
+    echo "$(checkStatusCode "${mergeRequestStatusCode}" '200')"
 }
 
 #######################################
@@ -561,21 +561,21 @@ merge_pull_request() {
 #
 # Returns:
 #   Value assigned to the specified version variable.
-obtain_version() {
+obtainVersion() {
     local repositoryUrl="$1"
     local fileWithVersion="$2"
     local versionVariable="$3"
 
-    local fullFilePath="$(obtain_full_file_path "${fileWithVersion}" \
+    local fullFilePath="$(obtainFullFilePath "${fileWithVersion}" \
         "${repositoryUrl}")"
 
-    local fileData="$(get_file_data ${fullFilePath})"
-    local fileContent="$(obtain_file_content "${fileData}")"
+    local fileData="$(getFileData ${fullFilePath})"
+    local fileContent="$(obtainFileContent "${fileData}")"
     local fileContentDecoded="$(decode "${fileContent}")"
 
-    local stringWithVersion="$(search_for_value_assignment "${versionVariable}" \
+    local stringWithVersion="$(searchForValueAssignment "${versionVariable}" \
         "${fileContentDecoded}")"
-    local version="$(retrieve_assigned_value "${versionVariable}" \
+    local version="$(retrieveAssignedValue "${versionVariable}" \
         "${stringWithVersion}")"
 
     echo "${version}"
@@ -611,7 +611,7 @@ obtain_version() {
 #
 # Returns:
 #   None.
-update_version() {
+updateVersion() {
     local targetVersion="$1"
     local repositoryUrl="$2"
     local fileWithVersion="$3"
@@ -624,10 +624,10 @@ update_version() {
     local pullRequestAssignee="${10}"
     local statusCheckTimeoutSeconds="${11}"
 
-    local fullFilePath="$(obtain_full_file_path "${fileWithVersion}" \
+    local fullFilePath="$(obtainFullFilePath "${fileWithVersion}" \
         "${repositoryUrl}")"
 
-    local branchExists="$(check_branch_exists "${newBranchName}" \
+    local branchExists="$(checkBranchExists "${newBranchName}" \
         "${repositoryUrl}")"
 
     if [ "${branchExists}" = 'true' ]; then
@@ -636,33 +636,33 @@ update_version() {
         fullFilePath="${fullFilePath}?ref=${newBranchName}"
     fi
 
-    local fileData="$(get_file_data ${fullFilePath})"
-    local fileContent="$(obtain_file_content "${fileData}")"
+    local fileData="$(getFileData ${fullFilePath})"
+    local fileContent="$(obtainFileContent "${fileData}")"
     local fileContentDecoded="$(decode "${fileContent}")"
 
-    local stringWithVersion="$(search_for_value_assignment "${versionVariable}" \
+    local stringWithVersion="$(searchForValueAssignment "${versionVariable}" \
         "${fileContentDecoded}")"
 
-    local version="$(retrieve_assigned_value "${versionVariable}" \
+    local version="$(retrieveAssignedValue "${versionVariable}" \
         "${stringWithVersion}")"
 
     if [ "${targetVersion}" != "${version}" ]; then
         if [ "${branchExists}" = 'false' ]; then
-            create_branch "${newBranchName}" \
+            createBranch "${newBranchName}" \
                 "${branchToMergeInto}" \
                 "${repositoryUrl}"
         fi
 
-        local labelString="$(remove_assigned_value "${version}" \
+        local labelString="$(removeAssignedValue "${version}" \
             "${stringWithVersion}")"
-        local newText="$(substitute_value "${version}" \
+        local newText="$(substituteValue "${version}" \
             "${targetVersion}" \
             "${labelString}" \
             "${fileContentDecoded}")"
 
         local encodedNewText="$(encode "${newText}")"
-        local fileSha="$(obtain_file_sha "${fileData}")"
-        commit_and_push_file "${commitMessage}" \
+        local fileSha="$(obtainFileSha "${fileData}")"
+        commitAndPushFile "${commitMessage}" \
             "${fullFilePath}" \
             "${encodedNewText}" \
             "${fileSha}" \
@@ -674,7 +674,7 @@ update_version() {
             # This leads to the push build status check being failed and PR not being able to merge.
             sleep 10
 
-            local pullRequestNumber="$(create_pull_request "${pullRequestTitle}" \
+            local pullRequestNumber="$(createPullRequest "${pullRequestTitle}" \
                 "${newBranchName}" \
                 "${branchToMergeInto}" \
                 "${pullRequestBody}" \
@@ -688,7 +688,7 @@ update_version() {
 
             # Emulate do...while loop.
             while true; do
-                statusCheckResult="$(get_status_check_result \
+                statusCheckResult="$(getStatusCheckResult \
                     "${newBranchName}" \
                     "${repositoryUrl}")"
 
@@ -708,16 +708,16 @@ update_version() {
             echo "Status checks result: ${statusCheckResult}"
 
             if [ "${statusCheckResult}" = 'success' ]; then
-                local mergeSuccessful="$(merge_pull_request "${pullRequestNumber}" \
+                local mergeSuccessful="$(mergePullRequest "${pullRequestNumber}" \
                     "${repositoryUrl}")"
                 if [ "${mergeSuccessful}" = 'true' ]; then
-                    delete_branch "${newBranchName}" "${repositoryUrl}"
+                    deleteBranch "${newBranchName}" "${repositoryUrl}"
                     return 0
                 fi
             fi
 
             # If status checks indicated failure or merge was unsuccessful, assign the PR to the assignee.
-            assign_pull_request "${pullRequestNumber}" \
+            assignPullRequest "${pullRequestNumber}" \
                 "${repositoryUrl}" \
                 "${pullRequestAssignee}"
         fi
@@ -750,7 +750,7 @@ update_version() {
 #   None.
 #
 # See:
-#   obtain_version(), update_version() for the implementation details.
+#   obtainVersion(), updateVersion() for the implementation details.
 main() {
     local gitAuthorizationToken="$1"
 
@@ -772,11 +772,11 @@ main() {
 
     GIT_AUTHORIZATION_HEADER="Authorization: token ${gitAuthorizationToken}"
 
-    local targetVersion="$(obtain_version "${sourceRepository}" \
+    local targetVersion="$(obtainVersion "${sourceRepository}" \
         "${sourceFileWithVersion}" \
         "${sourceVersionVariable}")"
 
-    update_version "${targetVersion}" \
+    updateVersion "${targetVersion}" \
         "${targetRepository}" \
         "${targetFileWithVersion}" \
         "${targetVersionVariable}" \
