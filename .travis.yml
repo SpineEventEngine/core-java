@@ -10,6 +10,8 @@ env:
     - secure: RVrbSK76Ui1JcnfAq8mV11FDkntu/BaJwOiMWIezAEZAenrwtVlnGaP2hZPRvvFV0c/jRnEv6Q1YuhB9rQ0Ldac2TWpTMomfTLzChZmhuev5Ee7bL4cCJ/gROA0cnYrixYLxpLk3yYMiZuJviDuvACzUXkll37lBIOjpXzoKB5xPN1xuw+vtMQ7L+BQLvBJkWgEDGrUMpOXNIph1fBVcANX28AAmlzZuruNdh6jyi97CfIzE5gn1HnKInn8mW1iG5C5kU6uxShVNTav1Moo9mYJTJt0WfTiDPhb6+11uDNtGjmATd73wjccpLKX7QJAqkH2i/jxPFlqB5pgmklmxCgaL/+NqRsN5Ow84bZ8uMH1j8LhdA3o79rYjeCyQ3BOnloGo2t5StXs/v/IZU1KCgCYvh4H26Bw768VsChtWtFVo+FxFoKub/AaVUmUtBTB63VKgr0iFIJSpSzMpXMFuvVBJ2y54UsOvZw1XL9IM+SYkgVBDd1fAwPT3nfNDUYfDbECzd7FbLhg0vvzhagOZCz/jbN8FEyauPFXQ4xwLoI6kKLoQSkF8qOr+dLbyXEKHSXxAt8lnIeGAJrSEmPiOv69JBirjSR0OMfaT/KL+cfQ2AJ6Hhc5XNmFQjIELP42Jmd+tmTBD2nfwY76vrU132C/nzoAGXkUME2hGbnvlrRg=
     # Encrypted `GCS_SECRET` variable.
     - secure: MDtkG8hUJtC67lf3jYwS4nkCScTTWq2kNGvOK5KaRYgvLKAVd6pIxE0OSUR7IJALLu5O4xAWhJH26TU5QcVrmnRMY4MrhLDgjDfcYCxoclPzTRzxlsGvZz2For02kaHxMF7CXzdtr13zr8EZR5nQI6uQoY39R6w01/xD7lWYAz5WEwlCy700AuOcZ5u4I4Me+9vhu2BO1fYCp1Enq4xkk6ARGXqF7MTm4fMuZeMLOA6PlQ94RaM+XMQ8VKqyYamv46O5P95/SwtNKfeFUCe+NIKVOX23VcS1om02KRNhYmVoABco0BNX3oNRqbVcXkubvAAgg5OHM+k5DbRk306WnMxvlhMitNQeJQ0xGuEPIjCREoZw3AXh+iV5xmaQ1EUa8tsJHMpLishsu9S/towRjtM+r/ODiLFWh+caBqKyDyExwrM79XOuv1/UpV9ZB5/eoz5oqyrO9NNJpJVmDkffh3NYXavE0Zb48g+1NLCvUPgIu7i76JCtK7y5BwYQQZqhOlU/QfF8TDekFv31JecSMpg3zwTGcec8a9F19J+G8bliheDSzpQ6l1AaRL6glzBWrGdGHMLRYJDYi8bHz/uYqavb8GMg61+kMTkXxgtSFCs47voJ/7HyMTOLNGJ+DCBb94GkqWcGrjsO3W1lNoKTmgLWXGU8ALMvqYDVTDolvEI=
+    # Encrypted `GITHUB_TOKEN` variable. The token belongs to dmitrykuzmin.
+    - secure: H4Y2y8exFGg3TSXBcLOLSSCKFVnhWmk8V1bmvY1pHtt5dcMDy7T3M0PdVXez0XeYbkJsDzTDk8ls7vvxNATSWl42pSt1YEeIIIesNHxsZvehyAySa03fuRLTt4tWOmsejAhZL1XytbLNRL5Bh99qVUJkx+9p8ThFtJenK8mSTzM0u9WaXGnMEXIqfraEOp6uzA8VFQHIkNSzPiM0zapxklNYuuzhHNpowkgrnmwz6ZW+6ExS5bLieZ1L9ktNk/vHYa0+Sy2vId6nGKALHy6cJc+aKaFmn3Bq7dd6wUDHtZgsbfWa2/Ia+jktHkGgUq5TIh0HR2bjqVBpFrz9jQcl8XKvd3E7rWIGCwDSZh0H+jt5tndZYtlrygKAMfNN47RrUZRcx6IqBFcf6kZ0KyWxtSB9hyqdtroQhSH6d5RupODZh8V8Ug8129xS1Rn7epCgTlyq8JdHu0U/ph8/Qtbr5cFhzwU8UMczhelAO2aGpffNTJGIgVpyeyNo9alyFOdP/ME1569wvPvlxWVT5Clm06HyMeCqpZnCe/r8ojKpWsWC5keSglMeIKZJZXfjkrjsY6mz4mM6ob6drvMH2/zQhHuo45jzVyWjbKHfMxepkvxwBx/u3WxmhQXXyCjcyWUOfHIZ/bkQCAFcldNgzu7GueLLl4t+1Acx+c4k+zPbQqw=
     # This email is used as a commit author email when updating the Javadoc hosted on GitHub Pages.
     # See `scripts/update-gh-pages.gradle`
     - FORMAL_GIT_HUB_PAGES_AUTHOR: "spine-developers@teamdev.com"
@@ -39,6 +41,11 @@ after_success:
   - bash <(curl -s https://codecov.io/bash)
   - chmod +x ./scripts/report-coverage.sh
   - ./scripts/report-coverage.sh
+  - |
+    if [[ $TRAVIS_BRANCH == master ]] && [[ $TRAVIS_PULL_REQUEST == false ]]; then
+      chmod +x ./scripts/dependant-repositories/update-dependant-repositories.sh
+      ./scripts/dependant-repositories/update-dependant-repositories.sh $GITHUB_TOKEN
+    fi
 
 after_script:
   - chmod +x ./scripts/upload-artifacts.sh
