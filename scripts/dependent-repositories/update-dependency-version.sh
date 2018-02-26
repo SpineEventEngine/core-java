@@ -623,7 +623,7 @@ function updateVersion() {
 
         local targetVersionNoQuotes="$(replace "\'" "" "${targetVersion}")"
 
-        local commitMessageWithVersion="$(replace "\*version\*" \
+        local commitMessageWithVersion="$(replace "/version/" \
             "${targetVersionNoQuotes}" \
             "${commitMessage}")"
 
@@ -634,7 +634,7 @@ function updateVersion() {
             "${newBranchName}"
 
         if [ "${branchExists}" = 'false' ]; then
-            local pullRequestTitleWithVersion="$(replace "\*version\*" \
+            local pullRequestTitleWithVersion="$(replace "/version/" \
                 "${targetVersionNoQuotes}" \
                 "${pullRequestTitle}")"
 
@@ -668,8 +668,8 @@ function updateVersion() {
 #   targetVersionVariable - name of the variable representing the target version of the library
 #   newBranchName - name of the branch for the updated file
 #   branchToMergeInto - name of the branch to merge the updated version of the file into
-#   commitMessage - title of the commit with the updated file; use "*version*" placeholder to insert the new version into it
-#   pullRequestTitle - title of the new pull request; use "*version*" placeholder to insert the new version into it
+#   commitMessage - title of the commit with the updated file; use "/version/" placeholder to insert the new version into it
+#   pullRequestTitle - title of the new pull request; use "/version/" placeholder to insert the new version into it
 #   pullRequestBody - body of the pull request for the new branch
 #   pullRequestAssignee - assignee of the created pull request
 #
