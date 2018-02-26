@@ -30,6 +30,51 @@
 GIT_AUTHORIZATION_HEADER=''
 
 #######################################
+# Log the message into the stdout.
+#
+# The usual 'echo' command doesn't allow normal indentation for the line-wrapped log strings.
+# This function strips all the spaces in the message, allowing it to have the same indentation as the rest of the code.
+#
+# The last-line 'echo' of this function is not supposed to be used as a return value.
+# Instead it's used to write the stripped message directly to the stdout.
+#
+# Arguments:
+#   message - message to output
+#
+# Returns:
+#   None.
+#######################################
+function log() {
+    local message="$1"
+
+    local messageToShow="$(tr -s ' ' <<< "${message}")"
+
+    echo "${messageToShow}"
+}
+
+#######################################
+# Retrieve the repository name from the repository URL.
+#
+# This helper function removes GitHub API "repos" prefix from the repository URL.
+# For example, for the "https://api.github.com/repos/BVLC/caffe" repository URL it will return "BVLC/caffe".
+#
+# Function's primary usage is to enhance the debug output.
+#
+# Arguments:
+#   repositoryUrl - URL of the repository via GitHub API
+#
+# Returns:
+#   The name of the repository.
+#######################################
+function retrieveRepositoryName() {
+    local repositoryUrl="$1"
+
+    local gitReposAddress='https://api.github.com/repos/'
+
+    echo "$(replace "${gitReposAddress}" "" "${repositoryUrl}")"
+}
+
+#######################################
 # Connect the repository URL and the relative file path to get the full path to the repository file.
 #
 # Arguments:
@@ -339,7 +384,7 @@ function checkBranchExists() {
 
     local httpStatusLabel='HTTP_STATUS:'
 
-    local responseBody="$(curl -H "${GIT_AUTHORIZATION_HEADER}" \
+    local responseBody="$(curl -s -H "${GIT_AUTHORIZATION_HEADER}" \
         --write-out "${httpStatusLabel}%{http_code}" \
         "${repositoryUrl}/git/refs/heads/${branchName}")"
 
@@ -371,7 +416,7 @@ function createBranch() {
 
     local repositoryRefsUrl="${repositoryUrl}/git/refs"
 
-    local baseBranchData="$(curl -H "${GIT_AUTHORIZATION_HEADER}" \
+    local baseBranchData="$(curl -s -H "${GIT_AUTHORIZATION_HEADER}" \
         "${repositoryRefsUrl}/heads/${baseBranchName}")"
 
     local lastCommitSha="$(readJsonFieldString 'sha' "${baseBranchData}")"
@@ -379,10 +424,10 @@ function createBranch() {
     local requestData="{\"ref\":\"refs/heads/${branchName}\",
                         \"sha\":${lastCommitSha}}"
 
-    curl -H "${GIT_AUTHORIZATION_HEADER}" \
+    curl -s -H "${GIT_AUTHORIZATION_HEADER}" \
         -H "Content-Type: application/json" \
         --data "${requestData}" \
-        "${repositoryRefsUrl}"
+        "${repositoryRefsUrl}" > /dev/null
 }
 
 #######################################
@@ -399,7 +444,7 @@ function createBranch() {
 function getFileData() {
     local fileUrl="$1"
 
-    echo "$(curl -H "${GIT_AUTHORIZATION_HEADER}" "${fileUrl}")"
+    echo "$(curl -s -H "${GIT_AUTHORIZATION_HEADER}" "${fileUrl}")"
 }
 
 #######################################
@@ -429,11 +474,11 @@ function commitAndPushFile() {
                         \"sha\":${fileSha},
                         \"branch\":\"${branch}\"}"
 
-    curl -H "${GIT_AUTHORIZATION_HEADER}" \
+    curl -s -H "${GIT_AUTHORIZATION_HEADER}" \
         -H "Content-Type: application/json" \
         -X PUT \
         --data "${requestData}" \
-        "${fileUrl}"
+        "${fileUrl}" > /dev/null
 }
 
 #######################################
@@ -463,7 +508,7 @@ function createPullRequest() {
                         \"base\":\"${base}\",
                         \"body\":\"${body}\"}"
 
-    local creationResponse="$(curl -H "${GIT_AUTHORIZATION_HEADER}" \
+    local creationResponse="$(curl -s -H "${GIT_AUTHORIZATION_HEADER}" \
         -H "Content-Type: application/json" \
         --data "$requestData" \
         "${repositoryUrl}/pulls")"
@@ -495,11 +540,11 @@ function assignPullRequest() {
 
     local requestData="{\"assignees\":[\"${assignee}\"]}"
 
-    curl -H "${GIT_AUTHORIZATION_HEADER}" \
+    curl -s -H "${GIT_AUTHORIZATION_HEADER}" \
         -H "Content-Type: application/json" \
         -X PATCH \
         --data "${requestData}" \
-        "${repositoryUrl}/issues/${pullRequestNumber}"
+        "${repositoryUrl}/issues/${pullRequestNumber}" > /dev/null
 }
 
 #######################################
@@ -582,13 +627,24 @@ function updateVersion() {
     local pullRequestBody="$9"
     local pullRequestAssignee="${10}"
 
+
+    local repositoryName="$(retrieveRepositoryName "${repositoryUrl}")"
+
+    log "Running version update for the dependency ${versionVariable} \
+        in the file ${fileWithVersion} in the repository ${repositoryName}."
+
     local fullFilePath="$(obtainFullFilePath "${fileWithVersion}" \
         "${repositoryUrl}")"
 
     local branchExists="$(checkBranchExists "${newBranchName}" \
         "${repositoryUrl}")"
 
+    log "Branch with the name ${newBranchName} already exists in ${repositoryName}: \
+        ${branchExists}."
+
     if [ "${branchExists}" = 'true' ]; then
+        log "The branch already exists, checking if it's still necessary to update \
+            the file there."
 
         # If the branch already exists, take the file from there.
         fullFilePath="${fullFilePath}?ref=${newBranchName}"
@@ -604,11 +660,16 @@ function updateVersion() {
     local version="$(retrieveAssignedValue "${versionVariable}" \
         "${stringWithVersion}")"
 
+    log "The actual version of the library is ${targetVersion}, and the dependency \
+        version is ${version}."
+
     if [ "${targetVersion}" != "${version}" ]; then
         if [ "${branchExists}" = 'false' ]; then
             createBranch "${newBranchName}" \
                 "${branchToMergeInto}" \
                 "${repositoryUrl}"
+            log "Created branch ${newBranchName} derived from ${branchToMergeInto} \
+                in ${repositoryName}."
         fi
 
         local labelString="$(removeAssignedValue "${version}" \
@@ -633,6 +694,9 @@ function updateVersion() {
             "${fileSha}" \
             "${newBranchName}"
 
+        log "Committed and pushed the file ${fileWithVersion}, commit message: \
+            ${commitMessageWithVersion}."
+
         if [ "${branchExists}" = 'false' ]; then
             local pullRequestTitleWithVersion="$(replace "\*version\*" \
                 "${targetVersionNoQuotes}" \
@@ -645,9 +709,16 @@ function updateVersion() {
                 "${pullRequestBody}" \
                 "${repositoryUrl}")"
 
+            log "Created pull request with the title: ${pullRequestTitleWithVersion}, \
+                head: ${newBranchName}, base: ${branchToMergeInto}, body: ${pullRequestBody} \
+                in ${repositoryName}. Pull request number: ${pullRequestNumber}."
+
             assignPullRequest "${pullRequestNumber}" \
                 "${repositoryUrl}" \
                 "${pullRequestAssignee}"
+
+            log "Assigned the pull request with the number ${pullRequestNumber} \
+                to ${pullRequestAssignee}."
         fi
     fi
 }
@@ -698,9 +769,16 @@ function main() {
 
     GIT_AUTHORIZATION_HEADER="Authorization: token ${gitAuthorizationToken}"
 
+    local sourceRepositoryName="$(retrieveRepositoryName "${sourceRepository}")"
+
+    log "Obtaining a version of ${sourceRepositoryName} from the config file \
+        ${sourceFileWithVersion} from the variable ${sourceVersionVariable}."
+
     local targetVersion="$(obtainVersion "${sourceRepository}" \
         "${sourceFileWithVersion}" \
         "${sourceVersionVariable}")"
+
+    log "The version is ${targetVersion}."
 
     updateVersion "${targetVersion}" \
         "${targetRepository}" \
