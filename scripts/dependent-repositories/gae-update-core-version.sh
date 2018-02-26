@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Update core library dependency of the gae-java repository to the latest version.
+# Update the core library dependency of the gae-java repository to the latest version.
 
 readonly SOURCE_REPOSITORY=https://api.github.com/repos/SpineEventEngine/core-java
 readonly SOURCE_FILE_WITH_VERSION='ext.gradle'
