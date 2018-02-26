@@ -18,8 +18,6 @@ readonly PULL_REQUEST_TITLE='Update the version of Spine core modules'
 readonly PULL_REQUEST_BODY='Auto-generated PR to update core library dependency to the latest version.'
 readonly PULL_REQUEST_ASSIGNEE='armiol'
 
-readonly STATUS_CHECK_TIMEOUT_SECONDS=1200
-
 function main() {
     local gitAuthorizationToken="$1"
 
@@ -37,8 +35,7 @@ function main() {
         "${COMMIT_MESSAGE}" \
         "${PULL_REQUEST_TITLE}" \
         "${PULL_REQUEST_BODY}" \
-        "${PULL_REQUEST_ASSIGNEE}" \
-        "${STATUS_CHECK_TIMEOUT_SECONDS}"
+        "${PULL_REQUEST_ASSIGNEE}"
 }
 
 main "$@"

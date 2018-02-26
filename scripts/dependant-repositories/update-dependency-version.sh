@@ -588,8 +588,7 @@ function obtainVersion() {
 # For the string of the type "*versionVariable* = *value*" it replaces the 'value' with the specified 'targetVersion'.
 #
 # After the new value is assigned to the version variable, the file is committed to a new branch of the repository.
-# A pull request is then opened for the new branch and, if all status checks are successful, immediately merged.
-# If the status checks indicate a failure, the pull request is assigned to the specified github user.
+# A pull request is then opened for the new branch and assigned to the specified *pullRequestAssignee*.
 #
 # If the branch and pull request already exist, the function just updates the version there if necessary.
 #
@@ -607,7 +606,6 @@ function obtainVersion() {
 #   pullRequestTitle - title of the pull request for the new branch
 #   pullRequestBody - body of the pull request for the new branch
 #   pullRequestAssignee - default assignee of the pull request if it can't be merged immediately
-#   statusCheckTimeoutSeconds - how long to wait for 'pending' PR status checks before accounting them as 'failure'
 #
 # Returns:
 #   None.
@@ -622,7 +620,6 @@ function updateVersion() {
     local pullRequestTitle="$8"
     local pullRequestBody="$9"
     local pullRequestAssignee="${10}"
-    local statusCheckTimeoutSeconds="${11}"
 
     local fullFilePath="$(obtainFullFilePath "${fileWithVersion}" \
         "${repositoryUrl}")"
@@ -632,7 +629,7 @@ function updateVersion() {
 
     if [ "${branchExists}" = 'true' ]; then
 
-        # If branch already exists take the file from there.
+        # If branch already exists, take the file from there.
         fullFilePath="${fullFilePath}?ref=${newBranchName}"
     fi
 
@@ -670,53 +667,12 @@ function updateVersion() {
 
         if [ "${branchExists}" = 'false' ]; then
 
-            # Wait so Travis pull request build doesn't auto-cancel Travis push build.
-            # This leads to the push build status check being failed and PR not being able to merge.
-            sleep 60
-
             local pullRequestNumber="$(createPullRequest "${pullRequestTitle}" \
                 "${newBranchName}" \
                 "${branchToMergeInto}" \
                 "${pullRequestBody}" \
                 "${repositoryUrl}")"
 
-            local statusCheckResult='pending'
-
-            echo 'Requesting status checks result...'
-
-            local secondsElapsed=0
-
-            # Emulate do...while loop.
-            while true; do
-                statusCheckResult="$(getStatusCheckResult \
-                    "${newBranchName}" \
-                    "${repositoryUrl}")"
-
-                [ "${statusCheckResult}" = 'pending' ] && \
-                    [ ${secondsElapsed} -lt ${statusCheckTimeoutSeconds} ] \
-                    || break
-
-                # Wait before the next request.
-                local secondsToWait=10
-                sleep ${secondsToWait}
-
-                secondsElapsed=$((${secondsElapsed} + ${secondsToWait}))
-
-                echo "Time elapsed: ${secondsElapsed}s"
-            done
-
-            echo "Status checks result: ${statusCheckResult}"
-
-            if [ "${statusCheckResult}" = 'success' ]; then
-                local mergeSuccessful="$(mergePullRequest "${pullRequestNumber}" \
-                    "${repositoryUrl}")"
-                if [ "${mergeSuccessful}" = 'true' ]; then
-                    deleteBranch "${newBranchName}" "${repositoryUrl}"
-                    return 0
-                fi
-            fi
-
-            # If status checks indicated failure or merge was unsuccessful, assign the PR to the assignee.
             assignPullRequest "${pullRequestNumber}" \
                 "${repositoryUrl}" \
                 "${pullRequestAssignee}"
@@ -744,7 +700,6 @@ function updateVersion() {
 #   pullRequestTitle - title of the pull request for the new branch
 #   pullRequestBody - body of the pull request for the new branch
 #   pullRequestAssignee - default assignee of the pull request if it can't be merged immediately
-#   statusCheckTimeoutSeconds - how long to wait for 'pending' PR status checks before accounting them as 'failure'
 #
 # Returns:
 #   None.
@@ -768,7 +723,6 @@ function main() {
     local pullRequestTitle="${11}"
     local pullRequestBody="${12}"
     local pullRequestAssignee="${13}"
-    local statusCheckTimeoutSeconds="${14}"
 
     GIT_AUTHORIZATION_HEADER="Authorization: token ${gitAuthorizationToken}"
 
@@ -785,8 +739,7 @@ function main() {
         "${commitMessage}" \
         "${pullRequestTitle}" \
         "${pullRequestBody}" \
-        "${pullRequestAssignee}" \
-        "${statusCheckTimeoutSeconds}"
+        "${pullRequestAssignee}"
 }
 
 main "$@"
