@@ -566,16 +566,16 @@ function updateVersion() {
 
         local labelString="$(removeAssignedValue "${version}" \
             "${stringWithVersion}")"
-        local newText="$(substituteValue "${version}" \
+        local newFileContent="$(substituteValue "${version}" \
             "${targetVersion}" \
             "${labelString}" \
             "${fileContentDecoded}")"
 
-        local encodedNewText="$(encode "${newText}")"
+        local newFileContentEncoded="$(encode "${newFileContent}")"
         local fileSha="$(obtainFileSha "${fileData}")"
         commitAndPushFile "${commitMessage}" \
             "${fullFilePath}" \
-            "${encodedNewText}" \
+            "${newFileContentEncoded}" \
             "${fileSha}" \
             "${newBranchName}"
 
