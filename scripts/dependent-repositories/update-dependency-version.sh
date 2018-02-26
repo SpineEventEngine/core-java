@@ -17,13 +17,13 @@
 # 5. Retrieve the "target" file and replace the "target" version in it with the "source" version.
 # 6. Commit and push the file to the new branch with the specified name.
 # 7. Open the pull request from the new branch to the specified default one (usually "master").
-# 8. Assign pull request to the specified GitHub user.
+# 8. Assign the pull request to the specified GitHub user.
 #
 # If the version update is triggered when the specified branch already exists (for example, from
 # the previous version update), the script just updates the dependency version directly in this
 # branch.
 #
-# For the detailed description of the command line arguments accepted by this script, see main() function.
+# For the detailed description of the command line arguments accepted by this script, see "main()" function.
 
 # Header used for the GitHub API request authorization.
 # Its content is updated with an authorization token received from the command line arguments on the script execution.
