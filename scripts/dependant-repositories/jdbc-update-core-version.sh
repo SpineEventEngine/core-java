@@ -1,4 +1,6 @@
 #!/bin/bash
+#
+# Update core library dependency of the jdbc-storage repository to the latest version.
 
 readonly SOURCE_REPOSITORY=https://api.github.com/repos/SpineEventEngine/core-java
 readonly SOURCE_FILE_WITH_VERSION='ext.gradle'
@@ -13,9 +15,7 @@ readonly BRANCH_TO_MERGE_INTO='master'
 
 readonly COMMIT_MESSAGE='Update the version of Spine core modules'
 readonly PULL_REQUEST_TITLE='Update the version of Spine core modules'
-readonly PULL_REQUEST_BODY='This is auto-generated PR.
-    It was created because the version of the Spine core library was updated in its recent build.
-    This PR makes the Spine jdbc storage library dependant on the latest version of the Spine core.'
+readonly PULL_REQUEST_BODY='Auto-generated PR to update core library dependency to the latest version.'
 readonly PULL_REQUEST_ASSIGNEE='armiol'
 
 readonly STATUS_CHECK_TIMEOUT_SECONDS=1200
