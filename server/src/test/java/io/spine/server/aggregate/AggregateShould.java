@@ -25,21 +25,23 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import io.spine.Identifier;
-import io.spine.client.TestActorRequestFactory;
+import io.spine.base.Error;
+import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.Commands;
 import io.spine.core.Event;
+import io.spine.core.Rejection;
+import io.spine.core.TenantId;
+import io.spine.grpc.MemoizingObserver;
+import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.given.AggregateTestEnv;
 import io.spine.server.aggregate.given.AggregateTestEnv.AggregateWithMissingApplier;
 import io.spine.server.aggregate.given.AggregateTestEnv.FaultyAggregate;
 import io.spine.server.aggregate.given.AggregateTestEnv.IntAggregate;
 import io.spine.server.aggregate.given.Given;
 import io.spine.server.command.Assign;
-import io.spine.server.command.TestEventFactory;
 import io.spine.server.entity.InvalidEntityStateException;
 import io.spine.server.model.Model;
 import io.spine.server.model.ModelTests;
@@ -49,9 +51,11 @@ import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.ProjectVBuilder;
 import io.spine.test.aggregate.Status;
 import io.spine.test.aggregate.command.AggAddTask;
+import io.spine.test.aggregate.command.AggAssignTask;
 import io.spine.test.aggregate.command.AggCancelProject;
 import io.spine.test.aggregate.command.AggCreateProject;
 import io.spine.test.aggregate.command.AggPauseProject;
+import io.spine.test.aggregate.command.AggReassignTask;
 import io.spine.test.aggregate.command.AggStartProject;
 import io.spine.test.aggregate.command.ImportEvents;
 import io.spine.test.aggregate.event.AggProjectCancelled;
@@ -59,8 +63,12 @@ import io.spine.test.aggregate.event.AggProjectCreated;
 import io.spine.test.aggregate.event.AggProjectPaused;
 import io.spine.test.aggregate.event.AggProjectStarted;
 import io.spine.test.aggregate.event.AggTaskAdded;
+import io.spine.test.aggregate.event.AggTaskAssigned;
+import io.spine.test.aggregate.event.AggUserNotified;
+import io.spine.test.aggregate.rejection.Rejections;
 import io.spine.test.aggregate.user.User;
 import io.spine.time.Time;
+import io.spine.type.TypeUrl;
 import io.spine.validate.ConstraintViolation;
 import org.junit.Before;
 import org.junit.Test;
@@ -70,12 +78,21 @@ import java.util.Set;
 
 import static com.google.common.base.Throwables.getRootCause;
 import static com.google.common.collect.Lists.newArrayList;
-import static io.spine.core.given.GivenVersion.withNumber;
+import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.TestCommandClasses.assertContains;
 import static io.spine.server.TestEventClasses.assertContains;
 import static io.spine.server.TestEventClasses.getEventClasses;
 import static io.spine.server.aggregate.AggregateMessageDispatcher.dispatchCommand;
+import static io.spine.server.aggregate.given.AggregateTestEnv.assignTask;
+import static io.spine.server.aggregate.given.AggregateTestEnv.command;
+import static io.spine.server.aggregate.given.AggregateTestEnv.createTask;
+import static io.spine.server.aggregate.given.AggregateTestEnv.env;
+import static io.spine.server.aggregate.given.AggregateTestEnv.newTaskBoundedContext;
+import static io.spine.server.aggregate.given.AggregateTestEnv.newTenantId;
+import static io.spine.server.aggregate.given.AggregateTestEnv.readAllEvents;
+import static io.spine.server.aggregate.given.AggregateTestEnv.reassignTask;
+import static io.spine.server.aggregate.given.AggregateTestEnv.typeUrlOf;
 import static io.spine.server.aggregate.given.Given.EventMessage.projectCancelled;
 import static io.spine.server.aggregate.given.Given.EventMessage.projectCreated;
 import static io.spine.server.aggregate.given.Given.EventMessage.projectPaused;
@@ -86,6 +103,7 @@ import static io.spine.test.Verify.assertSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -96,14 +114,9 @@ import static org.junit.Assert.fail;
 @SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
 public class AggregateShould {
 
-    private static final TestActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(AggregateShould.class);
     private static final ProjectId ID = ProjectId.newBuilder()
                                                  .setId("prj-01")
                                                  .build();
-
-    private static final TestEventFactory eventFactory =
-            TestEventFactory.newInstance(Identifier.pack(ID), requestFactory);
 
     private static final AggCreateProject createProject = Given.CommandMessage.createProject(ID);
     private static final AggPauseProject pauseProject = Given.CommandMessage.pauseProject(ID);
@@ -127,30 +140,16 @@ public class AggregateShould {
         return result;
     }
 
-    private static CommandEnvelope env(Message commandMessage) {
-        return CommandEnvelope.of(requestFactory.command()
-                                                .create(commandMessage));
-    }
-
-    private static Command command(Message commandMessage) {
-        return requestFactory.command()
-                             .create(commandMessage);
-    }
-
     private static void failNotThrows() {
         fail("Should have thrown RuntimeException.");
-    }
-
-    private static Event event(Message eventMessage, int versionNumber) {
-        return eventFactory.createEvent(eventMessage, withNumber(versionNumber));
     }
 
     private static List<Event> generateProjectEvents() {
         final String projectName = AggregateShould.class.getSimpleName();
         final List<Event> events = ImmutableList.<Event>builder()
-                .add(event(projectCreated(ID, projectName), 1))
-                .add(event(taskAdded(ID), 3))
-                .add(event(projectStarted(ID), 4))
+                .add(AggregateTestEnv.event(projectCreated(ID, projectName), 1))
+                .add(AggregateTestEnv.event(taskAdded(ID), 3))
+                .add(AggregateTestEnv.event(projectStarted(ID), 4))
                 .build();
         return events;
     }
@@ -467,8 +466,8 @@ public class AggregateShould {
         final ImportEvents importCmd =
                 ImportEvents.newBuilder()
                             .setProjectId(id)
-                            .addEvent(event(projectCreated(id, projectName), 1))
-                            .addEvent(event(taskAdded(id), 2))
+                            .addEvent(AggregateTestEnv.event(projectCreated(id, projectName), 1))
+                            .addEvent(AggregateTestEnv.event(taskAdded(id), 2))
                             .build();
         aggregate.dispatchCommands(command(importCmd));
 
@@ -551,7 +550,7 @@ public class AggregateShould {
         final FaultyAggregate faultyAggregate =
                 new FaultyAggregate(ID, false, true);
         try {
-            final Event event = event(projectCreated(ID, getClass().getSimpleName()), 1);
+            final Event event = AggregateTestEnv.event(projectCreated(ID, getClass().getSimpleName()), 1);
 
             final AggregateTransaction tx = AggregateTransaction.start(faultyAggregate);
             AggregatePlayer.play(faultyAggregate, AggregateStateRecord.newBuilder()
@@ -604,6 +603,125 @@ public class AggregateShould {
                                                               .withVersion(1)
                                                               .withState(user)
                                                               .build();
+    }
+
+    /**
+     * Ensures that a {@linkplain io.spine.server.tuple.Pair pair} with an empty second optional value
+     * returned from a command handler stores a single event.
+     *
+     * <p>The command handler that should return a pair is
+     * {@link io.spine.server.aggregate.given.AggregateTestEnv.TaskAggregate#handle(AggAssignTask) TaskAggregate#handle(AggAssignTask)}.
+     */
+    @Test
+    public void create_single_event_for_a_pair_of_events_with_empty_for_a_command_dispatch() {
+        final BoundedContext boundedContext = newTaskBoundedContext();
+
+        final TenantId tenantId = newTenantId();
+        final Command command = command(createTask(), tenantId);
+        final MemoizingObserver<Ack> observer = memoizingObserver();
+
+        boundedContext.getCommandBus()
+                      .post(command, observer);
+
+        assertNull(observer.getError());
+
+        final List<Ack> responses = observer.responses();
+        assertSize(1, responses);
+
+        final Ack response = responses.get(0);
+        final io.spine.core.Status status = response.getStatus();
+        final Error emptyError = Error.getDefaultInstance();
+        assertEquals(emptyError, status.getError());
+
+        final Rejection emptyRejection = Rejection.getDefaultInstance();
+        assertEquals(emptyRejection, status.getRejection());
+
+        final List<Event> events = readAllEvents(boundedContext, tenantId);
+        assertSize(1, events);
+    }
+
+    /**
+     * Ensures that a {@linkplain io.spine.server.tuple.Pair pair} with an empty second optional value
+     * returned from a reaction on an event stores a single event.
+     *
+     * <p>The first event is produced while handling a command by the
+     * {@link io.spine.server.aggregate.given.AggregateTestEnv.TaskAggregate#handle(AggAssignTask) TaskAggregate#handle(AggAssignTask)}.
+     * Then as a reaction to this event a single event should be fired as part of the pair by
+     * {@link io.spine.server.aggregate.given.AggregateTestEnv.TaskAggregate#on(AggTaskAssigned) TaskAggregate#on(AggTaskAssigned)}.
+     */
+    @Test
+    public void create_single_event_for_a_pair_of_events_with_empty_for_an_event_react() {
+        final BoundedContext boundedContext = newTaskBoundedContext();
+
+        final TenantId tenantId = newTenantId();
+        final Command command = command(assignTask(), tenantId);
+        final MemoizingObserver<Ack> observer = memoizingObserver();
+
+        boundedContext.getCommandBus()
+                      .post(command, observer);
+
+        assertNull(observer.getError());
+
+        final List<Ack> responses = observer.responses();
+        assertSize(1, responses);
+
+        final Ack response = responses.get(0);
+        final io.spine.core.Status status = response.getStatus();
+        final Error emptyError = Error.getDefaultInstance();
+        assertEquals(emptyError, status.getError());
+
+        final Rejection emptyRejection = Rejection.getDefaultInstance();
+        assertEquals(emptyRejection, status.getRejection());
+
+        final List<Event> events = readAllEvents(boundedContext, tenantId);
+        assertSize(2, events);
+
+        final Event sourceEvent = events.get(0);
+        final TypeUrl taskAssignedType = TypeUrl.from(AggTaskAssigned.getDescriptor());
+        assertEquals(typeUrlOf(sourceEvent), taskAssignedType);
+
+        final Event reactionEvent = events.get(1);
+        final TypeUrl userNotifiedType = TypeUrl.from(AggUserNotified.getDescriptor());
+        assertEquals(typeUrlOf(reactionEvent), userNotifiedType);
+    }
+
+    /**
+     * Ensures that a {@linkplain io.spine.server.tuple.Pair pair} with an empty second optional value
+     * returned from a reaction on a rejection stores a single event.
+     *
+     * <p>The rejection is fired by the {@link io.spine.server.aggregate.given.AggregateTestEnv.TaskAggregate#handle(AggReassignTask) TaskAggregate#handle(AggReassignTask)}
+     * and handled by the {@link io.spine.server.aggregate.given.AggregateTestEnv.TaskAggregate#on(Rejections.AggCannotReassignUnassignedTask) TaskAggregate#on(AggCannotReassignUnassignedTask)}.
+     */
+    @Test
+    public void create_single_event_for_a_pair_of_events_with_empty_for_a_rejection_react() {
+        final BoundedContext boundedContext = newTaskBoundedContext();
+
+        final TenantId tenantId = newTenantId();
+        final Command command = command(reassignTask(), tenantId);
+        final MemoizingObserver<Ack> observer = memoizingObserver();
+
+        boundedContext.getCommandBus()
+                      .post(command, observer);
+
+        assertNull(observer.getError());
+
+        final List<Ack> responses = observer.responses();
+        assertSize(1, responses);
+
+        final Ack response = responses.get(0);
+        final io.spine.core.Status status = response.getStatus();
+        final Error emptyError = Error.getDefaultInstance();
+        assertEquals(emptyError, status.getError());
+
+        final Rejection emptyRejection = Rejection.getDefaultInstance();
+        assertEquals(emptyRejection, status.getRejection());
+
+        final List<Event> events = readAllEvents(boundedContext, tenantId);
+        assertSize(1, events);
+
+        final Event reactionEvent = events.get(0);
+        final TypeUrl userNotifiedType = TypeUrl.from(AggUserNotified.getDescriptor());
+        assertEquals(typeUrlOf(reactionEvent), userNotifiedType);
     }
 
     /**
