@@ -3,6 +3,27 @@
 # Retrieve the current version of the source library and update the target library dependency version with it.
 #
 # In this script 'echo' to stdout and command substitution on call are used to emulate the function return value.
+#
+# The "main()" function is the entry point of this script.
+#
+# In general, it performs the following steps:
+#
+# 1. Read the value of the specified variable in the specified file in the "source" repository.
+#    This value is supposed to represent the current version of the library.
+# 2. Read the value of the specified variable in the "target" repository.
+#    It is supposed to represent the dependency version of the "target" repository.
+# 3. Compare "source" and "target" versions.
+# 4. If versions are equal, quit immediately. Otherwise go to the step 5.
+# 5. Retrieve the "target" file and replace the "target" version in it with the "source" version.
+# 6. Commit and push the file to the new branch with the specified name.
+# 7. Open the pull request from the new branch to the specified default one (usually "master").
+# 8. Assign pull request to the specified GitHub user.
+#
+# If the version update is triggered when the specified branch already exists (for example, from
+# the previous version update), the script just updates the dependency version directly in this
+# branch.
+#
+# For the detailed description of the command line arguments accepted by this script, see main() function.
 
 # Header used for the GitHub API request authorization.
 # Its content is updated with an authorization token received from the command line arguments on the script execution.
