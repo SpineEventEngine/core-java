@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Make all repositories dependant on the core library have its latest version as the dependency.
+# Update core library dependency version in the multiple repositories.
 #
 # This script accepts a single command line argument - "gitAuthorizationToken".
 # Such token can be generated in the "Settings/Developer settings/Personal access tokens" page on the GitHub website.
