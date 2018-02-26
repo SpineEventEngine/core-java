@@ -4,8 +4,8 @@
 #
 # In this script 'echo' to stdout and command substitution on call are used to emulate the function return value.
 
-# Header used for GitHub API request authorization.
-# Its content is updated with an authorization token received from the command line arguments on script execution.
+# Header used for the GitHub API request authorization.
+# Its content is updated with an authorization token received from the command line arguments on the script execution.
 GIT_AUTHORIZATION_HEADER=''
 
 #######################################
@@ -543,7 +543,7 @@ function updateVersion() {
 
     if [ "${branchExists}" = 'true' ]; then
 
-        # If branch already exists, take the file from there.
+        # If the branch already exists, take the file from there.
         fullFilePath="${fullFilePath}?ref=${newBranchName}"
     fi
 
