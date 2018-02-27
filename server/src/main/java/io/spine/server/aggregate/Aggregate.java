@@ -164,11 +164,6 @@ public abstract class Aggregate<I,
      */
     protected Aggregate(I id) {
         super(id);
-    }
-
-    @Override
-    protected void init() {
-        super.init();
         setIdempotencyGuard();
     }
 

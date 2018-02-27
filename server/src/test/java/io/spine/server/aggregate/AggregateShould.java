@@ -28,6 +28,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.grpc.stub.StreamObserver;
 import io.spine.Identifier;
+import io.spine.base.Error;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Ack;
 import io.spine.core.Command;
@@ -37,6 +38,7 @@ import io.spine.core.CommandEnvelope;
 import io.spine.core.Commands;
 import io.spine.core.Event;
 import io.spine.core.TenantId;
+import io.spine.grpc.MemoizingObserver;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.given.AggregateTestEnv;
 import io.spine.server.aggregate.given.AggregateTestEnv.AggregateWithMissingApplier;
@@ -46,6 +48,7 @@ import io.spine.server.aggregate.given.Given;
 import io.spine.server.command.Assign;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.commandbus.CommandBus;
+import io.spine.server.commandbus.DuplicateCommandException;
 import io.spine.server.entity.InvalidEntityStateException;
 import io.spine.server.model.Model;
 import io.spine.server.model.ModelTests;
@@ -81,6 +84,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.core.CommandEnvelope.of;
 import static io.spine.core.Events.getRootCommandId;
 import static io.spine.core.given.GivenVersion.withNumber;
+import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.TestCommandClasses.assertContains;
@@ -97,7 +101,6 @@ import static io.spine.server.aggregate.given.Given.EventMessage.projectStarted;
 import static io.spine.server.aggregate.given.Given.EventMessage.taskAdded;
 import static io.spine.server.entity.given.Given.aggregateOfClass;
 import static io.spine.test.Verify.assertSize;
-import static java.lang.Integer.MAX_VALUE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -683,64 +686,25 @@ public class AggregateShould {
     }
 
     @Test
-    public void return_true_when_the_command_was_handled_since_last_snapshot() {
+    public void acknowledge_DuplicateCommandException_when_the_command_was_handled_since_last_snapshot() {
         final TenantId tenantId = newTenantId();
         final Command createCommand = command(createProject, tenantId);
 
         final CommandBus commandBus = boundedContext.getCommandBus();
         final StreamObserver<Ack> noOpObserver = noOpObserver();
+        final MemoizingObserver<Ack> memoizingObserver = memoizingObserver();
         commandBus.post(createCommand, noOpObserver);
+        commandBus.post(createCommand, memoizingObserver);
 
-        final TestAggregate aggregate = getAggregate(ID, tenantId);
+        final List<Ack> responses = memoizingObserver.responses();
+        final Ack ack = responses.get(0);
+        assertTrue(ack.getStatus()
+                      .hasError());
 
-        final boolean didHandle = aggregate.didHandleSinceLastSnapshot(of(createCommand));
-        assertTrue(didHandle);
-    }
-
-    @Test
-    public void return_false_when_the_command_was_handled_but_the_snapshot_was_made() {
-        repository.setSnapshotTrigger(1);
-
-        final TenantId tenantId = newTenantId();
-        final Command createCommand = command(createProject, tenantId);
-
-        final CommandBus commandBus = boundedContext.getCommandBus();
-        final StreamObserver<Ack> noOpObserver = noOpObserver();
-        commandBus.post(createCommand, noOpObserver);
-
-        final TestAggregate aggregate = getAggregate(ID, tenantId);
-
-        final boolean didHandle = aggregate.didHandleSinceLastSnapshot(of(createCommand));
-
-        assertFalse(didHandle);
-    }
-
-    @Test
-    public void return_false_if_the_command_was_not_handled() {
-        final TenantId tenantId = newTenantId();
-        final Command createCommand = command(createProject, tenantId);
-        final TestAggregate aggregate = newAggregate(ID);
-
-        final boolean didHandle = aggregate.didHandleSinceLastSnapshot(of(createCommand));
-
-        assertFalse(didHandle);
-    }
-
-    @Test
-    public void return_false_if_another_command_was_handled() {
-        final TenantId tenantId = newTenantId();
-        final Command createCommand = command(createProject, tenantId);
-        final Command startCommand = command(startProject, tenantId);
-
-        final CommandBus commandBus = boundedContext.getCommandBus();
-        final StreamObserver<Ack> noOpObserver = noOpObserver();
-        commandBus.post(createCommand, noOpObserver);
-
-        final TestAggregate aggregate = getAggregate(ID, tenantId);
-
-        final boolean didHandle = aggregate.didHandleSinceLastSnapshot(of(startCommand));
-
-        assertFalse(didHandle);
+        final String errorType = DuplicateCommandException.class.getCanonicalName();
+        assertEquals(errorType, ack.getStatus()
+                                   .getError()
+                                   .getType());
     }
 
     private TestAggregate getAggregate(ProjectId id, TenantId tenantId) {

@@ -25,7 +25,6 @@ import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.Status;
 import io.spine.core.TenantId;
-import io.spine.server.command.given.DuplicateCommandTestEnv;
 import io.spine.server.command.given.DuplicateCommandTestEnv.TestClient;
 import io.spine.server.command.given.DuplicateCommandTestEnv.TestServer;
 import io.spine.server.commandbus.DuplicateCommandException;

@@ -30,13 +30,26 @@ import java.util.Iterator;
 
 import static io.spine.core.Events.getRootCommandId;
 
+/**
+ * This guard ensures that the message was not yet dispatched to the {@link Aggregate aggregate}.
+ * If it was the exception is thrown.
+ *
+ * @author Mykhailo Drachuk
+ */
 class IdempotencyGuard {
+
     private final Aggregate<?, ?, ?> aggregate;
 
     IdempotencyGuard(Aggregate<?, ?, ?> aggregate) {
         this.aggregate = aggregate;
     }
 
+    /**
+     * Ensures that the command was not dispatched to the aggregate.
+     * If it was a {@link DuplicateCommandException} is thrown.
+     *
+     * @param envelope an envelope with a command to check
+     */
     void ensureIdempotence(CommandEnvelope envelope) {
         if (didHandleSinceLastSnapshot(envelope)) {
             final Command command = envelope.getOuterObject();
