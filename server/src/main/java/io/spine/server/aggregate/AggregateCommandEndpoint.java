@@ -46,6 +46,7 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
         return endpoint.handle();
     }
 
+
     static <I, A extends Aggregate<I, ?, ?>>
     AggregateCommandEndpoint<I, A>
     of(AggregateRepository<I, A> repository, CommandEnvelope command) {
