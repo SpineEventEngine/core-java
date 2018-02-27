@@ -72,7 +72,7 @@ import static java.util.Collections.singleton;
  *                                  .select(Customer.class)
  *                                  .byId(getWestCostCustomerIds())
  *                                  .withMask("name", "address", "email")
- *                                  .where({@link ColumnFilters#eq eq}("type", "permanent"),
+ *                                  .where(eq("type", "permanent"),
  *                                         eq("discountPercent", 10),
  *                                         eq("companySize", Company.Size.SMALL))
  *                                  .build();
