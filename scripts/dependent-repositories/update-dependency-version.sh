@@ -36,7 +36,7 @@ GIT_AUTHORIZATION_HEADER=''
 # This function squeezes all the spaces in the message, allowing it to have the same indentation as the rest of the code.
 #
 # The last-line 'echo' of this function is not supposed to be used as a return value.
-# Instead it's used to write the stripped message directly to the stdout.
+# Instead it's used to write the message directly to the stdout.
 #
 # Arguments:
 #   message - message to output
