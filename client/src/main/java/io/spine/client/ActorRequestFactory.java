@@ -94,7 +94,7 @@ public class ActorRequestFactory {
     }
 
     /**
-     * Retrieves an instance of {@link QueryFactory} based on configuration of this
+     * Creates an instance of {@link QueryFactory} based on configuration of this
      * {@code ActorRequestFactory} instance.
      *
      * @return an instance of {@link QueryFactory}
@@ -104,7 +104,7 @@ public class ActorRequestFactory {
     }
 
     /**
-     * Retrieves an instance of {@link TopicFactory} based on configuration of this
+     * Creates an instance of {@link TopicFactory} based on configuration of this
      * {@code ActorRequestFactory} instance.
      *
      * @return an instance of {@link TopicFactory}
@@ -114,7 +114,7 @@ public class ActorRequestFactory {
     }
 
     /**
-     * Retrieves an instance of {@link CommandFactory} based on configuration of this
+     * Creates an instance of {@link CommandFactory} based on configuration of this
      * {@code ActorRequestFactory} instance.
      *
      * @return an instance of {@link CommandFactory}
