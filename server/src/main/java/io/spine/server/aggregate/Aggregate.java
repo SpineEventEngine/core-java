@@ -217,7 +217,7 @@ public abstract class Aggregate<I,
      */
     @Override
     protected List<? extends Message> dispatchCommand(CommandEnvelope command) {
-        idempotencyGuard.ensureIdempotence(command);
+        idempotencyGuard.check(command);
         final CommandHandlerMethod method = thisClass().getHandler(command.getMessageClass());
         final List<? extends Message> messages =
                 method.invoke(this, command.getMessage(), command.getCommandContext());

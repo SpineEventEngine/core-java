@@ -83,7 +83,7 @@ public class IdempotencyGuardShould {
 
         final TestAggregate aggregate = getAggregate(projectId, tenantId);
         final IdempotencyGuard guard = new IdempotencyGuard(aggregate);
-        guard.ensureIdempotence(of(createCommand));
+        guard.check(of(createCommand));
     }
 
     @Test
@@ -101,7 +101,7 @@ public class IdempotencyGuardShould {
         final TestAggregate aggregate = getAggregate(projectId, tenantId);
 
         final IdempotencyGuard guard = new IdempotencyGuard(aggregate);
-        guard.ensureIdempotence(of(createCommand));
+        guard.check(of(createCommand));
     }
 
     @Test
@@ -112,7 +112,7 @@ public class IdempotencyGuardShould {
         final TestAggregate aggregate = new TestAggregate(projectId);
 
         final IdempotencyGuard guard = new IdempotencyGuard(aggregate);
-        guard.ensureIdempotence(of(createCommand));
+        guard.check(of(createCommand));
     }
 
     @Test
@@ -129,7 +129,7 @@ public class IdempotencyGuardShould {
         final TestAggregate aggregate = getAggregate(projectId, tenantId);
 
         final IdempotencyGuard guard = new IdempotencyGuard(aggregate);
-        guard.ensureIdempotence(of(startCommand));
+        guard.check(of(startCommand));
     }
 
     private TestAggregate getAggregate(ProjectId id, TenantId tenantId) {

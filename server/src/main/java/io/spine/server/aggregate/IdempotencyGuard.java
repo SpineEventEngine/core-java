@@ -45,13 +45,13 @@ class IdempotencyGuard {
     }
 
     /**
-     * Ensures that the command was not dispatched to the aggregate.
+     * Checks that the command was not dispatched to the aggregate.
      * If it was a {@link DuplicateCommandException} is thrown.
      *
      * @param envelope an envelope with a command to check
      * @throws DuplicateCommandException if the command was dispatched to the aggregate
      */
-    void ensureIdempotence(CommandEnvelope envelope) {
+    void check(CommandEnvelope envelope) {
         if (didHandleSinceLastSnapshot(envelope)) {
             final Command command = envelope.getOuterObject();
             throw DuplicateCommandException.forAggregate(command);
