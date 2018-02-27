@@ -136,12 +136,7 @@ public abstract class Aggregate<I,
      */
     private final List<Event> uncommittedEvents = newLinkedList();
 
-    /**
-     * Holds the history of all events which happened to the aggregate since the last snapshot.
-     *
-     * @see #historyBackward()
-     */
-    private final Deque<Event> recentHistory = newArrayDeque();
+    private final RecentHistory recentHistory = new RecentHistory();
 
     /** A guard for ensuring idempotency of messages dispatched by this aggregate. */
     private IdempotencyGuard idempotencyGuard;
@@ -289,7 +284,7 @@ public abstract class Aggregate<I,
         final List<Event> events = aggregateStateRecord.getEventList();
 
         play(events);
-        addToHistory(events);
+        recentHistory.add(events);
     }
 
     /**
@@ -421,19 +416,8 @@ public abstract class Aggregate<I,
     List<Event> commitEvents() {
         final List<Event> result = ImmutableList.copyOf(uncommittedEvents);
         uncommittedEvents.clear();
-        addToHistory(result);
+        recentHistory.add(result);
         return result;
-    }
-
-    /**
-     * Adds events to the aggregate history.
-     *
-     *  @param events the list of the events
-     */
-    private void addToHistory(Collection<Event> events) {
-        for (Event event : events) {
-            recentHistory.addFirst(event);
-        }
     }
 
     /**
@@ -478,8 +462,7 @@ public abstract class Aggregate<I,
      * @return new iterator instance
      */
     protected Iterator<Event> historyBackward() {
-        final ImmutableList<Event> events = ImmutableList.copyOf(recentHistory);
-        return events.iterator();
+        return recentHistory.iterator();
     }
 
     /**
@@ -517,6 +500,42 @@ public abstract class Aggregate<I,
         @Override
         public boolean apply(Message message) {
             return !message.equals(EMPTY);
+        }
+    }
+
+    private static class RecentHistory {
+
+        /**
+         * Holds the history of all events which happened to the aggregate since the last snapshot.
+         */
+        private final Deque<Event> history = newArrayDeque();
+
+        /**
+         * Removes all events from the recent history.
+         */
+        public void clear() {
+            history.clear();
+        }
+
+        /**
+         * Creates a new iterator over the recent history items.
+         *
+         * @return an events iterator
+         */
+        public Iterator<Event> iterator() {
+            final ImmutableList<Event> events = ImmutableList.copyOf(history);
+            return events.iterator();
+        }
+
+        /**
+         * Adds events to the aggregate history.
+         *
+         * @param events the list of the events to add
+         */
+        private void add(Collection<Event> events) {
+            for (Event event : events) {
+                history.addFirst(event);
+            }
         }
     }
 }
