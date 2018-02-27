@@ -60,6 +60,7 @@ import io.spine.test.aggregate.command.AggAssignTask;
 import io.spine.test.aggregate.command.AggCancelProject;
 import io.spine.test.aggregate.command.AggCreateProject;
 import io.spine.test.aggregate.command.AggPauseProject;
+import io.spine.test.aggregate.command.AggReassignTask;
 import io.spine.test.aggregate.command.AggStartProject;
 import io.spine.test.aggregate.command.ImportEvents;
 import io.spine.test.aggregate.event.AggProjectCancelled;
@@ -69,6 +70,7 @@ import io.spine.test.aggregate.event.AggProjectStarted;
 import io.spine.test.aggregate.event.AggTaskAdded;
 import io.spine.test.aggregate.event.AggTaskAssigned;
 import io.spine.test.aggregate.event.AggUserNotified;
+import io.spine.test.aggregate.rejection.Rejections;
 import io.spine.test.aggregate.user.User;
 import io.spine.time.Time;
 import io.spine.type.TypeUrl;
@@ -791,7 +793,7 @@ public class AggregateShould {
      * returned from a reaction on a rejection stores a single event.
      *
      * <p>The rejection is fired by the {@link io.spine.server.aggregate.given.AggregateTestEnv.TaskAggregate#handle(AggReassignTask) TaskAggregate#handle(AggReassignTask)}
-     * and handled by the {@link io.spine.server.aggregate.given.AggregateTestEnv.TaskAggregate#onRejections.AggCannotReassignUnassignedTask) TaskAggregate#on(AggCannotReassignUnassignedTask)}.
+     * and handled by the {@link io.spine.server.aggregate.given.AggregateTestEnv.TaskAggregate#on(Rejections.AggCannotReassignUnassignedTask) TaskAggregate#on(AggCannotReassignUnassignedTask)}.
      */
     @Test
     public void create_single_event_for_a_pair_of_events_with_empty_for_a_rejection_react() {
