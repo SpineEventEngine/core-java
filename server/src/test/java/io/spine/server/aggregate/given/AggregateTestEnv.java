@@ -62,11 +62,6 @@ public class AggregateTestEnv {
         return TestActorRequestFactory.newInstance(AggregateShould.class, tenantId);
     }
 
-    public static CommandId getRootCommandId(AggregateEventRecord record) {
-        final Event event = record.getEvent();
-        return Events.getRootCommandId(event);
-    }
-
     /**
      * The test environment class for test of missing command handler or missing event applier.
      */

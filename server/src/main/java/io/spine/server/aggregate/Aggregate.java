@@ -58,7 +58,6 @@ import static com.google.common.collect.Queues.newArrayDeque;
 import static io.spine.core.Events.getMessage;
 import static io.spine.core.Events.getRootCommandId;
 import static io.spine.time.Time.getCurrentTime;
-import static io.spine.util.Exceptions.newIllegalStateException;
 import static io.spine.validate.Validate.checkPositive;
 import static io.spine.validate.Validate.isNotDefault;
 import static java.lang.Integer.MAX_VALUE;
@@ -144,7 +143,7 @@ public abstract class Aggregate<I,
      *
      * @see #didHandleSinceLastSnapshot(CommandEnvelope)
      */
-    private final Deque<AggregateEventRecord> historySinceLastSnapshot = newArrayDeque();
+    private final Deque<Event> historySinceLastSnapshot = newArrayDeque();
 
     /**
      * Creates a new instance.
@@ -406,9 +405,8 @@ public abstract class Aggregate<I,
      *  @param events the list of the events
      */
     private void addToHistory(Collection<Event> events) {
-        final List<AggregateEventRecord> records = toAggregateEventRecords(events);
-        for (AggregateEventRecord record : records) {
-            historySinceLastSnapshot.addFirst(record);
+        for (Event event : events) {
+            historySinceLastSnapshot.addFirst(event);
         }
     }
 
@@ -452,10 +450,10 @@ public abstract class Aggregate<I,
      *                  should be performed
      * @return new iterator instance
      */
-    public Iterator<AggregateEventRecord> historyBackward(AggregateRecordQueryCriteria criteria) {
+    protected Iterator<Event> historyBackward(AggregateRecordQueryCriteria criteria) {
         checkNotNull(criteria);
         final int batchSize = criteria.batchSize();
-        final List<AggregateEventRecord> items = queryBatch(batchSize);
+        final List<Event> items = queryBatch(batchSize);
         return items.iterator();
     }
 
@@ -464,13 +462,13 @@ public abstract class Aggregate<I,
      * 
      * @param batchSize the amount of events that must be retrieved
      */
-    private List<AggregateEventRecord> queryBatch(int batchSize) {
+    private List<Event> queryBatch(int batchSize) {
         checkPositive(batchSize);
 
-        final ImmutableList.Builder<AggregateEventRecord> builder = ImmutableList.builder();
+        final ImmutableList.Builder<Event> builder = ImmutableList.builder();
         int selectedCount = 0;
 
-        for (AggregateEventRecord record : historySinceLastSnapshot) {
+        for (Event record : historySinceLastSnapshot) {
             builder.add(record);
 
             selectedCount++;
@@ -521,22 +519,12 @@ public abstract class Aggregate<I,
     public boolean didHandleSinceLastSnapshot(CommandEnvelope command) {
         final CommandId newCommandId = command.getId();
         final AggregateRecordQueryCriteria query = new AggregateRecordQueryCriteria(MAX_VALUE);
-        final Iterator<AggregateEventRecord> iterator = historyBackward(query);
+        final Iterator<Event> iterator = historyBackward(query);
         while (iterator.hasNext()) {
-            final AggregateEventRecord record = iterator.next();
-            switch (record.getKindCase()) {
-                case EVENT:
-                    final Event event = record.getEvent();
-                    final CommandId eventRootCommandId = getRootCommandId(event);
-                    if (newCommandId.equals(eventRootCommandId)) {
-                        return true;
-                    }
-                    break;
-                case SNAPSHOT:
-                    return false;
-                case KIND_NOT_SET:
-                default:
-                    throw newIllegalStateException("Aggregate record with kind not set.");
+            final Event event = iterator.next();
+            final CommandId eventRootCommandId = getRootCommandId(event);
+            if (newCommandId.equals(eventRootCommandId)) {
+                return true;
             }
         }
         return false;

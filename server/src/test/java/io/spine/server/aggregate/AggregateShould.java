@@ -79,6 +79,7 @@ import java.util.Set;
 import static com.google.common.base.Throwables.getRootCause;
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.core.CommandEnvelope.of;
+import static io.spine.core.Events.getRootCommandId;
 import static io.spine.core.given.GivenVersion.withNumber;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.protobuf.AnyPacker.unpack;
@@ -87,7 +88,6 @@ import static io.spine.server.TestEventClasses.assertContains;
 import static io.spine.server.TestEventClasses.getEventClasses;
 import static io.spine.server.aggregate.AggregateMessageDispatcher.dispatchCommand;
 import static io.spine.server.aggregate.given.AggregateTestEnv.UserAggregate;
-import static io.spine.server.aggregate.given.AggregateTestEnv.getRootCommandId;
 import static io.spine.server.aggregate.given.AggregateTestEnv.newRequestFactory;
 import static io.spine.server.aggregate.given.AggregateTestEnv.newTenantId;
 import static io.spine.server.aggregate.given.Given.EventMessage.projectCancelled;
@@ -650,7 +650,7 @@ public class AggregateShould {
         final TestAggregate aggregate = getAggregate(ID, tenantId);
         final AggregateRecordQueryCriteria query = new AggregateRecordQueryCriteria(MAX_VALUE);
 
-        final Iterator<AggregateEventRecord> history = aggregate.historyBackward(query);
+        final Iterator<Event> history = aggregate.historyBackward(query);
 
         assertEquals(startCommand.getId(), getRootCommandId(history.next()));
         assertEquals(addTaskCommand2.getId(), getRootCommandId(history.next()));
@@ -676,7 +676,7 @@ public class AggregateShould {
         final TestAggregate aggregate = getAggregate(ID, tenantId);
         final AggregateRecordQueryCriteria query = new AggregateRecordQueryCriteria(3);
 
-        final Iterator<AggregateEventRecord> history = aggregate.historyBackward(query);
+        final Iterator<Event> history = aggregate.historyBackward(query);
 
         assertEquals(addTaskCommand2.getId(), getRootCommandId(history.next()));
         assertEquals(startCommand.getId(), getRootCommandId(history.next()));
@@ -703,7 +703,7 @@ public class AggregateShould {
         final TestAggregate aggregate = getAggregate(ID, tenantId);
         final AggregateRecordQueryCriteria query = new AggregateRecordQueryCriteria(MAX_VALUE);
 
-        final Iterator<AggregateEventRecord> history = aggregate.historyBackward(query);
+        final Iterator<Event> history = aggregate.historyBackward(query);
 
         assertEquals(addTaskCommand2.getId(), getRootCommandId(history.next()));
         assertFalse(history.hasNext());
