@@ -63,7 +63,7 @@ class IdempotencyGuard {
      * <p>The check is performed by searching for an event caused by this command that was
      * committed since last snapshot.
      *
-     * <p>This functionality support the ability to stop duplicate commands from being dispatched
+     * <p>This functionality supports the ability to stop duplicate commands from being dispatched
      * to the aggregate.
      *
      * @param envelope the command to check
