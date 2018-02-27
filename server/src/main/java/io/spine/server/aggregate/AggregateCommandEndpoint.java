@@ -22,7 +22,6 @@ package io.spine.server.aggregate;
 
 import com.google.protobuf.Message;
 import io.spine.core.CommandEnvelope;
-import io.spine.server.commandbus.DuplicateCommandException;
 
 import java.util.List;
 
