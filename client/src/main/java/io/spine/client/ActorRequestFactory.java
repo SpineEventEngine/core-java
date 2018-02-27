@@ -93,14 +93,32 @@ public class ActorRequestFactory {
         return result;
     }
 
+    /**
+     * Creates an instance of {@link QueryFactory} based on configuration of this
+     * {@code ActorRequestFactory} instance.
+     *
+     * @return an instance of {@link QueryFactory}
+     */
     public QueryFactory query() {
         return new QueryFactory(this);
     }
 
+    /**
+     * Creates an instance of {@link TopicFactory} based on configuration of this
+     * {@code ActorRequestFactory} instance.
+     *
+     * @return an instance of {@link TopicFactory}
+     */
     public TopicFactory topic() {
         return new TopicFactory(this);
     }
 
+    /**
+     * Creates an instance of {@link CommandFactory} based on configuration of this
+     * {@code ActorRequestFactory} instance.
+     *
+     * @return an instance of {@link CommandFactory}
+     */
     public CommandFactory command() {
         return new CommandFactory(this);
     }
