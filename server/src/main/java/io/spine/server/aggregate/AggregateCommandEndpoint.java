@@ -54,27 +54,6 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
-    protected void deliverNowTo(A aggregate) {
-        ensureNotDuplicate(aggregate);
-        super.deliverNowTo(aggregate);
-    }
-
-    /**
-     * Ensures that the current command does not duplicate a command which was already handled 
-     * by the aggregate since its last snapshot.
-     *
-     * @param aggregate the aggregate to check
-     * @throws DuplicateCommandException if the command already handled by the aggregate since
-     *                                   last snapshot
-     */
-    private void ensureNotDuplicate(Aggregate aggregate) {
-        final CommandEnvelope command = envelope();
-        if (aggregate.didHandleSinceLastSnapshot(command)) {
-            throw DuplicateCommandException.forAggregate(command.getOuterObject());
-        }
-    }
-
-    @Override
     protected List<? extends Message> doDispatch(A aggregate, CommandEnvelope envelope) {
         return aggregate.dispatchCommand(envelope);
     }

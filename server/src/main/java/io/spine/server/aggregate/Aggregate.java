@@ -26,7 +26,6 @@ import com.google.protobuf.Message;
 import io.grpc.Internal;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
-import io.spine.core.CommandId;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
@@ -55,11 +54,9 @@ import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.common.collect.Queues.newArrayDeque;
 import static io.spine.core.Events.getMessage;
-import static io.spine.core.Events.getRootCommandId;
 import static io.spine.time.Time.getCurrentTime;
 import static io.spine.validate.Validate.checkPositive;
 import static io.spine.validate.Validate.isNotDefault;
-import static java.lang.Integer.MAX_VALUE;
 
 /**
  * Abstract base for aggregates.
@@ -140,9 +137,12 @@ public abstract class Aggregate<I,
     /**
      * Holds the history of all events which happened to the aggregate since the last snapshot.
      *
-     * @see #didHandleSinceLastSnapshot(CommandEnvelope)
+     * @see #historyBackward()
      */
     private final Deque<Event> historySinceLastSnapshot = newArrayDeque();
+
+    /** A guard for ensuring idempotency of messages dispatched by this aggregate. */
+    private IdempotencyGuard idempotencyGuard;
 
     /**
      * Creates a new instance.
@@ -164,6 +164,19 @@ public abstract class Aggregate<I,
      */
     protected Aggregate(I id) {
         super(id);
+    }
+
+    @Override
+    protected void init() {
+        super.init();
+        setIdempotencyGuard();
+    }
+
+    /**
+     * Creates and assigns the aggregate an {@link IdempotencyGuard idempotency guard}.
+     */
+    private void setIdempotencyGuard() {
+        idempotencyGuard = new IdempotencyGuard(this);
     }
 
     /**
@@ -201,6 +214,7 @@ public abstract class Aggregate<I,
      */
     @Override
     protected List<? extends Message> dispatchCommand(CommandEnvelope command) {
+        idempotencyGuard.ensureIdempotence(command);
         final CommandHandlerMethod method = thisClass().getHandler(command.getMessageClass());
         final List<? extends Message> result =
                 method.invoke(this, command.getMessage(), command.getCommandContext());
@@ -422,7 +436,7 @@ public abstract class Aggregate<I,
      * Transforms the current state of the aggregate into the {@link Snapshot} instance.
      * 
      * <p> The aggregate is aware of the snapshot being made. For example, this information is used 
-     * by {@link #didHandleSinceLastSnapshot}.
+     * by {@link IdempotencyGuard#didHandleSinceLastSnapshot}.
      *
      * @return new snapshot
      */
@@ -450,31 +464,6 @@ public abstract class Aggregate<I,
     protected Iterator<Event> historyBackward() {
         final ImmutableList<Event> events = ImmutableList.copyOf(historySinceLastSnapshot);
         return events.iterator();
-    }
-
-    /**
-     * Checks if the command was already handled by the aggregate since last snapshot.
-     *
-     * <p> The check is performed by searching for an event caused by this command that was
-     * committed since last snapshot.
-     *
-     * <p> This functionality support the ability to stop duplicate commands from being dispatched
-     * to the aggregate.
-     *
-     * @param command the command to check
-     * @return {@code true} if the command was handled since last snapshot, {@code false} otherwise
-     */
-    public boolean didHandleSinceLastSnapshot(CommandEnvelope command) {
-        final CommandId newCommandId = command.getId();
-        final Iterator<Event> iterator = historyBackward();
-        while (iterator.hasNext()) {
-            final Event event = iterator.next();
-            final CommandId eventRootCommandId = getRootCommandId(event);
-            if (newCommandId.equals(eventRootCommandId)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
