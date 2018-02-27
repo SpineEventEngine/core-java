@@ -21,9 +21,7 @@
 package io.spine.server.aggregate;
 
 import com.google.common.base.Optional;
-import io.grpc.stub.StreamObserver;
 import io.spine.Identifier;
-import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Subscribe;
@@ -32,7 +30,6 @@ import io.spine.server.aggregate.given.AggregateCommandEndpointTestEnv.ProjectAg
 import io.spine.server.aggregate.given.AggregateCommandEndpointTestEnv.ProjectAggregateRepository;
 import io.spine.server.event.EventSubscriber;
 import io.spine.server.model.ModelTests;
-import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggCreateProject;
 import io.spine.test.aggregate.event.AggProjectCreated;
@@ -40,17 +37,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.server.aggregate.given.Given.ACommand.addTask;
 import static io.spine.server.aggregate.given.Given.ACommand.createProject;
 import static io.spine.server.aggregate.given.Given.ACommand.startProject;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-/**
- * @author Mykhailo Drachuk
- */
 public class AggregateCommandEndpointShould {
 
     private BoundedContext boundedContext;
@@ -112,7 +104,7 @@ public class AggregateCommandEndpointShould {
     }
 
     @Test
-    public void dispatch_a_command() {
+    public void dispatch_command() {
         assertDispatches(createProject());
     }
 
@@ -121,25 +113,6 @@ public class AggregateCommandEndpointShould {
         assertDispatches(createProject(projectId));
         assertDispatches(addTask(projectId));
         assertDispatches(startProject(projectId));
-    }
-
-    @Test
-    public void filter_out_a_reused_command() {
-        final Command command = addTask(projectId);
-
-        postToBoundedContext(command);
-        postToBoundedContext(command);
-
-        assertEquals(1, taskCountForProject(projectId));
-    }
-
-    @Test
-    public void filter_out_the_same_command() {
-        final Command command = addTask(projectId);
-
-        postToBoundedContext(command, command);
-
-        assertEquals(1, taskCountForProject(projectId));
     }
 
     /*
@@ -160,27 +133,5 @@ public class AggregateCommandEndpointShould {
         void on(AggProjectCreated msg) {
             remembered = msg;
         }
-    }
-
-    private void postToBoundedContext(Command command) {
-        final StreamObserver<Ack> observer = noOpObserver();
-        boundedContext.getCommandBus()
-                      .post(command, observer);
-    }
-
-    private void postToBoundedContext(Command... commands) {
-        final StreamObserver<Ack> observer = noOpObserver();
-        boundedContext.getCommandBus()
-                      .post(newArrayList(commands), observer);
-    }
-
-    private int taskCountForProject(ProjectId id) {
-        final Optional<ProjectAggregate> optional = repository.find(id);
-        assertTrue(optional.isPresent());
-
-        final ProjectAggregate aggregate = optional.get();
-        final Project project = aggregate.getState();
-        final int taskCount = project.getTaskCount();
-        return taskCount;
     }
 }
