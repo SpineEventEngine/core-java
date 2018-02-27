@@ -20,8 +20,10 @@
 package io.spine.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
+import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.grpc.Internal;
 import io.spine.core.CommandContext;
@@ -49,6 +51,7 @@ import java.util.Deque;
 import java.util.Iterator;
 import java.util.List;
 
+import static com.google.common.collect.FluentIterable.from;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static com.google.common.collect.Lists.newLinkedList;
@@ -205,39 +208,55 @@ public abstract class Aggregate<I,
 
     /**
      * Obtains a method for the passed command and invokes it.
+     *
+     * <p>Dispatching the commands results in emitting event messages. All the 
+     * {@linkplain Empty empty} messages are filtered out from the result.
+     * 
+     * @param  command the envelope with the command to dispatch
+     * @return a list of event messages that the aggregate produces by handling the command
      */
     @Override
     protected List<? extends Message> dispatchCommand(CommandEnvelope command) {
         idempotencyGuard.ensureIdempotence(command);
         final CommandHandlerMethod method = thisClass().getHandler(command.getMessageClass());
-        final List<? extends Message> result =
+        final List<? extends Message> messages =
                 method.invoke(this, command.getMessage(), command.getCommandContext());
-        return result;
+        return from(messages).filter(nonEmpty()).toList();
     }
 
     /**
      * Dispatches the event on which the aggregate reacts.
      *
+     * <p>Reacting on a event may result in emitting event messages. All the {@linkplain Empty empty} 
+     * messages are filtered out from the result.
+     *
      * @param  event the envelope with the event to dispatch
-     * @return a list with event messages that the aggregate produces in reaction to the event or
+     * @return a list of event messages that the aggregate produces in reaction to the event or
      *         an empty list if the aggregate state does not change in reaction to the event
      */
     List<? extends Message> reactOn(EventEnvelope event) {
         final EventReactorMethod method = thisClass().getReactor(event.getMessageClass());
-        return method.invoke(this, event.getMessage(), event.getEventContext());
+        final List<? extends Message> messages =
+                method.invoke(this, event.getMessage(), event.getEventContext());
+        return from(messages).filter(nonEmpty()).toList();
     }
 
     /**
      * Dispatches the rejection to which the aggregate reacts.
+     * 
+     * <p>Reacting on a rejection may result in emitting event messages. All the 
+     * {@linkplain Empty empty} messages are filtered out from the result.
      *
      * @param  rejection the envelope with the rejection
-     * @return a list with event messages that the aggregate produces in reaction to
+     * @return a list of event messages that the aggregate produces in reaction to
      *         the rejection, or an empty list if the aggregate state does not change in
      *         response to this rejection
      */
     List<? extends Message> reactOn(RejectionEnvelope rejection) {
         final RejectionReactorMethod method = thisClass().getReactor(rejection.getMessageClass());
-        return method.invoke(this, rejection.getMessage(), rejection.getRejectionContext());
+        final List<? extends Message> messages =
+                method.invoke(this, rejection.getMessage(), rejection.getRejectionContext());
+        return from(messages).filter(nonEmpty()).toList();
     }
 
     /**
@@ -469,5 +488,32 @@ public abstract class Aggregate<I,
     @VisibleForTesting
     protected int versionNumber() {
         return super.versionNumber();
+    }
+
+    /**
+     * @return an instance of an {@linkplain NonEmpty non-empty predicate}
+     */
+    private static Predicate<Message> nonEmpty() {
+        return NonEmpty.INSTANCE;
+    }
+
+    /**
+     * A predicate checking that message is not {@linkplain Empty empty}.
+     */
+    private enum NonEmpty implements Predicate<Message> {
+        INSTANCE;
+
+        private static final Empty EMPTY = Empty.getDefaultInstance();
+
+        /**
+         * Checks that message is not {@linkplain Empty empty}.
+         *
+         * @param  message the message being checked
+         * @return {@code true} if the message is not empty, {@code false} otherwise 
+         */
+        @Override
+        public boolean apply(Message message) {
+            return !message.equals(EMPTY);
+        }
     }
 }
