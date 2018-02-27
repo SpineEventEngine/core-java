@@ -30,8 +30,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.client.Targets.composeTarget;
 
 /**
- * Public API for creating {@link Topic} instances, using the {@code ActorRequestFactory}
- * configuration.
+ * A factory of {@link Topic} instances.
+ *
+ * <p>Uses the given {@link ActorRequestFactory} as the source of the topic meta information,
+ * such as the actor.
  *
  * @see ActorRequestFactory#topic()
  */
@@ -45,11 +47,11 @@ public final class TopicFactory {
     }
 
     /**
-     * Creates a {@link Topic} for a subset of the entity states by specifying their IDs.
+     * Creates a {@link Topic} for the entity states with the given IDs.
      *
      * @param entityClass the class of a target entity
      * @param ids         the IDs of interest
-     * @return the instance of {@code Topic} assembled according to the parameters.
+     * @return the instance of {@code Topic} assembled according to the parameters
      */
     public Topic someOf(Class<? extends Message> entityClass, Set<? extends Message> ids) {
         checkNotNull(entityClass);
@@ -64,7 +66,7 @@ public final class TopicFactory {
      * Creates a {@link Topic} for all of the specified entity states.
      *
      * @param entityClass the class of a target entity
-     * @return the instance of {@code Topic} assembled according to the parameters.
+     * @return the instance of {@code Topic} assembled according to the parameters
      */
     public Topic allOf(Class<? extends Message> entityClass) {
         checkNotNull(entityClass);
@@ -75,14 +77,13 @@ public final class TopicFactory {
     }
 
     /**
-     * Creates a {@link Topic} for the specified {@linkplain Target}.
+     * Creates a {@link Topic} for the specified {@link Target}.
      *
-     * <p>This method is intended for internal use only. To achieve the similar result,
-     * {@linkplain #allOf(Class) allOf()} and {@linkplain #someOf(Class, Set) someOf()} methods
-     * should be used.
+     * <p>This method is intended for internal use only. To achieve the similar result use
+     * {@linkplain #allOf(Class)} and {@linkplain #someOf(Class, Set)}.
      *
-     * @param target the {@code} Target to create a topic for.
-     * @return the instance of {@code Topic}.
+     * @param target the {@code Target} to create a topic for
+     * @return the instance of {@code Topic}
      */
     @Internal
     public Topic forTarget(Target target) {
