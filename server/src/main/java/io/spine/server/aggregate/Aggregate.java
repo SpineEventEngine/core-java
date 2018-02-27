@@ -448,7 +448,7 @@ public abstract class Aggregate<I,
     /**
      * Transforms the current state of the aggregate into the {@link Snapshot} instance.
      * 
-     * <p> The aggregate is aware of the snapshot being made. For example, this information updates 
+     * <p>The aggregate is aware of the snapshot being made. For example, this information updates 
      * {@link #historySinceLastSnapshot history since last snapshot}.
      *
      * @return new snapshot
