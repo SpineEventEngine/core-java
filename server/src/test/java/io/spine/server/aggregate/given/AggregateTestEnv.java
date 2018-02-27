@@ -77,18 +77,9 @@ import static io.spine.server.aggregate.given.Given.EventMessage.projectCreated;
  */
 public class AggregateTestEnv {
 
+    /** Prevent instantiation of this test environment */
     private AggregateTestEnv() {
-        // Prevent instantiation of this utility class.
-    }
-
-    public static TenantId newTenantId() {
-        return TenantId.newBuilder()
-                       .setValue(newUuid())
-                       .build();
-    }
-
-    public static TestActorRequestFactory newRequestFactory(TenantId tenantId) {
-        return TestActorRequestFactory.newInstance(AggregateShould.class, tenantId);
+        // Do nothing.
     }
 
     /**

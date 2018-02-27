@@ -27,6 +27,7 @@ import com.google.common.collect.Lists;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.grpc.stub.StreamObserver;
+import io.spine.base.Error;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandClass;
@@ -55,6 +56,7 @@ import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.ProjectVBuilder;
 import io.spine.test.aggregate.Status;
 import io.spine.test.aggregate.command.AggAddTask;
+import io.spine.test.aggregate.command.AggAssignTask;
 import io.spine.test.aggregate.command.AggCancelProject;
 import io.spine.test.aggregate.command.AggCreateProject;
 import io.spine.test.aggregate.command.AggPauseProject;
@@ -65,6 +67,8 @@ import io.spine.test.aggregate.event.AggProjectCreated;
 import io.spine.test.aggregate.event.AggProjectPaused;
 import io.spine.test.aggregate.event.AggProjectStarted;
 import io.spine.test.aggregate.event.AggTaskAdded;
+import io.spine.test.aggregate.event.AggTaskAssigned;
+import io.spine.test.aggregate.event.AggUserNotified;
 import io.spine.test.aggregate.user.User;
 import io.spine.time.Time;
 import io.spine.type.TypeUrl;
@@ -87,12 +91,15 @@ import static io.spine.server.TestEventClasses.assertContains;
 import static io.spine.server.TestEventClasses.getEventClasses;
 import static io.spine.server.aggregate.AggregateMessageDispatcher.dispatchCommand;
 import static io.spine.server.aggregate.given.AggregateTestEnv.UserAggregate;
+import static io.spine.server.aggregate.given.AggregateTestEnv.assignTask;
 import static io.spine.server.aggregate.given.AggregateTestEnv.command;
+import static io.spine.server.aggregate.given.AggregateTestEnv.createTask;
 import static io.spine.server.aggregate.given.AggregateTestEnv.env;
 import static io.spine.server.aggregate.given.AggregateTestEnv.event;
 import static io.spine.server.aggregate.given.AggregateTestEnv.newTaskBoundedContext;
 import static io.spine.server.aggregate.given.AggregateTestEnv.newTenantId;
 import static io.spine.server.aggregate.given.AggregateTestEnv.readAllEvents;
+import static io.spine.server.aggregate.given.AggregateTestEnv.reassignTask;
 import static io.spine.server.aggregate.given.AggregateTestEnv.typeUrlOf;
 import static io.spine.server.aggregate.given.Given.EventMessage.projectCancelled;
 import static io.spine.server.aggregate.given.Given.EventMessage.projectCreated;
@@ -784,7 +791,7 @@ public class AggregateShould {
      * returned from a reaction on a rejection stores a single event.
      *
      * <p>The rejection is fired by the {@link io.spine.server.aggregate.given.AggregateTestEnv.TaskAggregate#handle(AggReassignTask) TaskAggregate#handle(AggReassignTask)}
-     * and handled by the {@link io.spine.server.aggregate.given.AggregateTestEnv.TaskAggregate#on(Rejections.AggCannotReassignUnassignedTask) TaskAggregate#on(AggCannotReassignUnassignedTask)}.
+     * and handled by the {@link io.spine.server.aggregate.given.AggregateTestEnv.TaskAggregate#onRejections.AggCannotReassignUnassignedTask) TaskAggregate#on(AggCannotReassignUnassignedTask)}.
      */
     @Test
     public void create_single_event_for_a_pair_of_events_with_empty_for_a_rejection_react() {
