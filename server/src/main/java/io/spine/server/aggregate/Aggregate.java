@@ -50,7 +50,6 @@ import java.util.Deque;
 import java.util.Iterator;
 import java.util.List;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static com.google.common.collect.Lists.newLinkedList;
@@ -446,62 +445,11 @@ public abstract class Aggregate<I,
      * 
      * <p>The iterator is empty if there's no history for the aggregate.
      *
-     * @param  criteria specifies the filters the returned data should pass and how the query 
-     *                  should be performed
      * @return new iterator instance
      */
-    protected Iterator<Event> historyBackward(AggregateRecordQueryCriteria criteria) {
-        checkNotNull(criteria);
-        final int batchSize = criteria.batchSize();
-        final List<Event> items = queryBatch(batchSize);
-        return items.iterator();
-    }
-
-    /**
-     * Obtains a batch of aggregate records specified by the batch size.
-     * 
-     * @param batchSize the amount of events that must be retrieved
-     */
-    private List<Event> queryBatch(int batchSize) {
-        checkPositive(batchSize);
-
-        final ImmutableList.Builder<Event> builder = ImmutableList.builder();
-        int selectedCount = 0;
-
-        for (Event record : historySinceLastSnapshot) {
-            builder.add(record);
-
-            selectedCount++;
-            if (selectedCount == batchSize) {
-                return builder.build();
-            }
-        }
-
-        return builder.build();
-    }
-
-    /**
-     * Creates a new list mapping every {@link Event} in the provided collection to a newly created 
-     * {@link AggregateEventRecord}.
-     */
-    private static List<AggregateEventRecord> toAggregateEventRecords(Collection<Event> events) {
-        final ImmutableList.Builder<AggregateEventRecord> items = ImmutableList.builder();
-        for (Event event : events) {
-            final AggregateEventRecord record = newAggregateEventRecord(event);
-            items.add(record);
-        }
-        return items.build();
-    }
-
-    /**
-     * Creates a new {@link AggregateEventRecord} holding the specified {@link Event}.
-     */
-    private static AggregateEventRecord newAggregateEventRecord(Event event) {
-        final EventContext context = event.getContext();
-        return AggregateEventRecord.newBuilder()
-                                   .setTimestamp(context.getTimestamp())
-                                   .setEvent(event)
-                                   .build();
+    protected Iterator<Event> historyBackward() {
+        final ImmutableList<Event> events = ImmutableList.copyOf(historySinceLastSnapshot);
+        return events.iterator();
     }
 
     /**
@@ -518,8 +466,7 @@ public abstract class Aggregate<I,
      */
     public boolean didHandleSinceLastSnapshot(CommandEnvelope command) {
         final CommandId newCommandId = command.getId();
-        final AggregateRecordQueryCriteria query = new AggregateRecordQueryCriteria(MAX_VALUE);
-        final Iterator<Event> iterator = historyBackward(query);
+        final Iterator<Event> iterator = historyBackward();
         while (iterator.hasNext()) {
             final Event event = iterator.next();
             final CommandId eventRootCommandId = getRootCommandId(event);

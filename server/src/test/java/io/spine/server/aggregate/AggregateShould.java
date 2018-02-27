@@ -648,39 +648,13 @@ public class AggregateShould {
         commandBus.post(newArrayList(addTaskCommand2, startCommand), noOpObserver);
 
         final TestAggregate aggregate = getAggregate(ID, tenantId);
-        final AggregateRecordQueryCriteria query = new AggregateRecordQueryCriteria(MAX_VALUE);
 
-        final Iterator<Event> history = aggregate.historyBackward(query);
+        final Iterator<Event> history = aggregate.historyBackward();
 
         assertEquals(startCommand.getId(), getRootCommandId(history.next()));
         assertEquals(addTaskCommand2.getId(), getRootCommandId(history.next()));
         assertEquals(addTaskCommand.getId(), getRootCommandId(history.next()));
         assertEquals(createCommand.getId(), getRootCommandId(history.next()));
-        assertFalse(history.hasNext());
-    }
-
-    @Test
-    public void traverse_the_history_for_the_specified_batch_size_only() {
-        final TenantId tenantId = newTenantId();
-        final Command createCommand = command(createProject, tenantId);
-        final Command startCommand = command(startProject, tenantId);
-        final Command addTaskCommand = command(addTask, tenantId);
-        final Command addTaskCommand2 = command(addTask, tenantId);
-
-        final CommandBus commandBus = boundedContext.getCommandBus();
-        final StreamObserver<Ack> noOpObserver = noOpObserver();
-        commandBus.post(createCommand, noOpObserver);
-        commandBus.post(addTaskCommand, noOpObserver);
-        commandBus.post(newArrayList(startCommand, addTaskCommand2), noOpObserver);
-
-        final TestAggregate aggregate = getAggregate(ID, tenantId);
-        final AggregateRecordQueryCriteria query = new AggregateRecordQueryCriteria(3);
-
-        final Iterator<Event> history = aggregate.historyBackward(query);
-
-        assertEquals(addTaskCommand2.getId(), getRootCommandId(history.next()));
-        assertEquals(startCommand.getId(), getRootCommandId(history.next()));
-        assertEquals(addTaskCommand.getId(), getRootCommandId(history.next()));
         assertFalse(history.hasNext());
     }
 
@@ -701,9 +675,8 @@ public class AggregateShould {
         commandBus.post(newArrayList(addTaskCommand, addTaskCommand2), noOpObserver);
 
         final TestAggregate aggregate = getAggregate(ID, tenantId);
-        final AggregateRecordQueryCriteria query = new AggregateRecordQueryCriteria(MAX_VALUE);
 
-        final Iterator<Event> history = aggregate.historyBackward(query);
+        final Iterator<Event> history = aggregate.historyBackward();
 
         assertEquals(addTaskCommand2.getId(), getRootCommandId(history.next()));
         assertFalse(history.hasNext());
