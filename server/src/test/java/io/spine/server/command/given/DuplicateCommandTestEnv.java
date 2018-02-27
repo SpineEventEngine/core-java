@@ -69,16 +69,16 @@ public class DuplicateCommandTestEnv {
                        .build();
     }
 
-    public static DCmdCreateProject createProject() {
-        return DCmdCreateProject.newBuilder()
-                                .setProjectId(newProjectId())
-                                .build();
-    }
-
     private static ProjectId newProjectId() {
         return ProjectId.newBuilder()
                         .setId(newUuid())
                         .build();
+    }
+
+    public static DCmdCreateProject createProject() {
+        return DCmdCreateProject.newBuilder()
+                                .setProjectId(newProjectId())
+                                .build();
     }
 
     public static Command command(Message commandMessage, TenantId tenantId) {
@@ -169,7 +169,7 @@ public class DuplicateCommandTestEnv {
         }
 
         /**
-         * Shutdown the connection channel.
+         * Shuts down the connection channel.
          *
          * @throws InterruptedException if waiting is interrupted.
          */
@@ -229,7 +229,7 @@ public class DuplicateCommandTestEnv {
         }
 
         /**
-         * Shutdown the connection channel.
+         * Shuts down the connection channel.
          *
          * @throws InterruptedException if waiting is interrupted.
          */
