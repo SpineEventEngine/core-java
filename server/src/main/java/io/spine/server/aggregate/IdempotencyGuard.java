@@ -49,6 +49,7 @@ class IdempotencyGuard {
      * If it was a {@link DuplicateCommandException} is thrown.
      *
      * @param envelope an envelope with a command to check
+     * @throws DuplicateCommandException if the command was dispatched to the aggregate
      */
     void ensureIdempotence(CommandEnvelope envelope) {
         if (didHandleSinceLastSnapshot(envelope)) {
