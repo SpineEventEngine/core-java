@@ -32,7 +32,7 @@ import io.spine.type.TypeName;
 import static java.lang.String.format;
 
 /**
- * Reports an attempt to dispatch a command more than once.
+ * Reports an attempt to dispatch a duplicate command.
  *
  * <p>A command is considered a duplicate when its ID matches the ID of a command which was
  * already dispatched emitting events in a target aggregate.
