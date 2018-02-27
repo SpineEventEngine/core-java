@@ -91,16 +91,18 @@ public final class CommandFactory {
      * definition. In case the message isn't valid, an {@linkplain ValidationException
      * exception} is thrown.
      *
+     * <p>The {@code targetVersion} parameter defines the version of the entity which handles
+     * the resulting command. Note that the framework performs no validation of the target version
+     * before a command is handled. The validation may be performed by the user themselves instead.
+     *
      * @param message       the command message
-     * @param targetVersion the ID of the entity for applying commands if {@code null}
-     *                      the commands can be applied to any entity
+     * @param targetVersion the version of the entity for which this command is intended
      * @return new command instance
      * @throws ValidationException if the passed message does not satisfy the constraints
      *                             set for it in its Protobuf definition
      */
     public Command create(Message message, int targetVersion) throws ValidationException {
         checkNotNull(message);
-        checkNotNull(targetVersion);
         checkValid(message);
 
         final CommandContext context = createContext(targetVersion);
@@ -224,7 +226,7 @@ public final class CommandFactory {
      * @param tenantId      the ID of the tenant or {@code null} for single-tenant applications
      * @param userId        the actor id
      * @param zoneOffset    the offset of the timezone in which the user works
-     * @param targetVersion the the ID of the entity for applying commands
+     * @param targetVersion the version of the entity for which this command is intended
      * @return new {@code CommandContext}
      * @see CommandFactory#create(Message)
      */
@@ -235,7 +237,6 @@ public final class CommandFactory {
                                         int targetVersion) {
         checkNotNull(userId);
         checkNotNull(zoneOffset);
-        checkNotNull(targetVersion);
 
         final CommandContext.Builder builder = newContextBuilder(tenantId, userId, zoneOffset);
         final CommandContext result = builder.setTargetVersion(targetVersion)
