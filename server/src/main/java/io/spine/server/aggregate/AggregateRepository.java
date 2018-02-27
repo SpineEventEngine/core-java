@@ -233,7 +233,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
             storage.writeEvent(id, event);
             ++eventCount;
             if (eventCount >= snapshotTrigger) {
-                final Snapshot snapshot = aggregate.saveAsSnapshot();
+                final Snapshot snapshot = aggregate.toShapshot();
+                aggregate.clearRecentHistory();
                 storage.writeSnapshot(id, snapshot);
                 eventCount = 0;
             }

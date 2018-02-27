@@ -141,7 +141,7 @@ public abstract class Aggregate<I,
      *
      * @see #historyBackward()
      */
-    private final Deque<Event> historySinceLastSnapshot = newArrayDeque();
+    private final Deque<Event> recentHistory = newArrayDeque();
 
     /** A guard for ensuring idempotency of messages dispatched by this aggregate. */
     private IdempotencyGuard idempotencyGuard;
@@ -432,7 +432,7 @@ public abstract class Aggregate<I,
      */
     private void addToHistory(Collection<Event> events) {
         for (Event event : events) {
-            historySinceLastSnapshot.addFirst(event);
+            recentHistory.addFirst(event);
         }
     }
 
@@ -446,23 +446,26 @@ public abstract class Aggregate<I,
     }
 
     /**
-     * Saves the current aggregate state as {@link Snapshot} instance.
-     * 
-     * <p>The aggregate is aware of the snapshot being save. For example, this information updates 
-     * {@link #historySinceLastSnapshot history since last snapshot}.
+     * Transforms the current state of the aggregate into the {@link Snapshot} instance.
      *
      * @return new snapshot
      */
     @CheckReturnValue
-    Snapshot saveAsSnapshot() {
+    Snapshot toShapshot() {
         final Any state = AnyPacker.pack(getState());
         final Snapshot.Builder builder = Snapshot.newBuilder()
                 .setState(state)
                 .setVersion(getVersion())
                 .setTimestamp(getCurrentTime());
         final Snapshot snapshot = builder.build();
-        historySinceLastSnapshot.clear();
         return snapshot;
+    }
+
+    /**
+     * Clears recent history of events.
+     */
+    void clearRecentHistory() {
+        recentHistory.clear();
     }
 
     /**
@@ -475,7 +478,7 @@ public abstract class Aggregate<I,
      * @return new iterator instance
      */
     protected Iterator<Event> historyBackward() {
-        final ImmutableList<Event> events = ImmutableList.copyOf(historySinceLastSnapshot);
+        final ImmutableList<Event> events = ImmutableList.copyOf(recentHistory);
         return events.iterator();
     }
 
