@@ -31,12 +31,15 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.Identifier.newUuid;
 import static io.spine.client.Queries.queryBuilderFor;
 import static java.lang.String.format;
 
 /**
- * Public API for creating {@link Query} instances, using the {@code ActorRequestFactory}
- * configuration.
+ * A factory of {@link Query} instances.
+ *
+ * <p>Uses the given {@link ActorRequestFactory} as the source of the query meta information,
+ * such as the actor.
  *
  * @see ActorRequestFactory#query()
  */
@@ -57,14 +60,14 @@ public final class QueryFactory {
     }
 
     private static QueryId newQueryId() {
-        final String formattedId = format(QUERY_ID_FORMAT, Identifier.newUuid());
+        final String formattedId = format(QUERY_ID_FORMAT, newUuid());
         return QueryId.newBuilder()
                       .setValue(formattedId)
                       .build();
     }
 
     /**
-     * Creates a new instance of {@link QueryBuilder} for the further {@linkplain Query}
+     * Creates a new instance of {@link QueryBuilder} for the further {@link Query}
      * construction.
      *
      * @param targetType the {@linkplain Query query} target type

@@ -44,7 +44,7 @@ import static io.spine.validate.Validate.checkValid;
  * A factory of {@link Command} instances.
  *
  * <p>Uses the given {@link ActorRequestFactory} as the source of the command meta information,
- * such as actor, tenant, etc.
+ * such as the actor, the tenant, etc.
  *
  * <p>The command messages passed to the factory are
  * {@linkplain io.spine.validate.Validate#checkValid(Message) validated} according to their

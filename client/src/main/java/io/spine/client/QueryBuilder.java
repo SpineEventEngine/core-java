@@ -43,10 +43,10 @@ import static java.util.Collections.singleton;
  *
  * <p>The API of this class is inspired by the SQL syntax.
  *
- * <p>Calling any of the methods is optional. Call {@link #build() build()} to retrieve
- * the instance of {@link Query}.
+ * <p>Calling any of the methods is optional. Call {@link #build()} to retrieve the resulting
+ * instance of {@link Query}.
  *
- * <p>Calling any of the builder methods overrides the previous call of the given method of
+ * <p>Calling any of the builder methods overrides the previous call of the given method or
  * any of its overloads. For example, calling sequentially
  * <pre>
  *     {@code
@@ -70,7 +70,7 @@ import static java.util.Collections.singleton;
  *     {@code
  *     final Query query = factory().query()
  *                                  .select(Customer.class)
- *                                  .byId(getWestCostCustomersIds())
+ *                                  .byId(getWestCostCustomerIds())
  *                                  .withMask("name", "address", "email")
  *                                  .where({@link ColumnFilters#eq eq}("type", "permanent"),
  *                                         eq("discountPercent", 10),
@@ -87,9 +87,10 @@ public final class QueryBuilder {
     private final QueryFactory queryFactory;
     private final Class<? extends Message> targetType;
 
-    /* All the optional fields are initialized only when and if set
-       The empty collections make effectively no influence, but null values allow us to create
-       the query `Target` more efficiently.
+    /*
+        All the optional fields are initialized only when and if set.
+        The empty collections make effectively no influence, but null values allow us to create
+        the query `Target` more efficiently.
      */
 
     @Nullable
@@ -107,13 +108,13 @@ public final class QueryBuilder {
     }
 
     /**
-     * Sets the ID predicate to the {@linkplain Query}.
+     * Sets the ID predicate to the {@link Query}.
      *
      * <p>Though it's not prohibited at compile-time, please make sure to pass instances of the
      * same type to the argument of this method. Moreover, the instances must be of the type of
      * the query target type identifier.
      *
-     * <p>This method or any of its overload do not check these
+     * <p>This method or any of its overloads do not check these
      * constrains an assume they are followed by the caller.
      *
      * <p>If there are no IDs (i.e. and empty {@link Iterable} is passed), the query retrieves all
@@ -129,7 +130,7 @@ public final class QueryBuilder {
     }
 
     /**
-     * Sets the ID predicate to the {@linkplain Query}.
+     * Sets the ID predicate to the {@link Query}.
      *
      * @param ids the values of the IDs to look up
      * @return self for method chaining
@@ -141,7 +142,7 @@ public final class QueryBuilder {
     }
 
     /**
-     * Sets the ID predicate to the {@linkplain Query}.
+     * Sets the ID predicate to the {@link Query}.
      *
      * @param ids the values of the IDs to look up
      * @return self for method chaining
@@ -153,7 +154,7 @@ public final class QueryBuilder {
     }
 
     /**
-     * Sets the ID predicate to the {@linkplain Query}.
+     * Sets the ID predicate to the {@link Query}.
      *
      * @param ids the values of the IDs to look up
      * @return self for method chaining
@@ -165,7 +166,7 @@ public final class QueryBuilder {
     }
 
     /**
-     * Sets the ID predicate to the {@linkplain Query}.
+     * Sets the ID predicate to the {@link Query}.
      *
      * @param ids the values of the IDs to look up
      * @return self for method chaining
@@ -177,7 +178,7 @@ public final class QueryBuilder {
     }
 
     /**
-     * Sets the Entity Column predicate to the {@linkplain Query}.
+     * Sets the Entity Column predicate to the {@link Query}.
      *
      * <p>If there are no {@link ColumnFilter}s (i.e. the passed array is empty), all
      * the records will be retrieved regardless the Entity Columns values.
@@ -198,7 +199,7 @@ public final class QueryBuilder {
     }
 
     /**
-     * Sets the Entity Column predicate to the {@linkplain Query}.
+     * Sets the Entity Column predicate to the {@link Query}.
      *
      * <p>If there are no {@link ColumnFilter}s (i.e. the passed array is empty), all
      * the records will be retrieved regardless the Entity Columns values.
@@ -251,8 +252,7 @@ public final class QueryBuilder {
      *
      * <p>The {@code Option 1} is recommended in this case, since the filters are grouped logically,
      * though both builders produce effectively the same {@link Query} instances. Note, that
-     * those instances may not be equal in terms of {@link Object#equals(Object) Object.equals}
-     * method.
+     * those instances may not be equal in terms of {@link Object#equals(Object)} method.
      *
      * @param predicate a number of {@link CompositeColumnFilter} instances forming the query
      *                  predicate
@@ -308,7 +308,6 @@ public final class QueryBuilder {
      */
     public Query build() {
         final FieldMask mask = composeMask();
-        // Implying AnyPacker.pack to be idempotent
         final Set<Any> entityIds = composeIdPredicate();
 
         final Query result = queryFactory.composeQuery(targetType, entityIds, columns, mask);

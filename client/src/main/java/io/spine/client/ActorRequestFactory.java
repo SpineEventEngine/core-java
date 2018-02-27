@@ -93,14 +93,29 @@ public class ActorRequestFactory {
         return result;
     }
 
+    /**
+     * Retrieves an instance of {@link QueryFactory} for this actor.
+     *
+     * @return an instance of {@link QueryFactory}
+     */
     public QueryFactory query() {
         return new QueryFactory(this);
     }
 
+    /**
+     * Retrieves an instance of {@link TopicFactory} for this actor.
+     *
+     * @return an instance of {@link TopicFactory}
+     */
     public TopicFactory topic() {
         return new TopicFactory(this);
     }
 
+    /**
+     * Retrieves an instance of {@link CommandFactory} for this actor.
+     *
+     * @return an instance of {@link CommandFactory}
+     */
     public CommandFactory command() {
         return new CommandFactory(this);
     }
