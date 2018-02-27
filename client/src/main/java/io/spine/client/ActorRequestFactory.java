@@ -94,7 +94,8 @@ public class ActorRequestFactory {
     }
 
     /**
-     * Retrieves an instance of {@link QueryFactory} for this actor.
+     * Retrieves an instance of {@link QueryFactory} for the actor configured for this
+     * {@code ActorRequestFactory}.
      *
      * @return an instance of {@link QueryFactory}
      */
@@ -103,7 +104,8 @@ public class ActorRequestFactory {
     }
 
     /**
-     * Retrieves an instance of {@link TopicFactory} for this actor.
+     * Retrieves an instance of {@link TopicFactory} for the actor configured for this
+     * {@code ActorRequestFactory}.
      *
      * @return an instance of {@link TopicFactory}
      */
@@ -112,7 +114,8 @@ public class ActorRequestFactory {
     }
 
     /**
-     * Retrieves an instance of {@link CommandFactory} for this actor.
+     * Retrieves an instance of {@link CommandFactory} for the actor configured for this
+     * {@code ActorRequestFactory}.
      *
      * @return an instance of {@link CommandFactory}
      */
