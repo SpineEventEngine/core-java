@@ -749,6 +749,9 @@ public class AggregateShould {
                     @Override
                     public TestAggregate apply(ProjectId input) {
                         final Optional<TestAggregate> optional = repository.find(input);
+                        if (!optional.isPresent()) {
+                            fail("Aggregate not found.");
+                        }
                         return optional.get();
                     }
                 };
