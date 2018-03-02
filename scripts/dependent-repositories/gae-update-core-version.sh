@@ -13,7 +13,7 @@ readonly TARGET_COMMIT_MESSAGE="Update the dependency to \`core-java\` *version*
 
 readonly OWN_FILE_WITH_VERSION='ext.gradle'
 readonly OWN_VERSION_VARIABLE='spineGaeVersion'
-readonly OWN_COMMIT_MESSAGE="Update own version to *version*."
+readonly OWN_COMMIT_MESSAGE="Update the library version to *version*."
 
 readonly NEW_BRANCH_NAME='update-core-version'
 readonly BRANCH_TO_MERGE_INTO='master'
