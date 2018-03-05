@@ -25,7 +25,7 @@
  *  as we want to manage the versions in a single source.
  */
  
-def final SPINE_VERSION = '0.10.27-SNAPSHOT'
+def final SPINE_VERSION = '0.10.29-SNAPSHOT'
 
 //noinspection GroovyAssignabilityCheck
 ext {
@@ -43,9 +43,9 @@ ext {
     // NOTE: when updating Protobuf dependency, please check that
     // `KnownTypes.addStandardProtobufTypes()` method is updated with new Message types that may be
     // introduced in the new version of Protobuf.
-    protobufVersion = '3.5.0'
+    protobufVersion = '3.5.1'
     
-    gRpcVersion = '1.8.0'
+    gRpcVersion = '1.9.0'
     slf4JVersion = '1.7.25'
     jUnitVersion = '4.12'
 
@@ -54,5 +54,5 @@ ext {
     // throughout a test suite. We leave this version as is ('2.7.22') for now.
     mockitoVersion = '2.7.22'
 
-    protobufGradlePluginVerison = '0.8.3'
+    protobufGradlePluginVerison = '0.8.4'
 }
