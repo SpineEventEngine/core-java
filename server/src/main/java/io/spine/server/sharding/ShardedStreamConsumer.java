@@ -19,23 +19,12 @@
  */
 package io.spine.server.sharding;
 
-import com.google.protobuf.Message;
-
-import java.util.Set;
+import io.grpc.stub.StreamObserver;
 
 /**
  * @author Alex Tymchenko
  */
-public interface Sharding {
+public interface ShardedStreamConsumer extends StreamObserver<ShardedMessage> {
 
-    ShardedStream register(Shardable shardable) throws NoShardAvailableException;
-
-    Set<ShardedStream> find(Object targetId, Message message) throws NoShardAvailableException;
-
-    enum Strategy {
-
-        ALL_TARGETS_OF_TYPE,
-
-        UNIFORM_ACROSS_TARGETS
-    }
+    ShardConsumerId getConsumerId();
 }

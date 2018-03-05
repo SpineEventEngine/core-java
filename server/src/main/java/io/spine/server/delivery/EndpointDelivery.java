@@ -25,7 +25,15 @@ import io.spine.core.TenantId;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityMessageEndpoint;
 import io.spine.server.entity.Repository;
+import io.spine.server.model.ModelClass;
+import io.spine.server.sharding.ShardConsumerId;
+import io.spine.server.sharding.ShardedMessage;
+import io.spine.server.sharding.ShardedStreamConsumer;
 import io.spine.server.tenant.TenantAwareOperation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import static java.lang.String.format;
 
 /**
  * A strategy on delivering the messages to the instances of a certain entity type.
@@ -46,12 +54,16 @@ import io.spine.server.tenant.TenantAwareOperation;
 @Internal
 public abstract class EndpointDelivery<I,
                                        E extends Entity<I, ?>,
-                                       M extends ActorMessageEnvelope<?, ?, ?>>  {
+                                       M extends ActorMessageEnvelope<?, ?, ?>>
+        implements ShardedStreamConsumer {
 
     private final Repository<I, E> repository;
 
-    protected EndpointDelivery(Repository<I, E> repository) {
+    private final ShardConsumerId shardConsumerId;
+
+    protected EndpointDelivery(Repository<I, E> repository, ModelClass<E> modelClass) {
         this.repository = repository;
+        shardConsumerId = ShardConsumerId.forCommandsOf(modelClass);
     }
 
     /**
@@ -72,6 +84,11 @@ public abstract class EndpointDelivery<I,
      * @return the message endpoint
      */
     protected abstract EntityMessageEndpoint<I, E, M, ?> getEndpoint(M messageEnvelope);
+
+    @Override
+    public ShardConsumerId getConsumerId() {
+        return shardConsumerId;
+    }
 
     /**
      * Delivers the envelope to the entity of the given ID taking into account
@@ -105,5 +122,32 @@ public abstract class EndpointDelivery<I,
 
     protected Repository<I, E> repository() {
         return repository;
+    }
+
+    @Override
+    public void onNext(ShardedMessage value) {
+
+    }
+
+    @Override
+    public void onError(Throwable t) {
+        final String errorMsg = format("Unexpected error consuming the sharded messages. " +
+                                               "Repository: %s", repository().getClass());
+        log().error(errorMsg, t);
+    }
+
+    @Override
+    public void onCompleted() {
+        //TODO:2018-02-27:alex.tymchenko: find out if this is going to happen at all.
+    }
+
+    private enum LogSingleton {
+        INSTANCE;
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Logger value = LoggerFactory.getLogger(EndpointDelivery.class);
+    }
+
+    private static Logger log() {
+        return LogSingleton.INSTANCE.value;
     }
 }

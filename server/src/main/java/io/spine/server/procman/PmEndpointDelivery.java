@@ -38,7 +38,7 @@ public abstract class PmEndpointDelivery<I,
         extends EndpointDelivery<I, P, M> {
 
     protected PmEndpointDelivery(ProcessManagerRepository<I, P, ?> repository) {
-        super(repository);
+        super(repository, repository.processManagerClass());
     }
 
     @Override

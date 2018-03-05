@@ -51,7 +51,7 @@ public class ServerEnvironment {
         //TODO:2018-02-22:alex.tymchenko: supply an in-process implementation instead.
         this.sharding = new Sharding() {
             @Override
-            public ShardedStream ofDestination(Shardable shardable) throws NoShardAvailableException {
+            public ShardedStream register(Shardable shardable) throws NoShardAvailableException {
                 return null;
             }
 

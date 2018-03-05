@@ -53,7 +53,7 @@ public class ShardedStream {
         this.transportFactory = transportFactory;
         this.boundedContextName = boundedContextName;
         this.key = key;
-        this.channelId = getChannelId(key);
+        this.channelId = toChannelId(key);
     }
 
     public ShardingKey getKey() {
@@ -66,8 +66,9 @@ public class ShardedStream {
         publisher.publish(externalMessage.getId(), externalMessage);
     }
 
-    public void setConsumer(final StreamObserver<ShardedMessage> consumer) {
+    public void addObserver(final StreamObserver<ShardedMessage> consumer) {
         checkNotNull(consumer);
+
         getSubscriber().addObserver(new StreamObserver<ExternalMessage>() {
             @Override
             public void onNext(ExternalMessage value) {
@@ -98,7 +99,9 @@ public class ShardedStream {
         return result;
     }
 
-    private static ChannelId getChannelId(ShardingKey key) {
+    private static ChannelId toChannelId(ShardingKey key) {
+        checkNotNull(key);
+
         final ClassName className = key.getModelClass()
                                        .getClassName();
         final IdPredicate idPredicate = key.getIdPredicate();

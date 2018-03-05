@@ -20,21 +20,16 @@
 package io.spine.server.aggregate;
 
 import com.google.protobuf.Message;
-import io.grpc.stub.StreamObserver;
-import io.spine.annotation.SPI;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.sharding.ShardedMessage;
 import io.spine.server.sharding.ShardedMessages;
 import io.spine.server.sharding.ShardedStream;
 import io.spine.server.sharding.Sharding;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Set;
 
 import static io.spine.protobuf.TypeConverter.toMessage;
-import static java.lang.String.format;
 
 /**
  * An abstract base for {@code Aggregate} {@linkplain AggregateCommandDelivery command
@@ -46,14 +41,13 @@ import static java.lang.String.format;
  *
  * @author Alex Tymchenko
  */
-@SPI
-public abstract class ShardedAggregateCommandDelivery<I, A extends Aggregate<I, ?, ?>>
-        extends AggregateCommandDelivery<I, A> {
+public class ShardedAggregateCommandDelivery<I, A extends Aggregate<I, ?, ?>>
+                            extends AggregateCommandDelivery<I, A>
+                           {
 
     protected ShardedAggregateCommandDelivery(AggregateRepository<I, A> repository) {
         super(repository);
-        final ShardedStream shardedStream = sharding().ofDestination(repository);
-        shardedStream.setConsumer(new Consumer());
+
     }
 
     /**
@@ -99,34 +93,14 @@ public abstract class ShardedAggregateCommandDelivery<I, A extends Aggregate<I, 
         return result;
     }
 
-    private class Consumer implements StreamObserver<ShardedMessage> {
-
-        @Override
-        public void onNext(ShardedMessage value) {
-            final CommandEnvelope commandEnvelope = ShardedMessages.getCommandEnvelope(value);
-            final I targetId = ShardedMessages.getTargetId(value, repository().getIdClass());
-            deliverNow(targetId, commandEnvelope);
-        }
-
-        @Override
-        public void onError(Throwable t) {
-            final String errorMsg = format("Unexpected error consuming the sharded messages. " +
-                                                   "Repository: %s", repository().getClass());
-            log().error(errorMsg, t);
-        }
-
-        @Override
-        public void onCompleted() {
-        }
+    @Override
+    public void onNext(ShardedMessage value) {
+        final CommandEnvelope commandEnvelope = ShardedMessages.getCommandEnvelope(value);
+        final I targetId = ShardedMessages.getTargetId(value, repository().getIdClass());
+        deliverNow(targetId, commandEnvelope);
     }
 
-    private enum LogSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(ShardedAggregateCommandDelivery.class);
-    }
-
-    private static Logger log() {
-        return LogSingleton.INSTANCE.value;
+    @Override
+    public void onError(Throwable t) {
     }
 }

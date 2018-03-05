@@ -21,6 +21,7 @@
 package io.spine.server.projection;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
@@ -40,6 +41,9 @@ import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.model.Model;
 import io.spine.server.route.EventProducers;
 import io.spine.server.route.EventRouting;
+import io.spine.server.sharding.Shardable;
+import io.spine.server.sharding.ShardedStreamConsumer;
+import io.spine.server.sharding.Sharding;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
@@ -60,7 +64,8 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @author Alexander Yevsyukov
  */
 public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S extends Message>
-        extends EventDispatchingRepository<I, P, S> {
+        extends EventDispatchingRepository<I, P, S>
+        implements Shardable<P> {
 
     /** An underlying entity storage used to store projections. */
     private RecordStorage<I> recordStorage;
@@ -80,7 +85,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
 
     /** Obtains class information of projection managed by this repository. */
     @SuppressWarnings("unchecked") // The cast is ensured by generic parameters of the repository.
-    private ProjectionClass<P> projectionClass() {
+    ProjectionClass<P> projectionClass() {
         return (ProjectionClass<P>) entityClass();
     }
 
@@ -261,6 +266,18 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     @Override
     protected ExternalMessageDispatcher<I> getExternalEventDispatcher() {
         return new ProjectionExternalEventDispatcher();
+    }
+
+    @Override
+    public Sharding.Strategy getShardingStrategy() {
+        return Sharding.Strategy.ALL_TARGETS_OF_TYPE;
+    }
+
+    @Override
+    public Iterable<ShardedStreamConsumer> getMessageConsumers() {
+        final Iterable<ShardedStreamConsumer> result =
+                ImmutableList.<ShardedStreamConsumer>of(getEndpointDelivery());
+        return result;
     }
 
     /**

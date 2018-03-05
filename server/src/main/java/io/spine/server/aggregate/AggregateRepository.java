@@ -21,6 +21,7 @@ package io.spine.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 import io.spine.annotation.SPI;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
@@ -33,6 +34,7 @@ import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.commandbus.CommandErrorHandler;
+import io.spine.server.delivery.EndpointDelivery;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.DelegatingEventDispatcher;
@@ -41,7 +43,6 @@ import io.spine.server.event.EventDispatcherDelegate;
 import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.model.Model;
-import io.spine.server.model.ModelClass;
 import io.spine.server.rejection.DelegatingRejectionDispatcher;
 import io.spine.server.rejection.RejectionDispatcherDelegate;
 import io.spine.server.route.CommandRouting;
@@ -50,6 +51,7 @@ import io.spine.server.route.EventRouting;
 import io.spine.server.route.RejectionProducers;
 import io.spine.server.route.RejectionRouting;
 import io.spine.server.sharding.Shardable;
+import io.spine.server.sharding.ShardedStreamConsumer;
 import io.spine.server.sharding.Sharding;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.Storage;
@@ -168,6 +170,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         registerExtMessageDispatcher(boundedContext, extRejectionDispatcher, extRejectionClasses);
 
         this.commandErrorHandler = CommandErrorHandler.with(boundedContext.getRejectionBus());
+
     }
 
     private void registerExtMessageDispatcher(BoundedContext boundedContext,
@@ -211,7 +214,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     /** Obtains class information of aggregates managed by this repository. */
-    private AggregateClass<A> aggregateClass() {
+    AggregateClass<A> aggregateClass() {
         return (AggregateClass<A>)entityClass();
     }
 
@@ -599,7 +602,12 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
-    public ModelClass<A> getModelClass() {
-        return aggregateClass();
+    public Iterable<ShardedStreamConsumer> getMessageConsumers() {
+        final EndpointDelivery<I, A, CommandEnvelope> cmdDelivery = getCommandEndpointDelivery();
+        final EndpointDelivery<I, A, EventEnvelope> eventDelivery = getEventEndpointDelivery();
+        final EndpointDelivery<I, A, RejectionEnvelope> rjDelivery = getRejectionEndpointDelivery();
+        final Iterable<ShardedStreamConsumer> result =
+                ImmutableList.<ShardedStreamConsumer>of(cmdDelivery, eventDelivery, rjDelivery);
+        return result;
     }
 }

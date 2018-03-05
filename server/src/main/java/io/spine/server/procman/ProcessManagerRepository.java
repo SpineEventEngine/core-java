@@ -20,6 +20,7 @@
 
 package io.spine.server.procman;
 
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import io.spine.annotation.SPI;
 import io.spine.core.CommandClass;
@@ -37,6 +38,7 @@ import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcherDelegate;
 import io.spine.server.commandbus.CommandErrorHandler;
 import io.spine.server.commandbus.DelegatingCommandDispatcher;
+import io.spine.server.delivery.EndpointDelivery;
 import io.spine.server.entity.EventDispatchingRepository;
 import io.spine.server.event.EventBus;
 import io.spine.server.integration.ExternalMessageClass;
@@ -50,6 +52,9 @@ import io.spine.server.route.EventProducers;
 import io.spine.server.route.EventRouting;
 import io.spine.server.route.RejectionProducers;
 import io.spine.server.route.RejectionRouting;
+import io.spine.server.sharding.Shardable;
+import io.spine.server.sharding.ShardedStreamConsumer;
+import io.spine.server.sharding.Sharding;
 
 import javax.annotation.CheckReturnValue;
 import java.util.Set;
@@ -72,7 +77,8 @@ public abstract class ProcessManagerRepository<I,
                                                S extends Message>
                 extends EventDispatchingRepository<I, P, S>
                 implements CommandDispatcherDelegate<I>,
-                           RejectionDispatcherDelegate<I> {
+                           RejectionDispatcherDelegate<I>,
+                           Shardable<P> {
 
     /** The command routing schema used by this repository. */
     private final CommandRouting<I> commandRouting = CommandRouting.newInstance();
@@ -98,7 +104,7 @@ public abstract class ProcessManagerRepository<I,
 
     /** Obtains class information of process managers managed by this repository. */
     @SuppressWarnings("unchecked") // The cast is ensured by generic parameters of the repository.
-    private ProcessManagerClass<P> processManagerClass() {
+    ProcessManagerClass<P> processManagerClass() {
         return (ProcessManagerClass<P>) entityClass();
     }
 
@@ -394,6 +400,21 @@ public abstract class ProcessManagerRepository<I,
     @Override
     protected ExternalMessageDispatcher<I> getExternalEventDispatcher() {
         return new PmExternalEventDispatcher();
+    }
+
+    @Override
+    public Sharding.Strategy getShardingStrategy() {
+        return Sharding.Strategy.ALL_TARGETS_OF_TYPE;
+    }
+
+    @Override
+    public Iterable<ShardedStreamConsumer> getMessageConsumers() {
+        final EndpointDelivery<I, P, CommandEnvelope> cmdDelivery = getCommandEndpointDelivery();
+        final EndpointDelivery<I, P, EventEnvelope> eventDelivery = getEventEndpointDelivery();
+        final EndpointDelivery<I, P, RejectionEnvelope> rjDelivery = getRejectionEndpointDelivery();
+        final Iterable<ShardedStreamConsumer> result =
+                ImmutableList.<ShardedStreamConsumer>of(cmdDelivery, eventDelivery, rjDelivery);
+        return result;
     }
 
     /**

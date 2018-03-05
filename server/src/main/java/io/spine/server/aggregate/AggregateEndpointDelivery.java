@@ -38,7 +38,7 @@ public abstract class AggregateEndpointDelivery<I,
         extends EndpointDelivery<I, A, E> {
 
     AggregateEndpointDelivery(AggregateRepository<I, A> repository) {
-        super(repository);
+        super(repository, repository.aggregateClass());
     }
 
     @Override

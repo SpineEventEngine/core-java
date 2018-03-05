@@ -36,7 +36,7 @@ public abstract class ProjectionEventDelivery<I, P extends Projection<I, ?, ?>>
         extends EndpointDelivery<I, P, EventEnvelope> {
 
     protected ProjectionEventDelivery(ProjectionRepository<I, P, ?> repository) {
-        super(repository);
+        super(repository, repository.projectionClass());
     }
 
     public static <I, P extends Projection<I, ?, ?>>

@@ -19,8 +19,6 @@
  */
 package io.spine.server.sharding;
 
-import io.spine.server.model.ModelClass;
-
 /**
  * @author Alex Tymchenko
  */
@@ -28,5 +26,5 @@ public interface Shardable<E> {
 
     Sharding.Strategy getShardingStrategy();
 
-    ModelClass<E> getModelClass();
+    Iterable<ShardedStreamConsumer> getMessageConsumers();
 }
