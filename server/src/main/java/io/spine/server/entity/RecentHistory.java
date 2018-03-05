@@ -41,7 +41,9 @@ public final class RecentHistory {
     /**
      * Holds the history of all events which happened to the aggregate since the last snapshot.
      *
-     * <p>Most recent event comes first.
+     * <p>Most recent event come first.
+     *
+     * @see #iterator()
      */
     private final Deque<Event> history = newArrayDeque();
 
@@ -68,6 +70,9 @@ public final class RecentHistory {
 
     /**
      * Creates a new iterator over the recent history items.
+     *
+     * <p>The iterator returns events in the reverse chronological order. That is, most recent
+     * event would be returned first.
      *
      * @return an events iterator
      */
