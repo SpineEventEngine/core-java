@@ -64,7 +64,7 @@ public final class RecentHistory {
     /**
      * Removes all events from the recent history.
      */
-    public void clear() {
+    void clear() {
         history.clear();
     }
 
