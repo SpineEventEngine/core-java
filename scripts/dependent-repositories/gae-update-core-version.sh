@@ -15,7 +15,7 @@ readonly OWN_FILE_WITH_VERSION='ext.gradle'
 readonly OWN_VERSION_VARIABLE='spineGaeVersion'
 readonly OWN_COMMIT_MESSAGE="Update the library version to *version*."
 
-readonly NEW_BRANCH_NAME='update-core-version'
+readonly NEW_BRANCH_NAME='update-to-core-java-*version*'
 readonly BRANCH_TO_MERGE_INTO='master'
 
 readonly PULL_REQUEST_TITLE="Update the dependency to \`core-java\` *version*."
