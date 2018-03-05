@@ -42,8 +42,8 @@ import static io.spine.core.Responses.ok;
     // We allow custom `toString()` in the anonymous classes for easier diagnostics.
 public class StreamObservers {
 
+    /** Prevent instantiation of this utility class. */
     private StreamObservers() {
-        // Prevent from instantiation.
     }
 
     /**
