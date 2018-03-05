@@ -39,18 +39,18 @@ import static com.google.common.collect.Queues.newArrayDeque;
 public final class RecentHistory {
 
     /**
-     * Creates new instance.
-     */
-    RecentHistory() {
-        super();
-    }
-
-    /**
      * Holds the history of all events which happened to the aggregate since the last snapshot.
      *
      * <p>Most recent event comes first.
      */
     private final Deque<Event> history = newArrayDeque();
+
+    /**
+     * Creates new instance.
+     */
+    RecentHistory() {
+        super();
+    }
 
     /**
      * Returns {@code true} if there are no events in the recent history, {@code false} otherwise.
