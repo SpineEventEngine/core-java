@@ -636,6 +636,12 @@ function updateVersion() {
     local fullFilePath="$(obtainFullFilePath "${fileWithVersion}" \
         "${repositoryUrl}")"
 
+    local targetVersionNoQuotes="$(replace "\'" "" "${targetVersion}")"
+
+    newBranchName="$(replace "\*version\*" \
+        "${targetVersionNoQuotes}" \
+        "${newBranchName}")"
+
     local branchExists="$(checkBranchExists "${newBranchName}" \
         "${repositoryUrl}")"
 
@@ -681,8 +687,6 @@ function updateVersion() {
 
         local newFileContentEncoded="$(encode "${newFileContent}")"
         local fileSha="$(obtainFileSha "${fileData}")"
-
-        local targetVersionNoQuotes="$(replace "\'" "" "${targetVersion}")"
 
         local commitMessageWithVersion="$(replace "\*version\*" \
             "${targetVersionNoQuotes}" \
@@ -737,7 +741,7 @@ function updateVersion() {
 #   targetRepository - target repository URL via GitHub API
 #   targetFileWithVersion - relative path to the configuration file containing target version
 #   targetVersionVariable - name of the variable representing the target version of the library
-#   newBranchName - name of the branch for the updated file
+#   newBranchName - name of the branch for the updated file; use "*version*" placeholder to insert the new version into it
 #   branchToMergeInto - name of the branch to merge the updated version of the file into
 #   commitMessage - title of the commit with the updated file; use "*version*" placeholder to insert the new version into it
 #   pullRequestTitle - title of the new pull request; use "*version*" placeholder to insert the new version into it
