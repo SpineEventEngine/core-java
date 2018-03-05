@@ -78,10 +78,6 @@ import static com.google.common.base.Preconditions.checkState;
  * <p>The passed {@link Event} is stored in the {@link EventStore} associated with
  * the {@code EventBus} <strong>before</strong> it is passed to subscribers.
  *
- * <p>The delivery of the events to the subscribers and dispatchers is performed by
- * the {@link DispatcherEventDelivery} strategy associated with
- * this instance of the {@code EventBus}.
- *
  * <p>If there is no subscribers or dispatchers for the posted event, the fact is
  * logged as warning, with no further processing.
  *
@@ -123,7 +119,7 @@ public class EventBus
 
     /** Creates new instance by the passed builder. */
     private EventBus(Builder builder) {
-        super(checkNotNull(builder.dispatcherEventDelivery), builder);
+        super(builder);
         this.eventStore = builder.eventStore;
         this.enricher = builder.enricher;
         this.eventMessageValidator = builder.eventValidator;
@@ -245,16 +241,6 @@ public class EventBus
         return (EventDispatcherRegistry) super.registry();
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Overrides for return type covariance.
-     */
-    @Override
-    protected DispatcherEventDelivery delivery() {
-        return (DispatcherEventDelivery) super.delivery();
-    }
-
     /** The {@code Builder} for {@code EventBus}. */
     public static class Builder extends AbstractBuilder<EventEnvelope, Event, Builder, EventBus> {
 
@@ -295,14 +281,6 @@ public class EventBus
          */
         @Nullable
         private Executor eventStoreStreamExecutor;
-
-        /**
-         * Optional {@code DispatcherEventDelivery} for calling the dispatchers.
-         *
-         * <p>If not set, a default value will be set by the builder.
-         */
-        @Nullable
-        private DispatcherEventDelivery dispatcherEventDelivery;
 
         /**
          * Optional validator for events.
@@ -397,22 +375,6 @@ public class EventBus
             return Optional.fromNullable(eventStoreStreamExecutor);
         }
 
-        /**
-         * Sets a {@code DispatcherEventDelivery} to be used for the event delivery
-         * to the dispatchers in the {@code EventBus} we build.
-         *
-         * <p>If the {@code DispatcherEventDelivery} is not set,
-         * {@link DispatcherEventDelivery#directDelivery()} will be used.
-         */
-        public Builder setDispatcherEventDelivery(DispatcherEventDelivery delivery) {
-            this.dispatcherEventDelivery = checkNotNull(delivery);
-            return this;
-        }
-
-        public Optional<DispatcherEventDelivery> getDispatcherEventDelivery() {
-            return Optional.fromNullable(dispatcherEventDelivery);
-        }
-
         public Builder setEventValidator(MessageValidator eventValidator) {
             this.eventValidator = checkNotNull(eventValidator);
             return this;
@@ -483,10 +445,6 @@ public class EventBus
                                        .setStorageFactory(storageFactory)
                                        .setLogger(EventStore.log())
                                        .build();
-            }
-
-            if (dispatcherEventDelivery == null) {
-                dispatcherEventDelivery = DispatcherEventDelivery.directDelivery();
             }
 
             if (eventValidator == null) {

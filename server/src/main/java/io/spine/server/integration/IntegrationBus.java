@@ -141,7 +141,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
 
     @SuppressWarnings("ConstantConditions")     // `TransportFactory` has already been initialized.
     private IntegrationBus(Builder builder) {
-        super(builder.getDelivery(), builder);
+        super(builder);
         this.boundedContextName = builder.boundedContextName;
         this.subscriberHub = new SubscriberHub(builder.getTransportFactory().get());
         this.publisherHub = new PublisherHub(builder.getTransportFactory().get());
@@ -429,7 +429,6 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
 
         private EventBus eventBus;
         private RejectionBus rejectionBus;
-        private DomesticDelivery delivery;
         private BoundedContextName boundedContextName;
 
         public Optional<EventBus> getEventBus() {
@@ -462,10 +461,6 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
             return self();
         }
 
-        private DomesticDelivery getDelivery() {
-            return delivery;
-        }
-
         @Override
         public IntegrationBus doBuild() {
 
@@ -475,9 +470,6 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
                        "`rejectionBus` must be set for IntegrationBus.");
             checkNotDefault(boundedContextName,
                             "`boundedContextName` must be set for IntegrationBus.");
-
-
-            this.delivery = new DomesticDelivery();
 
             return new IntegrationBus(this);
         }

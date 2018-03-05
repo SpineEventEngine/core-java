@@ -71,7 +71,7 @@ public class RejectionBus extends CommandOutputBus<Rejection,
      * Creates a new instance according to the pre-configured {@code Builder}.
      */
     private RejectionBus(Builder builder) {
-        super(checkNotNull(builder.dispatcherRejectionDelivery), builder);
+        super(builder);
         this.filterChain = builder.getFilters();
         this.enricher = builder.enricher;
     }
@@ -150,15 +150,6 @@ public class RejectionBus extends CommandOutputBus<Rejection,
     }
 
     /**
-     * Exposes the associated message delivery strategy to tests.
-     */
-    @VisibleForTesting
-    @Override
-    protected DispatcherRejectionDelivery delivery() {
-        return (DispatcherRejectionDelivery) super.delivery();
-    }
-
-    /**
      * Posts the rejection to this bus instance.
      *
      * <p>This method should be used if the callee does not need to follow the
@@ -176,13 +167,6 @@ public class RejectionBus extends CommandOutputBus<Rejection,
     public static class Builder
             extends AbstractBuilder<RejectionEnvelope, Rejection, Builder, RejectionBus> {
 
-        /**
-         * Optional {@code DispatcherRejectionDelivery} for calling the dispatchers.
-         *
-         * <p>If not set, a default value will be set by the builder.
-         */
-        @Nullable
-        private DispatcherRejectionDelivery dispatcherRejectionDelivery;
 
         /**
          * Optional enricher for rejections.
@@ -196,22 +180,6 @@ public class RejectionBus extends CommandOutputBus<Rejection,
         /** Prevents direct instantiation. */
         private Builder() {
             super();
-        }
-
-        /**
-         * Sets a {@code DispatcherRejectionDelivery} to be used for the rejection delivery
-         * to the dispatchers in the {@code RejectionBus} being built.
-         *
-         * <p>If the {@code DispatcherRejectionDelivery} is not set,
-         * {@linkplain  DispatcherRejectionDelivery#directDelivery() direct delivery} will be used.
-         */
-        public Builder setDispatcherRejectionDelivery(DispatcherRejectionDelivery delivery) {
-            this.dispatcherRejectionDelivery = checkNotNull(delivery);
-            return this;
-        }
-
-        public Optional<DispatcherRejectionDelivery> getDispatcherRejectionDelivery() {
-            return Optional.fromNullable(dispatcherRejectionDelivery);
         }
 
         /**
@@ -235,10 +203,6 @@ public class RejectionBus extends CommandOutputBus<Rejection,
 
         @Override
         protected RejectionBus doBuild() {
-            if(dispatcherRejectionDelivery == null) {
-                dispatcherRejectionDelivery = DispatcherRejectionDelivery.directDelivery();
-            }
-
             return new RejectionBus(this);
         }
 

@@ -29,7 +29,6 @@ import io.spine.core.MessageEnvelope;
 import io.spine.core.Rejection;
 import io.spine.server.bus.MessageDispatcher;
 import io.spine.server.bus.MulticastBus;
-import io.spine.server.delivery.MulticastDelivery;
 import io.spine.type.MessageClass;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -58,9 +57,8 @@ public abstract class CommandOutputBus<M extends Message,
                                        D extends MessageDispatcher<C, E, ?>>
         extends MulticastBus<M, E, C, D> {
 
-    protected CommandOutputBus(MulticastDelivery<E, C, D> delivery,
-                               AbstractBuilder<E, M, ?, ?> builder) {
-        super(delivery, builder);
+    protected CommandOutputBus(AbstractBuilder<E, M, ?, ?> builder) {
+        super(builder);
     }
 
     /**

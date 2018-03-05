@@ -22,10 +22,6 @@ package io.spine.server.rejection;
 import io.spine.core.Rejection;
 import io.spine.core.RejectionEnvelope;
 import io.spine.server.bus.BusBuilderShould;
-import io.spine.test.Tests;
-import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
 
 /**
  * @author Alex Tymchenko
@@ -37,29 +33,5 @@ public class RejectionBusBuilderShould extends BusBuilderShould<RejectionBus.Bui
     @Override
     protected RejectionBus.Builder builder() {
         return RejectionBus.newBuilder();
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_DispatcherDelivery() {
-        builder().setDispatcherRejectionDelivery(Tests.<DispatcherRejectionDelivery>nullRef());
-    }
-
-    @SuppressWarnings("OptionalGetWithoutIsPresent")    //It's fine as for the Builder tests.
-    @Test
-    public void return_set_DispatcherDelivery() {
-        final DispatcherRejectionDelivery delivery = deliveryForTests();
-        assertEquals(delivery, builder().setDispatcherRejectionDelivery(delivery)
-                                        .getDispatcherRejectionDelivery()
-                                        .get());
-    }
-
-    private static DispatcherRejectionDelivery deliveryForTests() {
-        return new DispatcherRejectionDelivery() {
-            @Override
-            protected boolean shouldPostponeDelivery(RejectionEnvelope deliverable,
-                                                     RejectionDispatcher<?> consumer) {
-                return false;   // Does not really matter for tests.
-            }
-        };
     }
 }
