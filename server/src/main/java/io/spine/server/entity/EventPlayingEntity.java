@@ -89,7 +89,7 @@ public abstract class EventPlayingEntity <I,
     /**
      * Clears {@linkplain #recentHistory() recent history}.
      */
-    protected void forgetRecentHistory() {
+    protected void clearRecentHistory() {
         recentHistory.clear();
     }
 

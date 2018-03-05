@@ -441,10 +441,13 @@ public abstract class Aggregate<I,
     }
 
     /**
-     * Clears recent history of events.
+     * {@inheritDoc}
+     *
+     * <p>Opens the method for the repository.
      */
-    void clearRecentHistory() {
-        forgetRecentHistory();
+    @Override
+    protected void clearRecentHistory() {
+        super.clearRecentHistory();
     }
 
     /**
