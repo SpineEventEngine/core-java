@@ -656,7 +656,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         assertEquals(1, readRecords.size());
         final EntityRecord readRecord = readRecords.get(0);
         assertEquals(targetEntity.getState(), unpack(readRecord.getState()));
-        assertEquals(targetId, unpack(readRecord.getEntityId()));
+        assertEquals(targetId, Identifier.unpack(readRecord.getEntityId()));
     }
 
     @SuppressWarnings("MismatchedQueryAndUpdateOfCollection"/* Storing of generated objects and
