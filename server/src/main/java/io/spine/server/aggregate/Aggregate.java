@@ -56,8 +56,8 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.common.collect.Queues.newArrayDeque;
+import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.Events.getMessage;
-import static io.spine.time.Time.getCurrentTime;
 import static io.spine.validate.Validate.isNotDefault;
 
 /**

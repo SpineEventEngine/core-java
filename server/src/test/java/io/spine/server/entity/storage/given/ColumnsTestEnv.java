@@ -22,13 +22,13 @@ package io.spine.server.entity.storage.given;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
+import io.spine.base.Time;
 import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.server.entity.storage.Column;
 import io.spine.test.entity.Project;
 import io.spine.test.entity.ProjectId;
 import io.spine.testdata.Sample;
-import io.spine.time.Time;
 
 import javax.annotation.Nullable;
 

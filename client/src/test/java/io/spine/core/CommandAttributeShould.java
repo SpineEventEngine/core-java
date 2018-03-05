@@ -22,8 +22,8 @@ package io.spine.core;
 
 import com.google.protobuf.Empty;
 import com.google.protobuf.StringValue;
+import io.spine.base.Time;
 import io.spine.client.TestActorRequestFactory;
-import io.spine.time.Time;
 import org.junit.Before;
 import org.junit.Test;
 

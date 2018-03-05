@@ -19,8 +19,10 @@
  */
 dependencies {
     compile group: 'io.spine', name: 'spine-base', version: spineBaseVersion
+    compile group: 'io.spine', name: 'spine-time', version: spineTimeVersion
 
     testCompile project(path: ":testutil-core")
+    testCompile group: 'io.spine', name: 'spine-testutil-time', version: spineTimeVersion
 }
 
 apply from: generateDescriptorSetScript

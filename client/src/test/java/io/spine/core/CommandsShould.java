@@ -47,6 +47,7 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.protobuf.Descriptors.FileDescriptor;
+import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.Commands.sameActorAndTenant;
 import static io.spine.core.given.GivenTenantId.newUuid;
 import static io.spine.protobuf.TypeConverter.toMessage;
@@ -54,7 +55,6 @@ import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.TimeTests.Past.minutesAgo;
 import static io.spine.test.TimeTests.Past.secondsAgo;
 import static io.spine.time.Durations2.seconds;
-import static io.spine.time.Time.getCurrentTime;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;

@@ -37,7 +37,7 @@ import io.spine.validate.ValidationException;
 import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.time.Time.getCurrentTime;
+import static io.spine.base.Time.getCurrentTime;
 import static io.spine.validate.Validate.checkValid;
 
 /**
@@ -202,7 +202,7 @@ public final class CommandFactory {
 
     /**
      * Creates a new command context with the given parameters and
-     * {@link io.spine.time.Time#getCurrentTime() current time} as the {@code timestamp}.
+     * {@link io.spine.base.Time#getCurrentTime() current time} as the {@code timestamp}.
      *
      * @param tenantId      the ID of the tenant or {@code null} for single-tenant applications
      * @param userId        the actor id
@@ -242,7 +242,7 @@ public final class CommandFactory {
      * Creates a new instance of {@code CommandContext} based on the passed one.
      *
      * <p>The returned instance gets new {@code timestamp} set to
-     * the {@link io.spine.time.Time#getCurrentTime() current time}.
+     * the {@link io.spine.base.Time#getCurrentTime() current time}.
      *
      * @param value the instance from which to copy values
      * @return new {@code CommandContext}

@@ -22,12 +22,12 @@ package io.spine.model.verify;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
-import io.spine.gradle.ProjectHierarchy;
 import io.spine.model.CommandHandlers;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.model.Model;
 import io.spine.server.procman.ProcessManager;
+import io.spine.tools.gradle.ProjectHierarchy;
 import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.tasks.compile.JavaCompile;

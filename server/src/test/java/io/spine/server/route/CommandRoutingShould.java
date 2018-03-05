@@ -23,10 +23,10 @@ package io.spine.server.route;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
+import io.spine.base.Time;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
-import io.spine.time.Time;
 import org.junit.Before;
 import org.junit.Test;
 

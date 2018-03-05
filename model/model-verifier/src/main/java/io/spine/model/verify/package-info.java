@@ -18,27 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.core.given;
-
-import io.spine.base.Time;
-import io.spine.core.Version;
-import io.spine.core.Versions;
-
 /**
- * Utilities for using {@link Version}s in tests.
- *
- * @author Alexander Yevsyukov
+ * Utilities for verification of Spine project model.
  */
-public class GivenVersion {
+@ParametersAreNonnullByDefault
+package io.spine.model.verify;
 
-    private GivenVersion() {
-        // Prevent instantiation of this utility class.
-    }
-
-    /**
-     * Creates {@link Version} with the passed number and current time.
-     */
-    public static Version withNumber(int number) {
-        return Versions.newVersion(number, Time.getCurrentTime());
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

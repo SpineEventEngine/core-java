@@ -205,8 +205,8 @@ public final class Events {
      * stored in the initial {@link CommandContext} and can be retrieved from the events origin 
      * command or rejection context. 
      *
-     * @return a tenant ID available by traversing event context back to original command context or 
-     *         a default empty tenant ID if no tenant ID is found this way  
+     * @return a tenant ID available by traversing event context back to original command
+     *         context or a default empty tenant ID if no tenant ID is found this way
      */
     @Internal
     public static TenantId getTenantId(Event event) {
