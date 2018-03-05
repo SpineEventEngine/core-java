@@ -46,8 +46,6 @@ import io.spine.server.rejection.RejectionReactorMethod;
 import io.spine.validate.ValidatingBuilder;
 
 import javax.annotation.CheckReturnValue;
-import java.util.Collection;
-import java.util.Deque;
 import java.util.Iterator;
 import java.util.List;
 
@@ -55,7 +53,6 @@ import static com.google.common.collect.FluentIterable.from;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static com.google.common.collect.Lists.newLinkedList;
-import static com.google.common.collect.Queues.newArrayDeque;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.Events.getMessage;
 import static io.spine.validate.Validate.isNotDefault;
@@ -135,8 +132,6 @@ public abstract class Aggregate<I,
      * @see #commitEvents()
      */
     private final List<Event> uncommittedEvents = newLinkedList();
-
-    private final RecentHistory recentHistory = new RecentHistory();
 
     /** A guard for ensuring idempotency of messages dispatched by this aggregate. */
     private IdempotencyGuard idempotencyGuard;
@@ -284,7 +279,7 @@ public abstract class Aggregate<I,
         final List<Event> events = aggregateStateRecord.getEventList();
 
         play(events);
-        recentHistory.add(events);
+        remember(events);
     }
 
     /**
@@ -416,7 +411,7 @@ public abstract class Aggregate<I,
     List<Event> commitEvents() {
         final List<Event> result = ImmutableList.copyOf(uncommittedEvents);
         uncommittedEvents.clear();
-        recentHistory.add(result);
+        remember(result);
         return result;
     }
 
@@ -449,7 +444,7 @@ public abstract class Aggregate<I,
      * Clears recent history of events.
      */
     void clearRecentHistory() {
-        recentHistory.clear();
+        forgetRecentHistory();
     }
 
     /**
@@ -462,7 +457,7 @@ public abstract class Aggregate<I,
      * @return new iterator instance
      */
     protected Iterator<Event> historyBackward() {
-        return recentHistory.iterator();
+        return recentHistory().iterator();
     }
 
     /**
@@ -487,6 +482,7 @@ public abstract class Aggregate<I,
      * A predicate checking that message is not {@linkplain Empty empty}.
      */
     private enum NonEmpty implements Predicate<Message> {
+
         INSTANCE;
 
         private static final Empty EMPTY = Empty.getDefaultInstance();
@@ -500,42 +496,6 @@ public abstract class Aggregate<I,
         @Override
         public boolean apply(Message message) {
             return !message.equals(EMPTY);
-        }
-    }
-
-    private static class RecentHistory {
-
-        /**
-         * Holds the history of all events which happened to the aggregate since the last snapshot.
-         */
-        private final Deque<Event> history = newArrayDeque();
-
-        /**
-         * Removes all events from the recent history.
-         */
-        public void clear() {
-            history.clear();
-        }
-
-        /**
-         * Creates a new iterator over the recent history items.
-         *
-         * @return an events iterator
-         */
-        public Iterator<Event> iterator() {
-            final ImmutableList<Event> events = ImmutableList.copyOf(history);
-            return events.iterator();
-        }
-
-        /**
-         * Adds events to the aggregate history.
-         *
-         * @param events the list of the events to add
-         */
-        private void add(Collection<Event> events) {
-            for (Event event : events) {
-                history.addFirst(event);
-            }
         }
     }
 }
