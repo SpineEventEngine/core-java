@@ -31,7 +31,10 @@ import java.util.Objects;
 import static com.google.common.collect.Queues.newArrayDeque;
 
 /**
- * Recent history of an {@linkplain io.spine.server.entity.EventPlayingEntity event-sourced entity}.
+ * A copy of recent history of an {@linkplain io.spine.server.entity.EventPlayingEntity
+ * event-sourced entity}.
+ *
+ * <p>Any modifications to this object will not affect the real history of the entity.
  *
  * @author Mykhailo Drachuk
  * @author Alexander Yevsyukov
@@ -82,7 +85,7 @@ public final class RecentHistory {
     }
 
     /**
-     * Adds events to the aggregate history.
+     * Adds events to the history.
      *
      * @param events events in the chronological order
      */
