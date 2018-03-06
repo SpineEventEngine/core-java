@@ -20,12 +20,14 @@
 
 package io.spine.server.aggregate.given.aggregate;
 
-import io.spine.server.aggregate.AggregateRepository;
 import io.spine.test.aggregate.ProjectId;
 
 /**
+ * Test environment repository for {@linkplain io.spine.server.aggregate.AggregateShould
+ * Aggregate tests}.
+ *
  * @author Alexander Yevsyukov
  */
 public class TestAggregateRepository
-        extends AggregateRepository<ProjectId, TestAggregate> {
+        extends AbstractAggregateTestRepository<ProjectId, TestAggregate> {
 }

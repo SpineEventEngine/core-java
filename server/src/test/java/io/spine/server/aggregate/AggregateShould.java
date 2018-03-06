@@ -20,7 +20,6 @@
 
 package io.spine.server.aggregate;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
@@ -49,7 +48,6 @@ import io.spine.server.commandbus.DuplicateCommandException;
 import io.spine.server.entity.InvalidEntityStateException;
 import io.spine.server.model.Model;
 import io.spine.server.model.ModelTests;
-import io.spine.server.tenant.TenantAwareFunction;
 import io.spine.test.TimeTests;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
@@ -506,7 +504,7 @@ public class AggregateShould {
     }
 
     @Test
-    public void record_modification_timestamp() throws InterruptedException {
+    public void record_modification_timestamp() {
         try {
             final TimeTests.BackToTheFuture provider = new TimeTests.BackToTheFuture();
             Time.setProvider(provider);
@@ -638,7 +636,7 @@ public class AggregateShould {
         commandBus.post(addTaskCommand, noOpObserver);
         commandBus.post(newArrayList(addTaskCommand2, startCommand), noOpObserver);
 
-        final TestAggregate aggregate = loadAggregate(tenantId, ID);
+        final TestAggregate aggregate = repository.loadAggregate(tenantId, ID);
 
         final Iterator<Event> history = aggregate.historyBackward();
 
@@ -665,7 +663,7 @@ public class AggregateShould {
         commandBus.post(startCommand, noOpObserver);
         commandBus.post(newArrayList(addTaskCommand, addTaskCommand2), noOpObserver);
 
-        final TestAggregate aggregate = loadAggregate(tenantId, ID);
+        final TestAggregate aggregate = repository.loadAggregate(tenantId, ID);
 
         final Iterator<Event> history = aggregate.historyBackward();
 
@@ -693,21 +691,6 @@ public class AggregateShould {
         assertEquals(errorType, ack.getStatus()
                                    .getError()
                                    .getType());
-    }
-
-    private TestAggregate loadAggregate(TenantId tenantId, ProjectId id) {
-        final TenantAwareFunction<ProjectId, TestAggregate> getAggregate =
-                new TenantAwareFunction<ProjectId, TestAggregate>(tenantId) {
-                    @Override
-                    public TestAggregate apply(ProjectId input) {
-                        final Optional<TestAggregate> optional = repository.find(input);
-                        if (!optional.isPresent()) {
-                            fail("Aggregate not found.");
-                        }
-                        return optional.get();
-                    }
-                };
-        return getAggregate.execute(id);
     }
 
     /**
@@ -747,8 +730,8 @@ public class AggregateShould {
     }
 
     /**
-     * Ensures that a {@linkplain io.spine.server.tuple.Pair pair} with an empty second optional value
-     * returned from a reaction on an event stores a single event.
+     * Ensures that a {@linkplain io.spine.server.tuple.Pair pair} with an empty second optional
+     * value returned from a reaction on an event stores a single event.
      *
      * <p>The first event is produced while handling a command by the
      * {@link TaskAggregate#handle(AggAssignTask) TaskAggregate#handle(AggAssignTask)}.
@@ -792,11 +775,13 @@ public class AggregateShould {
     }
 
     /**
-     * Ensures that a {@linkplain io.spine.server.tuple.Pair pair} with an empty second optional value
-     * returned from a reaction on a rejection stores a single event.
+     * Ensures that a {@linkplain io.spine.server.tuple.Pair pair} with an empty second optional
+     * value returned from a reaction on a rejection stores a single event.
      *
-     * <p>The rejection is fired by the {@link TaskAggregate#handle(AggReassignTask) TaskAggregate#handle(AggReassignTask)}
-     * and handled by the {@link TaskAggregate#on(Rejections.AggCannotReassignUnassignedTask) TaskAggregate#on(AggCannotReassignUnassignedTask)}.
+     * <p>The rejection is fired by the {@link TaskAggregate#handle(AggReassignTask)
+     * TaskAggregate.handle(AggReassignTask)}
+     * and handled by the {@link TaskAggregate#on(Rejections.AggCannotReassignUnassignedTask)
+     * TaskAggregate.on(AggCannotReassignUnassignedTask)}.
      */
     @Test
     public void create_single_event_for_a_pair_of_events_with_empty_for_a_rejection_react() {

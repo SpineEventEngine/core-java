@@ -20,36 +20,15 @@
 
 package io.spine.server.aggregate.given.aggregate;
 
-import com.google.common.base.Optional;
-import io.spine.core.TenantId;
-import io.spine.server.aggregate.AggregateRepository;
-import io.spine.server.tenant.TenantAwareFunction;
 import io.spine.test.aggregate.ProjectId;
 
-import static org.junit.Assert.fail;
-
 /**
+ * Test environment repository for {@linkplain io.spine.server.aggregate.IdempotencyGuardShould
+ * IdempotencyGuard tests}.
+ *
  * @author Mykhailo Drachuk
  * @author Alexander Yevsyukov
  */
 public class IgTestAggregateRepository
-        extends AggregateRepository<ProjectId, IgTestAggregate> {
-
-    /**
-     * Helper method for loading an aggregate by its ID.
-     */
-    public IgTestAggregate loadAggregate(TenantId tenantId, ProjectId id) {
-        final TenantAwareFunction<ProjectId, IgTestAggregate> load =
-                new TenantAwareFunction<ProjectId, IgTestAggregate>(tenantId) {
-                    @Override
-                    public IgTestAggregate apply(ProjectId input) {
-                        final Optional<IgTestAggregate> optional = find(input);
-                        if (!optional.isPresent()) {
-                            fail("Aggregate not found.");
-                        }
-                        return optional.get();
-                    }
-                };
-        return load.execute(id);
-    }
+        extends AbstractAggregateTestRepository<ProjectId, IgTestAggregate> {
 }
