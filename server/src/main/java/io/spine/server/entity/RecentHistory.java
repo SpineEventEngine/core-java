@@ -115,7 +115,7 @@ public final class RecentHistory {
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                          .add("history", history)
+                          .add("size", history.size())
                           .toString();
     }
 }
