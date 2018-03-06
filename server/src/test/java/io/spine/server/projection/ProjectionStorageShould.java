@@ -27,6 +27,10 @@ import com.google.protobuf.Timestamp;
 import io.spine.core.given.GivenVersion;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.EntityRecord;
+import io.spine.server.entity.EntityWithLifecycle;
+import io.spine.server.entity.storage.EntityColumn;
+import io.spine.server.entity.storage.EntityRecordWithColumns;
+import io.spine.server.entity.storage.TestEntityRecordWithColumnsFactory;
 import io.spine.server.storage.RecordStorageShould;
 import io.spine.test.Tests;
 import io.spine.test.storage.Project;
@@ -41,7 +45,9 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
+import static com.google.common.collect.ImmutableMap.of;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.protobuf.util.Durations.fromSeconds;
 import static com.google.protobuf.util.Timestamps.add;
@@ -51,10 +57,13 @@ import static io.spine.test.Verify.assertContains;
 import static io.spine.test.Verify.assertSize;
 import static io.spine.testdata.TestEntityStorageRecordFactory.newEntityStorageRecord;
 import static io.spine.time.Time.getCurrentTime;
+import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static java.lang.String.format;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Projection storage tests.
@@ -125,8 +134,10 @@ public abstract class ProjectionStorageShould
 
         final String projectDescriptor = Project.getDescriptor()
                                                 .getFullName();
-        @SuppressWarnings("DuplicateStringLiteralInspection")       // clashes with non-related tests.
-        final FieldMask fieldMask = maskForPaths(projectDescriptor + ".id", projectDescriptor + ".name");
+        @SuppressWarnings("DuplicateStringLiteralInspection")
+        // clashes with non-related tests.
+        final FieldMask fieldMask = maskForPaths(projectDescriptor + ".id",
+                                                 projectDescriptor + ".name");
 
         final Iterator<EntityRecord> read = storage.readAll(fieldMask);
         final Collection<EntityRecord> readRecords = newArrayList(read);
@@ -162,10 +173,11 @@ public abstract class ProjectionStorageShould
 
         final String projectDescriptor = Project.getDescriptor()
                                                 .getFullName();
-        final FieldMask fieldMask = maskForPaths(projectDescriptor + ".id", projectDescriptor + ".status");
+        final FieldMask fieldMask = maskForPaths(projectDescriptor + ".id",
+                                                 projectDescriptor + ".status");
 
         final Iterator<EntityRecord> read = storage.readMultiple(ids, fieldMask);
-        final Collection<EntityRecord> readRecords  =newArrayList(read);
+        final Collection<EntityRecord> readRecords = newArrayList(read);
         assertSize(ids.size(), readRecords);
 
         // Check data consistency
@@ -202,11 +214,13 @@ public abstract class ProjectionStorageShould
             final Project state = Given.project(id, format("project-%d", i));
             final Any packedState = AnyPacker.pack(state);
 
-            final EntityRecord record = EntityRecord.newBuilder()
-                                                    .setState(packedState)
-                                                    .setVersion(
-                                                            GivenVersion.withNumber(1))
-                                                    .build();
+            final EntityRecord rawRecord = EntityRecord.newBuilder()
+                                                       .setState(packedState)
+                                                       .setVersion(GivenVersion.withNumber(1))
+                                                       .build();
+            final EntityRecordWithColumns record = TestEntityRecordWithColumnsFactory.createRecord(
+                    rawRecord, Given.activeLifecycle()
+            );
             storage.write(id, record);
             ids.add(id);
         }
@@ -249,6 +263,22 @@ public abstract class ProjectionStorageShould
 
     private static class Given {
 
+        private static final EntityColumn ARCHIVED;
+        private static final EntityColumn DELETED;
+
+        static {
+            try {
+                ARCHIVED = EntityColumn.from(
+                        EntityWithLifecycle.class.getDeclaredMethod("isArchived")
+                );
+                DELETED = EntityColumn.from(
+                        EntityWithLifecycle.class.getDeclaredMethod("isDeleted")
+                );
+            } catch (NoSuchMethodException e) {
+                throw illegalStateWithCauseOf(e);
+            }
+        }
+
         private static Project project(ProjectId id, String name) {
             final Project project = Project.newBuilder()
                                            .setId(id)
@@ -257,6 +287,18 @@ public abstract class ProjectionStorageShould
                                            .addTask(Task.getDefaultInstance())
                                            .build();
             return project;
+        }
+
+        private static Map<String, EntityColumn.MemoizedValue> activeLifecycle() {
+            return of(ARCHIVED.getStoredName(), trueBooleanColumn(ARCHIVED),
+                      DELETED.getStoredName(), trueBooleanColumn(DELETED));
+        }
+
+        private static EntityColumn.MemoizedValue trueBooleanColumn(EntityColumn column) {
+            final EntityColumn.MemoizedValue value = mock(EntityColumn.MemoizedValue.class);
+            when(value.getSourceColumn()).thenReturn(column);
+            when(value.getValue()).thenReturn(true);
+            return value;
         }
     }
 }
