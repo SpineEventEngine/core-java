@@ -20,18 +20,16 @@
 
 package io.spine.server.aggregate;
 
-import com.google.common.base.Optional;
 import io.grpc.stub.StreamObserver;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
-import io.spine.server.aggregate.given.IdempotencyGuardTestEnv.TestAggregate;
-import io.spine.server.aggregate.given.IdempotencyGuardTestEnv.TestAggregateRepository;
+import io.spine.server.aggregate.given.aggregate.IgTestAggregate;
+import io.spine.server.aggregate.given.aggregate.IgTestAggregateRepository;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.DuplicateCommandException;
 import io.spine.server.model.ModelTests;
-import io.spine.server.tenant.TenantAwareFunction;
 import io.spine.test.aggregate.ProjectId;
 import org.junit.After;
 import org.junit.Before;
@@ -44,7 +42,6 @@ import static io.spine.server.aggregate.given.IdempotencyGuardTestEnv.createProj
 import static io.spine.server.aggregate.given.IdempotencyGuardTestEnv.newProjectId;
 import static io.spine.server.aggregate.given.IdempotencyGuardTestEnv.newTenantId;
 import static io.spine.server.aggregate.given.IdempotencyGuardTestEnv.startProject;
-import static org.junit.Assert.fail;
 
 /**
  * @author Mykhailo Drachuks
@@ -52,7 +49,7 @@ import static org.junit.Assert.fail;
 public class IdempotencyGuardShould {
 
     private BoundedContext boundedContext;
-    private TestAggregateRepository repository;
+    private IgTestAggregateRepository repository;
 
     @Before
     public void setUp() {
@@ -61,7 +58,7 @@ public class IdempotencyGuardShould {
                                        .setMultitenant(true)
                                        .build();
 
-        repository = new TestAggregateRepository();
+        repository = new IgTestAggregateRepository();
         boundedContext.register(repository);
     }
     
@@ -81,7 +78,7 @@ public class IdempotencyGuardShould {
         final StreamObserver<Ack> noOpObserver = noOpObserver();
         commandBus.post(createCommand, noOpObserver);
 
-        final TestAggregate aggregate = getAggregate(projectId, tenantId);
+        final IgTestAggregate aggregate = repository.loadAggregate(tenantId, projectId);
         final IdempotencyGuard guard = new IdempotencyGuard(aggregate);
         guard.check(of(createCommand));
     }
@@ -98,7 +95,7 @@ public class IdempotencyGuardShould {
         final StreamObserver<Ack> noOpObserver = noOpObserver();
         commandBus.post(createCommand, noOpObserver);
 
-        final TestAggregate aggregate = getAggregate(projectId, tenantId);
+        final IgTestAggregate aggregate = repository.loadAggregate(tenantId, projectId);
 
         final IdempotencyGuard guard = new IdempotencyGuard(aggregate);
         guard.check(of(createCommand));
@@ -109,7 +106,7 @@ public class IdempotencyGuardShould {
         final TenantId tenantId = newTenantId();
         final ProjectId projectId = newProjectId();
         final Command createCommand = command(createProject(projectId), tenantId);
-        final TestAggregate aggregate = new TestAggregate(projectId);
+        final IgTestAggregate aggregate = new IgTestAggregate(projectId);
 
         final IdempotencyGuard guard = new IdempotencyGuard(aggregate);
         guard.check(of(createCommand));
@@ -126,24 +123,11 @@ public class IdempotencyGuardShould {
         final StreamObserver<Ack> noOpObserver = noOpObserver();
         commandBus.post(createCommand, noOpObserver);
 
-        final TestAggregate aggregate = getAggregate(projectId, tenantId);
+        final IgTestAggregate aggregate = repository.loadAggregate(tenantId, projectId);
 
         final IdempotencyGuard guard = new IdempotencyGuard(aggregate);
         guard.check(of(startCommand));
     }
 
-    private TestAggregate getAggregate(ProjectId id, TenantId tenantId) {
-        final TenantAwareFunction<ProjectId, TestAggregate> getAggregate =
-                new TenantAwareFunction<ProjectId, TestAggregate>(tenantId) {
-                    @Override
-                    public TestAggregate apply(ProjectId input) {
-                        final Optional<TestAggregate> optional = repository.find(input);
-                        if (!optional.isPresent()) {
-                            fail("Aggregate not found.");
-                        }
-                        return optional.get();
-                    }
-                };
-        return getAggregate.execute(id);
-    }
+
 }
