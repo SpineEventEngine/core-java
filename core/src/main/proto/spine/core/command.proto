@@ -150,7 +150,7 @@ enum CommandValidationError {
 
     // The command is a duplicate of the command that was already dispatched.
     //
-    // A command is considered a duplicate if its ID matches the id of another command.
+    // A command is considered a duplicate if its ID matches the ID of another command.
     //
     DUPLICATE = 6;
 }
