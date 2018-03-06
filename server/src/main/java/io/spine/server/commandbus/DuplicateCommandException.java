@@ -48,12 +48,12 @@ public class DuplicateCommandException extends CommandException implements Messa
     }
 
     /**
-     * Creates an exception for a duplicate command dispatched to aggregate.
+     * Creates an exception for a duplicate command.
      *
      * @param command the duplicate command
-     * @return a newly constructed {@link DuplicateCommandException} instance
+     * @return a newly constructed instance
      */
-    public static DuplicateCommandException forAggregate(Command command) {
+    public static DuplicateCommandException of(Command command) {
         final CommandEnvelope envelope = CommandEnvelope.of(command);
         final Message commandMessage = envelope.getMessage();
         final String errorMessage = aggregateErrorMessage(envelope);
@@ -66,7 +66,7 @@ public class DuplicateCommandException extends CommandException implements Messa
      *
      * @param commandMessage the domain message that ended up a duplicate
      * @param errorText      the text to be set as the error message
-     * @return a newly constructed {@link Error} instance
+     * @return a newly constructed instance
      */
     public static Error error(Message commandMessage, String errorText) {
         final Error.Builder error =

@@ -54,7 +54,7 @@ class IdempotencyGuard {
     void check(CommandEnvelope envelope) {
         if (didHandleSinceLastSnapshot(envelope)) {
             final Command command = envelope.getOuterObject();
-            throw DuplicateCommandException.forAggregate(command);
+            throw DuplicateCommandException.of(command);
         }
     }
 
