@@ -218,9 +218,7 @@ public abstract class ProjectionStorageShould
                                                        .setState(packedState)
                                                        .setVersion(GivenVersion.withNumber(1))
                                                        .build();
-            final EntityRecordWithColumns record = TestEntityRecordWithColumnsFactory.createRecord(
-                    rawRecord, Given.activeLifecycle()
-            );
+            final EntityRecordWithColumns record = withLifecycleColumns(rawRecord);
             storage.write(id, record);
             ids.add(id);
         }
@@ -263,22 +261,6 @@ public abstract class ProjectionStorageShould
 
     private static class Given {
 
-        private static final EntityColumn ARCHIVED;
-        private static final EntityColumn DELETED;
-
-        static {
-            try {
-                ARCHIVED = EntityColumn.from(
-                        EntityWithLifecycle.class.getDeclaredMethod("isArchived")
-                );
-                DELETED = EntityColumn.from(
-                        EntityWithLifecycle.class.getDeclaredMethod("isDeleted")
-                );
-            } catch (NoSuchMethodException e) {
-                throw illegalStateWithCauseOf(e);
-            }
-        }
-
         private static Project project(ProjectId id, String name) {
             final Project project = Project.newBuilder()
                                            .setId(id)
@@ -287,18 +269,6 @@ public abstract class ProjectionStorageShould
                                            .addTask(Task.getDefaultInstance())
                                            .build();
             return project;
-        }
-
-        private static Map<String, EntityColumn.MemoizedValue> activeLifecycle() {
-            return of(ARCHIVED.getStoredName(), trueBooleanColumn(ARCHIVED),
-                      DELETED.getStoredName(), trueBooleanColumn(DELETED));
-        }
-
-        private static EntityColumn.MemoizedValue trueBooleanColumn(EntityColumn column) {
-            final EntityColumn.MemoizedValue value = mock(EntityColumn.MemoizedValue.class);
-            when(value.getSourceColumn()).thenReturn(column);
-            when(value.getValue()).thenReturn(true);
-            return value;
         }
     }
 }

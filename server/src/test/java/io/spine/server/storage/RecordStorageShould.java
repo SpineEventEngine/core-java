@@ -23,6 +23,7 @@ package io.spine.server.storage;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors;
@@ -41,14 +42,18 @@ import io.spine.core.given.GivenVersion;
 import io.spine.protobuf.TypeConverter;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
+import io.spine.server.entity.EntityWithLifecycle;
 import io.spine.server.entity.EventPlayingEntity;
 import io.spine.server.entity.FieldMasks;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.TestTransaction;
 import io.spine.server.entity.storage.Column;
+import io.spine.server.entity.storage.EntityColumn;
+import io.spine.server.entity.storage.EntityColumn.MemoizedValue;
 import io.spine.server.entity.storage.EntityQueries;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
+import io.spine.server.entity.storage.TestEntityRecordWithColumnsFactory;
 import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectVBuilder;
 import io.spine.testdata.Sample;
@@ -76,12 +81,14 @@ import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.TestTransaction.injectState;
 import static io.spine.server.entity.given.GivenLifecycleFlags.archived;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
+import static io.spine.server.entity.storage.TestEntityRecordWithColumnsFactory.createRecord;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.test.Tests.assertMatchesMask;
 import static io.spine.test.Verify.assertIteratorsEqual;
 import static io.spine.test.Verify.assertSize;
 import static io.spine.test.storage.Project.Status.CANCELLED;
 import static io.spine.test.storage.Project.Status.DONE;
+import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static io.spine.validate.Validate.isDefault;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -90,8 +97,10 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Dmytro Dashenkov
@@ -108,6 +117,22 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
                     return entityRecord.getRecord();
                 }
             };
+
+    private static final EntityColumn ARCHIVED;
+    private static final EntityColumn DELETED;
+
+    static {
+        try {
+            ARCHIVED = EntityColumn.from(
+                    EntityWithLifecycle.class.getDeclaredMethod("isArchived")
+            );
+            DELETED = EntityColumn.from(
+                    EntityWithLifecycle.class.getDeclaredMethod("isDeleted")
+            );
+        } catch (NoSuchMethodException e) {
+            throw illegalStateWithCauseOf(e);
+        }
+    }
 
     /**
      * Creates an unique {@code Message} with the specified ID.
@@ -311,7 +336,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
                         if (record == null) {
                             return null;
                         }
-                        return EntityRecordWithColumns.of(record);
+                        return withLifecycleColumns(record);
                     }
                 };
         final Map<I, EntityRecord> v1Records = new HashMap<>(recordCount);
@@ -672,6 +697,23 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
                 fail("RecordStorageShould.newState() should return unique messages.");
             }
         }
+    }
+
+    protected static EntityRecordWithColumns withLifecycleColumns(EntityRecord record) {
+        final LifecycleFlags flags = record.getLifecycleFlags();
+        final Map<String, MemoizedValue> columns = ImmutableMap.of(
+                ARCHIVED.getStoredName(), booleanColumn(ARCHIVED, flags.getArchived()),
+                DELETED.getStoredName(), booleanColumn(DELETED, flags.getDeleted())
+        );
+        final EntityRecordWithColumns result = createRecord(record, columns);
+        return result;
+    }
+
+    private static MemoizedValue booleanColumn(EntityColumn column, boolean value) {
+        final MemoizedValue memoizedValue = mock(MemoizedValue.class);
+        when(memoizedValue.getSourceColumn()).thenReturn(column);
+        when(memoizedValue.getValue()).thenReturn(value);
+        return memoizedValue;
     }
 
     private static EntityRecordWithColumns withRecordAndNoFields(final EntityRecord record) {
