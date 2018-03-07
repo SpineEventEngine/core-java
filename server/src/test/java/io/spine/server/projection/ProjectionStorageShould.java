@@ -27,10 +27,7 @@ import com.google.protobuf.Timestamp;
 import io.spine.core.given.GivenVersion;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.EntityRecord;
-import io.spine.server.entity.EntityWithLifecycle;
-import io.spine.server.entity.storage.EntityColumn;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
-import io.spine.server.entity.storage.TestEntityRecordWithColumnsFactory;
 import io.spine.server.storage.RecordStorageShould;
 import io.spine.test.Tests;
 import io.spine.test.storage.Project;
@@ -45,25 +42,20 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
-import static com.google.common.collect.ImmutableMap.of;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.protobuf.util.Durations.fromSeconds;
 import static com.google.protobuf.util.Timestamps.add;
 import static io.spine.Identifier.newUuid;
+import static io.spine.base.Time.getCurrentTime;
 import static io.spine.test.Tests.assertMatchesMask;
 import static io.spine.test.Verify.assertContains;
 import static io.spine.test.Verify.assertSize;
 import static io.spine.testdata.TestEntityStorageRecordFactory.newEntityStorageRecord;
-import static io.spine.time.Time.getCurrentTime;
-import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static java.lang.String.format;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * Projection storage tests.
