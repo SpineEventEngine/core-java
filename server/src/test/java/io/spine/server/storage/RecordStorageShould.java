@@ -53,7 +53,6 @@ import io.spine.server.entity.storage.EntityColumn.MemoizedValue;
 import io.spine.server.entity.storage.EntityQueries;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
-import io.spine.server.entity.storage.TestEntityRecordWithColumnsFactory;
 import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectVBuilder;
 import io.spine.testdata.Sample;
@@ -117,22 +116,6 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
                     return entityRecord.getRecord();
                 }
             };
-
-    private static final EntityColumn ARCHIVED;
-    private static final EntityColumn DELETED;
-
-    static {
-        try {
-            ARCHIVED = EntityColumn.from(
-                    EntityWithLifecycle.class.getDeclaredMethod("isArchived")
-            );
-            DELETED = EntityColumn.from(
-                    EntityWithLifecycle.class.getDeclaredMethod("isDeleted")
-            );
-        } catch (NoSuchMethodException e) {
-            throw illegalStateWithCauseOf(e);
-        }
-    }
 
     /**
      * Creates an unique {@code Message} with the specified ID.
@@ -702,8 +685,10 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     protected static EntityRecordWithColumns withLifecycleColumns(EntityRecord record) {
         final LifecycleFlags flags = record.getLifecycleFlags();
         final Map<String, MemoizedValue> columns = ImmutableMap.of(
-                ARCHIVED.getStoredName(), booleanColumn(ARCHIVED, flags.getArchived()),
-                DELETED.getStoredName(), booleanColumn(DELETED, flags.getDeleted())
+                LifecycleColumns.ARCHIVED.columnName(),
+                booleanColumn(LifecycleColumns.ARCHIVED.column(), flags.getArchived()),
+                LifecycleColumns.DELETED.columnName(),
+                booleanColumn(LifecycleColumns.DELETED.column(), flags.getDeleted())
         );
         final EntityRecordWithColumns result = createRecord(record, columns);
         return result;
@@ -816,6 +801,32 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
 
         private void delete() {
             TestTransaction.delete(this);
+        }
+    }
+
+    private enum LifecycleColumns {
+
+        ARCHIVED("getArchived"),
+        DELETED("getDeleted");
+
+        private final EntityColumn column;
+
+        LifecycleColumns(String getterName) {
+            try {
+                this.column = EntityColumn.from(
+                        EntityWithLifecycle.class.getDeclaredMethod(getterName)
+                );
+            } catch (NoSuchMethodException e) {
+                throw illegalStateWithCauseOf(e);
+            }
+        }
+
+        EntityColumn column() {
+            return column;
+        }
+
+        String columnName() {
+            return column.getStoredName();
         }
     }
 }
