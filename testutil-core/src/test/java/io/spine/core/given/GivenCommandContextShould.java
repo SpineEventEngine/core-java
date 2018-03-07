@@ -31,9 +31,9 @@ import io.spine.time.Durations2;
 import org.junit.Test;
 
 import static com.google.protobuf.util.Timestamps.add;
+import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.given.GivenUserId.newUuid;
 import static io.spine.time.Durations2.fromMinutes;
-import static io.spine.time.Time.getCurrentTime;
 import static io.spine.validate.Validate.checkValid;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;

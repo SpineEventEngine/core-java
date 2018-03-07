@@ -120,8 +120,8 @@ public abstract class EventDispatchingRepository<I,
      *
      * <p>Such a delegate-based approach is chosen, since it's not possible to make
      * {@code EventDispatchingRepository} extend another
-     * {@link io.spine.server.bus.MessageDispatcher} interface due to clashes in the class
-     * hierarchy.
+     * {@link io.spine.server.bus.MessageDispatcher MessageDispatcher} interface due to clashes
+     * in the class hierarchy.
      *
      * @return the external event dispatcher
      */

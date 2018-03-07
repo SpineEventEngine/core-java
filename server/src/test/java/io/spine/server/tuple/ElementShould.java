@@ -22,8 +22,8 @@ package io.spine.server.tuple;
 
 import com.google.common.base.Optional;
 import com.google.common.testing.EqualsTester;
+import io.spine.base.Time;
 import io.spine.test.TestValues;
-import io.spine.time.Time;
 import org.junit.Test;
 
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;

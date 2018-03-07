@@ -32,6 +32,7 @@ import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.Identifier;
+import io.spine.base.Time;
 import io.spine.client.ColumnFilter;
 import io.spine.client.CompositeColumnFilter;
 import io.spine.client.EntityFilters;
@@ -56,7 +57,6 @@ import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectVBuilder;
 import io.spine.testdata.Sample;
-import io.spine.time.Time;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 

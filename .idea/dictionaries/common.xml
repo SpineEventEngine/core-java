@@ -20,6 +20,7 @@
       <w>grpc</w>
       <w>handshaker</w>
       <w>hohpe</w>
+      <w>idempotency</w>
       <w>lempira</w>
       <w>liskov</w>
       <w>melnik</w>

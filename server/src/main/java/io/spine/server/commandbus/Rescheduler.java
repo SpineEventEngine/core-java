@@ -41,8 +41,8 @@ import java.util.Iterator;
 import java.util.Set;
 
 import static com.google.protobuf.util.Timestamps.add;
+import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.CommandStatus.SCHEDULED;
-import static io.spine.time.Time.getCurrentTime;
 import static io.spine.time.Timestamps2.isLaterThan;
 
 /**

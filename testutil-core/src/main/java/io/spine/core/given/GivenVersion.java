@@ -20,9 +20,9 @@
 
 package io.spine.core.given;
 
+import io.spine.base.Time;
 import io.spine.core.Version;
 import io.spine.core.Versions;
-import io.spine.time.Time;
 
 /**
  * Utilities for using {@link Version}s in tests.

@@ -28,7 +28,7 @@ import io.spine.core.CommandContext.Schedule;
 import io.spine.core.TenantId;
 import io.spine.core.UserId;
 
-import static io.spine.time.Time.getCurrentTime;
+import static io.spine.base.Time.getCurrentTime;
 import static io.spine.time.ZoneOffsets.UTC;
 
 /**

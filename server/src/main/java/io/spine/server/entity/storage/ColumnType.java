@@ -86,7 +86,7 @@ public interface ColumnType<J, S, R, C> {
      * Set the {@link EntityColumn} value to the database record type.
      *
      * <p>Common example is setting a value to
-     * a {@link java.sql.PreparedStatement PreparedStatement} instance into a determined position.
+     * a {@code java.sql.PreparedStatement} instance into a determined position.
      *
      * @param storageRecord    the database record
      * @param value            the value to store

@@ -20,16 +20,12 @@
 
 package io.spine.server.aggregate.given;
 
-import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;
-import io.spine.core.Event;
 import io.spine.core.UserId;
 import io.spine.core.given.GivenUserId;
-import io.spine.server.aggregate.AggregateEventRecord;
-import io.spine.server.command.TestEventFactory;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggAddTask;
 import io.spine.test.aggregate.command.AggCancelProject;
@@ -43,15 +39,7 @@ import io.spine.test.aggregate.event.AggProjectStarted;
 import io.spine.test.aggregate.event.AggTaskAdded;
 import io.spine.testdata.Sample;
 
-import java.util.List;
-
-import static com.google.common.collect.Lists.newArrayList;
-import static com.google.protobuf.util.Timestamps.add;
-import static io.spine.server.aggregate.given.Given.EventMessage.projectCreated;
-import static io.spine.server.aggregate.given.Given.EventMessage.taskAdded;
-import static io.spine.server.command.TestEventFactory.newInstance;
-import static io.spine.time.Durations2.seconds;
-import static io.spine.time.Time.getCurrentTime;
+import static io.spine.base.Time.getCurrentTime;
 
 public class Given {
 
@@ -181,76 +169,7 @@ public class Given {
         }
     }
 
-    private static String projectName(ProjectId id) {
+    static String projectName(ProjectId id) {
         return "Project_" + id.getId();
-    }
-
-    public static class StorageRecord {
-
-        private static final TestEventFactory eventFactory = newInstance(Given.class);
-
-        private StorageRecord() {
-        }
-
-        public static AggregateEventRecord create(Timestamp timestamp) {
-            final Message eventMessage = Sample.messageOfType(AggProjectCreated.class);
-            final Event event = eventFactory.createEvent(eventMessage);
-            final AggregateEventRecord.Builder builder
-                    = AggregateEventRecord.newBuilder()
-                                          .setTimestamp(timestamp)
-                                          .setEvent(event);
-            return builder.build();
-        }
-
-        public static AggregateEventRecord create(Timestamp timestamp, Event event) {
-            final AggregateEventRecord.Builder builder = create(timestamp)
-                    .toBuilder()
-                    .setEvent(event);
-            return builder.build();
-        }
-    }
-
-    public static class StorageRecords {
-
-        private StorageRecords() {
-        }
-
-        /**
-         * Returns several records sorted by timestamp ascending.
-         * First record's timestamp is the current time.
-         */
-        public static List<AggregateEventRecord> sequenceFor(ProjectId id) {
-            return sequenceFor(id, getCurrentTime());
-        }
-
-        /**
-         * Returns several records sorted by timestamp ascending.
-         *
-         * @param timestamp1 the timestamp of first record.
-         */
-        public static List<AggregateEventRecord> sequenceFor(ProjectId id, Timestamp timestamp1) {
-            final Duration delta = seconds(10);
-            final Timestamp timestamp2 = add(timestamp1, delta);
-            final Timestamp timestamp3 = add(timestamp2, delta);
-
-            final TestEventFactory eventFactory = newInstance(Given.class);
-
-            final Event e1 = eventFactory.createEvent(projectCreated(id, projectName(id)),
-                                                      null,
-                                                      timestamp1);
-            final AggregateEventRecord record1 = StorageRecord.create(timestamp1, e1);
-
-            final Event e2 = eventFactory.createEvent(taskAdded(id),
-                                                      null,
-                                                      timestamp2);
-            final AggregateEventRecord record2 = StorageRecord.create(timestamp2, e2);
-
-            final Event e3 = eventFactory.createEvent(EventMessage.projectStarted(id),
-                                                      null,
-                                                      timestamp3);
-            final AggregateEventRecord record3 = StorageRecord.create(timestamp3, e3);
-
-            return newArrayList(record1, record2, record3);
-        }
     }
 }

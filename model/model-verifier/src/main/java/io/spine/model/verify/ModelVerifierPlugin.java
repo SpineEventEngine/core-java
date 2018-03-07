@@ -21,23 +21,22 @@
 package io.spine.model.verify;
 
 import io.spine.annotation.Experimental;
-import io.spine.gradle.SpinePlugin;
 import io.spine.model.CommandHandlers;
 import io.spine.model.assemble.AssignLookup;
+import io.spine.tools.gradle.SpinePlugin;
 import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
-import static io.spine.gradle.TaskName.CLASSES;
-import static io.spine.gradle.TaskName.COMPILE_JAVA;
-import static io.spine.gradle.TaskName.VERIFY_MODEL;
+import static io.spine.tools.gradle.TaskName.CLASSES;
+import static io.spine.tools.gradle.TaskName.COMPILE_JAVA;
+import static io.spine.tools.gradle.TaskName.VERIFY_MODEL;
 import static java.nio.file.Files.exists;
 import static java.nio.file.Files.newInputStream;
 
@@ -56,17 +55,19 @@ public final class ModelVerifierPlugin extends SpinePlugin {
         log().debug("Applying Spine model verifier plugin.");
         final Path rawModelStorage = rawModelPath(project);
         // Ensure right environment (`main` scope sources with the `java` plugin)
-        if (project.getTasks().findByPath(CLASSES.getValue()) != null) {
+        if (project.getTasks()
+                   .findByPath(CLASSES.getValue()) != null) {
             createTask(rawModelStorage, project);
         }
     }
 
     private void createTask(Path rawModelStorage, Project project) {
         log().debug("Adding task {}", VERIFY_MODEL.getValue());
-        newTask(VERIFY_MODEL, action(rawModelStorage)).insertBeforeTask(CLASSES)
-                                                      .insertAfterTask(COMPILE_JAVA)
-                                                      .withInputFiles(rawModelStorage)
-                                                      .applyNowTo(project);
+        newTask(VERIFY_MODEL, action(rawModelStorage))
+                .insertBeforeTask(CLASSES)
+                .insertAfterTask(COMPILE_JAVA)
+                .withInputFiles(rawModelStorage)
+                .applyNowTo(project);
     }
 
     private static Path rawModelPath(Project project) {
@@ -75,8 +76,8 @@ public final class ModelVerifierPlugin extends SpinePlugin {
         return result;
     }
 
-    private static Action<Task> action(Path path) {
-        return new VerifierAction(path);
+    private Action<Task> action(Path path) {
+        return new VerifierAction(this, path);
     }
 
     /**
@@ -91,26 +92,38 @@ public final class ModelVerifierPlugin extends SpinePlugin {
     }
 
     /**
+     * Opens the method to the helper class.
+     */
+    @SuppressWarnings("RedundantMethodOverride") // See Javadoc.
+    @Override
+    protected Logger log() {
+        return super.log();
+    }
+
+    /**
      * The action performing the model processing.
      *
      * <p>The action is executed only if the passed {@code rawModelPath} is present.
      *
-     * <p>Reads the {@link CommandHandlers} from the given file and {@linkplain #verifyModel processes}
-     * the model.
+     * <p>Reads the {@link CommandHandlers} from the given file and
+     * {@linkplain #verifyModel processes} the model.
      */
     private static class VerifierAction implements Action<Task> {
 
+        private final ModelVerifierPlugin parent;
         private final Path rawModelPath;
 
-        private VerifierAction(Path rawModelPath) {
+        private VerifierAction(ModelVerifierPlugin parent, Path rawModelPath) {
+            this.parent = parent;
             this.rawModelPath = rawModelPath;
         }
 
         @Override
         public void execute(Task task) {
             if (!exists(rawModelPath)) {
-                log().warn("No Spine model description found under {}. Completing the task.",
-                           rawModelPath);
+                final Logger log = parent.log();
+                log.warn("No Spine model definition found under {}. Completing the task.",
+                         rawModelPath);
                 return;
             }
             final CommandHandlers model;
@@ -121,15 +134,5 @@ public final class ModelVerifierPlugin extends SpinePlugin {
             }
             verifyModel(model, task.getProject());
         }
-    }
-
-    private static Logger log() {
-        return LogSingleton.INSTANCE.value;
-    }
-
-    private enum LogSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(ModelVerifierPlugin.class);
     }
 }

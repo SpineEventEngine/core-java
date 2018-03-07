@@ -20,7 +20,7 @@
 
 /**
  * This package provides implementation of in-memory
- * {@link io.spine.server.integration.TransportFactory} routines.
+ * {@link io.spine.server.integration.TransportFactory TransportFactory} routines.
  *
  * <p>Should be used in test purposes only.
  */

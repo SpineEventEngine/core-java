@@ -20,8 +20,8 @@
 
 package io.spine.model.verify;
 
-import io.spine.gradle.GradleProject;
-import io.spine.gradle.TaskName;
+import io.spine.tools.gradle.TaskName;
+import io.spine.tools.gradle.given.GradleProject;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.BuildTask;
 import org.gradle.testkit.runner.TaskOutcome;
@@ -30,7 +30,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import static io.spine.gradle.TaskName.VERIFY_MODEL;
+import static io.spine.tools.gradle.TaskName.VERIFY_MODEL;
 import static org.gradle.testkit.runner.TaskOutcome.FAILED;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -74,7 +74,8 @@ public class ModelVerifierPluginShould {
         project.executeTask(VERIFY_MODEL);
     }
 
-    @Ignore // TODO:2017-08-25:dmytro.dashenkov: Re-enable when Model is capable of checking the handler methods.
+    @Ignore // TODO:2017-08-25:dmytro.dashenkov: Re-enable when Model is capable of
+            // checking the handler methods.
             // https://github.com/SpineEventEngine/base/issues/49
     @Test
     public void halt_build_on_malformed_command_handling_methods() {

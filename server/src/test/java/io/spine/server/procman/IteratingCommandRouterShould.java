@@ -25,11 +25,11 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
+import io.spine.base.Time;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.Commands;
 import io.spine.server.commandbus.CommandBus;
-import io.spine.time.Time;
 import org.junit.Test;
 
 import java.util.List;

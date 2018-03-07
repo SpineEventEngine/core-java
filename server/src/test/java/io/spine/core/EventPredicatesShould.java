@@ -26,13 +26,13 @@ import com.google.protobuf.Timestamp;
 import io.spine.core.given.GivenEvent;
 import org.junit.Test;
 
+import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.EventPredicates.isAfter;
 import static io.spine.core.EventPredicates.isBefore;
 import static io.spine.core.EventPredicates.isBetween;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.TimeTests.Past.minutesAgo;
 import static io.spine.test.TimeTests.Past.secondsAgo;
-import static io.spine.time.Time.getCurrentTime;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
