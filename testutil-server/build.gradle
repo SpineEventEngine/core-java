@@ -35,4 +35,7 @@ dependencies {
     // General purpose test utilities.
     compile group: 'io.spine', name: 'spine-testutil-base', version: spineBaseVersion
     compile project(path: ':testutil-client')
+
+    // Depend on testutil-time for `TimeTests` class.
+    testCompile group: 'io.spine', name: 'spine-testutil-time', version: spineTimeVersion
 }

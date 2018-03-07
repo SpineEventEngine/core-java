@@ -21,8 +21,8 @@
 package io.spine.server.aggregate;
 
 import com.google.protobuf.Timestamp;
+import io.spine.base.Time;
 import io.spine.test.TimeTests;
-import io.spine.time.Time;
 import io.spine.validate.TimestampVBuilder;
 import org.junit.Test;
 

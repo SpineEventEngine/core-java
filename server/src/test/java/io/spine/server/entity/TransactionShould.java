@@ -38,9 +38,9 @@ import org.mockito.ArgumentMatcher;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.Versions.newVersion;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.time.Time.getCurrentTime;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;

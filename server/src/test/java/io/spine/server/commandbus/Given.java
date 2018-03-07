@@ -33,11 +33,11 @@ import io.spine.core.given.GivenCommandContext;
 import io.spine.core.given.GivenUserId;
 import io.spine.test.command.CmdAddTask;
 import io.spine.test.command.CmdCreateProject;
-import io.spine.test.command.ProjectId;
 import io.spine.test.command.CmdStartProject;
+import io.spine.test.command.ProjectId;
 
 import static io.spine.Identifier.newUuid;
-import static io.spine.time.Time.getCurrentTime;
+import static io.spine.base.Time.getCurrentTime;
 
 public class Given {
 

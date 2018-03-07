@@ -27,6 +27,7 @@ import org.junit.Test;
 
 import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;
 import static com.google.protobuf.util.Timestamps.add;
+import static io.spine.base.Time.getCurrentTime;
 import static io.spine.client.ColumnFilter.Operator;
 import static io.spine.client.ColumnFilter.Operator.CFO_UNDEFINED;
 import static io.spine.client.ColumnFilter.Operator.EQUAL;
@@ -37,7 +38,6 @@ import static io.spine.client.ColumnFilter.Operator.LESS_THAN;
 import static io.spine.server.storage.OperatorEvaluator.eval;
 import static io.spine.test.Tests.nullRef;
 import static io.spine.time.Durations2.seconds;
-import static io.spine.time.Time.getCurrentTime;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 

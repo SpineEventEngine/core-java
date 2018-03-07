@@ -27,8 +27,8 @@ import com.google.protobuf.BoolValue;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
+import io.spine.base.Time;
 import io.spine.test.TestValues;
-import io.spine.time.Time;
 import org.junit.Test;
 
 import java.util.Iterator;

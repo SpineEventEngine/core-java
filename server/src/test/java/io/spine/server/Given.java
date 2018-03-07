@@ -59,8 +59,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.Identifier.newUuid;
+import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.given.GivenUserId.of;
-import static io.spine.time.Time.getCurrentTime;
 
 public class Given {
 

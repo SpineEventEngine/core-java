@@ -34,6 +34,7 @@ import com.google.protobuf.UInt32Value;
 import com.google.protobuf.UInt64Value;
 import com.google.protobuf.util.Timestamps;
 import io.spine.Identifier;
+import io.spine.base.Time;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
@@ -70,7 +71,6 @@ import io.spine.test.aggregate.event.AggTaskAdded;
 import io.spine.test.aggregate.rejection.AggCannotStartArchivedProject;
 import io.spine.test.aggregate.rejection.Rejections;
 import io.spine.testdata.Sample;
-import io.spine.time.Time;
 import io.spine.validate.BoolValueVBuilder;
 import io.spine.validate.StringValueVBuilder;
 

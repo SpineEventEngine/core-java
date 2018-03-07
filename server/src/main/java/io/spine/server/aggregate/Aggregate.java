@@ -22,7 +22,6 @@ package io.spine.server.aggregate;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
@@ -47,13 +46,15 @@ import io.spine.server.rejection.RejectionReactorMethod;
 import io.spine.validate.ValidatingBuilder;
 
 import javax.annotation.CheckReturnValue;
+import java.util.Iterator;
 import java.util.List;
 
 import static com.google.common.collect.FluentIterable.from;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
+import static com.google.common.collect.Lists.newLinkedList;
+import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.Events.getMessage;
-import static io.spine.time.Time.getCurrentTime;
 import static io.spine.validate.Validate.isNotDefault;
 
 /**
@@ -130,7 +131,10 @@ public abstract class Aggregate<I,
      *
      * @see #commitEvents()
      */
-    private final List<Event> uncommittedEvents = Lists.newLinkedList();
+    private final List<Event> uncommittedEvents = newLinkedList();
+
+    /** A guard for ensuring idempotency of messages dispatched by this aggregate. */
+    private IdempotencyGuard idempotencyGuard;
 
     /**
      * Creates a new instance.
@@ -152,6 +156,14 @@ public abstract class Aggregate<I,
      */
     protected Aggregate(I id) {
         super(id);
+        setIdempotencyGuard();
+    }
+
+    /**
+     * Creates and assigns the aggregate an {@link IdempotencyGuard idempotency guard}.
+     */
+    private void setIdempotencyGuard() {
+        idempotencyGuard = new IdempotencyGuard(this);
     }
 
     /**
@@ -195,6 +207,7 @@ public abstract class Aggregate<I,
      */
     @Override
     protected List<? extends Message> dispatchCommand(CommandEnvelope command) {
+        idempotencyGuard.check(command);
         final CommandHandlerMethod method = thisClass().getHandler(command.getMessageClass());
         final List<? extends Message> messages =
                 method.invoke(this, command.getMessage(), command.getCommandContext());
@@ -266,6 +279,7 @@ public abstract class Aggregate<I,
         final List<Event> events = aggregateStateRecord.getEventList();
 
         play(events);
+        remember(events);
     }
 
     /**
@@ -397,6 +411,7 @@ public abstract class Aggregate<I,
     List<Event> commitEvents() {
         final List<Event> result = ImmutableList.copyOf(uncommittedEvents);
         uncommittedEvents.clear();
+        remember(result);
         return result;
     }
 
@@ -415,13 +430,37 @@ public abstract class Aggregate<I,
      * @return new snapshot
      */
     @CheckReturnValue
-    Snapshot toSnapshot() {
+    Snapshot toShapshot() {
         final Any state = AnyPacker.pack(getState());
         final Snapshot.Builder builder = Snapshot.newBuilder()
                 .setState(state)
                 .setVersion(getVersion())
                 .setTimestamp(getCurrentTime());
-        return builder.build();
+        final Snapshot snapshot = builder.build();
+        return snapshot;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Opens the method for the repository.
+     */
+    @Override
+    protected void clearRecentHistory() {
+        super.clearRecentHistory();
+    }
+
+    /**
+     * Creates an iterator of the aggregate event history with reverse traversal.
+     *
+     * <p>The records are returned sorted by timestamp in a descending order (from newer to older).
+     * 
+     * <p>The iterator is empty if there's no history for the aggregate.
+     *
+     * @return new iterator instance
+     */
+    protected Iterator<Event> historyBackward() {
+        return recentHistory().iterator();
     }
 
     /**
@@ -446,6 +485,7 @@ public abstract class Aggregate<I,
      * A predicate checking that message is not {@linkplain Empty empty}.
      */
     private enum NonEmpty implements Predicate<Message> {
+
         INSTANCE;
 
         private static final Empty EMPTY = Empty.getDefaultInstance();

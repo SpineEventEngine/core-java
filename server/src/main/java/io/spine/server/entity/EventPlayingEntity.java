@@ -50,6 +50,8 @@ public abstract class EventPlayingEntity <I,
                                           B extends ValidatingBuilder<S, ? extends Message.Builder>>
                       extends AbstractVersionableEntity<I, S> {
 
+    private final RecentHistory recentHistory = new RecentHistory();
+
     /**
      * The flag, which becomes {@code true}, if the state of the entity has been changed
      * since it has been {@linkplain RecordBasedRepository#findOrCreate(Object) loaded or created}.
@@ -68,6 +70,27 @@ public abstract class EventPlayingEntity <I,
      */
     protected EventPlayingEntity(I id) {
         super(id);
+    }
+
+    /**
+     * Obtains recent history of events of this entity.
+     */
+    protected RecentHistory recentHistory() {
+        return recentHistory;
+    }
+
+    /**
+     * Adds events to the {@linkplain #recentHistory() recent history}.
+     */
+    protected void remember(Iterable<Event> events) {
+        recentHistory.addAll(events);
+    }
+
+    /**
+     * Clears {@linkplain #recentHistory() recent history}.
+     */
+    protected void clearRecentHistory() {
+        recentHistory.clear();
     }
 
     /**
