@@ -804,10 +804,10 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         }
     }
 
-    private enum LifecycleColumns {
+    enum LifecycleColumns {
 
-        ARCHIVED("getArchived"),
-        DELETED("getDeleted");
+        ARCHIVED("isArchived"),
+        DELETED("isDeleted");
 
         private final EntityColumn column;
 
