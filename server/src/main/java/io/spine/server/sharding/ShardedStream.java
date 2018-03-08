@@ -19,74 +19,81 @@
  */
 package io.spine.server.sharding;
 
-import com.google.protobuf.Any;
-import com.google.protobuf.StringValue;
 import io.grpc.stub.StreamObserver;
 import io.spine.core.BoundedContextName;
-import io.spine.protobuf.AnyPacker;
+import io.spine.core.MessageEnvelope;
 import io.spine.server.integration.ChannelId;
 import io.spine.server.integration.ExternalMessage;
 import io.spine.server.integration.ExternalMessages;
 import io.spine.server.transport.Publisher;
 import io.spine.server.transport.Subscriber;
 import io.spine.server.transport.TransportFactory;
-import io.spine.string.Stringifiers;
-import io.spine.type.ClassName;
+import io.spine.util.GenericTypeIndex;
 
-import static com.google.common.base.Joiner.on;
+import javax.annotation.Nullable;
+
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.server.sharding.ShardedMessages.toChannelId;
+import static io.spine.server.sharding.ShardedStream.GenericParameter.MESSAGE_CLASS;
 
 /**
  * @author Alex Tymchenko
  */
-public class ShardedStream {
+public abstract class ShardedStream<I, E extends MessageEnvelope<?, ?, ?>> {
 
     private final TransportFactory transportFactory;
     private final BoundedContextName boundedContextName;
-
     private final ShardingKey key;
     private final ChannelId channelId;
 
-    protected ShardedStream(ShardingKey key,
+    @Nullable
+    private ExternalMessageObserver channelObserver;
+
+    ShardedStream(ShardingKey key,
                             TransportFactory transportFactory,
                             BoundedContextName boundedContextName) {
         this.transportFactory = transportFactory;
         this.boundedContextName = boundedContextName;
         this.key = key;
-        this.channelId = toChannelId(key);
+        final Class<E> envelopeCls = getEnvelopeClass();
+        this.channelId = toChannelId(boundedContextName, key, envelopeCls);
     }
+
+    @SuppressWarnings("unchecked")  // Ensured by the generic type definition.
+    private Class<E> getEnvelopeClass() {
+        return (Class<E>) MESSAGE_CLASS.getArgumentIn(getClass());
+    }
+
+
+    protected abstract ShardedMessageConverter<I, E> converter();
 
     public ShardingKey getKey() {
         return key;
     }
 
-    public void post(ShardedMessage message) {
+    public final void post(I targetId, E messageEnvelope) {
+        checkNotNull(messageEnvelope);
+
+        final ShardedMessage shardedMessage = converter().convert(targetId, messageEnvelope);
+        checkNotNull(shardedMessage);
+
+        post(shardedMessage);
+    }
+
+    private void post(ShardedMessage message) {
         final ExternalMessage externalMessage = ExternalMessages.of(message, boundedContextName);
         final Publisher publisher = getPublisher();
         publisher.publish(externalMessage.getId(), externalMessage);
     }
 
-    public void addObserver(final StreamObserver<ShardedMessage> consumer) {
+    public void setConsumer(ShardedStreamConsumer<I, E> consumer) {
         checkNotNull(consumer);
-
-        getSubscriber().addObserver(new StreamObserver<ExternalMessage>() {
-            @Override
-            public void onNext(ExternalMessage value) {
-                checkNotNull(value);
-                final ShardedMessage shardedMessage = ExternalMessages.asShardedMessage(value);
-                consumer.onNext(shardedMessage);
-            }
-
-            @Override
-            public void onError(Throwable t) {
-                //TODO:2018-02-25:alex.tymchenko: define the expected behavior.
-            }
-
-            @Override
-            public void onCompleted() {
-                //TODO:2018-02-25:alex.tymchenko: is this legal at all?
-            }
-        });
+        if(channelObserver == null) {
+            channelObserver = new ExternalMessageObserver(consumer);
+            getSubscriber().addObserver(channelObserver);
+        } else {
+            channelObserver.updateDelegate(consumer);
+        }
     }
 
     private Publisher getPublisher() {
@@ -99,20 +106,73 @@ public class ShardedStream {
         return result;
     }
 
-    private static ChannelId toChannelId(ShardingKey key) {
-        checkNotNull(key);
 
-        final ClassName className = key.getModelClass()
-                                       .getClassName();
-        final IdPredicate idPredicate = key.getIdPredicate();
-        final String value = on(':').join(className, Stringifiers.toString(idPredicate));
-        final StringValue asMsg = StringValue.newBuilder()
-                                             .setValue(value)
-                                             .build();
-        final Any asAny = AnyPacker.pack(asMsg);
-        final ChannelId result = ChannelId.newBuilder()
-                                          .setIdentifier(asAny)
-                                          .build();
-        return result;
+    private class ExternalMessageObserver implements StreamObserver<ExternalMessage> {
+
+        private ShardedStreamConsumer<I, E> delegate;
+
+        private ExternalMessageObserver(ShardedStreamConsumer<I, E> delegate) {
+            this.delegate = delegate;
+        }
+
+        private void updateDelegate(ShardedStreamConsumer<I, E> newDelegate) {
+            checkNotNull(newDelegate);
+            this.delegate = newDelegate;
+        }
+
+        @Override
+        public void onNext(ExternalMessage value) {
+            checkNotNull(value);
+            final ShardedMessage shardedMessage = ExternalMessages.asShardedMessage(value);
+
+            final E envelope = converter().envelopeOf(shardedMessage);
+            final I targetId = converter().targetIdOf(shardedMessage);
+            checkNotNull(envelope);
+            delegate.onNext(targetId, envelope);
+        }
+
+        @Override
+        public void onError(Throwable t) {
+            //TODO:2018-03-8:alex.tymchenko: figure out what should happen.
+        }
+
+        @Override
+        public void onCompleted() {
+            //TODO:2018-03-8:alex.tymchenko: figure out what should happen.
+        }
+    }
+
+    protected interface ShardedMessageConverter<I, E extends MessageEnvelope<?, ?, ?>> {
+
+        ShardedMessage convert(Object id, E envelope);
+
+        I targetIdOf(ShardedMessage message);
+
+        E envelopeOf(ShardedMessage message);
+    }
+
+    /**
+     * Enumeration of generic type parameters of this class.
+     */
+    enum GenericParameter implements GenericTypeIndex<ShardedStream> {
+
+        /** The index of the generic type {@code <M>}. */
+        MESSAGE_CLASS(0);
+
+        private final int index;
+
+        GenericParameter(int index) {
+            this.index = index;
+        }
+
+        @Override
+        public int getIndex() {
+            return this.index;
+        }
+
+        @Override
+        public Class<?> getArgumentIn(Class<? extends ShardedStream> cls) {
+            return Default.getArgument(this, cls);
+        }
     }
 }

@@ -19,7 +19,7 @@
  */
 package io.spine.server.sharding;
 
-import io.spine.core.Command;
+import io.spine.core.CommandEnvelope;
 import io.spine.server.model.ModelClass;
 import io.spine.type.ClassName;
 
@@ -38,6 +38,10 @@ public final class ShardConsumerId {
     private ShardConsumerId(ModelClass<?> modelClass, ClassName observedMsgType) {
         this.modelClass = modelClass;
         this.observedMsgType = observedMsgType;
+    }
+
+    public ClassName getObservedMsgType() {
+        return observedMsgType;
     }
 
     @Override
@@ -61,7 +65,7 @@ public final class ShardConsumerId {
     public static ShardConsumerId forCommandsOf(ModelClass<?> modelClass) {
         checkNotNull(modelClass);
 
-        final ClassName className = ClassName.of(Command.class);
+        final ClassName className = ClassName.of(CommandEnvelope.class);
         final ShardConsumerId id = new ShardConsumerId(modelClass, className);
         return id;
     }

@@ -19,12 +19,14 @@
  */
 package io.spine.server.sharding;
 
-import io.grpc.stub.StreamObserver;
+import io.spine.core.MessageEnvelope;
 
 /**
  * @author Alex Tymchenko
  */
-public interface ShardedStreamConsumer extends StreamObserver<ShardedMessage> {
+public interface ShardedStreamConsumer<I, E extends MessageEnvelope<?, ?, ?>> {
 
     ShardConsumerId getConsumerId();
+
+    void onNext(I targetId, E envelope);
 }

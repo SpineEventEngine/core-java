@@ -27,6 +27,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
 import io.spine.annotation.SPI;
+import io.spine.core.BoundedContextName;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.server.BoundedContext;
@@ -94,6 +95,12 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     protected final ProjectionClass<P> getModelClass(Class<P> cls) {
         return (ProjectionClass<P>) Model.getInstance()
                                          .asProjectionClass(cls);
+    }
+
+    //TODO:2018-03-8:alex.tymchenko: try to hide it.
+    @Override
+    public ProjectionClass<P> getModelClass() {
+        return projectionClass();
     }
 
     /**
@@ -278,6 +285,12 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         final Iterable<ShardedStreamConsumer> result =
                 ImmutableList.<ShardedStreamConsumer>of(getEndpointDelivery());
         return result;
+    }
+
+    @Override
+    public BoundedContextName getBoundedContextName() {
+        final BoundedContextName name = getBoundedContext().getName();
+        return name;
     }
 
     /**

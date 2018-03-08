@@ -19,7 +19,8 @@
  */
 package io.spine.server.sharding;
 
-import com.google.protobuf.Message;
+import io.spine.core.MessageEnvelope;
+import io.spine.server.model.ModelClass;
 
 import java.util.Set;
 
@@ -28,9 +29,13 @@ import java.util.Set;
  */
 public interface Sharding {
 
-    ShardedStream register(Shardable shardable) throws NoShardAvailableException;
+    void register(Shardable<?> shardable) throws NoShardAvailableException;
 
-    Set<ShardedStream> find(Object targetId, Message message) throws NoShardAvailableException;
+    <I, E extends MessageEnvelope<?,?,?>>
+    Set<ShardedStream<I, E>> find(I targetId, Class<E> envelopeClass)
+            throws NoShardAvailableException;
+
+    IdPredicate toIdPredicate(ModelClass<?> modelClass, Strategy strategy);
 
     enum Strategy {
 

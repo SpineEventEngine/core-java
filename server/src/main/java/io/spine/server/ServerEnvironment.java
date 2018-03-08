@@ -22,14 +22,11 @@ package io.spine.server;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
-import com.google.protobuf.Message;
-import io.spine.server.sharding.NoShardAvailableException;
-import io.spine.server.sharding.Shardable;
-import io.spine.server.sharding.ShardedStream;
+import io.spine.server.sharding.InProcessSharding;
 import io.spine.server.sharding.Sharding;
+import io.spine.server.transport.memory.InMemoryTransportFactory;
 
 import javax.annotation.Nullable;
-import java.util.Set;
 
 @SuppressWarnings("AccessOfSystemProperties") // OK as we need system properties for this class.
 public class ServerEnvironment {
@@ -48,19 +45,8 @@ public class ServerEnvironment {
 
     /** Prevents instantiation of this utility class. */
     private ServerEnvironment() {
-        //TODO:2018-02-22:alex.tymchenko: supply an in-process implementation instead.
-        this.sharding = new Sharding() {
-            @Override
-            public ShardedStream register(Shardable shardable) throws NoShardAvailableException {
-                return null;
-            }
-
-            @Override
-            public Set<ShardedStream> find(Object targetId, Message message)
-                    throws NoShardAvailableException {
-                return null;
-            }
-        };
+        //TODO:2018-02-22:alex.tymchenko: use a singleton transport factory instead.
+        this.sharding = new InProcessSharding(InMemoryTransportFactory.newInstance());
     }
 
     /**

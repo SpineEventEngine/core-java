@@ -21,14 +21,20 @@ package io.spine.server.sharding;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import com.google.protobuf.StringValue;
+import io.spine.core.BoundedContextName;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandId;
+import io.spine.core.MessageEnvelope;
 import io.spine.protobuf.AnyPacker;
 import io.spine.protobuf.TypeConverter;
+import io.spine.server.integration.ChannelId;
 import io.spine.string.Stringifiers;
 import io.spine.time.Time;
+import io.spine.type.ClassName;
 
+import static com.google.common.base.Joiner.on;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -79,6 +85,32 @@ public class ShardedMessages {
         final Any originalMessage = source.getOriginalMessage();
         final Command command = AnyPacker.unpack(originalMessage);
         final CommandEnvelope result = CommandEnvelope.of(command);
+        return result;
+    }
+
+    public static <E extends MessageEnvelope<?, ?, ?>>
+    ChannelId toChannelId(BoundedContextName boundedContextName,
+                          ShardingKey key,
+                          Class<E> envelopeClass) {
+        checkNotNull(key);
+        checkNotNull(boundedContextName);
+        checkNotNull(envelopeClass);
+
+        final ClassName className = key.getModelClass()
+                                       .getClassName();
+        final IdPredicate idPredicate = key.getIdPredicate();
+
+        final String value = on("__").join("bc_", boundedContextName.getValue(),
+                                           "target_", className,
+                                           "prd_", Stringifiers.toString(idPredicate),
+                                           "env_", envelopeClass);
+        final StringValue asMsg = StringValue.newBuilder()
+                                             .setValue(value)
+                                             .build();
+        final Any asAny = AnyPacker.pack(asMsg);
+        final ChannelId result = ChannelId.newBuilder()
+                                          .setIdentifier(asAny)
+                                          .build();
         return result;
     }
 }

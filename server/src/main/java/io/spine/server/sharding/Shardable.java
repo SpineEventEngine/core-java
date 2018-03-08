@@ -19,6 +19,9 @@
  */
 package io.spine.server.sharding;
 
+import io.spine.core.BoundedContextName;
+import io.spine.server.model.ModelClass;
+
 /**
  * @author Alex Tymchenko
  */
@@ -27,4 +30,8 @@ public interface Shardable<E> {
     Sharding.Strategy getShardingStrategy();
 
     Iterable<ShardedStreamConsumer> getMessageConsumers();
+
+    BoundedContextName getBoundedContextName();
+
+    ModelClass getModelClass();
 }

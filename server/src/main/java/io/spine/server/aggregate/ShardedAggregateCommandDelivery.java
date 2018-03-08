@@ -19,17 +19,12 @@
  */
 package io.spine.server.aggregate;
 
-import com.google.protobuf.Message;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.ServerEnvironment;
-import io.spine.server.sharding.ShardedMessage;
-import io.spine.server.sharding.ShardedMessages;
 import io.spine.server.sharding.ShardedStream;
 import io.spine.server.sharding.Sharding;
 
 import java.util.Set;
-
-import static io.spine.protobuf.TypeConverter.toMessage;
 
 /**
  * An abstract base for {@code Aggregate} {@linkplain AggregateCommandDelivery command
@@ -42,8 +37,7 @@ import static io.spine.protobuf.TypeConverter.toMessage;
  * @author Alex Tymchenko
  */
 public class ShardedAggregateCommandDelivery<I, A extends Aggregate<I, ?, ?>>
-                            extends AggregateCommandDelivery<I, A>
-                           {
+                            extends AggregateCommandDelivery<I, A> {
 
     protected ShardedAggregateCommandDelivery(AggregateRepository<I, A> repository) {
         super(repository);
@@ -67,14 +61,11 @@ public class ShardedAggregateCommandDelivery<I, A extends Aggregate<I, ?, ?>>
     }
 
     private void sendToShards(I id, CommandEnvelope envelope) {
-        final Message commandMessage = envelope.getMessage();
-        final Set<ShardedStream> shardedStreams = sharding().find(id, commandMessage);
+        final Set<ShardedStream<I, CommandEnvelope>> streams =
+                sharding().find(id, CommandEnvelope.class);
 
-        final Message idAsMessage = toMessage(id);
-        final ShardedMessage shardedMessage = ShardedMessages.of(idAsMessage, envelope);
-
-        for (ShardedStream shardedStream : shardedStreams) {
-            shardedStream.post(shardedMessage);
+        for (ShardedStream<I, CommandEnvelope> shardedStream : streams) {
+            shardedStream.post(id, envelope);
         }
     }
 
@@ -91,16 +82,5 @@ public class ShardedAggregateCommandDelivery<I, A extends Aggregate<I, ?, ?>>
         final Sharding result = ServerEnvironment.getInstance()
                                                  .getSharding();
         return result;
-    }
-
-    @Override
-    public void onNext(ShardedMessage value) {
-        final CommandEnvelope commandEnvelope = ShardedMessages.getCommandEnvelope(value);
-        final I targetId = ShardedMessages.getTargetId(value, repository().getIdClass());
-        deliverNow(targetId, commandEnvelope);
-    }
-
-    @Override
-    public void onError(Throwable t) {
     }
 }

@@ -23,6 +23,7 @@ package io.spine.server.procman;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import io.spine.annotation.SPI;
+import io.spine.core.BoundedContextName;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
@@ -113,6 +114,12 @@ public abstract class ProcessManagerRepository<I,
     protected final ProcessManagerClass<P> getModelClass(Class<P> cls) {
         return (ProcessManagerClass<P>) Model.getInstance()
                                              .asProcessManagerClass(cls);
+    }
+
+    //TODO:2018-03-8:alex.tymchenko: try to hide it.
+    @Override
+    public ProcessManagerClass<P> getModelClass() {
+        return processManagerClass();
     }
 
     /**
@@ -415,6 +422,13 @@ public abstract class ProcessManagerRepository<I,
         final Iterable<ShardedStreamConsumer> result =
                 ImmutableList.<ShardedStreamConsumer>of(cmdDelivery, eventDelivery, rjDelivery);
         return result;
+    }
+
+
+    @Override
+    public BoundedContextName getBoundedContextName() {
+        final BoundedContextName name = getBoundedContext().getName();
+        return name;
     }
 
     /**

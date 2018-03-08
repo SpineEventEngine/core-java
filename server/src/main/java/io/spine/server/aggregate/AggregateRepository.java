@@ -23,6 +23,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import io.spine.annotation.SPI;
+import io.spine.core.BoundedContextName;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
@@ -32,6 +33,7 @@ import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
+import io.spine.server.ServerEnvironment;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.commandbus.CommandErrorHandler;
 import io.spine.server.delivery.EndpointDelivery;
@@ -171,6 +173,13 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
         this.commandErrorHandler = CommandErrorHandler.with(boundedContext.getRejectionBus());
 
+        registerAsShard();
+    }
+
+    private void registerAsShard() {
+        ServerEnvironment.getInstance()
+                         .getSharding()
+                         .register(this);
     }
 
     private void registerExtMessageDispatcher(BoundedContext boundedContext,
@@ -223,6 +232,12 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     protected AggregateClass<A> getModelClass(Class<A> cls) {
         return (AggregateClass<A>) Model.getInstance()
                                         .asAggregateClass(cls);
+    }
+
+    //TODO:2018-03-8:alex.tymchenko: try to hide it.
+    @Override
+    public AggregateClass<A> getModelClass() {
+        return aggregateClass();
     }
 
     /**
@@ -609,5 +624,11 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         final Iterable<ShardedStreamConsumer> result =
                 ImmutableList.<ShardedStreamConsumer>of(cmdDelivery, eventDelivery, rjDelivery);
         return result;
+    }
+
+    @Override
+    public BoundedContextName getBoundedContextName() {
+        final BoundedContextName name = getBoundedContext().getName();
+        return name;
     }
 }
