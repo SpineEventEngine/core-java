@@ -179,9 +179,8 @@ public final class EntityRecordWithColumns implements Serializable {
      * <p>If returns {@code false}, the {@linkplain EntityColumn columns} are not considered
      * by the storage.
      *
-     * @return {@code true} if the object was constructed via
-     *         {@link #create(EntityRecord, Entity)} and the entity has columns;
-     *         {@code false} otherwise
+     * @return {@code true} if the object was constructed via {@link #create(EntityRecord, Entity)}
+     *         and the entity has columns; {@code false} otherwise
      */
     public boolean hasColumns() {
         return hasStorageFields;
