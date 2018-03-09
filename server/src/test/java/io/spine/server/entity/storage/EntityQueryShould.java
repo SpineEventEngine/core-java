@@ -48,6 +48,7 @@ import static com.google.common.testing.SerializableTester.reserializeAndAssert;
 import static io.spine.client.ColumnFilter.Operator.EQUAL;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
 import static io.spine.protobuf.TypeConverter.toAny;
+import static io.spine.server.entity.storage.Columns.findColumn;
 import static io.spine.server.entity.storage.EntityColumnCache.initializeFor;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
 import static io.spine.test.Verify.assertContains;
@@ -65,8 +66,7 @@ public class EntityQueryShould {
     @Test
     public void be_serializable() {
         final String columnName = deleted.name();
-        final EntityColumnCache columnCache = initializeFor(EntityWithLifecycle.class);
-        final EntityColumn column = columnCache.findColumn(columnName);
+        final EntityColumn column = findColumn(EntityWithLifecycle.class, columnName);
         final ColumnFilter filter = ColumnFilters.eq(columnName, false);
         final Multimap<EntityColumn, ColumnFilter> filters = of(column, filter);
         final CompositeQueryParameter parameter = CompositeQueryParameter.from(filters, ALL);

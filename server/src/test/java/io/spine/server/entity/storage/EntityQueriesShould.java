@@ -88,7 +88,8 @@ public class EntityQueriesShould {
     @Test
     public void construct_empty_queries() {
         final EntityFilters filters = EntityFilters.getDefaultInstance();
-        final EntityQuery<?> query = createEntityQuery(filters, AbstractEntity.class);
+        final Class<? extends Entity> entityClass = AbstractEntity.class;
+        final EntityQuery<?> query = createEntityQuery(filters, entityClass);
         assertNotNull(query);
         assertEquals(0, size(query.getParameters().iterator()));
         assertTrue(query.getIds().isEmpty());
@@ -122,7 +123,8 @@ public class EntityQueriesShould {
                                                    .setIdFilter(idFilter)
                                                    .addFilter(aggregatingFilter)
                                                    .build();
-        final EntityQuery<?> query = createEntityQuery(filters, AbstractVersionableEntity.class);
+        final Class<? extends Entity> entityClass = AbstractVersionableEntity.class;
+        final EntityQuery<?> query = createEntityQuery(filters, entityClass);
         assertNotNull(query);
 
         final Collection<?> ids = query.getIds();

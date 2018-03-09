@@ -23,10 +23,7 @@ package io.spine.server.entity.storage;
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
-import io.spine.server.entity.AbstractEntity;
-import io.spine.server.entity.AbstractVersionableEntity;
-import io.spine.server.entity.EntityRecord;
-import io.spine.server.entity.VersionableEntity;
+import io.spine.server.entity.*;
 import io.spine.server.entity.given.Given;
 import io.spine.test.entity.Project;
 import io.spine.testdata.Sample;
@@ -38,6 +35,7 @@ import java.util.Map;
 
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
 import static io.spine.server.entity.storage.Columns.extractColumnValues;
+import static io.spine.server.entity.storage.Columns.findColumn;
 import static io.spine.server.entity.storage.EntityColumn.MemoizedValue;
 import static io.spine.server.entity.storage.EntityColumnCache.initializeFor;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
@@ -63,8 +61,7 @@ public class EntityRecordWithColumnsShould {
                                                     .withVersion(1)
                                                     .build();
         final String columnName = version.name();
-        final EntityColumnCache columnCache = initializeFor(VersionableEntity.class);
-        final EntityColumn column = columnCache.findColumn(columnName);
+        final EntityColumn column = findColumn(VersionableEntity.class, columnName);
         final MemoizedValue value = column.memoizeFor(entity);
 
         final Map<String, MemoizedValue> columns = singletonMap(columnName, value);
@@ -130,7 +127,7 @@ public class EntityRecordWithColumnsShould {
     @Test
     public void not_have_columns_if_values_list_is_empty() {
         final EntityWithoutColumns entity = new EntityWithoutColumns("ID");
-        final Class<? extends EntityWithoutColumns> entityClass = entity.getClass();
+        final Class<? extends Entity> entityClass = entity.getClass();
         final EntityColumnCache columnCache = initializeFor(entityClass);
         final Collection<EntityColumn> entityColumns = columnCache.getAllColumns();
         final Map<String, MemoizedValue> columnValues = extractColumnValues(entity, entityColumns);

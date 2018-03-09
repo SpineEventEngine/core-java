@@ -69,7 +69,6 @@ public class ColumnsShould {
 
     @Test
     public void pass_null_check() {
-        new NullPointerTester().testAllPublicStaticMethods(Columns.class);
         new NullPointerTester().testStaticMethods(Columns.class, Visibility.PACKAGE);
     }
 
