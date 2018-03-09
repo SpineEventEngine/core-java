@@ -184,9 +184,9 @@ public class Columns {
      * <p>This way the process of {@linkplain Columns#obtainColumns(Class) obtaining columns} from
      * the given {@link Entity} class can be skipped.
      *
-     * @param entity an {@link Entity} to get the {@linkplain EntityColumn column} values from
+     * @param entity        an {@link Entity} to get the {@linkplain EntityColumn column} values from
      * @param entityColumns {@linkplain EntityColumn entity columns} which values should be extracted
-     * @param <E>    the type of the {@link Entity}
+     * @param <E>           the type of the {@link Entity}
      * @return a {@link Map} of the column {@linkplain EntityColumn#getStoredName()
      *         names for storing} to their {@linkplain MemoizedValue memoized values}
      * @see MemoizedValue
@@ -234,7 +234,7 @@ public class Columns {
      * <p>Records the result to {@link Map}.
      *
      * @param columns {@link Collection collection} of columns to extract values from
-     * @param entity {@link Entity} from which to extract the values
+     * @param entity  {@link Entity} from which to extract the values
      * @return a {@link Map} of the column {@linkplain EntityColumn#getStoredName()
      *         names for storing} to their {@linkplain MemoizedValue memoized values}
      * @see MemoizedValue
