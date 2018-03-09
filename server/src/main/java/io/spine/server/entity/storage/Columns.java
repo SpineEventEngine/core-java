@@ -108,7 +108,7 @@ public class Columns {
         checkNotNull(entityClass);
         checkNotEmptyOrBlank(columnName, "entity column name");
 
-        final Collection<EntityColumn> entityColumns = Columns.obtainColumns(entityClass);
+        final Collection<EntityColumn> entityColumns = obtainColumns(entityClass);
         for (EntityColumn column : entityColumns) {
             if (column.getName()
                     .equals(columnName)) {
@@ -172,8 +172,8 @@ public class Columns {
     static <E extends Entity<?, ?>> Map<String, EntityColumn.MemoizedValue> extractColumnValues(E entity) {
         checkNotNull(entity);
 
-        final Collection<EntityColumn> entityColumns = Columns.obtainColumns(entity.getClass());
-        return Columns.extractColumnValues(entity, entityColumns);
+        final Collection<EntityColumn> entityColumns = obtainColumns(entity.getClass());
+        return extractColumnValues(entity, entityColumns);
     }
 
     /**
@@ -195,7 +195,7 @@ public class Columns {
         checkNotNull(entity);
 
         final Class<? extends Entity> entityClass = entity.getClass();
-        if (!Columns.isPublic(entityClass)) {
+        if (!isPublic(entityClass)) {
             return Collections.emptyMap();
         }
 
