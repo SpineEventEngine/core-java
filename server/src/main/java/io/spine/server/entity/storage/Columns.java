@@ -181,6 +181,9 @@ public class Columns {
      *
      * <p>Uses given {@linkplain EntityColumn entity columns} for the value extraction.
      *
+     * <p>This way the process of {@linkplain Columns#obtainColumns(Class) obtaining columns} from
+     * the given {@link Entity} class can be skipped.
+     *
      * @param entity an {@link Entity} to get the {@linkplain EntityColumn column} values from
      * @param entityColumns {@linkplain EntityColumn entity columns} which values should be extracted
      * @param <E>    the type of the {@link Entity}
