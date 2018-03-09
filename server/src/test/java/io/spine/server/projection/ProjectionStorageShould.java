@@ -27,6 +27,7 @@ import com.google.protobuf.Timestamp;
 import io.spine.core.given.GivenVersion;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.EntityRecord;
+import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.storage.RecordStorageShould;
 import io.spine.test.Tests;
 import io.spine.test.storage.Project;
@@ -125,8 +126,10 @@ public abstract class ProjectionStorageShould
 
         final String projectDescriptor = Project.getDescriptor()
                                                 .getFullName();
-        @SuppressWarnings("DuplicateStringLiteralInspection")       // clashes with non-related tests.
-        final FieldMask fieldMask = maskForPaths(projectDescriptor + ".id", projectDescriptor + ".name");
+        @SuppressWarnings("DuplicateStringLiteralInspection")
+        // clashes with non-related tests.
+        final FieldMask fieldMask = maskForPaths(projectDescriptor + ".id",
+                                                 projectDescriptor + ".name");
 
         final Iterator<EntityRecord> read = storage.readAll(fieldMask);
         final Collection<EntityRecord> readRecords = newArrayList(read);
@@ -162,10 +165,11 @@ public abstract class ProjectionStorageShould
 
         final String projectDescriptor = Project.getDescriptor()
                                                 .getFullName();
-        final FieldMask fieldMask = maskForPaths(projectDescriptor + ".id", projectDescriptor + ".status");
+        final FieldMask fieldMask = maskForPaths(projectDescriptor + ".id",
+                                                 projectDescriptor + ".status");
 
         final Iterator<EntityRecord> read = storage.readMultiple(ids, fieldMask);
-        final Collection<EntityRecord> readRecords  =newArrayList(read);
+        final Collection<EntityRecord> readRecords = newArrayList(read);
         assertSize(ids.size(), readRecords);
 
         // Check data consistency
@@ -202,11 +206,11 @@ public abstract class ProjectionStorageShould
             final Project state = Given.project(id, format("project-%d", i));
             final Any packedState = AnyPacker.pack(state);
 
-            final EntityRecord record = EntityRecord.newBuilder()
-                                                    .setState(packedState)
-                                                    .setVersion(
-                                                            GivenVersion.withNumber(1))
-                                                    .build();
+            final EntityRecord rawRecord = EntityRecord.newBuilder()
+                                                       .setState(packedState)
+                                                       .setVersion(GivenVersion.withNumber(1))
+                                                       .build();
+            final EntityRecordWithColumns record = withLifecycleColumns(rawRecord);
             storage.write(id, record);
             ids.add(id);
         }
