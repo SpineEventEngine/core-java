@@ -27,6 +27,8 @@ import com.google.common.collect.Iterators;
 import io.spine.Identifier;
 import io.spine.core.MessageEnvelope;
 import io.spine.server.BoundedContext;
+import io.spine.server.entity.storage.Column;
+import io.spine.server.entity.storage.Columns;
 import io.spine.server.model.Model;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.Storage;
@@ -372,6 +374,18 @@ public abstract class Repository<I, E extends Entity<I, ?>>
         log().error(errorMessage, exception);
     }
 
+    /**
+     * Checks that {@link Column} definitions are correct for the {@link Entity} class
+     * managed by this repository.
+     *
+     * <p>This method relies on the {@linkplain Columns#checkColumnDefinitions(Class) Columns}
+     * utility to perform the check.
+     *
+     * <p>If {@link Column} definitions are incorrect, the {@link IllegalStateException}
+     * is thrown.
+     *
+     * @throws IllegalStateException in case entity column definitions are incorrect
+     */
     void checkEntityColumnDefinitions() {
         checkColumnDefinitions(getEntityClass());
     }

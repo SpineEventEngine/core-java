@@ -54,11 +54,11 @@ public final class EntityQueries {
     }
 
     /**
-     * Creates a new instance of {@link EntityQuery} from the given {@link EntityFilters} targeting
-     * the given Entity class.
+     * Creates a new instance of {@link EntityQuery} from the given {@link EntityFilters} and
+     * {@linkplain EntityColumnCache cached entity columns}.
      *
      * @param  entityFilters the filters for the Entities specifying the query predicate
-     * @param  knownEntityColumns   // todo update doc
+     * @param  knownEntityColumns cached entity columns to apply filter to
      * @return new instance of the {@code EntityQuery} with the specified attributes
      */
     public static <I> EntityQuery<I> from(EntityFilters entityFilters,

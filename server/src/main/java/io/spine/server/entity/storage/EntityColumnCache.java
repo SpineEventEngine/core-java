@@ -34,16 +34,30 @@ import static io.spine.validate.Validate.checkNotEmptyOrBlank;
 import static java.lang.String.format;
 import static java.util.Collections.synchronizedMap;
 
+/**
+ * A class designated to store cached {@linkplain EntityColumn entity column metadata} for a single
+ * {@link Entity} class.
+ *
+ * <p>The cache remains empty on creation. The {@linkplain EntityColumn column metadata} is retrieved
+ * on the first access to the {@linkplain EntityColumnCache cache} instance and then is stored
+ * to the {@link Map}.
+ *
+ * <p>This class relies on the {@link Columns} utility methods to perform operations
+ * on {@linkplain EntityColumn entity columns}.
+ *
+ * <p>The order in which {@link EntityColumn entity columns} are stored, is retained for
+ * the access operations.
+ *
+ * @author Dmytro Kuzmin
+ * @see EntityColumn
+ * @see Columns
+ */
 @Internal
 public class EntityColumnCache {
 
     private final Class<? extends Entity> entityClass;
     private boolean columnsCached = false;
-
-    /**
-     * EntityColumns of the managed entity class.
-     */
-    private Map<String, EntityColumn> entityColumns = synchronizedMap(
+    private Map<String, EntityColumn> entityColumnData = synchronizedMap(
             new LinkedHashMap<String, EntityColumn>());
 
     @VisibleForTesting
@@ -62,18 +76,43 @@ public class EntityColumnCache {
         return new EntityColumnCache();
     }
 
+    /**
+     * Creates an instance of {@link EntityColumnCache} for the given {@link Entity} class.
+     *
+     * <p>The {@linkplain EntityColumn column metadata} will not be retrieved and stored on creation.
+     * Instead the {@linkplain EntityColumnCache instance }will wait for the first access to it
+     * to cache {@linkplain EntityColumn entity columns}.
+     *
+     * @param entityClass the class for which {@linkplain EntityColumn entity columns} should
+     *                    be obtained and cached
+     * @return new {@link EntityColumnCache} instance
+     */
     public static EntityColumnCache initializeFor(Class<? extends Entity> entityClass) {
         checkNotNull(entityClass);
 
         return new EntityColumnCache(entityClass);
     }
 
+    /**
+     * Finds cached {@linkplain EntityColumn metadata} for the entity column with a given name.
+     *
+     * <p>If the {@linkplain EntityColumn column metadata} is not yet obtained and cached, this method
+     * will {@linkplain EntityColumnCache#ensureColumnsCached() retrieve and cache it}.
+     *
+     * <p>If there is no {@link EntityColumn column} with the given name in the {@link Entity}
+     * class managed by this {@linkplain EntityColumnCache cache}, the method will throw
+     * {@link IllegalArgumentException}.
+     *
+     * @param columnName the {@linkplain EntityColumn#getName() name} of the searched column
+     * @return {@linkplain EntityColumn found entity column}
+     * @throws IllegalArgumentException if the {@link EntityColumn} is not found
+     */
     public EntityColumn findColumn(String columnName) {
         checkNotEmptyOrBlank(columnName, "entity column name");
 
         ensureColumnsCached();
 
-        final EntityColumn entityColumn = entityColumns.get(columnName);
+        final EntityColumn entityColumn = entityColumnData.get(columnName);
 
         if (entityColumn == null) {
             throw new IllegalArgumentException(
@@ -86,11 +125,27 @@ public class EntityColumnCache {
         return entityColumn;
     }
 
+    /**
+     * Retrieves all {@linkplain EntityColumn entity columns} for the {@link Entity} class managed
+     * by this {@linkplain EntityColumnCache cache}.
+     *
+     * <p>If the {@linkplain EntityColumn column metadata} is not yet obtained and cached, this method
+     * will {@linkplain EntityColumnCache#ensureColumnsCached() retrieve and cache it}.
+     *
+     * @return {@linkplain EntityColumn entity column} {@link Collection} for the managed
+     *         {@link Entity} class
+     */
     public Collection<EntityColumn> getAllColumns() {
         ensureColumnsCached();
-        return entityColumns.values();
+        return entityColumnData.values();
     }
 
+    /**
+     * {@linkplain Columns#obtainColumns(Class) Obtains} and caches {@link EntityColumn} data if it is not
+     * yet cached.
+     *
+     * <p>If the data is already retrieved and cached, this method does nothing.
+     */
     public void ensureColumnsCached() {
         if (!columnsCached) {
             obtainAndCacheColumns();
@@ -98,19 +153,41 @@ public class EntityColumnCache {
         }
     }
 
+    /**
+     * Checks if the current {@link EntityColumnCache} instance has already retrieved and cached
+     * {@linkplain EntityColumn column metadata}.
+     *
+     * @return {@code true} if columns are cached and {@code false} otherwise
+     */
     @VisibleForTesting
     boolean isEmpty() {
-        return !columnsCached && entityColumns.isEmpty();
+        return !columnsCached && entityColumnData.isEmpty();
     }
 
+    /**
+     * {@linkplain Columns#obtainColumns(Class) Obtains} and caches {@link EntityColumn}
+     * column metadata.
+     *
+     * <p>If {@link Column} definitions are incorrect for the given {@link Entity} class this method
+     * will throw {@link IllegalStateException}.
+     *
+     * @throws IllegalStateException if entity column definitions for the managed {@link Entity}
+     * class are incorrect
+     */
     private void obtainAndCacheColumns() {
         final Collection<EntityColumn> columns = obtainColumns(entityClass);
         cacheEntityColumns(columns);
     }
 
+    /**
+     * Stores {@linkplain EntityColumn entity columns} from the {@link Iterable} to the inner
+     * {@link EntityColumnCache#entityColumnData cache}.
+     *
+     * @param columns {@linkplain EntityColumn columns} to store
+     */
     private void cacheEntityColumns(Iterable<EntityColumn> columns) {
         for (EntityColumn column : columns) {
-            entityColumns.put(column.getName(), column);
+            entityColumnData.put(column.getName(), column);
         }
     }
 }

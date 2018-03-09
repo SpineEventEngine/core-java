@@ -45,7 +45,7 @@ import static io.spine.validate.Validate.checkNotEmptyOrBlank;
 import static java.lang.String.format;
 
 /**
- * A utility for generating the {@linkplain EntityColumn columns} {@linkplain Map}.
+ * A utility class for working with {@linkplain EntityColumn entity columns}.
  *
  * <p>The methods of all {@link Entity entities} that fit
  * <a href="http://download.oracle.com/otndocs/jcp/7224-javabeans-1.01-fr-spec-oth-JSpec/">
@@ -55,12 +55,9 @@ import static java.lang.String.format;
  * <p>Inherited columns are taken into account too, but building entity hierarchies is strongly
  * discouraged.
  *
- * <p>Note that the returned type of a {@link EntityColumn} getter must either be primitive or
+ * <p>Note that the returned type of an {@link EntityColumn} getter must either be primitive or
  * serializable, otherwise a runtime exception is thrown when trying to get an instance of
  * {@link EntityColumn}.
- *
- * <p>When passing an instance of an already known {@link Entity} type,
- * the getters are retrieved from a cache and are not updated.
  *
  * @author Dmytro Dashenkov
  * @see EntityColumn
@@ -81,12 +78,32 @@ public class Columns {
     private Columns() {
     }
 
+    /**
+     * Ensures that the entity columns are valid for the specified entity class.
+     *
+     * <p>This method tries to extract {@linkplain EntityColumn entity columns} from the given class,
+     * performing all checks along the way.
+     *
+     * <p>If extraction is performed without errors, the check is passed, if not - failed.
+     *
+     * @param entityClass the class to check entity columns
+     */
     public static void checkColumnDefinitions(Class<? extends Entity> entityClass) {
         checkNotNull(entityClass);
 
         obtainColumns(entityClass);
     }
 
+    /**
+     * Retrieves an {@link EntityColumn} instance of the given name and from the given entity class.
+     *
+     * <p>If no column is found, an {@link IllegalArgumentException} is thrown.
+     *
+     * @param entityClass the class containing the {@link EntityColumn} definition
+     * @param columnName  the entity column {@linkplain EntityColumn#getName() name}
+     * @return an instance of {@link EntityColumn} with the given name
+     * @throws IllegalArgumentException if the {@link EntityColumn} is not found
+     */
     static EntityColumn findColumn(Class<? extends Entity> entityClass, String columnName) {
         checkNotNull(entityClass);
         checkNotEmptyOrBlank(columnName, "entity column name");
@@ -105,6 +122,17 @@ public class Columns {
                         columnName));
     }
 
+    /**
+     * Retrieves {@linkplain EntityColumn columns} for the given {@code Entity} class.
+     *
+     * <p>Performs checks for entity column definitions correctness along the way.
+     *
+     * <p>If check for correctness fails, throws {@link IllegalStateException}.
+     *
+     * @param entityClass the class containing the {@link EntityColumn} definition
+     * @return a {@link Collection} of {@link EntityColumn} corresponded to entity class
+     * @throws IllegalStateException if entity column definitions are incorrect
+     */
     static Collection<EntityColumn> obtainColumns(Class<? extends Entity> entityClass) {
         checkNotNull(entityClass);
 
@@ -129,6 +157,18 @@ public class Columns {
         return entityColumns;
     }
 
+    /**
+     * Generates the {@linkplain EntityColumn column} values for the given {@linkplain Entity}.
+     *
+     * <p>Retrieves {@linkplain EntityColumn columns} for the given {@code Entity} class, then generates
+     * {@linkplain MemoizedValue memoized values} from them.
+     *
+     * @param entity an {@link Entity} to get the {@linkplain EntityColumn column} values from
+     * @param <E>    the type of the {@link Entity}
+     * @return a {@link Map} of the column {@linkplain EntityColumn#getStoredName()
+     *         names for storing} to their {@linkplain MemoizedValue memoized values}
+     * @see MemoizedValue
+     */
     static <E extends Entity<?, ?>> Map<String, EntityColumn.MemoizedValue> extractColumnValues(E entity) {
         checkNotNull(entity);
 
@@ -136,6 +176,18 @@ public class Columns {
         return Columns.extractColumnValues(entity, entityColumns);
     }
 
+    /**
+     * Generates the {@linkplain EntityColumn column} values for the given {@linkplain Entity}.
+     *
+     * <p>Uses given {@linkplain EntityColumn entity columns} for the value extraction.
+     *
+     * @param entity an {@link Entity} to get the {@linkplain EntityColumn column} values from
+     * @param entityColumns {@linkplain EntityColumn entity columns} which values should be extracted
+     * @param <E>    the type of the {@link Entity}
+     * @return a {@link Map} of the column {@linkplain EntityColumn#getStoredName()
+     *         names for storing} to their {@linkplain MemoizedValue memoized values}
+     * @see MemoizedValue
+     */
     static <E extends Entity<?, ?>> Map<String, MemoizedValue> extractColumnValues(
             E entity,
             Collection<EntityColumn> entityColumns) {
@@ -152,6 +204,14 @@ public class Columns {
         return values;
     }
 
+    /**
+     * Checks if the given {@link Entity entity class} is public.
+     *
+     * <p>Outputs a message to the log if the class is non-public.
+     *
+     * @param entityClass {@link Entity entity class} to check
+     * @return {@code true} if class is public and {@code false} otherwise
+     */
     private static boolean isPublic(Class<? extends Entity> entityClass) {
         checkNotNull(entityClass);
 
@@ -164,6 +224,18 @@ public class Columns {
         return true;
     }
 
+    /**
+     * Generates {@linkplain MemoizedValue memoized values} for the given {@linkplain EntityColumn columns}
+     * of the given {@linkplain Entity}.
+     *
+     * <p>Records the result to {@link Map}.
+     *
+     * @param columns {@link Collection collection} of columns to extract values from
+     * @param entity {@link Entity} from which to extract the values
+     * @return a {@link Map} of the column {@linkplain EntityColumn#getStoredName()
+     *         names for storing} to their {@linkplain MemoizedValue memoized values}
+     * @see MemoizedValue
+     */
     private static <E extends Entity<?, ?>> Map<String, MemoizedValue> recordColumnValuesToMap(
             Collection<EntityColumn> columns,
             E entity) {
@@ -179,8 +251,11 @@ public class Columns {
     /**
      * Ensures that the specified columns have no repeated names.
      *
+     * <p>If the check fails, throws {@link IllegalStateException}.
+     *
      * @param columns     the columns to check
      * @param entityClass the entity class for the columns
+     * @throws IllegalStateException if columns contain repeated names
      */
     private static void checkRepeatedColumnNames(Iterable<EntityColumn> columns,
                                                  Class<? extends Entity> entityClass) {

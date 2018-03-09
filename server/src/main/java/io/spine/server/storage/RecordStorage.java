@@ -43,7 +43,6 @@ import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.server.entity.storage.EntityColumnCache.initializeFor;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -61,11 +60,20 @@ public abstract class RecordStorage<I>
 
     private final EntityColumnCache entityColumnCache;
 
+    /**
+     * Creates an instance of {@link RecordStorage} which doesn't support the {@link EntityColumnCache}.
+     *
+     * <p>Calls to the {@linkplain RecordStorage#getEntityColumnCache() cache retrieval method} of such
+     * storage will result into the {@link IllegalStateException}.
+     */
     protected RecordStorage(boolean multitenant) {
         super(multitenant);
         this.entityColumnCache = null;
     }
 
+    /**
+     * Creates an instance of {@link RecordStorage} which supports the {@link EntityColumnCache}.
+     */
     protected RecordStorage(boolean multitenant, Class<? extends Entity> entityClass) {
         super(multitenant);
         this.entityColumnCache = EntityColumnCache.initializeFor(entityClass);

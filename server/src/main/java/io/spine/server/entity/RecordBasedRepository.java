@@ -31,10 +31,7 @@ import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.client.EntityFilters;
 import io.spine.client.EntityId;
-import io.spine.server.entity.storage.EntityColumnCache;
-import io.spine.server.entity.storage.EntityQueries;
-import io.spine.server.entity.storage.EntityQuery;
-import io.spine.server.entity.storage.EntityRecordWithColumns;
+import io.spine.server.entity.storage.*;
 import io.spine.server.storage.RecordReadRequest;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
@@ -76,8 +73,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     /** {@inheritDoc} */
     @Override
     protected RecordStorage<I> createStorage(StorageFactory factory) {
-        final RecordStorage<I> storage = factory.createRecordStorage(getEntityClass());
-        return storage;
+        final RecordStorage<I> result = factory.createRecordStorage(getEntityClass());
+        return result;
     }
 
     /**
@@ -395,7 +392,14 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     }
 
     /**
-     * Needs its own doc.
+     * Checks that {@link Column} definitions are correct for the {@link Entity} class
+     * managed by this repository, and, in case the repository {@linkplain RecordStorage storage}
+     * supports {@link EntityColumnCache}, caches {@link EntityColumn} definitions.
+     *
+     * <p>If {@link Column} definitions are incorrect, the {@link IllegalStateException}
+     * is thrown.
+     *
+     * @throws IllegalStateException in case entity column definitions are incorrect
      */
     @Override
     void checkEntityColumnDefinitions() {

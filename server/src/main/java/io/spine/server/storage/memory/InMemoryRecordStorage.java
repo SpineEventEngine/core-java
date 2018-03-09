@@ -24,6 +24,7 @@ import com.google.common.base.Optional;
 import com.google.protobuf.FieldMask;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
+import io.spine.server.entity.storage.EntityColumnCache;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.storage.RecordStorage;
@@ -68,11 +69,20 @@ public class InMemoryRecordStorage<I> extends RecordStorage<I> {
         };
     }
 
+    /**
+     * Creates an instance of {@link InMemoryRecordStorage} which doesn't support the {@link EntityColumnCache}.
+     *
+     * <p>Calls to the {@linkplain RecordStorage#getEntityColumnCache() cache retrieval method} of such
+     * storage will result into the {@link IllegalStateException}.
+     */
     protected static <I> InMemoryRecordStorage<I> newInstance(StorageSpec<I> spec,
                                                               boolean multitenant) {
         return new InMemoryRecordStorage<>(spec, multitenant);
     }
 
+    /**
+     * Creates an instance of {@link InMemoryRecordStorage} which supports the {@link EntityColumnCache}.
+     */
     protected static <I> InMemoryRecordStorage<I> newInstance(StorageSpec<I> spec,
                                                               boolean multitenant,
                                                               Class<? extends Entity> entityClass) {

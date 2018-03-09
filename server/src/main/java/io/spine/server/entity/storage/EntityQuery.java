@@ -135,7 +135,7 @@ public final class EntityQuery<I> implements Serializable {
      * <p>The precondition for this method is that current instance
      * {@linkplain #isLifecycleAttributesSet() does not specify the values}.
      *
-     * @param knownEntityColumns // todo update doc
+     * @param knownEntityColumns cached entity columns where lifecycle flag fields can be found
      * @return new instance of {@code EntityQuery}
      */
     @Internal

@@ -52,8 +52,7 @@ public final class EntityRecordWithColumns implements Serializable {
      * Creates a new instance of the {@code EntityRecordWithColumns}.
      *
      * @param record  {@link EntityRecord} to pack
-     * @param columns {@linkplain Columns#extractColumnValues(Entity, Collection)} columns} map to
-     * pack
+     * @param columns {@linkplain Columns#extractColumnValues(Entity)} columns} map to pack
      */
     private EntityRecordWithColumns(EntityRecord record,
                                     Map<String, EntityColumn.MemoizedValue> columns) {
@@ -81,6 +80,13 @@ public final class EntityRecordWithColumns implements Serializable {
     /**
      * Creates a new instance of the {@code EntityRecordWithColumns} with
      * {@link EntityColumn} values from the given {@linkplain Entity}.
+     *
+     * <p>Extracts {@linkplain EntityColumn column} values from the given {@linkplain Entity}
+     * and then combines it with the given {@link EntityRecord}.
+     *
+     * @param record the {@link EntityRecord} to create value from
+     * @param entity the {@link Entity} to extract {@linkplain EntityColumn column} values from
+     * @return new instance of {@link EntityRecordWithColumns}
      */
     public static EntityRecordWithColumns create(EntityRecord record,
                                                  Entity entity) {
@@ -92,7 +98,17 @@ public final class EntityRecordWithColumns implements Serializable {
      * Creates a new instance of the {@code EntityRecordWithColumns} with
      * {@link EntityColumn} values from the given {@linkplain Entity}.
      *
-     * Uses provided entity columns for the value extraction.
+     * <p>Extracts {@linkplain EntityColumn column} values from the given {@linkplain Entity}
+     * and then combines it with the given {@link EntityRecord}.
+     *
+     * <p>Uses {@linkplain EntityColumnCache cached entity columns} to extract the value from
+     * the {@link Entity}. This way the {@linkplain Columns#obtainColumns(Class) column retrieval
+     * operation} can be omitted in favor of the cached results of the previous operation.
+     *
+     * @param record the {@link EntityRecord} to create value from
+     * @param entity the {@link Entity} to extract {@linkplain EntityColumn column} values from
+     * @param knownEntityColumns the cached entity columns to extract values from
+     * @return new instance of {@link EntityRecordWithColumns}
      */
     public static EntityRecordWithColumns create(EntityRecord record,
                                                  Entity entity,
@@ -164,7 +180,7 @@ public final class EntityRecordWithColumns implements Serializable {
      * by the storage.
      *
      * @return {@code true} if the object was constructed via
-     *         {@link #create(EntityRecord, Entity, EntityColumnCache)} and the entity has columns;
+     *         {@link #create(EntityRecord, Entity)} and the entity has columns;
      *         {@code false} otherwise
      */
     public boolean hasColumns() {

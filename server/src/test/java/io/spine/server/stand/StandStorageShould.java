@@ -33,6 +33,8 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.FieldMasks;
+import io.spine.server.entity.storage.EntityColumn;
+import io.spine.server.entity.storage.EntityColumnCache;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.RecordStorageShould;
@@ -87,6 +89,12 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
         return project;
     }
 
+    /**
+     * Override example {@link EntityRecordWithColumns} creation method so that test {@link StandStorage}
+     * does not rely on the {@link EntityColumnCache} for the record creation. This is required because
+     * {@link EntityColumn entity columns} and thus {@link EntityColumnCache} are not supported by the
+     * {@link StandStorage}.
+     */
     @Override
     protected EntityRecordWithColumns createRecordWithColumns(EntityRecord record,
                                                               Entity<AggregateStateId, ?> testEntity,
