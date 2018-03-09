@@ -25,11 +25,14 @@ import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.Identifier;
+import io.spine.annotation.Internal;
 import io.spine.protobuf.AnyPacker;
+import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.FieldMasks;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.storage.EntityColumn;
+import io.spine.server.entity.storage.EntityColumnCache;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.stand.AggregateStateId;
@@ -40,6 +43,7 @@ import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.server.entity.storage.EntityColumnCache.initializeFor;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -54,6 +58,8 @@ public abstract class RecordStorage<I>
         extends AbstractStorage<I, EntityRecord, RecordReadRequest<I>>
         implements StorageWithLifecycleFlags<I, EntityRecord, RecordReadRequest<I>>,
                    BulkStorageOperationsMixin<I, EntityRecord> {
+
+    private EntityColumnCache entityColumnCache;
 
     protected RecordStorage(boolean multitenant) {
         super(multitenant);
@@ -251,6 +257,19 @@ public abstract class RecordStorage<I>
         checkNotNull(fieldMask);
 
         return readAllRecords(query, fieldMask);
+    }
+
+    @Internal
+    public void createEntityColumnCache(Class<? extends Entity> entityClass) {
+        if (this.entityColumnCache == null) {
+
+            this.entityColumnCache = initializeFor(entityClass);
+        }
+    }
+
+    @Internal
+    public EntityColumnCache getEntityColumnCache() {
+        return entityColumnCache;
     }
 
     /*

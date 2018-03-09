@@ -27,10 +27,12 @@ import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.server.entity.storage.Columns.extractColumnValues;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -50,7 +52,8 @@ public final class EntityRecordWithColumns implements Serializable {
      * Creates a new instance of the {@code EntityRecordWithColumns}.
      *
      * @param record  {@link EntityRecord} to pack
-     * @param columns {@linkplain Columns#from(Entity) columns} map to pack
+     * @param columns {@linkplain Columns#extractColumnValues(Entity, Collection)} columns} map to
+     * pack
      */
     private EntityRecordWithColumns(EntityRecord record,
                                     Map<String, EntityColumn.MemoizedValue> columns) {
@@ -79,8 +82,11 @@ public final class EntityRecordWithColumns implements Serializable {
      * Creates a new instance of the {@code EntityRecordWithColumns} with
      * {@link EntityColumn} values from the given {@linkplain Entity}.
      */
-    public static EntityRecordWithColumns create(EntityRecord record, Entity entity) {
-        final Map<String, EntityColumn.MemoizedValue> columns = Columns.from(entity);
+    public static EntityRecordWithColumns create(EntityRecord record,
+                                                 Entity entity,
+                                                 EntityColumnCache entityColumns) {
+        final Map<String, EntityColumn.MemoizedValue> columns = extractColumnValues(entity,
+                entityColumns.getAllColumns());
         return of(record, columns);
     }
 
@@ -145,8 +151,9 @@ public final class EntityRecordWithColumns implements Serializable {
      * <p>If returns {@code false}, the {@linkplain EntityColumn columns} are not considered
      * by the storage.
      *
-     * @return {@code true} if the object was constructed via {@link #create(EntityRecord, Entity)}
-     *         and the entity has columns; {@code false} otherwise
+     * @return {@code true} if the object was constructed via
+     *         {@link #create(EntityRecord, Entity, EntityColumnCache)} and the entity has columns;
+     *         {@code false} otherwise
      */
     public boolean hasColumns() {
         return hasStorageFields;

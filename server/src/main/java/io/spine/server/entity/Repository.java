@@ -45,6 +45,7 @@ import java.util.Iterator;
 
 import static com.google.common.base.Preconditions.checkState;
 import static io.spine.server.entity.Repository.GenericParameter.ENTITY;
+import static io.spine.server.entity.storage.Columns.checkColumnDefinitions;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static io.spine.util.Exceptions.unsupported;
 import static java.lang.String.format;
@@ -369,6 +370,10 @@ public abstract class Repository<I, E extends Entity<I, ?>>
         final String messageId = Stringifiers.toString(envelope.getId());
         final String errorMessage = format(msgFormat, messageClass, messageId);
         log().error(errorMessage, exception);
+    }
+
+    void checkEntityColumnDefinitions() {
+        checkColumnDefinitions(getEntityClass());
     }
 
     /**

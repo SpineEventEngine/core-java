@@ -39,7 +39,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Maps.filterValues;
 import static com.google.common.collect.Maps.newHashMap;
-import static io.spine.server.entity.storage.Columns.checkColumnDefinitions;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
@@ -74,7 +73,7 @@ public final class VisibilityGuard {
         final EntityClass<?> entityClass = repository.entityClass();
         final Class<? extends Message> stateClass = entityClass.getStateClass();
         checkNotAlreadyRegistered(stateClass);
-        checkColumnDefinitions(entityClass);
+        repository.checkEntityColumnDefinitions();
         repositories.put(stateClass, new RepositoryAccess(repository));
     }
 

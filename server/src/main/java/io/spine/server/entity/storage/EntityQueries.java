@@ -30,7 +30,6 @@ import io.spine.client.CompositeColumnFilter.CompositeOperator;
 import io.spine.client.EntityFilters;
 import io.spine.client.EntityId;
 import io.spine.client.EntityIdFilter;
-import io.spine.server.entity.Entity;
 
 import java.util.Collection;
 import java.util.LinkedList;
@@ -40,7 +39,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.HashMultimap.create;
 import static com.google.common.primitives.Primitives.wrap;
 import static io.spine.protobuf.TypeConverter.toObject;
-import static io.spine.server.entity.storage.Columns.findColumn;
 
 /**
  * A utility class for working with {@link EntityQuery} instances.
@@ -60,15 +58,15 @@ public final class EntityQueries {
      * the given Entity class.
      *
      * @param  entityFilters the filters for the Entities specifying the query predicate
-     * @param  entityClass   the Entity class specifying the query target
+     * @param  knownEntityColumns   // todo update doc
      * @return new instance of the {@code EntityQuery} with the specified attributes
      */
     public static <I> EntityQuery<I> from(EntityFilters entityFilters,
-                                          Class<? extends Entity> entityClass) {
+                                          EntityColumnCache knownEntityColumns) {
         checkNotNull(entityFilters);
-        checkNotNull(entityClass);
+        checkNotNull(knownEntityColumns);
 
-        final QueryParameters queryParams = toQueryParams(entityFilters, entityClass);
+        final QueryParameters queryParams = toQueryParams(entityFilters, knownEntityColumns);
         final Collection<I> ids = toGenericIdValues(entityFilters);
 
         final EntityQuery<I> result = EntityQuery.of(ids, queryParams);
@@ -76,12 +74,12 @@ public final class EntityQueries {
     }
 
     private static QueryParameters toQueryParams(EntityFilters entityFilters,
-                                                 Class<? extends Entity> entityClass) {
+                                                 EntityColumnCache knownEntityColumns) {
         final QueryParameters.Builder builder = QueryParameters.newBuilder();
 
         for (CompositeColumnFilter filter : entityFilters.getFilterList()) {
             final Multimap<EntityColumn, ColumnFilter> columnFilters =
-                    splitFilters(filter, entityClass);
+                    splitFilters(filter, knownEntityColumns);
             final CompositeOperator operator = filter.getOperator();
             final CompositeQueryParameter parameter =
                     CompositeQueryParameter.from(columnFilters, operator);
@@ -92,11 +90,11 @@ public final class EntityQueries {
 
     private static Multimap<EntityColumn, ColumnFilter> splitFilters(
             CompositeColumnFilter filter,
-            Class<? extends Entity> entityClass) {
+            EntityColumnCache knownEntityColumns) {
         final Multimap<EntityColumn, ColumnFilter> columnFilters =
                 create(filter.getFilterCount(), 1);
         for (ColumnFilter columnFilter : filter.getFilterList()) {
-            final EntityColumn column = findColumn(entityClass, columnFilter.getColumnName());
+            final EntityColumn column = knownEntityColumns.findColumn(columnFilter.getColumnName());
             checkFilterType(column, columnFilter);
             columnFilters.put(column, columnFilter);
         }

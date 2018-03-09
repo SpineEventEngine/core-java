@@ -34,6 +34,7 @@ import io.spine.client.EntityId;
 import io.spine.server.entity.storage.EntityQueries;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
+import io.spine.server.entity.storage.EntityColumnCache;
 import io.spine.server.storage.RecordReadRequest;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
@@ -75,8 +76,9 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     /** {@inheritDoc} */
     @Override
     protected RecordStorage<I> createStorage(StorageFactory factory) {
-        final RecordStorage<I> result = factory.createRecordStorage(getEntityClass());
-        return result;
+        final RecordStorage<I> storage = factory.createRecordStorage(getEntityClass());
+        storage.createEntityColumnCache(getEntityClass());
+        return storage;
     }
 
     /**
@@ -313,7 +315,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         checkNotNull(filters);
         checkNotNull(fieldMask);
 
-        final EntityQuery<I> entityQuery = EntityQueries.from(filters, getEntityClass());
+        final EntityQuery<I> entityQuery = EntityQueries.from(filters, retrieveEntityColumnCache());
         final EntityQuery<I> completeQuery = toCompleteQuery(entityQuery);
         final Iterator<EntityRecord> records = recordStorage().readAll(completeQuery, fieldMask);
         final Function<EntityRecord, E> toEntity = entityConverter().reverse();
@@ -333,7 +335,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         checkNotNull(filters);
         checkNotNull(fieldMask);
 
-        final EntityQuery<I> entityQuery = EntityQueries.from(filters, getEntityClass());
+        final EntityQuery<I> entityQuery = EntityQueries.from(filters, retrieveEntityColumnCache());
         final EntityQuery<I> completeQuery = toCompleteQuery(entityQuery);
         return recordStorage().readAll(completeQuery, fieldMask);
     }
@@ -375,7 +377,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
             @SuppressWarnings("unchecked") // Checked at runtime
             final Class<? extends EntityWithLifecycle<I, ?>> cls =
                     (Class<? extends EntityWithLifecycle<I, ?>>) getEntityClass();
-            completeQuery = src.withLifecycleFlags(cls);
+            completeQuery = src.withLifecycleFlags(retrieveEntityColumnCache());
         } else {
             completeQuery = src;
         }
@@ -389,14 +391,26 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         final EntityRecord entityRecord = entityConverter().convert(entity);
         checkNotNull(entityRecord);
         final EntityRecordWithColumns recordWithColumns =
-                EntityRecordWithColumns.create(entityRecord, entity);
+                EntityRecordWithColumns.create(entityRecord, entity, retrieveEntityColumnCache());
         return recordWithColumns;
+    }
+
+    /**
+     * Needs its own doc.
+     */
+    @Override
+    void checkEntityColumnDefinitions() {
+        retrieveEntityColumnCache().ensureColumnsCached();
     }
 
     private E toEntity(EntityRecord record) {
         final E result = entityConverter().reverse()
                                           .convert(record);
         return result;
+    }
+
+    private EntityColumnCache retrieveEntityColumnCache() {
+        return recordStorage().getEntityColumnCache();
     }
 
     /**
