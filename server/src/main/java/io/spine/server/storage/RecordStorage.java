@@ -266,6 +266,11 @@ public abstract class RecordStorage<I>
     }
 
     @Internal
+    public boolean supportsEntityColumnCache() {
+        return entityColumnCache != null;
+    }
+
+    @Internal
     public EntityColumnCache getEntityColumnCache() {
         if (entityColumnCache == null) {
             throw new IllegalStateException("This storage does not support entity column cache.");

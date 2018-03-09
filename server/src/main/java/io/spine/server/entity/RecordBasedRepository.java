@@ -399,7 +399,11 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      */
     @Override
     void checkEntityColumnDefinitions() {
-        retrieveEntityColumnCache().ensureColumnsCached();
+        if (recordStorage().supportsEntityColumnCache()) {
+            retrieveEntityColumnCache().ensureColumnsCached();
+        } else {
+            super.checkEntityColumnDefinitions();
+        }
     }
 
     private E toEntity(EntityRecord record) {
