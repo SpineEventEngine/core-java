@@ -43,6 +43,7 @@ import static io.spine.client.ColumnFilters.eq;
 import static io.spine.client.ColumnFilters.gt;
 import static io.spine.client.ColumnFilters.le;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
+import static io.spine.server.entity.storage.Columns.findColumn;
 import static io.spine.server.entity.storage.CompositeQueryParameter.from;
 import static io.spine.server.entity.storage.QueryParameters.newBuilder;
 import static io.spine.server.storage.EntityField.version;
@@ -62,7 +63,7 @@ public class QueryParametersShould {
     @Test
     public void be_serializable() {
         final String columnName = version.name();
-        final EntityColumn column = Columns.findColumn(VersionableEntity.class, columnName);
+        final EntityColumn column = findColumn(VersionableEntity.class, columnName);
         final ColumnFilter filter = ColumnFilters.eq(columnName, 1);
         final CompositeQueryParameter parameter = aggregatingParameter(column, filter);
         final QueryParameters parameters = QueryParameters.newBuilder()

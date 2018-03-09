@@ -48,6 +48,7 @@ import static com.google.common.testing.SerializableTester.reserializeAndAssert;
 import static io.spine.client.ColumnFilter.Operator.EQUAL;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
 import static io.spine.protobuf.TypeConverter.toAny;
+import static io.spine.server.entity.storage.EntityColumnCache.initializeFor;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
 import static io.spine.test.Verify.assertContains;
 import static java.util.Collections.emptyList;
@@ -64,7 +65,8 @@ public class EntityQueryShould {
     @Test
     public void be_serializable() {
         final String columnName = deleted.name();
-        final EntityColumn column = Columns.findColumn(EntityWithLifecycle.class, columnName);
+        final EntityColumnCache columnCache = initializeFor(EntityWithLifecycle.class);
+        final EntityColumn column = columnCache.findColumn(columnName);
         final ColumnFilter filter = ColumnFilters.eq(columnName, false);
         final Multimap<EntityColumn, ColumnFilter> filters = of(column, filter);
         final CompositeQueryParameter parameter = CompositeQueryParameter.from(filters, ALL);
@@ -115,7 +117,8 @@ public class EntityQueryShould {
 
     @Test(expected = IllegalStateException.class)
     public void fail_to_append_lifecycle_columns_if_already_contains() {
-        final EntityColumn column = Columns.findColumn(EntityWithLifecycle.class, deleted.name());
+        final EntityColumnCache columnCache = initializeFor(EntityWithLifecycle.class);
+        final EntityColumn column = columnCache.findColumn(deleted.name());
         final CompositeQueryParameter queryParameter = CompositeQueryParameter.from(
                 ImmutableMultimap.of(column, ColumnFilter.getDefaultInstance()),
                 ALL
@@ -124,7 +127,7 @@ public class EntityQueryShould {
                                                           .add(queryParameter)
                                                           .build();
         final EntityQuery<String> query = EntityQuery.of(Collections.<String>emptySet(), parameters);
-        query.withLifecycleFlags(TestEntity.class);
+        query.withLifecycleFlags(columnCache);
     }
 
     /**

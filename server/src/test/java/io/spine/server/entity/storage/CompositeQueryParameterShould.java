@@ -37,6 +37,7 @@ import static io.spine.client.ColumnFilters.ge;
 import static io.spine.client.ColumnFilters.lt;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.CCF_CO_UNDEFINED;
+import static io.spine.server.entity.storage.Columns.findColumn;
 import static io.spine.server.entity.storage.CompositeQueryParameter.from;
 import static io.spine.server.storage.EntityField.version;
 import static io.spine.server.storage.LifecycleFlagField.archived;
@@ -75,9 +76,9 @@ public class CompositeQueryParameterShould {
         final String deletedColumnName = deleted.name();
         final String versionColumnName = version.name();
 
-        final EntityColumn archivedColumn = Columns.findColumn(cls, archivedColumnName);
-        final EntityColumn deletedColumn = Columns.findColumn(cls, deletedColumnName);
-        final EntityColumn versionColumn = Columns.findColumn(cls, versionColumnName);
+        final EntityColumn archivedColumn = findColumn(cls, archivedColumnName);
+        final EntityColumn deletedColumn = findColumn(cls, deletedColumnName);
+        final EntityColumn versionColumn = findColumn(cls, versionColumnName);
 
         final ColumnFilter archived = eq(archivedColumnName, true);
         final ColumnFilter deleted = eq(archivedColumnName, false);
@@ -112,9 +113,9 @@ public class CompositeQueryParameterShould {
         final String deletedColumnName = deleted.name();
         final String versionColumnName = version.name();
 
-        final EntityColumn archivedColumn = Columns.findColumn(cls, archivedColumnName);
-        final EntityColumn deletedColumn = Columns.findColumn(cls, deletedColumnName);
-        final EntityColumn versionColumn = Columns.findColumn(cls, versionColumnName);
+        final EntityColumn archivedColumn = findColumn(cls, archivedColumnName);
+        final EntityColumn deletedColumn = findColumn(cls, deletedColumnName);
+        final EntityColumn versionColumn = findColumn(cls, versionColumnName);
 
         final ColumnFilter archived = eq(archivedColumnName, false);
         final ColumnFilter deleted = eq(archivedColumnName, false);

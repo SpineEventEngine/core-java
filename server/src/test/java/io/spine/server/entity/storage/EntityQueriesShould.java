@@ -69,6 +69,7 @@ public class EntityQueriesShould {
     public void not_accept_nulls() {
         new NullPointerTester()
                 .setDefault(EntityFilters.class, EntityFilters.getDefaultInstance())
+                .setDefault(EntityColumnCache.class, EntityColumnCache.getEmptyInstance())
                 .testAllPublicStaticMethods(EntityQueries.class);
     }
 
@@ -80,15 +81,14 @@ public class EntityQueriesShould {
         final EntityFilters filters = EntityFilters.newBuilder()
                                                    .addFilter(compositeFilter)
                                                    .build();
-        EntityQueries.from(filters, AbstractVersionableEntity.class);
+        createEntityQuery(filters, AbstractVersionableEntity.class);
     }
 
 
     @Test
     public void construct_empty_queries() {
         final EntityFilters filters = EntityFilters.getDefaultInstance();
-        final Class<? extends Entity> entityClass = AbstractEntity.class;
-        final EntityQuery<?> query = EntityQueries.from(filters, entityClass);
+        final EntityQuery<?> query = createEntityQuery(filters, AbstractEntity.class);
         assertNotNull(query);
         assertEquals(0, size(query.getParameters().iterator()));
         assertTrue(query.getIds().isEmpty());
@@ -122,8 +122,7 @@ public class EntityQueriesShould {
                                                    .setIdFilter(idFilter)
                                                    .addFilter(aggregatingFilter)
                                                    .build();
-        final Class<? extends Entity> entityClass = AbstractVersionableEntity.class;
-        final EntityQuery<?> query = EntityQueries.from(filters, entityClass);
+        final EntityQuery<?> query = createEntityQuery(filters, AbstractVersionableEntity.class);
         assertNotNull(query);
 
         final Collection<?> ids = query.getIds();
@@ -140,5 +139,10 @@ public class EntityQueriesShould {
         assertEquals(EITHER, singleParam.getOperator());
         assertContains(versionFilter, columnFilters);
         assertContains(archivedFilter, columnFilters);
+    }
+
+    private static EntityQuery<?> createEntityQuery(EntityFilters filters, Class<? extends Entity> entityClass) {
+        final EntityColumnCache columnCache = EntityColumnCache.initializeFor(entityClass);
+        return EntityQueries.from(filters, columnCache);
     }
 }

@@ -37,7 +37,9 @@ import java.util.Collections;
 import java.util.Map;
 
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
+import static io.spine.server.entity.storage.Columns.extractColumnValues;
 import static io.spine.server.entity.storage.EntityColumn.MemoizedValue;
+import static io.spine.server.entity.storage.EntityColumnCache.initializeFor;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.of;
 import static io.spine.server.storage.EntityField.version;
@@ -61,7 +63,8 @@ public class EntityRecordWithColumnsShould {
                                                     .withVersion(1)
                                                     .build();
         final String columnName = version.name();
-        final EntityColumn column = Columns.findColumn(VersionableEntity.class, columnName);
+        final EntityColumnCache columnCache = initializeFor(VersionableEntity.class);
+        final EntityColumn column = columnCache.findColumn(columnName);
         final MemoizedValue value = column.memoizeFor(entity);
 
         final Map<String, MemoizedValue> columns = singletonMap(columnName, value);
@@ -127,10 +130,13 @@ public class EntityRecordWithColumnsShould {
     @Test
     public void not_have_columns_if_values_list_is_empty() {
         final EntityWithoutColumns entity = new EntityWithoutColumns("ID");
-        final Map<String, MemoizedValue> columnValues = Columns.from(entity);
+        final Class<? extends EntityWithoutColumns> entityClass = entity.getClass();
+        final EntityColumnCache columnCache = initializeFor(entityClass);
+        final Collection<EntityColumn> entityColumns = columnCache.getAllColumns();
+        final Map<String, MemoizedValue> columnValues = extractColumnValues(entity, entityColumns);
         assertTrue(columnValues.isEmpty());
 
-        final EntityRecordWithColumns record = create(EntityRecord.getDefaultInstance(), entity);
+        final EntityRecordWithColumns record = create(EntityRecord.getDefaultInstance(), entity, columnCache);
         assertFalse(record.hasColumns());
     }
 
