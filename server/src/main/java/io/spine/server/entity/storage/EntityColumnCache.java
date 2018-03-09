@@ -57,7 +57,15 @@ public class EntityColumnCache {
 
     private final Class<? extends Entity> entityClass;
     private boolean columnsCached = false;
-    private Map<String, EntityColumn> entityColumnData = synchronizedMap(
+
+    /**
+     * A one to one container of the {@link EntityColumn} name and its data.
+     *
+     * <p>The data is stored this way for convenient querying of the specific columns.
+     *
+     * <p>This contained is mutable and thread safe.
+     */
+    private final Map<String, EntityColumn> entityColumnData = synchronizedMap(
             new LinkedHashMap<String, EntityColumn>());
 
     @VisibleForTesting
