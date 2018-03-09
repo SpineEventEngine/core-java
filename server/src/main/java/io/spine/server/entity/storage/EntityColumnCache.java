@@ -61,6 +61,8 @@ public class EntityColumnCache {
     }
 
     public static EntityColumnCache initializeFor(Class<? extends Entity> entityClass) {
+        checkNotNull(entityClass);
+
         return new EntityColumnCache(entityClass);
     }
 
@@ -92,6 +94,11 @@ public class EntityColumnCache {
             obtainAndCacheColumns();
             columnsCached = true;
         }
+    }
+
+    @VisibleForTesting
+    boolean isEmpty() {
+        return !columnsCached && entityColumns.isEmpty();
     }
 
     private void obtainAndCacheColumns() {
