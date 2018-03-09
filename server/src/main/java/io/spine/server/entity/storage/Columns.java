@@ -229,7 +229,7 @@ public class Columns {
 
     /**
      * Generates {@linkplain MemoizedValue memoized values} for the given {@linkplain EntityColumn columns}
-     * of the given {@linkplain Entity}.
+     * of the given {@link Entity}.
      *
      * <p>Records the result to {@link Map}.
      *
