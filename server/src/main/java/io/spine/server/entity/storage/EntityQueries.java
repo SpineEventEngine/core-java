@@ -58,15 +58,15 @@ public final class EntityQueries {
      * {@linkplain EntityColumnCache cached entity columns}.
      *
      * @param  entityFilters the filters for the Entities specifying the query predicate
-     * @param  knownEntityColumns cached entity columns to apply filter to
+     * @param  entityColumns cached entity columns to apply filter to
      * @return new instance of the {@code EntityQuery} with the specified attributes
      */
     public static <I> EntityQuery<I> from(EntityFilters entityFilters,
-                                          EntityColumnCache knownEntityColumns) {
+                                          EntityColumnCache entityColumns) {
         checkNotNull(entityFilters);
-        checkNotNull(knownEntityColumns);
+        checkNotNull(entityColumns);
 
-        final QueryParameters queryParams = toQueryParams(entityFilters, knownEntityColumns);
+        final QueryParameters queryParams = toQueryParams(entityFilters, entityColumns);
         final Collection<I> ids = toGenericIdValues(entityFilters);
 
         final EntityQuery<I> result = EntityQuery.of(ids, queryParams);
@@ -74,12 +74,12 @@ public final class EntityQueries {
     }
 
     private static QueryParameters toQueryParams(EntityFilters entityFilters,
-                                                 EntityColumnCache knownEntityColumns) {
+                                                 EntityColumnCache entityColumns) {
         final QueryParameters.Builder builder = QueryParameters.newBuilder();
 
         for (CompositeColumnFilter filter : entityFilters.getFilterList()) {
             final Multimap<EntityColumn, ColumnFilter> columnFilters =
-                    splitFilters(filter, knownEntityColumns);
+                    splitFilters(filter, entityColumns);
             final CompositeOperator operator = filter.getOperator();
             final CompositeQueryParameter parameter =
                     CompositeQueryParameter.from(columnFilters, operator);
@@ -90,11 +90,11 @@ public final class EntityQueries {
 
     private static Multimap<EntityColumn, ColumnFilter> splitFilters(
             CompositeColumnFilter filter,
-            EntityColumnCache knownEntityColumns) {
+            EntityColumnCache entityColumns) {
         final Multimap<EntityColumn, ColumnFilter> columnFilters =
                 create(filter.getFilterCount(), 1);
         for (ColumnFilter columnFilter : filter.getFilterList()) {
-            final EntityColumn column = knownEntityColumns.findColumn(columnFilter.getColumnName());
+            final EntityColumn column = entityColumns.findColumn(columnFilter.getColumnName());
             checkFilterType(column, columnFilter);
             columnFilters.put(column, columnFilter);
         }
