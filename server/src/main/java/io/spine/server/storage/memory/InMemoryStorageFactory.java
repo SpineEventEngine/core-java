@@ -103,7 +103,7 @@ public class InMemoryStorageFactory implements StorageFactory {
         @SuppressWarnings("unchecked") // The cast is protected by generic params of the method.
         final Class<I> idClass = (Class<I>) modelClass.getIdClass();
         final StorageSpec<I> spec = StorageSpec.of(boundedContextName, typeUrl, idClass);
-        return InMemoryRecordStorage.newInstance(spec, isMultitenant());
+        return InMemoryRecordStorage.newInstance(spec, isMultitenant(), entityClass);
     }
 
     @Override
@@ -119,7 +119,7 @@ public class InMemoryStorageFactory implements StorageFactory {
 
         final boolean multitenant = isMultitenant();
         final InMemoryRecordStorage<I> entityStorage =
-                InMemoryRecordStorage.newInstance(spec, multitenant);
+                InMemoryRecordStorage.newInstance(spec, multitenant, projectionClass);
         return InMemoryProjectionStorage.newInstance(entityStorage);
     }
 

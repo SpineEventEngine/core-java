@@ -59,10 +59,16 @@ public abstract class RecordStorage<I>
         implements StorageWithLifecycleFlags<I, EntityRecord, RecordReadRequest<I>>,
                    BulkStorageOperationsMixin<I, EntityRecord> {
 
-    private EntityColumnCache entityColumnCache;
+    private final EntityColumnCache entityColumnCache;
 
     protected RecordStorage(boolean multitenant) {
         super(multitenant);
+        this.entityColumnCache = null;
+    }
+
+    protected RecordStorage(boolean multitenant, Class<? extends Entity> entityClass) {
+        super(multitenant);
+        this.entityColumnCache = EntityColumnCache.initializeFor(entityClass);
     }
 
     /**
@@ -260,15 +266,11 @@ public abstract class RecordStorage<I>
     }
 
     @Internal
-    public void createEntityColumnCache(Class<? extends Entity> entityClass) {
-        if (this.entityColumnCache == null) {
-
-            this.entityColumnCache = initializeFor(entityClass);
-        }
-    }
-
-    @Internal
     public EntityColumnCache getEntityColumnCache() {
+        if (entityColumnCache == null) {
+            throw new IllegalStateException("This storage does not support entity column cache.");
+        }
+
         return entityColumnCache;
     }
 

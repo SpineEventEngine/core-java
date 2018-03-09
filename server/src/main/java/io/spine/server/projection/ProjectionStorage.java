@@ -25,6 +25,7 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.SPI;
 import io.spine.server.entity.EntityRecord;
+import io.spine.server.entity.storage.EntityColumnCache;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.storage.RecordReadRequest;
@@ -48,6 +49,11 @@ public abstract class ProjectionStorage<I> extends RecordStorage<I> {
 
     protected ProjectionStorage(boolean multitenant) {
         super(multitenant);
+    }
+
+    @Override
+    public EntityColumnCache getEntityColumnCache() {
+        return recordStorage().getEntityColumnCache();
     }
 
     @Override

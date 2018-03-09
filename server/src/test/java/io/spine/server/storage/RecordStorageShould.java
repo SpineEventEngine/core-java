@@ -405,7 +405,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final I id = newId();
         final EntityRecord record = newStorageRecord(id);
         final TestCounterEntity<?> testEntity = new TestCounterEntity<>(id);
-        final S storage = getStorageWithColumnCache();
+        final S storage = getStorage();
         final EntityRecordWithColumns recordWithColumns = create(record, testEntity,
                                                                  storage.getEntityColumnCache());
         storage.write(id, recordWithColumns);
@@ -438,7 +438,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
                                                    .addFilter(aggregatingFilter)
                                                    .build();
 
-        final RecordStorage<I> storage = getStorageWithColumnCache();
+        final RecordStorage<I> storage = getStorage();
 
         final EntityQuery<I> query = EntityQueries.from(filters, storage.getEntityColumnCache());
         final I idMatching = newId();
@@ -494,7 +494,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
                                                    .addFilter(aggregatingFilter)
                                                    .build();
 
-        final RecordStorage<I> storage = getStorageWithColumnCache();
+        final RecordStorage<I> storage = getStorage();
 
         final EntityQuery<I> query = EntityQueries.from(filters, storage.getEntityColumnCache());
 
@@ -536,7 +536,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final EntityRecord notFineRecord1 = newStorageRecord(idWrong1, newState(idWrong1));
         final EntityRecord notFineRecord2 = newStorageRecord(idWrong2, newState(idWrong2));
 
-        final RecordStorage<I> storage = getStorageWithColumnCache();
+        final RecordStorage<I> storage = getStorage();
 
         final EntityRecordWithColumns recordRight = create(fineRecord, matchingEntity, storage.getEntityColumnCache());
         final EntityRecordWithColumns recordWrong1 = create(notFineRecord1, wrongEntity1,
@@ -582,7 +582,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final TestCounterEntity<I> archivedEntity = new TestCounterEntity<>(archivedRecordId);
         archivedEntity.archive();
 
-        final RecordStorage<I> storage = getStorageWithColumnCache();
+        final RecordStorage<I> storage = getStorage();
         storage.write(activeRecordId, create(activeRecord, activeEntity, storage.getEntityColumnCache()));
         storage.write(archivedRecordId, create(archivedRecord, archivedEntity, storage.getEntityColumnCache()));
 
@@ -610,7 +610,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final EntityRecord archivedRecord = newStorageRecord(archivedId, archivedEntity.getState());
         final EntityRecord deletedRecord = newStorageRecord(deletedId, deletedEntity.getState());
 
-        final RecordStorage<I> storage = getStorageWithColumnCache();
+        final RecordStorage<I> storage = getStorage();
         storage.write(deletedId, create(deletedRecord, deletedEntity, storage.getEntityColumnCache()));
         storage.write(activeId, create(activeRecord, activeEntity, storage.getEntityColumnCache()));
         storage.write(archivedId, create(archivedRecord, archivedEntity, storage.getEntityColumnCache()));
@@ -656,7 +656,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
                                                    .setIdFilter(idFilter)
                                                    .addFilter(columnFilter)
                                                    .build();
-        final RecordStorage<I> storage = getStorageWithColumnCache();
+        final RecordStorage<I> storage = getStorage();
         final EntityQuery<I> query = EntityQueries.<I>from(filters, storage.getEntityColumnCache())
                                                   .withLifecycleFlags(storage.getEntityColumnCache());
         final Iterator<EntityRecord> read = storage.readAll(query, FieldMask.getDefaultInstance());
@@ -709,15 +709,9 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     }
 
     private void write(Entity<I, ?> entity) {
-        final RecordStorage<I> storage = getStorageWithColumnCache();
+        final RecordStorage<I> storage = getStorage();
         final EntityRecord record = newStorageRecord(entity.getId(), entity.getState());
         storage.write(entity.getId(), create(record, entity, storage.getEntityColumnCache()));
-    }
-
-    private S getStorageWithColumnCache() {
-        final S storage = getStorage();
-        storage.createEntityColumnCache(getTestEntityClass());
-        return storage;
     }
 
     @SuppressWarnings("unused") // Reflective access

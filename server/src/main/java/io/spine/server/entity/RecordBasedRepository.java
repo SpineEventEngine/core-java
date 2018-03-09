@@ -31,10 +31,10 @@ import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.client.EntityFilters;
 import io.spine.client.EntityId;
+import io.spine.server.entity.storage.EntityColumnCache;
 import io.spine.server.entity.storage.EntityQueries;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
-import io.spine.server.entity.storage.EntityColumnCache;
 import io.spine.server.storage.RecordReadRequest;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
@@ -77,7 +77,6 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     @Override
     protected RecordStorage<I> createStorage(StorageFactory factory) {
         final RecordStorage<I> storage = factory.createRecordStorage(getEntityClass());
-        storage.createEntityColumnCache(getEntityClass());
         return storage;
     }
 

@@ -167,7 +167,6 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         final ProjectionStorage<I> projectionStorage =
                 factory.createProjectionStorage(projectionClass);
         this.recordStorage = projectionStorage.recordStorage();
-        this.recordStorage.createEntityColumnCache(projectionClass);
         return projectionStorage;
     }
 
