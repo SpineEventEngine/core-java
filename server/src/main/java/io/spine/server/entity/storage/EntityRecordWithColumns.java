@@ -27,7 +27,6 @@ import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
