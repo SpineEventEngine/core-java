@@ -105,8 +105,8 @@ public final class EntityRecordWithColumns implements Serializable {
      * the {@link Entity}. This way the {@linkplain Columns#obtainColumns(Class) column retrieval
      * operation} can be omitted in favor of the cached results of the previous operation.
      *
-     * @param record the {@link EntityRecord} to create value from
-     * @param entity the {@link Entity} to extract {@linkplain EntityColumn column} values from
+     * @param record        the {@link EntityRecord} to create value from
+     * @param entity        the {@link Entity} to extract {@linkplain EntityColumn column} values from
      * @param entityColumns the cached entity columns to extract values from
      * @return new instance of {@link EntityRecordWithColumns}
      */
