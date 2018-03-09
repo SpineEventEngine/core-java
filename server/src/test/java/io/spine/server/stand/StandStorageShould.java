@@ -30,8 +30,11 @@ import com.google.protobuf.Message;
 import io.spine.Identifier;
 import io.spine.core.given.GivenVersion;
 import io.spine.protobuf.AnyPacker;
+import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.FieldMasks;
+import io.spine.server.entity.storage.EntityRecordWithColumns;
+import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.RecordStorageShould;
 import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectId;
@@ -48,6 +51,7 @@ import java.util.List;
 import java.util.Set;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
 import static io.spine.test.Tests.assertMatchesMask;
 import static io.spine.test.Verify.assertContains;
 import static io.spine.test.Verify.assertSize;
@@ -81,6 +85,13 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
                                        .addTask(Task.getDefaultInstance())
                                        .build();
         return project;
+    }
+
+    @Override
+    protected EntityRecordWithColumns createRecordWithColumns(EntityRecord record,
+                                                              Entity<AggregateStateId, ?> testEntity,
+                                                              RecordStorage<AggregateStateId> storage) {
+        return create(record, testEntity);
     }
 
     @Test
@@ -198,12 +209,6 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
     @SuppressWarnings("NoopMethodInAbstractClass") // Overrides the behavior for all the inheritors.
     @Override
     public void read_both_by_columns_and_IDs() {
-        // Stand storage does not support entity columns.
-    }
-
-    @SuppressWarnings("NoopMethodInAbstractClass") // Overrides the behavior for all the inheritors.
-    @Override
-    public void write_record_with_columns() {
         // Stand storage does not support entity columns.
     }
 

@@ -83,10 +83,22 @@ public final class EntityRecordWithColumns implements Serializable {
      * {@link EntityColumn} values from the given {@linkplain Entity}.
      */
     public static EntityRecordWithColumns create(EntityRecord record,
+                                                 Entity entity) {
+        final Map<String, EntityColumn.MemoizedValue> columns = extractColumnValues(entity);
+        return of(record, columns);
+    }
+
+    /**
+     * Creates a new instance of the {@code EntityRecordWithColumns} with
+     * {@link EntityColumn} values from the given {@linkplain Entity}.
+     *
+     * Uses provided entity columns for the value extraction.
+     */
+    public static EntityRecordWithColumns create(EntityRecord record,
                                                  Entity entity,
-                                                 EntityColumnCache entityColumns) {
+                                                 EntityColumnCache knownEntityColumns) {
         final Map<String, EntityColumn.MemoizedValue> columns = extractColumnValues(entity,
-                entityColumns.getAllColumns());
+                knownEntityColumns.getAllColumns());
         return of(record, columns);
     }
 
