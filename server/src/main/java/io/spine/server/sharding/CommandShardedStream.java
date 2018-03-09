@@ -19,9 +19,17 @@
  */
 package io.spine.server.sharding;
 
+import com.google.protobuf.Any;
+import com.google.protobuf.Message;
 import io.spine.core.BoundedContextName;
+import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
+import io.spine.core.CommandId;
+import io.spine.protobuf.AnyPacker;
+import io.spine.protobuf.TypeConverter;
 import io.spine.server.transport.TransportFactory;
+import io.spine.string.Stringifiers;
+import io.spine.time.Time;
 
 import javax.annotation.Nullable;
 
@@ -41,26 +49,47 @@ public class CommandShardedStream<I> extends ShardedStream<I, CommandEnvelope> {
 
     @Override
     protected ShardedMessageConverter<I, CommandEnvelope> converter() {
-        if(converter == null) {
-            converter = new ShardedMessageConverter<I, CommandEnvelope>() {
-                @Override
-                public ShardedMessage convert(Object id, CommandEnvelope envelope) {
-                    return null;
-                }
-
-                @Override
-                public I targetIdOf(ShardedMessage message) {
-                    return null;
-                }
-
-                @Override
-                public CommandEnvelope envelopeOf(ShardedMessage message) {
-                    return null;
-                }
-            };
+        if (converter == null) {
+            converter = new Converter<>();
         }
         return converter;
     }
 
+    private static class Converter<I> extends ShardedMessageConverter<I, CommandEnvelope> {
 
+        @Override
+        public ShardedMessage convert(I targetId, CommandEnvelope envelope) {
+
+            final CommandId id = envelope.getId();
+            final Message originalMessage = envelope.getMessage();
+            final String stringId = Stringifiers.toString(id);
+            final ShardedMessageId shardedMessageId = ShardedMessageId.newBuilder()
+                                                                      .setValue(stringId)
+                                                                      .build();
+            final Any packedOriginalMsg = AnyPacker.pack(originalMessage);
+            final Any packedTargetId = AnyPacker.pack(TypeConverter.toMessage(targetId));
+            final ShardedMessage result = ShardedMessage.newBuilder()
+                                                        .setId(shardedMessageId)
+                                                        .setTargetId(packedTargetId)
+                                                        .setOriginalMessage(packedOriginalMsg)
+                                                        .setWhenSharded(Time.getCurrentTime())
+                                                        .build();
+            return result;
+        }
+
+        @Override
+        public I targetIdOf(ShardedMessage message) {
+            final Any asAny = message.getTargetId();
+            final I result = TypeConverter.toObject(asAny, getIdClass());
+            return result;
+        }
+
+        @Override
+        public CommandEnvelope envelopeOf(ShardedMessage message) {
+            final Any originalMessage = message.getOriginalMessage();
+            final Command command = AnyPacker.unpack(originalMessage);
+            final CommandEnvelope result = CommandEnvelope.of(command);
+            return result;
+        }
+    }
 }

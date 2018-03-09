@@ -49,14 +49,12 @@ public abstract class ShardedStream<I, E extends MessageEnvelope<?, ?, ?>> {
     @Nullable
     private ExternalMessageObserver channelObserver;
 
-    ShardedStream(ShardingKey key,
-                            TransportFactory transportFactory,
-                            BoundedContextName boundedContextName) {
+    ShardedStream(ShardingKey key, TransportFactory transportFactory, BoundedContextName name) {
         this.transportFactory = transportFactory;
-        this.boundedContextName = boundedContextName;
+        this.boundedContextName = name;
         this.key = key;
         final Class<E> envelopeCls = getEnvelopeClass();
-        this.channelId = toChannelId(boundedContextName, key, envelopeCls);
+        this.channelId = toChannelId(name, key, envelopeCls);
     }
 
     @SuppressWarnings("unchecked")  // Ensured by the generic type definition.
@@ -106,7 +104,6 @@ public abstract class ShardedStream<I, E extends MessageEnvelope<?, ?, ?>> {
         return result;
     }
 
-
     private class ExternalMessageObserver implements StreamObserver<ExternalMessage> {
 
         private ShardedStreamConsumer<I, E> delegate;
@@ -140,15 +137,6 @@ public abstract class ShardedStream<I, E extends MessageEnvelope<?, ?, ?>> {
         public void onCompleted() {
             //TODO:2018-03-8:alex.tymchenko: figure out what should happen.
         }
-    }
-
-    protected interface ShardedMessageConverter<I, E extends MessageEnvelope<?, ?, ?>> {
-
-        ShardedMessage convert(Object id, E envelope);
-
-        I targetIdOf(ShardedMessage message);
-
-        E envelopeOf(ShardedMessage message);
     }
 
     /**
