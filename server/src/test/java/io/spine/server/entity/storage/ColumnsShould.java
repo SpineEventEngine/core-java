@@ -35,11 +35,13 @@ import io.spine.test.entity.ProjectId;
 import io.spine.testdata.Sample;
 import org.junit.Test;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
-import static io.spine.server.entity.storage.Columns.extractColumnValues;
+import static io.spine.server.entity.storage.Columns.checkColumnDefinitions;
 import static io.spine.server.entity.storage.Columns.findColumn;
+import static io.spine.server.entity.storage.Columns.extractColumnValues;
 import static io.spine.server.entity.storage.given.ColumnsTestEnv.CUSTOM_COLUMN_NAME;
 import static io.spine.server.storage.EntityField.version;
 import static io.spine.server.storage.LifecycleFlagField.archived;
@@ -67,6 +69,7 @@ public class ColumnsShould {
 
     @Test
     public void pass_null_check() {
+        new NullPointerTester().testAllPublicStaticMethods(Columns.class);
         new NullPointerTester().testStaticMethods(Columns.class, Visibility.PACKAGE);
     }
 
@@ -106,6 +109,30 @@ public class ColumnsShould {
         assertEquals(entity.getSomeMessage(),
                      fields.get(messageKey)
                            .getValue());
+    }
+
+    @Test
+    public void extract_column_values_using_predefined_columns() {
+        final EntityWithManyGetters entity = new EntityWithManyGetters(STRING_ID);
+        final Collection<EntityColumn> entityColumns = Columns.obtainColumns(entity.getClass());
+        final Map<String, EntityColumn.MemoizedValue> fields = extractColumnValues(entity, entityColumns);
+        assertNotNull(fields);
+
+        assertSize(3, fields);
+
+        final String floatNullKey = "floatNull";
+        final EntityColumn.MemoizedValue floatMemoizedNull = fields.get(floatNullKey);
+        assertNotNull(floatMemoizedNull);
+        assertNull(floatMemoizedNull.getValue());
+
+        assertEquals(entity.getIntegerFieldValue(),
+                fields.get(CUSTOM_COLUMN_NAME)
+                        .getValue());
+
+        final String messageKey = "someMessage";
+        assertEquals(entity.getSomeMessage(),
+                fields.get(messageKey)
+                        .getValue());
     }
 
     @Test
@@ -162,9 +189,14 @@ public class ColumnsShould {
         findColumn(entityClass, nonExistingColumnName);
     }
 
+    @Test
+    public void pass_column_definitions_check_for_correct_entity() {
+        checkColumnDefinitions(EntityWithManyGetters.class);
+    }
+
     @Test(expected = IllegalStateException.class)
-    public void not_allow_same_column_name_within_one_entity() {
-        Columns.obtainColumns(EntityWithRepeatedColumnNames.class);
+    public void fail_column_definitions_check_for_incorrect_entity() {
+        checkColumnDefinitions(EntityWithRepeatedColumnNames.class);
     }
 
     @SuppressWarnings("unused") // Reflective access

@@ -91,7 +91,6 @@ public class Columns {
         checkNotNull(entityClass);
         checkNotEmptyOrBlank(columnName, "entity column name");
 
-
         final Collection<EntityColumn> entityColumns = Columns.obtainColumns(entityClass);
         for (EntityColumn column : entityColumns) {
             if (column.getName()
@@ -130,7 +129,7 @@ public class Columns {
         return entityColumns;
     }
 
-    static Map<String, EntityColumn.MemoizedValue> extractColumnValues(Entity entity) {
+    static <E extends Entity<?, ?>> Map<String, EntityColumn.MemoizedValue> extractColumnValues(E entity) {
         checkNotNull(entity);
 
         final Collection<EntityColumn> entityColumns = Columns.obtainColumns(entity.getClass());
