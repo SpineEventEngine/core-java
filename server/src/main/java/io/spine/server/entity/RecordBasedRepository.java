@@ -401,6 +401,9 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * managed by this repository, and, in case the repository {@linkplain RecordStorage storage}
      * supports {@link EntityColumnCache}, caches {@link EntityColumn} definitions.
      *
+     * <p>In case the cache is supported, the process of caching columns itself act as a check,
+     * because {@linkplain Column columns} with incorrect definitions cannot be retrieved and stored.
+     *
      * <p>If {@link Column} definitions are incorrect, the {@link IllegalStateException}
      * is thrown.
      *
