@@ -25,6 +25,7 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Supplier;
 import com.google.common.collect.Iterators;
 import io.spine.Identifier;
+import io.spine.annotation.Internal;
 import io.spine.core.MessageEnvelope;
 import io.spine.server.BoundedContext;
 import io.spine.server.entity.storage.Column;
@@ -386,6 +387,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      *
      * @throws IllegalStateException in case entity column definitions are incorrect
      */
+    @Internal
     void checkEntityColumnDefinitions() {
         checkColumnDefinitions(getEntityClass());
     }
