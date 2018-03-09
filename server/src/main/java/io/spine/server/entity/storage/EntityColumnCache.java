@@ -63,7 +63,7 @@ public class EntityColumnCache {
      *
      * <p>The data is stored this way for convenient querying of the specific columns.
      *
-     * <p>This contained is mutable and thread safe.
+     * <p>This container is mutable and thread safe.
      */
     private final Map<String, EntityColumn> entityColumnData = synchronizedMap(
             new LinkedHashMap<String, EntityColumn>());
@@ -88,7 +88,7 @@ public class EntityColumnCache {
      * Creates an instance of {@link EntityColumnCache} for the given {@link Entity} class.
      *
      * <p>The {@linkplain EntityColumn column metadata} will not be retrieved and stored on creation.
-     * Instead the {@linkplain EntityColumnCache instance }will wait for the first access to it
+     * Instead, the {@linkplain EntityColumnCache cache instance} will wait for the first access to it
      * to cache {@linkplain EntityColumn entity columns}.
      *
      * @param entityClass the class for which {@linkplain EntityColumn entity columns} should
