@@ -58,6 +58,7 @@ import static io.spine.test.Tests.assertMatchesMask;
 import static io.spine.test.Verify.assertContains;
 import static io.spine.test.Verify.assertSize;
 import static java.lang.String.format;
+import static org.junit.Assert.assertFalse;
 
 /**
  * @author Dmytro Dashenkov
@@ -130,6 +131,16 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
     public void read_all_records_of_given_type_with_field_mask() {
         final FieldMask mask = FieldMasks.maskOf(Project.getDescriptor(), 1, 2);
         checkByTypeRead(mask);
+    }
+
+    @Test
+    public void not_support_entity_column_cache() {
+        assertFalse(getStorage().supportsEntityColumnCache());
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void not_return_entity_column_cache() {
+        getStorage().getEntityColumnCache();
     }
 
     @SuppressWarnings({"MethodWithMultipleLoops", "ConstantConditions"}) // OK for this test.
