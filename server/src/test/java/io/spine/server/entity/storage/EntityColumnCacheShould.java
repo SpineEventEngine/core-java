@@ -21,32 +21,20 @@
 package io.spine.server.entity.storage;
 
 import com.google.common.testing.NullPointerTester;
-import com.google.common.testing.NullPointerTester.Visibility;
-import com.google.protobuf.Any;
-import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.Entity;
-import io.spine.server.entity.storage.given.ColumnsTestEnv;
-import io.spine.server.entity.storage.given.ColumnsTestEnv.*;
-import io.spine.test.entity.ProjectId;
-import io.spine.testdata.Sample;
-import org.junit.After;
+import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithManyGetters;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
-import static io.spine.server.entity.storage.Columns.extractColumnValues;
-import static io.spine.server.entity.storage.Columns.findColumn;
 import static io.spine.server.entity.storage.Columns.obtainColumns;
-import static io.spine.server.entity.storage.given.ColumnsTestEnv.*;
-import static io.spine.server.storage.EntityField.version;
-import static io.spine.server.storage.LifecycleFlagField.archived;
-import static io.spine.server.storage.LifecycleFlagField.deleted;
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
-import static io.spine.test.Verify.*;
+import static io.spine.test.Verify.assertFalse;
+import static io.spine.test.Verify.assertTrue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 
 /**
  * @author Dmytro Kuzmin

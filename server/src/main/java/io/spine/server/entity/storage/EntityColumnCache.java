@@ -40,7 +40,9 @@ public class EntityColumnCache {
     private final Class<? extends Entity> entityClass;
     private boolean columnsCached = false;
 
-    /** EntityColumns of the managed entity class. */
+    /**
+     * EntityColumns of the managed entity class.
+     */
     private Map<String, EntityColumn> entityColumns = synchronizedMap(
             new LinkedHashMap<String, EntityColumn>());
 
@@ -76,8 +78,8 @@ public class EntityColumnCache {
         if (entityColumn == null) {
             throw new IllegalArgumentException(
                     format("Could not find an EntityColumn description for %s.%s.",
-                           entityClass.getCanonicalName(),
-                           columnName));
+                            entityClass.getCanonicalName(),
+                            columnName));
 
         }
 
