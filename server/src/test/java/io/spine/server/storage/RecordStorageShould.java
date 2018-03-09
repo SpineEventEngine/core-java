@@ -804,6 +804,18 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         }
     }
 
+    /**
+     * Entity columns representing lifecycle flags, {@code archived} and {@code deleted}.
+     *
+     * <p>These columns are present in each {@link EntityWithLifecycle} entity. For the purpose of
+     * tests being as close to the real production environment as possible, these columns are stored
+     * with the entity records, even if an actual entity is missing.
+     *
+     * <p>Note that there are cases, when a {@code RecordStorage} stores entity records with no such
+     * columns, e.g. the {@linkplain io.spine.server.event.EEntity event entity}. Thus, do not rely
+     * on these columns being present in all the entities by default when implementing
+     * a {@code RecordStorage}.
+     */
     enum LifecycleColumns {
 
         ARCHIVED("isArchived"),
