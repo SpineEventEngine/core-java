@@ -401,11 +401,10 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * managed by this repository, and, in case the repository {@linkplain RecordStorage storage}
      * supports {@link EntityColumnCache}, caches {@link EntityColumn} definitions.
      *
-     * <p>In case the cache is supported, the process of caching columns itself act as a check,
+     * <p>In case the cache is supported, the process of caching columns itself acts as a check,
      * because {@linkplain Column columns} with incorrect definitions cannot be retrieved and stored.
      *
-     * <p>If {@link Column} definitions are incorrect, the {@link IllegalStateException}
-     * is thrown.
+     * <p>If {@link Column} definitions are incorrect, the {@link IllegalStateException} is thrown.
      *
      * @throws IllegalStateException in case entity column definitions are incorrect
      */
@@ -424,6 +423,13 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         return result;
     }
 
+    /**
+     * Retrieves the {@link EntityColumnCache} used by this repository's {@linkplain RecordStorage storage}.
+     *
+     * @return the entity column cache from the storage
+     * @throws IllegalStateException if the {@link EntityColumnCache} is not supported by this
+     *                               repository's storage
+     */
     private EntityColumnCache retrieveEntityColumnCache() {
         return recordStorage().getEntityColumnCache();
     }
