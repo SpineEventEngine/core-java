@@ -90,10 +90,10 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
     }
 
     /**
-     * Override example {@link EntityRecordWithColumns} creation method so that test {@link StandStorage}
-     * does not rely on the {@link EntityColumnCache} for the record creation. This is required because
-     * {@link EntityColumn entity columns} and thus {@link EntityColumnCache} are not supported by the
-     * {@link StandStorage}.
+     * Override {@link EntityRecordWithColumns} test instance creation method so that test
+     * {@link StandStorage} does not rely on the {@link EntityColumnCache} for the record creation.
+     * This is required because {@link EntityColumn entity columns} and thus {@link EntityColumnCache}
+     * are not supported by the {@link StandStorage}.
      */
     @Override
     protected EntityRecordWithColumns createRecordWithColumns(EntityRecord record,
