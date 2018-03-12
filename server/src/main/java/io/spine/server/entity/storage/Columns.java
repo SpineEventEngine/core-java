@@ -86,7 +86,7 @@ public class Columns {
      * @return a {@code Collection} of {@link EntityColumn} corresponded to entity class
      * @throws IllegalStateException if entity column definitions are incorrect
      */
-    static Collection<EntityColumn> getColumns(Class<? extends Entity> entityClass) {
+    static Collection<EntityColumn> getAllColumns(Class<? extends Entity> entityClass) {
         checkNotNull(entityClass);
 
         final ColumnReader columnReader = ColumnReader.createForClass(entityClass);

@@ -75,7 +75,7 @@ public class ColumnsShould {
 
     @Test
     public void get_all_valid_columns_for_entity_class() {
-        final Collection<EntityColumn> entityColumns = Columns.getColumns(EntityWithManyGetters.class);
+        final Collection<EntityColumn> entityColumns = Columns.getAllColumns(EntityWithManyGetters.class);
 
         assertNotNull(entityColumns);
         assertSize(3, entityColumns);
@@ -123,7 +123,7 @@ public class ColumnsShould {
     @Test
     public void extract_column_values_using_predefined_columns() {
         final EntityWithManyGetters entity = new EntityWithManyGetters(STRING_ID);
-        final Collection<EntityColumn> entityColumns = Columns.getColumns(entity.getClass());
+        final Collection<EntityColumn> entityColumns = Columns.getAllColumns(entity.getClass());
         final Map<String, EntityColumn.MemoizedValue> fields = extractColumnValues(entity, entityColumns);
         assertNotNull(fields);
 

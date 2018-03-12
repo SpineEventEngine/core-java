@@ -133,7 +133,7 @@ public class EntityRecordWithColumnsShould {
         final EntityWithoutColumns entity = new EntityWithoutColumns("ID");
         final Class<? extends Entity> entityClass = entity.getClass();
         final EntityColumnCache columnCache = initializeFor(entityClass);
-        final Collection<EntityColumn> entityColumns = columnCache.getAllColumns();
+        final Collection<EntityColumn> entityColumns = columnCache.getColumns();
         final Map<String, MemoizedValue> columnValues = extractColumnValues(entity, entityColumns);
         assertTrue(columnValues.isEmpty());
 

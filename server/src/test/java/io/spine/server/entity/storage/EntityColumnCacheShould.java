@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static io.spine.server.entity.storage.Columns.getColumns;
+import static io.spine.server.entity.storage.Columns.getAllColumns;
 import static io.spine.test.Verify.assertFalse;
 import static io.spine.test.Verify.assertTrue;
 import static org.junit.Assert.assertEquals;
@@ -68,7 +68,7 @@ public class EntityColumnCacheShould {
     @Test
     public void cache_columns_on_first_access() {
         final EntityColumnCache cacheForGetAll = EntityColumnCache.initializeFor(entityClass);
-        cacheForGetAll.getAllColumns();
+        cacheForGetAll.getColumns();
         assertFalse(cacheForGetAll.isEmpty());
 
         final EntityColumnCache cacheForFind = EntityColumnCache.initializeFor(entityClass);
@@ -99,10 +99,10 @@ public class EntityColumnCacheShould {
 
     @Test
     public void retain_stored_columns_order() {
-        final Collection<EntityColumn> columnsFromCache = entityColumnCache.getAllColumns();
+        final Collection<EntityColumn> columnsFromCache = entityColumnCache.getColumns();
         assertNotNull(columnsFromCache);
 
-        final Collection<EntityColumn> columnsViaUtil = getColumns(entityClass);
+        final Collection<EntityColumn> columnsViaUtil = getAllColumns(entityClass);
 
         final int columnsFromCacheSize = columnsFromCache.size();
         final int columnsViaUtilSize = columnsViaUtil.size();

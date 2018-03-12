@@ -32,7 +32,7 @@ import org.junit.Test;
 import java.util.Collection;
 import java.util.Map;
 
-import static io.spine.server.entity.storage.Columns.getColumns;
+import static io.spine.server.entity.storage.Columns.getAllColumns;
 import static io.spine.server.entity.storage.given.ColumnsTestEnv.CUSTOM_COLUMN_NAME;
 import static io.spine.test.Verify.assertEmpty;
 import static io.spine.test.Verify.assertSize;
@@ -103,7 +103,7 @@ public class ColumnValueExtractorShould {
 
 
     private static <E extends Entity<?, ?>> Map<String, EntityColumn.MemoizedValue> extractColumnValues(E entity) {
-        final Collection<EntityColumn> entityColumns = getColumns(entity.getClass());
+        final Collection<EntityColumn> entityColumns = getAllColumns(entity.getClass());
         final ColumnValueExtractor columnValueExtractor = ColumnValueExtractor.create(entity, entityColumns);
         return columnValueExtractor.extractColumnValues();
     }

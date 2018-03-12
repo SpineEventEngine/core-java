@@ -29,7 +29,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.server.entity.storage.Columns.getColumns;
 import static io.spine.validate.Validate.checkNotEmptyOrBlank;
 import static java.lang.String.format;
 import static java.util.Collections.synchronizedMap;
@@ -141,13 +140,13 @@ public class EntityColumnCache {
      * @return {@linkplain EntityColumn entity column} {@link Collection} for the managed
      *         {@link Entity} class
      */
-    public Collection<EntityColumn> getAllColumns() {
+    public Collection<EntityColumn> getColumns() {
         ensureColumnsCached();
         return entityColumnData.values();
     }
 
     /**
-     * {@linkplain Columns#getColumns(Class) Obtains} and caches {@link EntityColumn} data if it is not
+     * {@linkplain Columns#getAllColumns(Class) Obtains} and caches {@link EntityColumn} data if it is not
      * yet cached.
      *
      * <p>If the data is already retrieved and cached, this method does nothing.
@@ -171,7 +170,7 @@ public class EntityColumnCache {
     }
 
     /**
-     * {@linkplain Columns#getColumns(Class) Obtains} and caches {@link EntityColumn}
+     * {@linkplain Columns#getAllColumns(Class) Obtains} and caches {@link EntityColumn}
      * column metadata.
      *
      * <p>If {@link Column} definitions are incorrect for the given {@link Entity} class this method
@@ -181,7 +180,7 @@ public class EntityColumnCache {
      * class are incorrect
      */
     private void obtainAndCacheColumns() {
-        final Collection<EntityColumn> columns = getColumns(entityClass);
+        final Collection<EntityColumn> columns = Columns.getAllColumns(entityClass);
         cacheEntityColumns(columns);
     }
 
