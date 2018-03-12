@@ -71,16 +71,15 @@ public class Columns {
     public static void checkColumnDefinitions(Class<? extends Entity> entityClass) {
         checkNotNull(entityClass);
 
-        final ColumnReader columnReader = ColumnReader.createForClass(entityClass);
-        columnReader.readColumns();
+        getAllColumns(entityClass);
     }
 
     /**
      * Retrieves {@linkplain EntityColumn columns} for the given {@code Entity} class.
      *
-     * <p>Performs checks for entity column definitions correctness along the way.
+     * <p>Performs checks for the entity column definitions correctness along the way.
      *
-     * <p>If check for correctness fails, throws {@link IllegalStateException}.
+     * <p>If the check for correctness fails, throws {@link IllegalStateException}.
      *
      * @param entityClass the class containing the {@link EntityColumn} definition
      * @return a {@code Collection} of {@link EntityColumn} corresponded to entity class

@@ -74,7 +74,7 @@ public class ColumnValueExtractorShould {
     }
 
     @Test
-    public void allow_access_values_by_custom_column_name() {
+    public void allow_to_access_values_by_custom_column_name() {
         final EntityWithManyGetters entity = new EntityWithManyGetters(STRING_ID);
         final Map<String, EntityColumn.MemoizedValue> columnValues = extractColumnValues(entity);
 

@@ -48,7 +48,6 @@ import static org.junit.Assert.assertNull;
 
 /**
  * @author Dmytro Dashenkov
- * @author Dmytro Kuzmin
  */
 public class ColumnsShould {
 
@@ -117,9 +116,11 @@ public class ColumnsShould {
     }
 
     /**
-     * Helper method that checks all {@link EntityWithManyGetters} fields to avoid code duplication,
-     * as {@link EntityWithManyGetters} is the main {@link Entity} class used to test
-     * {@linkplain Columns#extractColumnValues(Entity, Collection) column extraction} functionality.
+     * Helper method that checks all {@link EntityWithManyGetters} field values.
+     * 
+     * <p>Created to avoid code duplication, as {@link EntityWithManyGetters} is the main {@link Entity}
+     * class used to test {@linkplain Columns#extractColumnValues(Entity, Collection) column extraction}
+     * functionality.
      */
     private static void checkEntityWithManyGettersFields(EntityWithManyGetters entity,
                                                          Map<String, EntityColumn.MemoizedValue> fields) {

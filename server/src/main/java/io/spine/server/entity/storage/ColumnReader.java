@@ -39,7 +39,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * A class whose purpose is to obtain {@linkplain EntityColumn entity columns} from the given
  * {@link Entity} type.
  *
- * <p>Each {@code ColumnReader} instance is created for the specific {@link Entity} class.
+ * <p>Each {@code ColumnReader} instance is created for the specified {@link Entity} class.
  *
  * <p>Along with obtaining {@link Entity} class columns, the {@code ColumnReader} performs various
  * checks verifying that {@link EntityColumn} definitions in the processed {@link Entity} class are
@@ -65,9 +65,9 @@ public class ColumnReader {
      * <p>The reader can be further used to {@linkplain ColumnReader#readColumns() obtain}
      * {@linkplain EntityColumn entity columns} for the given class.
      *
-     * <p>{@code Null} as an argument is not accepted by this method.
+     * <p>{@code Null} entity class as an argument is not accepted by this method.
      *
-     * @param entityClass {@link Entity} class for which to create an instance
+     * @param entityClass {@link Entity} class for which to create the instance
      * @return new instance of {@code ColumnReader} for the specified class
      */
     static ColumnReader createForClass(Class<? extends Entity> entityClass) {
@@ -81,7 +81,7 @@ public class ColumnReader {
      *
      * <p>Performs checks for entity column definitions correctness along the way.
      *
-     * <p>If checks for correctness fail, throws {@link IllegalStateException}.
+     * <p>If the check for correctness fails, throws {@link IllegalStateException}.
      *
      * @return a {@code Collection} of {@link EntityColumn} corresponded to entity class
      * @throws IllegalStateException if entity column definitions are incorrect

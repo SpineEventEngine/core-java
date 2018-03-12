@@ -43,7 +43,7 @@ import static java.lang.String.format;
  *
  * <p>This class does not process {@link Entity} classes that are non-public or cannot be subjected
  * to column extraction for some other reason. For them, {@linkplain Collections#emptyMap() empty map}
- * will be returned instead of {@linkplain EntityColumn column} values.
+ * will be returned instead of column values.
  *
  * @author Dmytro Kuzmin
  * @see Columns
@@ -74,8 +74,8 @@ public class ColumnValueExtractor {
      * <p>This instance can be further used to {@linkplain ColumnValueExtractor#extractColumnValues() extract}
      * column values from the given {@link Entity}.
      *
-     * <p>This method supports neither {@code null} entity nor {@code null} entity column list, but
-     * it accepts {@linkplain Collection#isEmpty() empty} collection of columns (in this case no values
+     * <p>This method accepts neither {@code null} entity nor {@code null} entity column list as arguments, but
+     * an {@linkplain Collection#isEmpty() empty} collection of columns is accepted (in this case no values
      * will be extracted).
      *
      * @param entity        {@link Entity} for which to create the {@code ColumnValueExtractor}
