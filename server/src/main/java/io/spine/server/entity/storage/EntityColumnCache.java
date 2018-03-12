@@ -29,7 +29,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.server.entity.storage.Columns.obtainColumns;
+import static io.spine.server.entity.storage.Columns.getColumns;
 import static io.spine.validate.Validate.checkNotEmptyOrBlank;
 import static java.lang.String.format;
 import static java.util.Collections.synchronizedMap;
@@ -147,7 +147,7 @@ public class EntityColumnCache {
     }
 
     /**
-     * {@linkplain Columns#obtainColumns(Class) Obtains} and caches {@link EntityColumn} data if it is not
+     * {@linkplain Columns#getColumns(Class) Obtains} and caches {@link EntityColumn} data if it is not
      * yet cached.
      *
      * <p>If the data is already retrieved and cached, this method does nothing.
@@ -171,7 +171,7 @@ public class EntityColumnCache {
     }
 
     /**
-     * {@linkplain Columns#obtainColumns(Class) Obtains} and caches {@link EntityColumn}
+     * {@linkplain Columns#getColumns(Class) Obtains} and caches {@link EntityColumn}
      * column metadata.
      *
      * <p>If {@link Column} definitions are incorrect for the given {@link Entity} class this method
@@ -181,7 +181,7 @@ public class EntityColumnCache {
      * class are incorrect
      */
     private void obtainAndCacheColumns() {
-        final Collection<EntityColumn> columns = obtainColumns(entityClass);
+        final Collection<EntityColumn> columns = getColumns(entityClass);
         cacheEntityColumns(columns);
     }
 

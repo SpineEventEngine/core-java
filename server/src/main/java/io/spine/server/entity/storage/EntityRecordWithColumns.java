@@ -101,7 +101,7 @@ public final class EntityRecordWithColumns implements Serializable {
      * and then combines it with the given {@link EntityRecord}.
      *
      * <p>Uses {@linkplain EntityColumnCache cached entity columns} to extract the value from
-     * the {@link Entity}. This way the {@linkplain Columns#obtainColumns(Class) column retrieval
+     * the {@link Entity}. This way the {@linkplain Columns#getColumns(Class) column retrieval
      * operation} can be omitted in favor of the cached results of the previous operation.
      *
      * @param record        the {@link EntityRecord} to create value from
