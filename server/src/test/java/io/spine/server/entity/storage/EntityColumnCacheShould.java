@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static io.spine.server.entity.storage.Columns.obtainColumns;
+import static io.spine.server.entity.storage.Columns.getColumns;
 import static io.spine.test.Verify.assertFalse;
 import static io.spine.test.Verify.assertTrue;
 import static org.junit.Assert.assertEquals;
@@ -102,7 +102,7 @@ public class EntityColumnCacheShould {
         final Collection<EntityColumn> columnsFromCache = entityColumnCache.getAllColumns();
         assertNotNull(columnsFromCache);
 
-        final Collection<EntityColumn> columnsViaUtil = obtainColumns(entityClass);
+        final Collection<EntityColumn> columnsViaUtil = getColumns(entityClass);
 
         final int columnsFromCacheSize = columnsFromCache.size();
         final int columnsViaUtilSize = columnsViaUtil.size();
