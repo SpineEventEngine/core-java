@@ -73,7 +73,7 @@ public class Columns {
                     "Storage fields won't be extracted.";
 
     /**
-     * Prevent instantiation of this utility class.
+     * Prevents instantiation of this utility class.
      */
     private Columns() {
     }
@@ -158,10 +158,13 @@ public class Columns {
     }
 
     /**
-     * Generates the {@linkplain EntityColumn column} values for the given {@linkplain Entity}.
+     * Extracts the {@linkplain EntityColumn column} values for the given {@linkplain Entity}.
      *
      * <p>Retrieves {@linkplain EntityColumn columns} for the given {@code Entity} class, then generates
      * {@linkplain MemoizedValue memoized values} from them.
+     *
+     * <p>This method will return {@linkplain Collections#emptyMap() empty map} for non-public
+     * {@link Entity} classes.
      *
      * @param entity an {@link Entity} to get the {@linkplain EntityColumn column} values from
      * @param <E>    the type of the {@link Entity}
@@ -177,12 +180,15 @@ public class Columns {
     }
 
     /**
-     * Generates the {@linkplain EntityColumn column} values for the given {@linkplain Entity}.
+     * Extracts the {@linkplain EntityColumn column} values for the given {@linkplain Entity}.
      *
      * <p>Uses given {@linkplain EntityColumn entity columns} for the value extraction.
      *
      * <p>This way the process of {@linkplain Columns#obtainColumns(Class) obtaining columns} from
      * the given {@link Entity} class can be skipped.
+     *
+     * <p>This method will return {@linkplain Collections#emptyMap() empty map} for non-public
+     * {@link Entity} classes.
      *
      * @param entity        an {@link Entity} to get the {@linkplain EntityColumn column} values from
      * @param entityColumns {@linkplain EntityColumn entity columns} which values should be extracted
@@ -191,9 +197,8 @@ public class Columns {
      *         names for storing} to their {@linkplain MemoizedValue memoized values}
      * @see MemoizedValue
      */
-    static <E extends Entity<?, ?>> Map<String, MemoizedValue> extractColumnValues(
-            E entity,
-            Collection<EntityColumn> entityColumns) {
+    static <E extends Entity<?, ?>> Map<String, MemoizedValue>
+    extractColumnValues(E entity, Collection<EntityColumn> entityColumns) {
         checkNotNull(entityColumns);
         checkNotNull(entity);
 
@@ -202,8 +207,7 @@ public class Columns {
             return Collections.emptyMap();
         }
 
-        final Map<String, MemoizedValue> values = recordColumnValuesToMap(entityColumns, entity);
-
+        final Map<String, MemoizedValue> values = readValues(entityColumns, entity);
         return values;
     }
 
@@ -228,20 +232,17 @@ public class Columns {
     }
 
     /**
-     * Generates {@linkplain MemoizedValue memoized values} for the given {@linkplain EntityColumn columns}
+     * Extracts {@linkplain MemoizedValue memoized values} for the given {@linkplain EntityColumn columns}
      * of the given {@link Entity}.
-     *
-     * <p>Records the result to {@link Map}.
      *
      * @param columns {@link Collection collection} of columns to extract values from
      * @param entity  {@link Entity} from which to extract the values
-     * @return a {@link Map} of the column {@linkplain EntityColumn#getStoredName()
+     * @return a {@code Map} of the column {@linkplain EntityColumn#getStoredName()
      *         names for storing} to their {@linkplain MemoizedValue memoized values}
      * @see MemoizedValue
      */
-    private static <E extends Entity<?, ?>> Map<String, MemoizedValue> recordColumnValuesToMap(
-            Collection<EntityColumn> columns,
-            E entity) {
+    private static <E extends Entity<?, ?>> Map<String, MemoizedValue> readValues(Collection<EntityColumn> columns,
+                                                                                  E entity) {
         final Map<String, MemoizedValue> values = new HashMap<>(columns.size());
         for (EntityColumn column : columns) {
             final String name = column.getStoredName();

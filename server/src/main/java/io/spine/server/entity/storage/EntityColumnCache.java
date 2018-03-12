@@ -39,11 +39,7 @@ import static java.util.Collections.synchronizedMap;
  * {@link Entity} class.
  *
  * <p>The cache remains empty on creation. The {@linkplain EntityColumn column metadata} is retrieved
- * on the first access to the {@linkplain EntityColumnCache cache} instance and then is stored
- * to the {@link Map}.
- *
- * <p>This class relies on the {@link Columns} utility methods to perform operations
- * on {@linkplain EntityColumn entity columns}.
+ * on the first access to the {@linkplain EntityColumnCache cache} instance and then stored in it.
  *
  * <p>The order in which {@link EntityColumn entity columns} are stored, is retained for
  * the access operations.
@@ -59,16 +55,19 @@ public class EntityColumnCache {
     private boolean columnsCached = false;
 
     /**
-     * A one to one container of the {@link EntityColumn} name and its data.
+     * A container of {@link EntityColumn entity column} name and its data.
+     *
+     * Each {@link EntityColumn entity column} data instance can be accessed by the
+     * corresponding entity column {@linkplain EntityColumn#getName() name}.
      *
      * <p>The data is stored this way for convenient querying of the specific columns.
      *
-     * <p>This container is mutable and thread safe.
+     * <p>This container is mutable and thread-safe.
      */
-    private final Map<String, EntityColumn> entityColumnData = synchronizedMap(
-            new LinkedHashMap<String, EntityColumn>());
+    private final Map<String, EntityColumn> entityColumnData =
+            synchronizedMap(new LinkedHashMap<String, EntityColumn>());
 
-    @VisibleForTesting
+    /** Exists only for testing. */
     private EntityColumnCache() {
         this.entityClass = null;
     }
@@ -79,6 +78,7 @@ public class EntityColumnCache {
         this.entityClass = entityClass;
     }
 
+    /** Exists only for testing. */
     @VisibleForTesting
     static EntityColumnCache getEmptyInstance() {
         return new EntityColumnCache();
@@ -127,9 +127,7 @@ public class EntityColumnCache {
                     format("Could not find an EntityColumn description for %s.%s.",
                             entityClass.getCanonicalName(),
                             columnName));
-
         }
-
         return entityColumn;
     }
 
