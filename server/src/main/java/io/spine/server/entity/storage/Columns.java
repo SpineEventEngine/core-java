@@ -71,7 +71,7 @@ public class Columns {
     public static void checkColumnDefinitions(Class<? extends Entity> entityClass) {
         checkNotNull(entityClass);
 
-        final ColumnReader columnReader = ColumnReader.forClass(entityClass);
+        final ColumnReader columnReader = ColumnReader.createForClass(entityClass);
         columnReader.readColumns();
     }
 
@@ -87,8 +87,11 @@ public class Columns {
      * @throws IllegalStateException if entity column definitions are incorrect
      */
     static Collection<EntityColumn> getColumns(Class<? extends Entity> entityClass) {
-        final ColumnReader columnReader = ColumnReader.forClass(entityClass);
-        return columnReader.readColumns();
+        checkNotNull(entityClass);
+
+        final ColumnReader columnReader = ColumnReader.createForClass(entityClass);
+        final Collection<EntityColumn> entityColumns = columnReader.readColumns();
+        return entityColumns;
     }
 
     /**
@@ -105,7 +108,7 @@ public class Columns {
         checkNotNull(entityClass);
         checkNotEmptyOrBlank(columnName, "entity column name");
 
-        final ColumnReader columnReader = ColumnReader.forClass(entityClass);
+        final ColumnReader columnReader = ColumnReader.createForClass(entityClass);
         final Collection<EntityColumn> entityColumns = columnReader.readColumns();
         for (EntityColumn column : entityColumns) {
             if (column.getName()
@@ -121,7 +124,7 @@ public class Columns {
     }
 
     /**
-     * Extracts the {@linkplain EntityColumn column} values for the given {@linkplain Entity}.
+     * Extracts the {@linkplain EntityColumn column} values from the given {@linkplain Entity}.
      *
      * <p>Retrieves {@linkplain EntityColumn columns} for the given {@code Entity} class, then generates
      * {@linkplain MemoizedValue memoized values} from them.
@@ -138,18 +141,18 @@ public class Columns {
     static <E extends Entity<?, ?>> Map<String, EntityColumn.MemoizedValue> extractColumnValues(E entity) {
         checkNotNull(entity);
 
-        final ColumnReader columnReader = ColumnReader.forClass(entity.getClass());
+        final ColumnReader columnReader = ColumnReader.createForClass(entity.getClass());
         final Collection<EntityColumn> entityColumns = columnReader.readColumns();
         return extractColumnValues(entity, entityColumns);
     }
 
     /**
-     * Extracts the {@linkplain EntityColumn column} values for the given {@linkplain Entity}.
+     * Extracts the {@linkplain EntityColumn column} values from the given {@linkplain Entity}, using given
+     * {@linkplain EntityColumn entity columns}.
      *
-     * <p>Uses given {@linkplain EntityColumn entity columns} for the value extraction.
-     *
-     * <p>This way the process of {@linkplain ColumnReader#readColumns() obtaining columns} from
-     * the given {@link Entity} class can be skipped.
+     * <p>By using predefined {@linkplain EntityColumn entity columns} the process of
+     * {@linkplain ColumnReader#readColumns() obtaining columns} from the given {@link Entity} class
+     * can be skipped.
      *
      * <p>This method will return {@linkplain Collections#emptyMap() empty map} for {@link Entity} classes
      * that are non-public or cannot be subjected to column extraction for some other reason.

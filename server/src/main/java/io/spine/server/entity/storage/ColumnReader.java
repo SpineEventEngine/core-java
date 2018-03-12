@@ -35,6 +35,21 @@ import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.server.entity.storage.ColumnRecords.getAnnotatedVersion;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
+/**
+ * A class whose purpose is to obtain {@linkplain EntityColumn entity columns} from the given
+ * {@link Entity} type.
+ *
+ * <p>Each {@code ColumnReader} instance is created for the specific {@link Entity} class.
+ *
+ * <p>Along with obtaining {@link Entity} class columns, the {@code ColumnReader} performs various
+ * checks verifying that {@link EntityColumn} definitions in the processed {@link Entity} class are
+ * correct. If column definitions are incorrect, the exception is thrown upon
+ * {@linkplain EntityColumn entity columns} reading.
+ *
+ * @author Dmytro Kuzmin
+ * @see Columns
+ * @see EntityColumn
+ */
 @Internal
 public class ColumnReader {
 
@@ -44,7 +59,18 @@ public class ColumnReader {
         this.entityClass = entityClass;
     }
 
-    static ColumnReader forClass(Class<? extends Entity> entityClass) {
+    /**
+     * Creates an instance of {@link ColumnReader} for the given {@link Entity} class.
+     *
+     * <p>The reader can be further used to {@linkplain ColumnReader#readColumns() obtain}
+     * {@linkplain EntityColumn entity columns} for the given class.
+     *
+     * <p>{@code Null} as an argument is not accepted by this method.
+     *
+     * @param entityClass {@link Entity} class for which to create an instance
+     * @return new instance of {@code ColumnReader} for the specified class
+     */
+    static ColumnReader createForClass(Class<? extends Entity> entityClass) {
         checkNotNull(entityClass);
 
         return new ColumnReader(entityClass);
@@ -55,7 +81,7 @@ public class ColumnReader {
      *
      * <p>Performs checks for entity column definitions correctness along the way.
      *
-     * <p>If check for correctness fails, throws {@link IllegalStateException}.
+     * <p>If checks for correctness fail, throws {@link IllegalStateException}.
      *
      * @return a {@code Collection} of {@link EntityColumn} corresponded to entity class
      * @throws IllegalStateException if entity column definitions are incorrect
@@ -77,8 +103,8 @@ public class ColumnReader {
                 entityColumns.add(column);
             }
         }
-        checkRepeatedColumnNames(entityColumns);
 
+        checkRepeatedColumnNames(entityColumns);
         return entityColumns;
     }
 

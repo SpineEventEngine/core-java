@@ -34,6 +34,21 @@ import java.util.Map;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
 
+/**
+ * A class designated to retrieve {@link EntityColumn} values from the given {@link Entity}
+ * using specified {@linkplain EntityColumn entity columns}.
+ *
+ * <p>Each {@code ColumnValueExtractor} instance is created for the specific {@link Entity} and
+ * the specific set of {@linkplain EntityColumn columns}.
+ *
+ * <p>This class does not process {@link Entity} classes that are non-public or cannot be subjected
+ * to column extraction for some other reason. For them, {@linkplain Collections#emptyMap() empty map}
+ * will be returned instead of {@linkplain EntityColumn column} values.
+ *
+ * @author Dmytro Kuzmin
+ * @see Columns
+ * @see EntityColumn
+ */
 @Internal
 public class ColumnValueExtractor {
 
@@ -52,6 +67,21 @@ public class ColumnValueExtractor {
         this.entityColumns = entityColumns;
     }
 
+    /**
+     * Creates an instance of {@link ColumnValueExtractor} for the given {@link Entity} and
+     * {@link Collection} of {@linkplain EntityColumn entity columns}.
+     *
+     * <p>This instance can be further used to {@linkplain ColumnValueExtractor#extractColumnValues() extract}
+     * column values from the given {@link Entity}.
+     *
+     * <p>This method supports neither {@code null} entity nor {@code null} entity column list, but
+     * it accepts {@linkplain Collection#isEmpty() empty} collection of columns (in this case no values
+     * will be extracted).
+     *
+     * @param entity        {@link Entity} for which to create the {@code ColumnValueExtractor}
+     * @param entityColumns list of {@linkplain EntityColumn entity columns} to extract from the {@link Entity}
+     * @return new instance of the {@code ColumnValueExtractor}
+     */
     static ColumnValueExtractor create(Entity entity, Collection<EntityColumn> entityColumns) {
         checkNotNull(entity);
         checkNotNull(entityColumns);
@@ -60,17 +90,13 @@ public class ColumnValueExtractor {
     }
 
     /**
-     * Extracts the {@linkplain EntityColumn column} values for the processed {@link Entity}.
-     *
-     * <p>Uses {@linkplain EntityColumn entity columns} stored in advance for the value extraction.
-     *
-     * <p>This way the process of {@linkplain ColumnReader#readColumns() obtaining columns} from
-     * the given {@link Entity} class can be skipped.
+     * Extracts the {@linkplain EntityColumn column} values for the processed {@link Entity} using specified
+     * {@linkplain EntityColumn entity columns}.
      *
      * <p>This method will return {@linkplain Collections#emptyMap() empty map} for {@link Entity} classes
      * that are non-public or cannot be subjected to column extraction for some other reason.
      *
-     * @return a {@link Map} of the column {@linkplain EntityColumn#getStoredName()
+     * @return a {@code Map} of the column {@linkplain EntityColumn#getStoredName()
      *         names for storing} to their {@linkplain EntityColumn.MemoizedValue memoized values}
      * @see EntityColumn.MemoizedValue
      */
