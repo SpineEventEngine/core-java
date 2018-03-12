@@ -124,28 +124,6 @@ public class Columns {
     }
 
     /**
-     * Extracts the {@linkplain EntityColumn column} values from the given {@linkplain Entity}.
-     *
-     * <p>Retrieves {@linkplain EntityColumn columns} for the given {@code Entity} class, then generates
-     * {@linkplain MemoizedValue memoized values} from them.
-     *
-     * <p>This method will return {@linkplain Collections#emptyMap() empty map} for {@link Entity} classes
-     * that are non-public or cannot be subjected to column extraction for some other reason.
-     *
-     * @param entity an {@link Entity} to get the {@linkplain EntityColumn column} values from
-     * @param <E>    the type of the {@link Entity}
-     * @return a {@code Map} of the column {@linkplain EntityColumn#getStoredName()
-     *         names for storing} to their {@linkplain MemoizedValue memoized values}
-     * @see MemoizedValue
-     */
-    static <E extends Entity<?, ?>> Map<String, EntityColumn.MemoizedValue> extractColumnValues(E entity) {
-        checkNotNull(entity);
-
-        final Collection<EntityColumn> entityColumns = getAllColumns(entity.getClass());
-        return extractColumnValues(entity, entityColumns);
-    }
-
-    /**
      * Extracts the {@linkplain EntityColumn column} values from the given {@linkplain Entity}, using given
      * {@linkplain EntityColumn entity columns}.
      *

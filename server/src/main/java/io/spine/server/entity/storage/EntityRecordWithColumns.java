@@ -27,11 +27,13 @@ import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.entity.storage.Columns.extractColumnValues;
+import static io.spine.server.entity.storage.Columns.getAllColumns;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -51,7 +53,7 @@ public final class EntityRecordWithColumns implements Serializable {
      * Creates a new instance of the {@code EntityRecordWithColumns}.
      *
      * @param record  {@link EntityRecord} to pack
-     * @param columns {@linkplain Columns#extractColumnValues(Entity)} columns} map to pack
+     * @param columns {@linkplain Columns#extractColumnValues(Entity, Collection)} columns} map to pack
      */
     private EntityRecordWithColumns(EntityRecord record,
                                     Map<String, EntityColumn.MemoizedValue> columns) {
@@ -89,7 +91,8 @@ public final class EntityRecordWithColumns implements Serializable {
      */
     public static EntityRecordWithColumns create(EntityRecord record,
                                                  Entity entity) {
-        final Map<String, EntityColumn.MemoizedValue> columns = extractColumnValues(entity);
+        final Collection<EntityColumn> entityColumns = getAllColumns(entity.getClass());
+        final Map<String, EntityColumn.MemoizedValue> columns = extractColumnValues(entity, entityColumns);
         return of(record, columns);
     }
 

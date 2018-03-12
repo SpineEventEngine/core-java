@@ -37,6 +37,7 @@ import java.util.Map;
 import static io.spine.server.entity.storage.Columns.checkColumnDefinitions;
 import static io.spine.server.entity.storage.Columns.extractColumnValues;
 import static io.spine.server.entity.storage.Columns.findColumn;
+import static io.spine.server.entity.storage.Columns.getAllColumns;
 import static io.spine.server.entity.storage.given.ColumnsTestEnv.CUSTOM_COLUMN_NAME;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
@@ -75,7 +76,7 @@ public class ColumnsShould {
 
     @Test
     public void get_all_valid_columns_for_entity_class() {
-        final Collection<EntityColumn> entityColumns = Columns.getAllColumns(EntityWithManyGetters.class);
+        final Collection<EntityColumn> entityColumns = getAllColumns(EntityWithManyGetters.class);
 
         assertNotNull(entityColumns);
         assertSize(3, entityColumns);
@@ -100,7 +101,8 @@ public class ColumnsShould {
     @Test
     public void extract_column_values_with_names_for_storing() {
         final EntityWithManyGetters entity = new EntityWithManyGetters(STRING_ID);
-        final Map<String, EntityColumn.MemoizedValue> fields = extractColumnValues(entity);
+        final Collection<EntityColumn> entityColumns = getAllColumns(entity.getClass());
+        final Map<String, EntityColumn.MemoizedValue> fields = extractColumnValues(entity, entityColumns);
         assertNotNull(fields);
 
         assertSize(3, fields);
@@ -123,7 +125,7 @@ public class ColumnsShould {
     @Test
     public void extract_column_values_using_predefined_columns() {
         final EntityWithManyGetters entity = new EntityWithManyGetters(STRING_ID);
-        final Collection<EntityColumn> entityColumns = Columns.getAllColumns(entity.getClass());
+        final Collection<EntityColumn> entityColumns = getAllColumns(entity.getClass());
         final Map<String, EntityColumn.MemoizedValue> fields = extractColumnValues(entity, entityColumns);
         assertNotNull(fields);
 
