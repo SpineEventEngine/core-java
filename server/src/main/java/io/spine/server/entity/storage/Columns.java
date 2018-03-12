@@ -141,8 +141,7 @@ public class Columns {
     static <E extends Entity<?, ?>> Map<String, EntityColumn.MemoizedValue> extractColumnValues(E entity) {
         checkNotNull(entity);
 
-        final ColumnReader columnReader = ColumnReader.createForClass(entity.getClass());
-        final Collection<EntityColumn> entityColumns = columnReader.readColumns();
+        final Collection<EntityColumn> entityColumns = getAllColumns(entity.getClass());
         return extractColumnValues(entity, entityColumns);
     }
 
