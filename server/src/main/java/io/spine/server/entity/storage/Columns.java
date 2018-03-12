@@ -75,7 +75,7 @@ public class Columns {
     }
 
     /**
-     * Retrieves {@linkplain EntityColumn columns} for the given {@code Entity} class.
+     * Retrieves {@linkplain EntityColumn columns} for the given {@link Entity} class.
      *
      * <p>Performs checks for the entity column definitions correctness along the way.
      *
