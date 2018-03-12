@@ -21,6 +21,7 @@ package io.spine.server.procman;
 
 import io.spine.annotation.SPI;
 import io.spine.core.EventEnvelope;
+import io.spine.server.sharding.EventShardedStream;
 
 /**
  * A strategy on delivering the events to the instances of a certain process manager type.
@@ -31,7 +32,8 @@ import io.spine.core.EventEnvelope;
  */
 @SPI
 public abstract class PmEventDelivery<I, P extends ProcessManager<I, ?, ?>>
-        extends PmEndpointDelivery<I, P, EventEnvelope> {
+        extends PmEndpointDelivery<I, P, EventEnvelope,
+                                   EventShardedStream<I>, EventShardedStream.Builder<I>> {
 
     protected PmEventDelivery(ProcessManagerRepository<I, P, ?> repository) {
         super(repository);
@@ -45,6 +47,11 @@ public abstract class PmEventDelivery<I, P extends ProcessManager<I, ?, ?>>
     public static <I, A extends ProcessManager<I, ?, ?>>
     PmEventDelivery<I, A> directDelivery(ProcessManagerRepository<I, A, ?> repository) {
         return new Direct<>(repository);
+    }
+
+    @Override
+    protected EventShardedStream.Builder<I> newShardedStreamBuilder() {
+        return EventShardedStream.newBuilder();
     }
 
     /**

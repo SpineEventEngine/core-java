@@ -19,7 +19,9 @@
  */
 package io.spine.server.sharding;
 
+import io.spine.core.BoundedContextName;
 import io.spine.core.MessageEnvelope;
+import io.spine.server.transport.TransportFactory;
 
 /**
  * @author Alex Tymchenko
@@ -29,4 +31,8 @@ public interface ShardedStreamConsumer<I, E extends MessageEnvelope<?, ?, ?>> {
     ShardConsumerId getConsumerId();
 
     void onNext(I targetId, E envelope);
+
+    ShardedStream<I, E> bindToTransport(BoundedContextName name,
+                                        ShardingKey key,
+                                        TransportFactory transportFactory);
 }

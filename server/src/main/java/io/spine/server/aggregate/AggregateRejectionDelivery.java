@@ -20,6 +20,7 @@
 package io.spine.server.aggregate;
 
 import io.spine.core.RejectionEnvelope;
+import io.spine.server.sharding.RejectionShardedStream;
 
 /**
  * A strategy on delivering the rejections to the instances of a certain aggregate type.
@@ -29,7 +30,8 @@ import io.spine.core.RejectionEnvelope;
  * @author Alex Tymchenko
  */
 public abstract class AggregateRejectionDelivery<I, A extends Aggregate<I, ?, ?>>
-        extends AggregateEndpointDelivery<I, A, RejectionEnvelope> {
+        extends AggregateEndpointDelivery<I, A, RejectionEnvelope,
+                                    RejectionShardedStream<I>, RejectionShardedStream.Builder<I>> {
 
     protected AggregateRejectionDelivery(AggregateRepository<I, A> repository) {
         super(repository);
@@ -44,6 +46,11 @@ public abstract class AggregateRejectionDelivery<I, A extends Aggregate<I, ?, ?>
     public static <I, A extends Aggregate<I, ?, ?>>
     AggregateRejectionDelivery<I, A> directDelivery(AggregateRepository<I, A> repository) {
         return new Direct<>(repository);
+    }
+
+    @Override
+    protected RejectionShardedStream.Builder<I> newShardedStreamBuilder() {
+        return RejectionShardedStream.newBuilder();
     }
 
     /**

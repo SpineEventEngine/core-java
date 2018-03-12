@@ -21,11 +21,9 @@ package io.spine.server.sharding;
 
 import com.google.common.collect.Maps;
 import io.spine.core.BoundedContextName;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.MessageEnvelope;
 import io.spine.server.model.ModelClass;
 import io.spine.server.transport.TransportFactory;
-import io.spine.type.ClassName;
 
 import java.util.Map;
 import java.util.Set;
@@ -44,7 +42,7 @@ public class InProcessSharding implements Sharding {
 
     @Override
     public void register(Shardable<?> shardable) throws NoShardAvailableException {
-        final Iterable<ShardedStreamConsumer> consumers = shardable.getMessageConsumers();
+        final Iterable<ShardedStreamConsumer<?, ?>> consumers = shardable.getMessageConsumers();
         if (!consumers.iterator()
                       .hasNext()) {
             return;
@@ -52,20 +50,12 @@ public class InProcessSharding implements Sharding {
         final BoundedContextName bcName = shardable.getBoundedContextName();
         final ShardingKey shardingKey = getShardingKey(shardable.getModelClass(),
                                                        shardable.getShardingStrategy());
-        for (ShardedStreamConsumer consumer : consumers) {
+        for (ShardedStreamConsumer<?, ?> consumer : consumers) {
+            final ShardedStream<?, ?> stream = consumer.bindToTransport(bcName,
+                                                                        shardingKey,
+                                                                        transportFactory);
             final ShardConsumerId consumerId = consumer.getConsumerId();
-            final ClassName className = consumerId.getObservedMsgType();
-            if (className.equals(ClassName.of(CommandEnvelope.class))) {
-                //TODO:2018-03-8:alex.tymchenko: deal with the proper creation.
-                // Static methods of the supported-message-types enum?
-                final CommandShardedStream<Object> stream =
-                        new CommandShardedStream<>(shardingKey,
-                                                   transportFactory,
-                                                   bcName);
-                stream.setConsumer(consumer);
-                streams.put(consumerId,
-                            stream);
-            }
+            streams.put(consumerId, stream);
         }
     }
 

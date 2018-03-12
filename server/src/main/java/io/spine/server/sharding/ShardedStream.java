@@ -49,12 +49,12 @@ public abstract class ShardedStream<I, E extends MessageEnvelope<?, ?, ?>> {
     @Nullable
     private ExternalMessageObserver channelObserver;
 
-    ShardedStream(ShardingKey key, TransportFactory transportFactory, BoundedContextName name) {
-        this.transportFactory = transportFactory;
-        this.boundedContextName = name;
-        this.key = key;
+    ShardedStream(AbstractBuilder<?, ? extends ShardedStream> builder) {
+        this.transportFactory = builder.transportFactory;
+        this.boundedContextName = builder.boundedContextName;
+        this.key = builder.key;
         final Class<E> envelopeCls = getEnvelopeClass();
-        this.channelId = toChannelId(name, key, envelopeCls);
+        this.channelId = toChannelId(builder.boundedContextName, key, envelopeCls);
     }
 
     @SuppressWarnings("unchecked")  // Ensured by the generic type definition.
@@ -161,6 +161,50 @@ public abstract class ShardedStream<I, E extends MessageEnvelope<?, ?, ?>> {
         @Override
         public Class<?> getArgumentIn(Class<? extends ShardedStream> cls) {
             return Default.getArgument(this, cls);
+        }
+    }
+
+    public abstract static class AbstractBuilder<B extends AbstractBuilder<B, S>,
+                                                 S extends ShardedStream<?, ?>> {
+
+        private BoundedContextName boundedContextName;
+        private ShardingKey key;
+        private TransportFactory transportFactory;
+
+        /** Prevents the instantiation of this builder. */
+        protected AbstractBuilder() {}
+
+        public BoundedContextName getBoundedContextName() {
+            return boundedContextName;
+        }
+
+        public B setBoundedContextName(BoundedContextName boundedContextName) {
+            checkNotNull(boundedContextName);
+            this.boundedContextName = boundedContextName;
+            return thisAsB();
+        }
+
+        public ShardingKey getKey() {
+            return key;
+        }
+
+        public B setKey(ShardingKey key) {
+            checkNotNull(key);
+            this.key = key;
+            return thisAsB();
+        }
+
+        @SuppressWarnings("unchecked")
+        private B thisAsB() {
+            return (B) this;
+        }
+        protected abstract S createStream();
+
+        public S build(TransportFactory transportFactory) {
+            checkNotNull(transportFactory);
+            this.transportFactory = transportFactory;
+            final S result = createStream();
+            return result;
         }
     }
 }

@@ -23,6 +23,7 @@ package io.spine.server.projection;
 import io.spine.annotation.SPI;
 import io.spine.core.EventEnvelope;
 import io.spine.server.delivery.EndpointDelivery;
+import io.spine.server.sharding.EventShardedStream;
 
 /**
  * A strategy on delivering the events to the instances of a certain projection type.
@@ -33,7 +34,8 @@ import io.spine.server.delivery.EndpointDelivery;
  */
 @SPI
 public abstract class ProjectionEventDelivery<I, P extends Projection<I, ?, ?>>
-        extends EndpointDelivery<I, P, EventEnvelope> {
+        extends EndpointDelivery<I, P, EventEnvelope,
+                                 EventShardedStream<I>, EventShardedStream.Builder<I>> {
 
     protected ProjectionEventDelivery(ProjectionRepository<I, P, ?> repository) {
         super(repository, repository.projectionClass());
@@ -57,6 +59,11 @@ public abstract class ProjectionEventDelivery<I, P extends Projection<I, ?, ?>>
     @Override
     protected void passToEndpoint(I id, EventEnvelope event) {
         getEndpoint(event).deliverNowTo(id);
+    }
+
+    @Override
+    protected EventShardedStream.Builder<I> newShardedStreamBuilder() {
+        return EventShardedStream.newBuilder();
     }
 
     /**

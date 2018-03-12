@@ -21,6 +21,7 @@ package io.spine.server.aggregate;
 
 import io.spine.annotation.SPI;
 import io.spine.core.CommandEnvelope;
+import io.spine.server.sharding.CommandShardedStream;
 
 /**
  * A strategy on delivering the commands to the instances of a certain aggregate type.
@@ -30,8 +31,9 @@ import io.spine.core.CommandEnvelope;
  * @author Alex Tymchenko
  */
 @SPI
-public abstract class AggregateCommandDelivery <I, A extends Aggregate<I, ?, ?>>
-        extends AggregateEndpointDelivery<I, A, CommandEnvelope> {
+public abstract class AggregateCommandDelivery<I, A extends Aggregate<I, ?, ?>>
+        extends AggregateEndpointDelivery<I, A, CommandEnvelope,
+                                        CommandShardedStream<I>, CommandShardedStream.Builder<I>> {
 
     protected AggregateCommandDelivery(AggregateRepository<I, A> repository) {
         super(repository);
@@ -46,6 +48,11 @@ public abstract class AggregateCommandDelivery <I, A extends Aggregate<I, ?, ?>>
     public static <I, A extends Aggregate<I, ?, ?>>
     AggregateCommandDelivery<I, A> directDelivery(AggregateRepository<I, A> repository) {
         return new Direct<>(repository);
+    }
+
+    @Override
+    protected CommandShardedStream.Builder<I> newShardedStreamBuilder() {
+        return CommandShardedStream.newBuilder();
     }
 
     /**

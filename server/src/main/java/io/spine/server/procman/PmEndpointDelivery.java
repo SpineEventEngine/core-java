@@ -22,6 +22,7 @@ package io.spine.server.procman;
 import io.spine.annotation.SPI;
 import io.spine.core.ActorMessageEnvelope;
 import io.spine.server.delivery.EndpointDelivery;
+import io.spine.server.sharding.ShardedStream;
 
 /**
  * A strategy on delivering the messages to the instances of a certain process manager type.
@@ -34,8 +35,10 @@ import io.spine.server.delivery.EndpointDelivery;
 @SPI
 public abstract class PmEndpointDelivery<I,
                                          P extends ProcessManager<I, ?, ?>,
-                                         M extends ActorMessageEnvelope<?, ?, ?>>
-        extends EndpointDelivery<I, P, M> {
+                                         M extends ActorMessageEnvelope<?, ?, ?>,
+                                         S extends ShardedStream<I, M>,
+                                         B extends ShardedStream.AbstractBuilder<B, S>>
+        extends EndpointDelivery<I, P, M, S, B> {
 
     protected PmEndpointDelivery(ProcessManagerRepository<I, P, ?> repository) {
         super(repository, repository.processManagerClass());

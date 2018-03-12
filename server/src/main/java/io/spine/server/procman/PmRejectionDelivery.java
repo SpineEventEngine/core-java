@@ -21,6 +21,7 @@ package io.spine.server.procman;
 
 import io.spine.annotation.SPI;
 import io.spine.core.RejectionEnvelope;
+import io.spine.server.sharding.RejectionShardedStream;
 
 /**
  * A strategy on delivering the rejections to the instances of a certain process manager type.
@@ -31,7 +32,8 @@ import io.spine.core.RejectionEnvelope;
  */
 @SPI
 public abstract class PmRejectionDelivery<I, P extends ProcessManager<I, ?, ?>>
-        extends PmEndpointDelivery<I, P, RejectionEnvelope> {
+        extends PmEndpointDelivery<I, P, RejectionEnvelope,
+                                   RejectionShardedStream<I>, RejectionShardedStream.Builder<I>> {
 
     protected PmRejectionDelivery(ProcessManagerRepository<I, P, ?> repository) {
         super(repository);
@@ -45,6 +47,11 @@ public abstract class PmRejectionDelivery<I, P extends ProcessManager<I, ?, ?>>
     public static <I, A extends ProcessManager<I, ?, ?>>
     PmRejectionDelivery<I, A> directDelivery(ProcessManagerRepository<I, A, ?> repository) {
         return new Direct<>(repository);
+    }
+
+    @Override
+    protected RejectionShardedStream.Builder<I> newShardedStreamBuilder() {
+        return RejectionShardedStream.newBuilder();
     }
 
     /**

@@ -78,7 +78,7 @@ class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
     }
 
     @Override
-    protected EndpointDelivery<I, P, EventEnvelope> getEndpointDelivery(EventEnvelope event) {
+    protected EndpointDelivery<I, P, EventEnvelope, ?, ?> getEndpointDelivery(EventEnvelope event) {
         return repository().getEndpointDelivery();
     }
 

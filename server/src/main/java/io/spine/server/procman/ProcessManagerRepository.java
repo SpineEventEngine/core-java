@@ -39,7 +39,6 @@ import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcherDelegate;
 import io.spine.server.commandbus.CommandErrorHandler;
 import io.spine.server.commandbus.DelegatingCommandDispatcher;
-import io.spine.server.delivery.EndpointDelivery;
 import io.spine.server.entity.EventDispatchingRepository;
 import io.spine.server.event.EventBus;
 import io.spine.server.integration.ExternalMessageClass;
@@ -415,12 +414,11 @@ public abstract class ProcessManagerRepository<I,
     }
 
     @Override
-    public Iterable<ShardedStreamConsumer> getMessageConsumers() {
-        final EndpointDelivery<I, P, CommandEnvelope> cmdDelivery = getCommandEndpointDelivery();
-        final EndpointDelivery<I, P, EventEnvelope> eventDelivery = getEventEndpointDelivery();
-        final EndpointDelivery<I, P, RejectionEnvelope> rjDelivery = getRejectionEndpointDelivery();
-        final Iterable<ShardedStreamConsumer> result =
-                ImmutableList.<ShardedStreamConsumer>of(cmdDelivery, eventDelivery, rjDelivery);
+    public Iterable<ShardedStreamConsumer<?, ?>> getMessageConsumers() {
+        final Iterable<ShardedStreamConsumer<?, ?>> result =
+                ImmutableList.<ShardedStreamConsumer<?, ?>>of(getCommandEndpointDelivery(),
+                                                              getEventEndpointDelivery(),
+                                                              getRejectionEndpointDelivery());
         return result;
     }
 

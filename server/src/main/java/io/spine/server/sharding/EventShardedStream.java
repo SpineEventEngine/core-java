@@ -20,8 +20,8 @@
 package io.spine.server.sharding;
 
 import com.google.protobuf.Any;
-import io.spine.core.Command;
-import io.spine.core.CommandEnvelope;
+import io.spine.core.Event;
+import io.spine.core.EventEnvelope;
 import io.spine.protobuf.AnyPacker;
 
 import javax.annotation.Nullable;
@@ -29,12 +29,12 @@ import javax.annotation.Nullable;
 /**
  * @author Alex Tymchenko
  */
-public class CommandShardedStream<I> extends ShardedStream<I, CommandEnvelope> {
+public class EventShardedStream<I> extends ShardedStream<I, EventEnvelope> {
 
     @Nullable
-    private ShardedMessageConverter<I, CommandEnvelope> converter;
+    private ShardedMessageConverter<I, EventEnvelope> converter;
 
-    private CommandShardedStream(Builder<I> builder) {
+    private EventShardedStream(Builder<I> builder) {
         super(builder);
     }
 
@@ -43,27 +43,27 @@ public class CommandShardedStream<I> extends ShardedStream<I, CommandEnvelope> {
     }
 
     @Override
-    protected ShardedMessageConverter<I, CommandEnvelope> converter() {
+    protected ShardedMessageConverter<I, EventEnvelope> converter() {
         if (converter == null) {
             converter = new Converter<>();
         }
         return converter;
     }
 
-    private static class Converter<I> extends ShardedMessageConverter<I, CommandEnvelope> {
+    private static class Converter<I> extends ShardedMessageConverter<I, EventEnvelope> {
 
         @Override
-        protected CommandEnvelope toEnvelope(Any packedEnvelope) {
-            final Command command = AnyPacker.unpack(packedEnvelope);
-            final CommandEnvelope result = CommandEnvelope.of(command);
+        protected EventEnvelope toEnvelope(Any packedEnvelope) {
+            final Event event = AnyPacker.unpack(packedEnvelope);
+            final EventEnvelope result = EventEnvelope.of(event);
             return result;
         }
     }
 
-    public static class Builder<I> extends AbstractBuilder<Builder<I>, CommandShardedStream<I>> {
+    public static class Builder<I> extends AbstractBuilder<Builder<I>, EventShardedStream<I>> {
         @Override
-        protected CommandShardedStream<I> createStream() {
-            return new CommandShardedStream<>(this);
+        protected EventShardedStream<I> createStream() {
+            return new EventShardedStream<>(this);
         }
     }
 }

@@ -22,6 +22,7 @@ package io.spine.server.aggregate;
 import io.spine.annotation.SPI;
 import io.spine.core.ActorMessageEnvelope;
 import io.spine.server.delivery.EndpointDelivery;
+import io.spine.server.sharding.ShardedStream;
 
 /**
  * A strategy on delivering the messages to the instances of a certain aggregate type.
@@ -34,8 +35,10 @@ import io.spine.server.delivery.EndpointDelivery;
 @SPI
 public abstract class AggregateEndpointDelivery<I,
                                                 A extends Aggregate<I, ?, ?>,
-                                                E extends ActorMessageEnvelope<?, ?, ?>>
-        extends EndpointDelivery<I, A, E> {
+                                                E extends ActorMessageEnvelope<?, ?, ?>,
+                                                S extends ShardedStream<I, E>,
+                                                B extends ShardedStream.AbstractBuilder<B, S>>
+        extends EndpointDelivery<I, A, E, S, B> {
 
     AggregateEndpointDelivery(AggregateRepository<I, A> repository) {
         super(repository, repository.aggregateClass());

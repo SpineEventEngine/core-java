@@ -21,6 +21,7 @@ package io.spine.server.procman;
 
 import io.spine.annotation.SPI;
 import io.spine.core.CommandEnvelope;
+import io.spine.server.sharding.CommandShardedStream;
 
 /**
  * A strategy on delivering the ecommandsvents to the instances of a certain process manager type.
@@ -31,7 +32,8 @@ import io.spine.core.CommandEnvelope;
  */
 @SPI
 public abstract class PmCommandDelivery<I, P extends ProcessManager<I, ?, ?>>
-        extends PmEndpointDelivery<I, P, CommandEnvelope> {
+        extends PmEndpointDelivery<I, P, CommandEnvelope,
+                                   CommandShardedStream<I>, CommandShardedStream.Builder<I>> {
 
     protected PmCommandDelivery(ProcessManagerRepository<I, P, ?> repository) {
         super(repository);
@@ -45,6 +47,11 @@ public abstract class PmCommandDelivery<I, P extends ProcessManager<I, ?, ?>>
     public static <I, A extends ProcessManager<I, ?, ?>>
     PmCommandDelivery<I, A> directDelivery(ProcessManagerRepository<I, A, ?> repository) {
         return new Direct<>(repository);
+    }
+
+    @Override
+    protected CommandShardedStream.Builder<I> newShardedStreamBuilder() {
+        return CommandShardedStream.newBuilder();
     }
 
     /**

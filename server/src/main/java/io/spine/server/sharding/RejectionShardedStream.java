@@ -20,8 +20,8 @@
 package io.spine.server.sharding;
 
 import com.google.protobuf.Any;
-import io.spine.core.Command;
-import io.spine.core.CommandEnvelope;
+import io.spine.core.Rejection;
+import io.spine.core.RejectionEnvelope;
 import io.spine.protobuf.AnyPacker;
 
 import javax.annotation.Nullable;
@@ -29,12 +29,12 @@ import javax.annotation.Nullable;
 /**
  * @author Alex Tymchenko
  */
-public class CommandShardedStream<I> extends ShardedStream<I, CommandEnvelope> {
+public class RejectionShardedStream<I> extends ShardedStream<I, RejectionEnvelope> {
 
     @Nullable
-    private ShardedMessageConverter<I, CommandEnvelope> converter;
+    private ShardedMessageConverter<I, RejectionEnvelope> converter;
 
-    private CommandShardedStream(Builder<I> builder) {
+    private RejectionShardedStream(Builder<I> builder) {
         super(builder);
     }
 
@@ -43,27 +43,27 @@ public class CommandShardedStream<I> extends ShardedStream<I, CommandEnvelope> {
     }
 
     @Override
-    protected ShardedMessageConverter<I, CommandEnvelope> converter() {
+    protected ShardedMessageConverter<I, RejectionEnvelope> converter() {
         if (converter == null) {
             converter = new Converter<>();
         }
         return converter;
     }
 
-    private static class Converter<I> extends ShardedMessageConverter<I, CommandEnvelope> {
+    private static class Converter<I> extends ShardedMessageConverter<I, RejectionEnvelope> {
 
         @Override
-        protected CommandEnvelope toEnvelope(Any packedEnvelope) {
-            final Command command = AnyPacker.unpack(packedEnvelope);
-            final CommandEnvelope result = CommandEnvelope.of(command);
+        protected RejectionEnvelope toEnvelope(Any packedEnvelope) {
+            final Rejection rejection = AnyPacker.unpack(packedEnvelope);
+            final RejectionEnvelope result = RejectionEnvelope.of(rejection);
             return result;
         }
     }
 
-    public static class Builder<I> extends AbstractBuilder<Builder<I>, CommandShardedStream<I>> {
+    public static class Builder<I> extends AbstractBuilder<Builder<I>, RejectionShardedStream<I>> {
         @Override
-        protected CommandShardedStream<I> createStream() {
-            return new CommandShardedStream<>(this);
+        protected RejectionShardedStream<I> createStream() {
+            return new RejectionShardedStream<>(this);
         }
     }
 }

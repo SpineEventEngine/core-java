@@ -281,9 +281,9 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     }
 
     @Override
-    public Iterable<ShardedStreamConsumer> getMessageConsumers() {
-        final Iterable<ShardedStreamConsumer> result =
-                ImmutableList.<ShardedStreamConsumer>of(getEndpointDelivery());
+    public Iterable<ShardedStreamConsumer<?, ?>> getMessageConsumers() {
+        final Iterable<ShardedStreamConsumer<?, ?>> result =
+                ImmutableList.<ShardedStreamConsumer<?, ?>>of(getEndpointDelivery());
         return result;
     }
 

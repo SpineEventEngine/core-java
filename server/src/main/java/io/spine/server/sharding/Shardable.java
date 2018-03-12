@@ -29,7 +29,7 @@ public interface Shardable<E> {
 
     Sharding.Strategy getShardingStrategy();
 
-    Iterable<ShardedStreamConsumer> getMessageConsumers();
+    Iterable<ShardedStreamConsumer<?, ?>> getMessageConsumers();
 
     BoundedContextName getBoundedContextName();
 

@@ -19,7 +19,13 @@
  */
 package io.spine.server.sharding;
 
+import com.google.protobuf.Any;
+import com.google.protobuf.Message;
 import io.spine.core.MessageEnvelope;
+import io.spine.protobuf.AnyPacker;
+import io.spine.protobuf.TypeConverter;
+import io.spine.string.Stringifiers;
+import io.spine.time.Time;
 import io.spine.util.GenericTypeIndex;
 
 /**
@@ -27,11 +33,38 @@ import io.spine.util.GenericTypeIndex;
  */
 abstract class ShardedMessageConverter<I, E extends MessageEnvelope<?, ?, ?>> {
 
-    protected abstract ShardedMessage convert(I id, E envelope);
+    protected abstract E toEnvelope(Any packedEnvelope);
 
-    protected abstract I targetIdOf(ShardedMessage message);
+    protected ShardedMessage convert(I targetId, E envelope) {
 
-    protected abstract E envelopeOf(ShardedMessage message);
+        final Message id = envelope.getId();
+        final Message originalMessage = envelope.getMessage();
+        final String stringId = Stringifiers.toString(id);
+        final ShardedMessageId shardedMessageId = ShardedMessageId.newBuilder()
+                                                                  .setValue(stringId)
+                                                                  .build();
+        final Any packedOriginalMsg = AnyPacker.pack(originalMessage);
+        final Any packedTargetId = AnyPacker.pack(TypeConverter.toMessage(targetId));
+        final ShardedMessage result = ShardedMessage.newBuilder()
+                                                    .setId(shardedMessageId)
+                                                    .setTargetId(packedTargetId)
+                                                    .setOriginalMessage(packedOriginalMsg)
+                                                    .setWhenSharded(Time.getCurrentTime())
+                                                    .build();
+        return result;
+    }
+
+    protected I targetIdOf(ShardedMessage message) {
+        final Any asAny = message.getTargetId();
+        final I result = TypeConverter.toObject(asAny, getIdClass());
+        return result;
+    }
+
+    protected E envelopeOf(ShardedMessage message) {
+        final Any packedEnvelope = message.getOriginalMessage();
+        final E result = toEnvelope(packedEnvelope);
+        return result;
+    }
 
     @SuppressWarnings("unchecked") // Ensured by the generic type definition.
     protected Class<I> getIdClass() {

@@ -21,6 +21,7 @@ package io.spine.server.aggregate;
 
 import io.spine.annotation.SPI;
 import io.spine.core.EventEnvelope;
+import io.spine.server.sharding.EventShardedStream;
 
 /**
  * A strategy on delivering the events to the instances of a certain aggregate type.
@@ -31,7 +32,8 @@ import io.spine.core.EventEnvelope;
  */
 @SPI
 public abstract class AggregateEventDelivery<I, A extends Aggregate<I, ?, ?>>
-        extends AggregateEndpointDelivery<I, A, EventEnvelope> {
+        extends AggregateEndpointDelivery<I, A, EventEnvelope,
+                                            EventShardedStream<I>, EventShardedStream.Builder<I>> {
 
     protected AggregateEventDelivery(AggregateRepository<I, A> repository) {
         super(repository);
@@ -45,6 +47,11 @@ public abstract class AggregateEventDelivery<I, A extends Aggregate<I, ?, ?>>
     public static <I, A extends Aggregate<I, ?, ?>>
     AggregateEventDelivery<I, A> directDelivery(AggregateRepository<I, A> repository) {
         return new Direct<>(repository);
+    }
+
+    @Override
+    protected EventShardedStream.Builder<I> newShardedStreamBuilder() {
+        return EventShardedStream.newBuilder();
     }
 
     /**

@@ -21,14 +21,18 @@ package io.spine.server.delivery;
 
 import io.spine.annotation.Internal;
 import io.spine.core.ActorMessageEnvelope;
+import io.spine.core.BoundedContextName;
 import io.spine.core.TenantId;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityMessageEndpoint;
 import io.spine.server.entity.Repository;
 import io.spine.server.model.ModelClass;
 import io.spine.server.sharding.ShardConsumerId;
+import io.spine.server.sharding.ShardedStream;
 import io.spine.server.sharding.ShardedStreamConsumer;
+import io.spine.server.sharding.ShardingKey;
 import io.spine.server.tenant.TenantAwareOperation;
+import io.spine.server.transport.TransportFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +55,9 @@ import org.slf4j.LoggerFactory;
 @Internal
 public abstract class EndpointDelivery<I,
                                        E extends Entity<I, ?>,
-                                       M extends ActorMessageEnvelope<?, ?, ?>>
+                                       M extends ActorMessageEnvelope<?, ?, ?>,
+                                       S extends ShardedStream<I, M>,
+                                       B extends ShardedStream.AbstractBuilder<B, S>>
         implements ShardedStreamConsumer<I, M> {
 
     private final Repository<I, E> repository;
@@ -85,6 +91,8 @@ public abstract class EndpointDelivery<I,
      * @return the message endpoint
      */
     protected abstract EntityMessageEndpoint<I, E, M, ?> getEndpoint(M messageEnvelope);
+
+    protected abstract B newShardedStreamBuilder();
 
     @Override
     public ShardConsumerId getConsumerId() {
@@ -123,6 +131,18 @@ public abstract class EndpointDelivery<I,
 
     protected Repository<I, E> repository() {
         return repository;
+    }
+
+    @Override
+    public ShardedStream<I, M> bindToTransport(BoundedContextName name,
+                                               ShardingKey key,
+                                               TransportFactory transportFactory) {
+        final ShardedStream<I, M> stream =
+                newShardedStreamBuilder().setBoundedContextName(name)
+                                         .setKey(key)
+                                         .build(transportFactory);
+        stream.setConsumer(this);
+        return stream;
     }
 
     @Override

@@ -36,7 +36,6 @@ import io.spine.server.BoundedContext;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.commandbus.CommandErrorHandler;
-import io.spine.server.delivery.EndpointDelivery;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.DelegatingEventDispatcher;
@@ -563,7 +562,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * @return delivery strategy for events applied to the instances managed by this repository
      */
     @SPI
-    protected AggregateEndpointDelivery<I, A, EventEnvelope> getEventEndpointDelivery() {
+    protected AggregateEndpointDelivery<I, A, EventEnvelope, ?, ?> getEventEndpointDelivery() {
         return AggregateEventDelivery.directDelivery(this);
     }
 
@@ -579,7 +578,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * @return delivery strategy for rejections
      */
     @SPI
-    protected AggregateEndpointDelivery<I, A, RejectionEnvelope> getRejectionEndpointDelivery() {
+    protected AggregateEndpointDelivery<I, A, RejectionEnvelope, ?, ?>
+    getRejectionEndpointDelivery() {
         return AggregateRejectionDelivery.directDelivery(this);
     }
 
@@ -594,7 +594,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      *
      * @return delivery strategy for rejections
      */
-    protected AggregateEndpointDelivery<I, A, CommandEnvelope> getCommandEndpointDelivery() {
+    protected AggregateEndpointDelivery<I, A, CommandEnvelope, ?, ?> getCommandEndpointDelivery() {
         return AggregateCommandDelivery.directDelivery(this);
     }
 
@@ -617,12 +617,11 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
-    public Iterable<ShardedStreamConsumer> getMessageConsumers() {
-        final EndpointDelivery<I, A, CommandEnvelope> cmdDelivery = getCommandEndpointDelivery();
-        final EndpointDelivery<I, A, EventEnvelope> eventDelivery = getEventEndpointDelivery();
-        final EndpointDelivery<I, A, RejectionEnvelope> rjDelivery = getRejectionEndpointDelivery();
-        final Iterable<ShardedStreamConsumer> result =
-                ImmutableList.<ShardedStreamConsumer>of(cmdDelivery, eventDelivery, rjDelivery);
+    public Iterable<ShardedStreamConsumer<?, ?>> getMessageConsumers() {
+        final Iterable<ShardedStreamConsumer<?, ?>> result =
+                ImmutableList.<ShardedStreamConsumer<?, ?>>of(getCommandEndpointDelivery(),
+                                                              getEventEndpointDelivery(),
+                                                              getRejectionEndpointDelivery());
         return result;
     }
 

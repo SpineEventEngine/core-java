@@ -105,7 +105,7 @@ public abstract class EntityMessageEndpoint<I,
      */
     private void dispatchToOne(I entityId) {
         final M envelope = envelope();
-        final EndpointDelivery<I, E, M> delivery = getEndpointDelivery(envelope);
+        final EndpointDelivery<I, E, M, ?, ?> delivery = getEndpointDelivery(envelope);
         if(!delivery.shouldPostpone(entityId, envelope)) {
             deliverNowTo(entityId);
         }
@@ -133,7 +133,7 @@ public abstract class EntityMessageEndpoint<I,
      * @param envelope the envelope to obtain an instance of delivery for
      * @return the instance of endpoint delivery
      */
-    protected abstract EndpointDelivery<I, E, M> getEndpointDelivery(M envelope);
+    protected abstract EndpointDelivery<I, E, M, ?, ?> getEndpointDelivery(M envelope);
 
 
     /**
