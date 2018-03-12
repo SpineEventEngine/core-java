@@ -113,7 +113,6 @@ public class ColumnValueExtractor {
         return values;
     }
 
-
     /**
      * Checks if the given {@link Entity entity class} is public.
      *
