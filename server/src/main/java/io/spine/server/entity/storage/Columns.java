@@ -187,8 +187,8 @@ public class Columns {
      * <p>This way the process of {@linkplain Columns#obtainColumns(Class) obtaining columns} from
      * the given {@link Entity} class can be skipped.
      *
-     * <p>This method will return {@linkplain Collections#emptyMap() empty map} for non-public
-     * {@link Entity} classes.
+     * <p>This method will return {@linkplain Collections#emptyMap() empty map} for {@link Entity} classes
+     * that are non-public or cannot be subjected to column extraction for some other reason.
      *
      * @param entity        an {@link Entity} to get the {@linkplain EntityColumn column} values from
      * @param entityColumns {@linkplain EntityColumn entity columns} which values should be extracted
@@ -203,7 +203,7 @@ public class Columns {
         checkNotNull(entity);
 
         final Class<? extends Entity> entityClass = entity.getClass();
-        if (!isPublic(entityClass)) {
+        if (!canExtractColumns(entityClass)) {
             return Collections.emptyMap();
         }
 
@@ -219,7 +219,7 @@ public class Columns {
      * @param entityClass {@link Entity entity class} to check
      * @return {@code true} if class is public and {@code false} otherwise
      */
-    private static boolean isPublic(Class<? extends Entity> entityClass) {
+    private static boolean canExtractColumns(Class<? extends Entity> entityClass) {
         checkNotNull(entityClass);
 
         final int modifiers = entityClass.getModifiers();
@@ -227,7 +227,6 @@ public class Columns {
             logNonPublicClass(entityClass);
             return false;
         }
-
         return true;
     }
 
