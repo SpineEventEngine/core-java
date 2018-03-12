@@ -103,23 +103,8 @@ public class ColumnsShould {
         final EntityWithManyGetters entity = new EntityWithManyGetters(STRING_ID);
         final Collection<EntityColumn> entityColumns = getAllColumns(entity.getClass());
         final Map<String, EntityColumn.MemoizedValue> fields = extractColumnValues(entity, entityColumns);
-        assertNotNull(fields);
 
-        assertSize(3, fields);
-
-        final String floatNullKey = "floatNull";
-        final EntityColumn.MemoizedValue floatMemoizedNull = fields.get(floatNullKey);
-        assertNotNull(floatMemoizedNull);
-        assertNull(floatMemoizedNull.getValue());
-
-        assertEquals(entity.getIntegerFieldValue(),
-                fields.get(CUSTOM_COLUMN_NAME)
-                        .getValue());
-
-        final String messageKey = "someMessage";
-        assertEquals(entity.getSomeMessage(),
-                fields.get(messageKey)
-                        .getValue());
+        checkEntityWithManyGettersFields(entity, fields);
     }
 
     @Test
@@ -127,6 +112,17 @@ public class ColumnsShould {
         final EntityWithManyGetters entity = new EntityWithManyGetters(STRING_ID);
         final Collection<EntityColumn> entityColumns = getAllColumns(entity.getClass());
         final Map<String, EntityColumn.MemoizedValue> fields = extractColumnValues(entity, entityColumns);
+
+        checkEntityWithManyGettersFields(entity, fields);
+    }
+
+    /**
+     * Helper method that checks all {@link EntityWithManyGetters} fields to avoid code duplication,
+     * as {@link EntityWithManyGetters} is the main {@link Entity} class used to test
+     * {@linkplain Columns#extractColumnValues(Entity, Collection) column extraction} functionality.
+     */
+    private static void checkEntityWithManyGettersFields(EntityWithManyGetters entity,
+                                                         Map<String, EntityColumn.MemoizedValue> fields) {
         assertNotNull(fields);
 
         assertSize(3, fields);
