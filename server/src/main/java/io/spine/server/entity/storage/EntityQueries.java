@@ -88,9 +88,8 @@ public final class EntityQueries {
         return builder.build();
     }
 
-    private static Multimap<EntityColumn, ColumnFilter> splitFilters(
-            CompositeColumnFilter filter,
-            EntityColumnCache entityColumns) {
+    private static Multimap<EntityColumn, ColumnFilter> splitFilters(CompositeColumnFilter filter,
+                                                                     EntityColumnCache entityColumns) {
         final Multimap<EntityColumn, ColumnFilter> columnFilters =
                 create(filter.getFilterCount(), 1);
         for (ColumnFilter columnFilter : filter.getFilterList()) {
