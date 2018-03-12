@@ -461,6 +461,14 @@ public abstract class AggregateStorageShould
                                                .build());
     }
 
+    @Test
+    public void read_archived_and_deleted_records() {
+        readRecordsWithLifecycle(LifecycleFlags.newBuilder()
+                                               .setArchived(true)
+                                               .setDeleted(true)
+                                               .build());
+    }
+
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_try_to_write_event_count_to_closed_storage() {
         close(storage);
