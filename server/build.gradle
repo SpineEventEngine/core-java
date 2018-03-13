@@ -18,10 +18,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 dependencies {
-    compile(group: 'io.grpc', name: 'grpc-all', version: gRpcVersion) {
-        // TODO:2018-03-07:dmytro.dashenkov: https://github.com/SpineEventEngine/core-java/issues/680.
-        exclude module: 'grpc-testing'
-    }
+    compile "io.grpc:grpc-netty:$gRpcVersion"
+    compile "io.grpc:grpc-protobuf:$gRpcVersion"
+    compile "io.grpc:grpc-stub:$gRpcVersion"
 
     compile project(path: ':client')
 

@@ -485,6 +485,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     @Test
     public void update_entity_column_values() {
         final Project.Status initialStatus = DONE;
+        @SuppressWarnings("UnnecessaryLocalVariable") // is used for documentation purposes.
         final Project.Status statusAfterUpdate = CANCELLED;
         final Int32Value initialStatusValue = Int32Value.newBuilder()
                                                         .setValue(initialStatus.getNumber())
