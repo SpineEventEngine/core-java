@@ -73,7 +73,6 @@ public final class VisibilityGuard {
         final EntityClass<?> entityClass = repository.entityClass();
         final Class<? extends Message> stateClass = entityClass.getStateClass();
         checkNotAlreadyRegistered(stateClass);
-        repository.checkEntityColumnDefinitions();
         repositories.put(stateClass, new RepositoryAccess(repository));
     }
 

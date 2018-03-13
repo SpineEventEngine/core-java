@@ -376,23 +376,6 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     }
 
     /**
-     * Checks that {@link Column} definitions are correct for the {@link Entity} class
-     * managed by this repository.
-     *
-     * <p>This method relies on the {@linkplain Columns#checkColumnDefinitions(Class) Columns}
-     * utility to perform the check.
-     *
-     * <p>If {@link Column} definitions are incorrect, the {@link IllegalStateException}
-     * is thrown.
-     *
-     * @throws IllegalStateException in case entity column definitions are incorrect
-     */
-    @Internal
-    void checkEntityColumnDefinitions() {
-        checkColumnDefinitions(getEntityClass());
-    }
-
-    /**
      * Enumeration of generic type parameters of this class.
      */
     enum GenericParameter implements GenericTypeIndex<Repository> {

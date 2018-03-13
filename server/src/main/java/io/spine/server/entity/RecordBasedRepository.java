@@ -54,6 +54,7 @@ import static com.google.common.collect.Iterators.transform;
 import static com.google.common.collect.Maps.newHashMapWithExpectedSize;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.EntityWithLifecycle.Predicates.isEntityVisible;
+import static io.spine.server.entity.storage.Columns.checkColumnDefinitions;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -102,6 +103,13 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         @SuppressWarnings("unchecked") // OK as we control the creation in createStorage().
         final RecordStorage<I> storage = (RecordStorage<I>) getStorage();
         return storage;
+    }
+
+    @Override
+    public void onRegistered() {
+        super.onRegistered();
+
+        verifyEntityColumnDefinitions();
     }
 
     /** {@inheritDoc} */
@@ -396,27 +404,6 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         return recordWithColumns;
     }
 
-    /**
-     * Checks that {@link Column} definitions are correct for the {@link Entity} class
-     * managed by this repository, and, in case the repository {@linkplain RecordStorage storage}
-     * supports {@link EntityColumnCache}, caches {@link EntityColumn} definitions.
-     *
-     * <p>In case the cache is supported, the process of caching columns itself acts as a check,
-     * because {@linkplain Column columns} with incorrect definitions cannot be retrieved and stored.
-     *
-     * <p>If {@link Column} definitions are incorrect, the {@link IllegalStateException} is thrown.
-     *
-     * @throws IllegalStateException in case entity column definitions are incorrect
-     */
-    @Override
-    void checkEntityColumnDefinitions() {
-        if (recordStorage().supportsEntityColumnCache()) {
-            retrieveEntityColumnCache().ensureColumnsCached();
-        } else {
-            super.checkEntityColumnDefinitions();
-        }
-    }
-
     private E toEntity(EntityRecord record) {
         final E result = entityConverter().reverse()
                                           .convert(record);
@@ -432,6 +419,26 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      */
     private EntityColumnCache retrieveEntityColumnCache() {
         return recordStorage().getEntityColumnCache();
+    }
+
+    /**
+     * Checks that {@link Column} definitions are correct for the {@link Entity} class
+     * managed by this repository, and, in case the repository {@linkplain RecordStorage storage}
+     * supports {@link EntityColumnCache}, caches {@link EntityColumn} definitions.
+     *
+     * <p>In case the cache is supported, the process of caching columns itself acts as a check,
+     * because {@linkplain Column columns} with incorrect definitions cannot be retrieved and stored.
+     *
+     * <p>If {@link Column} definitions are incorrect, the {@link IllegalStateException} is thrown.
+     *
+     * @throws IllegalStateException in case entity column definitions are incorrect
+     */
+    private void verifyEntityColumnDefinitions() {
+        if (recordStorage().supportsEntityColumnCache()) {
+            retrieveEntityColumnCache().ensureColumnsCached();
+        } else {
+            checkColumnDefinitions(getEntityClass());
+        }
     }
 
     /**
