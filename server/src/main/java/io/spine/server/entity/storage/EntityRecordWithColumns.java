@@ -85,24 +85,6 @@ public final class EntityRecordWithColumns implements Serializable {
      * <p>Extracts {@linkplain EntityColumn column} values from the given {@linkplain Entity}
      * and then combines it with the given {@link EntityRecord}.
      *
-     * @param record the {@link EntityRecord} to create value from
-     * @param entity the {@link Entity} to extract {@linkplain EntityColumn column} values from
-     * @return new instance of {@link EntityRecordWithColumns}
-     */
-    public static EntityRecordWithColumns create(EntityRecord record,
-                                                 Entity entity) {
-        final Collection<EntityColumn> entityColumns = getAllColumns(entity.getClass());
-        final Map<String, EntityColumn.MemoizedValue> columns = extractColumnValues(entity, entityColumns);
-        return of(record, columns);
-    }
-
-    /**
-     * Creates a new instance of the {@code EntityRecordWithColumns} with
-     * {@link EntityColumn} values from the given {@linkplain Entity}.
-     *
-     * <p>Extracts {@linkplain EntityColumn column} values from the given {@linkplain Entity}
-     * and then combines it with the given {@link EntityRecord}.
-     *
      * <p>Uses {@linkplain EntityColumnCache cached entity columns} to extract the value from
      * the {@link Entity}. This way the {@linkplain Columns#getAllColumns(Class) column retrieval
      * operation} can be omitted in favor of the cached results of the previous operation.
@@ -181,7 +163,7 @@ public final class EntityRecordWithColumns implements Serializable {
      * <p>If returns {@code false}, the {@linkplain EntityColumn columns} are not considered
      * by the storage.
      *
-     * @return {@code true} if the object was constructed via {@link #create(EntityRecord, Entity)}
+     * @return {@code true} if the object was constructed via {@link #create(EntityRecord, Entity, EntityColumnCache)}
      *         and the entity has columns; {@code false} otherwise
      */
     public boolean hasColumns() {
