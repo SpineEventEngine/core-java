@@ -70,7 +70,7 @@ public class ColumnReader {
      * @param entityClass {@link Entity} class for which to create the instance
      * @return new instance of {@code ColumnReader} for the specified class
      */
-    static ColumnReader createForClass(Class<? extends Entity> entityClass) {
+    static ColumnReader forClass(Class<? extends Entity> entityClass) {
         checkNotNull(entityClass);
 
         return new ColumnReader(entityClass);

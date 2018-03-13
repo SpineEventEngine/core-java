@@ -22,7 +22,6 @@ package io.spine.server.entity.storage;
 
 import io.spine.annotation.Internal;
 import io.spine.server.entity.Entity;
-import io.spine.server.entity.storage.EntityColumn.MemoizedValue;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -88,7 +87,7 @@ public class Columns {
     static Collection<EntityColumn> getAllColumns(Class<? extends Entity> entityClass) {
         checkNotNull(entityClass);
 
-        final ColumnReader columnReader = ColumnReader.createForClass(entityClass);
+        final ColumnReader columnReader = ColumnReader.forClass(entityClass);
         final Collection<EntityColumn> entityColumns = columnReader.readColumns();
         return entityColumns;
     }
@@ -107,7 +106,7 @@ public class Columns {
         checkNotNull(entityClass);
         checkNotEmptyOrBlank(columnName, "entity column name");
 
-        final ColumnReader columnReader = ColumnReader.createForClass(entityClass);
+        final ColumnReader columnReader = ColumnReader.forClass(entityClass);
         final Collection<EntityColumn> entityColumns = columnReader.readColumns();
         for (EntityColumn column : entityColumns) {
             if (column.getName()

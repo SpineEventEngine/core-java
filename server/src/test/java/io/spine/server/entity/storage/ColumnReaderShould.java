@@ -46,7 +46,7 @@ public class ColumnReaderShould {
 
     @Test
     public void retrieve_entity_columns_from_class() {
-        final ColumnReader columnReader = ColumnReader.createForClass(EntityWithManyGetters.class);
+        final ColumnReader columnReader = ColumnReader.forClass(EntityWithManyGetters.class);
         final Collection<EntityColumn> entityColumns = columnReader.readColumns();
 
         assertSize(3, entityColumns);
@@ -57,7 +57,7 @@ public class ColumnReaderShould {
 
     @Test
     public void handle_class_without_columns() {
-        final ColumnReader columnReader = ColumnReader.createForClass(EntityWithNoStorageFields.class);
+        final ColumnReader columnReader = ColumnReader.forClass(EntityWithNoStorageFields.class);
         final Collection<EntityColumn> entityColumns = columnReader.readColumns();
 
         assertNotNull(entityColumns);
@@ -66,28 +66,28 @@ public class ColumnReaderShould {
 
     @Test(expected = IllegalStateException.class)
     public void throw_error_on_invalid_column_definitions() {
-        final ColumnReader columnReader = ColumnReader.createForClass(EntityWithRepeatedColumnNames.class);
+        final ColumnReader columnReader = ColumnReader.forClass(EntityWithRepeatedColumnNames.class);
         columnReader.readColumns();
     }
 
 
     @Test
     public void ignore_non_public_getters_with_column_annotation_from_super_class() {
-        final ColumnReader columnReader = ColumnReader.createForClass(EntityWithManyGettersDescendant.class);
+        final ColumnReader columnReader = ColumnReader.forClass(EntityWithManyGettersDescendant.class);
         final Collection<EntityColumn> entityColumns = columnReader.readColumns();
         assertSize(3, entityColumns);
     }
 
     @Test
     public void ignore_static_members() {
-        final ColumnReader columnReader = ColumnReader.createForClass(EntityWithManyGetters.class);
+        final ColumnReader columnReader = ColumnReader.forClass(EntityWithManyGetters.class);
         final Collection<EntityColumn> entityColumns = columnReader.readColumns();
         assertFalse(containsColumn(entityColumns, "staticMember"));
     }
 
     @Test
     public void handle_inherited_fields() {
-        final ColumnReader columnReader = ColumnReader.createForClass(RealLifeEntity.class);
+        final ColumnReader columnReader = ColumnReader.forClass(RealLifeEntity.class);
         final Collection<EntityColumn> entityColumns = columnReader.readColumns();
 
         assertSize(5, entityColumns);
@@ -100,7 +100,7 @@ public class ColumnReaderShould {
 
     @Test
     public void obtain_fields_from_implemented_interfaces() {
-        final ColumnReader columnReader = ColumnReader.createForClass(EntityWithColumnFromInterface.class);
+        final ColumnReader columnReader = ColumnReader.forClass(EntityWithColumnFromInterface.class);
         final Collection<EntityColumn> entityColumns = columnReader.readColumns();
 
         assertSize(1, entityColumns);
