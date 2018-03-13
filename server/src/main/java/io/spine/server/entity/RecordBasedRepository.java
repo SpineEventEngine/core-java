@@ -44,6 +44,7 @@ import io.spine.type.TypeUrl;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
+import javax.annotation.OverridingMethodsMustInvokeSuper;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
@@ -105,7 +106,14 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         return storage;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Verifies and, if possible, caches {@link Column} definitions of the {@link Entity} class
+     * managed by this repository.
+     */
     @Override
+    @OverridingMethodsMustInvokeSuper
     public void onRegistered() {
         super.onRegistered();
 
