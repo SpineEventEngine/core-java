@@ -405,11 +405,9 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
         }
 
         final RecordStorage<I> storage = repository.recordStorage();
-        if(storage.supportsEntityColumnCache()) {
-            final EntityColumnCache entityColumnCache = storage.getEntityColumnCache();
+        final EntityColumnCache entityColumnCache = storage.getEntityColumnCache();
 
-            // Verify that cache contains searched column
-            entityColumnCache.findColumn("idString");
-        }
+        // Verify that cache contains searched column
+        entityColumnCache.findColumn("idString");
     }
 }

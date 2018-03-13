@@ -47,17 +47,6 @@ public class InMemoryRecordStorage<I> extends RecordStorage<I> {
     private final StorageSpec<I> spec;
     private final MultitenantStorage<TenantRecords<I>> multitenantStorage;
 
-    InMemoryRecordStorage(StorageSpec<I> spec, boolean multitenant) {
-        super(multitenant);
-        this.spec = spec;
-        this.multitenantStorage = new MultitenantStorage<TenantRecords<I>>(multitenant) {
-            @Override
-            TenantRecords<I> createSlice() {
-                return new TenantRecords<>();
-            }
-        };
-    }
-
     InMemoryRecordStorage(StorageSpec<I> spec, boolean multitenant, Class<? extends Entity> entityClass) {
         super(multitenant, entityClass);
         this.spec = spec;
@@ -69,20 +58,6 @@ public class InMemoryRecordStorage<I> extends RecordStorage<I> {
         };
     }
 
-    /**
-     * Creates an instance of {@link InMemoryRecordStorage} which doesn't support the {@link EntityColumnCache}.
-     *
-     * <p>Calls to the {@linkplain RecordStorage#getEntityColumnCache() cache retrieval method} of such
-     * storage will result into the {@link IllegalStateException}.
-     */
-    protected static <I> InMemoryRecordStorage<I> newInstance(StorageSpec<I> spec,
-                                                              boolean multitenant) {
-        return new InMemoryRecordStorage<>(spec, multitenant);
-    }
-
-    /**
-     * Creates an instance of {@link InMemoryRecordStorage} which supports the {@link EntityColumnCache}.
-     */
     protected static <I> InMemoryRecordStorage<I> newInstance(StorageSpec<I> spec,
                                                               boolean multitenant,
                                                               Class<? extends Entity> entityClass) {

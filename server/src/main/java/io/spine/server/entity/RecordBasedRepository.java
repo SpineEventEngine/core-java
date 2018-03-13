@@ -109,15 +109,14 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     /**
      * {@inheritDoc}
      *
-     * <p>Verifies and, if possible, caches {@link Column} definitions of the {@link Entity} class
-     * managed by this repository.
+     * <p>Caches {@link Column} definitions of the {@link Entity} class managed by this repository.
      */
     @Override
     @OverridingMethodsMustInvokeSuper
     public void onRegistered() {
         super.onRegistered();
 
-        verifyEntityColumnDefinitions();
+        cacheEntityColumns();
     }
 
     /** {@inheritDoc} */
@@ -430,23 +429,17 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     }
 
     /**
-     * Checks that {@link Column} definitions are correct for the {@link Entity} class
-     * managed by this repository, and, in case the repository {@linkplain RecordStorage storage}
-     * supports {@link EntityColumnCache}, caches {@link EntityColumn} definitions.
+     * Caches {@link Column} definitions of the {@link Entity} class managed by this repository.
      *
-     * <p>In case the cache is supported, the process of caching columns itself acts as a check,
+     * <p>The process of caching columns also acts as a check of {@link Column} definitions,
      * because {@linkplain Column columns} with incorrect definitions cannot be retrieved and stored.
      *
      * <p>If {@link Column} definitions are incorrect, the {@link IllegalStateException} is thrown.
      *
      * @throws IllegalStateException in case entity column definitions are incorrect
      */
-    private void verifyEntityColumnDefinitions() {
-        if (recordStorage().supportsEntityColumnCache()) {
-            retrieveEntityColumnCache().ensureColumnsCached();
-        } else {
-            checkColumnDefinitions(getEntityClass());
-        }
+    private void cacheEntityColumns() {
+        retrieveEntityColumnCache().ensureColumnsCached();
     }
 
     /**

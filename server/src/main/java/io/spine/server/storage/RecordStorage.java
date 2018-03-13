@@ -35,7 +35,9 @@ import io.spine.server.entity.storage.EntityColumn;
 import io.spine.server.entity.storage.EntityColumnCache;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
+import io.spine.server.projection.ProjectionStorage;
 import io.spine.server.stand.AggregateStateId;
+import io.spine.server.stand.StandStorage;
 import io.spine.type.TypeUrl;
 
 import java.util.Iterator;
@@ -63,8 +65,12 @@ public abstract class RecordStorage<I>
     /**
      * Creates an instance of {@link RecordStorage} which doesn't support the {@link EntityColumnCache}.
      *
-     * <p>Calls to the {@linkplain RecordStorage#getEntityColumnCache() cache retrieval method} of such
-     * storage will result into the {@link IllegalStateException}.
+     * <p>This creation method should only be used for the {@link RecordStorage} descendants, that are
+     * containers for the other {@link RecordStorage} instance, which actually supports
+     * {@link EntityColumnCache}, for example: {@link ProjectionStorage}, {@link StandStorage}.
+     *
+     * <p>Instances created by this constructor should override {@link RecordStorage#getEntityColumnCache()}
+     * method.
      */
     protected RecordStorage(boolean multitenant) {
         super(multitenant);
@@ -274,14 +280,9 @@ public abstract class RecordStorage<I>
     }
 
     @Internal
-    public boolean supportsEntityColumnCache() {
-        return entityColumnCache != null;
-    }
-
-    @Internal
     public EntityColumnCache getEntityColumnCache() {
         if (entityColumnCache == null) {
-            throw new IllegalStateException("This storage does not support entity column cache.");
+            throw new IllegalStateException("Entity column cache not initialized for this storage.");
         }
 
         return entityColumnCache;
