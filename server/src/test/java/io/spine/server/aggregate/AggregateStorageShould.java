@@ -447,6 +447,28 @@ public abstract class AggregateStorageShould
         assertTrue(isDefault(loadedOrigin.getEnrichment()));
     }
 
+    @Test
+    public void read_archived_records() {
+        readRecordsWithLifecycle(LifecycleFlags.newBuilder()
+                                               .setArchived(true)
+                                               .build());
+    }
+
+    @Test
+    public void read_deleted_records() {
+        readRecordsWithLifecycle(LifecycleFlags.newBuilder()
+                                               .setDeleted(true)
+                                               .build());
+    }
+
+    @Test
+    public void read_archived_and_deleted_records() {
+        readRecordsWithLifecycle(LifecycleFlags.newBuilder()
+                                               .setArchived(true)
+                                               .setDeleted(true)
+                                               .build());
+    }
+
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_try_to_write_event_count_to_closed_storage() {
         close(storage);
@@ -506,6 +528,16 @@ public abstract class AggregateStorageShould
     private Iterator<AggregateEventRecord> historyBackward() {
         final AggregateReadRequest<ProjectId> readRequest = newReadRequest(id);
         return storage.historyBackward(readRequest);
+    }
+
+    private void readRecordsWithLifecycle(LifecycleFlags flags) {
+        final AggregateStateRecord record = newStorageRecord();
+        storage.write(id, record);
+        storage.writeLifecycleFlags(id, flags);
+        final Optional<AggregateStateRecord> read = storage.read(newReadRequest(id));
+        assertTrue(read.isPresent());
+        final AggregateStateRecord readRecord = read.get();
+        assertEquals(record, readRecord);
     }
 
     protected static final Function<AggregateEventRecord, Event> TO_EVENT =
