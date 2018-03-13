@@ -22,6 +22,7 @@ package io.spine.server.entity.storage;
 
 import io.spine.annotation.Internal;
 import io.spine.server.entity.Entity;
+import io.spine.server.entity.storage.EntityColumn.MemoizedValue;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -136,10 +137,10 @@ public class Columns {
      * @param entityColumns {@linkplain EntityColumn entity columns} which values should be extracted
      * @param <E>           the type of the {@link Entity}
      * @return a {@code Map} of the column {@linkplain EntityColumn#getStoredName()
-     *         names for storing} to their {@linkplain EntityColumn.MemoizedValue memoized values}
-     * @see EntityColumn.MemoizedValue
+     *         names for storing} to their {@linkplain MemoizedValue memoized values}
+     * @see MemoizedValue
      */
-    static <E extends Entity<?, ?>> Map<String, EntityColumn.MemoizedValue>
+    static <E extends Entity<?, ?>> Map<String, MemoizedValue>
     extractColumnValues(E entity, Collection<EntityColumn> entityColumns) {
         checkNotNull(entity);
         checkNotNull(entityColumns);
