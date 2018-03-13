@@ -65,8 +65,6 @@ public class ColumnReader {
      * <p>The reader can be further used to {@linkplain ColumnReader#readColumns() obtain}
      * {@linkplain EntityColumn entity columns} for the given class.
      *
-     * <p>{@code Null} entity class as an argument is not accepted by this method.
-     *
      * @param entityClass {@link Entity} class for which to create the instance
      * @return new instance of {@code ColumnReader} for the specified class
      */

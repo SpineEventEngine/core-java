@@ -74,9 +74,8 @@ public class ColumnValueExtractor {
      * <p>This instance can be further used to {@linkplain ColumnValueExtractor#extractColumnValues() extract}
      * column values from the given {@link Entity}.
      *
-     * <p>This method accepts neither {@code null} entity nor {@code null} entity column list as arguments, but
-     * an {@linkplain Collection#isEmpty() empty} collection of columns is accepted (in this case no values
-     * will be extracted).
+     * <p>This method accepts an {@linkplain Collection#isEmpty() empty} collection of columns as an
+     * argument, but no values will be extracted in this case.
      *
      * @param entity        {@link Entity} for which to create the {@code ColumnValueExtractor}
      * @param entityColumns list of {@linkplain EntityColumn entity columns} to extract from the {@link Entity}
