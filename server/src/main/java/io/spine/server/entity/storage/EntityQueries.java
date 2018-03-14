@@ -79,7 +79,7 @@ public final class EntityQueries {
     }
 
     /**
-     * Exists only for testing, so it is possible to test the method without creating storage.
+     * Exists only for testing so it is possible to test the method without creating storage.
      * Does not use any cached entity columns, instead retrieves them on every call.
      */
     @VisibleForTesting
