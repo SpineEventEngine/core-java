@@ -41,7 +41,6 @@ import static com.google.common.testing.SerializableTester.reserializeAndAssert;
 import static io.spine.server.entity.storage.Columns.extractColumnValues;
 import static io.spine.server.entity.storage.Columns.findColumn;
 import static io.spine.server.entity.storage.EntityColumn.MemoizedValue;
-import static io.spine.server.entity.storage.EntityColumnCache.initializeFor;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.of;
 import static io.spine.server.storage.EntityField.version;
@@ -132,12 +131,11 @@ public class EntityRecordWithColumnsShould {
     public void not_have_columns_if_values_list_is_empty() {
         final EntityWithoutColumns entity = new EntityWithoutColumns("ID");
         final Class<? extends Entity> entityClass = entity.getClass();
-        final EntityColumnCache columnCache = initializeFor(entityClass);
-        final Collection<EntityColumn> entityColumns = columnCache.getColumns();
+        final Collection<EntityColumn> entityColumns = Columns.getAllColumns(entityClass);
         final Map<String, MemoizedValue> columnValues = extractColumnValues(entity, entityColumns);
         assertTrue(columnValues.isEmpty());
 
-        final EntityRecordWithColumns record = create(EntityRecord.getDefaultInstance(), entity, columnCache);
+        final EntityRecordWithColumns record = create(EntityRecord.getDefaultInstance(), entity);
         assertFalse(record.hasColumns());
     }
 

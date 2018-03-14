@@ -53,12 +53,10 @@ import java.util.List;
 import java.util.Set;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
 import static io.spine.test.Tests.assertMatchesMask;
 import static io.spine.test.Verify.assertContains;
 import static io.spine.test.Verify.assertSize;
 import static java.lang.String.format;
-import static org.junit.Assert.assertFalse;
 
 /**
  * @author Dmytro Dashenkov

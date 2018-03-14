@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableMap;
 import io.spine.annotation.Internal;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
+import io.spine.server.storage.RecordStorage;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -84,20 +85,30 @@ public final class EntityRecordWithColumns implements Serializable {
      * <p>Extracts {@linkplain EntityColumn column} values from the given {@linkplain Entity}
      * and then combines it with the given {@link EntityRecord}.
      *
-     * <p>Uses {@linkplain EntityColumnCache cached entity columns} to extract the value from
-     * the {@link Entity}. This way the {@linkplain Columns#getAllColumns(Class) column retrieval
-     * operation} can be omitted in favor of the cached results of the previous operation.
+     * <p>Uses {@link EntityColumn} definitions contained in storage for the value extraction. This way
+     * the {@linkplain Columns#getAllColumns(Class) column retrieval operation} can be omitted when calling
+     * this method.
      *
-     * @param record        the {@link EntityRecord} to create value from
-     * @param entity        the {@link Entity} to extract {@linkplain EntityColumn column} values from
-     * @param entityColumns the cached entity columns to extract values from
+     * @param record  the {@link EntityRecord} to create value from
+     * @param entity  the {@link Entity} to extract {@linkplain EntityColumn column} values from
+     * @param storage the {@linkplain RecordStorage storage} for which the record is created
      * @return new instance of {@link EntityRecordWithColumns}
      */
     public static EntityRecordWithColumns create(EntityRecord record,
                                                  Entity entity,
-                                                 EntityColumnCache entityColumns) {
-        final Map<String, EntityColumn.MemoizedValue> columns = extractColumnValues(entity,
-                entityColumns.getColumns());
+                                                 RecordStorage<?> storage) {
+        final Map<String, EntityColumn.MemoizedValue> columns = extractColumnValues(entity, storage.entityColumns());
+        return of(record, columns);
+    }
+
+    /**
+     * Exists only for testing so it is possible to test the method without creating storage.
+     * Does not use any cached entity columns, instead retrieves them on every call.
+     */
+    @VisibleForTesting
+    static EntityRecordWithColumns create(EntityRecord record, Entity entity) {
+        final Collection<EntityColumn> entityColumns = Columns.getAllColumns(entity.getClass());
+        final Map<String, EntityColumn.MemoizedValue> columns = extractColumnValues(entity, entityColumns);
         return of(record, columns);
     }
 
@@ -162,7 +173,7 @@ public final class EntityRecordWithColumns implements Serializable {
      * <p>If returns {@code false}, the {@linkplain EntityColumn columns} are not considered
      * by the storage.
      *
-     * @return {@code true} if the object was constructed via {@link #create(EntityRecord, Entity, EntityColumnCache)}
+     * @return {@code true} if the object was constructed via {@link #create(EntityRecord, Entity, RecordStorage)}
      *         and the entity has columns; {@code false} otherwise
      */
     public boolean hasColumns() {

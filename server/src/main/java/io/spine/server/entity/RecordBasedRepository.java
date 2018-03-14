@@ -402,7 +402,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         final EntityRecord entityRecord = entityConverter().convert(entity);
         checkNotNull(entityRecord);
         final EntityRecordWithColumns recordWithColumns =
-                EntityRecordWithColumns.create(entityRecord, entity, columnCache());
+                EntityRecordWithColumns.create(entityRecord, entity, recordStorage());
         return recordWithColumns;
     }
 
