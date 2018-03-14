@@ -96,6 +96,16 @@ public class EntityQueriesShould {
         EntityQueries.from(filters, AbstractVersionableEntity.class);
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void not_create_query_for_non_existing_column() {
+        final ColumnFilter filter = ColumnFilters.eq("nonExistingColumn", 42);
+        final CompositeColumnFilter compositeFilter = ColumnFilters.all(filter);
+        final EntityFilters filters = EntityFilters.newBuilder()
+                .addFilter(compositeFilter)
+                .build();
+        EntityQueries.from(filters, AbstractVersionableEntity.class);
+    }
+
 
     @Test
     public void construct_empty_queries() {
