@@ -447,7 +447,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
 
         final RecordStorage<I> storage = getStorage();
 
-        final EntityQuery<I> query = EntityQueries.from(filters, storage.getEntityColumnCache());
+        final EntityQuery<I> query = EntityQueries.from(filters, storage);
         final I idMatching = newId();
         final I idWrong1 = newId();
         final I idWrong2 = newId();
@@ -505,7 +505,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
 
         final RecordStorage<I> storage = getStorage();
 
-        final EntityQuery<I> query = EntityQueries.from(filters, storage.getEntityColumnCache());
+        final EntityQuery<I> query = EntityQueries.from(filters, storage);
 
         final I id = newId();
         final TestCounterEntity<I> entity = new TestCounterEntity<>(id);
@@ -571,7 +571,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final EntityFilters filters = EntityFilters.newBuilder()
                                                    .setIdFilter(idFilter)
                                                    .build();
-        final EntityQuery<I> query = EntityQueries.from(filters, storage.getEntityColumnCache());
+        final EntityQuery<I> query = EntityQueries.from(filters, storage);
 
         // Perform the query
         final Iterator<EntityRecord> readRecords = storage.readAll(query,
@@ -600,7 +600,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final EntityFilters filters = EntityFilters.newBuilder()
                                                    .addFilter(all(eq(archived.toString(), true)))
                                                    .build();
-        final EntityQuery<I> query = EntityQueries.from(filters, storage.getEntityColumnCache());
+        final EntityQuery<I> query = EntityQueries.from(filters, storage);
         final Iterator<EntityRecord> read = storage.readAll(query, FieldMask.getDefaultInstance());
         assertSingleRecord(archivedRecord, read);
     }
@@ -633,7 +633,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final EntityFilters filters = EntityFilters.newBuilder()
                                                    .setIdFilter(idFilter)
                                                    .build();
-        final EntityQuery<I> query = EntityQueries.<I>from(filters, storage.getEntityColumnCache())
+        final EntityQuery<I> query = EntityQueries.<I>from(filters, storage)
                                                   .withLifecycleFlags(storage.getEntityColumnCache());
         final Iterator<EntityRecord> read = storage.readAll(query, FieldMask.getDefaultInstance());
         assertSingleRecord(activeRecord, read);
@@ -668,7 +668,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
                                                    .addFilter(columnFilter)
                                                    .build();
         final RecordStorage<I> storage = getStorage();
-        final EntityQuery<I> query = EntityQueries.<I>from(filters, storage.getEntityColumnCache())
+        final EntityQuery<I> query = EntityQueries.<I>from(filters, storage)
                                                   .withLifecycleFlags(storage.getEntityColumnCache());
         final Iterator<EntityRecord> read = storage.readAll(query, FieldMask.getDefaultInstance());
         final List<EntityRecord> readRecords = newArrayList(read);

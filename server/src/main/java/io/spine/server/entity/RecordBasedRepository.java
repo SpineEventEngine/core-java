@@ -329,7 +329,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         checkNotNull(filters);
         checkNotNull(fieldMask);
 
-        final EntityQuery<I> entityQuery = EntityQueries.from(filters, columnCache());
+        final EntityQuery<I> entityQuery = EntityQueries.from(filters, recordStorage());
         final EntityQuery<I> completeQuery = toCompleteQuery(entityQuery);
         final Iterator<EntityRecord> records = recordStorage().readAll(completeQuery, fieldMask);
         final Function<EntityRecord, E> toEntity = entityConverter().reverse();
@@ -349,7 +349,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         checkNotNull(filters);
         checkNotNull(fieldMask);
 
-        final EntityQuery<I> entityQuery = EntityQueries.from(filters, columnCache());
+        final EntityQuery<I> entityQuery = EntityQueries.from(filters, recordStorage());
         final EntityQuery<I> completeQuery = toCompleteQuery(entityQuery);
         return recordStorage().readAll(completeQuery, fieldMask);
     }

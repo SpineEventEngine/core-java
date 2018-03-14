@@ -35,11 +35,13 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.server.entity.Entity;
+import io.spine.server.storage.RecordStorage;
 import io.spine.test.storage.ProjectId;
 import io.spine.testdata.Sample;
 import org.junit.Test;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import static com.google.common.collect.Iterators.size;
@@ -65,12 +67,24 @@ public class EntityQueriesShould {
         assertHasPrivateParameterlessCtor(EntityQueries.class);
     }
 
-    @Test
-    public void not_accept_nulls() {
-        new NullPointerTester()
-                .setDefault(EntityFilters.class, EntityFilters.getDefaultInstance())
-                .setDefault(EntityColumnCache.class, EntityColumnCache.getEmptyInstance())
-                .testAllPublicStaticMethods(EntityQueries.class);
+    @SuppressWarnings("ConstantConditions") // The purpose of the check is passing null for @NotNull field.
+    @Test(expected = NullPointerException.class)
+    public void not_accept_null_filters() {
+        EntityQueries.from(null, Collections.<EntityColumn>emptyList());
+    }
+
+    @SuppressWarnings("ConstantConditions") // The purpose of the check is passing null for @NotNull field.
+    @Test(expected = NullPointerException.class)
+    public void not_accept_null_storage() {
+        final RecordStorage<?> storage = null;
+        EntityQueries.from(EntityFilters.getDefaultInstance(), storage);
+    }
+
+    @SuppressWarnings("ConstantConditions") // The purpose of the check is passing null for @NotNull field.
+    @Test(expected = NullPointerException.class)
+    public void not_accept_null_column_collection() {
+        final Collection<EntityColumn> entityColumns = null;
+        EntityQueries.from(EntityFilters.getDefaultInstance(), entityColumns);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -144,7 +158,7 @@ public class EntityQueriesShould {
     }
 
     private static EntityQuery<?> createEntityQuery(EntityFilters filters, Class<? extends Entity> entityClass) {
-        final EntityColumnCache columnCache = EntityColumnCache.initializeFor(entityClass);
-        return EntityQueries.from(filters, columnCache);
+        final Collection<EntityColumn> entityColumns = Columns.getAllColumns(entityClass);
+        return EntityQueries.from(filters, entityColumns);
     }
 }
