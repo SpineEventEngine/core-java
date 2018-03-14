@@ -32,7 +32,6 @@ import io.spine.annotation.Internal;
 import io.spine.client.EntityFilters;
 import io.spine.client.EntityId;
 import io.spine.server.entity.storage.Column;
-import io.spine.server.entity.storage.EntityColumn;
 import io.spine.server.entity.storage.EntityColumnCache;
 import io.spine.server.entity.storage.EntityQueries;
 import io.spine.server.entity.storage.EntityQuery;

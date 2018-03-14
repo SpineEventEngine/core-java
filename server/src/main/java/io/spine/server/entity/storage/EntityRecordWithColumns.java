@@ -33,7 +33,6 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.entity.storage.Columns.extractColumnValues;
-import static io.spine.server.entity.storage.Columns.getAllColumns;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
