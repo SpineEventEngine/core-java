@@ -470,11 +470,12 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final EntityRecord notFineRecord1 = newStorageRecord(idWrong1, newState(idWrong1));
         final EntityRecord notFineRecord2 = newStorageRecord(idWrong2, newState(idWrong2));
 
-        final EntityRecordWithColumns recordRight = create(fineRecord, matchingEntity, storage.getEntityColumnCache());
-        final EntityRecordWithColumns recordWrong1 = create(notFineRecord1, wrongEntity1,
-                storage.getEntityColumnCache());
-        final EntityRecordWithColumns recordWrong2 = create(notFineRecord2, wrongEntity2,
-                storage.getEntityColumnCache());
+        final EntityRecordWithColumns recordRight =
+                create(fineRecord, matchingEntity, storage.getEntityColumnCache());
+        final EntityRecordWithColumns recordWrong1 =
+                create(notFineRecord1, wrongEntity1, storage.getEntityColumnCache());
+        final EntityRecordWithColumns recordWrong2 =
+                create(notFineRecord2, wrongEntity2, storage.getEntityColumnCache());
 
         storage.write(idMatching, recordRight);
         storage.write(idWrong1, recordWrong1);
@@ -522,7 +523,8 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
 
         // Update the entity columns of the record.
         entity.setStatus(statusAfterUpdate);
-        final EntityRecordWithColumns updatedRecordWithColumns = create(record, entity, storage.getEntityColumnCache());
+        final EntityRecordWithColumns updatedRecordWithColumns =
+                create(record, entity, storage.getEntityColumnCache());
         storage.write(id, updatedRecordWithColumns);
 
         final Iterator<EntityRecord> recordsAfter = storage.readAll(query, fieldMask);
@@ -546,11 +548,12 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
 
         final RecordStorage<I> storage = getStorage();
 
-        final EntityRecordWithColumns recordRight = create(fineRecord, matchingEntity, storage.getEntityColumnCache());
-        final EntityRecordWithColumns recordWrong1 = create(notFineRecord1, wrongEntity1,
-                storage.getEntityColumnCache());
-        final EntityRecordWithColumns recordWrong2 = create(notFineRecord2, wrongEntity2,
-                storage.getEntityColumnCache());
+        final EntityRecordWithColumns recordRight =
+                create(fineRecord, matchingEntity, storage.getEntityColumnCache());
+        final EntityRecordWithColumns recordWrong1 =
+                create(notFineRecord1, wrongEntity1, storage.getEntityColumnCache());
+        final EntityRecordWithColumns recordWrong2 =
+                create(notFineRecord2, wrongEntity2, storage.getEntityColumnCache());
 
         // Fill the storage
         storage.write(idWrong1, recordWrong1);
