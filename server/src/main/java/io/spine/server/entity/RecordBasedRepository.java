@@ -55,7 +55,6 @@ import static com.google.common.collect.Iterators.transform;
 import static com.google.common.collect.Maps.newHashMapWithExpectedSize;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.EntityWithLifecycle.Predicates.isEntityVisible;
-import static io.spine.server.entity.storage.Columns.checkColumnDefinitions;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**

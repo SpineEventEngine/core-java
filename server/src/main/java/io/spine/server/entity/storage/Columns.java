@@ -60,21 +60,6 @@ public class Columns {
     }
 
     /**
-     * Ensures that the entity columns are valid for the specified entity class.
-     *
-     * <p>This method tries to obtain {@linkplain EntityColumn entity columns} for the given class,
-     * performing all checks along the way. If this process is performed without errors, the check is passed,
-     * if not - failed.
-     *
-     * @param entityClass the class to check entity columns
-     */
-    public static void checkColumnDefinitions(Class<? extends Entity> entityClass) {
-        checkNotNull(entityClass);
-
-        getAllColumns(entityClass);
-    }
-
-    /**
      * Retrieves {@linkplain EntityColumn columns} for the given {@link Entity} class.
      *
      * <p>Performs checks for the entity column definitions correctness along the way.

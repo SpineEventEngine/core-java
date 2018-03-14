@@ -34,7 +34,6 @@ import org.junit.Test;
 import java.util.Collection;
 import java.util.Map;
 
-import static io.spine.server.entity.storage.Columns.checkColumnDefinitions;
 import static io.spine.server.entity.storage.Columns.extractColumnValues;
 import static io.spine.server.entity.storage.Columns.findColumn;
 import static io.spine.server.entity.storage.Columns.getAllColumns;
@@ -64,21 +63,16 @@ public class ColumnsShould {
     }
 
     @Test
-    public void pass_column_definitions_check_for_correct_entity() {
-        checkColumnDefinitions(EntityWithManyGetters.class);
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void fail_column_definitions_check_for_incorrect_entity() {
-        checkColumnDefinitions(EntityWithRepeatedColumnNames.class);
-    }
-
-    @Test
     public void get_all_valid_columns_for_entity_class() {
         final Collection<EntityColumn> entityColumns = getAllColumns(EntityWithManyGetters.class);
 
         assertNotNull(entityColumns);
         assertSize(3, entityColumns);
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void fail_to_obtain_columns_for_invalid_entity_class() {
+        getAllColumns(EntityWithRepeatedColumnNames.class);
     }
 
     @Test
