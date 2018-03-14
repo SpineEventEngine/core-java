@@ -31,6 +31,7 @@ import io.spine.server.transport.TransportFactory;
 import io.spine.util.GenericTypeIndex;
 
 import javax.annotation.Nullable;
+import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.sharding.ShardedMessages.toChannelId;
@@ -102,6 +103,24 @@ public abstract class ShardedStream<I, E extends MessageEnvelope<?, ?, ?>> {
     private Subscriber getSubscriber() {
         final Subscriber result = transportFactory.createSubscriber(channelId);
         return result;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final ShardedStream<?, ?> that = (ShardedStream<?, ?>) o;
+        return Objects.equals(boundedContextName, that.boundedContextName) &&
+                Objects.equals(key, that.key);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(boundedContextName, key);
     }
 
     private class ExternalMessageObserver implements StreamObserver<ExternalMessage> {

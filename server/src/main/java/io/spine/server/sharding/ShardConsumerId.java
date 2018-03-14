@@ -20,8 +20,10 @@
 package io.spine.server.sharding;
 
 import io.spine.core.CommandEnvelope;
-import io.spine.server.model.ModelClass;
-import io.spine.type.ClassName;
+import io.spine.core.EventEnvelope;
+import io.spine.core.MessageEnvelope;
+import io.spine.core.RejectionEnvelope;
+import io.spine.server.entity.EntityClass;
 
 import java.util.Objects;
 
@@ -30,17 +32,21 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * @author Alex Tymchenko
  */
-public final class ShardConsumerId {
+public final class ShardConsumerId<E extends MessageEnvelope<?, ?, ?>> {
 
-    private final ModelClass<?> modelClass;
-    private final ClassName observedMsgType;
+    private final EntityClass<?> modelClass;
+    private final Class<E> observedMsgType;
 
-    private ShardConsumerId(ModelClass<?> modelClass, ClassName observedMsgType) {
+    private ShardConsumerId(EntityClass<?> modelClass, Class<E> observedMsgType) {
         this.modelClass = modelClass;
         this.observedMsgType = observedMsgType;
     }
 
-    public ClassName getObservedMsgType() {
+    public EntityClass<?> getModelClass() {
+        return modelClass;
+    }
+
+    public Class<E> getObservedMsgType() {
         return observedMsgType;
     }
 
@@ -62,11 +68,23 @@ public final class ShardConsumerId {
         return Objects.hash(modelClass, observedMsgType);
     }
 
-    public static ShardConsumerId forCommandsOf(ModelClass<?> modelClass) {
-        checkNotNull(modelClass);
+    public static ShardConsumerId<CommandEnvelope> forCommandsOf(EntityClass<?> modelClass) {
+        return forEnvelope(modelClass, CommandEnvelope.class);
+    }
 
-        final ClassName className = ClassName.of(CommandEnvelope.class);
-        final ShardConsumerId id = new ShardConsumerId(modelClass, className);
+    public static ShardConsumerId<EventEnvelope> forEventsOf(EntityClass<?> modelClass) {
+        return forEnvelope(modelClass, EventEnvelope.class);
+    }
+
+    public static ShardConsumerId<RejectionEnvelope> forRejectionsOf(EntityClass<?> modelClass) {
+        return forEnvelope(modelClass, RejectionEnvelope.class);
+    }
+
+    private static <E extends MessageEnvelope<?, ?, ?>> ShardConsumerId<E>
+    forEnvelope(EntityClass<?> entityClass, Class<E> envelopeClass) {
+        checkNotNull(entityClass);
+
+        final ShardConsumerId<E> id = new ShardConsumerId<>(entityClass, envelopeClass);
         return id;
     }
 }

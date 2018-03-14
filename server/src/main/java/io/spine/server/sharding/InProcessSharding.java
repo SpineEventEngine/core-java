@@ -19,14 +19,18 @@
  */
 package io.spine.server.sharding;
 
-import com.google.common.collect.Maps;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Multimap;
 import io.spine.core.BoundedContextName;
 import io.spine.core.MessageEnvelope;
-import io.spine.server.model.ModelClass;
+import io.spine.server.entity.EntityClass;
 import io.spine.server.transport.TransportFactory;
 
-import java.util.Map;
+import java.util.Collection;
 import java.util.Set;
+
+import static com.google.common.collect.Multimaps.synchronizedMultimap;
 
 /**
  * @author Alex Tymchenko
@@ -34,7 +38,7 @@ import java.util.Set;
 public class InProcessSharding implements Sharding {
 
     private final TransportFactory transportFactory;
-    private final Map<ShardConsumerId, ShardedStream<?, ?>> streams = Maps.newConcurrentMap();
+    private final ShardedStreamRegistry registry = new ShardedStreamRegistry();
 
     public InProcessSharding(TransportFactory transportFactory) {
         this.transportFactory = transportFactory;
@@ -48,25 +52,25 @@ public class InProcessSharding implements Sharding {
             return;
         }
         final BoundedContextName bcName = shardable.getBoundedContextName();
-        final ShardingKey shardingKey = getShardingKey(shardable.getModelClass(),
+        final ShardingKey shardingKey = getShardingKey(shardable.getShardedModelClass(),
                                                        shardable.getShardingStrategy());
         for (ShardedStreamConsumer<?, ?> consumer : consumers) {
             final ShardedStream<?, ?> stream = consumer.bindToTransport(bcName,
                                                                         shardingKey,
                                                                         transportFactory);
             final ShardConsumerId consumerId = consumer.getConsumerId();
-            streams.put(consumerId, stream);
+            registry.register(consumerId, stream);
         }
     }
 
     @Override
     public <I, E extends MessageEnvelope<?, ?, ?>> Set<ShardedStream<I, E>>
-    find(I targetId, Class<E> envelopeClass)
-            throws NoShardAvailableException {
-        return null;
+    find(ShardConsumerId<E> shardConsumerId, I targetId) throws NoShardAvailableException {
+        final Set<ShardedStream<I, E>> result = registry.find(shardConsumerId, targetId);
+        return result;
     }
 
-    private ShardingKey getShardingKey(ModelClass<?> modelClass,
+    private ShardingKey getShardingKey(EntityClass<?> modelClass,
                                        Sharding.Strategy strategy) {
         final ShardingKey key = new ShardingKey(modelClass,
                                                 toIdPredicate(modelClass, strategy));
@@ -74,10 +78,38 @@ public class InProcessSharding implements Sharding {
     }
 
     @Override
-    public IdPredicate toIdPredicate(ModelClass<?> modelClass, Strategy strategy) {
+    public IdPredicate toIdPredicate(EntityClass<?> entityClass, Strategy strategy) {
         final IdPredicate result = IdPredicate.newBuilder()
                                               .setAllIds(true)
                                               .build();
         return result;
+    }
+
+    private static final class ShardedStreamRegistry {
+
+        private final Multimap<ShardConsumerId, ShardedStream<?, ?>> streams =
+                synchronizedMultimap(HashMultimap.<ShardConsumerId, ShardedStream<?, ?>>create());
+
+        private void register(ShardConsumerId id, ShardedStream<?, ?> stream) {
+            streams.put(id, stream);
+        }
+
+        private <I, E extends MessageEnvelope<?, ?, ?>> Set<ShardedStream<I, E>>
+        find(final ShardConsumerId<E> id, final I targetId) {
+
+            final Collection<ShardedStream<?, ?>> shardedStreams = streams.get(id);
+
+            final ImmutableSet.Builder<ShardedStream<I, E>> builder = ImmutableSet.builder();
+            for (ShardedStream<?, ?> shardedStream : shardedStreams) {
+                final boolean idMatches = shardedStream.getKey()
+                                               .applyToId(targetId);
+                if(idMatches) {
+                    final ShardedStream<I, E> result = (ShardedStream<I, E>) shardedStream;
+                    builder.add(result);
+                }
+            }
+
+            return builder.build();
+        }
     }
 }

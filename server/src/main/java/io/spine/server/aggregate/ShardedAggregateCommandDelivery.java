@@ -21,6 +21,7 @@ package io.spine.server.aggregate;
 
 import io.spine.core.CommandEnvelope;
 import io.spine.server.ServerEnvironment;
+import io.spine.server.sharding.ShardConsumerId;
 import io.spine.server.sharding.ShardedStream;
 import io.spine.server.sharding.Sharding;
 
@@ -60,12 +61,14 @@ public class ShardedAggregateCommandDelivery<I, A extends Aggregate<I, ?, ?>>
         return true;
     }
 
-    private void sendToShards(I id, CommandEnvelope envelope) {
+    private void sendToShards(I targetId, CommandEnvelope envelope) {
+        final ShardConsumerId<CommandEnvelope> consumerId = getConsumerId();
         final Set<ShardedStream<I, CommandEnvelope>> streams =
-                sharding().find(id, CommandEnvelope.class);
+                sharding().find(consumerId, targetId);
 
         for (ShardedStream<I, CommandEnvelope> shardedStream : streams) {
-            shardedStream.post(id, envelope);
+
+            shardedStream.post(targetId, envelope);
         }
     }
 

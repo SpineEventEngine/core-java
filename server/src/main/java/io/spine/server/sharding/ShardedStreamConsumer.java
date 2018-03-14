@@ -28,7 +28,7 @@ import io.spine.server.transport.TransportFactory;
  */
 public interface ShardedStreamConsumer<I, E extends MessageEnvelope<?, ?, ?>> {
 
-    ShardConsumerId getConsumerId();
+    ShardConsumerId<E> getConsumerId();
 
     void onNext(I targetId, E envelope);
 

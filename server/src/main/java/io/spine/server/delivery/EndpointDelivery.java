@@ -26,7 +26,6 @@ import io.spine.core.TenantId;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityMessageEndpoint;
 import io.spine.server.entity.Repository;
-import io.spine.server.model.ModelClass;
 import io.spine.server.sharding.ShardConsumerId;
 import io.spine.server.sharding.ShardedStream;
 import io.spine.server.sharding.ShardedStreamConsumer;
@@ -62,11 +61,11 @@ public abstract class EndpointDelivery<I,
 
     private final Repository<I, E> repository;
 
-    private final ShardConsumerId shardConsumerId;
+    private final ShardConsumerId<M> shardConsumerId;
 
-    protected EndpointDelivery(Repository<I, E> repository, ModelClass<E> modelClass) {
+    protected EndpointDelivery(Repository<I, E> repository, ShardConsumerId<M> shardConsumerId) {
         this.repository = repository;
-        shardConsumerId = ShardConsumerId.forCommandsOf(modelClass);
+        this.shardConsumerId = shardConsumerId;
     }
 
     public void deliver(I id, M message) {
@@ -95,7 +94,7 @@ public abstract class EndpointDelivery<I,
     protected abstract B newShardedStreamBuilder();
 
     @Override
-    public ShardConsumerId getConsumerId() {
+    public ShardConsumerId<M> getConsumerId() {
         return shardConsumerId;
     }
 

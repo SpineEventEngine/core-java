@@ -99,7 +99,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
 
     //TODO:2018-03-8:alex.tymchenko: try to hide it.
     @Override
-    public ProjectionClass<P> getModelClass() {
+    public ProjectionClass<P> getShardedModelClass() {
         return projectionClass();
     }
 

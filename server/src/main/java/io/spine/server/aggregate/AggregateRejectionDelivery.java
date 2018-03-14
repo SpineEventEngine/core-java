@@ -21,6 +21,7 @@ package io.spine.server.aggregate;
 
 import io.spine.core.RejectionEnvelope;
 import io.spine.server.sharding.RejectionShardedStream;
+import io.spine.server.sharding.ShardConsumerId;
 
 /**
  * A strategy on delivering the rejections to the instances of a certain aggregate type.
@@ -34,7 +35,7 @@ public abstract class AggregateRejectionDelivery<I, A extends Aggregate<I, ?, ?>
                                     RejectionShardedStream<I>, RejectionShardedStream.Builder<I>> {
 
     protected AggregateRejectionDelivery(AggregateRepository<I, A> repository) {
-        super(repository);
+        super(repository, ShardConsumerId.forRejectionsOf(repository.getShardedModelClass()));
     }
 
     @Override

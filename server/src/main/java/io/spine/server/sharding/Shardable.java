@@ -20,7 +20,7 @@
 package io.spine.server.sharding;
 
 import io.spine.core.BoundedContextName;
-import io.spine.server.model.ModelClass;
+import io.spine.server.entity.EntityClass;
 
 /**
  * @author Alex Tymchenko
@@ -33,5 +33,5 @@ public interface Shardable<E> {
 
     BoundedContextName getBoundedContextName();
 
-    ModelClass getModelClass();
+    EntityClass getShardedModelClass();
 }

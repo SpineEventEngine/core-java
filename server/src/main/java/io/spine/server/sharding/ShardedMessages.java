@@ -96,7 +96,7 @@ public class ShardedMessages {
         checkNotNull(boundedContextName);
         checkNotNull(envelopeClass);
 
-        final ClassName className = key.getModelClass()
+        final ClassName className = key.getEntityClass()
                                        .getClassName();
         final IdPredicate idPredicate = key.getIdPredicate();
 

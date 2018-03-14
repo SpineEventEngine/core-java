@@ -22,6 +22,7 @@ package io.spine.server.aggregate;
 import io.spine.annotation.SPI;
 import io.spine.core.ActorMessageEnvelope;
 import io.spine.server.delivery.EndpointDelivery;
+import io.spine.server.sharding.ShardConsumerId;
 import io.spine.server.sharding.ShardedStream;
 
 /**
@@ -40,8 +41,9 @@ public abstract class AggregateEndpointDelivery<I,
                                                 B extends ShardedStream.AbstractBuilder<B, S>>
         extends EndpointDelivery<I, A, E, S, B> {
 
-    AggregateEndpointDelivery(AggregateRepository<I, A> repository) {
-        super(repository, repository.aggregateClass());
+    AggregateEndpointDelivery(AggregateRepository<I, A> repository,
+                              ShardConsumerId<E> shardConsumerId) {
+        super(repository, shardConsumerId);
     }
 
     @Override

@@ -22,6 +22,7 @@ package io.spine.server.procman;
 import io.spine.annotation.SPI;
 import io.spine.core.ActorMessageEnvelope;
 import io.spine.server.delivery.EndpointDelivery;
+import io.spine.server.sharding.ShardConsumerId;
 import io.spine.server.sharding.ShardedStream;
 
 /**
@@ -40,8 +41,9 @@ public abstract class PmEndpointDelivery<I,
                                          B extends ShardedStream.AbstractBuilder<B, S>>
         extends EndpointDelivery<I, P, M, S, B> {
 
-    protected PmEndpointDelivery(ProcessManagerRepository<I, P, ?> repository) {
-        super(repository, repository.processManagerClass());
+    protected PmEndpointDelivery(ProcessManagerRepository<I, P, ?> repository,
+                                 ShardConsumerId<M> shardConsumerId) {
+        super(repository, shardConsumerId);
     }
 
     @Override

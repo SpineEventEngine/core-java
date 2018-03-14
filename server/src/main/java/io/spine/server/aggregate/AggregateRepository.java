@@ -235,7 +235,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     //TODO:2018-03-8:alex.tymchenko: try to hide it.
     @Override
-    public AggregateClass<A> getModelClass() {
+    public AggregateClass<A> getShardedModelClass() {
         return aggregateClass();
     }
 

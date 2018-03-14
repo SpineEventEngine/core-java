@@ -117,7 +117,7 @@ public abstract class ProcessManagerRepository<I,
 
     //TODO:2018-03-8:alex.tymchenko: try to hide it.
     @Override
-    public ProcessManagerClass<P> getModelClass() {
+    public ProcessManagerClass<P> getShardedModelClass() {
         return processManagerClass();
     }
 

@@ -19,9 +19,11 @@
  */
 package io.spine.server.sharding;
 
-import io.spine.server.model.ModelClass;
+import io.spine.server.entity.EntityClass;
 
 import java.io.Serializable;
+
+import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
  * @author Alex Tymchenko
@@ -30,20 +32,46 @@ public class ShardingKey implements Serializable {
 
     private static final long serialVersionUID = 0L;
 
-    private final ModelClass<?> modelClass;
+    private final EntityClass<?> entityClass;
     private final IdPredicate idPredicate;
 
 
-    ShardingKey(ModelClass<?> modelClass, IdPredicate idPredicate) {
-        this.modelClass = modelClass;
+    ShardingKey(EntityClass<?> entityClass, IdPredicate idPredicate) {
+        this.entityClass = entityClass;
         this.idPredicate = idPredicate;
     }
 
-    public ModelClass<?> getModelClass() {
-        return modelClass;
+    public EntityClass<?> getEntityClass() {
+        return entityClass;
     }
 
     public IdPredicate getIdPredicate() {
         return idPredicate;
+    }
+
+    public boolean applyToId(Object id) {
+
+        final boolean result;
+        final IdPredicate.PredicateCase predicateCase = idPredicate.getPredicateCase();
+        switch (predicateCase) {
+            case ALL_IDS:
+                result = true; break;
+            case UNIFORM_BY_IDS:
+                result = apply(idPredicate.getUniformByIds(), id.hashCode()); break;
+            case PREDICATE_NOT_SET:
+                throw newIllegalArgumentException("Unset ID hash Predicate type detected: %s",
+                                                  predicateCase);
+            default:
+                throw newIllegalArgumentException("Unsupported ID hash Predicate type detected: %s",
+                                                  predicateCase);
+        }
+
+        return result;
+    }
+
+    private static boolean apply(UniformByIdHash uniformByIds, int idHash) {
+        final int actualRemainder = idHash % uniformByIds.getDivisor();
+        final int expectedRemainder = uniformByIds.getRemainder();
+        return actualRemainder == expectedRemainder;
     }
 }

@@ -20,7 +20,7 @@
 package io.spine.server.sharding;
 
 import io.spine.core.MessageEnvelope;
-import io.spine.server.model.ModelClass;
+import io.spine.server.entity.EntityClass;
 
 import java.util.Set;
 
@@ -31,11 +31,10 @@ public interface Sharding {
 
     void register(Shardable<?> shardable) throws NoShardAvailableException;
 
-    <I, E extends MessageEnvelope<?,?,?>>
-    Set<ShardedStream<I, E>> find(I targetId, Class<E> envelopeClass)
-            throws NoShardAvailableException;
+    <I, E extends MessageEnvelope<?, ?, ?>> Set<ShardedStream<I, E>>
+    find(ShardConsumerId<E> consumerId, I targetId) throws NoShardAvailableException;
 
-    IdPredicate toIdPredicate(ModelClass<?> modelClass, Strategy strategy);
+    IdPredicate toIdPredicate(EntityClass<?> entityClass, Strategy strategy);
 
     enum Strategy {
 
