@@ -50,6 +50,7 @@ import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
 import static io.spine.protobuf.TypeConverter.toAny;
 import static io.spine.server.entity.storage.Columns.findColumn;
 import static io.spine.server.entity.storage.EntityColumnCache.initializeFor;
+import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
 import static io.spine.test.Verify.assertContains;
 import static java.util.Collections.emptyList;
@@ -118,16 +119,17 @@ public class EntityQueryShould {
     @Test(expected = IllegalStateException.class)
     public void fail_to_append_lifecycle_columns_if_already_contains() {
         final EntityColumnCache columnCache = initializeFor(EntityWithLifecycle.class);
-        final EntityColumn column = columnCache.findColumn(deleted.name());
+        final EntityColumn archivedColumn = columnCache.findColumn(archived.name());
+        final EntityColumn deletedColumn = columnCache.findColumn(deleted.name());
         final CompositeQueryParameter queryParameter = CompositeQueryParameter.from(
-                ImmutableMultimap.of(column, ColumnFilter.getDefaultInstance()),
+                ImmutableMultimap.of(deletedColumn, ColumnFilter.getDefaultInstance()),
                 ALL
         );
         final QueryParameters parameters = QueryParameters.newBuilder()
                                                           .add(queryParameter)
                                                           .build();
         final EntityQuery<String> query = EntityQuery.of(Collections.<String>emptySet(), parameters);
-        query.withLifecycleFlags(columnCache);
+        query.withLifecycleFlags(archivedColumn, deletedColumn);
     }
 
     /**

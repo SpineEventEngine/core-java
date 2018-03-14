@@ -67,8 +67,8 @@ public abstract class StandStorage extends RecordStorage<AggregateStateId> {
                                                                     FieldMask fieldMask);
 
     @Override
-    public EntityColumnCache getEntityColumnCache() {
-        return recordStorage().getEntityColumnCache();
+    public EntityColumnCache entityColumnCache() {
+        return recordStorage().entityColumnCache();
     }
 
     /**

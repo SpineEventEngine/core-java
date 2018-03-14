@@ -388,10 +388,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         final EntityQuery<I> completeQuery;
         if (!src.isLifecycleAttributesSet()
                 && EntityWithLifecycle.class.isAssignableFrom(getEntityClass())) {
-            @SuppressWarnings("unchecked") // Checked at runtime
-            final Class<? extends EntityWithLifecycle<I, ?>> cls =
-                    (Class<? extends EntityWithLifecycle<I, ?>>) getEntityClass();
-            completeQuery = src.withLifecycleFlags(columnCache());
+            completeQuery = src.withLifecycleFlags(recordStorage());
         } else {
             completeQuery = src;
         }
@@ -423,7 +420,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      *                               repository's storage
      */
     private EntityColumnCache columnCache() {
-        return recordStorage().getEntityColumnCache();
+        return recordStorage().entityColumnCache();
     }
 
     /**

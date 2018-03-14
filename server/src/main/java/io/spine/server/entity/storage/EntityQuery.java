@@ -20,11 +20,13 @@
 
 package io.spine.server.entity.storage;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
+import io.spine.server.storage.RecordStorage;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -135,15 +137,16 @@ public final class EntityQuery<I> implements Serializable {
      * <p>The precondition for this method is that current instance
      * {@linkplain #isLifecycleAttributesSet() does not specify the values}.
      *
-     * @param entityColumns cached entity columns where lifecycle flag fields can be found
+     * @param storage the {@linkplain RecordStorage storage} for which this {@code EntityQuery} is created
      * @return new instance of {@code EntityQuery}
      */
     @Internal
-    public EntityQuery<I> withLifecycleFlags(EntityColumnCache entityColumns) {
+    public EntityQuery<I> withLifecycleFlags(RecordStorage<I> storage) {
         checkState(!isLifecycleAttributesSet(),
                    "The query overrides Lifecycle Flags default values.");
-        final EntityColumn archivedColumn = entityColumns.findColumn(archived.name());
-        final EntityColumn deletedColumn = entityColumns.findColumn(deleted.name());
+        final Map<String, EntityColumn> lifecycleColumns = storage.entityLifecycleColumns();
+        final EntityColumn archivedColumn = lifecycleColumns.get(archived.name());
+        final EntityColumn deletedColumn = lifecycleColumns.get(deleted.name());
         final CompositeQueryParameter lifecycleParameter = CompositeQueryParameter.from(
                 ImmutableMultimap.of(archivedColumn, eq(archived.name(), false),
                                      deletedColumn, eq(deletedColumn.getName(), false)),
@@ -153,6 +156,24 @@ public final class EntityQuery<I> implements Serializable {
                                                           .addAll(getParameters())
                                                           .add(lifecycleParameter)
                                                           .build();
+        final EntityQuery<I> result = new EntityQuery<>(ids, parameters);
+        return result;
+    }
+
+    /** Exists only for testing, so it is possible to test the method without creating storage. */
+    @VisibleForTesting
+    EntityQuery<I> withLifecycleFlags(EntityColumn archivedColumn, EntityColumn deletedColumn) {
+        checkState(!isLifecycleAttributesSet(),
+                "The query overrides Lifecycle Flags default values.");
+        final CompositeQueryParameter lifecycleParameter = CompositeQueryParameter.from(
+                ImmutableMultimap.of(archivedColumn, eq(archived.name(), false),
+                        deletedColumn, eq(deletedColumn.getName(), false)),
+                ALL
+        );
+        final QueryParameters parameters = QueryParameters.newBuilder()
+                .addAll(getParameters())
+                .add(lifecycleParameter)
+                .build();
         final EntityQuery<I> result = new EntityQuery<>(ids, parameters);
         return result;
     }

@@ -52,8 +52,8 @@ public abstract class ProjectionStorage<I> extends RecordStorage<I> {
     }
 
     @Override
-    public EntityColumnCache getEntityColumnCache() {
-        return recordStorage().getEntityColumnCache();
+    public EntityColumnCache entityColumnCache() {
+        return recordStorage().entityColumnCache();
     }
 
     @Override

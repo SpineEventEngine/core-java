@@ -77,7 +77,7 @@ public final class EntityQueries {
         return result;
     }
 
-    /** Exists only for testing, so it is possible to test {@link EntityQueries} without creating storage. */
+    /** Exists only for testing, so it is possible to test the method without creating storage. */
     @VisibleForTesting
     static <I> EntityQuery<I> from(EntityFilters entityFilters,
                                    Collection<EntityColumn> entityColumns) {

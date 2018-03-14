@@ -43,11 +43,14 @@ import io.spine.server.stand.StandStorage;
 import io.spine.type.TypeUrl;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.server.storage.LifecycleFlagField.archived;
+import static io.spine.server.storage.LifecycleFlagField.deleted;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -72,7 +75,7 @@ public abstract class RecordStorage<I>
      * containers for the other {@link RecordStorage} instance, which actually supports
      * {@link EntityColumnCache}, for example: {@link ProjectionStorage}, {@link StandStorage}.
      *
-     * <p>Instances created by this constructor should override {@link RecordStorage#getEntityColumnCache()}
+     * <p>Instances created by this constructor should override {@link RecordStorage#entityColumnCache()}
      * method.
      */
     protected RecordStorage(boolean multitenant) {
@@ -290,12 +293,34 @@ public abstract class RecordStorage<I>
      * @see EntityColumn
      * @see Columns
      */
+    @Internal
     public Collection<EntityColumn> entityColumns() {
-        return getEntityColumnCache().getColumns();
+        return entityColumnCache().getColumns();
+    }
+
+    /**
+     * Returns a {@code Collection} of {@linkplain EntityColumn columns} corresponded to the
+     * {@link LifecycleFlagField lifecycle storage fields} of the {@link Entity} class managed by this storage.
+     *
+     * @return a {@code Collection} of managed {@link Entity} lifecycle columns
+     * @see EntityColumn
+     * @see Columns
+     * @see LifecycleFlagField
+     */
+    @Internal
+    public Map<String, EntityColumn> entityLifecycleColumns() {
+        final HashMap<String, EntityColumn> lifecycleColumns = new HashMap<>();
+
+        final EntityColumn archivedColumn = entityColumnCache().findColumn(archived.name());
+        lifecycleColumns.put(archived.name(), archivedColumn);
+
+        final EntityColumn deletedColumn = entityColumnCache().findColumn(deleted.name());
+        lifecycleColumns.put(deleted.name(), deletedColumn);
+        return lifecycleColumns;
     }
 
     @Internal
-    public EntityColumnCache getEntityColumnCache() {
+    public EntityColumnCache entityColumnCache() {
         if (entityColumnCache == null) {
             throw new IllegalStateException("Entity column cache not initialized for this storage.");
         }
