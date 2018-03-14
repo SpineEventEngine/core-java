@@ -20,7 +20,6 @@
 
 package io.spine.server.entity.storage;
 
-import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Message;
@@ -41,7 +40,6 @@ import io.spine.testdata.Sample;
 import org.junit.Test;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import static com.google.common.collect.Iterators.size;
@@ -70,7 +68,7 @@ public class EntityQueriesShould {
     @SuppressWarnings("ConstantConditions") // The purpose of the check is passing null for @NotNull field.
     @Test(expected = NullPointerException.class)
     public void not_accept_null_filters() {
-        EntityQueries.from(null, Collections.<EntityColumn>emptyList());
+        EntityQueries.from(null, Entity.class);
     }
 
     @SuppressWarnings("ConstantConditions") // The purpose of the check is passing null for @NotNull field.
@@ -82,9 +80,9 @@ public class EntityQueriesShould {
 
     @SuppressWarnings("ConstantConditions") // The purpose of the check is passing null for @NotNull field.
     @Test(expected = NullPointerException.class)
-    public void not_accept_null_column_collection() {
-        final Collection<EntityColumn> entityColumns = null;
-        EntityQueries.from(EntityFilters.getDefaultInstance(), entityColumns);
+    public void not_accept_null_entity_class() {
+        final Class<? extends Entity> entityClass = null;
+        EntityQueries.from(EntityFilters.getDefaultInstance(), entityClass);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -95,7 +93,7 @@ public class EntityQueriesShould {
         final EntityFilters filters = EntityFilters.newBuilder()
                                                    .addFilter(compositeFilter)
                                                    .build();
-        createEntityQuery(filters, AbstractVersionableEntity.class);
+        EntityQueries.from(filters, AbstractVersionableEntity.class);
     }
 
 
@@ -103,7 +101,7 @@ public class EntityQueriesShould {
     public void construct_empty_queries() {
         final EntityFilters filters = EntityFilters.getDefaultInstance();
         final Class<? extends Entity> entityClass = AbstractEntity.class;
-        final EntityQuery<?> query = createEntityQuery(filters, entityClass);
+        final EntityQuery<?> query = EntityQueries.from(filters, entityClass);
         assertNotNull(query);
         assertEquals(0, size(query.getParameters().iterator()));
         assertTrue(query.getIds().isEmpty());
@@ -138,7 +136,7 @@ public class EntityQueriesShould {
                                                    .addFilter(aggregatingFilter)
                                                    .build();
         final Class<? extends Entity> entityClass = AbstractVersionableEntity.class;
-        final EntityQuery<?> query = createEntityQuery(filters, entityClass);
+        final EntityQuery<?> query = EntityQueries.from(filters, entityClass);
         assertNotNull(query);
 
         final Collection<?> ids = query.getIds();
@@ -155,10 +153,5 @@ public class EntityQueriesShould {
         assertEquals(EITHER, singleParam.getOperator());
         assertContains(versionFilter, columnFilters);
         assertContains(archivedFilter, columnFilters);
-    }
-
-    private static EntityQuery<?> createEntityQuery(EntityFilters filters, Class<? extends Entity> entityClass) {
-        final Collection<EntityColumn> entityColumns = Columns.getAllColumns(entityClass);
-        return EntityQueries.from(filters, entityColumns);
     }
 }

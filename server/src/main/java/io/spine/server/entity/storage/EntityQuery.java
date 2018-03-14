@@ -26,6 +26,7 @@ import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
+import io.spine.server.entity.Entity;
 import io.spine.server.storage.RecordStorage;
 
 import java.io.Serializable;
@@ -160,11 +161,16 @@ public final class EntityQuery<I> implements Serializable {
         return result;
     }
 
-    /** Exists only for testing, so it is possible to test the method without creating storage. */
+    /**
+     * Exists only for testing, so it is possible to test the method without creating storage.
+     * Does not use any cached entity columns, instead retrieves them on every call.
+     */
     @VisibleForTesting
-    EntityQuery<I> withLifecycleFlags(EntityColumn archivedColumn, EntityColumn deletedColumn) {
+    EntityQuery<I> withLifecycleFlags(Class<? extends Entity> entityClass) {
         checkState(!isLifecycleAttributesSet(),
                 "The query overrides Lifecycle Flags default values.");
+        final EntityColumn archivedColumn = Columns.findColumn(entityClass, archived.name());
+        final EntityColumn deletedColumn = Columns.findColumn(entityClass, deleted.name());
         final CompositeQueryParameter lifecycleParameter = CompositeQueryParameter.from(
                 ImmutableMultimap.of(archivedColumn, eq(archived.name(), false),
                         deletedColumn, eq(deletedColumn.getName(), false)),

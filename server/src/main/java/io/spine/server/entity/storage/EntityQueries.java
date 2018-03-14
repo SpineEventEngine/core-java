@@ -31,6 +31,7 @@ import io.spine.client.CompositeColumnFilter.CompositeOperator;
 import io.spine.client.EntityFilters;
 import io.spine.client.EntityId;
 import io.spine.client.EntityIdFilter;
+import io.spine.server.entity.Entity;
 import io.spine.server.storage.RecordStorage;
 
 import java.util.Collection;
@@ -77,13 +78,17 @@ public final class EntityQueries {
         return result;
     }
 
-    /** Exists only for testing, so it is possible to test the method without creating storage. */
+    /**
+     * Exists only for testing, so it is possible to test the method without creating storage.
+     * Does not use any cached entity columns, instead retrieves them on every call.
+     */
     @VisibleForTesting
     static <I> EntityQuery<I> from(EntityFilters entityFilters,
-                                   Collection<EntityColumn> entityColumns) {
+                                   Class<? extends Entity> entityClass) {
         checkNotNull(entityFilters);
-        checkNotNull(entityColumns);
+        checkNotNull(entityClass);
 
+        final Collection<EntityColumn> entityColumns = Columns.getAllColumns(entityClass);
         final QueryParameters queryParams = toQueryParams(entityFilters, entityColumns);
         final Collection<I> ids = toGenericIdValues(entityFilters);
 
