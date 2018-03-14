@@ -142,7 +142,7 @@ public final class EntityQuery<I> implements Serializable {
      * @return new instance of {@code EntityQuery}
      */
     @Internal
-    public EntityQuery<I> withLifecycleFlags(RecordStorage<I> storage) {
+    public EntityQuery<I> withLifecycleFlags(RecordStorage<?> storage) {
         checkState(canAppendLifecycleFlags(),
                    "The query overrides Lifecycle Flags default values.");
         final Map<String, EntityColumn> lifecycleColumns = storage.entityLifecycleColumns();
