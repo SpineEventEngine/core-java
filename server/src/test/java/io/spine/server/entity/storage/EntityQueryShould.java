@@ -54,6 +54,7 @@ import static io.spine.test.Verify.assertContains;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
+import static org.junit.Assert.assertFalse;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -114,7 +115,7 @@ public class EntityQueryShould {
         tester.testEquals();
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void fail_to_append_lifecycle_columns_if_already_contains() {
         final EntityColumn deletedColumn = Columns.findColumn(EntityWithLifecycle.class, deleted.name());
         final CompositeQueryParameter queryParameter = CompositeQueryParameter.from(
@@ -125,7 +126,7 @@ public class EntityQueryShould {
                                                           .add(queryParameter)
                                                           .build();
         final EntityQuery<String> query = EntityQuery.of(Collections.<String>emptySet(), parameters);
-        query.withLifecycleFlags(EntityWithLifecycle.class);
+        assertFalse(query.canAppendLifecycleFlags());
     }
 
     /**

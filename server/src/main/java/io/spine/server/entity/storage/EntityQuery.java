@@ -143,7 +143,7 @@ public final class EntityQuery<I> implements Serializable {
      */
     @Internal
     public EntityQuery<I> withLifecycleFlags(RecordStorage<I> storage) {
-        checkState(!isLifecycleAttributesSet(),
+        checkState(canAppendLifecycleFlags(),
                    "The query overrides Lifecycle Flags default values.");
         final Map<String, EntityColumn> lifecycleColumns = storage.entityLifecycleColumns();
         final EntityColumn archivedColumn = lifecycleColumns.get(archived.name());
@@ -157,29 +157,6 @@ public final class EntityQuery<I> implements Serializable {
                                                           .addAll(getParameters())
                                                           .add(lifecycleParameter)
                                                           .build();
-        final EntityQuery<I> result = new EntityQuery<>(ids, parameters);
-        return result;
-    }
-
-    /**
-     * Exists only for testing so it is possible to test the method without creating storage.
-     * Does not use any cached entity columns, instead retrieves them on every call.
-     */
-    @VisibleForTesting
-    EntityQuery<I> withLifecycleFlags(Class<? extends Entity> entityClass) {
-        checkState(!isLifecycleAttributesSet(),
-                "The query overrides Lifecycle Flags default values.");
-        final EntityColumn archivedColumn = Columns.findColumn(entityClass, archived.name());
-        final EntityColumn deletedColumn = Columns.findColumn(entityClass, deleted.name());
-        final CompositeQueryParameter lifecycleParameter = CompositeQueryParameter.from(
-                ImmutableMultimap.of(archivedColumn, eq(archived.name(), false),
-                        deletedColumn, eq(deletedColumn.getName(), false)),
-                ALL
-        );
-        final QueryParameters parameters = QueryParameters.newBuilder()
-                .addAll(getParameters())
-                .add(lifecycleParameter)
-                .build();
         final EntityQuery<I> result = new EntityQuery<>(ids, parameters);
         return result;
     }
@@ -208,5 +185,10 @@ public final class EntityQuery<I> implements Serializable {
                           .add("idFilter", ids)
                           .add("parameters", parameters)
                           .toString();
+    }
+
+    @VisibleForTesting
+    boolean canAppendLifecycleFlags() {
+        return !isLifecycleAttributesSet();
     }
 }
