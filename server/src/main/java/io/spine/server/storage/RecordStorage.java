@@ -299,10 +299,10 @@ public abstract class RecordStorage<I>
     }
 
     /**
-     * Returns a {@code Collection} of {@linkplain EntityColumn columns} corresponded to the
+     * Returns a {@code Map} of {@linkplain EntityColumn columns} corresponded to the
      * {@link LifecycleFlagField lifecycle storage fields} of the {@link Entity} class managed by this storage.
      *
-     * @return a {@code Collection} of managed {@link Entity} lifecycle columns
+     * @return a {@code Map} of managed {@link Entity} lifecycle columns
      * @see EntityColumn
      * @see Columns
      * @see LifecycleFlagField
