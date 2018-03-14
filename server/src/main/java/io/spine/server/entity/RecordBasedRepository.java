@@ -329,7 +329,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         checkNotNull(filters);
         checkNotNull(fieldMask);
 
-        final EntityQuery<I> entityQuery = EntityQueries.from(filters, retrieveEntityColumnCache());
+        final EntityQuery<I> entityQuery = EntityQueries.from(filters, columnCache());
         final EntityQuery<I> completeQuery = toCompleteQuery(entityQuery);
         final Iterator<EntityRecord> records = recordStorage().readAll(completeQuery, fieldMask);
         final Function<EntityRecord, E> toEntity = entityConverter().reverse();
@@ -349,7 +349,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         checkNotNull(filters);
         checkNotNull(fieldMask);
 
-        final EntityQuery<I> entityQuery = EntityQueries.from(filters, retrieveEntityColumnCache());
+        final EntityQuery<I> entityQuery = EntityQueries.from(filters, columnCache());
         final EntityQuery<I> completeQuery = toCompleteQuery(entityQuery);
         return recordStorage().readAll(completeQuery, fieldMask);
     }
@@ -391,7 +391,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
             @SuppressWarnings("unchecked") // Checked at runtime
             final Class<? extends EntityWithLifecycle<I, ?>> cls =
                     (Class<? extends EntityWithLifecycle<I, ?>>) getEntityClass();
-            completeQuery = src.withLifecycleFlags(retrieveEntityColumnCache());
+            completeQuery = src.withLifecycleFlags(columnCache());
         } else {
             completeQuery = src;
         }
@@ -405,7 +405,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         final EntityRecord entityRecord = entityConverter().convert(entity);
         checkNotNull(entityRecord);
         final EntityRecordWithColumns recordWithColumns =
-                EntityRecordWithColumns.create(entityRecord, entity, retrieveEntityColumnCache());
+                EntityRecordWithColumns.create(entityRecord, entity, columnCache());
         return recordWithColumns;
     }
 
@@ -422,7 +422,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * @throws IllegalStateException if the {@link EntityColumnCache} is not supported by this
      *                               repository's storage
      */
-    private EntityColumnCache retrieveEntityColumnCache() {
+    private EntityColumnCache columnCache() {
         return recordStorage().getEntityColumnCache();
     }
 
@@ -437,7 +437,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * @throws IllegalStateException in case entity column definitions are incorrect
      */
     private void cacheEntityColumns() {
-        retrieveEntityColumnCache().ensureColumnsCached();
+        columnCache().ensureColumnsCached();
     }
 
     /**
