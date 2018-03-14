@@ -61,6 +61,12 @@ public class EntityColumnCacheShould {
     }
 
     @Test
+    public void create_empty_instance() {
+        final EntityColumnCache columnCache = EntityColumnCache.getEmptyInstance();
+        assertTrue(columnCache.isEmpty());
+    }
+
+    @Test
     public void stay_empty_after_creation() {
         assertTrue(entityColumnCache.isEmpty());
     }
