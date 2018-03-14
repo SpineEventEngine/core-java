@@ -50,8 +50,6 @@ import static java.util.Collections.synchronizedMap;
 @Internal
 public class EntityColumnCache {
 
-    private static final EntityColumnCache EMPTY_INSTANCE = new EntityColumnCache();
-
     private final Class<? extends Entity> entityClass;
     private boolean columnsCached = false;
 
@@ -68,27 +66,10 @@ public class EntityColumnCache {
     private final Map<String, EntityColumn> entityColumnData =
             synchronizedMap(new LinkedHashMap<String, EntityColumn>());
 
-    private EntityColumnCache() {
-        this.entityClass = null;
-        this.columnsCached = true;
-    }
-
     private EntityColumnCache(Class<? extends Entity> entityClass) {
         checkNotNull(entityClass);
 
         this.entityClass = entityClass;
-    }
-
-    /**
-     * Returns an empty instance of {@link EntityColumnCache}.
-     *
-     * <p>Such instance won't try to obtain and store any {@linkplain EntityColumn entity columns}. Instead,
-     * it will perform all access operations on the empty {@link Map} of {@link EntityColumn} data.
-     *
-     * @return an empty instance of {@link EntityColumnCache}
-     */
-    public static EntityColumnCache getEmptyInstance() {
-        return EMPTY_INSTANCE;
     }
 
     /**
