@@ -49,8 +49,6 @@ import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.server.storage.LifecycleFlagField.archived;
-import static io.spine.server.storage.LifecycleFlagField.deleted;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -310,12 +308,11 @@ public abstract class RecordStorage<I>
     @Internal
     public Map<String, EntityColumn> entityLifecycleColumns() {
         final HashMap<String, EntityColumn> lifecycleColumns = new HashMap<>();
-
-        final EntityColumn archivedColumn = entityColumnCache().findColumn(archived.name());
-        lifecycleColumns.put(archived.name(), archivedColumn);
-
-        final EntityColumn deletedColumn = entityColumnCache().findColumn(deleted.name());
-        lifecycleColumns.put(deleted.name(), deletedColumn);
+        for (LifecycleFlagField field : LifecycleFlagField.values()) {
+            final String name = field.name();
+            final EntityColumn column = entityColumnCache().findColumn(name);
+            lifecycleColumns.put(name, column);
+        }
         return lifecycleColumns;
     }
 
