@@ -66,7 +66,7 @@ public final class EntityQueries {
      * @return new instance of the {@code EntityQuery} with the specified attributes
      */
     public static <I> EntityQuery<I> from(EntityFilters entityFilters,
-                                          RecordStorage<?> storage) {
+                                          RecordStorage<I> storage) {
         checkNotNull(entityFilters);
         checkNotNull(storage);
 
