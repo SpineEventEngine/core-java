@@ -98,14 +98,6 @@ public final class EntityRecordWithColumns implements Serializable {
                                                  Entity entity,
                                                  RecordStorage<?> storage) {
         final Collection<EntityColumn> entityColumns = storage.entityColumns();
-        final EntityRecordWithColumns result = create(record, entity, entityColumns);
-        return result;
-    }
-
-    @VisibleForTesting
-    static EntityRecordWithColumns create(EntityRecord record,
-                                          Entity entity,
-                                          Collection<EntityColumn> entityColumns) {
         final Map<String, EntityColumn.MemoizedValue> columns = extractColumnValues(entity, entityColumns);
         return of(record, columns);
     }

@@ -41,7 +41,6 @@ import static com.google.common.testing.SerializableTester.reserializeAndAssert;
 import static io.spine.server.entity.storage.Columns.extractColumnValues;
 import static io.spine.server.entity.storage.Columns.findColumn;
 import static io.spine.server.entity.storage.EntityColumn.MemoizedValue;
-import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.of;
 import static io.spine.server.storage.EntityField.version;
 import static io.spine.test.Verify.assertSize;
@@ -135,7 +134,8 @@ public class EntityRecordWithColumnsShould {
         final Map<String, MemoizedValue> columnValues = extractColumnValues(entity, entityColumns);
         assertTrue(columnValues.isEmpty());
 
-        final EntityRecordWithColumns record = create(EntityRecord.getDefaultInstance(), entity, entityColumns);
+        final Map<String, MemoizedValue> storageFields = extractColumnValues(entity, entityColumns);
+        final EntityRecordWithColumns record = of(EntityRecord.getDefaultInstance(), storageFields);
         assertFalse(record.hasColumns());
     }
 
