@@ -135,7 +135,7 @@ public class EntityRecordWithColumnsShould {
         final Map<String, MemoizedValue> columnValues = extractColumnValues(entity, entityColumns);
         assertTrue(columnValues.isEmpty());
 
-        final EntityRecordWithColumns record = create(EntityRecord.getDefaultInstance(), entity);
+        final EntityRecordWithColumns record = create(EntityRecord.getDefaultInstance(), entity, entityColumns);
         assertFalse(record.hasColumns());
     }
 

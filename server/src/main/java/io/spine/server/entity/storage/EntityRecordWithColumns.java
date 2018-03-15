@@ -97,17 +97,14 @@ public final class EntityRecordWithColumns implements Serializable {
     public static EntityRecordWithColumns create(EntityRecord record,
                                                  Entity entity,
                                                  RecordStorage<?> storage) {
-        final Map<String, EntityColumn.MemoizedValue> columns = extractColumnValues(entity, storage.entityColumns());
-        return of(record, columns);
+        final EntityRecordWithColumns result = create(record, entity, storage.entityColumns());
+        return result;
     }
 
-    /**
-     * Exists only for testing so it is possible to test the method without creating storage.
-     * Does not use any cached entity columns, instead retrieves them on every call.
-     */
     @VisibleForTesting
-    static EntityRecordWithColumns create(EntityRecord record, Entity entity) {
-        final Collection<EntityColumn> entityColumns = Columns.getAllColumns(entity.getClass());
+    static EntityRecordWithColumns create(EntityRecord record,
+                                          Entity entity,
+                                          Collection<EntityColumn> entityColumns) {
         final Map<String, EntityColumn.MemoizedValue> columns = extractColumnValues(entity, entityColumns);
         return of(record, columns);
     }

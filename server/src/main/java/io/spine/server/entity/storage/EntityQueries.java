@@ -71,24 +71,16 @@ public final class EntityQueries {
         checkNotNull(storage);
 
         final Collection<EntityColumn> entityColumns = storage.entityColumns();
-        final QueryParameters queryParams = toQueryParams(entityFilters, entityColumns);
-        final Collection<I> ids = toGenericIdValues(entityFilters);
-
-        final EntityQuery<I> result = EntityQuery.of(ids, queryParams);
+        final EntityQuery<I> result = from(entityFilters, entityColumns);
         return result;
     }
 
-    /**
-     * Exists only for testing so it is possible to test the method without creating storage.
-     * Does not use any cached entity columns, instead retrieves them on every call.
-     */
     @VisibleForTesting
     static <I> EntityQuery<I> from(EntityFilters entityFilters,
-                                   Class<? extends Entity> entityClass) {
+                                   Collection<EntityColumn> entityColumns) {
         checkNotNull(entityFilters);
-        checkNotNull(entityClass);
+        checkNotNull(entityColumns);
 
-        final Collection<EntityColumn> entityColumns = Columns.getAllColumns(entityClass);
         final QueryParameters queryParams = toQueryParams(entityFilters, entityColumns);
         final Collection<I> ids = toGenericIdValues(entityFilters);
 
