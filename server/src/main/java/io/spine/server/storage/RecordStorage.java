@@ -301,6 +301,7 @@ public abstract class RecordStorage<I>
      * {@link LifecycleFlagField lifecycle storage fields} of the {@link Entity} class managed by this storage.
      *
      * @return a {@code Map} of managed {@link Entity} lifecycle columns
+     * @throws IllegalArgumentException if a lifecycle field is not present in the managed {@link Entity} class
      * @see EntityColumn
      * @see Columns
      * @see LifecycleFlagField
