@@ -108,7 +108,6 @@ public class EntityQueriesShould {
         EntityQueries.from(filters, entityColumns);
     }
 
-
     @Test
     public void construct_empty_queries() {
         final EntityFilters filters = EntityFilters.getDefaultInstance();
