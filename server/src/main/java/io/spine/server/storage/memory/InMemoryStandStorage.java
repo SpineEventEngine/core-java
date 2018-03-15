@@ -23,12 +23,14 @@ import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.protobuf.FieldMask;
 import io.spine.core.BoundedContextName;
+import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.stand.AggregateStateId;
 import io.spine.server.stand.StandStorage;
 import io.spine.server.storage.RecordReadRequest;
+import io.spine.server.storage.RecordStorage;
 import io.spine.type.TypeUrl;
 
 import javax.annotation.Nullable;
@@ -64,7 +66,8 @@ class InMemoryStandStorage extends StandStorage {
                 StorageSpec.of(checkNotNull(builder.boundedContextName),
                                TypeUrl.of(EntityRecord.class),
                                AggregateStateId.class),
-                builder.isMultitenant());
+                builder.isMultitenant(),
+                AbstractVersionableEntity.class);
     }
 
     public static Builder newBuilder() {
@@ -101,47 +104,47 @@ class InMemoryStandStorage extends StandStorage {
 
     @Override
     public Iterator<AggregateStateId> index() {
-        return recordStorage.index();
+        return recordStorage().index();
     }
 
     @Override
     public boolean delete(AggregateStateId id) {
-        return recordStorage.delete(id);
+        return recordStorage().delete(id);
     }
 
     @Nullable
     @Override
     protected Optional<EntityRecord> readRecord(AggregateStateId id) {
         final RecordReadRequest<AggregateStateId> request = new RecordReadRequest<>(id);
-        return recordStorage.read(request);
+        return recordStorage().read(request);
     }
 
     @Override
     protected Iterator<EntityRecord> readMultipleRecords(Iterable<AggregateStateId> ids) {
-        return recordStorage.readMultiple(ids);
+        return recordStorage().readMultiple(ids);
     }
 
     @Override
     protected Iterator<EntityRecord> readMultipleRecords(Iterable<AggregateStateId> ids,
                                                          FieldMask fieldMask) {
-        return recordStorage.readMultiple(ids, fieldMask);
+        return recordStorage().readMultiple(ids, fieldMask);
     }
 
     @Override
     protected Iterator<EntityRecord> readAllRecords() {
-        return recordStorage.readAll();
+        return recordStorage().readAll();
     }
 
     @Override
     protected Iterator<EntityRecord> readAllRecords(FieldMask fieldMask) {
-        return recordStorage.readAll(fieldMask);
+        return recordStorage().readAll(fieldMask);
     }
 
     @Override
     protected Iterator<EntityRecord> readAllRecords(
             EntityQuery<AggregateStateId> query,
             FieldMask fieldMask) {
-        return recordStorage.readAll(query, fieldMask);
+        return recordStorage().readAll(query, fieldMask);
     }
 
     @Override
@@ -154,7 +157,7 @@ class InMemoryStandStorage extends StandStorage {
                    TYPE_URL_MISMATCH_MESSAGE_PATTERN,
                    recordType,
                    recordTypeFromId);
-        recordStorage.write(id, record);
+        recordStorage().write(id, record);
     }
 
     @Override
@@ -162,6 +165,11 @@ class InMemoryStandStorage extends StandStorage {
         for (Map.Entry<AggregateStateId, EntityRecordWithColumns> record : records.entrySet()) {
             writeRecord(record.getKey(), record.getValue());
         }
+    }
+
+    @Override
+    protected RecordStorage<AggregateStateId> recordStorage() {
+        return recordStorage;
     }
 
     public static class Builder {

@@ -25,16 +25,25 @@ import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.Identifier;
+import io.spine.annotation.Internal;
 import io.spine.protobuf.AnyPacker;
+import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.FieldMasks;
 import io.spine.server.entity.LifecycleFlags;
+import io.spine.server.entity.storage.Column;
+import io.spine.server.entity.storage.Columns;
 import io.spine.server.entity.storage.EntityColumn;
+import io.spine.server.entity.storage.EntityColumnCache;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
+import io.spine.server.projection.ProjectionStorage;
 import io.spine.server.stand.AggregateStateId;
+import io.spine.server.stand.StandStorage;
 import io.spine.type.TypeUrl;
 
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -55,8 +64,29 @@ public abstract class RecordStorage<I>
         implements StorageWithLifecycleFlags<I, EntityRecord, RecordReadRequest<I>>,
                    BulkStorageOperationsMixin<I, EntityRecord> {
 
+    private final EntityColumnCache entityColumnCache;
+
+    /**
+     * Creates an instance of {@link RecordStorage} which doesn't support the {@link EntityColumnCache}.
+     *
+     * <p>This creation method should only be used for the {@link RecordStorage} descendants, that are
+     * containers for the other {@link RecordStorage} instance, which actually supports
+     * {@link EntityColumnCache}, for example: {@link ProjectionStorage}, {@link StandStorage}.
+     *
+     * <p>Instances created by this constructor should override {@link RecordStorage#entityColumnCache()}
+     * method.
+     */
     protected RecordStorage(boolean multitenant) {
         super(multitenant);
+        this.entityColumnCache = null;
+    }
+
+    /**
+     * Creates an instance of {@link RecordStorage} which supports the {@link EntityColumnCache}.
+     */
+    protected RecordStorage(boolean multitenant, Class<? extends Entity> entityClass) {
+        super(multitenant);
+        this.entityColumnCache = EntityColumnCache.initializeFor(entityClass);
     }
 
     /**
@@ -251,6 +281,49 @@ public abstract class RecordStorage<I>
         checkNotNull(fieldMask);
 
         return readAllRecords(query, fieldMask);
+    }
+
+    /**
+     * Returns a {@code Collection} of {@linkplain Column columns} of the {@link Entity} managed
+     * by this storage.
+     *
+     * @return a {@code Collection} of managed {@link Entity} columns
+     * @see EntityColumn
+     * @see Columns
+     */
+    @Internal
+    public Collection<EntityColumn> entityColumns() {
+        return entityColumnCache().getColumns();
+    }
+
+    /**
+     * Returns a {@code Map} of {@linkplain EntityColumn columns} corresponded to the
+     * {@link LifecycleFlagField lifecycle storage fields} of the {@link Entity} class managed by this storage.
+     *
+     * @return a {@code Map} of managed {@link Entity} lifecycle columns
+     * @throws IllegalArgumentException if a lifecycle field is not present in the managed {@link Entity} class
+     * @see EntityColumn
+     * @see Columns
+     * @see LifecycleFlagField
+     */
+    @Internal
+    public Map<String, EntityColumn> entityLifecycleColumns() {
+        final HashMap<String, EntityColumn> lifecycleColumns = new HashMap<>();
+        for (LifecycleFlagField field : LifecycleFlagField.values()) {
+            final String name = field.name();
+            final EntityColumn column = entityColumnCache().findColumn(name);
+            lifecycleColumns.put(name, column);
+        }
+        return lifecycleColumns;
+    }
+
+    @Internal
+    public EntityColumnCache entityColumnCache() {
+        if (entityColumnCache == null) {
+            throw new IllegalStateException("Entity column cache not initialized for this storage.");
+        }
+
+        return entityColumnCache;
     }
 
     /*

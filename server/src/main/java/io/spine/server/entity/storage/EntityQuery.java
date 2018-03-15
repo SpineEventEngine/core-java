@@ -20,12 +20,14 @@
 
 package io.spine.server.entity.storage;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
 import io.spine.server.entity.Entity;
+import io.spine.server.storage.RecordStorage;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -36,7 +38,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static io.spine.client.ColumnFilters.eq;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
-import static io.spine.server.entity.storage.Columns.findColumn;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
 
@@ -137,15 +138,16 @@ public final class EntityQuery<I> implements Serializable {
      * <p>The precondition for this method is that current instance
      * {@linkplain #isLifecycleAttributesSet() does not specify the values}.
      *
-     * @param cls the {@code Class} of the entity to create the query for
+     * @param storage the {@linkplain RecordStorage storage} for which this {@code EntityQuery} is created
      * @return new instance of {@code EntityQuery}
      */
     @Internal
-    public EntityQuery<I> withLifecycleFlags(Class<? extends Entity> cls) {
-        checkState(!isLifecycleAttributesSet(),
+    public EntityQuery<I> withLifecycleFlags(RecordStorage<I> storage) {
+        checkState(canAppendLifecycleFlags(),
                    "The query overrides Lifecycle Flags default values.");
-        final EntityColumn archivedColumn = findColumn(cls, archived.name());
-        final EntityColumn deletedColumn = findColumn(cls, deleted.name());
+        final Map<String, EntityColumn> lifecycleColumns = storage.entityLifecycleColumns();
+        final EntityColumn archivedColumn = lifecycleColumns.get(archived.name());
+        final EntityColumn deletedColumn = lifecycleColumns.get(deleted.name());
         final CompositeQueryParameter lifecycleParameter = CompositeQueryParameter.from(
                 ImmutableMultimap.of(archivedColumn, eq(archived.name(), false),
                                      deletedColumn, eq(deletedColumn.getName(), false)),
@@ -183,5 +185,10 @@ public final class EntityQuery<I> implements Serializable {
                           .add("idFilter", ids)
                           .add("parameters", parameters)
                           .toString();
+    }
+
+    @VisibleForTesting
+    boolean canAppendLifecycleFlags() {
+        return !isLifecycleAttributesSet();
     }
 }

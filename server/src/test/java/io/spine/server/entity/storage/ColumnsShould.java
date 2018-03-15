@@ -25,27 +25,21 @@ import com.google.common.testing.NullPointerTester.Visibility;
 import com.google.protobuf.Any;
 import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.Entity;
-import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithColumnFromInterface;
 import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithManyGetters;
-import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithManyGettersDescendant;
 import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithNoStorageFields;
 import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithRepeatedColumnNames;
 import io.spine.server.entity.storage.given.ColumnsTestEnv.RealLifeEntity;
-import io.spine.test.entity.ProjectId;
-import io.spine.testdata.Sample;
 import org.junit.Test;
 
+import java.util.Collection;
 import java.util.Map;
-import java.util.Set;
 
+import static io.spine.server.entity.storage.Columns.extractColumnValues;
+import static io.spine.server.entity.storage.Columns.findColumn;
+import static io.spine.server.entity.storage.Columns.getAllColumns;
 import static io.spine.server.entity.storage.given.ColumnsTestEnv.CUSTOM_COLUMN_NAME;
-import static io.spine.server.storage.EntityField.version;
 import static io.spine.server.storage.LifecycleFlagField.archived;
-import static io.spine.server.storage.LifecycleFlagField.deleted;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
-import static io.spine.test.Verify.assertContains;
-import static io.spine.test.Verify.assertEmpty;
-import static io.spine.test.Verify.assertNotEmpty;
 import static io.spine.test.Verify.assertSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -69,24 +63,61 @@ public class ColumnsShould {
     }
 
     @Test
-    public void extract_no_fields_if_none_defined() {
-        final Entity entity = new EntityWithNoStorageFields(STRING_ID);
-        final Map<String, EntityColumn.MemoizedValue> fields = Columns.from(entity);
-        assertNotNull(fields);
-        assertEmpty(fields);
+    public void get_all_valid_columns_for_entity_class() {
+        final Collection<EntityColumn> entityColumns = getAllColumns(EntityWithManyGetters.class);
+
+        assertNotNull(entityColumns);
+        assertSize(3, entityColumns);
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void fail_to_obtain_columns_for_invalid_entity_class() {
+        getAllColumns(EntityWithRepeatedColumnNames.class);
     }
 
     @Test
-    public void extract_fields_from_implemented_interfaces() {
-        final Entity entity = new EntityWithColumnFromInterface(STRING_ID);
-        final Map<String, EntityColumn.MemoizedValue> fields = Columns.from(entity);
-        assertNotEmpty(fields);
+    public void retrieve_specific_column_metadata_from_given_class() {
+        final Class<? extends Entity<?, ?>> entityClass = RealLifeEntity.class;
+        final String existingColumnName = archived.name();
+        final EntityColumn archivedColumn = findColumn(entityClass, existingColumnName);
+        assertNotNull(archivedColumn);
+        assertEquals(existingColumnName, archivedColumn.getName());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void fail_to_retrieve_non_existing_column() {
+        final Class<? extends Entity<?, ?>> entityClass = EntityWithNoStorageFields.class;
+        final String nonExistingColumnName = "foo";
+        findColumn(entityClass, nonExistingColumnName);
     }
 
     @Test
     public void extract_column_values_with_names_for_storing() {
         final EntityWithManyGetters entity = new EntityWithManyGetters(STRING_ID);
-        final Map<String, EntityColumn.MemoizedValue> fields = Columns.from(entity);
+        final Collection<EntityColumn> entityColumns = getAllColumns(entity.getClass());
+        final Map<String, EntityColumn.MemoizedValue> fields = extractColumnValues(entity, entityColumns);
+
+        checkEntityWithManyGettersFields(entity, fields);
+    }
+
+    @Test
+    public void extract_column_values_using_predefined_columns() {
+        final EntityWithManyGetters entity = new EntityWithManyGetters(STRING_ID);
+        final Collection<EntityColumn> entityColumns = getAllColumns(entity.getClass());
+        final Map<String, EntityColumn.MemoizedValue> fields = extractColumnValues(entity, entityColumns);
+
+        checkEntityWithManyGettersFields(entity, fields);
+    }
+
+    /**
+     * Helper method that checks all {@link EntityWithManyGetters} field values.
+     * 
+     * <p>Created to avoid code duplication, as {@link EntityWithManyGetters} is the main {@link Entity}
+     * class used to test {@linkplain Columns#extractColumnValues(Entity, Collection) column extraction}
+     * functionality.
+     */
+    private static void checkEntityWithManyGettersFields(EntityWithManyGetters entity,
+                                                         Map<String, EntityColumn.MemoizedValue> fields) {
         assertNotNull(fields);
 
         assertSize(3, fields);
@@ -97,71 +128,13 @@ public class ColumnsShould {
         assertNull(floatMemoizedNull.getValue());
 
         assertEquals(entity.getIntegerFieldValue(),
-                     fields.get(CUSTOM_COLUMN_NAME)
-                           .getValue());
+                fields.get(CUSTOM_COLUMN_NAME)
+                        .getValue());
 
         final String messageKey = "someMessage";
         assertEquals(entity.getSomeMessage(),
-                     fields.get(messageKey)
-                           .getValue());
-    }
-
-    @Test
-    public void ignore_non_public_getters_with_column_annotation_from_super_class() {
-        final Entity entity = new EntityWithManyGettersDescendant(STRING_ID);
-        final Map<String, EntityColumn.MemoizedValue> fields = Columns.from(entity);
-        assertSize(3, fields);
-    }
-
-    @Test
-    public void ignore_static_members() {
-        final Map<String, EntityColumn.MemoizedValue> fields =
-                Columns.from(new EntityWithManyGetters(STRING_ID));
-        final EntityColumn.MemoizedValue staticValue = fields.get("staticMember");
-        assertNull(staticValue);
-    }
-
-    @Test
-    public void handle_non_public_entity_class() {
-        final Map<?, ?> fields = Columns.from(new PrivateEntity(STRING_ID));
-        assertNotNull(fields);
-        assertEmpty(fields);
-    }
-
-    @Test
-    public void handle_inherited_fields() {
-        final Entity<?, ?> entity = new RealLifeEntity(Sample.messageOfType(ProjectId.class));
-        final Map<String, ?> storageFields = Columns.from(entity);
-        final Set<String> storageFieldNames = storageFields.keySet();
-
-        assertSize(5, storageFieldNames);
-
-        assertContains(archived.name(), storageFieldNames);
-        assertContains(deleted.name(), storageFieldNames);
-        assertContains("visible", storageFieldNames);
-        assertContains(version.name(), storageFieldNames);
-        assertContains("someTime", storageFieldNames);
-    }
-
-    @Test
-    public void retrieve_column_metadata_from_given_class() {
-        final Class<? extends Entity<?, ?>> entityClass = RealLifeEntity.class;
-        final String existingColumnName = archived.name();
-        final EntityColumn archivedColumn = Columns.findColumn(entityClass, existingColumnName);
-        assertNotNull(archivedColumn);
-        assertEquals(existingColumnName, archivedColumn.getName());
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void fail_to_retrieve_non_existing_column() {
-        final Class<? extends Entity<?, ?>> entityClass = EntityWithNoStorageFields.class;
-        final String existingColumnName = "foo";
-        Columns.findColumn(entityClass, existingColumnName);
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void not_allow_same_column_name_within_one_entity() {
-        Columns.getColumns(EntityWithRepeatedColumnNames.class);
+                fields.get(messageKey)
+                        .getValue());
     }
 
     @SuppressWarnings("unused") // Reflective access

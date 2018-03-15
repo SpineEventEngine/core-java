@@ -25,6 +25,7 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.AbstractVersionableEntity;
+import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.VersionableEntity;
 import io.spine.server.entity.given.Given;
@@ -37,8 +38,9 @@ import java.util.Collections;
 import java.util.Map;
 
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
+import static io.spine.server.entity.storage.Columns.extractColumnValues;
+import static io.spine.server.entity.storage.Columns.findColumn;
 import static io.spine.server.entity.storage.EntityColumn.MemoizedValue;
-import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.of;
 import static io.spine.server.storage.EntityField.version;
 import static io.spine.test.Verify.assertSize;
@@ -61,7 +63,7 @@ public class EntityRecordWithColumnsShould {
                                                     .withVersion(1)
                                                     .build();
         final String columnName = version.name();
-        final EntityColumn column = Columns.findColumn(VersionableEntity.class, columnName);
+        final EntityColumn column = findColumn(VersionableEntity.class, columnName);
         final MemoizedValue value = column.memoizeFor(entity);
 
         final Map<String, MemoizedValue> columns = singletonMap(columnName, value);
@@ -127,10 +129,12 @@ public class EntityRecordWithColumnsShould {
     @Test
     public void not_have_columns_if_values_list_is_empty() {
         final EntityWithoutColumns entity = new EntityWithoutColumns("ID");
-        final Map<String, MemoizedValue> columnValues = Columns.from(entity);
+        final Class<? extends Entity> entityClass = entity.getClass();
+        final Collection<EntityColumn> entityColumns = Columns.getAllColumns(entityClass);
+        final Map<String, MemoizedValue> columnValues = extractColumnValues(entity, entityColumns);
         assertTrue(columnValues.isEmpty());
 
-        final EntityRecordWithColumns record = create(EntityRecord.getDefaultInstance(), entity);
+        final EntityRecordWithColumns record = of(EntityRecord.getDefaultInstance(), columnValues);
         assertFalse(record.hasColumns());
     }
 

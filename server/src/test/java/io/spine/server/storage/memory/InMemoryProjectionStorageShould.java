@@ -41,7 +41,7 @@ public class InMemoryProjectionStorageShould extends ProjectionStorageShould {
                                ProjectId.class);
         final InMemoryProjectionStorage<ProjectId> storage =
                 InMemoryProjectionStorage.newInstance(
-                        InMemoryRecordStorage.newInstance(spec, false));
+                        InMemoryRecordStorage.newInstance(spec, false, cls));
         return storage;
     }
 }

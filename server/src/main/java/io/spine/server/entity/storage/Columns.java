@@ -20,36 +20,20 @@
 
 package io.spine.server.entity.storage;
 
-import com.google.common.collect.LinkedListMultimap;
-import com.google.common.collect.Multimap;
 import io.spine.annotation.Internal;
 import io.spine.server.entity.Entity;
-import io.spine.server.entity.EntityClass;
 import io.spine.server.entity.storage.EntityColumn.MemoizedValue;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.beans.BeanInfo;
-import java.beans.IntrospectionException;
-import java.beans.Introspector;
-import java.beans.PropertyDescriptor;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Lists.newLinkedList;
-import static com.google.common.collect.Multimaps.synchronizedListMultimap;
-import static io.spine.server.entity.storage.ColumnRecords.getAnnotatedVersion;
-import static io.spine.util.Exceptions.newIllegalStateException;
 import static io.spine.validate.Validate.checkNotEmptyOrBlank;
 import static java.lang.String.format;
 
 /**
- * A utility for generating the {@linkplain EntityColumn columns} {@linkplain Map}.
+ * A utility class for working with {@linkplain EntityColumn entity columns}.
  *
  * <p>The methods of all {@link Entity entities} that fit
  * <a href="http://download.oracle.com/otndocs/jcp/7224-javabeans-1.01-fr-spec-oth-JSpec/">
@@ -59,12 +43,9 @@ import static java.lang.String.format;
  * <p>Inherited columns are taken into account too, but building entity hierarchies is strongly
  * discouraged.
  *
- * <p>Note that the returned type of a {@link EntityColumn} getter must either be primitive or
+ * <p>Note that the returned type of an {@link EntityColumn} getter must either be primitive or
  * serializable, otherwise a runtime exception is thrown when trying to get an instance of
  * {@link EntityColumn}.
- *
- * <p>When passing an instance of an already known {@link Entity} type,
- * the getters are retrieved from a cache and are not updated.
  *
  * @author Dmytro Dashenkov
  * @see EntityColumn
@@ -72,70 +53,33 @@ import static java.lang.String.format;
 @Internal
 public class Columns {
 
-    private static final String SPINE_PACKAGE = "io.spine.";
-    private static final String NON_PUBLIC_CLASS_WARNING =
-            "Passed entity class %s is not public. Storage fields won't be extracted.";
-    private static final String NON_PUBLIC_INTERNAL_CLASS_WARNING =
-            "Passed entity class %s is probably a Spine internal non-public entity. " +
-                    "Storage fields won't be extracted.";
-
     /**
-     * A one to many container of the {@link Class} to {@link EntityColumn} relations.
-     *
-     * <p>This container is mutable and thread safe.
-     */
-    private static final Multimap<Class<? extends Entity>, EntityColumn> knownEntityProperties =
-            synchronizedListMultimap(
-                    LinkedListMultimap.<Class<? extends Entity>, EntityColumn>create());
-
-    /**
-     * Prevents initialization of this class from outside.
+     * Prevents instantiation of this utility class.
      */
     private Columns() {
     }
 
     /**
-     * Ensures that the entity columns are valid for the specified entity class and caches them.
+     * Retrieves {@linkplain EntityColumn columns} for the given {@link Entity} class.
      *
-     * @param entityClass the class to check entity columns
+     * <p>Performs checks for the entity column definitions correctness along the way.
+     *
+     * <p>If the check for correctness fails, throws {@link IllegalStateException}.
+     *
+     * @param entityClass the class containing the {@link EntityColumn} definition
+     * @return a {@code Collection} of {@link EntityColumn} corresponded to entity class
+     * @throws IllegalStateException if entity column definitions are incorrect
      */
-    public static void checkColumnDefinitions(EntityClass<?> entityClass) {
-        ensureRegistered(entityClass.value());
+    static Collection<EntityColumn> getAllColumns(Class<? extends Entity> entityClass) {
+        checkNotNull(entityClass);
+
+        final ColumnReader columnReader = ColumnReader.forClass(entityClass);
+        final Collection<EntityColumn> entityColumns = columnReader.readColumns();
+        return entityColumns;
     }
 
     /**
-     * Generates the {@linkplain EntityColumn columns} for the given {@linkplain Entity}.
-     *
-     * <p>If there were no {@linkplain Entity entities} stored in the scope of current class
-     * <a href="https://docs.oracle.com/javase/specs/jls/se7/html/jls-12.html">initialization</a>,
-     * a call to this method will create a cache of the passed {@linkplain Entity entity's} getters
-     * and use it in all the successive calls.
-     *
-     * @param entity an {@link Entity} to get the {@linkplain EntityColumn columns} from
-     * @param <E>    the type of the {@link Entity}
-     * @return a {@link Map} of the column {@linkplain EntityColumn#getStoredName()
-     *         names for storing} to their {@linkplain MemoizedValue memoized values}.
-     * @see MemoizedValue
-     */
-    static <E extends Entity<?, ?>> Map<String, MemoizedValue> from(E entity) {
-        checkNotNull(entity);
-        final Class<? extends Entity> entityType = entity.getClass();
-        final int modifiers = entityType.getModifiers();
-        if (!Modifier.isPublic(modifiers)) {
-            logNonPublicClass(entityType);
-            return Collections.emptyMap();
-        }
-        ensureRegistered(entityType);
-
-        final Map<String, MemoizedValue> fields = extractColumns(entityType, entity);
-        return fields;
-    }
-
-    /**
-     * Retrieves a {@link EntityColumn} instance of the given name and from the given entity class.
-     *
-     * <p>If the given entity class has not yet been added to the column cache,
-     * it will be added upon this operation.
+     * Retrieves an {@link EntityColumn} instance of the given name and from the given entity class.
      *
      * <p>If no column is found, an {@link IllegalArgumentException} is thrown.
      *
@@ -147,131 +91,46 @@ public class Columns {
     static EntityColumn findColumn(Class<? extends Entity> entityClass, String columnName) {
         checkNotNull(entityClass);
         checkNotEmptyOrBlank(columnName, "entity column name");
-        ensureRegistered(entityClass);
 
-        final Collection<EntityColumn> cachedColumns = getColumns(entityClass);
-        for (EntityColumn column : cachedColumns) {
+        final ColumnReader columnReader = ColumnReader.forClass(entityClass);
+        final Collection<EntityColumn> entityColumns = columnReader.readColumns();
+        for (EntityColumn column : entityColumns) {
             if (column.getName()
-                      .equals(columnName)) {
+                    .equals(columnName)) {
                 return column;
             }
         }
 
         throw new IllegalArgumentException(
-                format("Could not find a EntityColumn description for %s.%s.",
-                       entityClass.getCanonicalName(),
-                       columnName));
+                format("Could not find an EntityColumn description for %s.%s.",
+                        entityClass.getCanonicalName(),
+                        columnName));
     }
 
     /**
-     * Retrieves {@linkplain EntityColumn columns} for the given {@code Entity} class.
+     * Extracts the {@linkplain EntityColumn column} values from the given {@linkplain Entity}, using given
+     * {@linkplain EntityColumn entity columns}.
      *
-     * @param entityClass the class containing the {@link EntityColumn} definition
-     * @return a {@link Collection} of {@link EntityColumn} corresponded to entity class
-     */
-    static Collection<EntityColumn> getColumns(Class<? extends Entity> entityClass) {
-        checkNotNull(entityClass);
-        ensureRegistered(entityClass);
-
-        final Collection<EntityColumn> result = knownEntityProperties.get(entityClass);
-        return result;
-    }
-
-    /**
-     * Generates the {@link EntityColumn} values considering the passed
-     * {@linkplain Entity entity type} indexed.
+     * <p>By using predefined {@linkplain EntityColumn entity columns} the process of
+     * {@linkplain ColumnReader#readColumns() obtaining columns} from the given {@link Entity} class
+     * can be skipped.
      *
-     * @param entityType indexed type of the {@link Entity}
-     * @param entity     the object which to take the values from
-     * @return a {@link Map} of the {@linkplain EntityColumn columns}
-     */
-    private static Map<String, MemoizedValue> extractColumns(Class<? extends Entity> entityType,
-                                                             Entity entity) {
-        final Collection<EntityColumn> columns = knownEntityProperties.get(entityType);
-        final Map<String, MemoizedValue> values = new HashMap<>(columns.size());
-
-        for (EntityColumn column : columns) {
-            final String name = column.getStoredName();
-            final MemoizedValue value = column.memoizeFor(entity);
-            values.put(name, value);
-        }
-        return values;
-    }
-
-    private static void ensureRegistered(Class<? extends Entity> entityType) {
-        if (knownEntityProperties.containsKey(entityType)) {
-            return;
-        }
-        addToCache(entityType);
-    }
-
-    /**
-     * Caches the {@linkplain Entity entity type}
-     * for further {@linkplain EntityColumn columns} retrieving.
-     */
-    private static void addToCache(Class<? extends Entity> entityType) {
-        final BeanInfo entityDescriptor;
-        try {
-            entityDescriptor = Introspector.getBeanInfo(entityType);
-        } catch (IntrospectionException e) {
-            throw new IllegalStateException(e);
-        }
-
-        final Collection<EntityColumn> entityColumns = newLinkedList();
-        for (PropertyDescriptor property : entityDescriptor.getPropertyDescriptors()) {
-            final Method getter = property.getReadMethod();
-            final boolean isEntityColumn = getAnnotatedVersion(getter).isPresent();
-            if (isEntityColumn) {
-                final EntityColumn column = EntityColumn.from(getter);
-                entityColumns.add(column);
-            }
-        }
-        checkRepeatedColumnNames(entityColumns, entityType);
-        knownEntityProperties.putAll(entityType, entityColumns);
-    }
-
-    /**
-     * Ensures that the specified columns have no repeated names.
+     * <p>This method will return {@linkplain Collections#emptyMap() empty map} for {@link Entity} classes
+     * that are non-public or cannot be subjected to column extraction for some other reason.
      *
-     * @param columns     the columns to check
-     * @param entityClass the entity class for the columns
+     * @param entity        an {@link Entity} to get the {@linkplain EntityColumn column} values from
+     * @param entityColumns {@linkplain EntityColumn entity columns} which values should be extracted
+     * @param <E>           the type of the {@link Entity}
+     * @return a {@code Map} of the column {@linkplain EntityColumn#getStoredName()
+     *         names for storing} to their {@linkplain MemoizedValue memoized values}
+     * @see MemoizedValue
      */
-    private static void checkRepeatedColumnNames(Iterable<EntityColumn> columns,
-                                                 Class<? extends Entity> entityClass) {
-        final Collection<String> checkedNames = newLinkedList();
-        for (EntityColumn column : columns) {
-            final String columnName = column.getStoredName();
-            if (checkedNames.contains(columnName)) {
-                throw newIllegalStateException(
-                        "The entity `%s` has columns with the same name for storing `%s`.",
-                        entityClass.getName(),
-                        columnName);
-            }
-            checkedNames.add(columnName);
-        }
-    }
+    static <E extends Entity<?, ?>> Map<String, MemoizedValue>
+    extractColumnValues(E entity, Collection<EntityColumn> entityColumns) {
+        checkNotNull(entity);
+        checkNotNull(entityColumns);
 
-    /**
-     * Writes the non-public {@code Entity} class warning into the log unless the passed class
-     * represents one of the Spine internal {@link Entity} implementations.
-     */
-    private static void logNonPublicClass(Class<? extends Entity> cls) {
-        final String className = cls.getCanonicalName();
-        final boolean internal = className.startsWith(SPINE_PACKAGE);
-        if (internal) {
-            log().trace(format(NON_PUBLIC_INTERNAL_CLASS_WARNING, className));
-        } else {
-            log().warn(format(NON_PUBLIC_CLASS_WARNING, className));
-        }
-    }
-
-    private static Logger log() {
-        return LogSingleton.INSTANCE.value;
-    }
-
-    private enum LogSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(Columns.class);
+        final ColumnValueExtractor columnValueExtractor = ColumnValueExtractor.create(entity, entityColumns);
+        return columnValueExtractor.extractColumnValues();
     }
 }

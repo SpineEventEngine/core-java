@@ -25,12 +25,15 @@ import com.google.common.collect.ImmutableMap;
 import io.spine.annotation.Internal;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
+import io.spine.server.storage.RecordStorage;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.server.entity.storage.Columns.extractColumnValues;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -50,7 +53,7 @@ public final class EntityRecordWithColumns implements Serializable {
      * Creates a new instance of the {@code EntityRecordWithColumns}.
      *
      * @param record  {@link EntityRecord} to pack
-     * @param columns {@linkplain Columns#from(Entity) columns} map to pack
+     * @param columns {@linkplain Columns#extractColumnValues(Entity, Collection)} columns} map to pack
      */
     private EntityRecordWithColumns(EntityRecord record,
                                     Map<String, EntityColumn.MemoizedValue> columns) {
@@ -78,9 +81,24 @@ public final class EntityRecordWithColumns implements Serializable {
     /**
      * Creates a new instance of the {@code EntityRecordWithColumns} with
      * {@link EntityColumn} values from the given {@linkplain Entity}.
+     *
+     * <p>Extracts {@linkplain EntityColumn column} values from the given {@linkplain Entity}
+     * and then combines it with the given {@link EntityRecord}.
+     *
+     * <p>Uses {@link EntityColumn} definitions contained in storage for the value extraction. This way
+     * the {@linkplain Columns#getAllColumns(Class) column retrieval operation} can be omitted when calling
+     * this method.
+     *
+     * @param record  the {@link EntityRecord} to create value from
+     * @param entity  the {@link Entity} to extract {@linkplain EntityColumn column} values from
+     * @param storage the {@linkplain RecordStorage storage} for which the record is created
+     * @return new instance of {@link EntityRecordWithColumns}
      */
-    public static EntityRecordWithColumns create(EntityRecord record, Entity entity) {
-        final Map<String, EntityColumn.MemoizedValue> columns = Columns.from(entity);
+    public static EntityRecordWithColumns create(EntityRecord record,
+                                                 Entity entity,
+                                                 RecordStorage<?> storage) {
+        final Collection<EntityColumn> entityColumns = storage.entityColumns();
+        final Map<String, EntityColumn.MemoizedValue> columns = extractColumnValues(entity, entityColumns);
         return of(record, columns);
     }
 
@@ -145,7 +163,7 @@ public final class EntityRecordWithColumns implements Serializable {
      * <p>If returns {@code false}, the {@linkplain EntityColumn columns} are not considered
      * by the storage.
      *
-     * @return {@code true} if the object was constructed via {@link #create(EntityRecord, Entity)}
+     * @return {@code true} if the object was constructed via {@link #create(EntityRecord, Entity, RecordStorage)}
      *         and the entity has columns; {@code false} otherwise
      */
     public boolean hasColumns() {

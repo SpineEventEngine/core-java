@@ -46,7 +46,7 @@ public class InMemoryRecordStorageShould
         final StorageSpec<ProjectId> spec = StorageSpec.of(newName(getClass().getSimpleName()),
                                                            TypeUrl.of(Project.class),
                                                            ProjectId.class);
-        return InMemoryRecordStorage.newInstance(spec, false);
+        return InMemoryRecordStorage.newInstance(spec, false, cls);
     }
 
     @Override

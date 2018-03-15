@@ -412,9 +412,9 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     public void write_record_with_columns() {
         final I id = newId();
         final EntityRecord record = newStorageRecord(id);
-        final TestCounterEntity<?> testEntity = new TestCounterEntity<>(id);
-        final EntityRecordWithColumns recordWithColumns = create(record, testEntity);
-        final S storage = getStorage();
+        final TestCounterEntity<I> testEntity = new TestCounterEntity<>(id);
+        final RecordStorage<I> storage = getStorage();
+        final EntityRecordWithColumns recordWithColumns = create(record, testEntity, storage);
         storage.write(id, recordWithColumns);
 
         final RecordReadRequest<I> readRequest = newReadRequest(id);
@@ -444,7 +444,10 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final EntityFilters filters = EntityFilters.newBuilder()
                                                    .addFilter(aggregatingFilter)
                                                    .build();
-        final EntityQuery<I> query = EntityQueries.from(filters, getTestEntityClass());
+
+        final RecordStorage<I> storage = getStorage();
+
+        final EntityQuery<I> query = EntityQueries.from(filters, storage);
         final I idMatching = newId();
         final I idWrong1 = newId();
         final I idWrong2 = newId();
@@ -467,11 +470,9 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final EntityRecord notFineRecord1 = newStorageRecord(idWrong1, newState(idWrong1));
         final EntityRecord notFineRecord2 = newStorageRecord(idWrong2, newState(idWrong2));
 
-        final EntityRecordWithColumns recordRight = create(fineRecord, matchingEntity);
-        final EntityRecordWithColumns recordWrong1 = create(notFineRecord1, wrongEntity1);
-        final EntityRecordWithColumns recordWrong2 = create(notFineRecord2, wrongEntity2);
-
-        final RecordStorage<I> storage = getStorage();
+        final EntityRecordWithColumns recordRight = create(fineRecord, matchingEntity, storage);
+        final EntityRecordWithColumns recordWrong1 = create(notFineRecord1, wrongEntity1, storage);
+        final EntityRecordWithColumns recordWrong2 = create(notFineRecord2, wrongEntity2, storage);
 
         storage.write(idMatching, recordRight);
         storage.write(idWrong1, recordWrong1);
@@ -498,16 +499,18 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final EntityFilters filters = EntityFilters.newBuilder()
                                                    .addFilter(aggregatingFilter)
                                                    .build();
-        final EntityQuery<I> query = EntityQueries.from(filters, getTestEntityClass());
+
+        final RecordStorage<I> storage = getStorage();
+
+        final EntityQuery<I> query = EntityQueries.from(filters, storage);
 
         final I id = newId();
         final TestCounterEntity<I> entity = new TestCounterEntity<>(id);
         entity.setStatus(initialStatus);
 
         final EntityRecord record = newStorageRecord(id, newState(id));
-        final EntityRecordWithColumns recordWithColumns = create(record, entity);
+        final EntityRecordWithColumns recordWithColumns = create(record, entity, storage);
 
-        final RecordStorage<I> storage = getStorage();
         final FieldMask fieldMask = FieldMask.getDefaultInstance();
 
         // Create the record.
@@ -517,7 +520,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
 
         // Update the entity columns of the record.
         entity.setStatus(statusAfterUpdate);
-        final EntityRecordWithColumns updatedRecordWithColumns = create(record, entity);
+        final EntityRecordWithColumns updatedRecordWithColumns = create(record, entity, storage);
         storage.write(id, updatedRecordWithColumns);
 
         final Iterator<EntityRecord> recordsAfter = storage.readAll(query, fieldMask);
@@ -539,11 +542,11 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final EntityRecord notFineRecord1 = newStorageRecord(idWrong1, newState(idWrong1));
         final EntityRecord notFineRecord2 = newStorageRecord(idWrong2, newState(idWrong2));
 
-        final EntityRecordWithColumns recordRight = create(fineRecord, matchingEntity);
-        final EntityRecordWithColumns recordWrong1 = create(notFineRecord1, wrongEntity1);
-        final EntityRecordWithColumns recordWrong2 = create(notFineRecord2, wrongEntity2);
-
         final RecordStorage<I> storage = getStorage();
+
+        final EntityRecordWithColumns recordRight = create(fineRecord, matchingEntity, storage);
+        final EntityRecordWithColumns recordWrong1 = create(notFineRecord1, wrongEntity1, storage);
+        final EntityRecordWithColumns recordWrong2 = create(notFineRecord2, wrongEntity2, storage);
 
         // Fill the storage
         storage.write(idWrong1, recordWrong1);
@@ -561,7 +564,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final EntityFilters filters = EntityFilters.newBuilder()
                                                    .setIdFilter(idFilter)
                                                    .build();
-        final EntityQuery<I> query = EntityQueries.from(filters, getTestEntityClass());
+        final EntityQuery<I> query = EntityQueries.from(filters, storage);
 
         // Perform the query
         final Iterator<EntityRecord> readRecords = storage.readAll(query,
@@ -584,13 +587,13 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         archivedEntity.archive();
 
         final RecordStorage<I> storage = getStorage();
-        storage.write(activeRecordId, create(activeRecord, activeEntity));
-        storage.write(archivedRecordId, create(archivedRecord, archivedEntity));
+        storage.write(activeRecordId, create(activeRecord, activeEntity, storage));
+        storage.write(archivedRecordId, create(archivedRecord, archivedEntity, storage));
 
         final EntityFilters filters = EntityFilters.newBuilder()
                                                    .addFilter(all(eq(archived.toString(), true)))
                                                    .build();
-        final EntityQuery<I> query = EntityQueries.from(filters, TestCounterEntity.class);
+        final EntityQuery<I> query = EntityQueries.from(filters, storage);
         final Iterator<EntityRecord> read = storage.readAll(query, FieldMask.getDefaultInstance());
         assertSingleRecord(archivedRecord, read);
     }
@@ -612,9 +615,9 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final EntityRecord deletedRecord = newStorageRecord(deletedId, deletedEntity.getState());
 
         final RecordStorage<I> storage = getStorage();
-        storage.write(deletedId, create(deletedRecord, deletedEntity));
-        storage.write(activeId, create(activeRecord, activeEntity));
-        storage.write(archivedId, create(archivedRecord, archivedEntity));
+        storage.write(deletedId, create(deletedRecord, deletedEntity, storage));
+        storage.write(activeId, create(activeRecord, activeEntity, storage));
+        storage.write(archivedId, create(archivedRecord, archivedEntity, storage));
         final EntityIdFilter idFilter = EntityIdFilter.newBuilder()
                                                       .addIds(toEntityId(activeId))
                                                       .addIds(toEntityId(archivedId))
@@ -623,8 +626,8 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final EntityFilters filters = EntityFilters.newBuilder()
                                                    .setIdFilter(idFilter)
                                                    .build();
-        final EntityQuery<I> query = EntityQueries.<I>from(filters, TestCounterEntity.class)
-                                                  .withLifecycleFlags(TestCounterEntity.class);
+        final EntityQuery<I> query = EntityQueries.<I>from(filters, storage)
+                                                  .withLifecycleFlags(storage);
         final Iterator<EntityRecord> read = storage.readAll(query, FieldMask.getDefaultInstance());
         assertSingleRecord(activeRecord, read);
     }
@@ -657,9 +660,9 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
                                                    .setIdFilter(idFilter)
                                                    .addFilter(columnFilter)
                                                    .build();
-        final EntityQuery<I> query = EntityQueries.<I>from(filters, TestCounterEntity.class)
-                                                  .withLifecycleFlags(TestCounterEntity.class);
         final RecordStorage<I> storage = getStorage();
+        final EntityQuery<I> query = EntityQueries.<I>from(filters, storage)
+                                                  .withLifecycleFlags(storage);
         final Iterator<EntityRecord> read = storage.readAll(query, FieldMask.getDefaultInstance());
         final List<EntityRecord> readRecords = newArrayList(read);
         assertEquals(1, readRecords.size());
@@ -731,7 +734,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     private void write(Entity<I, ?> entity) {
         final RecordStorage<I> storage = getStorage();
         final EntityRecord record = newStorageRecord(entity.getId(), entity.getState());
-        storage.write(entity.getId(), create(record, entity));
+        storage.write(entity.getId(), create(record, entity, storage));
     }
 
     @SuppressWarnings("unused") // Reflective access

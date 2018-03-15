@@ -27,7 +27,6 @@ import io.spine.option.EntityOption.Visibility;
 import io.spine.server.BoundedContext;
 import io.spine.server.entity.given.VisibilityGuardTestEnv.ExposedRepository;
 import io.spine.server.entity.given.VisibilityGuardTestEnv.HiddenRepository;
-import io.spine.server.entity.given.VisibilityGuardTestEnv.RepositoryForInvalidEntity;
 import io.spine.server.entity.given.VisibilityGuardTestEnv.SubscribableRepository;
 import io.spine.test.entity.FullAccessAggregate;
 import io.spine.test.entity.HiddenAggregate;
@@ -125,11 +124,6 @@ public class VisibilityGuardShould {
     @Test(expected = IllegalArgumentException.class)
     public void reject_unregistered_state_class() {
         guard.getRepository(Empty.class);
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void cache_entity_columns_on_registration() {
-        guard.register(new RepositoryForInvalidEntity());
     }
 
     @Test

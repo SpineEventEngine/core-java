@@ -22,7 +22,9 @@ package io.spine.server.storage.memory;
 
 import com.google.common.base.Optional;
 import com.google.protobuf.FieldMask;
+import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
+import io.spine.server.entity.storage.EntityColumnCache;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.storage.RecordStorage;
@@ -45,8 +47,8 @@ public class InMemoryRecordStorage<I> extends RecordStorage<I> {
     private final StorageSpec<I> spec;
     private final MultitenantStorage<TenantRecords<I>> multitenantStorage;
 
-    InMemoryRecordStorage(StorageSpec<I> spec, boolean multitenant) {
-        super(multitenant);
+    InMemoryRecordStorage(StorageSpec<I> spec, boolean multitenant, Class<? extends Entity> entityClass) {
+        super(multitenant, entityClass);
         this.spec = spec;
         this.multitenantStorage = new MultitenantStorage<TenantRecords<I>>(multitenant) {
             @Override
@@ -57,8 +59,9 @@ public class InMemoryRecordStorage<I> extends RecordStorage<I> {
     }
 
     protected static <I> InMemoryRecordStorage<I> newInstance(StorageSpec<I> spec,
-                                                              boolean multitenant) {
-        return new InMemoryRecordStorage<>(spec, multitenant);
+                                                              boolean multitenant,
+                                                              Class<? extends Entity> entityClass) {
+        return new InMemoryRecordStorage<>(spec, multitenant, entityClass);
     }
 
     StorageSpec<I> getSpec() {
