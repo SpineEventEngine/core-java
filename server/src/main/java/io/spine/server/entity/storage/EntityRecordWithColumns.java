@@ -97,7 +97,8 @@ public final class EntityRecordWithColumns implements Serializable {
     public static EntityRecordWithColumns create(EntityRecord record,
                                                  Entity entity,
                                                  RecordStorage<?> storage) {
-        final EntityRecordWithColumns result = create(record, entity, storage.entityColumns());
+        final Collection<EntityColumn> entityColumns = storage.entityColumns();
+        final EntityRecordWithColumns result = create(record, entity, entityColumns);
         return result;
     }
 
