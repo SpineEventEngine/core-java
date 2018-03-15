@@ -163,8 +163,7 @@ public class EntityQueriesShould {
         assertContains(archivedFilter, columnFilters);
     }
 
-    private static EntityQuery<?> createEntityQuery(EntityFilters filters,
-                                                    Class<? extends Entity> entityClass) {
+    private static EntityQuery<?> createEntityQuery(EntityFilters filters, Class<? extends Entity> entityClass) {
         final Collection<EntityColumn> entityColumns = Columns.getAllColumns(entityClass);
         return EntityQueries.from(filters, entityColumns);
     }
