@@ -33,6 +33,7 @@ import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.AbstractVersionableEntity;
+import io.spine.server.entity.Entity;
 import io.spine.server.storage.RecordStorage;
 import io.spine.test.storage.ProjectId;
 import io.spine.testdata.Sample;
@@ -93,8 +94,7 @@ public class EntityQueriesShould {
         final EntityFilters filters = EntityFilters.newBuilder()
                                                    .addFilter(compositeFilter)
                                                    .build();
-        final Collection<EntityColumn> entityColumns = Columns.getAllColumns(AbstractVersionableEntity.class);
-        EntityQueries.from(filters, entityColumns);
+        createEntityQuery(filters, AbstractVersionableEntity.class);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -104,15 +104,13 @@ public class EntityQueriesShould {
         final EntityFilters filters = EntityFilters.newBuilder()
                 .addFilter(compositeFilter)
                 .build();
-        final Collection<EntityColumn> entityColumns = Columns.getAllColumns(AbstractVersionableEntity.class);
-        EntityQueries.from(filters, entityColumns);
+        createEntityQuery(filters, AbstractVersionableEntity.class);
     }
 
     @Test
     public void construct_empty_queries() {
         final EntityFilters filters = EntityFilters.getDefaultInstance();
-        final Collection<EntityColumn> entityColumns = Columns.getAllColumns(AbstractEntity.class);
-        final EntityQuery<?> query = EntityQueries.from(filters, entityColumns);
+        final EntityQuery<?> query = createEntityQuery(filters, AbstractEntity.class);
         assertNotNull(query);
         assertEquals(0, size(query.getParameters().iterator()));
         assertTrue(query.getIds().isEmpty());
@@ -146,8 +144,7 @@ public class EntityQueriesShould {
                                                    .setIdFilter(idFilter)
                                                    .addFilter(aggregatingFilter)
                                                    .build();
-        final Collection<EntityColumn> entityColumns = Columns.getAllColumns(AbstractVersionableEntity.class);
-        final EntityQuery<?> query = EntityQueries.from(filters, entityColumns);
+        final EntityQuery<?> query = createEntityQuery(filters, AbstractVersionableEntity.class);
         assertNotNull(query);
 
         final Collection<?> ids = query.getIds();
@@ -164,5 +161,11 @@ public class EntityQueriesShould {
         assertEquals(EITHER, singleParam.getOperator());
         assertContains(versionFilter, columnFilters);
         assertContains(archivedFilter, columnFilters);
+    }
+
+    private static EntityQuery<?> createEntityQuery(EntityFilters filters,
+                                                    Class<? extends Entity> entityClass) {
+        final Collection<EntityColumn> entityColumns = Columns.getAllColumns(entityClass);
+        return EntityQueries.from(filters, entityColumns);
     }
 }
