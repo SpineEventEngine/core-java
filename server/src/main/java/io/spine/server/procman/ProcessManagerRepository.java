@@ -32,6 +32,7 @@ import io.spine.core.EventEnvelope;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
 import io.spine.server.BoundedContext;
+import io.spine.server.ServerEnvironment;
 import io.spine.server.bus.Bus;
 import io.spine.server.bus.MessageDispatcher;
 import io.spine.server.command.CommandHandlingEntity;
@@ -168,6 +169,10 @@ public abstract class ProcessManagerRepository<I,
                             "and do not react upon any rejections or events.", this);
         }
         this.commandErrorHandler = CommandErrorHandler.with(boundedContext.getRejectionBus());
+
+        ServerEnvironment.getInstance()
+                         .getSharding()
+                         .register(this);
     }
 
     /**
@@ -367,7 +372,7 @@ public abstract class ProcessManagerRepository<I,
      */
     @SPI
     protected PmEventDelivery<I, P> getEventEndpointDelivery() {
-        return PmEventDelivery.directDelivery(this);
+        return new PmEventDelivery<>(this);
     }
 
 
@@ -384,7 +389,7 @@ public abstract class ProcessManagerRepository<I,
      */
     @SPI
     protected PmRejectionDelivery<I, P> getRejectionEndpointDelivery() {
-        return PmRejectionDelivery.directDelivery(this);
+        return new PmRejectionDelivery<>(this);
     }
 
     /**
@@ -400,7 +405,7 @@ public abstract class ProcessManagerRepository<I,
      */
     @SPI
     protected PmCommandDelivery<I, P> getCommandEndpointDelivery() {
-        return PmCommandDelivery.directDelivery(this);
+        return new PmCommandDelivery<>(this);
     }
 
     @Override
@@ -416,9 +421,10 @@ public abstract class ProcessManagerRepository<I,
     @Override
     public Iterable<ShardedStreamConsumer<?, ?>> getMessageConsumers() {
         final Iterable<ShardedStreamConsumer<?, ?>> result =
-                ImmutableList.<ShardedStreamConsumer<?, ?>>of(getCommandEndpointDelivery(),
-                                                              getEventEndpointDelivery(),
-                                                              getRejectionEndpointDelivery());
+                ImmutableList.<ShardedStreamConsumer<?, ?>>of(
+                        getCommandEndpointDelivery().getConsumer(),
+                        getEventEndpointDelivery().getConsumer(),
+                        getRejectionEndpointDelivery().getConsumer());
         return result;
     }
 
@@ -427,6 +433,12 @@ public abstract class ProcessManagerRepository<I,
     public BoundedContextName getBoundedContextName() {
         final BoundedContextName name = getBoundedContext().getName();
         return name;
+    }
+
+    @Override
+    public void close() {
+        ServerEnvironment.getInstance().getSharding().unregister(this);
+        super.close();
     }
 
     /**

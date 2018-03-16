@@ -19,29 +19,20 @@
  */
 package io.spine.server.aggregate.given;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.Identifier;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
 import io.spine.core.React;
 import io.spine.core.Rejection;
-import io.spine.core.RejectionEnvelope;
 import io.spine.core.Rejections;
 import io.spine.server.aggregate.Aggregate;
-import io.spine.server.aggregate.AggregateCommandDelivery;
-import io.spine.server.aggregate.AggregateEventDelivery;
-import io.spine.server.aggregate.AggregateRejectionDelivery;
-import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.command.TestEventFactory;
-import io.spine.server.route.RejectionProducers;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggCreateProject;
 import io.spine.test.aggregate.command.AggStartProject;
@@ -52,9 +43,7 @@ import io.spine.validate.StringValueVBuilder;
 
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.Map;
 
-import static com.google.common.collect.Maps.newHashMap;
 import static io.spine.protobuf.AnyPacker.pack;
 import static java.util.Collections.emptyList;
 
@@ -173,121 +162,6 @@ public class AggregateMessageDeliveryTestEnv {
         @Nullable
         public static AggCannotStartArchivedProject getRejectionReceived() {
             return rejectionReceived;
-        }
-    }
-
-    /**
-     * A repository which overrides the delivery strategy for events, rejections and commands,
-     * postponing the delivery of each of these objects to aggregate instances.
-     */
-    public static class PostponingRepository
-            extends AggregateRepository<ProjectId, ReactingProject> {
-
-        private PostponingEventDelivery eventDelivery = null;
-        private PostponingRejectionDelivery rejectionDelivery = null;
-        private PostponingCommandDelivery commandDelivery = null;
-
-        public PostponingRepository() {
-            // Override the routing to use the first field; it's more obvious for tests.
-            getRejectionRouting().replaceDefault(
-                    RejectionProducers.<ProjectId>fromFirstMessageField());
-        }
-
-        @Override
-        public PostponingEventDelivery getEventEndpointDelivery() {
-            if (eventDelivery == null) {
-                eventDelivery = new PostponingEventDelivery(this);
-            }
-            return eventDelivery;
-        }
-
-        @Override
-        public PostponingRejectionDelivery getRejectionEndpointDelivery() {
-            if (rejectionDelivery == null) {
-                rejectionDelivery = new PostponingRejectionDelivery(this);
-            }
-            return rejectionDelivery;
-        }
-
-        @Override
-        public PostponingCommandDelivery getCommandEndpointDelivery() {
-            if(commandDelivery == null) {
-                commandDelivery = new PostponingCommandDelivery(this);
-            }
-            return commandDelivery;
-        }
-    }
-
-    /**
-     * Event delivery strategy which always postpones the delivery, but remembers the event
-     * along with the target entity ID.
-     */
-    public static class PostponingEventDelivery
-            extends AggregateEventDelivery<ProjectId, ReactingProject> {
-
-        private final Map<ProjectId, EventEnvelope> postponedEvents = newHashMap();
-
-        protected PostponingEventDelivery(PostponingRepository repository) {
-            super(repository);
-        }
-
-        @Override
-        public boolean shouldPostpone(ProjectId id, EventEnvelope envelope) {
-            postponedEvents.put(id, envelope);
-            return true;
-        }
-
-        public Map<ProjectId, EventEnvelope> getPostponedEvents() {
-            return ImmutableMap.copyOf(postponedEvents);
-        }
-    }
-
-    /**
-     * Rejection delivery strategy which always postpones the delivery, but remembers the rejection
-     * along with the target entity ID.
-     */
-    public static class PostponingRejectionDelivery
-            extends AggregateRejectionDelivery<ProjectId, ReactingProject> {
-
-        private final Map<ProjectId, RejectionEnvelope> postponedRejections = newHashMap();
-
-        protected PostponingRejectionDelivery(PostponingRepository repository) {
-            super(repository);
-        }
-
-        @Override
-        public boolean shouldPostpone(ProjectId id, RejectionEnvelope envelope) {
-            postponedRejections.put(id, envelope);
-            return true;
-        }
-
-        public Map<ProjectId, RejectionEnvelope> getPostponedRejections() {
-            return ImmutableMap.copyOf(postponedRejections);
-        }
-    }
-
-
-    /**
-     * Command delivery strategy which always postpones the delivery, but remembers the command
-     * along with the target entity ID.
-     */
-    public static class PostponingCommandDelivery
-            extends AggregateCommandDelivery<ProjectId, ReactingProject> {
-
-        private final Map<ProjectId, CommandEnvelope> postponedCommands = newHashMap();
-
-        protected PostponingCommandDelivery(PostponingRepository repository) {
-            super(repository);
-        }
-
-        @Override
-        public boolean shouldPostpone(ProjectId id, CommandEnvelope envelope) {
-            postponedCommands.put(id, envelope);
-            return true;
-        }
-
-        public Map<ProjectId, CommandEnvelope> getPostponedCommands() {
-            return ImmutableMap.copyOf(postponedCommands);
         }
     }
 }

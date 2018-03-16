@@ -28,11 +28,13 @@ import io.spine.server.transport.TransportFactory;
  */
 public interface ShardedStreamConsumer<I, E extends MessageEnvelope<?, ?, ?>> {
 
-    ShardConsumerId<E> getConsumerId();
+    ShardingTag<E> getTag();
 
     void onNext(I targetId, E envelope);
 
-    ShardedStream<I, E> bindToTransport(BoundedContextName name,
-                                        ShardingKey key,
-                                        TransportFactory transportFactory);
+    ShardedStream<I, ?, E> bindToTransport(BoundedContextName name,
+                                           ShardingKey key,
+                                           TransportFactory transportFactory);
+
+    ShardedStream<I, ?, E> getStream();
 }

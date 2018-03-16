@@ -19,10 +19,9 @@
  */
 package io.spine.server.procman;
 
-import io.spine.annotation.SPI;
 import io.spine.core.RejectionEnvelope;
 import io.spine.server.sharding.RejectionShardedStream;
-import io.spine.server.sharding.ShardConsumerId;
+import io.spine.server.sharding.ShardingTag;
 
 /**
  * A strategy on delivering the rejections to the instances of a certain process manager type.
@@ -31,46 +30,29 @@ import io.spine.server.sharding.ShardConsumerId;
  * @param <P> the type of process manager
  * @author Alex Tymchenko
  */
-@SPI
-public abstract class PmRejectionDelivery<I, P extends ProcessManager<I, ?, ?>>
+public class PmRejectionDelivery<I, P extends ProcessManager<I, ?, ?>>
         extends PmEndpointDelivery<I, P, RejectionEnvelope,
                                    RejectionShardedStream<I>, RejectionShardedStream.Builder<I>> {
 
     protected PmRejectionDelivery(ProcessManagerRepository<I, P, ?> repository) {
-        super(repository, ShardConsumerId.forRejectionsOf(repository.getShardedModelClass()));
+        super(new PmRejectionConsumer<>(repository));
     }
 
-    @Override
-    protected PmRejectionEndpoint<I, P> getEndpoint(RejectionEnvelope envelope) {
-        return PmRejectionEndpoint.of(repository(), envelope);
-    }
-
-    public static <I, A extends ProcessManager<I, ?, ?>>
-    PmRejectionDelivery<I, A> directDelivery(ProcessManagerRepository<I, A, ?> repository) {
-        return new Direct<>(repository);
-    }
-
-    @Override
-    protected RejectionShardedStream.Builder<I> newShardedStreamBuilder() {
-        return RejectionShardedStream.newBuilder();
-    }
-
-    /**
-     * Direct delivery which does not postpone dispatching.
-     *
-     * @param <I> the type of process manager IDs
-     * @param <P> the type of process manager
-     */
-    public static class Direct<I, P extends ProcessManager<I, ?, ?>>
-            extends PmRejectionDelivery<I, P> {
-
-        private Direct(ProcessManagerRepository<I, P, ?> repository) {
-            super(repository);
+    private static class PmRejectionConsumer<I, P extends ProcessManager<I, ?, ?>>
+            extends PmMessageConsumer<I, P, RejectionEnvelope, RejectionShardedStream<I>,
+            RejectionShardedStream.Builder<I>> {
+        protected PmRejectionConsumer(ProcessManagerRepository<I, P, ?> repository) {
+            super(ShardingTag.forRejectionsOf(repository.getShardedModelClass()), repository);
         }
 
         @Override
-        public boolean shouldPostpone(I id, RejectionEnvelope envelope) {
-            return false;
+        protected RejectionShardedStream.Builder<I> newShardedStreamBuilder() {
+            return RejectionShardedStream.newBuilder();
+        }
+
+        @Override
+        protected PmRejectionEndpoint<I, P> getEndpoint(RejectionEnvelope envelope) {
+            return PmRejectionEndpoint.of(repository(), envelope);
         }
     }
 }

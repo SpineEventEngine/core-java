@@ -31,14 +31,14 @@ import io.spine.util.GenericTypeIndex;
 /**
  * @author Alex Tymchenko
  */
-abstract class ShardedMessageConverter<I, E extends MessageEnvelope<?, ?, ?>> {
+abstract class ShardedMessageConverter<I, M extends Message, E extends MessageEnvelope<?, M, ?>> {
 
-    protected abstract E toEnvelope(Any packedEnvelope);
+    protected abstract E toEnvelope(Any packedOriginalMessage);
 
     protected ShardedMessage convert(I targetId, E envelope) {
 
         final Message id = envelope.getId();
-        final Message originalMessage = envelope.getMessage();
+        final M originalMessage = envelope.getOuterObject();
         final String stringId = Stringifiers.toString(id);
         final ShardedMessageId shardedMessageId = ShardedMessageId.newBuilder()
                                                                   .setValue(stringId)
@@ -54,15 +54,15 @@ abstract class ShardedMessageConverter<I, E extends MessageEnvelope<?, ?, ?>> {
         return result;
     }
 
-    protected I targetIdOf(ShardedMessage message) {
+    protected I targetIdOf(ShardedMessage message, Class<I> idClass) {
         final Any asAny = message.getTargetId();
-        final I result = TypeConverter.toObject(asAny, getIdClass());
+        final I result = TypeConverter.toObject(asAny, idClass);
         return result;
     }
 
     protected E envelopeOf(ShardedMessage message) {
-        final Any packedEnvelope = message.getOriginalMessage();
-        final E result = toEnvelope(packedEnvelope);
+        final Any packedOriginalMessage = message.getOriginalMessage();
+        final E result = toEnvelope(packedOriginalMessage);
         return result;
     }
 

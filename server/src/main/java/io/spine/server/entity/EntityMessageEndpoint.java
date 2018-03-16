@@ -106,9 +106,7 @@ public abstract class EntityMessageEndpoint<I,
     private void dispatchToOne(I entityId) {
         final M envelope = envelope();
         final EndpointDelivery<I, E, M, ?, ?> delivery = getEndpointDelivery(envelope);
-        if(!delivery.shouldPostpone(entityId, envelope)) {
-            deliverNowTo(entityId);
-        }
+        delivery.getSender().send(entityId, envelope);
     }
 
     /**

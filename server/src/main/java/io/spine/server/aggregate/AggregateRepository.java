@@ -120,6 +120,15 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     /** The number of events to store between snapshots. */
     private int snapshotTrigger = DEFAULT_SNAPSHOT_TRIGGER;
 
+    private final AggregateCommandDelivery<I, A> commandDelivery =
+            new AggregateCommandDelivery<>(this);
+    private final AggregateEventDelivery<I, A> eventDelivery =
+            new AggregateEventDelivery<>(this);
+    private final AggregateRejectionDelivery<I, A> rejectionDelivery =
+            new AggregateRejectionDelivery<>(this);
+
+
+
     /** Creates a new instance. */
     protected AggregateRepository() {
         super();
@@ -172,10 +181,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
         this.commandErrorHandler = CommandErrorHandler.with(boundedContext.getRejectionBus());
 
-        registerAsShard();
-    }
-
-    private void registerAsShard() {
         ServerEnvironment.getInstance()
                          .getSharding()
                          .register(this);
@@ -563,7 +568,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     @SPI
     protected AggregateEndpointDelivery<I, A, EventEnvelope, ?, ?> getEventEndpointDelivery() {
-        return AggregateEventDelivery.directDelivery(this);
+        return eventDelivery;
     }
 
     /**
@@ -580,7 +585,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @SPI
     protected AggregateEndpointDelivery<I, A, RejectionEnvelope, ?, ?>
     getRejectionEndpointDelivery() {
-        return AggregateRejectionDelivery.directDelivery(this);
+        return rejectionDelivery;
     }
 
     /**
@@ -595,20 +600,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * @return delivery strategy for rejections
      */
     protected AggregateEndpointDelivery<I, A, CommandEnvelope, ?, ?> getCommandEndpointDelivery() {
-        return AggregateCommandDelivery.directDelivery(this);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Overridden to expose to {@link ShardedAggregateCommandDelivery sharded aggregate command
-     * delivery} implementation, which requires this for its sharding routines.
-     *
-     * @return the class of the identifiers used by this repository.
-     */
-    @Override
-    protected Class<I> getIdClass() {
-        return super.getIdClass();
+        //TODO:2018-03-16:alex.tymchenko: introduce lazy-initialization instead.
+        return commandDelivery;
     }
 
     @Override
@@ -619,9 +612,11 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     public Iterable<ShardedStreamConsumer<?, ?>> getMessageConsumers() {
         final Iterable<ShardedStreamConsumer<?, ?>> result =
-                ImmutableList.<ShardedStreamConsumer<?, ?>>of(getCommandEndpointDelivery(),
-                                                              getEventEndpointDelivery(),
-                                                              getRejectionEndpointDelivery());
+                ImmutableList.<ShardedStreamConsumer<?, ?>>of(
+                        getCommandEndpointDelivery().getConsumer(),
+                        getEventEndpointDelivery().getConsumer(),
+                        getRejectionEndpointDelivery().getConsumer()
+                );
         return result;
     }
 
@@ -629,5 +624,11 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     public BoundedContextName getBoundedContextName() {
         final BoundedContextName name = getBoundedContext().getName();
         return name;
+    }
+
+    @Override
+    public void close() {
+        ServerEnvironment.getInstance().getSharding().unregister(this);
+        super.close();
     }
 }

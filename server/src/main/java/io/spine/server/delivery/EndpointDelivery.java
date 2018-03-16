@@ -21,25 +21,12 @@ package io.spine.server.delivery;
 
 import io.spine.annotation.Internal;
 import io.spine.core.ActorMessageEnvelope;
-import io.spine.core.BoundedContextName;
-import io.spine.core.TenantId;
 import io.spine.server.entity.Entity;
-import io.spine.server.entity.EntityMessageEndpoint;
-import io.spine.server.entity.Repository;
-import io.spine.server.sharding.ShardConsumerId;
 import io.spine.server.sharding.ShardedStream;
-import io.spine.server.sharding.ShardedStreamConsumer;
-import io.spine.server.sharding.ShardingKey;
-import io.spine.server.tenant.TenantAwareOperation;
-import io.spine.server.transport.TransportFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 
 /**
  * A strategy on delivering the messages to the instances of a certain entity type.
- *
- * <p>Allows {@linkplain #shouldPostpone(Object, ActorMessageEnvelope) to postpone} the delivery
- * at runtime for a certain ID and message.
  *
  * <p>The postponed messages are not dispatched to the entity instances automatically. However
  * it is expected they are dispatched manually later via
@@ -55,107 +42,105 @@ import org.slf4j.LoggerFactory;
 public abstract class EndpointDelivery<I,
                                        E extends Entity<I, ?>,
                                        M extends ActorMessageEnvelope<?, ?, ?>,
-                                       S extends ShardedStream<I, M>,
-                                       B extends ShardedStream.AbstractBuilder<B, S>>
-        implements ShardedStreamConsumer<I, M> {
+                                       S extends ShardedStream<I, ?, M>,
+                                       B extends ShardedStream.AbstractBuilder<I, B, S>> {
+    private final Sender<I, M> sender;
+    private final Consumer<I, E, M, S, B> consumer;
 
-    private final Repository<I, E> repository;
-
-    private final ShardConsumerId<M> shardConsumerId;
-
-    protected EndpointDelivery(Repository<I, E> repository, ShardConsumerId<M> shardConsumerId) {
-        this.repository = repository;
-        this.shardConsumerId = shardConsumerId;
+    protected EndpointDelivery(Consumer<I, E, M, S, B> consumer) {
+        this.consumer = consumer;
+        this.sender = new Sender<>(consumer.getTag());
     }
 
-    public void deliver(I id, M message) {
-        //TODO:2018-03-8:alex.tymchenko: kill `shouldPostpone` and migrate to this method instead.
+    public Sender<I, M> getSender() {
+        return sender;
     }
 
-    /**
-     * Determines whether the given envelope should be automatically dispatched to the instance
-     * of a specified ID.
-     *
-     * @param id       the ID of the entity the envelope is going to be dispatched.
-     * @param envelope the envelope to be dispatched — now or later
-     * @return {@code true} if the flow to be kept regular and thus the message dispatching
-     * to happen immediately, {@code false} otherwise
-     */
-    public abstract boolean shouldPostpone(I id, M envelope);
-
-    /**
-     * Obtains an endpoint to dispatch the given envelope.
-     *
-     * @param messageEnvelope the envelope to obtain the endpoint for
-     * @return the message endpoint
-     */
-    protected abstract EntityMessageEndpoint<I, E, M, ?> getEndpoint(M messageEnvelope);
-
-    protected abstract B newShardedStreamBuilder();
-
-    @Override
-    public ShardConsumerId<M> getConsumerId() {
-        return shardConsumerId;
+    public Consumer<I, E, M, S, B> getConsumer() {
+        return consumer;
     }
 
-    /**
-     * Delivers the envelope to the entity of the given ID taking into account
-     * the target tenant.
-     *
-     * <p>Use this method to deliver the previously postponed messages.
-     *
-     * @param id       an ID of an entity to deliver the envelope to
-     * @param envelopeMessage an envelope to deliver
-     */
-    public void deliverNow(final I id, final M envelopeMessage) {
-        final TenantId tenantId = envelopeMessage.getActorContext()
-                                                 .getTenantId();
-        final TenantAwareOperation operation = new TenantAwareOperation(tenantId) {
-            @Override
-            public void run() {
-                passToEndpoint(id, envelopeMessage);
-            }
-        };
+    //    public void deliver(I id, M message) {
+//        final ShardingTag<M> consumerId = getTag();
+//        final Set<ShardedStream<I, M>> streams = sharding().find(consumerId, id);
+//
+//        for (ShardedStream<I, M> shardedStream : streams) {
+//            shardedStream.post(id, message);
+//        }
+//    }
 
-        operation.run();
-    }
+//    /**
+//     * Obtains an endpoint to dispatch the given envelope.
+//     *
+//     * @param messageEnvelope the envelope to obtain the endpoint for
+//     * @return the message endpoint
+//     */
+//    protected abstract EntityMessageEndpoint<I, E, M, ?> getEndpoint(M messageEnvelope);
 
-    /**
-     * Calls the dispatching method of endpoint directly.
-     *
-     * @param id an ID of an entity to deliver th envelope to
-     * @param envelopeMessage an envelope to delivery
-     */
-    protected abstract void passToEndpoint(I id, M envelopeMessage);
+//    protected abstract B newShardedStreamBuilder();
 
-    protected Repository<I, E> repository() {
-        return repository;
-    }
+//    @Override
+//    public ShardingTag<M> getTag() {
+//        return shardingTag;
+//    }
+//
+//    /**
+//     * Delivers the envelope to the entity of the given ID taking into account
+//     * the target tenant.
+//     *
+//     * <p>Use this method to deliver the previously postponed messages.
+//     *
+//     * @param id       an ID of an entity to deliver the envelope to
+//     * @param envelopeMessage an envelope to deliver
+//     */
+//    protected void deliverNow(final I id, final M envelopeMessage) {
+//        final TenantId tenantId = envelopeMessage.getActorContext()
+//                                                 .getTenantId();
+//        final TenantAwareOperation operation = new TenantAwareOperation(tenantId) {
+//            @Override
+//            public void run() {
+//                passToEndpoint(id, envelopeMessage);
+//            }
+//        };
+//
+//        operation.run();
+//    }
 
-    @Override
-    public ShardedStream<I, M> bindToTransport(BoundedContextName name,
-                                               ShardingKey key,
-                                               TransportFactory transportFactory) {
-        final ShardedStream<I, M> stream =
-                newShardedStreamBuilder().setBoundedContextName(name)
-                                         .setKey(key)
-                                         .build(transportFactory);
-        stream.setConsumer(this);
-        return stream;
-    }
+//    /**
+//     * Calls the dispatching method of endpoint directly.
+//     *
+//     * @param id an ID of an entity to deliver th envelope to
+//     * @param envelopeMessage an envelope to delivery
+//     */
+//    protected abstract void passToEndpoint(I id, M envelopeMessage);
+//
 
-    @Override
-    public void onNext(I targetId, M messageEnvelope) {
-        deliverNow(targetId, messageEnvelope);
-    }
 
-    private enum LogSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(EndpointDelivery.class);
-    }
+//    @Override
+//    public ShardedStream<I, M> bindToTransport(BoundedContextName name,
+//                                               ShardingKey key,
+//                                               TransportFactory transportFactory) {
+//        final ShardedStream<I, M> stream =
+//                newShardedStreamBuilder().setBoundedContextName(name)
+//                                         .setKey(key)
+//                                         .build(transportFactory);
+//        stream.setConsumer(this);
+//        return stream;
+//    }
 
-    private static Logger log() {
-        return LogSingleton.INSTANCE.value;
-    }
+
+//    @Override
+//    public void onNext(I targetId, M messageEnvelope) {
+//        deliverNow(targetId, messageEnvelope);
+//    }
+
+//    private enum LogSingleton {
+//        INSTANCE;
+//        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+//        private final Logger value = LoggerFactory.getLogger(EndpointDelivery.class);
+//    }
+//
+//    private static Logger log() {
+//        return LogSingleton.INSTANCE.value;
+//    }
 }

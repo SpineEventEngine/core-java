@@ -29,10 +29,10 @@ import javax.annotation.Nullable;
 /**
  * @author Alex Tymchenko
  */
-public class EventShardedStream<I> extends ShardedStream<I, EventEnvelope> {
+public class EventShardedStream<I> extends ShardedStream<I, Event, EventEnvelope> {
 
     @Nullable
-    private ShardedMessageConverter<I, EventEnvelope> converter;
+    private ShardedMessageConverter<I, Event, EventEnvelope> converter;
 
     private EventShardedStream(Builder<I> builder) {
         super(builder);
@@ -43,24 +43,24 @@ public class EventShardedStream<I> extends ShardedStream<I, EventEnvelope> {
     }
 
     @Override
-    protected ShardedMessageConverter<I, EventEnvelope> converter() {
+    protected ShardedMessageConverter<I, Event, EventEnvelope> converter() {
         if (converter == null) {
             converter = new Converter<>();
         }
         return converter;
     }
 
-    private static class Converter<I> extends ShardedMessageConverter<I, EventEnvelope> {
+    private static class Converter<I> extends ShardedMessageConverter<I, Event, EventEnvelope> {
 
         @Override
-        protected EventEnvelope toEnvelope(Any packedEnvelope) {
-            final Event event = AnyPacker.unpack(packedEnvelope);
+        protected EventEnvelope toEnvelope(Any packedEvent) {
+            final Event event = AnyPacker.unpack(packedEvent);
             final EventEnvelope result = EventEnvelope.of(event);
             return result;
         }
     }
 
-    public static class Builder<I> extends AbstractBuilder<Builder<I>, EventShardedStream<I>> {
+    public static class Builder<I> extends AbstractBuilder<I, Builder<I>, EventShardedStream<I>> {
         @Override
         protected EventShardedStream<I> createStream() {
             return new EventShardedStream<>(this);

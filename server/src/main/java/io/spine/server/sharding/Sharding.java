@@ -31,8 +31,10 @@ public interface Sharding {
 
     void register(Shardable<?> shardable) throws NoShardAvailableException;
 
-    <I, E extends MessageEnvelope<?, ?, ?>> Set<ShardedStream<I, E>>
-    find(ShardConsumerId<E> consumerId, I targetId) throws NoShardAvailableException;
+    void unregister(Shardable<?> shardable);
+
+    <I, E extends MessageEnvelope<?, ?, ?>> Set<ShardedStream<I, ?, E>>
+    find(ShardingTag<E> tag, I targetId) throws NoShardAvailableException;
 
     IdPredicate toIdPredicate(EntityClass<?> entityClass, Strategy strategy);
 

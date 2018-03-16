@@ -19,11 +19,12 @@
  */
 package io.spine.server.procman;
 
-import io.spine.annotation.SPI;
 import io.spine.core.ActorMessageEnvelope;
+import io.spine.server.delivery.Consumer;
 import io.spine.server.delivery.EndpointDelivery;
-import io.spine.server.sharding.ShardConsumerId;
+import io.spine.server.entity.Repository;
 import io.spine.server.sharding.ShardedStream;
+import io.spine.server.sharding.ShardingTag;
 
 /**
  * A strategy on delivering the messages to the instances of a certain process manager type.
@@ -33,29 +34,38 @@ import io.spine.server.sharding.ShardedStream;
  * @param <M> the type of message envelope, which is used for message delivery
  * @author Alex Tymchenko
  */
-@SPI
-public abstract class PmEndpointDelivery<I,
-                                         P extends ProcessManager<I, ?, ?>,
-                                         M extends ActorMessageEnvelope<?, ?, ?>,
-                                         S extends ShardedStream<I, M>,
-                                         B extends ShardedStream.AbstractBuilder<B, S>>
+public class PmEndpointDelivery<I,
+                                P extends ProcessManager<I, ?, ?>,
+                                M extends ActorMessageEnvelope<?, ?, ?>,
+                                S extends ShardedStream<I, ?, M>,
+                                B extends ShardedStream.AbstractBuilder<I, B, S>>
         extends EndpointDelivery<I, P, M, S, B> {
 
-    protected PmEndpointDelivery(ProcessManagerRepository<I, P, ?> repository,
-                                 ShardConsumerId<M> shardConsumerId) {
-        super(repository, shardConsumerId);
+    protected PmEndpointDelivery(PmMessageConsumer<I, P, M, S, B> consumer) {
+        super(consumer);
     }
 
-    @Override
-    protected abstract PmEndpoint<I, P, M, ?> getEndpoint(M messageEnvelope);
+    protected abstract static class PmMessageConsumer<I,
+            P extends ProcessManager<I, ?, ?>,
+            M extends ActorMessageEnvelope<?, ?, ?>,
+            S extends ShardedStream<I, ?, M>,
+            B extends ShardedStream.AbstractBuilder<I, B, S>> extends Consumer<I, P, M, S, B> {
 
-    @Override
-    protected ProcessManagerRepository<I, P, ?> repository() {
-        return (ProcessManagerRepository<I, P, ?>) super.repository();
-    }
+        protected PmMessageConsumer(ShardingTag<M> tag, Repository<I, P> repository) {
+            super(tag, repository);
+        }
 
-    @Override
-    protected void passToEndpoint(I id, M envelopeMessage) {
-        getEndpoint(envelopeMessage).deliverNowTo(id);
+        @Override
+        protected abstract PmEndpoint<I, P, M, ?> getEndpoint(M messageEnvelope);
+
+        @Override
+        protected ProcessManagerRepository<I, P, ?> repository() {
+            return (ProcessManagerRepository<I, P, ?>) super.repository();
+        }
+
+        @Override
+        protected void passToEndpoint(I id, M envelopeMessage) {
+            getEndpoint(envelopeMessage).deliverNowTo(id);
+        }
     }
 }

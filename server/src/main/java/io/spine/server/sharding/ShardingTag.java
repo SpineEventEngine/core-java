@@ -32,22 +32,22 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * @author Alex Tymchenko
  */
-public final class ShardConsumerId<E extends MessageEnvelope<?, ?, ?>> {
+public final class ShardingTag<E extends MessageEnvelope<?, ?, ?>> {
 
-    private final EntityClass<?> modelClass;
-    private final Class<E> observedMsgType;
+    private final EntityClass<?> entityClass;
+    private final Class<E> envelopeType;
 
-    private ShardConsumerId(EntityClass<?> modelClass, Class<E> observedMsgType) {
-        this.modelClass = modelClass;
-        this.observedMsgType = observedMsgType;
+    private ShardingTag(EntityClass<?> entityClass, Class<E> envelopeType) {
+        this.entityClass = entityClass;
+        this.envelopeType = envelopeType;
     }
 
-    public EntityClass<?> getModelClass() {
-        return modelClass;
+    public EntityClass<?> getEntityClass() {
+        return entityClass;
     }
 
-    public Class<E> getObservedMsgType() {
-        return observedMsgType;
+    public Class<E> getEnvelopeType() {
+        return envelopeType;
     }
 
     @Override
@@ -58,33 +58,33 @@ public final class ShardConsumerId<E extends MessageEnvelope<?, ?, ?>> {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        ShardConsumerId that = (ShardConsumerId) o;
-        return Objects.equals(modelClass, that.modelClass) &&
-                Objects.equals(observedMsgType, that.observedMsgType);
+        ShardingTag that = (ShardingTag) o;
+        return Objects.equals(entityClass, that.entityClass) &&
+                Objects.equals(envelopeType, that.envelopeType);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(modelClass, observedMsgType);
+        return Objects.hash(entityClass, envelopeType);
     }
 
-    public static ShardConsumerId<CommandEnvelope> forCommandsOf(EntityClass<?> modelClass) {
+    public static ShardingTag<CommandEnvelope> forCommandsOf(EntityClass<?> modelClass) {
         return forEnvelope(modelClass, CommandEnvelope.class);
     }
 
-    public static ShardConsumerId<EventEnvelope> forEventsOf(EntityClass<?> modelClass) {
+    public static ShardingTag<EventEnvelope> forEventsOf(EntityClass<?> modelClass) {
         return forEnvelope(modelClass, EventEnvelope.class);
     }
 
-    public static ShardConsumerId<RejectionEnvelope> forRejectionsOf(EntityClass<?> modelClass) {
+    public static ShardingTag<RejectionEnvelope> forRejectionsOf(EntityClass<?> modelClass) {
         return forEnvelope(modelClass, RejectionEnvelope.class);
     }
 
-    private static <E extends MessageEnvelope<?, ?, ?>> ShardConsumerId<E>
+    private static <E extends MessageEnvelope<?, ?, ?>> ShardingTag<E>
     forEnvelope(EntityClass<?> entityClass, Class<E> envelopeClass) {
         checkNotNull(entityClass);
 
-        final ShardConsumerId<E> id = new ShardConsumerId<>(entityClass, envelopeClass);
+        final ShardingTag<E> id = new ShardingTag<>(entityClass, envelopeClass);
         return id;
     }
 }

@@ -21,9 +21,11 @@ package io.spine.server.aggregate;
 
 import io.spine.annotation.SPI;
 import io.spine.core.ActorMessageEnvelope;
+import io.spine.server.delivery.Consumer;
 import io.spine.server.delivery.EndpointDelivery;
-import io.spine.server.sharding.ShardConsumerId;
+import io.spine.server.entity.Repository;
 import io.spine.server.sharding.ShardedStream;
+import io.spine.server.sharding.ShardingTag;
 
 /**
  * A strategy on delivering the messages to the instances of a certain aggregate type.
@@ -37,25 +39,35 @@ import io.spine.server.sharding.ShardedStream;
 public abstract class AggregateEndpointDelivery<I,
                                                 A extends Aggregate<I, ?, ?>,
                                                 E extends ActorMessageEnvelope<?, ?, ?>,
-                                                S extends ShardedStream<I, E>,
-                                                B extends ShardedStream.AbstractBuilder<B, S>>
+                                                S extends ShardedStream<I, ?, E>,
+                                                B extends ShardedStream.AbstractBuilder<I, B, S>>
         extends EndpointDelivery<I, A, E, S, B> {
 
-    AggregateEndpointDelivery(AggregateRepository<I, A> repository,
-                              ShardConsumerId<E> shardConsumerId) {
-        super(repository, shardConsumerId);
+    AggregateEndpointDelivery(AggregateMessageConsumer<I, A, E, S, B> consumer) {
+        super(consumer);
     }
 
-    @Override
-    protected abstract AggregateMessageEndpoint<I, A, E, ?> getEndpoint(E messageEnvelope);
+    protected abstract static class AggregateMessageConsumer<I,
+            A extends Aggregate<I, ?, ?>,
+            E extends ActorMessageEnvelope<?, ?, ?>,
+            S extends ShardedStream<I, ?, E>,
+            B extends ShardedStream.AbstractBuilder<I, B, S>> extends Consumer<I, A, E, S, B> {
 
-    @Override
-    protected AggregateRepository<I, A> repository() {
-        return (AggregateRepository<I, A>) super.repository();
-    }
+        protected AggregateMessageConsumer(ShardingTag<E> tag, Repository<I, A> repository) {
+            super(tag, repository);
+        }
 
-    @Override
-    protected void passToEndpoint(I id, E envelopeMessage) {
-        getEndpoint(envelopeMessage).deliverNowTo(id);
+        @Override
+        protected abstract AggregateMessageEndpoint<I, A, E, ?> getEndpoint(E messageEnvelope);
+
+        @Override
+        protected void passToEndpoint(I id, E envelopeMessage) {
+            getEndpoint(envelopeMessage).deliverNowTo(id);
+        }
+
+        @Override
+        protected AggregateRepository<I, A> repository() {
+            return (AggregateRepository<I, A>) super.repository();
+        }
     }
 }

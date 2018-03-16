@@ -31,6 +31,7 @@ import io.spine.core.BoundedContextName;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.server.BoundedContext;
+import io.spine.server.ServerEnvironment;
 import io.spine.server.entity.EntityStorageConverter;
 import io.spine.server.entity.EventDispatchingRepository;
 import io.spine.server.event.EventFilter;
@@ -123,6 +124,10 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
                                 "event subscriptions.", this);
             }
         }
+
+        ServerEnvironment.getInstance()
+                         .getSharding()
+                         .register(this);
     }
 
     /**
@@ -252,7 +257,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      */
     @SPI
     protected ProjectionEventDelivery<I, P> getEndpointDelivery() {
-        return ProjectionEventDelivery.directDelivery(this);
+        return new ProjectionEventDelivery<>(this);
     }
 
     /**
@@ -283,7 +288,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     @Override
     public Iterable<ShardedStreamConsumer<?, ?>> getMessageConsumers() {
         final Iterable<ShardedStreamConsumer<?, ?>> result =
-                ImmutableList.<ShardedStreamConsumer<?, ?>>of(getEndpointDelivery());
+                ImmutableList.<ShardedStreamConsumer<?, ?>>of(getEndpointDelivery().getConsumer());
         return result;
     }
 
@@ -291,6 +296,12 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     public BoundedContextName getBoundedContextName() {
         final BoundedContextName name = getBoundedContext().getName();
         return name;
+    }
+
+    @Override
+    public void close() {
+        ServerEnvironment.getInstance().getSharding().unregister(this);
+        super.close();
     }
 
     /**

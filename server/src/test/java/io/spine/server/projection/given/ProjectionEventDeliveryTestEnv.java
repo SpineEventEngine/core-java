@@ -19,24 +19,18 @@
  */
 package io.spine.server.projection.given;
 
-import com.google.common.collect.ImmutableMap;
 import io.spine.Identifier;
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
 import io.spine.core.Subscribe;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.projection.Projection;
-import io.spine.server.projection.ProjectionEventDelivery;
-import io.spine.server.projection.ProjectionRepository;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.ProjectVBuilder;
 import io.spine.test.projection.event.PrjProjectCreated;
 
 import javax.annotation.Nullable;
-import java.util.Map;
 
-import static com.google.common.collect.Maps.newHashMap;
 import static io.spine.protobuf.AnyPacker.pack;
 
 /**
@@ -89,45 +83,4 @@ public class ProjectionEventDeliveryTestEnv {
         }
     }
 
-    /**
-     * A repository which overrides the delivery strategy for events postponing their delivery
-     * to projection instances.
-     */
-    public static class PostponingRepository
-            extends ProjectionRepository<ProjectId, ProjectDetails, Project> {
-
-        private PostponingEventDelivery eventDelivery = null;
-
-        @Override
-        public PostponingEventDelivery getEndpointDelivery() {
-            if (eventDelivery == null) {
-                eventDelivery = new PostponingEventDelivery(this);
-            }
-            return eventDelivery;
-        }
-    }
-
-    /**
-     * Event delivery strategy which always postpones the delivery, but remembers the event
-     * along with the target entity ID.
-     */
-    public static class PostponingEventDelivery
-            extends ProjectionEventDelivery<ProjectId, ProjectDetails> {
-
-        private final Map<ProjectId, EventEnvelope> postponedEvents = newHashMap();
-
-        protected PostponingEventDelivery(PostponingRepository repository) {
-            super(repository);
-        }
-
-        @Override
-        public boolean shouldPostpone(ProjectId id, EventEnvelope envelope) {
-            postponedEvents.put(id, envelope);
-            return true;
-        }
-
-        public Map<ProjectId, EventEnvelope> getPostponedEvents() {
-            return ImmutableMap.copyOf(postponedEvents);
-        }
-    }
 }

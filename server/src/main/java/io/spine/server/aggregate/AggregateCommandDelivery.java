@@ -19,10 +19,9 @@
  */
 package io.spine.server.aggregate;
 
-import io.spine.annotation.SPI;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.sharding.CommandShardedStream;
-import io.spine.server.sharding.ShardConsumerId;
+import io.spine.server.sharding.ShardingTag;
 
 /**
  * A strategy on delivering the commands to the instances of a certain aggregate type.
@@ -31,47 +30,29 @@ import io.spine.server.sharding.ShardConsumerId;
  * @param <A> the type of aggregate
  * @author Alex Tymchenko
  */
-@SPI
-public abstract class AggregateCommandDelivery<I, A extends Aggregate<I, ?, ?>>
-        extends AggregateEndpointDelivery<I, A, CommandEnvelope,
-                                        CommandShardedStream<I>, CommandShardedStream.Builder<I>> {
+public class AggregateCommandDelivery<I, A extends Aggregate<I, ?, ?>>
+        extends AggregateEndpointDelivery<I, A,
+                CommandEnvelope, CommandShardedStream<I>, CommandShardedStream.Builder<I>> {
 
     protected AggregateCommandDelivery(AggregateRepository<I, A> repository) {
-        super(repository, ShardConsumerId.forCommandsOf(repository.getShardedModelClass()));
+        super(new AggregateCommandConsumer<>(repository));
     }
 
-    @Override
-    protected AggregateMessageEndpoint<I, A, CommandEnvelope, ?> getEndpoint(
-            CommandEnvelope envelope) {
-        return AggregateCommandEndpoint.of(repository(), envelope);
-    }
-
-    public static <I, A extends Aggregate<I, ?, ?>>
-    AggregateCommandDelivery<I, A> directDelivery(AggregateRepository<I, A> repository) {
-        return new Direct<>(repository);
-    }
-
-    @Override
-    protected CommandShardedStream.Builder<I> newShardedStreamBuilder() {
-        return CommandShardedStream.newBuilder();
-    }
-
-    /**
-     * Direct delivery which does not postpone dispatching.
-     *
-     * @param <I> the type of aggregate IDs
-     * @param <A> the type of aggregate
-     */
-    public static class Direct<I, A extends Aggregate<I, ?, ?>>
-            extends AggregateCommandDelivery<I, A> {
-
-        private Direct(AggregateRepository<I, A> repository) {
-            super(repository);
+    private static class AggregateCommandConsumer<I, A extends Aggregate<I, ?, ?>>
+            extends AggregateMessageConsumer<I, A, CommandEnvelope, CommandShardedStream<I>,
+            CommandShardedStream.Builder<I>> {
+        protected AggregateCommandConsumer(AggregateRepository<I, A> repository) {
+            super(ShardingTag.forCommandsOf(repository.getShardedModelClass()), repository);
         }
 
         @Override
-        public boolean shouldPostpone(I id, CommandEnvelope envelope) {
-            return false;
+        protected CommandShardedStream.Builder<I> newShardedStreamBuilder() {
+            return CommandShardedStream.newBuilder();
+        }
+
+        @Override
+        protected AggregateCommandEndpoint<I, A> getEndpoint(CommandEnvelope envelope) {
+            return AggregateCommandEndpoint.of(repository(), envelope);
         }
     }
 }

@@ -19,6 +19,7 @@
  */
 package io.spine.server.sharding;
 
+import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.core.BoundedContextName;
 import io.spine.core.MessageEnvelope;
@@ -40,20 +41,22 @@ import static io.spine.server.sharding.ShardedStream.GenericParameter.MESSAGE_CL
 /**
  * @author Alex Tymchenko
  */
-public abstract class ShardedStream<I, E extends MessageEnvelope<?, ?, ?>> {
+public abstract class ShardedStream<I, M extends Message, E extends MessageEnvelope<?, M, ?>> {
 
     private final TransportFactory transportFactory;
     private final BoundedContextName boundedContextName;
     private final ShardingKey key;
     private final ChannelId channelId;
+    private final Class<I> targetIdClass;
 
     @Nullable
     private ExternalMessageObserver channelObserver;
 
-    ShardedStream(AbstractBuilder<?, ? extends ShardedStream> builder) {
+    ShardedStream(AbstractBuilder<I, ?, ? extends ShardedStream> builder) {
         this.transportFactory = builder.transportFactory;
         this.boundedContextName = builder.boundedContextName;
         this.key = builder.key;
+        this.targetIdClass = builder.targetIdClass;
         final Class<E> envelopeCls = getEnvelopeClass();
         this.channelId = toChannelId(builder.boundedContextName, key, envelopeCls);
     }
@@ -63,8 +66,11 @@ public abstract class ShardedStream<I, E extends MessageEnvelope<?, ?, ?>> {
         return (Class<E>) MESSAGE_CLASS.getArgumentIn(getClass());
     }
 
+    private Class<I> getTargetIdClass() {
+        return targetIdClass;
+    }
 
-    protected abstract ShardedMessageConverter<I, E> converter();
+    protected abstract ShardedMessageConverter<I, M, E> converter();
 
     public ShardingKey getKey() {
         return key;
@@ -113,7 +119,7 @@ public abstract class ShardedStream<I, E extends MessageEnvelope<?, ?, ?>> {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        final ShardedStream<?, ?> that = (ShardedStream<?, ?>) o;
+        final ShardedStream<?, ?, ?> that = (ShardedStream<?, ?, ?>) o;
         return Objects.equals(boundedContextName, that.boundedContextName) &&
                 Objects.equals(key, that.key);
     }
@@ -142,7 +148,7 @@ public abstract class ShardedStream<I, E extends MessageEnvelope<?, ?, ?>> {
             final ShardedMessage shardedMessage = ExternalMessages.asShardedMessage(value);
 
             final E envelope = converter().envelopeOf(shardedMessage);
-            final I targetId = converter().targetIdOf(shardedMessage);
+            final I targetId = converter().targetIdOf(shardedMessage, getTargetIdClass());
             checkNotNull(envelope);
             delegate.onNext(targetId, envelope);
         }
@@ -163,8 +169,11 @@ public abstract class ShardedStream<I, E extends MessageEnvelope<?, ?, ?>> {
      */
     enum GenericParameter implements GenericTypeIndex<ShardedStream> {
 
+        /** The index of the generic type {@code <I>}. */
+        TARGET_ID_CLASS(0),
+
         /** The index of the generic type {@code <M>}. */
-        MESSAGE_CLASS(0);
+        MESSAGE_CLASS(1);
 
         private final int index;
 
@@ -183,12 +192,14 @@ public abstract class ShardedStream<I, E extends MessageEnvelope<?, ?, ?>> {
         }
     }
 
-    public abstract static class AbstractBuilder<B extends AbstractBuilder<B, S>,
-                                                 S extends ShardedStream<?, ?>> {
+    public abstract static class AbstractBuilder<I,
+                                                 B extends AbstractBuilder<I, B, S>,
+                                                 S extends ShardedStream<I, ?, ?>> {
 
         private BoundedContextName boundedContextName;
         private ShardingKey key;
         private TransportFactory transportFactory;
+        private Class<I> targetIdClass;
 
         /** Prevents the instantiation of this builder. */
         protected AbstractBuilder() {}
@@ -213,10 +224,17 @@ public abstract class ShardedStream<I, E extends MessageEnvelope<?, ?, ?>> {
             return thisAsB();
         }
 
+        public B setTargetIdClass(Class<I> targetIdClass) {
+            checkNotNull(targetIdClass);
+            this.targetIdClass = targetIdClass;
+            return thisAsB();
+        }
+
         @SuppressWarnings("unchecked")
         private B thisAsB() {
             return (B) this;
         }
+
         protected abstract S createStream();
 
         public S build(TransportFactory transportFactory) {

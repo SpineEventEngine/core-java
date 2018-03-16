@@ -19,10 +19,9 @@
  */
 package io.spine.server.aggregate;
 
-import io.spine.annotation.SPI;
 import io.spine.core.EventEnvelope;
 import io.spine.server.sharding.EventShardedStream;
-import io.spine.server.sharding.ShardConsumerId;
+import io.spine.server.sharding.ShardingTag;
 
 /**
  * A strategy on delivering the events to the instances of a certain aggregate type.
@@ -31,46 +30,29 @@ import io.spine.server.sharding.ShardConsumerId;
  * @param <A> the type of aggregate
  * @author Alex Tymchenko
  */
-@SPI
-public abstract class AggregateEventDelivery<I, A extends Aggregate<I, ?, ?>>
+public class AggregateEventDelivery<I, A extends Aggregate<I, ?, ?>>
         extends AggregateEndpointDelivery<I, A, EventEnvelope,
                                             EventShardedStream<I>, EventShardedStream.Builder<I>> {
-
     protected AggregateEventDelivery(AggregateRepository<I, A> repository) {
-        super(repository, ShardConsumerId.forEventsOf(repository.getShardedModelClass()));
+        super(new AggregateEventConsumer<>(repository));
     }
 
-    @Override
-    protected AggregateMessageEndpoint<I, A, EventEnvelope, ?> getEndpoint(EventEnvelope envelope) {
-        return AggregateEventEndpoint.of(repository(), envelope);
-    }
-
-    public static <I, A extends Aggregate<I, ?, ?>>
-    AggregateEventDelivery<I, A> directDelivery(AggregateRepository<I, A> repository) {
-        return new Direct<>(repository);
-    }
-
-    @Override
-    protected EventShardedStream.Builder<I> newShardedStreamBuilder() {
-        return EventShardedStream.newBuilder();
-    }
-
-    /**
-     * Direct delivery which does not postpone dispatching.
-     *
-     * @param <I> the type of aggregate IDs
-     * @param <A> the type of aggregate
-     */
-    public static class Direct<I, A extends Aggregate<I, ?, ?>>
-            extends AggregateEventDelivery<I, A> {
-
-        private Direct(AggregateRepository<I, A> repository) {
-            super(repository);
+    private static class AggregateEventConsumer<I, A extends Aggregate<I, ?, ?>>
+            extends AggregateMessageConsumer<I, A, EventEnvelope, EventShardedStream<I>,
+            EventShardedStream.Builder<I>> {
+        protected AggregateEventConsumer(AggregateRepository<I, A> repository) {
+            super(ShardingTag.forEventsOf(repository.getShardedModelClass()), repository);
         }
 
         @Override
-        public boolean shouldPostpone(I id, EventEnvelope envelope) {
-            return false;
+        protected EventShardedStream.Builder<I> newShardedStreamBuilder() {
+            return EventShardedStream.newBuilder();
+        }
+
+        @Override
+        protected AggregateEventEndpoint<I, A>
+        getEndpoint(EventEnvelope envelope) {
+            return AggregateEventEndpoint.of(repository(), envelope);
         }
     }
 }

@@ -29,10 +29,10 @@ import javax.annotation.Nullable;
 /**
  * @author Alex Tymchenko
  */
-public class RejectionShardedStream<I> extends ShardedStream<I, RejectionEnvelope> {
+public class RejectionShardedStream<I> extends ShardedStream<I, Rejection, RejectionEnvelope> {
 
     @Nullable
-    private ShardedMessageConverter<I, RejectionEnvelope> converter;
+    private ShardedMessageConverter<I, Rejection, RejectionEnvelope> converter;
 
     private RejectionShardedStream(Builder<I> builder) {
         super(builder);
@@ -43,24 +43,26 @@ public class RejectionShardedStream<I> extends ShardedStream<I, RejectionEnvelop
     }
 
     @Override
-    protected ShardedMessageConverter<I, RejectionEnvelope> converter() {
+    protected ShardedMessageConverter<I, Rejection, RejectionEnvelope> converter() {
         if (converter == null) {
             converter = new Converter<>();
         }
         return converter;
     }
 
-    private static class Converter<I> extends ShardedMessageConverter<I, RejectionEnvelope> {
+    private static class Converter<I> extends ShardedMessageConverter<I, Rejection, RejectionEnvelope> {
 
         @Override
-        protected RejectionEnvelope toEnvelope(Any packedEnvelope) {
-            final Rejection rejection = AnyPacker.unpack(packedEnvelope);
+        protected RejectionEnvelope toEnvelope(Any packedRejection) {
+            final Rejection rejection = AnyPacker.unpack(packedRejection);
             final RejectionEnvelope result = RejectionEnvelope.of(rejection);
             return result;
         }
     }
 
-    public static class Builder<I> extends AbstractBuilder<Builder<I>, RejectionShardedStream<I>> {
+    public static class Builder<I> extends AbstractBuilder<I,
+                                                           Builder<I>,
+                                                           RejectionShardedStream<I>> {
         @Override
         protected RejectionShardedStream<I> createStream() {
             return new RejectionShardedStream<>(this);

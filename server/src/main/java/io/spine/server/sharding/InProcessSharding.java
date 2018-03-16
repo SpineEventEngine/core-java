@@ -55,18 +55,24 @@ public class InProcessSharding implements Sharding {
         final ShardingKey shardingKey = getShardingKey(shardable.getShardedModelClass(),
                                                        shardable.getShardingStrategy());
         for (ShardedStreamConsumer<?, ?> consumer : consumers) {
-            final ShardedStream<?, ?> stream = consumer.bindToTransport(bcName,
-                                                                        shardingKey,
-                                                                        transportFactory);
-            final ShardConsumerId consumerId = consumer.getConsumerId();
-            registry.register(consumerId, stream);
+            consumer.bindToTransport(bcName, shardingKey, transportFactory);
+            registry.register(consumer);
         }
     }
 
     @Override
-    public <I, E extends MessageEnvelope<?, ?, ?>> Set<ShardedStream<I, E>>
-    find(ShardConsumerId<E> shardConsumerId, I targetId) throws NoShardAvailableException {
-        final Set<ShardedStream<I, E>> result = registry.find(shardConsumerId, targetId);
+    public void unregister(Shardable<?> shardable) {
+        final Iterable<ShardedStreamConsumer<?, ?>> consumers = shardable.getMessageConsumers();
+        for (ShardedStreamConsumer<?, ?> consumer : consumers) {
+            registry.unregister(consumer);
+        }
+
+    }
+
+    @Override
+    public <I, E extends MessageEnvelope<?, ?, ?>> Set<ShardedStream<I, ?, E>>
+    find(ShardingTag<E> tag, I targetId) throws NoShardAvailableException {
+        final Set<ShardedStream<I, ?, E>> result = registry.find(tag, targetId);
         return result;
     }
 
@@ -87,24 +93,32 @@ public class InProcessSharding implements Sharding {
 
     private static final class ShardedStreamRegistry {
 
-        private final Multimap<ShardConsumerId, ShardedStream<?, ?>> streams =
-                synchronizedMultimap(HashMultimap.<ShardConsumerId, ShardedStream<?, ?>>create());
+        private final Multimap<ShardingTag, ShardedStream<?, ?, ?>> streams =
+                synchronizedMultimap(HashMultimap.<ShardingTag, ShardedStream<?, ?, ?>>create());
 
-        private void register(ShardConsumerId id, ShardedStream<?, ?> stream) {
-            streams.put(id, stream);
+        private void register(ShardedStreamConsumer streamConsumer) {
+            final ShardingTag tag = streamConsumer.getTag();
+            final ShardedStream stream = streamConsumer.getStream();
+            streams.put(tag, stream);
         }
 
-        private <I, E extends MessageEnvelope<?, ?, ?>> Set<ShardedStream<I, E>>
-        find(final ShardConsumerId<E> id, final I targetId) {
+        private void unregister(ShardedStreamConsumer streamConsumer) {
+            final ShardingTag tag = streamConsumer.getTag();
+            final ShardedStream stream = streamConsumer.getStream();
+            streams.remove(tag, stream);
+        }
 
-            final Collection<ShardedStream<?, ?>> shardedStreams = streams.get(id);
+        private <I, E extends MessageEnvelope<?, ?, ?>> Set<ShardedStream<I, ?, E>>
+        find(final ShardingTag<E> id, final I targetId) {
 
-            final ImmutableSet.Builder<ShardedStream<I, E>> builder = ImmutableSet.builder();
-            for (ShardedStream<?, ?> shardedStream : shardedStreams) {
+            final Collection<ShardedStream<?, ?, ?>> shardedStreams = streams.get(id);
+
+            final ImmutableSet.Builder<ShardedStream<I, ?, E>> builder = ImmutableSet.builder();
+            for (ShardedStream<?, ?, ?> shardedStream : shardedStreams) {
                 final boolean idMatches = shardedStream.getKey()
                                                .applyToId(targetId);
                 if(idMatches) {
-                    final ShardedStream<I, E> result = (ShardedStream<I, E>) shardedStream;
+                    final ShardedStream<I, ?, E> result = (ShardedStream<I, ?, E>) shardedStream;
                     builder.add(result);
                 }
             }

@@ -20,11 +20,11 @@
 
 package io.spine.server.projection;
 
-import io.spine.annotation.SPI;
 import io.spine.core.EventEnvelope;
+import io.spine.server.delivery.Consumer;
 import io.spine.server.delivery.EndpointDelivery;
 import io.spine.server.sharding.EventShardedStream;
-import io.spine.server.sharding.ShardConsumerId;
+import io.spine.server.sharding.ShardingTag;
 
 /**
  * A strategy on delivering the events to the instances of a certain projection type.
@@ -33,56 +33,39 @@ import io.spine.server.sharding.ShardConsumerId;
  * @param <P> the type of projection
  * @author Alexander Yevsyukov
  */
-@SPI
-public abstract class ProjectionEventDelivery<I, P extends Projection<I, ?, ?>>
+public class ProjectionEventDelivery<I, P extends Projection<I, ?, ?>>
         extends EndpointDelivery<I, P, EventEnvelope,
                                  EventShardedStream<I>, EventShardedStream.Builder<I>> {
 
     protected ProjectionEventDelivery(ProjectionRepository<I, P, ?> repository) {
-        super(repository, ShardConsumerId.<EventEnvelope>forEventsOf(repository.projectionClass()));
+        super(new ProjectionEventConsumer<I, P>(repository));
     }
 
-    public static <I, P extends Projection<I, ?, ?>>
-    ProjectionEventDelivery<I, P> directDelivery(ProjectionRepository<I, P, ?> repository) {
-        return new Direct<>(repository);
-    }
-
-    @Override
-    protected ProjectionRepository<I, P, ?> repository() {
-        return (ProjectionRepository<I, P, ?>) super.repository();
-    }
-
-    @Override
-    protected ProjectionEndpoint<I, P> getEndpoint(EventEnvelope event) {
-        return ProjectionEndpoint.of(repository(), event);
-    }
-
-    @Override
-    protected void passToEndpoint(I id, EventEnvelope event) {
-        getEndpoint(event).deliverNowTo(id);
-    }
-
-    @Override
-    protected EventShardedStream.Builder<I> newShardedStreamBuilder() {
-        return EventShardedStream.newBuilder();
-    }
-
-    /**
-     * Direct delivery which does not postpone dispatching.
-     *
-     * @param <I> the type of projection IDs
-     * @param <P> the type of projections
-     */
-    public static class Direct<I, P extends Projection<I, ?, ?>>
-            extends ProjectionEventDelivery<I, P> {
-
-        private Direct(ProjectionRepository<I, P, ?> repository) {
-            super(repository);
+    private static class ProjectionEventConsumer<I, P extends Projection<I, ?, ?>>
+            extends Consumer<I, P, EventEnvelope,
+            EventShardedStream<I>, EventShardedStream.Builder<I>> {
+        protected ProjectionEventConsumer(ProjectionRepository<I, P, ?> repository) {
+            super(ShardingTag.forEventsOf(repository.getShardedModelClass()), repository);
         }
 
         @Override
-        public boolean shouldPostpone(I id, EventEnvelope envelope) {
-            return false;
+        protected EventShardedStream.Builder<I> newShardedStreamBuilder() {
+            return EventShardedStream.newBuilder();
+        }
+
+        @Override
+        protected ProjectionRepository<I, P, ?> repository() {
+            return (ProjectionRepository<I, P, ?>) super.repository();
+        }
+
+        @Override
+        protected ProjectionEndpoint<I, P> getEndpoint(EventEnvelope envelope) {
+            return ProjectionEndpoint.of(repository(), envelope);
+        }
+
+        @Override
+        protected void passToEndpoint(I id, EventEnvelope event) {
+            getEndpoint(event).deliverNowTo(id);
         }
     }
 }

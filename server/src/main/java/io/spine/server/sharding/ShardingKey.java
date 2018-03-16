@@ -22,6 +22,7 @@ package io.spine.server.sharding;
 import io.spine.server.entity.EntityClass;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
@@ -39,6 +40,24 @@ public class ShardingKey implements Serializable {
     ShardingKey(EntityClass<?> entityClass, IdPredicate idPredicate) {
         this.entityClass = entityClass;
         this.idPredicate = idPredicate;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final ShardingKey that = (ShardingKey) o;
+        return Objects.equals(entityClass, that.entityClass) &&
+                Objects.equals(idPredicate, that.idPredicate);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(entityClass, idPredicate);
     }
 
     public EntityClass<?> getEntityClass() {

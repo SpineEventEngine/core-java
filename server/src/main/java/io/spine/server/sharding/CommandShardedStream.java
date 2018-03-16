@@ -29,10 +29,10 @@ import javax.annotation.Nullable;
 /**
  * @author Alex Tymchenko
  */
-public class CommandShardedStream<I> extends ShardedStream<I, CommandEnvelope> {
+public class CommandShardedStream<I> extends ShardedStream<I, Command, CommandEnvelope> {
 
     @Nullable
-    private ShardedMessageConverter<I, CommandEnvelope> converter;
+    private ShardedMessageConverter<I, Command, CommandEnvelope> converter;
 
     private CommandShardedStream(Builder<I> builder) {
         super(builder);
@@ -43,24 +43,24 @@ public class CommandShardedStream<I> extends ShardedStream<I, CommandEnvelope> {
     }
 
     @Override
-    protected ShardedMessageConverter<I, CommandEnvelope> converter() {
+    protected ShardedMessageConverter<I, Command, CommandEnvelope> converter() {
         if (converter == null) {
             converter = new Converter<>();
         }
         return converter;
     }
 
-    private static class Converter<I> extends ShardedMessageConverter<I, CommandEnvelope> {
+    private static class Converter<I> extends ShardedMessageConverter<I, Command, CommandEnvelope> {
 
         @Override
-        protected CommandEnvelope toEnvelope(Any packedEnvelope) {
-            final Command command = AnyPacker.unpack(packedEnvelope);
+        protected CommandEnvelope toEnvelope(Any packedCommand) {
+            final Command command = AnyPacker.unpack(packedCommand);
             final CommandEnvelope result = CommandEnvelope.of(command);
             return result;
         }
     }
 
-    public static class Builder<I> extends AbstractBuilder<Builder<I>, CommandShardedStream<I>> {
+    public static class Builder<I> extends AbstractBuilder<I, Builder<I>, CommandShardedStream<I>> {
         @Override
         protected CommandShardedStream<I> createStream() {
             return new CommandShardedStream<>(this);
