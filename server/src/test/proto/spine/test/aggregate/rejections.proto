@@ -27,9 +27,17 @@ option (type_url_prefix) = "type.spine.io";
 option java_package="io.spine.test.aggregate.rejection";
 option java_generate_equals_and_hash = true;
 
+import "spine/core/user_id.proto";
+
 import "spine/test/aggregate/project.proto";
+import "spine/test/aggregate/task.proto";
 
 message AggCannotStartArchivedProject {
     ProjectId project_id = 1;
     repeated ProjectId child_project_id = 2;
+}
+
+message AggCannotReassignUnassignedTask {
+    AggTaskId task_id = 1;
+    spine.core.UserId user_id = 2;
 }

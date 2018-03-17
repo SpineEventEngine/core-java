@@ -31,7 +31,7 @@ import io.spine.time.ZoneOffsets;
 import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.time.Time.getCurrentTime;
+import static io.spine.base.Time.getCurrentTime;
 
 /**
  * A factory for the various requests fired from the client-side by an actor.
@@ -93,14 +93,32 @@ public class ActorRequestFactory {
         return result;
     }
 
+    /**
+     * Creates an instance of {@link QueryFactory} based on configuration of this
+     * {@code ActorRequestFactory} instance.
+     *
+     * @return an instance of {@link QueryFactory}
+     */
     public QueryFactory query() {
         return new QueryFactory(this);
     }
 
+    /**
+     * Creates an instance of {@link TopicFactory} based on configuration of this
+     * {@code ActorRequestFactory} instance.
+     *
+     * @return an instance of {@link TopicFactory}
+     */
     public TopicFactory topic() {
         return new TopicFactory(this);
     }
 
+    /**
+     * Creates an instance of {@link CommandFactory} based on configuration of this
+     * {@code ActorRequestFactory} instance.
+     *
+     * @return an instance of {@link CommandFactory}
+     */
     public CommandFactory command() {
         return new CommandFactory(this);
     }
@@ -117,7 +135,7 @@ public class ActorRequestFactory {
      * Creates an {@linkplain ActorContext actor context}, based on the factory properties.
      *
      * <p>Sets the timestamp value to the
-     * {@linkplain io.spine.time.Time#getCurrentTime() current time}.
+     * {@linkplain io.spine.base.Time#getCurrentTime() current time}.
      */
     ActorContext actorContext() {
         final ActorContext.Builder builder = ActorContext.newBuilder()

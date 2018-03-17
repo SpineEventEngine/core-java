@@ -50,6 +50,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.CommandStatus.ERROR;
 import static io.spine.core.CommandStatus.OK;
 import static io.spine.core.CommandStatus.RECEIVED;
@@ -63,7 +64,6 @@ import static io.spine.server.commandbus.Given.CommandMessage.createProjectMessa
 import static io.spine.server.commandstore.CommandTestUtil.checkRecord;
 import static io.spine.server.commandstore.Records.newRecordBuilder;
 import static io.spine.server.commandstore.Records.toCommandIterator;
-import static io.spine.time.Time.getCurrentTime;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;

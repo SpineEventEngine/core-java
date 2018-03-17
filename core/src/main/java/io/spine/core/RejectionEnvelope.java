@@ -100,13 +100,24 @@ public class RejectionEnvelope
     }
 
     /**
-     * Sets the context of the rejection as the context origin of the event being built.
+     * Sets the origin fields of the event context being built using the data of the enclosed
+     * rejection.
      *
-     * @param builder event context builder into which set the event origin context
+     * <p>In particular: 
+     * <ul>
+     *     <li>the ID of the command inside of the rejection context is set as the root command 
+     *     identifier;</li>
+     *     <li>the rejection context is set as the origin.</li>
+     * </ul>
+     *
+     * @param builder event context builder into which the origin related fields are set
      */
     @Override
-    public void setOriginContext(EventContext.Builder builder) {
-        builder.setRejectionContext(getOuterObject().getContext());
+    public void setOriginFields(EventContext.Builder builder) {
+        final RejectionContext context = getOuterObject().getContext();
+        builder.setRejectionContext(context);
+        builder.setRootCommandId(context.getCommand()
+                                        .getId());
     }
 
     public Message getCommandMessage() {

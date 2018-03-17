@@ -32,7 +32,9 @@ import io.spine.client.EntityFilters;
 import io.spine.client.EntityId;
 import io.spine.client.EntityIdFilter;
 import io.spine.server.entity.given.Given;
+import io.spine.server.entity.storage.EntityColumnCache;
 import io.spine.server.model.ModelTests;
+import io.spine.server.storage.RecordStorage;
 import io.spine.server.tenant.TenantAwareTest;
 import io.spine.test.Tests;
 import org.junit.After;
@@ -394,5 +396,18 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
         // Check result
         assertSize(2, foundList);
         assertContainsAll(foundList, activeEntity, deletedEntity);
+    }
+
+    @Test
+    public void cache_entity_columns_on_registration() {
+        if(!repository.isRegistered()) {
+            repository.onRegistered();
+        }
+
+        final RecordStorage<I> storage = repository.recordStorage();
+        final EntityColumnCache entityColumnCache = storage.entityColumnCache();
+
+        // Verify that cache contains searched column
+        entityColumnCache.findColumn("idString");
     }
 }

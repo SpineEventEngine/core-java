@@ -37,6 +37,7 @@ import java.util.concurrent.CountDownLatch;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.Identifier.newUuid;
+import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.CommandStatus.SCHEDULED;
 import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.server.commandbus.CommandScheduler.setSchedule;
@@ -45,7 +46,6 @@ import static io.spine.server.commandbus.Given.ACommand.createProject;
 import static io.spine.server.commandbus.Given.ACommand.startProject;
 import static io.spine.test.TimeTests.Past.minutesAgo;
 import static io.spine.time.Durations2.minutes;
-import static io.spine.time.Time.getCurrentTime;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;

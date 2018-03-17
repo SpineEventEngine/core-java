@@ -32,7 +32,7 @@ import io.spine.core.Rejections;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.bus.Bus;
 import io.spine.server.bus.BusFilter;
-import io.spine.server.bus.DeadMessageTap;
+import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.bus.MulticastBus;
 import io.spine.server.event.EventBus;
@@ -190,8 +190,8 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
     }
 
     @Override
-    protected DeadMessageTap<ExternalMessageEnvelope> getDeadMessageHandler() {
-        return DeadExternalMessageTap.INSTANCE;
+    protected DeadMessageHandler<ExternalMessageEnvelope> getDeadMessageHandler() {
+        return DeadExternalMessageHandler.INSTANCE;
     }
 
     @Override

@@ -21,7 +21,7 @@
 package io.spine.server.tenant;
 
 import com.google.protobuf.Timestamp;
-import io.spine.time.Time;
+import io.spine.base.Time;
 import org.junit.Test;
 
 import static io.spine.core.given.GivenTenantId.newUuid;

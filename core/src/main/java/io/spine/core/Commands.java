@@ -21,6 +21,7 @@
 package io.spine.core;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
@@ -106,10 +107,21 @@ public final class Commands {
      */
     public static TenantId getTenantId(Command command) {
         checkNotNull(command);
-        final TenantId result = command.getContext()
-                                       .getActorContext()
-                                       .getTenantId();
+        final TenantId result = getTenantId(command.getContext());
         return result;
+    }
+
+    /**
+     * Obtains a {@link TenantId} from the {@link CommandContext}.
+     *
+     * <p>The {@link CommandContext} is accessible from the {@link Event} if the {@code Event} was 
+     * created as a result of some command or its rejection. This makes the {@code CommandContext}
+     * a valid {@code TenantId} source inside of the {@code Event}.
+     */
+    @Internal
+    public static TenantId getTenantId(CommandContext context) {
+        return context.getActorContext()
+                      .getTenantId();
     }
 
     /**

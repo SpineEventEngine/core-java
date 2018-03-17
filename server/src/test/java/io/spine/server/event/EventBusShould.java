@@ -23,6 +23,8 @@ package io.spine.server.event;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
+import io.spine.core.Ack;
+import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
@@ -30,26 +32,46 @@ import io.spine.core.EventEnvelope;
 import io.spine.core.EventId;
 import io.spine.core.Events;
 import io.spine.core.Subscribe;
+import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
 import io.spine.server.bus.EnvelopeValidator;
+import io.spine.server.commandbus.CommandBus;
+import io.spine.server.delivery.Consumers;
 import io.spine.server.event.given.EventBusTestEnv.GivenEvent;
+import io.spine.server.event.given.EventBusTestEnv.ProjectRepository;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.StorageFactorySwitch;
-import io.spine.server.transport.TransportFactory;
-import io.spine.server.transport.memory.InMemoryTransportFactory;
+import io.spine.test.event.EBProjectArchived;
+import io.spine.test.event.EBProjectCreated;
+import io.spine.test.event.EBTaskAdded;
 import io.spine.test.event.ProjectCreated;
+import io.spine.test.event.Task;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static com.google.common.collect.Maps.newHashMap;
 import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.BoundedContext.newName;
+import static io.spine.server.event.given.EventBusTestEnv.TaskCreatedFilter;
+import static io.spine.server.event.given.EventBusTestEnv.addTasks;
+import static io.spine.server.event.given.EventBusTestEnv.command;
+import static io.spine.server.event.given.EventBusTestEnv.createProject;
+import static io.spine.server.event.given.EventBusTestEnv.invalidArchiveProject;
+import static io.spine.server.event.given.EventBusTestEnv.newTask;
+import static io.spine.server.event.given.EventBusTestEnv.readEvents;
+import static io.spine.test.Verify.assertSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -62,11 +84,17 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
+/**
+ * @author Mykhailo Drachuk
+ */
 public class EventBusShould {
 
     private EventBus eventBus;
-    private StorageFactory storageFactory;
-    private TransportFactory transportFactory;
+    private EventBus eventBusWithPosponedExecution;
+    private PostponedDispatcherEventDelivery postponedDispatcherDelivery;
+    private Executor delegateDispatcherExecutor;
+    private CommandBus commandBus;
+    private BoundedContext bc;
 
     @Before
     public void setUp() {
@@ -74,22 +102,66 @@ public class EventBusShould {
     }
 
     private void setUp(@Nullable EventEnricher enricher) {
-        final BoundedContext bc = BoundedContext.newBuilder()
-                                                .setMultitenant(true)
-                                                .build();
-        this.storageFactory = bc.getStorageFactory();
-        this.transportFactory = InMemoryTransportFactory.newInstance();
-        buildEventBus(enricher);
+        /**
+         * Cannot use {@link com.google.common.util.concurrent.MoreExecutors#directExecutor()
+         * MoreExecutors.directExecutor()} because it's impossible to spy on {@code final} classes.
+         */
+        this.delegateDispatcherExecutor = spy(directExecutor());
+        this.postponedDispatcherDelivery =
+                new PostponedDispatcherEventDelivery(delegateDispatcherExecutor);
+
+        final EventBus.Builder eventBusBuilder = eventBusBuilder(enricher);
+
+        bc = BoundedContext.newBuilder()
+                           .setEventBus(eventBusBuilder)
+                           .setMultitenant(true)
+                           .build();
+
+        final ProjectRepository projectRepository = new ProjectRepository();
+        bc.register(projectRepository);
+
+        this.commandBus = bc.getCommandBus();
+        this.eventBus = bc.getEventBus();
+
+        this.eventBusWithPosponedExecution =
+                buildEventBusWithPostponedExecution(enricher, bc.getStorageFactory());
     }
 
-    private void buildEventBus(@Nullable EventEnricher enricher) {
-        final EventBus.Builder busBuilder = EventBus.newBuilder()
-                                                    .setStorageFactory(storageFactory)
-                                                    .setTransportFactory(transportFactory);
+    @After
+    public void tearDown() throws Exception {
+        bc.close();
+    }
+
+    @SuppressWarnings("MethodMayBeStatic")   /* it cannot, as its result is used in {@code org.mockito.Mockito.spy() */
+    private Executor directExecutor() {
+        return new Executor() {
+            @Override
+            public void execute(Runnable command) {
+                command.run();
+            }
+        };
+    }
+
+    private EventBus buildEventBusWithPostponedExecution(@Nullable EventEnricher enricher,
+                                                         StorageFactory storageFactory) {
+        final EventBus.Builder busBuilder =
+                EventBus.newBuilder()
+                        .setStorageFactory(storageFactory)
+                        .setDispatcherEventDelivery(postponedDispatcherDelivery);
+
         if (enricher != null) {
             busBuilder.setEnricher(enricher);
         }
-        this.eventBus = busBuilder.build();
+        return busBuilder.build();
+    }
+
+    private static EventBus.Builder eventBusBuilder(@Nullable EventEnricher enricher) {
+        final EventBus.Builder busBuilder = EventBus.newBuilder()
+                                                    .appendFilter(new TaskCreatedFilter());
+        if (enricher != null) {
+            busBuilder.setEnricher(enricher);
+        }
+        return busBuilder;
     }
 
     @Test
@@ -102,7 +174,6 @@ public class EventBusShould {
         final EventStore eventStore = mock(EventStore.class);
         final EventBus result = EventBus.newBuilder()
                                         .setEventStore(eventStore)
-                                        .setTransportFactory(transportFactory)
                                         .build();
         assertEquals(eventStore, result.getEventStore());
     }
@@ -190,6 +261,68 @@ public class EventBusShould {
     }
 
     @Test
+    public void return_direct_DispatcherDelivery_if_none_customized() {
+        final DispatcherEventDelivery actual = eventBus.delivery();
+        assertTrue(actual instanceof DispatcherEventDelivery.DirectDelivery);
+    }
+
+    @Test
+    public void not_call_dispatchers_if_dispatcher_event_execution_postponed() {
+        final BareDispatcher dispatcher = new BareDispatcher();
+
+        eventBusWithPosponedExecution.register(dispatcher);
+
+        final Event event = GivenEvent.projectCreated();
+        eventBusWithPosponedExecution.post(event);
+        assertFalse(dispatcher.isDispatchCalled());
+
+        final boolean eventPostponed = postponedDispatcherDelivery.isPostponed(event, dispatcher);
+        assertTrue(eventPostponed);
+    }
+
+    @Test
+    public void deliver_postponed_event_to_dispatcher_using_configured_executor() {
+        final BareDispatcher dispatcher = new BareDispatcher();
+
+        eventBusWithPosponedExecution.register(dispatcher);
+
+        final Event event = GivenEvent.projectCreated();
+        eventBusWithPosponedExecution.post(event);
+        final Set<EventEnvelope> postponedEvents = postponedDispatcherDelivery.getPostponedEvents();
+        final EventEnvelope postponedEvent = postponedEvents.iterator()
+                                                            .next();
+        verify(delegateDispatcherExecutor, never()).execute(any(Runnable.class));
+        postponedDispatcherDelivery.deliverNow(postponedEvent, Consumers.idOf(dispatcher));
+        assertTrue(dispatcher.isDispatchCalled());
+        verify(delegateDispatcherExecutor).execute(any(Runnable.class));
+    }
+
+    @Test
+    public void pick_proper_consumer_by_consumer_id_when_delivering_to_delegates_of_same_event() {
+        final FirstProjectCreatedDelegate first = new FirstProjectCreatedDelegate();
+        final AnotherProjectCreatedDelegate second = new AnotherProjectCreatedDelegate();
+
+        final DelegatingEventDispatcher<String> firstDispatcher =
+                DelegatingEventDispatcher.of(first);
+        final DelegatingEventDispatcher<String> secondDispatcher =
+                DelegatingEventDispatcher.of(second);
+
+        eventBusWithPosponedExecution.register(firstDispatcher);
+        eventBusWithPosponedExecution.register(secondDispatcher);
+
+        final Event event = GivenEvent.projectCreated();
+        eventBusWithPosponedExecution.post(event);
+        final Set<EventEnvelope> postponedEvents = postponedDispatcherDelivery.getPostponedEvents();
+        final EventEnvelope postponedEvent = postponedEvents.iterator()
+                                                            .next();
+        verify(delegateDispatcherExecutor, never()).execute(any(Runnable.class));
+        postponedDispatcherDelivery.deliverNow(postponedEvent, Consumers.idOf(firstDispatcher));
+        assertTrue(first.isDispatchCalled());
+        verify(delegateDispatcherExecutor).execute(any(Runnable.class));
+        assertFalse(second.isDispatchCalled());
+    }
+
+    @Test
     public void unregister_dispatchers() {
         final EventDispatcher dispatcherOne = new BareDispatcher();
         final EventDispatcher dispatcherTwo = new BareDispatcher();
@@ -214,7 +347,6 @@ public class EventBusShould {
         final EventStore eventStore = spy(mock(EventStore.class));
         final EventBus eventBus = EventBus.newBuilder()
                                           .setEventStore(eventStore)
-                                          .setTransportFactory(transportFactory)
                                           .build();
         eventBus.register(new BareDispatcher());
         eventBus.register(new ProjectCreatedSubscriber());
@@ -261,6 +393,120 @@ public class EventBusShould {
         final EnvelopeValidator<EventEnvelope> validator = eventBus.getValidator();
         assertNotNull(validator);
         assertSame(validator, eventBus.getValidator());
+    }
+
+    @Test
+    public void store_an_event() {
+        final Command command = command(createProject());
+        eventBus.register(new EBProjectCreatedNoOpSubscriber());
+
+        commandBus.post(command, StreamObservers.<Ack>noOpObserver());
+
+        final List<Event> events = readEvents(eventBus);
+        assertSize(1, events);
+    }
+
+    @Test
+    public void store_a_dead_event() {
+        final Command command = command(createProject());
+
+        commandBus.post(command, StreamObservers.<Ack>noOpObserver());
+
+        final List<Event> events = readEvents(eventBus);
+        assertSize(1, events);
+    }
+
+    @Test
+    public void not_store_an_invalid_event() {
+        final Command command = command(invalidArchiveProject());
+        eventBus.register(new EBProjectArchivedSubscriber());
+
+        commandBus.post(command, StreamObservers.<Ack>noOpObserver());
+
+        final List<Event> events = readEvents(eventBus);
+        assertSize(0, events);
+    }
+
+    @Test
+    public void not_store_an_invalid_dead_event() {
+        final Command command = command(invalidArchiveProject());
+
+        commandBus.post(command, StreamObservers.<Ack>noOpObserver());
+
+        final List<Event> events = readEvents(eventBus);
+        assertSize(0, events);
+    }
+
+    /**
+     * Ensures that events are stored when all of them pass the filters.
+     *
+     * <p> To filter the {@link EBTaskAdded} events the {@linkplain EventBus} has a custom filter. 
+     * The {@link TaskCreatedFilter} filters out {@link EBTaskAdded} events with 
+     * {@link Task#getDone()} set to {@code true}.
+     *
+     * <p> The {@link EBTaskAddedNoOpSubscriber} is registered so that the event would not get 
+     * filtered out by the {@link io.spine.server.bus.DeadMessageFilter}.
+     */
+    @Test
+    public void store_multiple_messages_passing_filters() {
+        eventBus.register(new EBTaskAddedNoOpSubscriber());
+        final Command command = command(addTasks(newTask(false), newTask(false), newTask(false)));
+
+        commandBus.post(command, StreamObservers.<Ack>noOpObserver());
+
+        final List<Event> storedEvents = readEvents(eventBus);
+        assertSize(3, storedEvents);
+    }
+
+    /**
+     * Ensures that events which pass filters and the ones that don’t are treated independently when
+     * sent in batch.
+     *
+     * <p> To filter the {@link EBTaskAdded} events the {@linkplain EventBus} has a custom filter. 
+     * The {@link TaskCreatedFilter} filters out {@link EBTaskAdded} events with 
+     * {@link Task#getDone()} set to {@code true}.
+     * 
+     * <p> The {@link EBTaskAddedNoOpSubscriber} is registered so that the event would not get 
+     * filtered out by the {@link io.spine.server.bus.DeadMessageFilter}.
+     * 
+     */
+    @Test
+    public void store_only_events_passing_filters() {
+        eventBus.register(new EBTaskAddedNoOpSubscriber());
+        final Command command = command(addTasks(newTask(false), newTask(true), newTask(false),
+                                                 newTask(true), newTask(true)));
+
+        commandBus.post(command, StreamObservers.<Ack>noOpObserver());
+
+        final List<Event> storedEvents = readEvents(eventBus);
+        assertSize(2, storedEvents);
+
+        for (Event event : storedEvents) {
+            final EBTaskAdded contents = unpack(event.getMessage());
+            final Task task = contents.getTask();
+            assertFalse(task.getDone());
+        }
+    }
+
+    /**
+     * Ensures that events are not stored when none of them pass the filters.
+     *
+     * <p> To filter the {@link EBTaskAdded} events the {@linkplain EventBus} has a custom filter. 
+     * The {@link TaskCreatedFilter} filters out {@link EBTaskAdded} events with 
+     * {@link Task#getDone()} set to {@code true}.
+     *
+     * <p> The {@link EBTaskAddedNoOpSubscriber} is registered so that the event would not get 
+     * filtered out by the {@link io.spine.server.bus.DeadMessageFilter}.
+     */
+    @Test
+    public void not_store_any_events_when_they_are_failing_filtering() {
+        eventBus.register(new EBTaskAddedNoOpSubscriber());
+        final Command command = command(addTasks(newTask(true), newTask(true), newTask(true)));
+
+        commandBus.post(command, StreamObservers.<Ack>noOpObserver());
+
+        final List<Event> storedEvents = readEvents(eventBus);
+        assertSize(0, storedEvents);
     }
 
     /**
@@ -314,6 +560,33 @@ public class EventBusShould {
         executor.shutdownNow();
     }
 
+    /**
+     * {@link EBProjectCreated} subscriber that does nothing. Can be used for the event to get pass the
+     * {@link io.spine.server.bus.DeadMessageFilter}.
+     */
+    private static class EBProjectCreatedNoOpSubscriber extends EventSubscriber {
+
+        @Subscribe
+        public void on(EBProjectCreated message, EventContext context) {
+            // Do nothing.
+        }
+    }
+
+    
+    private static class EBProjectArchivedSubscriber extends EventSubscriber {
+
+        private Message eventMessage;
+
+        @Subscribe
+        public void on(EBProjectArchived message, EventContext ignored) {
+            this.eventMessage = message;
+        }
+
+        public Message getEventMessage() {
+            return eventMessage;
+        }
+    }
+
     private static class ProjectCreatedSubscriber extends EventSubscriber {
 
         private Message eventMessage;
@@ -329,8 +602,20 @@ public class EventBusShould {
             return eventMessage;
         }
 
-        public EventContext getEventContext() {
+        private EventContext getEventContext() {
             return eventContext;
+        }
+    }
+
+    /**
+     * {@link EBTaskAdded} subscriber that does nothing. Can be used for the event to get pass the
+     * {@link io.spine.server.bus.DeadMessageFilter}.
+     */
+    private static class EBTaskAddedNoOpSubscriber extends EventSubscriber {
+
+        @Subscribe
+        public void on(EBTaskAdded message, EventContext context) {
+            // Do nothing.
         }
     }
 
@@ -363,6 +648,35 @@ public class EventBusShould {
         }
     }
 
+    private static class PostponedDispatcherEventDelivery extends DispatcherEventDelivery {
+
+        private final Map<EventEnvelope,
+                Class<? extends EventDispatcher>> postponedExecutions = newHashMap();
+
+        private PostponedDispatcherEventDelivery(Executor delegate) {
+            super(delegate);
+        }
+
+        @Override
+        public boolean shouldPostponeDelivery(EventEnvelope event, EventDispatcher consumer) {
+            postponedExecutions.put(event, consumer.getClass());
+            return true;
+        }
+
+        private boolean isPostponed(Event event, EventDispatcher dispatcher) {
+            final EventEnvelope envelope = EventEnvelope.of(event);
+            final Class<? extends EventDispatcher> actualClass = postponedExecutions.get(envelope);
+            final boolean eventPostponed = actualClass != null;
+            final boolean dispatcherMatches = eventPostponed && dispatcher.getClass()
+                                                                          .equals(actualClass);
+            return dispatcherMatches;
+        }
+
+        private Set<EventEnvelope> getPostponedEvents() {
+            final Set<EventEnvelope> envelopes = postponedExecutions.keySet();
+            return envelopes;
+        }
+    }
 
     /**
      * A delegate, dispatching {@link ProjectCreated} events.

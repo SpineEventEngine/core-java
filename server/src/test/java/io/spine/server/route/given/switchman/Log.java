@@ -22,6 +22,7 @@ package io.spine.server.route.given.switchman;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
+import io.spine.base.Time;
 import io.spine.core.EventContext;
 import io.spine.core.React;
 import io.spine.core.RejectionContext;
@@ -36,7 +37,6 @@ import io.spine.server.route.given.switchman.event.SwitchPositionConfirmed;
 import io.spine.server.route.given.switchman.event.SwitchWorkRecorded;
 import io.spine.server.route.given.switchman.event.SwitchmanAbsenceRecorded;
 import io.spine.server.route.given.switchman.rejection.Rejections;
-import io.spine.time.Time;
 
 import java.util.Set;
 

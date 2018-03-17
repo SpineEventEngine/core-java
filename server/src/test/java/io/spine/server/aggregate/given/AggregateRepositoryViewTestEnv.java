@@ -68,7 +68,7 @@ public class AggregateRepositoryViewTestEnv {
         }
 
         @Apply
-        private void on(StringValue eventMessage) {
+        void on(StringValue eventMessage) {
             final String msg = RepoOfAggregateWithLifecycle.getMessage(eventMessage);
             if (archived.name()
                         .equalsIgnoreCase(msg)) {

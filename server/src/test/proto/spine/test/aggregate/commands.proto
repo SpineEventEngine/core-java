@@ -30,8 +30,10 @@ option java_multiple_files = true;
 option java_generate_equals_and_hash = true;
 
 import "spine/core/event.proto";
+import "spine/core/user_id.proto";
 
 import "spine/test/aggregate/project.proto";
+import "spine/test/aggregate/task.proto";
 
 message AggCreateProject {
     ProjectId project_id = 1;
@@ -69,4 +71,19 @@ message AggPauseProject {
 
 message AggCancelProject {
     ProjectId project_id = 1;
+}
+
+message AggCreateTask {
+    AggTaskId task_id = 1;
+    spine.core.UserId assignee = 2;
+}
+
+message AggAssignTask {
+    AggTaskId task_id = 1;
+    spine.core.UserId assignee = 2;
+}
+
+message AggReassignTask {
+    AggTaskId task_id = 1;
+    spine.core.UserId assignee = 2;
 }

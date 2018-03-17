@@ -33,7 +33,7 @@ import io.spine.core.EventEnvelope;
 import io.spine.grpc.LoggingObserver;
 import io.spine.grpc.LoggingObserver.Level;
 import io.spine.server.bus.BusFilter;
-import io.spine.server.bus.DeadMessageTap;
+import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.outbus.CommandOutputBus;
 import io.spine.server.outbus.OutputDispatcherRegistry;
@@ -47,6 +47,7 @@ import java.util.concurrent.Executor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.ImmutableSet.of;
 
 /**
  * Dispatches incoming events to subscribers, and provides ways for registering those subscribers.
@@ -103,6 +104,9 @@ public class EventBus
     /** The validator for messages of posted events. */
     private final MessageValidator eventMessageValidator;
 
+    /** The handler for dead events. */
+    private final DeadMessageHandler<EventEnvelope> deadMessageHandler;
+
     /** Filters applied when an event is posted. */
     private final Deque<BusFilter<EventEnvelope>> filterChain;
 
@@ -125,6 +129,8 @@ public class EventBus
         this.eventMessageValidator = builder.eventValidator;
         this.filterChain = builder.getFilters();
         this.streamObserver = LoggingObserver.forClass(getClass(), builder.logLevelForPost);
+
+        this.deadMessageHandler = new DeadEventTap();
     }
 
     /** Creates a builder for new {@code EventBus}. */
@@ -143,8 +149,8 @@ public class EventBus
     }
 
     @Override
-    protected DeadMessageTap<EventEnvelope> getDeadMessageHandler() {
-        return DeadEventTap.INSTANCE;
+    protected DeadMessageHandler<EventEnvelope> getDeadMessageHandler() {
+        return deadMessageHandler;
     }
 
     @Override
@@ -462,13 +468,19 @@ public class EventBus
     }
 
     /**
-     * Produces an {@link UnsupportedEventException} upon a dead event.
+     * Handles a dead event by saving it to the {@link EventStore} and producing an 
+     * {@link UnsupportedEventException}.
+     *
+     * <p> We must store dead events, as they are still emitted by some entity and therefore are 
+     * a part of the history for the current bounded context.
      */
-    private enum DeadEventTap implements DeadMessageTap<EventEnvelope> {
-        INSTANCE;
-
+    private class DeadEventTap implements DeadMessageHandler<EventEnvelope> {
         @Override
-        public UnsupportedEventException capture(EventEnvelope envelope) {
+        public UnsupportedEventException handle(EventEnvelope envelope) {
+
+            final Event event = envelope.getOuterObject();
+            store(of(event));
+
             final Message message = envelope.getMessage();
             final UnsupportedEventException exception = new UnsupportedEventException(message);
             return exception;

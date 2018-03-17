@@ -48,11 +48,13 @@ import static com.google.common.testing.SerializableTester.reserializeAndAssert;
 import static io.spine.client.ColumnFilter.Operator.EQUAL;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
 import static io.spine.protobuf.TypeConverter.toAny;
+import static io.spine.server.entity.storage.Columns.findColumn;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
 import static io.spine.test.Verify.assertContains;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
+import static org.junit.Assert.assertFalse;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -64,7 +66,7 @@ public class EntityQueryShould {
     @Test
     public void be_serializable() {
         final String columnName = deleted.name();
-        final EntityColumn column = Columns.findColumn(EntityWithLifecycle.class, columnName);
+        final EntityColumn column = findColumn(EntityWithLifecycle.class, columnName);
         final ColumnFilter filter = ColumnFilters.eq(columnName, false);
         final Multimap<EntityColumn, ColumnFilter> filters = of(column, filter);
         final CompositeQueryParameter parameter = CompositeQueryParameter.from(filters, ALL);
@@ -113,18 +115,18 @@ public class EntityQueryShould {
         tester.testEquals();
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void fail_to_append_lifecycle_columns_if_already_contains() {
-        final EntityColumn column = Columns.findColumn(EntityWithLifecycle.class, deleted.name());
+        final EntityColumn deletedColumn = Columns.findColumn(EntityWithLifecycle.class, deleted.name());
         final CompositeQueryParameter queryParameter = CompositeQueryParameter.from(
-                ImmutableMultimap.of(column, ColumnFilter.getDefaultInstance()),
+                ImmutableMultimap.of(deletedColumn, ColumnFilter.getDefaultInstance()),
                 ALL
         );
         final QueryParameters parameters = QueryParameters.newBuilder()
                                                           .add(queryParameter)
                                                           .build();
         final EntityQuery<String> query = EntityQuery.of(Collections.<String>emptySet(), parameters);
-        query.withLifecycleFlags(TestEntity.class);
+        assertFalse(query.canAppendLifecycleFlags());
     }
 
     /**

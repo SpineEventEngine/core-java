@@ -17,25 +17,11 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.integration;
-
-import com.google.protobuf.Message;
-import io.spine.server.bus.DeadMessageTap;
 
 /**
- * Produces an {@link UnsupportedExternalMessageException} upon capturing an external message,
- * which has no targets to be dispatched to.
- *
- * @author Alex Tymchenko
+ * Utilities for verification of Spine project model.
  */
-enum DeadExternalMessageTap implements DeadMessageTap<ExternalMessageEnvelope> {
-    INSTANCE;
+@ParametersAreNonnullByDefault
+package io.spine.model.verify;
 
-    @Override
-    public UnsupportedExternalMessageException capture(ExternalMessageEnvelope envelope) {
-        final Message message = envelope.getMessage();
-        final UnsupportedExternalMessageException exception =
-                new UnsupportedExternalMessageException(message);
-        return exception;
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

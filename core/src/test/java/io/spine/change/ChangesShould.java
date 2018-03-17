@@ -23,6 +23,7 @@ package io.spine.change;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Timestamp;
+import io.spine.base.Time;
 import io.spine.test.TimeTests;
 import io.spine.time.Interval;
 import io.spine.time.Intervals;
@@ -36,7 +37,6 @@ import io.spine.time.OffsetDateTimes;
 import io.spine.time.OffsetDates;
 import io.spine.time.OffsetTime;
 import io.spine.time.OffsetTimes;
-import io.spine.time.Time;
 import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
 import org.junit.Test;
@@ -44,9 +44,9 @@ import org.junit.Test;
 import java.util.UUID;
 
 import static com.google.protobuf.util.Timestamps.subtract;
+import static io.spine.base.Time.getCurrentTime;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.time.Durations2.minutes;
-import static io.spine.time.Time.getCurrentTime;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -130,24 +130,24 @@ public class ChangesShould {
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_Timestamp_previousValue() {
-        Changes.of(null, Time.getCurrentTime());
+        Changes.of(null, getCurrentTime());
     }
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_Timestamp_newValue() {
-        Changes.of(Time.getCurrentTime(), null);
+        Changes.of(getCurrentTime(), null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void do_not_accept_equal_Timestamp_values() {
-        final Timestamp now = Time.getCurrentTime();
+        final Timestamp now = getCurrentTime();
         Changes.of(now, now);
     }
 
     @Test
     public void create_TimestampChange_instance() {
         final Timestamp fiveMinutesAgo = TimeTests.Past.minutesAgo(5);
-        final Timestamp now = Time.getCurrentTime();
+        final Timestamp now = getCurrentTime();
 
         final TimestampChange result = Changes.of(fiveMinutesAgo, now);
 

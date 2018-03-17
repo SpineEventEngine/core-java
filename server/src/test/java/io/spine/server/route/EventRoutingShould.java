@@ -25,12 +25,12 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
+import io.spine.base.Time;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.server.command.TestEventFactory;
 import io.spine.test.TestValues;
-import io.spine.time.Time;
 import org.junit.Before;
 import org.junit.Test;
 

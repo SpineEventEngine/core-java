@@ -37,9 +37,9 @@ import io.spine.validate.ValidationException;
 import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.base.Time.getCurrentTime;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.TypeConverter.toAny;
-import static io.spine.time.Time.getCurrentTime;
 import static io.spine.validate.Validate.checkValid;
 
 /**
@@ -158,7 +158,7 @@ public class EventFactory {
         final EventContext.Builder builder = EventContext.newBuilder()
                                                          .setTimestamp(timestamp)
                                                          .setProducerId(producerId);
-        origin.setOriginContext(builder);
+        origin.setOriginFields(builder);
         if (version != null) {
             builder.setVersion(version);
         }

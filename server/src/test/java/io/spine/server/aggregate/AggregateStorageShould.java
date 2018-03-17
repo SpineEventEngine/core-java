@@ -26,12 +26,13 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
+import io.spine.base.Time;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventId;
 import io.spine.core.RejectionContext;
 import io.spine.core.Version;
-import io.spine.server.aggregate.given.Given.StorageRecord;
+import io.spine.server.aggregate.given.StorageRecord;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.storage.AbstractStorageShould;
@@ -40,7 +41,6 @@ import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.ProjectVBuilder;
 import io.spine.testdata.Sample;
-import io.spine.time.Time;
 import org.junit.Test;
 
 import javax.annotation.Nullable;
@@ -52,13 +52,13 @@ import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.common.collect.Lists.transform;
 import static com.google.protobuf.util.Timestamps.add;
 import static io.spine.Identifier.newUuid;
+import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.Versions.increment;
 import static io.spine.core.Versions.zero;
 import static io.spine.core.given.GivenEnrichment.withOneAttribute;
-import static io.spine.server.aggregate.given.Given.StorageRecords.sequenceFor;
+import static io.spine.server.aggregate.given.StorageRecords.sequenceFor;
 import static io.spine.server.command.TestEventFactory.newInstance;
 import static io.spine.time.Durations2.seconds;
-import static io.spine.time.Time.getCurrentTime;
 import static io.spine.validate.Validate.isDefault;
 import static java.lang.Integer.MAX_VALUE;
 import static java.util.Collections.reverse;
@@ -447,6 +447,28 @@ public abstract class AggregateStorageShould
         assertTrue(isDefault(loadedOrigin.getEnrichment()));
     }
 
+    @Test
+    public void read_archived_records() {
+        readRecordsWithLifecycle(LifecycleFlags.newBuilder()
+                                               .setArchived(true)
+                                               .build());
+    }
+
+    @Test
+    public void read_deleted_records() {
+        readRecordsWithLifecycle(LifecycleFlags.newBuilder()
+                                               .setDeleted(true)
+                                               .build());
+    }
+
+    @Test
+    public void read_archived_and_deleted_records() {
+        readRecordsWithLifecycle(LifecycleFlags.newBuilder()
+                                               .setArchived(true)
+                                               .setDeleted(true)
+                                               .build());
+    }
+
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_try_to_write_event_count_to_closed_storage() {
         close(storage);
@@ -506,6 +528,16 @@ public abstract class AggregateStorageShould
     private Iterator<AggregateEventRecord> historyBackward() {
         final AggregateReadRequest<ProjectId> readRequest = newReadRequest(id);
         return storage.historyBackward(readRequest);
+    }
+
+    private void readRecordsWithLifecycle(LifecycleFlags flags) {
+        final AggregateStateRecord record = newStorageRecord();
+        storage.write(id, record);
+        storage.writeLifecycleFlags(id, flags);
+        final Optional<AggregateStateRecord> read = storage.read(newReadRequest(id));
+        assertTrue(read.isPresent());
+        final AggregateStateRecord readRecord = read.get();
+        assertEquals(record, readRecord);
     }
 
     protected static final Function<AggregateEventRecord, Event> TO_EVENT =

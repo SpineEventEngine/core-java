@@ -59,8 +59,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.Identifier.newUuid;
+import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.given.GivenUserId.of;
-import static io.spine.time.Time.getCurrentTime;
 
 public class Given {
 
@@ -223,7 +223,7 @@ public class Given {
         }
 
         @Apply
-        private void event(AggProjectCreated event) {
+        void event(AggProjectCreated event) {
             getBuilder()
                     .setId(event.getProjectId())
                     .setStatus(Status.CREATED)
@@ -231,11 +231,11 @@ public class Given {
         }
 
         @Apply
-        private void event(AggTaskAdded event) {
+        void event(AggTaskAdded event) {
         }
 
         @Apply
-        private void event(AggProjectStarted event) {
+        void event(AggProjectStarted event) {
             getBuilder()
                     .setId(event.getProjectId())
                     .setStatus(Status.STARTED)
@@ -269,7 +269,7 @@ public class Given {
         }
 
         @Apply
-        private void event(CustomerCreated event) {
+        void event(CustomerCreated event) {
             getBuilder().mergeFrom(event.getCustomer());
         }
     }

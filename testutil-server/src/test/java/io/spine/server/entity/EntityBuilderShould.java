@@ -23,7 +23,7 @@ package io.spine.server.entity;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
-import io.spine.time.Time;
+import io.spine.base.Time;
 import org.junit.Test;
 
 import static io.spine.protobuf.TypeConverter.toMessage;

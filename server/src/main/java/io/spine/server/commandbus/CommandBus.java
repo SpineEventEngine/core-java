@@ -34,7 +34,7 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.bus.Bus;
 import io.spine.server.bus.BusFilter;
-import io.spine.server.bus.DeadMessageTap;
+import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.commandstore.CommandStore;
 import io.spine.server.rejection.RejectionBus;
@@ -96,7 +96,7 @@ public class CommandBus extends Bus<Command,
      */
     private final boolean isThreadSpawnAllowed;
 
-    private final DeadCommandTap deadCommandHandler;
+    private final DeadCommandHandler deadCommandHandler;
 
     /**
      * Tha validator for the commands posted into this bus.
@@ -123,7 +123,7 @@ public class CommandBus extends Bus<Command,
         this.isThreadSpawnAllowed = builder.threadSpawnAllowed;
         this.rejectionBus = builder.rejectionBus;
         this.filterChain = builder.getFilters();
-        this.deadCommandHandler = new DeadCommandTap();
+        this.deadCommandHandler = new DeadCommandHandler();
     }
 
     /**
@@ -238,7 +238,7 @@ public class CommandBus extends Bus<Command,
     }
 
     @Override
-    protected DeadMessageTap<CommandEnvelope> getDeadMessageHandler() {
+    protected DeadMessageHandler<CommandEnvelope> getDeadMessageHandler() {
         return deadCommandHandler;
     }
 
@@ -511,10 +511,10 @@ public class CommandBus extends Bus<Command,
     /**
      * Produces an {@link UnsupportedCommandException} upon a dead command.
      */
-    private class DeadCommandTap implements DeadMessageTap<CommandEnvelope> {
+    private class DeadCommandHandler implements DeadMessageHandler<CommandEnvelope> {
 
         @Override
-        public UnsupportedCommandException capture(CommandEnvelope message) {
+        public UnsupportedCommandException handle(CommandEnvelope message) {
             final Command command = message.getCommand();
             final UnsupportedCommandException exception = new UnsupportedCommandException(command);
             commandStore().storeWithError(command, exception);

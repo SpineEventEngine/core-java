@@ -36,9 +36,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static io.spine.Identifier.newUuid;
+import static io.spine.base.Time.getCurrentTime;
 import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.test.Tests.assertSecondsEqual;
-import static io.spine.time.Time.getCurrentTime;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

@@ -34,6 +34,7 @@ import com.google.protobuf.UInt32Value;
 import com.google.protobuf.UInt64Value;
 import com.google.protobuf.util.Timestamps;
 import io.spine.Identifier;
+import io.spine.base.Time;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
@@ -70,7 +71,6 @@ import io.spine.test.aggregate.event.AggTaskAdded;
 import io.spine.test.aggregate.rejection.AggCannotStartArchivedProject;
 import io.spine.test.aggregate.rejection.Rejections;
 import io.spine.testdata.Sample;
-import io.spine.time.Time;
 import io.spine.validate.BoolValueVBuilder;
 import io.spine.validate.StringValueVBuilder;
 
@@ -162,7 +162,7 @@ public class AggregateRepositoryTestEnv {
         }
 
         @Apply
-        private void apply(AggProjectCreated event) {
+        void apply(AggProjectCreated event) {
             getBuilder().setId(event.getProjectId())
                         .setName(event.getName());
         }
@@ -176,7 +176,7 @@ public class AggregateRepositoryTestEnv {
         }
 
         @Apply
-        private void apply(AggTaskAdded event) {
+        void apply(AggTaskAdded event) {
             getBuilder().setId(event.getProjectId())
                         .addTask(event.getTask());
         }
@@ -189,7 +189,7 @@ public class AggregateRepositoryTestEnv {
         }
 
         @Apply
-        private void apply(AggProjectStarted event) {
+        void apply(AggProjectStarted event) {
             getBuilder().setStatus(Status.STARTED);
         }
 
@@ -209,7 +209,7 @@ public class AggregateRepositoryTestEnv {
         }
 
         @Apply
-        private void apply(AggProjectArchived event) {
+        void apply(AggProjectArchived event) {
             setArchived(true);
         }
 
@@ -499,12 +499,12 @@ public class AggregateRepositoryTestEnv {
         }
 
         @Apply
-        private void apply(AggProjectArchived event) {
+        void apply(AggProjectArchived event) {
             getBuilder().setValue(PROJECT_ARCHIVED);
         }
 
         @Apply
-        private void apply(AggProjectDeleted event) {
+        void apply(AggProjectDeleted event) {
             getBuilder().setValue(PROJECT_DELETED);
         }
     }

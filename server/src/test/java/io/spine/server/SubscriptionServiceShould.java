@@ -22,6 +22,7 @@ package io.spine.server;
 
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
+import io.spine.base.Time;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionUpdate;
 import io.spine.client.Target;
@@ -34,7 +35,6 @@ import io.spine.server.entity.VersionableEntity;
 import io.spine.server.stand.Stand;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
-import io.spine.time.Time;
 import org.junit.Test;
 
 import java.util.List;

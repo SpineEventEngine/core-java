@@ -20,9 +20,10 @@
 package io.spine.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
+import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.grpc.Internal;
 import io.spine.core.CommandContext;
@@ -45,12 +46,15 @@ import io.spine.server.rejection.RejectionReactorMethod;
 import io.spine.validate.ValidatingBuilder;
 
 import javax.annotation.CheckReturnValue;
+import java.util.Iterator;
 import java.util.List;
 
+import static com.google.common.collect.FluentIterable.from;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
+import static com.google.common.collect.Lists.newLinkedList;
+import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.Events.getMessage;
-import static io.spine.time.Time.getCurrentTime;
 import static io.spine.validate.Validate.isNotDefault;
 
 /**
@@ -127,7 +131,10 @@ public abstract class Aggregate<I,
      *
      * @see #commitEvents()
      */
-    private final List<Event> uncommittedEvents = Lists.newLinkedList();
+    private final List<Event> uncommittedEvents = newLinkedList();
+
+    /** A guard for ensuring idempotency of messages dispatched by this aggregate. */
+    private IdempotencyGuard idempotencyGuard;
 
     /**
      * Creates a new instance.
@@ -149,6 +156,14 @@ public abstract class Aggregate<I,
      */
     protected Aggregate(I id) {
         super(id);
+        setIdempotencyGuard();
+    }
+
+    /**
+     * Creates and assigns the aggregate an {@link IdempotencyGuard idempotency guard}.
+     */
+    private void setIdempotencyGuard() {
+        idempotencyGuard = new IdempotencyGuard(this);
     }
 
     /**
@@ -183,38 +198,55 @@ public abstract class Aggregate<I,
 
     /**
      * Obtains a method for the passed command and invokes it.
+     *
+     * <p>Dispatching the commands results in emitting event messages. All the 
+     * {@linkplain Empty empty} messages are filtered out from the result.
+     * 
+     * @param  command the envelope with the command to dispatch
+     * @return a list of event messages that the aggregate produces by handling the command
      */
     @Override
     protected List<? extends Message> dispatchCommand(CommandEnvelope command) {
+        idempotencyGuard.check(command);
         final CommandHandlerMethod method = thisClass().getHandler(command.getMessageClass());
-        final List<? extends Message> result =
+        final List<? extends Message> messages =
                 method.invoke(this, command.getMessage(), command.getCommandContext());
-        return result;
+        return from(messages).filter(nonEmpty()).toList();
     }
 
     /**
      * Dispatches the event on which the aggregate reacts.
      *
+     * <p>Reacting on a event may result in emitting event messages. All the {@linkplain Empty empty} 
+     * messages are filtered out from the result.
+     *
      * @param  event the envelope with the event to dispatch
-     * @return a list with event messages that the aggregate produces in reaction to the event or
+     * @return a list of event messages that the aggregate produces in reaction to the event or
      *         an empty list if the aggregate state does not change in reaction to the event
      */
     List<? extends Message> reactOn(EventEnvelope event) {
         final EventReactorMethod method = thisClass().getReactor(event.getMessageClass());
-        return method.invoke(this, event.getMessage(), event.getEventContext());
+        final List<? extends Message> messages =
+                method.invoke(this, event.getMessage(), event.getEventContext());
+        return from(messages).filter(nonEmpty()).toList();
     }
 
     /**
      * Dispatches the rejection to which the aggregate reacts.
+     * 
+     * <p>Reacting on a rejection may result in emitting event messages. All the 
+     * {@linkplain Empty empty} messages are filtered out from the result.
      *
      * @param  rejection the envelope with the rejection
-     * @return a list with event messages that the aggregate produces in reaction to
+     * @return a list of event messages that the aggregate produces in reaction to
      *         the rejection, or an empty list if the aggregate state does not change in
      *         response to this rejection
      */
     List<? extends Message> reactOn(RejectionEnvelope rejection) {
         final RejectionReactorMethod method = thisClass().getReactor(rejection.getMessageClass());
-        return method.invoke(this, rejection.getMessage(), rejection.getRejectionContext());
+        final List<? extends Message> messages =
+                method.invoke(this, rejection.getMessage(), rejection.getRejectionContext());
+        return from(messages).filter(nonEmpty()).toList();
     }
 
     /**
@@ -247,6 +279,7 @@ public abstract class Aggregate<I,
         final List<Event> events = aggregateStateRecord.getEventList();
 
         play(events);
+        remember(events);
     }
 
     /**
@@ -378,6 +411,7 @@ public abstract class Aggregate<I,
     List<Event> commitEvents() {
         final List<Event> result = ImmutableList.copyOf(uncommittedEvents);
         uncommittedEvents.clear();
+        remember(result);
         return result;
     }
 
@@ -396,13 +430,37 @@ public abstract class Aggregate<I,
      * @return new snapshot
      */
     @CheckReturnValue
-    Snapshot toSnapshot() {
+    Snapshot toShapshot() {
         final Any state = AnyPacker.pack(getState());
         final Snapshot.Builder builder = Snapshot.newBuilder()
                 .setState(state)
                 .setVersion(getVersion())
                 .setTimestamp(getCurrentTime());
-        return builder.build();
+        final Snapshot snapshot = builder.build();
+        return snapshot;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Opens the method for the repository.
+     */
+    @Override
+    protected void clearRecentHistory() {
+        super.clearRecentHistory();
+    }
+
+    /**
+     * Creates an iterator of the aggregate event history with reverse traversal.
+     *
+     * <p>The records are returned sorted by timestamp in a descending order (from newer to older).
+     * 
+     * <p>The iterator is empty if there's no history for the aggregate.
+     *
+     * @return new iterator instance
+     */
+    protected Iterator<Event> historyBackward() {
+        return recentHistory().iterator();
     }
 
     /**
@@ -414,5 +472,33 @@ public abstract class Aggregate<I,
     @VisibleForTesting
     protected int versionNumber() {
         return super.versionNumber();
+    }
+
+    /**
+     * @return an instance of an {@linkplain NonEmpty non-empty predicate}
+     */
+    private static Predicate<Message> nonEmpty() {
+        return NonEmpty.INSTANCE;
+    }
+
+    /**
+     * A predicate checking that message is not {@linkplain Empty empty}.
+     */
+    private enum NonEmpty implements Predicate<Message> {
+
+        INSTANCE;
+
+        private static final Empty EMPTY = Empty.getDefaultInstance();
+
+        /**
+         * Checks that message is not {@linkplain Empty empty}.
+         *
+         * @param  message the message being checked
+         * @return {@code true} if the message is not empty, {@code false} otherwise 
+         */
+        @Override
+        public boolean apply(Message message) {
+            return !message.equals(EMPTY);
+        }
     }
 }

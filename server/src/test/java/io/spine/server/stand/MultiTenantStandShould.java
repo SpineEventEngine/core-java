@@ -54,6 +54,7 @@ public class MultiTenantStandShould extends StandShould {
     @Override
     @Before
     public void setUp() {
+        super.setUp();
         final TenantId tenantId = newUuid();
 
         setCurrentTenant(tenantId);

@@ -39,7 +39,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
 
-import static io.spine.gradle.TaskName.COMPILE_JAVA;
+import static io.spine.tools.gradle.TaskName.COMPILE_JAVA;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;

@@ -147,6 +147,12 @@ enum CommandValidationError {
 
     // The scheduled command was not delivered to the target in time.
     EXPIRED = 5;
+
+    // The command is a duplicate of the command that was already dispatched.
+    //
+    // A command is considered a duplicate if its ID matches the ID of another command.
+    //
+    DUPLICATE = 6;
 }
 
 // This enumeration defines possible statuses of command processing.

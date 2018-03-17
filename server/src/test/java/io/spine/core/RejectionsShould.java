@@ -27,9 +27,9 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.spine.Identifier;
 import io.spine.base.ThrowableMessage;
+import io.spine.base.Time;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.protobuf.AnyPacker;
-import io.spine.time.Time;
 import org.junit.Before;
 import org.junit.Test;
 

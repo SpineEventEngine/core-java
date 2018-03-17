@@ -101,7 +101,7 @@ public class AggregatePartCommandTestShould {
         }
 
         @Apply
-        private void on(Timestamp timestamp) {
+        void on(Timestamp timestamp) {
             getBuilder().setValue(getState().getValue() + 1);
         }
     }

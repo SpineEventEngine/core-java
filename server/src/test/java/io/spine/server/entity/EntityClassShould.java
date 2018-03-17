@@ -22,11 +22,11 @@ package io.spine.server.entity;
 
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
+import io.spine.base.Time;
 import io.spine.server.model.ModelError;
 import io.spine.test.TimeTests;
 import io.spine.time.Interval;
 import io.spine.time.Intervals;
-import io.spine.time.Time;
 import org.junit.Test;
 
 import java.lang.reflect.Constructor;

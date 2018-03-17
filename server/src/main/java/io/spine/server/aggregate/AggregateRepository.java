@@ -19,7 +19,6 @@
  */
 package io.spine.server.aggregate;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableList;
@@ -283,7 +282,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
             storage.writeEvent(id, event);
             ++eventCount;
             if (eventCount >= snapshotTrigger) {
-                final Snapshot snapshot = aggregate.toSnapshot();
+                final Snapshot snapshot = aggregate.toShapshot();
+                aggregate.clearRecentHistory();
                 storage.writeSnapshot(id, snapshot);
                 eventCount = 0;
             }
@@ -455,8 +455,13 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         this.snapshotTrigger = snapshotTrigger;
     }
 
-    @VisibleForTesting
-    public AggregateStorage<I> aggregateStorage() {
+    /**
+     * Returns the storage assigned to this aggregate.
+     *
+     * @return storage instance
+     * @throws IllegalStateException if the storage is null
+     */
+    protected AggregateStorage<I> aggregateStorage() {
         @SuppressWarnings("unchecked") // We check the type on initialization.
         final AggregateStorage<I> result = (AggregateStorage<I>) getStorage();
         return result;

@@ -99,6 +99,13 @@ message EventContext {
         RejectionContext rejection_context = 7 [(required) = true];
     }
 
+    // An ID of the root command, which lead to this event.
+    //
+    // If the event is a reaction to another event, then this attribute holds the identifier 
+    // of the very first command in this chain.
+    //
+    CommandId root_command_id = 9 [(required) = true];
+
     // The ID of the entity which generated the event.
     //
     // Examples of event producers are: aggregates, process managers (which generate

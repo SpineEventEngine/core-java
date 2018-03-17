@@ -31,6 +31,7 @@ import org.junit.Test;
 import java.util.Calendar;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static io.spine.base.Time.getCurrentTime;
 import static io.spine.client.ColumnFilter.Operator.EQUAL;
 import static io.spine.client.ColumnFilter.Operator.GREATER_OR_EQUAL;
 import static io.spine.client.ColumnFilter.Operator.GREATER_THAN;
@@ -49,7 +50,6 @@ import static io.spine.client.CompositeColumnFilter.CompositeOperator.EITHER;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Verify.assertContainsAll;
-import static io.spine.time.Time.getCurrentTime;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 

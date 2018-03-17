@@ -21,8 +21,8 @@
 package io.spine.server.tenant;
 
 import com.google.protobuf.Timestamp;
+import io.spine.base.Time;
 import io.spine.core.TenantId;
-import io.spine.time.Time;
 
 /**
  * Default implementation of {code TenantRepository} that stores timestamps

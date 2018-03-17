@@ -129,7 +129,7 @@ public class AggregatePartRepositoryLookupShould {
         }
 
         @Apply
-        private void apply(AggProjectCreated event) {
+        void apply(AggProjectCreated event) {
             getBuilder().setId(event.getProjectId())
                         .setName(event.getName());
         }

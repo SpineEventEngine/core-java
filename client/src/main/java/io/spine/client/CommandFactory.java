@@ -37,21 +37,18 @@ import io.spine.validate.ValidationException;
 import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.time.Time.getCurrentTime;
+import static io.spine.base.Time.getCurrentTime;
 import static io.spine.validate.Validate.checkValid;
 
 /**
- * Public API for creating {@link Command} instances, using the {@code ActorRequestFactory}
- * configuration.
+ * A factory of {@link Command} instances.
  *
- * <p>During the creation of {@code Command} instances the source {@code Message} instances, passed
- * into creation methods, are validated. The validation is performed according to the constraints
- * set in Protobuf definition of each {@code Message}. In case the message isn't valid,
- * an {@linkplain ValidationException exception} is thrown.
+ * <p>Uses the given {@link ActorRequestFactory} as the source of the command meta information,
+ * such as the actor, the tenant, etc.
  *
- * <p>Therefore it is recommended to use a corresponding
- * {@linkplain io.spine.validate.ValidatingBuilder ValidatingBuilder} implementation to create
- * a command message.
+ * <p>The command messages passed to the factory are
+ * {@linkplain io.spine.validate.Validate#checkValid(Message) validated} according to their
+ * Proto definitions. If a given message is invalid, a {@link ValidationException} is thrown.
  *
  * @see ActorRequestFactory#command()
  */
@@ -64,14 +61,12 @@ public final class CommandFactory {
     }
 
     /**
-     * Creates new {@code Command} with the passed message.
-     *
-     * <p>The command contains a {@code CommandContext} instance with the current time.
+     * Creates a new {@link Command} with the given message.
      *
      * @param message the command message
      * @return new command instance
      * @throws ValidationException if the passed message does not satisfy the constraints
-     *                                      set for it in its Protobuf definition
+     *                             set for it in its Protobuf definition
      */
     public Command create(Message message) throws ValidationException {
         checkNotNull(message);
@@ -83,24 +78,20 @@ public final class CommandFactory {
     }
 
     /**
-     * Creates new {@code Command} with the passed message and target entity version.
+     * Creates a new {@code Command} with the passed message and target entity version.
      *
-     * <p>The command contains a {@code CommandContext} instance with the current time.
-     *
-     * <p>The message passed is validated according to the constraints set in its Protobuf
-     * definition. In case the message isn't valid, an {@linkplain ValidationException
-     * exception} is thrown.
+     * <p>The {@code targetVersion} parameter defines the version of the entity which handles
+     * the resulting command. Note that the framework performs no validation of the target version
+     * before a command is handled. The validation may be performed by the user themselves instead.
      *
      * @param message       the command message
-     * @param targetVersion the ID of the entity for applying commands if {@code null}
-     *                      the commands can be applied to any entity
+     * @param targetVersion the version of the entity for which this command is intended
      * @return new command instance
      * @throws ValidationException if the passed message does not satisfy the constraints
      *                             set for it in its Protobuf definition
      */
     public Command create(Message message, int targetVersion) throws ValidationException {
         checkNotNull(message);
-        checkNotNull(targetVersion);
         checkValid(message);
 
         final CommandContext context = createContext(targetVersion);
@@ -109,10 +100,7 @@ public final class CommandFactory {
     }
 
     /**
-     * Creates new {@code Command} with the passed {@code message} and {@code context}.
-     *
-     * <p>The timestamp of the resulting command is the <i>same</i> as in
-     * the passed {@code CommandContext}.
+     * Creates a new {@code Command} with the passed {@code message} and {@code context}.
      *
      * @param message the command message
      * @param context the command context
@@ -157,10 +145,10 @@ public final class CommandFactory {
     }
 
     /**
-     * Creates a command instance with the given {@code message} and the {@code context}.
+     * Creates a command instance with the given {@code message} and {@code context}.
      *
-     * <p>If {@code Any} instance is passed as the first parameter it will be used as is.
-     * Otherwise, the command message will be packed into {@code Any}.
+     * <p>If an instance of {@link Any} is passed as the {@code message} parameter, the packed
+     * message is used for the command construction.
      *
      * <p>The ID of the new command instance is automatically generated.
      *
@@ -169,9 +157,6 @@ public final class CommandFactory {
      * @return a new command
      */
     private static Command createCommand(Message message, CommandContext context) {
-        checkNotNull(message);
-        checkNotNull(context);
-
         final Any packed = AnyPacker.pack(message);
         final Command.Builder result = Command.newBuilder()
                                               .setId(Commands.generateId())
@@ -211,20 +196,18 @@ public final class CommandFactory {
     private static CommandContext createContext(@Nullable TenantId tenantId,
                                                 UserId userId,
                                                 ZoneOffset zoneOffset) {
-        checkNotNull(userId);
-        checkNotNull(zoneOffset);
-
         final CommandContext.Builder result = newContextBuilder(tenantId, userId, zoneOffset);
         return result.build();
     }
 
     /**
-     * Creates a new command context with the current time.
+     * Creates a new command context with the given parameters and
+     * {@link io.spine.base.Time#getCurrentTime() current time} as the {@code timestamp}.
      *
      * @param tenantId      the ID of the tenant or {@code null} for single-tenant applications
      * @param userId        the actor id
      * @param zoneOffset    the offset of the timezone in which the user works
-     * @param targetVersion the the ID of the entity for applying commands
+     * @param targetVersion the version of the entity for which this command is intended
      * @return new {@code CommandContext}
      * @see CommandFactory#create(Message)
      */
@@ -233,10 +216,6 @@ public final class CommandFactory {
                                         UserId userId,
                                         ZoneOffset zoneOffset,
                                         int targetVersion) {
-        checkNotNull(userId);
-        checkNotNull(zoneOffset);
-        checkNotNull(targetVersion);
-
         final CommandContext.Builder builder = newContextBuilder(tenantId, userId, zoneOffset);
         final CommandContext result = builder.setTargetVersion(targetVersion)
                                              .build();
@@ -262,13 +241,13 @@ public final class CommandFactory {
     /**
      * Creates a new instance of {@code CommandContext} based on the passed one.
      *
-     * <p>The returned instance gets new {@code timestamp} set to the time of the call.
+     * <p>The returned instance gets new {@code timestamp} set to
+     * the {@link io.spine.base.Time#getCurrentTime() current time}.
      *
      * @param value the instance from which to copy values
      * @return new {@code CommandContext}
      */
     private static CommandContext contextBasedOn(CommandContext value) {
-        checkNotNull(value);
         final ActorContext.Builder withCurrentTime = value.getActorContext()
                                                           .toBuilder()
                                                           .setTimestamp(getCurrentTime());

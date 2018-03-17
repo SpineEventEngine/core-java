@@ -22,6 +22,7 @@ package io.spine.server.stand;
 import com.google.protobuf.FieldMask;
 import io.spine.annotation.SPI;
 import io.spine.server.entity.EntityRecord;
+import io.spine.server.entity.storage.EntityColumnCache;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.storage.RecordStorage;
 import io.spine.type.TypeUrl;
@@ -65,6 +66,11 @@ public abstract class StandStorage extends RecordStorage<AggregateStateId> {
     public abstract Iterator<EntityRecord> readAllByType(TypeUrl type,
                                                                     FieldMask fieldMask);
 
+    @Override
+    public EntityColumnCache entityColumnCache() {
+        return recordStorage().entityColumnCache();
+    }
+
     /**
      * Reads all the state records from the storage.
      *
@@ -91,4 +97,7 @@ public abstract class StandStorage extends RecordStorage<AggregateStateId> {
             FieldMask fieldMask) {
         throw new IllegalStateException("Call #readAll(EntityQuery, FieldMask) instead.");
     }
+
+    /** Returns an entity storage implementation. */
+    protected abstract RecordStorage<?> recordStorage();
 }

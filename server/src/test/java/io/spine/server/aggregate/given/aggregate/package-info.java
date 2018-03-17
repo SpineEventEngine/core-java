@@ -18,32 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.bus;
-
-import io.spine.annotation.Internal;
-import io.spine.core.MessageEnvelope;
-
 /**
- * A definition of a handler for a dead message.
- *
- * <p>If a message with no target dispatchers found is passed to the bus, it will result in a call
- * to {@link DeadMessageTap#capture
- * DeadMessageTap.capture(MessageEnvelope)}. The method produces
- * {@link MessageUnhandled} instance describing the dead message. It may also process the given
- * message (e.g. store it into the bus store).
- *
- * @author Dmytro Dashenkov
+ * Test environment classes for {@linkplain io.spine.server.aggregate.AggregateShould
+ * Aggregate tests}.
  */
-@Internal
-public interface DeadMessageTap<E extends MessageEnvelope<?, ?, ?>> {
+@ParametersAreNonnullByDefault
+package io.spine.server.aggregate.given.aggregate;
 
-    /**
-     * Handles the dead message in a bus-specific way and produces an {@link MessageUnhandled} which
-     * may be converted to a {@link Error} for notifying the poster about the absence of
-     * dispatchers.
-     *
-     * @param message the dead message
-     * @return the {@link MessageUnhandled} instance describing the dead message
-     */
-    MessageUnhandled capture(E message);
-}
+import javax.annotation.ParametersAreNonnullByDefault;

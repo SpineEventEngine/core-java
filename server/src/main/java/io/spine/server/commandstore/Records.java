@@ -34,8 +34,8 @@ import javax.annotation.Nullable;
 import java.util.Iterator;
 
 import static io.spine.Identifier.EMPTY_ID;
+import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.Commands.generateId;
-import static io.spine.time.Time.getCurrentTime;
 
 /**
  * Utility class for working with {@link CommandRecord}s.

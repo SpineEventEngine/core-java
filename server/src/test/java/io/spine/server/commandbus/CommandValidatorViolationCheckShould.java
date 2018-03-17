@@ -21,6 +21,7 @@
 package io.spine.server.commandbus;
 
 import com.google.protobuf.Any;
+import io.spine.base.Time;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
@@ -28,7 +29,6 @@ import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandId;
 import io.spine.protobuf.AnyPacker;
 import io.spine.test.command.CmdCreateProject;
-import io.spine.time.Time;
 import io.spine.validate.ConstraintViolation;
 import org.junit.Test;
 
