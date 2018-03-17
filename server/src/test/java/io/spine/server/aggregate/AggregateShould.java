@@ -68,7 +68,9 @@ import io.spine.test.aggregate.event.AggUserNotified;
 import io.spine.test.aggregate.rejection.Rejections;
 import io.spine.test.aggregate.user.User;
 import io.spine.type.TypeUrl;
+import io.spine.util.Exceptions;
 import io.spine.validate.ConstraintViolation;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -76,6 +78,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.getRootCause;
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.core.Events.getRootCommandId;
@@ -175,6 +178,11 @@ public class AggregateShould {
 
         repository = new TestAggregateRepository();
         boundedContext.register(repository);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        boundedContext.close();
     }
 
     @Test
@@ -727,6 +735,7 @@ public class AggregateShould {
 
         final List<Event> events = readAllEvents(boundedContext, tenantId);
         assertSize(1, events);
+        closeContext(boundedContext);
     }
 
     /**
@@ -772,6 +781,8 @@ public class AggregateShould {
         final Event reactionEvent = events.get(1);
         final TypeUrl userNotifiedType = TypeUrl.from(AggUserNotified.getDescriptor());
         assertEquals(typeUrlOf(reactionEvent), userNotifiedType);
+
+        closeContext(boundedContext);
     }
 
     /**
@@ -813,5 +824,24 @@ public class AggregateShould {
         final Event reactionEvent = events.get(0);
         final TypeUrl userNotifiedType = TypeUrl.from(AggUserNotified.getDescriptor());
         assertEquals(typeUrlOf(reactionEvent), userNotifiedType);
+
+        closeContext(boundedContext);
+    }
+
+    /**
+     * A convenience method for closing the bounded context.
+     *
+     * <p>Instead of a checked {@link java.io.IOException IOException}, wraps any issues
+     * that may occur while closing, into an {@link IllegalStateException}.
+     *
+     * @param boundedContext a bounded context to close
+     */
+    private static void closeContext(BoundedContext boundedContext) {
+        checkNotNull(boundedContext);
+        try {
+            boundedContext.close();
+        } catch (Exception e) {
+            throw Exceptions.illegalStateWithCauseOf(e);
+        }
     }
 }
