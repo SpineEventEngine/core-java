@@ -43,7 +43,7 @@ public class AggregateRejectionDelivery<I, A extends Aggregate<I, ?, ?>>
             extends AggregateMessageConsumer<I, A, RejectionEnvelope, RejectionShardedStream<I>,
             RejectionShardedStream.Builder<I>> {
         protected AggregateRejectionConsumer(AggregateRepository<I, A> repository) {
-            super(ShardingTag.forRejectionsOf(repository.getShardedModelClass()), repository);
+            super(ShardingTag.forRejectionsOf(repository), repository);
         }
 
         @Override

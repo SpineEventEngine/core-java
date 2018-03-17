@@ -42,7 +42,7 @@ public class AggregateCommandDelivery<I, A extends Aggregate<I, ?, ?>>
             extends AggregateMessageConsumer<I, A, CommandEnvelope, CommandShardedStream<I>,
             CommandShardedStream.Builder<I>> {
         protected AggregateCommandConsumer(AggregateRepository<I, A> repository) {
-            super(ShardingTag.forCommandsOf(repository.getShardedModelClass()), repository);
+            super(ShardingTag.forCommandsOf(repository), repository);
         }
 
         @Override

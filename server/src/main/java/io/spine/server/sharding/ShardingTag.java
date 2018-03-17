@@ -19,6 +19,7 @@
  */
 package io.spine.server.sharding;
 
+import io.spine.core.BoundedContextName;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.EventEnvelope;
 import io.spine.core.MessageEnvelope;
@@ -34,10 +35,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public final class ShardingTag<E extends MessageEnvelope<?, ?, ?>> {
 
+    private final BoundedContextName boundedContextName;
     private final EntityClass<?> entityClass;
     private final Class<E> envelopeType;
 
-    private ShardingTag(EntityClass<?> entityClass, Class<E> envelopeType) {
+    private ShardingTag(BoundedContextName boundedContextName,
+                        EntityClass<?> entityClass,
+                        Class<E> envelopeType) {
+        this.boundedContextName = boundedContextName;
         this.entityClass = entityClass;
         this.envelopeType = envelopeType;
     }
@@ -58,33 +63,46 @@ public final class ShardingTag<E extends MessageEnvelope<?, ?, ?>> {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        ShardingTag that = (ShardingTag) o;
-        return Objects.equals(entityClass, that.entityClass) &&
+        ShardingTag<?> that = (ShardingTag<?>) o;
+        return Objects.equals(boundedContextName, that.boundedContextName) &&
+                Objects.equals(entityClass, that.entityClass) &&
                 Objects.equals(envelopeType, that.envelopeType);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(entityClass, envelopeType);
+
+        return Objects.hash(boundedContextName, entityClass, envelopeType);
     }
 
-    public static ShardingTag<CommandEnvelope> forCommandsOf(EntityClass<?> modelClass) {
-        return forEnvelope(modelClass, CommandEnvelope.class);
+    public static ShardingTag<CommandEnvelope> forCommandsOf(Shardable<?> shardable) {
+        checkNotNull(shardable);
+        return forEnvelope(shardable.getBoundedContextName(),
+                           shardable.getShardedModelClass(),
+                           CommandEnvelope.class);
     }
 
-    public static ShardingTag<EventEnvelope> forEventsOf(EntityClass<?> modelClass) {
-        return forEnvelope(modelClass, EventEnvelope.class);
+    public static ShardingTag<EventEnvelope> forEventsOf(Shardable<?> shardable) {
+        checkNotNull(shardable);
+        return forEnvelope(shardable.getBoundedContextName(),
+                           shardable.getShardedModelClass(),
+                           EventEnvelope.class);
     }
 
-    public static ShardingTag<RejectionEnvelope> forRejectionsOf(EntityClass<?> modelClass) {
-        return forEnvelope(modelClass, RejectionEnvelope.class);
+    public static ShardingTag<RejectionEnvelope> forRejectionsOf(Shardable<?> shardable) {
+        checkNotNull(shardable);
+        return forEnvelope(shardable.getBoundedContextName(),
+                           shardable.getShardedModelClass(),
+                           RejectionEnvelope.class);
     }
 
     private static <E extends MessageEnvelope<?, ?, ?>> ShardingTag<E>
-    forEnvelope(EntityClass<?> entityClass, Class<E> envelopeClass) {
+    forEnvelope(BoundedContextName bcName, EntityClass<?> entityClass, Class<E> envelopeClass) {
+        checkNotNull(bcName);
         checkNotNull(entityClass);
+        checkNotNull(envelopeClass);
 
-        final ShardingTag<E> id = new ShardingTag<>(entityClass, envelopeClass);
+        final ShardingTag<E> id = new ShardingTag<>(bcName, entityClass, envelopeClass);
         return id;
     }
 }

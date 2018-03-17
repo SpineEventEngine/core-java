@@ -42,7 +42,7 @@ public class PmRejectionDelivery<I, P extends ProcessManager<I, ?, ?>>
             extends PmMessageConsumer<I, P, RejectionEnvelope, RejectionShardedStream<I>,
             RejectionShardedStream.Builder<I>> {
         protected PmRejectionConsumer(ProcessManagerRepository<I, P, ?> repository) {
-            super(ShardingTag.forRejectionsOf(repository.getShardedModelClass()), repository);
+            super(ShardingTag.forRejectionsOf(repository), repository);
         }
 
         @Override

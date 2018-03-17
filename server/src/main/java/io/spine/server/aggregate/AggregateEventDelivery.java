@@ -41,7 +41,7 @@ public class AggregateEventDelivery<I, A extends Aggregate<I, ?, ?>>
             extends AggregateMessageConsumer<I, A, EventEnvelope, EventShardedStream<I>,
             EventShardedStream.Builder<I>> {
         protected AggregateEventConsumer(AggregateRepository<I, A> repository) {
-            super(ShardingTag.forEventsOf(repository.getShardedModelClass()), repository);
+            super(ShardingTag.forEventsOf(repository), repository);
         }
 
         @Override

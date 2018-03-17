@@ -42,7 +42,7 @@ public class PmCommandDelivery<I, P extends ProcessManager<I, ?, ?>>
             extends PmMessageConsumer<I, P, CommandEnvelope, CommandShardedStream<I>,
             CommandShardedStream.Builder<I>> {
         protected PmCommandConsumer(ProcessManagerRepository<I, P, ?> repository) {
-            super(ShardingTag.forCommandsOf(repository.getShardedModelClass()), repository);
+            super(ShardingTag.forCommandsOf(repository), repository);
         }
 
         @Override

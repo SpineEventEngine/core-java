@@ -42,7 +42,7 @@ public class PmEventDelivery<I, P extends ProcessManager<I, ?, ?>>
             extends PmMessageConsumer<I, P, EventEnvelope, EventShardedStream<I>,
             EventShardedStream.Builder<I>> {
         protected PmEventConsumer(ProcessManagerRepository<I, P, ?> repository) {
-            super(ShardingTag.forEventsOf(repository.getShardedModelClass()), repository);
+            super(ShardingTag.forEventsOf(repository), repository);
         }
 
         @Override

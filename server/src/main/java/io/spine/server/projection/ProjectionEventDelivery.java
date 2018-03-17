@@ -45,7 +45,7 @@ public class ProjectionEventDelivery<I, P extends Projection<I, ?, ?>>
             extends Consumer<I, P, EventEnvelope,
             EventShardedStream<I>, EventShardedStream.Builder<I>> {
         protected ProjectionEventConsumer(ProjectionRepository<I, P, ?> repository) {
-            super(ShardingTag.forEventsOf(repository.getShardedModelClass()), repository);
+            super(ShardingTag.forEventsOf(repository), repository);
         }
 
         @Override
