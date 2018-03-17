@@ -28,10 +28,6 @@ import io.spine.server.sharding.ShardedStream;
 /**
  * A strategy on delivering the messages to the instances of a certain entity type.
  *
- * <p>The postponed messages are not dispatched to the entity instances automatically. However
- * it is expected they are dispatched manually later via
- * {@linkplain #deliverNow(Object, ActorMessageEnvelope) deliverNow(ID, envelope)} method call.
- *
  * @param <I> the ID type of entity, to which the messages are being delivered
  * @param <E> the type of entity
  * @param <M> the type of message envelope, which is used for message delivery
@@ -44,6 +40,7 @@ public abstract class EndpointDelivery<I,
                                        M extends ActorMessageEnvelope<?, ?, ?>,
                                        S extends ShardedStream<I, ?, M>,
                                        B extends ShardedStream.AbstractBuilder<I, B, S>> {
+
     private final Sender<I, M> sender;
     private final Consumer<I, E, M, S, B> consumer;
 
