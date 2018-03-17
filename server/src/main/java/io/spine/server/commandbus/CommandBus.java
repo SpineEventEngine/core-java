@@ -38,7 +38,6 @@ import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.commandstore.CommandStore;
 import io.spine.server.rejection.RejectionBus;
-import io.spine.server.transport.TransportFactory;
 
 import javax.annotation.Nullable;
 import java.util.Deque;
@@ -51,7 +50,6 @@ import static io.spine.core.Rejections.causedByRejection;
 import static io.spine.core.Rejections.toRejection;
 import static io.spine.server.bus.Buses.acknowledge;
 import static io.spine.server.bus.Buses.reject;
-import static io.spine.util.Exceptions.newIllegalStateException;
 import static io.spine.util.Exceptions.toError;
 import static java.lang.String.format;
 
@@ -113,7 +111,7 @@ public class CommandBus extends Bus<Command,
      */
     @SuppressWarnings("ThisEscapedInObjectConstruction") // OK as nested objects only
     private CommandBus(Builder builder) {
-        super(builder);
+        super();
         this.multitenant = builder.multitenant != null
                 ? builder.multitenant
                 : false;
@@ -316,8 +314,7 @@ public class CommandBus extends Bus<Command,
     /**
      * The {@code Builder} for {@code CommandBus}.
      */
-    public static class Builder
-            extends AbstractBuilder<CommandEnvelope, Command, Builder, CommandBus> {
+    public static class Builder extends AbstractBuilder<CommandEnvelope, Command, Builder> {
 
         /**
          * The multi-tenancy flag for the {@code CommandBus} to build.
@@ -457,7 +454,7 @@ public class CommandBus extends Bus<Command,
          */
         @Override
         @Internal
-        protected CommandBus doBuild() {
+        public CommandBus build() {
             checkState(
                     commandStore != null,
                     "CommandStore must be set. Please call CommandBus.Builder.setCommandStore()."
@@ -472,13 +469,7 @@ public class CommandBus extends Bus<Command,
             }
 
             if (rejectionBus == null) {
-                if(!getTransportFactory().isPresent()) {
-                    throw newIllegalStateException(
-                            "`TransportFactory` is required to initialize a `RejectionBus`.");
-                }
-                final TransportFactory transportFactory = getTransportFactory().get();
                 rejectionBus = RejectionBus.newBuilder()
-                                           .setTransportFactory(transportFactory)
                                            .build();
             }
 

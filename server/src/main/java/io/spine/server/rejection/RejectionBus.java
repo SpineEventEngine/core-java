@@ -71,7 +71,6 @@ public class RejectionBus extends CommandOutputBus<Rejection,
      * Creates a new instance according to the pre-configured {@code Builder}.
      */
     private RejectionBus(Builder builder) {
-        super(builder);
         this.filterChain = builder.getFilters();
         this.enricher = builder.enricher;
     }
@@ -164,8 +163,7 @@ public class RejectionBus extends CommandOutputBus<Rejection,
     }
 
     /** The {@code Builder} for {@code RejectionBus}. */
-    public static class Builder
-            extends AbstractBuilder<RejectionEnvelope, Rejection, Builder, RejectionBus> {
+    public static class Builder extends AbstractBuilder<RejectionEnvelope, Rejection, Builder> {
 
 
         /**
@@ -202,7 +200,7 @@ public class RejectionBus extends CommandOutputBus<Rejection,
         }
 
         @Override
-        protected RejectionBus doBuild() {
+        public RejectionBus build() {
             return new RejectionBus(this);
         }
 

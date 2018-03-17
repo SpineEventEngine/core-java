@@ -462,8 +462,8 @@ public final class BoundedContext
             final TransportFactory transportFactory = getTransportFactory();
 
             initTenantIndex(storageFactory);
-            initCommandBus(storageFactory, transportFactory);
-            initEventBus(storageFactory, transportFactory);
+            initCommandBus(storageFactory);
+            initEventBus(storageFactory);
             initStand(storageFactory);
             initIntegrationBus(transportFactory);
 
@@ -505,12 +505,11 @@ public final class BoundedContext
             }
         }
 
-        private void initCommandBus(StorageFactory factory, TransportFactory transportFactory) {
+        private void initCommandBus(StorageFactory factory) {
             if (commandBus == null) {
                 final CommandStore commandStore = createCommandStore(factory, tenantIndex);
                 commandBus = CommandBus.newBuilder()
                                        .setMultitenant(this.multitenant)
-                                       .setTransportFactory(transportFactory)
                                        .setCommandStore(commandStore);
             } else {
                 final Boolean commandBusMultitenancy = commandBus.isMultitenant();
@@ -526,26 +525,18 @@ public final class BoundedContext
                     final CommandStore commandStore = createCommandStore(factory, tenantIndex);
                     commandBus.setCommandStore(commandStore);
                 }
-                if(!commandBus.getTransportFactory().isPresent()) {
-                    commandBus.setTransportFactory(transportFactory);
-                }
             }
         }
 
-        private void initEventBus(StorageFactory storageFactory,
-                                  TransportFactory transportFactory) {
+        private void initEventBus(StorageFactory storageFactory) {
             if (eventBus == null) {
                 eventBus = EventBus.newBuilder()
-                                   .setStorageFactory(storageFactory)
-                                   .setTransportFactory(transportFactory);
+                                   .setStorageFactory(storageFactory);
             } else {
                 final boolean eventStoreConfigured = eventBus.getEventStore()
                                                              .isPresent();
                 if (!eventStoreConfigured) {
                     eventBus.setStorageFactory(storageFactory);
-                }
-                if(!eventBus.getTransportFactory().isPresent()) {
-                    eventBus.setTransportFactory(transportFactory);
                 }
             }
         }

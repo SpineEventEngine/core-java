@@ -21,11 +21,11 @@ package io.spine.server.sharding;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.base.Time;
 import io.spine.core.MessageEnvelope;
 import io.spine.protobuf.AnyPacker;
 import io.spine.protobuf.TypeConverter;
 import io.spine.string.Stringifiers;
-import io.spine.time.Time;
 import io.spine.util.GenericTypeIndex;
 
 /**

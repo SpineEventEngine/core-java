@@ -141,7 +141,6 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
 
     @SuppressWarnings("ConstantConditions")     // `TransportFactory` has already been initialized.
     private IntegrationBus(Builder builder) {
-        super(builder);
         this.boundedContextName = builder.boundedContextName;
         this.subscriberHub = new SubscriberHub(builder.getTransportFactory().get());
         this.publisherHub = new PublisherHub(builder.getTransportFactory().get());
@@ -417,7 +416,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
      * A {@code Builder} for {@code IntegrationBus} instances.
      */
     public static class Builder extends
-            Bus.AbstractBuilder<ExternalMessageEnvelope, ExternalMessage, Builder, IntegrationBus> {
+                                Bus.AbstractBuilder<ExternalMessageEnvelope, ExternalMessage, Builder> {
 
         /**
          * Buses that act inside the bounded context, e.g. {@code EventBus}, and which allow
@@ -430,6 +429,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
         private EventBus eventBus;
         private RejectionBus rejectionBus;
         private BoundedContextName boundedContextName;
+        private TransportFactory transportFactory;
 
         public Optional<EventBus> getEventBus() {
             return Optional.fromNullable(eventBus);
@@ -461,8 +461,17 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
             return self();
         }
 
+        public Builder setTransportFactory(TransportFactory transportFactory) {
+            this.transportFactory = checkNotNull(transportFactory);
+            return self();
+        }
+
+        public Optional<TransportFactory> getTransportFactory() {
+            return Optional.fromNullable(transportFactory);
+        }
+
         @Override
-        public IntegrationBus doBuild() {
+        public IntegrationBus build() {
 
             checkState(eventBus != null,
                        "`eventBus` must be set for IntegrationBus.");
@@ -470,6 +479,10 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
                        "`rejectionBus` must be set for IntegrationBus.");
             checkNotDefault(boundedContextName,
                             "`boundedContextName` must be set for IntegrationBus.");
+
+            if (transportFactory == null) {
+                transportFactory = initTransportFactory();
+            }
 
             return new IntegrationBus(this);
         }

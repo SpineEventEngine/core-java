@@ -34,8 +34,6 @@ import io.spine.server.rejection.given.InvalidOrderSubscriber;
 import io.spine.server.rejection.given.InvalidProjectNameSubscriber;
 import io.spine.server.rejection.given.RejectionMessageSubscriber;
 import io.spine.server.rejection.given.VerifiableSubscriber;
-import io.spine.server.transport.TransportFactory;
-import io.spine.server.transport.memory.InMemoryTransportFactory;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -62,13 +60,10 @@ import static org.junit.Assert.assertTrue;
 public class RejectionBusShould {
 
     private RejectionBus rejectionBus;
-    private TransportFactory transportFactory;
 
     @Before
     public void setUp() {
-        this.transportFactory = InMemoryTransportFactory.newInstance();
         this.rejectionBus = RejectionBus.newBuilder()
-                                        .setTransportFactory(transportFactory)
                                         .build();
     }
 
@@ -211,7 +206,6 @@ public class RejectionBusShould {
     @Test
     public void unregister_registries_on_close() throws Exception {
         final RejectionBus rejectionBus = RejectionBus.newBuilder()
-                                                      .setTransportFactory(transportFactory)
                                                       .build();
         rejectionBus.register(new BareDispatcher());
         rejectionBus.register(new InvalidProjectNameSubscriber());

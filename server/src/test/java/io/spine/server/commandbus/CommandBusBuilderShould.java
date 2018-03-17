@@ -24,12 +24,12 @@ import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.bus.BusBuilderShould;
 import io.spine.server.commandstore.CommandStore;
-import io.spine.server.transport.TransportFactory;
-import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.server.rejection.RejectionBus;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.tenant.TenantAwareTest;
 import io.spine.server.tenant.TenantIndex;
+import io.spine.server.transport.TransportFactory;
+import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.test.Tests;
 import org.junit.Before;
 import org.junit.Test;
@@ -77,15 +77,12 @@ public class CommandBusBuilderShould extends BusBuilderShould<CommandBus.Builder
 
     @Test(expected = IllegalStateException.class)
     public void not_allow_to_omit_setting_CommandStore() {
-        CommandBus.newBuilder()
-                  .setTransportFactory(transportFactory)
-                  .build();
+        CommandBus.newBuilder().build();
     }
 
     @Test
     public void create_new_instance() {
         final CommandBus commandBus = builder().setCommandStore(commandStore)
-                                               .setTransportFactory(transportFactory)
                                                .build();
         assertNotNull(commandBus);
     }
@@ -95,7 +92,6 @@ public class CommandBusBuilderShould extends BusBuilderShould<CommandBus.Builder
         final CommandScheduler expectedScheduler = mock(CommandScheduler.class);
 
         final CommandBus.Builder builder = builder().setCommandStore(commandStore)
-                                                    .setTransportFactory(transportFactory)
                                                     .setCommandScheduler(expectedScheduler);
 
         assertEquals(expectedScheduler, builder.getCommandScheduler()

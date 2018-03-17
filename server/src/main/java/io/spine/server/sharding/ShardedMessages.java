@@ -22,16 +22,14 @@ package io.spine.server.sharding;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
+import io.spine.base.Time;
 import io.spine.core.BoundedContextName;
-import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandId;
 import io.spine.core.MessageEnvelope;
 import io.spine.protobuf.AnyPacker;
-import io.spine.protobuf.TypeConverter;
 import io.spine.server.integration.ChannelId;
 import io.spine.string.Stringifiers;
-import io.spine.time.Time;
 import io.spine.type.ClassName;
 
 import static com.google.common.base.Joiner.on;
@@ -67,24 +65,6 @@ public class ShardedMessages {
                                                     .setOriginalMessage(packedOriginalMsg)
                                                     .setWhenSharded(Time.getCurrentTime())
                                                     .build();
-        return result;
-    }
-
-    public static <T> T getTargetId(ShardedMessage source, Class<T> targetIdClass) {
-        checkNotNull(source);
-        checkNotNull(targetIdClass);
-
-        final Any packed = source.getTargetId();
-        final T result = TypeConverter.toObject(packed, targetIdClass);
-        return result;
-    }
-
-    public static CommandEnvelope getCommandEnvelope(ShardedMessage source) {
-        checkNotNull(source);
-
-        final Any originalMessage = source.getOriginalMessage();
-        final Command command = AnyPacker.unpack(originalMessage);
-        final CommandEnvelope result = CommandEnvelope.of(command);
         return result;
     }
 

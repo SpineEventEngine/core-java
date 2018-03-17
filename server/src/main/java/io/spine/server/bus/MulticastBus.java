@@ -36,10 +36,6 @@ public abstract class MulticastBus<M extends Message,
                                    D extends MessageDispatcher<C, E, ?>>
         extends Bus<M, E, C, D> {
 
-    protected MulticastBus(AbstractBuilder<E, M, ?, ?> builder) {
-        super(builder);
-    }
-
     /**
      * Call the dispatchers for the {@code messageEnvelope}.
      *
