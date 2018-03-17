@@ -33,10 +33,10 @@ ext {
     spineVersion = SPINE_VERSION
 
     // Depend on `base` for the general definitions and a model compiler.
-    spineBaseVersion = '0.10.31-SNAPSHOT'
+    spineBaseVersion = '0.10.32-SNAPSHOT'
 
     // We use Spine tools in the build process.
-    spineToolsVersion = '0.10.29-SNAPSHOT'
+    spineToolsVersion = '0.10.32-SNAPSHOT'
 
     spineTimeVersion = '0.10.29-SNAPSHOT'
 
