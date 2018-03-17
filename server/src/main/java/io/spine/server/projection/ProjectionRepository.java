@@ -21,6 +21,7 @@
 package io.spine.server.projection;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
@@ -55,6 +56,7 @@ import javax.annotation.Nullable;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Suppliers.memoize;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -68,6 +70,16 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S extends Message>
         extends EventDispatchingRepository<I, P, S>
         implements Shardable<P> {
+
+    private final Supplier<ProjectionEventDelivery<I, P>> eventDeliverySupplier =
+            memoize(new Supplier<ProjectionEventDelivery<I, P>>() {
+                @Override
+                public ProjectionEventDelivery<I, P> get() {
+                    final ProjectionEventDelivery<I, P> result
+                            = new ProjectionEventDelivery<>(ProjectionRepository.this);
+                    return result;
+                }
+            });
 
     /** An underlying entity storage used to store projections. */
     private RecordStorage<I> recordStorage;
@@ -257,7 +269,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      */
     @SPI
     protected ProjectionEventDelivery<I, P> getEndpointDelivery() {
-        return new ProjectionEventDelivery<>(this);
+        return eventDeliverySupplier.get();
     }
 
     /**

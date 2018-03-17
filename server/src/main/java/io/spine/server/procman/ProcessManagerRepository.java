@@ -20,6 +20,7 @@
 
 package io.spine.server.procman;
 
+import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import io.spine.annotation.SPI;
@@ -61,6 +62,7 @@ import javax.annotation.CheckReturnValue;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Suppliers.memoize;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -87,6 +89,37 @@ public abstract class ProcessManagerRepository<I,
     /** The rejection routing schema used by this repository. */
     private final RejectionRouting<I> rejectionRouting =
             RejectionRouting.withDefault(RejectionProducers.<I>fromContext());
+
+    private final Supplier<PmCommandDelivery<I, P>> commandDeliverySupplier =
+            memoize(new Supplier<PmCommandDelivery<I, P>>() {
+                @Override
+                public PmCommandDelivery<I, P> get() {
+                    final PmCommandDelivery<I, P> result =
+                            new PmCommandDelivery<>(ProcessManagerRepository.this);
+                    return result;
+                }
+            });
+
+    private final Supplier<PmEventDelivery<I, P>> eventDeliverySupplier =
+            memoize(new Supplier<PmEventDelivery<I, P>>() {
+                @Override
+                public PmEventDelivery<I, P> get() {
+                    final PmEventDelivery<I, P> result
+                            = new PmEventDelivery<>(ProcessManagerRepository.this);
+                    return result;
+                }
+            });
+
+    private final Supplier<PmRejectionDelivery<I, P>> rejectionDeliverySupplier =
+            memoize(new Supplier<PmRejectionDelivery<I, P>>() {
+                @Override
+                public PmRejectionDelivery<I, P> get() {
+                    final PmRejectionDelivery<I, P> result
+                            = new PmRejectionDelivery<>(ProcessManagerRepository.this);
+                    return result;
+                }
+            });
+
 
     /**
      * The {@link CommandErrorHandler} tackling the dispatching errors.
@@ -372,7 +405,7 @@ public abstract class ProcessManagerRepository<I,
      */
     @SPI
     protected PmEventDelivery<I, P> getEventEndpointDelivery() {
-        return new PmEventDelivery<>(this);
+        return eventDeliverySupplier.get();
     }
 
 
@@ -389,7 +422,7 @@ public abstract class ProcessManagerRepository<I,
      */
     @SPI
     protected PmRejectionDelivery<I, P> getRejectionEndpointDelivery() {
-        return new PmRejectionDelivery<>(this);
+        return rejectionDeliverySupplier.get();
     }
 
     /**
@@ -405,7 +438,7 @@ public abstract class ProcessManagerRepository<I,
      */
     @SPI
     protected PmCommandDelivery<I, P> getCommandEndpointDelivery() {
-        return new PmCommandDelivery<>(this);
+        return commandDeliverySupplier.get();
     }
 
     @Override

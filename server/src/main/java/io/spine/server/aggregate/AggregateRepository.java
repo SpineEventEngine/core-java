@@ -21,6 +21,7 @@ package io.spine.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
+import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableList;
 import io.spine.annotation.SPI;
 import io.spine.core.BoundedContextName;
@@ -64,6 +65,7 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Suppliers.memoize;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -109,6 +111,36 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     private final RejectionRouting<I> rejectionRouting =
             RejectionRouting.withDefault(RejectionProducers.<I>fromContext());
 
+    private final Supplier<AggregateCommandDelivery<I, A>> commandDeliverySupplier =
+            memoize(new Supplier<AggregateCommandDelivery<I, A>>() {
+        @Override
+        public AggregateCommandDelivery<I, A> get() {
+            final AggregateCommandDelivery<I, A> result =
+                    new AggregateCommandDelivery<>(AggregateRepository.this);
+            return result;
+        }
+    });
+
+    private final Supplier<AggregateEventDelivery<I, A>> eventDeliverySupplier =
+            memoize(new Supplier<AggregateEventDelivery<I, A>>() {
+        @Override
+        public AggregateEventDelivery<I, A> get() {
+            final AggregateEventDelivery<I, A> result
+                    = new AggregateEventDelivery<>(AggregateRepository.this);
+            return result;
+        }
+    });
+
+    private final Supplier<AggregateRejectionDelivery<I, A>> rejectionDeliverySupplier =
+            memoize(new Supplier<AggregateRejectionDelivery<I, A>>() {
+                @Override
+                public AggregateRejectionDelivery<I, A> get() {
+                    final AggregateRejectionDelivery<I, A> result
+                            = new AggregateRejectionDelivery<>(AggregateRepository.this);
+                    return result;
+                }
+            });
+
     /**
      * The {@link CommandErrorHandler} tackling the dispatching errors.
      *
@@ -119,15 +151,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     /** The number of events to store between snapshots. */
     private int snapshotTrigger = DEFAULT_SNAPSHOT_TRIGGER;
-
-    private final AggregateCommandDelivery<I, A> commandDelivery =
-            new AggregateCommandDelivery<>(this);
-    private final AggregateEventDelivery<I, A> eventDelivery =
-            new AggregateEventDelivery<>(this);
-    private final AggregateRejectionDelivery<I, A> rejectionDelivery =
-            new AggregateRejectionDelivery<>(this);
-
-
 
     /** Creates a new instance. */
     protected AggregateRepository() {
@@ -568,7 +591,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     @SPI
     protected AggregateEndpointDelivery<I, A, EventEnvelope, ?, ?> getEventEndpointDelivery() {
-        return eventDelivery;
+        return eventDeliverySupplier.get();
     }
 
     /**
@@ -585,7 +608,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @SPI
     protected AggregateEndpointDelivery<I, A, RejectionEnvelope, ?, ?>
     getRejectionEndpointDelivery() {
-        return rejectionDelivery;
+        return rejectionDeliverySupplier.get();
     }
 
     /**
@@ -600,8 +623,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * @return delivery strategy for rejections
      */
     protected AggregateEndpointDelivery<I, A, CommandEnvelope, ?, ?> getCommandEndpointDelivery() {
-        //TODO:2018-03-16:alex.tymchenko: introduce lazy-initialization instead.
-        return commandDelivery;
+        return commandDeliverySupplier.get();
     }
 
     @Override

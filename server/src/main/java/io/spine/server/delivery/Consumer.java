@@ -59,7 +59,7 @@ public abstract class Consumer<I,
     public ShardedStream<I, ?, M> bindToTransport(BoundedContextName name,
                                                   ShardingKey key,
                                                   TransportFactory transportFactory) {
-        this.stream = newShardedStreamBuilder().setBoundedContextName(name)
+        stream = newShardedStreamBuilder().setBoundedContextName(name)
                                                .setKey(key)
                                                .setTargetIdClass(repository.getIdClass())
                                                .build(transportFactory);
@@ -126,5 +126,12 @@ public abstract class Consumer<I,
 
     protected Repository<I, E> repository() {
         return repository;
+    }
+
+    @Override
+    public void close() {
+        if(stream != null) {
+            stream.close();
+        }
     }
 }

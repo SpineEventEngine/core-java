@@ -32,6 +32,7 @@ import io.spine.server.transport.TransportFactory;
 import io.spine.util.GenericTypeIndex;
 
 import javax.annotation.Nullable;
+import java.io.Closeable;
 import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -41,24 +42,27 @@ import static io.spine.server.sharding.ShardedStream.GenericParameter.MESSAGE_CL
 /**
  * @author Alex Tymchenko
  */
-public abstract class ShardedStream<I, M extends Message, E extends MessageEnvelope<?, M, ?>> {
+public abstract class ShardedStream<I, M extends Message, E extends MessageEnvelope<?, M, ?>>
+                                                                            implements Closeable {
 
-    private final TransportFactory transportFactory;
     private final BoundedContextName boundedContextName;
     private final ShardingKey key;
-    private final ChannelId channelId;
     private final Class<I> targetIdClass;
+    private final Subscriber subscriber;
+    private final Publisher publisher;
+
 
     @Nullable
     private ExternalMessageObserver channelObserver;
 
     ShardedStream(AbstractBuilder<I, ?, ? extends ShardedStream> builder) {
-        this.transportFactory = builder.transportFactory;
         this.boundedContextName = builder.boundedContextName;
         this.key = builder.key;
         this.targetIdClass = builder.targetIdClass;
         final Class<E> envelopeCls = getEnvelopeClass();
-        this.channelId = toChannelId(builder.boundedContextName, key, envelopeCls);
+        final ChannelId channelId = toChannelId(builder.boundedContextName, key, envelopeCls);
+        this.subscriber = builder.transportFactory.createSubscriber(channelId);
+        this.publisher = builder.transportFactory.createPublisher(channelId);
     }
 
     @SuppressWarnings("unchecked")  // Ensured by the generic type definition.
@@ -87,7 +91,6 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
 
     private void post(ShardedMessage message) {
         final ExternalMessage externalMessage = ExternalMessages.of(message, boundedContextName);
-        final Publisher publisher = getPublisher();
         publisher.publish(externalMessage.getId(), externalMessage);
     }
 
@@ -95,20 +98,17 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
         checkNotNull(consumer);
         if(channelObserver == null) {
             channelObserver = new ExternalMessageObserver(consumer);
-            getSubscriber().addObserver(channelObserver);
+            subscriber.addObserver(channelObserver);
         } else {
             channelObserver.updateDelegate(consumer);
         }
     }
 
-    private Publisher getPublisher() {
-        final Publisher result = transportFactory.createPublisher(channelId);
-        return result;
-    }
-
-    private Subscriber getSubscriber() {
-        final Subscriber result = transportFactory.createSubscriber(channelId);
-        return result;
+    @Override
+    public void close() {
+        if(channelObserver != null) {
+            subscriber.removeObserver(channelObserver);
+        }
     }
 
     @Override

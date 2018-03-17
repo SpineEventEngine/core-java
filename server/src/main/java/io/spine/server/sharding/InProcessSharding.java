@@ -64,6 +64,7 @@ public class InProcessSharding implements Sharding {
     public void unregister(Shardable<?> shardable) {
         final Iterable<ShardedStreamConsumer<?, ?>> consumers = shardable.getMessageConsumers();
         for (ShardedStreamConsumer<?, ?> consumer : consumers) {
+            consumer.close();
             registry.unregister(consumer);
         }
 
