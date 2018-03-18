@@ -595,7 +595,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * @return delivery strategy for events applied to the instances managed by this repository
      */
     @SPI
-    protected AggregateEndpointDelivery<I, A, EventEnvelope, ?, ?> getEventEndpointDelivery() {
+    protected AggregateDelivery<I, A, EventEnvelope, ?, ?> getEventEndpointDelivery() {
         return eventDeliverySupplier.get();
     }
 
@@ -611,7 +611,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * @return delivery strategy for rejections
      */
     @SPI
-    protected AggregateEndpointDelivery<I, A, RejectionEnvelope, ?, ?>
+    protected AggregateDelivery<I, A, RejectionEnvelope, ?, ?>
     getRejectionEndpointDelivery() {
         return rejectionDeliverySupplier.get();
     }
@@ -627,7 +627,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      *
      * @return delivery strategy for rejections
      */
-    protected AggregateEndpointDelivery<I, A, CommandEnvelope, ?, ?> getCommandEndpointDelivery() {
+    protected AggregateDelivery<I, A, CommandEnvelope, ?, ?> getCommandEndpointDelivery() {
         return commandDeliverySupplier.get();
     }
 

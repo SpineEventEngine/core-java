@@ -31,8 +31,8 @@ import io.spine.server.sharding.ShardingTag;
  * @author Alex Tymchenko
  */
 public class PmCommandDelivery<I, P extends ProcessManager<I, ?, ?>>
-        extends PmEndpointDelivery<I, P, CommandEnvelope,
-                                   CommandShardedStream<I>, CommandShardedStream.Builder<I>> {
+        extends PmDelivery<I, P, CommandEnvelope,
+                                           CommandShardedStream<I>, CommandShardedStream.Builder<I>> {
 
     protected PmCommandDelivery(ProcessManagerRepository<I, P, ?> repository) {
         super(new PmCommandConsumer<>(repository));

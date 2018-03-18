@@ -31,8 +31,8 @@ import io.spine.server.sharding.ShardingTag;
  * @author Alex Tymchenko
  */
 public class AggregateCommandDelivery<I, A extends Aggregate<I, ?, ?>>
-        extends AggregateEndpointDelivery<I, A,
-                CommandEnvelope, CommandShardedStream<I>, CommandShardedStream.Builder<I>> {
+        extends AggregateDelivery<I, A,
+                        CommandEnvelope, CommandShardedStream<I>, CommandShardedStream.Builder<I>> {
 
     protected AggregateCommandDelivery(AggregateRepository<I, A> repository) {
         super(new AggregateCommandConsumer<>(repository));

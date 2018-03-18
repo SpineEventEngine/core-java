@@ -31,8 +31,8 @@ import io.spine.server.sharding.ShardingTag;
  * @author Alex Tymchenko
  */
 public class PmRejectionDelivery<I, P extends ProcessManager<I, ?, ?>>
-        extends PmEndpointDelivery<I, P, RejectionEnvelope,
-                                   RejectionShardedStream<I>, RejectionShardedStream.Builder<I>> {
+        extends PmDelivery<I, P, RejectionEnvelope,
+                                           RejectionShardedStream<I>, RejectionShardedStream.Builder<I>> {
 
     protected PmRejectionDelivery(ProcessManagerRepository<I, P, ?> repository) {
         super(new PmRejectionConsumer<>(repository));

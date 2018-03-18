@@ -31,9 +31,9 @@ import io.spine.server.sharding.ShardingTag;
  * @author Alex Tymchenko
  */
 public class AggregateRejectionDelivery<I, A extends Aggregate<I, ?, ?>>
-        extends AggregateEndpointDelivery<I, A, RejectionEnvelope,
-                                          RejectionShardedStream<I>,
-                                          RejectionShardedStream.Builder<I>> {
+        extends AggregateDelivery<I, A, RejectionEnvelope,
+                                                  RejectionShardedStream<I>,
+                                                  RejectionShardedStream.Builder<I>> {
 
     protected AggregateRejectionDelivery(AggregateRepository<I, A> repository) {
         super(new AggregateRejectionConsumer<>(repository));

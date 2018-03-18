@@ -22,7 +22,7 @@ package io.spine.server.projection;
 
 import io.spine.core.EventEnvelope;
 import io.spine.server.delivery.Consumer;
-import io.spine.server.delivery.EndpointDelivery;
+import io.spine.server.delivery.Delivery;
 import io.spine.server.sharding.EventShardedStream;
 import io.spine.server.sharding.ShardingTag;
 
@@ -34,8 +34,8 @@ import io.spine.server.sharding.ShardingTag;
  * @author Alexander Yevsyukov
  */
 public class ProjectionEventDelivery<I, P extends Projection<I, ?, ?>>
-        extends EndpointDelivery<I, P, EventEnvelope,
-                                 EventShardedStream<I>, EventShardedStream.Builder<I>> {
+        extends Delivery<I, P, EventEnvelope,
+                         EventShardedStream<I>, EventShardedStream.Builder<I>> {
 
     protected ProjectionEventDelivery(ProjectionRepository<I, P, ?> repository) {
         super(new ProjectionEventConsumer<I, P>(repository));

@@ -31,8 +31,8 @@ import io.spine.server.sharding.ShardingTag;
  * @author Alex Tymchenko
  */
 public class PmEventDelivery<I, P extends ProcessManager<I, ?, ?>>
-        extends PmEndpointDelivery<I, P, EventEnvelope,
-                                   EventShardedStream<I>, EventShardedStream.Builder<I>> {
+        extends PmDelivery<I, P, EventEnvelope,
+                                           EventShardedStream<I>, EventShardedStream.Builder<I>> {
 
     protected PmEventDelivery(ProcessManagerRepository<I, P, ?> repository) {
         super(new PmEventConsumer<>(repository));

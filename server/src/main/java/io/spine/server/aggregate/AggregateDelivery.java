@@ -22,7 +22,7 @@ package io.spine.server.aggregate;
 import io.spine.annotation.SPI;
 import io.spine.core.ActorMessageEnvelope;
 import io.spine.server.delivery.Consumer;
-import io.spine.server.delivery.EndpointDelivery;
+import io.spine.server.delivery.Delivery;
 import io.spine.server.entity.Repository;
 import io.spine.server.sharding.ShardedStream;
 import io.spine.server.sharding.ShardingTag;
@@ -36,14 +36,14 @@ import io.spine.server.sharding.ShardingTag;
  * @author Alex Tymchenko
  */
 @SPI
-public abstract class AggregateEndpointDelivery<I,
-                                                A extends Aggregate<I, ?, ?>,
-                                                E extends ActorMessageEnvelope<?, ?, ?>,
-                                                S extends ShardedStream<I, ?, E>,
-                                                B extends ShardedStream.AbstractBuilder<I, B, S>>
-        extends EndpointDelivery<I, A, E, S, B> {
+public abstract class AggregateDelivery<I,
+                                        A extends Aggregate<I, ?, ?>,
+                                        E extends ActorMessageEnvelope<?, ?, ?>,
+                                        S extends ShardedStream<I, ?, E>,
+                                        B extends ShardedStream.AbstractBuilder<I, B, S>>
+        extends Delivery<I, A, E, S, B> {
 
-    AggregateEndpointDelivery(AggregateMessageConsumer<I, A, E, S, B> consumer) {
+    AggregateDelivery(AggregateMessageConsumer<I, A, E, S, B> consumer) {
         super(consumer);
     }
 

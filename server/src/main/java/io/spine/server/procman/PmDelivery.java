@@ -21,7 +21,7 @@ package io.spine.server.procman;
 
 import io.spine.core.ActorMessageEnvelope;
 import io.spine.server.delivery.Consumer;
-import io.spine.server.delivery.EndpointDelivery;
+import io.spine.server.delivery.Delivery;
 import io.spine.server.entity.Repository;
 import io.spine.server.sharding.ShardedStream;
 import io.spine.server.sharding.ShardingTag;
@@ -34,14 +34,14 @@ import io.spine.server.sharding.ShardingTag;
  * @param <M> the type of message envelope, which is used for message delivery
  * @author Alex Tymchenko
  */
-public class PmEndpointDelivery<I,
-                                P extends ProcessManager<I, ?, ?>,
-                                M extends ActorMessageEnvelope<?, ?, ?>,
-                                S extends ShardedStream<I, ?, M>,
-                                B extends ShardedStream.AbstractBuilder<I, B, S>>
-        extends EndpointDelivery<I, P, M, S, B> {
+public class PmDelivery<I,
+                        P extends ProcessManager<I, ?, ?>,
+                        M extends ActorMessageEnvelope<?, ?, ?>,
+                        S extends ShardedStream<I, ?, M>,
+                        B extends ShardedStream.AbstractBuilder<I, B, S>>
+        extends Delivery<I, P, M, S, B> {
 
-    protected PmEndpointDelivery(PmMessageConsumer<I, P, M, S, B> consumer) {
+    protected PmDelivery(PmMessageConsumer<I, P, M, S, B> consumer) {
         super(consumer);
     }
 

@@ -35,16 +35,16 @@ import io.spine.server.sharding.ShardedStream;
  * @author Alex Tymchenko
  */
 @Internal
-public abstract class EndpointDelivery<I,
-                                       E extends Entity<I, ?>,
-                                       M extends ActorMessageEnvelope<?, ?, ?>,
-                                       S extends ShardedStream<I, ?, M>,
-                                       B extends ShardedStream.AbstractBuilder<I, B, S>> {
+public abstract class Delivery<I,
+                               E extends Entity<I, ?>,
+                               M extends ActorMessageEnvelope<?, ?, ?>,
+                               S extends ShardedStream<I, ?, M>,
+                               B extends ShardedStream.AbstractBuilder<I, B, S>> {
 
     private final Sender<I, M> sender;
     private final Consumer<I, E, M, S, B> consumer;
 
-    protected EndpointDelivery(Consumer<I, E, M, S, B> consumer) {
+    protected Delivery(Consumer<I, E, M, S, B> consumer) {
         this.consumer = consumer;
         this.sender = new Sender<>(consumer.getTag());
     }

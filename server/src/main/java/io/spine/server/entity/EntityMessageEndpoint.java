@@ -27,7 +27,7 @@ import io.spine.core.ActorMessageEnvelope;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.TenantId;
-import io.spine.server.delivery.EndpointDelivery;
+import io.spine.server.delivery.Delivery;
 import io.spine.server.tenant.TenantAwareFunction0;
 import io.spine.string.Stringifiers;
 
@@ -105,7 +105,7 @@ public abstract class EntityMessageEndpoint<I,
      */
     private void dispatchToOne(I entityId) {
         final M envelope = envelope();
-        final EndpointDelivery<I, E, M, ?, ?> delivery = getEndpointDelivery(envelope);
+        final Delivery<I, E, M, ?, ?> delivery = getEndpointDelivery(envelope);
         delivery.getSender().send(entityId, envelope);
     }
 
@@ -131,7 +131,7 @@ public abstract class EntityMessageEndpoint<I,
      * @param envelope the envelope to obtain an instance of delivery for
      * @return the instance of endpoint delivery
      */
-    protected abstract EndpointDelivery<I, E, M, ?, ?> getEndpointDelivery(M envelope);
+    protected abstract Delivery<I, E, M, ?, ?> getEndpointDelivery(M envelope);
 
 
     /**

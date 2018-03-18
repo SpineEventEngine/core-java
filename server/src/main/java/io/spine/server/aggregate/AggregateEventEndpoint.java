@@ -56,7 +56,7 @@ class AggregateEventEndpoint<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
-    protected AggregateEndpointDelivery<I, A, EventEnvelope, ?, ?>
+    protected AggregateDelivery<I, A, EventEnvelope, ?, ?>
     getEndpointDelivery(EventEnvelope envelope) {
         return repository().getEventEndpointDelivery();
     }
