@@ -40,7 +40,7 @@ import static com.google.common.collect.Multimaps.synchronizedMultimap;
  *
  * @author Alex Tymchenko
  */
-public final class InMemoryTransportFactory implements TransportFactory {
+public class InMemoryTransportFactory implements TransportFactory {
 
     /**
      * An in-memory storage of subscribers per message class.
@@ -48,8 +48,8 @@ public final class InMemoryTransportFactory implements TransportFactory {
     private final Multimap<ChannelId, InMemorySubscriber> subscribers =
             synchronizedMultimap(HashMultimap.<ChannelId, InMemorySubscriber>create());
 
-    /** Prevent direct instantiation from the outside. */
-    private InMemoryTransportFactory() {}
+    /** Prevent direct instantiation from outside of the inheritance tree. */
+    protected InMemoryTransportFactory() {}
 
     /**
      * Creates a new instance of {@code InMemoryTransportFactory}.
@@ -61,17 +61,21 @@ public final class InMemoryTransportFactory implements TransportFactory {
     }
 
     @Override
-    public Publisher createPublisher(ChannelId channelId) {
+    public final synchronized Publisher createPublisher(ChannelId channelId) {
         final InMemoryPublisher result = new InMemoryPublisher(channelId,
                                                                providerOf(subscribers));
         return result;
     }
 
     @Override
-    public Subscriber createSubscriber(ChannelId channelId) {
-        final InMemorySubscriber subscriber = new InMemorySubscriber(channelId);
+    public final synchronized Subscriber createSubscriber(ChannelId channelId) {
+        final InMemorySubscriber subscriber = newSubscriber(channelId);
         subscribers.put(channelId, subscriber);
         return subscriber;
+    }
+
+    protected InMemorySubscriber newSubscriber(ChannelId channelId) {
+        return new InMemorySubscriber(channelId);
     }
 
     /**

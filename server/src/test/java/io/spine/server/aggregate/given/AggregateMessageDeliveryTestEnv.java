@@ -19,7 +19,10 @@
  */
 package io.spine.server.aggregate.given;
 
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.Identifier;
@@ -34,14 +37,11 @@ import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.command.TestEventFactory;
 import io.spine.test.aggregate.ProjectId;
-import io.spine.test.aggregate.command.AggCreateProject;
 import io.spine.test.aggregate.command.AggStartProject;
-import io.spine.test.aggregate.event.AggProjectCreated;
 import io.spine.test.aggregate.event.AggProjectStarted;
 import io.spine.test.aggregate.rejection.Rejections.AggCannotStartArchivedProject;
 import io.spine.validate.StringValueVBuilder;
 
-import javax.annotation.Nullable;
 import java.util.List;
 
 import static io.spine.protobuf.AnyPacker.pack;
@@ -55,12 +55,11 @@ public class AggregateMessageDeliveryTestEnv {
     /** Prevents instantiation of this utility class. */
     private AggregateMessageDeliveryTestEnv() {}
 
-    public static Command createProject() {
+    public static Command startProject() {
         final ProjectId projectId = projectId();
-        final Command command = createCommand(AggCreateProject.newBuilder()
-                                                              .setName("A project" + projectId)
-                                                              .setProjectId(projectId)
-                                                              .build());
+        final Command command = createCommand(AggStartProject.newBuilder()
+                                                             .setProjectId(projectId)
+                                                             .build());
         return command;
     }
 
@@ -117,51 +116,45 @@ public class AggregateMessageDeliveryTestEnv {
     public static class ReactingProject
             extends Aggregate<ProjectId, StringValue, StringValueVBuilder> {
 
-        private static AggCreateProject commandReceived = null;
-        private static AggProjectStarted eventReceived = null;
-        private static AggCannotStartArchivedProject rejectionReceived = null;
+
+        private static final Multimap<Long, ProjectId> threadToId =
+                Multimaps.synchronizedMultimap(HashMultimap.<Long, ProjectId>create());
+
 
         protected ReactingProject(ProjectId id) {
             super(id);
         }
 
         @Assign
-        AggProjectCreated on(AggCreateProject cmd) {
-            commandReceived = cmd;
-            return AggProjectCreated.newBuilder().setName(cmd.getName()).build();
+        AggProjectStarted on(AggStartProject cmd) {
+            final ProjectId projectId = getId();
+            final long currentThreadId = Thread.currentThread()
+                                               .getId();
+            threadToId.put(currentThreadId, projectId);
+            final AggProjectStarted event = AggProjectStarted.newBuilder()
+                                                             .setProjectId(projectId)
+                                                             .build();
+            return event;
         }
 
         @SuppressWarnings("unused")     // an applier is required by the framework.
         @Apply
-        void the(AggProjectCreated event) {
+        void the(AggProjectStarted event) {
             // do nothing.
         }
 
         @React
         List<Message> onEvent(AggProjectStarted event) {
-            eventReceived = event;
             return emptyList();
         }
 
         @React
         List<Message> onRejection(AggCannotStartArchivedProject rejection) {
-            rejectionReceived = rejection;
             return emptyList();
         }
 
-        @Nullable
-        public static AggCreateProject getCommandReceived() {
-            return commandReceived;
-        }
-
-        @Nullable
-        public static AggProjectStarted getEventReceived() {
-            return eventReceived;
-        }
-
-        @Nullable
-        public static AggCannotStartArchivedProject getRejectionReceived() {
-            return rejectionReceived;
+        public static Multimap<Long, ProjectId> getThreadToId() {
+            return Multimaps.unmodifiableMultimap(threadToId);
         }
     }
 }

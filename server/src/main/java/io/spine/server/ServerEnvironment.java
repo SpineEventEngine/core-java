@@ -28,6 +28,8 @@ import io.spine.server.transport.memory.InMemoryTransportFactory;
 
 import javax.annotation.Nullable;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 @SuppressWarnings("AccessOfSystemProperties") // OK as we need system properties for this class.
 public class ServerEnvironment {
 
@@ -76,6 +78,11 @@ public class ServerEnvironment {
 
     public Sharding getSharding() {
         return sharding;
+    }
+
+    public void replaceSharding(Sharding sharding) {
+        checkNotNull(sharding);
+        this.sharding = sharding;
     }
 
     /**

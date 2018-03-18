@@ -21,7 +21,6 @@ package io.spine.server.transport.memory;
 
 import com.google.common.base.Function;
 import com.google.protobuf.Any;
-import io.grpc.stub.StreamObserver;
 import io.spine.core.Ack;
 import io.spine.server.bus.Buses;
 import io.spine.server.integration.ChannelId;
@@ -58,10 +57,7 @@ final class InMemoryPublisher extends AbstractInMemoryChannel implements Publish
     }
 
     private static void callSubscriber(ExternalMessage message, InMemorySubscriber subscriber) {
-        final Iterable<StreamObserver<ExternalMessage>> callees = subscriber.getObservers();
-        for (StreamObserver<ExternalMessage> observer : callees) {
-            observer.onNext(message);
-        }
+        subscriber.onMessage(message);
     }
 
     private Iterable<InMemorySubscriber> getSubscribers(ChannelId channelId) {

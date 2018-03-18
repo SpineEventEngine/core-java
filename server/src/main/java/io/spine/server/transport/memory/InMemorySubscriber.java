@@ -37,7 +37,8 @@ import static com.google.common.collect.Sets.newConcurrentHashSet;
  *
  * @author Alex Tymchenko
  */
-final class InMemorySubscriber extends AbstractInMemoryChannel implements Subscriber {
+
+class InMemorySubscriber extends AbstractInMemoryChannel implements Subscriber {
 
     /**
      * Observers, that actually are informed about the messages arriving through this channel.
@@ -68,5 +69,15 @@ final class InMemorySubscriber extends AbstractInMemoryChannel implements Subscr
     @Override
     public boolean isStale() {
         return observers.isEmpty();
+    }
+
+    void onMessage(final ExternalMessage message) {
+        callObservers(message);
+    }
+
+    protected final void callObservers(ExternalMessage message) {
+        for (StreamObserver<ExternalMessage> observer : getObservers()) {
+            observer.onNext(message);
+        }
     }
 }

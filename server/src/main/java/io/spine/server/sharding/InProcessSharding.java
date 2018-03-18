@@ -22,6 +22,7 @@ package io.spine.server.sharding;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
+import io.spine.annotation.SPI;
 import io.spine.core.BoundedContextName;
 import io.spine.core.MessageEnvelope;
 import io.spine.server.entity.EntityClass;
@@ -45,7 +46,7 @@ public class InProcessSharding implements Sharding {
     }
 
     @Override
-    public void register(Shardable<?> shardable) throws NoShardAvailableException {
+    public final void register(Shardable<?> shardable) throws NoShardAvailableException {
         final Iterable<ShardedStreamConsumer<?, ?>> consumers = shardable.getMessageConsumers();
         if (!consumers.iterator()
                       .hasNext()) {
@@ -61,7 +62,7 @@ public class InProcessSharding implements Sharding {
     }
 
     @Override
-    public void unregister(Shardable<?> shardable) {
+    public final void unregister(Shardable<?> shardable) {
         final Iterable<ShardedStreamConsumer<?, ?>> consumers = shardable.getMessageConsumers();
         for (ShardedStreamConsumer<?, ?> consumer : consumers) {
             consumer.close();
@@ -70,6 +71,7 @@ public class InProcessSharding implements Sharding {
 
     }
 
+    @SPI
     @Override
     public <I, E extends MessageEnvelope<?, ?, ?>> Set<ShardedStream<I, ?, E>>
     find(ShardingTag<E> tag, I targetId) throws NoShardAvailableException {
@@ -84,6 +86,7 @@ public class InProcessSharding implements Sharding {
         return key;
     }
 
+    @SPI
     @Override
     public IdPredicate toIdPredicate(EntityClass<?> entityClass, Strategy strategy) {
         final IdPredicate result = IdPredicate.newBuilder()
