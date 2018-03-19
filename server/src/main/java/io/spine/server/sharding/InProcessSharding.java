@@ -19,19 +19,13 @@
  */
 package io.spine.server.sharding;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Multimap;
 import io.spine.annotation.SPI;
 import io.spine.core.BoundedContextName;
 import io.spine.core.MessageEnvelope;
 import io.spine.server.entity.EntityClass;
 import io.spine.server.transport.TransportFactory;
 
-import java.util.Collection;
 import java.util.Set;
-
-import static com.google.common.collect.Multimaps.synchronizedMultimap;
 
 /**
  * @author Alex Tymchenko
@@ -39,7 +33,7 @@ import static com.google.common.collect.Multimaps.synchronizedMultimap;
 public class InProcessSharding implements Sharding {
 
     private final TransportFactory transportFactory;
-    private final ShardedStreamRegistry registry = new ShardedStreamRegistry();
+    private final ShardingRegistry registry = new ShardingRegistry();
 
     public InProcessSharding(TransportFactory transportFactory) {
         this.transportFactory = transportFactory;
@@ -93,41 +87,5 @@ public class InProcessSharding implements Sharding {
                                               .setAllIds(true)
                                               .build();
         return result;
-    }
-
-    private static final class ShardedStreamRegistry {
-
-        private final Multimap<ShardingTag, ShardedStream<?, ?, ?>> streams =
-                synchronizedMultimap(HashMultimap.<ShardingTag, ShardedStream<?, ?, ?>>create());
-
-        private void register(ShardedStreamConsumer streamConsumer) {
-            final ShardingTag tag = streamConsumer.getTag();
-            final ShardedStream stream = streamConsumer.getStream();
-            streams.put(tag, stream);
-        }
-
-        private void unregister(ShardedStreamConsumer streamConsumer) {
-            final ShardingTag tag = streamConsumer.getTag();
-            final ShardedStream stream = streamConsumer.getStream();
-            streams.remove(tag, stream);
-        }
-
-        private <I, E extends MessageEnvelope<?, ?, ?>> Set<ShardedStream<I, ?, E>>
-        find(final ShardingTag<E> id, final I targetId) {
-
-            final Collection<ShardedStream<?, ?, ?>> shardedStreams = streams.get(id);
-
-            final ImmutableSet.Builder<ShardedStream<I, ?, E>> builder = ImmutableSet.builder();
-            for (ShardedStream<?, ?, ?> shardedStream : shardedStreams) {
-                final boolean idMatches = shardedStream.getKey()
-                                               .applyToId(targetId);
-                if(idMatches) {
-                    final ShardedStream<I, ?, E> result = (ShardedStream<I, ?, E>) shardedStream;
-                    builder.add(result);
-                }
-            }
-
-            return builder.build();
-        }
     }
 }
