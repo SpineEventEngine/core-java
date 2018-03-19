@@ -98,7 +98,7 @@ public abstract class Consumer<I,
             }
         };
 
-        operation.run();
+        operation.execute();
     }
 
     protected abstract B newShardedStreamBuilder();
