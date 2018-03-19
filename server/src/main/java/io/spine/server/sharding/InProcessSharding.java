@@ -62,7 +62,6 @@ public class InProcessSharding implements Sharding {
             consumer.close();
             registry.unregister(consumer);
         }
-
     }
 
     @SPI
@@ -73,10 +72,8 @@ public class InProcessSharding implements Sharding {
         return result;
     }
 
-    private ShardingKey getShardingKey(EntityClass<?> modelClass,
-                                       Sharding.Strategy strategy) {
-        final ShardingKey key = new ShardingKey(modelClass,
-                                                toIdPredicate(modelClass, strategy));
+    private ShardingKey getShardingKey(EntityClass<?> modelClass, Sharding.Strategy strategy) {
+        final ShardingKey key = new ShardingKey(modelClass, toIdPredicate(modelClass, strategy));
         return key;
     }
 
