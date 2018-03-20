@@ -215,7 +215,7 @@ public class RejectionBusShould {
     }
 
     @Test
-    public void call_subscriber_by_rejection_message() {
+    public void call_subscriber_by_rejection_message_only() {
         final MultipleRejectionSubscriber subscriber = new MultipleRejectionSubscriber();
         rejectionBus.register(subscriber);
 
