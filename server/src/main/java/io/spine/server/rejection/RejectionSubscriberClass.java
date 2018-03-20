@@ -42,7 +42,7 @@ public final class RejectionSubscriberClass<S extends RejectionSubscriber> exten
     private static final long serialVersionUID = 0L;
 
     private final
-    MessageHandlerMap<RejectionClass, RejectionSubscriberMethod> rejectionSubscriptions;
+    MessageHandlerMap<RejectionClass, RejectionSubscriberMethod.Id, RejectionSubscriberMethod> rejectionSubscriptions;
     private final ImmutableSet<RejectionClass> domesticSubscriptions;
     private final ImmutableSet<RejectionClass> externalSubscriptions;
 

@@ -43,7 +43,7 @@ public final class EventSubscriberClass<S extends EventSubscriber> extends Model
 
     private static final long serialVersionUID = 0L;
 
-    private final MessageHandlerMap<EventClass, EventSubscriberMethod> eventSubscriptions;
+    private final MessageHandlerMap<EventClass, EventSubscriberMethod.Id, EventSubscriberMethod> eventSubscriptions;
     private final ImmutableSet<EventClass> domesticSubscriptions;
     private final ImmutableSet<EventClass> externalSubscriptions;
 

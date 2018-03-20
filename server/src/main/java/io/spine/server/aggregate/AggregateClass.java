@@ -51,10 +51,10 @@ public class AggregateClass<A extends Aggregate>
 
     private static final long serialVersionUID = 0L;
 
-    private final MessageHandlerMap<CommandClass, CommandHandlerMethod> commands;
-    private final MessageHandlerMap<EventClass, EventApplierMethod> stateEvents;
-    private final MessageHandlerMap<EventClass, EventReactorMethod> eventReactions;
-    private final MessageHandlerMap<RejectionClass, RejectionReactorMethod> rejectionReactions;
+    private final MessageHandlerMap<CommandClass, CommandHandlerMethod.Id, CommandHandlerMethod> commands;
+    private final MessageHandlerMap<EventClass, EventApplierMethod.Id, EventApplierMethod> stateEvents;
+    private final MessageHandlerMap<EventClass, EventReactorMethod.Id, EventReactorMethod> eventReactions;
+    private final MessageHandlerMap<RejectionClass, RejectionReactorMethod.Id, RejectionReactorMethod> rejectionReactions;
 
     private final ImmutableSet<EventClass> domesticEventReactions;
     private final ImmutableSet<EventClass> externalEventReactions;

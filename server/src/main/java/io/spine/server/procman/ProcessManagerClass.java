@@ -51,9 +51,9 @@ public final class ProcessManagerClass<P extends ProcessManager>
 
     private static final long serialVersionUID = 0L;
 
-    private final MessageHandlerMap<CommandClass, CommandHandlerMethod> commands;
-    private final MessageHandlerMap<EventClass, EventReactorMethod> eventReactors;
-    private final MessageHandlerMap<RejectionClass, RejectionReactorMethod> rejectionReactors;
+    private final MessageHandlerMap<CommandClass, CommandHandlerMethod.Id, CommandHandlerMethod> commands;
+    private final MessageHandlerMap<EventClass, EventReactorMethod.Id, EventReactorMethod> eventReactors;
+    private final MessageHandlerMap<RejectionClass, RejectionReactorMethod.Id, RejectionReactorMethod> rejectionReactors;
 
     private final ImmutableSet<EventClass> domesticEventReactions;
     private final ImmutableSet<EventClass> externalEventReactions;

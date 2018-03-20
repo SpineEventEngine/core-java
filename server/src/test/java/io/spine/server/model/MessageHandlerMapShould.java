@@ -31,7 +31,7 @@ public class MessageHandlerMapShould {
 
     @Test(expected = DuplicateHandlerMethodError.class)
     public void not_allow_duplicating_message_classes() {
-        new MessageHandlerMap<CommandClass, CommandHandlerMethod>
+        new MessageHandlerMap<CommandClass, CommandHandlerMethod.Id, CommandHandlerMethod>
                 (HandlerWithDuplicatingMethods.class, CommandHandlerMethod.factory());
     }
 

@@ -24,7 +24,6 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
-import com.google.protobuf.Message;
 import io.spine.type.MessageClass;
 
 import java.io.Serializable;
@@ -33,7 +32,6 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkState;
-import static io.spine.server.model.HandlerMethod.getFirstParamType;
 
 /**
  * Provides mapping from a class of messages to a method which handles such messages.
@@ -42,12 +40,12 @@ import static io.spine.server.model.HandlerMethod.getFirstParamType;
  * @param <H> the type of handler methods
  * @author Alexander Yevsyukov
  */
-public class MessageHandlerMap<M extends MessageClass, H extends HandlerMethod>
+public class MessageHandlerMap<M extends MessageClass, I extends HandlerMethod.MethodId, H extends HandlerMethod<I, ?>>
         implements Serializable {
 
     private static final long serialVersionUID = 0L;
 
-    private final ImmutableMap<M, H> map;
+    private final ImmutableMap<I, H> map;
 
     /**
      * Creates a map of methods found in the passed class.
@@ -56,38 +54,31 @@ public class MessageHandlerMap<M extends MessageClass, H extends HandlerMethod>
      * @param factory the factory of methods
      */
     public MessageHandlerMap(Class<?> cls, HandlerMethod.Factory<H> factory) {
-        final Predicate<Method> predicate = factory.getPredicate();
-
-        final Map<Class<? extends Message>, Method> rawMethods = scan(cls, predicate);
-        final ImmutableMap.Builder<M, H> builder = ImmutableMap.builder();
-        for (Method method : rawMethods.values()) {
-            final H handlerMethod = factory.create(method);
-            @SuppressWarnings("unchecked") // The type is ensured by handler method impl.
-            final M messageClass = (M) handlerMethod.getMessageClass();
-            builder.put(messageClass, handlerMethod);
-        }
-        this.map = builder.build();
+        this.map = scan(cls, factory);
     }
 
-    private static Map<Class<? extends Message>, Method> scan(Class<?> declaringClass,
-                                                              Predicate<Method> filter) {
-        final Map<Class<? extends Message>, Method> tempMap = Maps.newHashMap();
+    private static <I extends HandlerMethod.MethodId, H extends HandlerMethod<I, ?>>
+    ImmutableMap<I, H> scan(Class<?> declaringClass, HandlerMethod.Factory<H> factory) {
+        final Predicate<Method> filter = factory.getPredicate();
+        final Map<I, H> tempMap = Maps.newHashMap();
         final Method[] declaredMethods = declaringClass.getDeclaredMethods();
         for (Method method : declaredMethods) {
             if (filter.apply(method)) {
-                final Class<? extends Message> messageClass = getFirstParamType(method);
-                if (tempMap.containsKey(messageClass)) {
-                    final Method alreadyPresent = tempMap.get(messageClass);
+                final H handler = factory.create(method);
+                final I handlerId = handler.id();
+                if (tempMap.containsKey(handlerId)) {
+                    final Method alreadyPresent = tempMap.get(handlerId)
+                                                         .getMethod();
                     throw new DuplicateHandlerMethodError(
                             declaringClass,
-                            messageClass,
+                            handlerId,
                             alreadyPresent.getName(),
                             method.getName());
                 }
-                tempMap.put(messageClass, method);
+                tempMap.put(handlerId, handler);
             }
         }
-        final ImmutableMap<Class<? extends Message>, Method> result = ImmutableMap.copyOf(tempMap);
+        final ImmutableMap<I, H> result = ImmutableMap.copyOf(tempMap);
         return result;
     }
 
