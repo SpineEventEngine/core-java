@@ -30,6 +30,7 @@ import io.spine.server.model.MethodPredicate;
 
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Objects;
 
 import static io.spine.server.model.HandlerMethods.ensureExternalMatch;
 import static io.spine.util.Exceptions.newIllegalStateException;
@@ -51,6 +52,15 @@ public final class EventReactorMethod extends HandlerMethod<EventContext> {
     @Override
     public EventClass getMessageClass() {
         return EventClass.of(rawMessageClass());
+    }
+
+    @Override
+    public MethodId id() {
+        return idFor(getMessageClass());
+    }
+
+    public static MethodId idFor(EventClass eventClass) {
+        return new EventReactorId(eventClass);
     }
 
     /**
@@ -164,6 +174,32 @@ public final class EventReactorMethod extends HandlerMethod<EventContext> {
                         "React method cannot return the same event message {}",
                         firstParamType.getName());
             }
+        }
+    }
+
+    private static final class EventReactorId implements HandlerMethod.MethodId {
+
+        private final EventClass eventClass;
+
+        private EventReactorId(EventClass eventClass) {
+            this.eventClass = eventClass;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            EventReactorId that = (EventReactorId) o;
+            return Objects.equals(eventClass, that.eventClass);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(eventClass);
         }
     }
 }

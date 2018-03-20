@@ -199,6 +199,11 @@ public class HandlerMethodShould {
         public EventClass getMessageClass() {
             return EventClass.of(rawMessageClass());
         }
+
+        @Override
+        public MethodId id() {
+            throw new UnsupportedOperationException("The method is not target of the test");
+        }
     }
 
     private static class OneParamMethod extends HandlerMethod<Empty> {
@@ -210,6 +215,11 @@ public class HandlerMethodShould {
         @Override
         public EventClass getMessageClass() {
             return EventClass.of(rawMessageClass());
+        }
+
+        @Override
+        public MethodId id() {
+            throw new UnsupportedOperationException("The method is not target of the test");
         }
     }
 }

@@ -30,6 +30,7 @@ import io.spine.server.model.MethodPredicate;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Objects;
 
 import static io.spine.core.Rejections.isRejection;
 import static io.spine.server.model.HandlerMethods.ensureExternalMatch;
@@ -53,6 +54,15 @@ public final class EventSubscriberMethod extends HandlerMethod<EventContext> {
     @Override
     public EventClass getMessageClass() {
         return EventClass.of(rawMessageClass());
+    }
+
+    @Override
+    public MethodId id() {
+        return idFrom(getMessageClass());
+    }
+
+    public static MethodId idFrom(EventClass eventClass) {
+        return new EventSubscriberId(eventClass);
     }
 
     static EventSubscriberMethod from(Method method) {
@@ -140,6 +150,32 @@ public final class EventSubscriberMethod extends HandlerMethod<EventContext> {
         protected boolean verifyReturnType(Method method) {
             final boolean isVoid = Void.TYPE.equals(method.getReturnType());
             return isVoid;
+        }
+    }
+
+    private static final class EventSubscriberId implements HandlerMethod.MethodId {
+
+        private final EventClass eventClass;
+
+        private EventSubscriberId(EventClass eventClass) {
+            this.eventClass = eventClass;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            EventSubscriberId that = (EventSubscriberId) o;
+            return Objects.equals(eventClass, that.eventClass);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(eventClass);
         }
     }
 }

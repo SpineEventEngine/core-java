@@ -91,6 +91,8 @@ public abstract class HandlerMethod<C extends Message> {
 
     public abstract MessageClass getMessageClass();
 
+    public abstract MethodId id();
+
     /**
      * Returns {@code true} if the method has package-private access, {@code false} otherwise.
      */
@@ -347,5 +349,11 @@ public abstract class HandlerMethod<C extends Message> {
          * @see HandlerMethod#warnOnWrongModifier(String, Method)
          */
         void checkAccessModifier(Method method);
+    }
+
+    /**
+     * A marker interface for an ID of a handler method.
+     */
+    public interface MethodId {
     }
 }

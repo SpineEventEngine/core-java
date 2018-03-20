@@ -22,6 +22,7 @@ package io.spine.server.rejection;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.Command;
+import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
 import io.spine.core.Commands;
 import io.spine.core.RejectionClass;
@@ -29,9 +30,11 @@ import io.spine.core.RejectionContext;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.HandlerMethodPredicate;
 
+import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.core.Rejections.isRejection;
@@ -64,6 +67,26 @@ class RejectionHandlerMethod extends HandlerMethod<RejectionContext> {
     @Override
     public RejectionClass getMessageClass() {
         return RejectionClass.of(rawMessageClass());
+    }
+
+    @Override
+    public MethodId id() {
+        if (kind == Kind.COMMAND_AWARE || kind == Kind.COMMAND_MESSAGE_AWARE) {
+            @SuppressWarnings("unchecked") // RejectionFilterPredicate ensures that
+            final Class<? extends Message> rawCommandClass = (Class<? extends Message>) getMethod().getParameterTypes()[1];
+            return idFrom(getMessageClass(), CommandClass.of(rawCommandClass));
+        } else {
+            return idFrom(getMessageClass());
+        }
+    }
+
+    public static MethodId idFrom(RejectionClass rejectionClass) {
+        return new RejectionHandlerId(rejectionClass, null);
+    }
+
+    public static MethodId idFrom(RejectionClass rejectionClass,
+                                  CommandClass commandClass) {
+        return new RejectionHandlerId(rejectionClass, commandClass);
     }
 
     private static Kind getKind(Method method) {
@@ -290,6 +313,43 @@ class RejectionHandlerMethod extends HandlerMethod<RejectionContext> {
             final Class<? extends Message> contextClass = getContextClass();
             final boolean thirdParamCorrect = contextClass == paramTypes[2];
             return thirdParamCorrect;
+        }
+    }
+
+    /**
+     * An ID for a rejection handler method.
+     *
+     * <p>The ID always contains {@link RejectionClass}, but {@link CommandClass} is optional
+     * because a rejection handler doesn't necessarily receives a command message as a parameter.
+     */
+    private static final class RejectionHandlerId implements HandlerMethod.MethodId {
+
+        @Nullable
+        private final CommandClass commandClass;
+        private final RejectionClass rejectionClass;
+
+        private RejectionHandlerId(RejectionClass rejectionClass,
+                                   @Nullable CommandClass commandClass) {
+            this.rejectionClass = rejectionClass;
+            this.commandClass = commandClass;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            RejectionHandlerId that = (RejectionHandlerId) o;
+            return Objects.equals(rejectionClass, that.rejectionClass) &&
+                    Objects.equals(commandClass, that.commandClass);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(rejectionClass, commandClass);
         }
     }
 }

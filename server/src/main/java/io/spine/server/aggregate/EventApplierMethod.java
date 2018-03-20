@@ -33,6 +33,7 @@ import io.spine.server.model.MethodPredicate;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Objects;
 
 /**
  * A wrapper for event applier method.
@@ -57,6 +58,15 @@ public final class EventApplierMethod extends HandlerMethod<Empty> {
     @Override
     public EventClass getMessageClass() {
         return EventClass.of(rawMessageClass());
+    }
+
+    @Override
+    public MethodId id() {
+        return idFor(getMessageClass());
+    }
+
+    public static MethodId idFor(EventClass eventClass) {
+        return new EventApplierId(eventClass);
     }
 
     static EventApplierMethod from(Method method) {
@@ -148,6 +158,33 @@ public final class EventApplierMethod extends HandlerMethod<Empty> {
         protected boolean verifyReturnType(Method method) {
             final boolean isVoid = Void.TYPE.equals(method.getReturnType());
             return isVoid;
+        }
+    }
+
+    private static final class EventApplierId implements HandlerMethod.MethodId {
+
+        private final EventClass eventClass;
+
+        private EventApplierId(EventClass eventClass) {
+            this.eventClass = eventClass;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            EventApplierId that = (EventApplierId) o;
+            return Objects.equals(eventClass, that.eventClass);
+        }
+
+        @Override
+        public int hashCode() {
+
+            return Objects.hash(eventClass);
         }
     }
 }

@@ -37,6 +37,7 @@ import io.spine.server.model.MethodPredicate;
 
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Objects;
 
 import static com.google.common.base.Throwables.getRootCause;
 
@@ -63,6 +64,15 @@ public final class CommandHandlerMethod extends HandlerMethod<CommandContext> {
     @Override
     public CommandClass getMessageClass() {
         return CommandClass.of(rawMessageClass());
+    }
+
+    @Override
+    public MethodId id() {
+        return idFrom(getMessageClass());
+    }
+
+    public static MethodId idFrom(CommandClass commandClass) {
+        return new CommandHandlerId(commandClass);
     }
 
     static CommandHandlerMethod from(Method method) {
@@ -186,6 +196,32 @@ public final class CommandHandlerMethod extends HandlerMethod<CommandContext> {
         protected boolean verifyReturnType(Method method) {
             final boolean result = returnsMessageOrIterable(method);
             return result;
+        }
+    }
+
+    private static final class CommandHandlerId implements HandlerMethod.MethodId {
+
+        private final CommandClass commandClass;
+
+        private CommandHandlerId(CommandClass commandClass) {
+            this.commandClass = commandClass;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            CommandHandlerId that = (CommandHandlerId) o;
+            return Objects.equals(commandClass, that.commandClass);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(commandClass);
         }
     }
 }
