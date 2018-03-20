@@ -32,8 +32,6 @@ import io.spine.server.sharding.ShardingTag;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.server.transport.TransportFactory;
 
-import javax.annotation.Nullable;
-
 /**
  * @author Alex Tymchenko
  */
@@ -47,9 +45,6 @@ public abstract class Consumer<I,
     private final Repository<I, E> repository;
     private final ShardingTag<M> shardingTag;
 
-    @Nullable
-    private ShardedStream<I, ?, M> stream;
-
     protected Consumer(ShardingTag<M> tag, Repository<I, E> repository) {
         this.shardingTag = tag;
         this.repository = repository;
@@ -59,20 +54,15 @@ public abstract class Consumer<I,
     public ShardedStream<I, ?, M> bindToTransport(BoundedContextName name,
                                                   ShardingKey key,
                                                   TransportFactory transportFactory) {
-        stream = newShardedStreamBuilder().setBoundedContextName(name)
-                                               .setKey(key)
-                                               .setTargetIdClass(repository.getIdClass())
-                                               .build(transportFactory);
-
+        final S stream = newShardedStreamBuilder().setBoundedContextName(name)
+                                                  .setKey(key)
+                                                  .setTag(shardingTag)
+                                                  .setTargetIdClass(repository.getIdClass())
+                                                  .build(transportFactory);
         stream.setConsumer(this);
         return stream;
     }
 
-    @Nullable
-    @Override
-    public ShardedStream<I, ?, M> getStream() {
-        return stream;
-    }
 
     @Override
     public void onNext(I targetId, M messageEnvelope) {
@@ -126,12 +116,5 @@ public abstract class Consumer<I,
 
     protected Repository<I, E> repository() {
         return repository;
-    }
-
-    @Override
-    public void close() {
-        if(stream != null) {
-            stream.close();
-        }
     }
 }

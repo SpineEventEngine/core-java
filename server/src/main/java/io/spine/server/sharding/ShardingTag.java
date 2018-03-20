@@ -63,7 +63,7 @@ public final class ShardingTag<E extends MessageEnvelope<?, ?, ?>> {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        ShardingTag<?> that = (ShardingTag<?>) o;
+        final ShardingTag<?> that = (ShardingTag<?>) o;
         return Objects.equals(boundedContextName, that.boundedContextName) &&
                 Objects.equals(entityClass, that.entityClass) &&
                 Objects.equals(envelopeType, that.envelopeType);
@@ -71,7 +71,6 @@ public final class ShardingTag<E extends MessageEnvelope<?, ?, ?>> {
 
     @Override
     public int hashCode() {
-
         return Objects.hash(boundedContextName, entityClass, envelopeType);
     }
 

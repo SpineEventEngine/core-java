@@ -47,6 +47,7 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
 
     private final BoundedContextName boundedContextName;
     private final ShardingKey key;
+    private final ShardingTag<E> tag;
     private final Class<I> targetIdClass;
     private final Subscriber subscriber;
     private final Publisher publisher;
@@ -58,6 +59,7 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
     ShardedStream(AbstractBuilder<I, ?, ? extends ShardedStream> builder) {
         this.boundedContextName = builder.boundedContextName;
         this.key = builder.key;
+        this.tag = (ShardingTag<E>) builder.tag;
         this.targetIdClass = builder.targetIdClass;
         final Class<E> envelopeCls = getEnvelopeClass();
         final ChannelId channelId = toChannelId(builder.boundedContextName, key, envelopeCls);
@@ -78,6 +80,10 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
 
     public ShardingKey getKey() {
         return key;
+    }
+
+    public ShardingTag<E> getTag() {
+        return tag;
     }
 
     public final void post(I targetId, E messageEnvelope) {
@@ -198,6 +204,7 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
 
         private BoundedContextName boundedContextName;
         private ShardingKey key;
+        private ShardingTag tag;
         private TransportFactory transportFactory;
         private Class<I> targetIdClass;
 
@@ -221,6 +228,16 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
         public B setKey(ShardingKey key) {
             checkNotNull(key);
             this.key = key;
+            return thisAsB();
+        }
+
+        public ShardingTag getTag() {
+            return tag;
+        }
+
+        public B setTag(ShardingTag tag) {
+            checkNotNull(tag);
+            this.tag = tag;
             return thisAsB();
         }
 

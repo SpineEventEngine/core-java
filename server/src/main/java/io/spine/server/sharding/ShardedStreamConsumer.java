@@ -23,12 +23,10 @@ import io.spine.core.BoundedContextName;
 import io.spine.core.MessageEnvelope;
 import io.spine.server.transport.TransportFactory;
 
-import java.io.Closeable;
-
 /**
  * @author Alex Tymchenko
  */
-public interface ShardedStreamConsumer<I, E extends MessageEnvelope<?, ?, ?>> extends Closeable {
+public interface ShardedStreamConsumer<I, E extends MessageEnvelope<?, ?, ?>> {
 
     ShardingTag<E> getTag();
 
@@ -37,9 +35,4 @@ public interface ShardedStreamConsumer<I, E extends MessageEnvelope<?, ?, ?>> ex
     ShardedStream<I, ?, E> bindToTransport(BoundedContextName name,
                                            ShardingKey key,
                                            TransportFactory transportFactory);
-
-    ShardedStream<I, ?, E> getStream();
-
-    @Override
-    void close();
 }

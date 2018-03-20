@@ -24,8 +24,6 @@ import io.spine.server.entity.EntityClass;
 import java.io.Serializable;
 import java.util.Objects;
 
-import static io.spine.util.Exceptions.newIllegalArgumentException;
-
 /**
  * @author Alex Tymchenko
  */
@@ -34,12 +32,11 @@ public class ShardingKey implements Serializable {
     private static final long serialVersionUID = 0L;
 
     private final EntityClass<?> entityClass;
-    private final IdPredicate idPredicate;
+    private final ShardIndex index;
 
-
-    ShardingKey(EntityClass<?> entityClass, IdPredicate idPredicate) {
+    public ShardingKey(EntityClass<?> entityClass, ShardIndex index) {
         this.entityClass = entityClass;
-        this.idPredicate = idPredicate;
+        this.index = index;
     }
 
     @Override
@@ -50,47 +47,22 @@ public class ShardingKey implements Serializable {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        final ShardingKey that = (ShardingKey) o;
+        ShardingKey that = (ShardingKey) o;
         return Objects.equals(entityClass, that.entityClass) &&
-                Objects.equals(idPredicate, that.idPredicate);
+                Objects.equals(index, that.index);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(entityClass, idPredicate);
+
+        return Objects.hash(entityClass, index);
     }
 
     public EntityClass<?> getEntityClass() {
         return entityClass;
     }
 
-    public IdPredicate getIdPredicate() {
-        return idPredicate;
-    }
-
-    public boolean applyToId(Object id) {
-
-        final boolean result;
-        final IdPredicate.PredicateCase predicateCase = idPredicate.getPredicateCase();
-        switch (predicateCase) {
-            case ALL_IDS:
-                result = true; break;
-            case UNIFORM_BY_IDS:
-                result = apply(idPredicate.getUniformByIds(), id.hashCode()); break;
-            case PREDICATE_NOT_SET:
-                throw newIllegalArgumentException("Unset ID hash Predicate type detected: %s",
-                                                  predicateCase);
-            default:
-                throw newIllegalArgumentException("Unsupported ID hash Predicate type detected: %s",
-                                                  predicateCase);
-        }
-
-        return result;
-    }
-
-    private static boolean apply(UniformByIdHash uniformByIds, int idHash) {
-        final int actualRemainder = idHash % uniformByIds.getDivisor();
-        final int expectedRemainder = uniformByIds.getRemainder();
-        return actualRemainder == expectedRemainder;
+    public ShardIndex getIndex() {
+        return index;
     }
 }

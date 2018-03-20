@@ -78,11 +78,11 @@ public class ShardedMessages {
 
         final ClassName className = key.getEntityClass()
                                        .getClassName();
-        final IdPredicate idPredicate = key.getIdPredicate();
+        final ShardIndex shardIndex = key.getIndex();
 
         final String value = on("__").join("bc_", boundedContextName.getValue(),
                                            "target_", className,
-                                           "prd_", Stringifiers.toString(idPredicate),
+                                           "prd_", Stringifiers.toString(shardIndex),
                                            "env_", envelopeClass);
         final StringValue asMsg = StringValue.newBuilder()
                                              .setValue(value)

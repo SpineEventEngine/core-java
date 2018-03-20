@@ -19,24 +19,17 @@
  */
 package io.spine.server.sharding;
 
-import io.spine.annotation.SPI;
-import io.spine.core.MessageEnvelope;
-
+import java.io.Serializable;
 import java.util.Set;
 
 /**
  * @author Alex Tymchenko
  */
-public interface Sharding {
+public interface ShardingStrategy extends Serializable {
 
-    void register(Shardable<?> shardable) throws NoShardAvailableException;
+    int getNumberOfShards();
 
-    void unregister(Shardable<?> shardable);
+    ShardIndex indexForTarget(Object targetId);
 
-    @SPI
-    Set<ShardingKey> pickKeysForNode(Shardable<?> shardable, Set<ShardingKey> keys);
-
-    <I, E extends MessageEnvelope<?, ?, ?>> Set<ShardedStream<I, ?, E>>
-    find(ShardingTag<E> tag, I targetId) throws NoShardAvailableException;
-
+    Set<ShardIndex> allIndexes();
 }

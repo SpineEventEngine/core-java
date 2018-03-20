@@ -156,5 +156,9 @@ public class AggregateMessageDeliveryTestEnv {
         public static Multimap<Long, ProjectId> getThreadToId() {
             return Multimaps.unmodifiableMultimap(threadToId);
         }
+
+        public static void clearStats() {
+            threadToId.clear();
+        }
     }
 }

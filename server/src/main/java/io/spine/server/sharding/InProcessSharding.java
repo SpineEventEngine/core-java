@@ -19,13 +19,18 @@
  */
 package io.spine.server.sharding;
 
+import com.google.common.base.Function;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.SPI;
 import io.spine.core.BoundedContextName;
 import io.spine.core.MessageEnvelope;
-import io.spine.server.entity.EntityClass;
 import io.spine.server.transport.TransportFactory;
 
+import javax.annotation.Nullable;
 import java.util.Set;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * @author Alex Tymchenko
@@ -47,11 +52,11 @@ public class InProcessSharding implements Sharding {
             return;
         }
         final BoundedContextName bcName = shardable.getBoundedContextName();
-        final ShardingKey shardingKey = getShardingKey(shardable.getShardedModelClass(),
-                                                       shardable.getShardingStrategy());
-        for (ShardedStreamConsumer<?, ?> consumer : consumers) {
-            consumer.bindToTransport(bcName, shardingKey, transportFactory);
-            registry.register(consumer);
+        final Set<ShardingKey> keys = obtainKeys(shardable);
+
+        for (ShardingKey key : keys) {
+            final Set<ShardedStream<?, ?, ?>> streams = bindWithKey(consumers, bcName, key);
+            registry.register(shardable.getShardingStrategy(), streams);
         }
     }
 
@@ -59,9 +64,14 @@ public class InProcessSharding implements Sharding {
     public final void unregister(Shardable<?> shardable) {
         final Iterable<ShardedStreamConsumer<?, ?>> consumers = shardable.getMessageConsumers();
         for (ShardedStreamConsumer<?, ?> consumer : consumers) {
-            consumer.close();
             registry.unregister(consumer);
         }
+    }
+
+    @SPI
+    @Override
+    public Set<ShardingKey> pickKeysForNode(Shardable<?> shardable, Set<ShardingKey> keys) {
+        return keys;
     }
 
     @SPI
@@ -72,17 +82,58 @@ public class InProcessSharding implements Sharding {
         return result;
     }
 
-    private ShardingKey getShardingKey(EntityClass<?> modelClass, Sharding.Strategy strategy) {
-        final ShardingKey key = new ShardingKey(modelClass, toIdPredicate(modelClass, strategy));
-        return key;
+    private Set<ShardingKey> obtainKeys(Shardable<?> shardable) {
+        final Set<ShardIndex> allIndexes = shardable.getShardingStrategy()
+                                                    .allIndexes();
+
+        final ImmutableSet.Builder<ShardingKey> keySetBuilder = ImmutableSet.builder();
+        for (ShardIndex shardIndex : allIndexes) {
+            final ShardingKey key = new ShardingKey(shardable.getShardedModelClass(),
+                                                    shardIndex);
+            keySetBuilder.add(key);
+        }
+        final Set<ShardingKey> allKeys = keySetBuilder.build();
+
+        final Set<ShardingKey> keysForThisNode = pickKeysForNode(shardable, allKeys);
+        return keysForThisNode;
     }
 
-    @SPI
-    @Override
-    public IdPredicate toIdPredicate(EntityClass<?> entityClass, Strategy strategy) {
-        final IdPredicate result = IdPredicate.newBuilder()
-                                              .setAllIds(true)
-                                              .build();
+    private Set<ShardedStream<?, ?, ?>>
+    bindWithKey(final Iterable<ShardedStreamConsumer<?, ?>> consumers,
+                final BoundedContextName bcName,
+                final ShardingKey shardingKey) {
+        final TransportBindFn fn = new TransportBindFn(bcName, shardingKey,
+                                                       transportFactory);
+        final ImmutableSet<ShardedStream<?, ?, ?>> result = FluentIterable.from(consumers)
+                                                                          .transform(fn)
+                                                                          .toSet();
         return result;
+    }
+
+    private static final class TransportBindFn
+            implements Function<ShardedStreamConsumer<?, ?>, ShardedStream<?, ?, ?>> {
+
+        private final BoundedContextName bcName;
+        private final ShardingKey shardingKey;
+        private final TransportFactory transportFactory;
+
+        private TransportBindFn(BoundedContextName bcName,
+                                ShardingKey shardingKey,
+                                TransportFactory transportFactory) {
+            this.bcName = bcName;
+            this.shardingKey = shardingKey;
+            this.transportFactory = transportFactory;
+        }
+
+        @Override
+        public ShardedStream<?, ?, ?> apply(@Nullable ShardedStreamConsumer<?, ?> consumer) {
+            checkNotNull(
+                    consumer);
+            final ShardedStream<?, ?, ?> result = consumer.bindToTransport(
+                    bcName,
+                    shardingKey,
+                    transportFactory);
+            return result;
+        }
     }
 }

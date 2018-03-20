@@ -25,6 +25,7 @@ import com.google.common.collect.Multimap;
 import io.spine.core.MessageEnvelope;
 
 import java.util.Collection;
+import java.util.Objects;
 import java.util.Set;
 
 import static com.google.common.collect.Multimaps.synchronizedMultimap;
@@ -34,36 +35,70 @@ import static com.google.common.collect.Multimaps.synchronizedMultimap;
  */
 final class ShardingRegistry {
 
-    private final Multimap<ShardingTag, ShardedStream<?, ?, ?>> streams =
-            synchronizedMultimap(HashMultimap.<ShardingTag, ShardedStream<?, ?, ?>>create());
+    private final Multimap<ShardingTag, Entry> entries =
+            synchronizedMultimap(HashMultimap.<ShardingTag, Entry>create());
 
-    void register(ShardedStreamConsumer streamConsumer) {
-        final ShardingTag tag = streamConsumer.getTag();
-        final ShardedStream stream = streamConsumer.getStream();
-        streams.put(tag, stream);
+    void register(ShardingStrategy strategy, Set<ShardedStream<?, ?, ?>> streams) {
+        for (ShardedStream<?, ?, ?> stream : streams) {
+            final Entry entry = new Entry(strategy, stream);
+            final ShardingTag<?> tag = stream.getTag();
+            entries.put(tag, entry);
+        }
     }
 
     void unregister(ShardedStreamConsumer streamConsumer) {
         final ShardingTag tag = streamConsumer.getTag();
-        final ShardedStream stream = streamConsumer.getStream();
-        streams.remove(tag, stream);
+        final Collection<Entry> entriesForTag = entries.get(tag);
+        for (Entry entry : entriesForTag) {
+            entry.stream.close();
+        }
+        entries.removeAll(tag);
     }
 
     <I, E extends MessageEnvelope<?, ?, ?>> Set<ShardedStream<I, ?, E>>
-    find(final ShardingTag<E> id, final I targetId) {
+    find(final ShardingTag<E> tag, final I targetId) {
 
-        final Collection<ShardedStream<?, ?, ?>> shardedStreams = streams.get(id);
+        final Collection<Entry> entriesForTag = entries.get(tag);
 
         final ImmutableSet.Builder<ShardedStream<I, ?, E>> builder = ImmutableSet.builder();
-        for (ShardedStream<?, ?, ?> shardedStream : shardedStreams) {
-            final boolean idMatches = shardedStream.getKey()
-                                                   .applyToId(targetId);
-            if (idMatches) {
-                final ShardedStream<I, ?, E> result = (ShardedStream<I, ?, E>) shardedStream;
-                builder.add(result);
+        for (Entry entry : entriesForTag) {
+
+            final ShardIndex shardIndex = entry.strategy.indexForTarget(targetId);
+            if(shardIndex.equals(entry.stream.getKey().getIndex())) {
+                builder.add(((ShardedStream<I, ?, E>)entry.stream));
             }
         }
 
         return builder.build();
+    }
+
+    private static class Entry {
+        private final ShardingStrategy strategy;
+        private final ShardedStream<?, ?, ?> stream;
+
+        private Entry(ShardingStrategy strategy,
+                      ShardedStream<?, ?, ?> stream) {
+            this.strategy = strategy;
+            this.stream = stream;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            Entry entry = (Entry) o;
+            return Objects.equals(strategy, entry.strategy) &&
+                    Objects.equals(stream, entry.stream);
+        }
+
+        @Override
+        public int hashCode() {
+
+            return Objects.hash(strategy, stream);
+        }
     }
 }

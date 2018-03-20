@@ -58,6 +58,13 @@ message ShardedMessage {
     google.protobuf.Timestamp when_sharded = 4 [(required) = true];
 }
 
+message ShardIndex {
+
+    int32 index = 1;
+
+    int32 of_total = 2;
+}
+
 message IdPredicate {
 
     oneof predicate {

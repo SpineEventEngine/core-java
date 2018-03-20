@@ -27,7 +27,7 @@ import io.spine.server.entity.EntityClass;
  */
 public interface Shardable<E> {
 
-    Sharding.Strategy getShardingStrategy();
+    ShardingStrategy getShardingStrategy();
 
     Iterable<ShardedStreamConsumer<?, ?>> getMessageConsumers();
 

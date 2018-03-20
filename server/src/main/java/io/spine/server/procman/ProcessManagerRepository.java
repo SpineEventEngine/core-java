@@ -56,7 +56,8 @@ import io.spine.server.route.RejectionProducers;
 import io.spine.server.route.RejectionRouting;
 import io.spine.server.sharding.Shardable;
 import io.spine.server.sharding.ShardedStreamConsumer;
-import io.spine.server.sharding.Sharding;
+import io.spine.server.sharding.ShardingStrategy;
+import io.spine.server.sharding.UniformAcrossTargets;
 
 import javax.annotation.CheckReturnValue;
 import java.util.Set;
@@ -447,8 +448,8 @@ public abstract class ProcessManagerRepository<I,
     }
 
     @Override
-    public Sharding.Strategy getShardingStrategy() {
-        return Sharding.Strategy.ALL_TARGETS_OF_TYPE;
+    public ShardingStrategy getShardingStrategy() {
+        return UniformAcrossTargets.singleShard();
     }
 
     @Override

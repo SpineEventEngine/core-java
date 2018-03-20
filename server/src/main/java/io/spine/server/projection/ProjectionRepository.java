@@ -46,7 +46,8 @@ import io.spine.server.route.EventProducers;
 import io.spine.server.route.EventRouting;
 import io.spine.server.sharding.Shardable;
 import io.spine.server.sharding.ShardedStreamConsumer;
-import io.spine.server.sharding.Sharding;
+import io.spine.server.sharding.ShardingStrategy;
+import io.spine.server.sharding.UniformAcrossTargets;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
@@ -293,8 +294,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     }
 
     @Override
-    public Sharding.Strategy getShardingStrategy() {
-        return Sharding.Strategy.ALL_TARGETS_OF_TYPE;
+    public ShardingStrategy getShardingStrategy() {
+        return UniformAcrossTargets.singleShard();
     }
 
     @Override
