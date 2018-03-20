@@ -28,10 +28,12 @@ import io.spine.type.MessageClass;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.Sets.newHashSet;
 
 /**
  * Provides mapping from a class of messages to a method which handles such messages.
@@ -61,7 +63,7 @@ public class MessageHandlerMap<M extends MessageClass, I extends HandlerMethod.I
      * Obtains classes of messages for which handlers are stored in this map.
      */
     public Set<M> getMessageClasses() {
-        return map.keySet();
+        return messageClasses(map.values());
     }
 
     /**
@@ -70,9 +72,8 @@ public class MessageHandlerMap<M extends MessageClass, I extends HandlerMethod.I
      * @param predicate a predicate for handler methods to filter the corresponding message classes
      */
     public ImmutableSet<M> getMessageClasses(Predicate<H> predicate) {
-        final Set<M> matchingKeys = Maps.filterValues(map, predicate)
-                                        .keySet();
-        return ImmutableSet.copyOf(matchingKeys);
+        final Map<I, H> filtered = Maps.filterValues(map, predicate);
+        return messageClasses(filtered.values());
     }
 
     /**
@@ -85,7 +86,7 @@ public class MessageHandlerMap<M extends MessageClass, I extends HandlerMethod.I
     public H getMethod(I handlerId) {
         final H handlerMethod = map.get(handlerId);
         checkState(handlerMethod != null,
-                   "Unable to find handler for the message class %s", handlerId);
+                   "Unable to find handler with ID %s", handlerId);
         return handlerMethod;
     }
 
@@ -97,6 +98,15 @@ public class MessageHandlerMap<M extends MessageClass, I extends HandlerMethod.I
      */
     public boolean exists(I handlerId) {
         return map.containsKey(handlerId);
+    }
+
+    private static <M extends MessageClass, H extends HandlerMethod>
+    ImmutableSet<M> messageClasses(Collection<H> handlers) {
+        final Set<M> setToSwallowDuplicates = newHashSet();
+        for (HandlerMethod handler : handlers) {
+            setToSwallowDuplicates.add((M) handler.getMessageClass());
+        }
+        return ImmutableSet.copyOf(setToSwallowDuplicates);
     }
 
     private static <I extends HandlerMethod.Id, H extends HandlerMethod<I, ?>>

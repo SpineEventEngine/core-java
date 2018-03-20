@@ -82,7 +82,7 @@ public class RejectionSubscriber implements RejectionDispatcher<String> {
     }
 
     private void handle(RejectionEnvelope rejection) {
-        final CommandClass commandClass = CommandClass.of(rejection.getMessage()
+        final CommandClass commandClass = CommandClass.of(rejection.getCommandMessage()
                                                                    .getClass());
         final RejectionSubscriberMethod method =
                 thisClass.getSubscriber(rejection.getMessageClass(), commandClass);

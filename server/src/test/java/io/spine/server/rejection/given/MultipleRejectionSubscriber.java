@@ -22,11 +22,11 @@ package io.spine.server.rejection.given;
 
 import com.google.protobuf.Message;
 import io.spine.core.Subscribe;
-import io.spine.server.entity.rejection.StandardRejections.CannotModifyArchivedEntity;
+import io.spine.server.entity.rejection.StandardRejections.CannotModifyDeletedEntity;
 import io.spine.server.rejection.RejectionSubscriber;
-import io.spine.test.event.command.StartProject;
 import io.spine.test.reflect.command.UpdateProjectName;
 import io.spine.test.rejection.command.RemoveOwner;
+import io.spine.test.rejection.command.StartProject;
 
 public class MultipleRejectionSubscriber extends RejectionSubscriber {
 
@@ -34,25 +34,25 @@ public class MultipleRejectionSubscriber extends RejectionSubscriber {
     private Class<? extends Message> commandMessageClass;
 
     @Subscribe
-    public void on(CannotModifyArchivedEntity rejection,
+    public void on(CannotModifyDeletedEntity rejection,
                    StartProject command) {
         handleRejectionWithCommandMessage(command);
     }
 
     @Subscribe
-    public void on(CannotModifyArchivedEntity rejection,
+    public void on(CannotModifyDeletedEntity rejection,
                    UpdateProjectName command) {
         handleRejectionWithCommandMessage(command);
     }
 
     @Subscribe
-    public void on(CannotModifyArchivedEntity rejection,
+    public void on(CannotModifyDeletedEntity rejection,
                    RemoveOwner command) {
         handleRejectionWithCommandMessage(command);
     }
 
     @Subscribe
-    public void on(CannotModifyArchivedEntity rejection) {
+    public void on(CannotModifyDeletedEntity rejection) {
         subscriberCalls++;
     }
 
