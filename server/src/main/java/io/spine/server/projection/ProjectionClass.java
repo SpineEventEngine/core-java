@@ -72,6 +72,7 @@ public final class ProjectionClass<P extends Projection> extends EntityClass<P> 
     }
 
     EventSubscriberMethod getSubscriber(EventClass eventClass) {
-        return eventSubscriptions.getMethod(eventClass);
+        final EventSubscriberMethod.Id subscriberId = EventSubscriberMethod.idFrom(eventClass);
+        return eventSubscriptions.getMethod(subscriberId);
     }
 }

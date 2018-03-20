@@ -22,6 +22,7 @@ package io.spine.server.rejection;
 
 import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
+import io.spine.core.CommandClass;
 import io.spine.core.RejectionClass;
 import io.spine.server.model.HandlerMethods;
 import io.spine.server.model.MessageHandlerMap;
@@ -72,7 +73,13 @@ public final class RejectionSubscriberClass<S extends RejectionSubscriber> exten
         return externalSubscriptions;
     }
 
-    RejectionSubscriberMethod getSubscriber(RejectionClass cls) {
-        return rejectionSubscriptions.getMethod(cls);
+    RejectionSubscriberMethod getSubscriber(RejectionClass cls, CommandClass commandClass) {
+        final RejectionHandlerMethod.Id idWithCommand = RejectionHandlerMethod.idFrom(cls, commandClass);
+        final boolean existsHandlerForCommand = rejectionSubscriptions.exists(idWithCommand);
+        if (existsHandlerForCommand) {
+            return rejectionSubscriptions.getMethod(idWithCommand);
+        }
+        final RejectionHandlerMethod.Id idWithoutCommand = RejectionHandlerMethod.idFrom(cls);
+        return rejectionSubscriptions.getMethod(idWithoutCommand);
     }
 }

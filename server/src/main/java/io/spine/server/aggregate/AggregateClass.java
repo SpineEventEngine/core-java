@@ -31,6 +31,7 @@ import io.spine.server.entity.EntityClass;
 import io.spine.server.event.EventReactorMethod;
 import io.spine.server.model.HandlerMethods;
 import io.spine.server.model.MessageHandlerMap;
+import io.spine.server.rejection.RejectionHandlerMethod;
 import io.spine.server.rejection.RejectionReactorMethod;
 
 import java.util.Set;
@@ -105,18 +106,22 @@ public class AggregateClass<A extends Aggregate>
     }
 
     CommandHandlerMethod getHandler(CommandClass commandClass) {
-        return commands.getMethod(commandClass);
+        final CommandHandlerMethod.Id handlerId = CommandHandlerMethod.idFrom(commandClass);
+        return commands.getMethod(handlerId);
     }
 
     EventApplierMethod getApplier(EventClass eventClass) {
-        return stateEvents.getMethod(eventClass);
+        final EventApplierMethod.Id applierId = EventApplierMethod.idFrom(eventClass);
+        return stateEvents.getMethod(applierId);
     }
 
     EventReactorMethod getReactor(EventClass eventClass) {
-        return eventReactions.getMethod(eventClass);
+        final EventReactorMethod.Id eventReactorId = EventReactorMethod.idFrom(eventClass);
+        return eventReactions.getMethod(eventReactorId);
     }
 
     RejectionReactorMethod getReactor(RejectionClass rejectionClass) {
-        return rejectionReactions.getMethod(rejectionClass);
+        final RejectionHandlerMethod.Id handlerId = RejectionHandlerMethod.idFrom(rejectionClass);
+        return rejectionReactions.getMethod(handlerId);
     }
 }

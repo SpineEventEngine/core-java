@@ -57,6 +57,48 @@ public class MessageHandlerMap<M extends MessageClass, I extends HandlerMethod.M
         this.map = scan(cls, factory);
     }
 
+    /**
+     * Obtains classes of messages for which handlers are stored in this map.
+     */
+    public Set<M> getMessageClasses() {
+        return map.keySet();
+    }
+
+    /**
+     * Obtains classes of messages which handlers satisfy the passed {@code predicate}.
+     *
+     * @param predicate a predicate for handler methods to filter the corresponding message classes
+     */
+    public ImmutableSet<M> getMessageClasses(Predicate<H> predicate) {
+        final Set<M> matchingKeys = Maps.filterValues(map, predicate)
+                                        .keySet();
+        return ImmutableSet.copyOf(matchingKeys);
+    }
+
+    /**
+     * Obtains the method for handling by the passed ID.
+     *
+     * @param  handlerId the ID of the handler to get
+     * @return a handler method
+     * @throws IllegalStateException if there is no method found in the map
+     */
+    public H getMethod(I handlerId) {
+        final H handlerMethod = map.get(handlerId);
+        checkState(handlerMethod != null,
+                   "Unable to find handler for the message class %s", handlerId);
+        return handlerMethod;
+    }
+
+    /**
+     * Determines whether the handler with the specified exists.
+     *
+     * @param handlerId the ID of the handler to check
+     * @return {@code true} if there is a handler with the ID, {@code false} otherwise
+     */
+    public boolean exists(I handlerId) {
+        return map.containsKey(handlerId);
+    }
+
     private static <I extends HandlerMethod.MethodId, H extends HandlerMethod<I, ?>>
     ImmutableMap<I, H> scan(Class<?> declaringClass, HandlerMethod.Factory<H> factory) {
         final Predicate<Method> filter = factory.getPredicate();
@@ -80,37 +122,5 @@ public class MessageHandlerMap<M extends MessageClass, I extends HandlerMethod.M
         }
         final ImmutableMap<I, H> result = ImmutableMap.copyOf(tempMap);
         return result;
-    }
-
-    /**
-     * Obtains classes of messages for which handlers are stored in this map.
-     */
-    public Set<M> getMessageClasses() {
-        return map.keySet();
-    }
-
-    /**
-     * Obtains classes of messages which handlers satisfy the passed {@code predicate}.
-     *
-     * @param predicate a predicate for handler methods to filter the corresponding message classes
-     */
-    public ImmutableSet<M> getMessageClasses(Predicate<H> predicate) {
-        final Set<M> matchingKeys = Maps.filterValues(map, predicate)
-                                        .keySet();
-        return ImmutableSet.copyOf(matchingKeys);
-    }
-
-    /**
-     * Obtains the method for handling the passed class of messages.
-     *
-     * @param  messageClass the class of messages for which to find a handler method
-     * @return a handler method
-     * @throws IllegalStateException if there is no method found in the map
-     */
-    public H getMethod(M messageClass) {
-        final H handlerMethod = map.get(messageClass);
-        checkState(handlerMethod != null,
-                   "Unable to find handler for the message class %s", messageClass);
-        return handlerMethod;
     }
 }

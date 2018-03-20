@@ -63,10 +63,10 @@ public final class EventApplierMethod extends HandlerMethod<EventApplierMethod.I
 
     @Override
     public Id id() {
-        return idFor(getMessageClass());
+        return idFrom(getMessageClass());
     }
 
-    public static Id idFor(EventClass eventClass) {
+    public static Id idFrom(EventClass eventClass) {
         return new Id(eventClass);
     }
 

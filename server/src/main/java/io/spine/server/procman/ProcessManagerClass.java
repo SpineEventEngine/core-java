@@ -31,6 +31,7 @@ import io.spine.server.entity.EntityClass;
 import io.spine.server.event.EventReactorMethod;
 import io.spine.server.model.HandlerMethods;
 import io.spine.server.model.MessageHandlerMap;
+import io.spine.server.rejection.RejectionHandlerMethod;
 import io.spine.server.rejection.RejectionReactorMethod;
 
 import java.util.Set;
@@ -108,14 +109,17 @@ public final class ProcessManagerClass<P extends ProcessManager>
     }
 
     CommandHandlerMethod getHandler(CommandClass commandClass) {
-        return commands.getMethod(commandClass);
+        final CommandHandlerMethod.Id handlerId = CommandHandlerMethod.idFrom(commandClass);
+        return commands.getMethod(handlerId);
     }
 
     EventReactorMethod getReactor(EventClass eventClass) {
-        return eventReactors.getMethod(eventClass);
+        final EventReactorMethod.Id eventReactorId = EventReactorMethod.idFrom(eventClass);
+        return eventReactors.getMethod(eventReactorId);
     }
 
     RejectionReactorMethod getReactor(RejectionClass rejectionClass) {
-        return rejectionReactors.getMethod(rejectionClass);
+        final RejectionHandlerMethod.Id handlerId = RejectionHandlerMethod.idFrom(rejectionClass);
+        return rejectionReactors.getMethod(handlerId);
     }
 }

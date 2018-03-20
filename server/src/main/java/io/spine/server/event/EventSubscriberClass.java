@@ -74,6 +74,7 @@ public final class EventSubscriberClass<S extends EventSubscriber> extends Model
     }
 
     EventSubscriberMethod getSubscriber(EventClass eventClass) {
-        return eventSubscriptions.getMethod(eventClass);
+        final EventSubscriberMethod.Id subscriberId = EventSubscriberMethod.idFrom(eventClass);
+        return eventSubscriptions.getMethod(subscriberId);
     }
 }

@@ -52,7 +52,8 @@ public final class CommandHandlerClass<C extends CommandHandler>
     }
 
     CommandHandlerMethod getHandler(CommandClass commandClass) {
-        return commands.getMethod(commandClass);
+        final CommandHandlerMethod.Id handlerId = CommandHandlerMethod.idFrom(commandClass);
+        return commands.getMethod(handlerId);
     }
 
     /**

@@ -50,7 +50,7 @@ import static io.spine.util.Exceptions.unsupported;
  * @author Alexander Yevsyukov
  */
 @Internal
-class RejectionHandlerMethod extends HandlerMethod<RejectionHandlerMethod.Id, RejectionContext> {
+public class RejectionHandlerMethod extends HandlerMethod<RejectionHandlerMethod.Id, RejectionContext> {
 
     /** Determines the number of parameters and their types. */
     private final Kind kind;
