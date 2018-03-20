@@ -20,12 +20,16 @@
 
 package io.spine.server.rejection.given;
 
+import com.google.protobuf.Any;
+import com.google.protobuf.Message;
 import io.spine.change.StringChange;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;
 import io.spine.core.Rejection;
 import io.spine.core.Rejections;
 import io.spine.core.TenantId;
+import io.spine.protobuf.AnyPacker;
+import io.spine.server.entity.rejection.StandardRejections.CannotModifyDeletedEntity;
 import io.spine.server.rejection.RejectionBusShould;
 import io.spine.test.rejection.ProjectId;
 import io.spine.test.rejection.ProjectRejections;
@@ -71,6 +75,17 @@ public class Given {
         final Command command = io.spine.server.commandbus.Given.ACommand.withMessage(
                 Sample.messageOfType(RemoveOwner.class));
         return Rejections.createRejection(msg, command);
+    }
+
+    public static Rejection cannotModifyDeletedEntity(Class<? extends Message> commandMessage) {
+        final ProjectId projectId = newProjectId();
+        final Any idAny = AnyPacker.pack(projectId);
+        final CannotModifyDeletedEntity rejectionMsg = CannotModifyDeletedEntity.newBuilder()
+                                                                                .setEntityId(idAny)
+                                                                                .build();
+        final Command command = io.spine.server.commandbus.Given.ACommand.withMessage(
+                Sample.messageOfType(commandMessage));
+        return Rejections.createRejection(rejectionMsg, command);
     }
 
     private static ProjectId newProjectId() {
