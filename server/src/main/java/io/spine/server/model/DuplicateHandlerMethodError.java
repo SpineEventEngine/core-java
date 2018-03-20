@@ -34,7 +34,7 @@ public class DuplicateHandlerMethodError extends ModelError {
 
     public DuplicateHandlerMethodError(
             Class<?> targetClass,
-            HandlerMethod.MethodId methodId,
+            HandlerMethod.Id methodId,
             String firstMethodName,
             String secondMethodName) {
 

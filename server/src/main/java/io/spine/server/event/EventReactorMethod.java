@@ -178,7 +178,7 @@ public final class EventReactorMethod extends HandlerMethod<EventReactorMethod.I
         }
     }
 
-    public static final class Id implements HandlerMethod.MethodId {
+    public static final class Id implements HandlerMethod.Id {
 
         private final EventClass eventClass;
 

@@ -200,7 +200,7 @@ public final class CommandHandlerMethod extends HandlerMethod<CommandHandlerMeth
         }
     }
 
-    public static final class Id implements HandlerMethod.MethodId {
+    public static final class Id implements HandlerMethod.Id {
 
         private final CommandClass commandClass;
 

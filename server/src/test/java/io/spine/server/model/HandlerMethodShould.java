@@ -43,8 +43,8 @@ import static org.junit.Assert.assertTrue;
  */
 public class HandlerMethodShould {
 
-    private HandlerMethod<HandlerMethod.MethodId, EventContext> twoParamMethod;
-    private HandlerMethod<HandlerMethod.MethodId, Empty> oneParamMethod;
+    private HandlerMethod<HandlerMethod.Id, EventContext> twoParamMethod;
+    private HandlerMethod<HandlerMethod.Id, Empty> oneParamMethod;
 
     private Object target;
 
@@ -127,7 +127,7 @@ public class HandlerMethodShould {
 
     @Test
     public void compare_fields_in_equals() {
-        final HandlerMethod<HandlerMethod.MethodId, EventContext> anotherMethod =
+        final HandlerMethod<HandlerMethod.Id, EventContext> anotherMethod =
                 new TwoParamMethod(StubHandler.getTwoParameterMethod());
 
         assertTrue(twoParamMethod.equals(anotherMethod));
@@ -189,7 +189,7 @@ public class HandlerMethodShould {
         }
     }
 
-    private static class TwoParamMethod extends HandlerMethod<HandlerMethod.MethodId, EventContext> {
+    private static class TwoParamMethod extends HandlerMethod<HandlerMethod.Id, EventContext> {
 
         private TwoParamMethod(Method method) {
             super(method);
@@ -201,12 +201,12 @@ public class HandlerMethodShould {
         }
 
         @Override
-        public MethodId id() {
+        public Id id() {
             throw new UnsupportedOperationException("The method is not target of the test");
         }
     }
 
-    private static class OneParamMethod extends HandlerMethod<HandlerMethod.MethodId, Empty> {
+    private static class OneParamMethod extends HandlerMethod<HandlerMethod.Id, Empty> {
 
         private OneParamMethod(Method method) {
             super(method);
@@ -218,7 +218,7 @@ public class HandlerMethodShould {
         }
 
         @Override
-        public MethodId id() {
+        public Id id() {
             throw new UnsupportedOperationException("The method is not target of the test");
         }
     }

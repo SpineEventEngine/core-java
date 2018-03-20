@@ -162,7 +162,7 @@ public final class EventApplierMethod extends HandlerMethod<EventApplierMethod.I
         }
     }
 
-    public static final class Id implements HandlerMethod.MethodId {
+    public static final class Id implements HandlerMethod.Id {
 
         private final EventClass eventClass;
 

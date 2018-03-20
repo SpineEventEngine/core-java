@@ -40,7 +40,7 @@ import static com.google.common.base.Preconditions.checkState;
  * @param <H> the type of handler methods
  * @author Alexander Yevsyukov
  */
-public class MessageHandlerMap<M extends MessageClass, I extends HandlerMethod.MethodId, H extends HandlerMethod<I, ?>>
+public class MessageHandlerMap<M extends MessageClass, I extends HandlerMethod.Id, H extends HandlerMethod<I, ?>>
         implements Serializable {
 
     private static final long serialVersionUID = 0L;
@@ -99,7 +99,7 @@ public class MessageHandlerMap<M extends MessageClass, I extends HandlerMethod.M
         return map.containsKey(handlerId);
     }
 
-    private static <I extends HandlerMethod.MethodId, H extends HandlerMethod<I, ?>>
+    private static <I extends HandlerMethod.Id, H extends HandlerMethod<I, ?>>
     ImmutableMap<I, H> scan(Class<?> declaringClass, HandlerMethod.Factory<H> factory) {
         final Predicate<Method> filter = factory.getPredicate();
         final Map<I, H> tempMap = Maps.newHashMap();

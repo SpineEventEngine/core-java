@@ -59,7 +59,7 @@ import static java.util.Collections.singletonList;
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
-public abstract class HandlerMethod<I extends HandlerMethod.MethodId, C extends Message> {
+public abstract class HandlerMethod<I extends HandlerMethod.Id, C extends Message> {
 
     /** The method to be called. */
     private final Method method;
@@ -355,6 +355,6 @@ public abstract class HandlerMethod<I extends HandlerMethod.MethodId, C extends 
     /**
      * A marker interface for an ID of a handler method.
      */
-    public interface MethodId {
+    public interface Id {
     }
 }

@@ -154,7 +154,7 @@ public final class EventSubscriberMethod extends HandlerMethod<EventSubscriberMe
         }
     }
 
-    public static final class Id implements HandlerMethod.MethodId {
+    public static final class Id implements HandlerMethod.Id {
 
         private final EventClass eventClass;
 

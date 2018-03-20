@@ -322,7 +322,7 @@ public class RejectionHandlerMethod extends HandlerMethod<RejectionHandlerMethod
      * <p>The ID always contains {@link RejectionClass}, but {@link CommandClass} is optional
      * because a rejection handler doesn't necessarily receives a command message as a parameter.
      */
-    public static final class Id implements HandlerMethod.MethodId {
+    public static final class Id implements HandlerMethod.Id {
 
         @Nullable
         private final CommandClass commandClass;
