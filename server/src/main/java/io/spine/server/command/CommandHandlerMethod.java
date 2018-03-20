@@ -20,6 +20,7 @@
 
 package io.spine.server.command;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.protobuf.Any;
@@ -222,6 +223,13 @@ public final class CommandHandlerMethod extends HandlerMethod<CommandContext> {
         @Override
         public int hashCode() {
             return Objects.hash(commandClass);
+        }
+
+        @Override
+        public String toString() {
+            return MoreObjects.toStringHelper(this)
+                              .add("commandClass", commandClass)
+                              .toString();
         }
     }
 }

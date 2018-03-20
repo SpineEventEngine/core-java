@@ -21,6 +21,7 @@
 package io.spine.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Predicate;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Empty;
@@ -183,8 +184,14 @@ public final class EventApplierMethod extends HandlerMethod<Empty> {
 
         @Override
         public int hashCode() {
-
             return Objects.hash(eventClass);
+        }
+
+        @Override
+        public String toString() {
+            return MoreObjects.toStringHelper(this)
+                              .add("eventClass", eventClass)
+                              .toString();
         }
     }
 }

@@ -20,6 +20,7 @@
 
 package io.spine.server.event;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Predicate;
 import com.google.protobuf.Message;
 import io.spine.core.EventClass;
@@ -200,6 +201,13 @@ public final class EventReactorMethod extends HandlerMethod<EventContext> {
         @Override
         public int hashCode() {
             return Objects.hash(eventClass);
+        }
+
+        @Override
+        public String toString() {
+            return MoreObjects.toStringHelper(this)
+                              .add("eventClass", eventClass)
+                              .toString();
         }
     }
 }

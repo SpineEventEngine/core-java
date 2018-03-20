@@ -19,6 +19,7 @@
  */
 package io.spine.server.rejection;
 
+import com.google.common.base.MoreObjects;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.Command;
@@ -350,6 +351,14 @@ class RejectionHandlerMethod extends HandlerMethod<RejectionContext> {
         @Override
         public int hashCode() {
             return Objects.hash(rejectionClass, commandClass);
+        }
+
+        @Override
+        public String toString() {
+            return MoreObjects.toStringHelper(this)
+                              .add("rejectionClass", rejectionClass)
+                              .add("commandClass", commandClass)
+                              .toString();
         }
     }
 }
