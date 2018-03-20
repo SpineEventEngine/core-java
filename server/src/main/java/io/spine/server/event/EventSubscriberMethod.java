@@ -42,7 +42,7 @@ import static io.spine.server.model.HandlerMethods.ensureExternalMatch;
  * @author Alexander Yevsyukov
  * @see Subscribe
  */
-public final class EventSubscriberMethod extends HandlerMethod<EventContext> {
+public final class EventSubscriberMethod extends HandlerMethod<EventSubscriberMethod.Id, EventContext> {
 
     /** The instance of the predicate to filter event subscriber methods of a class. */
     private static final MethodPredicate PREDICATE = new FilterPredicate();
@@ -58,12 +58,12 @@ public final class EventSubscriberMethod extends HandlerMethod<EventContext> {
     }
 
     @Override
-    public MethodId id() {
+    public Id id() {
         return idFrom(getMessageClass());
     }
 
-    public static MethodId idFrom(EventClass eventClass) {
-        return new EventSubscriberId(eventClass);
+    public static Id idFrom(EventClass eventClass) {
+        return new Id(eventClass);
     }
 
     static EventSubscriberMethod from(Method method) {
@@ -154,11 +154,11 @@ public final class EventSubscriberMethod extends HandlerMethod<EventContext> {
         }
     }
 
-    private static final class EventSubscriberId implements HandlerMethod.MethodId {
+    public static final class Id implements HandlerMethod.MethodId {
 
         private final EventClass eventClass;
 
-        private EventSubscriberId(EventClass eventClass) {
+        private Id(EventClass eventClass) {
             this.eventClass = eventClass;
         }
 
@@ -170,7 +170,7 @@ public final class EventSubscriberMethod extends HandlerMethod<EventContext> {
             if (o == null || getClass() != o.getClass()) {
                 return false;
             }
-            EventSubscriberId that = (EventSubscriberId) o;
+            Id that = (Id) o;
             return Objects.equals(eventClass, that.eventClass);
         }
 

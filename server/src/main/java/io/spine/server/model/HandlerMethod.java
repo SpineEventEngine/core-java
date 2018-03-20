@@ -53,12 +53,13 @@ import static java.util.Collections.singletonList;
  * <p>Two message handlers are equivalent when they refer to the same method on the
  * same object (not class).
  *
+ * @param <I> the type of handler method ID
  * @param <C> the type of the message context or {@link com.google.protobuf.Empty Empty} if
  *            a context parameter is never used
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
-public abstract class HandlerMethod<C extends Message> {
+public abstract class HandlerMethod<I extends HandlerMethod.MethodId, C extends Message> {
 
     /** The method to be called. */
     private final Method method;
@@ -91,7 +92,7 @@ public abstract class HandlerMethod<C extends Message> {
 
     public abstract MessageClass getMessageClass();
 
-    public abstract MethodId id();
+    public abstract I id();
 
     /**
      * Returns {@code true} if the method has package-private access, {@code false} otherwise.

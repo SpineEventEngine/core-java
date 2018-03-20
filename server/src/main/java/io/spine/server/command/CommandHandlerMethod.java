@@ -48,7 +48,7 @@ import static com.google.common.base.Throwables.getRootCause;
  * @author Alexander Yevsyukov
  */
 @Internal
-public final class CommandHandlerMethod extends HandlerMethod<CommandContext> {
+public final class CommandHandlerMethod extends HandlerMethod<CommandHandlerMethod.Id, CommandContext> {
 
     /** The instance of the predicate to filter command handler methods of a class. */
     private static final MethodPredicate PREDICATE = new FilterPredicate();
@@ -68,12 +68,12 @@ public final class CommandHandlerMethod extends HandlerMethod<CommandContext> {
     }
 
     @Override
-    public MethodId id() {
+    public Id id() {
         return idFrom(getMessageClass());
     }
 
-    public static MethodId idFrom(CommandClass commandClass) {
-        return new CommandHandlerId(commandClass);
+    public static Id idFrom(CommandClass commandClass) {
+        return new Id(commandClass);
     }
 
     static CommandHandlerMethod from(Method method) {
@@ -200,11 +200,11 @@ public final class CommandHandlerMethod extends HandlerMethod<CommandContext> {
         }
     }
 
-    private static final class CommandHandlerId implements HandlerMethod.MethodId {
+    public static final class Id implements HandlerMethod.MethodId {
 
         private final CommandClass commandClass;
 
-        private CommandHandlerId(CommandClass commandClass) {
+        private Id(CommandClass commandClass) {
             this.commandClass = commandClass;
         }
 
@@ -216,7 +216,7 @@ public final class CommandHandlerMethod extends HandlerMethod<CommandContext> {
             if (o == null || getClass() != o.getClass()) {
                 return false;
             }
-            CommandHandlerId that = (CommandHandlerId) o;
+            Id that = (Id) o;
             return Objects.equals(commandClass, that.commandClass);
         }
 

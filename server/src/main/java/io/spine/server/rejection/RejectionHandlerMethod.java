@@ -50,7 +50,7 @@ import static io.spine.util.Exceptions.unsupported;
  * @author Alexander Yevsyukov
  */
 @Internal
-class RejectionHandlerMethod extends HandlerMethod<RejectionContext> {
+class RejectionHandlerMethod extends HandlerMethod<RejectionHandlerMethod.Id, RejectionContext> {
 
     /** Determines the number of parameters and their types. */
     private final Kind kind;
@@ -71,7 +71,7 @@ class RejectionHandlerMethod extends HandlerMethod<RejectionContext> {
     }
 
     @Override
-    public MethodId id() {
+    public Id id() {
         if (kind == Kind.COMMAND_AWARE || kind == Kind.COMMAND_MESSAGE_AWARE) {
             @SuppressWarnings("unchecked") // RejectionFilterPredicate ensures that
             final Class<? extends Message> rawCommandClass = (Class<? extends Message>) getMethod().getParameterTypes()[1];
@@ -81,13 +81,12 @@ class RejectionHandlerMethod extends HandlerMethod<RejectionContext> {
         }
     }
 
-    public static MethodId idFrom(RejectionClass rejectionClass) {
-        return new RejectionHandlerId(rejectionClass, null);
+    public static Id idFrom(RejectionClass rejectionClass) {
+        return new Id(rejectionClass, null);
     }
 
-    public static MethodId idFrom(RejectionClass rejectionClass,
-                                  CommandClass commandClass) {
-        return new RejectionHandlerId(rejectionClass, commandClass);
+    public static Id idFrom(RejectionClass rejectionClass, CommandClass commandClass) {
+        return new Id(rejectionClass, commandClass);
     }
 
     private static Kind getKind(Method method) {
@@ -323,14 +322,14 @@ class RejectionHandlerMethod extends HandlerMethod<RejectionContext> {
      * <p>The ID always contains {@link RejectionClass}, but {@link CommandClass} is optional
      * because a rejection handler doesn't necessarily receives a command message as a parameter.
      */
-    private static final class RejectionHandlerId implements HandlerMethod.MethodId {
+    public static final class Id implements HandlerMethod.MethodId {
 
         @Nullable
         private final CommandClass commandClass;
         private final RejectionClass rejectionClass;
 
-        private RejectionHandlerId(RejectionClass rejectionClass,
-                                   @Nullable CommandClass commandClass) {
+        private Id(RejectionClass rejectionClass,
+                   @Nullable CommandClass commandClass) {
             this.rejectionClass = rejectionClass;
             this.commandClass = commandClass;
         }
@@ -343,7 +342,7 @@ class RejectionHandlerMethod extends HandlerMethod<RejectionContext> {
             if (o == null || getClass() != o.getClass()) {
                 return false;
             }
-            RejectionHandlerId that = (RejectionHandlerId) o;
+            Id that = (Id) o;
             return Objects.equals(rejectionClass, that.rejectionClass) &&
                     Objects.equals(commandClass, that.commandClass);
         }

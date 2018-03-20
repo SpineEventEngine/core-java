@@ -42,7 +42,7 @@ import java.util.Objects;
  * @author Alexander Yevsyukov
  */
 @Internal
-public final class EventApplierMethod extends HandlerMethod<Empty> {
+public final class EventApplierMethod extends HandlerMethod<EventApplierMethod.Id, Empty> {
 
     /** The instance of the predicate to filter event applier methods of an aggregate class. */
     private static final MethodPredicate PREDICATE = new FilterPredicate();
@@ -62,12 +62,12 @@ public final class EventApplierMethod extends HandlerMethod<Empty> {
     }
 
     @Override
-    public MethodId id() {
+    public Id id() {
         return idFor(getMessageClass());
     }
 
-    public static MethodId idFor(EventClass eventClass) {
-        return new EventApplierId(eventClass);
+    public static Id idFor(EventClass eventClass) {
+        return new Id(eventClass);
     }
 
     static EventApplierMethod from(Method method) {
@@ -162,11 +162,11 @@ public final class EventApplierMethod extends HandlerMethod<Empty> {
         }
     }
 
-    private static final class EventApplierId implements HandlerMethod.MethodId {
+    public static final class Id implements HandlerMethod.MethodId {
 
         private final EventClass eventClass;
 
-        private EventApplierId(EventClass eventClass) {
+        private Id(EventClass eventClass) {
             this.eventClass = eventClass;
         }
 
@@ -178,7 +178,7 @@ public final class EventApplierMethod extends HandlerMethod<Empty> {
             if (o == null || getClass() != o.getClass()) {
                 return false;
             }
-            EventApplierId that = (EventApplierId) o;
+            Id that = (Id) o;
             return Objects.equals(eventClass, that.eventClass);
         }
 

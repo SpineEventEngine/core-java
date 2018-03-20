@@ -42,7 +42,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @author Alexander Yevsyukov
  * @see React
  */
-public final class EventReactorMethod extends HandlerMethod<EventContext> {
+public final class EventReactorMethod extends HandlerMethod<EventReactorMethod.Id, EventContext> {
 
     private static final MethodPredicate PREDICATE = new FilterPredicate();
 
@@ -56,12 +56,12 @@ public final class EventReactorMethod extends HandlerMethod<EventContext> {
     }
 
     @Override
-    public MethodId id() {
+    public Id id() {
         return idFor(getMessageClass());
     }
 
-    public static MethodId idFor(EventClass eventClass) {
-        return new EventReactorId(eventClass);
+    public static Id idFor(EventClass eventClass) {
+        return new Id(eventClass);
     }
 
     /**
@@ -178,11 +178,11 @@ public final class EventReactorMethod extends HandlerMethod<EventContext> {
         }
     }
 
-    private static final class EventReactorId implements HandlerMethod.MethodId {
+    public static final class Id implements HandlerMethod.MethodId {
 
         private final EventClass eventClass;
 
-        private EventReactorId(EventClass eventClass) {
+        private Id(EventClass eventClass) {
             this.eventClass = eventClass;
         }
 
@@ -194,7 +194,7 @@ public final class EventReactorMethod extends HandlerMethod<EventContext> {
             if (o == null || getClass() != o.getClass()) {
                 return false;
             }
-            EventReactorId that = (EventReactorId) o;
+            Id that = (Id) o;
             return Objects.equals(eventClass, that.eventClass);
         }
 

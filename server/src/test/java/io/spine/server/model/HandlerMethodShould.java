@@ -43,8 +43,8 @@ import static org.junit.Assert.assertTrue;
  */
 public class HandlerMethodShould {
 
-    private HandlerMethod<EventContext> twoParamMethod;
-    private HandlerMethod<Empty> oneParamMethod;
+    private HandlerMethod<HandlerMethod.MethodId, EventContext> twoParamMethod;
+    private HandlerMethod<HandlerMethod.MethodId, Empty> oneParamMethod;
 
     private Object target;
 
@@ -127,7 +127,7 @@ public class HandlerMethodShould {
 
     @Test
     public void compare_fields_in_equals() {
-        final HandlerMethod<EventContext> anotherMethod =
+        final HandlerMethod<HandlerMethod.MethodId, EventContext> anotherMethod =
                 new TwoParamMethod(StubHandler.getTwoParameterMethod());
 
         assertTrue(twoParamMethod.equals(anotherMethod));
@@ -189,7 +189,7 @@ public class HandlerMethodShould {
         }
     }
 
-    private static class TwoParamMethod extends HandlerMethod<EventContext> {
+    private static class TwoParamMethod extends HandlerMethod<HandlerMethod.MethodId, EventContext> {
 
         private TwoParamMethod(Method method) {
             super(method);
@@ -206,7 +206,7 @@ public class HandlerMethodShould {
         }
     }
 
-    private static class OneParamMethod extends HandlerMethod<Empty> {
+    private static class OneParamMethod extends HandlerMethod<HandlerMethod.MethodId, Empty> {
 
         private OneParamMethod(Method method) {
             super(method);
