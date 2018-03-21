@@ -73,8 +73,8 @@ public final class RejectionSubscriberClass<S extends RejectionSubscriber> exten
         return externalSubscriptions;
     }
 
-    RejectionSubscriberMethod getSubscriber(RejectionClass cls, CommandClass commandClass) {
-        final RejectionHandlerMethod.Id idWithCommand = RejectionHandlerMethod.idFrom(cls, commandClass);
+    RejectionSubscriberMethod getSubscriber(RejectionClass cls, CommandClass commandCls) {
+        final RejectionHandlerMethod.Id idWithCommand = RejectionHandlerMethod.idFrom(cls, commandCls);
         final boolean existsHandlerForCommand = rejectionSubscriptions.exists(idWithCommand);
         if (existsHandlerForCommand) {
             return rejectionSubscriptions.getMethod(idWithCommand);

@@ -118,8 +118,13 @@ public final class ProcessManagerClass<P extends ProcessManager>
         return eventReactors.getMethod(eventReactorId);
     }
 
-    RejectionReactorMethod getReactor(RejectionClass rejectionClass) {
-        final RejectionHandlerMethod.Id handlerId = RejectionHandlerMethod.idFrom(rejectionClass);
-        return rejectionReactors.getMethod(handlerId);
+    RejectionReactorMethod getReactor(RejectionClass cls, CommandClass commandCls) {
+        final RejectionHandlerMethod.Id idWithCommand = RejectionHandlerMethod.idFrom(cls, commandCls);
+        final boolean existsHandlerForCommand = rejectionReactors.exists(idWithCommand);
+        if (existsHandlerForCommand) {
+            return rejectionReactors.getMethod(idWithCommand);
+        }
+        final RejectionHandlerMethod.Id idWithoutCommand = RejectionHandlerMethod.idFrom(cls);
+        return rejectionReactors.getMethod(idWithoutCommand);
     }
 }
