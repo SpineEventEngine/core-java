@@ -323,7 +323,7 @@ public class RejectionHandlerMethod extends HandlerMethod<RejectionHandlerMethod
      * <p>The ID always contains {@link RejectionClass}, but {@link CommandClass} is optional
      * because a rejection handler doesn't necessarily has a command message as a parameter.
      */
-    public static final class Id implements HandlerKey {
+    public static final class Id implements HandlerKey<RejectionClass> {
 
         @Nullable
         private final CommandClass commandClass;
@@ -333,6 +333,11 @@ public class RejectionHandlerMethod extends HandlerMethod<RejectionHandlerMethod
                    @Nullable CommandClass commandClass) {
             this.rejectionClass = checkNotNull(rejectionClass);
             this.commandClass = commandClass;
+        }
+
+        @Override
+        public RejectionClass getHandledMessageCls() {
+            return rejectionClass;
         }
 
         @Override

@@ -180,12 +180,17 @@ public final class EventReactorMethod extends HandlerMethod<EventReactorMethod.I
         }
     }
 
-    public static final class Id implements HandlerKey {
+    public static final class Id implements HandlerKey<EventClass> {
 
         private final EventClass eventClass;
 
         private Id(EventClass eventClass) {
             this.eventClass = checkNotNull(eventClass);
+        }
+
+        @Override
+        public EventClass getHandledMessageCls() {
+            return eventClass;
         }
 
         @Override

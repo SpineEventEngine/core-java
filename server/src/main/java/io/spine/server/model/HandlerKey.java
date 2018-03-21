@@ -20,10 +20,17 @@
 
 package io.spine.server.model;
 
+import io.spine.type.MessageClass;
+
 /**
  * A key of {@link HandlerMethod}.
  *
  * @author Dmytro Grankin
  */
-public interface HandlerKey {
+public interface HandlerKey<M extends MessageClass> {
+
+    /**
+     * Obtains a {@link MessageClass}, which is handled by {@link HandlerMethod} with this key.
+     */
+    M getHandledMessageCls();
 }

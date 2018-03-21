@@ -42,7 +42,7 @@ import static com.google.common.collect.Sets.newHashSet;
  * @param <H> the type of handler methods
  * @author Alexander Yevsyukov
  */
-public class MessageHandlerMap<M extends MessageClass, K extends HandlerKey, H extends HandlerMethod<K, ?>>
+public class MessageHandlerMap<M extends MessageClass, K extends HandlerKey<M>, H extends HandlerMethod<K, ?>>
         implements Serializable {
 
     private static final long serialVersionUID = 0L;

@@ -202,12 +202,17 @@ public final class CommandHandlerMethod extends HandlerMethod<CommandHandlerMeth
         }
     }
 
-    public static final class Id implements HandlerKey {
+    public static final class Id implements HandlerKey<CommandClass> {
 
         private final CommandClass commandClass;
 
         private Id(CommandClass commandClass) {
             this.commandClass = checkNotNull(commandClass);
+        }
+
+        @Override
+        public CommandClass getHandledMessageCls() {
+            return commandClass;
         }
 
         @Override
