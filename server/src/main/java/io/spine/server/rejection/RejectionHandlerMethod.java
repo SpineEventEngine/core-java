@@ -47,7 +47,7 @@ import static io.spine.util.Exceptions.unsupported;
  * @author Alexander Yevsyukov
  */
 @Internal
-public class RejectionHandlerMethod extends HandlerMethod<RejectionHandlerKey, RejectionContext> {
+class RejectionHandlerMethod extends HandlerMethod<RejectionHandlerKey, RejectionContext> {
 
     /** Determines the number of parameters and their types. */
     private final Kind kind;
