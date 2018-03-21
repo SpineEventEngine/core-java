@@ -120,7 +120,7 @@ public final class ProcessManagerClass<P extends ProcessManager>
 
     RejectionReactorMethod getReactor(RejectionClass cls, CommandClass commandCls) {
         final RejectionHandlerMethod.Id idWithCommand = RejectionHandlerMethod.idFrom(cls, commandCls);
-        final boolean existsHandlerForCommand = rejectionReactors.exists(idWithCommand);
+        final boolean existsHandlerForCommand = rejectionReactors.hasMethod(idWithCommand);
         if (existsHandlerForCommand) {
             return rejectionReactors.getMethod(idWithCommand);
         }

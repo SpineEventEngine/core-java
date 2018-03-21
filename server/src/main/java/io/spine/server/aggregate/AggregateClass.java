@@ -123,7 +123,7 @@ public class AggregateClass<A extends Aggregate>
     RejectionReactorMethod getReactor(RejectionClass rejCls, CommandClass cmdCls) {
         final RejectionHandlerMethod.Id idWithCommand = RejectionHandlerMethod.idFrom(rejCls,
                                                                                       cmdCls);
-        final boolean existsHandlerForCommand = rejectionReactions.exists(idWithCommand);
+        final boolean existsHandlerForCommand = rejectionReactions.hasMethod(idWithCommand);
         if (existsHandlerForCommand) {
             return rejectionReactions.getMethod(idWithCommand);
         }

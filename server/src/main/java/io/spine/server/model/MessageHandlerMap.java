@@ -91,12 +91,12 @@ public class MessageHandlerMap<M extends MessageClass, I extends HandlerMethod.I
     }
 
     /**
-     * Determines whether the handler with the specified exists.
+     * Determines whether the map has a handler method with the specified ID.
      *
      * @param handlerId the ID of the handler to check
      * @return {@code true} if there is a handler with the ID, {@code false} otherwise
      */
-    public boolean exists(I handlerId) {
+    public boolean hasMethod(I handlerId) {
         return map.containsKey(handlerId);
     }
 
