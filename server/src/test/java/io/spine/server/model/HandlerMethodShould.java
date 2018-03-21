@@ -202,7 +202,7 @@ public class HandlerMethodShould {
 
         @Override
         public Id id() {
-            throw new UnsupportedOperationException("The method is not target of the test");
+            throw new UnsupportedOperationException("The method is not a target of the test.");
         }
     }
 
@@ -219,7 +219,7 @@ public class HandlerMethodShould {
 
         @Override
         public Id id() {
-            throw new UnsupportedOperationException("The method is not target of the test");
+            throw new UnsupportedOperationException("The method is not a target of the test.");
         }
     }
 }
