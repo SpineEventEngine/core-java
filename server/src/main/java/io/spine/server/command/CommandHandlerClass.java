@@ -40,7 +40,7 @@ public final class CommandHandlerClass<C extends CommandHandler>
 
     private static final long serialVersionUID = 0L;
 
-    private final MessageHandlerMap<CommandClass, CommandHandlerMethod.Id, CommandHandlerMethod> commands;
+    private final MessageHandlerMap<CommandClass, CommandHandlerKey, CommandHandlerMethod> commands;
 
     private CommandHandlerClass(Class<? extends C> cls) {
         super(cls);
@@ -52,8 +52,8 @@ public final class CommandHandlerClass<C extends CommandHandler>
     }
 
     CommandHandlerMethod getHandler(CommandClass commandClass) {
-        final CommandHandlerMethod.Id handlerId = CommandHandlerMethod.idFrom(commandClass);
-        return commands.getMethod(handlerId);
+        final CommandHandlerKey handlerKey = CommandHandlerKey.of(commandClass);
+        return commands.getMethod(handlerKey);
     }
 
     /**

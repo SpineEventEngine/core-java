@@ -43,7 +43,7 @@ public final class RejectionSubscriberClass<S extends RejectionSubscriber> exten
     private static final long serialVersionUID = 0L;
 
     private final
-    MessageHandlerMap<RejectionClass, RejectionSubscriberMethod.Id, RejectionSubscriberMethod> rejectionSubscriptions;
+    MessageHandlerMap<RejectionClass, RejectionHandlerKey, RejectionSubscriberMethod> rejectionSubscriptions;
     private final ImmutableSet<RejectionClass> domesticSubscriptions;
     private final ImmutableSet<RejectionClass> externalSubscriptions;
 
@@ -74,12 +74,12 @@ public final class RejectionSubscriberClass<S extends RejectionSubscriber> exten
     }
 
     RejectionSubscriberMethod getSubscriber(RejectionClass cls, CommandClass commandCls) {
-        final RejectionHandlerMethod.Id idWithCommand = RejectionHandlerMethod.idFrom(cls, commandCls);
-        final boolean existsHandlerForCommand = rejectionSubscriptions.hasMethod(idWithCommand);
+        final RejectionHandlerKey keyWithCommand = RejectionHandlerKey.of(cls, commandCls);
+        final boolean existsHandlerForCommand = rejectionSubscriptions.hasMethod(keyWithCommand);
         if (existsHandlerForCommand) {
-            return rejectionSubscriptions.getMethod(idWithCommand);
+            return rejectionSubscriptions.getMethod(keyWithCommand);
         }
-        final RejectionHandlerMethod.Id idWithoutCommand = RejectionHandlerMethod.idFrom(cls);
-        return rejectionSubscriptions.getMethod(idWithoutCommand);
+        final RejectionHandlerKey keyWithoutCommand = RejectionHandlerKey.of(cls);
+        return rejectionSubscriptions.getMethod(keyWithoutCommand);
     }
 }

@@ -21,23 +21,18 @@
 package io.spine.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.MoreObjects;
 import com.google.common.base.Predicate;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.EventClass;
-import io.spine.server.model.HandlerKey;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.HandlerMethodPredicate;
 import io.spine.server.model.MethodPredicate;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Objects;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A wrapper for event applier method.
@@ -45,7 +40,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alexander Yevsyukov
  */
 @Internal
-public final class EventApplierMethod extends HandlerMethod<EventApplierMethod.Id, Empty> {
+final class EventApplierMethod extends HandlerMethod<EventApplierKey, Empty> {
 
     /** The instance of the predicate to filter event applier methods of an aggregate class. */
     private static final MethodPredicate PREDICATE = new FilterPredicate();
@@ -65,12 +60,8 @@ public final class EventApplierMethod extends HandlerMethod<EventApplierMethod.I
     }
 
     @Override
-    public Id key() {
-        return idFrom(getMessageClass());
-    }
-
-    public static Id idFrom(EventClass eventClass) {
-        return new Id(eventClass);
+    public EventApplierKey key() {
+        return EventApplierKey.of(getMessageClass());
     }
 
     static EventApplierMethod from(Method method) {
@@ -162,44 +153,6 @@ public final class EventApplierMethod extends HandlerMethod<EventApplierMethod.I
         protected boolean verifyReturnType(Method method) {
             final boolean isVoid = Void.TYPE.equals(method.getReturnType());
             return isVoid;
-        }
-    }
-
-    public static final class Id implements HandlerKey<EventClass> {
-
-        private final EventClass eventClass;
-
-        private Id(EventClass eventClass) {
-            this.eventClass = checkNotNull(eventClass);
-        }
-
-        @Override
-        public EventClass getHandledMessageCls() {
-            return eventClass;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-            Id that = (Id) o;
-            return Objects.equals(eventClass, that.eventClass);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(eventClass);
-        }
-
-        @Override
-        public String toString() {
-            return MoreObjects.toStringHelper(this)
-                              .add("eventClass", eventClass)
-                              .toString();
         }
     }
 }

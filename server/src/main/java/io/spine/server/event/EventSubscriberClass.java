@@ -43,7 +43,7 @@ public final class EventSubscriberClass<S extends EventSubscriber> extends Model
 
     private static final long serialVersionUID = 0L;
 
-    private final MessageHandlerMap<EventClass, EventSubscriberMethod.Id, EventSubscriberMethod> eventSubscriptions;
+    private final MessageHandlerMap<EventClass, EventSubscriberKey, EventSubscriberMethod> eventSubscriptions;
     private final ImmutableSet<EventClass> domesticSubscriptions;
     private final ImmutableSet<EventClass> externalSubscriptions;
 
@@ -74,7 +74,7 @@ public final class EventSubscriberClass<S extends EventSubscriber> extends Model
     }
 
     EventSubscriberMethod getSubscriber(EventClass eventClass) {
-        final EventSubscriberMethod.Id subscriberId = EventSubscriberMethod.idFrom(eventClass);
-        return eventSubscriptions.getMethod(subscriberId);
+        final EventSubscriberKey subscriberKey = EventSubscriberKey.of(eventClass);
+        return eventSubscriptions.getMethod(subscriberKey);
     }
 }

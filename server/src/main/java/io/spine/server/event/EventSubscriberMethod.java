@@ -20,21 +20,17 @@
 
 package io.spine.server.event;
 
-import com.google.common.base.MoreObjects;
 import com.google.common.base.Predicate;
 import com.google.protobuf.Message;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
-import io.spine.server.model.HandlerKey;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.MethodPredicate;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Objects;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.core.Rejections.isRejection;
 import static io.spine.server.model.HandlerMethods.ensureExternalMatch;
 
@@ -44,7 +40,7 @@ import static io.spine.server.model.HandlerMethods.ensureExternalMatch;
  * @author Alexander Yevsyukov
  * @see Subscribe
  */
-public final class EventSubscriberMethod extends HandlerMethod<EventSubscriberMethod.Id, EventContext> {
+public final class EventSubscriberMethod extends HandlerMethod<EventSubscriberKey, EventContext> {
 
     /** The instance of the predicate to filter event subscriber methods of a class. */
     private static final MethodPredicate PREDICATE = new FilterPredicate();
@@ -60,12 +56,8 @@ public final class EventSubscriberMethod extends HandlerMethod<EventSubscriberMe
     }
 
     @Override
-    public Id key() {
-        return idFrom(getMessageClass());
-    }
-
-    public static Id idFrom(EventClass eventClass) {
-        return new Id(eventClass);
+    public EventSubscriberKey key() {
+        return EventSubscriberKey.of(getMessageClass());
     }
 
     static EventSubscriberMethod from(Method method) {
@@ -153,44 +145,6 @@ public final class EventSubscriberMethod extends HandlerMethod<EventSubscriberMe
         protected boolean verifyReturnType(Method method) {
             final boolean isVoid = Void.TYPE.equals(method.getReturnType());
             return isVoid;
-        }
-    }
-
-    public static final class Id implements HandlerKey<EventClass> {
-
-        private final EventClass eventClass;
-
-        private Id(EventClass eventClass) {
-            this.eventClass = checkNotNull(eventClass);
-        }
-
-        @Override
-        public EventClass getHandledMessageCls() {
-            return eventClass;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-            Id that = (Id) o;
-            return Objects.equals(eventClass, that.eventClass);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(eventClass);
-        }
-
-        @Override
-        public String toString() {
-            return MoreObjects.toStringHelper(this)
-                              .add("eventClass", eventClass)
-                              .toString();
         }
     }
 }

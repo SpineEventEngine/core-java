@@ -20,7 +20,6 @@
 
 package io.spine.server.command;
 
-import com.google.common.base.MoreObjects;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.protobuf.Any;
@@ -31,7 +30,6 @@ import io.spine.base.ThrowableMessage;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
 import io.spine.server.entity.Entity;
-import io.spine.server.model.HandlerKey;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.HandlerMethodFailedException;
 import io.spine.server.model.HandlerMethodPredicate;
@@ -39,9 +37,7 @@ import io.spine.server.model.MethodPredicate;
 
 import java.lang.reflect.Method;
 import java.util.List;
-import java.util.Objects;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.getRootCause;
 
 /**
@@ -50,7 +46,7 @@ import static com.google.common.base.Throwables.getRootCause;
  * @author Alexander Yevsyukov
  */
 @Internal
-public final class CommandHandlerMethod extends HandlerMethod<CommandHandlerMethod.Id, CommandContext> {
+public final class CommandHandlerMethod extends HandlerMethod<CommandHandlerKey, CommandContext> {
 
     /** The instance of the predicate to filter command handler methods of a class. */
     private static final MethodPredicate PREDICATE = new FilterPredicate();
@@ -70,12 +66,8 @@ public final class CommandHandlerMethod extends HandlerMethod<CommandHandlerMeth
     }
 
     @Override
-    public Id key() {
-        return idFrom(getMessageClass());
-    }
-
-    public static Id idFrom(CommandClass commandClass) {
-        return new Id(commandClass);
+    public CommandHandlerKey key() {
+        return CommandHandlerKey.of(getMessageClass());
     }
 
     static CommandHandlerMethod from(Method method) {
@@ -199,44 +191,6 @@ public final class CommandHandlerMethod extends HandlerMethod<CommandHandlerMeth
         protected boolean verifyReturnType(Method method) {
             final boolean result = returnsMessageOrIterable(method);
             return result;
-        }
-    }
-
-    public static final class Id implements HandlerKey<CommandClass> {
-
-        private final CommandClass commandClass;
-
-        private Id(CommandClass commandClass) {
-            this.commandClass = checkNotNull(commandClass);
-        }
-
-        @Override
-        public CommandClass getHandledMessageCls() {
-            return commandClass;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-            Id that = (Id) o;
-            return Objects.equals(commandClass, that.commandClass);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(commandClass);
-        }
-
-        @Override
-        public String toString() {
-            return MoreObjects.toStringHelper(this)
-                              .add("commandClass", commandClass)
-                              .toString();
         }
     }
 }

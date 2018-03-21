@@ -25,13 +25,15 @@ import io.spine.annotation.Internal;
 import io.spine.core.CommandClass;
 import io.spine.core.EventClass;
 import io.spine.core.RejectionClass;
+import io.spine.server.command.CommandHandlerKey;
 import io.spine.server.command.CommandHandlerMethod;
 import io.spine.server.command.CommandHandlingClass;
 import io.spine.server.entity.EntityClass;
+import io.spine.server.event.EventReactorKey;
 import io.spine.server.event.EventReactorMethod;
 import io.spine.server.model.HandlerMethods;
 import io.spine.server.model.MessageHandlerMap;
-import io.spine.server.rejection.RejectionHandlerMethod;
+import io.spine.server.rejection.RejectionHandlerKey;
 import io.spine.server.rejection.RejectionReactorMethod;
 
 import java.util.Set;
@@ -52,10 +54,10 @@ public class AggregateClass<A extends Aggregate>
 
     private static final long serialVersionUID = 0L;
 
-    private final MessageHandlerMap<CommandClass, CommandHandlerMethod.Id, CommandHandlerMethod> commands;
-    private final MessageHandlerMap<EventClass, EventApplierMethod.Id, EventApplierMethod> stateEvents;
-    private final MessageHandlerMap<EventClass, EventReactorMethod.Id, EventReactorMethod> eventReactions;
-    private final MessageHandlerMap<RejectionClass, RejectionReactorMethod.Id, RejectionReactorMethod> rejectionReactions;
+    private final MessageHandlerMap<CommandClass, CommandHandlerKey, CommandHandlerMethod> commands;
+    private final MessageHandlerMap<EventClass, EventApplierKey, EventApplierMethod> stateEvents;
+    private final MessageHandlerMap<EventClass, EventReactorKey, EventReactorMethod> eventReactions;
+    private final MessageHandlerMap<RejectionClass, RejectionHandlerKey, RejectionReactorMethod> rejectionReactions;
 
     private final ImmutableSet<EventClass> domesticEventReactions;
     private final ImmutableSet<EventClass> externalEventReactions;
@@ -106,28 +108,27 @@ public class AggregateClass<A extends Aggregate>
     }
 
     CommandHandlerMethod getHandler(CommandClass commandClass) {
-        final CommandHandlerMethod.Id handlerId = CommandHandlerMethod.idFrom(commandClass);
-        return commands.getMethod(handlerId);
+        final CommandHandlerKey handlerKey = CommandHandlerKey.of(commandClass);
+        return commands.getMethod(handlerKey);
     }
 
     EventApplierMethod getApplier(EventClass eventClass) {
-        final EventApplierMethod.Id applierId = EventApplierMethod.idFrom(eventClass);
-        return stateEvents.getMethod(applierId);
+        final EventApplierKey applierKey = EventApplierKey.of(eventClass);
+        return stateEvents.getMethod(applierKey);
     }
 
     EventReactorMethod getReactor(EventClass eventClass) {
-        final EventReactorMethod.Id eventReactorId = EventReactorMethod.idFrom(eventClass);
-        return eventReactions.getMethod(eventReactorId);
+        final EventReactorKey eventReactorKey = EventReactorKey.of(eventClass);
+        return eventReactions.getMethod(eventReactorKey);
     }
 
     RejectionReactorMethod getReactor(RejectionClass rejCls, CommandClass cmdCls) {
-        final RejectionHandlerMethod.Id idWithCommand = RejectionHandlerMethod.idFrom(rejCls,
-                                                                                      cmdCls);
-        final boolean existsHandlerForCommand = rejectionReactions.hasMethod(idWithCommand);
+        final RejectionHandlerKey keyWithCommand = RejectionHandlerKey.of(rejCls, cmdCls);
+        final boolean existsHandlerForCommand = rejectionReactions.hasMethod(keyWithCommand);
         if (existsHandlerForCommand) {
-            return rejectionReactions.getMethod(idWithCommand);
+            return rejectionReactions.getMethod(keyWithCommand);
         }
-        final RejectionHandlerMethod.Id idWithoutCommand = RejectionHandlerMethod.idFrom(rejCls);
-        return rejectionReactions.getMethod(idWithoutCommand);
+        final RejectionHandlerKey keyWithoutCommand = RejectionHandlerKey.of(rejCls);
+        return rejectionReactions.getMethod(keyWithoutCommand);
     }
 }

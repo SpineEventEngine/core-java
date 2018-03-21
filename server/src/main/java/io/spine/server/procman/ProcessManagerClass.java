@@ -25,13 +25,15 @@ import io.spine.annotation.Internal;
 import io.spine.core.CommandClass;
 import io.spine.core.EventClass;
 import io.spine.core.RejectionClass;
+import io.spine.server.command.CommandHandlerKey;
 import io.spine.server.command.CommandHandlerMethod;
 import io.spine.server.command.CommandHandlingClass;
 import io.spine.server.entity.EntityClass;
+import io.spine.server.event.EventReactorKey;
 import io.spine.server.event.EventReactorMethod;
 import io.spine.server.model.HandlerMethods;
 import io.spine.server.model.MessageHandlerMap;
-import io.spine.server.rejection.RejectionHandlerMethod;
+import io.spine.server.rejection.RejectionHandlerKey;
 import io.spine.server.rejection.RejectionReactorMethod;
 
 import java.util.Set;
@@ -52,9 +54,9 @@ public final class ProcessManagerClass<P extends ProcessManager>
 
     private static final long serialVersionUID = 0L;
 
-    private final MessageHandlerMap<CommandClass, CommandHandlerMethod.Id, CommandHandlerMethod> commands;
-    private final MessageHandlerMap<EventClass, EventReactorMethod.Id, EventReactorMethod> eventReactors;
-    private final MessageHandlerMap<RejectionClass, RejectionReactorMethod.Id, RejectionReactorMethod> rejectionReactors;
+    private final MessageHandlerMap<CommandClass, CommandHandlerKey, CommandHandlerMethod> commands;
+    private final MessageHandlerMap<EventClass, EventReactorKey, EventReactorMethod> eventReactors;
+    private final MessageHandlerMap<RejectionClass, RejectionHandlerKey, RejectionReactorMethod> rejectionReactors;
 
     private final ImmutableSet<EventClass> domesticEventReactions;
     private final ImmutableSet<EventClass> externalEventReactions;
@@ -109,22 +111,22 @@ public final class ProcessManagerClass<P extends ProcessManager>
     }
 
     CommandHandlerMethod getHandler(CommandClass commandClass) {
-        final CommandHandlerMethod.Id handlerId = CommandHandlerMethod.idFrom(commandClass);
-        return commands.getMethod(handlerId);
+        final CommandHandlerKey handlerKey = CommandHandlerKey.of(commandClass);
+        return commands.getMethod(handlerKey);
     }
 
     EventReactorMethod getReactor(EventClass eventClass) {
-        final EventReactorMethod.Id eventReactorId = EventReactorMethod.idFrom(eventClass);
-        return eventReactors.getMethod(eventReactorId);
+        final EventReactorKey eventReactorKey = EventReactorKey.of(eventClass);
+        return eventReactors.getMethod(eventReactorKey);
     }
 
     RejectionReactorMethod getReactor(RejectionClass cls, CommandClass commandCls) {
-        final RejectionHandlerMethod.Id idWithCommand = RejectionHandlerMethod.idFrom(cls, commandCls);
-        final boolean existsHandlerForCommand = rejectionReactors.hasMethod(idWithCommand);
+        final RejectionHandlerKey keyWithCommand = RejectionHandlerKey.of(cls, commandCls);
+        final boolean existsHandlerForCommand = rejectionReactors.hasMethod(keyWithCommand);
         if (existsHandlerForCommand) {
-            return rejectionReactors.getMethod(idWithCommand);
+            return rejectionReactors.getMethod(keyWithCommand);
         }
-        final RejectionHandlerMethod.Id idWithoutCommand = RejectionHandlerMethod.idFrom(cls);
-        return rejectionReactors.getMethod(idWithoutCommand);
+        final RejectionHandlerKey keyWithoutCommand = RejectionHandlerKey.of(cls);
+        return rejectionReactors.getMethod(keyWithoutCommand);
     }
 }

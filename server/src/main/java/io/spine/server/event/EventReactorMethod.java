@@ -20,21 +20,17 @@
 
 package io.spine.server.event;
 
-import com.google.common.base.MoreObjects;
 import com.google.common.base.Predicate;
 import com.google.protobuf.Message;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.React;
-import io.spine.server.model.HandlerKey;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.MethodPredicate;
 
 import java.lang.reflect.Method;
 import java.util.List;
-import java.util.Objects;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.model.HandlerMethods.ensureExternalMatch;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
@@ -44,7 +40,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @author Alexander Yevsyukov
  * @see React
  */
-public final class EventReactorMethod extends HandlerMethod<EventReactorMethod.Id, EventContext> {
+public final class EventReactorMethod extends HandlerMethod<EventReactorKey, EventContext> {
 
     private static final MethodPredicate PREDICATE = new FilterPredicate();
 
@@ -58,12 +54,8 @@ public final class EventReactorMethod extends HandlerMethod<EventReactorMethod.I
     }
 
     @Override
-    public Id key() {
-        return idFrom(getMessageClass());
-    }
-
-    public static Id idFrom(EventClass eventClass) {
-        return new Id(eventClass);
+    public EventReactorKey key() {
+        return EventReactorKey.of(getMessageClass());
     }
 
     /**
@@ -177,44 +169,6 @@ public final class EventReactorMethod extends HandlerMethod<EventReactorMethod.I
                         "React method cannot return the same event message {}",
                         firstParamType.getName());
             }
-        }
-    }
-
-    public static final class Id implements HandlerKey<EventClass> {
-
-        private final EventClass eventClass;
-
-        private Id(EventClass eventClass) {
-            this.eventClass = checkNotNull(eventClass);
-        }
-
-        @Override
-        public EventClass getHandledMessageCls() {
-            return eventClass;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-            Id that = (Id) o;
-            return Objects.equals(eventClass, that.eventClass);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(eventClass);
-        }
-
-        @Override
-        public String toString() {
-            return MoreObjects.toStringHelper(this)
-                              .add("eventClass", eventClass)
-                              .toString();
         }
     }
 }

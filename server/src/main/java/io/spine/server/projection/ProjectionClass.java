@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
 import io.spine.core.EventClass;
 import io.spine.server.entity.EntityClass;
+import io.spine.server.event.EventSubscriberKey;
 import io.spine.server.event.EventSubscriberMethod;
 import io.spine.server.model.HandlerMethods;
 import io.spine.server.model.MessageHandlerMap;
@@ -44,7 +45,7 @@ public final class ProjectionClass<P extends Projection> extends EntityClass<P> 
 
     private static final long serialVersionUID = 0L;
 
-    private final MessageHandlerMap<EventClass, EventSubscriberMethod.Id, EventSubscriberMethod> eventSubscriptions;
+    private final MessageHandlerMap<EventClass, EventSubscriberKey, EventSubscriberMethod> eventSubscriptions;
     private final ImmutableSet<EventClass> domesticSubscriptions;
     private final ImmutableSet<EventClass> externalSubscriptions;
 
@@ -72,7 +73,7 @@ public final class ProjectionClass<P extends Projection> extends EntityClass<P> 
     }
 
     EventSubscriberMethod getSubscriber(EventClass eventClass) {
-        final EventSubscriberMethod.Id subscriberId = EventSubscriberMethod.idFrom(eventClass);
-        return eventSubscriptions.getMethod(subscriberId);
+        final EventSubscriberKey subscriberKey = EventSubscriberKey.of(eventClass);
+        return eventSubscriptions.getMethod(subscriberKey);
     }
 }

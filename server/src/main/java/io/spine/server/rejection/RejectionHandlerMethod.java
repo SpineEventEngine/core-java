@@ -19,7 +19,6 @@
  */
 package io.spine.server.rejection;
 
-import com.google.common.base.MoreObjects;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.Command;
@@ -28,15 +27,12 @@ import io.spine.core.CommandContext;
 import io.spine.core.Commands;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionContext;
-import io.spine.server.model.HandlerKey;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.HandlerMethodPredicate;
 
-import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.core.Rejections.isRejection;
@@ -51,7 +47,7 @@ import static io.spine.util.Exceptions.unsupported;
  * @author Alexander Yevsyukov
  */
 @Internal
-public class RejectionHandlerMethod extends HandlerMethod<RejectionHandlerMethod.Id, RejectionContext> {
+public class RejectionHandlerMethod extends HandlerMethod<RejectionHandlerKey, RejectionContext> {
 
     /** Determines the number of parameters and their types. */
     private final Kind kind;
@@ -72,22 +68,14 @@ public class RejectionHandlerMethod extends HandlerMethod<RejectionHandlerMethod
     }
 
     @Override
-    public Id key() {
+    public RejectionHandlerKey key() {
         if (kind == Kind.COMMAND_AWARE || kind == Kind.COMMAND_MESSAGE_AWARE) {
             @SuppressWarnings("unchecked") // RejectionFilterPredicate ensures that
             final Class<? extends Message> rawCommandClass = (Class<? extends Message>) getMethod().getParameterTypes()[1];
-            return idFrom(getMessageClass(), CommandClass.of(rawCommandClass));
+            return RejectionHandlerKey.of(getMessageClass(), CommandClass.of(rawCommandClass));
         } else {
-            return idFrom(getMessageClass());
+            return RejectionHandlerKey.of(getMessageClass());
         }
-    }
-
-    public static Id idFrom(RejectionClass rejectionClass) {
-        return new Id(rejectionClass, null);
-    }
-
-    public static Id idFrom(RejectionClass rejectionClass, CommandClass commandClass) {
-        return new Id(rejectionClass, checkNotNull(commandClass));
     }
 
     private static Kind getKind(Method method) {
@@ -317,53 +305,4 @@ public class RejectionHandlerMethod extends HandlerMethod<RejectionHandlerMethod
         }
     }
 
-    /**
-     * An ID for a rejection handler method.
-     *
-     * <p>The ID always contains {@link RejectionClass}, but {@link CommandClass} is optional
-     * because a rejection handler doesn't necessarily has a command message as a parameter.
-     */
-    public static final class Id implements HandlerKey<RejectionClass> {
-
-        @Nullable
-        private final CommandClass commandClass;
-        private final RejectionClass rejectionClass;
-
-        private Id(RejectionClass rejectionClass,
-                   @Nullable CommandClass commandClass) {
-            this.rejectionClass = checkNotNull(rejectionClass);
-            this.commandClass = commandClass;
-        }
-
-        @Override
-        public RejectionClass getHandledMessageCls() {
-            return rejectionClass;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-            Id that = (Id) o;
-            return Objects.equals(rejectionClass, that.rejectionClass) &&
-                    Objects.equals(commandClass, that.commandClass);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(rejectionClass, commandClass);
-        }
-
-        @Override
-        public String toString() {
-            return MoreObjects.toStringHelper(this)
-                              .add("rejectionClass", rejectionClass)
-                              .add("commandClass", commandClass)
-                              .toString();
-        }
-    }
 }
