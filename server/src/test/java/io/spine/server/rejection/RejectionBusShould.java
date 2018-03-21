@@ -219,8 +219,7 @@ public class RejectionBusShould {
         final MultipleRejectionSubscriber subscriber = new MultipleRejectionSubscriber();
         rejectionBus.register(subscriber);
 
-        final Class<StringValue> commandMessageCls = StringValue.class;
-        final Rejection rejection = cannotModifyDeletedEntity(commandMessageCls);
+        final Rejection rejection = cannotModifyDeletedEntity(StringValue.class);
         rejectionBus.post(rejection);
 
         assertEquals(1, subscriber.numberOfSubscriberCalls());
