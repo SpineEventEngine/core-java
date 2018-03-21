@@ -23,7 +23,7 @@ package io.spine.server.model;
 import io.spine.type.MessageClass;
 
 /**
- * A key of {@link HandlerMethod}.
+ * A key, which is used to identify {@link HandlerMethod}.
  *
  * @author Dmytro Grankin
  */
