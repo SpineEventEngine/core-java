@@ -76,27 +76,27 @@ public class MessageHandlerMap<M extends MessageClass, K extends HandlerKey<M>, 
     }
 
     /**
-     * Obtains the method for handling by the passed ID.
+     * Obtains the method for handling by the passed key.
      *
-     * @param  handlerId the ID of the handler to get
+     * @param handlerKey the key of the handler to get
      * @return a handler method
      * @throws IllegalStateException if there is no method found in the map
      */
-    public H getMethod(K handlerId) {
-        final H handlerMethod = map.get(handlerId);
+    public H getMethod(K handlerKey) {
+        final H handlerMethod = map.get(handlerKey);
         checkState(handlerMethod != null,
-                   "Unable to find handler with ID %s", handlerId);
+                   "Unable to find handler with key %s", handlerKey);
         return handlerMethod;
     }
 
     /**
-     * Determines whether the map has a handler method with the specified ID.
+     * Determines whether the map has a handler method with the specified key.
      *
-     * @param handlerId the ID of the handler to check
-     * @return {@code true} if there is a handler with the ID, {@code false} otherwise
+     * @param handlerKey the key of the handler to check
+     * @return {@code true} if there is a handler with the key, {@code false} otherwise
      */
-    public boolean hasMethod(K handlerId) {
-        return map.containsKey(handlerId);
+    public boolean hasMethod(K handlerKey) {
+        return map.containsKey(handlerKey);
     }
 
     private static <M extends MessageClass, K extends HandlerKey<M>>
