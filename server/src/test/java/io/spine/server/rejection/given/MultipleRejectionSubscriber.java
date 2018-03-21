@@ -28,6 +28,11 @@ import io.spine.test.rejection.command.RjRemoveOwner;
 import io.spine.test.rejection.command.RjStartProject;
 import io.spine.test.rejection.command.RjUpdateProjectName;
 
+/**
+ * A rejection subscriber to test filtering of rejections using command message parameter.
+ *
+ * @author Dmytro Grankin
+ */
 public class MultipleRejectionSubscriber extends RejectionSubscriber {
 
     private int subscriberCalls = 0;
