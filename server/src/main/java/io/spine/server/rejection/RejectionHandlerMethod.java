@@ -320,7 +320,7 @@ public class RejectionHandlerMethod extends HandlerMethod<RejectionHandlerMethod
      * An ID for a rejection handler method.
      *
      * <p>The ID always contains {@link RejectionClass}, but {@link CommandClass} is optional
-     * because a rejection handler doesn't necessarily receives a command message as a parameter.
+     * because a rejection handler doesn't necessarily has a command message as a parameter.
      */
     public static final class Id implements HandlerMethod.Id {
 
