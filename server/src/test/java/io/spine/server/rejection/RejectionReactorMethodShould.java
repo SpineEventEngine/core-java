@@ -22,9 +22,7 @@ package io.spine.server.rejection;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import io.spine.core.Command;
-import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
-import io.spine.core.RejectionClass;
 import io.spine.core.RejectionContext;
 import io.spine.server.model.given.Given;
 import io.spine.server.rejection.given.RejectionReactorMethodTestEnv.RInvalidNoAnnotation;
@@ -61,8 +59,6 @@ public class RejectionReactorMethodShould {
                 .setDefault(Any.class, Any.getDefaultInstance())
                 .setDefault(CommandContext.class, emptyCommandContext)
                 .setDefault(RejectionContext.class, RejectionContext.getDefaultInstance())
-                .setDefault(RejectionClass.class, RejectionClass.of(Any.class))
-                .setDefault(CommandClass.class, CommandClass.of(Any.class))
                 .testAllPublicStaticMethods(RejectionReactorMethod.class);
     }
 
