@@ -26,17 +26,22 @@ import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
+import io.spine.core.Rejection;
+import io.spine.core.RejectionEnvelope;
+import io.spine.core.Rejections;
 import io.spine.core.TenantId;
 import io.spine.core.UserId;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.BoundedContext;
 import io.spine.server.command.TestEventFactory;
+import io.spine.server.entity.rejection.StandardRejections.CannotModifyDeletedEntity;
 import io.spine.server.event.EventStreamQuery;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.test.aggregate.command.AggAssignTask;
 import io.spine.test.aggregate.command.AggCreateTask;
 import io.spine.test.aggregate.command.AggReassignTask;
 import io.spine.test.aggregate.task.AggTaskId;
+import io.spine.testdata.Sample;
 import io.spine.type.TypeUrl;
 
 import java.util.List;
@@ -159,6 +164,15 @@ public class AggregateTestEnv {
 
     public static Event event(Message eventMessage, int versionNumber) {
         return eventFactory().createEvent(eventMessage, withNumber(versionNumber));
+    }
+
+    public static RejectionEnvelope cannotModifyDeletedEntity(Class<? extends Message> commandMessageCls) {
+        final CannotModifyDeletedEntity rejectionMsg = CannotModifyDeletedEntity.newBuilder()
+                                                                                .build();
+        final Command command = io.spine.server.commandbus.Given.ACommand.withMessage(
+                Sample.messageOfType(commandMessageCls));
+        final Rejection rejection = Rejections.createRejection(rejectionMsg, command);
+        return RejectionEnvelope.of(rejection);
     }
 
     private static TestActorRequestFactory requestFactory(TenantId tenantId) {

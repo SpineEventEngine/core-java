@@ -120,8 +120,14 @@ public class AggregateClass<A extends Aggregate>
         return eventReactions.getMethod(eventReactorId);
     }
 
-    RejectionReactorMethod getReactor(RejectionClass rejectionClass) {
-        final RejectionHandlerMethod.Id handlerId = RejectionHandlerMethod.idFrom(rejectionClass);
-        return rejectionReactions.getMethod(handlerId);
+    RejectionReactorMethod getReactor(RejectionClass rejCls, CommandClass cmdCls) {
+        final RejectionHandlerMethod.Id idWithCommand = RejectionHandlerMethod.idFrom(rejCls,
+                                                                                      cmdCls);
+        final boolean existsHandlerForCommand = rejectionReactions.exists(idWithCommand);
+        if (existsHandlerForCommand) {
+            return rejectionReactions.getMethod(idWithCommand);
+        }
+        final RejectionHandlerMethod.Id idWithoutCommand = RejectionHandlerMethod.idFrom(rejCls);
+        return rejectionReactions.getMethod(idWithoutCommand);
     }
 }

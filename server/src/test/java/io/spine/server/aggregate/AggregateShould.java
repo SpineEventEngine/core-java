@@ -22,6 +22,7 @@ package io.spine.server.aggregate;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
+import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Error;
@@ -86,10 +87,12 @@ import static io.spine.server.TestCommandClasses.assertContains;
 import static io.spine.server.TestEventClasses.assertContains;
 import static io.spine.server.TestEventClasses.getEventClasses;
 import static io.spine.server.aggregate.AggregateMessageDispatcher.dispatchCommand;
+import static io.spine.server.aggregate.AggregateMessageDispatcher.dispatchRejection;
 import static io.spine.server.aggregate.given.Given.EventMessage.projectCreated;
 import static io.spine.server.aggregate.given.Given.EventMessage.projectStarted;
 import static io.spine.server.aggregate.given.Given.EventMessage.taskAdded;
 import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.assignTask;
+import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.cannotModifyDeletedEntity;
 import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.command;
 import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.createTask;
 import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.env;
@@ -262,6 +265,20 @@ public class AggregateShould {
         dispatchCommand(aggregate, env(startProject));
         assertTrue(aggregate.isStartProjectCommandHandled);
         assertTrue(aggregate.isProjectStartedEventApplied);
+    }
+
+    @Test
+    public void react_on_rejection_by_rejection_message_only() {
+        dispatchRejection(aggregate, cannotModifyDeletedEntity(StringValue.class));
+        assertTrue(aggregate.isRejectionHandled);
+        assertFalse(aggregate.isRejectionWithCmdHandled);
+    }
+
+    @Test
+    public void react_on_rejection_by_rejection_and_command_message() {
+        dispatchRejection(aggregate, cannotModifyDeletedEntity(AggAddTask.class));
+        assertTrue(aggregate.isRejectionWithCmdHandled);
+        assertFalse(aggregate.isRejectionHandled);
     }
 
     @Test(expected = IllegalStateException.class)

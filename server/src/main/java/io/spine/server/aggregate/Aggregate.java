@@ -26,6 +26,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.grpc.Internal;
+import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
@@ -243,7 +244,10 @@ public abstract class Aggregate<I,
      *         response to this rejection
      */
     List<? extends Message> reactOn(RejectionEnvelope rejection) {
-        final RejectionReactorMethod method = thisClass().getReactor(rejection.getMessageClass());
+        final CommandClass commandClass = CommandClass.of(rejection.getCommandMessage()
+                                                                   .getClass());
+        final RejectionReactorMethod method = thisClass().getReactor(rejection.getMessageClass(),
+                                                                     commandClass);
         final List<? extends Message> messages =
                 method.invoke(this, rejection.getMessage(), rejection.getRejectionContext());
         return from(messages).filter(nonEmpty()).toList();
