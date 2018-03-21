@@ -33,6 +33,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Objects;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.core.Rejections.isRejection;
 import static io.spine.server.model.HandlerMethods.ensureExternalMatch;
 
@@ -159,7 +160,7 @@ public final class EventSubscriberMethod extends HandlerMethod<EventSubscriberMe
         private final EventClass eventClass;
 
         private Id(EventClass eventClass) {
-            this.eventClass = eventClass;
+            this.eventClass = checkNotNull(eventClass);
         }
 
         @Override

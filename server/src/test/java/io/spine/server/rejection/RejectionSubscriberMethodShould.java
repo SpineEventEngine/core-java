@@ -22,7 +22,9 @@ package io.spine.server.rejection;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import io.spine.core.Command;
+import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
+import io.spine.core.RejectionClass;
 import io.spine.core.RejectionContext;
 import io.spine.core.RejectionEnvelope;
 import io.spine.server.model.given.Given;
@@ -64,6 +66,8 @@ public class RejectionSubscriberMethodShould {
                 .setDefault(Any.class, Any.getDefaultInstance())
                 .setDefault(CommandContext.class, emptyCmdContext)
                 .setDefault(RejectionContext.class, emptyContext)
+                .setDefault(RejectionClass.class, RejectionClass.of(Any.class))
+                .setDefault(CommandClass.class, CommandClass.of(Any.class))
                 .testAllPublicStaticMethods(RejectionSubscriberMethod.class);
     }
 

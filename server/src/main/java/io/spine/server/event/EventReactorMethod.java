@@ -33,6 +33,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Objects;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.model.HandlerMethods.ensureExternalMatch;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
@@ -183,7 +184,7 @@ public final class EventReactorMethod extends HandlerMethod<EventReactorMethod.I
         private final EventClass eventClass;
 
         private Id(EventClass eventClass) {
-            this.eventClass = eventClass;
+            this.eventClass = checkNotNull(eventClass);
         }
 
         @Override

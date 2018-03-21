@@ -40,6 +40,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Objects;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.getRootCause;
 
 /**
@@ -205,7 +206,7 @@ public final class CommandHandlerMethod extends HandlerMethod<CommandHandlerMeth
         private final CommandClass commandClass;
 
         private Id(CommandClass commandClass) {
-            this.commandClass = commandClass;
+            this.commandClass = checkNotNull(commandClass);
         }
 
         @Override

@@ -36,6 +36,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Objects;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * A wrapper for event applier method.
  *
@@ -167,7 +169,7 @@ public final class EventApplierMethod extends HandlerMethod<EventApplierMethod.I
         private final EventClass eventClass;
 
         private Id(EventClass eventClass) {
-            this.eventClass = eventClass;
+            this.eventClass = checkNotNull(eventClass);
         }
 
         @Override

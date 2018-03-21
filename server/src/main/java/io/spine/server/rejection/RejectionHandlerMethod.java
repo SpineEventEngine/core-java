@@ -86,7 +86,7 @@ public class RejectionHandlerMethod extends HandlerMethod<RejectionHandlerMethod
     }
 
     public static Id idFrom(RejectionClass rejectionClass, CommandClass commandClass) {
-        return new Id(rejectionClass, commandClass);
+        return new Id(rejectionClass, checkNotNull(commandClass));
     }
 
     private static Kind getKind(Method method) {
@@ -330,7 +330,7 @@ public class RejectionHandlerMethod extends HandlerMethod<RejectionHandlerMethod
 
         private Id(RejectionClass rejectionClass,
                    @Nullable CommandClass commandClass) {
-            this.rejectionClass = rejectionClass;
+            this.rejectionClass = checkNotNull(rejectionClass);
             this.commandClass = commandClass;
         }
 
