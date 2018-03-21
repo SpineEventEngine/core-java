@@ -202,7 +202,7 @@ public class HandlerMethodShould {
 
         @Override
         public HandlerKey key() {
-            throw new UnsupportedOperationException("The method is not a target of the test.");
+            throw new IllegalStateException("The method is not a target of the test.");
         }
     }
 
@@ -219,7 +219,7 @@ public class HandlerMethodShould {
 
         @Override
         public HandlerKey key() {
-            throw new UnsupportedOperationException("The method is not a target of the test.");
+            throw new IllegalStateException("The method is not a target of the test.");
         }
     }
 }
