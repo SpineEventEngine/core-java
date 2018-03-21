@@ -38,7 +38,7 @@ import io.spine.server.rejection.given.RejectionReactorMethodTestEnv.RValidButPr
 import io.spine.server.rejection.given.RejectionReactorMethodTestEnv.RValidThreeParams;
 import io.spine.server.rejection.given.RejectionReactorMethodTestEnv.RValidTwoParams;
 import io.spine.test.reflect.ReflectRejections.InvalidProjectName;
-import io.spine.test.rejection.command.UpdateProjectName;
+import io.spine.test.rejection.command.RjUpdateProjectName;
 import org.junit.Test;
 
 import java.lang.reflect.InvocationTargetException;
@@ -78,7 +78,7 @@ public class RejectionReactorMethodShould {
                 CommandContext.newBuilder()
                               .setTargetVersion(3040)
                               .build();
-        final UpdateProjectName commandMessage = UpdateProjectName.getDefaultInstance();
+        final RjUpdateProjectName commandMessage = RjUpdateProjectName.getDefaultInstance();
         builder.setCommand(Command.newBuilder()
                                   .setMessage(pack(commandMessage))
                                   .setContext(commandContext));

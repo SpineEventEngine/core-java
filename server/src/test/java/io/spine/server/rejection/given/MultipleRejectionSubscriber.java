@@ -24,9 +24,9 @@ import com.google.protobuf.Message;
 import io.spine.core.Subscribe;
 import io.spine.server.entity.rejection.StandardRejections.CannotModifyDeletedEntity;
 import io.spine.server.rejection.RejectionSubscriber;
-import io.spine.test.reflect.command.UpdateProjectName;
-import io.spine.test.rejection.command.RemoveOwner;
-import io.spine.test.rejection.command.StartProject;
+import io.spine.test.rejection.command.RjRemoveOwner;
+import io.spine.test.rejection.command.RjStartProject;
+import io.spine.test.rejection.command.RjUpdateProjectName;
 
 public class MultipleRejectionSubscriber extends RejectionSubscriber {
 
@@ -35,19 +35,19 @@ public class MultipleRejectionSubscriber extends RejectionSubscriber {
 
     @Subscribe
     public void on(CannotModifyDeletedEntity rejection,
-                   StartProject command) {
+                   RjStartProject command) {
         handleRejectionWithCommandMessage(command);
     }
 
     @Subscribe
     public void on(CannotModifyDeletedEntity rejection,
-                   UpdateProjectName command) {
+                   RjUpdateProjectName command) {
         handleRejectionWithCommandMessage(command);
     }
 
     @Subscribe
     public void on(CannotModifyDeletedEntity rejection,
-                   RemoveOwner command) {
+                   RjRemoveOwner command) {
         handleRejectionWithCommandMessage(command);
     }
 

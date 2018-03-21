@@ -40,7 +40,7 @@ import io.spine.server.rejection.given.MultipleRejectionSubscriber;
 import io.spine.server.rejection.given.PostponedDispatcherRejectionDelivery;
 import io.spine.server.rejection.given.RejectionMessageSubscriber;
 import io.spine.server.rejection.given.VerifiableSubscriber;
-import io.spine.test.rejection.command.StartProject;
+import io.spine.test.rejection.command.RjStartProject;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -206,7 +206,7 @@ public class RejectionBusShould {
         final MultipleRejectionSubscriber subscriber = new MultipleRejectionSubscriber();
         rejectionBus.register(subscriber);
 
-        final Class<StartProject> commandMessageCls = StartProject.class;
+        final Class<RjStartProject> commandMessageCls = RjStartProject.class;
         final Rejection rejection = cannotModifyDeletedEntity(commandMessageCls);
         rejectionBus.post(rejection);
 

@@ -31,19 +31,19 @@ option java_multiple_files = true;
 import "spine/change/change.proto";
 import "spine/test/rejection/project.proto";
 
-message StartProject {
+message RjStartProject {
 
     ProjectId id = 1;
 }
 
-message UpdateProjectName {
+message RjUpdateProjectName {
 
     ProjectId id = 1;
 
     spine.change.StringChange name_update = 2;
 }
 
-message RemoveOwner {
+message RjRemoveOwner {
 
     ProjectId id = 1;
 
