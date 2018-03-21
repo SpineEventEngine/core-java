@@ -41,6 +41,7 @@ import io.spine.server.command.TestEventFactory;
 import io.spine.server.event.EventSubscriber;
 import io.spine.server.integration.IntegrationBus;
 import io.spine.server.integration.TransportFactory;
+import io.spine.server.model.HandlerMethod;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.server.projection.Projection;
@@ -474,6 +475,32 @@ public class IntegrationBusTestEnv {
         public static void clear() {
             externalRejection = null;
             domesticRejection = null;
+        }
+
+        /**
+         * Rethrow all the issues, so that they are visible to tests.
+         */
+        @Override
+        public void onError(RejectionEnvelope envelope, RuntimeException exception) {
+            throw illegalStateWithCauseOf(exception);
+        }
+    }
+
+    /**
+     * A subscriber for testing of
+     * {@linkplain io.spine.server.model.HandlerMethods#ensureExternalMatch(HandlerMethod, boolean)
+     * external attribute mismatch check}.
+     */
+    public static final class ExternalMismatchSubscriber extends RejectionSubscriber {
+
+        @Subscribe(external = true)
+        public void on(ItgCannotStartArchivedProject rejection, ItgStartProject command) {
+            // do nothing.
+        }
+
+        @Subscribe
+        public void on(ItgCannotStartArchivedProject rejection) {
+            // do nothing.
         }
 
         /**
