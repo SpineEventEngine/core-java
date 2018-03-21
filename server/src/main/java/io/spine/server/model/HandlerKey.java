@@ -17,31 +17,13 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package io.spine.server.model;
 
-import static java.lang.String.format;
-
 /**
- * Indicates that more than one handling method for the same message class are present
- * in the declaring class.
+ * A key of {@link HandlerMethod}.
  *
- * @author Mikhail Melnik
- * @author Alexander Yevsyukov
+ * @author Dmytro Grankin
  */
-public class DuplicateHandlerMethodError extends ModelError {
-
-    private static final long serialVersionUID = 0L;
-
-    public DuplicateHandlerMethodError(
-            Class<?> targetClass,
-            HandlerKey handlerKey,
-            String firstMethodName,
-            String secondMethodName) {
-
-        super(format(
-                "The %s class defines more than one method with ID %s." +
-                        " Methods encountered: %s, %s.",
-                targetClass.getName(), handlerKey,
-                firstMethodName, secondMethodName));
-    }
+public interface HandlerKey {
 }

@@ -28,6 +28,7 @@ import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.EventClass;
+import io.spine.server.model.HandlerKey;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.HandlerMethodPredicate;
 import io.spine.server.model.MethodPredicate;
@@ -64,7 +65,7 @@ public final class EventApplierMethod extends HandlerMethod<EventApplierMethod.I
     }
 
     @Override
-    public Id id() {
+    public Id key() {
         return idFrom(getMessageClass());
     }
 
@@ -164,7 +165,7 @@ public final class EventApplierMethod extends HandlerMethod<EventApplierMethod.I
         }
     }
 
-    public static final class Id implements HandlerMethod.Id {
+    public static final class Id implements HandlerKey {
 
         private final EventClass eventClass;
 

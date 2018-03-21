@@ -26,6 +26,7 @@ import com.google.protobuf.Message;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.React;
+import io.spine.server.model.HandlerKey;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.MethodPredicate;
 
@@ -57,7 +58,7 @@ public final class EventReactorMethod extends HandlerMethod<EventReactorMethod.I
     }
 
     @Override
-    public Id id() {
+    public Id key() {
         return idFrom(getMessageClass());
     }
 
@@ -179,7 +180,7 @@ public final class EventReactorMethod extends HandlerMethod<EventReactorMethod.I
         }
     }
 
-    public static final class Id implements HandlerMethod.Id {
+    public static final class Id implements HandlerKey {
 
         private final EventClass eventClass;
 

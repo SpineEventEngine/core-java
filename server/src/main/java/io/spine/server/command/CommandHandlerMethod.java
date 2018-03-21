@@ -31,6 +31,7 @@ import io.spine.base.ThrowableMessage;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
 import io.spine.server.entity.Entity;
+import io.spine.server.model.HandlerKey;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.HandlerMethodFailedException;
 import io.spine.server.model.HandlerMethodPredicate;
@@ -69,7 +70,7 @@ public final class CommandHandlerMethod extends HandlerMethod<CommandHandlerMeth
     }
 
     @Override
-    public Id id() {
+    public Id key() {
         return idFrom(getMessageClass());
     }
 
@@ -201,7 +202,7 @@ public final class CommandHandlerMethod extends HandlerMethod<CommandHandlerMeth
         }
     }
 
-    public static final class Id implements HandlerMethod.Id {
+    public static final class Id implements HandlerKey {
 
         private final CommandClass commandClass;
 
