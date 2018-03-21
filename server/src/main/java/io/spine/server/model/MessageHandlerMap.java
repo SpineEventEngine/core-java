@@ -28,7 +28,6 @@ import io.spine.type.MessageClass;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
-import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
@@ -63,7 +62,7 @@ public class MessageHandlerMap<M extends MessageClass, K extends HandlerKey<M>, 
      * Obtains classes of messages for which handlers are stored in this map.
      */
     public Set<M> getMessageClasses() {
-        return messageClasses(map.values());
+        return messageClasses(map.keySet());
     }
 
     /**
@@ -73,7 +72,7 @@ public class MessageHandlerMap<M extends MessageClass, K extends HandlerKey<M>, 
      */
     public ImmutableSet<M> getMessageClasses(Predicate<H> predicate) {
         final Map<K, H> filtered = Maps.filterValues(map, predicate);
-        return messageClasses(filtered.values());
+        return messageClasses(filtered.keySet());
     }
 
     /**
@@ -100,11 +99,11 @@ public class MessageHandlerMap<M extends MessageClass, K extends HandlerKey<M>, 
         return map.containsKey(handlerId);
     }
 
-    private static <M extends MessageClass, H extends HandlerMethod>
-    ImmutableSet<M> messageClasses(Collection<H> handlers) {
+    private static <M extends MessageClass, K extends HandlerKey<M>>
+    ImmutableSet<M> messageClasses(Iterable<K> handlerKeys) {
         final Set<M> setToSwallowDuplicates = newHashSet();
-        for (HandlerMethod handler : handlers) {
-            setToSwallowDuplicates.add((M) handler.getMessageClass());
+        for (K handlerKey : handlerKeys) {
+            setToSwallowDuplicates.add(handlerKey.getHandledMessageCls());
         }
         return ImmutableSet.copyOf(setToSwallowDuplicates);
     }
