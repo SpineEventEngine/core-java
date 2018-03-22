@@ -304,5 +304,4 @@ class RejectionHandlerMethod extends HandlerMethod<RejectionHandlerKey, Rejectio
             return thirdParamCorrect;
         }
     }
-
 }
