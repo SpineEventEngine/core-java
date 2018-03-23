@@ -41,12 +41,12 @@ import static com.google.common.collect.Sets.newHashSet;
  * @param <H> the type of handler methods
  * @author Alexander Yevsyukov
  */
-public class MessageHandlerMap<M extends MessageClass, K extends HandlerKey<M>, H extends HandlerMethod<K, ?>>
+public class MessageHandlerMap<M extends MessageClass, H extends HandlerMethod<M, ?>>
         implements Serializable {
 
     private static final long serialVersionUID = 0L;
 
-    private final ImmutableMap<K, H> map;
+    private final ImmutableMap<HandlerKey<M>, H> map;
 
     /**
      * Creates a map of methods found in the passed class.
@@ -71,7 +71,7 @@ public class MessageHandlerMap<M extends MessageClass, K extends HandlerKey<M>, 
      * @param predicate a predicate for handler methods to filter the corresponding message classes
      */
     public ImmutableSet<M> getMessageClasses(Predicate<H> predicate) {
-        final Map<K, H> filtered = Maps.filterValues(map, predicate);
+        final Map<HandlerKey<M>, H> filtered = Maps.filterValues(map, predicate);
         return messageClasses(filtered.keySet());
     }
 
@@ -82,7 +82,7 @@ public class MessageHandlerMap<M extends MessageClass, K extends HandlerKey<M>, 
      * @return a handler method
      * @throws IllegalStateException if there is no method found in the map
      */
-    public H getMethod(K handlerKey) {
+    public H getMethod(HandlerKey<M> handlerKey) {
         final H handlerMethod = map.get(handlerKey);
         checkState(handlerMethod != null,
                    "Unable to find handler with key %s", handlerKey);
@@ -95,7 +95,7 @@ public class MessageHandlerMap<M extends MessageClass, K extends HandlerKey<M>, 
      * @param handlerKey the key of the handler to check
      * @return {@code true} if there is a handler with the key, {@code false} otherwise
      */
-    public boolean hasMethod(K handlerKey) {
+    public boolean hasMethod(HandlerKey<M> handlerKey) {
         return map.containsKey(handlerKey);
     }
 
@@ -108,15 +108,15 @@ public class MessageHandlerMap<M extends MessageClass, K extends HandlerKey<M>, 
         return ImmutableSet.copyOf(setToSwallowDuplicates);
     }
 
-    private static <K extends HandlerKey, H extends HandlerMethod<K, ?>>
-    ImmutableMap<K, H> scan(Class<?> declaringClass, HandlerMethod.Factory<H> factory) {
+    private static <M extends MessageClass, H extends HandlerMethod<M, ?>>
+    ImmutableMap<HandlerKey<M>, H> scan(Class<?> declaringClass, HandlerMethod.Factory<H> factory) {
         final Predicate<Method> filter = factory.getPredicate();
-        final Map<K, H> tempMap = Maps.newHashMap();
+        final Map<HandlerKey<M>, H> tempMap = Maps.newHashMap();
         final Method[] declaredMethods = declaringClass.getDeclaredMethods();
         for (Method method : declaredMethods) {
             if (filter.apply(method)) {
                 final H handler = factory.create(method);
-                final K handlerKey = handler.key();
+                final HandlerKey<M> handlerKey = handler.key();
                 if (tempMap.containsKey(handlerKey)) {
                     final Method alreadyPresent = tempMap.get(handlerKey)
                                                          .getMethod();
@@ -129,7 +129,7 @@ public class MessageHandlerMap<M extends MessageClass, K extends HandlerKey<M>, 
                 tempMap.put(handlerKey, handler);
             }
         }
-        final ImmutableMap<K, H> result = ImmutableMap.copyOf(tempMap);
+        final ImmutableMap<HandlerKey<M>, H> result = ImmutableMap.copyOf(tempMap);
         return result;
     }
 }

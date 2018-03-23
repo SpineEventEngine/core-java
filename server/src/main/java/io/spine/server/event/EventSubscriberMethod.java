@@ -40,7 +40,7 @@ import static io.spine.server.model.HandlerMethods.ensureExternalMatch;
  * @author Alexander Yevsyukov
  * @see Subscribe
  */
-public final class EventSubscriberMethod extends HandlerMethod<EventSubscriberKey, EventContext> {
+public final class EventSubscriberMethod extends HandlerMethod<EventClass, EventContext> {
 
     /** The instance of the predicate to filter event subscriber methods of a class. */
     private static final MethodPredicate PREDICATE = new FilterPredicate();

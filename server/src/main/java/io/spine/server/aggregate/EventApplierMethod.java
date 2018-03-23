@@ -40,7 +40,7 @@ import java.lang.reflect.Modifier;
  * @author Alexander Yevsyukov
  */
 @Internal
-final class EventApplierMethod extends HandlerMethod<EventApplierKey, Empty> {
+final class EventApplierMethod extends HandlerMethod<EventClass, Empty> {
 
     /** The instance of the predicate to filter event applier methods of an aggregate class. */
     private static final MethodPredicate PREDICATE = new FilterPredicate();

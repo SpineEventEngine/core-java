@@ -45,7 +45,7 @@ public final class ProjectionClass<P extends Projection> extends EntityClass<P> 
 
     private static final long serialVersionUID = 0L;
 
-    private final MessageHandlerMap<EventClass, EventSubscriberKey, EventSubscriberMethod> eventSubscriptions;
+    private final MessageHandlerMap<EventClass, EventSubscriberMethod> eventSubscriptions;
     private final ImmutableSet<EventClass> domesticSubscriptions;
     private final ImmutableSet<EventClass> externalSubscriptions;
 

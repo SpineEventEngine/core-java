@@ -40,7 +40,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @author Alexander Yevsyukov
  * @see React
  */
-public final class EventReactorMethod extends HandlerMethod<EventReactorKey, EventContext> {
+public final class EventReactorMethod extends HandlerMethod<EventClass, EventContext> {
 
     private static final MethodPredicate PREDICATE = new FilterPredicate();
 

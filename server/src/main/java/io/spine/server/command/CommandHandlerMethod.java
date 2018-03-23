@@ -46,7 +46,7 @@ import static com.google.common.base.Throwables.getRootCause;
  * @author Alexander Yevsyukov
  */
 @Internal
-public final class CommandHandlerMethod extends HandlerMethod<CommandHandlerKey, CommandContext> {
+public final class CommandHandlerMethod extends HandlerMethod<CommandClass, CommandContext> {
 
     /** The instance of the predicate to filter command handler methods of a class. */
     private static final MethodPredicate PREDICATE = new FilterPredicate();
