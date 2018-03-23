@@ -20,57 +20,23 @@
 
 package io.spine.server.event;
 
-import com.google.common.base.MoreObjects;
+import com.google.protobuf.Empty;
+import io.spine.core.CommandClass;
 import io.spine.core.EventClass;
 import io.spine.server.model.HandlerKey;
-
-import java.util.Objects;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A key for {@link EventSubscriberMethod}.
  *
  * @author Dmytro Grankin
  */
-public final class EventSubscriberKey implements HandlerKey<EventClass> {
-
-    private final EventClass eventClass;
+public final class EventSubscriberKey extends HandlerKey<EventClass> {
 
     private EventSubscriberKey(EventClass eventClass) {
-        this.eventClass = checkNotNull(eventClass);
+        super(eventClass, CommandClass.of(Empty.class));
     }
 
     public static EventSubscriberKey of(EventClass eventClass) {
         return new EventSubscriberKey(eventClass);
-    }
-
-    @Override
-    public EventClass getHandledMessageCls() {
-        return eventClass;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        EventSubscriberKey that = (EventSubscriberKey) o;
-        return Objects.equals(eventClass, that.eventClass);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(eventClass);
-    }
-
-    @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-                          .add("eventClass", eventClass)
-                          .toString();
     }
 }

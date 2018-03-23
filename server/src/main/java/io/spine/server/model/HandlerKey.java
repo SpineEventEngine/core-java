@@ -20,17 +20,72 @@
 
 package io.spine.server.model;
 
+import com.google.common.base.MoreObjects;
 import io.spine.type.MessageClass;
 
+import java.util.Objects;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
- * A key, which is used to identify {@link HandlerMethod}.
+ * A key of {@link HandlerMethod}.
  *
+ * <p>Contains information about parameters of a handler method.
+ *
+ * @param <M> the type of the handled message class
  * @author Dmytro Grankin
  */
-public interface HandlerKey<M extends MessageClass> {
+public class HandlerKey<M extends MessageClass> {
+
+    private final M handledMessage;
+    private final MessageClass originMessage;
+
+    protected HandlerKey(M handledMessage, MessageClass originMessage) {
+        this.handledMessage = checkNotNull(handledMessage);
+        this.originMessage = checkNotNull(originMessage);
+    }
 
     /**
      * Obtains a {@link MessageClass}, which is handled by {@link HandlerMethod} with this key.
      */
-    M getHandledMessageCls();
+    public M getHandledMessageCls() {
+        return handledMessage;
+    }
+
+    /**
+     * Obtains {@link MessageClass} of the message caused
+     * {@linkplain #getHandledMessageCls() handled message}.
+     *
+     * @return the message class of the origin
+     *         or {@code CommandClass} of {@code Empty} if origin is ignored
+     */
+    public MessageClass getOriginCls() {
+        return originMessage;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof HandlerKey)) {
+            return false;
+        }
+        HandlerKey<?> that = (HandlerKey<?>) o;
+        return Objects.equals(handledMessage, that.handledMessage) &&
+                Objects.equals(originMessage, that.originMessage);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(handledMessage, originMessage);
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                          .add("handledMessage", handledMessage)
+                          .add("originMessage", originMessage)
+                          .toString();
+    }
 }

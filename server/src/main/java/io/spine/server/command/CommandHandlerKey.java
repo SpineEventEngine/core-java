@@ -20,57 +20,22 @@
 
 package io.spine.server.command;
 
-import com.google.common.base.MoreObjects;
+import com.google.protobuf.Empty;
 import io.spine.core.CommandClass;
 import io.spine.server.model.HandlerKey;
-
-import java.util.Objects;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A key for {@link CommandHandlerMethod}.
  *
  * @author Dmytro Grankin
  */
-public final class CommandHandlerKey implements HandlerKey<CommandClass> {
-
-    private final CommandClass commandClass;
+public final class CommandHandlerKey extends HandlerKey<CommandClass> {
 
     private CommandHandlerKey(CommandClass commandClass) {
-        this.commandClass = checkNotNull(commandClass);
+        super(commandClass, CommandClass.of(Empty.class));
     }
 
     public static CommandHandlerKey of(CommandClass commandClass) {
         return new CommandHandlerKey(commandClass);
-    }
-
-    @Override
-    public CommandClass getHandledMessageCls() {
-        return commandClass;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        CommandHandlerKey that = (CommandHandlerKey) o;
-        return Objects.equals(commandClass, that.commandClass);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(commandClass);
-    }
-
-    @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-                          .add("commandClass", commandClass)
-                          .toString();
     }
 }

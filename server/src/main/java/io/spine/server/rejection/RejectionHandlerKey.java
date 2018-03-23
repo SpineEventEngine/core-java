@@ -20,15 +20,10 @@
 
 package io.spine.server.rejection;
 
-import com.google.common.base.MoreObjects;
 import com.google.protobuf.Empty;
 import io.spine.core.CommandClass;
 import io.spine.core.RejectionClass;
 import io.spine.server.model.HandlerKey;
-
-import java.util.Objects;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A key for a rejection handler method.
@@ -38,15 +33,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Dmytro Grankin
  */
-public class RejectionHandlerKey implements HandlerKey<RejectionClass> {
-
-    private final CommandClass commandClass;
-    private final RejectionClass rejectionClass;
+public class RejectionHandlerKey extends HandlerKey<RejectionClass> {
 
     private RejectionHandlerKey(RejectionClass rejectionClass,
                                 CommandClass commandClass) {
-        this.rejectionClass = checkNotNull(rejectionClass);
-        this.commandClass = checkNotNull(commandClass);
+        super(rejectionClass, commandClass);
     }
 
     public static RejectionHandlerKey of(RejectionClass rejectionClass, CommandClass commandClass) {
@@ -55,36 +46,5 @@ public class RejectionHandlerKey implements HandlerKey<RejectionClass> {
 
     public static RejectionHandlerKey of(RejectionClass rejectionClass) {
         return new RejectionHandlerKey(rejectionClass, CommandClass.of(Empty.class));
-    }
-
-    @Override
-    public RejectionClass getHandledMessageCls() {
-        return rejectionClass;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        RejectionHandlerKey that = (RejectionHandlerKey) o;
-        return Objects.equals(rejectionClass, that.rejectionClass) &&
-                Objects.equals(commandClass, that.commandClass);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(rejectionClass, commandClass);
-    }
-
-    @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-                          .add("rejectionClass", rejectionClass)
-                          .add("commandClass", commandClass)
-                          .toString();
     }
 }
