@@ -25,7 +25,6 @@ import com.google.common.base.Predicate;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
-import io.spine.annotation.Internal;
 import io.spine.core.EventClass;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.HandlerMethodPredicate;
@@ -39,7 +38,6 @@ import java.lang.reflect.Modifier;
  *
  * @author Alexander Yevsyukov
  */
-@Internal
 final class EventApplierMethod extends HandlerMethod<EventClass, Empty> {
 
     /** The instance of the predicate to filter event applier methods of an aggregate class. */
