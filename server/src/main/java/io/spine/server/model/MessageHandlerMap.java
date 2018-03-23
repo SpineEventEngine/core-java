@@ -24,8 +24,6 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
-import com.google.protobuf.Empty;
-import io.spine.core.CommandClass;
 import io.spine.type.MessageClass;
 
 import java.io.Serializable;
@@ -100,7 +98,7 @@ public class MessageHandlerMap<M extends MessageClass, H extends HandlerMethod<M
      * @throws IllegalStateException if there is no method found in the map
      */
     public H getMethod(M messageClass, MessageClass originClass) {
-        final HandlerKey<M> key = new HandlerKey<>(messageClass, originClass);
+        final HandlerKey<M> key = HandlerKey.of(messageClass, originClass);
         return getMethod(key);
     }
 
@@ -112,7 +110,7 @@ public class MessageHandlerMap<M extends MessageClass, H extends HandlerMethod<M
      * @throws IllegalStateException if there is no method found in the map
      */
     public H getMethod(M messageClass) {
-        final HandlerKey<M> key = new HandlerKey<>(messageClass, CommandClass.of(Empty.class));
+        final HandlerKey<M> key = HandlerKey.of(messageClass);
         return getMethod(key);
     }
 
@@ -134,7 +132,7 @@ public class MessageHandlerMap<M extends MessageClass, H extends HandlerMethod<M
      * @return {@code true} if there is a matching handler, {@code false} otherwise
      */
     public boolean hasMethod(M messageClass, MessageClass originClass) {
-        final HandlerKey<M> key = new HandlerKey<>(messageClass, originClass);
+        final HandlerKey<M> key = HandlerKey.of(messageClass, originClass);
         return hasMethod(key);
     }
 

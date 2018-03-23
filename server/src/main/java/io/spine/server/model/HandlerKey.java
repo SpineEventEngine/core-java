@@ -21,6 +21,8 @@
 package io.spine.server.model;
 
 import com.google.common.base.MoreObjects;
+import com.google.protobuf.Empty;
+import io.spine.core.CommandClass;
 import io.spine.type.MessageClass;
 
 import java.util.Objects;
@@ -35,14 +37,23 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @param <M> the type of the handled message class
  * @author Dmytro Grankin
  */
-public class HandlerKey<M extends MessageClass> {
+public final class HandlerKey<M extends MessageClass> {
 
     private final M handledMessage;
     private final MessageClass originMessage;
 
-    protected HandlerKey(M handledMessage, MessageClass originMessage) {
+    private HandlerKey(M handledMessage, MessageClass originMessage) {
         this.handledMessage = checkNotNull(handledMessage);
         this.originMessage = checkNotNull(originMessage);
+    }
+
+    public static <M extends MessageClass>
+    HandlerKey<M> of(M handledMessage, MessageClass originMessage) {
+        return new HandlerKey<>(handledMessage, originMessage);
+    }
+
+    public static <M extends MessageClass> HandlerKey<M> of(M handledMessage) {
+        return new HandlerKey<>(handledMessage, CommandClass.of(Empty.class));
     }
 
     /**

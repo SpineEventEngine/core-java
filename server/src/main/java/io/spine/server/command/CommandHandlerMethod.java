@@ -30,6 +30,7 @@ import io.spine.base.ThrowableMessage;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
 import io.spine.server.entity.Entity;
+import io.spine.server.model.HandlerKey;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.HandlerMethodFailedException;
 import io.spine.server.model.HandlerMethodPredicate;
@@ -66,8 +67,8 @@ public final class CommandHandlerMethod extends HandlerMethod<CommandClass, Comm
     }
 
     @Override
-    public CommandHandlerKey key() {
-        return CommandHandlerKey.of(getMessageClass());
+    public HandlerKey<CommandClass> key() {
+        return HandlerKey.of(getMessageClass());
     }
 
     static CommandHandlerMethod from(Method method) {

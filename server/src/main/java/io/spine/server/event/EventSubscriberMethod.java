@@ -25,6 +25,7 @@ import com.google.protobuf.Message;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
+import io.spine.server.model.HandlerKey;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.MethodPredicate;
 
@@ -56,8 +57,8 @@ public final class EventSubscriberMethod extends HandlerMethod<EventClass, Event
     }
 
     @Override
-    public EventSubscriberKey key() {
-        return EventSubscriberKey.of(getMessageClass());
+    public HandlerKey<EventClass> key() {
+        return HandlerKey.of(getMessageClass());
     }
 
     static EventSubscriberMethod from(Method method) {

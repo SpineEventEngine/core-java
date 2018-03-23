@@ -27,6 +27,7 @@ import io.spine.core.CommandContext;
 import io.spine.core.Commands;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionContext;
+import io.spine.server.model.HandlerKey;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.HandlerMethodPredicate;
 
@@ -68,13 +69,13 @@ class RejectionHandlerMethod extends HandlerMethod<RejectionClass, RejectionCont
     }
 
     @Override
-    public RejectionHandlerKey key() {
+    public HandlerKey<RejectionClass> key() {
         if (kind == Kind.COMMAND_AWARE || kind == Kind.COMMAND_MESSAGE_AWARE) {
             @SuppressWarnings("unchecked") // RejectionFilterPredicate ensures that
             final Class<? extends Message> rawCommandClass = (Class<? extends Message>) getMethod().getParameterTypes()[1];
-            return RejectionHandlerKey.of(getMessageClass(), CommandClass.of(rawCommandClass));
+            return HandlerKey.of(getMessageClass(), CommandClass.of(rawCommandClass));
         } else {
-            return RejectionHandlerKey.of(getMessageClass());
+            return HandlerKey.of(getMessageClass());
         }
     }
 

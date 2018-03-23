@@ -26,6 +26,7 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.core.EventClass;
+import io.spine.server.model.HandlerKey;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.HandlerMethodPredicate;
 import io.spine.server.model.MethodPredicate;
@@ -58,8 +59,8 @@ final class EventApplierMethod extends HandlerMethod<EventClass, Empty> {
     }
 
     @Override
-    public EventApplierKey key() {
-        return EventApplierKey.of(getMessageClass());
+    public HandlerKey<EventClass> key() {
+        return HandlerKey.of(getMessageClass());
     }
 
     static EventApplierMethod from(Method method) {
