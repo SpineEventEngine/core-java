@@ -92,14 +92,20 @@ public class MessageHandlerMap<M extends MessageClass, H extends HandlerMethod<M
     /**
      * Obtains the method for handling by the passed message and origin classes.
      *
+     * <p>If there is no handler matching both the message and origin class,
+     * a handler will be searched by a message class only.
+     *
      * @param messageClass the message class of the handled message
      * @param originClass  the class of the message, from which the handled message is originate
      * @return a handler method
      * @throws IllegalStateException if there is no method found in the map
      */
     public H getMethod(M messageClass, MessageClass originClass) {
-        final HandlerKey<M> key = HandlerKey.of(messageClass, originClass);
-        return getMethod(key);
+        final HandlerKey<M> keyWithOrigin = HandlerKey.of(messageClass, originClass);
+        if (map.containsKey(keyWithOrigin)) {
+            return getMethod(keyWithOrigin);
+        }
+        return getMethod(messageClass);
     }
 
     /**
@@ -112,28 +118,6 @@ public class MessageHandlerMap<M extends MessageClass, H extends HandlerMethod<M
     public H getMethod(M messageClass) {
         final HandlerKey<M> key = HandlerKey.of(messageClass);
         return getMethod(key);
-    }
-
-    /**
-     * Determines whether the map has a handler method with the specified key.
-     *
-     * @param handlerKey the key of the handler to check
-     * @return {@code true} if there is a handler with the key, {@code false} otherwise
-     */
-    public boolean hasMethod(HandlerKey<M> handlerKey) {
-        return map.containsKey(handlerKey);
-    }
-
-    /**
-     * Determines whether the map has a handler method for the passes classes.
-     *
-     * @param messageClass the message class of the handled message
-     * @param originClass  the class of the message, from which the handled message is originate
-     * @return {@code true} if there is a matching handler, {@code false} otherwise
-     */
-    public boolean hasMethod(M messageClass, MessageClass originClass) {
-        final HandlerKey<M> key = HandlerKey.of(messageClass, originClass);
-        return hasMethod(key);
     }
 
     private static <M extends MessageClass, K extends HandlerKey<M>>

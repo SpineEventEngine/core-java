@@ -116,10 +116,6 @@ public final class ProcessManagerClass<P extends ProcessManager>
     }
 
     RejectionReactorMethod getReactor(RejectionClass cls, CommandClass commandCls) {
-        final boolean existsHandlerForCommand = rejectionReactors.hasMethod(cls, commandCls);
-        if (existsHandlerForCommand) {
-            return rejectionReactors.getMethod(cls, commandCls);
-        }
-        return rejectionReactors.getMethod(cls);
+        return rejectionReactors.getMethod(cls, commandCls);
     }
 }

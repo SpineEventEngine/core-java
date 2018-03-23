@@ -117,10 +117,6 @@ public class AggregateClass<A extends Aggregate>
     }
 
     RejectionReactorMethod getReactor(RejectionClass rejCls, CommandClass cmdCls) {
-        final boolean existsHandlerForCommand = rejectionReactions.hasMethod(rejCls, cmdCls);
-        if (existsHandlerForCommand) {
-            return rejectionReactions.getMethod(rejCls, cmdCls);
-        }
-        return rejectionReactions.getMethod(rejCls);
+        return rejectionReactions.getMethod(rejCls, cmdCls);
     }
 }
