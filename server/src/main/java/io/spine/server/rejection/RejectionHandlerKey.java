@@ -33,18 +33,18 @@ import io.spine.server.model.HandlerKey;
  *
  * @author Dmytro Grankin
  */
-public class RejectionHandlerKey extends HandlerKey<RejectionClass> {
+class RejectionHandlerKey extends HandlerKey<RejectionClass> {
 
     private RejectionHandlerKey(RejectionClass rejectionClass,
                                 CommandClass commandClass) {
         super(rejectionClass, commandClass);
     }
 
-    public static RejectionHandlerKey of(RejectionClass rejectionClass, CommandClass commandClass) {
+    static RejectionHandlerKey of(RejectionClass rejectionClass, CommandClass commandClass) {
         return new RejectionHandlerKey(rejectionClass, commandClass);
     }
 
-    public static RejectionHandlerKey of(RejectionClass rejectionClass) {
+    static RejectionHandlerKey of(RejectionClass rejectionClass) {
         return new RejectionHandlerKey(rejectionClass, CommandClass.of(Empty.class));
     }
 }

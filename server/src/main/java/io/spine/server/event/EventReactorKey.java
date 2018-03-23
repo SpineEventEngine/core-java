@@ -30,13 +30,13 @@ import io.spine.server.model.HandlerKey;
  *
  * @author Dmytro Grankin
  */
-public final class EventReactorKey extends HandlerKey<EventClass> {
+final class EventReactorKey extends HandlerKey<EventClass> {
 
     private EventReactorKey(EventClass eventClass) {
         super(eventClass, CommandClass.of(Empty.class));
     }
 
-    public static EventReactorKey of(EventClass eventClass) {
+    static EventReactorKey of(EventClass eventClass) {
         return new EventReactorKey(eventClass);
     }
 }

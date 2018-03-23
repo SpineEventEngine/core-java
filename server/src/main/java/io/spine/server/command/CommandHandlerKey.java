@@ -29,13 +29,13 @@ import io.spine.server.model.HandlerKey;
  *
  * @author Dmytro Grankin
  */
-public final class CommandHandlerKey extends HandlerKey<CommandClass> {
+final class CommandHandlerKey extends HandlerKey<CommandClass> {
 
     private CommandHandlerKey(CommandClass commandClass) {
         super(commandClass, CommandClass.of(Empty.class));
     }
 
-    public static CommandHandlerKey of(CommandClass commandClass) {
+    static CommandHandlerKey of(CommandClass commandClass) {
         return new CommandHandlerKey(commandClass);
     }
 }

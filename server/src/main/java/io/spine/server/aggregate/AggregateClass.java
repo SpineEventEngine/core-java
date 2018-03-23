@@ -25,11 +25,9 @@ import io.spine.annotation.Internal;
 import io.spine.core.CommandClass;
 import io.spine.core.EventClass;
 import io.spine.core.RejectionClass;
-import io.spine.server.command.CommandHandlerKey;
 import io.spine.server.command.CommandHandlerMethod;
 import io.spine.server.command.CommandHandlingClass;
 import io.spine.server.entity.EntityClass;
-import io.spine.server.event.EventReactorKey;
 import io.spine.server.event.EventReactorMethod;
 import io.spine.server.model.HandlerMethods;
 import io.spine.server.model.MessageHandlerMap;
@@ -107,18 +105,15 @@ public class AggregateClass<A extends Aggregate>
     }
 
     CommandHandlerMethod getHandler(CommandClass commandClass) {
-        final CommandHandlerKey handlerKey = CommandHandlerKey.of(commandClass);
-        return commands.getMethod(handlerKey);
+        return commands.getMethod(commandClass);
     }
 
     EventApplierMethod getApplier(EventClass eventClass) {
-        final EventApplierKey applierKey = EventApplierKey.of(eventClass);
-        return stateEvents.getMethod(applierKey);
+        return stateEvents.getMethod(eventClass);
     }
 
     EventReactorMethod getReactor(EventClass eventClass) {
-        final EventReactorKey eventReactorKey = EventReactorKey.of(eventClass);
-        return eventReactions.getMethod(eventReactorKey);
+        return eventReactions.getMethod(eventClass);
     }
 
     RejectionReactorMethod getReactor(RejectionClass rejCls, CommandClass cmdCls) {

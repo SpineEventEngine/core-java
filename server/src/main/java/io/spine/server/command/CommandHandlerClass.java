@@ -52,8 +52,7 @@ public final class CommandHandlerClass<C extends CommandHandler>
     }
 
     CommandHandlerMethod getHandler(CommandClass commandClass) {
-        final CommandHandlerKey handlerKey = CommandHandlerKey.of(commandClass);
-        return commands.getMethod(handlerKey);
+        return commands.getMethod(commandClass);
     }
 
     /**
