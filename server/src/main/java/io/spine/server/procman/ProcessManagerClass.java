@@ -33,7 +33,6 @@ import io.spine.server.event.EventReactorKey;
 import io.spine.server.event.EventReactorMethod;
 import io.spine.server.model.HandlerMethods;
 import io.spine.server.model.MessageHandlerMap;
-import io.spine.server.rejection.RejectionHandlerKey;
 import io.spine.server.rejection.RejectionReactorMethod;
 
 import java.util.Set;
@@ -121,12 +120,10 @@ public final class ProcessManagerClass<P extends ProcessManager>
     }
 
     RejectionReactorMethod getReactor(RejectionClass cls, CommandClass commandCls) {
-        final RejectionHandlerKey keyWithCommand = RejectionHandlerKey.of(cls, commandCls);
-        final boolean existsHandlerForCommand = rejectionReactors.hasMethod(keyWithCommand);
+        final boolean existsHandlerForCommand = rejectionReactors.hasMethod(cls, commandCls);
         if (existsHandlerForCommand) {
-            return rejectionReactors.getMethod(keyWithCommand);
+            return rejectionReactors.getMethod(cls, commandCls);
         }
-        final RejectionHandlerKey keyWithoutCommand = RejectionHandlerKey.of(cls);
-        return rejectionReactors.getMethod(keyWithoutCommand);
+        return rejectionReactors.getMethod(cls);
     }
 }

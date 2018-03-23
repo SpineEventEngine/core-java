@@ -33,7 +33,6 @@ import io.spine.server.event.EventReactorKey;
 import io.spine.server.event.EventReactorMethod;
 import io.spine.server.model.HandlerMethods;
 import io.spine.server.model.MessageHandlerMap;
-import io.spine.server.rejection.RejectionHandlerKey;
 import io.spine.server.rejection.RejectionReactorMethod;
 
 import java.util.Set;
@@ -123,12 +122,10 @@ public class AggregateClass<A extends Aggregate>
     }
 
     RejectionReactorMethod getReactor(RejectionClass rejCls, CommandClass cmdCls) {
-        final RejectionHandlerKey keyWithCommand = RejectionHandlerKey.of(rejCls, cmdCls);
-        final boolean existsHandlerForCommand = rejectionReactions.hasMethod(keyWithCommand);
+        final boolean existsHandlerForCommand = rejectionReactions.hasMethod(rejCls, cmdCls);
         if (existsHandlerForCommand) {
-            return rejectionReactions.getMethod(keyWithCommand);
+            return rejectionReactions.getMethod(rejCls, cmdCls);
         }
-        final RejectionHandlerKey keyWithoutCommand = RejectionHandlerKey.of(rejCls);
-        return rejectionReactions.getMethod(keyWithoutCommand);
+        return rejectionReactions.getMethod(rejCls);
     }
 }

@@ -74,12 +74,10 @@ public final class RejectionSubscriberClass<S extends RejectionSubscriber> exten
     }
 
     RejectionSubscriberMethod getSubscriber(RejectionClass cls, CommandClass commandCls) {
-        final RejectionHandlerKey keyWithCommand = RejectionHandlerKey.of(cls, commandCls);
-        final boolean existsHandlerForCommand = rejectionSubscriptions.hasMethod(keyWithCommand);
+        final boolean existsHandlerForCommand = rejectionSubscriptions.hasMethod(cls, commandCls);
         if (existsHandlerForCommand) {
-            return rejectionSubscriptions.getMethod(keyWithCommand);
+            return rejectionSubscriptions.getMethod(cls, commandCls);
         }
-        final RejectionHandlerKey keyWithoutCommand = RejectionHandlerKey.of(cls);
-        return rejectionSubscriptions.getMethod(keyWithoutCommand);
+        return rejectionSubscriptions.getMethod(cls);
     }
 }

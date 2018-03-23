@@ -24,6 +24,8 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
+import com.google.protobuf.Empty;
+import io.spine.core.CommandClass;
 import io.spine.type.MessageClass;
 
 import java.io.Serializable;
@@ -90,6 +92,31 @@ public class MessageHandlerMap<M extends MessageClass, H extends HandlerMethod<M
     }
 
     /**
+     * Obtains the method for handling by the passed message and origin classes.
+     *
+     * @param messageClass the message class of the handled message
+     * @param originClass  the class of the message, from which the handled message is originate
+     * @return a handler method
+     * @throws IllegalStateException if there is no method found in the map
+     */
+    public H getMethod(M messageClass, MessageClass originClass) {
+        final HandlerKey<M> key = new HandlerKey<>(messageClass, originClass);
+        return getMethod(key);
+    }
+
+    /**
+     * Obtains the method for handling by the passed message classes.
+     *
+     * @param messageClass the message class of the handled message
+     * @return a handler method
+     * @throws IllegalStateException if there is no method found in the map
+     */
+    public H getMethod(M messageClass) {
+        final HandlerKey<M> key = new HandlerKey<>(messageClass, CommandClass.of(Empty.class));
+        return getMethod(key);
+    }
+
+    /**
      * Determines whether the map has a handler method with the specified key.
      *
      * @param handlerKey the key of the handler to check
@@ -97,6 +124,18 @@ public class MessageHandlerMap<M extends MessageClass, H extends HandlerMethod<M
      */
     public boolean hasMethod(HandlerKey<M> handlerKey) {
         return map.containsKey(handlerKey);
+    }
+
+    /**
+     * Determines whether the map has a handler method for the passes classes.
+     *
+     * @param messageClass the message class of the handled message
+     * @param originClass  the class of the message, from which the handled message is originate
+     * @return {@code true} if there is a matching handler, {@code false} otherwise
+     */
+    public boolean hasMethod(M messageClass, MessageClass originClass) {
+        final HandlerKey<M> key = new HandlerKey<>(messageClass, originClass);
+        return hasMethod(key);
     }
 
     private static <M extends MessageClass, K extends HandlerKey<M>>
