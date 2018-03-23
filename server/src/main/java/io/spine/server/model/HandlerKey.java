@@ -47,11 +47,21 @@ public final class HandlerKey<M extends MessageClass> {
         this.originMessage = checkNotNull(originMessage);
     }
 
+    /**
+     * Creates a new instance by the passed message classes.
+     *
+     * @return a new instance
+     */
     public static <M extends MessageClass>
     HandlerKey<M> of(M handledMessage, MessageClass originMessage) {
         return new HandlerKey<>(handledMessage, originMessage);
     }
 
+    /**
+     * Creates a new instance by the passed message class with an {@link Empty} origin.
+     *
+     * @return a new instance
+     */
     public static <M extends MessageClass> HandlerKey<M> of(M handledMessage) {
         return new HandlerKey<>(handledMessage, CommandClass.of(Empty.class));
     }
