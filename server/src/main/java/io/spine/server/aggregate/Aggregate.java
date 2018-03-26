@@ -244,8 +244,7 @@ public abstract class Aggregate<I,
      *         response to this rejection
      */
     List<? extends Message> reactOn(RejectionEnvelope rejection) {
-        final CommandClass commandClass = CommandClass.of(rejection.getCommandMessage()
-                                                                   .getClass());
+        final CommandClass commandClass = CommandClass.of(rejection.getCommandMessage());
         final RejectionReactorMethod method = thisClass().getReactor(rejection.getMessageClass(),
                                                                      commandClass);
         final List<? extends Message> messages =
