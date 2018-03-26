@@ -201,7 +201,7 @@ public class HandlerMethodShould {
         }
 
         @Override
-        public HandlerKey<EventClass> key() {
+        public HandlerKey key() {
             throw new IllegalStateException("The method is not a target of the test.");
         }
     }
@@ -218,7 +218,7 @@ public class HandlerMethodShould {
         }
 
         @Override
-        public HandlerKey<EventClass> key() {
+        public HandlerKey key() {
             throw new IllegalStateException("The method is not a target of the test.");
         }
     }

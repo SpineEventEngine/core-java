@@ -69,7 +69,7 @@ class RejectionHandlerMethod extends HandlerMethod<RejectionClass, RejectionCont
     }
 
     @Override
-    public HandlerKey<RejectionClass> key() {
+    public HandlerKey key() {
         if (kind == Kind.COMMAND_AWARE || kind == Kind.COMMAND_MESSAGE_AWARE) {
             @SuppressWarnings("unchecked") // RejectionFilterPredicate ensures that
             final Class<? extends Message> rawCommandClass = (Class<? extends Message>) getMethod().getParameterTypes()[1];

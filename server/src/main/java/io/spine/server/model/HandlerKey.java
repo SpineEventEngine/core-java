@@ -34,15 +34,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * <p>Contains information about parameters of a handler method.
  *
- * @param <M> the type of the handled message class
  * @author Dmytro Grankin
  */
-public final class HandlerKey<M extends MessageClass> {
+public final class HandlerKey {
 
-    private final M handledMessage;
+    private final MessageClass handledMessage;
     private final MessageClass originMessage;
 
-    private HandlerKey(M handledMessage, MessageClass originMessage) {
+    private HandlerKey(MessageClass handledMessage, MessageClass originMessage) {
         this.handledMessage = checkNotNull(handledMessage);
         this.originMessage = checkNotNull(originMessage);
     }
@@ -52,9 +51,8 @@ public final class HandlerKey<M extends MessageClass> {
      *
      * @return a new instance
      */
-    public static <M extends MessageClass>
-    HandlerKey<M> of(M handledMessage, MessageClass originMessage) {
-        return new HandlerKey<>(handledMessage, originMessage);
+    public static HandlerKey of(MessageClass handledMessage, MessageClass originMessage) {
+        return new HandlerKey(handledMessage, originMessage);
     }
 
     /**
@@ -62,14 +60,14 @@ public final class HandlerKey<M extends MessageClass> {
      *
      * @return a new instance
      */
-    public static <M extends MessageClass> HandlerKey<M> of(M handledMessage) {
-        return new HandlerKey<>(handledMessage, CommandClass.of(Empty.class));
+    public static HandlerKey of(MessageClass handledMessage) {
+        return new HandlerKey(handledMessage, CommandClass.of(Empty.class));
     }
 
     /**
      * Obtains a {@link MessageClass}, which is handled by {@link HandlerMethod} with this key.
      */
-    public M getHandledMessageCls() {
+    public MessageClass getHandledMessageCls() {
         return handledMessage;
     }
 
@@ -92,7 +90,7 @@ public final class HandlerKey<M extends MessageClass> {
         if (!(o instanceof HandlerKey)) {
             return false;
         }
-        HandlerKey<?> that = (HandlerKey<?>) o;
+        HandlerKey that = (HandlerKey) o;
         return Objects.equals(handledMessage, that.handledMessage) &&
                 Objects.equals(originMessage, that.originMessage);
     }

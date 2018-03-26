@@ -92,7 +92,7 @@ public abstract class HandlerMethod<M extends MessageClass, C extends Message> {
 
     public abstract M getMessageClass();
 
-    public abstract HandlerKey<M> key();
+    public abstract HandlerKey key();
 
     /**
      * Returns {@code true} if the method has package-private access, {@code false} otherwise.

@@ -59,7 +59,7 @@ final class EventApplierMethod extends HandlerMethod<EventClass, Empty> {
     }
 
     @Override
-    public HandlerKey<EventClass> key() {
+    public HandlerKey key() {
         return HandlerKey.of(getMessageClass());
     }
 

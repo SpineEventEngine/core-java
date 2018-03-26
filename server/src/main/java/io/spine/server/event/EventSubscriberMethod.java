@@ -57,7 +57,7 @@ public final class EventSubscriberMethod extends HandlerMethod<EventClass, Event
     }
 
     @Override
-    public HandlerKey<EventClass> key() {
+    public HandlerKey key() {
         return HandlerKey.of(getMessageClass());
     }
 

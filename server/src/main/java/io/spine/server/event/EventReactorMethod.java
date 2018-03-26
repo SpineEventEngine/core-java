@@ -55,7 +55,7 @@ public final class EventReactorMethod extends HandlerMethod<EventClass, EventCon
     }
 
     @Override
-    public HandlerKey<EventClass> key() {
+    public HandlerKey key() {
         return HandlerKey.of(getMessageClass());
     }
 

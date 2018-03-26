@@ -67,7 +67,7 @@ public final class CommandHandlerMethod extends HandlerMethod<CommandClass, Comm
     }
 
     @Override
-    public HandlerKey<CommandClass> key() {
+    public HandlerKey key() {
         return HandlerKey.of(getMessageClass());
     }
 

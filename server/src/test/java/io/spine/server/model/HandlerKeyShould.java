@@ -48,16 +48,16 @@ public class HandlerKeyShould {
     @Test
     public void return_command_class_of_empty_if_there_is_no_origin() {
         final CommandClass handledMessage = stringClass;
-        final HandlerKey<CommandClass> key = HandlerKey.of(handledMessage);
+        final HandlerKey key = HandlerKey.of(handledMessage);
         assertEquals(handledMessage, key.getHandledMessageCls());
         assertEquals(emptyClass, key.getOriginCls());
     }
 
     @Test
     public void support_equality() {
-        final HandlerKey<CommandClass> first = HandlerKey.of(stringClass);
-        final HandlerKey<CommandClass> second = HandlerKey.of(stringClass, stringClass);
-        final HandlerKey<CommandClass> third = HandlerKey.of(emptyClass, stringClass);
+        final HandlerKey first = HandlerKey.of(stringClass);
+        final HandlerKey second = HandlerKey.of(stringClass, stringClass);
+        final HandlerKey third = HandlerKey.of(emptyClass, stringClass);
 
         new EqualsTester().addEqualityGroup(first)
                           .addEqualityGroup(second)
