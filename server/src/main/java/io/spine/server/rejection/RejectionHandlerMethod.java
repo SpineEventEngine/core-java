@@ -22,10 +22,12 @@ package io.spine.server.rejection;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.Command;
+import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
 import io.spine.core.Commands;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionContext;
+import io.spine.server.model.HandlerKey;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.HandlerMethodPredicate;
 
@@ -46,7 +48,7 @@ import static io.spine.util.Exceptions.unsupported;
  * @author Alexander Yevsyukov
  */
 @Internal
-class RejectionHandlerMethod extends HandlerMethod<RejectionContext> {
+class RejectionHandlerMethod extends HandlerMethod<RejectionClass, RejectionContext> {
 
     /** Determines the number of parameters and their types. */
     private final Kind kind;
@@ -64,6 +66,17 @@ class RejectionHandlerMethod extends HandlerMethod<RejectionContext> {
     @Override
     public RejectionClass getMessageClass() {
         return RejectionClass.of(rawMessageClass());
+    }
+
+    @Override
+    public HandlerKey key() {
+        if (kind == Kind.COMMAND_AWARE || kind == Kind.COMMAND_MESSAGE_AWARE) {
+            @SuppressWarnings("unchecked") // RejectionFilterPredicate ensures that
+            final Class<? extends Message> rawCommandClass = (Class<? extends Message>) getMethod().getParameterTypes()[1];
+            return HandlerKey.of(getMessageClass(), CommandClass.of(rawCommandClass));
+        } else {
+            return HandlerKey.of(getMessageClass());
+        }
     }
 
     private static Kind getKind(Method method) {

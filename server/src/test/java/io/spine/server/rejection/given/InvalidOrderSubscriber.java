@@ -24,7 +24,7 @@ import io.spine.core.CommandContext;
 import io.spine.core.Rejection;
 import io.spine.core.Subscribe;
 import io.spine.test.rejection.ProjectRejections;
-import io.spine.test.rejection.command.RemoveOwner;
+import io.spine.test.rejection.command.RjRemoveOwner;
 
 import static org.junit.Assert.fail;
 
@@ -33,8 +33,8 @@ public class InvalidOrderSubscriber extends VerifiableSubscriber {
     @SuppressWarnings("unused") // The method should never be invoked, so the params are unused.
     @Subscribe
     public void on(ProjectRejections.MissingOwner rejection,
-                    CommandContext context,
-                    RemoveOwner command) {
+                   CommandContext context,
+                   RjRemoveOwner command) {
         triggerCall();
         fail("InvalidOrderSubscriber invoked the handler method");
     }

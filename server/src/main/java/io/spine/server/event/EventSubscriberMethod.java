@@ -25,6 +25,7 @@ import com.google.protobuf.Message;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
+import io.spine.server.model.HandlerKey;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.MethodPredicate;
 
@@ -40,7 +41,7 @@ import static io.spine.server.model.HandlerMethods.ensureExternalMatch;
  * @author Alexander Yevsyukov
  * @see Subscribe
  */
-public final class EventSubscriberMethod extends HandlerMethod<EventContext> {
+public final class EventSubscriberMethod extends HandlerMethod<EventClass, EventContext> {
 
     /** The instance of the predicate to filter event subscriber methods of a class. */
     private static final MethodPredicate PREDICATE = new FilterPredicate();
@@ -53,6 +54,11 @@ public final class EventSubscriberMethod extends HandlerMethod<EventContext> {
     @Override
     public EventClass getMessageClass() {
         return EventClass.of(rawMessageClass());
+    }
+
+    @Override
+    public HandlerKey key() {
+        return HandlerKey.of(getMessageClass());
     }
 
     static EventSubscriberMethod from(Method method) {

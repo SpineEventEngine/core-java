@@ -32,7 +32,9 @@ import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Events;
+import io.spine.core.Rejection;
 import io.spine.core.RejectionEnvelope;
+import io.spine.core.Rejections;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.command.TestEventFactory;
@@ -60,10 +62,10 @@ import org.junit.Test;
 import java.util.List;
 
 import static io.spine.core.Commands.getMessage;
-import static io.spine.core.Rejections.createRejection;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.TypeConverter.toMessage;
+import static io.spine.server.commandbus.Given.ACommand;
 import static io.spine.server.procman.ProcessManagerDispatcher.dispatch;
 import static io.spine.test.Verify.assertSize;
 import static org.hamcrest.Matchers.instanceOf;
@@ -234,21 +236,18 @@ public class ProcessManagerShould {
     }
 
     @Test
-    public void dispatch_rejection() {
-        final EntityAlreadyArchived rejectionMessage =
-                EntityAlreadyArchived.newBuilder()
-                                     .setEntityId(Identifier.pack(getClass().getName()))
-                                     .build();
-
-        final Command command = requestFactory.generateCommand();
-        final RejectionEnvelope rejection = RejectionEnvelope.of(
-                createRejection(rejectionMessage, command)
-        );
-
+    public void dispatch_rejection_by_rejection_message_only() {
+        final RejectionEnvelope rejection = entityAlreadyArchived(StringValue.class);
         dispatch(processManager, rejection);
-
         assertEquals(rejection.getOuterObject()
                               .getMessage(), processManager.getState());
+    }
+
+    @Test
+    public void dispatch_rejection_by_rejection_and_command_message() {
+        final RejectionEnvelope rejection = entityAlreadyArchived(PmAddTask.class);
+        dispatch(processManager, rejection);
+        assertEquals(AnyPacker.pack(rejection.getCommandMessage()), processManager.getState());
     }
 
     @Test
@@ -305,5 +304,15 @@ public class ProcessManagerShould {
         return ((PmAddTask.Builder) Sample.builderForType(PmAddTask.class))
                 .setProjectId(ID)
                 .build();
+    }
+
+    private static RejectionEnvelope entityAlreadyArchived(Class<? extends Message> commandMessageCls) {
+        final Any id = Identifier.pack(ProcessManagerShould.class.getName());
+        final EntityAlreadyArchived rejectionMessage = EntityAlreadyArchived.newBuilder()
+                                                                            .setEntityId(id)
+                                                                            .build();
+        final Command command = ACommand.withMessage(Sample.messageOfType(commandMessageCls));
+        final Rejection rejection = Rejections.createRejection(rejectionMessage, command);
+        return RejectionEnvelope.of(rejection);
     }
 }

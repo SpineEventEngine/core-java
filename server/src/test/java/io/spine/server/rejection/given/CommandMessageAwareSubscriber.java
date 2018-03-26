@@ -24,7 +24,7 @@ import io.spine.core.Commands;
 import io.spine.core.Rejection;
 import io.spine.core.Subscribe;
 import io.spine.test.rejection.ProjectRejections;
-import io.spine.test.rejection.command.RemoveOwner;
+import io.spine.test.rejection.command.RjRemoveOwner;
 
 import static io.spine.core.Rejections.getMessage;
 import static org.junit.Assert.assertEquals;
@@ -32,10 +32,10 @@ import static org.junit.Assert.assertEquals;
 public class CommandMessageAwareSubscriber extends VerifiableSubscriber {
 
     private ProjectRejections.MissingOwner rejection;
-    private RemoveOwner command;
+    private RjRemoveOwner command;
 
     @Subscribe
-    public void on(ProjectRejections.MissingOwner rejection, RemoveOwner command) {
+    public void on(ProjectRejections.MissingOwner rejection, RjRemoveOwner command) {
         triggerCall();
         this.rejection = rejection;
         this.command = command;

@@ -149,6 +149,12 @@ public class ProcessManagerTestEnv {
          **************************/
 
         @React
+        Empty on(EntityAlreadyArchived rejection, PmAddTask command) {
+            getBuilder().mergeFrom(pack(command));
+            return Empty.getDefaultInstance();
+        }
+
+        @React
         Empty on(EntityAlreadyArchived rejection) {
             getBuilder().mergeFrom(pack(rejection));
             return Empty.getDefaultInstance();

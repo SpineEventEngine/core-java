@@ -20,17 +20,22 @@
 
 package io.spine.server.rejection.given;
 
+import com.google.protobuf.Any;
+import com.google.protobuf.Message;
 import io.spine.change.StringChange;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;
 import io.spine.core.Rejection;
 import io.spine.core.Rejections;
 import io.spine.core.TenantId;
+import io.spine.protobuf.AnyPacker;
+import io.spine.server.entity.rejection.StandardRejections.CannotModifyDeletedEntity;
 import io.spine.server.rejection.RejectionBusShould;
 import io.spine.test.rejection.ProjectId;
 import io.spine.test.rejection.ProjectRejections;
-import io.spine.test.rejection.command.RemoveOwner;
-import io.spine.test.rejection.command.UpdateProjectName;
+import io.spine.test.rejection.command.RjRemoveOwner;
+import io.spine.test.rejection.command.RjUpdateProjectName;
+import io.spine.test.rejection.command.RjUpdateProjectNameVBuilder;
 import io.spine.testdata.Sample;
 
 import static io.spine.Identifier.newUuid;
@@ -49,11 +54,11 @@ public class Given {
         final StringChange nameChange = StringChange.newBuilder()
                                                     .setNewValue("Too short")
                                                     .build();
-        final UpdateProjectName updateProjectName = UpdateProjectName.newBuilder()
-                                                                     .setId(projectId)
-                                                                     .setNameUpdate(nameChange)
-                                                                     .build();
-
+        final RjUpdateProjectName updateProjectName =
+                RjUpdateProjectNameVBuilder.newBuilder()
+                                           .setId(projectId)
+                                           .setNameUpdate(nameChange)
+                                           .build();
         final TenantId generatedTenantId = TenantId.newBuilder()
                                                    .setValue(newUuid())
                                                    .build();
@@ -69,8 +74,19 @@ public class Given {
                                                                                  .setProjectId(projectId)
                                                                                  .build();
         final Command command = io.spine.server.commandbus.Given.ACommand.withMessage(
-                Sample.messageOfType(RemoveOwner.class));
+                Sample.messageOfType(RjRemoveOwner.class));
         return Rejections.createRejection(msg, command);
+    }
+
+    public static Rejection cannotModifyDeletedEntity(Class<? extends Message> commandMessage) {
+        final ProjectId projectId = newProjectId();
+        final Any idAny = AnyPacker.pack(projectId);
+        final CannotModifyDeletedEntity rejectionMsg = CannotModifyDeletedEntity.newBuilder()
+                                                                                .setEntityId(idAny)
+                                                                                .build();
+        final Command command = io.spine.server.commandbus.Given.ACommand.withMessage(
+                Sample.messageOfType(commandMessage));
+        return Rejections.createRejection(rejectionMsg, command);
     }
 
     private static ProjectId newProjectId() {

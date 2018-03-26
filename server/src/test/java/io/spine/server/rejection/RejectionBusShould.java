@@ -19,6 +19,7 @@
  */
 package io.spine.server.rejection;
 
+import com.google.protobuf.StringValue;
 import io.spine.base.Error;
 import io.spine.core.Ack;
 import io.spine.core.Rejection;
@@ -35,9 +36,11 @@ import io.spine.server.rejection.given.FaultySubscriber;
 import io.spine.server.rejection.given.InvalidOrderSubscriber;
 import io.spine.server.rejection.given.InvalidProjectNameDelegate;
 import io.spine.server.rejection.given.InvalidProjectNameSubscriber;
+import io.spine.server.rejection.given.MultipleRejectionSubscriber;
 import io.spine.server.rejection.given.PostponedDispatcherRejectionDelivery;
 import io.spine.server.rejection.given.RejectionMessageSubscriber;
 import io.spine.server.rejection.given.VerifiableSubscriber;
+import io.spine.test.rejection.command.RjStartProject;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -47,12 +50,14 @@ import java.util.concurrent.Executor;
 
 import static io.spine.core.Status.StatusCase.ERROR;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
+import static io.spine.server.rejection.given.Given.cannotModifyDeletedEntity;
 import static io.spine.server.rejection.given.Given.invalidProjectNameRejection;
 import static io.spine.server.rejection.given.Given.missingOwnerRejection;
 import static io.spine.test.rejection.ProjectRejections.InvalidProjectName;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -194,6 +199,31 @@ public class RejectionBusShould {
                      handled.getContext()
                             .getCommand()
                             .getContext());
+    }
+
+    @Test
+    public void call_subscriber_by_rejection_and_command_message_when_rejection_posted() {
+        final MultipleRejectionSubscriber subscriber = new MultipleRejectionSubscriber();
+        rejectionBus.register(subscriber);
+
+        final Class<RjStartProject> commandMessageCls = RjStartProject.class;
+        final Rejection rejection = cannotModifyDeletedEntity(commandMessageCls);
+        rejectionBus.post(rejection);
+
+        assertEquals(1, subscriber.numberOfSubscriberCalls());
+        assertEquals(commandMessageCls, subscriber.commandMessageClass());
+    }
+
+    @Test
+    public void call_subscriber_by_rejection_message_only() {
+        final MultipleRejectionSubscriber subscriber = new MultipleRejectionSubscriber();
+        rejectionBus.register(subscriber);
+
+        final Rejection rejection = cannotModifyDeletedEntity(StringValue.class);
+        rejectionBus.post(rejection);
+
+        assertEquals(1, subscriber.numberOfSubscriberCalls());
+        assertNull(subscriber.commandMessageClass());
     }
 
     @Test

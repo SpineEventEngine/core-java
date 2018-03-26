@@ -30,6 +30,7 @@ import io.spine.base.ThrowableMessage;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
 import io.spine.server.entity.Entity;
+import io.spine.server.model.HandlerKey;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.HandlerMethodFailedException;
 import io.spine.server.model.HandlerMethodPredicate;
@@ -46,7 +47,7 @@ import static com.google.common.base.Throwables.getRootCause;
  * @author Alexander Yevsyukov
  */
 @Internal
-public final class CommandHandlerMethod extends HandlerMethod<CommandContext> {
+public final class CommandHandlerMethod extends HandlerMethod<CommandClass, CommandContext> {
 
     /** The instance of the predicate to filter command handler methods of a class. */
     private static final MethodPredicate PREDICATE = new FilterPredicate();
@@ -63,6 +64,11 @@ public final class CommandHandlerMethod extends HandlerMethod<CommandContext> {
     @Override
     public CommandClass getMessageClass() {
         return CommandClass.of(rawMessageClass());
+    }
+
+    @Override
+    public HandlerKey key() {
+        return HandlerKey.of(getMessageClass());
     }
 
     static CommandHandlerMethod from(Method method) {

@@ -43,8 +43,8 @@ import static org.junit.Assert.assertTrue;
  */
 public class HandlerMethodShould {
 
-    private HandlerMethod<EventContext> twoParamMethod;
-    private HandlerMethod<Empty> oneParamMethod;
+    private HandlerMethod<EventClass, EventContext> twoParamMethod;
+    private HandlerMethod<EventClass, Empty> oneParamMethod;
 
     private Object target;
 
@@ -127,7 +127,7 @@ public class HandlerMethodShould {
 
     @Test
     public void compare_fields_in_equals() {
-        final HandlerMethod<EventContext> anotherMethod =
+        final HandlerMethod<EventClass, EventContext> anotherMethod =
                 new TwoParamMethod(StubHandler.getTwoParameterMethod());
 
         assertTrue(twoParamMethod.equals(anotherMethod));
@@ -189,7 +189,7 @@ public class HandlerMethodShould {
         }
     }
 
-    private static class TwoParamMethod extends HandlerMethod<EventContext> {
+    private static class TwoParamMethod extends HandlerMethod<EventClass, EventContext> {
 
         private TwoParamMethod(Method method) {
             super(method);
@@ -199,9 +199,14 @@ public class HandlerMethodShould {
         public EventClass getMessageClass() {
             return EventClass.of(rawMessageClass());
         }
+
+        @Override
+        public HandlerKey key() {
+            throw new IllegalStateException("The method is not a target of the test.");
+        }
     }
 
-    private static class OneParamMethod extends HandlerMethod<Empty> {
+    private static class OneParamMethod extends HandlerMethod<EventClass, Empty> {
 
         private OneParamMethod(Method method) {
             super(method);
@@ -210,6 +215,11 @@ public class HandlerMethodShould {
         @Override
         public EventClass getMessageClass() {
             return EventClass.of(rawMessageClass());
+        }
+
+        @Override
+        public HandlerKey key() {
+            throw new IllegalStateException("The method is not a target of the test.");
         }
     }
 }

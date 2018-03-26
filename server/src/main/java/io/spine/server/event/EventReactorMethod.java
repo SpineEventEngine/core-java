@@ -25,6 +25,7 @@ import com.google.protobuf.Message;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.React;
+import io.spine.server.model.HandlerKey;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.MethodPredicate;
 
@@ -40,7 +41,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @author Alexander Yevsyukov
  * @see React
  */
-public final class EventReactorMethod extends HandlerMethod<EventContext> {
+public final class EventReactorMethod extends HandlerMethod<EventClass, EventContext> {
 
     private static final MethodPredicate PREDICATE = new FilterPredicate();
 
@@ -51,6 +52,11 @@ public final class EventReactorMethod extends HandlerMethod<EventContext> {
     @Override
     public EventClass getMessageClass() {
         return EventClass.of(rawMessageClass());
+    }
+
+    @Override
+    public HandlerKey key() {
+        return HandlerKey.of(getMessageClass());
     }
 
     /**

@@ -22,6 +22,7 @@ package io.spine.server.procman;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
+import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
@@ -175,7 +176,9 @@ public abstract class ProcessManager<I,
      *         produce new events because of the passed event
      */
     List<Event> dispatchRejection(RejectionEnvelope rejection) {
-        final RejectionReactorMethod method = thisClass().getReactor(rejection.getMessageClass());
+        final CommandClass commandClass = CommandClass.of(rejection.getCommandMessage());
+        final RejectionReactorMethod method = thisClass().getReactor(rejection.getMessageClass(),
+                                                                     commandClass);
         final List<? extends Message> eventMessages =
         method.invoke(this, rejection.getMessage(), rejection.getRejectionContext());
         final List<Event> events = toEvents(eventMessages, rejection);

@@ -31,6 +31,7 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.event.EventBus;
 import io.spine.server.integration.given.IntegrationBusTestEnv.ContextAwareProjectDetails;
+import io.spine.server.integration.given.IntegrationBusTestEnv.ExternalMismatchSubscriber;
 import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectCountAggregate;
 import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectDetails;
 import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectEventsSubscriber;
@@ -39,6 +40,7 @@ import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectStartedExt
 import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectWizard;
 import io.spine.server.integration.memory.InMemoryTransportFactory;
 import io.spine.server.rejection.RejectionBus;
+import io.spine.server.rejection.RejectionSubscriber;
 import io.spine.validate.Validate;
 import org.junit.Before;
 import org.junit.Test;
@@ -56,11 +58,13 @@ import static io.spine.server.integration.given.IntegrationBusTestEnv.contextWit
 import static io.spine.server.integration.given.IntegrationBusTestEnv.contextWithTransport;
 import static io.spine.server.integration.given.IntegrationBusTestEnv.projectCreated;
 import static io.spine.server.integration.given.IntegrationBusTestEnv.projectStarted;
+import static io.spine.test.Verify.assertContains;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * @author Alex Tymchenko
@@ -288,6 +292,27 @@ public class IntegrationBusShould {
         assertEquals(rejectionMessage, ProjectRejectionsExtSubscriber.getExternalRejection());
         assertEquals(rejectionMessage, ProjectCountAggregate.getExternalRejection());
         assertEquals(rejectionMessage, ProjectWizard.getExternalRejection());
+    }
+
+    @Test
+    public void throw_on_mismatch_of_external_attribute_during_dispatching() {
+        final InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
+
+        final BoundedContext sourceContext = contextWithTransport(transportFactory);
+        final RejectionSubscriber rejectionSubscriber = new ExternalMismatchSubscriber();
+        sourceContext.getRejectionBus()
+                     .register(rejectionSubscriber);
+        sourceContext.getIntegrationBus()
+                     .register(rejectionSubscriber);
+        final Rejection rejection = cannotStartArchivedProject();
+        try {
+            sourceContext.getRejectionBus()
+                         .post(rejection);
+            fail("An exception is expected.");
+        } catch (Exception e) {
+            final String exceptionMsg = e.getMessage();
+            assertContains("external", exceptionMsg);
+        }
     }
 
     @Test

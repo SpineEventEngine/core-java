@@ -115,7 +115,7 @@ public final class ProcessManagerClass<P extends ProcessManager>
         return eventReactors.getMethod(eventClass);
     }
 
-    RejectionReactorMethod getReactor(RejectionClass rejectionClass) {
-        return rejectionReactors.getMethod(rejectionClass);
+    RejectionReactorMethod getReactor(RejectionClass cls, CommandClass commandCls) {
+        return rejectionReactors.getMethod(cls, commandCls);
     }
 }
