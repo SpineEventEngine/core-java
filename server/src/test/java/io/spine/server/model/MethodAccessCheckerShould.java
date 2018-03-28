@@ -48,17 +48,17 @@ public class MethodAccessCheckerShould {
     public void do_not_log_warning_on_correct_access_modifier() {
         final Method publicMethod = getMethod("publicMethod");
         final MethodAccessChecker checkerPublic = spy(forMethod(publicMethod));
-        checkerPublic.checkAccessIsPublic(STUB_WARNING_MESSAGE);
+        checkerPublic.checkPublic(STUB_WARNING_MESSAGE);
         verify(checkerPublic, never()).warnOnWrongModifier(STUB_WARNING_MESSAGE);
 
         final Method packagePrivateMethod = getMethod("packagePrivateMethod");
         final MethodAccessChecker checkerPackagePrivate = spy(forMethod(packagePrivateMethod));
-        checkerPackagePrivate.checkAccessIsPackagePrivate(STUB_WARNING_MESSAGE);
+        checkerPackagePrivate.checkPackagePrivate(STUB_WARNING_MESSAGE);
         verify(checkerPackagePrivate, never()).warnOnWrongModifier(STUB_WARNING_MESSAGE);
 
         final Method privateMethod = getMethod("privateMethod");
         final MethodAccessChecker checkerPrivate = spy(forMethod(privateMethod));
-        checkerPrivate.checkAccessIsPrivate(STUB_WARNING_MESSAGE);
+        checkerPrivate.checkPrivate(STUB_WARNING_MESSAGE);
         verify(checkerPrivate, never()).warnOnWrongModifier(STUB_WARNING_MESSAGE);
     }
 
@@ -66,9 +66,9 @@ public class MethodAccessCheckerShould {
     public void log_warning_on_incorrect_access_modifier() {
         final Method method = getMethod("protectedMethod");
         final MethodAccessChecker checker = spy(forMethod(method));
-        checker.checkAccessIsPublic(STUB_WARNING_MESSAGE);
-        checker.checkAccessIsPackagePrivate(STUB_WARNING_MESSAGE);
-        checker.checkAccessIsPrivate(STUB_WARNING_MESSAGE);
+        checker.checkPublic(STUB_WARNING_MESSAGE);
+        checker.checkPackagePrivate(STUB_WARNING_MESSAGE);
+        checker.checkPrivate(STUB_WARNING_MESSAGE);
         verify(checker, times(3)).warnOnWrongModifier(STUB_WARNING_MESSAGE);
     }
 

@@ -168,7 +168,7 @@ public final class CommandHandlerMethod extends HandlerMethod<CommandClass, Comm
         @Override
         public void checkAccessModifier(Method method) {
             final MethodAccessChecker checker = MethodAccessChecker.forMethod(method);
-            checker.checkAccessIsPackagePrivate(
+            checker.checkPackagePrivate(
                     "Command handler method {} should be package-private.");
         }
 

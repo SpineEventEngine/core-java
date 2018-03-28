@@ -105,7 +105,7 @@ public final class EventSubscriberMethod extends HandlerMethod<EventClass, Event
         @Override
         public void checkAccessModifier(Method method) {
             final MethodAccessChecker checker = forMethod(method);
-            checker.checkAccessIsPublic("Event subscriber {} must be declared 'public'");
+            checker.checkPublic("Event subscriber {} must be declared 'public'");
         }
 
         @Override

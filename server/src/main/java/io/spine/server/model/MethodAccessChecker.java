@@ -69,7 +69,7 @@ public final class MethodAccessChecker {
      * @param warningMessageFormat a formatted {@code String} representing the warning message
      * @see String#format(String, Object...)
      */
-    public void checkAccessIsPublic(String warningMessageFormat) {
+    public void checkPublic(String warningMessageFormat) {
         if (!Modifier.isPublic(method.getModifiers())) {
             warnOnWrongModifier(warningMessageFormat);
         }
@@ -86,7 +86,7 @@ public final class MethodAccessChecker {
      * @param warningMessageFormat a formatted {@code String} representing the warning message
      * @see String#format(String, Object...)
      */
-    public void checkAccessIsPackagePrivate(String warningMessageFormat) {
+    public void checkPackagePrivate(String warningMessageFormat) {
         if (!isPackagePrivate(method)) {
             warnOnWrongModifier(warningMessageFormat);
         }
@@ -103,7 +103,7 @@ public final class MethodAccessChecker {
      * @param warningMessageFormat a formatted {@code String} representing the warning message
      * @see String#format(String, Object...)
      */
-    public void checkAccessIsPrivate(String warningMessageFormat) {
+    public void checkPrivate(String warningMessageFormat) {
         if (!Modifier.isPrivate(method.getModifiers())) {
             warnOnWrongModifier(warningMessageFormat);
         }
