@@ -43,8 +43,7 @@ public class MethodAccessChecker {
 
     private final Method method;
 
-    @VisibleForTesting
-    MethodAccessChecker(Method method) {
+    private MethodAccessChecker(Method method) {
         this.method = method;
     }
 

@@ -26,7 +26,10 @@ import org.junit.Test;
 import java.lang.reflect.Method;
 
 import static io.spine.server.model.MethodAccessChecker.forMethod;
-import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author Dmytro Kuzmin
@@ -44,30 +47,29 @@ public class MethodAccessCheckerShould {
     @Test
     public void do_not_log_warning_on_correct_access_modifier() {
         final Method publicMethod = getMethod("publicMethod");
-        final TestMethodAccessChecker checkerPublic = testAccessCheckerFor(publicMethod);
+        final MethodAccessChecker checkerPublic = spy(forMethod(publicMethod));
         checkerPublic.checkAccessIsPublic(STUB_WARNING_MESSAGE);
-        assertEquals(0, checkerPublic.getWarningCount());
+        verify(checkerPublic, never()).warnOnWrongModifier(STUB_WARNING_MESSAGE);
 
         final Method packagePrivateMethod = getMethod("packagePrivateMethod");
-        final TestMethodAccessChecker checkerPackagePrivate =
-                testAccessCheckerFor(packagePrivateMethod);
+        final MethodAccessChecker checkerPackagePrivate = spy(forMethod(packagePrivateMethod));
         checkerPackagePrivate.checkAccessIsPackagePrivate(STUB_WARNING_MESSAGE);
-        assertEquals(0, checkerPackagePrivate.getWarningCount());
+        verify(checkerPackagePrivate, never()).warnOnWrongModifier(STUB_WARNING_MESSAGE);
 
         final Method privateMethod = getMethod("privateMethod");
-        final TestMethodAccessChecker checkerPrivate = testAccessCheckerFor(privateMethod);
+        final MethodAccessChecker checkerPrivate = spy(forMethod(privateMethod));
         checkerPrivate.checkAccessIsPrivate(STUB_WARNING_MESSAGE);
-        assertEquals(0, checkerPrivate.getWarningCount());
+        verify(checkerPrivate, never()).warnOnWrongModifier(STUB_WARNING_MESSAGE);
     }
 
     @Test
     public void log_warning_on_incorrect_access_modifier() {
         final Method method = getMethod("protectedMethod");
-        final TestMethodAccessChecker checker = testAccessCheckerFor(method);
+        final MethodAccessChecker checker = spy(forMethod(method));
         checker.checkAccessIsPublic(STUB_WARNING_MESSAGE);
         checker.checkAccessIsPackagePrivate(STUB_WARNING_MESSAGE);
         checker.checkAccessIsPrivate(STUB_WARNING_MESSAGE);
-        assertEquals(3, checker.getWarningCount());
+        verify(checker, times(3)).warnOnWrongModifier(STUB_WARNING_MESSAGE);
     }
 
     private static Method getMethod(String methodName) {
@@ -79,10 +81,6 @@ public class MethodAccessCheckerShould {
             throw new IllegalStateException(e);
         }
         return method;
-    }
-
-    private static TestMethodAccessChecker testAccessCheckerFor(Method method) {
-        return new TestMethodAccessChecker(method);
     }
 
     private static class StubMethodContainer {
@@ -106,30 +104,6 @@ public class MethodAccessCheckerShould {
         @SuppressWarnings("unused") // Reflective access.
         private void privateMethod() {
 
-        }
-    }
-
-    /**
-     * Testing method access checker which allows to trace whether the warning function was called
-     * and how many times.
-     */
-    private static class TestMethodAccessChecker extends MethodAccessChecker {
-
-        private int warningCount;
-
-        private TestMethodAccessChecker(Method method) {
-            super(method);
-            warningCount = 0;
-        }
-
-        @Override
-        void warnOnWrongModifier(String messageFormat) {
-            super.warnOnWrongModifier(messageFormat);
-            warningCount++;
-        }
-
-        private int getWarningCount() {
-            return warningCount;
         }
     }
 }
