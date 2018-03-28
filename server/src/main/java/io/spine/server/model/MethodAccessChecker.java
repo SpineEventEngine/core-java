@@ -70,6 +70,7 @@ public final class MethodAccessChecker {
      * @see String#format(String, Object...)
      */
     public void checkPublic(String warningMessageFormat) {
+        checkNotNull(warningMessageFormat);
         if (!Modifier.isPublic(method.getModifiers())) {
             warnOnWrongModifier(warningMessageFormat);
         }
@@ -87,6 +88,7 @@ public final class MethodAccessChecker {
      * @see String#format(String, Object...)
      */
     public void checkPackagePrivate(String warningMessageFormat) {
+        checkNotNull(warningMessageFormat);
         if (!isPackagePrivate(method)) {
             warnOnWrongModifier(warningMessageFormat);
         }
@@ -104,6 +106,7 @@ public final class MethodAccessChecker {
      * @see String#format(String, Object...)
      */
     public void checkPrivate(String warningMessageFormat) {
+        checkNotNull(warningMessageFormat);
         if (!Modifier.isPrivate(method.getModifiers())) {
             warnOnWrongModifier(warningMessageFormat);
         }
