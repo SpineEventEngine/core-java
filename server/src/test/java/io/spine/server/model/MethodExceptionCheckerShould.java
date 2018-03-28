@@ -31,7 +31,7 @@ import static io.spine.server.model.MethodExceptionChecker.forMethod;
 /**
  * @author Dmytro Kuzmin
  */
-public class MethodExceptionsCheckerShould {
+public class MethodExceptionCheckerShould {
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_method() {
@@ -92,6 +92,7 @@ public class MethodExceptionsCheckerShould {
     }
 
     private static class StubMethodContainer {
+
         @SuppressWarnings("unused") // Reflective access
         private static void methodNoExceptions() {
 
