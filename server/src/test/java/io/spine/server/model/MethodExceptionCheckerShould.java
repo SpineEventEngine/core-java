@@ -62,7 +62,6 @@ public class MethodExceptionCheckerShould {
 
     @Test
     public void pass_check_for_allowed_custom_exception_types() {
-        //noinspection DuplicateStringLiteralInspection
         final Method methodCustomException = getMethod("methodCustomException");
         final MethodExceptionChecker checker = forMethod(methodCustomException);
         checker.checkThrowsNoExceptionsBut(IOException.class);
@@ -77,7 +76,6 @@ public class MethodExceptionCheckerShould {
 
     @Test(expected = IllegalStateException.class)
     public void fail_check_for_prohibited_custom_exception_types() {
-        //noinspection DuplicateStringLiteralInspection
         final Method methodCustomException = getMethod("methodCustomException");
         final MethodExceptionChecker checker = forMethod(methodCustomException);
         checker.checkThrowsNoExceptionsBut(RuntimeException.class);

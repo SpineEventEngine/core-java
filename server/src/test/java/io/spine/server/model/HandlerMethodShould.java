@@ -137,9 +137,10 @@ public class HandlerMethodShould {
         assertNotEquals(System.identityHashCode(twoParamMethod), twoParamMethod.hashCode());
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    // The purpose of the method is to throw exception.
     @Test(expected = IllegalStateException.class)
     public void do_not_be_created_from_method_with_checked_exception() {
-        //noinspection ResultOfMethodCallIgnored
         factory.create(StubHandler.getMethodWithCheckedException());
     }
 
@@ -192,7 +193,6 @@ public class HandlerMethodShould {
             final Method method;
             final Class<?> clazz = StubHandler.class;
             try {
-                //noinspection DuplicateStringLiteralInspection
                 method = clazz.getDeclaredMethod("handle", BoolValue.class);
             } catch (NoSuchMethodException e) {
                 throw new IllegalStateException(e);
