@@ -20,7 +20,7 @@
 
 package io.spine.server.model;
 
-import io.spine.test.Tests;
+import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
 
 import java.lang.reflect.Method;
@@ -38,10 +38,13 @@ public class MethodAccessCheckerShould {
 
     public static final String STUB_WARNING_MESSAGE = "Stub warning message";
 
-    @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_method() {
-        //noinspection ResultOfMethodCallIgnored
-        forMethod(Tests.<Method>nullRef());
+    @Test
+    public void pass_null_check() {
+        new NullPointerTester().testAllPublicStaticMethods(MethodAccessChecker.class);
+
+        final Method method = getMethod("publicMethod");
+        final MethodAccessChecker checker = forMethod(method);
+        new NullPointerTester().testAllPublicInstanceMethods(checker);
     }
 
     @Test
