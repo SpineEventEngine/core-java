@@ -119,7 +119,7 @@ final class EventApplierMethod extends HandlerMethod<EventClass, Empty> {
         }
 
         @Override
-        protected EventApplierMethod createForMethod(Method method) {
+        protected EventApplierMethod createFromMethod(Method method) {
             return from(method);
         }
     }

@@ -109,7 +109,7 @@ public final class EventSubscriberMethod extends HandlerMethod<EventClass, Event
         }
 
         @Override
-        protected EventSubscriberMethod createForMethod(Method method) {
+        protected EventSubscriberMethod createFromMethod(Method method) {
             return from(method);
         }
     }

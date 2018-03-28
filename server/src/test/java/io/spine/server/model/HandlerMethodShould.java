@@ -292,7 +292,7 @@ public class HandlerMethodShould {
             }
 
             @Override
-            protected OneParamMethod createForMethod(Method method) {
+            protected OneParamMethod createFromMethod(Method method) {
                 return new OneParamMethod(method);
             }
         }

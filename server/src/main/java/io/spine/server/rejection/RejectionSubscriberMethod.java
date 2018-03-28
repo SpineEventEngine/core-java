@@ -107,7 +107,7 @@ public class RejectionSubscriberMethod extends RejectionHandlerMethod {
         }
 
         @Override
-        protected RejectionSubscriberMethod createForMethod(Method method) {
+        protected RejectionSubscriberMethod createFromMethod(Method method) {
             final RejectionSubscriberMethod result = new RejectionSubscriberMethod(method);
             return result;
         }

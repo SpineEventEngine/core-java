@@ -116,7 +116,7 @@ public final class EventReactorMethod extends HandlerMethod<EventClass, EventCon
         }
 
         @Override
-        protected EventReactorMethod createForMethod(Method method) {
+        protected EventReactorMethod createFromMethod(Method method) {
             return from(method);
         }
     }

@@ -186,7 +186,7 @@ public final class CommandHandlerMethod extends HandlerMethod<CommandClass, Comm
         }
 
         @Override
-        protected CommandHandlerMethod createForMethod(Method method) {
+        protected CommandHandlerMethod createFromMethod(Method method) {
             return from(method);
         }
     }

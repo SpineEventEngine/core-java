@@ -318,23 +318,23 @@ public abstract class HandlerMethod<M extends MessageClass, C extends Message> {
         public abstract void checkAccessModifier(Method method);
 
         /**
-         * Creates a {@linkplain HandlerMethod wrapper} for the method.
+         * Creates a {@linkplain HandlerMethod wrapper} from the method.
          *
          * <p>Performs various checks before wrapper creation, e.g. method access modifier or
          * whether method throws any prohibited exceptions.
          *
-         * @param method the method to create wrapper for
-         * @return a wrapper object for the method
+         * @param method the method to create wrapper from
+         * @return a wrapper object created from the method
          * @throws IllegalStateException in case some of the method checks fail
          */
         public H create(Method method) {
             checkAccessModifier(method);
             checkThrownExceptions(method);
-            return createForMethod(method);
+            return createFromMethod(method);
         }
 
-        /** Creates a wrapper object for a method. */
-        protected abstract H createForMethod(Method method);
+        /** Creates a wrapper object from a method. */
+        protected abstract H createFromMethod(Method method);
 
         /**
          * Ensures method does not throw any prohibited exception types.
