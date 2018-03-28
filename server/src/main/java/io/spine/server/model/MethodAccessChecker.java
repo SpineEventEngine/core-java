@@ -141,7 +141,7 @@ public final class MethodAccessChecker {
     }
 
 
-    /** The common logger used by MethodAccessChecker classes. */
+    /** The logger used by the MethodAccessChecker class. */
     private static Logger log() {
         return LogSingleton.INSTANCE.value;
     }
