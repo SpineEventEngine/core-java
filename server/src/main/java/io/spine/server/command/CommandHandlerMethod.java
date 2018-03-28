@@ -34,6 +34,8 @@ import io.spine.server.model.HandlerKey;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.HandlerMethodFailedException;
 import io.spine.server.model.HandlerMethodPredicate;
+import io.spine.server.model.MethodAccessChecker;
+import io.spine.server.model.MethodExceptionChecker;
 import io.spine.server.model.MethodPredicate;
 
 import java.lang.reflect.Method;
@@ -145,7 +147,7 @@ public final class CommandHandlerMethod extends HandlerMethod<CommandClass, Comm
     /**
      * The factory for filtering {@linkplain CommandHandlerMethod command handling methods}.
      */
-    private static class Factory implements HandlerMethod.Factory<CommandHandlerMethod> {
+    private static class Factory extends HandlerMethod.Factory<CommandHandlerMethod> {
 
         private static final Factory INSTANCE = new Factory();
 
@@ -159,21 +161,33 @@ public final class CommandHandlerMethod extends HandlerMethod<CommandClass, Comm
         }
 
         @Override
-        public CommandHandlerMethod create(Method method) {
-            return from(method);
-        }
-
-        @Override
         public Predicate<Method> getPredicate() {
             return predicate();
         }
 
         @Override
         public void checkAccessModifier(Method method) {
-            if (!isPackagePrivate(method)) {
-                warnOnWrongModifier(
-                        "Command handler method {} should be package-private.", method);
-            }
+            final MethodAccessChecker checker = MethodAccessChecker.forMethod(method);
+            checker.checkAccessIsPackagePrivate(
+                    "Command handler method {} should be package-private.");
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * <p>For the {@link CommandHandlerMethod}, the {@link ThrowableMessage} checked exception
+         * type is allowed, because the mechanism of {@linkplain io.spine.core.Rejection
+         * command rejections} is based on this type.
+         */
+        @Override
+        protected void checkThrownExceptions(Method method) {
+            final MethodExceptionChecker checker = MethodExceptionChecker.forMethod(method);
+            checker.checkThrowsNoExceptionsExcept(RuntimeException.class, ThrowableMessage.class);
+        }
+
+        @Override
+        protected CommandHandlerMethod createForMethod(Method method) {
+            return from(method);
         }
     }
 

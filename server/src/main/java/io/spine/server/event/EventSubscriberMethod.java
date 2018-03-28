@@ -27,13 +27,14 @@ import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
 import io.spine.server.model.HandlerKey;
 import io.spine.server.model.HandlerMethod;
+import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodPredicate;
 
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 
 import static io.spine.core.Rejections.isRejection;
 import static io.spine.server.model.HandlerMethods.ensureExternalMatch;
+import static io.spine.server.model.MethodAccessChecker.forMethod;
 
 /**
  * A wrapper for an event subscriber method.
@@ -83,7 +84,7 @@ public final class EventSubscriberMethod extends HandlerMethod<EventClass, Event
     /**
      * The factory for creating {@linkplain EventSubscriberMethod event subscriber} methods.
      */
-    private static class Factory implements HandlerMethod.Factory<EventSubscriberMethod> {
+    private static class Factory extends HandlerMethod.Factory<EventSubscriberMethod> {
 
         private static final Factory INSTANCE = new Factory();
 
@@ -97,20 +98,19 @@ public final class EventSubscriberMethod extends HandlerMethod<EventClass, Event
         }
 
         @Override
-        public EventSubscriberMethod create(Method method) {
-            return from(method);
-        }
-
-        @Override
         public Predicate<Method> getPredicate() {
             return predicate();
         }
 
         @Override
         public void checkAccessModifier(Method method) {
-            if (!Modifier.isPublic(method.getModifiers())) {
-                warnOnWrongModifier("Event subscriber {} must be declared 'public'", method);
-            }
+            final MethodAccessChecker checker = forMethod(method);
+            checker.checkAccessIsPublic("Event subscriber {} must be declared 'public'");
+        }
+
+        @Override
+        protected EventSubscriberMethod createForMethod(Method method) {
+            return from(method);
         }
     }
 

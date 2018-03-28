@@ -26,13 +26,14 @@ import io.spine.annotation.Internal;
 import io.spine.core.React;
 import io.spine.core.RejectionContext;
 import io.spine.server.model.HandlerMethod;
+import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodPredicate;
 
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.List;
 
 import static io.spine.server.model.HandlerMethods.ensureExternalMatch;
+import static io.spine.server.model.MethodAccessChecker.forMethod;
 
 /**
  * A wrapper for a rejection reactor method.
@@ -93,17 +94,11 @@ public class RejectionReactorMethod extends RejectionHandlerMethod {
     /**
      * The factory for filtering methods that match {@code RejectionReactorMethod} specification.
      */
-    private static class Factory implements HandlerMethod.Factory<RejectionReactorMethod> {
+    private static class Factory extends HandlerMethod.Factory<RejectionReactorMethod> {
 
         @Override
         public Class<RejectionReactorMethod> getMethodClass() {
             return RejectionReactorMethod.class;
-        }
-
-        @Override
-        public RejectionReactorMethod create(Method method) {
-            final RejectionReactorMethod result = new RejectionReactorMethod(method);
-            return result;
         }
 
         @Override
@@ -113,10 +108,14 @@ public class RejectionReactorMethod extends RejectionHandlerMethod {
 
         @Override
         public void checkAccessModifier(Method method) {
-            if (!Modifier.isPublic(method.getModifiers())) {
-                warnOnWrongModifier("Rejection reactor {} must be declared 'public'",
-                                    method);
-            }
+            final MethodAccessChecker checker = forMethod(method);
+            checker.checkAccessIsPublic("Rejection reactor {} must be declared 'public'");
+        }
+
+        @Override
+        protected RejectionReactorMethod createForMethod(Method method) {
+            final RejectionReactorMethod result = new RejectionReactorMethod(method);
+            return result;
         }
 
         private enum Singleton {
