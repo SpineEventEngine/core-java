@@ -37,7 +37,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * <p>This class checks whether exception types thrown by the method match the provided list of
  * allowed exception types.
  *
- * <p>If such a check fails, the {@link IllegalStateException} will be thrown. If the check passes,
+ * <p>If such check fails, the {@link IllegalStateException} will be thrown. If the check passes,
  * no action is performed.
  *
  * @author Dmytro Kuzmin
