@@ -31,10 +31,10 @@ import java.lang.reflect.Modifier;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * The class designed to perform various checks on the specified {@link Method} access type.
+ * The checker of a {@link Method} access level.
  *
- * <p>If such check fails, the {@linkplain Logger#warn(String) warning} will be output to the log.
- * If the check passes, no action is performed.
+ * <p>If the access check fails, the {@linkplain Logger#warn(String) warning} will be output to
+ * the log. If the check passes, no action is performed.
  *
  * @author Dmytro Kuzmin
  */
