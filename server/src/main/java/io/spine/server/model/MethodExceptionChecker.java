@@ -71,21 +71,21 @@ public class MethodExceptionChecker {
      * @throws IllegalStateException if the check fails
      */
     public void checkThrowsNoCheckedExceptions() {
-        checkThrowsNoExceptionsExcept(RuntimeException.class);
+        checkThrowsNoExceptionsBut(RuntimeException.class);
     }
 
     /**
      * Checks that contained {@link Method} declares no thrown exception types except the ones
-     * specified and their descendants.
+     * specified as the {@code whiteList} and their descendants.
      *
-     * @param exceptionTypes the allowed exception types
+     * @param whiteList the allowed exception types
      * @throws IllegalStateException if the method throws any exception types apart from the
-     *                               specified types and their descendants
+     *                               types specified in {@code whiteList} and their descendants
      */
-    public void checkThrowsNoExceptionsExcept(Class<?>... exceptionTypes) {
-        checkNotNull(exceptionTypes);
+    public void checkThrowsNoExceptionsBut(Class<?>... whiteList) {
+        checkNotNull(whiteList);
 
-        final Collection<Class<?>> allowedExceptions = Arrays.asList(exceptionTypes);
+        final Collection<Class<?>> allowedExceptions = Arrays.asList(whiteList);
         final Collection<Class<?>> exceptions =
                 obtainProhibitedExceptionsThrown(allowedExceptions);
         if (!exceptions.isEmpty()) {

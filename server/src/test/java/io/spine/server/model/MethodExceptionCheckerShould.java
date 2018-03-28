@@ -62,14 +62,14 @@ public class MethodExceptionCheckerShould {
         //noinspection DuplicateStringLiteralInspection
         final Method methodCustomException = getMethod("methodCustomException");
         final MethodExceptionChecker checker = forMethod(methodCustomException);
-        checker.checkThrowsNoExceptionsExcept(IOException.class);
+        checker.checkThrowsNoExceptionsBut(IOException.class);
     }
 
     @Test
     public void pass_check_for_allowed_exception_types_descendants() {
         final Method methodDescendantException = getMethod("methodDescendantException");
         final MethodExceptionChecker checker = forMethod(methodDescendantException);
-        checker.checkThrowsNoExceptionsExcept(RuntimeException.class);
+        checker.checkThrowsNoExceptionsBut(RuntimeException.class);
     }
 
     @Test(expected = IllegalStateException.class)
@@ -77,7 +77,7 @@ public class MethodExceptionCheckerShould {
         //noinspection DuplicateStringLiteralInspection
         final Method methodCustomException = getMethod("methodCustomException");
         final MethodExceptionChecker checker = forMethod(methodCustomException);
-        checker.checkThrowsNoExceptionsExcept(RuntimeException.class);
+        checker.checkThrowsNoExceptionsBut(RuntimeException.class);
     }
 
     private static Method getMethod(String methodName) {

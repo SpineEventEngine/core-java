@@ -182,7 +182,7 @@ public final class CommandHandlerMethod extends HandlerMethod<CommandClass, Comm
         @Override
         protected void checkThrownExceptions(Method method) {
             final MethodExceptionChecker checker = MethodExceptionChecker.forMethod(method);
-            checker.checkThrowsNoExceptionsExcept(RuntimeException.class, ThrowableMessage.class);
+            checker.checkThrowsNoExceptionsBut(RuntimeException.class, ThrowableMessage.class);
         }
 
         @Override
