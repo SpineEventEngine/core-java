@@ -238,7 +238,7 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
 
         @Assign
         @SuppressWarnings({"unused"})
-            // Throwing is the purpose of this method.
+            // Reflective access.
         CmdProjectCreated handle(CmdCreateProject msg,
                                  CommandContext context) throws ThrowableMessage {
             throw throwable;
@@ -271,7 +271,7 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
 
         @Assign
         @SuppressWarnings({"unused"})
-            // Throwing is the purpose of this method.
+            // Reflective access.
         CmdProjectCreated handle(CmdCreateProject msg, CommandContext context) {
             throw exception;
         }

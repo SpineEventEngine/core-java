@@ -87,23 +87,23 @@ public class MethodAccessCheckerShould {
 
     private static class StubMethodContainer {
 
-        @SuppressWarnings("unused") // Reflective access
+        @SuppressWarnings("unused") // Reflective access.
         public void publicMethod() {
 
         }
 
-        @SuppressWarnings("unused") // Reflective access
+        @SuppressWarnings("unused") // Reflective access.
         protected void protectedMethod() {
 
         }
 
         @SuppressWarnings("unused")
-            // Reflective access
+            // Reflective access.
         void packagePrivateMethod() {
 
         }
 
-        @SuppressWarnings("unused") // Reflective access
+        @SuppressWarnings("unused") // Reflective access.
         private void privateMethod() {
 
         }
