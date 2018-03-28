@@ -95,7 +95,6 @@ public class MethodExceptionCheckerShould {
 
         @SuppressWarnings("unused") // Reflective access.
         private static void methodNoExceptions() {
-
         }
 
         @SuppressWarnings("unused") // Reflective access.

@@ -87,23 +87,19 @@ public class MethodAccessCheckerShould {
 
         @SuppressWarnings("unused") // Reflective access.
         public void publicMethod() {
-
         }
 
         @SuppressWarnings("unused") // Reflective access.
         protected void protectedMethod() {
-
         }
 
         @SuppressWarnings("unused")
             // Reflective access.
         void packagePrivateMethod() {
-
         }
 
         @SuppressWarnings("unused") // Reflective access.
         private void privateMethod() {
-
         }
     }
 }
