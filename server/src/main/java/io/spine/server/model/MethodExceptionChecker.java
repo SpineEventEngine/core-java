@@ -130,7 +130,7 @@ public class MethodExceptionChecker {
     private void throwCheckFailedException(Iterable<Class<?>> exceptionsThrown,
                                            Iterable<Class<?>> allowedExceptions) {
         throw newIllegalStateException(
-                "Method %s#%s throws prohibited exception types: %s. " +
+                "Method %s.%s throws prohibited exception types: %s. " +
                         "The allowed exception types for this method are: %s",
                 method.getDeclaringClass()
                       .getCanonicalName(),
