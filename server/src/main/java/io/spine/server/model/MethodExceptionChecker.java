@@ -32,10 +32,12 @@ import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
- * The class designed to perform various checks on the specified {@link Method}'s thrown
- * exception types.
+ * The checker of a {@link Method} thrown exception types.
  *
- * <p>If such check fails, the {@link IllegalStateException} will be thrown. If the check passes,
+ * <p>This class checks whether exception types thrown by the method match the provided list of
+ * allowed exception types.
+ *
+ * <p>If such a check fails, the {@link IllegalStateException} will be thrown. If the check passes,
  * no action is performed.
  *
  * @author Dmytro Kuzmin
