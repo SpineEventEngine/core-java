@@ -137,8 +137,7 @@ public class HandlerMethodShould {
         assertNotEquals(System.identityHashCode(twoParamMethod), twoParamMethod.hashCode());
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
-    // The purpose of the method is to throw exception.
+    @SuppressWarnings("ResultOfMethodCallIgnored") // Method is called only to throw exception.
     @Test(expected = IllegalStateException.class)
     public void do_not_be_created_from_method_with_checked_exception() {
         factory.create(StubHandler.getMethodWithCheckedException());
