@@ -255,8 +255,7 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
     }
 
     /**
-     * A stub handler that throws passed `RuntimeException` in the command handler method,
-     * rejecting the command.
+     * A stub handler that throws passed `RuntimeException` in the command handler method.
      *
      * @see #set_command_status_to_error_when_handler_throws_exception()
      */
