@@ -145,25 +145,6 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
         return func.execute(commandId);
     }
 
-    @Test
-    public void set_command_status_to_error_when_handler_throws_exception() {
-        ModelTests.clearModel();
-
-        final RuntimeException exception = new IllegalStateException("handler throws");
-        final Command command = givenThrowingHandler(exception);
-        final CommandEnvelope envelope = CommandEnvelope.of(command);
-
-        commandBus.post(command, observer);
-
-        // Check that the logging was called.
-        verify(log).errorHandling(eq(exception),
-                                  eq(envelope.getMessage()),
-                                  eq(envelope.getId()));
-
-        final String errorMessage = exception.getMessage();
-        assertHasErrorStatusWithMessage(envelope, errorMessage);
-    }
-
     /**
      * Checks that the command status has the correct code, and the stored error message matches the
      * passed message.
@@ -194,26 +175,6 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
     }
 
     @Test
-    public void set_command_status_to_error_when_handler_throws_unknown_Throwable()
-            throws TestRejection, TestThrowable {
-        ModelTests.clearModel();
-
-        final Throwable throwable = new TestThrowable("Unexpected Throwable");
-        final Command command = givenThrowingHandler(throwable);
-        final CommandEnvelope envelope = CommandEnvelope.of(command);
-
-        commandBus.post(command, observer);
-
-        // Check that the logging was called.
-        verify(log).errorHandlingUnknown(eq(throwable),
-                                         eq(envelope.getMessage()),
-                                         eq(envelope.getId()));
-
-        // Check that the status and message.
-        assertHasErrorStatusWithMessage(envelope, throwable.getMessage());
-    }
-
-    @Test
     public void set_expired_scheduled_command_status_to_error_if_time_to_post_them_passed() {
         final List<Command> commands = newArrayList(createProject(),
                                                     addTask(),
@@ -241,31 +202,30 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
     }
 
     /**
-     * A stub handler that throws passed `Throwable` in the command handler method.
+     * A stub handler that throws passed `ThrowableMessage` in the command handler method.
      *
      * @see #set_command_status_to_rejection_when_handler_throws_rejection()
-     * @see #set_command_status_to_error_when_handler_throws_exception
-     * @see #set_command_status_to_error_when_handler_throws_unknown_Throwable
      */
     private class ThrowingCreateProjectHandler extends CommandHandler {
 
         @Nonnull
-        private final Throwable throwable;
+        private final ThrowableMessage throwable;
 
-        protected ThrowingCreateProjectHandler(@Nonnull Throwable throwable) {
+        protected ThrowingCreateProjectHandler(@Nonnull ThrowableMessage throwable) {
             super(eventBus);
             this.throwable = throwable;
         }
 
         @Assign
-        @SuppressWarnings({"unused", "ProhibitedExceptionThrown"})
+        @SuppressWarnings({"unused"})
             // Throwing is the purpose of this method.
-        CmdProjectCreated handle(CmdCreateProject msg, CommandContext context) throws Throwable {
+        CmdProjectCreated handle(CmdCreateProject msg,
+                                 CommandContext context) throws ThrowableMessage {
             throw throwable;
         }
     }
 
-    private <E extends Throwable> Command givenThrowingHandler(E throwable) {
+    private <E extends ThrowableMessage> Command givenThrowingHandler(E throwable) {
         final CommandHandler handler = new ThrowingCreateProjectHandler(throwable);
         commandBus.register(handler);
         final CmdCreateProject msg = createProjectMessage();
