@@ -111,7 +111,7 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
         ModelTests.clearModel();
 
         final TestRejection rejection = new TestRejection();
-        final Command command = givenThrowingHandler(rejection);
+        final Command command = givenRejectingHandler(rejection);
         final CommandId commandId = command.getId();
         final Message commandMessage = getMessage(command);
 
@@ -143,6 +143,25 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
                     }
                 };
         return func.execute(commandId);
+    }
+
+    @Test
+    public void set_command_status_to_error_when_handler_throws_exception() {
+        ModelTests.clearModel();
+
+        final RuntimeException exception = new IllegalStateException("handler throws");
+        final Command command = givenThrowingHandler(exception);
+        final CommandEnvelope envelope = CommandEnvelope.of(command);
+
+        commandBus.post(command, observer);
+
+        // Check that the logging was called.
+        verify(log).errorHandling(eq(exception),
+                                  eq(envelope.getMessage()),
+                                  eq(envelope.getId()));
+
+        final String errorMessage = exception.getMessage();
+        assertHasErrorStatusWithMessage(envelope, errorMessage);
     }
 
     /**
@@ -202,16 +221,17 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
     }
 
     /**
-     * A stub handler that throws passed `ThrowableMessage` in the command handler method.
+     * A stub handler that throws passed `ThrowableMessage` in the command handler method,
+     * rejecting the command.
      *
      * @see #set_command_status_to_rejection_when_handler_throws_rejection()
      */
-    private class ThrowingCreateProjectHandler extends CommandHandler {
+    private class RejectingCreateProjectHandler extends CommandHandler {
 
         @Nonnull
         private final ThrowableMessage throwable;
 
-        protected ThrowingCreateProjectHandler(@Nonnull ThrowableMessage throwable) {
+        protected RejectingCreateProjectHandler(@Nonnull ThrowableMessage throwable) {
             super(eventBus);
             this.throwable = throwable;
         }
@@ -225,8 +245,41 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
         }
     }
 
-    private <E extends ThrowableMessage> Command givenThrowingHandler(E throwable) {
-        final CommandHandler handler = new ThrowingCreateProjectHandler(throwable);
+    private <E extends ThrowableMessage> Command givenRejectingHandler(E throwable) {
+        final CommandHandler handler = new RejectingCreateProjectHandler(throwable);
+        commandBus.register(handler);
+        final CmdCreateProject msg = createProjectMessage();
+        final Command command = requestFactory.command()
+                                              .create(msg);
+        return command;
+    }
+
+    /**
+     * A stub handler that throws passed `RuntimeException` in the command handler method,
+     * rejecting the command.
+     *
+     * @see #set_command_status_to_error_when_handler_throws_exception()
+     */
+    private class ThrowingCreateProjectHandler extends CommandHandler {
+
+        @Nonnull
+        private final RuntimeException exception;
+
+        protected ThrowingCreateProjectHandler(@Nonnull RuntimeException exception) {
+            super(eventBus);
+            this.exception = exception;
+        }
+
+        @Assign
+        @SuppressWarnings({"unused"})
+            // Throwing is the purpose of this method.
+        CmdProjectCreated handle(CmdCreateProject msg, CommandContext context) {
+            throw exception;
+        }
+    }
+
+    private <E extends RuntimeException> Command givenThrowingHandler(E exception) {
+        final CommandHandler handler = new ThrowingCreateProjectHandler(exception);
         commandBus.register(handler);
         final CmdCreateProject msg = createProjectMessage();
         final Command command = requestFactory.command()
@@ -243,13 +296,6 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
 
         private TestRejection() {
             super(TypeConverter.<String, StringValue>toMessage(TestRejection.class.getName()));
-        }
-    }
-
-    @SuppressWarnings("serial")
-    private static class TestThrowable extends Throwable {
-        private TestThrowable(String message) {
-            super(message);
         }
     }
 
