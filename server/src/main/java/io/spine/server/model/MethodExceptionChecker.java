@@ -57,7 +57,6 @@ public class MethodExceptionChecker {
      */
     public static MethodExceptionChecker forMethod(Method method) {
         checkNotNull(method);
-
         return new MethodExceptionChecker(method);
     }
 

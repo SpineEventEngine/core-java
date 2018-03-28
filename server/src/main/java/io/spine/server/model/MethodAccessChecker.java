@@ -55,7 +55,6 @@ public class MethodAccessChecker {
      */
     public static MethodAccessChecker forMethod(Method method) {
         checkNotNull(method);
-
         return new MethodAccessChecker(method);
     }
 
