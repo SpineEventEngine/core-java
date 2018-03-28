@@ -146,7 +146,6 @@ public class MethodAccessChecker {
         return result;
     }
 
-
     /** The logger used by the MethodAccessChecker class. */
     private static Logger log() {
         return LogSingleton.INSTANCE.value;
