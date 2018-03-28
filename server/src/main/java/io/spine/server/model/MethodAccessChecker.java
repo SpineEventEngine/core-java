@@ -39,7 +39,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Dmytro Kuzmin
  */
 @Internal
-public class MethodAccessChecker {
+public final class MethodAccessChecker {
 
     private final Method method;
 
