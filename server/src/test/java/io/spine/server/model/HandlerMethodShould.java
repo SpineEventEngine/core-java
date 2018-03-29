@@ -145,8 +145,7 @@ public class HandlerMethodShould {
 
     @Test
     public void be_normally_created_from_method_with_runtime_exception() {
-        final OneParamMethod method =
-                factory.create(StubHandler.getMethodWithRuntimeException());
+        final OneParamMethod method = factory.create(StubHandler.getMethodWithRuntimeException());
         assertEquals(StubHandler.getMethodWithRuntimeException(), method.getMethod());
     }
 
