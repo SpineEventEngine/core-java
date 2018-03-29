@@ -269,9 +269,9 @@ public class HandlerMethodShould {
 
         private static class Factory extends HandlerMethod.Factory<OneParamMethod> {
 
-            private static final OneParamMethod.Factory INSTANCE = new OneParamMethod.Factory();
+            private static final Factory INSTANCE = new Factory();
 
-            private static OneParamMethod.Factory getInstance() {
+            private static Factory getInstance() {
                 return INSTANCE;
             }
 
