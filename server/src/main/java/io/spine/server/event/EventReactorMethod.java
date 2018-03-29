@@ -111,8 +111,7 @@ public final class EventReactorMethod extends HandlerMethod<EventClass, EventCon
         @Override
         public void checkAccessModifier(Method method) {
             final MethodAccessChecker checker = forMethod(method);
-            checker.checkPackagePrivate(
-                    "Reactive handler method {} should be package-private.");
+            checker.checkPackagePrivate("Reactive handler method {} should be package-private.");
         }
 
         @Override
