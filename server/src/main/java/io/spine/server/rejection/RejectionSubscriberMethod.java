@@ -26,12 +26,13 @@ import io.spine.annotation.Internal;
 import io.spine.core.RejectionContext;
 import io.spine.core.Subscribe;
 import io.spine.server.model.HandlerMethod;
+import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodPredicate;
 
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 
 import static io.spine.server.model.HandlerMethods.ensureExternalMatch;
+import static io.spine.server.model.MethodAccessChecker.forMethod;
 
 /**
  * A wrapper for a rejection subscriber method.
@@ -87,17 +88,11 @@ public class RejectionSubscriberMethod extends RejectionHandlerMethod {
     /**
      * The factory for filtering methods that match {@code RejectionSubscriberMethod} specification.
      */
-    private static class Factory implements HandlerMethod.Factory<RejectionSubscriberMethod> {
+    private static class Factory extends HandlerMethod.Factory<RejectionSubscriberMethod> {
 
         @Override
         public Class<RejectionSubscriberMethod> getMethodClass() {
             return RejectionSubscriberMethod.class;
-        }
-
-        @Override
-        public RejectionSubscriberMethod create(Method method) {
-            final RejectionSubscriberMethod result = new RejectionSubscriberMethod(method);
-            return result;
         }
 
         @Override
@@ -107,10 +102,14 @@ public class RejectionSubscriberMethod extends RejectionHandlerMethod {
 
         @Override
         public void checkAccessModifier(Method method) {
-            if (!Modifier.isPublic(method.getModifiers())) {
-                warnOnWrongModifier("Rejection subscriber {} must be declared 'public'",
-                                    method);
-            }
+            final MethodAccessChecker checker = forMethod(method);
+            checker.checkPublic("Rejection subscriber {} must be declared 'public'");
+        }
+
+        @Override
+        protected RejectionSubscriberMethod createFromMethod(Method method) {
+            final RejectionSubscriberMethod result = new RejectionSubscriberMethod(method);
+            return result;
         }
 
         private enum Singleton {

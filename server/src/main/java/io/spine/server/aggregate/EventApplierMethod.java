@@ -29,10 +29,12 @@ import io.spine.core.EventClass;
 import io.spine.server.model.HandlerKey;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.HandlerMethodPredicate;
+import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodPredicate;
 
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
+
+import static io.spine.server.model.MethodAccessChecker.forMethod;
 
 /**
  * A wrapper for event applier method.
@@ -92,7 +94,7 @@ final class EventApplierMethod extends HandlerMethod<EventClass, Empty> {
     }
 
     /** The factory for filtering methods that match {@code EventApplier} specification. */
-    private static class Factory implements HandlerMethod.Factory<EventApplierMethod> {
+    private static class Factory extends HandlerMethod.Factory<EventApplierMethod> {
 
         private static final Factory INSTANCE = new Factory();
 
@@ -106,20 +108,19 @@ final class EventApplierMethod extends HandlerMethod<EventClass, Empty> {
         }
 
         @Override
-        public EventApplierMethod create(Method method) {
-            return from(method);
-        }
-
-        @Override
         public Predicate<Method> getPredicate() {
             return predicate();
         }
 
         @Override
         public void checkAccessModifier(Method method) {
-            if (!Modifier.isPrivate(method.getModifiers())) {
-                warnOnWrongModifier("Event applier method {} must be declared 'private'.", method);
-            }
+            final MethodAccessChecker checker = forMethod(method);
+            checker.checkPrivate("Event applier method {} must be declared 'private'.");
+        }
+
+        @Override
+        protected EventApplierMethod createFromMethod(Method method) {
+            return from(method);
         }
     }
 
