@@ -23,13 +23,36 @@ import java.io.Serializable;
 import java.util.Set;
 
 /**
+ * The strategy of splitting the message targets into shards.
+ *
  * @author Alex Tymchenko
  */
 public interface ShardingStrategy extends Serializable {
 
+    /**
+     * Obtains the total number of shards.
+     *
+     * <p>The returned value is always greater than zero.
+     *
+     * @return the total number of shards.
+     */
     int getNumberOfShards();
 
+    /**
+     * By the target identifier, obtains the index of the shard to which the target belongs.
+     *
+     * @param targetId the identifier of the target
+     * @return the index of the shard, to which the specified target belongs
+     */
     ShardIndex indexForTarget(Object targetId);
 
+    /**
+     * Obtains all possible indexes of existing shards.
+     *
+     * <p>The cardinality of the returned collection equals to the {@linkplain #getNumberOfShards()
+     * total number of shards}.
+     *
+     * @return the set of all possible shard indexes
+     */
     Set<ShardIndex> allIndexes();
 }

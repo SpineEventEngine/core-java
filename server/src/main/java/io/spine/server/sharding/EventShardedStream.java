@@ -27,6 +27,8 @@ import io.spine.protobuf.AnyPacker;
 import javax.annotation.Nullable;
 
 /**
+ * The stream of events sent to a specific shard.
+ *
  * @author Alex Tymchenko
  */
 public class EventShardedStream<I> extends ShardedStream<I, Event, EventEnvelope> {
@@ -50,6 +52,12 @@ public class EventShardedStream<I> extends ShardedStream<I, Event, EventEnvelope
         return converter;
     }
 
+    /**
+     * The converter of {@link EventEnvelope} into {@link ShardedMessage} instances
+     * and vice versa.
+     *
+     * @param <I> the identifier of the event targets.
+     */
     private static class Converter<I> extends ShardedMessageConverter<I, Event, EventEnvelope> {
 
         @Override

@@ -27,6 +27,8 @@ import io.spine.protobuf.AnyPacker;
 import javax.annotation.Nullable;
 
 /**
+ * The stream of rejections sent to a specific shard.
+ *
  * @author Alex Tymchenko
  */
 public class RejectionShardedStream<I> extends ShardedStream<I, Rejection, RejectionEnvelope> {
@@ -50,6 +52,12 @@ public class RejectionShardedStream<I> extends ShardedStream<I, Rejection, Rejec
         return converter;
     }
 
+    /**
+     * The converter of {@link RejectionEnvelope} into {@link ShardedMessage} instances
+     * and vice versa.
+     *
+     * @param <I> the identifier of the rejection targets.
+     */
     private static class Converter<I> extends ShardedMessageConverter<I, Rejection, RejectionEnvelope> {
 
         @Override

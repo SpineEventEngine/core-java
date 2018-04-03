@@ -95,7 +95,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         implements CommandDispatcher<I>,
                    EventDispatcherDelegate<I>,
                    RejectionDispatcherDelegate<I>,
-                   Shardable<A> {
+                   Shardable {
 
     /** The default number of events to be stored before a next snapshot is made. */
     static final int DEFAULT_SNAPSHOT_TRIGGER = 100;

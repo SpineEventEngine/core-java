@@ -23,15 +23,59 @@ import io.spine.core.BoundedContextName;
 import io.spine.server.entity.EntityClass;
 
 /**
+ * A contract for all message destinations, which require the messages sent to them
+ * to be grouped and processed in shards.
+ *
+ * <p>Typically, the message destinations are repositories of entities, which dispatch the messages,
+ * such as {@linkplain io.spine.core.Command Commands}, {@linkplain io.spine.core.Events Events}
+ * and {@linkplain io.spine.core.Rejection Rejections}, to the entities.
+ *
+ * <p>In order to avoid concurrent modifications of the same entity in several processing nodes,
+ * the entities are virtually grouped into shards by their identifiers. The items which belong
+ * to the same shard, should be processed in a synchronous manner (e.g. a single thread)
+ * to avoid such an issue.
+ *
+ * <p>Each {@code Shardable} may be serving as a destination for different kinds of messages.
+ * A particular way to react to a message is {@linkplain #getMessageConsumers() defined} via
+ * {@linkplain ShardedStreamConsumer consumers}, each consuming the messages of a particular kind.
+ * I.e. {@linkplain io.spine.server.aggregate.AggregateRepository AggregateRepository} entities
+ * handle {@code Commands} and may react to {@code Events} and {@code Rejections}. Therefore
+ * the repository should define three consumers, one for each kind of messages.
+ *
  * @author Alex Tymchenko
  */
-public interface Shardable<E> {
+public interface Shardable {
 
+    /**
+     * Defines the strategy of the sharding.
+     *
+     * <p>In particular, sets the rules on which message destination belongs to which shard.
+     *
+     * @return the strategy of sharding for this {@code Shardable}
+     */
     ShardingStrategy getShardingStrategy();
 
+    /**
+     * Obtains all the message consumers for this {@code Shardable}.
+     *
+     * @return all the consumers
+     */
     Iterable<ShardedStreamConsumer<?, ?>> getMessageConsumers();
 
+    /**
+     * Obtains the name of the {@linkplain io.spine.server.BoundedContext bounded context}, in scope
+     * of which the current {@code Shardable} operates.
+     *
+     * @return the name of the bounded context
+     */
     BoundedContextName getBoundedContextName();
 
+    /**
+     * Obtains the class of {@linkplain io.spine.server.entity.Entity Entity} which is served by
+     * this shardable.
+     *
+     * @return the class of the {@code Entity}, which processing is being sharded
+     * in this {@code Shardable}
+     */
     EntityClass getShardedModelClass();
 }

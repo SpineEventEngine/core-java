@@ -27,6 +27,8 @@ import io.spine.protobuf.AnyPacker;
 import javax.annotation.Nullable;
 
 /**
+ * The stream of commands sent to a specific shard.
+ *
  * @author Alex Tymchenko
  */
 public class CommandShardedStream<I> extends ShardedStream<I, Command, CommandEnvelope> {
@@ -50,6 +52,12 @@ public class CommandShardedStream<I> extends ShardedStream<I, Command, CommandEn
         return converter;
     }
 
+    /**
+     * The converter of {@link CommandEnvelope} into {@link ShardedMessage} instances
+     * and vice versa.
+     *
+     * @param <I> the identifier of the command targets.
+     */
     private static class Converter<I> extends ShardedMessageConverter<I, Command, CommandEnvelope> {
 
         @Override

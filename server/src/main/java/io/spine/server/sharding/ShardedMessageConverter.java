@@ -29,6 +29,20 @@ import io.spine.string.Stringifiers;
 import io.spine.util.GenericTypeIndex;
 
 /**
+ * The converter of messages, which have to be sent to a specific shard, into {@link ShardedMessage}
+ * and vice versa.
+ *
+ * <p>As long as the messages originally travel through the {@linkplain io.spine.server.bus.Bus
+ * buses} packed as envelopes, this converter takes an envelope of a certain type and the ID of
+ * the target entity, and transforms them into a {@code ShardedMessage} (a Protobuf message), which
+ * — unlike the envelope — can be easily transferred over the wire.
+ *
+ * <p>The converter, of course, serves for the reverse {@code ShardedMessage} -> "original envelope"
+ * and {@code ShardedMessage} -> "target ID" transformations as well.
+ *
+ * @param <I> the identifier of the message targets
+ * @param <M> the type of the messages being converted
+ * @param <E> the type of the message envelopes
  * @author Alex Tymchenko
  */
 abstract class ShardedMessageConverter<I, M extends Message, E extends MessageEnvelope<?, M, ?>> {
@@ -54,13 +68,13 @@ abstract class ShardedMessageConverter<I, M extends Message, E extends MessageEn
         return result;
     }
 
-    protected I targetIdOf(ShardedMessage message, Class<I> idClass) {
+    I targetIdOf(ShardedMessage message, Class<I> idClass) {
         final Any asAny = message.getTargetId();
         final I result = TypeConverter.toObject(asAny, idClass);
         return result;
     }
 
-    protected E envelopeOf(ShardedMessage message) {
+    E envelopeOf(ShardedMessage message) {
         final Any packedOriginalMessage = message.getOriginalMessage();
         final E result = toEnvelope(packedOriginalMessage);
         return result;

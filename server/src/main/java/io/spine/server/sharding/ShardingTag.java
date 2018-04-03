@@ -74,21 +74,21 @@ public final class ShardingTag<E extends MessageEnvelope<?, ?, ?>> {
         return Objects.hash(boundedContextName, entityClass, envelopeType);
     }
 
-    public static ShardingTag<CommandEnvelope> forCommandsOf(Shardable<?> shardable) {
+    public static ShardingTag<CommandEnvelope> forCommandsOf(Shardable shardable) {
         checkNotNull(shardable);
         return forEnvelope(shardable.getBoundedContextName(),
                            shardable.getShardedModelClass(),
                            CommandEnvelope.class);
     }
 
-    public static ShardingTag<EventEnvelope> forEventsOf(Shardable<?> shardable) {
+    public static ShardingTag<EventEnvelope> forEventsOf(Shardable shardable) {
         checkNotNull(shardable);
         return forEnvelope(shardable.getBoundedContextName(),
                            shardable.getShardedModelClass(),
                            EventEnvelope.class);
     }
 
-    public static ShardingTag<RejectionEnvelope> forRejectionsOf(Shardable<?> shardable) {
+    public static ShardingTag<RejectionEnvelope> forRejectionsOf(Shardable shardable) {
         checkNotNull(shardable);
         return forEnvelope(shardable.getBoundedContextName(),
                            shardable.getShardedModelClass(),

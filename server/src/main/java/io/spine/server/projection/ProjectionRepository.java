@@ -70,7 +70,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  */
 public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S extends Message>
         extends EventDispatchingRepository<I, P, S>
-        implements Shardable<P> {
+        implements Shardable {
 
     private final Supplier<ProjectionEventDelivery<I, P>> eventDeliverySupplier =
             memoize(new Supplier<ProjectionEventDelivery<I, P>>() {

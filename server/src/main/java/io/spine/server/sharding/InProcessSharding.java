@@ -45,7 +45,7 @@ public class InProcessSharding implements Sharding {
     }
 
     @Override
-    public final void register(Shardable<?> shardable) throws NoShardAvailableException {
+    public final void register(Shardable shardable) {
         final Iterable<ShardedStreamConsumer<?, ?>> consumers = shardable.getMessageConsumers();
         if (!consumers.iterator()
                       .hasNext()) {
@@ -61,7 +61,7 @@ public class InProcessSharding implements Sharding {
     }
 
     @Override
-    public final void unregister(Shardable<?> shardable) {
+    public final void unregister(Shardable shardable) {
         final Iterable<ShardedStreamConsumer<?, ?>> consumers = shardable.getMessageConsumers();
         for (ShardedStreamConsumer<?, ?> consumer : consumers) {
             registry.unregister(consumer);
@@ -70,19 +70,19 @@ public class InProcessSharding implements Sharding {
 
     @SPI
     @Override
-    public Set<ShardingKey> pickKeysForNode(Shardable<?> shardable, Set<ShardingKey> keys) {
+    public Set<ShardingKey> pickKeysForNode(Shardable shardable, Set<ShardingKey> keys) {
         return keys;
     }
 
     @SPI
     @Override
     public <I, E extends MessageEnvelope<?, ?, ?>> Set<ShardedStream<I, ?, E>>
-    find(ShardingTag<E> tag, I targetId) throws NoShardAvailableException {
+    find(ShardingTag<E> tag, I targetId) {
         final Set<ShardedStream<I, ?, E>> result = registry.find(tag, targetId);
         return result;
     }
 
-    private Set<ShardingKey> obtainKeys(Shardable<?> shardable) {
+    private Set<ShardingKey> obtainKeys(Shardable shardable) {
         final Set<ShardIndex> allIndexes = shardable.getShardingStrategy()
                                                     .allIndexes();
 

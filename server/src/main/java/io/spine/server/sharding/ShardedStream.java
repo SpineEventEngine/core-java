@@ -19,39 +19,65 @@
  */
 package io.spine.server.sharding;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import com.google.protobuf.StringValue;
 import io.grpc.stub.StreamObserver;
 import io.spine.core.BoundedContextName;
 import io.spine.core.MessageEnvelope;
+import io.spine.protobuf.AnyPacker;
 import io.spine.server.integration.ChannelId;
 import io.spine.server.integration.ExternalMessage;
 import io.spine.server.integration.ExternalMessages;
 import io.spine.server.transport.Publisher;
 import io.spine.server.transport.Subscriber;
 import io.spine.server.transport.TransportFactory;
+import io.spine.string.Stringifiers;
+import io.spine.type.ClassName;
 import io.spine.util.GenericTypeIndex;
 
 import javax.annotation.Nullable;
-import java.io.Closeable;
 import java.util.Objects;
 
+import static com.google.common.base.Joiner.on;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.server.sharding.ShardedMessages.toChannelId;
 import static io.spine.server.sharding.ShardedStream.GenericParameter.MESSAGE_CLASS;
 
 /**
+ * The stream of messages of a particular type sent for the processing to a specific shard.
+ *
+ * <p>Uses a {@linkplain io.spine.server.transport.MessageChannel MessageChannel} as an
+ * underlying transport.
+ *
+ * <p>A typical example is a stream of {@code Event}s, being sent from the write-side
+ * to a particular shard of read-side {@code Projection}s.
+ *
+ * @param <I> the type of identifiers of message targets, such as entities
+ * @param <M> the type of messages, which are being sharded and sent via this stream
+ * @param <E> the type of envelopes into which the messages are packed
+ *
  * @author Alex Tymchenko
  */
 public abstract class ShardedStream<I, M extends Message, E extends MessageEnvelope<?, M, ?>>
-                                                                            implements Closeable {
+        implements AutoCloseable {
 
+    /**
+     * A name of the bounded context, within which the sharded stream exists.
+     */
     private final BoundedContextName boundedContextName;
+
+    /**
+     * A key, which defines a shard.
+     */
     private final ShardingKey key;
+
+    /**
+     * A tag which defines a type
+     */
     private final ShardingTag<E> tag;
     private final Class<I> targetIdClass;
     private final Subscriber subscriber;
     private final Publisher publisher;
-
 
     @Nullable
     private ExternalMessageObserver channelObserver;
@@ -102,7 +128,7 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
 
     public void setConsumer(ShardedStreamConsumer<I, E> consumer) {
         checkNotNull(consumer);
-        if(channelObserver == null) {
+        if (channelObserver == null) {
             channelObserver = new ExternalMessageObserver(consumer);
             subscriber.addObserver(channelObserver);
         } else {
@@ -112,9 +138,35 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
 
     @Override
     public void close() {
-        if(channelObserver != null) {
+        if (channelObserver != null) {
             subscriber.removeObserver(channelObserver);
         }
+    }
+
+    private static <E extends MessageEnvelope<?, ?, ?>>
+    ChannelId toChannelId(BoundedContextName boundedContextName,
+                          ShardingKey key,
+                          Class<E> envelopeClass) {
+        checkNotNull(key);
+        checkNotNull(boundedContextName);
+        checkNotNull(envelopeClass);
+
+        final ClassName className = key.getEntityClass()
+                                       .getClassName();
+        final ShardIndex shardIndex = key.getIndex();
+
+        final String value = on("__").join("bc_", boundedContextName.getValue(),
+                                           "target_", className,
+                                           "prd_", Stringifiers.toString(shardIndex),
+                                           "env_", envelopeClass);
+        final StringValue asMsg = StringValue.newBuilder()
+                                             .setValue(value)
+                                             .build();
+        final Any asAny = AnyPacker.pack(asMsg);
+        final ChannelId result = ChannelId.newBuilder()
+                                          .setIdentifier(asAny)
+                                          .build();
+        return result;
     }
 
     @Override
@@ -199,8 +251,8 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
     }
 
     public abstract static class AbstractBuilder<I,
-                                                 B extends AbstractBuilder<I, B, S>,
-                                                 S extends ShardedStream<I, ?, ?>> {
+            B extends AbstractBuilder<I, B, S>,
+            S extends ShardedStream<I, ?, ?>> {
 
         private BoundedContextName boundedContextName;
         private ShardingKey key;
@@ -209,7 +261,8 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
         private Class<I> targetIdClass;
 
         /** Prevents the instantiation of this builder. */
-        protected AbstractBuilder() {}
+        protected AbstractBuilder() {
+        }
 
         public BoundedContextName getBoundedContextName() {
             return boundedContextName;

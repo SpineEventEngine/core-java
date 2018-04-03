@@ -25,13 +25,27 @@ import java.io.Serializable;
 import java.util.Objects;
 
 /**
+ * A key which defines the group of {@code Entity} instances, which must be processed within
+ * a single shard.
+ *
+ * <p>Each shard has a single key.
+ *
+ * <p>Each key defines the instances of a single shard.
+ *
  * @author Alex Tymchenko
  */
 public class ShardingKey implements Serializable {
 
     private static final long serialVersionUID = 0L;
 
+    /**
+     * A class of the {@code Entity}, which message dispatching is being sharded.
+     */
     private final EntityClass<?> entityClass;
+
+    /**
+     * The index of the shard, to which this sharding key corresponds.
+     */
     private final ShardIndex index;
 
     public ShardingKey(EntityClass<?> entityClass, ShardIndex index) {
@@ -58,10 +72,18 @@ public class ShardingKey implements Serializable {
         return Objects.hash(entityClass, index);
     }
 
+    /**
+     * Obtains the class of the {@code Entity}, which message dispatching is being sharded.
+     *
+     * @return the entity class for this shard.
+     */
     public EntityClass<?> getEntityClass() {
         return entityClass;
     }
 
+    /**
+     * The index of the shard, to which this sharding key corresponds.
+     */
     public ShardIndex getIndex() {
         return index;
     }

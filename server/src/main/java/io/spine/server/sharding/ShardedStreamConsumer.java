@@ -19,19 +19,53 @@
  */
 package io.spine.server.sharding;
 
+import io.spine.annotation.Internal;
 import io.spine.core.BoundedContextName;
 import io.spine.core.MessageEnvelope;
 import io.spine.server.transport.TransportFactory;
 
+import java.util.Set;
+
 /**
+ * The consumer of the sharded messages of a certain type.
+ *
+ * @param <I> the type of identifiers of the message targets
+ * @param <E> the type of the envelope, in which the sharded messages are packed
  * @author Alex Tymchenko
  */
 public interface ShardedStreamConsumer<I, E extends MessageEnvelope<?, ?, ?>> {
 
+    /**
+     * Defines the consumer tag.
+     *
+     * @return the tag value
+     */
     ShardingTag<E> getTag();
 
+    /**
+     * Defines the processing the message, sent to a particular destination (with the target ID
+     * specified).
+     *
+     * @param targetId the ID of the target to handle the message
+     * @param envelope the message to process packed into an envelope of a certain type
+     */
     void onNext(I targetId, E envelope);
 
+    /**
+     * Binds the consumer to the transport and returns the created sharded stream with this consumer
+     * as a subscriber.
+     *
+     * <p>Used internally in order to {@linkplain ShardingRegistry#register(ShardingStrategy, Set)
+     * register} the consumer in the system.
+     *
+     * @param name             the name of the bounded context in scope of which the resulting
+     *                         stream should act
+     * @param key              the key of the shard for this consumer
+     * @param transportFactory the transport factory which is used to create a low-level transport
+     *                         for the stream
+     * @return the sharded stream, down which the messages will travel to this consumer.
+     */
+    @Internal
     ShardedStream<I, ?, E> bindToTransport(BoundedContextName name,
                                            ShardingKey key,
                                            TransportFactory transportFactory);

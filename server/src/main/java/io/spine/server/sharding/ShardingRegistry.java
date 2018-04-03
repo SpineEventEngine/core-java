@@ -31,6 +31,8 @@ import java.util.Set;
 import static com.google.common.collect.Multimaps.synchronizedMultimap;
 
 /**
+ * The registry of sharded message streams.
+ *
  * @author Alex Tymchenko
  */
 final class ShardingRegistry {

@@ -29,14 +29,14 @@ import java.util.Set;
  */
 public interface Sharding {
 
-    void register(Shardable<?> shardable) throws NoShardAvailableException;
+    void register(Shardable shardable);
 
-    void unregister(Shardable<?> shardable);
+    void unregister(Shardable shardable);
 
     @SPI
-    Set<ShardingKey> pickKeysForNode(Shardable<?> shardable, Set<ShardingKey> keys);
+    Set<ShardingKey> pickKeysForNode(Shardable shardable, Set<ShardingKey> keys);
 
     <I, E extends MessageEnvelope<?, ?, ?>> Set<ShardedStream<I, ?, E>>
-    find(ShardingTag<E> tag, I targetId) throws NoShardAvailableException;
+    find(ShardingTag<E> tag, I targetId);
 
 }

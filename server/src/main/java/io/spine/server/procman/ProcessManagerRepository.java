@@ -82,7 +82,7 @@ public abstract class ProcessManagerRepository<I,
                 extends EventDispatchingRepository<I, P, S>
                 implements CommandDispatcherDelegate<I>,
                            RejectionDispatcherDelegate<I>,
-                           Shardable<P> {
+                           Shardable {
 
     /** The command routing schema used by this repository. */
     private final CommandRouting<I> commandRouting = CommandRouting.newInstance();
