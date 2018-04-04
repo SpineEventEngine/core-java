@@ -28,9 +28,14 @@ import io.spine.server.sharding.ShardingTag;
 import java.util.Set;
 
 /**
+ * The sending part of the {@linkplain Delivery}.
+ *
+ * <p>As long as the delivery process is sharded, the messages are posted to the assigned
+ * {@linkplain ShardedStream sharded stream}.
+ *
  * @author Alex Tymchenko
  */
-public class Sender<I, M extends ActorMessageEnvelope<?, ?, ?>>  {
+public class Sender<I, M extends ActorMessageEnvelope<?, ?, ?>> {
 
     private final ShardingTag<M> shardingTag;
 
@@ -38,6 +43,13 @@ public class Sender<I, M extends ActorMessageEnvelope<?, ?, ?>>  {
         this.shardingTag = shardingTag;
     }
 
+    /**
+     * Send the given {@code message} to the consuming part of this delivery, where the target
+     * with the specified {@code id} will be called to handle it.
+     *
+     * @param id      the identifier of the target entity
+     * @param message the message to deliver to the target entity, packed into an envelope
+     */
     public void send(I id, M message) {
         final Set<ShardedStream<I, ?, M>> streams = sharding().find(shardingTag, id);
 

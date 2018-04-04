@@ -33,6 +33,11 @@ import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.server.transport.TransportFactory;
 
 /**
+ * The consuming part of the {@linkplain Delivery}.
+ *
+ * <p>As long as the delivery process is sharded, the messages are transferred via a
+ * {@linkplain ShardedStream sharded stream}.
+ *
  * @author Alex Tymchenko
  */
 public abstract class Consumer<I,
@@ -50,6 +55,9 @@ public abstract class Consumer<I,
         this.repository = repository;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ShardedStream<I, ?, M> bindToTransport(BoundedContextName name,
                                                   ShardingKey key,
@@ -63,7 +71,9 @@ public abstract class Consumer<I,
         return stream;
     }
 
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onNext(I targetId, M messageEnvelope) {
         deliverNow(targetId, messageEnvelope);
@@ -91,8 +101,19 @@ public abstract class Consumer<I,
         operation.execute();
     }
 
+    /**
+     * Creates a new instance of a builder for the sharded stream.
+     *
+     * <p>Descendants must implement this method, as long as the exact type of {@code B} is only
+     * available at the end of the inheritance tree.
+     *
+     * @return the new instance of sharded stream builder
+     */
     protected abstract B newShardedStreamBuilder();
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ShardingTag<M> getTag() {
         return shardingTag;

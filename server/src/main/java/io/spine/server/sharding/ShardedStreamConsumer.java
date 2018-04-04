@@ -43,7 +43,7 @@ public interface ShardedStreamConsumer<I, E extends MessageEnvelope<?, ?, ?>> {
     ShardingTag<E> getTag();
 
     /**
-     * Defines the processing the message, sent to a particular destination (with the target ID
+     * Defines the processing of the message, sent to a particular destination (with the target ID
      * specified).
      *
      * @param targetId the ID of the target to handle the message

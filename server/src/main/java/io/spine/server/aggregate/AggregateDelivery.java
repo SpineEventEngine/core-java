@@ -30,6 +30,9 @@ import io.spine.server.sharding.ShardingTag;
 /**
  * A strategy on delivering the messages to the instances of a certain aggregate type.
  *
+ * <p>Spine users may want to extend this class or any of its framework-provided implementations
+ * in order to switch to another delivery mechanism.
+ *
  * @param <I> the ID type of aggregate, to which messages are being delivered
  * @param <A> the type of aggregate
  * @param <E> the type of message envelope, which is used for message delivery

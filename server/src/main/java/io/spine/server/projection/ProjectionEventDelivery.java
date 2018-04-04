@@ -20,6 +20,7 @@
 
 package io.spine.server.projection;
 
+import io.spine.annotation.SPI;
 import io.spine.core.EventEnvelope;
 import io.spine.server.delivery.Consumer;
 import io.spine.server.delivery.Delivery;
@@ -29,10 +30,13 @@ import io.spine.server.sharding.ShardingTag;
 /**
  * A strategy on delivering the events to the instances of a certain projection type.
  *
+ * <p>Spine users may want to extend this class in order to switch to another delivery mechanism.
+ *
  * @param <I> the ID type of projection, to which events are being delivered
  * @param <P> the type of projection
  * @author Alexander Yevsyukov
  */
+@SPI
 public class ProjectionEventDelivery<I, P extends Projection<I, ?, ?>>
         extends Delivery<I, P, EventEnvelope,
                          EventShardedStream<I>, EventShardedStream.Builder<I>> {

@@ -19,6 +19,7 @@
  */
 package io.spine.server.procman;
 
+import io.spine.annotation.SPI;
 import io.spine.core.ActorMessageEnvelope;
 import io.spine.server.delivery.Consumer;
 import io.spine.server.delivery.Delivery;
@@ -29,12 +30,16 @@ import io.spine.server.sharding.ShardingTag;
 /**
  * A strategy on delivering the messages to the instances of a certain process manager type.
  *
+ * <p>Spine users may want to extend this class or any of its framework-provided implementations
+ * in order to switch to another delivery mechanism.
+ *
  * @param <I> the ID type of process manager, to which messages are being delivered
  * @param <P> the type of process manager
  * @param <M> the type of message envelope, which is used for message delivery
  * @author Alex Tymchenko
  */
-public class PmDelivery<I,
+@SPI
+public abstract class PmDelivery<I,
                         P extends ProcessManager<I, ?, ?>,
                         M extends ActorMessageEnvelope<?, ?, ?>,
                         S extends ShardedStream<I, ?, M>,

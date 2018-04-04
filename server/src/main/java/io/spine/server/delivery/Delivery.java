@@ -24,14 +24,24 @@ import io.spine.core.ActorMessageEnvelope;
 import io.spine.server.entity.Entity;
 import io.spine.server.sharding.ShardedStream;
 
-
 /**
- * A strategy on delivering the messages to the instances of a certain entity type.
+ * A strategy on delivering the messages received from the respective bus futher through
+ * the entity repository down to to the instances of a certain entity type.
+ *
+ * <p>The delivery process is split into {@linkplain Sender sending} and {@linkplain Consumer
+ * consuming}.
+ *
+ * <p>The way of sending and consuming the messages is a joint point for re-routing the messages
+ * so that the entity instances are only modified in a single computational node at any moment.
+ * Such a processing is based upon a
+ * {@linkplain io.spine.server.sharding.Shardable#getShardingStrategy() sharding strategy},
+ * set for the destination repository.
  *
  * @param <I> the ID type of entity, to which the messages are being delivered
  * @param <E> the type of entity
  * @param <M> the type of message envelope, which is used for message delivery
- *
+ * @param <S> the type of the sharded stream that is used for the delivery
+ * @param <B> the type of the builder for the sharded stream
  * @author Alex Tymchenko
  */
 @Internal
@@ -40,6 +50,7 @@ public abstract class Delivery<I,
                                M extends ActorMessageEnvelope<?, ?, ?>,
                                S extends ShardedStream<I, ?, M>,
                                B extends ShardedStream.AbstractBuilder<I, M, B, S>> {
+
 
     private final Sender<I, M> sender;
     private final Consumer<I, E, M, S, B> consumer;
