@@ -27,6 +27,7 @@ import io.spine.protobuf.AnyPacker;
 /**
  * The stream of rejections sent to a specific shard.
  *
+ * @param <I> the type of the identifiers the of rejection targets.
  * @author Alex Tymchenko
  */
 public class RejectionShardedStream<I> extends ShardedStream<I, Rejection, RejectionEnvelope> {
@@ -48,7 +49,7 @@ public class RejectionShardedStream<I> extends ShardedStream<I, Rejection, Rejec
      * The converter of {@link RejectionEnvelope} into {@link ShardedMessage} instances
      * and vice versa.
      *
-     * @param <I> the identifier of the rejection targets.
+     * @param <I> the type of identifiers of the rejection targets.
      */
     private static class Converter<I> extends ShardedMessageConverter<I, Rejection, RejectionEnvelope> {
 
@@ -60,6 +61,11 @@ public class RejectionShardedStream<I> extends ShardedStream<I, Rejection, Rejec
         }
     }
 
+    /**
+     * The builder for the {@code RejectionShardedStream} instances.
+     *
+     * @param <I> the type of the identifiers the of rejection targets.
+     */
     public static class Builder<I> extends AbstractBuilder<I,
                                                            RejectionEnvelope,
                                                            Builder<I>,

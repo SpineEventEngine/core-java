@@ -40,7 +40,7 @@ public abstract class AggregateDelivery<I,
                                         A extends Aggregate<I, ?, ?>,
                                         E extends ActorMessageEnvelope<?, ?, ?>,
                                         S extends ShardedStream<I, ?, E>,
-                                        B extends ShardedStream.AbstractBuilder<I, B, S>>
+                                        B extends ShardedStream.AbstractBuilder<I, E, B, S>>
         extends Delivery<I, A, E, S, B> {
 
     AggregateDelivery(AggregateMessageConsumer<I, A, E, S, B> consumer) {
@@ -51,7 +51,7 @@ public abstract class AggregateDelivery<I,
             A extends Aggregate<I, ?, ?>,
             E extends ActorMessageEnvelope<?, ?, ?>,
             S extends ShardedStream<I, ?, E>,
-            B extends ShardedStream.AbstractBuilder<I, B, S>> extends Consumer<I, A, E, S, B> {
+            B extends ShardedStream.AbstractBuilder<I, E, B, S>> extends Consumer<I, A, E, S, B> {
 
         protected AggregateMessageConsumer(ShardingTag<E> tag, Repository<I, A> repository) {
             super(tag, repository);

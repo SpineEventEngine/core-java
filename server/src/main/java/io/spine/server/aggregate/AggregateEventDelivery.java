@@ -32,7 +32,7 @@ import io.spine.server.sharding.ShardingTag;
  */
 public class AggregateEventDelivery<I, A extends Aggregate<I, ?, ?>>
         extends AggregateDelivery<I, A, EventEnvelope,
-                                                    EventShardedStream<I>, EventShardedStream.Builder<I>> {
+                                  EventShardedStream<I>, EventShardedStream.Builder<I>> {
     protected AggregateEventDelivery(AggregateRepository<I, A> repository) {
         super(new AggregateEventConsumer<>(repository));
     }

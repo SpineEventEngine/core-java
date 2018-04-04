@@ -39,7 +39,7 @@ public abstract class Delivery<I,
                                E extends Entity<I, ?>,
                                M extends ActorMessageEnvelope<?, ?, ?>,
                                S extends ShardedStream<I, ?, M>,
-                               B extends ShardedStream.AbstractBuilder<I, B, S>> {
+                               B extends ShardedStream.AbstractBuilder<I, M, B, S>> {
 
     private final Sender<I, M> sender;
     private final Consumer<I, E, M, S, B> consumer;
