@@ -61,6 +61,7 @@ public class RejectionShardedStream<I> extends ShardedStream<I, Rejection, Rejec
     }
 
     public static class Builder<I> extends AbstractBuilder<I,
+                                                           RejectionEnvelope,
                                                            Builder<I>,
                                                            RejectionShardedStream<I>> {
         @Override

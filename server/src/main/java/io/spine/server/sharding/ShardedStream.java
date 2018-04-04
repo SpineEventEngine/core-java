@@ -78,6 +78,7 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
     private final Class<I> targetIdClass;
     private final Subscriber subscriber;
     private final Publisher publisher;
+    private final ExternalMessageObserver channelObserver;
 
     /**
      * A lazily-intialized converted for the sharded messages.
@@ -85,18 +86,18 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
     @Nullable
     private ShardedMessageConverter<I, M, E> converter;
 
-    @Nullable
-    private ExternalMessageObserver channelObserver;
-
-    ShardedStream(AbstractBuilder<I, ?, ? extends ShardedStream> builder) {
+    ShardedStream(AbstractBuilder<I, E, ?, ? extends ShardedStream> builder) {
         this.boundedContextName = builder.boundedContextName;
         this.key = builder.key;
-        this.tag = (ShardingTag<E>) builder.tag;
+        this.tag = builder.tag;
         this.targetIdClass = builder.targetIdClass;
         final Class<E> envelopeCls = getEnvelopeClass();
         final ChannelId channelId = toChannelId(builder.boundedContextName, key, envelopeCls);
         this.subscriber = builder.transportFactory.createSubscriber(channelId);
         this.publisher = builder.transportFactory.createPublisher(channelId);
+
+        this.channelObserver = new ExternalMessageObserver(builder.consumer);
+        this.subscriber.addObserver(channelObserver);
     }
 
     @SuppressWarnings("unchecked")  // Ensured by the generic type definition.
@@ -137,16 +138,6 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
     private void post(ShardedMessage message) {
         final ExternalMessage externalMessage = ExternalMessages.of(message, boundedContextName);
         publisher.publish(externalMessage.getId(), externalMessage);
-    }
-
-    public void setConsumer(ShardedStreamConsumer<I, E> consumer) {
-        checkNotNull(consumer);
-        if (channelObserver == null) {
-            channelObserver = new ExternalMessageObserver(consumer);
-            subscriber.addObserver(channelObserver);
-        } else {
-            channelObserver.updateDelegate(consumer);
-        }
     }
 
     @Override
@@ -263,15 +254,25 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
         }
     }
 
+    /**
+     * An abstract base for builders of the {@code ShardedStream} descendants.
+     *
+     * @param <I> the type of the identifiers of sharded message targets.
+     * @param <E> the type of message envelopes, in form of which messages travel
+     * @param <B> the exact type of the descendant builder
+     * @param <S> the exact type of the {@code ShardedStream} descendant to build
+     */
     public abstract static class AbstractBuilder<I,
-            B extends AbstractBuilder<I, B, S>,
-            S extends ShardedStream<I, ?, ?>> {
+                                                 E extends MessageEnvelope<?, ?, ?>,
+                                                 B extends AbstractBuilder<I, ?, B, S>,
+                                                 S extends ShardedStream<I, ?, ?>> {
 
         private BoundedContextName boundedContextName;
         private ShardingKey key;
-        private ShardingTag tag;
+        private ShardingTag<E> tag;
         private TransportFactory transportFactory;
         private Class<I> targetIdClass;
+        private ShardedStreamConsumer<I, E> consumer;
 
         /** Prevents the instantiation of this builder. */
         protected AbstractBuilder() {
@@ -297,11 +298,11 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
             return thisAsB();
         }
 
-        public ShardingTag getTag() {
+        public ShardingTag<E> getTag() {
             return tag;
         }
 
-        public B setTag(ShardingTag tag) {
+        public B setTag(ShardingTag<E> tag) {
             checkNotNull(tag);
             this.tag = tag;
             return thisAsB();
@@ -310,6 +311,12 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
         public B setTargetIdClass(Class<I> targetIdClass) {
             checkNotNull(targetIdClass);
             this.targetIdClass = targetIdClass;
+            return thisAsB();
+        }
+
+        public B setConsumer(ShardedStreamConsumer<I, E> consumer) {
+            checkNotNull(consumer);
+            this.consumer = consumer;
             return thisAsB();
         }
 

@@ -39,7 +39,7 @@ public abstract class Consumer<I,
                                E extends Entity<I, ?>,
                                M extends ActorMessageEnvelope<?, ?, ?>,
                                S extends ShardedStream<I, ?, M>,
-                               B extends ShardedStream.AbstractBuilder<I, B, S>>
+                               B extends ShardedStream.AbstractBuilder<I, M, B, S>>
                         implements ShardedStreamConsumer<I, M> {
 
     private final Repository<I, E> repository;
@@ -58,8 +58,8 @@ public abstract class Consumer<I,
                                                   .setKey(key)
                                                   .setTag(shardingTag)
                                                   .setTargetIdClass(repository.getIdClass())
+                                                  .setConsumer(this)
                                                   .build(transportFactory);
-        stream.setConsumer(this);
         return stream;
     }
 

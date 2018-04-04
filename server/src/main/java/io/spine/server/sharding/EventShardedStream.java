@@ -60,7 +60,8 @@ public class EventShardedStream<I> extends ShardedStream<I, Event, EventEnvelope
         }
     }
 
-    public static class Builder<I> extends AbstractBuilder<I, Builder<I>, EventShardedStream<I>> {
+    public static class Builder<I> extends AbstractBuilder<I, EventEnvelope,
+                                                           Builder<I>, EventShardedStream<I>> {
         @Override
         protected EventShardedStream<I> createStream() {
             return new EventShardedStream<>(this);

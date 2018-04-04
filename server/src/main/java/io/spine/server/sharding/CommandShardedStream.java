@@ -60,7 +60,8 @@ public class CommandShardedStream<I> extends ShardedStream<I, Command, CommandEn
         }
     }
 
-    public static class Builder<I> extends AbstractBuilder<I, Builder<I>, CommandShardedStream<I>> {
+    public static class Builder<I> extends AbstractBuilder<I, CommandEnvelope,
+                                                           Builder<I>, CommandShardedStream<I>> {
         @Override
         protected CommandShardedStream<I> createStream() {
             return new CommandShardedStream<>(this);
