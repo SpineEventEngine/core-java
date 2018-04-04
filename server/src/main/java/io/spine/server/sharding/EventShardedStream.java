@@ -24,17 +24,12 @@ import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.protobuf.AnyPacker;
 
-import javax.annotation.Nullable;
-
 /**
  * The stream of events sent to a specific shard.
  *
  * @author Alex Tymchenko
  */
 public class EventShardedStream<I> extends ShardedStream<I, Event, EventEnvelope> {
-
-    @Nullable
-    private ShardedMessageConverter<I, Event, EventEnvelope> converter;
 
     private EventShardedStream(Builder<I> builder) {
         super(builder);
@@ -45,11 +40,8 @@ public class EventShardedStream<I> extends ShardedStream<I, Event, EventEnvelope
     }
 
     @Override
-    protected ShardedMessageConverter<I, Event, EventEnvelope> converter() {
-        if (converter == null) {
-            converter = new Converter<>();
-        }
-        return converter;
+    protected ShardedMessageConverter<I, Event, EventEnvelope> newConverter() {
+        return new Converter<>();
     }
 
     /**

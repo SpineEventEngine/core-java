@@ -129,10 +129,9 @@ public class InProcessSharding implements Sharding {
         public ShardedStream<?, ?, ?> apply(@Nullable ShardedStreamConsumer<?, ?> consumer) {
             checkNotNull(
                     consumer);
-            final ShardedStream<?, ?, ?> result = consumer.bindToTransport(
-                    bcName,
-                    shardingKey,
-                    transportFactory);
+            final ShardedStream<?, ?, ?> result = consumer.bindToTransport(bcName,
+                                                                           shardingKey,
+                                                                           transportFactory);
             return result;
         }
     }

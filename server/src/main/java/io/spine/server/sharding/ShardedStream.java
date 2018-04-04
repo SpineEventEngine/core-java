@@ -79,6 +79,12 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
     private final Subscriber subscriber;
     private final Publisher publisher;
 
+    /**
+     * A lazily-intialized converted for the sharded messages.
+     */
+    @Nullable
+    private ShardedMessageConverter<I, M, E> converter;
+
     @Nullable
     private ExternalMessageObserver channelObserver;
 
@@ -102,7 +108,14 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
         return targetIdClass;
     }
 
-    protected abstract ShardedMessageConverter<I, M, E> converter();
+    private final ShardedMessageConverter<I, M, E> converter() {
+        if(converter == null) {
+            converter = newConverter();
+        }
+        return converter;
+    }
+
+    protected abstract ShardedMessageConverter<I, M, E> newConverter();
 
     public ShardingKey getKey() {
         return key;

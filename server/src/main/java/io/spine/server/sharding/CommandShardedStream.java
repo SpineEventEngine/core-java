@@ -24,17 +24,12 @@ import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.protobuf.AnyPacker;
 
-import javax.annotation.Nullable;
-
 /**
  * The stream of commands sent to a specific shard.
  *
  * @author Alex Tymchenko
  */
 public class CommandShardedStream<I> extends ShardedStream<I, Command, CommandEnvelope> {
-
-    @Nullable
-    private ShardedMessageConverter<I, Command, CommandEnvelope> converter;
 
     private CommandShardedStream(Builder<I> builder) {
         super(builder);
@@ -45,11 +40,8 @@ public class CommandShardedStream<I> extends ShardedStream<I, Command, CommandEn
     }
 
     @Override
-    protected ShardedMessageConverter<I, Command, CommandEnvelope> converter() {
-        if (converter == null) {
-            converter = new Converter<>();
-        }
-        return converter;
+    protected ShardedMessageConverter<I, Command, CommandEnvelope> newConverter() {
+        return new Converter<>();
     }
 
     /**

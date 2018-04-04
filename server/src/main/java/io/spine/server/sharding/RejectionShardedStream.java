@@ -24,17 +24,12 @@ import io.spine.core.Rejection;
 import io.spine.core.RejectionEnvelope;
 import io.spine.protobuf.AnyPacker;
 
-import javax.annotation.Nullable;
-
 /**
  * The stream of rejections sent to a specific shard.
  *
  * @author Alex Tymchenko
  */
 public class RejectionShardedStream<I> extends ShardedStream<I, Rejection, RejectionEnvelope> {
-
-    @Nullable
-    private ShardedMessageConverter<I, Rejection, RejectionEnvelope> converter;
 
     private RejectionShardedStream(Builder<I> builder) {
         super(builder);
@@ -45,11 +40,8 @@ public class RejectionShardedStream<I> extends ShardedStream<I, Rejection, Rejec
     }
 
     @Override
-    protected ShardedMessageConverter<I, Rejection, RejectionEnvelope> converter() {
-        if (converter == null) {
-            converter = new Converter<>();
-        }
-        return converter;
+    protected ShardedMessageConverter<I, Rejection, RejectionEnvelope> newConverter() {
+        return new Converter<>();
     }
 
     /**
