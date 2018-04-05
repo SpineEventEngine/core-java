@@ -86,7 +86,7 @@ public final class ColumnRecords {
                     (ColumnType<Object, Object, D, I>) columnTypeRegistry.get(columnMetadata);
             checkArgument(columnType != null,
                           String.format("ColumnType for %s could not be found.",
-                                        columnMetadata.getType()
+                                        columnMetadata.getPersistenceType()
                                                       .getCanonicalName()));
             setValue(columnValue, destination, columnIdentifier, columnType);
         }

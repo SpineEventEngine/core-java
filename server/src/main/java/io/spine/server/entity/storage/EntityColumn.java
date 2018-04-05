@@ -26,6 +26,7 @@ import com.google.common.base.Optional;
 import com.google.gson.internal.Primitives;
 import io.spine.annotation.Internal;
 import io.spine.server.entity.Entity;
+import io.spine.server.entity.storage.enumeration.EnumeratedValue;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -198,13 +199,20 @@ public class EntityColumn implements Serializable {
 
     private final boolean nullable;
 
-    private EntityColumn(Method getter, String name, String storedName, boolean nullable) {
+    private final EnumeratedValue enumeratedValue;
+
+    private EntityColumn(Method getter,
+                         String name,
+                         String storedName,
+                         boolean nullable,
+                         EnumeratedValue enumeratedValue) {
         this.getter = getter;
         this.entityType = getter.getDeclaringClass();
         this.getterMethodName = getter.getName();
         this.name = name;
         this.storedName = storedName;
         this.nullable = nullable;
+        this.enumeratedValue = enumeratedValue;
     }
 
     /**
@@ -216,20 +224,25 @@ public class EntityColumn implements Serializable {
     public static EntityColumn from(Method getter) {
         checkGetter(getter);
         final String nameForQuery = nameFromGetter(getter);
-        final String nameForStore = nameFromAnnotation(getter).or(nameForQuery);
+        final Method annotatedVersion = retrieveAnnotatedVersion(getter);
+        final String nameForStore = nameFromAnnotation(annotatedVersion).or(nameForQuery);
         final boolean nullable = getter.isAnnotationPresent(Nullable.class);
-        return new EntityColumn(getter, nameForQuery, nameForStore, nullable);
+        final EnumeratedValue value = EnumeratedValue.from(annotatedVersion);
+        return new EntityColumn(getter, nameForQuery, nameForStore, nullable, value);
     }
 
-    private static Optional<String> nameFromAnnotation(Method getter) {
+    private static Method retrieveAnnotatedVersion(Method getter) {
         final Optional<Method> optionalMethod = getAnnotatedVersion(getter);
         if (!optionalMethod.isPresent()) {
             throw newIllegalStateException("Method `%s` is not an entity column getter.", getter);
         }
-        final Method annotatedVersion = optionalMethod.get();
-        final String trimmedName = annotatedVersion.getAnnotation(Column.class)
-                                                   .name()
-                                                   .trim();
+        return optionalMethod.get();
+    }
+
+    private static Optional<String> nameFromAnnotation(Method getter) {
+        final String trimmedName = getter.getAnnotation(Column.class)
+                                         .name()
+                                         .trim();
         return trimmedName.isEmpty()
                ? Optional.<String>absent()
                : Optional.of(trimmedName);
@@ -307,6 +320,9 @@ public class EntityColumn implements Serializable {
             if (!nullable) {
                 checkNotNull(result, format("Not null getter %s returned null.", getter.getName()));
             }
+            if (isEnumType()) {
+                return enumeratedValue.getFor((Enum) result);
+            }
             return result;
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new IllegalStateException(
@@ -340,6 +356,23 @@ public class EntityColumn implements Serializable {
         return getter.getReturnType();
     }
 
+    public Class getPersistenceType() {
+        if (isEnumType()) {
+            return enumeratedValue.getPersistenceType();
+        }
+        return getter.getReturnType();
+    }
+
+    public Object convertIfEnumerated(Object value) {
+        checkNotNull(value);
+        final Class<?> type = value.getClass();
+        final boolean valueIsEnum = Enum.class.isAssignableFrom(type);
+        if (isEnumType() && valueIsEnum) {
+            return enumeratedValue.getFor((Enum) value);
+        }
+        return value;
+    }
+
     @SuppressWarnings("NonFinalFieldReferenceInEquals") // `getter` field is effectively final
     @Override
     public boolean equals(Object o) {
@@ -366,6 +399,11 @@ public class EntityColumn implements Serializable {
           .append('.')
           .append(getName());
         return sb.toString();
+    }
+
+    @VisibleForTesting
+    boolean isEnumType() {
+        return !enumeratedValue.isEmpty();
     }
 
     private void readObject(ObjectInputStream inputStream) throws IOException,
