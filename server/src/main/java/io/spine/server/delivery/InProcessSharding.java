@@ -25,7 +25,6 @@ import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.SPI;
 import io.spine.core.BoundedContextName;
 import io.spine.core.MessageEnvelope;
-import io.spine.server.sharding.ShardIndex;
 import io.spine.server.transport.TransportFactory;
 
 import javax.annotation.Nullable;

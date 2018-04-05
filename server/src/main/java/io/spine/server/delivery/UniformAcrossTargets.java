@@ -21,7 +21,6 @@ package io.spine.server.delivery;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
-import io.spine.server.sharding.ShardIndex;
 
 import java.util.Objects;
 import java.util.Set;

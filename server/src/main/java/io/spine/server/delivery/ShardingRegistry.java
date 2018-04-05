@@ -23,7 +23,6 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import io.spine.core.MessageEnvelope;
-import io.spine.server.sharding.ShardIndex;
 
 import java.util.Collection;
 import java.util.Objects;

@@ -29,8 +29,6 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.server.integration.ChannelId;
 import io.spine.server.integration.ExternalMessage;
 import io.spine.server.integration.ExternalMessages;
-import io.spine.server.sharding.ShardIndex;
-import io.spine.server.sharding.ShardedMessage;
 import io.spine.server.transport.Publisher;
 import io.spine.server.transport.Subscriber;
 import io.spine.server.transport.TransportFactory;

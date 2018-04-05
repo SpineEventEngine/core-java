@@ -25,8 +25,6 @@ import io.spine.base.Time;
 import io.spine.core.MessageEnvelope;
 import io.spine.protobuf.AnyPacker;
 import io.spine.protobuf.TypeConverter;
-import io.spine.server.sharding.ShardedMessage;
-import io.spine.server.sharding.ShardedMessageId;
 import io.spine.string.Stringifiers;
 import io.spine.util.GenericTypeIndex;
 

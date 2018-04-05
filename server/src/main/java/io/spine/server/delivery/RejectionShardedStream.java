@@ -23,7 +23,6 @@ import com.google.protobuf.Any;
 import io.spine.core.Rejection;
 import io.spine.core.RejectionEnvelope;
 import io.spine.protobuf.AnyPacker;
-import io.spine.server.sharding.ShardedMessage;
 
 /**
  * The stream of rejections sent to a specific shard.

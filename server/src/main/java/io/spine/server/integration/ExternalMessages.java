@@ -29,8 +29,8 @@ import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.Rejection;
 import io.spine.protobuf.AnyPacker;
-import io.spine.server.sharding.ShardedMessage;
-import io.spine.server.sharding.ShardedMessageId;
+import io.spine.server.delivery.ShardedMessage;
+import io.spine.server.delivery.ShardedMessageId;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

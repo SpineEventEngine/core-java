@@ -23,7 +23,6 @@ import com.google.protobuf.Any;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.protobuf.AnyPacker;
-import io.spine.server.sharding.ShardedMessage;
 
 /**
  * The stream of events sent to a specific shard.

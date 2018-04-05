@@ -24,7 +24,7 @@ import io.spine.core.BoundedContextName;
 import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.Rejection;
-import io.spine.server.sharding.ShardedMessage;
+import io.spine.server.delivery.ShardedMessage;
 import org.junit.Test;
 
 import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;

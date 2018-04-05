@@ -23,7 +23,6 @@ import com.google.protobuf.Any;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.protobuf.AnyPacker;
-import io.spine.server.sharding.ShardedMessage;
 
 /**
  * The stream of commands sent to a specific shard.
