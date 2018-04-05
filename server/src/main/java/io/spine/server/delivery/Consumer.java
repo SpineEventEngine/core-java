@@ -25,10 +25,10 @@ import io.spine.core.TenantId;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityMessageEndpoint;
 import io.spine.server.entity.Repository;
+import io.spine.server.sharding.DeliveryTag;
 import io.spine.server.sharding.ShardedStream;
 import io.spine.server.sharding.ShardedStreamConsumer;
 import io.spine.server.sharding.ShardingKey;
-import io.spine.server.sharding.ShardingTag;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.server.transport.TransportFactory;
 
@@ -48,10 +48,10 @@ public abstract class Consumer<I,
                         implements ShardedStreamConsumer<I, M> {
 
     private final Repository<I, E> repository;
-    private final ShardingTag<M> shardingTag;
+    private final DeliveryTag<M> deliveryTag;
 
-    protected Consumer(ShardingTag<M> tag, Repository<I, E> repository) {
-        this.shardingTag = tag;
+    protected Consumer(DeliveryTag<M> tag, Repository<I, E> repository) {
+        this.deliveryTag = tag;
         this.repository = repository;
     }
 
@@ -64,7 +64,7 @@ public abstract class Consumer<I,
                                                   TransportFactory transportFactory) {
         final S stream = newShardedStreamBuilder().setBoundedContextName(name)
                                                   .setKey(key)
-                                                  .setTag(shardingTag)
+                                                  .setTag(deliveryTag)
                                                   .setTargetIdClass(repository.getIdClass())
                                                   .setConsumer(this)
                                                   .build(transportFactory);
@@ -115,8 +115,8 @@ public abstract class Consumer<I,
      * {@inheritDoc}
      */
     @Override
-    public ShardingTag<M> getTag() {
-        return shardingTag;
+    public DeliveryTag<M> getTag() {
+        return deliveryTag;
     }
 
     /**

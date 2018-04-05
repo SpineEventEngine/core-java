@@ -21,7 +21,7 @@ package io.spine.server.aggregate;
 
 import io.spine.core.CommandEnvelope;
 import io.spine.server.sharding.CommandShardedStream;
-import io.spine.server.sharding.ShardingTag;
+import io.spine.server.sharding.DeliveryTag;
 
 /**
  * A strategy on delivering the commands to the instances of a certain aggregate type.
@@ -42,7 +42,7 @@ public class AggregateCommandDelivery<I, A extends Aggregate<I, ?, ?>>
             extends AggregateMessageConsumer<I, A, CommandEnvelope, CommandShardedStream<I>,
             CommandShardedStream.Builder<I>> {
         protected AggregateCommandConsumer(AggregateRepository<I, A> repository) {
-            super(ShardingTag.forCommandsOf(repository), repository);
+            super(DeliveryTag.forCommandsOf(repository), repository);
         }
 
         @Override

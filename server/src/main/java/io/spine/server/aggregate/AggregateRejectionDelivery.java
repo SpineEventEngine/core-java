@@ -20,8 +20,8 @@
 package io.spine.server.aggregate;
 
 import io.spine.core.RejectionEnvelope;
+import io.spine.server.sharding.DeliveryTag;
 import io.spine.server.sharding.RejectionShardedStream;
-import io.spine.server.sharding.ShardingTag;
 
 /**
  * A strategy on delivering the rejections to the instances of a certain aggregate type.
@@ -43,7 +43,7 @@ public class AggregateRejectionDelivery<I, A extends Aggregate<I, ?, ?>>
             extends AggregateMessageConsumer<I, A, RejectionEnvelope, RejectionShardedStream<I>,
             RejectionShardedStream.Builder<I>> {
         protected AggregateRejectionConsumer(AggregateRepository<I, A> repository) {
-            super(ShardingTag.forRejectionsOf(repository), repository);
+            super(DeliveryTag.forRejectionsOf(repository), repository);
         }
 
         @Override

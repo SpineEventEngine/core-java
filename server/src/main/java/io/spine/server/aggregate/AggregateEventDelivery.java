@@ -20,8 +20,8 @@
 package io.spine.server.aggregate;
 
 import io.spine.core.EventEnvelope;
+import io.spine.server.sharding.DeliveryTag;
 import io.spine.server.sharding.EventShardedStream;
-import io.spine.server.sharding.ShardingTag;
 
 /**
  * A strategy on delivering the events to the instances of a certain aggregate type.
@@ -41,7 +41,7 @@ public class AggregateEventDelivery<I, A extends Aggregate<I, ?, ?>>
             extends AggregateMessageConsumer<I, A, EventEnvelope, EventShardedStream<I>,
             EventShardedStream.Builder<I>> {
         protected AggregateEventConsumer(AggregateRepository<I, A> repository) {
-            super(ShardingTag.forEventsOf(repository), repository);
+            super(DeliveryTag.forEventsOf(repository), repository);
         }
 
         @Override

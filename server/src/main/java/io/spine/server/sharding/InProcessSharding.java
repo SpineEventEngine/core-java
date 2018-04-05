@@ -77,7 +77,7 @@ public class InProcessSharding implements Sharding {
     @SPI
     @Override
     public <I, E extends MessageEnvelope<?, ?, ?>> Set<ShardedStream<I, ?, E>>
-    find(ShardingTag<E> tag, I targetId) {
+    find(DeliveryTag<E> tag, I targetId) {
         final Set<ShardedStream<I, ?, E>> result = registry.find(tag, targetId);
         return result;
     }

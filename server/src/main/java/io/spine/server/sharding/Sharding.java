@@ -37,6 +37,6 @@ public interface Sharding {
     Set<ShardingKey> pickKeysForNode(Shardable shardable, Set<ShardingKey> keys);
 
     <I, E extends MessageEnvelope<?, ?, ?>> Set<ShardedStream<I, ?, E>>
-    find(ShardingTag<E> tag, I targetId);
+    find(DeliveryTag<E> tag, I targetId);
 
 }

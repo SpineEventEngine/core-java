@@ -21,9 +21,9 @@ package io.spine.server.delivery;
 
 import io.spine.core.ActorMessageEnvelope;
 import io.spine.server.ServerEnvironment;
+import io.spine.server.sharding.DeliveryTag;
 import io.spine.server.sharding.ShardedStream;
 import io.spine.server.sharding.Sharding;
-import io.spine.server.sharding.ShardingTag;
 
 import java.util.Set;
 
@@ -37,10 +37,10 @@ import java.util.Set;
  */
 public class Sender<I, M extends ActorMessageEnvelope<?, ?, ?>> {
 
-    private final ShardingTag<M> shardingTag;
+    private final DeliveryTag<M> deliveryTag;
 
-    public Sender(ShardingTag<M> shardingTag) {
-        this.shardingTag = shardingTag;
+    public Sender(DeliveryTag<M> deliveryTag) {
+        this.deliveryTag = deliveryTag;
     }
 
     /**
@@ -51,7 +51,7 @@ public class Sender<I, M extends ActorMessageEnvelope<?, ?, ?>> {
      * @param message the message to deliver to the target entity, packed into an envelope
      */
     public void send(I id, M message) {
-        final Set<ShardedStream<I, ?, M>> streams = sharding().find(shardingTag, id);
+        final Set<ShardedStream<I, ?, M>> streams = sharding().find(deliveryTag, id);
 
         for (ShardedStream<I, ?, M> shardedStream : streams) {
             shardedStream.post(id, message);

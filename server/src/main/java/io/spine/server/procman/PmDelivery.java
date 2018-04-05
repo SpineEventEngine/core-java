@@ -24,8 +24,8 @@ import io.spine.core.ActorMessageEnvelope;
 import io.spine.server.delivery.Consumer;
 import io.spine.server.delivery.Delivery;
 import io.spine.server.entity.Repository;
+import io.spine.server.sharding.DeliveryTag;
 import io.spine.server.sharding.ShardedStream;
-import io.spine.server.sharding.ShardingTag;
 
 /**
  * A strategy on delivering the messages to the instances of a certain process manager type.
@@ -56,7 +56,7 @@ public abstract class PmDelivery<I,
             S extends ShardedStream<I, ?, M>,
             B extends ShardedStream.AbstractBuilder<I, M, B, S>> extends Consumer<I, P, M, S, B> {
 
-        protected PmMessageConsumer(ShardingTag<M> tag, Repository<I, P> repository) {
+        protected PmMessageConsumer(DeliveryTag<M> tag, Repository<I, P> repository) {
             super(tag, repository);
         }
 

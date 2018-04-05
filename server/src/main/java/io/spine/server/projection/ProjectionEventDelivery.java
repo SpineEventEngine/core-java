@@ -24,8 +24,8 @@ import io.spine.annotation.SPI;
 import io.spine.core.EventEnvelope;
 import io.spine.server.delivery.Consumer;
 import io.spine.server.delivery.Delivery;
+import io.spine.server.sharding.DeliveryTag;
 import io.spine.server.sharding.EventShardedStream;
-import io.spine.server.sharding.ShardingTag;
 
 /**
  * A strategy on delivering the events to the instances of a certain projection type.
@@ -49,7 +49,7 @@ public class ProjectionEventDelivery<I, P extends Projection<I, ?, ?>>
             extends Consumer<I, P, EventEnvelope,
             EventShardedStream<I>, EventShardedStream.Builder<I>> {
         protected ProjectionEventConsumer(ProjectionRepository<I, P, ?> repository) {
-            super(ShardingTag.forEventsOf(repository), repository);
+            super(DeliveryTag.forEventsOf(repository), repository);
         }
 
         @Override

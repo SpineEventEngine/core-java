@@ -21,7 +21,7 @@ package io.spine.server.procman;
 
 import io.spine.core.CommandEnvelope;
 import io.spine.server.sharding.CommandShardedStream;
-import io.spine.server.sharding.ShardingTag;
+import io.spine.server.sharding.DeliveryTag;
 
 /**
  * A strategy on delivering the ecommandsvents to the instances of a certain process manager type.
@@ -42,7 +42,7 @@ public class PmCommandDelivery<I, P extends ProcessManager<I, ?, ?>>
             extends PmMessageConsumer<I, P, CommandEnvelope, CommandShardedStream<I>,
             CommandShardedStream.Builder<I>> {
         protected PmCommandConsumer(ProcessManagerRepository<I, P, ?> repository) {
-            super(ShardingTag.forCommandsOf(repository), repository);
+            super(DeliveryTag.forCommandsOf(repository), repository);
         }
 
         @Override

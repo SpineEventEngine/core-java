@@ -24,8 +24,8 @@ import io.spine.core.ActorMessageEnvelope;
 import io.spine.server.delivery.Consumer;
 import io.spine.server.delivery.Delivery;
 import io.spine.server.entity.Repository;
+import io.spine.server.sharding.DeliveryTag;
 import io.spine.server.sharding.ShardedStream;
-import io.spine.server.sharding.ShardingTag;
 
 /**
  * A strategy on delivering the messages to the instances of a certain aggregate type.
@@ -56,7 +56,7 @@ public abstract class AggregateDelivery<I,
             S extends ShardedStream<I, ?, E>,
             B extends ShardedStream.AbstractBuilder<I, E, B, S>> extends Consumer<I, A, E, S, B> {
 
-        protected AggregateMessageConsumer(ShardingTag<E> tag, Repository<I, A> repository) {
+        protected AggregateMessageConsumer(DeliveryTag<E> tag, Repository<I, A> repository) {
             super(tag, repository);
         }
 

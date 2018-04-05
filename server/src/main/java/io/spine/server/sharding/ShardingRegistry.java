@@ -37,19 +37,19 @@ import static com.google.common.collect.Multimaps.synchronizedMultimap;
  */
 final class ShardingRegistry {
 
-    private final Multimap<ShardingTag, Entry> entries =
-            synchronizedMultimap(HashMultimap.<ShardingTag, Entry>create());
+    private final Multimap<DeliveryTag, Entry> entries =
+            synchronizedMultimap(HashMultimap.<DeliveryTag, Entry>create());
 
     void register(ShardingStrategy strategy, Set<ShardedStream<?, ?, ?>> streams) {
         for (ShardedStream<?, ?, ?> stream : streams) {
             final Entry entry = new Entry(strategy, stream);
-            final ShardingTag<?> tag = stream.getTag();
+            final DeliveryTag<?> tag = stream.getTag();
             entries.put(tag, entry);
         }
     }
 
     void unregister(ShardedStreamConsumer streamConsumer) {
-        final ShardingTag tag = streamConsumer.getTag();
+        final DeliveryTag tag = streamConsumer.getTag();
         final Collection<Entry> entriesForTag = entries.get(tag);
         for (Entry entry : entriesForTag) {
             entry.stream.close();
@@ -58,7 +58,7 @@ final class ShardingRegistry {
     }
 
     <I, E extends MessageEnvelope<?, ?, ?>> Set<ShardedStream<I, ?, E>>
-    find(final ShardingTag<E> tag, final I targetId) {
+    find(final DeliveryTag<E> tag, final I targetId) {
 
         final Collection<Entry> entriesForTag = entries.get(tag);
 

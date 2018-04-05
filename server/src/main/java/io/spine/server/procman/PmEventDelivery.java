@@ -20,8 +20,8 @@
 package io.spine.server.procman;
 
 import io.spine.core.EventEnvelope;
+import io.spine.server.sharding.DeliveryTag;
 import io.spine.server.sharding.EventShardedStream;
-import io.spine.server.sharding.ShardingTag;
 
 /**
  * A strategy on delivering the events to the instances of a certain process manager type.
@@ -42,7 +42,7 @@ public class PmEventDelivery<I, P extends ProcessManager<I, ?, ?>>
             extends PmMessageConsumer<I, P, EventEnvelope, EventShardedStream<I>,
             EventShardedStream.Builder<I>> {
         protected PmEventConsumer(ProcessManagerRepository<I, P, ?> repository) {
-            super(ShardingTag.forEventsOf(repository), repository);
+            super(DeliveryTag.forEventsOf(repository), repository);
         }
 
         @Override
