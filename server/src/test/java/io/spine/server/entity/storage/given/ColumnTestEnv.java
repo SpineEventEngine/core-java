@@ -26,9 +26,12 @@ import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.server.entity.VersionableEntity;
 import io.spine.server.entity.storage.Column;
+import io.spine.server.entity.storage.enumeration.Enumerated;
 
 import javax.annotation.Nullable;
 
+import static io.spine.server.entity.storage.enumeration.EnumType.STRING;
+import static io.spine.server.entity.storage.given.ColumnTestEnv.TestEnum.ONE;
 import static io.spine.test.Tests.nullRef;
 import static org.junit.Assert.fail;
 
@@ -73,6 +76,23 @@ public class ColumnTestEnv {
         @Column
         public long getLong() {
             return 0;
+        }
+
+        @Column
+        public TestEnum getEnumNotAnnotated() {
+            return ONE;
+        }
+
+        @Column
+        @Enumerated
+        public TestEnum getEnumOrdinal() {
+            return ONE;
+        }
+
+        @Column
+        @Enumerated(STRING)
+        public TestEnum getEnumString() {
+            return ONE;
         }
 
         @Column
@@ -127,5 +147,10 @@ public class ColumnTestEnv {
         public int getValue() {
             return 0;
         }
+    }
+
+    public enum TestEnum {
+        ZERO,
+        ONE
     }
 }

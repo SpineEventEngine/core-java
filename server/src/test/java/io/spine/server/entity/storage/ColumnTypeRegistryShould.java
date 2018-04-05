@@ -107,6 +107,7 @@ public class ColumnTypeRegistryShould {
     private static <T> EntityColumn mockProperty(Class<T> cls) {
         final EntityColumn column = mock(EntityColumn.class);
         when(column.getType()).thenReturn(cls);
+        when(column.getPersistenceType()).thenReturn(cls);
         return column;
     }
 

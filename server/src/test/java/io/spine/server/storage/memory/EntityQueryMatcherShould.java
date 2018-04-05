@@ -55,6 +55,7 @@ import static java.util.Collections.emptySet;
 import static java.util.Collections.singletonMap;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -100,11 +101,13 @@ public class EntityQueryMatcherShould {
     @Test
     public void match_columns() {
         final String targetName = "feature";
+        final Serializable acceptedValue = true;
+
         final EntityColumn target = mock(EntityColumn.class);
         when(target.isNullable()).thenReturn(true);
         when(target.getStoredName()).thenReturn(targetName);
         when(target.getType()).thenReturn(Boolean.class);
-        final Serializable acceptedValue = true;
+        when(target.convertIfEnumerated(any())).thenReturn(acceptedValue);
 
         final Collection<Object> ids = Collections.emptyList();
 
@@ -148,6 +151,7 @@ public class EntityQueryMatcherShould {
         final EntityColumn column = mock(EntityColumn.class);
         when(column.getType()).thenReturn(Any.class);
         when(column.getStoredName()).thenReturn(columnName);
+        when(column.convertIfEnumerated(any())).thenReturn(actualValue);
 
         final EntityColumn.MemoizedValue value = mock(EntityColumn.MemoizedValue.class);
         when(value.getSourceColumn()).thenReturn(column);

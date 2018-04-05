@@ -47,6 +47,7 @@ import static io.spine.client.ColumnFilters.lt;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.EITHER;
+import static io.spine.client.ColumnFilterValues.toAny;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Verify.assertContainsAll;
@@ -60,6 +61,8 @@ public class ColumnFiltersShould {
 
     private static final String COLUMN_NAME = "preciseColumn";
     private static final Timestamp COLUMN_VALUE = getCurrentTime();
+    private static final String ENUM_COLUMN_NAME = "enumColumn";
+    private static final Operator ENUM_COLUMN_VALUE = EQUAL;
 
     @Test
     public void have_private_util_ctor() {
@@ -97,6 +100,14 @@ public class ColumnFiltersShould {
     @Test
     public void create_LESS_OR_EQUAL_instances() {
         checkCreatesInstance(le(COLUMN_NAME, COLUMN_VALUE), LESS_OR_EQUAL);
+    }
+
+    @Test
+    public void create_EQUALS_instances_for_enums() {
+        final ColumnFilter filter = eq(ENUM_COLUMN_NAME, ENUM_COLUMN_VALUE);
+        assertEquals(ENUM_COLUMN_NAME, filter.getColumnName());
+        assertEquals(toAny(ENUM_COLUMN_VALUE), filter.getValue());
+        assertEquals(EQUAL, filter.getOperator());
     }
 
     @Test
@@ -139,7 +150,7 @@ public class ColumnFiltersShould {
 
     @Test(expected = IllegalArgumentException.class)
     public void fail_to_create_ordering_filters_for_enums() {
-        ge("enumColumn", EQUAL);
+        ge(ENUM_COLUMN_NAME, ENUM_COLUMN_VALUE);
     }
 
     @Test(expected = IllegalArgumentException.class)
