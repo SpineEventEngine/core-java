@@ -17,12 +17,13 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.sharding;
+package io.spine.server.delivery;
 
 import com.google.protobuf.Any;
 import io.spine.core.Rejection;
 import io.spine.core.RejectionEnvelope;
 import io.spine.protobuf.AnyPacker;
+import io.spine.server.sharding.ShardedMessage;
 
 /**
  * The stream of rejections sent to a specific shard.

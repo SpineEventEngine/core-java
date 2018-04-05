@@ -17,13 +17,26 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package io.spine.server.delivery;
+
+import io.spine.annotation.SPI;
+import io.spine.core.MessageEnvelope;
+
+import java.util.Set;
 
 /**
- * This package defines an API to enable the sharded processing of commands, events and rejections
- * and thus address concurrent modifications of {@code Entity} states.
+ * @author Alex Tymchenko
  */
+public interface Sharding {
 
-@ParametersAreNonnullByDefault
-package io.spine.server.sharding;
+    void register(Shardable shardable);
 
-import javax.annotation.ParametersAreNonnullByDefault;
+    void unregister(Shardable shardable);
+
+    @SPI
+    Set<ShardingKey> pickKeysForNode(Shardable shardable, Set<ShardingKey> keys);
+
+    <I, E extends MessageEnvelope<?, ?, ?>> Set<ShardedStream<I, ?, E>>
+    find(DeliveryTag<E> tag, I targetId);
+
+}

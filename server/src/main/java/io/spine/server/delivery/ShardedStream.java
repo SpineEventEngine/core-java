@@ -17,7 +17,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.sharding;
+package io.spine.server.delivery;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
@@ -29,6 +29,8 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.server.integration.ChannelId;
 import io.spine.server.integration.ExternalMessage;
 import io.spine.server.integration.ExternalMessages;
+import io.spine.server.sharding.ShardIndex;
+import io.spine.server.sharding.ShardedMessage;
 import io.spine.server.transport.Publisher;
 import io.spine.server.transport.Subscriber;
 import io.spine.server.transport.TransportFactory;
@@ -41,7 +43,7 @@ import java.util.Objects;
 
 import static com.google.common.base.Joiner.on;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.server.sharding.ShardedStream.GenericParameter.MESSAGE_CLASS;
+import static io.spine.server.delivery.ShardedStream.GenericParameter.MESSAGE_CLASS;
 
 /**
  * The stream of messages of a particular type sent for the processing to a specific shard.

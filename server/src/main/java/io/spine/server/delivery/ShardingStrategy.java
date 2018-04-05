@@ -17,26 +17,44 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.sharding;
+package io.spine.server.delivery;
 
-import io.spine.annotation.SPI;
-import io.spine.core.MessageEnvelope;
+import io.spine.server.sharding.ShardIndex;
 
+import java.io.Serializable;
 import java.util.Set;
 
 /**
+ * The strategy of splitting the message targets into shards.
+ *
  * @author Alex Tymchenko
  */
-public interface Sharding {
+public interface ShardingStrategy extends Serializable {
 
-    void register(Shardable shardable);
+    /**
+     * Obtains the total number of shards.
+     *
+     * <p>The returned value is always greater than zero.
+     *
+     * @return the total number of shards.
+     */
+    int getNumberOfShards();
 
-    void unregister(Shardable shardable);
+    /**
+     * By the target identifier, obtains the index of the shard to which the target belongs.
+     *
+     * @param targetId the identifier of the target
+     * @return the index of the shard, to which the specified target belongs
+     */
+    ShardIndex indexForTarget(Object targetId);
 
-    @SPI
-    Set<ShardingKey> pickKeysForNode(Shardable shardable, Set<ShardingKey> keys);
-
-    <I, E extends MessageEnvelope<?, ?, ?>> Set<ShardedStream<I, ?, E>>
-    find(DeliveryTag<E> tag, I targetId);
-
+    /**
+     * Obtains all possible indexes of existing shards.
+     *
+     * <p>The cardinality of the returned collection equals to the {@linkplain #getNumberOfShards()
+     * total number of shards}.
+     *
+     * @return the set of all possible shard indexes
+     */
+    Set<ShardIndex> allIndexes();
 }

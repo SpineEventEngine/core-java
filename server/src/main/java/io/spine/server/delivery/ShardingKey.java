@@ -17,9 +17,10 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.sharding;
+package io.spine.server.delivery;
 
 import io.spine.server.entity.EntityClass;
+import io.spine.server.sharding.ShardIndex;
 
 import java.io.Serializable;
 import java.util.Objects;

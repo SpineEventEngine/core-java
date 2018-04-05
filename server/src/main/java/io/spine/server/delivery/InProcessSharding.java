@@ -17,7 +17,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.sharding;
+package io.spine.server.delivery;
 
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.SPI;
 import io.spine.core.BoundedContextName;
 import io.spine.core.MessageEnvelope;
+import io.spine.server.sharding.ShardIndex;
 import io.spine.server.transport.TransportFactory;
 
 import javax.annotation.Nullable;

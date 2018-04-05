@@ -20,8 +20,8 @@
 package io.spine.server.aggregate;
 
 import io.spine.core.CommandEnvelope;
-import io.spine.server.sharding.CommandShardedStream;
-import io.spine.server.sharding.DeliveryTag;
+import io.spine.server.delivery.CommandShardedStream;
+import io.spine.server.delivery.DeliveryTag;
 
 /**
  * A strategy on delivering the commands to the instances of a certain aggregate type.

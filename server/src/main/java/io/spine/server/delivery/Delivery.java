@@ -22,7 +22,6 @@ package io.spine.server.delivery;
 import io.spine.annotation.Internal;
 import io.spine.core.ActorMessageEnvelope;
 import io.spine.server.entity.Entity;
-import io.spine.server.sharding.ShardedStream;
 
 /**
  * A strategy on delivering the messages received from the respective bus futher through
@@ -34,7 +33,7 @@ import io.spine.server.sharding.ShardedStream;
  * <p>The way of sending and consuming the messages is a joint point for re-routing the messages
  * so that the entity instances are only modified in a single computational node at any moment.
  * Such a processing is based upon a
- * {@linkplain io.spine.server.sharding.Shardable#getShardingStrategy() sharding strategy},
+ * {@linkplain Shardable#getShardingStrategy() sharding strategy},
  * set for the destination repository.
  *
  * @param <I> the ID type of entity, to which the messages are being delivered

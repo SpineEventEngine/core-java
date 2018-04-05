@@ -20,8 +20,8 @@
 package io.spine.server.procman;
 
 import io.spine.core.CommandEnvelope;
-import io.spine.server.sharding.CommandShardedStream;
-import io.spine.server.sharding.DeliveryTag;
+import io.spine.server.delivery.CommandShardedStream;
+import io.spine.server.delivery.DeliveryTag;
 
 /**
  * A strategy on delivering the ecommandsvents to the instances of a certain process manager type.

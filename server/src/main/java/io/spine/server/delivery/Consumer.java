@@ -25,10 +25,6 @@ import io.spine.core.TenantId;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityMessageEndpoint;
 import io.spine.server.entity.Repository;
-import io.spine.server.sharding.DeliveryTag;
-import io.spine.server.sharding.ShardedStream;
-import io.spine.server.sharding.ShardedStreamConsumer;
-import io.spine.server.sharding.ShardingKey;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.server.transport.TransportFactory;
 

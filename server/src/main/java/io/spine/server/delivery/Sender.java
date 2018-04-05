@@ -21,9 +21,6 @@ package io.spine.server.delivery;
 
 import io.spine.core.ActorMessageEnvelope;
 import io.spine.server.ServerEnvironment;
-import io.spine.server.sharding.DeliveryTag;
-import io.spine.server.sharding.ShardedStream;
-import io.spine.server.sharding.Sharding;
 
 import java.util.Set;
 

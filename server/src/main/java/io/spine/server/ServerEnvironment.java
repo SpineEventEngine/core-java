@@ -22,8 +22,8 @@ package io.spine.server;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
-import io.spine.server.sharding.InProcessSharding;
-import io.spine.server.sharding.Sharding;
+import io.spine.server.delivery.InProcessSharding;
+import io.spine.server.delivery.Sharding;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
 
 import javax.annotation.Nullable;

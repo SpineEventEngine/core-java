@@ -17,22 +17,23 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.sharding;
+package io.spine.server.delivery;
 
 import com.google.protobuf.Any;
-import io.spine.core.Command;
-import io.spine.core.CommandEnvelope;
+import io.spine.core.Event;
+import io.spine.core.EventEnvelope;
 import io.spine.protobuf.AnyPacker;
+import io.spine.server.sharding.ShardedMessage;
 
 /**
- * The stream of commands sent to a specific shard.
+ * The stream of events sent to a specific shard.
  *
- * @param <I> the type of the identifiers of the command targets.
+ * @param <I> the type of the identifiers of the event targets.
  * @author Alex Tymchenko
  */
-public class CommandShardedStream<I> extends ShardedStream<I, Command, CommandEnvelope> {
+public class EventShardedStream<I> extends ShardedStream<I, Event, EventEnvelope> {
 
-    private CommandShardedStream(Builder<I> builder) {
+    private EventShardedStream(Builder<I> builder) {
         super(builder);
     }
 
@@ -41,36 +42,36 @@ public class CommandShardedStream<I> extends ShardedStream<I, Command, CommandEn
     }
 
     @Override
-    protected ShardedMessageConverter<I, Command, CommandEnvelope> newConverter() {
+    protected ShardedMessageConverter<I, Event, EventEnvelope> newConverter() {
         return new Converter<>();
     }
 
     /**
-     * The converter of {@link CommandEnvelope} into {@link ShardedMessage} instances
+     * The converter of {@link EventEnvelope} into {@link ShardedMessage} instances
      * and vice versa.
      *
-     * @param <I> the type of the identifiers of the command targets.
+     * @param <I> the type of the identifiers of the event targets.
      */
-    private static class Converter<I> extends ShardedMessageConverter<I, Command, CommandEnvelope> {
+    private static class Converter<I> extends ShardedMessageConverter<I, Event, EventEnvelope> {
 
         @Override
-        protected CommandEnvelope toEnvelope(Any packedCommand) {
-            final Command command = AnyPacker.unpack(packedCommand);
-            final CommandEnvelope result = CommandEnvelope.of(command);
+        protected EventEnvelope toEnvelope(Any packedEvent) {
+            final Event event = AnyPacker.unpack(packedEvent);
+            final EventEnvelope result = EventEnvelope.of(event);
             return result;
         }
     }
 
     /**
-     * The builder for the {@code CommandShardedStream} instances.
+     * The builder for the {@code EventShardedStream} instances.
      *
-     * @param <I> the type of the identifiers of the command targets.
+     * @param <I> the type of the identifiers of the event targets.
      */
-    public static class Builder<I> extends AbstractBuilder<I, CommandEnvelope,
-                                                           Builder<I>, CommandShardedStream<I>> {
+    public static class Builder<I> extends AbstractBuilder<I, EventEnvelope,
+                                                           Builder<I>, EventShardedStream<I>> {
         @Override
-        protected CommandShardedStream<I> createStream() {
-            return new CommandShardedStream<>(this);
+        protected EventShardedStream<I> createStream() {
+            return new EventShardedStream<>(this);
         }
     }
 }

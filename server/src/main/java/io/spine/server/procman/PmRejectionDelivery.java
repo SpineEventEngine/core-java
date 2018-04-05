@@ -20,8 +20,8 @@
 package io.spine.server.procman;
 
 import io.spine.core.RejectionEnvelope;
-import io.spine.server.sharding.DeliveryTag;
-import io.spine.server.sharding.RejectionShardedStream;
+import io.spine.server.delivery.DeliveryTag;
+import io.spine.server.delivery.RejectionShardedStream;
 
 /**
  * A strategy on delivering the rejections to the instances of a certain process manager type.

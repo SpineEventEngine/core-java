@@ -24,8 +24,8 @@ import io.spine.annotation.SPI;
 import io.spine.core.EventEnvelope;
 import io.spine.server.delivery.Consumer;
 import io.spine.server.delivery.Delivery;
-import io.spine.server.sharding.DeliveryTag;
-import io.spine.server.sharding.EventShardedStream;
+import io.spine.server.delivery.DeliveryTag;
+import io.spine.server.delivery.EventShardedStream;
 
 /**
  * A strategy on delivering the events to the instances of a certain projection type.

@@ -23,9 +23,9 @@ import io.spine.annotation.SPI;
 import io.spine.core.ActorMessageEnvelope;
 import io.spine.server.delivery.Consumer;
 import io.spine.server.delivery.Delivery;
+import io.spine.server.delivery.DeliveryTag;
+import io.spine.server.delivery.ShardedStream;
 import io.spine.server.entity.Repository;
-import io.spine.server.sharding.DeliveryTag;
-import io.spine.server.sharding.ShardedStream;
 
 /**
  * A strategy on delivering the messages to the instances of a certain aggregate type.

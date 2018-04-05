@@ -17,7 +17,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.sharding;
+package io.spine.server.delivery;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
@@ -25,6 +25,8 @@ import io.spine.base.Time;
 import io.spine.core.MessageEnvelope;
 import io.spine.protobuf.AnyPacker;
 import io.spine.protobuf.TypeConverter;
+import io.spine.server.sharding.ShardedMessage;
+import io.spine.server.sharding.ShardedMessageId;
 import io.spine.string.Stringifiers;
 import io.spine.util.GenericTypeIndex;
 
