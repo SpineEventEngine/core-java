@@ -54,7 +54,6 @@ import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -113,16 +112,6 @@ public class EventBusShould {
     @After
     public void tearDown() throws Exception {
         bc.close();
-    }
-
-    @SuppressWarnings("MethodMayBeStatic")   /* it cannot, as its result is used in {@code org.mockito.Mockito.spy() */
-    private Executor directExecutor() {
-        return new Executor() {
-            @Override
-            public void execute(Runnable command) {
-                command.run();
-            }
-        };
     }
 
     private static EventBus.Builder eventBusBuilder(@Nullable EventEnricher enricher) {
