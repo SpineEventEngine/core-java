@@ -109,7 +109,7 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
         return targetIdClass;
     }
 
-    private final ShardedMessageConverter<I, M, E> converter() {
+    private ShardedMessageConverter<I, M, E> converter() {
         if(converter == null) {
             converter = newConverter();
         }
