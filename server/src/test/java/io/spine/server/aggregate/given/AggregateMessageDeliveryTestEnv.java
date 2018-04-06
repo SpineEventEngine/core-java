@@ -146,8 +146,13 @@ public class AggregateMessageDeliveryTestEnv {
     /**
      * An aggregate class, which declares all kinds of message dispatching methods and remembers
      * the latest values submitted to each of them.
+     *
+     * <p>Message handlers are invoked via reflection, so some of them are considered unused.
+     *
+     * <p>Some handler parameters are not used, as they aren't needed for tests. They are still
+     * present, as long as they are required according to the handler declaration rules.
      */
-    @SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod")
+    @SuppressWarnings({"AssignmentToStaticFieldFromInstanceMethod", "unused"})
     public static class DeliveryProject
             extends Aggregate<ProjectId, StringValue, StringValueVBuilder> {
 
