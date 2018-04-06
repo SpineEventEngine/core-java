@@ -148,7 +148,7 @@ public class AggregateMessageDeliveryTestEnv {
      * the latest values submitted to each of them.
      */
     @SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod")
-    public static class ReactingProject
+    public static class DeliveryProject
             extends Aggregate<ProjectId, StringValue, StringValueVBuilder> {
 
 
@@ -156,7 +156,7 @@ public class AggregateMessageDeliveryTestEnv {
                 Multimaps.synchronizedMultimap(HashMultimap.<Long, ProjectId>create());
 
 
-        protected ReactingProject(ProjectId id) {
+        protected DeliveryProject(ProjectId id) {
             super(id);
         }
 

@@ -27,7 +27,7 @@ import io.spine.core.Rejection;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
 import io.spine.server.ServerEnvironment;
-import io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.ReactingProject;
+import io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.DeliveryProject;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.delivery.InProcessSharding;
 import io.spine.server.delivery.ShardingStrategy;
@@ -110,7 +110,7 @@ public class AggregateMessageDeliveryShould {
         final int numberOfShards = repository.getShardingStrategy()
                                              .getNumberOfShards();
 
-        assertTrue(ReactingProject.getThreadToId()
+        assertTrue(DeliveryProject.getThreadToId()
                                   .isEmpty());
 
         final CommandBus commandBus = boundedContext.getCommandBus();
@@ -151,7 +151,7 @@ public class AggregateMessageDeliveryShould {
         final int numberOfShards = repository.getShardingStrategy()
                                              .getNumberOfShards();
 
-        assertTrue(ReactingProject.getThreadToId()
+        assertTrue(DeliveryProject.getThreadToId()
                                   .isEmpty());
 
         final EventBus eventBus = boundedContext.getEventBus();
@@ -192,7 +192,7 @@ public class AggregateMessageDeliveryShould {
         final int numberOfShards = repository.getShardingStrategy()
                                              .getNumberOfShards();
 
-        assertTrue(ReactingProject.getThreadToId()
+        assertTrue(DeliveryProject.getThreadToId()
                                   .isEmpty());
 
         final RejectionBus rejectionBus = boundedContext.getRejectionBus();
@@ -223,14 +223,14 @@ public class AggregateMessageDeliveryShould {
 
     private static void setUp() {
         clearModel();
-        ReactingProject.clearStats();
+        DeliveryProject.clearStats();
         setShardingTransport(SynchronousInMemTransportFactory.newInstance());
     }
 
     private static void verifyStats(int totalEvents, int numberOfShards) {
-        final Map<Long, Collection<ProjectId>> whoProcessedWhat = ReactingProject.getThreadToId()
+        final Map<Long, Collection<ProjectId>> whoProcessedWhat = DeliveryProject.getThreadToId()
                                                                                  .asMap();
-        final Collection<ProjectId> actualProjectIds = newHashSet(ReactingProject.getThreadToId()
+        final Collection<ProjectId> actualProjectIds = newHashSet(DeliveryProject.getThreadToId()
                                                                                  .values());
         final Set<Long> actualThreads = whoProcessedWhat.keySet();
 
@@ -246,7 +246,7 @@ public class AggregateMessageDeliveryShould {
     }
 
     private static class SingleShardProjectRepository
-            extends AggregateRepository<ProjectId, ReactingProject> {
+            extends AggregateRepository<ProjectId, DeliveryProject> {
         SingleShardProjectRepository() {
             super();
             getRejectionRouting().replaceDefault(routeByProjectId());
@@ -255,7 +255,7 @@ public class AggregateMessageDeliveryShould {
     }
 
     private static class TripleShardProjectRepository
-            extends AggregateRepository<ProjectId, ReactingProject> {
+            extends AggregateRepository<ProjectId, DeliveryProject> {
 
         TripleShardProjectRepository() {
             super();
