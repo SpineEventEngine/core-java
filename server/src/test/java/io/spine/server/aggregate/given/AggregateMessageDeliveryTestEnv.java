@@ -20,9 +20,11 @@
 package io.spine.server.aggregate.given;
 
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.Identifier;
@@ -31,18 +33,22 @@ import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.React;
 import io.spine.core.Rejection;
+import io.spine.core.RejectionContext;
 import io.spine.core.Rejections;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.command.TestEventFactory;
+import io.spine.server.route.RejectionRoute;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggStartProject;
+import io.spine.test.aggregate.event.AggProjectCancelled;
 import io.spine.test.aggregate.event.AggProjectStarted;
 import io.spine.test.aggregate.rejection.Rejections.AggCannotStartArchivedProject;
 import io.spine.validate.StringValueVBuilder;
 
 import java.util.List;
+import java.util.Set;
 
 import static io.spine.protobuf.AnyPacker.pack;
 import static java.util.Collections.emptyList;
@@ -79,6 +85,22 @@ public class AggregateMessageDeliveryTestEnv {
         return result;
     }
 
+    public static Event projectCancelled() {
+        final ProjectId projectId = projectId();
+        final TestEventFactory eventFactory =
+                TestEventFactory.newInstance(
+                        pack(projectId),
+                        AggregateMessageDeliveryTestEnv.class
+                );
+
+        final AggProjectCancelled msg = AggProjectCancelled.newBuilder()
+                                                           .setProjectId(projectId)
+                                                           .build();
+
+        final Event result = eventFactory.createEvent(msg);
+        return result;
+    }
+
     private static ProjectId projectId() {
         return ProjectId.newBuilder()
                         .setId(Identifier.newUuid())
@@ -108,6 +130,19 @@ public class AggregateMessageDeliveryTestEnv {
         return result;
     }
 
+    public static RejectionRoute<ProjectId, Message> routeByProjectId() {
+        return new RejectionRoute<ProjectId, Message>() {
+
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Set<ProjectId> apply(Message raw, RejectionContext context) {
+                final AggCannotStartArchivedProject msg = (AggCannotStartArchivedProject) raw;
+                return ImmutableSet.of(msg.getProjectId());
+            }
+        };
+    }
+
     /**
      * An aggregate class, which declares all kinds of message dispatching methods and remembers
      * the latest values submitted to each of them.
@@ -127,10 +162,7 @@ public class AggregateMessageDeliveryTestEnv {
 
         @Assign
         AggProjectStarted on(AggStartProject cmd) {
-            final ProjectId projectId = getId();
-            final long currentThreadId = Thread.currentThread()
-                                               .getId();
-            threadToId.put(currentThreadId, projectId);
+            final ProjectId projectId = recordThread();
             final AggProjectStarted event = AggProjectStarted.newBuilder()
                                                              .setProjectId(projectId)
                                                              .build();
@@ -144,13 +176,24 @@ public class AggregateMessageDeliveryTestEnv {
         }
 
         @React
-        List<Message> onEvent(AggProjectStarted event) {
+        List<Message> onEvent(AggProjectCancelled event) {
+            recordThread();
             return emptyList();
         }
 
         @React
         List<Message> onRejection(AggCannotStartArchivedProject rejection) {
+            recordThread();
             return emptyList();
+        }
+
+        @CanIgnoreReturnValue
+        private ProjectId recordThread() {
+            final ProjectId projectId = getId();
+            final long currentThreadId = Thread.currentThread()
+                                               .getId();
+            threadToId.put(currentThreadId, projectId);
+            return projectId;
         }
 
         public static Multimap<Long, ProjectId> getThreadToId() {
