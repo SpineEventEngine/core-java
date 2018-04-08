@@ -38,7 +38,7 @@ import io.spine.server.command.Assign;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.delivery.ShardingStrategy;
 import io.spine.server.delivery.UniformAcrossTargets;
-import io.spine.server.delivery.given.MessageDeliveryTestEnv.EntityStats;
+import io.spine.server.delivery.given.MessageDeliveryTestEnv.ThreadStats;
 import io.spine.server.route.RejectionRoute;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggStartProject;
@@ -155,7 +155,7 @@ public class AggregateMessageDeliveryTestEnv {
     public static class DeliveryProject
             extends Aggregate<ProjectId, StringValue, StringValueVBuilder> {
 
-        private static final EntityStats<ProjectId> stats = new EntityStats<>();
+        private static final ThreadStats<ProjectId> stats = new ThreadStats<>();
 
         protected DeliveryProject(ProjectId id) {
             super(id);
@@ -188,7 +188,7 @@ public class AggregateMessageDeliveryTestEnv {
             return emptyList();
         }
 
-        public static EntityStats<ProjectId> getStats() {
+        public static ThreadStats<ProjectId> getStats() {
             return stats;
         }
     }

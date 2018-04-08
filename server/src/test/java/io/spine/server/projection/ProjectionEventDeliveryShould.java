@@ -23,8 +23,8 @@ import io.spine.core.Ack;
 import io.spine.core.Event;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
-import io.spine.server.delivery.given.MessageDeliveryTestEnv.EntityStats;
 import io.spine.server.delivery.given.MessageDeliveryTestEnv.ParallelDispatcher;
+import io.spine.server.delivery.given.MessageDeliveryTestEnv.ThreadStats;
 import io.spine.server.projection.given.ProjectionEventDeliveryTestEnv.DeliveryProjection;
 import io.spine.server.projection.given.ProjectionEventDeliveryTestEnv.SingleShardProjectRepository;
 import io.spine.server.projection.given.ProjectionEventDeliveryTestEnv.TripleShardProjectRepository;
@@ -66,7 +66,7 @@ public class ProjectionEventDeliveryShould {
                 new ParallelDispatcher<ProjectId, Event>(
                         180, 819, dispatchWaitTime()) {
                     @Override
-                    protected EntityStats<ProjectId> getStats() {
+                    protected ThreadStats<ProjectId> getStats() {
                         return DeliveryProjection.getStats();
                     }
 
@@ -93,7 +93,7 @@ public class ProjectionEventDeliveryShould {
                 new ParallelDispatcher<ProjectId, Event>(
                         270, 1637, dispatchWaitTime()) {
                     @Override
-                    protected EntityStats<ProjectId> getStats() {
+                    protected ThreadStats<ProjectId> getStats() {
                         return DeliveryProjection.getStats();
                     }
 

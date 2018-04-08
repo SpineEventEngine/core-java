@@ -71,27 +71,69 @@ public class MessageDeliveryTestEnv {
                          .replaceSharding(inProcessSharding);
     }
 
+    /**
+     * The time for the main thread to wait for the messages to finish dispatching in other threads.
+     *
+     * <p>The value returned should be fine for the most of current cases.
+     */
     public static int dispatchWaitTime() {
         return DISPATCH_WAIT_TIME;
     }
 
+    /**
+     * The helper class used to dispatch numerous messages of a certain kind to the entities,
+     * managed by a specific repository.
+     *
+     * <p>Another feature is to check that the messages were delivered to proper shards,
+     * according to the repository sharding configuration.
+     *
+     * @param <I> the type of the entity identifiers
+     * @param <M> the type of messages to dispatch (e.g. {@link io.spine.core.Command Command}).
+     */
     public abstract static class ParallelDispatcher<I extends Message, M extends Message> {
+        /**
+         * The count of threads to use for dispatching.
+         */
         private final int threadCount;
+
+        /**
+         * The count of messages to dispatch in several threads.
+         */
         private final int messageCount;
+
+        /**
+         * The time to wait in the main thread before analyzing the statistics of message delivery.
+         */
         private final int dispatchWaitTime;
 
-        public ParallelDispatcher(int threadCount, int messageCount, int dispatchWaitTime) {
+        protected ParallelDispatcher(int threadCount, int messageCount, int dispatchWaitTime) {
             this.threadCount = threadCount;
             this.messageCount = messageCount;
             this.dispatchWaitTime = dispatchWaitTime;
         }
 
-        protected abstract EntityStats<I> getStats();
+        /**
+         * Obtains the stats for the entity kind, which is served by this dispatcher.
+         */
+        protected abstract ThreadStats<I> getStats();
 
+        /**
+         * Creates a new message to be used in the dispatching.
+         */
         protected abstract M newMessage();
 
+        /**
+         * Posts the message to the respective bus.
+         */
         protected abstract void postToBus(BoundedContext context, M message);
 
+        /**
+         * Dispatches messages in several threads and check if they are delivered according to the
+         * sharding configuration for this repository.
+         *
+         * @param repository the repository which sharding configuration to take into account
+         * @throws Exception in case the multithreading message propagation breaks
+         */
         public void dispatchMessagesTo(Repository<I, ?> repository) throws Exception {
             final BoundedContext boundedContext = BoundedContext.newBuilder()
                                                                 .build();
@@ -141,7 +183,14 @@ public class MessageDeliveryTestEnv {
         }
     }
 
-    public static class EntityStats<I extends Message> {
+    /**
+     * The statistics of threads, in which the entity has been processed.
+     *
+     * <p>Required in order to verify the sharding configuration.
+     *
+     * @param <I> the type of entity identifiers
+     */
+    public static class ThreadStats<I extends Message> {
 
         private final Multimap<Long, I> threadToId =
                 Multimaps.synchronizedMultimap(HashMultimap.<Long, I>create());

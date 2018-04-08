@@ -35,7 +35,7 @@ import io.spine.server.command.Assign;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.delivery.ShardingStrategy;
 import io.spine.server.delivery.UniformAcrossTargets;
-import io.spine.server.delivery.given.MessageDeliveryTestEnv.EntityStats;
+import io.spine.server.delivery.given.MessageDeliveryTestEnv.ThreadStats;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.server.route.RejectionRoute;
@@ -142,7 +142,7 @@ public class PmMessageDeliveryTestEnv {
     public static class DeliveryPm
             extends ProcessManager<ProjectId, StringValue, StringValueVBuilder> {
 
-        private static final EntityStats<ProjectId> stats = new EntityStats<>();
+        private static final ThreadStats<ProjectId> stats = new ThreadStats<>();
 
         protected DeliveryPm(ProjectId id) {
             super(id);
@@ -168,7 +168,7 @@ public class PmMessageDeliveryTestEnv {
             return emptyList();
         }
 
-        public static EntityStats<ProjectId> getStats() {
+        public static ThreadStats<ProjectId> getStats() {
             return stats;
         }
     }

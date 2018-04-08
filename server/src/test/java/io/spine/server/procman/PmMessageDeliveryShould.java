@@ -25,8 +25,8 @@ import io.spine.core.Event;
 import io.spine.core.Rejection;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
-import io.spine.server.delivery.given.MessageDeliveryTestEnv.EntityStats;
 import io.spine.server.delivery.given.MessageDeliveryTestEnv.ParallelDispatcher;
+import io.spine.server.delivery.given.MessageDeliveryTestEnv.ThreadStats;
 import io.spine.server.procman.given.PmMessageDeliveryTestEnv.DeliveryPm;
 import io.spine.server.procman.given.PmMessageDeliveryTestEnv.QuadrupleShardPmRepository;
 import io.spine.server.procman.given.PmMessageDeliveryTestEnv.SingleShardPmRepository;
@@ -70,7 +70,7 @@ public class PmMessageDeliveryShould {
                 new ParallelDispatcher<ProjectId, Command>(
                         42, 400, dispatchWaitTime()) {
                     @Override
-                    protected EntityStats<ProjectId> getStats() {
+                    protected ThreadStats<ProjectId> getStats() {
                         return DeliveryPm.getStats();
                     }
 
@@ -97,7 +97,7 @@ public class PmMessageDeliveryShould {
                 new ParallelDispatcher<ProjectId, Event>(
                         180, 819, dispatchWaitTime()) {
                     @Override
-                    protected EntityStats<ProjectId> getStats() {
+                    protected ThreadStats<ProjectId> getStats() {
                         return DeliveryPm.getStats();
                     }
 
@@ -124,7 +124,7 @@ public class PmMessageDeliveryShould {
                 new ParallelDispatcher<ProjectId, Rejection>(
                         30, 619, dispatchWaitTime()) {
                     @Override
-                    protected EntityStats<ProjectId> getStats() {
+                    protected ThreadStats<ProjectId> getStats() {
                         return DeliveryPm.getStats();
                     }
 
@@ -150,7 +150,7 @@ public class PmMessageDeliveryShould {
                 new ParallelDispatcher<ProjectId, Command>(
                         59, 473, dispatchWaitTime()) {
                     @Override
-                    protected EntityStats<ProjectId> getStats() {
+                    protected ThreadStats<ProjectId> getStats() {
                         return DeliveryPm.getStats();
                     }
 
@@ -177,7 +177,7 @@ public class PmMessageDeliveryShould {
                 new ParallelDispatcher<ProjectId, Event>(
                         179, 918, dispatchWaitTime()) {
                     @Override
-                    protected EntityStats<ProjectId> getStats() {
+                    protected ThreadStats<ProjectId> getStats() {
                         return DeliveryPm.getStats();
                     }
 
@@ -204,7 +204,7 @@ public class PmMessageDeliveryShould {
                 new ParallelDispatcher<ProjectId, Rejection>(
                         43, 719, dispatchWaitTime()) {
                     @Override
-                    protected EntityStats<ProjectId> getStats() {
+                    protected ThreadStats<ProjectId> getStats() {
                         return DeliveryPm.getStats();
                     }
 

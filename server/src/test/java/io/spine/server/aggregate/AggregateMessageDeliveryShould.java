@@ -28,8 +28,8 @@ import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.DeliveryProject;
 import io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.SingleShardProjectRepository;
 import io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.TripleShardProjectRepository;
-import io.spine.server.delivery.given.MessageDeliveryTestEnv.EntityStats;
 import io.spine.server.delivery.given.MessageDeliveryTestEnv.ParallelDispatcher;
+import io.spine.server.delivery.given.MessageDeliveryTestEnv.ThreadStats;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.server.transport.memory.SynchronousInMemTransportFactory;
 import io.spine.test.aggregate.ProjectId;
@@ -69,7 +69,7 @@ public class AggregateMessageDeliveryShould {
                 new ParallelDispatcher<ProjectId, Command>(
                         42, 400, dispatchWaitTime()) {
                     @Override
-                    protected EntityStats<ProjectId> getStats() {
+                    protected ThreadStats<ProjectId> getStats() {
                         return DeliveryProject.getStats();
                     }
 
@@ -95,7 +95,7 @@ public class AggregateMessageDeliveryShould {
                 new ParallelDispatcher<ProjectId, Event>(
                         130, 500, dispatchWaitTime()) {
                     @Override
-                    protected EntityStats<ProjectId> getStats() {
+                    protected ThreadStats<ProjectId> getStats() {
                         return DeliveryProject.getStats();
                     }
 
@@ -121,7 +121,7 @@ public class AggregateMessageDeliveryShould {
                 new ParallelDispatcher<ProjectId, Rejection>(
                         36, 12, dispatchWaitTime()) {
                     @Override
-                    protected EntityStats<ProjectId> getStats() {
+                    protected ThreadStats<ProjectId> getStats() {
                         return DeliveryProject.getStats();
                     }
 
@@ -147,7 +147,7 @@ public class AggregateMessageDeliveryShould {
                 new ParallelDispatcher<ProjectId, Command>(
                         23, 423, dispatchWaitTime()) {
                     @Override
-                    protected EntityStats<ProjectId> getStats() {
+                    protected ThreadStats<ProjectId> getStats() {
                         return DeliveryProject.getStats();
                     }
 
@@ -172,7 +172,7 @@ public class AggregateMessageDeliveryShould {
                 new ParallelDispatcher<ProjectId, Event>(
                         190, 900, dispatchWaitTime()) {
                     @Override
-                    protected EntityStats<ProjectId> getStats() {
+                    protected ThreadStats<ProjectId> getStats() {
                         return DeliveryProject.getStats();
                     }
 
@@ -198,7 +198,7 @@ public class AggregateMessageDeliveryShould {
                 new ParallelDispatcher<ProjectId, Rejection>(
                         40, 603, dispatchWaitTime()) {
                     @Override
-                    protected EntityStats<ProjectId> getStats() {
+                    protected ThreadStats<ProjectId> getStats() {
                         return DeliveryProject.getStats();
                     }
 

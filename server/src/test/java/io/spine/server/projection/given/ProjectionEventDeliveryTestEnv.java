@@ -25,7 +25,7 @@ import io.spine.core.Subscribe;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.delivery.ShardingStrategy;
 import io.spine.server.delivery.UniformAcrossTargets;
-import io.spine.server.delivery.given.MessageDeliveryTestEnv.EntityStats;
+import io.spine.server.delivery.given.MessageDeliveryTestEnv.ThreadStats;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.test.projection.Project;
@@ -76,7 +76,7 @@ public class ProjectionEventDeliveryTestEnv {
     @SuppressWarnings("unused")
     public static class DeliveryProjection extends Projection<ProjectId, Project, ProjectVBuilder> {
 
-        private static final EntityStats<ProjectId> stats = new EntityStats<>();
+        private static final ThreadStats<ProjectId> stats = new ThreadStats<>();
 
         protected DeliveryProjection(ProjectId id) {
             super(id);
@@ -87,7 +87,7 @@ public class ProjectionEventDeliveryTestEnv {
             stats.recordCallingThread(getId());
         }
 
-        public static EntityStats<ProjectId> getStats() {
+        public static ThreadStats<ProjectId> getStats() {
             return stats;
         }
     }
