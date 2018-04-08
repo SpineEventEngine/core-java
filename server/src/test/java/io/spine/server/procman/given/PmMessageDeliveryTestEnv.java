@@ -19,6 +19,11 @@
  */
 package io.spine.server.procman.given;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.Identifier;
@@ -27,11 +32,13 @@ import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.React;
 import io.spine.core.Rejection;
+import io.spine.core.RejectionContext;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv;
 import io.spine.server.command.Assign;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.procman.ProcessManager;
+import io.spine.server.route.RejectionRoute;
 import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.command.PmCreateProject;
 import io.spine.test.procman.command.PmStartProject;
@@ -40,8 +47,8 @@ import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.rejection.Rejections.PmCannotStartArchivedProject;
 import io.spine.validate.StringValueVBuilder;
 
-import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Set;
 
 import static io.spine.core.Rejections.toRejection;
 import static java.util.Collections.emptyList;
@@ -107,27 +114,38 @@ public class PmMessageDeliveryTestEnv {
         return result;
     }
 
+    public static RejectionRoute<ProjectId, Message> routeByProjectId() {
+        return new RejectionRoute<ProjectId, Message>() {
+
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Set<ProjectId> apply(Message raw, RejectionContext context) {
+                final PmCannotStartArchivedProject msg = (PmCannotStartArchivedProject) raw;
+                return ImmutableSet.of(msg.getProjectId());
+            }
+        };
+    }
+
     /**
      * A process manager class, which declares all kinds of dispatching methods and remembers
      * the latest values submitted to each of them.
      */
     @SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod")
-    public static class ReactingProjectWizard
+    public static class DeliveryPm
             extends ProcessManager<ProjectId, StringValue, StringValueVBuilder> {
 
-        private static PmProjectStarted eventReceived = null;
-        private static PmCreateProject commandReceived = null;
-        private static PmCannotStartArchivedProject rejectionReceived = null;
+        private static final Multimap<Long, ProjectId> threadToId =
+                Multimaps.synchronizedMultimap(HashMultimap.<Long, ProjectId>create());
 
-        protected ReactingProjectWizard(ProjectId id) {
+        protected DeliveryPm(ProjectId id) {
             super(id);
         }
 
         @SuppressWarnings("unused")     // Accessed by the framework via reflection.
         @Assign
         PmProjectCreated on(PmCreateProject command) {
-            commandReceived = command;
-            getBuilder().setValue(command.getProjectId().getId());
+            recordThread();
             return PmProjectCreated.newBuilder()
                                    .setProjectId(command.getProjectId())
                                    .build();
@@ -136,31 +154,31 @@ public class PmMessageDeliveryTestEnv {
         @SuppressWarnings("unused")     // Accessed by the framework via reflection.
         @React
         List<Message> on(PmProjectStarted event) {
-            eventReceived = event;
+            recordThread();
             return emptyList();
         }
 
         @SuppressWarnings("unused")     // Accessed by the framework via reflection.
         @React
         List<Message> on(PmCannotStartArchivedProject rejection) {
-            rejectionReceived = rejection;
+            recordThread();
             return emptyList();
         }
 
-        @Nullable
-        public static PmCreateProject getCommandReceived() {
-            return commandReceived;
+        @CanIgnoreReturnValue
+        private void recordThread() {
+            final ProjectId projectId = getId();
+            final long currentThreadId = Thread.currentThread()
+                                               .getId();
+            threadToId.put(currentThreadId, projectId);
         }
 
-        @Nullable
-        public static PmProjectStarted getEventReceived() {
-            return eventReceived;
+        public static Multimap<Long, ProjectId> getThreadToId() {
+            return Multimaps.unmodifiableMultimap(threadToId);
         }
 
-        @Nullable
-        public static PmCannotStartArchivedProject getRejectionReceived() {
-            return rejectionReceived;
+        public static void clearStats() {
+            threadToId.clear();
         }
-
     }
 }

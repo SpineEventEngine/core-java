@@ -37,6 +37,8 @@ import io.spine.server.rejection.RejectionBus;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.server.transport.memory.SynchronousInMemTransportFactory;
 import io.spine.test.aggregate.ProjectId;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Collection;
@@ -60,6 +62,18 @@ import static org.junit.Assert.assertTrue;
  * @author Alex Tymchenko
  */
 public class AggregateMessageDeliveryShould {
+
+    @Before
+    public void setUp() {
+        clearModel();
+        DeliveryProject.clearStats();
+        setShardingTransport(SynchronousInMemTransportFactory.newInstance());
+    }
+
+    @After
+    public void tearDown() {
+        setShardingTransport(InMemoryTransportFactory.newInstance());
+    }
 
     @Test
     public void dispatch_commands_to_single_shard_in_multithreaded_env() throws
@@ -99,8 +113,6 @@ public class AggregateMessageDeliveryShould {
 
     private static void dispatchCommandsInParallel(AggregateRepository repository) throws
                                                                                    Exception {
-        setUp();
-
         final BoundedContext boundedContext = BoundedContext.newBuilder()
                                                             .build();
         boundedContext.register(repository);
@@ -140,8 +152,6 @@ public class AggregateMessageDeliveryShould {
     }
 
     private static void dispatchEventsInParallel(AggregateRepository repository) throws Exception {
-        setUp();
-
         final BoundedContext boundedContext = BoundedContext.newBuilder()
                                                             .build();
         boundedContext.register(repository);
@@ -182,7 +192,6 @@ public class AggregateMessageDeliveryShould {
 
     private static void dispatchRejectionsInParallel(AggregateRepository repository) throws
                                                                                      Exception {
-        setUp();
         final BoundedContext boundedContext = BoundedContext.newBuilder()
                                                             .build();
         boundedContext.register(repository);
@@ -221,12 +230,6 @@ public class AggregateMessageDeliveryShould {
         cleanUp(repository, boundedContext);
     }
 
-    private static void setUp() {
-        clearModel();
-        DeliveryProject.clearStats();
-        setShardingTransport(SynchronousInMemTransportFactory.newInstance());
-    }
-
     private static void verifyStats(int totalEvents, int numberOfShards) {
         final Map<Long, Collection<ProjectId>> whoProcessedWhat = DeliveryProject.getThreadToId()
                                                                                  .asMap();
@@ -242,7 +245,6 @@ public class AggregateMessageDeliveryShould {
                                 BoundedContext boundedContext) throws Exception {
         repository.close();
         boundedContext.close();
-        setShardingTransport(InMemoryTransportFactory.newInstance());
     }
 
     private static class SingleShardProjectRepository
