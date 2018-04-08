@@ -19,11 +19,7 @@
  */
 package io.spine.server.procman.given;
 
-import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.Identifier;
@@ -37,6 +33,7 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv;
 import io.spine.server.command.Assign;
 import io.spine.server.command.TestEventFactory;
+import io.spine.server.delivery.given.MessageDeliveryTestEnv.EntityStats;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.route.RejectionRoute;
 import io.spine.test.procman.ProjectId;
@@ -135,8 +132,7 @@ public class PmMessageDeliveryTestEnv {
     public static class DeliveryPm
             extends ProcessManager<ProjectId, StringValue, StringValueVBuilder> {
 
-        private static final Multimap<Long, ProjectId> threadToId =
-                Multimaps.synchronizedMultimap(HashMultimap.<Long, ProjectId>create());
+        private static final EntityStats<ProjectId> stats = new EntityStats<>();
 
         protected DeliveryPm(ProjectId id) {
             super(id);
@@ -145,7 +141,7 @@ public class PmMessageDeliveryTestEnv {
         @SuppressWarnings("unused")     // Accessed by the framework via reflection.
         @Assign
         PmProjectCreated on(PmCreateProject command) {
-            recordThread();
+            stats.recordCallingThread(command.getProjectId());
             return PmProjectCreated.newBuilder()
                                    .setProjectId(command.getProjectId())
                                    .build();
@@ -154,31 +150,19 @@ public class PmMessageDeliveryTestEnv {
         @SuppressWarnings("unused")     // Accessed by the framework via reflection.
         @React
         List<Message> on(PmProjectStarted event) {
-            recordThread();
+            stats.recordCallingThread(getId());
             return emptyList();
         }
 
         @SuppressWarnings("unused")     // Accessed by the framework via reflection.
         @React
         List<Message> on(PmCannotStartArchivedProject rejection) {
-            recordThread();
+            stats.recordCallingThread(getId());
             return emptyList();
         }
 
-        @CanIgnoreReturnValue
-        private void recordThread() {
-            final ProjectId projectId = getId();
-            final long currentThreadId = Thread.currentThread()
-                                               .getId();
-            threadToId.put(currentThreadId, projectId);
-        }
-
-        public static Multimap<Long, ProjectId> getThreadToId() {
-            return Multimaps.unmodifiableMultimap(threadToId);
-        }
-
-        public static void clearStats() {
-            threadToId.clear();
+        public static EntityStats<ProjectId> getStats() {
+            return stats;
         }
     }
 }

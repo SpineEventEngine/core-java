@@ -67,7 +67,8 @@ public class PmMessageDeliveryShould {
     @Before
     public void setUp() {
         clearModel();
-        DeliveryPm.clearStats();
+        DeliveryPm.getStats()
+                  .clear();
         setShardingTransport(SynchronousInMemTransportFactory.newInstance());
     }
 
@@ -113,7 +114,7 @@ public class PmMessageDeliveryShould {
     }
 
     private static void dispatchCommandsInParallel(ProcessManagerRepository repository) throws
-                                                                                   Exception {
+                                                                                        Exception {
 
         final BoundedContext boundedContext = BoundedContext.newBuilder()
                                                             .build();
@@ -124,8 +125,9 @@ public class PmMessageDeliveryShould {
         final int numberOfShards = repository.getShardingStrategy()
                                              .getNumberOfShards();
 
-        assertTrue(DeliveryPm.getThreadToId()
-                                  .isEmpty());
+        assertTrue(DeliveryPm.getStats()
+                             .getThreadToId()
+                             .isEmpty());
 
         final CommandBus commandBus = boundedContext.getCommandBus();
         final ExecutorService executorService = newFixedThreadPool(totalThreads);
@@ -153,7 +155,8 @@ public class PmMessageDeliveryShould {
         cleanUp(repository, boundedContext);
     }
 
-    private static void dispatchEventsInParallel(ProcessManagerRepository repository) throws Exception {
+    private static void dispatchEventsInParallel(ProcessManagerRepository repository) throws
+                                                                                      Exception {
 
         final BoundedContext boundedContext = BoundedContext.newBuilder()
                                                             .build();
@@ -164,8 +167,9 @@ public class PmMessageDeliveryShould {
         final int numberOfShards = repository.getShardingStrategy()
                                              .getNumberOfShards();
 
-        assertTrue(DeliveryPm.getThreadToId()
-                                  .isEmpty());
+        assertTrue(DeliveryPm.getStats()
+                             .getThreadToId()
+                             .isEmpty());
 
         final EventBus eventBus = boundedContext.getEventBus();
         final ExecutorService executorService = newFixedThreadPool(totalThreads);
@@ -194,7 +198,7 @@ public class PmMessageDeliveryShould {
     }
 
     private static void dispatchRejectionsInParallel(ProcessManagerRepository repository) throws
-                                                                                     Exception {
+                                                                                          Exception {
         final BoundedContext boundedContext = BoundedContext.newBuilder()
                                                             .build();
         boundedContext.register(repository);
@@ -204,8 +208,9 @@ public class PmMessageDeliveryShould {
         final int numberOfShards = repository.getShardingStrategy()
                                              .getNumberOfShards();
 
-        assertTrue(DeliveryPm.getThreadToId()
-                                  .isEmpty());
+        assertTrue(DeliveryPm.getStats()
+                             .getThreadToId()
+                             .isEmpty());
 
         final RejectionBus rejectionBus = boundedContext.getRejectionBus();
         final ExecutorService executorService = newFixedThreadPool(totalThreads);
@@ -234,10 +239,12 @@ public class PmMessageDeliveryShould {
     }
 
     private static void verifyStats(int totalEvents, int numberOfShards) {
-        final Map<Long, Collection<ProjectId>> whoProcessedWhat = DeliveryPm.getThreadToId()
+        final Map<Long, Collection<ProjectId>> whoProcessedWhat = DeliveryPm.getStats()
+                                                                            .getThreadToId()
                                                                             .asMap();
-        final Collection<ProjectId> actualProjectIds = newHashSet(DeliveryPm.getThreadToId()
-                                                                                 .values());
+        final Collection<ProjectId> actualProjectIds = newHashSet(DeliveryPm.getStats()
+                                                                            .getThreadToId()
+                                                                            .values());
         final Set<Long> actualThreads = whoProcessedWhat.keySet();
 
         assertEquals(numberOfShards, actualThreads.size());

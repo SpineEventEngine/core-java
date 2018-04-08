@@ -19,12 +19,8 @@
  */
 package io.spine.server.aggregate.given;
 
-import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.Identifier;
@@ -36,9 +32,13 @@ import io.spine.core.Rejection;
 import io.spine.core.RejectionContext;
 import io.spine.core.Rejections;
 import io.spine.server.aggregate.Aggregate;
+import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.command.TestEventFactory;
+import io.spine.server.delivery.ShardingStrategy;
+import io.spine.server.delivery.UniformAcrossTargets;
+import io.spine.server.delivery.given.MessageDeliveryTestEnv.EntityStats;
 import io.spine.server.route.RejectionRoute;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggStartProject;
@@ -156,10 +156,7 @@ public class AggregateMessageDeliveryTestEnv {
     public static class DeliveryProject
             extends Aggregate<ProjectId, StringValue, StringValueVBuilder> {
 
-
-        private static final Multimap<Long, ProjectId> threadToId =
-                Multimaps.synchronizedMultimap(HashMultimap.<Long, ProjectId>create());
-
+        private static final EntityStats<ProjectId> stats = new EntityStats<>();
 
         protected DeliveryProject(ProjectId id) {
             super(id);
@@ -167,9 +164,9 @@ public class AggregateMessageDeliveryTestEnv {
 
         @Assign
         AggProjectStarted on(AggStartProject cmd) {
-            final ProjectId projectId = recordThread();
+            stats.recordCallingThread(getId());
             final AggProjectStarted event = AggProjectStarted.newBuilder()
-                                                             .setProjectId(projectId)
+                                                             .setProjectId(cmd.getProjectId())
                                                              .build();
             return event;
         }
@@ -182,31 +179,41 @@ public class AggregateMessageDeliveryTestEnv {
 
         @React
         List<Message> onEvent(AggProjectCancelled event) {
-            recordThread();
+            stats.recordCallingThread(getId());
             return emptyList();
         }
 
         @React
         List<Message> onRejection(AggCannotStartArchivedProject rejection) {
-            recordThread();
+            stats.recordCallingThread(getId());
             return emptyList();
         }
 
-        @CanIgnoreReturnValue
-        private ProjectId recordThread() {
-            final ProjectId projectId = getId();
-            final long currentThreadId = Thread.currentThread()
-                                               .getId();
-            threadToId.put(currentThreadId, projectId);
-            return projectId;
+        public static EntityStats<ProjectId> getStats() {
+            return stats;
+        }
+    }
+
+    public static class SingleShardProjectRepository
+            extends AggregateRepository<ProjectId, DeliveryProject> {
+        public SingleShardProjectRepository() {
+            super();
+            getRejectionRouting().replaceDefault(routeByProjectId());
         }
 
-        public static Multimap<Long, ProjectId> getThreadToId() {
-            return Multimaps.unmodifiableMultimap(threadToId);
+    }
+
+    public static class TripleShardProjectRepository
+            extends AggregateRepository<ProjectId, DeliveryProject> {
+
+        public TripleShardProjectRepository() {
+            super();
+            getRejectionRouting().replaceDefault(routeByProjectId());
         }
 
-        public static void clearStats() {
-            threadToId.clear();
+        @Override
+        public ShardingStrategy getShardingStrategy() {
+            return UniformAcrossTargets.forNumber(3);
         }
     }
 }
