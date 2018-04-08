@@ -28,7 +28,6 @@ import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.DeliveryProject;
 import io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.SingleShardProjectRepository;
 import io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.TripleShardProjectRepository;
-import io.spine.server.delivery.given.MessageDeliveryTestEnv;
 import io.spine.server.delivery.given.MessageDeliveryTestEnv.EntityStats;
 import io.spine.server.delivery.given.MessageDeliveryTestEnv.ParallelDispatcher;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
@@ -42,6 +41,7 @@ import static io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.ca
 import static io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.projectCancelled;
 import static io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.startProject;
 import static io.spine.server.delivery.given.MessageDeliveryTestEnv.dispatchWaitTime;
+import static io.spine.server.delivery.given.MessageDeliveryTestEnv.setShardingTransport;
 import static io.spine.server.model.ModelTests.clearModel;
 
 /**
@@ -54,12 +54,12 @@ public class AggregateMessageDeliveryShould {
         clearModel();
         DeliveryProject.getStats()
                        .clear();
-        MessageDeliveryTestEnv.setShardingTransport(SynchronousInMemTransportFactory.newInstance());
+        setShardingTransport(SynchronousInMemTransportFactory.newInstance());
     }
 
     @After
     public void tearDown() {
-        MessageDeliveryTestEnv.setShardingTransport(InMemoryTransportFactory.newInstance());
+        setShardingTransport(InMemoryTransportFactory.newInstance());
     }
 
     @Test
