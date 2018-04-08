@@ -23,13 +23,15 @@ import io.spine.Identifier;
 import io.spine.core.Event;
 import io.spine.core.Subscribe;
 import io.spine.server.command.TestEventFactory;
+import io.spine.server.delivery.ShardingStrategy;
+import io.spine.server.delivery.UniformAcrossTargets;
+import io.spine.server.delivery.given.MessageDeliveryTestEnv.EntityStats;
 import io.spine.server.projection.Projection;
+import io.spine.server.projection.ProjectionRepository;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.ProjectVBuilder;
 import io.spine.test.projection.event.PrjProjectCreated;
-
-import javax.annotation.Nullable;
 
 import static io.spine.protobuf.AnyPacker.pack;
 
@@ -63,24 +65,43 @@ public class ProjectionEventDeliveryTestEnv {
                         .build();
     }
 
-    public static class ProjectDetails extends Projection<ProjectId, Project, ProjectVBuilder> {
+    /**
+     * A projection class, which remembers the threads in which its handler methods were invoked.
+     *
+     * <p>Message handlers are invoked via reflection, so some of them are considered unused.
+     *
+     * <p>The subscriber parameters are not used, as they aren't needed for tests. They are still
+     * present, as long as they are required according to the handler declaration rules.
+     */
+    @SuppressWarnings("unused")
+    public static class DeliveryProjection extends Projection<ProjectId, Project, ProjectVBuilder> {
 
-        private static PrjProjectCreated receivedEvent = null;
+        private static final EntityStats<ProjectId> stats = new EntityStats<>();
 
-        protected ProjectDetails(ProjectId id) {
+        protected DeliveryProjection(ProjectId id) {
             super(id);
         }
 
-        @SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod") // It's fine in tests.
         @Subscribe
         public void on(PrjProjectCreated event) {
-            receivedEvent = event;
+            stats.recordCallingThread(getId());
         }
 
-        @Nullable
-        public static PrjProjectCreated getEventReceived() {
-            return receivedEvent;
+        public static EntityStats<ProjectId> getStats() {
+            return stats;
         }
     }
 
+    public static class SingleShardProjectRepository
+            extends ProjectionRepository<ProjectId, DeliveryProjection, Project> {
+    }
+
+    public static class TripleShardProjectRepository
+            extends ProjectionRepository<ProjectId, DeliveryProjection, Project> {
+
+        @Override
+        public ShardingStrategy getShardingStrategy() {
+            return UniformAcrossTargets.forNumber(3);
+        }
+    }
 }

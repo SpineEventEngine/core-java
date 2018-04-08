@@ -58,7 +58,7 @@ import static java.util.Collections.emptyList;
  */
 public class AggregateMessageDeliveryTestEnv {
 
-    /** Prevents instantiation of this utility class. */
+    /** Prevents instantiation of this test environment class. */
     private AggregateMessageDeliveryTestEnv() {}
 
     public static Command startProject() {
@@ -144,8 +144,7 @@ public class AggregateMessageDeliveryTestEnv {
     }
 
     /**
-     * An aggregate class, which declares all kinds of message dispatching methods and remembers
-     * the latest values submitted to each of them.
+     * An aggregate class, which remembers the threads in which its handler methods were invoked.
      *
      * <p>Message handlers are invoked via reflection, so some of them are considered unused.
      *

@@ -25,13 +25,11 @@ import io.spine.core.Event;
 import io.spine.core.Rejection;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
-import io.spine.server.ServerEnvironment;
 import io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.DeliveryProject;
 import io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.SingleShardProjectRepository;
 import io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.TripleShardProjectRepository;
-import io.spine.server.delivery.InProcessSharding;
-import io.spine.server.delivery.Sharding;
 import io.spine.server.delivery.given.MessageDeliveryTestEnv;
+import io.spine.server.delivery.given.MessageDeliveryTestEnv.EntityStats;
 import io.spine.server.delivery.given.MessageDeliveryTestEnv.ParallelDispatcher;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.server.transport.memory.SynchronousInMemTransportFactory;
@@ -43,6 +41,7 @@ import org.junit.Test;
 import static io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.cannotStartProject;
 import static io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.projectCancelled;
 import static io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.startProject;
+import static io.spine.server.delivery.given.MessageDeliveryTestEnv.dispatchWaitTime;
 import static io.spine.server.model.ModelTests.clearModel;
 
 /**
@@ -50,27 +49,17 @@ import static io.spine.server.model.ModelTests.clearModel;
  */
 public class AggregateMessageDeliveryShould {
 
-    /**
-     * The time to wait until all the messages dispatched to entities
-     * are processed in several threads.
-     *
-     * <p>"Sleeping" down the main thread is a simpler choice to ensure the messages were delivered.
-     * The alternatives would imply injecting multiple mocks that would send reports
-     * down the dispatching route. Which seems to be much more complex.
-     */
-    private static final int DISPATCH_WAIT_TIME = 2500;
-
     @Before
     public void setUp() {
         clearModel();
         DeliveryProject.getStats()
                        .clear();
-        setShardingTransport(SynchronousInMemTransportFactory.newInstance());
+        MessageDeliveryTestEnv.setShardingTransport(SynchronousInMemTransportFactory.newInstance());
     }
 
     @After
     public void tearDown() {
-        setShardingTransport(InMemoryTransportFactory.newInstance());
+        MessageDeliveryTestEnv.setShardingTransport(InMemoryTransportFactory.newInstance());
     }
 
     @Test
@@ -78,9 +67,9 @@ public class AggregateMessageDeliveryShould {
                                                                          Exception {
         final ParallelDispatcher<ProjectId, Command> dispatcher =
                 new ParallelDispatcher<ProjectId, Command>(
-                        42, 400, DISPATCH_WAIT_TIME) {
+                        42, 400, dispatchWaitTime()) {
                     @Override
-                    protected MessageDeliveryTestEnv.EntityStats<ProjectId> getStats() {
+                    protected EntityStats<ProjectId> getStats() {
                         return DeliveryProject.getStats();
                     }
 
@@ -104,9 +93,9 @@ public class AggregateMessageDeliveryShould {
                                                                        Exception {
         final ParallelDispatcher<ProjectId, Event> dispatcher =
                 new ParallelDispatcher<ProjectId, Event>(
-                        130, 500, DISPATCH_WAIT_TIME) {
+                        130, 500, dispatchWaitTime()) {
                     @Override
-                    protected MessageDeliveryTestEnv.EntityStats<ProjectId> getStats() {
+                    protected EntityStats<ProjectId> getStats() {
                         return DeliveryProject.getStats();
                     }
 
@@ -130,9 +119,9 @@ public class AggregateMessageDeliveryShould {
                                                                            Exception {
         final ParallelDispatcher<ProjectId, Rejection> dispatcher =
                 new ParallelDispatcher<ProjectId, Rejection>(
-                        36, 12, DISPATCH_WAIT_TIME) {
+                        36, 12, dispatchWaitTime()) {
                     @Override
-                    protected MessageDeliveryTestEnv.EntityStats<ProjectId> getStats() {
+                    protected EntityStats<ProjectId> getStats() {
                         return DeliveryProject.getStats();
                     }
 
@@ -156,9 +145,9 @@ public class AggregateMessageDeliveryShould {
                                                                           Exception {
         final ParallelDispatcher<ProjectId, Command> dispatcher =
                 new ParallelDispatcher<ProjectId, Command>(
-                        23, 423, DISPATCH_WAIT_TIME) {
+                        23, 423, dispatchWaitTime()) {
                     @Override
-                    protected MessageDeliveryTestEnv.EntityStats<ProjectId> getStats() {
+                    protected EntityStats<ProjectId> getStats() {
                         return DeliveryProject.getStats();
                     }
 
@@ -181,9 +170,9 @@ public class AggregateMessageDeliveryShould {
                                                                          Exception {
         final ParallelDispatcher<ProjectId, Event> dispatcher =
                 new ParallelDispatcher<ProjectId, Event>(
-                        190, 900, DISPATCH_WAIT_TIME) {
+                        190, 900, dispatchWaitTime()) {
                     @Override
-                    protected MessageDeliveryTestEnv.EntityStats<ProjectId> getStats() {
+                    protected EntityStats<ProjectId> getStats() {
                         return DeliveryProject.getStats();
                     }
 
@@ -207,9 +196,9 @@ public class AggregateMessageDeliveryShould {
                                                                              Exception {
         final ParallelDispatcher<ProjectId, Rejection> dispatcher =
                 new ParallelDispatcher<ProjectId, Rejection>(
-                        40, 603, DISPATCH_WAIT_TIME) {
+                        40, 603, dispatchWaitTime()) {
                     @Override
-                    protected MessageDeliveryTestEnv.EntityStats<ProjectId> getStats() {
+                    protected EntityStats<ProjectId> getStats() {
                         return DeliveryProject.getStats();
                     }
 
@@ -226,11 +215,5 @@ public class AggregateMessageDeliveryShould {
                 };
 
         dispatcher.dispatchMessagesTo(new TripleShardProjectRepository());
-    }
-
-    private static void setShardingTransport(InMemoryTransportFactory transport) {
-        final Sharding inProcessSharding = new InProcessSharding(transport);
-        ServerEnvironment.getInstance()
-                         .replaceSharding(inProcessSharding);
     }
 }

@@ -33,8 +33,11 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv;
 import io.spine.server.command.Assign;
 import io.spine.server.command.TestEventFactory;
+import io.spine.server.delivery.ShardingStrategy;
+import io.spine.server.delivery.UniformAcrossTargets;
 import io.spine.server.delivery.given.MessageDeliveryTestEnv.EntityStats;
 import io.spine.server.procman.ProcessManager;
+import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.server.route.RejectionRoute;
 import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.command.PmCreateProject;
@@ -55,8 +58,9 @@ import static java.util.Collections.emptyList;
  */
 public class PmMessageDeliveryTestEnv {
 
-    /** Prevents instantiation of this utility class. */
-    private PmMessageDeliveryTestEnv() {}
+    /** Prevents instantiation of this test environment class. */
+    private PmMessageDeliveryTestEnv() {
+    }
 
     public static Command createProject() {
         final ProjectId projectId = projectId();
@@ -125,10 +129,16 @@ public class PmMessageDeliveryTestEnv {
     }
 
     /**
-     * A process manager class, which declares all kinds of dispatching methods and remembers
-     * the latest values submitted to each of them.
+     * A process manager class, which remembers the threads in which its handler methods
+     * were invoked.
+     *
+     * <p>Message handlers are invoked via reflection, so some of them are considered unused.
+     *
+     * <p>The handler method parameters are not used, as they aren't needed for tests.
+     * They are still present, as long as they are required according to the handler
+     * declaration rules.
      */
-    @SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod")
+    @SuppressWarnings("unused")
     public static class DeliveryPm
             extends ProcessManager<ProjectId, StringValue, StringValueVBuilder> {
 
@@ -138,7 +148,6 @@ public class PmMessageDeliveryTestEnv {
             super(id);
         }
 
-        @SuppressWarnings("unused")     // Accessed by the framework via reflection.
         @Assign
         PmProjectCreated on(PmCreateProject command) {
             stats.recordCallingThread(command.getProjectId());
@@ -147,14 +156,12 @@ public class PmMessageDeliveryTestEnv {
                                    .build();
         }
 
-        @SuppressWarnings("unused")     // Accessed by the framework via reflection.
         @React
         List<Message> on(PmProjectStarted event) {
             stats.recordCallingThread(getId());
             return emptyList();
         }
 
-        @SuppressWarnings("unused")     // Accessed by the framework via reflection.
         @React
         List<Message> on(PmCannotStartArchivedProject rejection) {
             stats.recordCallingThread(getId());
@@ -163,6 +170,27 @@ public class PmMessageDeliveryTestEnv {
 
         public static EntityStats<ProjectId> getStats() {
             return stats;
+        }
+    }
+
+    public static class SingleShardPmRepository
+            extends ProcessManagerRepository<ProjectId, DeliveryPm, StringValue> {
+        public SingleShardPmRepository() {
+            getRejectionRouting().replaceDefault(routeByProjectId());
+        }
+
+    }
+
+    public static class QuadrupleShardPmRepository
+            extends ProcessManagerRepository<ProjectId, DeliveryPm, StringValue> {
+
+        public QuadrupleShardPmRepository() {
+            getRejectionRouting().replaceDefault(routeByProjectId());
+        }
+
+        @Override
+        public ShardingStrategy getShardingStrategy() {
+            return UniformAcrossTargets.forNumber(4);
         }
     }
 }

@@ -19,12 +19,96 @@
  */
 package io.spine.server.projection;
 
+import io.spine.core.Ack;
+import io.spine.core.Event;
+import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
+import io.spine.server.delivery.given.MessageDeliveryTestEnv.EntityStats;
+import io.spine.server.delivery.given.MessageDeliveryTestEnv.ParallelDispatcher;
+import io.spine.server.projection.given.ProjectionEventDeliveryTestEnv.DeliveryProjection;
+import io.spine.server.projection.given.ProjectionEventDeliveryTestEnv.SingleShardProjectRepository;
+import io.spine.server.projection.given.ProjectionEventDeliveryTestEnv.TripleShardProjectRepository;
+import io.spine.server.transport.memory.InMemoryTransportFactory;
+import io.spine.server.transport.memory.SynchronousInMemTransportFactory;
+import io.spine.test.projection.ProjectId;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.spine.server.delivery.given.MessageDeliveryTestEnv.dispatchWaitTime;
+import static io.spine.server.delivery.given.MessageDeliveryTestEnv.setShardingTransport;
+import static io.spine.server.model.ModelTests.clearModel;
+import static io.spine.server.projection.given.ProjectionEventDeliveryTestEnv.projectCreated;
 
 /**
  * @author Alex Tymchenko
  */
 public class ProjectionEventDeliveryShould {
 
-    private BoundedContext boundedContext;
+    @Before
+    public void setUp() {
+        clearModel();
+        DeliveryProjection.getStats()
+                          .clear();
+        setShardingTransport(SynchronousInMemTransportFactory.newInstance());
+    }
+
+    @After
+    public void tearDown() {
+        setShardingTransport(InMemoryTransportFactory.newInstance());
+    }
+
+    @Test
+    public void dispatch_events_to_single_shard_in_multithreaded_env() throws
+                                                                       Exception {
+
+        final ParallelDispatcher<ProjectId, Event> dispatcher =
+                new ParallelDispatcher<ProjectId, Event>(
+                        180, 819, dispatchWaitTime()) {
+                    @Override
+                    protected EntityStats<ProjectId> getStats() {
+                        return DeliveryProjection.getStats();
+                    }
+
+                    @Override
+                    protected Event newMessage() {
+                        return projectCreated();
+                    }
+
+                    @Override
+                    protected void postToBus(BoundedContext context, Event event) {
+                        context.getEventBus()
+                               .post(event, StreamObservers.<Ack>noOpObserver());
+                    }
+                };
+
+        dispatcher.dispatchMessagesTo(new SingleShardProjectRepository());
+    }
+
+    @Test
+    public void dispatch_events_to_multiple_shard_in_multithreaded_env() throws
+                                                                         Exception {
+
+        final ParallelDispatcher<ProjectId, Event> dispatcher =
+                new ParallelDispatcher<ProjectId, Event>(
+                        270, 1637, dispatchWaitTime()) {
+                    @Override
+                    protected EntityStats<ProjectId> getStats() {
+                        return DeliveryProjection.getStats();
+                    }
+
+                    @Override
+                    protected Event newMessage() {
+                        return projectCreated();
+                    }
+
+                    @Override
+                    protected void postToBus(BoundedContext context, Event event) {
+                        context.getEventBus()
+                               .post(event, StreamObservers.<Ack>noOpObserver());
+                    }
+                };
+
+        dispatcher.dispatchMessagesTo(new TripleShardProjectRepository());
+    }
 }

@@ -25,8 +25,12 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.protobuf.Message;
 import io.spine.server.BoundedContext;
+import io.spine.server.ServerEnvironment;
+import io.spine.server.delivery.InProcessSharding;
 import io.spine.server.delivery.Shardable;
+import io.spine.server.delivery.Sharding;
 import io.spine.server.entity.Repository;
+import io.spine.server.transport.memory.InMemoryTransportFactory;
 
 import java.util.Collection;
 import java.util.List;
@@ -46,6 +50,30 @@ import static org.junit.Assert.assertEquals;
  * @author Alex Tymchenko
  */
 public class MessageDeliveryTestEnv {
+
+    /**
+     * The time to wait until all the messages dispatched to entities
+     * are processed in several threads.
+     *
+     * <p>"Sleeping" down the main thread is a simpler choice to ensure the messages were delivered.
+     * The alternatives would imply injecting multiple mocks that would send reports
+     * down the dispatching route. Which seems to be much more complex.
+     */
+    private static final int DISPATCH_WAIT_TIME = 2500;
+
+    /** Prevents instantiation of this test environment class. */
+    private MessageDeliveryTestEnv() {
+    }
+
+    public static void setShardingTransport(InMemoryTransportFactory transport) {
+        final Sharding inProcessSharding = new InProcessSharding(transport);
+        ServerEnvironment.getInstance()
+                         .replaceSharding(inProcessSharding);
+    }
+
+    public static int dispatchWaitTime() {
+        return DISPATCH_WAIT_TIME;
+    }
 
     public abstract static class ParallelDispatcher<I extends Message, M extends Message> {
         private final int threadCount;
@@ -102,12 +130,10 @@ public class MessageDeliveryTestEnv {
         }
 
         private void verifyStats(int totalMessages, int numberOfShards) {
-            final Map<Long, Collection<I>> whoProcessedWhat = getStats()
-                    .getThreadToId()
-                    .asMap();
-            final Collection<I> actualIds = newHashSet(getStats()
-                                                               .getThreadToId()
-                                                               .values());
+            final Map<Long, Collection<I>> whoProcessedWhat = getStats().getThreadToId()
+                                                                        .asMap();
+            final Collection<I> actualIds = newHashSet(getStats().getThreadToId()
+                                                                 .values());
             final Set<Long> actualThreads = whoProcessedWhat.keySet();
 
             assertEquals(numberOfShards, actualThreads.size());
