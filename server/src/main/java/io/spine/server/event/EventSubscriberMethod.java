@@ -25,14 +25,16 @@ import com.google.protobuf.Message;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
+import io.spine.server.model.HandlerKey;
 import io.spine.server.model.HandlerMethod;
+import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodPredicate;
 
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 
 import static io.spine.core.Rejections.isRejection;
 import static io.spine.server.model.HandlerMethods.ensureExternalMatch;
+import static io.spine.server.model.MethodAccessChecker.forMethod;
 
 /**
  * A wrapper for an event subscriber method.
@@ -40,7 +42,7 @@ import static io.spine.server.model.HandlerMethods.ensureExternalMatch;
  * @author Alexander Yevsyukov
  * @see Subscribe
  */
-public final class EventSubscriberMethod extends HandlerMethod<EventContext> {
+public final class EventSubscriberMethod extends HandlerMethod<EventClass, EventContext> {
 
     /** The instance of the predicate to filter event subscriber methods of a class. */
     private static final MethodPredicate PREDICATE = new FilterPredicate();
@@ -53,6 +55,11 @@ public final class EventSubscriberMethod extends HandlerMethod<EventContext> {
     @Override
     public EventClass getMessageClass() {
         return EventClass.of(rawMessageClass());
+    }
+
+    @Override
+    public HandlerKey key() {
+        return HandlerKey.of(getMessageClass());
     }
 
     static EventSubscriberMethod from(Method method) {
@@ -77,7 +84,7 @@ public final class EventSubscriberMethod extends HandlerMethod<EventContext> {
     /**
      * The factory for creating {@linkplain EventSubscriberMethod event subscriber} methods.
      */
-    private static class Factory implements HandlerMethod.Factory<EventSubscriberMethod> {
+    private static class Factory extends HandlerMethod.Factory<EventSubscriberMethod> {
 
         private static final Factory INSTANCE = new Factory();
 
@@ -91,20 +98,19 @@ public final class EventSubscriberMethod extends HandlerMethod<EventContext> {
         }
 
         @Override
-        public EventSubscriberMethod create(Method method) {
-            return from(method);
-        }
-
-        @Override
         public Predicate<Method> getPredicate() {
             return predicate();
         }
 
         @Override
         public void checkAccessModifier(Method method) {
-            if (!Modifier.isPublic(method.getModifiers())) {
-                warnOnWrongModifier("Event subscriber {} must be declared 'public'", method);
-            }
+            final MethodAccessChecker checker = forMethod(method);
+            checker.checkPublic("Event subscriber {} must be declared 'public'");
+        }
+
+        @Override
+        protected EventSubscriberMethod createFromMethod(Method method) {
+            return from(method);
         }
     }
 

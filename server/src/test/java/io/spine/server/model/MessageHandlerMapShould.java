@@ -20,7 +20,6 @@
 
 package io.spine.server.model;
 
-import io.spine.core.CommandClass;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandlerMethod;
 import io.spine.test.event.ProjectCreated;
@@ -31,7 +30,7 @@ public class MessageHandlerMapShould {
 
     @Test(expected = DuplicateHandlerMethodError.class)
     public void not_allow_duplicating_message_classes() {
-        new MessageHandlerMap<CommandClass, CommandHandlerMethod>
+        new MessageHandlerMap<>
                 (HandlerWithDuplicatingMethods.class, CommandHandlerMethod.factory());
     }
 

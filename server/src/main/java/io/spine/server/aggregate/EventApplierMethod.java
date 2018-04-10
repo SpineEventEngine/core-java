@@ -25,22 +25,23 @@ import com.google.common.base.Predicate;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
-import io.spine.annotation.Internal;
 import io.spine.core.EventClass;
+import io.spine.server.model.HandlerKey;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.HandlerMethodPredicate;
+import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodPredicate;
 
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
+
+import static io.spine.server.model.MethodAccessChecker.forMethod;
 
 /**
  * A wrapper for event applier method.
  *
  * @author Alexander Yevsyukov
  */
-@Internal
-public final class EventApplierMethod extends HandlerMethod<Empty> {
+final class EventApplierMethod extends HandlerMethod<EventClass, Empty> {
 
     /** The instance of the predicate to filter event applier methods of an aggregate class. */
     private static final MethodPredicate PREDICATE = new FilterPredicate();
@@ -57,6 +58,11 @@ public final class EventApplierMethod extends HandlerMethod<Empty> {
     @Override
     public EventClass getMessageClass() {
         return EventClass.of(rawMessageClass());
+    }
+
+    @Override
+    public HandlerKey key() {
+        return HandlerKey.of(getMessageClass());
     }
 
     static EventApplierMethod from(Method method) {
@@ -88,7 +94,7 @@ public final class EventApplierMethod extends HandlerMethod<Empty> {
     }
 
     /** The factory for filtering methods that match {@code EventApplier} specification. */
-    private static class Factory implements HandlerMethod.Factory<EventApplierMethod> {
+    private static class Factory extends HandlerMethod.Factory<EventApplierMethod> {
 
         private static final Factory INSTANCE = new Factory();
 
@@ -102,20 +108,19 @@ public final class EventApplierMethod extends HandlerMethod<Empty> {
         }
 
         @Override
-        public EventApplierMethod create(Method method) {
-            return from(method);
-        }
-
-        @Override
         public Predicate<Method> getPredicate() {
             return predicate();
         }
 
         @Override
         public void checkAccessModifier(Method method) {
-            if (!Modifier.isPrivate(method.getModifiers())) {
-                warnOnWrongModifier("Event applier method {} must be declared 'private'.", method);
-            }
+            final MethodAccessChecker checker = forMethod(method);
+            checker.checkPrivate("Event applier method {} must be declared 'private'.");
+        }
+
+        @Override
+        protected EventApplierMethod createFromMethod(Method method) {
+            return from(method);
         }
     }
 

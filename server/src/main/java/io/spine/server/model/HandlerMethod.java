@@ -32,8 +32,6 @@ import io.spine.core.MessageEnvelope;
 import io.spine.core.Version;
 import io.spine.server.event.EventFactory;
 import io.spine.type.MessageClass;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
@@ -44,6 +42,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.server.model.MethodExceptionChecker.forMethod;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
@@ -53,12 +52,13 @@ import static java.util.Collections.singletonList;
  * <p>Two message handlers are equivalent when they refer to the same method on the
  * same object (not class).
  *
+ * @param <M> the type of the message class
  * @param <C> the type of the message context or {@link com.google.protobuf.Empty Empty} if
  *            a context parameter is never used
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
-public abstract class HandlerMethod<C extends Message> {
+public abstract class HandlerMethod<M extends MessageClass, C extends Message> {
 
     /** The method to be called. */
     private final Method method;
@@ -89,26 +89,9 @@ public abstract class HandlerMethod<C extends Message> {
         return messageClass;
     }
 
-    public abstract MessageClass getMessageClass();
+    public abstract M getMessageClass();
 
-    /**
-     * Returns {@code true} if the method has package-private access, {@code false} otherwise.
-     */
-    protected static boolean isPackagePrivate(Method method) {
-        final int modifiers = method.getModifiers();
-        final boolean result =
-                !(Modifier.isPublic(modifiers)
-                        || Modifier.isProtected(modifiers)
-                        || Modifier.isPrivate(modifiers));
-        return result;
-    }
-
-    /**
-     * Logs a message at the WARN level according to the specified format and method.
-     */
-    protected static void warnOnWrongModifier(String messageFormat, Method method) {
-        log().warn(messageFormat, getFullMethodName(method));
-    }
+    public abstract HandlerKey key();
 
     /**
      * Returns a full method name without parameters.
@@ -136,11 +119,6 @@ public abstract class HandlerMethod<C extends Message> {
         final Class<? extends Message> result =
                 (Class<? extends Message>) handler.getParameterTypes()[0];
         return result;
-    }
-
-    /** The common logger used by message handling method classes. */
-    protected static Logger log() {
-        return LogSingleton.INSTANCE.value;
     }
 
     public static List<Event> toEvents(final Any producerId,
@@ -316,36 +294,61 @@ public abstract class HandlerMethod<C extends Message> {
         return getFullName();
     }
 
-    private enum LogSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(HandlerMethod.class);
-    }
-
     /**
-     * The interface for factory objects that can filter {@link Method} objects
+     * The base class for factory objects that can filter {@link Method} objects
      * that represent handler methods and create corresponding {@code HandlerMethod} instances
      * that wrap those methods.
      *
      * @param <H> the type of the handler method objects to create
      */
-    public interface Factory<H extends HandlerMethod> {
+    public abstract static class Factory<H extends HandlerMethod> {
 
         /** Returns the class of the method wrapper. */
-        Class<H> getMethodClass();
-
-        /** Creates a wrapper for a method. */
-        H create(Method method);
+        public abstract Class<H> getMethodClass();
 
         /** Returns a predicate for filtering methods. */
-        Predicate<Method> getPredicate();
+        public abstract Predicate<Method> getPredicate();
 
         /**
          * Checks an access modifier of the method and logs a warning if it is invalid.
          *
          * @param method the method to check
-         * @see HandlerMethod#warnOnWrongModifier(String, Method)
+         * @see MethodAccessChecker
          */
-        void checkAccessModifier(Method method);
+        public abstract void checkAccessModifier(Method method);
+
+        /**
+         * Creates a {@linkplain HandlerMethod wrapper} from the method.
+         *
+         * <p>Performs various checks before wrapper creation, e.g. method access modifier or
+         * whether method throws any prohibited exceptions.
+         *
+         * @param method the method to create wrapper from
+         * @return a wrapper object created from the method
+         * @throws IllegalStateException in case some of the method checks fail
+         */
+        public H create(Method method) {
+            checkAccessModifier(method);
+            checkThrownExceptions(method);
+            return createFromMethod(method);
+        }
+
+        /** Creates a wrapper object from a method. */
+        protected abstract H createFromMethod(Method method);
+
+        /**
+         * Ensures method does not throw any prohibited exception types.
+         *
+         * <p>In case it does, the {@link IllegalStateException} containing diagnostics info is
+         * thrown.
+         *
+         * @param method the method to check
+         * @throws IllegalStateException if the method throws any prohibited exception types
+         * @see MethodExceptionChecker
+         */
+        protected void checkThrownExceptions(Method method) {
+            final MethodExceptionChecker checker = forMethod(method);
+            checker.checkThrowsNoCheckedExceptions();
+        }
     }
 }

@@ -25,13 +25,16 @@ import com.google.protobuf.Message;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.React;
+import io.spine.server.model.HandlerKey;
 import io.spine.server.model.HandlerMethod;
+import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodPredicate;
 
 import java.lang.reflect.Method;
 import java.util.List;
 
 import static io.spine.server.model.HandlerMethods.ensureExternalMatch;
+import static io.spine.server.model.MethodAccessChecker.forMethod;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -40,7 +43,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @author Alexander Yevsyukov
  * @see React
  */
-public final class EventReactorMethod extends HandlerMethod<EventContext> {
+public final class EventReactorMethod extends HandlerMethod<EventClass, EventContext> {
 
     private static final MethodPredicate PREDICATE = new FilterPredicate();
 
@@ -51,6 +54,11 @@ public final class EventReactorMethod extends HandlerMethod<EventContext> {
     @Override
     public EventClass getMessageClass() {
         return EventClass.of(rawMessageClass());
+    }
+
+    @Override
+    public HandlerKey key() {
+        return HandlerKey.of(getMessageClass());
     }
 
     /**
@@ -82,7 +90,7 @@ public final class EventReactorMethod extends HandlerMethod<EventContext> {
     /**
      * The factory for creating {@link EventReactorMethod event reactor} methods.
      */
-    private static class Factory implements HandlerMethod.Factory<EventReactorMethod> {
+    private static class Factory extends HandlerMethod.Factory<EventReactorMethod> {
 
         private static final Factory INSTANCE = new Factory();
 
@@ -96,21 +104,19 @@ public final class EventReactorMethod extends HandlerMethod<EventContext> {
         }
 
         @Override
-        public EventReactorMethod create(Method method) {
-            return from(method);
-        }
-
-        @Override
         public Predicate<Method> getPredicate() {
             return predicate();
         }
 
         @Override
         public void checkAccessModifier(Method method) {
-            if (!isPackagePrivate(method)) {
-                warnOnWrongModifier("Reactive handler method {} should be package-private.",
-                                    method);
-            }
+            final MethodAccessChecker checker = forMethod(method);
+            checker.checkPackagePrivate("Reactive handler method {} should be package-private.");
+        }
+
+        @Override
+        protected EventReactorMethod createFromMethod(Method method) {
+            return from(method);
         }
     }
 

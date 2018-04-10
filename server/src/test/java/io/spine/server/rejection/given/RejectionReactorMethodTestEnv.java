@@ -25,7 +25,7 @@ import com.google.protobuf.Message;
 import io.spine.core.CommandContext;
 import io.spine.core.React;
 import io.spine.test.reflect.ReflectRejections.InvalidProjectName;
-import io.spine.test.rejection.command.UpdateProjectName;
+import io.spine.test.rejection.command.RjUpdateProjectName;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Method;
@@ -66,7 +66,7 @@ public class RejectionReactorMethodTestEnv {
 
     public static class RValidTwoParams extends TestRejectionReactor {
         @React
-        public Empty handle(InvalidProjectName rejection, UpdateProjectName command) {
+        public Empty handle(InvalidProjectName rejection, RjUpdateProjectName command) {
             return Empty.getDefaultInstance();
         }
     }
@@ -82,7 +82,7 @@ public class RejectionReactorMethodTestEnv {
 
         @React
         public Empty handle(InvalidProjectName rejection,
-                            UpdateProjectName command,
+                            RjUpdateProjectName command,
                             CommandContext context) {
             lastRejectionMessage = rejection;
             lastCommandMessage = command;
@@ -110,7 +110,7 @@ public class RejectionReactorMethodTestEnv {
     public static class RValidButPrivate extends TestRejectionReactor {
         @SuppressWarnings("MethodMayBeStatic") // Need instance method for the test.
         @React
-        private Empty handle(InvalidProjectName rejection, UpdateProjectName command) {
+        private Empty handle(InvalidProjectName rejection, RjUpdateProjectName command) {
             return Empty.getDefaultInstance();
         }
     }
@@ -120,7 +120,7 @@ public class RejectionReactorMethodTestEnv {
      */
     public static class RInvalidNoAnnotation extends TestRejectionReactor {
         @SuppressWarnings("unused")
-        public Empty handle(InvalidProjectName rejection, UpdateProjectName command) {
+        public Empty handle(InvalidProjectName rejection, RjUpdateProjectName command) {
             return Empty.getDefaultInstance();
         }
     }
@@ -141,7 +141,7 @@ public class RejectionReactorMethodTestEnv {
     public static class RInvalidTooManyParams extends TestRejectionReactor {
         @React
         public Empty handle(InvalidProjectName rejection,
-                            UpdateProjectName command,
+                            RjUpdateProjectName command,
                             CommandContext context,
                             Object redundant) {
             return Empty.getDefaultInstance();
@@ -163,7 +163,7 @@ public class RejectionReactorMethodTestEnv {
      */
     public static class RInvalidTwoParamsFirstInvalid extends TestRejectionReactor {
         @React
-        public Empty handle(Exception invalid, UpdateProjectName command) {
+        public Empty handle(Exception invalid, RjUpdateProjectName command) {
             return Empty.getDefaultInstance();
         }
     }
@@ -183,7 +183,7 @@ public class RejectionReactorMethodTestEnv {
      */
     public static class RInvalidNotMessage extends TestRejectionReactor {
         @React
-        public Object handle(InvalidProjectName rejection, UpdateProjectName command) {
+        public Object handle(InvalidProjectName rejection, RjUpdateProjectName command) {
             return rejection;
         }
     }

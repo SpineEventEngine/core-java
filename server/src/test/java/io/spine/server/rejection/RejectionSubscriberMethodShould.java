@@ -38,7 +38,7 @@ import io.spine.server.rejection.given.RejectionSubscriberMethodTestEnv.ValidThr
 import io.spine.server.rejection.given.RejectionSubscriberMethodTestEnv.ValidTwoParams;
 import io.spine.server.rejection.given.VerifiableSubscriber;
 import io.spine.test.reflect.ReflectRejections.InvalidProjectName;
-import io.spine.test.rejection.command.UpdateProjectName;
+import io.spine.test.rejection.command.RjUpdateProjectName;
 import org.junit.Test;
 
 import java.lang.reflect.InvocationTargetException;
@@ -79,7 +79,7 @@ public class RejectionSubscriberMethodShould {
                 CommandContext.newBuilder()
                               .setTargetVersion(1020)
                               .build();
-        final UpdateProjectName commandMessage = UpdateProjectName.getDefaultInstance();
+        final RjUpdateProjectName commandMessage = RjUpdateProjectName.getDefaultInstance();
         builder.setCommand(Command.newBuilder()
                                   .setMessage(pack(commandMessage))
                                   .setContext(commandContext));

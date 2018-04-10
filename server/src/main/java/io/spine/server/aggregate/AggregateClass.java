@@ -116,7 +116,7 @@ public class AggregateClass<A extends Aggregate>
         return eventReactions.getMethod(eventClass);
     }
 
-    RejectionReactorMethod getReactor(RejectionClass rejectionClass) {
-        return rejectionReactions.getMethod(rejectionClass);
+    RejectionReactorMethod getReactor(RejectionClass rejCls, CommandClass cmdCls) {
+        return rejectionReactions.getMethod(rejCls, cmdCls);
     }
 }

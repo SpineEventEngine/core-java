@@ -23,7 +23,7 @@ import com.google.protobuf.Message;
 import io.spine.core.CommandContext;
 import io.spine.core.Subscribe;
 import io.spine.test.reflect.ReflectRejections.InvalidProjectName;
-import io.spine.test.rejection.command.UpdateProjectName;
+import io.spine.test.rejection.command.RjUpdateProjectName;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Method;
@@ -65,7 +65,7 @@ public class RejectionSubscriberMethodTestEnv {
     public static class ValidTwoParams extends TestRejectionSubscriber {
         @Subscribe
         public void handle(InvalidProjectName rejection,
-                           UpdateProjectName command) {
+                           RjUpdateProjectName command) {
             // do nothing.
         }
     }
@@ -81,7 +81,7 @@ public class RejectionSubscriberMethodTestEnv {
 
         @Subscribe
         public void handle(InvalidProjectName rejection,
-                           UpdateProjectName command,
+                           RjUpdateProjectName command,
                            CommandContext context) {
             lastRejectionMessage = rejection;
             lastCommandMessage = command;
@@ -108,7 +108,7 @@ public class RejectionSubscriberMethodTestEnv {
         @SuppressWarnings("MethodMayBeStatic") // Need instance method for the test.
         @Subscribe
         private void handle(InvalidProjectName rejection,
-                            UpdateProjectName command) {
+                            RjUpdateProjectName command) {
             // do nothing.
         }
     }
@@ -119,7 +119,7 @@ public class RejectionSubscriberMethodTestEnv {
     public static class InvalidNoAnnotation extends TestRejectionSubscriber {
         @SuppressWarnings("unused")
         public void handle(InvalidProjectName rejection,
-                           UpdateProjectName command) {
+                           RjUpdateProjectName command) {
             // do nothing.
         }
     }
@@ -140,7 +140,7 @@ public class RejectionSubscriberMethodTestEnv {
     public static class InvalidTooManyParams extends TestRejectionSubscriber {
         @Subscribe
         public void handle(InvalidProjectName rejection,
-                           UpdateProjectName command,
+                           RjUpdateProjectName command,
                            CommandContext context,
                            Object redundant) {
             // do nothing.
@@ -162,7 +162,7 @@ public class RejectionSubscriberMethodTestEnv {
      */
     public static class InvalidTwoParamsFirstInvalid extends TestRejectionSubscriber {
         @Subscribe
-        public void handle(Exception invalid, UpdateProjectName command) {
+        public void handle(Exception invalid, RjUpdateProjectName command) {
             // do nothing.
         }
     }
@@ -183,7 +183,7 @@ public class RejectionSubscriberMethodTestEnv {
     public static class InvalidNotMessage extends TestRejectionSubscriber {
         @Subscribe
         public Object handle(InvalidProjectName rejection,
-                             UpdateProjectName command) {
+                             RjUpdateProjectName command) {
             return rejection;
         }
     }

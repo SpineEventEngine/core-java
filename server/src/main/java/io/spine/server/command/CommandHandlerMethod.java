@@ -30,9 +30,12 @@ import io.spine.base.ThrowableMessage;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
 import io.spine.server.entity.Entity;
+import io.spine.server.model.HandlerKey;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.HandlerMethodFailedException;
 import io.spine.server.model.HandlerMethodPredicate;
+import io.spine.server.model.MethodAccessChecker;
+import io.spine.server.model.MethodExceptionChecker;
 import io.spine.server.model.MethodPredicate;
 
 import java.lang.reflect.Method;
@@ -46,7 +49,7 @@ import static com.google.common.base.Throwables.getRootCause;
  * @author Alexander Yevsyukov
  */
 @Internal
-public final class CommandHandlerMethod extends HandlerMethod<CommandContext> {
+public final class CommandHandlerMethod extends HandlerMethod<CommandClass, CommandContext> {
 
     /** The instance of the predicate to filter command handler methods of a class. */
     private static final MethodPredicate PREDICATE = new FilterPredicate();
@@ -63,6 +66,11 @@ public final class CommandHandlerMethod extends HandlerMethod<CommandContext> {
     @Override
     public CommandClass getMessageClass() {
         return CommandClass.of(rawMessageClass());
+    }
+
+    @Override
+    public HandlerKey key() {
+        return HandlerKey.of(getMessageClass());
     }
 
     static CommandHandlerMethod from(Method method) {
@@ -139,7 +147,7 @@ public final class CommandHandlerMethod extends HandlerMethod<CommandContext> {
     /**
      * The factory for filtering {@linkplain CommandHandlerMethod command handling methods}.
      */
-    private static class Factory implements HandlerMethod.Factory<CommandHandlerMethod> {
+    private static class Factory extends HandlerMethod.Factory<CommandHandlerMethod> {
 
         private static final Factory INSTANCE = new Factory();
 
@@ -153,21 +161,32 @@ public final class CommandHandlerMethod extends HandlerMethod<CommandContext> {
         }
 
         @Override
-        public CommandHandlerMethod create(Method method) {
-            return from(method);
-        }
-
-        @Override
         public Predicate<Method> getPredicate() {
             return predicate();
         }
 
         @Override
         public void checkAccessModifier(Method method) {
-            if (!isPackagePrivate(method)) {
-                warnOnWrongModifier(
-                        "Command handler method {} should be package-private.", method);
-            }
+            final MethodAccessChecker checker = MethodAccessChecker.forMethod(method);
+            checker.checkPackagePrivate("Command handler method {} should be package-private.");
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * <p>For the {@link CommandHandlerMethod}, the {@link ThrowableMessage} checked exception
+         * type is allowed, because the mechanism of {@linkplain io.spine.core.Rejection
+         * command rejections} is based on this type.
+         */
+        @Override
+        protected void checkThrownExceptions(Method method) {
+            final MethodExceptionChecker checker = MethodExceptionChecker.forMethod(method);
+            checker.checkThrowsNoExceptionsBut(RuntimeException.class, ThrowableMessage.class);
+        }
+
+        @Override
+        protected CommandHandlerMethod createFromMethod(Method method) {
+            return from(method);
         }
     }
 

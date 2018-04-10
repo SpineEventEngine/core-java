@@ -19,8 +19,6 @@
  */
 package io.spine.server.model;
 
-import com.google.protobuf.Message;
-
 import static java.lang.String.format;
 
 /**
@@ -36,14 +34,14 @@ public class DuplicateHandlerMethodError extends ModelError {
 
     public DuplicateHandlerMethodError(
             Class<?> targetClass,
-            Class<? extends Message> messageClass,
+            HandlerKey handlerKey,
             String firstMethodName,
             String secondMethodName) {
 
         super(format(
-                "The %s class defines more than one method for handling the message class %s." +
+                "The %s class defines more than one method with key %s." +
                         " Methods encountered: %s, %s.",
-                targetClass.getName(), messageClass.getName(),
+                targetClass.getName(), handlerKey,
                 firstMethodName, secondMethodName));
     }
 }

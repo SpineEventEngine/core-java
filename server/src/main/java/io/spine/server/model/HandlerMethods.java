@@ -45,7 +45,7 @@ public final class HandlerMethods {
      * @param <M> the type of the {@code HandlerMethod} to apply this predicate to
      * @return the predicate
      */
-    public static <M extends HandlerMethod<?>> Predicate<M> externalPredicate() {
+    public static <M extends HandlerMethod<?, ?>> Predicate<M> externalPredicate() {
         return new Predicate<M>() {
             @Override
             public boolean apply(@Nullable M input) {
@@ -63,7 +63,7 @@ public final class HandlerMethods {
      * @param <M> the type of the {@code HandlerMethod} to apply this predicate to
      * @return the predicate
      */
-    public static <M extends HandlerMethod<?>> Predicate<M> domesticPredicate() {
+    public static <M extends HandlerMethod<?, ?>> Predicate<M> domesticPredicate() {
         return new Predicate<M>() {
             @Override
             public boolean apply(@Nullable M input) {
@@ -74,7 +74,7 @@ public final class HandlerMethods {
         };
     }
 
-    private static <M extends HandlerMethod<?>> boolean isExternal(M method) {
+    private static <M extends HandlerMethod<?, ?>> boolean isExternal(M method) {
         return method.getAttributes()
                      .contains(ExternalAttribute.EXTERNAL);
     }
@@ -89,7 +89,7 @@ public final class HandlerMethods {
      * @param shouldBeExternal an expected value of {@code external} attribute.
      * @see ExternalAttribute
      */
-    public static void ensureExternalMatch(HandlerMethod<?> method, boolean shouldBeExternal) {
+    public static void ensureExternalMatch(HandlerMethod<?, ?> method, boolean shouldBeExternal) {
 
         checkArgument(isExternal(method) == shouldBeExternal,
                       "Mismatch of `external` value for the handler method %s. " +

@@ -20,6 +20,7 @@
 
 package io.spine.server.model;
 
+import com.google.common.base.Predicate;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Empty;
 import com.google.protobuf.StringValue;
@@ -29,6 +30,7 @@ import io.spine.test.Tests;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -43,8 +45,10 @@ import static org.junit.Assert.assertTrue;
  */
 public class HandlerMethodShould {
 
-    private HandlerMethod<EventContext> twoParamMethod;
-    private HandlerMethod<Empty> oneParamMethod;
+    private final HandlerMethod.Factory<OneParamMethod> factory = OneParamMethod.factory();
+
+    private HandlerMethod<EventClass, EventContext> twoParamMethod;
+    private HandlerMethod<EventClass, Empty> oneParamMethod;
 
     private Object target;
 
@@ -74,11 +78,6 @@ public class HandlerMethodShould {
     @Test
     public void check_if_private() {
         assertTrue(oneParamMethod.isPrivate());
-    }
-
-    @Test
-    public void have_log_warning_method() {
-        HandlerMethod.warnOnWrongModifier("", oneParamMethod.getMethod());
     }
 
     @Test
@@ -127,7 +126,7 @@ public class HandlerMethodShould {
 
     @Test
     public void compare_fields_in_equals() {
-        final HandlerMethod<EventContext> anotherMethod =
+        final HandlerMethod<EventClass, EventContext> anotherMethod =
                 new TwoParamMethod(StubHandler.getTwoParameterMethod());
 
         assertTrue(twoParamMethod.equals(anotherMethod));
@@ -136,6 +135,18 @@ public class HandlerMethodShould {
     @Test
     public void have_hashCode() {
         assertNotEquals(System.identityHashCode(twoParamMethod), twoParamMethod.hashCode());
+    }
+
+    @SuppressWarnings("ResultOfMethodCallIgnored") // Method is called only to throw exception.
+    @Test(expected = IllegalStateException.class)
+    public void do_not_be_created_from_method_with_checked_exception() {
+        factory.create(StubHandler.getMethodWithCheckedException());
+    }
+
+    @Test
+    public void be_normally_created_from_method_with_runtime_exception() {
+        final OneParamMethod method = factory.create(StubHandler.getMethodWithRuntimeException());
+        assertEquals(StubHandler.getMethodWithRuntimeException(), method.getMethod());
     }
 
     /*
@@ -157,6 +168,14 @@ public class HandlerMethodShould {
             handleInvoked = true;
         }
 
+        private static void throwCheckedException(BoolValue message) throws Exception {
+            throw new IOException("Throw new checked exception");
+        }
+
+        private static void throwRuntimeException(BoolValue message) throws RuntimeException {
+            throw new RuntimeException("Throw new runtime exception");
+        }
+
         private static Method getTwoParameterMethod() {
             final Method method;
             final Class<?> clazz = StubHandler.class;
@@ -172,8 +191,29 @@ public class HandlerMethodShould {
             final Method method;
             final Class<?> clazz = StubHandler.class;
             try {
-                //noinspection DuplicateStringLiteralInspection
                 method = clazz.getDeclaredMethod("handle", BoolValue.class);
+            } catch (NoSuchMethodException e) {
+                throw new IllegalStateException(e);
+            }
+            return method;
+        }
+
+        private static Method getMethodWithCheckedException() {
+            final Method method;
+            final Class<?> clazz = StubHandler.class;
+            try {
+                method = clazz.getDeclaredMethod("throwCheckedException", BoolValue.class);
+            } catch (NoSuchMethodException e) {
+                throw new IllegalStateException(e);
+            }
+            return method;
+        }
+
+        private static Method getMethodWithRuntimeException() {
+            final Method method;
+            final Class<?> clazz = StubHandler.class;
+            try {
+                method = clazz.getDeclaredMethod("throwRuntimeException", BoolValue.class);
             } catch (NoSuchMethodException e) {
                 throw new IllegalStateException(e);
             }
@@ -189,7 +229,7 @@ public class HandlerMethodShould {
         }
     }
 
-    private static class TwoParamMethod extends HandlerMethod<EventContext> {
+    private static class TwoParamMethod extends HandlerMethod<EventClass, EventContext> {
 
         private TwoParamMethod(Method method) {
             super(method);
@@ -199,9 +239,14 @@ public class HandlerMethodShould {
         public EventClass getMessageClass() {
             return EventClass.of(rawMessageClass());
         }
+
+        @Override
+        public HandlerKey key() {
+            throw new IllegalStateException("The method is not a target of the test.");
+        }
     }
 
-    private static class OneParamMethod extends HandlerMethod<Empty> {
+    private static class OneParamMethod extends HandlerMethod<EventClass, Empty> {
 
         private OneParamMethod(Method method) {
             super(method);
@@ -210,6 +255,44 @@ public class HandlerMethodShould {
         @Override
         public EventClass getMessageClass() {
             return EventClass.of(rawMessageClass());
+        }
+
+        @Override
+        public HandlerKey key() {
+            throw new IllegalStateException("The method is not a target of the test.");
+        }
+
+        public static Factory factory() {
+            return Factory.getInstance();
+        }
+
+        private static class Factory extends HandlerMethod.Factory<OneParamMethod> {
+
+            private static final Factory INSTANCE = new Factory();
+
+            private static Factory getInstance() {
+                return INSTANCE;
+            }
+
+            @Override
+            public Class<OneParamMethod> getMethodClass() {
+                return OneParamMethod.class;
+            }
+
+            @Override
+            public Predicate<Method> getPredicate() {
+                throw new IllegalStateException("The test factory cannot provide the predicate.");
+            }
+
+            @Override
+            public void checkAccessModifier(Method method) {
+                // Any access modifier is accepted for the test method.
+            }
+
+            @Override
+            protected OneParamMethod createFromMethod(Method method) {
+                return new OneParamMethod(method);
+            }
         }
     }
 }

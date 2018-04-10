@@ -21,15 +21,18 @@
 package io.spine.server.aggregate.given.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.Commands;
 import io.spine.core.Event;
+import io.spine.core.React;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateMessageDispatcher;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
+import io.spine.server.entity.rejection.StandardRejections;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.ProjectVBuilder;
@@ -74,6 +77,10 @@ public class TestAggregate
     public boolean isTaskAddedEventApplied = false;
     @VisibleForTesting
     public boolean isProjectStartedEventApplied = false;
+    @VisibleForTesting
+    public boolean isRejectionHandled = false;
+    @VisibleForTesting
+    public boolean isRejectionWithCmdHandled = false;
 
     public TestAggregate(ProjectId id) {
         super(id);
@@ -139,6 +146,18 @@ public class TestAggregate
                 .setStatus(Status.STARTED);
 
         isProjectStartedEventApplied = true;
+    }
+
+    @React
+    Empty on(StandardRejections.CannotModifyDeletedEntity rejection, AggAddTask command) {
+        isRejectionWithCmdHandled = true;
+        return Empty.getDefaultInstance();
+    }
+
+    @React
+    Empty on(StandardRejections.CannotModifyDeletedEntity rejection) {
+        isRejectionHandled = true;
+        return Empty.getDefaultInstance();
     }
 
     @VisibleForTesting

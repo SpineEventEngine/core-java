@@ -111,7 +111,7 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
         ModelTests.clearModel();
 
         final TestRejection rejection = new TestRejection();
-        final Command command = givenThrowingHandler(rejection);
+        final Command command = givenRejectingHandler(rejection);
         final CommandId commandId = command.getId();
         final Message commandMessage = getMessage(command);
 
@@ -194,26 +194,6 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
     }
 
     @Test
-    public void set_command_status_to_error_when_handler_throws_unknown_Throwable()
-            throws TestRejection, TestThrowable {
-        ModelTests.clearModel();
-
-        final Throwable throwable = new TestThrowable("Unexpected Throwable");
-        final Command command = givenThrowingHandler(throwable);
-        final CommandEnvelope envelope = CommandEnvelope.of(command);
-
-        commandBus.post(command, observer);
-
-        // Check that the logging was called.
-        verify(log).errorHandlingUnknown(eq(throwable),
-                                         eq(envelope.getMessage()),
-                                         eq(envelope.getId()));
-
-        // Check that the status and message.
-        assertHasErrorStatusWithMessage(envelope, throwable.getMessage());
-    }
-
-    @Test
     public void set_expired_scheduled_command_status_to_error_if_time_to_post_them_passed() {
         final List<Command> commands = newArrayList(createProject(),
                                                     addTask(),
@@ -241,32 +221,64 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
     }
 
     /**
-     * A stub handler that throws passed `Throwable` in the command handler method.
+     * A stub handler that throws passed `ThrowableMessage` in the command handler method,
+     * rejecting the command.
      *
      * @see #set_command_status_to_rejection_when_handler_throws_rejection()
-     * @see #set_command_status_to_error_when_handler_throws_exception
-     * @see #set_command_status_to_error_when_handler_throws_unknown_Throwable
      */
-    private class ThrowingCreateProjectHandler extends CommandHandler {
+    private class RejectingCreateProjectHandler extends CommandHandler {
 
         @Nonnull
-        private final Throwable throwable;
+        private final ThrowableMessage throwable;
 
-        protected ThrowingCreateProjectHandler(@Nonnull Throwable throwable) {
+        protected RejectingCreateProjectHandler(@Nonnull ThrowableMessage throwable) {
             super(eventBus);
             this.throwable = throwable;
         }
 
         @Assign
-        @SuppressWarnings({"unused", "ProhibitedExceptionThrown"})
-            // Throwing is the purpose of this method.
-        CmdProjectCreated handle(CmdCreateProject msg, CommandContext context) throws Throwable {
+        @SuppressWarnings({"unused"})
+            // Reflective access.
+        CmdProjectCreated handle(CmdCreateProject msg,
+                                 CommandContext context) throws ThrowableMessage {
             throw throwable;
         }
     }
 
-    private <E extends Throwable> Command givenThrowingHandler(E throwable) {
-        final CommandHandler handler = new ThrowingCreateProjectHandler(throwable);
+    private <E extends ThrowableMessage> Command givenRejectingHandler(E throwable) {
+        final CommandHandler handler = new RejectingCreateProjectHandler(throwable);
+        commandBus.register(handler);
+        final CmdCreateProject msg = createProjectMessage();
+        final Command command = requestFactory.command()
+                                              .create(msg);
+        return command;
+    }
+
+    /**
+     * A stub handler that throws passed `RuntimeException` in the command handler method.
+     *
+     * @see #set_command_status_to_error_when_handler_throws_exception()
+     */
+    private class ThrowingCreateProjectHandler extends CommandHandler {
+
+        @Nonnull
+        private final RuntimeException exception;
+
+        protected ThrowingCreateProjectHandler(@Nonnull RuntimeException exception) {
+            super(eventBus);
+            this.exception = exception;
+        }
+
+        @Assign
+        @SuppressWarnings({"unused"})
+            // Reflective access.
+        CmdProjectCreated handle(CmdCreateProject msg, CommandContext context) {
+            throw exception;
+        }
+    }
+
+    private <E extends RuntimeException> Command givenThrowingHandler(E exception) {
+        final CommandHandler handler = new ThrowingCreateProjectHandler(exception);
         commandBus.register(handler);
         final CmdCreateProject msg = createProjectMessage();
         final Command command = requestFactory.command()
@@ -283,13 +295,6 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
 
         private TestRejection() {
             super(TypeConverter.<String, StringValue>toMessage(TestRejection.class.getName()));
-        }
-    }
-
-    @SuppressWarnings("serial")
-    private static class TestThrowable extends Throwable {
-        private TestThrowable(String message) {
-            super(message);
         }
     }
 

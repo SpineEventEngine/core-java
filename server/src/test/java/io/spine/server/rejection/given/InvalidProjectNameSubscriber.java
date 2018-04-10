@@ -29,7 +29,7 @@ import io.spine.core.Rejections;
 import io.spine.core.Subscribe;
 import io.spine.server.rejection.RejectionSubscriber;
 import io.spine.test.rejection.ProjectRejections.InvalidProjectName;
-import io.spine.test.rejection.command.UpdateProjectName;
+import io.spine.test.rejection.command.RjUpdateProjectName;
 
 public class InvalidProjectNameSubscriber extends RejectionSubscriber {
 
@@ -37,7 +37,7 @@ public class InvalidProjectNameSubscriber extends RejectionSubscriber {
 
     @Subscribe
     public void on(InvalidProjectName rejection,
-                   UpdateProjectName commandMessage,
+                   RjUpdateProjectName commandMessage,
                    CommandContext context) {
         final CommandFactory commandFactory =
                 TestActorRequestFactory.newInstance(InvalidProjectNameSubscriber.class)
