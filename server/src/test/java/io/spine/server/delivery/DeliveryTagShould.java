@@ -24,17 +24,10 @@ import com.google.common.testing.NullPointerTester;
 import io.spine.server.delivery.given.MessageDeliveryTestEnv.DeliveryEqualityRepository;
 import org.junit.Test;
 
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
-
 /**
  * @author Alex Tymchenko
  */
 public class DeliveryTagShould {
-
-    @Test
-    public void have_private_utility_ctor() {
-        assertHasPrivateParameterlessCtor(DeliveryTag.class);
-    }
 
     @Test
     public void pass_null_tolerance_check() {
