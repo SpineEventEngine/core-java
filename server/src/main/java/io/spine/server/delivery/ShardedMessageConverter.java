@@ -26,7 +26,6 @@ import io.spine.core.MessageEnvelope;
 import io.spine.protobuf.AnyPacker;
 import io.spine.protobuf.TypeConverter;
 import io.spine.string.Stringifiers;
-import io.spine.util.GenericTypeIndex;
 
 /**
  * The converter of messages, which have to be sent to a specific shard, into {@link ShardedMessage}
@@ -78,35 +77,5 @@ abstract class ShardedMessageConverter<I, M extends Message, E extends MessageEn
         final Any packedOriginalMessage = message.getOriginalMessage();
         final E result = toEnvelope(packedOriginalMessage);
         return result;
-    }
-
-    @SuppressWarnings("unchecked") // Ensured by the generic type definition.
-    protected Class<I> getIdClass() {
-        return (Class<I>) GenericParameter.ID.getArgumentIn(getClass());
-    }
-
-    /**
-     * Enumeration of generic type parameters of this class.
-     */
-    enum GenericParameter implements GenericTypeIndex<ShardedMessageConverter> {
-
-        /** The index of the generic type {@code <I>}. */
-        ID(0);
-
-        private final int index;
-
-        GenericParameter(int index) {
-            this.index = index;
-        }
-
-        @Override
-        public int getIndex() {
-            return this.index;
-        }
-
-        @Override
-        public Class<?> getArgumentIn(Class<? extends ShardedMessageConverter> cls) {
-            return Default.getArgument(this, cls);
-        }
     }
 }

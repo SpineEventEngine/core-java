@@ -19,18 +19,33 @@
  */
 package io.spine.server.delivery.given;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.protobuf.Message;
+import com.google.protobuf.StringValue;
+import io.spine.core.BoundedContextName;
+import io.spine.core.React;
 import io.spine.server.BoundedContext;
 import io.spine.server.ServerEnvironment;
+import io.spine.server.aggregate.Aggregate;
+import io.spine.server.aggregate.AggregateRepository;
+import io.spine.server.aggregate.Apply;
+import io.spine.server.command.Assign;
 import io.spine.server.delivery.InProcessSharding;
 import io.spine.server.delivery.Shardable;
 import io.spine.server.delivery.Sharding;
 import io.spine.server.entity.Repository;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
+import io.spine.test.aggregate.ProjectId;
+import io.spine.test.aggregate.command.AggStartProject;
+import io.spine.test.aggregate.event.AggProjectCancelled;
+import io.spine.test.aggregate.event.AggProjectPaused;
+import io.spine.test.aggregate.event.AggProjectStarted;
+import io.spine.test.aggregate.rejection.AggCannotReassignUnassignedTask;
+import io.spine.validate.StringValueVBuilder;
 
 import java.util.Collection;
 import java.util.List;
@@ -207,6 +222,54 @@ public class MessageDeliveryTestEnv {
 
         public void clear() {
             threadToId.clear();
+        }
+    }
+
+    /**
+     * An aggregate used to test the {@link io.spine.server.delivery.DeliveryTag DeliveryTag}
+     * features.
+     */
+    public static class DeliveryEqualityProject
+            extends Aggregate<ProjectId, StringValue, StringValueVBuilder> {
+
+        protected DeliveryEqualityProject(ProjectId id) {
+            super(id);
+        }
+
+        @Assign
+        AggProjectStarted on(AggStartProject cmd) {
+            return AggProjectStarted.getDefaultInstance();
+        }
+
+        @Apply
+        private void on(AggProjectStarted event) {
+            //Do nothing for this test.
+        }
+
+        @React
+        public Optional<AggProjectCancelled> on(AggProjectCancelled event) {
+            return Optional.absent();
+        }
+
+        @React
+        public Optional<AggProjectPaused> on(AggCannotReassignUnassignedTask rejection) {
+            return Optional.absent();
+        }
+    }
+
+    /**
+     * An aggregate repository for{@link io.spine.server.delivery.DeliveryTag DeliveryTag} tests.
+     */
+    public static class DeliveryEqualityRepository extends AggregateRepository<ProjectId,
+            DeliveryEqualityProject> {
+
+        /**
+         * Overriding the name of the {@code BoundedContext} to avoid the repository registration
+         * in the real bounded context and thus simplify the test environment.
+         */
+        @Override
+        public BoundedContextName getBoundedContextName() {
+            return BoundedContext.newName("Delivery tests");
         }
     }
 }

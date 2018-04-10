@@ -77,20 +77,3 @@ message ShardIndex {
 
     int32 of_total = 2;
 }
-
-message IdPredicate {
-
-    oneof predicate {
-
-        bool all_ids = 1;
-
-        UniformByIdHash uniform_by_ids = 2;
-    }
-}
-
-message UniformByIdHash {
-
-    int32 divisor = 1 [(required) = true];
-
-    int32 remainder = 2 [(required) = true];
-}

@@ -48,14 +48,6 @@ public final class DeliveryTag<E extends MessageEnvelope<?, ?, ?>> {
         this.envelopeType = envelopeType;
     }
 
-    public EntityClass<?> getEntityClass() {
-        return entityClass;
-    }
-
-    public Class<E> getEnvelopeType() {
-        return envelopeType;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) {
