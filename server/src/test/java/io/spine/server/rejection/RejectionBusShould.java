@@ -34,7 +34,6 @@ import io.spine.server.rejection.given.FaultySubscriber;
 import io.spine.server.rejection.given.InvalidOrderSubscriber;
 import io.spine.server.rejection.given.InvalidProjectNameSubscriber;
 import io.spine.server.rejection.given.MultipleRejectionSubscriber;
-import io.spine.server.rejection.given.PostponedDispatcherRejectionDelivery;
 import io.spine.server.rejection.given.RejectionMessageSubscriber;
 import io.spine.server.rejection.given.VerifiableSubscriber;
 import io.spine.test.rejection.command.RjStartProject;
