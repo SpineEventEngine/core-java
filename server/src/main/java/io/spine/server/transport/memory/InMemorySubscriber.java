@@ -58,12 +58,14 @@ class InMemorySubscriber extends AbstractInMemoryChannel implements Subscriber {
     public void addObserver(StreamObserver<ExternalMessage> observer) {
         checkNotNull(observer);
         observers.add(observer);
+        System.out.println(" ** Adding an observer: " + observer);
     }
 
     @Override
     public void removeObserver(StreamObserver<ExternalMessage> observer) {
         checkNotNull(observer);
         observers.remove(observer);
+        System.out.println(" ** Removing an observer: " + observer);
     }
 
     @Override

@@ -19,6 +19,7 @@
  */
 package io.spine.server.delivery;
 
+import com.google.common.base.MoreObjects;
 import io.spine.core.BoundedContextName;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.EventEnvelope;
@@ -103,5 +104,14 @@ public final class DeliveryTag<E extends MessageEnvelope<?, ?, ?>> {
 
         final DeliveryTag<E> id = new DeliveryTag<>(bcName, entityClass, envelopeClass);
         return id;
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                          .add("BoundedContext name", boundedContextName)
+                          .add("entityClass", entityClass)
+                          .add("envelopeType", envelopeType)
+                          .toString();
     }
 }

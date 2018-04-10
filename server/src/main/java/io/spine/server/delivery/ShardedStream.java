@@ -19,6 +19,7 @@
  */
 package io.spine.server.delivery;
 
+import com.google.common.base.MoreObjects;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
@@ -183,25 +184,31 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
         }
         final ShardedStream<?, ?, ?> that = (ShardedStream<?, ?, ?>) o;
         return Objects.equals(boundedContextName, that.boundedContextName) &&
-                Objects.equals(key, that.key);
+                Objects.equals(key, that.key) &&
+                Objects.equals(tag, that.tag);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(boundedContextName, key);
+        return Objects.hash(boundedContextName, key, tag);
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                          .add("Bounded Context name", boundedContextName)
+                          .add("Sharding key", key)
+                          .add("Delivery tag", tag)
+                          .add("Target ID class", targetIdClass)
+                          .toString();
     }
 
     private class ExternalMessageObserver implements StreamObserver<ExternalMessage> {
 
-        private ShardedStreamConsumer<I, E> delegate;
+        private final ShardedStreamConsumer<I, E> delegate;
 
         private ExternalMessageObserver(ShardedStreamConsumer<I, E> delegate) {
             this.delegate = delegate;
-        }
-
-        private void updateDelegate(ShardedStreamConsumer<I, E> newDelegate) {
-            checkNotNull(newDelegate);
-            this.delegate = newDelegate;
         }
 
         @Override
@@ -223,6 +230,11 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
         @Override
         public void onCompleted() {
             //TODO:2018-03-8:alex.tymchenko: figure out what should happen.
+        }
+
+        @Override
+        public String toString() {
+            return "ExternalMessage observer for the ShardedStream " + ShardedStream.this;
         }
     }
 

@@ -264,6 +264,9 @@ public class EventBusShould {
                       .canBeEnriched(any(EventEnvelope.class));
         doReturn(event).when(enricher)
                        .enrich(any(EventEnvelope.class));
+
+        // Close the bounded context, which was previously initialized in `@Before`.
+        closeBoundedContext();
         setUp(enricher);
         eventBus.register(new ProjectCreatedSubscriber());
 
@@ -277,6 +280,9 @@ public class EventBusShould {
         final EventEnricher enricher = mock(EventEnricher.class);
         doReturn(false).when(enricher)
                        .canBeEnriched(any(EventEnvelope.class));
+
+        // Close the bounded context, which was previously initialized in `@Before`.
+        closeBoundedContext();
         setUp(enricher);
         eventBus.register(new ProjectCreatedSubscriber());
 
@@ -297,6 +303,7 @@ public class EventBusShould {
         final Command command = command(createProject());
         eventBus.register(new EBProjectCreatedNoOpSubscriber());
 
+        System.out.println("JUnit test: " + Thread.currentThread().getId());
         commandBus.post(command, StreamObservers.<Ack>noOpObserver());
 
         final List<Event> events = readEvents(eventBus);
@@ -542,6 +549,13 @@ public class EventBusShould {
 
         private boolean isDispatchCalled() {
             return dispatchCalled;
+        }
+    }
+
+    private void closeBoundedContext() {
+        try {
+            bc.close();
+        } catch (Exception ignored) {
         }
     }
 
