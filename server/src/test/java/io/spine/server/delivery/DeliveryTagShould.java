@@ -22,6 +22,7 @@ package io.spine.server.delivery;
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
 import io.spine.server.delivery.given.MessageDeliveryTestEnv.DeliveryEqualityRepository;
+import io.spine.server.model.ModelTests;
 import org.junit.Test;
 
 /**
@@ -37,6 +38,7 @@ public class DeliveryTagShould {
 
     @Test
     public void support_equality() {
+        ModelTests.clearModel();
         final DeliveryEqualityRepository repository = new DeliveryEqualityRepository();
 
         final DeliveryTag eventTag = DeliveryTag.forEventsOf(repository);
