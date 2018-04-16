@@ -47,7 +47,6 @@ public class ServerEnvironment {
 
     /** Prevents instantiation of this utility class. */
     private ServerEnvironment() {
-        //TODO:2018-02-22:alex.tymchenko: use a singleton transport factory instead.
         this.sharding = new InProcessSharding(InMemoryTransportFactory.newInstance());
     }
 

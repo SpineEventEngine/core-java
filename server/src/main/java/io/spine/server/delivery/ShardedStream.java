@@ -43,6 +43,7 @@ import java.util.Objects;
 import static com.google.common.base.Joiner.on;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.delivery.ShardedStream.GenericParameter.MESSAGE_CLASS;
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * The stream of messages of a particular type sent for the processing to a specific shard.
@@ -203,6 +204,12 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
                           .toString();
     }
 
+    /**
+     * The observer of stream messages.
+     *
+     * <p>Passes the received messages to the respective {@linkplain ShardedStreamConsumer
+     * delegate}.
+     */
     private class ExternalMessageObserver implements StreamObserver<ExternalMessage> {
 
         private final ShardedStreamConsumer<I, E> delegate;
@@ -224,12 +231,12 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
 
         @Override
         public void onError(Throwable t) {
-            //TODO:2018-03-8:alex.tymchenko: figure out what should happen.
+            throw newIllegalStateException(t, "Error observing the external messages");
         }
 
         @Override
         public void onCompleted() {
-            //TODO:2018-03-8:alex.tymchenko: figure out what should happen.
+            //Do nothing. It's fine.
         }
 
         @Override
