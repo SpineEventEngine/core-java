@@ -111,7 +111,6 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
                                          .asProjectionClass(cls);
     }
 
-    //TODO:2018-03-8:alex.tymchenko: try to hide it.
     @Override
     public ProjectionClass<P> getShardedModelClass() {
         return projectionClass();
