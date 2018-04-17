@@ -47,6 +47,8 @@ public class ServerEnvironment {
 
     /** Prevents instantiation of this utility class. */
     private ServerEnvironment() {
+        //TODO:2018-04-17:alex.tymchenko: instead of factories use ServerEnvironment.Builder().
+        // See https://github.com/SpineEventEngine/core-java/issues/690.
         this.sharding = new InProcessSharding(InMemoryTransportFactory.newInstance());
     }
 
