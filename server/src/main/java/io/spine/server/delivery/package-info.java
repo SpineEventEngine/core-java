@@ -83,17 +83,8 @@
  *
  * <h3>Transport</h3>
  *
- * <p>The Spine transport routines are enhanced in this PR to meet the needs of sharding.
- *
- * <ul>
- *      <li>Channels are now identified by a generic {@code ChannelId} instead of a
- *      channel-per-message-type strategy as previously.</li>
- *      <li>In-memory implementation transport made more concurrency-friendly.</li>
- * </ul>
- *
- * <p>In addition, a {@linkplain io.spine.server.delivery.ShardedStream ShardedStream} has been
- * introduced as a convenience wrapper over channels, used to exchange the messages
- * to each of the shards.
+ * <p>A {@linkplain io.spine.server.delivery.ShardedStream ShardedStream} is introduced as
+ * a convenience wrapper over channels, used to exchange the messages to each of the shards.
  *
  *
  * <h3>Configuration</h3>
