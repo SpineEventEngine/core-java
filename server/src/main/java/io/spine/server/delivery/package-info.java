@@ -129,8 +129,8 @@
  *
  * <p>A JVM-wide {@link io.spine.server.delivery.Sharding Sharding} service is introduced. Its
  * implementation is exposed via {@link io.spine.server.ServerEnvironment ServerEnvironment} and is
- * used to glue up the transport factory, register new shards and, most importantly,
- * define which shards are served within the current JVM.
+ * used to integrate the transport factory, register new shards and define which shards
+ * are served within the current JVM.
  *
  * <p>{@code AggregateRepository}, {@code ProcessManagerRepository} and {@code ProjectionRepository}
  * become shardable by implementing the {@link io.spine.server.delivery.Shardable} interface.
