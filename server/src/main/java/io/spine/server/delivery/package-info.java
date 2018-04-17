@@ -124,8 +124,6 @@
  * means a lot. The provided out-of-the-box in-process implementation is naïve and should be
  * replaced with something playing well with the underlying infrastructure.
  *
- * <p>Spine GAE-related library will be releasing the implementation based upon Google PubSub soon.
- *
  *
  * <h3>Implementation Details</h3>
  *
