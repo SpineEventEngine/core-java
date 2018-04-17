@@ -41,12 +41,15 @@
  *
  * <p>{@code Aggregate}s, {@code ProcessManager}s and {@code Projection}s are grouped into shards.
  *
- * <p>A shard is virtual group of entities of the same kind. In scope of a shard the entities should
- * be processed synchronously (e.g. in a single thread). For instance, the commands to handle,
- * events and rejections to react on are all processed synchronously for the same instance
- * of an {@code Aggregate} — as each of them relies on the same entity state. More than that,
- * the events produced in each command handler and event/rejection reactors are applied
- * in the same thread — to prevent the concurrent modifications of the entity.
+ * <p>A shard is virtual group of entities of the same entity class (e.g. a group of
+ * certain {@code Projection} instances). In scope of a shard all the entities should
+ * be processed synchronously, in a single thread per shard.
+ *
+ * <p>So if an {@code Aggregate} declares commands to handle, events and rejections to react on,
+ * they should all be processed synchronously for a certain {@code Aggregate} instance.
+ * The events produced in each command handler and event/rejection reactors
+ * should be applied in the same thread as well. Such a synchronous entity processing allows to
+ * prevent the concurrent modification of the entity state.
  *
  * <p>The delivery strategies of each of the entity repositories are used to reroute and regroup
  * the messages sent for dispatching, and then dispatch those to the instances per-shard.
