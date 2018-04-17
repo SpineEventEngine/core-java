@@ -34,7 +34,7 @@
  *
  * <p>Similar issues occur when studying the event delivery from the write-side to read-side.
  * The same instances of {@code Projection}s must be updated in a synchronous and exclusive fashion.
- * Otherwise their state is going to be totally broken.
+ * Otherwise their state is going to be broken.
  *
  *
  * <h2>Sharding</h2>
