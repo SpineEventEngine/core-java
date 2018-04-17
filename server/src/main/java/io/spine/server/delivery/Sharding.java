@@ -25,9 +25,7 @@ import io.spine.core.MessageEnvelope;
 import java.util.Set;
 
 /**
- * The sharding service.
- *
- * <p>Responsible for orchestrating the shardables and their inbound streams of messages.
+ * The service responsible for orchestrating the shardables and their inbound streams of messages.
  *
  * <p>Typically is a JVM-wide singleton.
  *
