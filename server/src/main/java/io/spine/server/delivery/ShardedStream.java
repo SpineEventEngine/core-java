@@ -231,12 +231,17 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
 
         @Override
         public void onError(Throwable t) {
-            throw newIllegalStateException(t, "Error observing the external messages");
+            throw newIllegalStateException(t,
+                                           "Error observing the external messages for consumer " +
+                                                   "with tag %s.", delegate.getTag());
         }
 
         @Override
         public void onCompleted() {
-            //Do nothing. It's fine.
+            // The publishing side never "completes" the transmission. So throwing an exception.
+            throw newIllegalStateException(
+                    "Unexpected 'onCompleted()' occurred while observing the external messages " +
+                            "for consumer with tag %s.", delegate.getTag());
         }
 
         @Override
