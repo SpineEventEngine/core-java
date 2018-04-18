@@ -32,6 +32,17 @@ import java.util.Objects;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
+ * A value, that defines the message destination in the {@linkplain Delivery delivery process}.
+ *
+ * <p>In the message delivery process, envelopes are travelling from some {@linkplain Sender sender}
+ * through the {@linkplain ShardedStream sharded message stream} to a number of {@linkplain Consumer
+ * consumers}. To identify which consumers, should receive the message, an instance of
+ * {@code DeliveryTag} is used.
+ *
+ * <p>The value of the tag identifies the entity, which exists in scope of some bounded context and
+ * declares the need to consume message envelopes of a specific type (such as
+ * {@link CommandEnvelope}).
+ *
  * @author Alex Tymchenko
  */
 public final class DeliveryTag<E extends MessageEnvelope<?, ?, ?>> {
@@ -67,6 +78,13 @@ public final class DeliveryTag<E extends MessageEnvelope<?, ?, ?>> {
         return Objects.hash(boundedContextName, entityClass, envelopeType);
     }
 
+    /**
+     * Creates an instance of {@code DeliveryTag} that identifies the need to deliver command
+     * envelopes to entities that are sharded within the given {@code Shardable}.
+     *
+     * @param shardable the shardable, which entities declare the need in command envelopes
+     * @return the new instance of {@code DeliveryTag}
+     */
     public static DeliveryTag<CommandEnvelope> forCommandsOf(Shardable shardable) {
         checkNotNull(shardable);
         return forEnvelope(shardable.getBoundedContextName(),
@@ -74,6 +92,13 @@ public final class DeliveryTag<E extends MessageEnvelope<?, ?, ?>> {
                            CommandEnvelope.class);
     }
 
+    /**
+     * Creates an instance of {@code DeliveryTag} that identifies the need to deliver event
+     * envelopes to entities that are sharded within the given {@code Shardable}.
+     *
+     * @param shardable the shardable, which entities declare the need in event envelopes
+     * @return the new instance of {@code DeliveryTag}
+     */
     public static DeliveryTag<EventEnvelope> forEventsOf(Shardable shardable) {
         checkNotNull(shardable);
         return forEnvelope(shardable.getBoundedContextName(),
@@ -81,6 +106,13 @@ public final class DeliveryTag<E extends MessageEnvelope<?, ?, ?>> {
                            EventEnvelope.class);
     }
 
+    /**
+     * Creates an instance of {@code DeliveryTag} that identifies the need to deliver rejection
+     * envelopes to entities that are sharded within the given {@code Shardable}.
+     *
+     * @param shardable the shardable, which entities declare the need in command rejection
+     * @return the new instance of {@code DeliveryTag}
+     */
     public static DeliveryTag<RejectionEnvelope> forRejectionsOf(Shardable shardable) {
         checkNotNull(shardable);
         return forEnvelope(shardable.getBoundedContextName(),
