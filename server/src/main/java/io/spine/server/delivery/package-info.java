@@ -57,25 +57,9 @@
  *
  * <h3>Flow</h3>
  *
- * <i>How a  command is handled by some aggregate instance.</i>
+ * <i>(illustrated for Commands, however Events and Rejections are dispatched similarly)</i>
  *
- * <p>End-user  --&gt; the command is emitted --&gt; gRPC {@code CommandService} --&gt;
- * {@code BoundedContext} selected --&gt; the command is posted to its command bus
- * --&gt; {@code AggregateRepository} instance receives the command --&gt;
- * {@code AggregateCommandEndpoint} is given the command to dispatch it to the {@code Aggregate}
- * instance ...
- *
- * <ul>
- *      <li> --&gt; The endpoint {@code Delivery} detects the target shard by the aggregate ID.</li>
- *
- *      <li> --&gt; The command is packed into a transferable package and sent to the (remote)
- *          channel corresponding to the shard. The message channel consumers are also endpoint
- *          {@code Delivery} instances, each serving its own shard.</li>
- *
- *      <li> --&gt; The command is received by the {@code Delivery}'s consuming part, unpacked
- *      and dispatched to the proper {@code Aggregate} instance.</li>
- * </ul>
- *
+ * <p><img src="./doc-files/sharding-commands-flow.png"/>
  *
  * <p>In this flow the message channel serves as a single-lane road, enqueuing the messages
  * from multiple senders (potentially, posting their messages simultaneously) and transferring
