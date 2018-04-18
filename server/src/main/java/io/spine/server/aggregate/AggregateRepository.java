@@ -655,7 +655,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     @Override
     public void close() {
-        ServerEnvironment.getInstance().getSharding().unregister(this);
+        ServerEnvironment.getInstance()
+                         .getSharding()
+                         .unregister(this);
         super.close();
     }
 }
