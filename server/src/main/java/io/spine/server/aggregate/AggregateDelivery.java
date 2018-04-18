@@ -50,11 +50,13 @@ public abstract class AggregateDelivery<I,
         super(consumer);
     }
 
-    protected abstract static class AggregateMessageConsumer<I,
-            A extends Aggregate<I, ?, ?>,
-            E extends ActorMessageEnvelope<?, ?, ?>,
-            S extends ShardedStream<I, ?, E>,
-            B extends ShardedStream.AbstractBuilder<I, E, B, S>> extends Consumer<I, A, E, S, B> {
+    protected abstract static
+    class AggregateMessageConsumer<I,
+                                   A extends Aggregate<I, ?, ?>,
+                                   E extends ActorMessageEnvelope<?, ?, ?>,
+                                   S extends ShardedStream<I, ?, E>,
+                                   B extends ShardedStream.AbstractBuilder<I, E, B, S>>
+            extends Consumer<I, A, E, S, B> {
 
         protected AggregateMessageConsumer(DeliveryTag<E> tag, Repository<I, A> repository) {
             super(tag, repository);
