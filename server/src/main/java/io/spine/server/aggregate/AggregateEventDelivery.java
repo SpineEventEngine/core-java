@@ -31,15 +31,23 @@ import io.spine.server.delivery.EventShardedStream;
  * @author Alex Tymchenko
  */
 public class AggregateEventDelivery<I, A extends Aggregate<I, ?, ?>>
-        extends AggregateDelivery<I, A, EventEnvelope,
-                                  EventShardedStream<I>, EventShardedStream.Builder<I>> {
+        extends AggregateDelivery<I,
+                                  A,
+                                  EventEnvelope,
+                                  EventShardedStream<I>,
+                                  EventShardedStream.Builder<I>> {
+
     protected AggregateEventDelivery(AggregateRepository<I, A> repository) {
         super(new AggregateEventConsumer<>(repository));
     }
 
     private static class AggregateEventConsumer<I, A extends Aggregate<I, ?, ?>>
-            extends AggregateMessageConsumer<I, A, EventEnvelope, EventShardedStream<I>,
-            EventShardedStream.Builder<I>> {
+            extends AggregateMessageConsumer<I,
+                                             A,
+                                             EventEnvelope,
+                                             EventShardedStream<I>,
+                                             EventShardedStream.Builder<I>> {
+
         protected AggregateEventConsumer(AggregateRepository<I, A> repository) {
             super(DeliveryTag.forEventsOf(repository), repository);
         }
@@ -50,8 +58,7 @@ public class AggregateEventDelivery<I, A extends Aggregate<I, ?, ?>>
         }
 
         @Override
-        protected AggregateEventEndpoint<I, A>
-        getEndpoint(EventEnvelope envelope) {
+        protected AggregateEventEndpoint<I, A> getEndpoint(EventEnvelope envelope) {
             return AggregateEventEndpoint.of(repository(), envelope);
         }
     }
