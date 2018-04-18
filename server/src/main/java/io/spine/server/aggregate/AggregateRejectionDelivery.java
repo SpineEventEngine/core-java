@@ -31,17 +31,23 @@ import io.spine.server.delivery.RejectionShardedStream;
  * @author Alex Tymchenko
  */
 public class AggregateRejectionDelivery<I, A extends Aggregate<I, ?, ?>>
-        extends AggregateDelivery<I, A, RejectionEnvelope,
-                                                  RejectionShardedStream<I>,
-                                                  RejectionShardedStream.Builder<I>> {
+        extends AggregateDelivery<I,
+                                  A,
+                                  RejectionEnvelope,
+                                  RejectionShardedStream<I>,
+                                  RejectionShardedStream.Builder<I>> {
 
     protected AggregateRejectionDelivery(AggregateRepository<I, A> repository) {
         super(new AggregateRejectionConsumer<>(repository));
     }
 
     private static class AggregateRejectionConsumer<I, A extends Aggregate<I, ?, ?>>
-            extends AggregateMessageConsumer<I, A, RejectionEnvelope, RejectionShardedStream<I>,
-            RejectionShardedStream.Builder<I>> {
+            extends AggregateMessageConsumer<I,
+                                             A,
+                                             RejectionEnvelope,
+                                             RejectionShardedStream<I>,
+                                             RejectionShardedStream.Builder<I>> {
+
         protected AggregateRejectionConsumer(AggregateRepository<I, A> repository) {
             super(DeliveryTag.forRejectionsOf(repository), repository);
         }
