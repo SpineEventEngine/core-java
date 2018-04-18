@@ -57,9 +57,9 @@
  *
  * <h3>Flow</h3>
  *
- * <i>(illustrated for Commands, however Events and Rejections are dispatched similarly)</i>
- *
  * <p><img src="./doc-files/sharding-commands-flow.png" alt="Sharding command flow">
+ *
+ * <i>Command flow. Events and Rejections are dispatched similarly.</i>
  *
  * <p>In this flow the message channel serves as a single-lane road, enqueuing the messages
  * from multiple senders (potentially, posting their messages simultaneously) and transferring
