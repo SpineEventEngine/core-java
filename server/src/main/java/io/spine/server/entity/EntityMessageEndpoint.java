@@ -105,7 +105,7 @@ public abstract class EntityMessageEndpoint<I,
      */
     private void dispatchToOne(I entityId) {
         final M envelope = envelope();
-        final Delivery<I, E, M, ?, ?> delivery = getEndpointDelivery(envelope);
+        final Delivery<I, E, M, ?, ?> delivery = getEndpointDelivery();
         delivery.getSender().send(entityId, envelope);
     }
 
@@ -126,13 +126,11 @@ public abstract class EntityMessageEndpoint<I,
     protected abstract void deliverNowTo(I entityId);
 
     /**
-     * Obtains an instance of endpoint delivery for the given envelope.
+     * Obtains an instance of endpoint delivery.
      *
-     * @param envelope the envelope to obtain an instance of delivery for
      * @return the instance of endpoint delivery
      */
-    protected abstract Delivery<I, E, M, ?, ?> getEndpointDelivery(M envelope);
-
+    protected abstract Delivery<I, E, M, ?, ?> getEndpointDelivery();
 
     /**
      * Invokes entity-specific method for dispatching the message.

@@ -53,7 +53,7 @@ class PmEventEndpoint<I, P extends ProcessManager<I, ?, ?>>
     }
 
     @Override
-    protected PmEventDelivery<I, P> getEndpointDelivery(EventEnvelope envelope) {
+    protected PmEventDelivery<I, P> getEndpointDelivery() {
         return repository().getEventEndpointDelivery();
     }
 

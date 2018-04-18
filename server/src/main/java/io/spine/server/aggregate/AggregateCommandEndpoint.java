@@ -59,8 +59,7 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
-    protected AggregateDelivery<I, A, CommandEnvelope, ?, ?> getEndpointDelivery(
-            CommandEnvelope envelope) {
+    protected AggregateDelivery<I, A, CommandEnvelope, ?, ?> getEndpointDelivery() {
         return repository().getCommandEndpointDelivery();
     }
 

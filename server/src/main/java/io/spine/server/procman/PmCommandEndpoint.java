@@ -61,7 +61,7 @@ class PmCommandEndpoint<I, P extends ProcessManager<I, ?, ?>>
     }
 
     @Override
-    protected PmCommandDelivery<I, P> getEndpointDelivery(CommandEnvelope envelope) {
+    protected PmCommandDelivery<I, P> getEndpointDelivery() {
         return repository().getCommandEndpointDelivery();
     }
 
