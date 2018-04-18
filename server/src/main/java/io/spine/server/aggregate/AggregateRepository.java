@@ -135,8 +135,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
             memoize(new Supplier<AggregateRejectionDelivery<I, A>>() {
                 @Override
                 public AggregateRejectionDelivery<I, A> get() {
-                    final AggregateRejectionDelivery<I, A> result
-                            = new AggregateRejectionDelivery<>(AggregateRepository.this);
+                    final AggregateRejectionDelivery<I, A> result =
+                            new AggregateRejectionDelivery<>(AggregateRepository.this);
                     return result;
                 }
             });
