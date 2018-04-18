@@ -353,7 +353,8 @@ public class CommandBus extends Bus<Command,
          * the current runtime environment.
          */
         private static boolean detectThreadsAllowed() {
-            final boolean appEngine = ServerEnvironment.getInstance().isAppEngine();
+            final boolean appEngine = ServerEnvironment.getInstance()
+                                                       .isAppEngine();
             return !appEngine;
         }
 
