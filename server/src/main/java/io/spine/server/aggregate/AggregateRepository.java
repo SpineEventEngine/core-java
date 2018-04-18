@@ -125,8 +125,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
             memoize(new Supplier<AggregateEventDelivery<I, A>>() {
         @Override
         public AggregateEventDelivery<I, A> get() {
-            final AggregateEventDelivery<I, A> result
-                    = new AggregateEventDelivery<>(AggregateRepository.this);
+            final AggregateEventDelivery<I, A> result =
+                    new AggregateEventDelivery<>(AggregateRepository.this);
             return result;
         }
     });
