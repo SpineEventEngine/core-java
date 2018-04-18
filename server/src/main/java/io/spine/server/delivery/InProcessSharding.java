@@ -22,7 +22,6 @@ package io.spine.server.delivery;
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableSet;
-import io.spine.annotation.SPI;
 import io.spine.core.BoundedContextName;
 import io.spine.core.MessageEnvelope;
 import io.spine.server.transport.TransportFactory;
@@ -33,6 +32,11 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
+ * An implementation of the sharding service, that manages all the data in-memory and runs only
+ * within the current JVM process.
+ *
+ * <p>Must not be used in production mode. Designed primarily for local testing purposes.
+ *
  * @author Alex Tymchenko
  */
 public class InProcessSharding implements Sharding {
@@ -40,10 +44,19 @@ public class InProcessSharding implements Sharding {
     private final TransportFactory transportFactory;
     private final ShardingRegistry registry = new ShardingRegistry();
 
+    /**
+     * Creates a new instance of in-process sharding service, which uses the given
+     * transport factory to manage the channels for the sharded message streams.
+     *
+     * @param transportFactory the transport factory to use
+     */
     public InProcessSharding(TransportFactory transportFactory) {
         this.transportFactory = transportFactory;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public final void register(Shardable shardable) {
         final Iterable<ShardedStreamConsumer<?, ?>> consumers = shardable.getMessageConsumers();
@@ -60,6 +73,10 @@ public class InProcessSharding implements Sharding {
         }
     }
 
+    /**
+     *
+     * @param shardable a shardable instance to unregister
+     */
     @Override
     public final void unregister(Shardable shardable) {
         final Iterable<ShardedStreamConsumer<?, ?>> consumers = shardable.getMessageConsumers();
@@ -68,13 +85,17 @@ public class InProcessSharding implements Sharding {
         }
     }
 
-    @SPI
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Set<ShardingKey> pickKeysForNode(Shardable shardable, Set<ShardingKey> keys) {
         return keys;
     }
 
-    @SPI
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public <I, E extends MessageEnvelope<?, ?, ?>> Set<ShardedStream<I, ?, E>>
     find(DeliveryTag<E> tag, I targetId) {
@@ -110,6 +131,10 @@ public class InProcessSharding implements Sharding {
         return result;
     }
 
+    /**
+     * A function which takes a stream consumer as an argument and initializes it with the
+     * transport.
+     */
     private static final class TransportBindFn
             implements Function<ShardedStreamConsumer<?, ?>, ShardedStream<?, ?, ?>> {
 

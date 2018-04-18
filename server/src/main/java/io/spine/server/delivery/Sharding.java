@@ -61,7 +61,7 @@ public interface Sharding {
      *
      * @param shardable the shardable to define the keys for
      * @param keys all the sharding keys to pick those to handle within this instance
-     * @return
+     * @return the set of keys to serve within this sharding instance
      */
     @SPI
     Set<ShardingKey> pickKeysForNode(Shardable shardable, Set<ShardingKey> keys);
