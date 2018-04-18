@@ -22,6 +22,7 @@ package io.spine.server;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
+import io.spine.annotation.Internal;
 import io.spine.server.delivery.InProcessSharding;
 import io.spine.server.delivery.Sharding;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
@@ -81,7 +82,17 @@ public class ServerEnvironment {
         return sharding;
     }
 
+    /**
+     * Replaces the current sharding service with the given value.
+     *
+     * <p>This method is used internally by the framework, and should not be called from outside.
+     *
+     * @param sharding the new sharding service to set for this server environment
+     */
+    @Internal
     public void replaceSharding(Sharding sharding) {
+        //TODO:2018-04-17:alex.tymchenko: migrate to ServerEnvironment.Builder().
+        // See https://github.com/SpineEventEngine/core-java/issues/690.
         checkNotNull(sharding);
         this.sharding = sharding;
     }
