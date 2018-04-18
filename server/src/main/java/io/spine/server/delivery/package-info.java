@@ -59,7 +59,7 @@
  *
  * <i>(illustrated for Commands, however Events and Rejections are dispatched similarly)</i>
  *
- * <p><img src="./doc-files/sharding-commands-flow.png"/>
+ * <p><img src="./doc-files/sharding-commands-flow.png"></img>
  *
  * <p>In this flow the message channel serves as a single-lane road, enqueuing the messages
  * from multiple senders (potentially, posting their messages simultaneously) and transferring
