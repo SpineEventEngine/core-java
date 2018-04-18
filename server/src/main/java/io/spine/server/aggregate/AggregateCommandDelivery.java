@@ -31,16 +31,23 @@ import io.spine.server.delivery.DeliveryTag;
  * @author Alex Tymchenko
  */
 public class AggregateCommandDelivery<I, A extends Aggregate<I, ?, ?>>
-        extends AggregateDelivery<I, A,
-                        CommandEnvelope, CommandShardedStream<I>, CommandShardedStream.Builder<I>> {
+        extends AggregateDelivery<I,
+                                  A,
+                                  CommandEnvelope,
+                                  CommandShardedStream<I>,
+                                  CommandShardedStream.Builder<I>> {
 
     protected AggregateCommandDelivery(AggregateRepository<I, A> repository) {
         super(new AggregateCommandConsumer<>(repository));
     }
 
     private static class AggregateCommandConsumer<I, A extends Aggregate<I, ?, ?>>
-            extends AggregateMessageConsumer<I, A, CommandEnvelope, CommandShardedStream<I>,
-            CommandShardedStream.Builder<I>> {
+            extends AggregateMessageConsumer<I,
+                                             A,
+                                             CommandEnvelope,
+                                             CommandShardedStream<I>,
+                                             CommandShardedStream.Builder<I>> {
+
         protected AggregateCommandConsumer(AggregateRepository<I, A> repository) {
             super(DeliveryTag.forCommandsOf(repository), repository);
         }
