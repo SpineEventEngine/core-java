@@ -115,8 +115,8 @@ public abstract class ProcessManagerRepository<I,
             memoize(new Supplier<PmRejectionDelivery<I, P>>() {
                 @Override
                 public PmRejectionDelivery<I, P> get() {
-                    final PmRejectionDelivery<I, P> result
-                            = new PmRejectionDelivery<>(ProcessManagerRepository.this);
+                    final PmRejectionDelivery<I, P> result =
+                            new PmRejectionDelivery<>(ProcessManagerRepository.this);
                     return result;
                 }
             });
@@ -470,7 +470,9 @@ public abstract class ProcessManagerRepository<I,
 
     @Override
     public void close() {
-        ServerEnvironment.getInstance().getSharding().unregister(this);
+        ServerEnvironment.getInstance()
+                         .getSharding()
+                         .unregister(this);
         super.close();
     }
 
