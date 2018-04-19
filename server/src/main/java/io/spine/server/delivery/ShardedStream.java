@@ -83,7 +83,7 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
     private final ExternalMessageObserver channelObserver;
 
     /**
-     * A lazily-intialized converted for the sharded messages.
+     * A lazily-initialized converter for the sharded messages.
      */
     @Nullable
     private ShardedMessageConverter<I, M, E> converter;
@@ -120,14 +120,33 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
 
     protected abstract ShardedMessageConverter<I, M, E> newConverter();
 
+    /**
+     * Obtains the key defining the subset of entities (i.e. a shard), to which the messages
+     * of this stream are addressed.
+     *
+     * @return the key of the shard being a destination for the messages transferred by this stream
+     */
     public ShardingKey getKey() {
         return key;
     }
 
+    /**
+     * Obtains the tag which describes the delivery destination for this stream of messages
+     *
+     * @return the delivery tag for this stream
+     */
     public DeliveryTag<E> getTag() {
         return tag;
     }
 
+    /**
+     * Posts the message to this stream.
+     *
+     * <p>The message is sent to the corresponding shard via the underlying transport channel.
+     *
+     * @param targetId the ID of target entity, that this message should be dispatched to
+     * @param messageEnvelope the message to post, packed as an envelope
+     */
     public final void post(I targetId, E messageEnvelope) {
         checkNotNull(messageEnvelope);
 
