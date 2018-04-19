@@ -98,7 +98,6 @@ final class ShardingRegistry {
 
         @Override
         public int hashCode() {
-
             return Objects.hash(strategy, stream);
         }
     }
