@@ -60,6 +60,11 @@ message ShardedMessageId {
     string value = 1 [(required) = true];
 }
 
+// A message that has been rerouted to the specific shard.
+//
+// Messages travel to shards down the transport channels. This is a wrapper message, that
+// holds the original message and the original target entity ID, as long as some
+// utility data, required for the transport propagation.
 message ShardedMessage {
 
     ShardedMessageId id = 1 [(required) = true, (valid) = true];
@@ -71,9 +76,15 @@ message ShardedMessage {
     google.protobuf.Timestamp when_sharded = 4 [(required) = true];
 }
 
+// An index of a shard.
+//
+// A value type used across the application. To be potentially used in JavaScript, Go, C++ and
+// other client and server environments, that are split into shards.
 message ShardIndex {
 
-    int32 index = 1;
+    // The zero-based index of the shard.
+    int32 index = 1 [(min).value = "0"];
 
-    int32 of_total = 2;
+    // Total number of shards.
+    int32 of_total = 2 [(min).value = "1"];
 }
