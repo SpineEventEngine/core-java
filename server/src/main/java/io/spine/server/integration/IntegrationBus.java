@@ -415,8 +415,8 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
     /**
      * A {@code Builder} for {@code IntegrationBus} instances.
      */
-    public static class Builder extends
-                                Bus.AbstractBuilder<ExternalMessageEnvelope, ExternalMessage, Builder> {
+    public static class Builder
+            extends Bus.AbstractBuilder<ExternalMessageEnvelope, ExternalMessage, Builder> {
 
         /**
          * Buses that act inside the bounded context, e.g. {@code EventBus}, and which allow
