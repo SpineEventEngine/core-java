@@ -20,11 +20,6 @@
 package io.spine.server.delivery.given;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
-import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.core.BoundedContextName;
 import io.spine.core.React;
@@ -35,9 +30,7 @@ import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.delivery.InProcessSharding;
-import io.spine.server.delivery.Shardable;
 import io.spine.server.delivery.Sharding;
-import io.spine.server.entity.Repository;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggStartProject;
@@ -46,18 +39,6 @@ import io.spine.test.aggregate.event.AggProjectPaused;
 import io.spine.test.aggregate.event.AggProjectStarted;
 import io.spine.test.aggregate.rejection.AggCannotReassignUnassignedTask;
 import io.spine.validate.StringValueVBuilder;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-
-import static com.google.common.collect.Sets.newHashSet;
-import static java.util.concurrent.Executors.newFixedThreadPool;
-import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertEquals;
 
 /**
  * An abstract base for environments, which are created to ease the message delivery testing.
@@ -93,136 +74,6 @@ public class MessageDeliveryTestEnv {
      */
     public static int dispatchWaitTime() {
         return DISPATCH_WAIT_TIME;
-    }
-
-    /**
-     * The helper class used to dispatch numerous messages of a certain kind to the entities,
-     * managed by a specific repository.
-     *
-     * <p>Another feature is to check that the messages were delivered to proper shards,
-     * according to the repository sharding configuration.
-     *
-     * @param <I> the type of the entity identifiers
-     * @param <M> the type of messages to dispatch (e.g. {@link io.spine.core.Command Command}).
-     */
-    public abstract static class ParallelDispatcher<I extends Message, M extends Message> {
-        /**
-         * The count of threads to use for dispatching.
-         */
-        private final int threadCount;
-
-        /**
-         * The count of messages to dispatch in several threads.
-         */
-        private final int messageCount;
-
-        /**
-         * The time to wait in the main thread before analyzing the statistics of message delivery.
-         */
-        private final int dispatchWaitTime;
-
-        protected ParallelDispatcher(int threadCount, int messageCount, int dispatchWaitTime) {
-            this.threadCount = threadCount;
-            this.messageCount = messageCount;
-            this.dispatchWaitTime = dispatchWaitTime;
-        }
-
-        /**
-         * Obtains the stats for the entity kind, which is served by this dispatcher.
-         */
-        protected abstract ThreadStats<I> getStats();
-
-        /**
-         * Creates a new message to be used in the dispatching.
-         */
-        protected abstract M newMessage();
-
-        /**
-         * Posts the message to the respective bus.
-         */
-        protected abstract void postToBus(BoundedContext context, M message);
-
-        /**
-         * Dispatches messages in several threads and check if they are delivered according to the
-         * sharding configuration for this repository.
-         *
-         * @param repository the repository which sharding configuration to take into account
-         * @throws Exception in case the multithreading message propagation breaks
-         */
-        public void dispatchMessagesTo(Repository<I, ?> repository) throws Exception {
-            final BoundedContext boundedContext = BoundedContext.newBuilder()
-                                                                .build();
-            boundedContext.register(repository);
-
-            final int numberOfShards = ((Shardable) repository).getShardingStrategy()
-                                                               .getNumberOfShards();
-
-            assertTrue(getStats().getThreadToId()
-                                 .isEmpty());
-
-            final ExecutorService executorService = newFixedThreadPool(threadCount);
-            final ImmutableList.Builder<Callable<Object>> builder = ImmutableList.builder();
-
-            for (int i = 0; i < messageCount; i++) {
-                final M message = newMessage();
-
-                builder.add(new Callable<Object>() {
-                    @Override
-                    public Object call() {
-                        postToBus(boundedContext, message);
-                        return 0;
-                    }
-                });
-            }
-
-            final List<Callable<Object>> commandPostingJobs = builder.build();
-            executorService.invokeAll(commandPostingJobs);
-
-            Thread.sleep(dispatchWaitTime);
-
-            verifyStats(messageCount, numberOfShards);
-
-            repository.close();
-            boundedContext.close();
-        }
-
-        private void verifyStats(int totalMessages, int numberOfShards) {
-            final Map<Long, Collection<I>> whoProcessedWhat = getStats().getThreadToId()
-                                                                        .asMap();
-            final Collection<I> actualIds = newHashSet(getStats().getThreadToId()
-                                                                 .values());
-            final Set<Long> actualThreads = whoProcessedWhat.keySet();
-
-            assertEquals(numberOfShards, actualThreads.size());
-            assertEquals(totalMessages, actualIds.size());
-        }
-    }
-
-    /**
-     * The statistics of threads, in which the entity has been processed.
-     *
-     * <p>Required in order to verify the sharding configuration.
-     *
-     * @param <I> the type of entity identifiers
-     */
-    public static class ThreadStats<I extends Message> {
-
-        private final Multimap<Long, I> threadToId =
-                Multimaps.synchronizedMultimap(HashMultimap.<Long, I>create());
-
-        public void recordCallingThread(I id) {
-            final long currentThreadId = Thread.currentThread()
-                                               .getId();
-            threadToId.put(currentThreadId, id);
-        }
-
-        public Multimap<Long, I> getThreadToId() {
-            return Multimaps.unmodifiableMultimap(threadToId);
-        }
-
-        public void clear() {
-            threadToId.clear();
-        }
     }
 
     /**

@@ -25,7 +25,7 @@ import io.spine.core.Subscribe;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.delivery.ShardingStrategy;
 import io.spine.server.delivery.UniformAcrossTargets;
-import io.spine.server.delivery.given.MessageDeliveryTestEnv.ThreadStats;
+import io.spine.server.delivery.given.ThreadStats;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.test.projection.Project;

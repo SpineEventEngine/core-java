@@ -35,7 +35,7 @@ import io.spine.server.command.Assign;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.delivery.ShardingStrategy;
 import io.spine.server.delivery.UniformAcrossTargets;
-import io.spine.server.delivery.given.MessageDeliveryTestEnv.ThreadStats;
+import io.spine.server.delivery.given.ThreadStats;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.server.route.RejectionRoute;
