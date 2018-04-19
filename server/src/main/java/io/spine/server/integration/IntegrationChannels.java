@@ -42,7 +42,8 @@ class IntegrationChannels {
     /**
      * Prevents the creation of the class instances.
      */
-    private IntegrationChannels() {}
+    private IntegrationChannels() {
+    }
 
     /**
      * Creates a channel ID for a channel, serving to exchange the
