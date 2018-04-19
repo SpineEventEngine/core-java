@@ -59,6 +59,10 @@ public final class DeliveryTag<E extends MessageEnvelope<?, ?, ?>> {
         this.envelopeType = envelopeType;
     }
 
+    public BoundedContextName getBoundedContextName() {
+        return boundedContextName;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

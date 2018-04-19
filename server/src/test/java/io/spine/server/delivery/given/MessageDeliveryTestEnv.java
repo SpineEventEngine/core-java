@@ -24,7 +24,6 @@ import com.google.common.collect.Lists;
 import com.google.protobuf.StringValue;
 import io.spine.core.BoundedContextName;
 import io.spine.core.React;
-import io.spine.server.BoundedContext;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateClass;
@@ -47,6 +46,8 @@ import io.spine.test.aggregate.event.AggProjectPaused;
 import io.spine.test.aggregate.event.AggProjectStarted;
 import io.spine.test.aggregate.rejection.AggCannotReassignUnassignedTask;
 import io.spine.validate.StringValueVBuilder;
+
+import static io.spine.server.BoundedContext.newName;
 
 /**
  * An abstract base for environments, which are created to ease the message delivery testing.
@@ -128,7 +129,7 @@ public class MessageDeliveryTestEnv {
          */
         @Override
         public BoundedContextName getBoundedContextName() {
-            return BoundedContext.newName("Delivery tests");
+            return newName("Delivery tests");
         }
     }
 
@@ -148,7 +149,7 @@ public class MessageDeliveryTestEnv {
 
         @Override
         public BoundedContextName getBoundedContextName() {
-            return BoundedContext.newName("EmptyShardables");
+            return newName("EmptyShardables");
         }
 
         @Override
@@ -159,4 +160,5 @@ public class MessageDeliveryTestEnv {
             return result;
         }
     }
+
 }

@@ -179,12 +179,13 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
         final ShardedStream<?, ?, ?> that = (ShardedStream<?, ?, ?>) o;
         return Objects.equals(boundedContextName, that.boundedContextName) &&
                 Objects.equals(key, that.key) &&
-                Objects.equals(tag, that.tag);
+                Objects.equals(tag, that.tag) &&
+                Objects.equals(targetIdClass, that.targetIdClass);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(boundedContextName, key, tag);
+        return Objects.hash(boundedContextName, key, tag, targetIdClass);
     }
 
     @Override
@@ -402,10 +403,18 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
             return thisAsB();
         }
 
+        public Class<I> getTargetIdClass() {
+            return targetIdClass;
+        }
+
         public B setConsumer(ShardedStreamConsumer<I, E> consumer) {
             checkNotNull(consumer);
             this.consumer = consumer;
             return thisAsB();
+        }
+
+        public ShardedStreamConsumer<I, E> getConsumer() {
+            return consumer;
         }
 
         @SuppressWarnings("unchecked")
