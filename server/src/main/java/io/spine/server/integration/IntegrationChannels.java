@@ -50,7 +50,7 @@ class IntegrationChannels {
      * {@linkplain io.spine.core.Subscribe#external() external messages} of a specified class.
      *
      * @param messageCls the class of external messages, that will be exchanged via the channel,
-     *                    which ID is being created
+     *                   which ID is being created
      * @return the newly created channel ID
      */
     static ChannelId toId(ExternalMessageClass messageCls) {
