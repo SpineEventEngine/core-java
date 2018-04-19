@@ -78,8 +78,7 @@ final class ShardingRegistry {
         private final ShardingStrategy strategy;
         private final ShardedStream<?, ?, ?> stream;
 
-        private Entry(ShardingStrategy strategy,
-                      ShardedStream<?, ?, ?> stream) {
+        private Entry(ShardingStrategy strategy, ShardedStream<?, ?, ?> stream) {
             this.strategy = strategy;
             this.stream = stream;
         }
