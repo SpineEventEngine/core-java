@@ -20,17 +20,25 @@
 package io.spine.server.delivery.given;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 import com.google.protobuf.StringValue;
 import io.spine.core.BoundedContextName;
 import io.spine.core.React;
 import io.spine.server.BoundedContext;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.aggregate.Aggregate;
+import io.spine.server.aggregate.AggregateClass;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.delivery.InProcessSharding;
+import io.spine.server.delivery.Shardable;
+import io.spine.server.delivery.ShardedStreamConsumer;
 import io.spine.server.delivery.Sharding;
+import io.spine.server.delivery.ShardingStrategy;
+import io.spine.server.delivery.UniformAcrossTargets;
+import io.spine.server.entity.EntityClass;
+import io.spine.server.model.Model;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggStartProject;
@@ -121,6 +129,34 @@ public class MessageDeliveryTestEnv {
         @Override
         public BoundedContextName getBoundedContextName() {
             return BoundedContext.newName("Delivery tests");
+        }
+    }
+
+    /**
+     * A shardable which declares no message consumers.
+     */
+    public static class EmptyShardable implements Shardable {
+        @Override
+        public ShardingStrategy getShardingStrategy() {
+            return UniformAcrossTargets.singleShard();
+        }
+
+        @Override
+        public Iterable<ShardedStreamConsumer<?, ?>> getMessageConsumers() {
+            return Lists.newArrayList();
+        }
+
+        @Override
+        public BoundedContextName getBoundedContextName() {
+            return BoundedContext.newName("EmptyShardables");
+        }
+
+        @Override
+        public EntityClass getShardedModelClass() {
+            final Class<DeliveryEqualityProject> someAggregate = DeliveryEqualityProject.class;
+            final AggregateClass<?> result = Model.getInstance()
+                                                  .asAggregateClass(someAggregate);
+            return result;
         }
     }
 }

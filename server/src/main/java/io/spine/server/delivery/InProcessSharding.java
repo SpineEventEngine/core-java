@@ -30,6 +30,7 @@ import javax.annotation.Nullable;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
  * An implementation of the sharding service, that manages all the data in-memory and runs only
@@ -62,7 +63,8 @@ public class InProcessSharding implements Sharding {
         final Iterable<ShardedStreamConsumer<?, ?>> consumers = shardable.getMessageConsumers();
         if (!consumers.iterator()
                       .hasNext()) {
-            return;
+            throw newIllegalArgumentException("Cannot register the shardable with no consumers: %s",
+                                              shardable);
         }
         final BoundedContextName bcName = shardable.getBoundedContextName();
         final Set<ShardingKey> keys = obtainKeys(shardable);
