@@ -59,9 +59,7 @@ public class ProjectionEventDeliveryShould {
     }
 
     @Test
-    public void dispatch_events_to_single_shard_in_multithreaded_env() throws
-                                                                       Exception {
-
+    public void dispatch_events_to_single_shard_in_multithreaded_env() throws Exception {
         final ParallelDispatcher<ProjectId, Event> dispatcher =
                 new ParallelDispatcher<ProjectId, Event>(
                         180, 819, dispatchWaitTime()) {
@@ -86,9 +84,7 @@ public class ProjectionEventDeliveryShould {
     }
 
     @Test
-    public void dispatch_events_to_multiple_shard_in_multithreaded_env() throws
-                                                                         Exception {
-
+    public void dispatch_events_to_multiple_shard_in_multithreaded_env() throws Exception {
         final ParallelDispatcher<ProjectId, Event> dispatcher =
                 new ParallelDispatcher<ProjectId, Event>(
                         270, 1637, dispatchWaitTime()) {

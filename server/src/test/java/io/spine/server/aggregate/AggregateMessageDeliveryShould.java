@@ -63,8 +63,7 @@ public class AggregateMessageDeliveryShould {
     }
 
     @Test
-    public void dispatch_commands_to_single_shard_in_multithreaded_env() throws
-                                                                         Exception {
+    public void dispatch_commands_to_single_shard_in_multithreaded_env() throws Exception {
         final ParallelDispatcher<ProjectId, Command> dispatcher =
                 new ParallelDispatcher<ProjectId, Command>(
                         42, 400, dispatchWaitTime()) {
@@ -89,8 +88,7 @@ public class AggregateMessageDeliveryShould {
     }
 
     @Test
-    public void dispatch_events_to_single_shard_in_multithreaded_env() throws
-                                                                       Exception {
+    public void dispatch_events_to_single_shard_in_multithreaded_env() throws Exception {
         final ParallelDispatcher<ProjectId, Event> dispatcher =
                 new ParallelDispatcher<ProjectId, Event>(
                         130, 500, dispatchWaitTime()) {
@@ -115,8 +113,7 @@ public class AggregateMessageDeliveryShould {
     }
 
     @Test
-    public void dispatch_rejections_to_single_shard_in_multithreaded_env() throws
-                                                                           Exception {
+    public void dispatch_rejections_to_single_shard_in_multithreaded_env() throws Exception {
         final ParallelDispatcher<ProjectId, Rejection> dispatcher =
                 new ParallelDispatcher<ProjectId, Rejection>(
                         36, 12, dispatchWaitTime()) {
@@ -141,8 +138,7 @@ public class AggregateMessageDeliveryShould {
     }
 
     @Test
-    public void dispatch_commands_to_several_shard_in_multithreaded_env() throws
-                                                                          Exception {
+    public void dispatch_commands_to_several_shard_in_multithreaded_env() throws Exception {
         final ParallelDispatcher<ProjectId, Command> dispatcher =
                 new ParallelDispatcher<ProjectId, Command>(
                         23, 423, dispatchWaitTime()) {
@@ -166,8 +162,7 @@ public class AggregateMessageDeliveryShould {
     }
 
     @Test
-    public void dispatch_events_to_several_shards_in_multithreaded_env() throws
-                                                                         Exception {
+    public void dispatch_events_to_several_shards_in_multithreaded_env() throws Exception {
         final ParallelDispatcher<ProjectId, Event> dispatcher =
                 new ParallelDispatcher<ProjectId, Event>(
                         190, 900, dispatchWaitTime()) {
@@ -192,8 +187,7 @@ public class AggregateMessageDeliveryShould {
     }
 
     @Test
-    public void dispatch_rejections_to_several_shards_in_multithreaded_env() throws
-                                                                             Exception {
+    public void dispatch_rejections_to_several_shards_in_multithreaded_env() throws Exception {
         final ParallelDispatcher<ProjectId, Rejection> dispatcher =
                 new ParallelDispatcher<ProjectId, Rejection>(
                         40, 603, dispatchWaitTime()) {
