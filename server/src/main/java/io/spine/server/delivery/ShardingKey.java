@@ -68,7 +68,6 @@ public class ShardingKey implements Serializable {
 
     @Override
     public int hashCode() {
-
         return Objects.hash(entityClass, index);
     }
 
