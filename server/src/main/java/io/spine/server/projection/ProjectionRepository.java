@@ -312,7 +312,9 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
 
     @Override
     public void close() {
-        ServerEnvironment.getInstance().getSharding().unregister(this);
+        ServerEnvironment.getInstance()
+                         .getSharding()
+                         .unregister(this);
         super.close();
     }
 
