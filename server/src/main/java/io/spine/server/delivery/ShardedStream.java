@@ -225,8 +225,8 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
         @Override
         public void onError(Throwable t) {
             throw newIllegalStateException(t,
-                                           "Error observing the external messages for consumer " +
-                                                   "with tag %s.", delegate.getTag());
+                                           "Error observing the messages for consumer with tag %s.",
+                                           delegate.getTag());
         }
 
         @Override
