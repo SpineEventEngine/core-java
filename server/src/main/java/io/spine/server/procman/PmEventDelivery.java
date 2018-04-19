@@ -31,16 +31,23 @@ import io.spine.server.delivery.EventShardedStream;
  * @author Alex Tymchenko
  */
 public class PmEventDelivery<I, P extends ProcessManager<I, ?, ?>>
-        extends PmDelivery<I, P, EventEnvelope,
-                                           EventShardedStream<I>, EventShardedStream.Builder<I>> {
+        extends PmDelivery<I,
+                           P,
+                           EventEnvelope,
+                           EventShardedStream<I>,
+                           EventShardedStream.Builder<I>> {
 
     protected PmEventDelivery(ProcessManagerRepository<I, P, ?> repository) {
         super(new PmEventConsumer<>(repository));
     }
 
     private static class PmEventConsumer<I, P extends ProcessManager<I, ?, ?>>
-            extends PmMessageConsumer<I, P, EventEnvelope, EventShardedStream<I>,
-            EventShardedStream.Builder<I>> {
+            extends PmMessageConsumer<I,
+                                      P,
+                                      EventEnvelope,
+                                      EventShardedStream<I>,
+                                      EventShardedStream.Builder<I>> {
+
         protected PmEventConsumer(ProcessManagerRepository<I, P, ?> repository) {
             super(DeliveryTag.forEventsOf(repository), repository);
         }
