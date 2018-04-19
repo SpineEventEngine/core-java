@@ -19,15 +19,38 @@
  */
 package io.spine.server.delivery;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 
 import java.util.Objects;
 import java.util.Set;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.Math.abs;
 
 /**
+ * The strategy of splitting the entities into a number of shards uniformly.
+ *
+ * <p>Uses a hash code of the entity identifier and the remainder of its division by the total
+ * number of shards to determine a shard index. E.g.
+ *
+ * <pre>
+ *     {@code
+ *
+ *     final UserAggregate entity = ...
+ *
+ *     final int hashValue =  entity.getId().hashCode();
+ *     final int numberOfShards = 4;
+ *
+ *      // possible values are 0, 1, 2, and 3.
+ *     final int shardIndexValue = Math.abs(hashValue % numberOfShards);
+ *     final ShardIndex shardIndex = newIndex(shardIndexValue);
+ *     }
+ * </pre>
+ *
+ *  <p>Such an approach isn't truly uniform — as long as the ID nature may be very specific,
+ *  making the {@code hashCode()} value distribution uneven. However, it's a good enough choice
+ *  in a general case
+ *
  * @author Alex Tymchenko
  */
 public class UniformAcrossTargets implements ShardingStrategy {
@@ -36,16 +59,27 @@ public class UniformAcrossTargets implements ShardingStrategy {
 
     private final int numberOfShards;
 
+    /**
+     * Creates an instance of this strategy.
+     *
+     * @param numberOfShards a number of shards; must be greater than zero
+     */
     private UniformAcrossTargets(int numberOfShards) {
-        Preconditions.checkArgument(numberOfShards > 0, "Number of shards must be positive");
+        checkArgument(numberOfShards > 0, "Number of shards must be positive");
         this.numberOfShards = numberOfShards;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int getNumberOfShards() {
         return numberOfShards;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ShardIndex indexForTarget(Object targetId) {
         final int hashValue = targetId.hashCode();
@@ -56,6 +90,9 @@ public class UniformAcrossTargets implements ShardingStrategy {
         return result;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Set<ShardIndex> allIndexes() {
         final ImmutableSet.Builder<ShardIndex> resultBuilder = ImmutableSet.builder();
@@ -89,10 +126,22 @@ public class UniformAcrossTargets implements ShardingStrategy {
         private final UniformAcrossTargets strategy = new UniformAcrossTargets(1);
     }
 
+    /**
+     * Returns a pre-defined strategy instance, which defines a single shard and puts all
+     * the targets into it.
+     *
+     * @return a strategy that puts all entities in a single shard
+     */
     public static ShardingStrategy singleShard() {
         return SingleShard.INSTANCE.strategy;
     }
 
+    /**
+     * Creates a strategy of uniform target distribution across shards, for a given shard number.
+     *
+     * @param totalShards a number of shards
+     * @return a uniform distribution strategy instance for a given shard number
+     */
     public static ShardingStrategy forNumber(int totalShards) {
         final UniformAcrossTargets result = new UniformAcrossTargets(totalShards);
         return result;
