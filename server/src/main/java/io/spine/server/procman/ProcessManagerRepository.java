@@ -105,8 +105,8 @@ public abstract class ProcessManagerRepository<I,
             memoize(new Supplier<PmEventDelivery<I, P>>() {
                 @Override
                 public PmEventDelivery<I, P> get() {
-                    final PmEventDelivery<I, P> result
-                            = new PmEventDelivery<>(ProcessManagerRepository.this);
+                    final PmEventDelivery<I, P> result =
+                            new PmEventDelivery<>(ProcessManagerRepository.this);
                     return result;
                 }
             });
