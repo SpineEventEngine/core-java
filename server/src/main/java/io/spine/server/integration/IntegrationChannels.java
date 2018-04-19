@@ -39,6 +39,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 class IntegrationChannels {
 
+    private static final TypeUrl REJECTION_TYPE_URL = TypeUrl.of(Rejection.class);
+    private static final TypeUrl EVENT_TYPE_URL = TypeUrl.of(Event.class);
+
     /**
      * Prevents the creation of the class instances.
      */
@@ -98,8 +101,8 @@ class IntegrationChannels {
         final TypeUrl typeUrl = TypeUrl.parse(rawValue.getValue());
 
         final boolean isRejection = Rejections.isRejection(typeUrl.getJavaClass());
-        final String wrapperTypeUrl = isRejection ? TypeUrl.of(Rejection.class).value()
-                                                  : TypeUrl.of(Event.class).value();
+        final String wrapperTypeUrl = isRejection ? REJECTION_TYPE_URL.value()
+                                                  : EVENT_TYPE_URL.value();
         final ExternalMessageType result = ExternalMessageType.newBuilder()
                                                              .setMessageTypeUrl(typeUrl.value())
                                                              .setWrapperTypeUrl(wrapperTypeUrl)

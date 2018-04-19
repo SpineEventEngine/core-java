@@ -26,9 +26,6 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.core.Ack;
 import io.spine.core.BoundedContextName;
-import io.spine.core.Event;
-import io.spine.core.Rejection;
-import io.spine.core.Rejections;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.bus.Bus;
 import io.spine.server.bus.BusFilter;
@@ -44,8 +41,6 @@ import io.spine.server.transport.Subscriber;
 import io.spine.server.transport.SubscriberHub;
 import io.spine.server.transport.TransportFactory;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
-import io.spine.type.KnownTypes;
-import io.spine.type.TypeUrl;
 import io.spine.validate.Validate;
 
 import javax.annotation.Nullable;
@@ -313,17 +308,6 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
                                                                     boundedContextName);
         publisherHub.get(CONFIG_EXCHANGE_CHANNEL_ID)
                     .publish(pack(newUuid()), externalMessage);
-    }
-
-    private static ExternalMessageType toExternalMessageType(ExternalMessageClass messageClass) {
-        final TypeUrl typeUrl = KnownTypes.getTypeUrl(messageClass.getClassName());
-        final boolean isRejection = Rejections.isRejection(messageClass.value());
-        final String wrapperTypeUrl = isRejection ? TypeUrl.of(Rejection.class).value()
-                                                  : TypeUrl.of(Event.class).value();
-        return ExternalMessageType.newBuilder()
-                                                            .setMessageTypeUrl(typeUrl.value())
-                                                            .setWrapperTypeUrl(wrapperTypeUrl)
-                                                            .build();
     }
 
     /**
