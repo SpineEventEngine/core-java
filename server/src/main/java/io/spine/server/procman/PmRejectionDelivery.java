@@ -31,16 +31,23 @@ import io.spine.server.delivery.RejectionShardedStream;
  * @author Alex Tymchenko
  */
 public class PmRejectionDelivery<I, P extends ProcessManager<I, ?, ?>>
-        extends PmDelivery<I, P, RejectionEnvelope,
-                                           RejectionShardedStream<I>, RejectionShardedStream.Builder<I>> {
+        extends PmDelivery<I,
+                           P,
+                           RejectionEnvelope,
+                           RejectionShardedStream<I>,
+                           RejectionShardedStream.Builder<I>> {
 
     protected PmRejectionDelivery(ProcessManagerRepository<I, P, ?> repository) {
         super(new PmRejectionConsumer<>(repository));
     }
 
     private static class PmRejectionConsumer<I, P extends ProcessManager<I, ?, ?>>
-            extends PmMessageConsumer<I, P, RejectionEnvelope, RejectionShardedStream<I>,
-            RejectionShardedStream.Builder<I>> {
+            extends PmMessageConsumer<I,
+                                      P,
+                                      RejectionEnvelope,
+                                      RejectionShardedStream<I>,
+                                      RejectionShardedStream.Builder<I>> {
+
         protected PmRejectionConsumer(ProcessManagerRepository<I, P, ?> repository) {
             super(DeliveryTag.forRejectionsOf(repository), repository);
         }
