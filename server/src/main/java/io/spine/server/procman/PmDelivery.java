@@ -40,21 +40,23 @@ import io.spine.server.entity.Repository;
  */
 @SPI
 public abstract class PmDelivery<I,
-                        P extends ProcessManager<I, ?, ?>,
-                        M extends ActorMessageEnvelope<?, ?, ?>,
-                        S extends ShardedStream<I, ?, M>,
-                        B extends ShardedStream.AbstractBuilder<I, M, B, S>>
+                                 P extends ProcessManager<I, ?, ?>,
+                                 M extends ActorMessageEnvelope<?, ?, ?>,
+                                 S extends ShardedStream<I, ?, M>,
+                                 B extends ShardedStream.AbstractBuilder<I, M, B, S>>
         extends Delivery<I, P, M, S, B> {
 
     protected PmDelivery(PmMessageConsumer<I, P, M, S, B> consumer) {
         super(consumer);
     }
 
-    protected abstract static class PmMessageConsumer<I,
-            P extends ProcessManager<I, ?, ?>,
-            M extends ActorMessageEnvelope<?, ?, ?>,
-            S extends ShardedStream<I, ?, M>,
-            B extends ShardedStream.AbstractBuilder<I, M, B, S>> extends Consumer<I, P, M, S, B> {
+    protected abstract static
+    class PmMessageConsumer<I,
+                            P extends ProcessManager<I, ?, ?>,
+                            M extends ActorMessageEnvelope<?, ?, ?>,
+                            S extends ShardedStream<I, ?, M>,
+                            B extends ShardedStream.AbstractBuilder<I, M, B, S>>
+            extends Consumer<I, P, M, S, B> {
 
         protected PmMessageConsumer(DeliveryTag<M> tag, Repository<I, P> repository) {
             super(tag, repository);
