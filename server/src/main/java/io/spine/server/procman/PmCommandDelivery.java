@@ -31,16 +31,23 @@ import io.spine.server.delivery.DeliveryTag;
  * @author Alex Tymchenko
  */
 public class PmCommandDelivery<I, P extends ProcessManager<I, ?, ?>>
-        extends PmDelivery<I, P, CommandEnvelope,
-                                           CommandShardedStream<I>, CommandShardedStream.Builder<I>> {
+        extends PmDelivery<I,
+                           P,
+                           CommandEnvelope,
+                           CommandShardedStream<I>,
+                           CommandShardedStream.Builder<I>> {
 
     protected PmCommandDelivery(ProcessManagerRepository<I, P, ?> repository) {
         super(new PmCommandConsumer<>(repository));
     }
 
     private static class PmCommandConsumer<I, P extends ProcessManager<I, ?, ?>>
-            extends PmMessageConsumer<I, P, CommandEnvelope, CommandShardedStream<I>,
-            CommandShardedStream.Builder<I>> {
+            extends PmMessageConsumer<I,
+                                      P,
+                                      CommandEnvelope,
+                                      CommandShardedStream<I>,
+                                      CommandShardedStream.Builder<I>> {
+
         protected PmCommandConsumer(ProcessManagerRepository<I, P, ?> repository) {
             super(DeliveryTag.forCommandsOf(repository), repository);
         }
