@@ -141,9 +141,11 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
 
     @SuppressWarnings("ConstantConditions")     // `TransportFactory` has already been initialized.
     private IntegrationBus(Builder builder) {
+        final TransportFactory transportFactory = builder.getTransportFactory()
+                                                         .get();
         this.boundedContextName = builder.boundedContextName;
-        this.subscriberHub = new SubscriberHub(builder.getTransportFactory().get());
-        this.publisherHub = new PublisherHub(builder.getTransportFactory().get());
+        this.subscriberHub = new SubscriberHub(transportFactory);
+        this.publisherHub = new PublisherHub(transportFactory);
         this.localBusAdapters = createAdapters(builder, publisherHub);
         configurationChangeObserver = observeConfigurationChanges();
         subscriberHub.get(CONFIG_EXCHANGE_CHANNEL_ID)
