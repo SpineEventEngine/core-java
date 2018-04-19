@@ -38,16 +38,23 @@ import io.spine.server.delivery.EventShardedStream;
  */
 @SPI
 public class ProjectionEventDelivery<I, P extends Projection<I, ?, ?>>
-        extends Delivery<I, P, EventEnvelope,
-                         EventShardedStream<I>, EventShardedStream.Builder<I>> {
+        extends Delivery<I,
+                         P,
+                         EventEnvelope,
+                         EventShardedStream<I>,
+                         EventShardedStream.Builder<I>> {
 
     protected ProjectionEventDelivery(ProjectionRepository<I, P, ?> repository) {
         super(new ProjectionEventConsumer<I, P>(repository));
     }
 
     private static class ProjectionEventConsumer<I, P extends Projection<I, ?, ?>>
-            extends Consumer<I, P, EventEnvelope,
-            EventShardedStream<I>, EventShardedStream.Builder<I>> {
+            extends Consumer<I,
+                             P,
+                             EventEnvelope,
+                             EventShardedStream<I>,
+                             EventShardedStream.Builder<I>> {
+
         protected ProjectionEventConsumer(ProjectionRepository<I, P, ?> repository) {
             super(DeliveryTag.forEventsOf(repository), repository);
         }
