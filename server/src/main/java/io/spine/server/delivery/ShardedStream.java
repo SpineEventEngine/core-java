@@ -94,7 +94,7 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
         this.tag = builder.tag;
         this.targetIdClass = builder.targetIdClass;
         final Class<E> envelopeCls = getEnvelopeClass();
-        final ChannelId channelId = toChannelId(builder.boundedContextName, key, envelopeCls);
+        final ChannelId channelId = ChannelIds.toChannelId(builder.boundedContextName, key, envelopeCls);
         this.subscriber = builder.transportFactory.createSubscriber(channelId);
         this.publisher = builder.transportFactory.createPublisher(channelId);
 
@@ -166,32 +166,6 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
         if (channelObserver != null) {
             subscriber.removeObserver(channelObserver);
         }
-    }
-
-    private static <E extends MessageEnvelope<?, ?, ?>>
-    ChannelId toChannelId(BoundedContextName boundedContextName,
-                          ShardingKey key,
-                          Class<E> envelopeClass) {
-        checkNotNull(key);
-        checkNotNull(boundedContextName);
-        checkNotNull(envelopeClass);
-
-        final ClassName className = key.getEntityClass()
-                                       .getClassName();
-        final ShardIndex shardIndex = key.getIndex();
-
-        final String value = on("__").join("bc_", boundedContextName.getValue(),
-                                           "target_", className,
-                                           "prd_", Stringifiers.toString(shardIndex),
-                                           "env_", envelopeClass);
-        final StringValue asMsg = StringValue.newBuilder()
-                                             .setValue(value)
-                                             .build();
-        final Any asAny = AnyPacker.pack(asMsg);
-        final ChannelId result = ChannelId.newBuilder()
-                                          .setIdentifier(asAny)
-                                          .build();
-        return result;
     }
 
     @Override
@@ -294,6 +268,77 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
         @Override
         public Class<?> getArgumentIn(Class<? extends ShardedStream> cls) {
             return Default.getArgument(this, cls);
+        }
+    }
+
+    /**
+     * An internal utility aimed for working with {@linkplain ChannelId channel identifiers}.
+     */
+    private static class ChannelIds {
+
+        /**
+         * Prevents the instantiation of this utility class.
+         */
+        private ChannelIds() {
+        }
+
+        private static <E extends MessageEnvelope<?, ?, ?>>
+        StringValue asChannelName(BoundedContextName bcName,
+                                  Class<E> envelopeClass,
+                                  ClassName className,
+                                  ShardIndex shardIndex) {
+            final String value = on("__").join(Prefix.BOUNDED_CONTEXT, bcName.getValue(),
+                                               Prefix.TARGET_CLASS, className,
+                                               Prefix.SHARD_INDEX,
+                                               Stringifiers.toString(shardIndex),
+                                               Prefix.ENVELOPE_CLASS, envelopeClass);
+            final StringValue result = StringValue.newBuilder()
+                                                  .setValue(value)
+                                                  .build();
+            return result;
+        }
+
+        private static <E extends MessageEnvelope<?, ?, ?>>
+        ChannelId toChannelId(BoundedContextName boundedContextName,
+                              ShardingKey key,
+                              Class<E> envelopeClass) {
+            checkNotNull(key);
+            checkNotNull(boundedContextName);
+            checkNotNull(envelopeClass);
+
+            final ClassName className = key.getEntityClass()
+                                           .getClassName();
+            final ShardIndex shardIndex = key.getIndex();
+
+            final StringValue asMsg = asChannelName(boundedContextName, envelopeClass, className,
+                                                    shardIndex);
+            final Any asAny = AnyPacker.pack(asMsg);
+            final ChannelId result = ChannelId.newBuilder()
+                                              .setIdentifier(asAny)
+                                              .build();
+            return result;
+        }
+
+        /**
+         * Prefixes used for the channel name formatting.
+         */
+        enum Prefix {
+
+            BOUNDED_CONTEXT("bc_"),
+            TARGET_CLASS("target_"),
+            SHARD_INDEX("shardidx_"),
+            ENVELOPE_CLASS("env_");
+
+            private final String value;
+
+            Prefix(String value) {
+                this.value = value;
+            }
+
+            @Override
+            public String toString() {
+                return value;
+            }
         }
     }
 
