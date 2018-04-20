@@ -41,7 +41,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
@@ -110,33 +109,6 @@ public class EventBusBuilderShould extends BusBuilderShould<EventBus.Builder,
     public void require_set_EventStore_or_StorageFactory() {
         EventBus.newBuilder()
                 .build();
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_DispatcherEventDelivery() {
-        builder().setDispatcherEventDelivery(Tests.<DispatcherEventDelivery>nullRef());
-    }
-
-    @Test
-    public void return_set_DispatcherEventDelivery() {
-        // Create a custom event executor to differ from the default one.
-        final DispatcherEventDelivery delivery = new DispatcherEventDelivery() {
-            @Override
-            public boolean shouldPostponeDelivery(EventEnvelope event, EventDispatcher dispatcher) {
-                return true;
-            }
-        };
-        assertEquals(delivery, builder().setDispatcherEventDelivery(delivery)
-                                        .getDispatcherEventDelivery()
-                                        .get());
-    }
-
-    @Test
-    public void set_direct_DispatcherEventDelivery_if_not_set_explicitly() {
-        final DispatcherEventDelivery actualValue = builder().setStorageFactory(storageFactory)
-                                                             .build()
-                                                             .delivery();
-        assertTrue(actualValue instanceof DispatcherEventDelivery.DirectDelivery);
     }
 
     @Test

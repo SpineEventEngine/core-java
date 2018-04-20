@@ -55,8 +55,7 @@ class AggregateRejectionEndpoint<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
-    protected AggregateEndpointDelivery<I, A, RejectionEnvelope> getEndpointDelivery(
-            RejectionEnvelope envelope) {
+    protected AggregateDelivery<I, A, RejectionEnvelope, ?, ?> getEndpointDelivery() {
         return repository().getRejectionEndpointDelivery();
     }
 

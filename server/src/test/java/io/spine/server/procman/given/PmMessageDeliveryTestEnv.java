@@ -19,28 +19,26 @@
  */
 package io.spine.server.procman.given;
 
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.Identifier;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
 import io.spine.core.React;
 import io.spine.core.Rejection;
-import io.spine.core.RejectionEnvelope;
+import io.spine.core.RejectionContext;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv;
 import io.spine.server.command.Assign;
 import io.spine.server.command.TestEventFactory;
-import io.spine.server.procman.PmCommandDelivery;
-import io.spine.server.procman.PmEventDelivery;
-import io.spine.server.procman.PmRejectionDelivery;
+import io.spine.server.delivery.ShardingStrategy;
+import io.spine.server.delivery.UniformAcrossTargets;
+import io.spine.server.delivery.given.ThreadStats;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
-import io.spine.server.route.RejectionProducers;
+import io.spine.server.route.RejectionRoute;
 import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.command.PmCreateProject;
 import io.spine.test.procman.command.PmStartProject;
@@ -49,11 +47,9 @@ import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.rejection.Rejections.PmCannotStartArchivedProject;
 import io.spine.validate.StringValueVBuilder;
 
-import javax.annotation.Nullable;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
-import static com.google.common.collect.Maps.newHashMap;
 import static io.spine.core.Rejections.toRejection;
 import static java.util.Collections.emptyList;
 
@@ -62,8 +58,9 @@ import static java.util.Collections.emptyList;
  */
 public class PmMessageDeliveryTestEnv {
 
-    /** Prevents instantiation of this utility class. */
-    private PmMessageDeliveryTestEnv() {}
+    /** Prevents instantiation of this test environment class. */
+    private PmMessageDeliveryTestEnv() {
+    }
 
     public static Command createProject() {
         final ProjectId projectId = projectId();
@@ -118,174 +115,82 @@ public class PmMessageDeliveryTestEnv {
         return result;
     }
 
+    public static RejectionRoute<ProjectId, Message> routeByProjectId() {
+        return new RejectionRoute<ProjectId, Message>() {
+
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Set<ProjectId> apply(Message raw, RejectionContext context) {
+                final PmCannotStartArchivedProject msg = (PmCannotStartArchivedProject) raw;
+                return ImmutableSet.of(msg.getProjectId());
+            }
+        };
+    }
+
     /**
-     * A process manager class, which declares all kinds of dispatching methods and remembers
-     * the latest values submitted to each of them.
+     * A process manager class, which remembers the threads in which its handler methods
+     * were invoked.
+     *
+     * <p>Message handlers are invoked via reflection, so some of them are considered unused.
+     *
+     * <p>The handler method parameters are not used, as they aren't needed for tests.
+     * They are still present, as long as they are required according to the handler
+     * declaration rules.
      */
-    @SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod")
-    public static class ReactingProjectWizard
+    @SuppressWarnings("unused")
+    public static class DeliveryPm
             extends ProcessManager<ProjectId, StringValue, StringValueVBuilder> {
 
-        private static PmProjectStarted eventReceived = null;
-        private static PmCreateProject commandReceived = null;
-        private static PmCannotStartArchivedProject rejectionReceived = null;
+        private static final ThreadStats<ProjectId> stats = new ThreadStats<>();
 
-        protected ReactingProjectWizard(ProjectId id) {
+        protected DeliveryPm(ProjectId id) {
             super(id);
         }
 
-        @SuppressWarnings("unused")     // Accessed by the framework via reflection.
         @Assign
         PmProjectCreated on(PmCreateProject command) {
-            commandReceived = command;
-            getBuilder().setValue(command.getProjectId().getId());
+            stats.recordCallingThread(command.getProjectId());
             return PmProjectCreated.newBuilder()
                                    .setProjectId(command.getProjectId())
                                    .build();
         }
 
-        @SuppressWarnings("unused")     // Accessed by the framework via reflection.
         @React
         List<Message> on(PmProjectStarted event) {
-            eventReceived = event;
+            stats.recordCallingThread(getId());
             return emptyList();
         }
 
-        @SuppressWarnings("unused")     // Accessed by the framework via reflection.
         @React
         List<Message> on(PmCannotStartArchivedProject rejection) {
-            rejectionReceived = rejection;
+            stats.recordCallingThread(getId());
             return emptyList();
         }
 
-        @Nullable
-        public static PmCreateProject getCommandReceived() {
-            return commandReceived;
+        public static ThreadStats<ProjectId> getStats() {
+            return stats;
         }
+    }
 
-        @Nullable
-        public static PmProjectStarted getEventReceived() {
-            return eventReceived;
-        }
-
-        @Nullable
-        public static PmCannotStartArchivedProject getRejectionReceived() {
-            return rejectionReceived;
+    public static class SingleShardPmRepository
+            extends ProcessManagerRepository<ProjectId, DeliveryPm, StringValue> {
+        public SingleShardPmRepository() {
+            getRejectionRouting().replaceDefault(routeByProjectId());
         }
 
     }
 
-    /**
-     * A repository which overrides the delivery strategy for events, rejections and commands,
-     * postponing the delivery of each of these objects to process manager instances.
-     */
-    public static class PostponingRepository
-            extends ProcessManagerRepository<ProjectId, ReactingProjectWizard, StringValue> {
+    public static class QuadrupleShardPmRepository
+            extends ProcessManagerRepository<ProjectId, DeliveryPm, StringValue> {
 
-        private PostponingEventDelivery eventDelivery = null;
-        private PostponingRejectionDelivery rejectionDelivery = null;
-        private PostponingCommandDelivery commandDelivery = null;
-
-        public PostponingRepository() {
-            // Override the routing to use the first field; it's more obvious for tests.
-            getRejectionRouting().replaceDefault(
-                    RejectionProducers.<ProjectId>fromFirstMessageField());
+        public QuadrupleShardPmRepository() {
+            getRejectionRouting().replaceDefault(routeByProjectId());
         }
 
         @Override
-        public PostponingEventDelivery getEventEndpointDelivery() {
-            if (eventDelivery == null) {
-                eventDelivery = new PostponingEventDelivery(this);
-            }
-            return eventDelivery;
-        }
-
-        @Override
-        public PostponingRejectionDelivery getRejectionEndpointDelivery() {
-            if (rejectionDelivery == null) {
-                rejectionDelivery = new PostponingRejectionDelivery(this);
-            }
-            return rejectionDelivery;
-        }
-
-        @Override
-        public PostponingCommandDelivery getCommandEndpointDelivery() {
-            if (commandDelivery == null) {
-                commandDelivery = new PostponingCommandDelivery(this);
-            }
-            return commandDelivery;
-        }
-    }
-
-    /**
-     * Event delivery strategy which always postpones the delivery, but remembers the event
-     * along with the target entity ID.
-     */
-    public static class PostponingEventDelivery
-            extends PmEventDelivery<ProjectId, ReactingProjectWizard> {
-
-        private final Map<ProjectId, EventEnvelope> postponedEvents = newHashMap();
-
-        PostponingEventDelivery(PostponingRepository repo) {
-            super(repo);
-        }
-
-        @Override
-        public boolean shouldPostpone(ProjectId id, EventEnvelope envelope) {
-            postponedEvents.put(id, envelope);
-            return true;
-        }
-
-        public Map<ProjectId, EventEnvelope> getPostponedEvents() {
-            return ImmutableMap.copyOf(postponedEvents);
-        }
-    }
-
-    /**
-     * Rejection delivery strategy which always postpones the delivery, but remembers the rejection
-     * along with the target entity ID.
-     */
-    public static class PostponingRejectionDelivery
-            extends PmRejectionDelivery<ProjectId, ReactingProjectWizard> {
-
-        private final Map<ProjectId, RejectionEnvelope> postponedRejections = newHashMap();
-
-        PostponingRejectionDelivery(PostponingRepository repository) {
-            super(repository);
-        }
-
-        @Override
-        public boolean shouldPostpone(ProjectId id, RejectionEnvelope envelope) {
-            postponedRejections.put(id, envelope);
-            return true;
-        }
-
-        public Map<ProjectId, RejectionEnvelope> getPostponedRejections() {
-            return ImmutableMap.copyOf(postponedRejections);
-        }
-    }
-
-    /**
-     * Command delivery strategy which always postpones the delivery, but remembers the command
-     * along with the target entity ID.
-     */
-    public static class PostponingCommandDelivery
-            extends PmCommandDelivery<ProjectId, ReactingProjectWizard> {
-
-        private final Map<ProjectId, CommandEnvelope> postponedCommands = newHashMap();
-
-        PostponingCommandDelivery(PostponingRepository repository) {
-            super(repository);
-        }
-
-        @Override
-        public boolean shouldPostpone(ProjectId id, CommandEnvelope envelope) {
-            postponedCommands.put(id, envelope);
-            return true;
-        }
-
-        public Map<ProjectId, CommandEnvelope> getPostponedCommands() {
-            return ImmutableMap.copyOf(postponedCommands);
+        public ShardingStrategy getShardingStrategy() {
+            return UniformAcrossTargets.forNumber(4);
         }
     }
 }

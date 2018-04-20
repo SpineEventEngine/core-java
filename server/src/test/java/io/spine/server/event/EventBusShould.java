@@ -36,7 +36,6 @@ import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.commandbus.CommandBus;
-import io.spine.server.delivery.Consumers;
 import io.spine.server.event.given.EventBusTestEnv.GivenEvent;
 import io.spine.server.event.given.EventBusTestEnv.ProjectRepository;
 import io.spine.server.storage.StorageFactory;
@@ -54,13 +53,10 @@ import org.junit.Test;
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static com.google.common.collect.Maps.newHashMap;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.BoundedContext.newName;
@@ -90,9 +86,6 @@ import static org.mockito.Mockito.verify;
 public class EventBusShould {
 
     private EventBus eventBus;
-    private EventBus eventBusWithPosponedExecution;
-    private PostponedDispatcherEventDelivery postponedDispatcherDelivery;
-    private Executor delegateDispatcherExecutor;
     private CommandBus commandBus;
     private BoundedContext bc;
 
@@ -102,14 +95,6 @@ public class EventBusShould {
     }
 
     private void setUp(@Nullable EventEnricher enricher) {
-        /**
-         * Cannot use {@link com.google.common.util.concurrent.MoreExecutors#directExecutor()
-         * MoreExecutors.directExecutor()} because it's impossible to spy on {@code final} classes.
-         */
-        this.delegateDispatcherExecutor = spy(directExecutor());
-        this.postponedDispatcherDelivery =
-                new PostponedDispatcherEventDelivery(delegateDispatcherExecutor);
-
         final EventBus.Builder eventBusBuilder = eventBusBuilder(enricher);
 
         bc = BoundedContext.newBuilder()
@@ -122,37 +107,11 @@ public class EventBusShould {
 
         this.commandBus = bc.getCommandBus();
         this.eventBus = bc.getEventBus();
-
-        this.eventBusWithPosponedExecution =
-                buildEventBusWithPostponedExecution(enricher, bc.getStorageFactory());
     }
 
     @After
     public void tearDown() throws Exception {
         bc.close();
-    }
-
-    @SuppressWarnings("MethodMayBeStatic")   /* it cannot, as its result is used in {@code org.mockito.Mockito.spy() */
-    private Executor directExecutor() {
-        return new Executor() {
-            @Override
-            public void execute(Runnable command) {
-                command.run();
-            }
-        };
-    }
-
-    private EventBus buildEventBusWithPostponedExecution(@Nullable EventEnricher enricher,
-                                                         StorageFactory storageFactory) {
-        final EventBus.Builder busBuilder =
-                EventBus.newBuilder()
-                        .setStorageFactory(storageFactory)
-                        .setDispatcherEventDelivery(postponedDispatcherDelivery);
-
-        if (enricher != null) {
-            busBuilder.setEnricher(enricher);
-        }
-        return busBuilder.build();
     }
 
     private static EventBus.Builder eventBusBuilder(@Nullable EventEnricher enricher) {
@@ -261,68 +220,6 @@ public class EventBusShould {
     }
 
     @Test
-    public void return_direct_DispatcherDelivery_if_none_customized() {
-        final DispatcherEventDelivery actual = eventBus.delivery();
-        assertTrue(actual instanceof DispatcherEventDelivery.DirectDelivery);
-    }
-
-    @Test
-    public void not_call_dispatchers_if_dispatcher_event_execution_postponed() {
-        final BareDispatcher dispatcher = new BareDispatcher();
-
-        eventBusWithPosponedExecution.register(dispatcher);
-
-        final Event event = GivenEvent.projectCreated();
-        eventBusWithPosponedExecution.post(event);
-        assertFalse(dispatcher.isDispatchCalled());
-
-        final boolean eventPostponed = postponedDispatcherDelivery.isPostponed(event, dispatcher);
-        assertTrue(eventPostponed);
-    }
-
-    @Test
-    public void deliver_postponed_event_to_dispatcher_using_configured_executor() {
-        final BareDispatcher dispatcher = new BareDispatcher();
-
-        eventBusWithPosponedExecution.register(dispatcher);
-
-        final Event event = GivenEvent.projectCreated();
-        eventBusWithPosponedExecution.post(event);
-        final Set<EventEnvelope> postponedEvents = postponedDispatcherDelivery.getPostponedEvents();
-        final EventEnvelope postponedEvent = postponedEvents.iterator()
-                                                            .next();
-        verify(delegateDispatcherExecutor, never()).execute(any(Runnable.class));
-        postponedDispatcherDelivery.deliverNow(postponedEvent, Consumers.idOf(dispatcher));
-        assertTrue(dispatcher.isDispatchCalled());
-        verify(delegateDispatcherExecutor).execute(any(Runnable.class));
-    }
-
-    @Test
-    public void pick_proper_consumer_by_consumer_id_when_delivering_to_delegates_of_same_event() {
-        final FirstProjectCreatedDelegate first = new FirstProjectCreatedDelegate();
-        final AnotherProjectCreatedDelegate second = new AnotherProjectCreatedDelegate();
-
-        final DelegatingEventDispatcher<String> firstDispatcher =
-                DelegatingEventDispatcher.of(first);
-        final DelegatingEventDispatcher<String> secondDispatcher =
-                DelegatingEventDispatcher.of(second);
-
-        eventBusWithPosponedExecution.register(firstDispatcher);
-        eventBusWithPosponedExecution.register(secondDispatcher);
-
-        final Event event = GivenEvent.projectCreated();
-        eventBusWithPosponedExecution.post(event);
-        final Set<EventEnvelope> postponedEvents = postponedDispatcherDelivery.getPostponedEvents();
-        final EventEnvelope postponedEvent = postponedEvents.iterator()
-                                                            .next();
-        verify(delegateDispatcherExecutor, never()).execute(any(Runnable.class));
-        postponedDispatcherDelivery.deliverNow(postponedEvent, Consumers.idOf(firstDispatcher));
-        assertTrue(first.isDispatchCalled());
-        verify(delegateDispatcherExecutor).execute(any(Runnable.class));
-        assertFalse(second.isDispatchCalled());
-    }
-
-    @Test
     public void unregister_dispatchers() {
         final EventDispatcher dispatcherOne = new BareDispatcher();
         final EventDispatcher dispatcherTwo = new BareDispatcher();
@@ -367,6 +264,9 @@ public class EventBusShould {
                       .canBeEnriched(any(EventEnvelope.class));
         doReturn(event).when(enricher)
                        .enrich(any(EventEnvelope.class));
+
+        // Close the bounded context, which was previously initialized in `@Before`.
+        closeBoundedContext();
         setUp(enricher);
         eventBus.register(new ProjectCreatedSubscriber());
 
@@ -380,6 +280,9 @@ public class EventBusShould {
         final EventEnricher enricher = mock(EventEnricher.class);
         doReturn(false).when(enricher)
                        .canBeEnriched(any(EventEnvelope.class));
+
+        // Close the bounded context, which was previously initialized in `@Before`.
+        closeBoundedContext();
         setUp(enricher);
         eventBus.register(new ProjectCreatedSubscriber());
 
@@ -400,6 +303,7 @@ public class EventBusShould {
         final Command command = command(createProject());
         eventBus.register(new EBProjectCreatedNoOpSubscriber());
 
+        System.out.println("JUnit test: " + Thread.currentThread().getId());
         commandBus.post(command, StreamObservers.<Ack>noOpObserver());
 
         final List<Event> events = readEvents(eventBus);
@@ -648,97 +552,10 @@ public class EventBusShould {
         }
     }
 
-    private static class PostponedDispatcherEventDelivery extends DispatcherEventDelivery {
-
-        private final Map<EventEnvelope,
-                Class<? extends EventDispatcher>> postponedExecutions = newHashMap();
-
-        private PostponedDispatcherEventDelivery(Executor delegate) {
-            super(delegate);
-        }
-
-        @Override
-        public boolean shouldPostponeDelivery(EventEnvelope event, EventDispatcher consumer) {
-            postponedExecutions.put(event, consumer.getClass());
-            return true;
-        }
-
-        private boolean isPostponed(Event event, EventDispatcher dispatcher) {
-            final EventEnvelope envelope = EventEnvelope.of(event);
-            final Class<? extends EventDispatcher> actualClass = postponedExecutions.get(envelope);
-            final boolean eventPostponed = actualClass != null;
-            final boolean dispatcherMatches = eventPostponed && dispatcher.getClass()
-                                                                          .equals(actualClass);
-            return dispatcherMatches;
-        }
-
-        private Set<EventEnvelope> getPostponedEvents() {
-            final Set<EventEnvelope> envelopes = postponedExecutions.keySet();
-            return envelopes;
-        }
-    }
-
-    /**
-     * A delegate, dispatching {@link ProjectCreated} events.
-     */
-    private static class FirstProjectCreatedDelegate implements EventDispatcherDelegate<String> {
-        private boolean dispatchCalled = false;
-
-        @Override
-        public Set<EventClass> getEventClasses() {
-            return ImmutableSet.of(EventClass.of(ProjectCreated.class));
-        }
-
-        @Override
-        public Set<EventClass> getExternalEventClasses() {
-            return ImmutableSet.of();
-        }
-
-        @Override
-        public Set<String> dispatchEvent(EventEnvelope envelope) {
-            dispatchCalled = true;
-            return ImmutableSet.of(toString());
-        }
-
-        @Override
-        public void onError(EventEnvelope envelope, RuntimeException exception) {
-            // Do nothing.
-        }
-
-        private boolean isDispatchCalled() {
-            return dispatchCalled;
-        }
-    }
-
-    /**
-     * Another delegate, dispatching {@link ProjectCreated} events.
-     */
-    private static class AnotherProjectCreatedDelegate implements EventDispatcherDelegate<String> {
-        private boolean dispatchCalled = false;
-
-        @Override
-        public Set<EventClass> getEventClasses() {
-            return ImmutableSet.of(EventClass.of(ProjectCreated.class));
-        }
-
-        @Override
-        public Set<EventClass> getExternalEventClasses() {
-            return ImmutableSet.of();
-        }
-
-        @Override
-        public Set<String> dispatchEvent(EventEnvelope envelope) {
-            dispatchCalled = true;
-            return ImmutableSet.of(toString());
-        }
-
-        @Override
-        public void onError(EventEnvelope envelope, RuntimeException exception) {
-            // Do nothing.
-        }
-
-        private boolean isDispatchCalled() {
-            return dispatchCalled;
+    private void closeBoundedContext() {
+        try {
+            bc.close();
+        } catch (Exception ignored) {
         }
     }
 }

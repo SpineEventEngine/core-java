@@ -19,135 +19,51 @@
  */
 package io.spine.server.delivery;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
-import com.google.common.util.concurrent.MoreExecutors;
 import io.spine.annotation.Internal;
-import io.spine.core.MessageEnvelope;
-
-import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.concurrent.Executor;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+import io.spine.core.ActorMessageEnvelope;
+import io.spine.server.entity.Entity;
 
 /**
- * Base class for the strategies to deliver the packaged items to the specific consumers.
+ * A strategy on delivering the messages received from the respective bus futher through
+ * the entity repository down to to the instances of a certain entity type.
  *
- * <p>Operates with a pre-configured {@link Executor} to invoke the consumer methods.
+ * <p>The delivery process is split into {@linkplain Sender sending} and {@linkplain Consumer
+ * consuming}.
  *
- * <p>Allows to postpone the delivery of the items on per-item-per-consumer basis.
+ * <p>The way of sending and consuming the messages is a joint point for re-routing the messages
+ * so that the entity instances are only modified in a single computational node at any moment.
+ * Such a processing is based upon a
+ * {@linkplain Shardable#getShardingStrategy() sharding strategy},
+ * set for the destination repository.
  *
- * @param <D> the type of deliverable package
- * @param <C> the type of consumer
+ * @param <I> the ID type of entity, to which the messages are being delivered
+ * @param <E> the type of entity
+ * @param <M> the type of message envelope, which is used for message delivery
+ * @param <S> the type of the sharded stream that is used for the delivery
+ * @param <B> the type of the builder for the sharded stream
  * @author Alex Tymchenko
  */
 @Internal
-public abstract class Delivery<D extends MessageEnvelope, C> {
+public abstract class Delivery<I,
+                               E extends Entity<I, ?>,
+                               M extends ActorMessageEnvelope<?, ?, ?>,
+                               S extends ShardedStream<I, ?, M>,
+                               B extends ShardedStream.AbstractBuilder<I, M, B, S>> {
 
-    private final Executor delegate;
 
-    /**
-     * Creates a delivery strategy with a specified {@link Executor} used for the operation.
-     */
-    protected Delivery(Executor delegate) {
-        this.delegate = delegate;
+    private final Sender<I, M> sender;
+    private final Consumer<I, E, M, S, B> consumer;
+
+    protected Delivery(Consumer<I, E, M, S, B> consumer) {
+        this.consumer = consumer;
+        this.sender = new Sender<>(consumer.getTag());
     }
 
-    /**
-     * Creates an instance of a delivery with a
-     * {@link MoreExecutors#directExecutor() directExecutor()} used for the operation.
-     */
-    protected Delivery() {
-        this(MoreExecutors.directExecutor());
+    public Sender<I, M> getSender() {
+        return sender;
     }
 
-    /**
-     * Determines whether the item delivery should be postponed for
-     * the given {@code deliverable} and {@code consumer}.
-     *
-     * <p>This method must be implemented in descendants.
-     *
-     * @param deliverable the deliverable item which delivery may potentially be postponed
-     * @param consumer    the target consumer for the deliverable
-     * @return {@code true}, if the delivery should be postponed, {@code false} otherwise.
-     */
-    protected abstract boolean shouldPostponeDelivery(D deliverable, C consumer);
-
-    /**
-     * Defines what should be done to deliver a given {@code deliverable} to
-     * the {@code targetConsumer}.
-     *
-     * <p>Each {@code Delivery} implementation defines this behaviour depending on
-     * the type of the consumer.
-     *
-     * <p>The result is defined as {@link Runnable}, as this action will be executed by
-     * a delegate {@code Executor}, according to the strategy implementation regulated by
-     * {@link #shouldPostponeDelivery(MessageEnvelope, Object) shouldPostponeDelivery()} and
-     * {@link #deliverNow(MessageEnvelope, ConsumerId) deliverNow()} methods.
-     *
-     * @param consumer    the consumer to deliver the item to
-     * @param deliverable the item to be delivered
-     * @return the action on how to deliver the given item to the consumer.
-     */
-    protected abstract Runnable getDeliveryAction(C consumer, D deliverable);
-
-    /**
-     * Determines a collection of the consumers for the given {@code deliverable}.
-     *
-     * @param deliverable the item to deliver
-     * @return the collection of the consumers.
-     */
-    protected abstract Collection<C> consumersFor(D deliverable);
-
-    /**
-     * Passes the deliverable to the matching consumers using the {@code executor}
-     * configured for this instance of {@code Delivery}.
-     *
-     * <p>The delivery of the item to each of the consumers may be postponed according to
-     * {@link #shouldPostponeDelivery(MessageEnvelope, Object)} invocation result.
-     *
-     * @param deliverable the item to deliver
-     */
-    @Internal           // It is `public` as long as it is accessed from various framework packages.
-    public void deliver(D deliverable) {
-        final Collection<C> consumers = consumersFor(deliverable);
-        for (C consumer : consumers) {
-            final boolean shouldPostpone = shouldPostponeDelivery(deliverable, consumer);
-            if (!shouldPostpone) {
-                deliverNow(deliverable, Consumers.idOf(consumer));
-            }
-        }
-    }
-
-    /**
-     * Delivers the item immediately.
-     *
-     * @param deliverable   the item, packaged for the delivery
-     * @param consumerId the ID of the target consumer
-     */
-    @SuppressWarnings("WeakerAccess")       // Part of API.
-    public void deliverNow(final D deliverable, final ConsumerId consumerId) {
-        final Collection<C> consumers = consumersFor(deliverable);
-        final Iterable<C> matching = Iterables.filter(consumers, matches(consumerId));
-
-        for (final C targetConsumer : matching) {
-            final Runnable deliveryAction = getDeliveryAction(targetConsumer, deliverable);
-            execute(deliveryAction);
-        }
-    }
-
-    private void execute(Runnable command) {
-        delegate.execute(command);
-    }
-
-    private static <T> Predicate<T> matches(final ConsumerId consumerId) {
-        return new Predicate<T>() {
-            @Override
-            public boolean apply(@Nullable T consumer) {
-                checkNotNull(consumer);
-                return consumerId.equals(Consumers.idOf(consumer));
-            }
-        };
+    public Consumer<I, E, M, S, B> getConsumer() {
+        return consumer;
     }
 }

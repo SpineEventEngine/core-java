@@ -21,6 +21,7 @@
 package io.spine.server.entity.given;
 
 import com.google.protobuf.Any;
+import io.spine.core.BoundedContextName;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.entity.AbstractVersionableEntity;
@@ -33,10 +34,14 @@ import io.spine.test.entity.HiddenAggregateVBuilder;
 import io.spine.test.entity.SubscribableAggregate;
 import io.spine.test.entity.SubscribableAggregateVBuilder;
 
+import static io.spine.server.BoundedContext.newName;
+
 /**
  * @author Dmytro Grankin
  */
 public class VisibilityGuardTestEnv {
+
+    private static final BoundedContextName BOUNDED_CONTEXT_NAME = newName("Visibility Guards");
 
     private VisibilityGuardTestEnv() {
         // Prevent instantiation of this utility class.
@@ -53,6 +58,11 @@ public class VisibilityGuardTestEnv {
         public ExposedRepository() {
             super();
         }
+
+        @Override
+        public BoundedContextName getBoundedContextName() {
+            return BOUNDED_CONTEXT_NAME;
+        }
     }
 
     public static class Subscribable
@@ -66,6 +76,11 @@ public class VisibilityGuardTestEnv {
         public SubscribableRepository() {
             super();
         }
+
+        @Override
+        public BoundedContextName getBoundedContextName() {
+            return BOUNDED_CONTEXT_NAME;
+        }
     }
 
     public static class Hidden
@@ -78,6 +93,11 @@ public class VisibilityGuardTestEnv {
     public static class HiddenRepository extends AggregateRepository<String, Hidden> {
         public HiddenRepository() {
             super();
+        }
+
+        @Override
+        public BoundedContextName getBoundedContextName() {
+            return BOUNDED_CONTEXT_NAME;
         }
     }
 

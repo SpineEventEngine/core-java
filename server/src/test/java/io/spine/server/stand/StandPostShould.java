@@ -23,18 +23,13 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.StringValue;
 import io.netty.util.internal.ConcurrentSet;
 import io.spine.Identifier;
-import io.spine.base.Time;
 import io.spine.client.TestActorRequestFactory;
-import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Version;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.AggregateRepository;
-import io.spine.server.delivery.Consumers;
-import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.server.entity.EntityStateEnvelope;
-import io.spine.server.entity.VersionableEntity;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.storage.StorageFactory;
 import io.spine.test.projection.ProjectId;
@@ -51,14 +46,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.core.Versions.newVersion;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 /**
  * @author Alex Tymchenko
@@ -109,40 +100,6 @@ public class StandPostShould {
         verify(stand).update(ArgumentMatchers.argThat(argumentMatcher));
     }
 
-    @SuppressWarnings("MagicNumber")
-    @Test
-    public void use_delivery_from_builder() {
-        final StandUpdateDelivery delivery = spy(new StandUpdateDelivery() {
-            @Override
-            protected boolean shouldPostponeDelivery(EntityStateEnvelope deliverable,
-                                                     Stand consumer) {
-                return false;
-            }
-        });
-        final Stand.Builder builder = Stand.newBuilder()
-                                           .setDelivery(delivery);
-
-        final Stand stand = builder.build();
-        Assert.assertNotNull(stand);
-
-        final Object id = Identifier.newUuid();
-        final StringValue state = StringValue.getDefaultInstance();
-
-        final VersionableEntity entity = mock(AbstractVersionableEntity.class);
-        when(entity.getState()).thenReturn(state);
-        when(entity.getId()).thenReturn(id);
-        when(entity.getVersion()).thenReturn(newVersion(17, Time.getCurrentTime()));
-
-        final CommandContext context = requestFactory.createCommandContext();
-        stand.post(context.getActorContext()
-                          .getTenantId(), entity);
-
-        final EntityStateEnvelope envelope = EntityStateEnvelope.of(entity,
-                                                                    context.getActorContext()
-                                                                           .getTenantId());
-        verify(delivery).deliverNow(eq(envelope), eq(Consumers.idOf(stand)));
-    }
-
     // **** Integration scenarios (<source> -> StandFunnel -> Mock Stand) ****
 
     @Test
@@ -184,12 +141,10 @@ public class StandPostShould {
         final Executor executor = isConcurrent
                 ? Executors.newFixedThreadPool(Given.THREADS_COUNT_IN_POOL_EXECUTOR)
                 : MoreExecutors.directExecutor();
-        final StandUpdateDelivery delivery = spy(new SpyableStandUpdateDelivery(executor));
 
         final BoundedContext boundedContext =
                 BoundedContext.newBuilder()
-                              .setStand(Stand.newBuilder()
-                                             .setDelivery(delivery))
+                              .setStand(Stand.newBuilder())
                               .build();
 
         final Stand stand = boundedContext.getStand();
@@ -197,9 +152,6 @@ public class StandPostShould {
         for (BoundedContextAction dispatchAction : dispatchActions) {
             dispatchAction.perform(boundedContext);
         }
-
-        // Was called as many times as there are dispatch actions.
-        verify(delivery, times(dispatchActions.length)).deliver(any(EntityStateEnvelope.class));
 
         if (isConcurrent) {
             try {
@@ -309,21 +261,5 @@ public class StandPostShould {
 
     private interface BoundedContextAction {
         void perform(BoundedContext context);
-    }
-
-    /**
-     * A custom {@code StandUpdateDelivery}, which is suitable for
-     * {@linkplain org.mockito.Mockito#spy(Object) spying}.
-     */
-    private static class SpyableStandUpdateDelivery extends StandUpdateDelivery {
-
-        public SpyableStandUpdateDelivery(Executor delegate) {
-            super(delegate);
-        }
-
-        @Override
-        protected boolean shouldPostponeDelivery(EntityStateEnvelope deliverable, Stand consumer) {
-            return false;
-        }
     }
 }

@@ -30,6 +30,7 @@ import io.spine.type.TypeUrl;
 import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
@@ -183,5 +184,28 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
      */
     public final TypeUrl getStateType() {
         return entityStateType;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+        EntityClass<?> that = (EntityClass<?>) o;
+        return Objects.equals(idClass, that.idClass) &&
+                Objects.equals(stateClass, that.stateClass) &&
+                Objects.equals(entityStateType, that.entityStateType);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(super.hashCode(), idClass, stateClass, entityStateType);
     }
 }

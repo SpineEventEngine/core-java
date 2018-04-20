@@ -181,16 +181,6 @@ public class StandShould extends TenantAwareTest {
     }
 
     @Test
-    public void initialize_with_direct_UpdateDelivery_if_none_customized() {
-        final Stand.Builder builder = Stand.newBuilder()
-                                           .setMultitenant(isMultitenant());
-        final Stand stand = builder.build();
-
-        final StandUpdateDelivery actual = stand.delivery();
-        assertTrue(actual instanceof StandUpdateDelivery.DirectDelivery);
-    }
-
-    @Test
     public void register_projection_repositories() {
         final boolean multitenant = isMultitenant();
         final BoundedContext boundedContext = BoundedContext.newBuilder()

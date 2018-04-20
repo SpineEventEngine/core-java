@@ -38,7 +38,7 @@ import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectEventsSubs
 import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectRejectionsExtSubscriber;
 import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectStartedExtSubscriber;
 import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectWizard;
-import io.spine.server.integration.memory.InMemoryTransportFactory;
+import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.server.rejection.RejectionBus;
 import io.spine.server.rejection.RejectionSubscriber;
 import io.spine.validate.Validate;

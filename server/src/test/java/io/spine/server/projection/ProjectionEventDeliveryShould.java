@@ -19,75 +19,92 @@
  */
 package io.spine.server.projection;
 
+import io.spine.core.Ack;
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
-import io.spine.core.Events;
+import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
-import io.spine.server.projection.given.ProjectionEventDeliveryTestEnv.PostponingEventDelivery;
-import io.spine.server.projection.given.ProjectionEventDeliveryTestEnv.PostponingRepository;
-import io.spine.server.projection.given.ProjectionEventDeliveryTestEnv.ProjectDetails;
+import io.spine.server.delivery.given.ParallelDispatcher;
+import io.spine.server.delivery.given.ThreadStats;
+import io.spine.server.projection.given.ProjectionEventDeliveryTestEnv.DeliveryProjection;
+import io.spine.server.projection.given.ProjectionEventDeliveryTestEnv.SingleShardProjectRepository;
+import io.spine.server.projection.given.ProjectionEventDeliveryTestEnv.TripleShardProjectRepository;
+import io.spine.server.transport.memory.InMemoryTransportFactory;
+import io.spine.server.transport.memory.SynchronousInMemTransportFactory;
 import io.spine.test.projection.ProjectId;
-import io.spine.test.projection.event.PrjProjectCreated;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Map;
-
+import static io.spine.server.delivery.given.MessageDeliveryTestEnv.dispatchWaitTime;
+import static io.spine.server.delivery.given.MessageDeliveryTestEnv.setShardingTransport;
 import static io.spine.server.model.ModelTests.clearModel;
 import static io.spine.server.projection.given.ProjectionEventDeliveryTestEnv.projectCreated;
-import static junit.framework.TestCase.assertNull;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Alex Tymchenko
  */
 public class ProjectionEventDeliveryShould {
 
-    private BoundedContext boundedContext;
-    private PostponingRepository repository;
-
     @Before
     public void setUp() {
         clearModel();
-        boundedContext = BoundedContext.newBuilder()
-                                       .build();
-        repository = new PostponingRepository();
-        boundedContext.register(repository);
+        DeliveryProjection.getStats()
+                          .clear();
+        setShardingTransport(SynchronousInMemTransportFactory.newInstance());
     }
 
     @After
-    public void tearDown() throws Exception {
-        repository.close();
-        boundedContext.close();
+    public void tearDown() {
+        setShardingTransport(InMemoryTransportFactory.newInstance());
     }
 
     @Test
-    public void postpone_events_dispatched_to_subscriber_method() {
-        assertNull(ProjectDetails.getEventReceived());
+    public void dispatch_events_to_single_shard_in_multithreaded_env() throws Exception {
+        final ParallelDispatcher<ProjectId, Event> dispatcher =
+                new ParallelDispatcher<ProjectId, Event>(
+                        180, 819, dispatchWaitTime()) {
+                    @Override
+                    protected ThreadStats<ProjectId> getStats() {
+                        return DeliveryProjection.getStats();
+                    }
 
-        final Event event = projectCreated();
-        boundedContext.getEventBus()
-                      .post(event);
+                    @Override
+                    protected Event newMessage() {
+                        return projectCreated();
+                    }
 
-        assertNull(ProjectDetails.getEventReceived());
+                    @Override
+                    protected void postToBus(BoundedContext context, Event event) {
+                        context.getEventBus()
+                               .post(event, StreamObservers.<Ack>noOpObserver());
+                    }
+                };
 
-        final EventEnvelope expectedEnvelope = EventEnvelope.of(event);
-        final PostponingEventDelivery delivery = repository.getEndpointDelivery();
-        final Map<ProjectId, EventEnvelope> postponedEvents = delivery.getPostponedEvents();
-        assertTrue(postponedEvents.size() == 1 &&
-                           postponedEvents.containsValue(expectedEnvelope));
+        dispatcher.dispatchMessagesTo(new SingleShardProjectRepository());
+    }
 
-        final ProjectId projectId = postponedEvents.keySet()
-                                                   .iterator()
-                                                   .next();
+    @Test
+    public void dispatch_events_to_multiple_shard_in_multithreaded_env() throws Exception {
+        final ParallelDispatcher<ProjectId, Event> dispatcher =
+                new ParallelDispatcher<ProjectId, Event>(
+                        270, 1637, dispatchWaitTime()) {
+                    @Override
+                    protected ThreadStats<ProjectId> getStats() {
+                        return DeliveryProjection.getStats();
+                    }
 
-        delivery.deliverNow(projectId, postponedEvents.get(projectId));
+                    @Override
+                    protected Event newMessage() {
+                        return projectCreated();
+                    }
 
-        final PrjProjectCreated deliveredEventMsg = ProjectDetails.getEventReceived();
-        assertNotNull(deliveredEventMsg);
-        assertEquals(Events.getMessage(event), deliveredEventMsg);
+                    @Override
+                    protected void postToBus(BoundedContext context, Event event) {
+                        context.getEventBus()
+                               .post(event, StreamObservers.<Ack>noOpObserver());
+                    }
+                };
+
+        dispatcher.dispatchMessagesTo(new TripleShardProjectRepository());
     }
 }

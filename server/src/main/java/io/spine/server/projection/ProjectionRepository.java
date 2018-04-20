@@ -21,14 +21,22 @@
 package io.spine.server.projection;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Supplier;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
 import io.spine.annotation.SPI;
+import io.spine.core.BoundedContextName;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.server.BoundedContext;
+import io.spine.server.ServerEnvironment;
+import io.spine.server.delivery.Shardable;
+import io.spine.server.delivery.ShardedStreamConsumer;
+import io.spine.server.delivery.ShardingStrategy;
+import io.spine.server.delivery.UniformAcrossTargets;
 import io.spine.server.entity.EntityStorageConverter;
 import io.spine.server.entity.EventDispatchingRepository;
 import io.spine.server.event.EventFilter;
@@ -49,6 +57,7 @@ import javax.annotation.Nullable;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Suppliers.memoize;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -60,7 +69,18 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @author Alexander Yevsyukov
  */
 public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S extends Message>
-        extends EventDispatchingRepository<I, P, S> {
+        extends EventDispatchingRepository<I, P, S>
+        implements Shardable {
+
+    private final Supplier<ProjectionEventDelivery<I, P>> eventDeliverySupplier =
+            memoize(new Supplier<ProjectionEventDelivery<I, P>>() {
+                @Override
+                public ProjectionEventDelivery<I, P> get() {
+                    final ProjectionEventDelivery<I, P> result
+                            = new ProjectionEventDelivery<>(ProjectionRepository.this);
+                    return result;
+                }
+            });
 
     /** An underlying entity storage used to store projections. */
     private RecordStorage<I> recordStorage;
@@ -80,7 +100,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
 
     /** Obtains class information of projection managed by this repository. */
     @SuppressWarnings("unchecked") // The cast is ensured by generic parameters of the repository.
-    private ProjectionClass<P> projectionClass() {
+    ProjectionClass<P> projectionClass() {
         return (ProjectionClass<P>) entityClass();
     }
 
@@ -89,6 +109,11 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     protected final ProjectionClass<P> getModelClass(Class<P> cls) {
         return (ProjectionClass<P>) Model.getInstance()
                                          .asProjectionClass(cls);
+    }
+
+    @Override
+    public ProjectionClass<P> getShardedModelClass() {
+        return projectionClass();
     }
 
     /**
@@ -111,6 +136,10 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
                                 "event subscriptions.", this);
             }
         }
+
+        ServerEnvironment.getInstance()
+                         .getSharding()
+                         .register(this);
     }
 
     /**
@@ -240,7 +269,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      */
     @SPI
     protected ProjectionEventDelivery<I, P> getEndpointDelivery() {
-        return ProjectionEventDelivery.directDelivery(this);
+        return eventDeliverySupplier.get();
     }
 
     /**
@@ -261,6 +290,32 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     @Override
     protected ExternalMessageDispatcher<I> getExternalEventDispatcher() {
         return new ProjectionExternalEventDispatcher();
+    }
+
+    @Override
+    public ShardingStrategy getShardingStrategy() {
+        return UniformAcrossTargets.singleShard();
+    }
+
+    @Override
+    public Iterable<ShardedStreamConsumer<?, ?>> getMessageConsumers() {
+        final Iterable<ShardedStreamConsumer<?, ?>> result =
+                ImmutableList.<ShardedStreamConsumer<?, ?>>of(getEndpointDelivery().getConsumer());
+        return result;
+    }
+
+    @Override
+    public BoundedContextName getBoundedContextName() {
+        final BoundedContextName name = getBoundedContext().getName();
+        return name;
+    }
+
+    @Override
+    public void close() {
+        ServerEnvironment.getInstance()
+                         .getSharding()
+                         .unregister(this);
+        super.close();
     }
 
     /**

@@ -27,6 +27,8 @@ import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.rejection.RejectionSubscriber;
+import io.spine.server.transport.Publisher;
+import io.spine.server.transport.PublisherHub;
 
 import java.util.Objects;
 import java.util.Set;
@@ -68,7 +70,8 @@ final class DomesticRejectionPublisher extends RejectionSubscriber {
         final ExternalMessage message = ExternalMessages.of(rejection, boundedContextName);
         final ExternalMessageClass messageClass =
                 ExternalMessageClass.of(envelope.getMessageClass());
-        final Publisher channel = publisherHub.get(messageClass);
+        final ChannelId channelId = IntegrationChannels.toId(messageClass);
+        final Publisher channel = publisherHub.get(channelId);
         channel.publish(AnyPacker.pack(envelope.getId()), message);
 
         return ImmutableSet.of(channel.toString());

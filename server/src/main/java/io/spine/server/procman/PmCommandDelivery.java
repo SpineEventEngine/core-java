@@ -19,8 +19,9 @@
  */
 package io.spine.server.procman;
 
-import io.spine.annotation.SPI;
 import io.spine.core.CommandEnvelope;
+import io.spine.server.delivery.CommandShardedStream;
+import io.spine.server.delivery.DeliveryTag;
 
 /**
  * A strategy on delivering the ecommandsvents to the instances of a certain process manager type.
@@ -29,40 +30,36 @@ import io.spine.core.CommandEnvelope;
  * @param <P> the type of process manager
  * @author Alex Tymchenko
  */
-@SPI
-public abstract class PmCommandDelivery<I, P extends ProcessManager<I, ?, ?>>
-        extends PmEndpointDelivery<I, P, CommandEnvelope> {
+public class PmCommandDelivery<I, P extends ProcessManager<I, ?, ?>>
+        extends PmDelivery<I,
+                           P,
+                           CommandEnvelope,
+                           CommandShardedStream<I>,
+                           CommandShardedStream.Builder<I>> {
 
     protected PmCommandDelivery(ProcessManagerRepository<I, P, ?> repository) {
-        super(repository);
+        super(new PmCommandConsumer<>(repository));
     }
 
-    @Override
-    protected PmCommandEndpoint<I, P> getEndpoint(CommandEnvelope envelope) {
-        return PmCommandEndpoint.of(repository(), envelope);
-    }
+    private static class PmCommandConsumer<I, P extends ProcessManager<I, ?, ?>>
+            extends PmMessageConsumer<I,
+                                      P,
+                                      CommandEnvelope,
+                                      CommandShardedStream<I>,
+                                      CommandShardedStream.Builder<I>> {
 
-    public static <I, A extends ProcessManager<I, ?, ?>>
-    PmCommandDelivery<I, A> directDelivery(ProcessManagerRepository<I, A, ?> repository) {
-        return new Direct<>(repository);
-    }
-
-    /**
-     * Direct delivery which does not postpone dispatching.
-     *
-     * @param <I> the type of process manager IDs
-     * @param <P> the type of process manager
-     */
-    public static class Direct<I, P extends ProcessManager<I, ?, ?>>
-            extends PmCommandDelivery<I, P> {
-
-        private Direct(ProcessManagerRepository<I, P, ?> repository) {
-            super(repository);
+        protected PmCommandConsumer(ProcessManagerRepository<I, P, ?> repository) {
+            super(DeliveryTag.forCommandsOf(repository), repository);
         }
 
         @Override
-        public boolean shouldPostpone(I id, CommandEnvelope envelope) {
-            return false;
+        protected CommandShardedStream.Builder<I> newShardedStreamBuilder() {
+            return CommandShardedStream.newBuilder();
+        }
+
+        @Override
+        protected PmCommandEndpoint<I, P> getEndpoint(CommandEnvelope envelope) {
+            return PmCommandEndpoint.of(repository(), envelope);
         }
     }
 }

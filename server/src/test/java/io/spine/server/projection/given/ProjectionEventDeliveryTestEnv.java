@@ -19,24 +19,20 @@
  */
 package io.spine.server.projection.given;
 
-import com.google.common.collect.ImmutableMap;
 import io.spine.Identifier;
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
 import io.spine.core.Subscribe;
 import io.spine.server.command.TestEventFactory;
+import io.spine.server.delivery.ShardingStrategy;
+import io.spine.server.delivery.UniformAcrossTargets;
+import io.spine.server.delivery.given.ThreadStats;
 import io.spine.server.projection.Projection;
-import io.spine.server.projection.ProjectionEventDelivery;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.ProjectVBuilder;
 import io.spine.test.projection.event.PrjProjectCreated;
 
-import javax.annotation.Nullable;
-import java.util.Map;
-
-import static com.google.common.collect.Maps.newHashMap;
 import static io.spine.protobuf.AnyPacker.pack;
 
 /**
@@ -69,65 +65,43 @@ public class ProjectionEventDeliveryTestEnv {
                         .build();
     }
 
-    public static class ProjectDetails extends Projection<ProjectId, Project, ProjectVBuilder> {
+    /**
+     * A projection class, which remembers the threads in which its handler methods were invoked.
+     *
+     * <p>Message handlers are invoked via reflection, so some of them are considered unused.
+     *
+     * <p>The subscriber parameters are not used, as they aren't needed for tests. They are still
+     * present, as long as they are required according to the handler declaration rules.
+     */
+    @SuppressWarnings("unused")
+    public static class DeliveryProjection extends Projection<ProjectId, Project, ProjectVBuilder> {
 
-        private static PrjProjectCreated receivedEvent = null;
+        private static final ThreadStats<ProjectId> stats = new ThreadStats<>();
 
-        protected ProjectDetails(ProjectId id) {
+        protected DeliveryProjection(ProjectId id) {
             super(id);
         }
 
-        @SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod") // It's fine in tests.
         @Subscribe
         public void on(PrjProjectCreated event) {
-            receivedEvent = event;
+            stats.recordCallingThread(getId());
         }
 
-        @Nullable
-        public static PrjProjectCreated getEventReceived() {
-            return receivedEvent;
-        }
-    }
-
-    /**
-     * A repository which overrides the delivery strategy for events postponing their delivery
-     * to projection instances.
-     */
-    public static class PostponingRepository
-            extends ProjectionRepository<ProjectId, ProjectDetails, Project> {
-
-        private PostponingEventDelivery eventDelivery = null;
-
-        @Override
-        public PostponingEventDelivery getEndpointDelivery() {
-            if (eventDelivery == null) {
-                eventDelivery = new PostponingEventDelivery(this);
-            }
-            return eventDelivery;
+        public static ThreadStats<ProjectId> getStats() {
+            return stats;
         }
     }
 
-    /**
-     * Event delivery strategy which always postpones the delivery, but remembers the event
-     * along with the target entity ID.
-     */
-    public static class PostponingEventDelivery
-            extends ProjectionEventDelivery<ProjectId, ProjectDetails> {
+    public static class SingleShardProjectRepository
+            extends ProjectionRepository<ProjectId, DeliveryProjection, Project> {
+    }
 
-        private final Map<ProjectId, EventEnvelope> postponedEvents = newHashMap();
-
-        protected PostponingEventDelivery(PostponingRepository repository) {
-            super(repository);
-        }
+    public static class TripleShardProjectRepository
+            extends ProjectionRepository<ProjectId, DeliveryProjection, Project> {
 
         @Override
-        public boolean shouldPostpone(ProjectId id, EventEnvelope envelope) {
-            postponedEvents.put(id, envelope);
-            return true;
-        }
-
-        public Map<ProjectId, EventEnvelope> getPostponedEvents() {
-            return ImmutableMap.copyOf(postponedEvents);
+        public ShardingStrategy getShardingStrategy() {
+            return UniformAcrossTargets.forNumber(3);
         }
     }
 }

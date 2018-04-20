@@ -47,6 +47,8 @@ import io.spine.server.stand.StandStorage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.server.tenant.TenantIndex;
+import io.spine.server.transport.TransportFactory;
+import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.type.TypeName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -344,6 +346,7 @@ public final class BoundedContext
         private boolean multitenant;
         private TenantIndex tenantIndex;
         private Supplier<StorageFactory> storageFactorySupplier;
+        private TransportFactory transportFactory;
 
         private CommandBus.Builder commandBus;
         private EventBus.Builder eventBus;
@@ -448,14 +451,21 @@ public final class BoundedContext
             return this;
         }
 
+        public Builder setTransportFactory(TransportFactory transportFactory) {
+            this.transportFactory = checkNotNull(transportFactory);
+            return this;
+        }
+
         public BoundedContext build() {
             final StorageFactory storageFactory = getStorageFactory();
+
+            final TransportFactory transportFactory = getTransportFactory();
 
             initTenantIndex(storageFactory);
             initCommandBus(storageFactory);
             initEventBus(storageFactory);
             initStand(storageFactory);
-            initIntegrationBus();
+            initIntegrationBus(transportFactory);
 
             final BoundedContext result = new BoundedContext(this);
             result.init();
@@ -478,6 +488,13 @@ public final class BoundedContext
                 );
             }
             return storageFactory;
+        }
+
+        private TransportFactory getTransportFactory() {
+            if (transportFactory == null) {
+                transportFactory = InMemoryTransportFactory.newInstance();
+            }
+            return transportFactory;
         }
 
         private void initTenantIndex(StorageFactory factory) {
@@ -540,9 +557,14 @@ public final class BoundedContext
             }
         }
 
-        private void initIntegrationBus() {
-            if(integrationBus == null) {
-                integrationBus = IntegrationBus.newBuilder();
+        private void initIntegrationBus(TransportFactory transportFactory) {
+            if (integrationBus == null) {
+                integrationBus = IntegrationBus.newBuilder()
+                                               .setTransportFactory(transportFactory);
+            }
+            if (!integrationBus.getTransportFactory()
+                               .isPresent()) {
+                integrationBus.setTransportFactory(transportFactory);
             }
         }
 

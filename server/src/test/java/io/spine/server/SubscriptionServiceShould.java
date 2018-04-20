@@ -32,9 +32,11 @@ import io.spine.client.Topic;
 import io.spine.core.Response;
 import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.server.entity.VersionableEntity;
+import io.spine.server.model.ModelTests;
 import io.spine.server.stand.Stand;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
@@ -73,6 +75,11 @@ public class SubscriptionServiceShould {
                              .setName(name)
                              .setMultitenant(true)
                              .build();
+    }
+
+    @Before
+    public void setUp() {
+        ModelTests.clearModel();
     }
 
     @Test

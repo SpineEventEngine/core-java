@@ -19,8 +19,9 @@
  */
 package io.spine.server.procman;
 
-import io.spine.annotation.SPI;
 import io.spine.core.EventEnvelope;
+import io.spine.server.delivery.DeliveryTag;
+import io.spine.server.delivery.EventShardedStream;
 
 /**
  * A strategy on delivering the events to the instances of a certain process manager type.
@@ -29,40 +30,36 @@ import io.spine.core.EventEnvelope;
  * @param <P> the type of process manager
  * @author Alex Tymchenko
  */
-@SPI
-public abstract class PmEventDelivery<I, P extends ProcessManager<I, ?, ?>>
-        extends PmEndpointDelivery<I, P, EventEnvelope> {
+public class PmEventDelivery<I, P extends ProcessManager<I, ?, ?>>
+        extends PmDelivery<I,
+                           P,
+                           EventEnvelope,
+                           EventShardedStream<I>,
+                           EventShardedStream.Builder<I>> {
 
     protected PmEventDelivery(ProcessManagerRepository<I, P, ?> repository) {
-        super(repository);
+        super(new PmEventConsumer<>(repository));
     }
 
-    @Override
-    protected PmEventEndpoint<I, P> getEndpoint(EventEnvelope envelope) {
-        return PmEventEndpoint.of(repository(), envelope);
-    }
+    private static class PmEventConsumer<I, P extends ProcessManager<I, ?, ?>>
+            extends PmMessageConsumer<I,
+                                      P,
+                                      EventEnvelope,
+                                      EventShardedStream<I>,
+                                      EventShardedStream.Builder<I>> {
 
-    public static <I, A extends ProcessManager<I, ?, ?>>
-    PmEventDelivery<I, A> directDelivery(ProcessManagerRepository<I, A, ?> repository) {
-        return new Direct<>(repository);
-    }
-
-    /**
-     * Direct delivery which does not postpone dispatching.
-     *
-     * @param <I> the type of process manager IDs
-     * @param <P> the type of process manager
-     */
-    public static class Direct<I, P extends ProcessManager<I, ?, ?>>
-            extends PmEventDelivery<I, P> {
-
-        private Direct(ProcessManagerRepository<I, P, ?> repository) {
-            super(repository);
+        protected PmEventConsumer(ProcessManagerRepository<I, P, ?> repository) {
+            super(DeliveryTag.forEventsOf(repository), repository);
         }
 
         @Override
-        public boolean shouldPostpone(I id, EventEnvelope envelope) {
-            return false;
+        protected EventShardedStream.Builder<I> newShardedStreamBuilder() {
+            return EventShardedStream.newBuilder();
+        }
+
+        @Override
+        protected PmEventEndpoint<I, P> getEndpoint(EventEnvelope envelope) {
+            return PmEventEndpoint.of(repository(), envelope);
         }
     }
 }

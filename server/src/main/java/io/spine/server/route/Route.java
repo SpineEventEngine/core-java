@@ -26,7 +26,7 @@ import io.spine.core.EventContext;
 import java.io.Serializable;
 
 /**
- * Obtains on or more entity identifiers based on a message and its context.
+ * Obtains one or more entity identifiers based on a message and its context.
  *
  * @param <M> the type of messages to get IDs from
  * @param <C> the type of message context

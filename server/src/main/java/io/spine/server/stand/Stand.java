@@ -98,7 +98,6 @@ public class Stand implements AutoCloseable {
      *
      * <p>The storage is {@code null} if it was not passed to the builder and this instance is not
      * yet added to a {@code BoundedContext}.
-
      */
     @Nullable
     private StandStorage storage;
@@ -118,23 +117,14 @@ public class Stand implements AutoCloseable {
      */
     private final Executor callbackExecutor;
 
-    /**
-     * The delivery strategy to propagate the {@code Entity} state to the instance of {@code Stand}.
-     */
-    private final StandUpdateDelivery delivery;
-
     private final boolean multitenant;
 
     private final TopicValidator topicValidator;
     private final QueryValidator queryValidator;
     private final SubscriptionValidator subscriptionValidator;
 
-    @SuppressWarnings("ConstantConditions")
-        // getDelivery() availability is checked on builder construction.
     private Stand(Builder builder) {
         storage = builder.getStorage();
-        delivery = builder.getDelivery()
-                          .get();
         callbackExecutor = builder.getCallbackExecutor();
         multitenant = builder.multitenant != null
                 ? builder.multitenant
@@ -146,10 +136,6 @@ public class Stand implements AutoCloseable {
         subscriptionValidator = builder.getSubscriptionValidator();
     }
 
-    private void init() {
-        delivery.setStand(this);
-    }
-
     public void onCreated(BoundedContext parent) {
         if (storage == null) {
             storage = parent.getStorageFactory().createStandStorage();
@@ -158,12 +144,12 @@ public class Stand implements AutoCloseable {
 
     /**
      * Posts the state of an {@link VersionableEntity} to this {@link Stand}.
-     *  @param entity         the entity which state should be delivered to the {@code Stand}
      *
+     * @param entity the entity which state should be delivered to the {@code Stand}
      */
     public void post(TenantId tenantId, final VersionableEntity entity) {
         final EntityStateEnvelope envelope = EntityStateEnvelope.of(entity, tenantId);
-        delivery.deliver(envelope);
+        update(envelope);
     }
 
     public static Builder newBuilder() {
@@ -235,11 +221,6 @@ public class Stand implements AutoCloseable {
     @VisibleForTesting
     public boolean isMultitenant() {
         return multitenant;
-    }
-
-    @VisibleForTesting
-    StandUpdateDelivery delivery() {
-        return delivery;
     }
 
     /**
@@ -533,13 +514,6 @@ public class Stand implements AutoCloseable {
         @Nullable
         private Boolean multitenant;
 
-        /**
-         * Optional {@code StandUpdateDelivery} for propagating the data to {@code Stand}.
-         *
-         * <p>If not set, a {@link StandUpdateDelivery#directDelivery() directDelivery()}
-         * value will be set by the builder.
-         */
-        private StandUpdateDelivery delivery;
         private StandStorage storage;
         private Executor callbackExecutor;
         private SubscriptionRegistry subscriptionRegistry;
@@ -618,26 +592,6 @@ public class Stand implements AutoCloseable {
             return typeRegistry;
         }
 
-        public Optional<StandUpdateDelivery> getDelivery() {
-            return Optional.fromNullable(delivery);
-        }
-
-        /**
-         * Sets the {@code StandUpdateDelivery} instance for this {@code StandFunnel}.
-         *
-         * <p>The value must not be {@code null}.
-         *
-         * <p> If this method is not used, a
-         * {@link StandUpdateDelivery#directDelivery() directDelivery()} value will be used.
-         *
-         * @param delivery the instance of {@code StandUpdateDelivery}.
-         * @return {@code this} instance of {@code Builder}
-         */
-        public Builder setDelivery(StandUpdateDelivery delivery) {
-            this.delivery = checkNotNull(delivery);
-            return this;
-        }
-
         /**
          * Builds an instance of {@code Stand}.
          *
@@ -648,10 +602,6 @@ public class Stand implements AutoCloseable {
          */
         @Internal
         public Stand build() {
-            if (delivery == null) {
-                delivery = StandUpdateDelivery.directDelivery();
-            }
-
             final boolean multitenant = this.multitenant == null
                     ? false
                     : this.multitenant;
@@ -668,10 +618,8 @@ public class Stand implements AutoCloseable {
             queryValidator = new QueryValidator(typeRegistry);
             subscriptionValidator = new SubscriptionValidator(subscriptionRegistry);
 
-            final Stand product = new Stand(this);
-            product.init();
-
-            return product;
+            final Stand result = new Stand(this);
+            return result;
         }
     }
 }

@@ -20,8 +20,11 @@
 
 package io.spine.server.procman;
 
+import com.google.common.base.Supplier;
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import io.spine.annotation.SPI;
+import io.spine.core.BoundedContextName;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
@@ -30,6 +33,7 @@ import io.spine.core.EventEnvelope;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
 import io.spine.server.BoundedContext;
+import io.spine.server.ServerEnvironment;
 import io.spine.server.bus.Bus;
 import io.spine.server.bus.MessageDispatcher;
 import io.spine.server.command.CommandHandlingEntity;
@@ -37,6 +41,10 @@ import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcherDelegate;
 import io.spine.server.commandbus.CommandErrorHandler;
 import io.spine.server.commandbus.DelegatingCommandDispatcher;
+import io.spine.server.delivery.Shardable;
+import io.spine.server.delivery.ShardedStreamConsumer;
+import io.spine.server.delivery.ShardingStrategy;
+import io.spine.server.delivery.UniformAcrossTargets;
 import io.spine.server.entity.EventDispatchingRepository;
 import io.spine.server.event.EventBus;
 import io.spine.server.integration.ExternalMessageClass;
@@ -55,6 +63,7 @@ import javax.annotation.CheckReturnValue;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Suppliers.memoize;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -72,7 +81,8 @@ public abstract class ProcessManagerRepository<I,
                                                S extends Message>
                 extends EventDispatchingRepository<I, P, S>
                 implements CommandDispatcherDelegate<I>,
-                           RejectionDispatcherDelegate<I> {
+                           RejectionDispatcherDelegate<I>,
+                           Shardable {
 
     /** The command routing schema used by this repository. */
     private final CommandRouting<I> commandRouting = CommandRouting.newInstance();
@@ -80,6 +90,37 @@ public abstract class ProcessManagerRepository<I,
     /** The rejection routing schema used by this repository. */
     private final RejectionRouting<I> rejectionRouting =
             RejectionRouting.withDefault(RejectionProducers.<I>fromContext());
+
+    private final Supplier<PmCommandDelivery<I, P>> commandDeliverySupplier =
+            memoize(new Supplier<PmCommandDelivery<I, P>>() {
+                @Override
+                public PmCommandDelivery<I, P> get() {
+                    final PmCommandDelivery<I, P> result =
+                            new PmCommandDelivery<>(ProcessManagerRepository.this);
+                    return result;
+                }
+            });
+
+    private final Supplier<PmEventDelivery<I, P>> eventDeliverySupplier =
+            memoize(new Supplier<PmEventDelivery<I, P>>() {
+                @Override
+                public PmEventDelivery<I, P> get() {
+                    final PmEventDelivery<I, P> result =
+                            new PmEventDelivery<>(ProcessManagerRepository.this);
+                    return result;
+                }
+            });
+
+    private final Supplier<PmRejectionDelivery<I, P>> rejectionDeliverySupplier =
+            memoize(new Supplier<PmRejectionDelivery<I, P>>() {
+                @Override
+                public PmRejectionDelivery<I, P> get() {
+                    final PmRejectionDelivery<I, P> result =
+                            new PmRejectionDelivery<>(ProcessManagerRepository.this);
+                    return result;
+                }
+            });
+
 
     /**
      * The {@link CommandErrorHandler} tackling the dispatching errors.
@@ -98,7 +139,7 @@ public abstract class ProcessManagerRepository<I,
 
     /** Obtains class information of process managers managed by this repository. */
     @SuppressWarnings("unchecked") // The cast is ensured by generic parameters of the repository.
-    private ProcessManagerClass<P> processManagerClass() {
+    ProcessManagerClass<P> processManagerClass() {
         return (ProcessManagerClass<P>) entityClass();
     }
 
@@ -107,6 +148,11 @@ public abstract class ProcessManagerRepository<I,
     protected final ProcessManagerClass<P> getModelClass(Class<P> cls) {
         return (ProcessManagerClass<P>) Model.getInstance()
                                              .asProcessManagerClass(cls);
+    }
+
+    @Override
+    public ProcessManagerClass<P> getShardedModelClass() {
+        return processManagerClass();
     }
 
     /**
@@ -156,6 +202,10 @@ public abstract class ProcessManagerRepository<I,
                             "and do not react upon any rejections or events.", this);
         }
         this.commandErrorHandler = CommandErrorHandler.with(boundedContext.getRejectionBus());
+
+        ServerEnvironment.getInstance()
+                         .getSharding()
+                         .register(this);
     }
 
     /**
@@ -355,7 +405,7 @@ public abstract class ProcessManagerRepository<I,
      */
     @SPI
     protected PmEventDelivery<I, P> getEventEndpointDelivery() {
-        return PmEventDelivery.directDelivery(this);
+        return eventDeliverySupplier.get();
     }
 
 
@@ -372,7 +422,7 @@ public abstract class ProcessManagerRepository<I,
      */
     @SPI
     protected PmRejectionDelivery<I, P> getRejectionEndpointDelivery() {
-        return PmRejectionDelivery.directDelivery(this);
+        return rejectionDeliverySupplier.get();
     }
 
     /**
@@ -388,12 +438,42 @@ public abstract class ProcessManagerRepository<I,
      */
     @SPI
     protected PmCommandDelivery<I, P> getCommandEndpointDelivery() {
-        return PmCommandDelivery.directDelivery(this);
+        return commandDeliverySupplier.get();
     }
 
     @Override
     protected ExternalMessageDispatcher<I> getExternalEventDispatcher() {
         return new PmExternalEventDispatcher();
+    }
+
+    @Override
+    public ShardingStrategy getShardingStrategy() {
+        return UniformAcrossTargets.singleShard();
+    }
+
+    @Override
+    public Iterable<ShardedStreamConsumer<?, ?>> getMessageConsumers() {
+        final Iterable<ShardedStreamConsumer<?, ?>> result =
+                ImmutableList.<ShardedStreamConsumer<?, ?>>of(
+                        getCommandEndpointDelivery().getConsumer(),
+                        getEventEndpointDelivery().getConsumer(),
+                        getRejectionEndpointDelivery().getConsumer());
+        return result;
+    }
+
+
+    @Override
+    public BoundedContextName getBoundedContextName() {
+        final BoundedContextName name = getBoundedContext().getName();
+        return name;
+    }
+
+    @Override
+    public void close() {
+        ServerEnvironment.getInstance()
+                         .getSharding()
+                         .unregister(this);
+        super.close();
     }
 
     /**

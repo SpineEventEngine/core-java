@@ -36,7 +36,9 @@ import org.junit.Test;
 
 import java.util.Collections;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -103,8 +105,8 @@ public class SubscriptionRecordShould {
         final SubscriptionRecord same = new SubscriptionRecord(oneSubscription,
                                                                Given.target(),
                                                                Given.TYPE);
-        assertFalse(one.equals(similar));
-        assertTrue(one.equals(same));
+        assertNotEquals(one, similar);
+        assertEquals(one, same);
     }
 
     @SuppressWarnings("UtilityClass")

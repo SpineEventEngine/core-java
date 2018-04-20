@@ -22,6 +22,7 @@ package io.spine.server;
 import com.google.common.collect.Sets;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
+import io.spine.core.BoundedContextName;
 import io.spine.core.EventContext;
 import io.spine.core.Responses;
 import io.spine.core.Subscribe;
@@ -57,9 +58,11 @@ import static org.mockito.Mockito.when;
  */
 public class QueryServiceShould {
 
-    private QueryService service;
+    private static final String PROJECTS_CONTEXT_NAME = "Projects";
 
     private final Set<BoundedContext> boundedContexts = Sets.newHashSet();
+
+    private QueryService service;
 
     private BoundedContext projectsContext;
 
@@ -74,7 +77,7 @@ public class QueryServiceShould {
         ModelTests.clearModel();
         // Create Projects Bounded Context with one repository and one projection.
         projectsContext = BoundedContext.newBuilder()
-                                        .setName("Projects")
+                                        .setName(PROJECTS_CONTEXT_NAME)
                                         .build();
 
         // Inject spy, which will be obtained later via getStand().
@@ -184,6 +187,21 @@ public class QueryServiceShould {
 
     private static class ProjectDetailsRepository
             extends ProjectionRepository<ProjectId, ProjectDetails, Project> {
+
+        /**
+         * {@inheritDoc}
+         *
+         * This method is overridden to overcome the Mockito restrictions, since Mockit does not
+         * propagate all the changes into the spied object (and {@code ProjectDetailsRepository}
+         * instance is spied within this test suite). In turn that leads to the failures in
+         * delivery initialization, since it requires non-{@code null} bounded context name.
+         *
+         * @return the name of the bounded context for this repository
+         */
+        @Override
+        public BoundedContextName getBoundedContextName() {
+            return BoundedContext.newName(PROJECTS_CONTEXT_NAME);
+        }
     }
 
     private static class ProjectDetails

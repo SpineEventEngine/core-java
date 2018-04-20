@@ -122,7 +122,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     /** Returns the class of IDs used by this repository. */
     @SuppressWarnings("unchecked") // The cast is ensured by generic parameters of the repository.
     @CheckReturnValue
-    protected Class<I> getIdClass() {
+    public Class<I> getIdClass() {
         return (Class<I>) entityClass().getIdClass();
     }
 
