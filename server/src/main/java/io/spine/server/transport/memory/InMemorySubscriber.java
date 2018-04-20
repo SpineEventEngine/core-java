@@ -38,14 +38,14 @@ import static com.google.common.collect.Sets.newConcurrentHashSet;
  * @author Alex Tymchenko
  */
 
-class InMemorySubscriber extends AbstractInMemoryChannel implements Subscriber {
+public class InMemorySubscriber extends AbstractInMemoryChannel implements Subscriber {
 
     /**
      * Observers, that actually are informed about the messages arriving through this channel.
      */
     private final Set<StreamObserver<ExternalMessage>> observers = newConcurrentHashSet();
 
-    InMemorySubscriber(ChannelId channelId) {
+    public InMemorySubscriber(ChannelId channelId) {
         super(channelId);
     }
 
@@ -71,7 +71,8 @@ class InMemorySubscriber extends AbstractInMemoryChannel implements Subscriber {
         return observers.isEmpty();
     }
 
-    void onMessage(final ExternalMessage message) {
+    @Override
+    public void onMessage(final ExternalMessage message) {
         callObservers(message);
     }
 

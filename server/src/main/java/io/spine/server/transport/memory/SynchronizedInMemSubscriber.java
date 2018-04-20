@@ -37,7 +37,7 @@ public class SynchronizedInMemSubscriber extends InMemorySubscriber {
     }
 
     @Override
-    protected void onMessage(ExternalMessage message) {
+    public void onMessage(ExternalMessage message) {
         executor.submit(new SubmissionJob(message));
     }
 

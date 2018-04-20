@@ -54,4 +54,11 @@ public interface Subscriber extends MessageChannel {
      * @param observer an observer to remove
      */
     void removeObserver(StreamObserver<ExternalMessage> observer);
+
+    /**
+     * Passes the given message to observers.
+     *
+     * @param message the subscription update to pass to the observers for this channel
+     */
+    void onMessage(ExternalMessage message);
 }

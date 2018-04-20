@@ -26,6 +26,7 @@ import io.spine.server.bus.Buses;
 import io.spine.server.integration.ChannelId;
 import io.spine.server.integration.ExternalMessage;
 import io.spine.server.transport.Publisher;
+import io.spine.server.transport.Subscriber;
 
 /**
  * An in-memory implementation of the {@link Publisher}.
@@ -34,33 +35,33 @@ import io.spine.server.transport.Publisher;
  *
  * @author Alex Tymchenko
  */
-final class InMemoryPublisher extends AbstractInMemoryChannel implements Publisher {
+public final class InMemoryPublisher extends AbstractInMemoryChannel implements Publisher {
 
     /**
      * A provider of subscribers per channel ID.
      */
-    private final Function<ChannelId, Iterable<InMemorySubscriber>> subscriberProvider;
+    private final Function<ChannelId, Iterable<Subscriber>> subscriberProvider;
 
     InMemoryPublisher(ChannelId channelId,
-                      Function<ChannelId, Iterable<InMemorySubscriber>> provider) {
+                      Function<ChannelId, Iterable<Subscriber>> provider) {
         super(channelId);
         this.subscriberProvider = provider;
     }
 
     @Override
     public Ack publish(Any messageId, ExternalMessage message) {
-        final Iterable<InMemorySubscriber> localSubscribers = getSubscribers(getId());
-        for (InMemorySubscriber localSubscriber : localSubscribers) {
+        final Iterable<Subscriber> localSubscribers = getSubscribers(getId());
+        for (Subscriber localSubscriber : localSubscribers) {
             callSubscriber(message, localSubscriber);
         }
         return Buses.acknowledge(messageId);
     }
 
-    private static void callSubscriber(ExternalMessage message, InMemorySubscriber subscriber) {
+    private static void callSubscriber(ExternalMessage message, Subscriber subscriber) {
         subscriber.onMessage(message);
     }
 
-    private Iterable<InMemorySubscriber> getSubscribers(ChannelId channelId) {
+    private Iterable<Subscriber> getSubscribers(ChannelId channelId) {
         return subscriberProvider.apply(channelId);
     }
 

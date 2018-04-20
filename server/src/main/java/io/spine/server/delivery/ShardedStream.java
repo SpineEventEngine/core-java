@@ -425,10 +425,19 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
         protected abstract S createStream();
 
         public S build(TransportFactory transportFactory) {
-            checkNotNull(transportFactory);
+            checkPresent(transportFactory, "TransportFactory");
+            checkPresent(key, "ShardingKey");
+            checkPresent(tag, "DeliveryTag");
+            checkPresent(targetIdClass, "Target ID Class");
+            checkPresent(consumer, "Consumer");
+
             this.transportFactory = transportFactory;
             final S result = createStream();
             return result;
+        }
+
+        private static void checkPresent(Object value, final String fieldName) {
+            checkNotNull(value, fieldName + " must be set");
         }
     }
 }

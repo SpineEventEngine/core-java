@@ -19,7 +19,9 @@
  */
 package io.spine.server.delivery.given;
 
+import com.google.common.base.Function;
 import com.google.protobuf.StringValue;
+import io.grpc.stub.StreamObserver;
 import io.spine.core.BoundedContextName;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.aggregate.Aggregate;
@@ -31,9 +33,14 @@ import io.spine.server.delivery.CommandShardedStream;
 import io.spine.server.delivery.DeliveryTag;
 import io.spine.server.delivery.ShardIndex;
 import io.spine.server.delivery.ShardedStream;
+import io.spine.server.delivery.ShardedStreamConsumer;
 import io.spine.server.delivery.ShardingKey;
+import io.spine.server.integration.ChannelId;
+import io.spine.server.integration.ExternalMessage;
 import io.spine.server.model.Model;
+import io.spine.server.transport.Subscriber;
 import io.spine.server.transport.TransportFactory;
+import io.spine.server.transport.memory.InMemorySubscriber;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.TaskId;
@@ -51,72 +58,81 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  */
 public class ShardedStreamTestEnv {
 
-    private static final BoundedContextName TASKS_CONTEXT = newName("Tasks context");
-    private static final BoundedContextName PROJECTS_CONTEXT = newName("Projects context");
+    private static final TransportFactory transportFactory = InMemoryTransportFactory.newInstance();
 
-    private static final CommandShardedStream<ProjectId> streamZeroToProjects;
-    private static final CommandShardedStream<ProjectId> anotherZeroToProjects;
-    private static final CommandShardedStream<ProjectId> streamOneToProjects;
-    private static final CommandShardedStream<ProjectId> anotherOneToProjects;
-    private static final CommandShardedStream<TaskId> commandStreamToTasksZero;
-    private static final CommandShardedStream<TaskId> commandStreamToTasksOne;
+    private static final BoundedContextName tasksContextName = newName("Tasks context");
+    private static final BoundedContextName projectsContextName = newName("Projects context");
+
+    private static final AggregateClass<?> projectAggregateClass;
+    private static final AggregateClass<?> taskAggregateClass;
+    private static final ProjectAggregateRepository projectRepo;
+    private static final ShardingKey projectsShardZeroKey;
+    private static final ShardingKey projectsShardOneKey;
+    private static final DeliveryTag<CommandEnvelope> commandsToProjects;
+    private static final CommandShardedStream<ProjectId> projectsShardZero;
+    private static final CommandShardedStream<ProjectId> anotherProjectsShardZero;
+    private static final CommandShardedStream<ProjectId> projectsShardOne;
+    private static final CommandShardedStream<ProjectId> anotherProjectsShardOne;
+    private static final CommandShardedStream<TaskId> tasksShardZero;
+    private static final CommandShardedStream<TaskId> tasksShardOne;
 
     static {
-        final InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
-
         final Model model = Model.getInstance();
-        final AggregateClass<?> projectAggregateClass =
-                model.asAggregateClass(ProjectAggregate.class);
-
-        final AggregateClass<?> taskAggregateClass =
-                model.asAggregateClass(TaskAggregate.class);
-
-        final ProjectAggregateRepository projectRepo = new ProjectAggregateRepository();
-        final BoundedContextName projectsContextName = projectRepo.getBoundedContextName();
-        final ShardingKey projectsShardZero = shardingKeyOf(projectAggregateClass, 0);
-        final ShardingKey projectsShardOne = shardingKeyOf(projectAggregateClass, 1);
-        final DeliveryTag<CommandEnvelope> commandsToProjects = DeliveryTag.forCommandsOf(
-                projectRepo);
+        projectAggregateClass = model.asAggregateClass(ProjectAggregate.class);
+        taskAggregateClass = model.asAggregateClass(TaskAggregate.class);
+        projectRepo = new ProjectAggregateRepository();
+        projectsShardZeroKey = shardingKeyOf(projectAggregateClass, 0);
+        projectsShardOneKey = shardingKeyOf(projectAggregateClass, 1);
+        commandsToProjects = DeliveryTag.forCommandsOf(projectRepo);
 
         final TaskAggregateRepository taskRepo = new TaskAggregateRepository();
         final BoundedContextName tasksContextName = taskRepo.getBoundedContextName();
-        final ShardingKey tasksShardZero = shardingKeyOf(taskAggregateClass, 0);
-        final ShardingKey tasksShardOne = shardingKeyOf(taskAggregateClass, 1);
+        final ShardingKey tasksShardZeroKey = shardingKeyOf(taskAggregateClass, 0);
+        final ShardingKey tasksShardOneKey = shardingKeyOf(taskAggregateClass, 1);
         final DeliveryTag<CommandEnvelope> commandsToTask = DeliveryTag.forCommandsOf(taskRepo);
 
-        streamZeroToProjects = streamToProject(transportFactory,
-                                               projectsContextName,
-                                               projectsShardZero,
-                                               commandsToProjects);
+        projectsShardZero = streamToProject(transportFactory,
+                                            projectsContextName,
+                                            projectsShardZeroKey,
+                                            commandsToProjects);
 
-        anotherZeroToProjects = streamToProject(transportFactory,
-                                                projectsContextName,
-                                                projectsShardZero,
-                                                commandsToProjects);
+        anotherProjectsShardZero = streamToProject(transportFactory,
+                                                   projectsContextName,
+                                                   projectsShardZeroKey,
+                                                   commandsToProjects);
 
-        streamOneToProjects = streamToProject(transportFactory,
-                                              projectsContextName,
-                                              projectsShardOne,
-                                              commandsToProjects);
+        projectsShardOne = streamToProject(transportFactory,
+                                           projectsContextName,
+                                           projectsShardOneKey,
+                                           commandsToProjects);
 
-        anotherOneToProjects = streamToProject(transportFactory,
-                                               projectsContextName,
-                                               projectsShardOne,
-                                               commandsToProjects);
+        anotherProjectsShardOne = streamToProject(transportFactory,
+                                                  projectsContextName,
+                                                  projectsShardOneKey,
+                                                  commandsToProjects);
 
-        commandStreamToTasksZero =
-                CommandShardedStream.<TaskId>newBuilder().setBoundedContextName(tasksContextName)
-                                                         .setKey(tasksShardZero)
-                                                         .setTag(commandsToTask)
-                                                         .setTargetIdClass(TaskId.class)
-                                                         .build(transportFactory);
+        final ShardedStreamConsumer<TaskId, CommandEnvelope> taskConsumer = dummyConsumer();
+        tasksShardZero = streamToTask(tasksContextName,
+                                      tasksShardZeroKey,
+                                      commandsToTask,
+                                      taskConsumer);
+        tasksShardOne = streamToTask(tasksContextName,
+                                     tasksShardOneKey,
+                                     commandsToTask,
+                                     taskConsumer);
+    }
 
-        commandStreamToTasksOne =
-                CommandShardedStream.<TaskId>newBuilder().setBoundedContextName(tasksContextName)
-                                                         .setKey(tasksShardOne)
-                                                         .setTag(commandsToTask)
-                                                         .setTargetIdClass(TaskId.class)
-                                                         .build(transportFactory);
+    private static CommandShardedStream<TaskId>
+    streamToTask(BoundedContextName contextName,
+                 ShardingKey key,
+                 DeliveryTag<CommandEnvelope> tag,
+                 ShardedStreamConsumer<TaskId, CommandEnvelope> consumer) {
+        return CommandShardedStream.<TaskId>newBuilder().setBoundedContextName(contextName)
+                                                        .setKey(key)
+                                                        .setTag(tag)
+                                                        .setConsumer(consumer)
+                                                        .setTargetIdClass(TaskId.class)
+                                                        .build(transportFactory);
     }
 
     /**
@@ -125,39 +141,80 @@ public class ShardedStreamTestEnv {
     private ShardedStreamTestEnv() {
     }
 
-    public static CommandShardedStream<ProjectId> streamZeroToProjects() {
-        return streamZeroToProjects;
+    public static CommandShardedStream<ProjectId> projectsShardZero() {
+        return projectsShardZero;
     }
 
-    public static CommandShardedStream<ProjectId> anotherZeroToProjects() {
-        return anotherZeroToProjects;
+    public static CommandShardedStream<ProjectId> anotherProjectsShardZero() {
+        return anotherProjectsShardZero;
     }
 
-    public static CommandShardedStream<ProjectId> streamOneToProjects() {
-        return streamOneToProjects;
+    public static CommandShardedStream<ProjectId> projectsShardOne() {
+        return projectsShardOne;
     }
 
-    public static CommandShardedStream<ProjectId> anotherOneToProjects() {
-        return anotherOneToProjects;
+    public static CommandShardedStream<ProjectId> anotherProjectsShardOne() {
+        return anotherProjectsShardOne;
     }
 
-    public static CommandShardedStream<TaskId> commandStreamToTasksZero() {
-        return commandStreamToTasksZero;
+    public static CommandShardedStream<TaskId> tasksShardZero() {
+        return tasksShardZero;
     }
 
-    public static CommandShardedStream<TaskId> commandStreamToTasksOne() {
-        return commandStreamToTasksOne;
+    public static CommandShardedStream<TaskId> tasksShardOne() {
+        return tasksShardOne;
+    }
+
+    public static CommandShardedStream<ProjectId>
+    streamToShardWithFactory(TransportFactory factory) {
+        final CommandShardedStream.Builder<ProjectId> builder = CommandShardedStream.newBuilder();
+        final ShardedStreamConsumer<ProjectId, CommandEnvelope> consumer = dummyConsumer();
+        builder.setBoundedContextName(projectsContextName)
+               .setKey(projectsShardZeroKey)
+               .setTag(commandsToProjects)
+               .setConsumer(consumer)
+               .setTargetIdClass(ProjectId.class);
+        final CommandShardedStream<ProjectId> result = builder.build(factory);
+        return result;
     }
 
     private static CommandShardedStream<ProjectId>
     streamToProject(TransportFactory factory, BoundedContextName contextName,
                     ShardingKey key, DeliveryTag<CommandEnvelope> tag) {
         final CommandShardedStream.Builder<ProjectId> builder = CommandShardedStream.newBuilder();
+        final ShardedStreamConsumer<ProjectId, CommandEnvelope> consumer = dummyConsumer();
         return builder.setBoundedContextName(contextName)
                       .setKey(key)
                       .setTag(tag)
                       .setTargetIdClass(ProjectId.class)
+                      .setConsumer(consumer)
                       .build(factory);
+    }
+
+    /**
+     * Returns a stream consumer which does nothing.
+     */
+    @SuppressWarnings("ReturnOfNull")   // `null's are returned for simplicity
+    private static <I> ShardedStreamConsumer<I, CommandEnvelope> dummyConsumer() {
+        return new ShardedStreamConsumer<I, CommandEnvelope>() {
+
+            @Override
+            public DeliveryTag<CommandEnvelope> getTag() {
+                return null;
+            }
+
+            @Override
+            public void onNext(I targetId, CommandEnvelope envelope) {
+
+            }
+
+            @Override
+            public ShardedStream<I, ?, CommandEnvelope> bindToTransport(
+                    BoundedContextName name, ShardingKey key,
+                    TransportFactory transportFactory) {
+                return null;
+            }
+        };
     }
 
     private static ShardingKey shardingKeyOf(AggregateClass<?> taskAggregateClass, int shardIndex) {
@@ -169,6 +226,24 @@ public class ShardedStreamTestEnv {
         return ShardIndex.newBuilder()
                          .setIndex(index)
                          .build();
+    }
+
+    public static TransportFactory
+    customFactory(final Function<StreamObserver<ExternalMessage>, Void> observerCallback) {
+        return new InMemoryTransportFactory() {
+            @Override
+            protected Subscriber newSubscriber(ChannelId channelId) {
+                return new InMemorySubscriber(channelId) {
+                    @Override
+                    public void onMessage(ExternalMessage message) {
+                        final Iterable<StreamObserver<ExternalMessage>> observers = getObservers();
+                        for (StreamObserver<ExternalMessage> observer : observers) {
+                            observerCallback.apply(observer);
+                        }
+                    }
+                };
+            }
+        };
     }
 
     public static class ProjectAggregate
@@ -194,7 +269,7 @@ public class ShardedStreamTestEnv {
 
         @Override
         public BoundedContextName getBoundedContextName() {
-            return PROJECTS_CONTEXT;
+            return projectsContextName;
         }
     }
 
@@ -220,7 +295,7 @@ public class ShardedStreamTestEnv {
             extends AggregateRepository<TaskId, TaskAggregate> {
         @Override
         public BoundedContextName getBoundedContextName() {
-            return TASKS_CONTEXT;
+            return tasksContextName;
         }
     }
 

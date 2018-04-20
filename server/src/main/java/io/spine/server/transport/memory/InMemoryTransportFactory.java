@@ -45,8 +45,8 @@ public class InMemoryTransportFactory implements TransportFactory {
     /**
      * An in-memory storage of subscribers per message class.
      */
-    private final Multimap<ChannelId, InMemorySubscriber> subscribers =
-            synchronizedMultimap(HashMultimap.<ChannelId, InMemorySubscriber>create());
+    private final Multimap<ChannelId, Subscriber> subscribers =
+            synchronizedMultimap(HashMultimap.<ChannelId, Subscriber>create());
 
     /** Prevent direct instantiation from outside of the inheritance tree. */
     protected InMemoryTransportFactory() {}
@@ -69,12 +69,21 @@ public class InMemoryTransportFactory implements TransportFactory {
 
     @Override
     public final synchronized Subscriber createSubscriber(ChannelId channelId) {
-        final InMemorySubscriber subscriber = newSubscriber(channelId);
+        final Subscriber subscriber = newSubscriber(channelId);
         subscribers.put(channelId, subscriber);
         return subscriber;
     }
 
-    protected InMemorySubscriber newSubscriber(ChannelId channelId) {
+    /**
+     * Creates a new instance of subscriber.
+     *
+     * <p>The descendants may override this method to customize the implementation of subscribers
+     * to use within this {@code TransportFactory} instance.
+     *
+     * @param channelId a channel ID to create a subscriber for
+     * @return an instance of subscriber
+     */
+    protected Subscriber newSubscriber(ChannelId channelId) {
         return new InMemorySubscriber(channelId);
     }
 
@@ -85,11 +94,11 @@ public class InMemoryTransportFactory implements TransportFactory {
      * @param subscribers currently registered subscribers and their channel identifiers
      * @return a provider function allowing to fetch subscribers by the channel ID.
      */
-    private static Function<ChannelId, Iterable<InMemorySubscriber>>
-    providerOf(final Multimap<ChannelId, InMemorySubscriber> subscribers) {
-        return new Function<ChannelId, Iterable<InMemorySubscriber>>() {
+    private static Function<ChannelId, Iterable<Subscriber>>
+    providerOf(final Multimap<ChannelId, Subscriber> subscribers) {
+        return new Function<ChannelId, Iterable<Subscriber>>() {
             @Override
-            public Iterable<InMemorySubscriber> apply(@Nullable ChannelId channelId) {
+            public Iterable<Subscriber> apply(@Nullable ChannelId channelId) {
                 checkNotNull(channelId);
                 return subscribers.get(channelId);
             }

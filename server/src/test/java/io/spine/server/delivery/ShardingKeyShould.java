@@ -23,11 +23,11 @@ import com.google.common.testing.EqualsTester;
 import io.spine.server.model.ModelTests;
 import org.junit.Test;
 
-import static io.spine.server.delivery.given.ShardedStreamTestEnv.anotherZeroToProjects;
-import static io.spine.server.delivery.given.ShardedStreamTestEnv.commandStreamToTasksOne;
-import static io.spine.server.delivery.given.ShardedStreamTestEnv.commandStreamToTasksZero;
-import static io.spine.server.delivery.given.ShardedStreamTestEnv.streamOneToProjects;
-import static io.spine.server.delivery.given.ShardedStreamTestEnv.streamZeroToProjects;
+import static io.spine.server.delivery.given.ShardedStreamTestEnv.anotherProjectsShardZero;
+import static io.spine.server.delivery.given.ShardedStreamTestEnv.projectsShardOne;
+import static io.spine.server.delivery.given.ShardedStreamTestEnv.projectsShardZero;
+import static io.spine.server.delivery.given.ShardedStreamTestEnv.tasksShardOne;
+import static io.spine.server.delivery.given.ShardedStreamTestEnv.tasksShardZero;
 
 /**
  * @author Alex Tymchenko
@@ -38,11 +38,11 @@ public class ShardingKeyShould {
     public void support_equality() {
         ModelTests.clearModel();
 
-        final ShardingKey projectsZero = streamZeroToProjects().getKey();
-        final ShardingKey theSameProjectsZero = anotherZeroToProjects().getKey();
-        final ShardingKey projectsOne = streamOneToProjects().getKey();
-        final ShardingKey tasksZeroKey = commandStreamToTasksZero().getKey();
-        final ShardingKey tasksOneKey = commandStreamToTasksOne().getKey();
+        final ShardingKey projectsZero = projectsShardZero().getKey();
+        final ShardingKey theSameProjectsZero = anotherProjectsShardZero().getKey();
+        final ShardingKey projectsOne = projectsShardOne().getKey();
+        final ShardingKey tasksZeroKey = tasksShardZero().getKey();
+        final ShardingKey tasksOneKey = tasksShardOne().getKey();
 
         new EqualsTester().addEqualityGroup(projectsZero, theSameProjectsZero)
                           .addEqualityGroup(projectsOne)
