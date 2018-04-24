@@ -23,6 +23,7 @@ import io.spine.core.Ack;
 import io.spine.core.Event;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
+import io.spine.server.delivery.AbstractMessageDeliveryShould;
 import io.spine.server.delivery.given.ParallelDispatcher;
 import io.spine.server.delivery.given.ThreadStats;
 import io.spine.server.projection.given.ProjectionEventDeliveryTestEnv.DeliveryProjection;
@@ -43,19 +44,14 @@ import static io.spine.server.projection.given.ProjectionEventDeliveryTestEnv.pr
 /**
  * @author Alex Tymchenko
  */
-public class ProjectionEventDeliveryShould {
+public class ProjectionEventDeliveryShould extends AbstractMessageDeliveryShould {
 
+    @Override
     @Before
     public void setUp() {
-        clearModel();
+        super.setUp();
         DeliveryProjection.getStats()
                           .clear();
-        setShardingTransport(SynchronousInMemTransportFactory.newInstance());
-    }
-
-    @After
-    public void tearDown() {
-        setShardingTransport(InMemoryTransportFactory.newInstance());
     }
 
     @Test

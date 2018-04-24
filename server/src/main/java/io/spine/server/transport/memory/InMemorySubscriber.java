@@ -23,6 +23,7 @@ import com.google.common.collect.ImmutableSet;
 import io.grpc.stub.StreamObserver;
 import io.spine.server.integration.ChannelId;
 import io.spine.server.integration.ExternalMessage;
+import io.spine.server.transport.AbstractChannel;
 import io.spine.server.transport.Subscriber;
 
 import java.util.Set;
@@ -37,48 +38,17 @@ import static com.google.common.collect.Sets.newConcurrentHashSet;
  *
  * @author Alex Tymchenko
  */
-
-public class InMemorySubscriber extends AbstractInMemoryChannel implements Subscriber {
-
-    /**
-     * Observers, that actually are informed about the messages arriving through this channel.
-     */
-    private final Set<StreamObserver<ExternalMessage>> observers = newConcurrentHashSet();
+public class InMemorySubscriber extends Subscriber {
 
     public InMemorySubscriber(ChannelId channelId) {
         super(channelId);
     }
 
+    /**
+     * Does nothing as there are no resources to close in the in-memory implementation.
+     */
     @Override
-    public Iterable<StreamObserver<ExternalMessage>> getObservers() {
-        return ImmutableSet.copyOf(observers);
-    }
-
-    @Override
-    public void addObserver(StreamObserver<ExternalMessage> observer) {
-        checkNotNull(observer);
-        observers.add(observer);
-    }
-
-    @Override
-    public void removeObserver(StreamObserver<ExternalMessage> observer) {
-        checkNotNull(observer);
-        observers.remove(observer);
-    }
-
-    @Override
-    public boolean isStale() {
-        return observers.isEmpty();
-    }
-
-    @Override
-    public void onMessage(final ExternalMessage message) {
-        callObservers(message);
-    }
-
-    protected final void callObservers(ExternalMessage message) {
-        for (StreamObserver<ExternalMessage> observer : getObservers()) {
-            observer.onNext(message);
-        }
+    public void close() {
+        // Do nothing.
     }
 }

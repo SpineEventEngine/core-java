@@ -21,6 +21,7 @@ package io.spine.server.transport.memory;
 
 import io.spine.server.integration.ChannelId;
 import io.spine.server.integration.ExternalMessage;
+import io.spine.server.transport.Subscriber;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -28,7 +29,7 @@ import java.util.concurrent.Executors;
 /**
  * @author Alex Tymchenko
  */
-public class SynchronizedInMemSubscriber extends InMemorySubscriber {
+public class SynchronizedInMemSubscriber extends Subscriber {
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
@@ -57,7 +58,6 @@ public class SynchronizedInMemSubscriber extends InMemorySubscriber {
 
     @Override
     public void close() throws Exception {
-        super.close();
         executor.shutdown();
     }
 }

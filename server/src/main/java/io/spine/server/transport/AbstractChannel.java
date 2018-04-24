@@ -17,33 +17,23 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.transport.memory;
+package io.spine.server.transport;
 
+import io.spine.annotation.SPI;
 import io.spine.server.integration.ChannelId;
-import io.spine.server.transport.MessageChannel;
 
 /**
- * An abstract base for in-memory {@linkplain MessageChannel message channels}.
+ * An abstract base for {@linkplain MessageChannel message channels}.
  *
  * @author Alex Tymchenko
  */
-abstract class AbstractInMemoryChannel implements MessageChannel {
+@SPI
+public abstract class AbstractChannel implements MessageChannel {
 
     private final ChannelId channelId;
 
-    protected AbstractInMemoryChannel(ChannelId channelId) {
+    protected AbstractChannel(ChannelId channelId) {
         this.channelId = channelId;
-    }
-
-    /**
-     * Does nothing as there is nothing to close in the in-memory local channel implementation.
-     *
-     * @throws Exception never
-     */
-    @SuppressWarnings("NoopMethodInAbstractClass")  // See the Javadoc for the explanation.
-    @Override
-    public void close() throws Exception {
-        /* Do nothing. */
     }
 
     @Override

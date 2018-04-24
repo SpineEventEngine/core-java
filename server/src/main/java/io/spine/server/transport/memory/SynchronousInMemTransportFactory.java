@@ -20,6 +20,7 @@
 package io.spine.server.transport.memory;
 
 import io.spine.server.integration.ChannelId;
+import io.spine.server.transport.Subscriber;
 
 /**
  * @author Alex Tymchenko
@@ -27,7 +28,7 @@ import io.spine.server.integration.ChannelId;
 public class SynchronousInMemTransportFactory extends InMemoryTransportFactory {
 
     @Override
-    protected InMemorySubscriber newSubscriber(ChannelId channelId) {
+    protected Subscriber newSubscriber(ChannelId channelId) {
         return new SynchronizedInMemSubscriber(channelId);
     }
 

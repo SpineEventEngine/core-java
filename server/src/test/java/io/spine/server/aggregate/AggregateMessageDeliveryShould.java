@@ -28,8 +28,10 @@ import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.DeliveryProject;
 import io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.SingleShardProjectRepository;
 import io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.TripleShardProjectRepository;
+import io.spine.server.delivery.AbstractMessageDeliveryShould;
 import io.spine.server.delivery.given.ParallelDispatcher;
 import io.spine.server.delivery.given.ThreadStats;
+import io.spine.server.transport.TransportFactory;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.server.transport.memory.SynchronousInMemTransportFactory;
 import io.spine.test.aggregate.ProjectId;
@@ -41,25 +43,19 @@ import static io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.ca
 import static io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.projectCancelled;
 import static io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.startProject;
 import static io.spine.server.delivery.given.MessageDeliveryTestEnv.dispatchWaitTime;
-import static io.spine.server.delivery.given.MessageDeliveryTestEnv.setShardingTransport;
 import static io.spine.server.model.ModelTests.clearModel;
 
 /**
  * @author Alex Tymchenko
  */
-public class AggregateMessageDeliveryShould {
+public class AggregateMessageDeliveryShould extends AbstractMessageDeliveryShould {
 
+    @Override
     @Before
     public void setUp() {
-        clearModel();
+        super.setUp();
         DeliveryProject.getStats()
                        .clear();
-        setShardingTransport(SynchronousInMemTransportFactory.newInstance());
-    }
-
-    @After
-    public void tearDown() {
-        setShardingTransport(InMemoryTransportFactory.newInstance());
     }
 
     @Test
