@@ -23,9 +23,9 @@ import io.grpc.stub.StreamObserver;
 import io.spine.server.integration.ExternalMessage;
 
 /**
- * Subscriber for messages of a specific type.
+ * Subscriber for messages of a channel with the {@linkplain MessageChannel#getId() specified ID}.
  *
- * <p>There can be many subscribers per message type.
+ * <p>There can be many subscribers per channel ID.
  *
  * @author Alex Tymchenko
  */
