@@ -51,7 +51,6 @@ public abstract class AbstractMessageDeliveryShould {
         switchToShardingWithTransport(InMemoryTransportFactory.newInstance());
     }
 
-
     /**
      * Switches the current {@link ServerEnvironment} to the sharding based on the given transport
      *
@@ -71,7 +70,6 @@ public abstract class AbstractMessageDeliveryShould {
     protected TransportFactory getTransport() {
         return SynchronousInMemTransportFactory.newInstance();
     }
-
 
     /**
      * Creates an instance of {@link Sharding} to use for the delivery tests.
