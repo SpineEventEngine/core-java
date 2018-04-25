@@ -23,16 +23,19 @@ import io.spine.server.integration.ChannelId;
 import io.spine.server.transport.Subscriber;
 
 /**
+ * The implementation of {@link io.spine.server.transport.TransportFactory TransportFactory},
+ * which uses {@linkplain SingleThreadInMemSubscriber single-thread subscribers}.
+ *
  * @author Alex Tymchenko
  */
-public class SynchronousInMemTransportFactory extends InMemoryTransportFactory {
+public class SingleThreadInMemTransportFactory extends InMemoryTransportFactory {
 
     @Override
     protected Subscriber newSubscriber(ChannelId channelId) {
-        return new SynchronizedInMemSubscriber(channelId);
+        return new SingleThreadInMemSubscriber(channelId);
     }
 
-    public static InMemoryTransportFactory newInstance() {
-        return new SynchronousInMemTransportFactory();
+    public static SingleThreadInMemTransportFactory newInstance() {
+        return new SingleThreadInMemTransportFactory();
     }
 }

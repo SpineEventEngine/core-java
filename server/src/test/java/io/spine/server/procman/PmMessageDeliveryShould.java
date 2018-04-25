@@ -31,16 +31,11 @@ import io.spine.server.delivery.given.ThreadStats;
 import io.spine.server.procman.given.PmMessageDeliveryTestEnv.DeliveryPm;
 import io.spine.server.procman.given.PmMessageDeliveryTestEnv.QuadrupleShardPmRepository;
 import io.spine.server.procman.given.PmMessageDeliveryTestEnv.SingleShardPmRepository;
-import io.spine.server.transport.memory.InMemoryTransportFactory;
-import io.spine.server.transport.memory.SynchronousInMemTransportFactory;
 import io.spine.test.procman.ProjectId;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import static io.spine.server.delivery.given.MessageDeliveryTestEnv.dispatchWaitTime;
-import static io.spine.server.delivery.given.MessageDeliveryTestEnv.setShardingTransport;
-import static io.spine.server.model.ModelTests.clearModel;
 import static io.spine.server.procman.given.PmMessageDeliveryTestEnv.cannotStartProject;
 import static io.spine.server.procman.given.PmMessageDeliveryTestEnv.createProject;
 import static io.spine.server.procman.given.PmMessageDeliveryTestEnv.projectStarted;

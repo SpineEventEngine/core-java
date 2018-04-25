@@ -19,17 +19,9 @@
  */
 package io.spine.server.transport.memory;
 
-import com.google.common.collect.ImmutableSet;
-import io.grpc.stub.StreamObserver;
+import io.grpc.Internal;
 import io.spine.server.integration.ChannelId;
-import io.spine.server.integration.ExternalMessage;
-import io.spine.server.transport.AbstractChannel;
 import io.spine.server.transport.Subscriber;
-
-import java.util.Set;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Sets.newConcurrentHashSet;
 
 /**
  * An in-memory implementation of the {@link Subscriber}.
@@ -38,6 +30,7 @@ import static com.google.common.collect.Sets.newConcurrentHashSet;
  *
  * @author Alex Tymchenko
  */
+@Internal
 public class InMemorySubscriber extends Subscriber {
 
     public InMemorySubscriber(ChannelId channelId) {

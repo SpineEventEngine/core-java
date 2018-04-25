@@ -31,11 +31,7 @@ import io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.TripleSha
 import io.spine.server.delivery.AbstractMessageDeliveryShould;
 import io.spine.server.delivery.given.ParallelDispatcher;
 import io.spine.server.delivery.given.ThreadStats;
-import io.spine.server.transport.TransportFactory;
-import io.spine.server.transport.memory.InMemoryTransportFactory;
-import io.spine.server.transport.memory.SynchronousInMemTransportFactory;
 import io.spine.test.aggregate.ProjectId;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -43,7 +39,6 @@ import static io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.ca
 import static io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.projectCancelled;
 import static io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.startProject;
 import static io.spine.server.delivery.given.MessageDeliveryTestEnv.dispatchWaitTime;
-import static io.spine.server.model.ModelTests.clearModel;
 
 /**
  * @author Alex Tymchenko

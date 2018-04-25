@@ -23,7 +23,7 @@ package io.spine.server.delivery;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.transport.TransportFactory;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
-import io.spine.server.transport.memory.SynchronousInMemTransportFactory;
+import io.spine.server.transport.memory.SingleThreadInMemTransportFactory;
 import org.junit.After;
 import org.junit.Before;
 
@@ -67,7 +67,7 @@ public abstract class AbstractMessageDeliveryShould {
      * @return an instance of {@link TransportFactory} to use in tests
      */
     protected TransportFactory getTransport() {
-        return SynchronousInMemTransportFactory.newInstance();
+        return SingleThreadInMemTransportFactory.newInstance();
     }
 
     /**
