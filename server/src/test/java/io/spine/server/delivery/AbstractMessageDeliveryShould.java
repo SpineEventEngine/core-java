@@ -21,7 +21,6 @@
 package io.spine.server.delivery;
 
 import io.spine.server.ServerEnvironment;
-import io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv;
 import io.spine.server.transport.TransportFactory;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.server.transport.memory.SynchronousInMemTransportFactory;
