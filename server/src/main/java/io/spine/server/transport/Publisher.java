@@ -24,9 +24,9 @@ import io.spine.core.Ack;
 import io.spine.server.integration.ExternalMessage;
 
 /**
- * Publisher for messages of a specific type.
+ * Publisher of messages for the channel with the {@linkplain MessageChannel#getId() specified ID}.
  *
- * <p>There can be many publishers per message type.
+ * <p>There can be many publishers per channel ID.
  *
  * @author Alex Tymchenko
  */

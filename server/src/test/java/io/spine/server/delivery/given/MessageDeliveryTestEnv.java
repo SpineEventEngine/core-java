@@ -38,6 +38,7 @@ import io.spine.server.delivery.ShardingStrategy;
 import io.spine.server.delivery.UniformAcrossTargets;
 import io.spine.server.entity.EntityClass;
 import io.spine.server.model.Model;
+import io.spine.server.transport.TransportFactory;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggStartProject;
