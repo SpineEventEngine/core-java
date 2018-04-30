@@ -26,13 +26,21 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
+ * The in-memory subscriber, which uses single-thread delivery of messages.
+ *
+ * <p>The messages posted by any number of concurrent publishers are delivered to the observers
+ * of this subscriber one-by-one in a single thread.
+ *
+ * <p>This implementation should not be used in production environments, as it is not designed
+ * to operate with external transport.
+ *
  * @author Alex Tymchenko
  */
-public class SynchronizedInMemSubscriber extends InMemorySubscriber {
+class SingleThreadInMemSubscriber extends InMemorySubscriber {
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
-    SynchronizedInMemSubscriber(ChannelId channelId) {
+    SingleThreadInMemSubscriber(ChannelId channelId) {
         super(channelId);
     }
 
@@ -56,8 +64,7 @@ public class SynchronizedInMemSubscriber extends InMemorySubscriber {
     }
 
     @Override
-    public void close() throws Exception {
-        super.close();
+    public void close() {
         executor.shutdown();
     }
 }

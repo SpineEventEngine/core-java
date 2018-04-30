@@ -25,6 +25,7 @@ import io.spine.core.Ack;
 import io.spine.server.bus.Buses;
 import io.spine.server.integration.ChannelId;
 import io.spine.server.integration.ExternalMessage;
+import io.spine.server.transport.AbstractChannel;
 import io.spine.server.transport.Publisher;
 import io.spine.server.transport.Subscriber;
 
@@ -35,7 +36,7 @@ import io.spine.server.transport.Subscriber;
  *
  * @author Alex Tymchenko
  */
-public final class InMemoryPublisher extends AbstractInMemoryChannel implements Publisher {
+public final class InMemoryPublisher extends AbstractChannel implements Publisher {
 
     /**
      * A provider of subscribers per channel ID.
@@ -52,13 +53,9 @@ public final class InMemoryPublisher extends AbstractInMemoryChannel implements 
     public Ack publish(Any messageId, ExternalMessage message) {
         final Iterable<Subscriber> localSubscribers = getSubscribers(getId());
         for (Subscriber localSubscriber : localSubscribers) {
-            callSubscriber(message, localSubscriber);
+            localSubscriber.onMessage(message);
         }
         return Buses.acknowledge(messageId);
-    }
-
-    private static void callSubscriber(ExternalMessage message, Subscriber subscriber) {
-        subscriber.onMessage(message);
     }
 
     private Iterable<Subscriber> getSubscribers(ChannelId channelId) {
@@ -73,5 +70,13 @@ public final class InMemoryPublisher extends AbstractInMemoryChannel implements 
     @Override
     public boolean isStale() {
         return false;
+    }
+
+    /**
+     * Does nothing as there are no resources to close in the in-memory implementation.
+     */
+    @Override
+    public void close() {
+        // Do nothing.
     }
 }
