@@ -307,8 +307,29 @@ public class ProcessManagerShould {
                                            .getContext());
     }
 
+    /**
+     * This test executes two commands, thus checks for 2 Acks:
+     * <ol>
+     *     <li>{@link io.spine.test.procman.exam.command.PmStartExam Start Exam} — to initialize the PM;
+     *     <li>{@link io.spine.test.procman.exam.command.PmAnswerProblem Answer Problem } — a target
+     *         command that produces either of 3 events.
+     * </ol>
+     *
+     * <p>First command emits an {@link io.spine.test.procman.exam.event.PmExamStarted Exam Started}
+     * event.
+     *      
+     * <p>Second command emits a {@link io.spine.test.procman.exam.event.PmProblemAnswered Problem Answered} 
+     * event.
+     *     
+     * <p>As a reaction to {@link io.spine.test.procman.exam.event.PmProblemAnswered Problem Answered}
+     * the process manager emits an {@link io.spine.server.tuple.EitherOfThree Either Of Three}
+     * containing {@link com.google.protobuf.Empty Empty}. This is done because the answered problem
+     * is not part of an exam.
+     *
+     * @see io.spine.server.procman.given.ExamProcman
+     */
     @Test
-    public void create_no_events_if_reaction_contains_either_of_three_with_Empty() {
+    public void not_create_event_if_reaction_is_either_of_three_with_Empty() {
         final BoundedContext boundedContext = newExamBoundedContext();
         final TenantId tenantId = newTenantId();
         final PmExamId examId = newExamId();
@@ -338,8 +359,26 @@ public class ProcessManagerShould {
         closeContext(boundedContext);
     }
 
+    /**
+     * This test executes two commands, thus checks for 2 Acks:
+     * <ol>
+     *     <li>{@link io.spine.test.procman.exam.command.PmStartExam Start Exam} — to initialize the PM;
+     *     <li>{@link io.spine.test.procman.exam.command.PmAnswerProblem Answer Problem } — a target
+     *         command that produces either of 3 events.
+     * </ol>
+     *
+     * <p>First command emits an {@link io.spine.test.procman.exam.event.PmExamStarted Exam Started}
+     * event.
+     *
+     * <p>Because the exam is started without any problems to solve, 
+     * {@link io.spine.test.procman.exam.command.PmAnswerProblem answer problem command} can not 
+     * match any problems. This results in emitting {@link io.spine.server.tuple.EitherOfThree Either Of Three} 
+     * containing {@link com.google.protobuf.Empty Empty}.
+     *
+     * @see io.spine.server.procman.given.DirectExamProcman
+     */
     @Test
-    public void create_no_events_if_command_handle_results_in_either_of_three_with_Empty() {
+    public void not_create_event_if_command_handle_results_is_either_of_three_with_Empty() {
         final BoundedContext boundedContext = newDirectExamBoundedContext();
         final TenantId tenantId = newTenantId();
         final PmExamId examId = newExamId();
@@ -387,7 +426,8 @@ public class ProcessManagerShould {
                 .build();
     }
 
-    private static RejectionEnvelope entityAlreadyArchived(Class<? extends Message> commandMessageCls) {
+    private static RejectionEnvelope entityAlreadyArchived(
+            Class<? extends Message> commandMessageCls) {
         final Any id = Identifier.pack(ProcessManagerShould.class.getName());
         final EntityAlreadyArchived rejectionMessage = EntityAlreadyArchived.newBuilder()
                                                                             .setEntityId(id)
