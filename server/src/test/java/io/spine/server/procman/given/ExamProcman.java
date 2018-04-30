@@ -39,6 +39,10 @@ import io.spine.test.procman.exam.event.PmProblemSolved;
 
 import java.util.List;
 
+/**
+ * An exam is started using {@link PmStartExam Start Exam command} which defines a problem set, and 
+ * the problems are answered using {@link PmAnswerProblem Answer Problem commands}.
+ */
 class ExamProcman extends ProcessManager<PmExamId, PmExam, PmExamVBuilder> {
 
     protected ExamProcman(PmExamId id) {

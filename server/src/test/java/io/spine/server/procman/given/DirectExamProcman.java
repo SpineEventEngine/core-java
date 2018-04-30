@@ -38,6 +38,14 @@ import io.spine.test.procman.exam.event.PmProblemSolved;
 
 import java.util.List;
 
+/**
+ * An exam is started using {@link PmStartExam Start Exam command} which defines a problem set, and 
+ * the problems are answered using {@link PmAnswerProblem Answer Problem commands}.
+ * 
+ * <p>Differs from the {@link ExamProcman} by scarcing the interjacent 
+ * {@link io.spine.test.procman.exam.event.PmProblemAnswered Problem Answered event} and emits 
+ * either of three when handling a command.
+ */
 class DirectExamProcman extends ProcessManager<PmExamId, PmExam, PmExamVBuilder> {
 
     protected DirectExamProcman(PmExamId id) {
