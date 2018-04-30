@@ -78,6 +78,7 @@ import static io.spine.server.procman.ProcessManagerDispatcher.dispatch;
 import static io.spine.server.procman.given.ProcessManagerTestEnv.answerProblem;
 import static io.spine.server.procman.given.ProcessManagerTestEnv.closeContext;
 import static io.spine.server.procman.given.ProcessManagerTestEnv.command;
+import static io.spine.server.procman.given.ProcessManagerTestEnv.newDirectExamBoundedContext;
 import static io.spine.server.procman.given.ProcessManagerTestEnv.newExamBoundedContext;
 import static io.spine.server.procman.given.ProcessManagerTestEnv.newExamId;
 import static io.spine.server.procman.given.ProcessManagerTestEnv.newProblemAnswer;
@@ -334,6 +335,37 @@ public class ProcessManagerShould {
 
         final List<Event> events = readAllEvents(boundedContext, tenantId);
         assertSize(2, events);
+        closeContext(boundedContext);
+    }
+
+    @Test
+    public void create_no_events_if_command_handle_results_in_either_of_three_with_Empty() {
+        final BoundedContext boundedContext = newDirectExamBoundedContext();
+        final TenantId tenantId = newTenantId();
+        final PmExamId examId = newExamId();
+        final Iterable<PmProblemId> problems = newArrayList();
+        final Command startCommand = command(startExam(examId, problems), tenantId);
+        final MemoizingObserver<Ack> observer = memoizingObserver();
+        final CommandBus commandBus = boundedContext.getCommandBus();
+        commandBus.post(startCommand, observer);
+
+        final Command command = command(answerProblem(examId, newProblemAnswer()), tenantId);
+        commandBus.post(command, observer);
+
+        assertNull(observer.getError());
+
+        final List<Ack> responses = observer.responses();
+        assertSize(2, responses);
+
+        final Ack response = responses.get(0);
+        final io.spine.core.Status status = response.getStatus();
+        final Error emptyError = Error.getDefaultInstance();
+        assertEquals(emptyError, status.getError());
+        final Rejection emptyRejection = Rejection.getDefaultInstance();
+        assertEquals(emptyRejection, status.getRejection());
+
+        final List<Event> events = readAllEvents(boundedContext, tenantId);
+        assertSize(1, events);
         closeContext(boundedContext);
     }
 

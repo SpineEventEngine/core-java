@@ -150,6 +150,18 @@ public class ProcessManagerTestEnv {
     }
 
     /**
+     * Creates a new multitenant bounded context with a registered
+     * {@linkplain DirectExamProcmanRepository exam repository}.
+     */
+    public static BoundedContext newDirectExamBoundedContext() {
+        final BoundedContext boundedContext = BoundedContext.newBuilder()
+                                                            .setMultitenant(true)
+                                                            .build();
+        boundedContext.register(new DirectExamProcmanRepository());
+        return boundedContext;
+    }
+
+    /**
      * A convenience method for closing the bounded context.
      *
      * <p>Instead of a checked {@link java.io.IOException IOException}, wraps any issues
