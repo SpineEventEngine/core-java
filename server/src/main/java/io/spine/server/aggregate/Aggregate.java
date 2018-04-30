@@ -20,7 +20,6 @@
 package io.spine.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
@@ -56,6 +55,7 @@ import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.Events.getMessage;
+import static io.spine.server.utils.MessagePredicates.nonEmpty;
 import static io.spine.validate.Validate.isNotDefault;
 
 /**
@@ -477,31 +477,4 @@ public abstract class Aggregate<I,
         return super.versionNumber();
     }
 
-    /**
-     * @return an instance of an {@linkplain NonEmpty non-empty predicate}
-     */
-    private static Predicate<Message> nonEmpty() {
-        return NonEmpty.INSTANCE;
-    }
-
-    /**
-     * A predicate checking that message is not {@linkplain Empty empty}.
-     */
-    private enum NonEmpty implements Predicate<Message> {
-
-        INSTANCE;
-
-        private static final Empty EMPTY = Empty.getDefaultInstance();
-
-        /**
-         * Checks that message is not {@linkplain Empty empty}.
-         *
-         * @param  message the message being checked
-         * @return {@code true} if the message is not empty, {@code false} otherwise 
-         */
-        @Override
-        public boolean apply(Message message) {
-            return !message.equals(EMPTY);
-        }
-    }
 }

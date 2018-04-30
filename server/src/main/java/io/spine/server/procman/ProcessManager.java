@@ -42,6 +42,8 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.FluentIterable.from;
+import static io.spine.server.utils.MessagePredicates.nonEmpty;
 
 /**
  * A central processing unit used to maintain the state of the business process and determine
@@ -149,8 +151,19 @@ public abstract class ProcessManager<I,
      *         the envelope with the origin of events
      * @return list of events
      */
-    private List<Event> toEvents(List<? extends Message> eventMessages, MessageEnvelope origin) {
-        return HandlerMethod.toEvents(getProducerId(), getVersion(), eventMessages, origin);
+    private List<Event> toEvents(Iterable<? extends Message> eventMessages, MessageEnvelope origin) {
+        final List<? extends Message> messages = filterMessages(eventMessages);
+        return HandlerMethod.toEvents(getProducerId(), getVersion(), messages, origin);
+    }
+
+    /**
+     * Applies filters to messages emitted during command or event dispatch.
+     *
+     * @param messages event messages which were emitted and require filtering
+     * @return provided messages with an exception of those not passing filters
+     */
+    private static List<? extends Message> filterMessages(Iterable<? extends Message> messages) {
+        return from(messages).filter(nonEmpty()).toList();
     }
 
     /**
