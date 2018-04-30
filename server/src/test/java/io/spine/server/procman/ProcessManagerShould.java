@@ -25,7 +25,9 @@ import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.Identifier;
+import io.spine.base.Error;
 import io.spine.client.TestActorRequestFactory;
+import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
@@ -35,6 +37,8 @@ import io.spine.core.Events;
 import io.spine.core.Rejection;
 import io.spine.core.RejectionEnvelope;
 import io.spine.core.Rejections;
+import io.spine.core.TenantId;
+import io.spine.grpc.MemoizingObserver;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.command.TestEventFactory;
@@ -55,22 +59,36 @@ import io.spine.test.procman.command.PmStartProject;
 import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.event.PmTaskAdded;
+import io.spine.test.procman.exam.PmExamId;
+import io.spine.test.procman.exam.PmProblemId;
 import io.spine.testdata.Sample;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.core.Commands.getMessage;
+import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.server.commandbus.Given.ACommand;
 import static io.spine.server.procman.ProcessManagerDispatcher.dispatch;
+import static io.spine.server.procman.given.ProcessManagerTestEnv.answerProblem;
+import static io.spine.server.procman.given.ProcessManagerTestEnv.closeContext;
+import static io.spine.server.procman.given.ProcessManagerTestEnv.command;
+import static io.spine.server.procman.given.ProcessManagerTestEnv.newExamBoundedContext;
+import static io.spine.server.procman.given.ProcessManagerTestEnv.newExamId;
+import static io.spine.server.procman.given.ProcessManagerTestEnv.newProblemAnswer;
+import static io.spine.server.procman.given.ProcessManagerTestEnv.newTenantId;
+import static io.spine.server.procman.given.ProcessManagerTestEnv.readAllEvents;
+import static io.spine.server.procman.given.ProcessManagerTestEnv.startExam;
 import static io.spine.test.Verify.assertSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -286,6 +304,37 @@ public class ProcessManagerShould {
         assertEquals(commandMessage, getMessage(router.getSource()));
         assertEquals(commandContext, router.getSource()
                                            .getContext());
+    }
+
+    @Test
+    public void create_no_events_if_reaction_contains_either_of_three_with_Empty() {
+        final BoundedContext boundedContext = newExamBoundedContext();
+        final TenantId tenantId = newTenantId();
+        final PmExamId examId = newExamId();
+        final Iterable<PmProblemId> problems = newArrayList();
+        final Command startCommand = command(startExam(examId, problems), tenantId);
+        final MemoizingObserver<Ack> observer = memoizingObserver();
+        final CommandBus commandBus = boundedContext.getCommandBus();
+        commandBus.post(startCommand, observer);
+
+        final Command command = command(answerProblem(examId, newProblemAnswer()), tenantId);
+        commandBus.post(command, observer);
+
+        assertNull(observer.getError());
+
+        final List<Ack> responses = observer.responses();
+        assertSize(2, responses);
+
+        final Ack response = responses.get(0);
+        final io.spine.core.Status status = response.getStatus();
+        final Error emptyError = Error.getDefaultInstance();
+        assertEquals(emptyError, status.getError());
+        final Rejection emptyRejection = Rejection.getDefaultInstance();
+        assertEquals(emptyRejection, status.getRejection());
+
+        final List<Event> events = readAllEvents(boundedContext, tenantId);
+        assertSize(2, events);
+        closeContext(boundedContext);
     }
 
     private static PmCreateProject createProject() {
