@@ -49,13 +49,11 @@ import javax.annotation.CheckReturnValue;
 import java.util.Iterator;
 import java.util.List;
 
-import static com.google.common.collect.FluentIterable.from;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.Events.getMessage;
-import static io.spine.server.utils.MessagePredicates.nonEmpty;
 import static io.spine.validate.Validate.isNotDefault;
 
 /**
@@ -212,7 +210,8 @@ public abstract class Aggregate<I,
         final CommandHandlerMethod method = thisClass().getHandler(command.getMessageClass());
         final List<? extends Message> messages =
                 method.invoke(this, command.getMessage(), command.getCommandContext());
-        return from(messages).filter(nonEmpty()).toList();
+        final List<? extends Message> filteredMessages = EventFilter.of(messages).filter();
+        return filteredMessages;
     }
 
     /**
@@ -229,7 +228,8 @@ public abstract class Aggregate<I,
         final EventReactorMethod method = thisClass().getReactor(event.getMessageClass());
         final List<? extends Message> messages =
                 method.invoke(this, event.getMessage(), event.getEventContext());
-        return from(messages).filter(nonEmpty()).toList();
+        final List<? extends Message> filteredMessages = EventFilter.of(messages).filter();
+        return filteredMessages;
     }
 
     /**
@@ -249,7 +249,8 @@ public abstract class Aggregate<I,
                                                                      commandClass);
         final List<? extends Message> messages =
                 method.invoke(this, rejection.getMessage(), rejection.getRejectionContext());
-        return from(messages).filter(nonEmpty()).toList();
+        final List<? extends Message> filteredMessages = EventFilter.of(messages).filter();
+        return filteredMessages;
     }
 
     /**

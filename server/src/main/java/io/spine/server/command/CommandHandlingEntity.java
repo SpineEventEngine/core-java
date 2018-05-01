@@ -20,7 +20,9 @@
 
 package io.spine.server.command;
 
+import com.google.common.base.Predicate;
 import com.google.protobuf.Any;
+import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.Identifier;
 import io.spine.base.ThrowableMessage;
@@ -34,6 +36,8 @@ import io.spine.server.entity.EventPlayingEntity;
 import io.spine.validate.ValidatingBuilder;
 
 import java.util.List;
+
+import static com.google.common.collect.FluentIterable.from;
 
 /**
  * An entity that can handle commands.
@@ -171,5 +175,71 @@ class CommandHandlingEntity<I,
      */
     protected ValueMismatch unexpectedValue(String expected, String actual, String newValue) {
         return StringMismatch.unexpectedValue(expected, actual, newValue, versionNumber());
+    }
+
+    /**
+     * A object which performs filtering of the events emitted by a
+     * {@link CommandHandlingEntity command handling entity}.
+     */
+    protected static class EventFilter {
+
+        private final Iterable<? extends Message> messages;
+
+        /**
+         * A private constructor preventing instantiation.
+         * 
+         * @param messages event messages which were emitted by a command handling entity and
+         *                 require filtering
+         */
+        private EventFilter(Iterable<? extends Message> messages) {
+            this.messages = messages;
+        }
+
+        /**
+         * Performs the filtering of the event messages.
+         *
+         * @return provided messages with an exception of those not passing filter
+         */
+        public List<? extends Message> filter() {
+            return from(messages).filter(nonEmpty()).toList();
+        }
+
+        /**
+         * @param messages event messages which were emitted by a command handling entity and
+         *                 require filtering
+         * @return an instance of an {@link EventFilter event filter} processing provided messages
+         */
+        public static EventFilter of(Iterable<? extends Message> messages) {
+            return new EventFilter(messages);
+        }
+
+        /**
+         * @return an instance of an {@linkplain NonEmpty non-empty predicate}
+         */
+        private static Predicate<Message> nonEmpty() {
+            return NonEmpty.INSTANCE;
+        }
+
+        /**
+         * A predicate checking that message is not {@linkplain Empty empty}.
+         */
+        private enum NonEmpty implements Predicate<Message> {
+
+            INSTANCE;
+
+            private static final Empty EMPTY = Empty.getDefaultInstance();
+
+            /**
+             * Checks that message is not {@linkplain Empty empty}.
+             *
+             * @param message the message being checked
+             * @return {@code true} if the message is not empty, {@code false} otherwise
+             */
+            @Override
+            public boolean apply(Message message) {
+                return !message.equals(EMPTY);
+            }
+        }
+
     }
 }
