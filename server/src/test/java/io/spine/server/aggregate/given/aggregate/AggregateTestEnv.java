@@ -29,14 +29,10 @@ import io.spine.core.Event;
 import io.spine.core.Rejection;
 import io.spine.core.RejectionEnvelope;
 import io.spine.core.Rejections;
-import io.spine.core.TenantId;
 import io.spine.core.UserId;
-import io.spine.grpc.MemoizingObserver;
 import io.spine.server.BoundedContext;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.entity.rejection.StandardRejections.CannotModifyDeletedEntity;
-import io.spine.server.event.EventStreamQuery;
-import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.test.aggregate.command.AggAssignTask;
 import io.spine.test.aggregate.command.AggCreateTask;
 import io.spine.test.aggregate.command.AggReassignTask;
@@ -44,11 +40,10 @@ import io.spine.test.aggregate.task.AggTaskId;
 import io.spine.testdata.Sample;
 import io.spine.type.TypeUrl;
 
-import java.util.List;
-
 import static io.spine.Identifier.newUuid;
 import static io.spine.core.given.GivenVersion.withNumber;
-import static io.spine.grpc.StreamObservers.memoizingObserver;
+import static io.spine.server.boundedContext.TestBoundedContexts.command;
+import static io.spine.server.boundedContext.TestBoundedContexts.newBoundedContext;
 
 /**
  * @author Alexander Yevsyukov
@@ -59,34 +54,6 @@ public class AggregateTestEnv {
     /** Prevent instantiation of this test environment */
     private AggregateTestEnv() {
         // Do nothing.
-    }
-
-    /**
-     * Reads all events from the bounded context for the provided tenant.
-     */
-    public static List<Event> readAllEvents(final BoundedContext boundedContext,
-                                            TenantId tenantId) {
-        final MemoizingObserver<Event> queryObserver = memoizingObserver();
-        final TenantAwareOperation operation = new TenantAwareOperation(tenantId) {
-            @Override
-            public void run() {
-                boundedContext.getEventBus()
-                              .getEventStore()
-                              .read(allEventsQuery(), queryObserver);
-            }
-        };
-        operation.execute();
-
-        final List<Event> responses = queryObserver.responses();
-        return responses;
-    }
-
-    /**
-     * Creates a new {@link EventStreamQuery} without any filters.
-     */
-    private static EventStreamQuery allEventsQuery() {
-        return EventStreamQuery.newBuilder()
-                               .build();
     }
 
     private static AggTaskId newTaskId() {
@@ -101,20 +68,12 @@ public class AggregateTestEnv {
                      .build();
     }
 
-    public static TenantId newTenantId() {
-        return TenantId.newBuilder()
-                       .setValue(newUuid())
-                       .build();
-    }
-
     /**
      * Creates a new multitenant bounded context with a registered
      * {@linkplain TaskAggregateRepository task repository}.
      */
     public static BoundedContext newTaskBoundedContext() {
-        final BoundedContext boundedContext = BoundedContext.newBuilder()
-                                                            .setMultitenant(true)
-                                                            .build();
+        final BoundedContext boundedContext = newBoundedContext();
         boundedContext.register(new TaskAggregateRepository());
         return boundedContext;
     }
@@ -148,16 +107,6 @@ public class AggregateTestEnv {
         return result;
     }
 
-    public static Command command(Message commandMessage, TenantId tenantId) {
-        return requestFactory(tenantId).command()
-                                       .create(commandMessage);
-    }
-
-    public static Command command(Message commandMessage) {
-        return requestFactory().command()
-                               .create(commandMessage);
-    }
-
     public static CommandEnvelope env(Message commandMessage) {
         return CommandEnvelope.of(command(commandMessage));
     }
@@ -175,11 +124,7 @@ public class AggregateTestEnv {
         return RejectionEnvelope.of(rejection);
     }
 
-    private static TestActorRequestFactory requestFactory(TenantId tenantId) {
-        return TestActorRequestFactory.newInstance(AggregateTestEnv.class, tenantId);
-    }
-
-    public static TestActorRequestFactory requestFactory() {
+    private static TestActorRequestFactory requestFactory() {
         return TestActorRequestFactory.newInstance(AggregateTestEnv.class);
     }
 

@@ -23,26 +23,18 @@ package io.spine.server.procman.given;
 import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
-import io.spine.client.TestActorRequestFactory;
-import io.spine.core.Command;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
-import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.React;
-import io.spine.core.TenantId;
-import io.spine.grpc.MemoizingObserver;
 import io.spine.server.BoundedContext;
-import io.spine.server.aggregate.given.aggregate.AggregateTestEnv;
 import io.spine.server.command.Assign;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived;
-import io.spine.server.event.EventStreamQuery;
 import io.spine.server.procman.CommandRouted;
 import io.spine.server.procman.ProcessManager;
-import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.command.PmAddTask;
 import io.spine.test.procman.command.PmCreateProject;
@@ -57,7 +49,6 @@ import io.spine.test.procman.exam.PmProblemId;
 import io.spine.test.procman.exam.command.PmAnswerProblem;
 import io.spine.test.procman.exam.command.PmStartExam;
 import io.spine.testdata.Sample;
-import io.spine.util.Exceptions;
 import io.spine.validate.AnyVBuilder;
 
 import java.lang.reflect.InvocationTargetException;
@@ -66,32 +57,19 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.Identifier.newUuid;
-import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.server.boundedContext.TestBoundedContexts.newBoundedContext;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 
 /**
- * @author Alexander Yevsyukov
+ * @author Mykhailo Drachuk
  */
 public class ProcessManagerTestEnv {
 
     /** Prevents instantiation on this utility class. */
     private ProcessManagerTestEnv() {
-    }
-
-    public static Command command(Message commandMessage, TenantId tenantId) {
-        return requestFactory(tenantId).command()
-                                       .create(commandMessage);
-    }
-
-    /**
-     * Creates a new {@link EventStreamQuery} without any filters.
-     */
-    private static EventStreamQuery allEventsQuery() {
-        return EventStreamQuery.newBuilder()
-                               .build();
+        // Do nothing.
     }
 
     public static PmExamId newExamId() {
@@ -131,20 +109,12 @@ public class ProcessManagerTestEnv {
                               .build();
     }
 
-    public static TenantId newTenantId() {
-        return TenantId.newBuilder()
-                       .setValue(newUuid())
-                       .build();
-    }
-
     /**
      * Creates a new multitenant bounded context with a registered
      * {@linkplain ExamProcmanRepository exam repository}.
      */
     public static BoundedContext newExamBoundedContext() {
-        final BoundedContext boundedContext = BoundedContext.newBuilder()
-                                                            .setMultitenant(true)
-                                                            .build();
+        final BoundedContext boundedContext = newBoundedContext();
         boundedContext.register(new ExamProcmanRepository());
         return boundedContext;
     }
@@ -154,52 +124,9 @@ public class ProcessManagerTestEnv {
      * {@linkplain DirectExamProcmanRepository exam repository}.
      */
     public static BoundedContext newDirectExamBoundedContext() {
-        final BoundedContext boundedContext = BoundedContext.newBuilder()
-                                                            .setMultitenant(true)
-                                                            .build();
+        final BoundedContext boundedContext = newBoundedContext();
         boundedContext.register(new DirectExamProcmanRepository());
         return boundedContext;
-    }
-
-    /**
-     * A convenience method for closing the bounded context.
-     *
-     * <p>Instead of a checked {@link java.io.IOException IOException}, wraps any issues
-     * that may occur while closing, into an {@link IllegalStateException}.
-     *
-     * @param boundedContext a bounded context to close
-     */
-    public static void closeContext(BoundedContext boundedContext) {
-        checkNotNull(boundedContext);
-        try {
-            boundedContext.close();
-        } catch (Exception e) {
-            throw Exceptions.illegalStateWithCauseOf(e);
-        }
-    }
-
-    private static TestActorRequestFactory requestFactory(TenantId tenantId) {
-        return TestActorRequestFactory.newInstance(AggregateTestEnv.class, tenantId);
-    }
-
-    /**
-     * Reads all events from the bounded context for the provided tenant.
-     */
-    public static List<Event> readAllEvents(final BoundedContext boundedContext,
-                                            TenantId tenantId) {
-        final MemoizingObserver<Event> queryObserver = memoizingObserver();
-        final TenantAwareOperation operation = new TenantAwareOperation(tenantId) {
-            @Override
-            public void run() {
-                boundedContext.getEventBus()
-                              .getEventStore()
-                              .read(allEventsQuery(), queryObserver);
-            }
-        };
-        operation.execute();
-
-        final List<Event> responses = queryObserver.responses();
-        return responses;
     }
 
     /**
