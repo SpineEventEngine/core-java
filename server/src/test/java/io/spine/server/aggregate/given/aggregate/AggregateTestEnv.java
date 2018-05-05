@@ -42,8 +42,8 @@ import io.spine.type.TypeUrl;
 
 import static io.spine.Identifier.newUuid;
 import static io.spine.core.given.GivenVersion.withNumber;
-import static io.spine.server.boundedContext.TestBoundedContexts.command;
-import static io.spine.server.boundedContext.TestBoundedContexts.newBoundedContext;
+import static io.spine.server.TestBoundedContexts.command;
+import static io.spine.server.TestBoundedContexts.newBoundedContext;
 
 /**
  * @author Alexander Yevsyukov

@@ -59,7 +59,7 @@ import java.util.Set;
 
 import static io.spine.Identifier.newUuid;
 import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.server.boundedContext.TestBoundedContexts.newBoundedContext;
+import static io.spine.server.TestBoundedContexts.newBoundedContext;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 
 /**
