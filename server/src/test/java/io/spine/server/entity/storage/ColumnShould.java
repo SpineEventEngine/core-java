@@ -39,7 +39,7 @@ import java.lang.reflect.Method;
 
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
 import static io.spine.server.entity.storage.enumeration.EnumType.ORDINAL;
-import static io.spine.server.entity.storage.enumeration.EnumTypes.getPersistenceType;
+import static io.spine.server.entity.storage.enumeration.PersistenceTypes.getPersistenceType;
 import static io.spine.server.entity.storage.given.ColumnTestEnv.TestEnum.ONE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

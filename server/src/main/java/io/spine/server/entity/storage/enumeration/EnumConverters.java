@@ -29,15 +29,30 @@ import java.util.Map;
 import static io.spine.server.entity.storage.enumeration.EnumType.ORDINAL;
 import static io.spine.server.entity.storage.enumeration.EnumType.STRING;
 
+/**
+ * A container for the known {@linkplain EnumConverter enum converters} stored by the {@link
+ * EnumType}.
+ *
+ * @author Dmytro Kuzmin
+ */
 @Internal
 public final class EnumConverters {
 
     private static final Map<EnumType, EnumConverter<? extends Serializable>> converters =
             converters();
 
+    /**
+     * Prevent instantiation of this class.
+     */
     private EnumConverters() {
     }
 
+    /**
+     * Retrieve the {@linkplain EnumConverter converter} for the given {@link EnumType}.
+     *
+     * @param type the {@code EnumType} which defines the conversion method
+     * @return the converter for the given type
+     */
     public static EnumConverter<? extends Serializable> forType(EnumType type) {
         return converters.get(type);
     }

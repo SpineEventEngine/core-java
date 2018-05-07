@@ -20,8 +20,30 @@
 
 package io.spine.server.entity.storage.enumeration;
 
+/**
+ * Enumeration of persistence methods for the {@linkplain Enumerated enumerated values}.
+ *
+ * <p>The methods define the form in which the {@link Enum} objects will be persisted in the data
+ * storage as well as the conversion method between the {@link Enum} value and the persistence
+ * value.
+ *
+ * <p>For the details about various types conversion, see {@link EnumConverter} implementations.
+ *
+ * @author Dmytro Kuzmin
+ * @see Enumerated
+ * @see Enum
+ */
 public enum EnumType {
 
+    /**
+     * A persistence method which uses Java {@link Enum}'s {@linkplain Enum#ordinal() ordinal} to
+     * convert the {@link Enum} into the {@link Integer} value to use in the storage.
+     */
     ORDINAL,
+
+    /**
+     * A persistence method which uses {@link Enum}'s {@linkplain Enum#name() name} property to
+     * store the {@link Enum} value in the form of Java {@link String}.
+     */
     STRING
 }

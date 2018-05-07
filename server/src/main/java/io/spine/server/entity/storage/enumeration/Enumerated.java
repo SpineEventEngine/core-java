@@ -27,9 +27,32 @@ import static io.spine.server.entity.storage.enumeration.EnumType.ORDINAL;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
+/**
+ * Mark an {@linkplain io.spine.server.entity.storage.Column entity column} as an enumerated value.
+ *
+ * <p>This annotation only has effect when used in conjunction with the {@link
+ * io.spine.server.entity.storage.Column} annotation.
+ *
+ * <p>Entity columns storing enumerated types (i.e. {@linkplain Enum Java Enum}) are persisted
+ * differently to all other types. This annotation can be used to control the way the enumerated
+ * value is persisted in the data storage.
+ *
+ * <p>If this annotation is omitted for the column which stores {@link Enum} type, it is still
+ * counted as an enumerated type, and is assumed to be of the {@linkplain EnumType#ORDINAL ordinal
+ * enum type}.
+ *
+ * @author Dmytro Kuzmin
+ * @see EnumType
+ */
 @Target(METHOD)
 @Retention(RUNTIME)
 public @interface Enumerated {
 
+    /**
+     * The {@link EnumType} of the enumerated value which defines how the value will be persisted
+     * in the data storage.
+     *
+     * <p>For the detailed information about the persistent methods, see {@link EnumType}.
+     */
     EnumType value() default ORDINAL;
 }

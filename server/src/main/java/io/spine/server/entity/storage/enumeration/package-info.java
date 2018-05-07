@@ -20,7 +20,8 @@
 
 /**
  * This package contains classes and interfaces for working with
- * {@link java.lang.Enum enum} storage representation.
+ * {@linkplain io.spine.server.entity.storage.enumeration.Enumerated enumerated fields} of the
+ * {@link io.spine.server.entity.Entity} storage representation.
  */
 @ParametersAreNonnullByDefault
 package io.spine.server.entity.storage.enumeration;

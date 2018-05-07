@@ -29,7 +29,7 @@ import java.lang.reflect.Method;
 
 import static io.spine.server.entity.storage.enumeration.EnumType.ORDINAL;
 import static io.spine.server.entity.storage.enumeration.EnumType.STRING;
-import static io.spine.server.entity.storage.enumeration.EnumTypes.getPersistenceType;
+import static io.spine.server.entity.storage.enumeration.PersistenceTypes.getPersistenceType;
 import static io.spine.server.entity.storage.enumeration.EnumeratedValue.from;
 import static io.spine.server.entity.storage.enumeration.given.EnumeratedTestEnv.TestEnum.ONE;
 import static org.junit.Assert.assertEquals;

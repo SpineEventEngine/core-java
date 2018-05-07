@@ -355,6 +355,17 @@ public class EntityColumn implements Serializable {
         return getter.getReturnType();
     }
 
+    /**
+     * Return the type under which the column is persisted in the data storage.
+     *
+     * For the non-{@link io.spine.server.entity.storage.enumeration.Enumerated} entity columns
+     * this type will be equal to the one retrieved via the {@link #getType()}.
+     *
+     * For {@link io.spine.server.entity.storage.enumeration.Enumerated} columns see {@link
+     * io.spine.server.entity.storage.enumeration.PersistenceTypes}.
+     *
+     * @return the persistence type of the column
+     */
     public Class getPersistenceType() {
         if (isEnumType()) {
             return enumeratedValue.getPersistenceType();
@@ -362,6 +373,16 @@ public class EntityColumn implements Serializable {
         return getter.getReturnType();
     }
 
+    /**
+     * Convert the given column value to the type under which it will be persisted in the data
+     * storage.
+     *
+     * @param value the value to convert
+     * @return the value that will be persisted in the data storage
+     * @throws IllegalArgumentException in case the value type doesn't match the {@linkplain
+     *                                  #getType() one persisted in column}
+     * @see #getPersistenceType()
+     */
     public Object toPersistenceType(@Nullable Object value) {
         if (value == null) {
             return null;
@@ -408,8 +429,7 @@ public class EntityColumn implements Serializable {
         return !enumeratedValue.isEmpty();
     }
 
-    private void checkTypeMatches(Object value)
-    {
+    private void checkTypeMatches(Object value) {
         final Class<?> columnType = getType();
         final Class<?> valueType = value.getClass();
         final boolean typesNotPrimitive = !columnType.isPrimitive() && !valueType.isPrimitive();

@@ -22,9 +22,22 @@ package io.spine.server.entity.storage.enumeration;
 
 import io.spine.annotation.Internal;
 
+/**
+ * A converter which uses {@link Enum}'s {@linkplain Enum#ordinal() ordinal} to convert the
+ * enumerated value into the {@link Integer} value.
+ *
+ * @author Dmytro Kuzmin
+ */
 @Internal
 class OrdinalEnumConverter implements EnumConverter<Integer> {
 
+    /**
+     * Convert the given {@link Enum} value into the {@link Integer} using its {@linkplain
+     * Enum#ordinal() ordinal}.
+     *
+     * @param value the value to convert
+     * @return the ordinal of the enum
+     */
     @Override
     public Integer convert(Enum value) {
         return value.ordinal();

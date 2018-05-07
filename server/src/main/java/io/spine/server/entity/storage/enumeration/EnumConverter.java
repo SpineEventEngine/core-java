@@ -24,8 +24,22 @@ import io.spine.annotation.Internal;
 
 import java.io.Serializable;
 
+/**
+ * An interface for the converter of {@link Enum} value to the arbitrary {@link Serializable}
+ * value.
+ *
+ * @param <T> the type of the result value
+ *
+ * @author Dmytro Kuzmin
+ */
 @Internal
 public interface EnumConverter<T extends Serializable> {
 
+    /**
+     * Convert the given {@link Enum} value into the arbitrary {@link Serializable} value.
+     *
+     * @param value the value to convert
+     * @return the converted value
+     */
     T convert(Enum value);
 }

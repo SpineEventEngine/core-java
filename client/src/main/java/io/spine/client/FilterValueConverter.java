@@ -26,21 +26,37 @@ import io.spine.protobuf.TypeConverter;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+/**
+ * A utility for converting the {@link ColumnFilter} values represented as {@linkplain Object Java
+ * Objects} into the {@linkplain com.google.protobuf.Message Protobuf Messages} (in form of {@link
+ * Any}) and vice versa.
+ *
+ * <p>This class performs all necessary actions preceding the value storage as well as the type
+ * conversion itself.
+ *
+ * <p>{@link ColumnFilter} values can either be {@linkplain com.google.protobuf.Message Protobuf
+ * Messages}, Java primitives, or {@link Enum enumerated values}.
+ *
+ * @author Dmytro Kuzmin
+ */
 public class FilterValueConverter {
 
+    /**
+     * Prevent instantiation of this utility class.
+     */
     private FilterValueConverter() {
     }
 
-    public static <T> Any toAny(T value) {
-        checkNotNull(value);
-        if (isEnum(value.getClass())) {
-            final Enum enumValue = (Enum) value;
-            final Any enumValueToStore = enumToAny(enumValue);
-            return enumValueToStore;
-        }
-        return TypeConverter.toAny(value);
-    }
-
+    /**
+     * Convert the given {@link Any} to the filter value represented as {@linkplain Object Java
+     * Object}.
+     *
+     * @param message     the {@linkplain com.google.protobuf.Message Protobuf Messages} in form of
+     *                    {@code Any}
+     * @param targetClass the filter value {@link Class}
+     * @param <T>         the filter value type
+     * @return the filter value in the form of Java Object
+     */
     public static <T> T toValue(Any message, Class<T> targetClass) {
         checkNotNull(message);
         checkNotNull(targetClass);
@@ -48,21 +64,59 @@ public class FilterValueConverter {
             @SuppressWarnings("unchecked") // Checked at runtime.
             final Class<? extends Enum> enumClass = (Class<? extends Enum>) targetClass;
             final Enum enumValue = enumFromAny(message, enumClass);
-            final T result = targetClass.cast(enumValue);
-            return result;
+            final T filterValue = targetClass.cast(enumValue);
+            return filterValue;
         }
         return TypeConverter.toObject(message, targetClass);
     }
 
+    /**
+     * Convert the given filter value to Protobuf {@link Any}.
+     *
+     * @param value the filter value
+     * @param <T>   the value type
+     * @return the filter value in the form of {@code Any}
+     */
+    public static <T> Any toAny(T value) {
+        checkNotNull(value);
+        if (isEnum(value.getClass())) {
+            final Enum enumValue = (Enum) value;
+            final Any anyValue = enumToAny(enumValue);
+            return anyValue;
+        }
+        return TypeConverter.toAny(value);
+    }
+
+    /**
+     * Determine whether the given {@linkplain Class type} is Java {@link Enum}.
+     *
+     * @param type the {@code Class} object representing the type
+     * @return true if the type is Java Enum, false otherwise
+     */
     private static boolean isEnum(Class<?> type) {
         return Enum.class.isAssignableFrom(type);
     }
 
+    /**
+     * Convert the given {@link Enum} value to the Protobuf {@link Any}.
+     *
+     * @param value the value to convert
+     * @param <T>   the type of the {@code Enum}
+     * @return the value in the form of {@code Any}
+     */
     private static <T extends Enum> Any enumToAny(T value) {
         final String anyValue = value.name();
         return TypeConverter.toAny(anyValue);
     }
 
+    /**
+     * Convert the given {@link Any} to the Java {@link Enum} object.
+     *
+     * @param message   the {@code Any} object to convert
+     * @param enumClass the {@code Class} object representing the {@code Enum} type
+     * @param <T>       the {@code Enum} type
+     * @return the {@code Enum} value
+     */
     private static <T extends Enum<T>> T enumFromAny(Any message, Class<T> enumClass) {
         final String enumStoredValue = TypeConverter.toObject(message, String.class);
         return Enum.valueOf(enumClass, enumStoredValue);

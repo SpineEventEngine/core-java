@@ -30,6 +30,19 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.entity.storage.enumeration.EnumConverters.forType;
 import static io.spine.server.entity.storage.enumeration.EnumType.ORDINAL;
 
+/**
+ * A representation of the enumerated value of the {@link
+ * io.spine.server.entity.storage.EntityColumn}.
+ *
+ * <p>For the non-enum entity columns, the {@link EnumeratedValue} will be {@linkplain #isEmpty()
+ * empty}.
+ *
+ * <p>For the entity columns storing {@link Enum} types, the {@link EnumeratedValue} will provide
+ * a way to retrieve an object for persistence in the data storage for each given {@link
+ * io.spine.server.entity.Entity}.
+ *
+ * @author Dmytro Kuzmin
+ */
 @Internal
 public class EnumeratedValue implements Serializable {
 
@@ -48,14 +61,10 @@ public class EnumeratedValue implements Serializable {
         this.empty = false;
     }
 
-    private static EnumeratedValue empty() {
-        return new EnumeratedValue();
-    }
-
     public static EnumeratedValue from(Method getter) {
         checkNotNull(getter);
         if (!isEnumType(getter)) {
-            return empty();
+            return new EnumeratedValue();
         }
         final EnumType type = enumTypeFromAnnotation(getter);
         return new EnumeratedValue(type);
@@ -81,7 +90,7 @@ public class EnumeratedValue implements Serializable {
     }
 
     public Class<?> getPersistenceType() {
-        final Class<?> storedType = EnumTypes.getPersistenceType(type);
+        final Class<?> storedType = PersistenceTypes.getPersistenceType(type);
         return storedType;
     }
 

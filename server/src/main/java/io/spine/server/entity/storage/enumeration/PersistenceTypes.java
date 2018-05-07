@@ -28,14 +28,32 @@ import java.util.Map;
 import static io.spine.server.entity.storage.enumeration.EnumType.ORDINAL;
 import static io.spine.server.entity.storage.enumeration.EnumType.STRING;
 
+/**
+ * A storage of the persistence types for each of the {@linkplain EnumType enum types}.
+ *
+ * <p>A persistence type is a type used when storing the {@link Enumerated} field in the data
+ * storage.
+ *
+ * @author Dmytro Kuzmin
+ * @see Enumerated
+ */
 @Internal
-public class EnumTypes {
+public class PersistenceTypes {
 
     private static final Map<EnumType, Class<?>> persistenceTypes = persistenceTypes();
 
-    private EnumTypes() {
+    /**
+     * Prevent instantiation of this class.
+     */
+    private PersistenceTypes() {
     }
 
+    /**
+     * Retrieve persistence type for the given {@link EnumType}.
+     *
+     * @param type the type of the {@link Enumerated} value
+     * @return the persistence type used to store value in the data storage
+     */
     public static Class<?> getPersistenceType(EnumType type) {
         return persistenceTypes.get(type);
     }
