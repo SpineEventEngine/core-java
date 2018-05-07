@@ -27,7 +27,7 @@ import io.spine.core.ActorMessageEnvelope;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.TenantId;
-import io.spine.server.delivery.EndpointDelivery;
+import io.spine.server.delivery.Delivery;
 import io.spine.server.tenant.TenantAwareFunction0;
 import io.spine.string.Stringifiers;
 
@@ -105,10 +105,8 @@ public abstract class EntityMessageEndpoint<I,
      */
     private void dispatchToOne(I entityId) {
         final M envelope = envelope();
-        final EndpointDelivery<I, E, M> delivery = getEndpointDelivery(envelope);
-        if(!delivery.shouldPostpone(entityId, envelope)) {
-            deliverNowTo(entityId);
-        }
+        final Delivery<I, E, M, ?, ?> delivery = getEndpointDelivery();
+        delivery.getSender().send(entityId, envelope);
     }
 
     /**
@@ -128,13 +126,11 @@ public abstract class EntityMessageEndpoint<I,
     protected abstract void deliverNowTo(I entityId);
 
     /**
-     * Obtains an instance of endpoint delivery for the given envelope.
+     * Obtains an instance of endpoint delivery.
      *
-     * @param envelope the envelope to obtain an instance of delivery for
      * @return the instance of endpoint delivery
      */
-    protected abstract EndpointDelivery<I, E, M> getEndpointDelivery(M envelope);
-
+    protected abstract Delivery<I, E, M, ?, ?> getEndpointDelivery();
 
     /**
      * Invokes entity-specific method for dispatching the message.

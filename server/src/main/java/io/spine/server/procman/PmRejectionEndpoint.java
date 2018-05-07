@@ -62,7 +62,7 @@ class PmRejectionEndpoint<I, P extends ProcessManager<I, ?, ?>>
     }
 
     @Override
-    protected PmRejectionDelivery<I,P> getEndpointDelivery(RejectionEnvelope envelope) {
+    protected PmRejectionDelivery<I,P> getEndpointDelivery() {
         return repository().getRejectionEndpointDelivery();
     }
 

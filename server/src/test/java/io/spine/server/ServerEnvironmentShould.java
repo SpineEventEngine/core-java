@@ -35,13 +35,13 @@ public class ServerEnvironmentShould {
     @Test
     public void tell_when_not_running_under_AppEngine() {
         // Tests are not run by AppEngine by default.
-        assertFalse(ServerEnvironment.isAppEngine());
+        assertFalse(ServerEnvironment.getInstance().isAppEngine());
     }
 
     @Test
     public void obtain_AppEngine_version_as_optional_string() {
         // By default we're not running under AppEngine.
-        assertFalse(ServerEnvironment.appEngineVersion()
+        assertFalse(ServerEnvironment.getInstance().appEngineVersion()
                                      .isPresent());
     }
 }

@@ -119,7 +119,7 @@ public class MultiTenantStandShould extends StandShould {
         assertEquals(packedState, defaultTenantCallback.getNewEntityState());
 
         // And Another Tenant callback has not been called.
-        assertEquals(null, anotherCallback.getNewEntityState());
+        assertNull(anotherCallback.getNewEntityState());
     }
 
     protected MemoizeEntityUpdateCallback subscribeToAllOf(Stand stand,

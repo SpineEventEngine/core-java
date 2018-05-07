@@ -20,7 +20,10 @@
 package io.spine.server.aggregate;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Supplier;
+import com.google.common.collect.ImmutableList;
 import io.spine.annotation.SPI;
+import io.spine.core.BoundedContextName;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
@@ -30,8 +33,13 @@ import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
+import io.spine.server.ServerEnvironment;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.commandbus.CommandErrorHandler;
+import io.spine.server.delivery.Shardable;
+import io.spine.server.delivery.ShardedStreamConsumer;
+import io.spine.server.delivery.ShardingStrategy;
+import io.spine.server.delivery.UniformAcrossTargets;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.DelegatingEventDispatcher;
@@ -57,6 +65,7 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Suppliers.memoize;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -85,7 +94,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         extends Repository<I, A>
         implements CommandDispatcher<I>,
                    EventDispatcherDelegate<I>,
-                   RejectionDispatcherDelegate<I> {
+                   RejectionDispatcherDelegate<I>,
+                   Shardable {
 
     /** The default number of events to be stored before a next snapshot is made. */
     static final int DEFAULT_SNAPSHOT_TRIGGER = 100;
@@ -100,6 +110,36 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     /** The routing schema for rejections to which aggregates react. */
     private final RejectionRouting<I> rejectionRouting =
             RejectionRouting.withDefault(RejectionProducers.<I>fromContext());
+
+    private final Supplier<AggregateCommandDelivery<I, A>> commandDeliverySupplier =
+            memoize(new Supplier<AggregateCommandDelivery<I, A>>() {
+        @Override
+        public AggregateCommandDelivery<I, A> get() {
+            final AggregateCommandDelivery<I, A> result =
+                    new AggregateCommandDelivery<>(AggregateRepository.this);
+            return result;
+        }
+    });
+
+    private final Supplier<AggregateEventDelivery<I, A>> eventDeliverySupplier =
+            memoize(new Supplier<AggregateEventDelivery<I, A>>() {
+        @Override
+        public AggregateEventDelivery<I, A> get() {
+            final AggregateEventDelivery<I, A> result =
+                    new AggregateEventDelivery<>(AggregateRepository.this);
+            return result;
+        }
+    });
+
+    private final Supplier<AggregateRejectionDelivery<I, A>> rejectionDeliverySupplier =
+            memoize(new Supplier<AggregateRejectionDelivery<I, A>>() {
+                @Override
+                public AggregateRejectionDelivery<I, A> get() {
+                    final AggregateRejectionDelivery<I, A> result =
+                            new AggregateRejectionDelivery<>(AggregateRepository.this);
+                    return result;
+                }
+            });
 
     /**
      * The {@link CommandErrorHandler} tackling the dispatching errors.
@@ -163,6 +203,10 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         registerExtMessageDispatcher(boundedContext, extRejectionDispatcher, extRejectionClasses);
 
         this.commandErrorHandler = CommandErrorHandler.with(boundedContext.getRejectionBus());
+
+        ServerEnvironment.getInstance()
+                         .getSharding()
+                         .register(this);
     }
 
     private void registerExtMessageDispatcher(BoundedContext boundedContext,
@@ -206,7 +250,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     /** Obtains class information of aggregates managed by this repository. */
-    private AggregateClass<A> aggregateClass() {
+    AggregateClass<A> aggregateClass() {
         return (AggregateClass<A>)entityClass();
     }
 
@@ -215,6 +259,11 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     protected AggregateClass<A> getModelClass(Class<A> cls) {
         return (AggregateClass<A>) Model.getInstance()
                                         .asAggregateClass(cls);
+    }
+
+    @Override
+    public AggregateClass<A> getShardedModelClass() {
+        return aggregateClass();
     }
 
     /**
@@ -546,8 +595,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * @return delivery strategy for events applied to the instances managed by this repository
      */
     @SPI
-    protected AggregateEndpointDelivery<I, A, EventEnvelope> getEventEndpointDelivery() {
-        return AggregateEventDelivery.directDelivery(this);
+    protected AggregateDelivery<I, A, EventEnvelope, ?, ?> getEventEndpointDelivery() {
+        return eventDeliverySupplier.get();
     }
 
     /**
@@ -562,8 +611,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * @return delivery strategy for rejections
      */
     @SPI
-    protected AggregateEndpointDelivery<I, A, RejectionEnvelope> getRejectionEndpointDelivery() {
-        return AggregateRejectionDelivery.directDelivery(this);
+    protected AggregateDelivery<I, A, RejectionEnvelope, ?, ?>
+    getRejectionEndpointDelivery() {
+        return rejectionDeliverySupplier.get();
     }
 
     /**
@@ -577,7 +627,37 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      *
      * @return delivery strategy for rejections
      */
-    protected AggregateEndpointDelivery<I, A, CommandEnvelope> getCommandEndpointDelivery() {
-        return AggregateCommandDelivery.directDelivery(this);
+    protected AggregateDelivery<I, A, CommandEnvelope, ?, ?> getCommandEndpointDelivery() {
+        return commandDeliverySupplier.get();
+    }
+
+    @Override
+    public ShardingStrategy getShardingStrategy() {
+        return UniformAcrossTargets.singleShard();
+    }
+
+    @Override
+    public Iterable<ShardedStreamConsumer<?, ?>> getMessageConsumers() {
+        final Iterable<ShardedStreamConsumer<?, ?>> result =
+                ImmutableList.<ShardedStreamConsumer<?, ?>>of(
+                        getCommandEndpointDelivery().getConsumer(),
+                        getEventEndpointDelivery().getConsumer(),
+                        getRejectionEndpointDelivery().getConsumer()
+                );
+        return result;
+    }
+
+    @Override
+    public BoundedContextName getBoundedContextName() {
+        final BoundedContextName name = getBoundedContext().getName();
+        return name;
+    }
+
+    @Override
+    public void close() {
+        ServerEnvironment.getInstance()
+                         .getSharding()
+                         .unregister(this);
+        super.close();
     }
 }

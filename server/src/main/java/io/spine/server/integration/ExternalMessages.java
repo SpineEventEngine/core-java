@@ -25,9 +25,12 @@ import com.google.protobuf.StringValue;
 import io.spine.Identifier;
 import io.spine.annotation.Internal;
 import io.spine.core.BoundedContextName;
+import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.Rejection;
 import io.spine.protobuf.AnyPacker;
+import io.spine.server.delivery.ShardedMessage;
+import io.spine.server.delivery.ShardedMessageId;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -45,47 +48,98 @@ public final class ExternalMessages {
     /**
      * Wraps the instance of {@link Event} into an {@code ExternalMessage}.
      *
-     * @param event              the event to wrap
-     * @param boundedContextName the name of the bounded context in which the event was created
+     * @param event  the event to wrap
+     * @param origin the name of the bounded context in which the event was created
      * @return the external message wrapping the given event
      */
-    public static ExternalMessage of(Event event, BoundedContextName boundedContextName) {
+    public static ExternalMessage of(Event event, BoundedContextName origin) {
         checkNotNull(event);
+        checkNotNull(origin);
 
-        final ExternalMessage result = of(event.getId(), event, boundedContextName);
+        final ExternalMessage result = of(event.getId(), event, origin);
+        return result;
+    }
+
+    /**
+     * Wraps the instance of {@link Command} into an {@code ExternalMessage}.
+     *
+     * @param command the command to wrap
+     * @param origin  the name of the bounded context in which the command was created
+     * @return the external message wrapping the given command
+     */
+    public static ExternalMessage of(Command command, BoundedContextName origin) {
+        checkNotNull(command);
+        checkNotNull(origin);
+
+        final ExternalMessage result = of(command.getId(), command, origin);
         return result;
     }
 
     /**
      * Wraps the instance of {@link Rejection} into an {@code ExternalMessage}.
      *
-     * @param rejection          the rejection to wrap
-     * @param boundedContextName the name of bounded context in which the rejection was created
+     * @param rejection the rejection to wrap
+     * @param origin    the name of bounded context in which the rejection was created
      * @return the external message wrapping the given rejection
      */
-    static ExternalMessage of(Rejection rejection, BoundedContextName boundedContextName) {
+    static ExternalMessage of(Rejection rejection, BoundedContextName origin) {
         checkNotNull(rejection);
+        checkNotNull(origin);
 
-        final ExternalMessage result = of(rejection.getId(), rejection, boundedContextName);
+        final ExternalMessage result = of(rejection.getId(), rejection, origin);
         return result;
     }
 
     /**
      * Wraps the instance of {@link RequestForExternalMessages} into an {@code ExternalMessage}.
      *
-     * @param request            the request to wrap
-     * @param boundedContextName the name of bounded context in which the request was created
+     * @param request the request to wrap
+     * @param origin  the name of bounded context in which the request was created
      * @return the external message wrapping the given request
      */
-    static ExternalMessage of(RequestForExternalMessages request,
-                              BoundedContextName boundedContextName) {
+    static ExternalMessage of(RequestForExternalMessages request, BoundedContextName origin) {
         checkNotNull(request);
+        checkNotNull(origin);
+
         final String idString = Identifier.newUuid();
         final ExternalMessage result = of(StringValue.newBuilder()
                                                      .setValue(idString)
                                                      .build(),
                                           request,
-                                          boundedContextName);
+                                          origin);
+        return result;
+    }
+
+    /**
+     * Wraps the instance of {@link ShardedMessage} into an {@code ExternalMessage}.
+     *
+     * @param message the message to wrap
+     * @param origin  the name of bounded context in which the request message created
+     * @return the external message wrapping the given message
+     */
+    public static ExternalMessage of(ShardedMessage message, BoundedContextName origin) {
+        checkNotNull(message);
+        checkNotNull(origin);
+
+        final ShardedMessageId id = message.getId();
+        final ExternalMessage result = of(id, message, origin);
+        return result;
+    }
+
+    /**
+     * Unpacks the given {@code ExternalMessage} into a {@link ShardedMessage}.
+     *
+     * <p>Callees of this method should ensure that the given external message indeed wraps
+     * an instance of {@code ShardedMessage}, before calling this method.
+     * A {@link ClassCastException} is thrown otherwise.
+     *
+     * @param value the value to unpack
+     * @return the unpacked value
+     */
+    public static ShardedMessage asShardedMessage(ExternalMessage value) {
+        checkNotNull(value);
+        final Any originalMessage = value.getOriginalMessage();
+        final ShardedMessage result = AnyPacker.unpack(originalMessage);
         return result;
     }
 
@@ -95,10 +149,11 @@ public final class ExternalMessages {
         final Any packedId = Identifier.pack(messageId);
         final Any packedMessage = AnyPacker.pack(message);
 
-        return ExternalMessage.newBuilder()
-                              .setId(packedId)
-                              .setOriginalMessage(packedMessage)
-                              .setBoundedContextName(boundedContextName)
-                              .build();
+        final ExternalMessage result = ExternalMessage.newBuilder()
+                                                      .setId(packedId)
+                                                      .setOriginalMessage(packedMessage)
+                                                      .setBoundedContextName(boundedContextName)
+                                                      .build();
+        return result;
     }
 }

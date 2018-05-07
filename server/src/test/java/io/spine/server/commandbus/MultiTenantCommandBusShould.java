@@ -79,8 +79,8 @@ public class MultiTenantCommandBusShould extends AbstractCommandBusTestSuite {
     @Test
     public void have_rejection_bus_if_no_custom_set() {
         final CommandBus bus = CommandBus.newBuilder()
-                                           .setCommandStore(commandStore)
-                                           .build();
+                                         .setCommandStore(commandStore)
+                                         .build();
         assertNotNull(bus.rejectionBus());
     }
 

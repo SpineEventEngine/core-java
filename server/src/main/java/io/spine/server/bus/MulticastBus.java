@@ -19,17 +19,11 @@
  */
 package io.spine.server.bus;
 
-import com.google.common.base.Function;
 import com.google.protobuf.Message;
 import io.spine.core.MessageEnvelope;
-import io.spine.server.delivery.MulticastDelivery;
 import io.spine.type.MessageClass;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
-import java.util.Set;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A {@code Bus}, which delivers a single message to multiple dispatchers.
@@ -43,26 +37,6 @@ public abstract class MulticastBus<M extends Message,
         extends Bus<M, E, C, D> {
 
     /**
-     * The strategy to deliver the messages to the dispatchers.
-     */
-    private final MulticastDelivery<E, C, D> delivery;
-
-    protected MulticastBus(MulticastDelivery<E, C, D> delivery) {
-        super();
-        this.delivery = delivery;
-        injectDispatcherProvider();
-    }
-
-    /**
-     * Sets up the {@code MulticastDelivery} with an ability to obtain
-     * {@linkplain MessageDispatcher message dispatchers} by a given
-     * {@linkplain MessageClass message class} instance at runtime.
-     */
-    private void injectDispatcherProvider() {
-        delivery().setConsumerProvider(new DispatcherProvider());
-    }
-
-    /**
      * Call the dispatchers for the {@code messageEnvelope}.
      *
      * @param messageEnvelope the message envelope to pass to the dispatchers.
@@ -72,29 +46,9 @@ public abstract class MulticastBus<M extends Message,
         @SuppressWarnings("unchecked")  // it's fine, since the message is validated previously.
         final C messageClass = (C) messageEnvelope.getMessageClass();
         final Collection<D> dispatchers = registry().getDispatchers(messageClass);
-        delivery().deliver(messageEnvelope);
-        return dispatchers.size();
-    }
-
-    /**
-     * Obtains the {@linkplain MulticastDelivery delivery strategy} configured for this bus.
-     *
-     * @return the delivery strategy
-     */
-    protected MulticastDelivery<E, C, D> delivery() {
-        return this.delivery;
-    }
-
-    /**
-     * A provider of dispatchers for a given message class.
-     */
-    private class DispatcherProvider implements Function<C, Set<D>> {
-        @Nullable
-        @Override
-        public Set<D> apply(@Nullable C messageClass) {
-            checkNotNull(messageClass);
-            final Set<D> dispatchers = registry().getDispatchers(messageClass);
-            return dispatchers;
+        for (D dispatcher : dispatchers) {
+            dispatcher.dispatch(messageEnvelope);
         }
+        return dispatchers.size();
     }
 }

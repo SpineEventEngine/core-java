@@ -42,16 +42,6 @@ public abstract class AggregatePartRepository<I,
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Overrides to expose the method to the package.
-     */
-    @Override
-    protected Class<I> getIdClass() {
-        return super.getIdClass();
-    }
-
     @SuppressWarnings("MethodDoesntCallSuperMethod") // We create objects of another class.
     @Override
     public A create(I id) {

@@ -21,144 +21,184 @@ package io.spine.server.aggregate;
 
 import io.spine.core.Ack;
 import io.spine.core.Command;
-import io.spine.core.CommandEnvelope;
-import io.spine.core.Commands;
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
-import io.spine.core.Events;
 import io.spine.core.Rejection;
-import io.spine.core.RejectionEnvelope;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
-import io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.PostponingCommandDelivery;
-import io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.PostponingEventDelivery;
-import io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.PostponingRejectionDelivery;
-import io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.PostponingRepository;
-import io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.ReactingProject;
+import io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.DeliveryProject;
+import io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.SingleShardProjectRepository;
+import io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.TripleShardProjectRepository;
+import io.spine.server.delivery.AbstractMessageDeliveryShould;
+import io.spine.server.delivery.given.ParallelDispatcher;
+import io.spine.server.delivery.given.ThreadStats;
 import io.spine.test.aggregate.ProjectId;
-import io.spine.test.aggregate.command.AggCreateProject;
-import io.spine.test.aggregate.event.AggProjectStarted;
-import io.spine.test.aggregate.rejection.Rejections.AggCannotStartArchivedProject;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Map;
-
-import static io.spine.core.Rejections.getMessage;
 import static io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.cannotStartProject;
-import static io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.createProject;
-import static io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.projectStarted;
-import static io.spine.server.model.ModelTests.clearModel;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.projectCancelled;
+import static io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.startProject;
+import static io.spine.server.delivery.given.MessageDeliveryTestEnv.dispatchWaitTime;
 
 /**
  * @author Alex Tymchenko
  */
-public class AggregateMessageDeliveryShould {
+public class AggregateMessageDeliveryShould extends AbstractMessageDeliveryShould {
 
-    private BoundedContext boundedContext;
-    private PostponingRepository repository;
-
+    @Override
     @Before
     public void setUp() {
-        clearModel();
-        boundedContext = BoundedContext.newBuilder()
-                                       .build();
-        repository = new PostponingRepository();
-        boundedContext.register(repository);
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        repository.close();
-        boundedContext.close();
+        super.setUp();
+        DeliveryProject.getStats()
+                       .clear();
     }
 
     @Test
-    public void postpone_events_dispatched_to_reactor_method() {
-        assertNull(ReactingProject.getEventReceived());
+    public void dispatch_commands_to_single_shard_in_multithreaded_env() throws Exception {
+        final ParallelDispatcher<ProjectId, Command> dispatcher =
+                new ParallelDispatcher<ProjectId, Command>(
+                        42, 400, dispatchWaitTime()) {
+                    @Override
+                    protected ThreadStats<ProjectId> getStats() {
+                        return DeliveryProject.getStats();
+                    }
 
-        final Event event = projectStarted();
-        boundedContext.getEventBus()
-                      .post(event);
+                    @Override
+                    protected Command newMessage() {
+                        return startProject();
+                    }
 
-        assertNull(ReactingProject.getEventReceived());
+                    @Override
+                    protected void postToBus(BoundedContext context, Command command) {
+                        context.getCommandBus()
+                               .post(command, StreamObservers.<Ack>noOpObserver());
+                    }
+                };
 
-        final EventEnvelope expectedEnvelope = EventEnvelope.of(event);
-        final PostponingEventDelivery delivery = repository.getEventEndpointDelivery();
-        final Map<ProjectId, EventEnvelope> postponedEvents = delivery.getPostponedEvents();
-        assertTrue(postponedEvents.size() == 1 &&
-                           postponedEvents.containsValue(expectedEnvelope));
-
-        final ProjectId projectId = postponedEvents.keySet()
-                                              .iterator()
-                                              .next();
-
-        delivery.deliverNow(projectId, postponedEvents.get(projectId));
-
-        final AggProjectStarted deliveredEventMsg = ReactingProject.getEventReceived();
-        assertNotNull(deliveredEventMsg);
-        assertEquals(Events.getMessage(event), deliveredEventMsg);
+        dispatcher.dispatchMessagesTo(new SingleShardProjectRepository());
     }
 
     @Test
-    public void postpone_rejections_dispatched_to_reactor_method() {
-        assertNull(ReactingProject.getEventReceived());
+    public void dispatch_events_to_single_shard_in_multithreaded_env() throws Exception {
+        final ParallelDispatcher<ProjectId, Event> dispatcher =
+                new ParallelDispatcher<ProjectId, Event>(
+                        130, 500, dispatchWaitTime()) {
+                    @Override
+                    protected ThreadStats<ProjectId> getStats() {
+                        return DeliveryProject.getStats();
+                    }
 
-        final Rejection rejection = cannotStartProject();
-        boundedContext.getRejectionBus()
-                      .post(rejection);
+                    @Override
+                    protected Event newMessage() {
+                        return projectCancelled();
+                    }
 
-        assertNull(ReactingProject.getRejectionReceived());
+                    @Override
+                    protected void postToBus(BoundedContext context, Event event) {
+                        context.getEventBus()
+                               .post(event, StreamObservers.<Ack>noOpObserver());
+                    }
+                };
 
-        final RejectionEnvelope expectedEnvelope = RejectionEnvelope.of(rejection);
-        final PostponingRejectionDelivery delivery = repository.getRejectionEndpointDelivery();
-        final Map<ProjectId, RejectionEnvelope> postponedRejections =
-                delivery.getPostponedRejections();
-        assertTrue(postponedRejections.size() == 1 &&
-                           postponedRejections.containsValue(expectedEnvelope));
-
-        final ProjectId projectId = postponedRejections.keySet()
-                                                   .iterator()
-                                                   .next();
-
-        delivery.deliverNow(projectId, postponedRejections.get(projectId));
-
-        final AggCannotStartArchivedProject deliveredRejectionMsg
-                = ReactingProject.getRejectionReceived();
-        assertNotNull(deliveredRejectionMsg);
-        assertEquals(getMessage(rejection), deliveredRejectionMsg);
+        dispatcher.dispatchMessagesTo(new SingleShardProjectRepository());
     }
 
     @Test
-    public void postpone_commands_dispatched_to_command_handler_method() {
-        assertNull(ReactingProject.getCommandReceived());
+    public void dispatch_rejections_to_single_shard_in_multithreaded_env() throws Exception {
+        final ParallelDispatcher<ProjectId, Rejection> dispatcher =
+                new ParallelDispatcher<ProjectId, Rejection>(
+                        36, 12, dispatchWaitTime()) {
+                    @Override
+                    protected ThreadStats<ProjectId> getStats() {
+                        return DeliveryProject.getStats();
+                    }
 
-        final Command command = createProject();
-        boundedContext.getCommandBus()
-                      .post(command, StreamObservers.<Ack>noOpObserver());
+                    @Override
+                    protected Rejection newMessage() {
+                        return cannotStartProject();
+                    }
 
-        assertNull(ReactingProject.getCommandReceived());
+                    @Override
+                    protected void postToBus(BoundedContext context, Rejection rejection) {
+                        context.getRejectionBus()
+                               .post(rejection, StreamObservers.<Ack>noOpObserver());
+                    }
+                };
 
-        final CommandEnvelope expectedEnvelope = CommandEnvelope.of(command);
-        final PostponingCommandDelivery delivery = repository.getCommandEndpointDelivery();
-        final Map<ProjectId, CommandEnvelope> postponedCommands =
-                delivery.getPostponedCommands();
-        assertTrue(postponedCommands.size() == 1 &&
-                           postponedCommands.containsValue(expectedEnvelope));
+        dispatcher.dispatchMessagesTo(new SingleShardProjectRepository());
+    }
 
-        final ProjectId projectId = postponedCommands.keySet()
-                                                       .iterator()
-                                                       .next();
+    @Test
+    public void dispatch_commands_to_several_shard_in_multithreaded_env() throws Exception {
+        final ParallelDispatcher<ProjectId, Command> dispatcher =
+                new ParallelDispatcher<ProjectId, Command>(
+                        23, 423, dispatchWaitTime()) {
+                    @Override
+                    protected ThreadStats<ProjectId> getStats() {
+                        return DeliveryProject.getStats();
+                    }
 
-        delivery.deliverNow(projectId, postponedCommands.get(projectId));
+                    @Override
+                    protected Command newMessage() {
+                        return startProject();
+                    }
 
-        final AggCreateProject deliveredCommandMsg = ReactingProject.getCommandReceived();
-        assertNotNull(deliveredCommandMsg);
-        assertEquals(Commands.getMessage(command), deliveredCommandMsg);
+                    @Override
+                    protected void postToBus(BoundedContext context, Command command) {
+                        context.getCommandBus()
+                               .post(command, StreamObservers.<Ack>noOpObserver());
+                    }
+                };
+        dispatcher.dispatchMessagesTo(new TripleShardProjectRepository());
+    }
+
+    @Test
+    public void dispatch_events_to_several_shards_in_multithreaded_env() throws Exception {
+        final ParallelDispatcher<ProjectId, Event> dispatcher =
+                new ParallelDispatcher<ProjectId, Event>(
+                        190, 900, dispatchWaitTime()) {
+                    @Override
+                    protected ThreadStats<ProjectId> getStats() {
+                        return DeliveryProject.getStats();
+                    }
+
+                    @Override
+                    protected Event newMessage() {
+                        return projectCancelled();
+                    }
+
+                    @Override
+                    protected void postToBus(BoundedContext context, Event event) {
+                        context.getEventBus()
+                               .post(event, StreamObservers.<Ack>noOpObserver());
+                    }
+                };
+
+        dispatcher.dispatchMessagesTo(new TripleShardProjectRepository());
+    }
+
+    @Test
+    public void dispatch_rejections_to_several_shards_in_multithreaded_env() throws Exception {
+        final ParallelDispatcher<ProjectId, Rejection> dispatcher =
+                new ParallelDispatcher<ProjectId, Rejection>(
+                        40, 603, dispatchWaitTime()) {
+                    @Override
+                    protected ThreadStats<ProjectId> getStats() {
+                        return DeliveryProject.getStats();
+                    }
+
+                    @Override
+                    protected Rejection newMessage() {
+                        return cannotStartProject();
+                    }
+
+                    @Override
+                    protected void postToBus(BoundedContext context, Rejection rejection) {
+                        context.getRejectionBus()
+                               .post(rejection, StreamObservers.<Ack>noOpObserver());
+                    }
+                };
+
+        dispatcher.dispatchMessagesTo(new TripleShardProjectRepository());
     }
 }

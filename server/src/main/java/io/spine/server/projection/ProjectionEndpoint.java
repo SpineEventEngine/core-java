@@ -25,7 +25,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
-import io.spine.server.delivery.EndpointDelivery;
+import io.spine.server.delivery.Delivery;
 import io.spine.server.entity.EntityMessageEndpoint;
 import io.spine.server.entity.Repository;
 
@@ -78,7 +78,7 @@ class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
     }
 
     @Override
-    protected EndpointDelivery<I, P, EventEnvelope> getEndpointDelivery(EventEnvelope event) {
+    protected Delivery<I, P, EventEnvelope, ?, ?> getEndpointDelivery() {
         return repository().getEndpointDelivery();
     }
 

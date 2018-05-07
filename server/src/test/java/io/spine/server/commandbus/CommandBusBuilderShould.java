@@ -28,6 +28,8 @@ import io.spine.server.rejection.RejectionBus;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.tenant.TenantAwareTest;
 import io.spine.server.tenant.TenantIndex;
+import io.spine.server.transport.TransportFactory;
+import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.test.Tests;
 import org.junit.Before;
 import org.junit.Test;
@@ -49,6 +51,8 @@ public class CommandBusBuilderShould extends BusBuilderShould<CommandBus.Builder
 
     private CommandStore commandStore;
 
+    private TransportFactory transportFactory;
+
     @Override
     protected CommandBus.Builder builder() {
         return CommandBus.newBuilder();
@@ -63,6 +67,7 @@ public class CommandBusBuilderShould extends BusBuilderShould<CommandBus.Builder
         final TenantIndex tenantIndex =
                 TenantAwareTest.createTenantIndex(multitenant, storageFactory);
         commandStore = new CommandStore(storageFactory, tenantIndex);
+        transportFactory = InMemoryTransportFactory.newInstance();
     }
 
     @Test(expected = NullPointerException.class)
@@ -72,8 +77,7 @@ public class CommandBusBuilderShould extends BusBuilderShould<CommandBus.Builder
 
     @Test(expected = IllegalStateException.class)
     public void not_allow_to_omit_setting_CommandStore() {
-        CommandBus.newBuilder()
-                  .build();
+        CommandBus.newBuilder().build();
     }
 
     @Test

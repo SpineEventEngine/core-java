@@ -78,7 +78,7 @@ public class CommandBus extends Bus<Command,
     private final Log log;
 
     /**
-     * Is true, if the {@code BoundedContext} (to which this {@code CommandBus} belongs)
+     * Is {@code true}, if the {@code BoundedContext} (to which this {@code CommandBus} belongs)
      * is multi-tenant.
      *
      * <p>If the {@code CommandBus} is multi-tenant, the commands posted must have the
@@ -353,7 +353,8 @@ public class CommandBus extends Bus<Command,
          * the current runtime environment.
          */
         private static boolean detectThreadsAllowed() {
-            final boolean appEngine = ServerEnvironment.isAppEngine();
+            final boolean appEngine = ServerEnvironment.getInstance()
+                                                       .isAppEngine();
             return !appEngine;
         }
 

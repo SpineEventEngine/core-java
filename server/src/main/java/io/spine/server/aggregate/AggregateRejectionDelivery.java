@@ -20,6 +20,8 @@
 package io.spine.server.aggregate;
 
 import io.spine.core.RejectionEnvelope;
+import io.spine.server.delivery.DeliveryTag;
+import io.spine.server.delivery.RejectionShardedStream;
 
 /**
  * A strategy on delivering the rejections to the instances of a certain aggregate type.
@@ -28,40 +30,36 @@ import io.spine.core.RejectionEnvelope;
  * @param <A> the type of aggregate
  * @author Alex Tymchenko
  */
-public abstract class AggregateRejectionDelivery<I, A extends Aggregate<I, ?, ?>>
-        extends AggregateEndpointDelivery<I, A, RejectionEnvelope> {
+public class AggregateRejectionDelivery<I, A extends Aggregate<I, ?, ?>>
+        extends AggregateDelivery<I,
+                                  A,
+                                  RejectionEnvelope,
+                                  RejectionShardedStream<I>,
+                                  RejectionShardedStream.Builder<I>> {
 
     protected AggregateRejectionDelivery(AggregateRepository<I, A> repository) {
-        super(repository);
+        super(new AggregateRejectionConsumer<>(repository));
     }
 
-    @Override
-    protected AggregateMessageEndpoint<I, A, RejectionEnvelope, ?> getEndpoint(
-            RejectionEnvelope envelope) {
-        return AggregateRejectionEndpoint.of(repository(), envelope);
-    }
+    private static class AggregateRejectionConsumer<I, A extends Aggregate<I, ?, ?>>
+            extends AggregateMessageConsumer<I,
+                                             A,
+                                             RejectionEnvelope,
+                                             RejectionShardedStream<I>,
+                                             RejectionShardedStream.Builder<I>> {
 
-    public static <I, A extends Aggregate<I, ?, ?>>
-    AggregateRejectionDelivery<I, A> directDelivery(AggregateRepository<I, A> repository) {
-        return new Direct<>(repository);
-    }
-
-    /**
-     * Direct delivery which does not postpone dispatching.
-     *
-     * @param <I> the type of aggregate IDs
-     * @param <A> the type of aggregate
-     */
-    public static class Direct<I, A extends Aggregate<I, ?, ?>>
-            extends AggregateRejectionDelivery<I, A> {
-
-        private Direct(AggregateRepository<I, A> repository) {
-            super(repository);
+        protected AggregateRejectionConsumer(AggregateRepository<I, A> repository) {
+            super(DeliveryTag.forRejectionsOf(repository), repository);
         }
 
         @Override
-        public boolean shouldPostpone(I id, RejectionEnvelope envelope) {
-            return false;
+        protected RejectionShardedStream.Builder<I> newShardedStreamBuilder() {
+            return RejectionShardedStream.newBuilder();
+        }
+
+        @Override
+        protected AggregateRejectionEndpoint<I, A> getEndpoint(RejectionEnvelope envelope) {
+            return AggregateRejectionEndpoint.of(repository(), envelope);
         }
     }
 }

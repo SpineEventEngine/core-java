@@ -22,8 +22,14 @@ package io.spine.server;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
+import io.spine.annotation.Internal;
+import io.spine.server.delivery.InProcessSharding;
+import io.spine.server.delivery.Sharding;
+import io.spine.server.transport.memory.InMemoryTransportFactory;
 
 import javax.annotation.Nullable;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 @SuppressWarnings("AccessOfSystemProperties") // OK as we need system properties for this class.
 public class ServerEnvironment {
@@ -37,14 +43,28 @@ public class ServerEnvironment {
     private static final String appEngineRuntimeVersion =
             System.getProperty(ENV_KEY_APP_ENGINE_RUNTIME_VERSION);
 
+    /** A sharding strategy for this server environment. */
+    private Sharding sharding;
+
     /** Prevents instantiation of this utility class. */
-    private ServerEnvironment() {}
+    private ServerEnvironment() {
+        //TODO:2018-04-17:alex.tymchenko: instead of factories use ServerEnvironment.Builder().
+        // See https://github.com/SpineEventEngine/core-java/issues/690.
+        this.sharding = new InProcessSharding(InMemoryTransportFactory.newInstance());
+    }
+
+    /**
+     * Returns a singleton instance.
+     */
+    public static ServerEnvironment getInstance() {
+        return Singleton.INSTANCE.value;
+    }
 
     /**
      * Returns {@code true} if the code is running on the Google AppEngine,
      * {@code false} otherwise.
      */
-    public static boolean isAppEngine() {
+    public boolean isAppEngine() {
         final boolean isVersionPresent = (appEngineRuntimeVersion != null) &&
                 !appEngineRuntimeVersion.isEmpty();
         return isVersionPresent;
@@ -54,7 +74,39 @@ public class ServerEnvironment {
      * Returns the current Google AppEngine version
      * or {@code null} if the program is running not on the AppEngine.
      */
-    public static Optional<String> appEngineVersion() {
+    public Optional<String> appEngineVersion() {
         return Optional.fromNullable(appEngineRuntimeVersion);
+    }
+
+    public Sharding getSharding() {
+        return sharding;
+    }
+
+    /**
+     * Replaces the current sharding service with the given value.
+     *
+     * <p>This method is used internally by the framework, and should not be called from outside.
+     *
+     * @param sharding the new sharding service to set for this server environment
+     */
+    @Internal
+    public void replaceSharding(Sharding sharding) {
+        //TODO:2018-04-17:alex.tymchenko: migrate to ServerEnvironment.Builder().
+        // See https://github.com/SpineEventEngine/core-java/issues/690.
+        checkNotNull(sharding);
+        this.sharding = sharding;
+    }
+
+    /**
+     * A singleton holder.
+     *
+     * <p>Server environment is a singleton in scope of JVM.
+     */
+    private enum Singleton {
+
+        INSTANCE;
+
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final ServerEnvironment value = new ServerEnvironment();
     }
 }
