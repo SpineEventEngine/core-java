@@ -150,8 +150,8 @@ final class EntityQueryMatcher<I> implements Predicate<EntityRecordWithColumns> 
         } else {
             value = wrappedValue;
         }
-        final Object valueConverted = sourceColumn.convertIfEnumerated(value);
-        final boolean result = eval(actualValue.getValue(), filter.getOperator(), valueConverted);
+        final Object columnValue = sourceColumn.toPersistenceValue(value);
+        final boolean result = eval(actualValue.getValue(), filter.getOperator(), columnValue);
         return result;
     }
 

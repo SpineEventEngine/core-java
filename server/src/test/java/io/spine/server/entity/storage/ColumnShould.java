@@ -267,19 +267,19 @@ public class ColumnShould {
     @Test
     public void convert_enumerated_value_to_persistence_type() {
         final EntityColumn columnOrdinal = forMethod("getEnumOrdinal", TestEntity.class);
-        final Object ordinalValue = columnOrdinal.convertIfEnumerated(ONE);
+        final Object ordinalValue = columnOrdinal.toPersistenceValue(ONE);
         assertEquals(ONE.ordinal(), ordinalValue);
 
         final EntityColumn columnString = forMethod("getEnumString", TestEntity.class);
-        final Object stringValue = columnString.convertIfEnumerated(ONE);
+        final Object stringValue = columnString.toPersistenceValue(ONE);
         assertEquals(ONE.name(), stringValue);
     }
 
     @Test
     public void do_nothing_if_convert_non_enum_values() {
-        final EntityColumn column = forMethod("getEnumOrdinal", TestEntity.class);
-        final Object converted = column.convertIfEnumerated(15);
-        assertEquals(Integer.class, converted.getClass());
+        final EntityColumn column = forMethod("getLong", TestEntity.class);
+        final Object converted = column.toPersistenceValue(15L);
+        assertEquals(Long.class, converted.getClass());
     }
 
     private static EntityColumn forMethod(String name, Class<?> enclosingClass) {

@@ -41,6 +41,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static io.spine.server.entity.storage.ColumnRecords.getAnnotatedVersion;
+import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.lang.String.format;
 import static java.lang.reflect.Modifier.isPublic;
@@ -320,10 +321,8 @@ public class EntityColumn implements Serializable {
             if (!nullable) {
                 checkNotNull(result, format("Not null getter %s returned null.", getter.getName()));
             }
-            if (isEnumType()) {
-                return enumeratedValue.getFor((Enum) result);
-            }
-            return result;
+            final Serializable persistenceValue = (Serializable) toPersistenceValue(result);
+            return persistenceValue;
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new IllegalStateException(
                     format("Could not invoke getter of property %s from object %s",
@@ -363,11 +362,24 @@ public class EntityColumn implements Serializable {
         return getter.getReturnType();
     }
 
-    public Object convertIfEnumerated(Object value) {
-        checkNotNull(value);
-        final Class<?> type = value.getClass();
-        final boolean valueIsEnum = Enum.class.isAssignableFrom(type);
-        if (isEnumType() && valueIsEnum) {
+    public Object toPersistenceValue(@Nullable Object value) {
+        if (value == null) {
+            return null;
+        }
+
+        final Class<?> columnType = getType();
+        final Class<?> valueType = value.getClass();
+        final boolean typesNotPrimitive = !columnType.isPrimitive() && !valueType.isPrimitive();
+        final boolean typesMatch = columnType.isAssignableFrom(valueType);
+        if (typesNotPrimitive && !typesMatch) {
+            throw newIllegalArgumentException(
+                    "Passed value type %s doesn't match column type %s.",
+                    valueType.getCanonicalName(),
+                    columnType.getCanonicalName()
+            );
+        }
+
+        if (isEnumType()) {
             return enumeratedValue.getFor((Enum) value);
         }
         return value;
