@@ -41,7 +41,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.HashMultimap.create;
 import static com.google.common.primitives.Primitives.wrap;
-import static io.spine.protobuf.TypeConverter.toObject;
+import static io.spine.client.ColumnFilterValues.toValue;
 import static java.lang.String.format;
 
 /**
@@ -131,7 +131,7 @@ public final class EntityQueries {
     private static void checkFilterType(EntityColumn column, ColumnFilter filter) {
         final Class<?> expectedType = column.getType();
         final Any filterConvent = filter.getValue();
-        final Object filterValue = toObject(filterConvent, expectedType);
+        final Object filterValue = toValue(filterConvent, expectedType);
         final Class<?> actualType = filterValue.getClass();
         checkArgument(wrap(expectedType).isAssignableFrom(wrap(actualType)),
                       "EntityColumn type mismatch. EntityColumn %s cannot have value %s.",
