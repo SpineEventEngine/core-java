@@ -321,7 +321,7 @@ public class EntityColumn implements Serializable {
             if (!nullable) {
                 checkNotNull(result, format("Not null getter %s returned null.", getter.getName()));
             }
-            final Serializable persistenceValue = (Serializable) toPersistenceValue(result);
+            final Serializable persistenceValue = (Serializable) toPersistenceType(result);
             return persistenceValue;
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new IllegalStateException(
@@ -362,7 +362,7 @@ public class EntityColumn implements Serializable {
         return getter.getReturnType();
     }
 
-    public Object toPersistenceValue(@Nullable Object value) {
+    public Object toPersistenceType(@Nullable Object value) {
         if (value == null) {
             return null;
         }
