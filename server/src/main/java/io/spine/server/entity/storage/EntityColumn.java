@@ -367,17 +367,7 @@ public class EntityColumn implements Serializable {
             return null;
         }
 
-        final Class<?> columnType = getType();
-        final Class<?> valueType = value.getClass();
-        final boolean typesNotPrimitive = !columnType.isPrimitive() && !valueType.isPrimitive();
-        final boolean typesMatch = columnType.isAssignableFrom(valueType);
-        if (typesNotPrimitive && !typesMatch) {
-            throw newIllegalArgumentException(
-                    "Passed value type %s doesn't match column type %s.",
-                    valueType.getCanonicalName(),
-                    columnType.getCanonicalName()
-            );
-        }
+        checkTypeMatches(value);
 
         if (isEnumType()) {
             return enumeratedValue.getFor((Enum) value);
@@ -416,6 +406,21 @@ public class EntityColumn implements Serializable {
     @VisibleForTesting
     boolean isEnumType() {
         return !enumeratedValue.isEmpty();
+    }
+
+    private void checkTypeMatches(Object value)
+    {
+        final Class<?> columnType = getType();
+        final Class<?> valueType = value.getClass();
+        final boolean typesNotPrimitive = !columnType.isPrimitive() && !valueType.isPrimitive();
+        final boolean typesMatch = columnType.isAssignableFrom(valueType);
+        if (typesNotPrimitive && !typesMatch) {
+            throw newIllegalArgumentException(
+                    "Passed value type %s doesn't match column type %s.",
+                    valueType.getCanonicalName(),
+                    columnType.getCanonicalName()
+            );
+        }
     }
 
     private void readObject(ObjectInputStream inputStream) throws IOException,
