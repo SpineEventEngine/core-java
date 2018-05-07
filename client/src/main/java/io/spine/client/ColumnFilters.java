@@ -38,7 +38,7 @@ import static io.spine.client.ColumnFilter.Operator.LESS_OR_EQUAL;
 import static io.spine.client.ColumnFilter.Operator.LESS_THAN;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.EITHER;
-import static io.spine.client.ColumnFilterValues.toAny;
+import static io.spine.client.FilterValueConverter.toAny;
 
 /**
  * A factory of {@link ColumnFilter} instances.

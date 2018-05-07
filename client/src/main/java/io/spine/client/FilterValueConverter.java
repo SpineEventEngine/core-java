@@ -26,10 +26,9 @@ import io.spine.protobuf.TypeConverter;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-@Internal
-public class ColumnFilterValues {
+public class FilterValueConverter {
 
-    private ColumnFilterValues() {
+    private FilterValueConverter() {
     }
 
     public static <T> Any toAny(T value) {

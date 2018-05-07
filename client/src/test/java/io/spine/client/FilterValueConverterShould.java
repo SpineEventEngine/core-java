@@ -25,23 +25,23 @@ import com.google.protobuf.Any;
 import io.spine.protobuf.TypeConverter;
 import org.junit.Test;
 
-import static io.spine.client.ColumnFilterValues.toAny;
-import static io.spine.client.ColumnFilterValues.toValue;
+import static io.spine.client.FilterValueConverter.toAny;
+import static io.spine.client.FilterValueConverter.toValue;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.Assert.assertEquals;
 
-public class ColumnFilterValuesShould {
+public class FilterValueConverterShould {
 
     @Test
     public void have_utility_ctor() {
-        assertHasPrivateParameterlessCtor(ColumnFilterValues.class);
+        assertHasPrivateParameterlessCtor(FilterValueConverter.class);
     }
 
     @Test
     public void not_accept_nulls() {
         new NullPointerTester()
                 .setDefault(Any.class, Any.getDefaultInstance())
-                .testAllPublicStaticMethods(ColumnFilterValues.class);
+                .testAllPublicStaticMethods(FilterValueConverter.class);
     }
 
     @Test

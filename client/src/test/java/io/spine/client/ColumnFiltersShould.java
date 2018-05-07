@@ -47,7 +47,7 @@ import static io.spine.client.ColumnFilters.lt;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.EITHER;
-import static io.spine.client.ColumnFilterValues.toAny;
+import static io.spine.client.FilterValueConverter.toAny;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Verify.assertContainsAll;

@@ -40,7 +40,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.HashMultimap.create;
 import static com.google.common.primitives.Primitives.wrap;
-import static io.spine.client.ColumnFilterValues.toValue;
+import static io.spine.client.FilterValueConverter.toValue;
 import static java.lang.String.format;
 
 /**

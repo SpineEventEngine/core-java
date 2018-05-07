@@ -39,7 +39,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.client.ColumnFilterValues.toValue;
+import static io.spine.client.FilterValueConverter.toValue;
 import static io.spine.server.storage.OperatorEvaluator.eval;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
