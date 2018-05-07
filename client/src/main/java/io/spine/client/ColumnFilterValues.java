@@ -42,7 +42,7 @@ public class ColumnFilterValues {
         return TypeConverter.toAny(value);
     }
 
-    public static <T> T toObject(Any message, Class<T> targetClass) {
+    public static <T> T toValue(Any message, Class<T> targetClass) {
         checkNotNull(message);
         checkNotNull(targetClass);
         if (isEnum(targetClass)) {
