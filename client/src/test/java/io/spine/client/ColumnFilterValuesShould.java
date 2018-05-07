@@ -26,7 +26,7 @@ import io.spine.protobuf.TypeConverter;
 import org.junit.Test;
 
 import static io.spine.client.ColumnFilterValues.toAny;
-import static io.spine.client.ColumnFilterValues.toValue;
+import static io.spine.client.ColumnFilterValues.toObject;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.Assert.assertEquals;
 
@@ -65,7 +65,7 @@ public class ColumnFilterValuesShould {
     public void retrieve_non_enum_value_from_any() {
         final int value = 42;
         final Any convertedValue = TypeConverter.toAny(value);
-        final Object unpackedValue = toValue(convertedValue, Integer.class);
+        final Object unpackedValue = toObject(convertedValue, Integer.class);
         assertEquals(value, unpackedValue);
     }
 
@@ -73,7 +73,7 @@ public class ColumnFilterValuesShould {
     public void retrieve_enum_value_from_any() {
         final TestEnum value = TestEnum.ONE;
         final Any convertedValue = TypeConverter.toAny(value.name());
-        final Object unpackedValue = toValue(convertedValue, TestEnum.class);
+        final Object unpackedValue = toObject(convertedValue, TestEnum.class);
         assertEquals(value, unpackedValue);
     }
 
