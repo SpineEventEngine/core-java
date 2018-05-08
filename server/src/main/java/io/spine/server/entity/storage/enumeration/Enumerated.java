@@ -38,8 +38,8 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * value is persisted in the data storage.
  *
  * <p>If this annotation is omitted for the column which stores {@link Enum} type, it is still
- * counted as an enumerated type, and is assumed to be of the {@linkplain EnumType#ORDINAL ordinal
- * enum type}.
+ * considered enumerated, and is assumed to be of the {@linkplain EnumType#ORDINAL ordinal enum
+ * type}.
  *
  * @author Dmytro Kuzmin
  * @see EnumType

@@ -112,7 +112,7 @@ final class PersistenceInfo implements Serializable {
      * <p>Currently, non-{@link Enumerated} entity columns are persisted in the storage under the
      * same type as their getter return type, i.e. without changes.
      *
-     * <p>For the {@link Enumerated} entity columns see {@link EnumPersistenceTypes}
+     * <p>For the {@link Enumerated} entity columns, see {@link EnumPersistenceTypes}.
      *
      * @return the persistence type of the {@link EntityColumn}
      */

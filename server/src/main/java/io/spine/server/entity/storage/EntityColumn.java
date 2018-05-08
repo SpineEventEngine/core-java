@@ -361,7 +361,7 @@ public class EntityColumn implements Serializable {
      * <p>For the non-{@link io.spine.server.entity.storage.enumeration.Enumerated} entity columns
      * this type will be equal to the one retrieved via the {@link #getType()}.
      *
-     * <p>For {@link io.spine.server.entity.storage.enumeration.Enumerated} columns see {@link
+     * <p>For {@link io.spine.server.entity.storage.enumeration.Enumerated} columns, see {@link
      * EnumPersistenceTypes}.
      *
      * @return the persistence type of the column values
@@ -374,17 +374,17 @@ public class EntityColumn implements Serializable {
      * Converts the column value into the value for persistence in the data storage.
      *
      * <p>This method can be used to transform the value obtained through the {@link EntityColumn}
-     * getter into the corresponding value used for persistence in the data store.
+     * getter into the corresponding value used for persistence in the data storage.
      *
      * <p>The value type should be the same as the one obtained through the {@link #getType()}. The
      * output value type will be the same as {@link #getPersistedType()}.
      *
      * <p>For the {@code null} input argument the method will always return {@code null},
      * independently of the declared types.
-     *
+     *fggf
      * <p>The method is accessible outside of the {@link EntityColumn} class to enable the proper
      * {@link io.spine.client.ColumnFilter} conversion for the {@link
-     * io.spine.server.entity.storage.enumeration.Enumerated} column types.
+     * io.spine.server.entity.storage.enumeration.Enumerated} column values.
      *
      * @param columnValue the column value to convert
      * @return the column value converted to the form used for persistence in the data storage
