@@ -22,7 +22,7 @@ package io.spine.server.entity.storage;
 
 import java.io.Serializable;
 
-public interface PersistentValueConverter {
+public interface PersistentValueConverter extends Serializable {
 
     Serializable convert(Object value);
 }

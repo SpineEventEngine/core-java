@@ -31,6 +31,8 @@ import io.spine.annotation.Internal;
 @Internal
 class OrdinalEnumConverter extends EnumConverter {
 
+    private static final long serialVersionUID = 0L;
+
     /**
      * Convert the given {@link Enum} value into the {@link Integer} using its {@linkplain
      * Enum#ordinal() ordinal}.

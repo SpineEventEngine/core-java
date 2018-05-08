@@ -31,6 +31,8 @@ import io.spine.annotation.Internal;
 @Internal
 class StringEnumConverter extends EnumConverter {
 
+    private static final long serialVersionUID = 0L;
+
     /**
      * Converts the given {@link Enum} value into the {@link String} using its {@linkplain
      * Enum#name() name}.

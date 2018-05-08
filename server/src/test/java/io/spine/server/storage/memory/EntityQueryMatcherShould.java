@@ -107,7 +107,7 @@ public class EntityQueryMatcherShould {
         when(target.isNullable()).thenReturn(true);
         when(target.getStoredName()).thenReturn(targetName);
         when(target.getType()).thenReturn(Boolean.class);
-        when(target.toPersistenceType(any())).thenReturn(acceptedValue);
+        when(target.toPersistentValue(any())).thenReturn(acceptedValue);
 
         final Collection<Object> ids = Collections.emptyList();
 
@@ -151,7 +151,7 @@ public class EntityQueryMatcherShould {
         final EntityColumn column = mock(EntityColumn.class);
         when(column.getType()).thenReturn(Any.class);
         when(column.getStoredName()).thenReturn(columnName);
-        when(column.toPersistenceType(any())).thenReturn(actualValue);
+        when(column.toPersistentValue(any())).thenReturn(actualValue);
 
         final EntityColumn.MemoizedValue value = mock(EntityColumn.MemoizedValue.class);
         when(value.getSourceColumn()).thenReturn(column);

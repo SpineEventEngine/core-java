@@ -21,16 +21,19 @@
 package io.spine.server.entity.storage;
 
 import io.spine.server.entity.storage.enumeration.EnumConverters;
+import io.spine.server.entity.storage.enumeration.EnumPersistenceTypes;
 import io.spine.server.entity.storage.enumeration.EnumType;
 import io.spine.server.entity.storage.enumeration.Enumerated;
-import io.spine.server.entity.storage.enumeration.PersistenceTypes;
 
+import java.io.Serializable;
 import java.lang.reflect.Method;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.entity.storage.enumeration.EnumType.ORDINAL;
 
-public class PersistenceInfo {
+public class PersistenceInfo implements Serializable {
+
+    private static final long serialVersionUID = 0L;
 
     private final Class<?> persistenceType;
     private final PersistentValueConverter valueConverter;
@@ -48,7 +51,7 @@ public class PersistenceInfo {
             return new PersistenceInfo(returnType, converter);
         }
         final EnumType enumType = enumTypeFromAnnotation(getter);
-        final Class<?> type = PersistenceTypes.getPersistenceType(enumType);
+        final Class<?> type = EnumPersistenceTypes.getPersistenceType(enumType);
         final PersistentValueConverter converter = EnumConverters.forType(enumType);
         return new PersistenceInfo(type, converter);
     }

@@ -25,6 +25,7 @@ import io.spine.server.entity.storage.PersistentValueConverter;
 
 import java.io.Serializable;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
@@ -36,8 +37,11 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
 @Internal
 public abstract class EnumConverter implements PersistentValueConverter {
 
+    private static final long serialVersionUID = 0L;
+
     @Override
     public Serializable convert(Object value) {
+        checkNotNull(value);
         if (!isEnumType(value)) {
             throw newIllegalArgumentException(
                     "Value passed to the EnumConverter should be of Enum type, actual type: %s",

@@ -18,9 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity.storage.enumeration;
+package io.spine.server.entity.storage;
 
 import com.google.common.testing.NullPointerTester;
+import io.spine.server.entity.storage.enumeration.EnumConverter;
 import org.junit.Test;
 
 import java.io.Serializable;
@@ -28,27 +29,44 @@ import java.io.Serializable;
 import static io.spine.server.entity.storage.enumeration.EnumConverters.forType;
 import static io.spine.server.entity.storage.enumeration.EnumType.ORDINAL;
 import static io.spine.server.entity.storage.enumeration.EnumType.STRING;
-import static io.spine.server.entity.storage.enumeration.given.EnumeratedTestEnv.TestEnum.ONE;
+import static io.spine.server.entity.storage.given.ColumnTestEnv.TestEnum.ONE;
 import static org.junit.Assert.assertEquals;
 
-public class EnumConverterShould {
+/**
+ * @author Dmytro Kuzmin
+ */
+public class PersistentValueConverterShould {
 
     @Test
     public void not_accept_nulls() {
-        final EnumConverter<? extends Serializable> converter = forType(ORDINAL);
+        PersistentValueConverter converter = new IdentityConverter();
+        new NullPointerTester().testAllPublicInstanceMethods(converter);
+
+        converter = forType(ORDINAL);
+        new NullPointerTester().testAllPublicInstanceMethods(converter);
+
+        converter = forType(STRING);
         new NullPointerTester().testAllPublicInstanceMethods(converter);
     }
 
     @Test
-    public void convert_ordinal_value() {
-        final EnumConverter<? extends Serializable> converter = forType(ORDINAL);
+    public void perform_identity_conversion() {
+        final IdentityConverter converter = new IdentityConverter();
+        final Object object = "test";
+        final Serializable convertedObject = converter.convert(object);
+        assertEquals(object, convertedObject);
+    }
+
+    @Test
+    public void convert_enum_to_ordinal_value() {
+        final EnumConverter converter = forType(ORDINAL);
         final Serializable value = converter.convert(ONE);
         assertEquals(ONE.ordinal(), value);
     }
 
     @Test
-    public void convert_string_value() {
-        final EnumConverter<? extends Serializable> converter = forType(STRING);
+    public void convert_enum_to_string_value() {
+        final EnumConverter converter = forType(STRING);
         final Serializable value = converter.convert(ONE);
         assertEquals(ONE.name(), value);
     }
