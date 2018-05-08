@@ -28,6 +28,7 @@ import java.util.Map;
 import static io.spine.server.entity.storage.enumeration.EnumType.ORDINAL;
 import static io.spine.server.entity.storage.enumeration.EnumType.STRING;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
+import static java.util.Collections.unmodifiableMap;
 
 /**
  * A storage of the {@linkplain Class Java Classes} representing the persistence types for each
@@ -68,6 +69,6 @@ public final class EnumPersistenceTypes {
         final Map<EnumType, Class<?>> map = new EnumMap<>(EnumType.class);
         map.put(ORDINAL, Integer.class);
         map.put(STRING, String.class);
-        return map;
+        return unmodifiableMap(map);
     }
 }

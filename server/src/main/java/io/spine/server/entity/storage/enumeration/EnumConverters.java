@@ -28,6 +28,7 @@ import java.util.Map;
 import static io.spine.server.entity.storage.enumeration.EnumType.ORDINAL;
 import static io.spine.server.entity.storage.enumeration.EnumType.STRING;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
+import static java.util.Collections.unmodifiableMap;
 
 /**
  * A container for the known {@linkplain EnumConverter enum converters} stored by the
@@ -66,6 +67,6 @@ public final class EnumConverters {
         final Map<EnumType, EnumConverter> map = new EnumMap<>(EnumType.class);
         map.put(ORDINAL, new OrdinalEnumConverter());
         map.put(STRING, new StringEnumConverter());
-        return map;
+        return unmodifiableMap(map);
     }
 }
