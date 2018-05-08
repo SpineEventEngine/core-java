@@ -38,8 +38,7 @@ import static io.spine.server.entity.storage.enumeration.EnumType.STRING;
 @Internal
 public final class EnumConverters {
 
-    private static final Map<EnumType, EnumConverter> converters =
-            converters();
+    private static final Map<EnumType, EnumConverter> converters = converters();
 
     /**
      * Prevents instantiation of this class.

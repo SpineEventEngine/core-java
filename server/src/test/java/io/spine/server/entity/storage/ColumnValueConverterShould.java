@@ -35,11 +35,11 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author Dmytro Kuzmin
  */
-public class PersistentValueConverterShould {
+public class ColumnValueConverterShould {
 
     @Test
     public void not_accept_nulls() {
-        PersistentValueConverter converter = new IdentityConverter();
+        ColumnValueConverter converter = new IdentityConverter();
         new NullPointerTester().testAllPublicInstanceMethods(converter);
 
         converter = forType(ORDINAL);

@@ -20,9 +20,29 @@
 
 package io.spine.server.entity.storage;
 
+import io.spine.annotation.Internal;
+import io.spine.server.entity.Entity;
+
 import java.io.Serializable;
 
-public interface PersistentValueConverter extends Serializable {
+/**
+ * An interface for converting the {@link EntityColumn} values to their persisted type.
+ *
+ * @author Dmytro Kuzmin
+ */
+@Internal
+public interface ColumnValueConverter extends Serializable {
 
+    /**
+     * Converts the {@link EntityColumn} value to its persisted type.
+     *
+     * <p>The input value is assumed to be the one {@linkplain EntityColumn#memoizeFor(Entity)
+     * retrieved} via the {@link EntityColumn} getter.
+     *
+     * <p>The output value is the corresponding value to be used in the data storage.
+     *
+     * @param value the value to convert
+     * @return the value used for the persistence in the data storage
+     */
     Serializable convert(Object value);
 }

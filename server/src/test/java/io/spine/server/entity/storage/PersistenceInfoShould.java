@@ -81,11 +81,11 @@ public class PersistenceInfoShould {
     }
 
     private static void checkInfoIsOfEnumType(PersistenceInfo info, EnumType type) {
-        final Class<?> expectedType = EnumPersistenceTypes.ofType(type);
+        final Class<?> expectedType = EnumPersistenceTypes.of(type);
         final Class<?> actualType = info.getPersistedType();
         assertEquals(expectedType, actualType);
         final EnumConverter expectedConverter = EnumConverters.forType(type);
-        final PersistentValueConverter actualConverter = info.getValueConverter();
+        final ColumnValueConverter actualConverter = info.getValueConverter();
         assertEquals(expectedConverter.getClass(), actualConverter.getClass());
     }
 }

@@ -23,8 +23,8 @@ package io.spine.server.entity.storage.enumeration;
 import io.spine.annotation.Internal;
 
 /**
- * A converter which uses {@link Enum}'s {@linkplain Enum#name() name} to convert the enumerated
- * value into the {@link String} value.
+ * A converter which uses {@link Enum}'s {@linkplain Enum#name() name} property to convert the
+ * enumerated value into the {@link String} value.
  *
  * @author Dmytro Kuzmin
  */
@@ -34,14 +34,10 @@ final class StringEnumConverter extends EnumConverter {
     private static final long serialVersionUID = 0L;
 
     /**
-     * Converts the given {@link Enum} value into the {@link String} using its {@linkplain
-     * Enum#name() name}.
-     *
-     * @param value the value to convert
-     * @return the enum value's name
+     * {@inheritDoc}
      */
     @Override
-    protected String doConvert(Enum value) {
+    protected String convertEnumValue(Enum value) {
         return value.name();
     }
 }

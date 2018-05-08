@@ -21,7 +21,7 @@
 package io.spine.server.entity.storage.enumeration;
 
 import io.spine.annotation.Internal;
-import io.spine.server.entity.storage.PersistentValueConverter;
+import io.spine.server.entity.storage.ColumnValueConverter;
 
 import java.io.Serializable;
 
@@ -29,16 +29,22 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
- * An abstract base for converting the {@link Enum} entity columns value to the value for
+ * An abstract base for converting the {@link Enum} entity column value into the value for
  * persistence in the data storage.
  *
  * @author Dmytro Kuzmin
+ * @see EnumConverters
+ * @see EnumType
  */
 @Internal
-public abstract class EnumConverter implements PersistentValueConverter {
+public abstract class EnumConverter implements ColumnValueConverter {
 
     private static final long serialVersionUID = 0L;
 
+    /**
+     * {@inheritDoc}
+     * @throws IllegalArgumentException in case the passed value is not of the {@link Enum} type
+     */
     @Override
     public Serializable convert(Object value) {
         checkNotNull(value);
@@ -48,19 +54,28 @@ public abstract class EnumConverter implements PersistentValueConverter {
                     value.getClass());
         }
         final Enum enumValue = (Enum) value;
-        final Serializable convertedValue = doConvert(enumValue);
+        final Serializable convertedValue = convertEnumValue(enumValue);
         return convertedValue;
     }
 
     /**
-     * Convert the given {@link Enum} value into the arbitrary {@link Serializable} value.
+     * Converts the given {@link Enum} value into the {@link Serializable} value which can be used
+     * for persistence in the data storage.
      *
      * @param value the value to convert
      * @return the converted value
      */
-    protected abstract Serializable doConvert(Enum value);
+    protected abstract Serializable convertEnumValue(Enum value);
 
-    private boolean isEnumType(Object value) {
-        return Enum.class.isAssignableFrom(value.getClass());
+    /**
+     * Checks if the passed value is of the {@link Enum} type.
+     *
+     * @param value the value to check
+     * @return {@code true} if the value is of the {@link Enum} type, {@code false} otherwise
+     */
+    private static boolean isEnumType(Object value) {
+        final Class<?> valueType = value.getClass();
+        final boolean isJavaEnum = Enum.class.isAssignableFrom(valueType);
+        return isJavaEnum;
     }
 }

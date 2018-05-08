@@ -91,7 +91,7 @@ public final class FilterValueConverter {
      * Determines whether the given {@linkplain Class type} is Java {@link Enum}.
      *
      * @param type the {@code Class} object representing the type
-     * @return true if the type is Java Enum, false otherwise
+     * @return {@code true} if the type is Java Enum, {@code false} otherwise
      */
     private static boolean isEnum(Class<?> type) {
         return Enum.class.isAssignableFrom(type);

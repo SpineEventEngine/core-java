@@ -26,11 +26,19 @@ import java.io.Serializable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+/**
+ * A {@link ColumnValueConverter} which returns the same value as a result of the conversion.
+ *
+ * @author Dmytro Kuzmin
+ */
 @Internal
-public final class IdentityConverter implements PersistentValueConverter {
+public final class IdentityConverter implements ColumnValueConverter {
 
     private static final long serialVersionUID = 0L;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Serializable convert(Object value) {
         checkNotNull(value);

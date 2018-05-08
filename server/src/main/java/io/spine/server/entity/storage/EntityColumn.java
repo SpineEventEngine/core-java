@@ -356,28 +356,47 @@ public class EntityColumn implements Serializable {
     }
 
     /**
-     * Return the type under which the column is persisted in the data storage.
+     * Returns the type under which the column values are persisted in the data storage.
      *
-     * For the non-{@link io.spine.server.entity.storage.enumeration.Enumerated} entity columns
+     * <p>For the non-{@link io.spine.server.entity.storage.enumeration.Enumerated} entity columns
      * this type will be equal to the one retrieved via the {@link #getType()}.
      *
-     * For {@link io.spine.server.entity.storage.enumeration.Enumerated} columns see {@link
+     * <p>For {@link io.spine.server.entity.storage.enumeration.Enumerated} columns see {@link
      * EnumPersistenceTypes}.
      *
-     * @return the persistence type of the column
+     * @return the persistence type of the column values
      */
     public Class getPersistedType() {
         return persistenceInfo.getPersistedType();
     }
 
+    /**
+     * Converts the column value into the value for persistence in the data storage.
+     *
+     * <p>This method can be used to transform the value obtained through the {@link EntityColumn}
+     * getter into the corresponding value used for persistence in the data store.
+     *
+     * <p>The value type should be the same as the one obtained through the {@link #getType()}. The
+     * output value type will be the same as {@link #getPersistedType()}.
+     *
+     * <p>For the {@code null} input argument the method will always return {@code null},
+     * independently of the declared types.
+     *
+     * <p>The method is accessible outside of the {@link EntityColumn} class to enable the proper
+     * {@link io.spine.client.ColumnFilter} conversion for the {@link
+     * io.spine.server.entity.storage.enumeration.Enumerated} column types.
+     *
+     * @param columnValue the column value to convert
+     * @return the column value converted to the form used for persistence in the data storage
+     * @throws IllegalArgumentException if the value type is not equal to the {@linkplain #getType()
+     *                                  entity column type}
+     */
     public Serializable toPersistedValue(@Nullable Object columnValue) {
         if (columnValue == null) {
             return null;
         }
-
         checkTypeMatches(columnValue);
-
-        final PersistentValueConverter converter = persistenceInfo.getValueConverter();
+        final ColumnValueConverter converter = persistenceInfo.getValueConverter();
         final Serializable convertedValue = converter.convert(columnValue);
         return convertedValue;
     }
@@ -410,6 +429,16 @@ public class EntityColumn implements Serializable {
         return sb.toString();
     }
 
+    /**
+     * Checks that the passed value's type is the same as the {@linkplain #getType() entity column
+     * type}.
+     *
+     * <p>{@linkplain Class#isPrimitive() Primitive types} are ignored by this method to enable
+     * proper interaction between the primitive types and their wrapper types.
+     *
+     * @param value the value to check
+     * @throws IllegalArgumentException in case the check fails
+     */
     private void checkTypeMatches(Object value) {
         final Class<?> columnType = getType();
         final Class<?> valueType = value.getClass();
