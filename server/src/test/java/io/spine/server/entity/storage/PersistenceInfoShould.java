@@ -48,7 +48,7 @@ public class PersistenceInfoShould {
     @Test
     public void create_identity_instance_for_non_enum_type_getter() {
         final PersistenceInfo info = forGetter("getLong");
-        assertEquals(long.class, info.getPersistenceType());
+        assertEquals(long.class, info.getPersistedType());
         assertEquals(IdentityConverter.class, info.getValueConverter()
                                                   .getClass());
     }
@@ -81,8 +81,8 @@ public class PersistenceInfoShould {
     }
 
     private static void checkInfoIsOfEnumType(PersistenceInfo info, EnumType type) {
-        final Class<?> expectedType = EnumPersistenceTypes.getPersistenceType(type);
-        final Class<?> actualType = info.getPersistenceType();
+        final Class<?> expectedType = EnumPersistenceTypes.ofType(type);
+        final Class<?> actualType = info.getPersistedType();
         assertEquals(expectedType, actualType);
         final EnumConverter expectedConverter = EnumConverters.forType(type);
         final PersistentValueConverter actualConverter = info.getValueConverter();

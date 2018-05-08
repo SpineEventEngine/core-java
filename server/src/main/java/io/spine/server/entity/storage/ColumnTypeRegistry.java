@@ -78,7 +78,7 @@ public final class ColumnTypeRegistry<C extends ColumnType> {
      * Retrieves the {@link ColumnType} for specified {@link EntityColumn}.
      *
      * <p>By default, this method returns the {@link ColumnType} for the
-     * {@linkplain EntityColumn column's} {@linkplain EntityColumn#getPersistentType() type}.
+     * {@linkplain EntityColumn column's} {@linkplain EntityColumn#getPersistedType() type}.
      *
      * <p>If the {@link ColumnType} was not found by the {@code class} of the {@link EntityColumn},
      * its superclasses are checked one by one until a {@link ColumnType} is found or until
@@ -92,7 +92,7 @@ public final class ColumnTypeRegistry<C extends ColumnType> {
     public C get(EntityColumn field) {
         checkNotNull(field);
 
-        Class javaType = field.getPersistentType();
+        Class javaType = field.getPersistedType();
         javaType = Primitives.wrap(javaType);
         C type = null;
 
@@ -103,7 +103,7 @@ public final class ColumnTypeRegistry<C extends ColumnType> {
 
         checkState(type != null,
                    "Could not find storage type for %s.",
-                   field.getPersistentType());
+                   field.getPersistedType());
         return type;
     }
 

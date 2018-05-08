@@ -111,7 +111,7 @@ public class ColumnRecordsShould {
     private static Map<String, EntityColumn.MemoizedValue> setupMockColumnsAllowingNulls() {
         final EntityColumn mockColumn = mock(EntityColumn.class);
         when(mockColumn.getType()).thenReturn(Object.class);
-        when(mockColumn.getPersistentType()).thenReturn(Object.class);
+        when(mockColumn.getPersistedType()).thenReturn(Object.class);
         final Map<String, EntityColumn.MemoizedValue> columns = new HashMap<>(MOCK_COLUMNS_COUNT);
         for (int i = 0; i < MOCK_COLUMNS_COUNT; i++) {
             final Integer columnValueToPersist = (i % 2 != 0) ? null : i;

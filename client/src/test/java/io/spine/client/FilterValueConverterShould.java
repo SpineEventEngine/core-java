@@ -30,6 +30,9 @@ import static io.spine.client.FilterValueConverter.toValue;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.Assert.assertEquals;
 
+/**
+ * @author Dmytro Kuzmin
+ */
 public class FilterValueConverterShould {
 
     @Test

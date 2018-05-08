@@ -35,11 +35,11 @@ public final class PersistenceInfo implements Serializable {
 
     private static final long serialVersionUID = 0L;
 
-    private final Class<?> persistenceType;
+    private final Class<?> persistedType;
     private final PersistentValueConverter valueConverter;
 
-    private PersistenceInfo(Class<?> persistenceType, PersistentValueConverter valueConverter) {
-        this.persistenceType = persistenceType;
+    private PersistenceInfo(Class<?> persistedType, PersistentValueConverter valueConverter) {
+        this.persistedType = persistedType;
         this.valueConverter = valueConverter;
     }
 
@@ -51,7 +51,7 @@ public final class PersistenceInfo implements Serializable {
             return new PersistenceInfo(returnType, converter);
         }
         final EnumType enumType = enumTypeFromAnnotation(getter);
-        final Class<?> type = EnumPersistenceTypes.getPersistenceType(enumType);
+        final Class<?> type = EnumPersistenceTypes.ofType(enumType);
         final PersistentValueConverter converter = EnumConverters.forType(enumType);
         return new PersistenceInfo(type, converter);
     }
@@ -70,8 +70,8 @@ public final class PersistenceInfo implements Serializable {
         return type;
     }
 
-    public Class<?> getPersistenceType() {
-        return persistenceType;
+    public Class<?> getPersistedType() {
+        return persistedType;
     }
 
     public PersistentValueConverter getValueConverter() {

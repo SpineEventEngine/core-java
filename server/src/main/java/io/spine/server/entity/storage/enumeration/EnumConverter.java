@@ -29,8 +29,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
- * An interface for the converter of {@link Enum} value to the arbitrary {@link Serializable}
- * value.
+ * An abstract base for converting the {@link Enum} entity columns value to the value for
+ * persistence in the data storage.
  *
  * @author Dmytro Kuzmin
  */

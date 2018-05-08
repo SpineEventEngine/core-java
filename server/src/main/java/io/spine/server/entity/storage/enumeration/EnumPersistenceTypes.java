@@ -54,7 +54,7 @@ public final class EnumPersistenceTypes {
      * @param type the type of the {@link Enumerated} value
      * @return the persistence type used to store value in the data storage
      */
-    public static Class<?> getPersistenceType(EnumType type) {
+    public static Class<?> ofType(EnumType type) {
         return persistenceTypes.get(type);
     }
 

@@ -150,7 +150,7 @@ final class EntityQueryMatcher<I> implements Predicate<EntityRecordWithColumns> 
         } else {
             value = wrappedValue;
         }
-        final Object columnValue = sourceColumn.toPersistentValue(value);
+        final Object columnValue = sourceColumn.toPersistedValue(value);
         final boolean result = eval(actualValue.getValue(), filter.getOperator(), columnValue);
         return result;
     }

@@ -39,21 +39,21 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Dmytro Kuzmin
  */
-public class FilterValueConverter {
+public final class FilterValueConverter {
 
     /**
-     * Prevent instantiation of this utility class.
+     * Prevents instantiation of this utility class.
      */
     private FilterValueConverter() {
     }
 
     /**
-     * Convert the given {@link Any} to the filter value represented as {@linkplain Object Java
+     * Converts the given {@link Any} to the filter value represented as {@linkplain Object Java
      * Object}.
      *
-     * @param message     the {@linkplain com.google.protobuf.Message Protobuf Messages} in form of
+     * @param message     the {@linkplain com.google.protobuf.Message Protobuf Message} in form of
      *                    {@code Any}
-     * @param targetClass the filter value {@link Class}
+     * @param targetClass the {@link Class} representing filter value type
      * @param <T>         the filter value type
      * @return the filter value in the form of Java Object
      */
@@ -71,7 +71,7 @@ public class FilterValueConverter {
     }
 
     /**
-     * Convert the given filter value to Protobuf {@link Any}.
+     * Converts the given filter value to Protobuf {@link Any}.
      *
      * @param value the filter value
      * @param <T>   the value type
@@ -88,7 +88,7 @@ public class FilterValueConverter {
     }
 
     /**
-     * Determine whether the given {@linkplain Class type} is Java {@link Enum}.
+     * Determines whether the given {@linkplain Class type} is Java {@link Enum}.
      *
      * @param type the {@code Class} object representing the type
      * @return true if the type is Java Enum, false otherwise
@@ -98,7 +98,7 @@ public class FilterValueConverter {
     }
 
     /**
-     * Convert the given {@link Enum} value to the Protobuf {@link Any}.
+     * Converts the given {@link Enum} value to the Protobuf {@link Any}.
      *
      * @param value the value to convert
      * @param <T>   the type of the {@code Enum}
@@ -110,7 +110,7 @@ public class FilterValueConverter {
     }
 
     /**
-     * Convert the given {@link Any} to the Java {@link Enum} object.
+     * Converts the given {@link Any} to the Java {@link Enum} object.
      *
      * @param message   the {@code Any} object to convert
      * @param enumClass the {@code Class} object representing the {@code Enum} type

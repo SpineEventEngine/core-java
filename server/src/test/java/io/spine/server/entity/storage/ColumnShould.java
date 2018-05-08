@@ -33,15 +33,13 @@ import io.spine.server.entity.storage.given.ColumnTestEnv.BrokenTestEntity;
 import io.spine.server.entity.storage.given.ColumnTestEnv.EntityRedefiningColumnAnnotation;
 import io.spine.server.entity.storage.given.ColumnTestEnv.EntityWithDefaultColumnNameForStoring;
 import io.spine.server.entity.storage.given.ColumnTestEnv.TestEntity;
-import io.spine.server.entity.storage.given.ColumnTestEnv.TestEnum;
 import org.junit.Test;
 
-import java.io.Serializable;
 import java.lang.reflect.Method;
 
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
 import static io.spine.server.entity.storage.enumeration.EnumType.ORDINAL;
-import static io.spine.server.entity.storage.enumeration.EnumPersistenceTypes.getPersistenceType;
+import static io.spine.server.entity.storage.enumeration.EnumPersistenceTypes.ofType;
 import static io.spine.server.entity.storage.enumeration.EnumType.STRING;
 import static io.spine.server.entity.storage.given.ColumnTestEnv.TestEnum.ONE;
 import static org.junit.Assert.assertEquals;
@@ -219,30 +217,30 @@ public class ColumnShould {
     @Test
     public void be_constructed_from_enumerated_type_getter() {
         final EntityColumn column = forMethod("getEnumOrdinal", TestEntity.class);
-        final Class<?> expectedType = EnumPersistenceTypes.getPersistenceType(ORDINAL);
-        final Class actualType = column.getPersistentType();
+        final Class<?> expectedType = EnumPersistenceTypes.ofType(ORDINAL);
+        final Class actualType = column.getPersistedType();
         assertEquals(expectedType, actualType);
     }
 
     @Test
-    public void return_same_persistent_type_for_non_enum_getter() {
+    public void return_same_persisted_type_for_non_enum_getter() {
         final EntityColumn column = forMethod("getLong", TestEntity.class);
-        assertEquals(column.getType(), column.getPersistentType());
+        assertEquals(column.getType(), column.getPersistedType());
     }
 
     @Test
     public void return_persistence_type_for_ordinal_enumerated_value() {
         final EntityColumn column = forMethod("getEnumOrdinal", TestEntity.class);
-        final Class expectedType = getPersistenceType(ORDINAL);
-        final Class actualType = column.getPersistentType();
+        final Class expectedType = ofType(ORDINAL);
+        final Class actualType = column.getPersistedType();
         assertEquals(expectedType, actualType);
     }
 
     @Test
     public void return_persistence_type_for_string_enumerated_value() {
         final EntityColumn column = forMethod("getEnumString", TestEntity.class);
-        final Class expectedType = getPersistenceType(STRING);
-        final Class actualType = column.getPersistentType();
+        final Class expectedType = ofType(STRING);
+        final Class actualType = column.getPersistedType();
         assertEquals(expectedType, actualType);
     }
 
@@ -269,11 +267,11 @@ public class ColumnShould {
     @Test
     public void convert_enumerated_value_to_persistence_type() {
         final EntityColumn columnOrdinal = forMethod("getEnumOrdinal", TestEntity.class);
-        final Object ordinalValue = columnOrdinal.toPersistentValue(ONE);
+        final Object ordinalValue = columnOrdinal.toPersistedValue(ONE);
         assertEquals(ONE.ordinal(), ordinalValue);
 
         final EntityColumn columnString = forMethod("getEnumString", TestEntity.class);
-        final Object stringValue = columnString.toPersistentValue(ONE);
+        final Object stringValue = columnString.toPersistedValue(ONE);
         assertEquals(ONE.name(), stringValue);
     }
 
@@ -281,7 +279,7 @@ public class ColumnShould {
     public void do_identity_conversion_for_non_enum_values() {
         final EntityColumn column = forMethod("getLong", TestEntity.class);
         final Object value = 15L;
-        final Object converted = column.toPersistentValue(value);
+        final Object converted = column.toPersistedValue(value);
         assertEquals(value, converted);
     }
 
@@ -289,7 +287,7 @@ public class ColumnShould {
     public void return_null_on_null_conversion() {
         final EntityColumn column = forMethod("getLong", TestEntity.class);
         final Object value = null;
-        final Object converted = column.toPersistentValue(value);
+        final Object converted = column.toPersistedValue(value);
         assertNull(converted);
     }
 
@@ -297,7 +295,7 @@ public class ColumnShould {
     public void allow_conversion_only_for_type_stored_in_column() {
         final EntityColumn column = forMethod("getEnumOrdinal", TestEntity.class);
         final String value = "test";
-        column.toPersistentValue(value);
+        column.toPersistedValue(value);
     }
 
     private static EntityColumn forMethod(String name, Class<?> enclosingClass) {

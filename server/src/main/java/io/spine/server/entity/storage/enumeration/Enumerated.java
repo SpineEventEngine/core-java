@@ -52,7 +52,7 @@ public @interface Enumerated {
      * The {@link EnumType} of the enumerated value which defines how the value will be persisted
      * in the data storage.
      *
-     * <p>For the detailed information about the persistent methods, see {@link EnumType}.
+     * <p>For the detailed information about the persistence methods, see {@link EnumType}.
      */
     EnumType value() default ORDINAL;
 }
