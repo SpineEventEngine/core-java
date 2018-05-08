@@ -25,7 +25,6 @@ import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import io.spine.annotation.Internal;
 import io.spine.server.entity.Entity;
-import io.spine.server.entity.storage.enumeration.EnumPersistenceTypes;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -362,7 +361,7 @@ public class EntityColumn implements Serializable {
      * this type will be equal to the one retrieved via the {@link #getType()}.
      *
      * <p>For {@link io.spine.server.entity.storage.enumeration.Enumerated} columns, see {@link
-     * EnumPersistenceTypes}.
+     * io.spine.server.entity.storage.enumeration.EnumPersistenceTypes}.
      *
      * @return the persistence type of the column values
      */
