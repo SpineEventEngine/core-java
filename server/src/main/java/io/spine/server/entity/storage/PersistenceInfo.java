@@ -31,7 +31,7 @@ import java.lang.reflect.Method;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.entity.storage.enumeration.EnumType.ORDINAL;
 
-public class PersistenceInfo implements Serializable {
+public final class PersistenceInfo implements Serializable {
 
     private static final long serialVersionUID = 0L;
 

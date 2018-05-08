@@ -27,7 +27,7 @@ import java.io.Serializable;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 @Internal
-public class IdentityConverter implements PersistentValueConverter {
+public final class IdentityConverter implements PersistentValueConverter {
 
     private static final long serialVersionUID = 0L;
 

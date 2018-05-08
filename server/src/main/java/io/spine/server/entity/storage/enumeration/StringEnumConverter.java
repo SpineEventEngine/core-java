@@ -29,7 +29,7 @@ import io.spine.annotation.Internal;
  * @author Dmytro Kuzmin
  */
 @Internal
-class StringEnumConverter extends EnumConverter {
+final class StringEnumConverter extends EnumConverter {
 
     private static final long serialVersionUID = 0L;
 

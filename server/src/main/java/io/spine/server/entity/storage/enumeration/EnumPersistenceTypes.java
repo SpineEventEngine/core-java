@@ -38,7 +38,7 @@ import static io.spine.server.entity.storage.enumeration.EnumType.STRING;
  * @see Enumerated
  */
 @Internal
-public class EnumPersistenceTypes {
+public final class EnumPersistenceTypes {
 
     private static final Map<EnumType, Class<?>> persistenceTypes = persistenceTypes();
 
