@@ -68,4 +68,11 @@ public class ColumnValueConverterShould {
         final Serializable value = converter.convert(ONE);
         assertEquals(ONE.name(), value);
     }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void not_support_wrong_value_type_conversion() {
+        final EnumConverter converter = forType(ORDINAL);
+        final Object value = "test";
+        converter.convert(value);
+    }
 }
