@@ -18,28 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity.storage.enumeration;
+package io.spine.server.entity.storage;
 
-import io.spine.annotation.Internal;
+import java.io.Serializable;
 
-/**
- * A converter which uses {@link Enum}'s {@linkplain Enum#name() name} to convert the enumerated
- * value into the {@link String} value.
- *
- * @author Dmytro Kuzmin
- */
-@Internal
-class StringEnumConverter extends EnumConverter {
+public interface PersistentValueConverter {
 
-    /**
-     * Converts the given {@link Enum} value into the {@link String} using its {@linkplain
-     * Enum#name() name}.
-     *
-     * @param value the value to convert
-     * @return the enum value's name
-     */
-    @Override
-    protected String doConvert(Enum value) {
-        return value.name();
-    }
+    Serializable convert(Object value);
 }

@@ -26,7 +26,6 @@ import com.google.common.base.Optional;
 import com.google.gson.internal.Primitives;
 import io.spine.annotation.Internal;
 import io.spine.server.entity.Entity;
-import io.spine.server.entity.storage.enumeration.EnumeratedValue;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -200,20 +199,20 @@ public class EntityColumn implements Serializable {
 
     private final boolean nullable;
 
-    private final EnumeratedValue enumeratedValue;
+    private final PersistenceInfo persistenceInfo;
 
     private EntityColumn(Method getter,
                          String name,
                          String storedName,
                          boolean nullable,
-                         EnumeratedValue enumeratedValue) {
+                         PersistenceInfo persistenceInfo) {
         this.getter = getter;
         this.entityType = getter.getDeclaringClass();
         this.getterMethodName = getter.getName();
         this.name = name;
         this.storedName = storedName;
         this.nullable = nullable;
-        this.enumeratedValue = enumeratedValue;
+        this.persistenceInfo = persistenceInfo;
     }
 
     /**
@@ -228,7 +227,7 @@ public class EntityColumn implements Serializable {
         final Method annotatedVersion = retrieveAnnotatedVersion(getter);
         final String nameForStore = nameFromAnnotation(annotatedVersion).or(nameForQuery);
         final boolean nullable = getter.isAnnotationPresent(Nullable.class);
-        final EnumeratedValue value = EnumeratedValue.from(annotatedVersion);
+        final PersistenceInfo value = PersistenceInfo.from(annotatedVersion);
         return new EntityColumn(getter, nameForQuery, nameForStore, nullable, value);
     }
 
@@ -321,8 +320,8 @@ public class EntityColumn implements Serializable {
             if (!nullable) {
                 checkNotNull(result, format("Not null getter %s returned null.", getter.getName()));
             }
-            final Serializable persistenceValue = (Serializable) toPersistenceType(result);
-            return persistenceValue;
+            final Serializable value = toPersistentValue(result);
+            return value;
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new IllegalStateException(
                     format("Could not invoke getter of property %s from object %s",
@@ -366,34 +365,20 @@ public class EntityColumn implements Serializable {
      *
      * @return the persistence type of the column
      */
-    public Class getPersistenceType() {
-        if (isEnumType()) {
-            return enumeratedValue.getPersistenceType();
-        }
-        return getter.getReturnType();
+    public Class getPersistentType() {
+        return persistenceInfo.getPersistenceType();
     }
 
-    /**
-     * Convert the given column value to the type under which it will be persisted in the data
-     * storage.
-     *
-     * @param value the value to convert
-     * @return the value that will be persisted in the data storage
-     * @throws IllegalArgumentException in case the value type doesn't match the {@linkplain
-     *                                  #getType() one persisted in column}
-     * @see #getPersistenceType()
-     */
-    public Object toPersistenceType(@Nullable Object value) {
-        if (value == null) {
+    public Serializable toPersistentValue(@Nullable Object columnValue) {
+        if (columnValue == null) {
             return null;
         }
 
-        checkTypeMatches(value);
+        checkTypeMatches(columnValue);
 
-        if (isEnumType()) {
-            return enumeratedValue.getFor((Enum) value);
-        }
-        return value;
+        final PersistentValueConverter converter = persistenceInfo.getValueConverter();
+        final Serializable convertedValue = converter.convert(columnValue);
+        return convertedValue;
     }
 
     @SuppressWarnings("NonFinalFieldReferenceInEquals") // `getter` field is effectively final
@@ -422,11 +407,6 @@ public class EntityColumn implements Serializable {
           .append('.')
           .append(getName());
         return sb.toString();
-    }
-
-    @VisibleForTesting
-    boolean isEnumType() {
-        return !enumeratedValue.isEmpty();
     }
 
     private void checkTypeMatches(Object value) {

@@ -96,7 +96,7 @@ public class EnumeratedValue implements Serializable {
 
     public Serializable getFor(Enum value) {
         checkNotNull(value);
-        final EnumConverter<? extends Serializable> converter = forType(type);
+        final EnumConverter converter = forType(type);
         final Serializable result = converter.convert(value);
         return result;
     }

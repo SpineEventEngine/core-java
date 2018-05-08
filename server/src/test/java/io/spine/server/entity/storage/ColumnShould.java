@@ -224,7 +224,7 @@ public class ColumnShould {
         final EntityColumn column = forMethod("getEnumNotAnnotated", TestEntity.class);
         assertTrue(column.isEnumType());
         final Class expectedType = getPersistenceType(ORDINAL);
-        final Class actualType = column.getPersistenceType();
+        final Class actualType = column.getPersistentType();
         assertEquals(expectedType, actualType);
     }
 
@@ -232,7 +232,7 @@ public class ColumnShould {
     public void return_persistence_type_for_enumerated_value() {
         final EntityColumn column = forMethod("getEnumOrdinal", TestEntity.class);
         final Class expectedType = getPersistenceType(ORDINAL);
-        final Class actualType = column.getPersistenceType();
+        final Class actualType = column.getPersistentType();
         assertEquals(expectedType, actualType);
     }
 

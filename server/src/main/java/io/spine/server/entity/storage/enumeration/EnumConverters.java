@@ -38,28 +38,27 @@ import static io.spine.server.entity.storage.enumeration.EnumType.STRING;
 @Internal
 public final class EnumConverters {
 
-    private static final Map<EnumType, EnumConverter<? extends Serializable>> converters =
+    private static final Map<EnumType, EnumConverter> converters =
             converters();
 
     /**
-     * Prevent instantiation of this class.
+     * Prevents instantiation of this class.
      */
     private EnumConverters() {
     }
 
     /**
-     * Retrieve the {@linkplain EnumConverter converter} for the given {@link EnumType}.
+     * Retrieves the {@linkplain EnumConverter converter} for the given {@link EnumType}.
      *
      * @param type the {@code EnumType} which defines the conversion method
      * @return the converter for the given type
      */
-    public static EnumConverter<? extends Serializable> forType(EnumType type) {
+    public static EnumConverter forType(EnumType type) {
         return converters.get(type);
     }
 
-    private static Map<EnumType, EnumConverter<? extends Serializable>> converters() {
-        final Map<EnumType, EnumConverter<? extends Serializable>> map =
-                new EnumMap<>(EnumType.class);
+    private static Map<EnumType, EnumConverter> converters() {
+        final Map<EnumType, EnumConverter> map = new EnumMap<>(EnumType.class);
         map.put(ORDINAL, new OrdinalEnumConverter());
         map.put(STRING, new StringEnumConverter());
         return map;

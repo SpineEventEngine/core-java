@@ -29,7 +29,7 @@ import io.spine.annotation.Internal;
  * @author Dmytro Kuzmin
  */
 @Internal
-class OrdinalEnumConverter implements EnumConverter<Integer> {
+class OrdinalEnumConverter extends EnumConverter {
 
     /**
      * Convert the given {@link Enum} value into the {@link Integer} using its {@linkplain
@@ -39,7 +39,7 @@ class OrdinalEnumConverter implements EnumConverter<Integer> {
      * @return the ordinal of the enum
      */
     @Override
-    public Integer convert(Enum value) {
+    protected Integer doConvert(Enum value) {
         return value.ordinal();
     }
 }
