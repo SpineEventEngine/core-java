@@ -22,7 +22,6 @@ package io.spine.server.entity.storage.enumeration;
 
 import io.spine.annotation.Internal;
 
-import java.io.Serializable;
 import java.util.EnumMap;
 import java.util.Map;
 

@@ -23,7 +23,6 @@ package io.spine.server.entity.storage;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
-import com.google.gson.internal.Primitives;
 import io.spine.annotation.Internal;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.storage.enumeration.EnumPersistenceTypes;

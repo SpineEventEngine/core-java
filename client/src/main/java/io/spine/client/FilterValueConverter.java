@@ -21,7 +21,6 @@
 package io.spine.client;
 
 import com.google.protobuf.Any;
-import io.spine.annotation.Internal;
 import io.spine.protobuf.TypeConverter;
 
 import static com.google.common.base.Preconditions.checkNotNull;
