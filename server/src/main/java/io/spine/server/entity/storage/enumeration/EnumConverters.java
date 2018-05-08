@@ -28,10 +28,11 @@ import java.util.Map;
 
 import static io.spine.server.entity.storage.enumeration.EnumType.ORDINAL;
 import static io.spine.server.entity.storage.enumeration.EnumType.STRING;
+import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
- * A container for the known {@linkplain EnumConverter enum converters} stored by the {@link
- * EnumType}.
+ * A container for the known {@linkplain EnumConverter enum converters} stored by the
+ * {@link EnumType}.
  *
  * @author Dmytro Kuzmin
  */
@@ -51,9 +52,15 @@ public final class EnumConverters {
      *
      * @param type the {@code EnumType} which defines the conversion method
      * @return the converter for the given type
+     * @throws IllegalArgumentException if there is no converter for the specified {@code EnumType}
      */
     public static EnumConverter forType(EnumType type) {
-        return converters.get(type);
+        final EnumConverter converter = converters.get(type);
+        if (converter == null) {
+            throw newIllegalArgumentException(
+                    "There is no EnumConverter for the EnumType %s", type.name());
+        }
+        return converter;
     }
 
     private static Map<EnumType, EnumConverter> converters() {

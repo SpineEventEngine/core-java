@@ -41,10 +41,8 @@ public class ColumnValueConverterShould {
     public void not_accept_nulls() {
         ColumnValueConverter converter = new IdentityConverter();
         new NullPointerTester().testAllPublicInstanceMethods(converter);
-
         converter = forType(ORDINAL);
         new NullPointerTester().testAllPublicInstanceMethods(converter);
-
         converter = forType(STRING);
         new NullPointerTester().testAllPublicInstanceMethods(converter);
     }

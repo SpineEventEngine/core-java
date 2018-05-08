@@ -35,6 +35,9 @@ import static io.spine.server.entity.storage.enumeration.EnumType.ORDINAL;
 /**
  * An info about how the {@link EntityColumn} is persisted in the data storage.
  *
+ * <p>This class provides user with the info about {@link EntityColumn} persistence type as well
+ * as the conversion method between entity column values and persistence values.
+ *
  * @author Dmytro Kuzmin
  * @see Column
  */

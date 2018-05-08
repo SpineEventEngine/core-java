@@ -40,6 +40,7 @@ import java.util.regex.Pattern;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.gson.internal.Primitives.wrap;
 import static io.spine.server.entity.storage.ColumnRecords.getAnnotatedVersion;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static io.spine.util.Exceptions.newIllegalStateException;
@@ -267,7 +268,7 @@ public class EntityColumn implements Serializable {
         checkArgument(isPublic(modifiers) && !isStatic(modifiers),
                       "Entity column getter should be public instance method.");
         final Class<?> returnType = getter.getReturnType();
-        final Class<?> wrapped = Primitives.wrap(returnType);
+        final Class<?> wrapped = wrap(returnType);
         checkArgument(Serializable.class.isAssignableFrom(wrapped),
                       format("Cannot create column of non-serializable type %s by method %s.",
                              returnType,
@@ -381,7 +382,7 @@ public class EntityColumn implements Serializable {
      *
      * <p>For the {@code null} input argument the method will always return {@code null},
      * independently of the declared types.
-     *fggf
+     *
      * <p>The method is accessible outside of the {@link EntityColumn} class to enable the proper
      * {@link io.spine.client.ColumnFilter} conversion for the {@link
      * io.spine.server.entity.storage.enumeration.Enumerated} column values.
@@ -433,18 +434,13 @@ public class EntityColumn implements Serializable {
      * Checks that the passed value's type is the same as the {@linkplain #getType() entity column
      * type}.
      *
-     * <p>{@linkplain Class#isPrimitive() Primitive types} are ignored by this method to enable
-     * proper interaction between the primitive types and their wrapper types.
-     *
      * @param value the value to check
      * @throws IllegalArgumentException in case the check fails
      */
     private void checkTypeMatches(Object value) {
-        final Class<?> columnType = getType();
-        final Class<?> valueType = value.getClass();
-        final boolean typesNotPrimitive = !columnType.isPrimitive() && !valueType.isPrimitive();
-        final boolean typesMatch = columnType.isAssignableFrom(valueType);
-        if (typesNotPrimitive && !typesMatch) {
+        final Class<?> columnType = wrap(getType());
+        final Class<?> valueType = wrap(value.getClass());
+        if (!columnType.isAssignableFrom(valueType)) {
             throw newIllegalArgumentException(
                     "Passed value type %s doesn't match column type %s.",
                     valueType.getCanonicalName(),

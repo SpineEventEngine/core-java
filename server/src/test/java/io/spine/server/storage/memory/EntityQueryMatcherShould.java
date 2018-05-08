@@ -102,7 +102,6 @@ public class EntityQueryMatcherShould {
     public void match_columns() {
         final String targetName = "feature";
         final Serializable acceptedValue = true;
-
         final EntityColumn target = mock(EntityColumn.class);
         when(target.isNullable()).thenReturn(true);
         when(target.getStoredName()).thenReturn(targetName);

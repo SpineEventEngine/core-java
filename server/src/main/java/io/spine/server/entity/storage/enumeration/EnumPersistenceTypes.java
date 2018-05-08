@@ -27,6 +27,7 @@ import java.util.Map;
 
 import static io.spine.server.entity.storage.enumeration.EnumType.ORDINAL;
 import static io.spine.server.entity.storage.enumeration.EnumType.STRING;
+import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
  * A storage of the {@linkplain Class Java Classes} representing the persistence types for each
@@ -49,11 +50,18 @@ public final class EnumPersistenceTypes {
     /**
      * Retrieves the persistence type for the given {@link EnumType}.
      *
-     * @param type the type of the {@link Enumerated} value
+     * @param type the enum type of the {@link Enumerated} value
      * @return the persistence type used to store the value in the data storage
+     * @throws IllegalArgumentException if there is no known persistence type for the specified
+     *                                  {@code EnumType}
      */
     public static Class<?> of(EnumType type) {
-        return persistenceTypes.get(type);
+        final Class<?> persistenceType = persistenceTypes.get(type);
+        if (persistenceType == null) {
+            throw newIllegalArgumentException(
+                    "There is no known persistence type for the EnumType %s", type.name());
+        }
+        return persistenceType;
     }
 
     private static Map<EnumType, Class<?>> persistenceTypes() {

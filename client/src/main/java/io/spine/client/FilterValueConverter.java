@@ -31,7 +31,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * Objects} into the {@linkplain com.google.protobuf.Message Protobuf Messages} (in form of {@link
  * Any}) and vice versa.
  *
- * <p>This class performs all necessary actions preceding the value storage as well as the type
+ * <p>This class performs all necessary actions preceding the value conversion as well as the type
  * conversion itself.
  *
  * <p>{@link ColumnFilter} values can either be {@linkplain com.google.protobuf.Message Protobuf
@@ -53,7 +53,7 @@ public final class FilterValueConverter {
      *
      * @param message     the {@linkplain com.google.protobuf.Message Protobuf Message} in form of
      *                    {@code Any}
-     * @param targetClass the {@link Class} representing filter value type
+     * @param targetClass the {@code Class} representing filter value type
      * @param <T>         the filter value type
      * @return the filter value in the form of Java Object
      */
@@ -63,11 +63,14 @@ public final class FilterValueConverter {
         if (isEnum(targetClass)) {
             @SuppressWarnings("unchecked") // Checked at runtime.
             final Class<? extends Enum> enumClass = (Class<? extends Enum>) targetClass;
+            @SuppressWarnings("unchecked") // Checked at runtime.
             final Enum enumValue = enumFromAny(message, enumClass);
-            final T filterValue = targetClass.cast(enumValue);
+            @SuppressWarnings("unchecked") // Checked at runtime.
+            final T filterValue = (T) enumValue;
             return filterValue;
         }
-        return TypeConverter.toObject(message, targetClass);
+        final T filterValue = TypeConverter.toObject(message, targetClass);
+        return filterValue;
     }
 
     /**
@@ -84,7 +87,8 @@ public final class FilterValueConverter {
             final Any anyValue = enumToAny(enumValue);
             return anyValue;
         }
-        return TypeConverter.toAny(value);
+        final Any anyValue = TypeConverter.toAny(value);
+        return anyValue;
     }
 
     /**
@@ -94,7 +98,8 @@ public final class FilterValueConverter {
      * @return {@code true} if the type is Java Enum, {@code false} otherwise
      */
     private static boolean isEnum(Class<?> type) {
-        return Enum.class.isAssignableFrom(type);
+        final boolean isJavaEnum = Enum.class.isAssignableFrom(type);
+        return isJavaEnum;
     }
 
     /**
@@ -106,7 +111,8 @@ public final class FilterValueConverter {
      */
     private static <T extends Enum> Any enumToAny(T value) {
         final String anyValue = value.name();
-        return TypeConverter.toAny(anyValue);
+        final Any any = TypeConverter.toAny(anyValue);
+        return any;
     }
 
     /**
@@ -119,6 +125,7 @@ public final class FilterValueConverter {
      */
     private static <T extends Enum<T>> T enumFromAny(Any message, Class<T> enumClass) {
         final String enumStoredValue = TypeConverter.toObject(message, String.class);
-        return Enum.valueOf(enumClass, enumStoredValue);
+        final T enumValue = Enum.valueOf(enumClass, enumStoredValue);
+        return enumValue;
     }
 }
