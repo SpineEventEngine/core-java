@@ -39,7 +39,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.client.FilterValueConverter.toValue;
+import static io.spine.protobuf.TypeConverter.toObject;
 import static io.spine.server.storage.OperatorEvaluator.eval;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
@@ -146,7 +146,7 @@ final class EntityQueryMatcher<I> implements Predicate<EntityRecordWithColumns> 
         final EntityColumn sourceColumn = actualValue.getSourceColumn();
         final Class<?> sourceClass = sourceColumn.getType();
         if (sourceClass != Any.class) {
-            filterValue = toValue(wrappedValue, sourceClass);
+            filterValue = toObject(wrappedValue, sourceClass);
         } else {
             filterValue = wrappedValue;
         }
