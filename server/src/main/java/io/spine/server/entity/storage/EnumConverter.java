@@ -18,10 +18,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity.storage.enumeration;
+package io.spine.server.entity.storage;
 
 import io.spine.annotation.Internal;
-import io.spine.server.entity.storage.ColumnValueConverter;
 
 import java.io.Serializable;
 
@@ -36,8 +35,7 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  * @see EnumConverters
  * @see EnumType
  */
-@Internal
-public abstract class EnumConverter implements ColumnValueConverter {
+abstract class EnumConverter implements ColumnValueConverter {
 
     private static final long serialVersionUID = 0L;
 
@@ -65,7 +63,7 @@ public abstract class EnumConverter implements ColumnValueConverter {
      * @param value the value to convert
      * @return the converted value
      */
-    protected abstract Serializable convertEnumValue(Enum value);
+    abstract Serializable convertEnumValue(Enum value);
 
     /**
      * Checks if the passed value is of the {@link Enum} type.

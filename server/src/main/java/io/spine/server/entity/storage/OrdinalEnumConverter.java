@@ -18,29 +18,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity.storage.enumeration;
+package io.spine.server.entity.storage;
+
+import io.spine.annotation.Internal;
 
 /**
- * Enumeration of persistence methods for the {@linkplain Enumerated enumerated values}.
- *
- * <p>The methods define the form in which the {@link Enum} objects will be persisted in the data
- * storage as well as the conversion function between the {@link Enum} value and the persistence
- * value.
+ * A converter which uses {@link Enum}'s {@linkplain Enum#ordinal() ordinal} to convert the
+ * enumerated value into the {@link Integer} value.
  *
  * @author Dmytro Kuzmin
- * @see Enumerated
  */
-public enum EnumType {
+final class OrdinalEnumConverter extends EnumConverter {
+
+    private static final long serialVersionUID = 0L;
 
     /**
-     * A persistence method which uses Java {@link Enum}'s {@linkplain Enum#ordinal() ordinal} to
-     * convert the {@link Enum} into the {@link Integer} value to save in the storage.
+     * {@inheritDoc}
      */
-    ORDINAL,
-
-    /**
-     * A persistence method which uses {@link Enum}'s {@linkplain Enum#name() name} property to
-     * store the {@link Enum} value in the form of Java {@link String}.
-     */
-    STRING
+    @Override
+    Integer convertEnumValue(Enum value) {
+        return value.ordinal();
+    }
 }

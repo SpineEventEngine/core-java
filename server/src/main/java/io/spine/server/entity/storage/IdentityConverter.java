@@ -31,8 +31,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Dmytro Kuzmin
  */
-@Internal
-public final class IdentityConverter implements ColumnValueConverter {
+final class IdentityConverter implements ColumnValueConverter {
 
     private static final long serialVersionUID = 0L;
 

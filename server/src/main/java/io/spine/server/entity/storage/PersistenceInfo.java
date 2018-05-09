@@ -21,16 +21,13 @@
 package io.spine.server.entity.storage;
 
 import io.spine.annotation.Internal;
-import io.spine.server.entity.storage.enumeration.EnumPersistenceTypes;
-import io.spine.server.entity.storage.enumeration.EnumType;
-import io.spine.server.entity.storage.enumeration.Enumerated;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.server.entity.storage.enumeration.EnumConverters.forType;
-import static io.spine.server.entity.storage.enumeration.EnumType.ORDINAL;
+import static io.spine.server.entity.storage.EnumConverters.forType;
+import static io.spine.server.entity.storage.EnumType.ORDINAL;
 
 /**
  * An info about how the {@link EntityColumn} is persisted in the data storage.
@@ -41,7 +38,6 @@ import static io.spine.server.entity.storage.enumeration.EnumType.ORDINAL;
  * @author Dmytro Kuzmin
  * @see Column
  */
-@Internal
 final class PersistenceInfo implements Serializable {
 
     private static final long serialVersionUID = 0L;

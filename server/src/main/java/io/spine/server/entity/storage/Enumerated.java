@@ -18,12 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity.storage.enumeration;
+package io.spine.server.entity.storage;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import static io.spine.server.entity.storage.enumeration.EnumType.ORDINAL;
+import static io.spine.server.entity.storage.EnumType.ORDINAL;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 

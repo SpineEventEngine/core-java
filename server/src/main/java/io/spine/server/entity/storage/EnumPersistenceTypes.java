@@ -18,55 +18,56 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity.storage.enumeration;
+package io.spine.server.entity.storage;
 
 import io.spine.annotation.Internal;
 
 import java.util.EnumMap;
 import java.util.Map;
 
-import static io.spine.server.entity.storage.enumeration.EnumType.ORDINAL;
-import static io.spine.server.entity.storage.enumeration.EnumType.STRING;
+import static io.spine.server.entity.storage.EnumType.ORDINAL;
+import static io.spine.server.entity.storage.EnumType.STRING;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static java.util.Collections.unmodifiableMap;
 
 /**
- * A container for the known {@linkplain EnumConverter enum converters} stored by the
+ * A storage of the {@linkplain Class Java Classes} representing the persistence types for each
  * {@link EnumType}.
  *
  * @author Dmytro Kuzmin
+ * @see Enumerated
  */
-@Internal
-public final class EnumConverters {
+final class EnumPersistenceTypes {
 
-    private static final Map<EnumType, EnumConverter> converters = converters();
+    private static final Map<EnumType, Class<?>> persistenceTypes = persistenceTypes();
 
     /**
      * Prevents instantiation of this class.
      */
-    private EnumConverters() {
+    private EnumPersistenceTypes() {
     }
 
     /**
-     * Retrieves the {@linkplain EnumConverter converter} for the given {@link EnumType}.
+     * Retrieves the persistence type for the given {@link EnumType}.
      *
-     * @param type the {@code EnumType} which defines the conversion method
-     * @return the converter for the given type
-     * @throws IllegalArgumentException if there is no converter for the specified {@code EnumType}
+     * @param type the enum type of the {@link Enumerated} value
+     * @return the persistence type used to store the value in the data storage
+     * @throws IllegalArgumentException if there is no known persistence type for the specified
+     *                                  {@code EnumType}
      */
-    public static EnumConverter forType(EnumType type) {
-        final EnumConverter converter = converters.get(type);
-        if (converter == null) {
+    public static Class<?> of(EnumType type) {
+        final Class<?> persistenceType = persistenceTypes.get(type);
+        if (persistenceType == null) {
             throw newIllegalArgumentException(
-                    "There is no EnumConverter for the EnumType %s", type.name());
+                    "There is no known persistence type for the EnumType %s", type.name());
         }
-        return converter;
+        return persistenceType;
     }
 
-    private static Map<EnumType, EnumConverter> converters() {
-        final Map<EnumType, EnumConverter> map = new EnumMap<>(EnumType.class);
-        map.put(ORDINAL, new OrdinalEnumConverter());
-        map.put(STRING, new StringEnumConverter());
+    private static Map<EnumType, Class<?>> persistenceTypes() {
+        final Map<EnumType, Class<?>> map = new EnumMap<>(EnumType.class);
+        map.put(ORDINAL, Integer.class);
+        map.put(STRING, String.class);
         return unmodifiableMap(map);
     }
 }

@@ -21,14 +21,13 @@
 package io.spine.server.entity.storage;
 
 import com.google.common.testing.NullPointerTester;
-import io.spine.server.entity.storage.enumeration.EnumConverter;
 import org.junit.Test;
 
 import java.io.Serializable;
 
-import static io.spine.server.entity.storage.enumeration.EnumConverters.forType;
-import static io.spine.server.entity.storage.enumeration.EnumType.ORDINAL;
-import static io.spine.server.entity.storage.enumeration.EnumType.STRING;
+import static io.spine.server.entity.storage.EnumConverters.forType;
+import static io.spine.server.entity.storage.EnumType.ORDINAL;
+import static io.spine.server.entity.storage.EnumType.STRING;
 import static io.spine.server.entity.storage.given.ColumnTestEnv.TestEnum.ONE;
 import static org.junit.Assert.assertEquals;
 

@@ -18,12 +18,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * This package contains classes and interfaces for working with
- * {@linkplain io.spine.server.entity.storage.enumeration.Enumerated enumerated fields} of the
- * {@link io.spine.server.entity.Entity} storage representation.
- */
-@ParametersAreNonnullByDefault
-package io.spine.server.entity.storage.enumeration;
+package io.spine.server.entity.storage;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+import io.spine.annotation.Internal;
+
+/**
+ * A converter which uses {@link Enum}'s {@linkplain Enum#name() name} property to convert the
+ * enumerated value into the {@link String} value.
+ *
+ * @author Dmytro Kuzmin
+ */
+final class StringEnumConverter extends EnumConverter {
+
+    private static final long serialVersionUID = 0L;
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    String convertEnumValue(Enum value) {
+        return value.name();
+    }
+}
