@@ -103,6 +103,8 @@ public class ColumnFiltersShould {
         checkCreatesInstance(le(COLUMN_NAME, COLUMN_VALUE), LESS_OR_EQUAL);
     }
 
+    // This test is ignored temporarily until the new changes allowing `TypeConverter` to process
+    // enums are merged into base.
     @Ignore
     @Test
     public void create_EQUALS_instances_for_enums() {
