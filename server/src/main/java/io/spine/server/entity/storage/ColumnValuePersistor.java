@@ -62,7 +62,6 @@ final class ColumnValuePersistor {
         final Class<?> columnType = getter.getReturnType();
         Class<?> persistenceType;
         ColumnValueConverter converter;
-
         if (isEnumType(columnType)) {
             final EnumType enumType = getEnumType(getter);
             persistenceType = EnumPersistenceTypes.of(enumType);
@@ -71,7 +70,6 @@ final class ColumnValuePersistor {
             persistenceType = columnType;
             converter = new IdentityConverter();
         }
-
         return new ColumnValuePersistor(persistenceType, converter);
     }
 
