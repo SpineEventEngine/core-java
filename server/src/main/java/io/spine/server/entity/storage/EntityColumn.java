@@ -199,6 +199,15 @@ public class EntityColumn implements Serializable {
 
     private final boolean nullable;
 
+    /**
+     * The persistor for the column values which converts the column values into the type suitable
+     * for persistence in the data storage.
+     *
+     * <p>The field is effectively final and is left non-final for serialization purposes only.
+     *
+     * <p>The only place where this field is updated, except the constructor, is
+     * {@link #readObject(ObjectInputStream)} method.
+     */
     private transient ColumnValuePersistor valuePersistor;
 
     private EntityColumn(Method getter,
