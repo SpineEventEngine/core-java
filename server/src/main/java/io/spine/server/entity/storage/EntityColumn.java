@@ -213,15 +213,14 @@ public class EntityColumn implements Serializable {
     private EntityColumn(Method getter,
                          String name,
                          String storedName,
-                         boolean nullable,
-                         ColumnValuePersistor valuePersistor) {
+                         boolean nullable) {
         this.getter = getter;
         this.entityType = getter.getDeclaringClass();
         this.getterMethodName = getter.getName();
         this.name = name;
         this.storedName = storedName;
         this.nullable = nullable;
-        this.valuePersistor = valuePersistor;
+        this.valuePersistor = ColumnValuePersistor.from(getter);
     }
 
     /**
@@ -236,8 +235,7 @@ public class EntityColumn implements Serializable {
         final Method annotatedVersion = retrieveAnnotatedVersion(getter);
         final String nameForStore = nameFromAnnotation(annotatedVersion).or(nameForQuery);
         final boolean nullable = getter.isAnnotationPresent(Nullable.class);
-        final ColumnValuePersistor value = ColumnValuePersistor.from(annotatedVersion);
-        return new EntityColumn(getter, nameForQuery, nameForStore, nullable, value);
+        return new EntityColumn(getter, nameForQuery, nameForStore, nullable);
     }
 
     private static Method retrieveAnnotatedVersion(Method getter) {
