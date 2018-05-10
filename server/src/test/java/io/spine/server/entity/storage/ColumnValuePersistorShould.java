@@ -56,19 +56,19 @@ public class ColumnValuePersistorShould {
     @Test
     public void create_correct_instance_for_ordinal_enum_getter() {
         final ColumnValuePersistor persistor = forGetter("getEnumOrdinal");
-        checkInfoIsOfEnumType(persistor, ORDINAL);
+        checkPersistorIsOfEnumType(persistor, ORDINAL);
     }
 
     @Test
     public void create_correct_instance_for_string_enum_getter() {
         final ColumnValuePersistor persistor = forGetter("getEnumString");
-        checkInfoIsOfEnumType(persistor, STRING);
+        checkPersistorIsOfEnumType(persistor, STRING);
     }
 
     @Test
     public void create_instance_of_ordinal_type_for_not_annotated_enum_getter() {
         final ColumnValuePersistor persistor = forGetter("getEnumNotAnnotated");
-        checkInfoIsOfEnumType(persistor, ORDINAL);
+        checkPersistorIsOfEnumType(persistor, ORDINAL);
     }
 
     @Test
@@ -105,9 +105,9 @@ public class ColumnValuePersistorShould {
         }
     }
 
-    private static void checkInfoIsOfEnumType(ColumnValuePersistor info, EnumType type) {
+    private static void checkPersistorIsOfEnumType(ColumnValuePersistor persistor, EnumType type) {
         final Class<?> expectedType = EnumPersistenceTypes.of(type);
-        final Class<?> actualType = info.getPersistedType();
+        final Class<?> actualType = persistor.getPersistedType();
         assertEquals(expectedType, actualType);
     }
 }
