@@ -38,9 +38,7 @@ import static io.spine.server.entity.storage.EnumType.ORDINAL;
  * @author Dmytro Kuzmin
  * @see Column
  */
-final class ColumnValuePersistor implements Serializable {
-
-    private static final long serialVersionUID = 0L;
+final class ColumnValuePersistor {
 
     private final Class<?> persistedType;
     private final ColumnValueConverter converter;

@@ -37,8 +37,6 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  */
 abstract class EnumConverter implements ColumnValueConverter {
 
-    private static final long serialVersionUID = 0L;
-
     /**
      * {@inheritDoc}
      * @throws IllegalArgumentException in case the passed value is not of the {@link Enum} type

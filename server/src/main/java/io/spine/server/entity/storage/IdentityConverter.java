@@ -33,8 +33,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 final class IdentityConverter implements ColumnValueConverter {
 
-    private static final long serialVersionUID = 0L;
-
     /**
      * {@inheritDoc}
      */

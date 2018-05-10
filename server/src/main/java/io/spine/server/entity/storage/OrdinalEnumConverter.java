@@ -30,8 +30,6 @@ import io.spine.annotation.Internal;
  */
 final class OrdinalEnumConverter extends EnumConverter {
 
-    private static final long serialVersionUID = 0L;
-
     /**
      * {@inheritDoc}
      */

@@ -199,7 +199,7 @@ public class EntityColumn implements Serializable {
 
     private final boolean nullable;
 
-    private final ColumnValuePersistor valuePersistor;
+    private transient ColumnValuePersistor valuePersistor;
 
     private EntityColumn(Method getter,
                          String name,
@@ -450,6 +450,7 @@ public class EntityColumn implements Serializable {
                                                                   ClassNotFoundException {
         inputStream.defaultReadObject();
         getter = restoreGetter();
+        valuePersistor = restoreValuePersistor();
     }
 
     private Method restoreGetter() {
@@ -463,6 +464,12 @@ public class EntityColumn implements Serializable {
                                            getterMethodName);
             throw new IllegalStateException(errorMsg, e);
         }
+    }
+
+    private ColumnValuePersistor restoreValuePersistor() {
+        checkState(valuePersistor == null, "Column value persistor is already restored.");
+        final ColumnValuePersistor persistor = ColumnValuePersistor.from(getter);
+        return persistor;
     }
 
     /**

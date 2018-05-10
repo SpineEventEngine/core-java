@@ -30,7 +30,7 @@ import java.io.Serializable;
  *
  * @author Dmytro Kuzmin
  */
-interface ColumnValueConverter extends Serializable {
+interface ColumnValueConverter {
 
     /**
      * Converts the {@link EntityColumn} value to its persisted type.
