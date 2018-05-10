@@ -460,7 +460,9 @@ public class EntityColumn implements Serializable {
     }
 
     private Method restoreGetter() {
-        checkState(getter == null, "Getter method is already restored.");
+        if (getter != null) {
+            return getter;
+        }
         try {
             final Method method = entityType.getMethod(getterMethodName);
             return method;
@@ -473,7 +475,9 @@ public class EntityColumn implements Serializable {
     }
 
     private ColumnValuePersistor restoreValuePersistor() {
-        checkState(valuePersistor == null, "Column value persistor is already restored.");
+        if (valuePersistor != null) {
+            return valuePersistor;
+        }
         final ColumnValuePersistor persistor = ColumnValuePersistor.from(getter);
         return persistor;
     }
