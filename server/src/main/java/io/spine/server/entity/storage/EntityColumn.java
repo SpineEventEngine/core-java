@@ -384,8 +384,9 @@ public class EntityColumn implements Serializable {
      * <p>The value type should be the same as the one obtained through the {@link #getType()}. The
      * output value type will be the same as {@link #getPersistedType()}.
      *
-     * <p>For the {@code null} input argument the method will always return {@code null},
-     * independently of the declared types.
+     * <p>As the column value may be {@linkplain #isNullable() nullable}, and all {@code null}
+     * values are persisted in the data storage as {@code null}, i.e. without any conversion, for
+     * the {@code null} input argument this method will always return {@code null}.
      *
      * <p>The method is accessible outside of the {@link EntityColumn} class to enable the proper
      * {@link io.spine.client.ColumnFilter} conversion for the {@link Enumerated} column values.
