@@ -23,7 +23,7 @@ package io.spine.server.entity.storage;
 /**
  * Enumeration of persistence methods for the {@linkplain Enumerated enumerated values}.
  *
- * <p>The methods define the form in which the {@link Enum} objects will be persisted in the data
+ * <p>The methods define the form in which the {@link Enum} objects are persisted in the data
  * storage as well as the conversion function between the {@link Enum} value and the persistence
  * value.
  *
