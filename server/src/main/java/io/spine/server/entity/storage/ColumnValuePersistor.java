@@ -20,8 +20,6 @@
 
 package io.spine.server.entity.storage;
 
-import io.spine.annotation.Internal;
-
 import java.io.Serializable;
 import java.lang.reflect.Method;
 
@@ -30,45 +28,52 @@ import static io.spine.server.entity.storage.EnumConverters.forType;
 import static io.spine.server.entity.storage.EnumType.ORDINAL;
 
 /**
- * An info about how the {@link EntityColumn} is persisted in the data storage.
+ * A class performing conversions necessary for the {@link EntityColumn} value persistence in the
+ * data storage.
  *
- * <p>This class provides user with the info about {@link EntityColumn} persistence type as well
- * as the conversion method between the entity column values and the persistence values.
+ * <p>This class transforms {@link EntityColumn} value into the type which is persisted in the data
+ * storage. It also can provide user with the information about the persistence type of the {@link
+ * EntityColumn}.
  *
  * @author Dmytro Kuzmin
  * @see Column
  */
-final class PersistenceInfo implements Serializable {
+final class ColumnValuePersistor implements Serializable {
 
     private static final long serialVersionUID = 0L;
 
     private final Class<?> persistedType;
-    private final ColumnValueConverter valueConverter;
+    private final ColumnValueConverter converter;
 
-    private PersistenceInfo(Class<?> persistedType, ColumnValueConverter valueConverter) {
+    private ColumnValuePersistor(Class<?> persistedType, ColumnValueConverter converter) {
         this.persistedType = persistedType;
-        this.valueConverter = valueConverter;
+        this.converter = converter;
     }
 
     /**
-     * Creates {@link PersistenceInfo} for the {@link EntityColumn} represented by the getter.
+     * Creates {@link ColumnValuePersistor} for the {@link EntityColumn} represented by the getter.
      *
      * <p>An annotated version of the getter should be used in case of the object hierarchy.
      *
      * @param getter the getter from which the {@link EntityColumn} is created
-     * @return the {@code PersistenceInfo} of the {@link EntityColumn}
+     * @return the {@code ColumnValuePersistor} of the {@link EntityColumn}
      */
-    public static PersistenceInfo from(Method getter) {
+    static ColumnValuePersistor from(Method getter) {
         checkNotNull(getter);
-        final Class<?> returnType = getter.getReturnType();
-        if (isEnumType(returnType)) {
+        final Class<?> columnType = getter.getReturnType();
+        Class<?> persistenceType;
+        ColumnValueConverter converter;
+
+        if (isEnumType(columnType)) {
             final EnumType enumType = getEnumType(getter);
-            final Class<?> type = EnumPersistenceTypes.of(enumType);
-            final ColumnValueConverter converter = forType(enumType);
-            return new PersistenceInfo(type, converter);
+            persistenceType = EnumPersistenceTypes.of(enumType);
+            converter = forType(enumType);
+        } else {
+            persistenceType = columnType;
+            converter = new IdentityConverter();
         }
-        final ColumnValueConverter converter = new IdentityConverter();
-        return new PersistenceInfo(returnType, converter);
+
+        return new ColumnValuePersistor(persistenceType, converter);
     }
 
     /**
@@ -106,6 +111,22 @@ final class PersistenceInfo implements Serializable {
     }
 
     /**
+     * Converts the {@link EntityColumn} value to the type persisted in the data storage.
+     *
+     * <p>The value is assumed to be of the {@linkplain EntityColumn#getType() entity column type},
+     * so it is suitable for the {@linkplain ColumnValueConverter#convert(Object) conversion} to
+     * the persisted type.
+     *
+     * @param columnValue the column value to convert
+     * @return the converted {@link EntityColumn} value
+     */
+    Serializable toPersistedValue(Object columnValue) {
+        checkNotNull(columnValue);
+        final Serializable convertedValue = converter.convert(columnValue);
+        return convertedValue;
+    }
+
+    /**
      * Returns the type under which the {@link EntityColumn} is persisted in the data storage.
      *
      * <p>Currently, non-{@link Enumerated} entity columns are persisted in the storage under the
@@ -117,17 +138,5 @@ final class PersistenceInfo implements Serializable {
      */
     Class<?> getPersistedType() {
         return persistedType;
-    }
-
-    /**
-     * Returns the converter between the {@link EntityColumn} value and its persisted type.
-     *
-     * <p>This converter can be used to transform the values obtained through the {@link
-     * EntityColumn} getter to the values for persistence in the data storage.
-     *
-     * @return the converter of the {@link EntityColumn} values
-     */
-    ColumnValueConverter getValueConverter() {
-        return valueConverter;
     }
 }

@@ -199,20 +199,20 @@ public class EntityColumn implements Serializable {
 
     private final boolean nullable;
 
-    private final PersistenceInfo persistenceInfo;
+    private final ColumnValuePersistor valuePersistor;
 
     private EntityColumn(Method getter,
                          String name,
                          String storedName,
                          boolean nullable,
-                         PersistenceInfo persistenceInfo) {
+                         ColumnValuePersistor valuePersistor) {
         this.getter = getter;
         this.entityType = getter.getDeclaringClass();
         this.getterMethodName = getter.getName();
         this.name = name;
         this.storedName = storedName;
         this.nullable = nullable;
-        this.persistenceInfo = persistenceInfo;
+        this.valuePersistor = valuePersistor;
     }
 
     /**
@@ -227,7 +227,7 @@ public class EntityColumn implements Serializable {
         final Method annotatedVersion = retrieveAnnotatedVersion(getter);
         final String nameForStore = nameFromAnnotation(annotatedVersion).or(nameForQuery);
         final boolean nullable = getter.isAnnotationPresent(Nullable.class);
-        final PersistenceInfo value = PersistenceInfo.from(annotatedVersion);
+        final ColumnValuePersistor value = ColumnValuePersistor.from(annotatedVersion);
         return new EntityColumn(getter, nameForQuery, nameForStore, nullable, value);
     }
 
@@ -366,7 +366,7 @@ public class EntityColumn implements Serializable {
      * @return the persistence type of the column values
      */
     public Class getPersistedType() {
-        return persistenceInfo.getPersistedType();
+        return valuePersistor.getPersistedType();
     }
 
     /**
@@ -390,14 +390,13 @@ public class EntityColumn implements Serializable {
      * @throws IllegalArgumentException if the value type is not equal to the {@linkplain #getType()
      *                                  entity column type}
      */
+    @Nullable
     public Serializable toPersistedValue(@Nullable Object columnValue) {
         if (columnValue == null) {
             return null;
         }
         checkTypeMatches(columnValue);
-        final ColumnValueConverter converter = persistenceInfo.getValueConverter();
-        final Serializable convertedValue = converter.convert(columnValue);
-        return convertedValue;
+        return valuePersistor.toPersistedValue(columnValue);
     }
 
     @SuppressWarnings("NonFinalFieldReferenceInEquals") // `getter` field is effectively final
