@@ -53,7 +53,7 @@ final class EnumPersistenceTypes {
      * @throws IllegalArgumentException if there is no known persistence type for the specified
      *                                  {@code EnumType}
      */
-    public static Class<?> of(EnumType type) {
+    static Class<?> of(EnumType type) {
         final Class<?> persistenceType = persistenceTypes.get(type);
         if (persistenceType == null) {
             throw newIllegalArgumentException(
