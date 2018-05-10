@@ -28,7 +28,7 @@ import java.io.Serializable;
 import static io.spine.server.entity.storage.EnumConverters.forType;
 import static io.spine.server.entity.storage.EnumType.ORDINAL;
 import static io.spine.server.entity.storage.EnumType.STRING;
-import static io.spine.server.entity.storage.given.ColumnTestEnv.TestEnum.ONE;
+import static io.spine.server.entity.storage.given.ColumnTestEnv.TaskStatus.SUCCESS;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -57,15 +57,15 @@ public class ColumnValueConverterShould {
     @Test
     public void convert_enum_to_ordinal_value() {
         final EnumConverter converter = forType(ORDINAL);
-        final Serializable value = converter.convert(ONE);
-        assertEquals(ONE.ordinal(), value);
+        final Serializable value = converter.convert(SUCCESS);
+        assertEquals(SUCCESS.ordinal(), value);
     }
 
     @Test
     public void convert_enum_to_string_value() {
         final EnumConverter converter = forType(STRING);
-        final Serializable value = converter.convert(ONE);
-        assertEquals(ONE.name(), value);
+        final Serializable value = converter.convert(SUCCESS);
+        assertEquals(SUCCESS.name(), value);
     }
 
     @Test(expected = IllegalArgumentException.class)

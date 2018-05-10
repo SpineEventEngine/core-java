@@ -31,7 +31,7 @@ import io.spine.server.entity.storage.Enumerated;
 import javax.annotation.Nullable;
 
 import static io.spine.server.entity.storage.EnumType.STRING;
-import static io.spine.server.entity.storage.given.ColumnTestEnv.TestEnum.ONE;
+import static io.spine.server.entity.storage.given.ColumnTestEnv.TaskStatus.SUCCESS;
 import static io.spine.test.Tests.nullRef;
 import static org.junit.Assert.fail;
 
@@ -79,20 +79,20 @@ public class ColumnTestEnv {
         }
 
         @Column
-        public TestEnum getEnumNotAnnotated() {
-            return ONE;
+        public TaskStatus getEnumNotAnnotated() {
+            return SUCCESS;
         }
 
         @Column
         @Enumerated
-        public TestEnum getEnumOrdinal() {
-            return ONE;
+        public TaskStatus getEnumOrdinal() {
+            return SUCCESS;
         }
 
         @Column
         @Enumerated(STRING)
-        public TestEnum getEnumString() {
-            return ONE;
+        public TaskStatus getEnumString() {
+            return SUCCESS;
         }
 
         @Column
@@ -149,8 +149,10 @@ public class ColumnTestEnv {
         }
     }
 
-    public enum TestEnum {
-        ZERO,
-        ONE
+    public enum TaskStatus {
+        QUEUED,
+        EXECUTING,
+        FAILED,
+        SUCCESS
     }
 }

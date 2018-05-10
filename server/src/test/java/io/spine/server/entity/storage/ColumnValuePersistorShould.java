@@ -31,7 +31,7 @@ import java.lang.reflect.Method;
 import static io.spine.server.entity.storage.ColumnValuePersistor.from;
 import static io.spine.server.entity.storage.EnumType.ORDINAL;
 import static io.spine.server.entity.storage.EnumType.STRING;
-import static io.spine.server.entity.storage.given.ColumnTestEnv.TestEnum.ONE;
+import static io.spine.server.entity.storage.given.ColumnTestEnv.TaskStatus.SUCCESS;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -82,7 +82,7 @@ public class ColumnValuePersistorShould {
     @Test
     public void do_conversion_for_ordinal_enum_type() {
         final ColumnValuePersistor persistor = forGetter("getEnumOrdinal");
-        final ColumnTestEnv.TestEnum value = ONE;
+        final ColumnTestEnv.TaskStatus value = SUCCESS;
         final Serializable persistedValue = persistor.toPersistedValue(value);
         assertEquals(value.ordinal(), persistedValue);
     }
@@ -90,7 +90,7 @@ public class ColumnValuePersistorShould {
     @Test
     public void do_conversion_for_string_enum_type() {
         final ColumnValuePersistor persistor = forGetter("getEnumString");
-        final ColumnTestEnv.TestEnum value = ONE;
+        final ColumnTestEnv.TaskStatus value = SUCCESS;
         final Serializable persistedValue = persistor.toPersistedValue(value);
         assertEquals(value.name(), persistedValue);
     }

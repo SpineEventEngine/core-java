@@ -37,10 +37,10 @@ import org.junit.Test;
 import java.lang.reflect.Method;
 
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
-import static io.spine.server.entity.storage.EnumType.ORDINAL;
 import static io.spine.server.entity.storage.EnumPersistenceTypes.of;
+import static io.spine.server.entity.storage.EnumType.ORDINAL;
 import static io.spine.server.entity.storage.EnumType.STRING;
-import static io.spine.server.entity.storage.given.ColumnTestEnv.TestEnum.ONE;
+import static io.spine.server.entity.storage.given.ColumnTestEnv.TaskStatus.SUCCESS;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -266,12 +266,12 @@ public class ColumnShould {
     @Test
     public void convert_enumerated_value_to_persistence_type() {
         final EntityColumn columnOrdinal = forMethod("getEnumOrdinal", TestEntity.class);
-        final Object ordinalValue = columnOrdinal.toPersistedValue(ONE);
-        assertEquals(ONE.ordinal(), ordinalValue);
+        final Object ordinalValue = columnOrdinal.toPersistedValue(SUCCESS);
+        assertEquals(SUCCESS.ordinal(), ordinalValue);
 
         final EntityColumn columnString = forMethod("getEnumString", TestEntity.class);
-        final Object stringValue = columnString.toPersistedValue(ONE);
-        assertEquals(ONE.name(), stringValue);
+        final Object stringValue = columnString.toPersistedValue(SUCCESS);
+        assertEquals(SUCCESS.name(), stringValue);
     }
 
     @Test
