@@ -49,7 +49,8 @@ final class ColumnValuePersistor {
     }
 
     /**
-     * Creates {@link ColumnValuePersistor} for the {@link EntityColumn} represented by the getter.
+     * Creates a {@link ColumnValuePersistor} for the {@link EntityColumn} represented by the
+     * getter.
      *
      * <p>An annotated version of the getter should be used in case of the object hierarchy.
      *
