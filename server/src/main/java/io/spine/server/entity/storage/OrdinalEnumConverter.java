@@ -20,8 +20,6 @@
 
 package io.spine.server.entity.storage;
 
-import io.spine.annotation.Internal;
-
 /**
  * A converter which uses {@link Enum}'s {@linkplain Enum#ordinal() ordinal} to convert the
  * enumerated value into the {@link Integer} value.

@@ -20,8 +20,6 @@
 
 package io.spine.server.entity.storage;
 
-import io.spine.annotation.Internal;
-
 import java.io.Serializable;
 
 import static com.google.common.base.Preconditions.checkNotNull;

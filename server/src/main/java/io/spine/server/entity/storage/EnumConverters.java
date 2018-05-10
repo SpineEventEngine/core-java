@@ -20,8 +20,6 @@
 
 package io.spine.server.entity.storage;
 
-import io.spine.annotation.Internal;
-
 import java.util.EnumMap;
 import java.util.Map;
 
