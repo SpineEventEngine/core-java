@@ -54,7 +54,7 @@ final class ColumnValuePersistor {
      * <p>An annotated version of the getter should be used in case of the object hierarchy.
      *
      * @param getter the getter from which the {@link EntityColumn} is created
-     * @return the {@code ColumnValuePersistor} of the {@link EntityColumn}
+     * @return the {@code ColumnValuePersistor} for the {@link EntityColumn}
      */
     static ColumnValuePersistor from(Method getter) {
         checkNotNull(getter);
