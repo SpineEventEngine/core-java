@@ -364,11 +364,10 @@ public class EntityColumn implements Serializable {
     /**
      * Returns the type under which the column values are persisted in the data storage.
      *
-     * <p>For the non-{@link Enumerated} entity columns
-     * this type will be equal to the one retrieved via the {@link #getType()}.
+     * <p>For the non-{@link Enumerated} entity columns this type will be equal to the one
+     * retrieved via the {@link #getType()}.
      *
-     * <p>For {@link Enumerated} columns, see {@link
-     * EnumPersistenceTypes}.
+     * <p>For {@link Enumerated} columns, see {@link EnumPersistenceTypes}.
      *
      * @return the persistence type of the column values
      */
@@ -389,8 +388,7 @@ public class EntityColumn implements Serializable {
      * independently of the declared types.
      *
      * <p>The method is accessible outside of the {@link EntityColumn} class to enable the proper
-     * {@link io.spine.client.ColumnFilter} conversion for the {@link
-     * Enumerated} column values.
+     * {@link io.spine.client.ColumnFilter} conversion for the {@link Enumerated} column values.
      *
      * @param columnValue the column value to convert
      * @return the column value converted to the form used for persistence in the data storage
