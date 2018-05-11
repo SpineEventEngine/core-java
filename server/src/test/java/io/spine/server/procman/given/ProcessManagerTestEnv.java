@@ -43,11 +43,11 @@ import io.spine.test.procman.event.PmNotificationSent;
 import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.event.PmTaskAdded;
-import io.spine.test.procman.exam.PmExamId;
-import io.spine.test.procman.exam.PmProblemAnswer;
-import io.spine.test.procman.exam.PmProblemId;
-import io.spine.test.procman.exam.command.PmAnswerProblem;
-import io.spine.test.procman.exam.command.PmStartExam;
+import io.spine.test.procman.quiz.PmAnswer;
+import io.spine.test.procman.quiz.PmQuizId;
+import io.spine.test.procman.quiz.PmQuestionId;
+import io.spine.test.procman.quiz.command.PmAnswerQuestion;
+import io.spine.test.procman.quiz.command.PmStartQuiz;
 import io.spine.testdata.Sample;
 import io.spine.validate.AnyVBuilder;
 
@@ -72,60 +72,60 @@ public class ProcessManagerTestEnv {
         // Do nothing.
     }
 
-    public static PmExamId newExamId() {
-        return PmExamId.newBuilder()
+    public static PmQuizId newQuizId() {
+        return PmQuizId.newBuilder()
                        .setId(newUuid())
                        .build();
     }
 
-    public static PmStartExam startExam(PmExamId id, Iterable<? extends PmProblemId> problems) {
-        return PmStartExam.newBuilder()
-                          .setExamId(id)
-                          .addAllProblem(problems)
+    public static PmStartQuiz startQuiz(PmQuizId id, Iterable<? extends PmQuestionId> problems) {
+        return PmStartQuiz.newBuilder()
+                          .setQuizId(id)
+                          .addAllQuestion(problems)
                           .build();
     }
 
-    public static PmAnswerProblem answerProblem(PmExamId id, PmProblemAnswer answer) {
-        return PmAnswerProblem.newBuilder()
-                              .setExamId(id)
-                              .setAnswer(answer)
-                              .build();
+    public static PmAnswerQuestion answerQuestion(PmQuizId id, PmAnswer answer) {
+        return PmAnswerQuestion.newBuilder()
+                               .setQuizId(id)
+                               .setAnswer(answer)
+                               .build();
     }
 
-    public static PmProblemAnswer newProblemAnswer() {
-        return newProblemAnswer(newProblemId(), true);
+    public static PmAnswer newAnswer() {
+        return newAnswer(newQuestionId(), true);
     }
 
-    private static PmProblemId newProblemId() {
-        return PmProblemId.newBuilder()
-                          .setId(newUuid())
-                          .build();
+    private static PmQuestionId newQuestionId() {
+        return PmQuestionId.newBuilder()
+                           .setId(newUuid())
+                           .build();
     }
 
-    public static PmProblemAnswer newProblemAnswer(PmProblemId id, boolean correct) {
-        return PmProblemAnswer.newBuilder()
-                              .setProblemId(id)
-                              .setCorrect(correct)
-                              .build();
+    public static PmAnswer newAnswer(PmQuestionId id, boolean correct) {
+        return PmAnswer.newBuilder()
+                       .setQuestionId(id)
+                       .setCorrect(correct)
+                       .build();
     }
 
     /**
      * Creates a new multitenant bounded context with a registered
-     * {@linkplain ExamProcmanRepository exam repository}.
+     * {@linkplain QuizProcmanRepository exam repository}.
      */
-    public static BoundedContext newExamBoundedContext() {
+    public static BoundedContext newQuizBoundedContext() {
         final BoundedContext boundedContext = newBoundedContext();
-        boundedContext.register(new ExamProcmanRepository());
+        boundedContext.register(new QuizProcmanRepository());
         return boundedContext;
     }
 
     /**
      * Creates a new multitenant bounded context with a registered
-     * {@linkplain DirectExamProcmanRepository exam repository}.
+     * {@linkplain DirectQuizProcmanRepository exam repository}.
      */
-    public static BoundedContext newDirectExamBoundedContext() {
+    public static BoundedContext newDirectQuizBoundedContext() {
         final BoundedContext boundedContext = newBoundedContext();
-        boundedContext.register(new DirectExamProcmanRepository());
+        boundedContext.register(new DirectQuizProcmanRepository());
         return boundedContext;
     }
 

@@ -59,8 +59,12 @@ import io.spine.test.procman.command.PmStartProject;
 import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.event.PmTaskAdded;
-import io.spine.test.procman.exam.PmExamId;
-import io.spine.test.procman.exam.PmProblemId;
+import io.spine.test.procman.quiz.PmQuizId;
+import io.spine.test.procman.quiz.PmQuestionId;
+import io.spine.test.procman.quiz.command.PmAnswerQuestion;
+import io.spine.test.procman.quiz.command.PmStartQuiz;
+import io.spine.test.procman.quiz.event.PmQuestionAnswered;
+import io.spine.test.procman.quiz.event.PmQuizStarted;
 import io.spine.testdata.Sample;
 import org.junit.Before;
 import org.junit.Test;
@@ -75,16 +79,16 @@ import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.server.commandbus.Given.ACommand;
 import static io.spine.server.procman.ProcessManagerDispatcher.dispatch;
-import static io.spine.server.procman.given.ProcessManagerTestEnv.answerProblem;
+import static io.spine.server.procman.given.ProcessManagerTestEnv.answerQuestion;
 import static io.spine.server.TestBoundedContexts.closeContext;
 import static io.spine.server.TestBoundedContexts.command;
-import static io.spine.server.procman.given.ProcessManagerTestEnv.newDirectExamBoundedContext;
-import static io.spine.server.procman.given.ProcessManagerTestEnv.newExamBoundedContext;
-import static io.spine.server.procman.given.ProcessManagerTestEnv.newExamId;
-import static io.spine.server.procman.given.ProcessManagerTestEnv.newProblemAnswer;
+import static io.spine.server.procman.given.ProcessManagerTestEnv.newDirectQuizBoundedContext;
+import static io.spine.server.procman.given.ProcessManagerTestEnv.newQuizBoundedContext;
+import static io.spine.server.procman.given.ProcessManagerTestEnv.newQuizId;
+import static io.spine.server.procman.given.ProcessManagerTestEnv.newAnswer;
 import static io.spine.server.TestBoundedContexts.newTenantId;
 import static io.spine.server.TestBoundedContexts.readAllEvents;
-import static io.spine.server.procman.given.ProcessManagerTestEnv.startExam;
+import static io.spine.server.procman.given.ProcessManagerTestEnv.startQuiz;
 import static io.spine.test.Verify.assertSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertEquals;
@@ -310,36 +314,36 @@ public class ProcessManagerShould {
     /**
      * This test executes two commands, thus checks for 2 Acks:
      * <ol>
-     *     <li>{@link io.spine.test.procman.exam.command.PmStartExam Start Exam} — to initialize the PM;
-     *     <li>{@link io.spine.test.procman.exam.command.PmAnswerProblem Answer Problem } — a target
+     *     <li>{@link PmStartQuiz Start Quiz} — to start the process;
+     *     <li>{@link PmAnswerQuestion Answer Question } — a target
      *         command that produces either of 3 events.
      * </ol>
      *
-     * <p>First command emits an {@link io.spine.test.procman.exam.event.PmExamStarted Exam Started}
+     * <p>First command emits a {@link PmQuizStarted Quiz Started}
      * event.
      *      
-     * <p>Second command emits a {@link io.spine.test.procman.exam.event.PmProblemAnswered Problem Answered} 
+     * <p>Second command emits a {@link PmQuestionAnswered Question Answered} 
      * event.
      *     
-     * <p>As a reaction to {@link io.spine.test.procman.exam.event.PmProblemAnswered Problem Answered}
+     * <p>As a reaction to {@link PmQuestionAnswered Quiestion Answered}
      * the process manager emits an {@link io.spine.server.tuple.EitherOfThree Either Of Three}
-     * containing {@link com.google.protobuf.Empty Empty}. This is done because the answered problem
-     * is not part of an exam.
+     * containing {@link com.google.protobuf.Empty Empty}. This is done because the answered 
+     * question is not part of a quiz.
      *
-     * @see io.spine.server.procman.given.ExamProcman
+     * @see io.spine.server.procman.given.QuizProcman
      */
     @Test
     public void not_create_event_if_reaction_is_either_of_three_with_Empty() {
-        final BoundedContext boundedContext = newExamBoundedContext();
+        final BoundedContext boundedContext = newQuizBoundedContext();
         final TenantId tenantId = newTenantId();
-        final PmExamId examId = newExamId();
-        final Iterable<PmProblemId> problems = newArrayList();
-        final Command startCommand = command(startExam(examId, problems), tenantId);
+        final PmQuizId quizId = newQuizId();
+        final Iterable<PmQuestionId> questions = newArrayList();
+        final Command startCommand = command(startQuiz(quizId, questions), tenantId);
         final MemoizingObserver<Ack> observer = memoizingObserver();
         final CommandBus commandBus = boundedContext.getCommandBus();
         commandBus.post(startCommand, observer);
 
-        final Command command = command(answerProblem(examId, newProblemAnswer()), tenantId);
+        final Command command = command(answerQuestion(quizId, newAnswer()), tenantId);
         commandBus.post(command, observer);
 
         assertNull(observer.getError());
@@ -362,33 +366,34 @@ public class ProcessManagerShould {
     /**
      * This test executes two commands, thus checks for 2 Acks:
      * <ol>
-     *     <li>{@link io.spine.test.procman.exam.command.PmStartExam Start Exam} — to initialize the PM;
-     *     <li>{@link io.spine.test.procman.exam.command.PmAnswerProblem Answer Problem } — a target
+     *     <li>{@link PmStartQuiz Start Quiz} — to initialize the process;
+     *     <li>{@link PmAnswerQuestion Answer Question } — a target
      *         command that produces either of 3 events.
      * </ol>
      *
-     * <p>First command emits an {@link io.spine.test.procman.exam.event.PmExamStarted Exam Started}
+     * <p>First command emits a {@link PmQuizStarted Quiz Started}
      * event.
      *
-     * <p>Because the exam is started without any problems to solve, 
-     * {@link io.spine.test.procman.exam.command.PmAnswerProblem answer problem command} can not 
-     * match any problems. This results in emitting {@link io.spine.server.tuple.EitherOfThree Either Of Three} 
+     * <p>Because the quiz is started without any questions to solve, 
+     * an {@link PmAnswerQuestion answer question command} can not 
+     * match any questions. This results in emitting 
+     * {@link io.spine.server.tuple.EitherOfThree Either Of Three} 
      * containing {@link com.google.protobuf.Empty Empty}.
      *
-     * @see io.spine.server.procman.given.DirectExamProcman
+     * @see io.spine.server.procman.given.DirectQuizProcman
      */
     @Test
     public void not_create_event_if_command_handle_results_is_either_of_three_with_Empty() {
-        final BoundedContext boundedContext = newDirectExamBoundedContext();
+        final BoundedContext boundedContext = newDirectQuizBoundedContext();
         final TenantId tenantId = newTenantId();
-        final PmExamId examId = newExamId();
-        final Iterable<PmProblemId> problems = newArrayList();
-        final Command startCommand = command(startExam(examId, problems), tenantId);
+        final PmQuizId quizId = newQuizId();
+        final Iterable<PmQuestionId> questions = newArrayList();
+        final Command startCommand = command(startQuiz(quizId, questions), tenantId);
         final MemoizingObserver<Ack> observer = memoizingObserver();
         final CommandBus commandBus = boundedContext.getCommandBus();
         commandBus.post(startCommand, observer);
 
-        final Command command = command(answerProblem(examId, newProblemAnswer()), tenantId);
+        final Command command = command(answerQuestion(quizId, newAnswer()), tenantId);
         commandBus.post(command, observer);
 
         assertNull(observer.getError());

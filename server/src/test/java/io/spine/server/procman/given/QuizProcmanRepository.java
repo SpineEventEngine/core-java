@@ -21,8 +21,8 @@
 package io.spine.server.procman.given;
 
 import io.spine.server.procman.ProcessManagerRepository;
-import io.spine.test.procman.exam.PmExam;
-import io.spine.test.procman.exam.PmExamId;
+import io.spine.test.procman.quiz.PmQuiz;
+import io.spine.test.procman.quiz.PmQuizId;
 
-class DirectExamProcmanRepository extends ProcessManagerRepository<PmExamId, DirectExamProcman, PmExam> {
+class QuizProcmanRepository extends ProcessManagerRepository<PmQuizId, QuizProcman, PmQuiz> {
 }

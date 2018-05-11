@@ -19,33 +19,33 @@
 //
 syntax = "proto3";
 
-package spine.test.procman.exam.event;
+package spine.test.procman.quiz.event;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package = "io.spine.test.procman.exam.event";
-option java_outer_classname = "ProcmanExamEventsProto";
+option java_package = "io.spine.test.procman.quiz.event";
+option java_outer_classname = "ProcmanQuizEventsProto";
 option java_multiple_files = true;
 
-import "spine/test/procman/exam/exam.proto";
+import "spine/test/procman/quiz/quiz.proto";
 
-message PmExamStarted {
-    PmExamId exam_id = 1 [(required) = true];
-    repeated PmProblemId problem = 2;
+message PmQuizStarted {
+    PmQuizId quiz_id = 1 [(required) = true];
+    repeated PmQuestionId question = 2;
 }
 
-message PmProblemAnswered {
-    PmExamId exam_id = 1 [(required) = true];
-    PmProblemAnswer answer = 2 [(required) = true];
+message PmQuestionAnswered {
+    PmQuizId quiz_id = 1 [(required) = true];
+    PmAnswer answer = 2 [(required) = true];
 }
 
-message PmProblemSolved {
-    PmExamId exam_id = 1 [(required) = true];
-    PmProblemId problem_id = 2 [(required) = true];
+message PmQuestionSolved {
+    PmQuizId quiz_id = 1 [(required) = true];
+    PmQuestionId question_id = 2 [(required) = true];
 }
 
-message PmProblemFailed {
-    PmExamId exam_id = 1 [(required) = true];
-    PmProblemId problem_id = 2 [(required) = true];
+message PmQuestionFailed {
+    PmQuizId quiz_id = 1 [(required) = true];
+    PmQuestionId question_id = 2 [(required) = true];
 }
