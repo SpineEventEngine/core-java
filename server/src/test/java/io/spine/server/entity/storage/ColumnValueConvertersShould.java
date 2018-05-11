@@ -27,6 +27,7 @@ import org.junit.Test;
 import java.lang.reflect.Method;
 
 import static io.spine.server.entity.storage.ColumnValueConverters.of;
+import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -34,6 +35,11 @@ import static org.junit.Assert.assertEquals;
  */
 @SuppressWarnings("DuplicateStringLiteralInspection") // Many literals for method names.
 public class ColumnValueConvertersShould {
+
+    @Test
+    public void have_private_utility_ctor() {
+        assertHasPrivateParameterlessCtor(ColumnValueConverters.class);
+    }
 
     @Test
     public void not_accept_nulls() {
