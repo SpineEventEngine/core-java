@@ -49,8 +49,9 @@ final class EnumConverters {
                 return new OrdinalEnumConverter(sourceType);
             case STRING:
                 return new StringEnumConverter(sourceType);
+            default:
+                throw newIllegalArgumentException(
+                        "There is no EnumConverter for the EnumType %s", enumType.name());
         }
-        throw newIllegalArgumentException(
-                "There is no EnumConverter for the EnumType %s", enumType.name());
     }
 }
