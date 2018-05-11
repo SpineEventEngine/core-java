@@ -240,6 +240,5 @@ class CommandHandlingEntity<I,
                 return !message.equals(EMPTY);
             }
         }
-
     }
 }
