@@ -35,6 +35,12 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  */
 abstract class EnumConverter implements ColumnValueConverter {
 
+    private final Class<? extends Enum> sourceType;
+
+    EnumConverter(Class<? extends Enum> sourceType) {
+        this.sourceType = sourceType;
+    }
+
     /**
      * {@inheritDoc}
      * @throws IllegalArgumentException in case the passed value is not of the {@link Enum} type
@@ -50,6 +56,14 @@ abstract class EnumConverter implements ColumnValueConverter {
         final Enum enumValue = (Enum) value;
         final Serializable convertedValue = convertEnumValue(enumValue);
         return convertedValue;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Class<? extends Enum> getSourceType() {
+        return sourceType;
     }
 
     /**

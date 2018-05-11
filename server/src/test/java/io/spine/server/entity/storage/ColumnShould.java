@@ -37,9 +37,6 @@ import org.junit.Test;
 import java.lang.reflect.Method;
 
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
-import static io.spine.server.entity.storage.EnumPersistenceTypes.of;
-import static io.spine.server.entity.storage.EnumType.ORDINAL;
-import static io.spine.server.entity.storage.EnumType.STRING;
 import static io.spine.server.entity.storage.given.ColumnTestEnv.TaskStatus.SUCCESS;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -216,7 +213,7 @@ public class ColumnShould {
     @Test
     public void be_constructed_from_enumerated_type_getter() {
         final EntityColumn column = forMethod("getEnumOrdinal", TestEntity.class);
-        final Class<?> expectedType = EnumPersistenceTypes.of(ORDINAL);
+        final Class<?> expectedType = Integer.class;
         final Class actualType = column.getPersistedType();
         assertEquals(expectedType, actualType);
     }
@@ -230,7 +227,7 @@ public class ColumnShould {
     @Test
     public void return_persistence_type_for_ordinal_enumerated_value() {
         final EntityColumn column = forMethod("getEnumOrdinal", TestEntity.class);
-        final Class expectedType = of(ORDINAL);
+        final Class expectedType = Integer.class;
         final Class actualType = column.getPersistedType();
         assertEquals(expectedType, actualType);
     }
@@ -238,7 +235,7 @@ public class ColumnShould {
     @Test
     public void return_persistence_type_for_string_enumerated_value() {
         final EntityColumn column = forMethod("getEnumString", TestEntity.class);
-        final Class expectedType = of(STRING);
+        final Class expectedType = String.class;
         final Class actualType = column.getPersistedType();
         assertEquals(expectedType, actualType);
     }

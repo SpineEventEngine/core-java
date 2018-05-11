@@ -31,6 +31,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 final class IdentityConverter implements ColumnValueConverter {
 
+    private final Class<? extends Serializable> type;
+
+    IdentityConverter(Class<? extends Serializable> type) {
+        this.type = type;
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -39,5 +45,21 @@ final class IdentityConverter implements ColumnValueConverter {
         checkNotNull(value);
         final Serializable result = (Serializable) value;
         return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Class<?> getSourceType() {
+        return type;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Class<? extends Serializable> getTargetType() {
+        return type;
     }
 }

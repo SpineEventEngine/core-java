@@ -43,4 +43,18 @@ interface ColumnValueConverter {
      * @return the value used for the persistence in the data storage
      */
     Serializable convert(Object value);
+
+    /**
+     * Returns the source {@link Class} of the conversion, i.e. {@link EntityColumn} getter type.
+     *
+     * @return the source type of the conversion
+     */
+    Class<?> getSourceType();
+
+    /**
+     * Returns the target {@link Class} of the conversion, i.e. {@link EntityColumn} persisted type.
+     *
+     * @return the target type of the conversion
+     */
+    Class<? extends Serializable> getTargetType();
 }

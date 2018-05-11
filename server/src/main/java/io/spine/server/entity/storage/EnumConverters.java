@@ -20,23 +20,15 @@
 
 package io.spine.server.entity.storage;
 
-import java.util.EnumMap;
-import java.util.Map;
-
-import static io.spine.server.entity.storage.EnumType.ORDINAL;
-import static io.spine.server.entity.storage.EnumType.STRING;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
-import static java.util.Collections.unmodifiableMap;
 
 /**
- * A container for the known {@linkplain EnumConverter enum converters} stored by the
+ * A utility for the creation of {@linkplain EnumConverter enum converters} for the given
  * {@link EnumType}.
  *
  * @author Dmytro Kuzmin
  */
 final class EnumConverters {
-
-    private static final Map<EnumType, EnumConverter> converters = converters();
 
     /**
      * Prevents instantiation of this class.
@@ -45,25 +37,20 @@ final class EnumConverters {
     }
 
     /**
-     * Retrieves the {@linkplain EnumConverter converter} for the given {@link EnumType}.
+     * Creates a {@link EnumConverter} for the given {@link EnumType} and {@link Class source type}.
      *
-     * @param type the {@code EnumType} which defines the conversion method
-     * @return the converter for the given type
-     * @throws IllegalArgumentException if there is no converter for the specified {@code EnumType}
+     * @param enumType the {@code EnumType} which defines the conversion method
+     * @param sourceType the source {@code Class} of the conversion
+     * @return the converter for the given enum type and the source class
      */
-    static EnumConverter forType(EnumType type) {
-        final EnumConverter converter = converters.get(type);
-        if (converter == null) {
-            throw newIllegalArgumentException(
-                    "There is no EnumConverter for the EnumType %s", type.name());
+    static EnumConverter createFor(EnumType enumType, Class<? extends Enum> sourceType) {
+        switch (enumType) {
+            case ORDINAL:
+                return new OrdinalEnumConverter(sourceType);
+            case STRING:
+                return new StringEnumConverter(sourceType);
         }
-        return converter;
-    }
-
-    private static Map<EnumType, EnumConverter> converters() {
-        final Map<EnumType, EnumConverter> map = new EnumMap<>(EnumType.class);
-        map.put(ORDINAL, new OrdinalEnumConverter());
-        map.put(STRING, new StringEnumConverter());
-        return unmodifiableMap(map);
+        throw newIllegalArgumentException(
+                "There is no EnumConverter for the EnumType %s", enumType.name());
     }
 }

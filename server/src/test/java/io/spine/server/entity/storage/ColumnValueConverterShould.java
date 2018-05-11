@@ -21,13 +21,11 @@
 package io.spine.server.entity.storage;
 
 import com.google.common.testing.NullPointerTester;
+import io.spine.server.entity.storage.given.ColumnTestEnv.TaskStatus;
 import org.junit.Test;
 
 import java.io.Serializable;
 
-import static io.spine.server.entity.storage.EnumConverters.forType;
-import static io.spine.server.entity.storage.EnumType.ORDINAL;
-import static io.spine.server.entity.storage.EnumType.STRING;
 import static io.spine.server.entity.storage.given.ColumnTestEnv.TaskStatus.SUCCESS;
 import static org.junit.Assert.assertEquals;
 
@@ -38,40 +36,42 @@ public class ColumnValueConverterShould {
 
     @Test
     public void not_accept_nulls() {
-        ColumnValueConverter converter = new IdentityConverter();
+        ColumnValueConverter converter = new IdentityConverter(TaskStatus.class);
         new NullPointerTester().testAllPublicInstanceMethods(converter);
-        converter = forType(ORDINAL);
+        converter = new OrdinalEnumConverter(TaskStatus.class);
         new NullPointerTester().testAllPublicInstanceMethods(converter);
-        converter = forType(STRING);
+        converter = new StringEnumConverter(TaskStatus.class);
         new NullPointerTester().testAllPublicInstanceMethods(converter);
     }
 
     @Test
     public void perform_identity_conversion() {
-        final IdentityConverter converter = new IdentityConverter();
-        final Object object = "test";
-        final Serializable convertedObject = converter.convert(object);
-        assertEquals(object, convertedObject);
+        final String value = "stringValue";
+        final ColumnValueConverter converter = new IdentityConverter(value.getClass());
+        final Serializable convertedObject = converter.convert(value);
+        assertEquals(value, convertedObject);
     }
 
     @Test
     public void convert_enum_to_ordinal_value() {
-        final EnumConverter converter = forType(ORDINAL);
-        final Serializable value = converter.convert(SUCCESS);
-        assertEquals(SUCCESS.ordinal(), value);
+        final TaskStatus value = SUCCESS;
+        final ColumnValueConverter converter = new OrdinalEnumConverter(value.getClass());
+        final Serializable convertedValue = converter.convert(value);
+        assertEquals(value.ordinal(), convertedValue);
     }
 
     @Test
     public void convert_enum_to_string_value() {
-        final EnumConverter converter = forType(STRING);
-        final Serializable value = converter.convert(SUCCESS);
-        assertEquals(SUCCESS.name(), value);
+        final TaskStatus value = SUCCESS;
+        final ColumnValueConverter converter = new StringEnumConverter(value.getClass());
+        final Serializable convertedValue = converter.convert(value);
+        assertEquals(value.name(), convertedValue);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void not_support_wrong_value_type_conversion() {
-        final EnumConverter converter = forType(ORDINAL);
-        final Object value = "test";
+        final String value = "unsupportedValue";
+        final ColumnValueConverter converter = new OrdinalEnumConverter(TaskStatus.class);
         converter.convert(value);
     }
 }

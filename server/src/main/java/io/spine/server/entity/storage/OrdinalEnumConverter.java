@@ -20,6 +20,8 @@
 
 package io.spine.server.entity.storage;
 
+import java.io.Serializable;
+
 /**
  * A converter which uses {@link Enum}'s {@linkplain Enum#ordinal() ordinal} to convert the
  * enumerated value into the {@link Integer} value.
@@ -27,6 +29,18 @@ package io.spine.server.entity.storage;
  * @author Dmytro Kuzmin
  */
 final class OrdinalEnumConverter extends EnumConverter {
+
+    OrdinalEnumConverter(Class<? extends Enum> sourceType) {
+        super(sourceType);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Class<? extends Serializable> getTargetType() {
+        return Integer.class;
+    }
 
     /**
      * {@inheritDoc}

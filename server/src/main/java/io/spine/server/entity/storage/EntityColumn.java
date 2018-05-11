@@ -37,9 +37,9 @@ import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 import static com.google.gson.internal.Primitives.wrap;
 import static io.spine.server.entity.storage.ColumnRecords.getAnnotatedVersion;
+import static io.spine.server.entity.storage.ColumnValueConverters.of;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.lang.String.format;
@@ -200,15 +200,15 @@ public class EntityColumn implements Serializable {
     private final boolean nullable;
 
     /**
-     * The persistor for the column values which converts the column values into the type suitable
-     * for persistence in the data storage.
+     * The converter for the column values which transforms the value obtained from the getter into
+     * the type suitable for persistence in the data storage.
      *
      * <p>The field is effectively final and is left non-final for serialization purposes only.
      *
      * <p>The only place where this field is updated, except the constructor, is
      * {@link #readObject(ObjectInputStream)} method.
      */
-    private transient ColumnValuePersistor valuePersistor;
+    private transient ColumnValueConverter valueConverter;
 
     private EntityColumn(Method getter,
                          String name,
@@ -220,7 +220,7 @@ public class EntityColumn implements Serializable {
         this.name = name;
         this.storedName = storedName;
         this.nullable = nullable;
-        this.valuePersistor = ColumnValuePersistor.from(getter);
+        this.valueConverter = of(getter);
     }
 
     /**
@@ -358,7 +358,7 @@ public class EntityColumn implements Serializable {
      * @return the type of the column
      */
     public Class getType() {
-        return getter.getReturnType();
+        return valueConverter.getSourceType();
     }
 
     /**
@@ -367,12 +367,12 @@ public class EntityColumn implements Serializable {
      * <p>For the non-{@link Enumerated} entity columns this type will be equal to the one
      * retrieved via the {@link #getType()}.
      *
-     * <p>For {@link Enumerated} columns, see {@link EnumPersistenceTypes}.
+     * <p>For the {@link Enumerated} columns, see {@link EnumConverter} implementations.
      *
      * @return the persistence type of the column values
      */
     public Class getPersistedType() {
-        return valuePersistor.getPersistedType();
+        return valueConverter.getTargetType();
     }
 
     /**
@@ -402,7 +402,7 @@ public class EntityColumn implements Serializable {
             return null;
         }
         checkTypeMatches(columnValue);
-        return valuePersistor.toPersistedValue(columnValue);
+        return valueConverter.convert(columnValue);
     }
 
     @SuppressWarnings("NonFinalFieldReferenceInEquals") // `getter` field is effectively final
@@ -456,7 +456,7 @@ public class EntityColumn implements Serializable {
                                                                   ClassNotFoundException {
         inputStream.defaultReadObject();
         getter = restoreGetter();
-        valuePersistor = restoreValuePersistor();
+        valueConverter = restoreValueConverter();
     }
 
     private Method restoreGetter() {
@@ -474,12 +474,12 @@ public class EntityColumn implements Serializable {
         }
     }
 
-    private ColumnValuePersistor restoreValuePersistor() {
-        if (valuePersistor != null) {
-            return valuePersistor;
+    private ColumnValueConverter restoreValueConverter() {
+        if (valueConverter != null) {
+            return valueConverter;
         }
-        final ColumnValuePersistor persistor = ColumnValuePersistor.from(getter);
-        return persistor;
+        final ColumnValueConverter converter = of(getter);
+        return converter;
     }
 
     /**

@@ -20,6 +20,8 @@
 
 package io.spine.server.entity.storage;
 
+import java.io.Serializable;
+
 /**
  * A converter which uses {@link Enum}'s {@linkplain Enum#name() name} property to convert the
  * enumerated value into the {@link String} value.
@@ -27,6 +29,18 @@ package io.spine.server.entity.storage;
  * @author Dmytro Kuzmin
  */
 final class StringEnumConverter extends EnumConverter {
+
+    StringEnumConverter(Class<? extends Enum> sourceType) {
+        super(sourceType);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Class<? extends Serializable> getTargetType() {
+        return String.class;
+    }
 
     /**
      * {@inheritDoc}
