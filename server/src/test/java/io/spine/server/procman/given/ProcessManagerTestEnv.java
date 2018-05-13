@@ -63,6 +63,7 @@ import static io.spine.server.TestBoundedContexts.newBoundedContext;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 
 /**
+ * @author Alexander Yevsyukov
  * @author Mykhailo Drachuk
  */
 public class ProcessManagerTestEnv {
