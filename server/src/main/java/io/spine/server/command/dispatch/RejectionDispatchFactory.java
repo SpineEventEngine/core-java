@@ -35,7 +35,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Mykhailo Drachuk
  */
 public final class RejectionDispatchFactory extends MessageDispatchFactory<RejectionEnvelope, 
-                                                                     RejectionReactorMethod> {
+                                                                           RejectionReactorMethod> {
     RejectionDispatchFactory(RejectionEnvelope rejection) {
         super(rejection);
     }

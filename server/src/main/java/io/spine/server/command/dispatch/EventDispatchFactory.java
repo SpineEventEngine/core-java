@@ -35,7 +35,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Mykhailo Drachuk
  */
 public final class EventDispatchFactory extends MessageDispatchFactory<EventEnvelope,
-                                                                 EventReactorMethod> {
+                                                                       EventReactorMethod> {
     EventDispatchFactory(EventEnvelope event) {
         super(event);
     }
