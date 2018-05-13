@@ -22,15 +22,15 @@ package io.spine.server.command;
 
 import com.google.common.base.Supplier;
 import com.google.protobuf.Any;
-import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.protobuf.AnyPacker;
+import io.spine.server.command.dispatch.Dispatch;
+import io.spine.server.command.dispatch.DispatchResult;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.event.EventBus;
-import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.Model;
 import io.spine.string.Stringifiers;
 import io.spine.type.MessageClass;
@@ -123,9 +123,9 @@ public abstract class CommandHandler implements CommandDispatcher<String> {
     @Override
     public String dispatch(CommandEnvelope envelope) {
         final CommandHandlerMethod method = thisClass.getHandler(envelope.getMessageClass());
-        final List<? extends Message> eventMessages =
-                method.invoke(this, envelope.getMessage(), envelope.getCommandContext());
-        final List<Event> events = toEvents(eventMessages, envelope);
+        final Dispatch<CommandEnvelope> dispatch = Dispatch.of(envelope).to(this, method);
+        final DispatchResult dispatchResult = dispatch.perform();
+        final List<Event> events = dispatchResult.asEvents(producerId, null);
         postEvents(events);
         return getId();
     }
@@ -152,10 +152,6 @@ public abstract class CommandHandler implements CommandDispatcher<String> {
     @Override
     public Set<CommandClass> getMessageClasses() {
         return thisClass.getCommands();
-    }
-
-    private List<Event> toEvents(List<? extends Message> eventMessages, CommandEnvelope ce) {
-        return HandlerMethod.toEvents(producerId, null, eventMessages, ce);
     }
 
     /** Posts passed events to {@link EventBus}. */

@@ -39,6 +39,8 @@ import io.spine.core.Versions;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.command.CommandHandlerMethod;
 import io.spine.server.command.CommandHandlingEntity;
+import io.spine.server.command.dispatch.Dispatch;
+import io.spine.server.command.dispatch.DispatchResult;
 import io.spine.server.event.EventFactory;
 import io.spine.server.event.EventReactorMethod;
 import io.spine.server.model.Model;
@@ -208,10 +210,9 @@ public abstract class Aggregate<I,
     protected List<? extends Message> dispatchCommand(CommandEnvelope command) {
         idempotencyGuard.check(command);
         final CommandHandlerMethod method = thisClass().getHandler(command.getMessageClass());
-        final List<? extends Message> messages =
-                method.invoke(this, command.getMessage(), command.getCommandContext());
-        final List<? extends Message> filteredMessages = EventFilter.of(messages).filter();
-        return filteredMessages;
+        final Dispatch<CommandEnvelope> dispatch = Dispatch.of(command).to(this, method);
+        final DispatchResult dispatchResult = dispatch.perform();
+        return dispatchResult.asMessages(); 
     }
 
     /**
@@ -226,10 +227,9 @@ public abstract class Aggregate<I,
      */
     List<? extends Message> reactOn(EventEnvelope event) {
         final EventReactorMethod method = thisClass().getReactor(event.getMessageClass());
-        final List<? extends Message> messages =
-                method.invoke(this, event.getMessage(), event.getEventContext());
-        final List<? extends Message> filteredMessages = EventFilter.of(messages).filter();
-        return filteredMessages;
+        final Dispatch<EventEnvelope> dispatch = Dispatch.of(event).to(this, method);
+        final DispatchResult dispatchResult = dispatch.perform();
+        return dispatchResult.asMessages();
     }
 
     /**
@@ -247,10 +247,9 @@ public abstract class Aggregate<I,
         final CommandClass commandClass = CommandClass.of(rejection.getCommandMessage());
         final RejectionReactorMethod method = thisClass().getReactor(rejection.getMessageClass(),
                                                                      commandClass);
-        final List<? extends Message> messages =
-                method.invoke(this, rejection.getMessage(), rejection.getRejectionContext());
-        final List<? extends Message> filteredMessages = EventFilter.of(messages).filter();
-        return filteredMessages;
+        final Dispatch<RejectionEnvelope> dispatch = Dispatch.of(rejection).to(this, method);
+        final DispatchResult dispatchResult = dispatch.perform();
+        return dispatchResult.asMessages();
     }
 
     /**
