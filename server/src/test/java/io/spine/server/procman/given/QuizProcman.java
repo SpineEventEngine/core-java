@@ -42,6 +42,8 @@ import java.util.List;
 /**
  * A quiz is started using {@link PmStartQuiz Start Quiz command} which defines a question set, and 
  * the question are answered using {@link PmAnswerQuestion Answer Question commands}.
+ * 
+ * @author Mykhailo Drachuk
  */
 class QuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuizVBuilder> {
 

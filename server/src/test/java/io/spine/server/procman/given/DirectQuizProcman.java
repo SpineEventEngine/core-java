@@ -46,6 +46,8 @@ import java.util.List;
  * <p>Differs from the {@link QuizProcman} by scarcing the interjacent 
  * {@link PmQuestionAnswered Question Answered event} and emits 
  * either of three when handling a command.
+ * 
+ * @author Mykhailo Drachuk
  */
 class DirectQuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuizVBuilder> {
 
