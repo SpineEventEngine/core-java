@@ -23,7 +23,6 @@ package io.spine.server.command.dispatch;
 import com.google.common.base.Predicate;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
-import io.spine.server.command.CommandHandlingEntity;
 
 import java.util.List;
 
