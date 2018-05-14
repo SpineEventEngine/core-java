@@ -57,7 +57,8 @@ abstract class ShardedMessageConverter<I, M extends Message, E extends MessageEn
                                                                   .setValue(stringId)
                                                                   .build();
         final Any packedOriginalMsg = AnyPacker.pack(originalMessage);
-        final Any packedTargetId = AnyPacker.pack(TypeConverter.toMessage(targetId));
+        final Message message = TypeConverter.toMessage(targetId);
+        final Any packedTargetId = AnyPacker.pack(message);
         final ShardedMessage result = ShardedMessage.newBuilder()
                                                     .setId(shardedMessageId)
                                                     .setTargetId(packedTargetId)
