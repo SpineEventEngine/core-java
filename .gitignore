@@ -36,7 +36,7 @@ credentials.properties
 #
 # See sample file for a Mac OS X workstation below.
 # -------
-# # Set Java home to point to JDK7. This is need to generate classes working with Java7 API.
+# # Set Java home to point to JDK8. This is need to generate classes working with Java8 API.
 # # Otherwise the following warning appears during the build:
 # #     warning: [options] bootstrap class path not set in conjunction with -source 1.7
 # #
