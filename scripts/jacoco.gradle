@@ -151,6 +151,23 @@ class CodebaseFilter {
     }
 }
 
+subprojects {
+    project.afterEvaluate {
+        def junitPlatformTestTask = project.tasks.getByName('junitPlatformTest')
+
+        // Configure jacoco to analyze the junitPlatformTest task.
+        jacoco {
+            // This tool version is known to be compatible with JUnit 5.
+            toolVersion = "0.7.6.201602180812"
+            applyTo junitPlatformTestTask
+        }
+    }
+
+    jacocoTestReport {
+        executionData file("$projectDir/build/jacoco/junitPlatformTest.exec")
+    }
+}
+
 // Create an aggregate coverage report across modules, excluding the generated content from the coverage stats.
 //
 task jacocoRootReport(dependsOn: subprojects.test, type: JacocoReport) {
