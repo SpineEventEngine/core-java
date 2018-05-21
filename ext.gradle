@@ -41,9 +41,6 @@ ext {
     // Depend on `base` for the general definitions and a model compiler.
     spineBaseVersion = '0.10.37-SNAPSHOT'
 
-    // We use Spine tools in the build process.
-    spineToolsVersion = '0.10.37-SNAPSHOT'
-
     spineTimeVersion = '0.10.29-SNAPSHOT'
 
     // Use Guava snapshot version until this commit gets into the release:

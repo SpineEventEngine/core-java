@@ -61,7 +61,7 @@ buildscript {
            Please note that offline builds will not be available then. */
                                              //, changing: true
 
-        classpath ("io.spine.tools:spine-gcloud-storage:$spineToolsVersion") {
+        classpath ("io.spine.tools:spine-gcloud-storage:$spineBaseVersion") {
             exclude group: 'com.google.guava'
         }
     }
