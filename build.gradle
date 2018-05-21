@@ -151,11 +151,6 @@ subprojects {
     //
     // It is expected that warnings are viewed and analyzed in the local build logs.
     if (isTravis) {
-
-        // Disable code style checks, which may produce many errors.
-        tasks.findByPath('checkRightMarginWrapping').enabled = false
-        tasks.findByPath('checkJavadocLink').enabled = false
-
         javadoc {
 
             // Set the maximum number of Javadoc warnings to print.
