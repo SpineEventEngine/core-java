@@ -54,7 +54,7 @@ dependencies {
     testRuntime "org.junit.vintage:junit-vintage-engine:$jUnitVersion"
 }
 
-test {
+junitPlatformTest {
     dependsOn publishToMavenLocal
     dependsOn project(':core').publishToMavenLocal
     dependsOn project(':client').publishToMavenLocal
