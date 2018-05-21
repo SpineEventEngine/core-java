@@ -46,7 +46,10 @@ buildscript {
     }
 
     dependencies {
-        classpath group: 'com.google.guava', name: 'guava', version: guavaVersion, changing: true
+        classpath group: 'com.google.guava',
+                  name: 'guava',
+                  version: guavaVersion,
+                  changing: true
         classpath("com.google.protobuf:protobuf-gradle-plugin:$protobufGradlePluginVersion") {
             // exclude an old Guava version
             exclude group: 'com.google.guava'
@@ -67,13 +70,6 @@ buildscript {
             exclude group: 'com.google.guava'
         }
     }
-
-    configurations.all({
-      resolutionStrategy {
-          force "com.google.guava:guava:$guavaVersion"
-          force "com.google.guava:guava-testlib:$guavaVersion"
-      }
-    })
 }
 
 apply from: 'ext.gradle'
@@ -195,7 +191,10 @@ subprojects {
     }
 
     dependencies {
-        compile group: 'com.google.guava', name: 'guava', version: guavaVersion, changing: true
+        compile group: 'com.google.guava',
+                name: 'guava',
+                version: guavaVersion,
+                changing: true
         compile group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.0'
 
         //As a Library, we provide logging facade API, not specific logger bindings.
