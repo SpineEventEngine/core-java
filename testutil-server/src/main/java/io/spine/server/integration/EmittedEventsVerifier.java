@@ -32,32 +32,33 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 @VisibleForTesting
-public abstract class EmittedEventsVerifiers {
+public abstract class EmittedEventsVerifier {
 
     public abstract void verify(EmittedEvents events);
 
-    public static EmittedEventsVerifiers emitted(final int expectedCount) {
+    public static EmittedEventsVerifier emitted(final int expectedCount) {
         checkArgument(expectedCount >= 0);
-        return new EmittedEventsVerifiers() {
+
+        return new EmittedEventsVerifier() {
 
             @Override
             public void verify(EmittedEvents events) {
                 final int actualCount = events.count();
-                final String moreOrLess = (expectedCount < actualCount) ? "more" : "less";
-                assertEquals(format("Bounded Context emitted %s events than expected", moreOrLess),
+                final String moreOrLess = compare(actualCount, expectedCount);
+                assertEquals("Bounded Context emitted " + moreOrLess + " events than expected",
                              expectedCount, actualCount);
             }
         };
     }
 
     @SafeVarargs
-    public static EmittedEventsVerifiers emitted(Class<? extends Message>... eventTypes) {
+    public static EmittedEventsVerifier emitted(Class<? extends Message>... eventTypes) {
         checkArgument(eventTypes.length > 0);
         return emitted(asList(eventTypes));
     }
 
-    private static EmittedEventsVerifiers emitted(final List<Class<? extends Message>> eventTypes) {
-        return new EmittedEventsVerifiers() {
+    private static EmittedEventsVerifier emitted(final List<Class<? extends Message>> eventTypes) {
+        return new EmittedEventsVerifier() {
 
             @Override
             public void verify(EmittedEvents events) {
@@ -70,21 +71,25 @@ public abstract class EmittedEventsVerifiers {
         };
     }
 
-    public static EmittedEventsVerifiers
+    public static EmittedEventsVerifier
     emitted(final int expectedCount, final Class<? extends Message> eventType) {
         checkArgument(expectedCount >= 0);
-        return new EmittedEventsVerifiers() {
+        return new EmittedEventsVerifier() {
 
             @Override
             public void verify(EmittedEvents events) {
                 final String eventName = eventType.getName();
                 final int actualCount = events.count(eventType);
-                final String moreOrLess = (expectedCount < actualCount) ? "more" : "less";
+                final String moreOrLess = compare(actualCount, expectedCount);
                 assertEquals(
                         format("Bounded Context emitted %s %s events than expected",
                                moreOrLess, eventName),
                         expectedCount, actualCount);
             }
         };
+    }
+
+    private static String compare(int actualCount, int expectedCount) {
+        return (expectedCount < actualCount) ? "more" : "less";
     }
 }

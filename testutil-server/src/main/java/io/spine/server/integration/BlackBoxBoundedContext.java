@@ -54,6 +54,7 @@ public class BlackBoxBoundedContext {
     private final CommandBus commandBus;
     private final EventBus eventBus;
     private final TenantId tenantId;
+    private MemoizingObserver<Ack> observer;
 
     private BlackBoxBoundedContext() {
         this.boundedContext = newBoundedContext();
@@ -62,6 +63,7 @@ public class BlackBoxBoundedContext {
         this.eventFactory = eventFactory(requestFactory);
         this.commandBus = boundedContext.getCommandBus();
         this.eventBus = boundedContext.getEventBus();
+        this.observer = memoizingObserver();
     }
 
     /*
@@ -156,7 +158,6 @@ public class BlackBoxBoundedContext {
         for (Message domainCommand : domainCommands) {
             commands.add(command(domainCommand));
         }
-        final MemoizingObserver<Ack> observer = memoizingObserver();
         commandBus.post(commands, observer);
         return this;
     }
@@ -208,10 +209,20 @@ public class BlackBoxBoundedContext {
      * Methods verifying the bounded context behaviour.
      ******************************************************************************/
 
-    public BlackBoxBoundedContext verify(EmittedEventsVerifiers verifier) {
+    public BlackBoxBoundedContext verify(EmittedEventsVerifier verifier) {
         final EmittedEvents events = emittedEvents();
         verifier.verify(events);
         return this;
+    }
+    
+    public BlackBoxBoundedContext verify(AckedCommandsVerifier verifier) {
+        final AckedCommands acks = ackedCommands();
+        verifier.verify(acks);
+        return this;
+    }
+
+    private AckedCommands ackedCommands() {
+        return new AckedCommands(observer);
     }
 
     /*

@@ -20,6 +20,7 @@
 
 package io.spine.server.integration;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Message;
@@ -32,6 +33,7 @@ import java.util.Map;
 
 import static io.spine.protobuf.AnyPacker.unpack;
 
+@VisibleForTesting
 class EmittedEvents {
 
     private final List<Event> events;
