@@ -20,7 +20,7 @@
 
 package io.spine.server.model;
 
-import io.spine.type.ClassTypeValue;
+import io.spine.value.ClassTypeValue;
 
 /**
  * A class that belongs to a {@link Model}.

@@ -30,7 +30,7 @@ import io.spine.server.rejection.RejectionSubscriber;
 import io.spine.server.rejection.RejectionSubscriberClass;
 import io.spine.string.Stringifiers;
 import io.spine.type.MessageClass;
-import io.spine.util.Logging;
+import io.spine.logging.Logging;
 import org.slf4j.Logger;
 
 import java.util.Objects;

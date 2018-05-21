@@ -21,7 +21,7 @@ package io.spine.server.stand;
 
 import com.google.common.base.Objects;
 import com.google.protobuf.Any;
-import io.spine.Identifier;
+import io.spine.base.Identifier;
 import io.spine.client.EntityFilters;
 import io.spine.client.EntityId;
 import io.spine.client.EntityIdFilter;

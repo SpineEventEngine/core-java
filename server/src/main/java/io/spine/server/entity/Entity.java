@@ -21,8 +21,8 @@
 package io.spine.server.entity;
 
 import com.google.protobuf.Message;
-import io.spine.Identifier;
-import io.spine.util.GenericTypeIndex;
+import io.spine.base.Identifier;
+import io.spine.reflect.GenericTypeIndex;
 
 /**
  * A server-side object with an {@link Identifier#checkSupported(Class) identity}.

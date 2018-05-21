@@ -27,7 +27,7 @@ import com.google.common.collect.Lists;
 import com.google.protobuf.FloatValue;
 import com.google.protobuf.UInt64Value;
 import io.grpc.stub.StreamObserver;
-import io.spine.Identifier;
+import io.spine.base.Identifier;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Ack;
 import io.spine.core.Command;

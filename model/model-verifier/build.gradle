@@ -43,11 +43,12 @@ dependencies {
     compile project(':server')
     compile project(':model-assembler')
 
-    testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: jUnitVersion
-    testRuntime group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: jUnitVersion
-    testRuntime group: 'org.junit.vintage', name: 'junit-vintage-engine', version: jUnitVersion
     testCompile gradleTestKit()
     testCompile group: 'io.spine.tools', name: 'spine-plugin-base', version: spineBaseVersion, classifier: 'test'
+    testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: jUnitVersion
+
+    testRuntime group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: jUnitVersion
+    testRuntime group: 'org.junit.vintage', name: 'junit-vintage-engine', version: jUnitVersion
 }
 
 test {

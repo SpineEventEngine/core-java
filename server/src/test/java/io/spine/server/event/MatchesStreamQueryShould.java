@@ -30,7 +30,7 @@ import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.ProjectId;
 import org.junit.Test;
 
-import static io.spine.Identifier.newUuid;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.server.command.TestEventFactory.newInstance;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;

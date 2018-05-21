@@ -23,7 +23,7 @@ package io.spine.server.entity.storage;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Any;
-import io.spine.Identifier;
+import io.spine.base.Identifier;
 import io.spine.annotation.Internal;
 import io.spine.client.ColumnFilter;
 import io.spine.client.CompositeColumnFilter;

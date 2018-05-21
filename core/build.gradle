@@ -19,10 +19,14 @@
  */
 dependencies {
     compile group: 'io.spine', name: 'spine-base', version: spineBaseVersion
-    compile group: 'io.spine', name: 'spine-time', version: spineTimeVersion
+    compile (group: 'io.spine', name: 'spine-time', version: spineTimeVersion) {
+        exclude group: 'com.google.guava'
+    }
 
     testCompile project(path: ":testutil-core")
-    testCompile group: 'io.spine', name: 'spine-testutil-time', version: spineTimeVersion
+    testCompile (group: 'io.spine', name: 'spine-testutil-time', version: spineTimeVersion) {
+        exclude group: 'com.google.guava'
+    }
 }
 
 apply from: generateDescriptorSetScript

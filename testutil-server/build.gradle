@@ -35,9 +35,13 @@ dependencies {
     compile project(path: ':server')
 
     // General purpose test utilities.
-    compile group: 'io.spine', name: 'spine-testutil-base', version: spineBaseVersion
+    compile (group: 'io.spine', name: 'spine-testlib', version: spineBaseVersion) {
+        exclude group: 'com.google.guava'
+    }
     compile project(path: ':testutil-client')
 
     // Depend on testutil-time for `TimeTests` class.
-    testCompile group: 'io.spine', name: 'spine-testutil-time', version: spineTimeVersion
+    testCompile (group: 'io.spine', name: 'spine-testutil-time', version: spineTimeVersion) {
+        exclude group: 'com.google.guava'
+    }
 }

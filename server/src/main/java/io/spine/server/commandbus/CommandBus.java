@@ -21,7 +21,7 @@ package io.spine.server.commandbus;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
-import io.spine.Identifier;
+import io.spine.base.Identifier;
 import io.spine.annotation.Internal;
 import io.spine.base.Error;
 import io.spine.base.ThrowableMessage;
@@ -50,7 +50,7 @@ import static io.spine.core.Rejections.causedByRejection;
 import static io.spine.core.Rejections.toRejection;
 import static io.spine.server.bus.Buses.acknowledge;
 import static io.spine.server.bus.Buses.reject;
-import static io.spine.util.Exceptions.toError;
+import static io.spine.base.Errors.fromThrowable;
 import static java.lang.String.format;
 
 /**
@@ -213,7 +213,7 @@ public class CommandBus extends Bus<Command,
                 rejectionBus().post(rejection);
                 result = reject(envelope.getId(), rejection);
             } else {
-                final Error error = toError(cause);
+                final Error error = fromThrowable(cause);
                 result = reject(envelope.getId(), error);
             }
         }
@@ -260,7 +260,7 @@ public class CommandBus extends Bus<Command,
         final String idStr = Identifier.toString(commandEnvelope.getId());
         final String msg = format("No dispatcher found for the command (class: %s id: %s).",
                                   commandEnvelope.getMessageClass()
-                                                 .getClassName(),
+                                                 .toString(),
                                   idStr);
         throw new IllegalStateException(msg);
     }

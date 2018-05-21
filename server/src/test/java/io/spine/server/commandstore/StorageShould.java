@@ -24,7 +24,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
-import io.spine.Identifier;
+import io.spine.base.Identifier;
 import io.spine.base.Error;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;

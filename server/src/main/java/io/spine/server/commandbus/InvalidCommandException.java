@@ -22,7 +22,7 @@ package io.spine.server.commandbus;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.Value;
-import io.spine.Identifier;
+import io.spine.base.Identifier;
 import io.spine.base.Error;
 import io.spine.core.Command;
 import io.spine.core.CommandClass;

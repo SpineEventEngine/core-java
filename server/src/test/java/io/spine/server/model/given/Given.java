@@ -26,7 +26,7 @@ import io.spine.test.reflect.command.RefCreateProject;
 import io.spine.test.reflect.command.RefStartProject;
 import io.spine.test.reflect.event.RefProjectCreated;
 
-import static io.spine.Identifier.newUuid;
+import static io.spine.base.Identifier.newUuid;
 
 public class Given {
 

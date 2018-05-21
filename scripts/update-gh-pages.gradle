@@ -23,6 +23,9 @@ import org.apache.tools.ant.filters.ReplaceTokens
 
 buildscript {
     repositories {
+        // Snapshots of Guava.
+        maven { url = sonatypeSnapshots }
+
         mavenCentral()
     }
 

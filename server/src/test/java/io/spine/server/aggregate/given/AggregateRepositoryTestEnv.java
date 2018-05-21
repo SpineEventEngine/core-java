@@ -33,7 +33,7 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.UInt32Value;
 import com.google.protobuf.UInt64Value;
 import com.google.protobuf.util.Timestamps;
-import io.spine.Identifier;
+import io.spine.base.Identifier;
 import io.spine.base.Time;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.CommandContext;

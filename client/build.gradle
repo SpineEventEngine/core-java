@@ -18,13 +18,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 dependencies {
-    compile group: 'io.grpc', name: 'grpc-okhttp', version: gRpcVersion
-    compile group: 'io.grpc', name: 'grpc-protobuf', version: gRpcVersion
-    compile group: 'io.grpc', name: 'grpc-stub', version: gRpcVersion
+    compile (group: 'io.grpc', name: 'grpc-okhttp', version: gRpcVersion) {
+        exclude group: 'com.google.guava'
+    }
+    compile (group: 'io.grpc', name: 'grpc-protobuf', version: gRpcVersion) {
+        exclude group: 'com.google.guava'
+    }
+    compile (group: 'io.grpc', name: 'grpc-stub', version: gRpcVersion) {
+        exclude group: 'com.google.guava'
+    }
 
     compile project(path: ':core')
 
-    testCompile group: 'io.spine', name: 'spine-testutil-base', version: spineBaseVersion
+    testCompile (group: 'io.spine', name: 'spine-testlib', version: spineBaseVersion) {
+        exclude group: 'com.google.guava'
+    }
     testCompile project(path: ":testutil-client")
     testCompile project(path: ":core", configuration: 'testArtifacts')
 }

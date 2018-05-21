@@ -35,7 +35,7 @@ import io.spine.server.transport.Subscriber;
 import io.spine.server.transport.TransportFactory;
 import io.spine.string.Stringifiers;
 import io.spine.type.ClassName;
-import io.spine.util.GenericTypeIndex;
+import io.spine.reflect.GenericTypeIndex;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
@@ -307,8 +307,9 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
             checkNotNull(boundedContextName);
             checkNotNull(envelopeClass);
 
-            final ClassName className = key.getEntityClass()
-                                           .getClassName();
+            final Class<?> keyClass = key.getEntityClass()
+                                         .value();
+            final ClassName className = ClassName.of(keyClass);
             final ShardIndex shardIndex = key.getIndex();
 
             final StringValue asMsg = asChannelName(boundedContextName, envelopeClass, className,

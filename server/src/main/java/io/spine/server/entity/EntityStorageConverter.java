@@ -24,7 +24,7 @@ import com.google.common.base.Converter;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import io.spine.Identifier;
+import io.spine.base.Identifier;
 import io.spine.type.TypeUrl;
 
 import javax.annotation.Nullable;

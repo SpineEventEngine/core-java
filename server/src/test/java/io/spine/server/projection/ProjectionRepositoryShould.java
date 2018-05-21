@@ -24,7 +24,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
-import io.spine.Identifier;
+import io.spine.base.Identifier;
 import io.spine.base.Time;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Event;
@@ -64,7 +64,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import static io.spine.Identifier.newUuid;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.getCurrentTime;
 import static java.lang.String.format;
 import static org.junit.Assert.assertEquals;

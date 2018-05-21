@@ -22,7 +22,7 @@ package io.spine.server.integration;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
-import io.spine.Identifier;
+import io.spine.base.Identifier;
 import io.spine.annotation.Internal;
 import io.spine.core.BoundedContextName;
 import io.spine.core.Command;

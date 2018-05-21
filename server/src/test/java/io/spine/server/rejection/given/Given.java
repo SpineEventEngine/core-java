@@ -38,7 +38,7 @@ import io.spine.test.rejection.command.RjUpdateProjectName;
 import io.spine.test.rejection.command.RjUpdateProjectNameVBuilder;
 import io.spine.testdata.Sample;
 
-import static io.spine.Identifier.newUuid;
+import static io.spine.base.Identifier.newUuid;
 
 public class Given {
 

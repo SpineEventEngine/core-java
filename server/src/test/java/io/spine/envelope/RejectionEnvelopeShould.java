@@ -33,7 +33,7 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.test.rejection.OperationRejections.CannotPerformBusinessOperation;
 import org.junit.Test;
 
-import static io.spine.Identifier.newUuid;
+import static io.spine.base.Identifier.newUuid;
 import static org.junit.Assert.assertEquals;
 
 /**

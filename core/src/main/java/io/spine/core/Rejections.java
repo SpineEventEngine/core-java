@@ -25,7 +25,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import io.spine.Identifier;
+import io.spine.base.Identifier;
 import io.spine.annotation.Internal;
 import io.spine.base.ThrowableMessage;
 

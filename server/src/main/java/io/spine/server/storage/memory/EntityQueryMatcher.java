@@ -24,7 +24,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Any;
-import io.spine.Identifier;
+import io.spine.base.Identifier;
 import io.spine.client.ColumnFilter;
 import io.spine.client.CompositeColumnFilter.CompositeOperator;
 import io.spine.server.entity.storage.CompositeQueryParameter;

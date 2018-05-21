@@ -21,7 +21,7 @@
 package io.spine.server.commandbus;
 
 import com.google.protobuf.Message;
-import io.spine.Identifier;
+import io.spine.base.Identifier;
 import io.spine.base.ThrowableMessage;
 import io.spine.core.CommandId;
 import io.spine.type.TypeName;

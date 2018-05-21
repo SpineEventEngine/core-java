@@ -21,7 +21,7 @@ package io.spine.server.outbus;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import io.spine.Identifier;
+import io.spine.base.Identifier;
 import io.spine.annotation.Internal;
 import io.spine.core.Ack;
 import io.spine.core.Event;

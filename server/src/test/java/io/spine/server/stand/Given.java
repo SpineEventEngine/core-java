@@ -23,7 +23,7 @@ package io.spine.server.stand;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
-import io.spine.Identifier;
+import io.spine.base.Identifier;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
@@ -53,7 +53,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import static io.spine.Identifier.newUuid;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.protobuf.TypeConverter.toMessage;
 
 /**

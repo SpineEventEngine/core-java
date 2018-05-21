@@ -43,7 +43,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import static io.spine.Identifier.newUuid;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.core.Enrichments.getEnrichment;
 import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.server.command.TestEventFactory.newInstance;

@@ -34,5 +34,7 @@ dependencies {
     compile project(path: ':testutil-core')
 
     // General purpose test utilities.
-    compile group: 'io.spine', name: 'spine-testutil-base', version: spineBaseVersion
+    compile (group: 'io.spine', name: 'spine-testlib', version: spineBaseVersion) {
+        exclude group: 'com.google.guava'
+    }
 }

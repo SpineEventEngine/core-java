@@ -24,7 +24,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
-import io.spine.Identifier;
+import io.spine.base.Identifier;
 import io.spine.base.Error;
 import io.spine.core.Command;
 import io.spine.core.CommandId;

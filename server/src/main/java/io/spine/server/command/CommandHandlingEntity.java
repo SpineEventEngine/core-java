@@ -22,7 +22,7 @@ package io.spine.server.command;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import io.spine.Identifier;
+import io.spine.base.Identifier;
 import io.spine.base.ThrowableMessage;
 import io.spine.change.MessageMismatch;
 import io.spine.change.StringMismatch;

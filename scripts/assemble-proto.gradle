@@ -47,6 +47,9 @@ import com.google.common.collect.Lists
 
 buildscript {
     repositories {
+        // Snapshots of Guava.
+        maven { url = sonatypeSnapshots }
+
         mavenCentral()
         mavenLocal()
     }

@@ -28,7 +28,7 @@ import io.spine.type.TypeUrl;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.Identifier.checkSupported;
+import static io.spine.base.Identifier.checkSupported;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 
 /**

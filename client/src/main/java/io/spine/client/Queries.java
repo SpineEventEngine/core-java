@@ -21,7 +21,7 @@ package io.spine.client;
 
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import io.spine.Identifier;
+import io.spine.base.Identifier;
 import io.spine.annotation.Internal;
 import io.spine.type.TypeUrl;
 

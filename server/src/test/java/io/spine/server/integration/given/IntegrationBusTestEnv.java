@@ -63,7 +63,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newLinkedList;
-import static io.spine.Identifier.newUuid;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.core.Rejections.toRejection;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.command.TestEventFactory.newInstance;

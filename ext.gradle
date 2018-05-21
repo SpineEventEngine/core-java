@@ -25,22 +25,31 @@
  *  as we want to manage the versions in a single source.
  */
  
-def final SPINE_VERSION = '0.10.36-SNAPSHOT'
+def final SPINE_VERSION = '0.10.37-SNAPSHOT'
 
 //noinspection GroovyAssignabilityCheck
 ext {
+    // Repositories for specific purposes.
+    googleMavenCentralMirror = 'https://maven-central.storage.googleapis.com'
+    spineRepository = 'http://maven.teamdev.com/repository/spine'
+    spineSnapshotsRepository = 'http://maven.teamdev.com/repository/spine-snapshots'
+    sonatypeSnapshots = 'https://oss.sonatype.org/content/repositories/snapshots'
+
     // The version of the modules in this project.
     spineVersion = SPINE_VERSION
 
     // Depend on `base` for the general definitions and a model compiler.
-    spineBaseVersion = '0.10.32-SNAPSHOT'
+    spineBaseVersion = '0.10.37-SNAPSHOT'
 
     // We use Spine tools in the build process.
-    spineToolsVersion = '0.10.32-SNAPSHOT'
+    spineToolsVersion = '0.10.37-SNAPSHOT'
 
     spineTimeVersion = '0.10.29-SNAPSHOT'
 
-    guavaVersion = '20.0'
+    // Use Guava snapshot version until this commit gets into the release:
+    // https://github.com/google/guava/commit/0a2258e6691a22aa7ff2604871b520d44bbac01f
+    // We use it for using @Nullable instead of @NullableDecl in NullPointerTester.
+    guavaVersion = 'HEAD-jre-SNAPSHOT'
 
     // NOTE: when updating Protobuf dependency, please check that
     // `KnownTypes.addStandardProtobufTypes()` method is updated with new Message types that may be
@@ -55,7 +64,7 @@ ext {
     // throughout a test suite. We leave this version as is ('2.7.22') for now.
     mockitoVersion = '2.7.22'
 
-    protobufGradlePluginVerison = '0.8.4'
+    protobufGradlePluginVersion = '0.8.5'
 
     jUnitPlatformVersion = '1.1.1'
     jUnitVersion = '5.1.1'

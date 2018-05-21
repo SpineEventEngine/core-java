@@ -22,7 +22,7 @@ package io.spine.server.aggregate;
 
 import com.google.common.base.Optional;
 import com.google.protobuf.Timestamp;
-import io.spine.Identifier;
+import io.spine.base.Identifier;
 import io.spine.annotation.SPI;
 import io.spine.core.Event;
 import io.spine.core.EventContext;

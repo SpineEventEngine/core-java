@@ -32,7 +32,7 @@ import io.spine.type.TypeName;
 import org.junit.Before;
 import org.junit.Test;
 
-import static io.spine.Identifier.newUuid;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.core.Enrichments.getEnrichment;
 import static io.spine.core.Enrichments.getEnrichments;
 import static io.spine.core.given.GivenEvent.context;

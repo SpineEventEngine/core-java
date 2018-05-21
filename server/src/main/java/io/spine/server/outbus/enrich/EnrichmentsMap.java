@@ -45,7 +45,7 @@ import java.util.regex.Pattern;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.Descriptors.FieldDescriptor;
-import static io.spine.util.PropertyFiles.loadAllProperties;
+import static io.spine.io.PropertyFiles.loadAllProperties;
 
 /**
  * A map from an event enrichment Protobuf type name to the corresponding

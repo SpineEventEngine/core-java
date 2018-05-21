@@ -34,7 +34,7 @@ import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.Model;
 import io.spine.string.Stringifiers;
 import io.spine.type.MessageClass;
-import io.spine.util.Logging;
+import io.spine.logging.Logging;
 import org.slf4j.Logger;
 
 import java.util.List;
