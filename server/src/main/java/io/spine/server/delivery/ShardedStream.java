@@ -27,6 +27,7 @@ import io.grpc.stub.StreamObserver;
 import io.spine.core.BoundedContextName;
 import io.spine.core.MessageEnvelope;
 import io.spine.protobuf.AnyPacker;
+import io.spine.reflect.GenericTypeIndex;
 import io.spine.server.integration.ChannelId;
 import io.spine.server.integration.ExternalMessage;
 import io.spine.server.integration.ExternalMessages;
@@ -35,7 +36,6 @@ import io.spine.server.transport.Subscriber;
 import io.spine.server.transport.TransportFactory;
 import io.spine.string.Stringifiers;
 import io.spine.type.ClassName;
-import io.spine.reflect.GenericTypeIndex;
 
 import javax.annotation.Nullable;
 import java.util.Objects;

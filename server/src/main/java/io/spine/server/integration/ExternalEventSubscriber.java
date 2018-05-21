@@ -24,13 +24,13 @@ import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
+import io.spine.logging.Logging;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.event.EventSubscriber;
 import io.spine.server.event.EventSubscriberClass;
 import io.spine.server.model.Model;
 import io.spine.string.Stringifiers;
 import io.spine.type.MessageClass;
-import io.spine.logging.Logging;
 import org.slf4j.Logger;
 
 import java.util.Objects;

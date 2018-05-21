@@ -22,16 +22,16 @@ package io.spine.server.commandbus;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.Value;
-import io.spine.base.Identifier;
 import io.spine.base.Error;
+import io.spine.base.Identifier;
 import io.spine.core.Command;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandValidationError;
+import io.spine.core.MessageInvalid;
 import io.spine.type.TypeName;
 import io.spine.validate.ConstraintViolation;
 import io.spine.validate.ConstraintViolations.ExceptionFactory;
-import io.spine.core.MessageInvalid;
 
 import java.util.Map;
 

@@ -21,8 +21,8 @@
 package io.spine.server.entity;
 
 import com.google.protobuf.Message;
-import io.spine.base.Identifier;
 import io.spine.annotation.Internal;
+import io.spine.base.Identifier;
 import io.spine.server.model.ModelClass;
 import io.spine.server.model.ModelError;
 import io.spine.type.TypeUrl;

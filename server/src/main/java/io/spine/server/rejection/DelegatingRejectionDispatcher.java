@@ -26,13 +26,13 @@ import io.spine.annotation.Internal;
 import io.spine.core.Rejection;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
+import io.spine.logging.Logging;
 import io.spine.server.integration.ExternalMessage;
 import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.string.Stringifiers;
 import io.spine.type.MessageClass;
-import io.spine.logging.Logging;
 import org.slf4j.Logger;
 
 import java.util.Set;

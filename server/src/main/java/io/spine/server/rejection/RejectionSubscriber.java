@@ -25,11 +25,11 @@ import io.spine.core.Command;
 import io.spine.core.CommandClass;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
+import io.spine.logging.Logging;
 import io.spine.server.model.Model;
 import io.spine.server.tenant.CommandOperation;
 import io.spine.string.Stringifiers;
 import io.spine.type.MessageClass;
-import io.spine.logging.Logging;
 import org.slf4j.Logger;
 
 import java.util.Set;

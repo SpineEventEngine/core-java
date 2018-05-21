@@ -24,8 +24,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Supplier;
 import io.grpc.Internal;
 import io.grpc.stub.StreamObserver;
-import io.spine.string.Stringifiers;
 import io.spine.logging.Logging;
+import io.spine.string.Stringifiers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
