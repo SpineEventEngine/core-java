@@ -30,7 +30,7 @@ buildscript {
     }
 
     dependencies {
-        classpath group: 'com.google.guava', name: 'guava', version: guavaVersion
+        classpath "com.google.guava:guava:$guavaVersion"
     }
 }
 

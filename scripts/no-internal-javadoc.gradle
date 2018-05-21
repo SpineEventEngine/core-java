@@ -23,7 +23,7 @@ configurations {
 }
 
 dependencies {
-    excludeInternalDoclet group: 'io.spine.tools', name: 'spine-javadoc-filter', version: spineToolsVersion
+    excludeInternalDoclet "io.spine.tools:spine-javadoc-filter:$spineToolsVersion"
 }
 
 task noInternalJavadoc(type: Javadoc) {

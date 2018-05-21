@@ -18,13 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 dependencies {
-    compile group: 'io.spine', name: 'spine-base', version: spineBaseVersion
-    compile (group: 'io.spine', name: 'spine-time', version: spineTimeVersion) {
+    compile "io.spine:spine-base:$spineBaseVersion"
+    compile ("io.spine:spine-time:$spineTimeVersion") {
         exclude group: 'com.google.guava'
     }
 
     testCompile project(path: ":testutil-core")
-    testCompile (group: 'io.spine', name: 'spine-testutil-time', version: spineTimeVersion) {
+    testCompile ("io.spine:spine-testutil-time:$spineTimeVersion") {
         exclude group: 'com.google.guava'
     }
 }

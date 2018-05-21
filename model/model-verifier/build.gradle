@@ -39,16 +39,19 @@ sourceSets {
 
 dependencies {
     compile gradleApi()
-    compile group: 'io.spine.tools', name: 'spine-plugin-base', version: spineBaseVersion
+    compile "io.spine.tools:spine-plugin-base:$spineBaseVersion"
     compile project(':server')
     compile project(':model-assembler')
 
     testCompile gradleTestKit()
-    testCompile group: 'io.spine.tools', name: 'spine-plugin-base', version: spineBaseVersion, classifier: 'test'
-    testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: jUnitVersion
+    testCompile group: 'io.spine.tools',
+                name: 'spine-plugin-base',
+                version: spineBaseVersion,
+                classifier: 'test'
+    testCompile "org.junit.jupiter:junit-jupiter-api:$jUnitVersion"
 
-    testRuntime group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: jUnitVersion
-    testRuntime group: 'org.junit.vintage', name: 'junit-vintage-engine', version: jUnitVersion
+    testRuntime "org.junit.jupiter:junit-jupiter-engine:$jUnitVersion"
+    testRuntime "org.junit.vintage:junit-vintage-engine:$jUnitVersion"
 }
 
 test {

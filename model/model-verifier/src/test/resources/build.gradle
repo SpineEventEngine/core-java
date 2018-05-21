@@ -81,9 +81,11 @@ compileJava {
 
 dependencies {
 
-    compile group: 'com.google.protobuf', name:'protobuf-java', version: protobufVersion
+    compile ("com.google.protobuf:protobuf-java:$protobufVersion") {
+        exclude group: 'com.google.guava'
+    }
 
-    compileOnly group: 'io.spine.tools', name: 'spine-model-assembler', version: spineVersion
+    compileOnly "io.spine.tools:spine-model-assembler:$spineVersion"
 }
 
 sourceSets {

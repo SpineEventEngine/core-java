@@ -20,13 +20,13 @@
 dependencies {
     // Depend on JUnit in the production part of the code, as this module exposes testing utilities
     // that are based on JUnit.
-    compile group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: jUnitVersion
-    runtime group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: jUnitVersion
-    runtime group: 'org.junit.vintage', name: 'junit-vintage-engine', version: jUnitVersion
+    compile "org.junit.jupiter:junit-jupiter-api:$jUnitVersion"
+    runtime "org.junit.jupiter:junit-jupiter-engine:$jUnitVersion"
+    runtime "org.junit.vintage:junit-vintage-engine:$jUnitVersion"
 
     // Depend on Mockito in the production code because this module exposes testing utilities
     // based on this library.
-    compile group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
+    compile "org.mockito:mockito-core:$mockitoVersion"
 
     // Depend on the client module that contains `Timestamps` and other utility classes.
     compile project(path: ':client')
@@ -34,7 +34,7 @@ dependencies {
     compile project(path: ':testutil-core')
 
     // General purpose test utilities.
-    compile (group: 'io.spine', name: 'spine-testlib', version: spineBaseVersion) {
+    compile ("io.spine:spine-testlib:$spineBaseVersion") {
         exclude group: 'com.google.guava'
     }
 }
