@@ -219,8 +219,8 @@ subprojects {
 
         selectors {
             directory "$sourcesRootDir/test/java"
-            packages 'com.teamdev', 'io.spine.client', 'io.spine.core', 'io.spine.grpc',
-                    'io.spine.change', 'io.spine.model', 'io.spine.envelope', 'io.spine.server'
+            packages 'io.spine.client', 'io.spine.core', 'io.spine.grpc', 'io.spine.change',
+                    'io.spine.model', 'io.spine.envelope', 'io.spine.server'
         }
 
         filters {
