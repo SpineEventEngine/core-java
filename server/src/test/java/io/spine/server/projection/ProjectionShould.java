@@ -39,7 +39,7 @@ import org.junit.Test;
 
 import java.util.Set;
 
-import static io.spine.Identifier.newUuid;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.server.projection.ProjectionEventDispatcher.dispatch;
 import static org.junit.Assert.assertEquals;

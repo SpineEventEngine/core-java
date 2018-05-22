@@ -30,7 +30,7 @@ import com.google.protobuf.Duration;
 import com.google.protobuf.Int64Value;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
-import io.spine.Identifier;
+import io.spine.base.Identifier;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.given.GivenCommandContext;

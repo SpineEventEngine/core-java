@@ -51,7 +51,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.common.collect.Lists.transform;
 import static com.google.protobuf.util.Timestamps.add;
-import static io.spine.Identifier.newUuid;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.Versions.increment;
 import static io.spine.core.Versions.zero;

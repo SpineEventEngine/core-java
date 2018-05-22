@@ -19,7 +19,7 @@
  */
 package io.spine.server.projection.given;
 
-import io.spine.Identifier;
+import io.spine.base.Identifier;
 import io.spine.core.Event;
 import io.spine.core.Subscribe;
 import io.spine.server.command.TestEventFactory;

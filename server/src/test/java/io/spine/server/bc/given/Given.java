@@ -31,7 +31,7 @@ import io.spine.test.bc.event.BcProjectCreated;
 import io.spine.test.bc.event.BcProjectStarted;
 import io.spine.test.bc.event.BcTaskAdded;
 
-import static io.spine.Identifier.newUuid;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.BoundedContext.newName;

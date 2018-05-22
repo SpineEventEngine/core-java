@@ -27,6 +27,7 @@ import com.google.protobuf.StringValue;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
+import io.spine.logging.Logging;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.event.EventBus;
@@ -34,7 +35,6 @@ import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.Model;
 import io.spine.string.Stringifiers;
 import io.spine.type.MessageClass;
-import io.spine.util.Logging;
 import org.slf4j.Logger;
 
 import java.util.List;

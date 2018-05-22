@@ -21,8 +21,8 @@
 package io.spine.server.aggregate;
 
 import com.google.protobuf.Message;
+import io.spine.reflect.GenericTypeIndex;
 import io.spine.server.model.Model;
-import io.spine.util.GenericTypeIndex;
 import io.spine.validate.ValidatingBuilder;
 
 /**

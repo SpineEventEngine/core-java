@@ -31,16 +31,23 @@ buildscript {
     apply from: 'ext.gradle'
 
     repositories {
+        // Snapshots of Guava.
+        maven { url = sonatypeSnapshots }
+
         mavenLocal()
         mavenCentral()
 
-        maven { url = 'http://maven.teamdev.com/repository/spine' }
-        maven { url = 'http://maven.teamdev.com/repository/spine-snapshots' }
+        maven { url = spineRepository }
+        maven { url = spineSnapshotsRepository }
     }
 
     dependencies {
-        classpath "com.google.protobuf:protobuf-java:${protobufVersion}"
-        classpath "com.google.protobuf:protobuf-gradle-plugin:${protobufGradlePluginVerison}"
+        classpath ("com.google.protobuf:protobuf-java:${protobufVersion}") {
+            exclude group: 'com.google.guava'
+        }
+        classpath ("com.google.protobuf:protobuf-gradle-plugin:${protobufGradlePluginVersion}") {
+            exclude group: 'com.google.guava'
+        }
         classpath "io.spine.tools:spine-model-verifier:${spineVersion}"
     }
 
@@ -58,11 +65,14 @@ apply from: 'ext.gradle'
 
 
 repositories {
+    // Snapshots of Guava.
+    maven { url = sonatypeSnapshots }
+
     mavenLocal()
     mavenCentral()
 
-    maven { url = 'http://maven.teamdev.com/repository/spine' }
-    maven { url = 'http://maven.teamdev.com/repository/spine-snapshots' }
+    maven { url = spineRepository }
+    maven { url = spineSnapshotsRepository }
 }
 
 compileJava {
@@ -71,9 +81,11 @@ compileJava {
 
 dependencies {
 
-    compile group: 'com.google.protobuf', name:'protobuf-java', version: protobufVersion
+    compile ("com.google.protobuf:protobuf-java:$protobufVersion") {
+        exclude group: 'com.google.guava'
+    }
 
-    compileOnly group: 'io.spine.tools', name: 'spine-model-assembler', version: spineVersion
+    compileOnly "io.spine.tools:spine-model-assembler:$spineVersion"
 }
 
 sourceSets {

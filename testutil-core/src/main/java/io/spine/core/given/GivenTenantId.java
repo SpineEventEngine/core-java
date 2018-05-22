@@ -20,7 +20,7 @@
 
 package io.spine.core.given;
 
-import io.spine.Identifier;
+import io.spine.base.Identifier;
 import io.spine.core.TenantId;
 
 import static io.spine.validate.Validate.checkNotEmptyOrBlank;

@@ -27,7 +27,7 @@ import com.google.common.collect.Sets;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import io.spine.Identifier;
+import io.spine.base.Identifier;
 import io.spine.core.given.GivenVersion;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.EntityRecord;

@@ -126,10 +126,11 @@ public abstract class CommandException extends RuntimeException implements Messa
      */
     protected static String messageFormat(String format, Command command) {
         final CommandEnvelope envelope = CommandEnvelope.of(command);
-        final ClassName commandClass = envelope.getMessageClass()
-                                               .getClassName();
+        final Class<? extends Message> commandClass = envelope.getMessageClass()
+                                                              .value();
+        final ClassName commandClassName = ClassName.of(commandClass);
         final TypeName typeName = envelope.getTypeName();
-        final String result = format(format, commandClass, typeName);
+        final String result = format(format, commandClassName, typeName);
         return result;
     }
 }

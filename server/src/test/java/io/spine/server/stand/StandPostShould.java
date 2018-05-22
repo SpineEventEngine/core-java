@@ -22,7 +22,7 @@ package io.spine.server.stand;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.StringValue;
 import io.netty.util.internal.ConcurrentSet;
-import io.spine.Identifier;
+import io.spine.base.Identifier;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.EventEnvelope;

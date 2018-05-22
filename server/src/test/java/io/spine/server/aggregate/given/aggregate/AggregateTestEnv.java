@@ -46,7 +46,7 @@ import io.spine.type.TypeUrl;
 
 import java.util.List;
 
-import static io.spine.Identifier.newUuid;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.core.given.GivenVersion.withNumber;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 

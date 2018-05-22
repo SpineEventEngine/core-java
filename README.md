@@ -7,7 +7,7 @@
 Spine Event Engine is a Java framework for building Event Sourcing and CQRS applications that are accessed by
 clients built with JavaScript, Java Nano (Android), Objective-C, and Java.
 
-Requires Java 7 or higher.
+Requires Java 8 or higher.
 
 ## Pre-release
 The project is under active ongoing development. At this stage, we do not recommend using the framework for production purposes.

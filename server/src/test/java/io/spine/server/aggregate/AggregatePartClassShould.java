@@ -29,7 +29,7 @@ import io.spine.server.model.ModelTests;
 import org.junit.Before;
 import org.junit.Test;
 
-import static io.spine.Identifier.newUuid;
+import static io.spine.base.Identifier.newUuid;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 

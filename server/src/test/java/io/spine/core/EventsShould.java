@@ -25,7 +25,7 @@ import com.google.protobuf.DoubleValue;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
-import io.spine.Identifier;
+import io.spine.base.Identifier;
 import io.spine.base.Time;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.given.EventsTestEnv;
@@ -41,7 +41,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static io.spine.Identifier.newUuid;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.core.Events.checkValid;
 import static io.spine.core.Events.getActor;
 import static io.spine.core.Events.getMessage;

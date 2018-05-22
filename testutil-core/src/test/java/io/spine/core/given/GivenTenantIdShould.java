@@ -21,7 +21,7 @@
 package io.spine.core.given;
 
 import com.google.common.testing.NullPointerTester;
-import io.spine.Identifier;
+import io.spine.base.Identifier;
 import io.spine.test.Tests;
 import org.junit.Test;
 

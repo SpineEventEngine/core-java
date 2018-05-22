@@ -22,7 +22,7 @@ package io.spine.server.commandstore;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterators;
-import io.spine.Identifier;
+import io.spine.base.Identifier;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandId;
@@ -33,7 +33,7 @@ import io.spine.server.commandbus.ProcessingStatus;
 import javax.annotation.Nullable;
 import java.util.Iterator;
 
-import static io.spine.Identifier.EMPTY_ID;
+import static io.spine.base.Identifier.EMPTY_ID;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.Commands.generateId;
 

@@ -20,7 +20,7 @@
 
 package io.spine.core.given;
 
-import io.spine.Identifier;
+import io.spine.base.Identifier;
 import io.spine.core.UserId;
 
 import static com.google.common.base.Preconditions.checkNotNull;

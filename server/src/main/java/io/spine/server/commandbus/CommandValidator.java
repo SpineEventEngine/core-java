@@ -24,7 +24,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
-import io.spine.Identifier;
+import io.spine.base.Identifier;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.MessageInvalid;
@@ -38,7 +38,7 @@ import java.util.List;
 
 import static com.google.common.base.Optional.absent;
 import static com.google.common.base.Optional.of;
-import static io.spine.Identifier.EMPTY_ID;
+import static io.spine.base.Identifier.EMPTY_ID;
 import static io.spine.server.commandbus.InvalidCommandException.onConstraintViolations;
 import static io.spine.server.commandbus.InvalidCommandException.onInapplicableTenantId;
 import static io.spine.server.commandbus.InvalidCommandException.onMissingTenantId;

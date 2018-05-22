@@ -33,7 +33,7 @@ import org.slf4j.helpers.SubstituteLogger;
 
 import java.util.Queue;
 
-import static io.spine.Identifier.newUuid;
+import static io.spine.base.Identifier.newUuid;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;

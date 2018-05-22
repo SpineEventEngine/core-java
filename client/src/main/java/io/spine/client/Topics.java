@@ -20,7 +20,7 @@
 
 package io.spine.client;
 
-import io.spine.Identifier;
+import io.spine.base.Identifier;
 
 import static java.lang.String.format;
 

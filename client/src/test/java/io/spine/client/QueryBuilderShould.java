@@ -39,7 +39,7 @@ import java.util.List;
 
 import static com.google.common.collect.Collections2.transform;
 import static com.google.protobuf.util.Timestamps.subtract;
-import static io.spine.Identifier.newUuid;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.client.ColumnFilters.all;
 import static io.spine.client.ColumnFilters.either;

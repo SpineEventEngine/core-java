@@ -22,7 +22,7 @@ package io.spine.server.aggregate;
 
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.UInt32Value;
-import io.spine.Identifier;
+import io.spine.base.Identifier;
 import io.spine.client.ActorRequestFactory;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;

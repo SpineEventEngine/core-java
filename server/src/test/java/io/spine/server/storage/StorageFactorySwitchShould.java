@@ -21,7 +21,7 @@
 package io.spine.server.storage;
 
 import com.google.common.base.Supplier;
-import io.spine.Environment;
+import io.spine.base.Environment;
 import io.spine.core.BoundedContextName;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import org.junit.After;
