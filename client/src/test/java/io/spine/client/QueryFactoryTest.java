@@ -147,7 +147,7 @@ class QueryFactoryTest extends ActorRequestFactoryTest {
         assertThrows(IllegalArgumentException.class,
                      () -> factory().query()
                                     .byIdsWithMask(TestEntity.class,
-                                                   Collections.<Message>emptySet(),
+                                                   Collections.emptySet(),
                                                    "", ""));
     }
 
