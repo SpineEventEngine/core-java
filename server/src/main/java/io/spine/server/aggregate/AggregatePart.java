@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -21,8 +21,8 @@
 package io.spine.server.aggregate;
 
 import com.google.protobuf.Message;
+import io.spine.reflect.GenericTypeIndex;
 import io.spine.server.model.Model;
-import io.spine.util.GenericTypeIndex;
 import io.spine.validate.ValidatingBuilder;
 
 /**

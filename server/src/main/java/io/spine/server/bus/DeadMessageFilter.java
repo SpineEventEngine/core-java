@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -23,8 +23,8 @@ package io.spine.server.bus;
 import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import io.spine.Identifier;
 import io.spine.base.Error;
+import io.spine.base.Identifier;
 import io.spine.core.Ack;
 import io.spine.core.MessageEnvelope;
 import io.spine.type.MessageClass;

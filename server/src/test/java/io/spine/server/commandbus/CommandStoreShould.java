@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -52,8 +52,10 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
+import static io.spine.base.Errors.fromThrowable;
 import static io.spine.core.Commands.getMessage;
 import static io.spine.core.Rejections.toRejection;
+import static io.spine.server.commandbus.DuplicateCommandException.of;
 import static io.spine.server.commandbus.Given.ACommand.addTask;
 import static io.spine.server.commandbus.Given.ACommand.createProject;
 import static io.spine.server.commandbus.Given.ACommand.startProject;
@@ -218,6 +220,73 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
             final Error expected = CommandExpiredException.commandExpired(cmd);
             assertEquals(expected, status.getError());
         }
+    }
+
+    @Test
+    public void store_given_command() {
+        final Command command = requestFactory.command()
+                                              .create(createProjectMessage());
+        commandStore.store(command);
+
+        final TenantId tenantId = command.getContext()
+                                         .getActorContext()
+                                         .getTenantId();
+        final CommandId commandId = command.getId();
+        final ProcessingStatus status = getStatus(commandId, tenantId);
+
+        assertEquals(CommandStatus.RECEIVED, status.getCode());
+    }
+
+    @Test
+    public void store_given_command_with_status() {
+        final Command command = requestFactory.command()
+                                              .create(createProjectMessage());
+        final CommandStatus commandStatus = CommandStatus.OK;
+        commandStore.store(command, commandStatus);
+
+        final TenantId tenantId = command.getContext()
+                                         .getActorContext()
+                                         .getTenantId();
+        final CommandId commandId = command.getId();
+        final ProcessingStatus status = getStatus(commandId, tenantId);
+
+        assertEquals(commandStatus, status.getCode());
+    }
+
+    @Test
+    public void store_given_command_with_error() {
+        final Command command = requestFactory.command()
+                                              .create(createProjectMessage());
+        @SuppressWarnings("ThrowableNotThrown") // Creation without throwing needed for test.
+        final DuplicateCommandException exception = of(command);
+        commandStore.storeWithError(command, exception);
+
+        final TenantId tenantId = command.getContext()
+                                         .getActorContext()
+                                         .getTenantId();
+        final CommandId commandId = command.getId();
+        final ProcessingStatus status = getStatus(commandId, tenantId);
+
+        assertEquals(CommandStatus.ERROR, status.getCode());
+        assertEquals(exception.asError(), status.getError());
+    }
+
+    @Test
+    public void store_given_command_with_exception() {
+        final Command command = requestFactory.command()
+                                              .create(createProjectMessage());
+        @SuppressWarnings("ThrowableNotThrown") // Creation without throwing needed for test.
+        final DuplicateCommandException exception = of(command);
+        commandStore.store(command, exception);
+
+        final TenantId tenantId = command.getContext()
+                                         .getActorContext()
+                                         .getTenantId();
+        final CommandId commandId = command.getId();
+        final ProcessingStatus status = getStatus(commandId, tenantId);
+
+        assertEquals(CommandStatus.ERROR, status.getCode());
+        assertEquals(fromThrowable(exception), status.getError());
     }
 
     /**

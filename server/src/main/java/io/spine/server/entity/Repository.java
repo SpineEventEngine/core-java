@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -24,8 +24,10 @@ import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Supplier;
 import com.google.common.collect.Iterators;
-import io.spine.Identifier;
+import io.spine.base.Identifier;
 import io.spine.core.MessageEnvelope;
+import io.spine.logging.Logging;
+import io.spine.reflect.GenericTypeIndex;
 import io.spine.server.BoundedContext;
 import io.spine.server.model.Model;
 import io.spine.server.stand.Stand;
@@ -34,8 +36,6 @@ import io.spine.server.storage.StorageFactory;
 import io.spine.string.Stringifiers;
 import io.spine.type.MessageClass;
 import io.spine.type.TypeUrl;
-import io.spine.util.GenericTypeIndex;
-import io.spine.util.Logging;
 import org.slf4j.Logger;
 
 import javax.annotation.CheckReturnValue;

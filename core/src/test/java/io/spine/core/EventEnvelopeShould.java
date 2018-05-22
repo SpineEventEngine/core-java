@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -25,7 +25,7 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.test.core.ProjectCreated;
 import io.spine.test.core.ProjectId;
 
-import static io.spine.Identifier.newUuid;
+import static io.spine.base.Identifier.newUuid;
 
 /**
  * @author Dmytro Dashenkov

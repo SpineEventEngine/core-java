@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -24,8 +24,8 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import io.spine.Identifier;
 import io.spine.base.Error;
+import io.spine.base.Identifier;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Ack;
@@ -62,7 +62,7 @@ import io.spine.testdata.Sample;
 import java.util.List;
 
 import static com.google.common.base.Optional.absent;
-import static io.spine.Identifier.newUuid;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.bus.Buses.reject;

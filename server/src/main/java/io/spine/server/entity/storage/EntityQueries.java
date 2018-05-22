@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -23,8 +23,8 @@ package io.spine.server.entity.storage;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Any;
-import io.spine.Identifier;
 import io.spine.annotation.Internal;
+import io.spine.base.Identifier;
 import io.spine.client.ColumnFilter;
 import io.spine.client.CompositeColumnFilter;
 import io.spine.client.CompositeColumnFilter.CompositeOperator;

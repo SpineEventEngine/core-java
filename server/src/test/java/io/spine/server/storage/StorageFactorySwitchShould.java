@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -21,7 +21,7 @@
 package io.spine.server.storage;
 
 import com.google.common.base.Supplier;
-import io.spine.Environment;
+import io.spine.base.Environment;
 import io.spine.core.BoundedContextName;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import org.junit.After;

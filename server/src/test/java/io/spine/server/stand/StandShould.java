@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -92,7 +92,7 @@ import java.util.concurrent.Executor;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
-import static io.spine.Identifier.newUuid;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.client.QueryValidationError.INVALID_QUERY;
 import static io.spine.client.QueryValidationError.UNSUPPORTED_QUERY_TARGET;
 import static io.spine.client.TopicValidationError.INVALID_TOPIC;

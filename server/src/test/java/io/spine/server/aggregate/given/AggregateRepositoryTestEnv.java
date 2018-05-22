@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -33,7 +33,7 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.UInt32Value;
 import com.google.protobuf.UInt64Value;
 import com.google.protobuf.util.Timestamps;
-import io.spine.Identifier;
+import io.spine.base.Identifier;
 import io.spine.base.Time;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.CommandContext;

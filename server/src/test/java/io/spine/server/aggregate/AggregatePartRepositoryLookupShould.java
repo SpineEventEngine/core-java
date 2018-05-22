@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -39,7 +39,7 @@ import io.spine.test.aggregate.event.AggTaskAdded;
 import org.junit.Before;
 import org.junit.Test;
 
-import static io.spine.Identifier.newUuid;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.server.aggregate.AggregatePartRepositoryLookup.createLookup;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;

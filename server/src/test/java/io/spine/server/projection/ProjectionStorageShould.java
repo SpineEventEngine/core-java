@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -46,7 +46,7 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.protobuf.util.Durations.fromSeconds;
 import static com.google.protobuf.util.Timestamps.add;
-import static io.spine.Identifier.newUuid;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.test.Tests.assertMatchesMask;
 import static io.spine.test.Verify.assertContains;

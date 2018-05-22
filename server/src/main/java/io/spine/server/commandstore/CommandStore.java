@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -140,7 +140,13 @@ public class CommandStore implements AutoCloseable {
     public void store(Command command, Exception exception) {
         checkNotClosed();
         keepTenantId(command);
-        repository.store(command, Errors.fromException(exception));
+        final TenantAwareOperation op = new Operation(this, command) {
+            @Override
+            public void run() {
+                repository.store(command, Errors.fromThrowable(exception));
+            }
+        };
+        op.execute();
     }
 
     /**
@@ -206,7 +212,7 @@ public class CommandStore implements AutoCloseable {
      * Updates the status of the command processing with the exception.
      */
     private void updateStatus(CommandEnvelope commandEnvelope, Exception exception) {
-        updateStatus(commandEnvelope, Errors.fromException(exception));
+        updateStatus(commandEnvelope, Errors.fromThrowable(exception));
     }
 
     /**

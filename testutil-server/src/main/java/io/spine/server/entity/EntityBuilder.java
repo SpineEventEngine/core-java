@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -23,7 +23,7 @@ package io.spine.server.entity;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import io.spine.Identifier;
+import io.spine.base.Identifier;
 import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.test.ReflectiveBuilder;

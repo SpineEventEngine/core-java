@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -29,7 +29,7 @@ import io.spine.test.storage.Task;
 import io.spine.type.TypeUrl;
 import org.junit.Test;
 
-import static io.spine.Identifier.newUuid;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.server.BoundedContext.newName;
 import static java.lang.String.format;
 import static java.lang.System.nanoTime;

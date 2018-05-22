@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -57,7 +57,8 @@ abstract class ShardedMessageConverter<I, M extends Message, E extends MessageEn
                                                                   .setValue(stringId)
                                                                   .build();
         final Any packedOriginalMsg = AnyPacker.pack(originalMessage);
-        final Any packedTargetId = AnyPacker.pack(TypeConverter.toMessage(targetId));
+        final Message message = TypeConverter.toMessage(targetId);
+        final Any packedTargetId = AnyPacker.pack(message);
         final ShardedMessage result = ShardedMessage.newBuilder()
                                                     .setId(shardedMessageId)
                                                     .setTargetId(packedTargetId)
