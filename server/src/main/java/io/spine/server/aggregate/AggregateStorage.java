@@ -59,13 +59,14 @@ public abstract class AggregateStorage<I>
 
     /**
      * Forms and returns an {@link AggregateStateRecord} based on the
-     * {@linkplain #historyBackward(AggregateReadRequest) aggregate history}.
+     * {@linkplain #historyBackward(AggregateReadRequest) aggregate histor@Vhey}.
      *
      * @param request the aggregate read request based on which to form a record
      * @return the record instance or {@code Optional.absent()} if the
      *         {@linkplain #historyBackward(AggregateReadRequest) aggregate history} is empty
      * @throws IllegalStateException if the storage was closed before
      */
+    @SuppressWarnings("CheckReturnValue") // calling builder method
     @Override
     public Optional<AggregateStateRecord> read(AggregateReadRequest<I> request) {
         checkNotClosed();

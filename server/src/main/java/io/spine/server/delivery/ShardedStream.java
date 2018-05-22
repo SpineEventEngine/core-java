@@ -36,8 +36,8 @@ import io.spine.server.transport.Subscriber;
 import io.spine.server.transport.TransportFactory;
 import io.spine.string.Stringifiers;
 import io.spine.type.ClassName;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Objects;
 
 import static com.google.common.base.Joiner.on;

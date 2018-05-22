@@ -24,8 +24,7 @@ import com.google.common.base.Predicate;
 import com.google.protobuf.Message;
 import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
-
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * An entity which has {@linkplain LifecycleFlags lifecycle flags}.

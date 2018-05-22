@@ -59,7 +59,6 @@ import io.spine.server.stand.Stand;
 import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
 
-import javax.annotation.CheckReturnValue;
 import java.util.List;
 import java.util.Set;
 
@@ -271,18 +270,20 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      *
      * @param aggregate an instance to store
      */
+    @SuppressWarnings("CheckReturnValue") 
+        // ignore result of `commitEvents()` because we obtain them in the block before the call. 
     @Override
     protected void store(A aggregate) {
-        final I id = aggregate.getId();
-        final int snapshotTrigger = getSnapshotTrigger();
-        final AggregateStorage<I> storage = aggregateStorage();
+        I id = aggregate.getId();
+        int snapshotTrigger = getSnapshotTrigger();
+        AggregateStorage<I> storage = aggregateStorage();
         int eventCount = storage.readEventCountAfterLastSnapshot(id);
-        final Iterable<Event> uncommittedEvents = aggregate.getUncommittedEvents();
+        Iterable<Event> uncommittedEvents = aggregate.getUncommittedEvents();
         for (Event event : uncommittedEvents) {
             storage.writeEvent(id, event);
             ++eventCount;
             if (eventCount >= snapshotTrigger) {
-                final Snapshot snapshot = aggregate.toShapshot();
+                Snapshot snapshot = aggregate.toShapshot();
                 aggregate.clearRecentHistory();
                 storage.writeSnapshot(id, snapshot);
                 eventCount = 0;
@@ -438,7 +439,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * @return a positive integer value
      * @see #DEFAULT_SNAPSHOT_TRIGGER
      */
-    @CheckReturnValue
     protected int getSnapshotTrigger() {
         return this.snapshotTrigger;
     }

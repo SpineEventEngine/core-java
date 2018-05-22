@@ -114,6 +114,7 @@ public abstract class RecordStorage<I>
      *         or {@code Optional.absent()} if there is no record matching this request
      * @see    #read(RecordReadRequest)
      */
+    @SuppressWarnings("CheckReturnValue") // calling builder method
     public Optional<EntityRecord> read(RecordReadRequest<I> request, FieldMask fieldMask) {
         final Optional<EntityRecord> rawResult = read(request);
 

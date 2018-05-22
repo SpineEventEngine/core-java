@@ -33,10 +33,10 @@ import io.spine.server.event.grpc.EventStoreGrpc;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.EventOperation;
 import io.spine.server.tenant.TenantAwareOperation;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;

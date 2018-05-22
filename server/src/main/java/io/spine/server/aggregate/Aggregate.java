@@ -46,7 +46,6 @@ import io.spine.server.model.Model;
 import io.spine.server.rejection.RejectionReactorMethod;
 import io.spine.validate.ValidatingBuilder;
 
-import javax.annotation.CheckReturnValue;
 import java.util.Iterator;
 import java.util.List;
 
@@ -392,7 +391,6 @@ public abstract class Aggregate<I,
      *
      * @return immutable view of all uncommitted events
      */
-    @CheckReturnValue
     List<Event> getUncommittedEvents() {
         return ImmutableList.copyOf(uncommittedEvents);
     }
@@ -432,7 +430,6 @@ public abstract class Aggregate<I,
      *
      * @return new snapshot
      */
-    @CheckReturnValue
     Snapshot toShapshot() {
         final Any state = AnyPacker.pack(getState());
         final Snapshot.Builder builder = Snapshot.newBuilder()

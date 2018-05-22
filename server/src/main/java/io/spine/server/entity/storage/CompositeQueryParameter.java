@@ -30,8 +30,8 @@ import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
 import io.spine.client.ColumnFilter;
 import io.spine.client.CompositeColumnFilter.CompositeOperator;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 import java.io.Serializable;
 
 import static com.google.common.base.Preconditions.checkArgument;

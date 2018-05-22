@@ -27,8 +27,8 @@ import io.spine.server.entity.EntityRecord;
 import io.spine.server.projection.ProjectionStorage;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.tenant.TenantFunction;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Iterator;
 import java.util.Map;
 

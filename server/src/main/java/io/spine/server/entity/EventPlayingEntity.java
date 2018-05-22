@@ -28,8 +28,7 @@ import io.spine.core.Version;
 import io.spine.reflect.GenericTypeIndex;
 import io.spine.validate.ValidatingBuilder;
 import io.spine.validate.ValidatingBuilders;
-
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -58,8 +57,7 @@ public abstract class EventPlayingEntity <I,
      */
     private volatile boolean stateChanged;
 
-    @Nullable
-    private volatile Transaction<I, ? extends EventPlayingEntity<I, S, B>, S, B> transaction;
+    private volatile @Nullable Transaction<I, ? extends EventPlayingEntity<I, S, B>, S, B> transaction;
 
     /**
      * Creates a new instance.

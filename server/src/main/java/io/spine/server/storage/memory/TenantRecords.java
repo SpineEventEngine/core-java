@@ -30,8 +30,8 @@ import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.type.TypeUrl;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Iterator;
 import java.util.Map;
 

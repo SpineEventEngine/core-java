@@ -26,8 +26,7 @@ import io.spine.server.tuple.Element.AValue;
 import io.spine.server.tuple.Element.BValue;
 import io.spine.server.tuple.Element.CValue;
 import io.spine.server.tuple.Element.DValue;
-
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Optional.fromNullable;
 import static io.spine.server.tuple.Element.value;

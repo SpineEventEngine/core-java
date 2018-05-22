@@ -27,8 +27,8 @@ import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.ServerServiceDefinition;
 import io.spine.client.ConnectionConstants;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.Set;
 

@@ -26,8 +26,8 @@ import com.google.common.base.Optional;
 import com.google.gson.internal.Primitives;
 import io.spine.annotation.Internal;
 import io.spine.server.entity.Entity;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;

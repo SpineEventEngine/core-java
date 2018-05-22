@@ -52,8 +52,8 @@ import io.spine.server.stand.Stand;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.type.TypeName;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;

@@ -34,8 +34,8 @@ import io.spine.core.Event;
 import io.spine.core.EventId;
 import io.spine.server.entity.DefaultRecordBasedRepository;
 import io.spine.server.storage.RecordStorage;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Iterator;
 import java.util.List;
 

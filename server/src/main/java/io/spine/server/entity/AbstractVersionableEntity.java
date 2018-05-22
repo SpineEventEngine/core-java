@@ -30,7 +30,6 @@ import io.spine.core.Versions;
 import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
 import io.spine.server.entity.rejection.CannotModifyDeletedEntity;
 
-import javax.annotation.CheckReturnValue;
 import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -213,7 +212,6 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
     /**
      * Obtains timestamp of the entity version.
      */
-    @CheckReturnValue
     public Timestamp whenModified() {
         return version.getTimestamp();
     }

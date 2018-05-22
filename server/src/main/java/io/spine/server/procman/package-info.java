@@ -22,7 +22,10 @@
  * This package provides classes related to Process Managers.
  */
 
+@CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.server.procman;
+
+import com.google.errorprone.annotations.CheckReturnValue;
 
 import javax.annotation.ParametersAreNonnullByDefault;

@@ -26,8 +26,8 @@ import io.spine.base.Identifier;
 import io.spine.server.model.ModelClass;
 import io.spine.server.model.ModelError;
 import io.spine.type.TypeUrl;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Objects;

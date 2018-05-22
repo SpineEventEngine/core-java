@@ -42,8 +42,8 @@ import io.spine.server.transport.SubscriberHub;
 import io.spine.server.transport.TransportFactory;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.validate.Validate;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Deque;
 import java.util.Set;
 

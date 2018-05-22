@@ -200,7 +200,13 @@ subprojects {
                 name: 'guava',
                 version: guavaVersion,
                 changing: true
+
+        //TODO:2018-05-11:alexander.yevsyukov: Replace the below with Checker Framework
+        // after Guava fully migrates from it too.
         compile "com.google.code.findbugs:jsr305:3.0.0"
+
+        compile "org.checkerframework:checker-qual:$checkerFrameworkVersion"
+        compile "com.google.errorprone:error_prone_annotations:$errorProneVersion"
 
         //As a Library, we provide logging facade API, not specific logger bindings.
         //Target apps are free to use any binding they need.
@@ -229,12 +235,16 @@ subprojects {
     sourceSets {
         main {
             proto.srcDirs = ["$sourcesRootDir/main/proto"]
-            java.srcDirs = [generatedJavaDir, "$sourcesRootDir/main/java", generatedSpineDir]
+            java.srcDirs = [generatedJavaDir,
+                            "$sourcesRootDir/main/java",
+                            generatedSpineDir]
             resources.srcDirs = ["$generatedRootDir/main/resources"]
         }
         test {
             proto.srcDirs = ["$sourcesRootDir/test/proto"]
-            java.srcDirs = [generatedTestJavaDir, "$sourcesRootDir/test/java", generatedTestSpineDir]
+            java.srcDirs = [generatedTestJavaDir,
+                            "$sourcesRootDir/test/java",
+                            generatedTestSpineDir]
             resources.srcDirs = ["$generatedRootDir/test/resources"]
         }
     }

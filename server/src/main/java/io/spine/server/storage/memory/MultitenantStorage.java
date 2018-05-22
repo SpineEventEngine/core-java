@@ -22,8 +22,8 @@ package io.spine.server.storage.memory;
 
 import io.spine.core.TenantId;
 import io.spine.server.tenant.TenantFunction;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;

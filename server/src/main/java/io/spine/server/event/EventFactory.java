@@ -33,8 +33,7 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.server.integration.IntegrationEvent;
 import io.spine.server.integration.IntegrationEventContext;
 import io.spine.validate.ValidationException;
-
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.base.Time.getCurrentTime;

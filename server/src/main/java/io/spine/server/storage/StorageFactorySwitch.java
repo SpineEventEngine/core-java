@@ -26,8 +26,7 @@ import com.google.common.base.Supplier;
 import io.spine.base.Environment;
 import io.spine.core.BoundedContextName;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
-
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalStateException;

@@ -28,8 +28,8 @@ import io.spine.core.Ack;
 import io.spine.core.MessageEnvelope;
 import io.spine.core.Rejection;
 import io.spine.type.MessageClass;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.concurrent.ConcurrentLinkedDeque;

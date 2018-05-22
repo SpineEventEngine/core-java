@@ -32,8 +32,8 @@ import io.spine.core.Events;
 import io.spine.server.reflect.Field;
 import io.spine.type.TypeName;
 import io.spine.type.TypeUrl;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
 

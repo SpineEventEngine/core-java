@@ -39,8 +39,8 @@ import io.spine.server.outbus.CommandOutputBus;
 import io.spine.server.outbus.OutputDispatcherRegistry;
 import io.spine.server.storage.StorageFactory;
 import io.spine.validate.MessageValidator;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Deque;
 import java.util.Set;
 import java.util.concurrent.Executor;

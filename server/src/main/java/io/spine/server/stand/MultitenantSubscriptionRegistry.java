@@ -27,8 +27,8 @@ import io.spine.client.Topic;
 import io.spine.core.TenantId;
 import io.spine.server.tenant.TenantFunction;
 import io.spine.type.TypeUrl;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;

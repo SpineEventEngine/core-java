@@ -35,10 +35,10 @@ import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.outbus.CommandOutputBus;
 import io.spine.server.outbus.OutputDispatcherRegistry;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
 import java.util.Deque;
 import java.util.Set;
 

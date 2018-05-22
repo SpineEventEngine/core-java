@@ -25,8 +25,8 @@ import com.google.common.collect.ImmutableSet;
 import io.spine.core.BoundedContextName;
 import io.spine.core.MessageEnvelope;
 import io.spine.server.transport.TransportFactory;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;

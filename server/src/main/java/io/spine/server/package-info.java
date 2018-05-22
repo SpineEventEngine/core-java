@@ -25,7 +25,10 @@
  * Those classes represent general data structures for working with backend data in
  * a multi-language system.
  */
+@CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.server;
+
+import com.google.errorprone.annotations.CheckReturnValue;
 
 import javax.annotation.ParametersAreNonnullByDefault;

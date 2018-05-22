@@ -24,6 +24,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.MoreExecutors;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
@@ -53,9 +54,9 @@ import io.spine.server.tenant.QueryOperation;
 import io.spine.server.tenant.SubscriptionOperation;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.type.TypeUrl;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.CheckReturnValue;
-import javax.annotation.Nullable;
 import java.util.Set;
 import java.util.concurrent.Executor;
 
@@ -315,7 +316,6 @@ public class Stand implements AutoCloseable {
      *
      * @return the set of types as {@link TypeUrl} instances
      */
-    @CheckReturnValue
     public ImmutableSet<TypeUrl> getExposedTypes() {
         return typeRegistry.getTypes();
     }
@@ -328,7 +328,6 @@ public class Stand implements AutoCloseable {
      *
      * @return the set of types as {@link TypeUrl} instances
      */
-    @CheckReturnValue
     public ImmutableSet<TypeUrl> getExposedAggregateTypes() {
         return typeRegistry.getAggregateTypes();
     }
@@ -511,8 +510,7 @@ public class Stand implements AutoCloseable {
          * <p>If set directly, the value would be matched to the multi-tenancy flag of aggregating
          * {@code BoundedContext}.
          */
-        @Nullable
-        private Boolean multitenant;
+        private @MonotonicNonNull Boolean multitenant;
 
         private StandStorage storage;
         private Executor callbackExecutor;
@@ -561,14 +559,14 @@ public class Stand implements AutoCloseable {
         }
 
         @Internal
+        @CanIgnoreReturnValue
         public Builder setMultitenant(@Nullable Boolean multitenant) {
             this.multitenant = multitenant;
             return this;
         }
 
         @Internal
-        @Nullable
-        public Boolean isMultitenant() {
+        public @Nullable Boolean isMultitenant() {
             return multitenant;
         }
 

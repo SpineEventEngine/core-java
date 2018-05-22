@@ -28,7 +28,6 @@ import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.test.ReflectiveBuilder;
 
-import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
 
@@ -78,7 +77,7 @@ public class EntityBuilder<E extends AbstractVersionableEntity<I, S>, I, S exten
         // Have the constructor for finding usages easier.
     }
 
-    @SuppressWarnings("MethodDoesntCallSuperMethod") // fix IDEA bug
+    @SuppressWarnings("CheckReturnValue") // calling builder method
     @Override
     public EntityBuilder<E, I, S> setResultClass(Class<E> entityClass) {
         super.setResultClass(entityClass);
@@ -117,7 +116,6 @@ public class EntityBuilder<E extends AbstractVersionableEntity<I, S>, I, S exten
 
     /** Returns the class of IDs used by entities. */
     @SuppressWarnings("unchecked") // The cast is protected by generic parameters of the builder.
-    @CheckReturnValue
     protected Class<I> getIdClass() {
         return (Class<I>) entityClass().getIdClass();
     }

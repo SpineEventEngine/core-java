@@ -25,7 +25,6 @@ import io.spine.protobuf.Messages;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityClass;
 
-import javax.annotation.CheckReturnValue;
 import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -61,7 +60,6 @@ class DefaultStateRegistry {
      * @param entityClass the class to check
      * @return {@code true} if there is a state for the passed class, {@code false} otherwise
      */
-    @CheckReturnValue
     boolean contains(Class<? extends Entity> entityClass) {
         lock.readLock().lock();
         try {
@@ -97,7 +95,6 @@ class DefaultStateRegistry {
      *
      * @param entityClass an entity class
      */
-    @CheckReturnValue
     Message get(Class<? extends Entity> entityClass) {
         lock.readLock().lock();
         try {

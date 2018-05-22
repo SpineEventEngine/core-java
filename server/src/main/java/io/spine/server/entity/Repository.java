@@ -24,6 +24,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Supplier;
 import com.google.common.collect.Iterators;
+import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import io.spine.base.Identifier;
 import io.spine.core.MessageEnvelope;
 import io.spine.logging.Logging;
@@ -36,11 +37,10 @@ import io.spine.server.storage.StorageFactory;
 import io.spine.string.Stringifiers;
 import io.spine.type.MessageClass;
 import io.spine.type.TypeUrl;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 
-import javax.annotation.CheckReturnValue;
-import javax.annotation.Nullable;
-import javax.annotation.OverridingMethodsMustInvokeSuper;
 import java.util.Iterator;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -68,16 +68,14 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      * <p>This field is null when a repository is not {@linkplain
      * BoundedContext#register(Repository) registered} yet.
      */
-    @Nullable
-    private BoundedContext boundedContext;
+    private @MonotonicNonNull BoundedContext boundedContext;
 
     /**
      * Model class of entities managed by this repository.
      *
      * <p>This field is null if {@link #entityClass()} is never called.
      */
-    @Nullable
-    private volatile EntityClass<E> entityClass;
+    private volatile @MonotonicNonNull EntityClass<E> entityClass;
 
     /**
      * The data storage for this repository.
@@ -85,8 +83,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      * <p>This field is null if the storage was not {@linkplain #initStorage(StorageFactory)
      * initialized} or the repository was {@linkplain #close() closed}.
      */
-    @Nullable
-    private Storage<I, ?, ?> storage;
+    private @Nullable Storage<I, ?, ?> storage;
 
     /** Lazily initialized logger. */
     private final Supplier<Logger> loggerSupplier = Logging.supplyFor(getClass());
@@ -104,7 +101,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
         if (entityClass == null) {
             @SuppressWarnings("unchecked") // The type is ensured by the declaration of this class.
             final Class<E> cast =
-                    (Class<E>)ENTITY.getArgumentIn((Class<? extends Repository<I, E>>) getClass());
+                    (Class<E>)ENTITY.getArgumentIn(getClass());
             entityClass = getModelClass(cast);
         }
         return entityClass;
@@ -121,14 +118,12 @@ public abstract class Repository<I, E extends Entity<I, ?>>
 
     /** Returns the class of IDs used by this repository. */
     @SuppressWarnings("unchecked") // The cast is ensured by generic parameters of the repository.
-    @CheckReturnValue
     public Class<I> getIdClass() {
         return (Class<I>) entityClass().getIdClass();
     }
 
     /** Returns the class of entities managed by this repository. */
     @SuppressWarnings("unchecked") // The cast is ensured by generic parameters of the repository.
-    @CheckReturnValue
     public Class<E> getEntityClass() {
         return (Class<E>) entityClass().value();
     }
@@ -137,7 +132,6 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      * Returns the {@link TypeUrl} for the state objects wrapped by entities
      * managed by this repository
      */
-    @CheckReturnValue
     public TypeUrl getEntityStateType() {
         return entityClass().getStateType();
     }
@@ -225,7 +219,6 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      * @param id the id of the entity
      * @return new entity instance
      */
-    @CheckReturnValue
     public abstract E create(I id);
 
     /**
@@ -259,7 +252,6 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      *
      * @throws IllegalStateException if the storage is not assigned
      */
-    @CheckReturnValue
     protected final Storage<I, ?, ?> getStorage() {
         return checkStorage(this.storage);
     }

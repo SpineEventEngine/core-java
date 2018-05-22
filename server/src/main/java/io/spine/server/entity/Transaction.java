@@ -21,6 +21,7 @@ package io.spine.server.entity;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.EventContext;
@@ -318,7 +319,8 @@ public abstract class Transaction<I,
      * @return this instance of the transaction
      * @see Transaction#apply(EventEnvelope)
      */
-    @SuppressWarnings("OverlyBroadCatchBlock")  // to `rollback(..)` in case of any exception.
+    @CanIgnoreReturnValue
+    @SuppressWarnings("OverlyBroadCatchBlock")  /* to `rollback(..)` in case of any exception. */
     Transaction<I, E, S, B> apply(EventEnvelope event) {
         final Phase<I, E, S, B> phase = new Phase<>(this, event);
 
@@ -360,6 +362,7 @@ public abstract class Transaction<I,
         entity.updateStateChanged();
     }
 
+    @SuppressWarnings("CheckReturnValue") // calling builder method
     void initAll(S state, Version version) {
         final B builder = getBuilder();
         builder.clear();

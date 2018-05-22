@@ -29,8 +29,8 @@ import io.spine.type.TypeName;
 import io.spine.validate.ConstraintViolation;
 import io.spine.validate.MessageValidator;
 import io.spine.validate.ValidationError;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.List;
 
 import static io.spine.server.transport.Statuses.invalidArgumentWithCause;

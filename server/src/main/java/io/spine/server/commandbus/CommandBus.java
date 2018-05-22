@@ -21,6 +21,7 @@ package io.spine.server.commandbus;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.annotation.Internal;
 import io.spine.base.Error;
 import io.spine.base.Identifier;
@@ -38,8 +39,8 @@ import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.commandstore.CommandStore;
 import io.spine.server.rejection.RejectionBus;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Deque;
 import java.util.Set;
 
@@ -103,8 +104,7 @@ public class CommandBus extends Bus<Command,
      *
      * @see #getValidator() to getreive the non-null value of the validator
      */
-    @Nullable
-    private CommandValidator commandValidator;
+    private @Nullable CommandValidator commandValidator;
 
     /**
      * Creates new instance according to the passed {@link Builder}.
@@ -251,8 +251,10 @@ public class CommandBus extends Bus<Command,
     /**
      * Passes a previously scheduled command to the corresponding dispatcher.
      */
+    @SuppressWarnings("CheckReturnValue")
+        // can ignore ack. since we checked the command when scheduled
     void postPreviouslyScheduled(Command command) {
-        final CommandEnvelope commandEnvelope = CommandEnvelope.of(command);
+        CommandEnvelope commandEnvelope = CommandEnvelope.of(command);
         doPost(commandEnvelope);
     }
 
@@ -273,9 +275,8 @@ public class CommandBus extends Bus<Command,
     }
 
     private CommandDispatcher<?> getDispatcher(CommandEnvelope commandEnvelope) {
-        final Optional<? extends CommandDispatcher<?>> dispatcher = getDispatcher(
-                commandEnvelope.getMessageClass()
-        );
+        Optional<? extends CommandDispatcher<?>> dispatcher =
+                getDispatcher(commandEnvelope.getMessageClass());
         if (!dispatcher.isPresent()) {
             throw noDispatcherFound(commandEnvelope);
         }
@@ -326,8 +327,7 @@ public class CommandBus extends Bus<Command,
          * <p>If set directly, the value would be matched to the multi-tenancy flag of
          * {@code BoundedContext}.
          */
-        @Nullable
-        private Boolean multitenant;
+        private @Nullable Boolean multitenant;
 
         private CommandStore commandStore;
 
@@ -359,12 +359,12 @@ public class CommandBus extends Bus<Command,
         }
 
         @Internal
-        @Nullable
-        public Boolean isMultitenant() {
+        public @Nullable Boolean isMultitenant() {
             return multitenant;
         }
 
         @Internal
+        @CanIgnoreReturnValue
         public Builder setMultitenant(@Nullable Boolean multitenant) {
             this.multitenant = multitenant;
             return this;
@@ -386,18 +386,21 @@ public class CommandBus extends Bus<Command,
             return Optional.fromNullable(rejectionBus);
         }
 
+        @CanIgnoreReturnValue
         public Builder setCommandStore(CommandStore commandStore) {
             checkNotNull(commandStore);
             this.commandStore = commandStore;
             return this;
         }
 
+        @CanIgnoreReturnValue
         public Builder setCommandScheduler(CommandScheduler commandScheduler) {
             checkNotNull(commandScheduler);
             this.commandScheduler = commandScheduler;
             return this;
         }
 
+        @CanIgnoreReturnValue
         public Builder setRejectionBus(RejectionBus rejectionBus) {
             checkNotNull(rejectionBus);
             this.rejectionBus = rejectionBus;
@@ -417,6 +420,7 @@ public class CommandBus extends Bus<Command,
          * <p>If not set explicitly, the default value of this flag is set upon the best guess,
          * based on current {@link io.spine.server.ServerEnvironment server environment}.
          */
+        @CanIgnoreReturnValue
         public Builder setThreadSpawnAllowed(boolean threadSpawnAllowed) {
             this.threadSpawnAllowed = threadSpawnAllowed;
             return this;
@@ -490,12 +494,12 @@ public class CommandBus extends Bus<Command,
             return this;
         }
 
+        @SuppressWarnings("CheckReturnValue")
+            /* Calling registry() enforces creating the registry to make spying for CommandBus-es
+               in tests work. */
         private CommandBus createCommandBus() {
-            final CommandBus commandBus = new CommandBus(this);
-
-            // Enforce creating the registry to make spying for CommandBus-es in tests work.
+            CommandBus commandBus = new CommandBus(this);
             commandBus.registry();
-
             return commandBus;
         }
     }

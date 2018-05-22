@@ -32,8 +32,8 @@ import io.spine.core.MessageEnvelope;
 import io.spine.core.Version;
 import io.spine.server.event.EventFactory;
 import io.spine.type.MessageClass;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;

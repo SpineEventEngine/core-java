@@ -26,9 +26,9 @@ import com.google.common.collect.UnmodifiableIterator;
 import com.google.protobuf.Empty;
 import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Message;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.Iterator;
 import java.util.List;
