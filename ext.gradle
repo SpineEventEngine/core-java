@@ -34,6 +34,7 @@ ext {
     spineRepository = 'http://maven.teamdev.com/repository/spine'
     spineSnapshotsRepository = 'http://maven.teamdev.com/repository/spine-snapshots'
     sonatypeSnapshots = 'https://oss.sonatype.org/content/repositories/snapshots'
+    gradlePlugins = 'https://plugins.gradle.org/m2/'
 
     // The version of the modules in this project.
     spineVersion = SPINE_VERSION
@@ -52,10 +53,14 @@ ext {
     // `KnownTypes.addStandardProtobufTypes()` method is updated with new Message types that may be
     // introduced in the new version of Protobuf.
     protobufVersion = '3.5.1'
-    
-    gRpcVersion = '1.9.0'
+
+    gRpcVersion = '1.10.0'
     slf4JVersion = '1.7.25'
     jUnitVersion = '5.1.1'
+
+    checkerFrameworkVersion = '2.5.1'
+    errorProneVersion = '2.3.1'
+    errorPronePluginVersion = '0.0.14'
 
     // Note that this Mockito version is not the latest one.
     // When migrating to the further versions, side effects may happen, like mocks persisting
