@@ -86,10 +86,11 @@ public class ActorRequestFactory {
      * @return new factory at new time zone
      */
     public ActorRequestFactory switchTimezone(ZoneOffset zoneOffset) {
-        final ActorRequestFactory result = newBuilder().setActor(getActor())
-                                                       .setZoneOffset(zoneOffset)
-                                                       .setTenantId(getTenantId())
-                                                       .build();
+        ActorRequestFactory result =
+                newBuilder().setActor(getActor())
+                            .setZoneOffset(zoneOffset)
+                            .setTenantId(getTenantId())
+                            .build();
         return result;
     }
 
@@ -137,11 +138,13 @@ public class ActorRequestFactory {
      * <p>Sets the timestamp value to the
      * {@linkplain io.spine.base.Time#getCurrentTime() current time}.
      */
+    @SuppressWarnings("CheckReturnValue") // calling builder
     ActorContext actorContext() {
-        final ActorContext.Builder builder = ActorContext.newBuilder()
-                                                         .setActor(actor)
-                                                         .setTimestamp(getCurrentTime())
-                                                         .setZoneOffset(zoneOffset);
+        ActorContext.Builder builder =
+                ActorContext.newBuilder()
+                            .setActor(actor)
+                            .setTimestamp(getCurrentTime())
+                            .setZoneOffset(zoneOffset);
         if (tenantId != null) {
             builder.setTenantId(tenantId);
         }
@@ -211,7 +214,7 @@ public class ActorRequestFactory {
          *
          * @return {@code null}
          */
-        @SuppressWarnings("ReturnOfNull")   // It's fine for an abstract Builder.
+        @SuppressWarnings("CheckReturnValue") // calling builder
         @CanIgnoreReturnValue
         public ActorRequestFactory build() {
             checkNotNull(actor, "`actor` must be defined");

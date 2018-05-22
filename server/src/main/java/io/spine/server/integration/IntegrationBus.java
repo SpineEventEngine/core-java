@@ -22,6 +22,7 @@ package io.spine.server.integration;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.core.Ack;
@@ -296,16 +297,16 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
      *         the set of message types that are now requested by this instance of
      *         integration bus
      */
+    @SuppressWarnings("CheckReturnValue") // calling builder
     private void notifyOfNeeds(Iterable<ChannelId> currentlyRequested) {
-        final RequestForExternalMessages.Builder resultBuilder =
+        RequestForExternalMessages.Builder resultBuilder =
                 RequestForExternalMessages.newBuilder();
         for (ChannelId channelId : currentlyRequested) {
-            final ExternalMessageType type = fromId(channelId);
+            ExternalMessageType type = fromId(channelId);
             resultBuilder.addRequestedMessageTypes(type);
         }
-        final RequestForExternalMessages result = resultBuilder.build();
-        final ExternalMessage externalMessage = ExternalMessages.of(result,
-                                                                    boundedContextName);
+        RequestForExternalMessages result = resultBuilder.build();
+        ExternalMessage externalMessage = ExternalMessages.of(result, boundedContextName);
         publisherHub.get(CONFIG_EXCHANGE_CHANNEL_ID)
                     .publish(pack(newUuid()), externalMessage);
     }
@@ -421,6 +422,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
             return Optional.fromNullable(eventBus);
         }
 
+        @CanIgnoreReturnValue
         public Builder setEventBus(EventBus eventBus) {
             this.eventBus = checkNotNull(eventBus);
             return self();
@@ -437,16 +439,19 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
             return Optional.fromNullable(value);
         }
 
+        @CanIgnoreReturnValue
         public Builder setRejectionBus(RejectionBus rejectionBus) {
             this.rejectionBus = checkNotNull(rejectionBus);
             return self();
         }
 
+        @CanIgnoreReturnValue
         public Builder setBoundedContextName(BoundedContextName boundedContextName) {
             this.boundedContextName = checkNotNull(boundedContextName);
             return self();
         }
 
+        @CanIgnoreReturnValue
         public Builder setTransportFactory(TransportFactory transportFactory) {
             this.transportFactory = checkNotNull(transportFactory);
             return self();

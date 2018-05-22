@@ -22,7 +22,9 @@ package io.spine.change;
 
 import com.google.common.testing.NullPointerTester;
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import static io.spine.change.BooleanMismatch.expectedTrue;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
@@ -34,6 +36,9 @@ public class IntMismatchShould {
     private static final int ACTUAL = 1567;
     private static final int NEW_VALUE = 1452;
     private static final int VERSION = 5;
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     @Test
     public void have_private_constructor() {
@@ -83,27 +88,31 @@ public class IntMismatchShould {
         assertEquals(VERSION, mismatch.getVersion());
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void not_unpackExpected_if_its_not_a_IntMismatch() {
         final ValueMismatch mismatch = expectedTrue(VERSION);
+        thrown.expect(RuntimeException.class);
         IntMismatch.unpackExpected(mismatch);
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void not_unpackActual_if_its_not_a_IntMismatch() {
         final ValueMismatch mismatch = expectedTrue(VERSION);
+        thrown.expect(RuntimeException.class);
         IntMismatch.unpackActual(mismatch);
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void not_unpackNewValue_if_its_not_a_IntMismatch() {
         final ValueMismatch mismatch = expectedTrue(VERSION);
+        thrown.expect(RuntimeException.class);
         IntMismatch.unpackNewValue(mismatch);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void not_accept_same_expected_and_actual() {
         final int value = 5;
+        thrown.expect(IllegalArgumentException.class);
         IntMismatch.unexpectedValue(value, value, NEW_VALUE, VERSION);
     }
 

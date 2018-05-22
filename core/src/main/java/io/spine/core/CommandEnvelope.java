@@ -124,6 +124,7 @@ public final class CommandEnvelope
      *
      * @param builder event context builder into which the origin related fields are set
      */
+    @SuppressWarnings("CheckReturnValue") // calling builder
     @Override
     public void setOriginFields(EventContext.Builder builder) {
         builder.setCommandContext(getCommandContext());

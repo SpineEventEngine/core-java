@@ -21,7 +21,10 @@
 /**
  * This package provides classes for working with event stream projections.
  */
+@CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.server.projection;
+
+import com.google.errorprone.annotations.CheckReturnValue;
 
 import javax.annotation.ParametersAreNonnullByDefault;

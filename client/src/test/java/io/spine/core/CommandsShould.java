@@ -24,6 +24,7 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.testing.NullPointerTester;
+import com.google.common.testing.NullPointerTester.Visibility;
 import com.google.protobuf.Any;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Duration;
@@ -41,7 +42,9 @@ import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
 import io.spine.type.TypeName;
 import io.spine.type.TypeUrl;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.util.List;
 
@@ -57,6 +60,7 @@ import static io.spine.test.TimeTests.Past.secondsAgo;
 import static io.spine.time.Durations2.seconds;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -76,6 +80,9 @@ public class CommandsShould {
     private final TestActorRequestFactory requestFactory =
             TestActorRequestFactory.newInstance(CommandsShould.class);
 
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
+
     @Test
     public void have_private_ctor() {
         assertHasPrivateParameterlessCtor(Commands.class);
@@ -91,7 +98,7 @@ public class CommandsShould {
                                                           secondsAgo(5));
         final List<Command> sortedCommands = newArrayList(cmd1, cmd2, cmd3);
         final List<Command> commandsToSort = newArrayList(cmd3, cmd1, cmd2);
-        assertFalse(sortedCommands.equals(commandsToSort));
+        assertNotEquals(sortedCommands, commandsToSort);
 
         Commands.sort(commandsToSort);
 
@@ -128,7 +135,7 @@ public class CommandsShould {
                 .setDefault(CommandContext.class, requestFactory.createCommandContext())
                 .setDefault(ZoneOffset.class, ZoneOffsets.UTC)
                 .setDefault(UserId.class, GivenUserId.newUuid())
-                .testStaticMethods(Commands.class, NullPointerTester.Visibility.PACKAGE);
+                .testStaticMethods(Commands.class, Visibility.PACKAGE);
     }
 
     @Test
@@ -195,12 +202,13 @@ public class CommandsShould {
         assertFalse(Commands.isScheduled(cmd));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void when_set_negative_delay_then_throw_exception() {
         final CommandContext context = GivenCommandContext.withScheduledDelayOf(seconds(-10));
         final Command cmd = requestFactory.command()
                                           .createBasedOnContext(StringValue.getDefaultInstance(),
                                                                 context);
+        thrown.expect(IllegalArgumentException.class);
         Commands.isScheduled(cmd);
     }
 
@@ -213,8 +221,9 @@ public class CommandsShould {
         assertEquals(id, convertedBack);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void throw_exception_if_checked_command_id_is_empty() {
+        thrown.expect(IllegalArgumentException.class);
         Commands.checkValid(CommandId.getDefaultInstance());
     }
 

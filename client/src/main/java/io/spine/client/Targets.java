@@ -75,6 +75,7 @@ public final class Targets {
         return result;
     }
 
+    @SuppressWarnings("CheckReturnValue") // calling builder
     static Target composeTarget(Class<? extends Message> entityClass,
                                 @Nullable Set<? extends Message> ids,
                                 @Nullable Set<CompositeColumnFilter> columnFilters) {

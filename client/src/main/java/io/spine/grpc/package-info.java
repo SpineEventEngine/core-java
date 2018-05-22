@@ -21,7 +21,10 @@
 /**
  * This package contains classes and interfaces related to gRPC.
  */
+@CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.grpc;
+
+import com.google.errorprone.annotations.CheckReturnValue;
 
 import javax.annotation.ParametersAreNonnullByDefault;

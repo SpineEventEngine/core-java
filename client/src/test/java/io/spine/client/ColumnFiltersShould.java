@@ -26,7 +26,9 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.spine.client.ColumnFilter.Operator;
 import io.spine.protobuf.AnyPacker;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.util.Calendar;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -60,6 +62,9 @@ public class ColumnFiltersShould {
 
     private static final String COLUMN_NAME = "preciseColumn";
     private static final Timestamp COLUMN_VALUE = getCurrentTime();
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     @Test
     public void have_private_util_ctor() {
@@ -129,28 +134,33 @@ public class ColumnFiltersShould {
 
     @Test
     public void create_ordering_filters_for_strings() {
-        final String string = "abc";
-        final ColumnFilter filter = gt("stringColumn", string);
+        final String str = "abc";
+        final ColumnFilter filter = gt("stringColumn", str);
         assertNotNull(filter);
         assertEquals(GREATER_THAN, filter.getOperator());
         final StringValue value = AnyPacker.unpack(filter.getValue());
-        assertEquals(string, value.getValue());
+        assertEquals(str, value.getValue());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void fail_to_create_ordering_filters_for_enums() {
+        thrown.expect(IllegalArgumentException.class);
         ge("enumColumn", EQUAL);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void fail_to_create_ordering_filters_for_non_primitive_numbers() {
         final AtomicInteger number = new AtomicInteger(42);
+
+        thrown.expect(IllegalArgumentException.class);
         ge("atomicColumn", number);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void fail_to_create_ordering_filters_for_not_supported_types() {
         final Comparable<?> value = Calendar.getInstance(); // Comparable but not supported
+
+        thrown.expect(IllegalArgumentException.class);
         le("invalidColumn", value);
     }
 

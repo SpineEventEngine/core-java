@@ -21,7 +21,9 @@
 package io.spine.change;
 
 import com.google.common.testing.NullPointerTester;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import static io.spine.change.BooleanMismatch.expectedFalse;
 import static io.spine.change.BooleanMismatch.expectedTrue;
@@ -34,6 +36,9 @@ import static org.junit.Assert.assertEquals;
 public class BooleanMismatchShould {
 
     private static final int VERSION = 2;
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     @Test
     public void have_private_constructor() {
@@ -66,21 +71,24 @@ public class BooleanMismatchShould {
         assertEquals(VERSION, mismatch.getVersion());
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void not_unpackExpected_if_its_not_a_BooleanMismatch() {
         final ValueMismatch mismatch = IntMismatch.of(1, 2, 3, VERSION);
+        thrown.expect(RuntimeException.class);
         BooleanMismatch.unpackExpected(mismatch);
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void not_unpackActual_if_its_not_a_BooleanMismatch() {
         final ValueMismatch mismatch = IntMismatch.of(1, 2, 3, VERSION);
+        thrown.expect(RuntimeException.class);
         BooleanMismatch.unpackActual(mismatch);
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void not_unpackNewValue_if_its_not_a_BooleanMismatch() {
         final ValueMismatch mismatch = IntMismatch.of(1, 2, 3, VERSION);
+        thrown.expect(RuntimeException.class);
         BooleanMismatch.unpackNewValue(mismatch);
     }
 

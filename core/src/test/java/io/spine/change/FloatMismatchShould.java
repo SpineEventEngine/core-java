@@ -21,7 +21,9 @@
 package io.spine.change;
 
 import com.google.common.testing.NullPointerTester;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import static io.spine.change.BooleanMismatch.expectedTrue;
 import static io.spine.change.FloatMismatch.expectedNonZero;
@@ -40,6 +42,9 @@ public class FloatMismatchShould {
     private static final float ACTUAL = 19.01f;
     private static final float NEW_VALUE = 14.52f;
     private static final float DELTA = 0.01f;
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     @Test
     public void have_private_constructor() {
@@ -88,27 +93,31 @@ public class FloatMismatchShould {
         assertEquals(VERSION, mismatch.getVersion());
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void not_unpackExpected_if_its_not_a_IntMismatch() {
         final ValueMismatch mismatch = expectedTrue(VERSION);
+        thrown.expect(RuntimeException.class);
         unpackExpected(mismatch);
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void not_unpackActual_if_its_not_a_IntMismatch() {
         final ValueMismatch mismatch = expectedTrue(VERSION);
+        thrown.expect(RuntimeException.class);
         unpackActual(mismatch);
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void not_unpackNewValue_if_its_not_a_IntMismatch() {
         final ValueMismatch mismatch = expectedTrue(VERSION);
+        thrown.expect(RuntimeException.class);
         unpackNewValue(mismatch);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void not_accept_same_expected_and_actual() {
         final float value = 19.19f;
+        thrown.expect(IllegalArgumentException.class);
         unexpectedValue(value, value, NEW_VALUE, VERSION);
     }
 

@@ -20,14 +20,14 @@
 package io.spine.server.event;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicates;
-import com.google.common.collect.FluentIterable;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.TextFormat;
 import io.grpc.ServerServiceDefinition;
 import io.grpc.stub.StreamObserver;
 import io.spine.core.Event;
+import io.spine.core.Events;
 import io.spine.core.TenantId;
 import io.spine.server.event.grpc.EventStoreGrpc;
 import io.spine.server.storage.StorageFactory;
@@ -41,11 +41,12 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.Executor;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Iterables.tryFind;
-import static io.spine.core.Events.getTenantId;
 
 /**
  * A store of all events in a bounded context.
@@ -62,8 +63,7 @@ public class EventStore implements AutoCloseable {
     private final ERepository storage;
     private final Executor streamExecutor;
 
-    @Nullable
-    private final Logger logger;
+    private final @Nullable Logger logger;
 
     /**
      * Creates a builder for locally running {@code EventStore}.
@@ -84,18 +84,10 @@ public class EventStore implements AutoCloseable {
 
     private static void ensureSameTenant(Iterable<Event> events) {
         checkNotNull(events);
-
-        final Set<TenantId> tenants =
-                FluentIterable.from(events)
-                              .transform(new Function<Event, TenantId>() {
-                                  @Override
-                                  public TenantId apply(
-                                          @Nullable Event event) {
-                                      checkNotNull(event);
-                                      return getTenantId(event);
-                                  }
-                              })
-                              .toSet();
+        Set<TenantId> tenants =
+                StreamSupport.stream(events.spliterator(), false)
+                             .map(Events::getTenantId)
+                             .collect(Collectors.toSet());
         checkArgument(tenants.size() == 1,
                       TENANT_MISMATCH_ERROR_MSG,
                       tenants);
@@ -153,12 +145,12 @@ public class EventStore implements AutoCloseable {
      */
     public void appendAll(final Iterable<Event> events) {
         checkNotNull(events);
-        final Optional<Event> tenantDefiningEvent = tryFind(events, Predicates.<Event>notNull());
+        Optional<Event> tenantDefiningEvent = tryFind(events, Predicates.notNull());
         if (!tenantDefiningEvent.isPresent()) {
             return;
         }
-        final Event event = tenantDefiningEvent.get();
-        final TenantAwareOperation op = new EventOperation(event) {
+        Event event = tenantDefiningEvent.get();
+        TenantAwareOperation op = new EventOperation(event) {
             @Override
             public void run() {
                 if (isTenantSet()) { // If multitenant context
@@ -258,8 +250,7 @@ public class EventStore implements AutoCloseable {
 
         private Executor streamExecutor;
         private StorageFactory storageFactory;
-        @Nullable
-        private Logger logger;
+        private @Nullable Logger logger;
 
         public abstract T build();
 
@@ -276,6 +267,7 @@ public class EventStore implements AutoCloseable {
             return streamExecutor;
         }
 
+        @CanIgnoreReturnValue
         public B setStreamExecutor(Executor executor) {
             this.streamExecutor = checkNotNull(executor);
             return castThis();
@@ -285,16 +277,17 @@ public class EventStore implements AutoCloseable {
             return storageFactory;
         }
 
+        @CanIgnoreReturnValue
         public B setStorageFactory(StorageFactory storageFactory) {
             this.storageFactory = checkNotNull(storageFactory);
             return castThis();
         }
 
-        @Nullable
-        public Logger getLogger() {
+        public @Nullable Logger getLogger() {
             return logger;
         }
 
+        @CanIgnoreReturnValue
         public B setLogger(@Nullable Logger logger) {
             this.logger = logger;
             return castThis();
@@ -305,6 +298,7 @@ public class EventStore implements AutoCloseable {
          *
          * @see EventStore#log()
          */
+        @CanIgnoreReturnValue
         public B withDefaultLogger() {
             setLogger(log());
             return castThis();
@@ -325,7 +319,7 @@ public class EventStore implements AutoCloseable {
         @Override
         public EventStore build() {
             checkState();
-            final EventStore result =
+            EventStore result =
                     new EventStore(getStreamExecutor(), getStorageFactory(), getLogger());
             return result;
         }
@@ -334,7 +328,7 @@ public class EventStore implements AutoCloseable {
     /**
      * The builder of {@code EventStore} instance exposed as gRPC service.
      *
-     * @see io.spine.server.event.grpc.EventStoreGrpc.EventStoreImplBase
+     * @see EventStoreGrpc.EventStoreImplBase
      *      EventStoreGrpc.EventStoreImplBase
      */
     public static class ServiceBuilder
@@ -343,10 +337,10 @@ public class EventStore implements AutoCloseable {
         @Override
         public ServerServiceDefinition build() {
             checkState();
-            final EventStore eventStore =
+            EventStore eventStore =
                     new EventStore(getStreamExecutor(), getStorageFactory(), getLogger());
-            final EventStoreGrpc.EventStoreImplBase grpcService = new GrpcService(eventStore);
-            final ServerServiceDefinition result = grpcService.bindService();
+            EventStoreGrpc.EventStoreImplBase grpcService = new GrpcService(eventStore);
+            ServerServiceDefinition result = grpcService.bindService();
             return result;
         }
     }

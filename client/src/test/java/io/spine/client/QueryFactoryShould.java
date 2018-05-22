@@ -26,7 +26,9 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.test.client.TestEntity;
 import io.spine.test.client.TestEntityId;
 import io.spine.type.TypeUrl;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -48,6 +50,9 @@ public class QueryFactoryShould extends ActorRequestFactoryShould {
 
     // See {@code client_requests} for declaration.
     private static final Class<TestEntity> TARGET_ENTITY_CLASS = TestEntity.class;
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     @Test
     public void compose_proper_read_all_query() {
@@ -133,8 +138,9 @@ public class QueryFactoryShould extends ActorRequestFactoryShould {
         verifyMultiplePathsInQuery(paths, readByIdsWithSinglePathQuery);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void fail_to_create_query_with_empty_IDs_with_mask() {
+        thrown.expect(IllegalArgumentException.class);
         factory().query()
                  .byIdsWithMask(TestEntity.class,
                                 Collections.<Message>emptySet(),

@@ -22,7 +22,10 @@
  * This package provides types related to storage of aggregates.
  */
 
+@CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.server.aggregate.storage;
+
+import com.google.errorprone.annotations.CheckReturnValue;
 
 import javax.annotation.ParametersAreNonnullByDefault;

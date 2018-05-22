@@ -78,6 +78,7 @@ public final class Queries {
         return typeUrl;
     }
 
+    @SuppressWarnings("CheckReturnValue") // calling builder
     static Query.Builder queryBuilderFor(Class<? extends Message> entityClass,
                                          @Nullable Set<? extends Message> ids,
                                          @Nullable Set<CompositeColumnFilter> columnFilters,

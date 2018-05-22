@@ -35,12 +35,17 @@ import io.spine.time.Timestamps2;
 import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
 import io.spine.validate.ValidationException;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class CommandFactoryShould extends ActorRequestFactoryShould {
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     @Test
     public void create_command_context() {
@@ -105,16 +110,20 @@ public class CommandFactoryShould extends ActorRequestFactoryShould {
                                       .getTenantId());
     }
 
-    @Test(expected = ValidationException.class)
+    @Test
     public void throw_ValidationException_once_passed_invalid_Message() {
         final RequiredFieldCommand invalidCommand = RequiredFieldCommand.getDefaultInstance();
+
+        thrown.expect(ValidationException.class);
         factory().command()
                  .create(invalidCommand);
     }
 
-    @Test(expected = ValidationException.class)
+    @Test
     public void throw_ValidationException_once_passed_invalid_Message_with_version() {
         final RequiredFieldCommand invalidCommand = RequiredFieldCommand.getDefaultInstance();
+
+        thrown.expect(ValidationException.class);
         factory().command()
                  .create(invalidCommand, 42);
     }

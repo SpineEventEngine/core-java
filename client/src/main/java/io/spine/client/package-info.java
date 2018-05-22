@@ -22,7 +22,10 @@
  * This package provides utility classes for client-side code.
  */
 
+@CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.client;
+
+import com.google.errorprone.annotations.CheckReturnValue;
 
 import javax.annotation.ParametersAreNonnullByDefault;

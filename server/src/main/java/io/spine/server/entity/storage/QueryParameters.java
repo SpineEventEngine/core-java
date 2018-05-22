@@ -23,6 +23,7 @@ package io.spine.server.entity.storage;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.annotation.SPI;
 import io.spine.client.ColumnFilter;
 
@@ -116,12 +117,14 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter>,
             parameters = ImmutableList.builder();
         }
 
+        @CanIgnoreReturnValue
         public Builder add(CompositeQueryParameter parameter) {
             parameters.add(parameter);
             hasLifecycle |= parameter.hasLifecycle();
             return this;
         }
 
+        @CanIgnoreReturnValue
         public Builder addAll(Iterable<CompositeQueryParameter> parameters) {
             for (CompositeQueryParameter parameter : parameters) {
                 add(parameter);

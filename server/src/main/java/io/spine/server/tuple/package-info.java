@@ -86,8 +86,10 @@
  * {@link io.spine.server.tuple.Pair#withEither(com.google.protobuf.Message,
  * io.spine.server.tuple.Either) Pair.withEither()}.
  */
-
+@CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.server.tuple;
+
+import com.google.errorprone.annotations.CheckReturnValue;
 
 import javax.annotation.ParametersAreNonnullByDefault;

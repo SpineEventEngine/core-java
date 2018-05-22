@@ -21,8 +21,10 @@
 /**
  * This package contains classes and interfaces for obtaining entity identifiers.
  */
-
+@CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.server.route;
+
+import com.google.errorprone.annotations.CheckReturnValue;
 
 import javax.annotation.ParametersAreNonnullByDefault;

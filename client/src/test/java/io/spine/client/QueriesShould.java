@@ -22,7 +22,9 @@ package io.spine.client;
 import com.google.common.testing.NullPointerTester;
 import io.spine.test.client.TestEntity;
 import io.spine.type.TypeUrl;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.Assert.assertEquals;
@@ -35,6 +37,9 @@ public class QueriesShould {
 
     private static final String TARGET_ENTITY_TYPE_URL =
             "type.spine.io/spine.test.queries.TestEntity";
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     @Test
     public void have_private_constructor() {
@@ -58,7 +63,7 @@ public class QueriesShould {
         assertEquals(TARGET_ENTITY_TYPE_URL, type.toString());
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void throw_ISE_for_unknown_type() {
         final Target target = Target.newBuilder()
                                     .setType("nonexistent/message.type")
@@ -66,6 +71,8 @@ public class QueriesShould {
         final Query query = Query.newBuilder()
                                  .setTarget(target)
                                  .build();
+
+        thrown.expect(IllegalStateException.class);
         Queries.typeOf(query);
     }
 }

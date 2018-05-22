@@ -225,14 +225,15 @@ public abstract class HandlerMethod<M extends MessageClass, C extends Message> {
      * @return the result of message handling
      */
     public Object invoke(Object target, Message message, C context) {
+        checkNotNull(target);
         checkNotNull(message);
         checkNotNull(context);
         try {
-            final int paramCount = getParamCount();
-            final Object returnedValue = (paramCount == 1)
-                    ? method.invoke(target, message)
-                    : method.invoke(target, message, context);
-            return returnedValue;
+            int paramCount = getParamCount();
+            Object result = (paramCount == 1)
+                            ? method.invoke(target, message)
+                            : method.invoke(target, message, context);
+            return result;
         } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
             throw whyFailed(target, message, context, e);
         }

@@ -21,7 +21,9 @@
 package io.spine.change;
 
 import com.google.common.testing.NullPointerTester;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import static io.spine.change.BooleanMismatch.expectedTrue;
 import static io.spine.change.StringMismatch.expectedEmpty;
@@ -40,6 +42,9 @@ public class StringMismatchShould {
     private static final String NEW_VALUE = "new value to set";
 
     private static final int VERSION = 1;
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     @Test
     public void have_private_constructor() {
@@ -82,27 +87,31 @@ public class StringMismatchShould {
         assertEquals(VERSION, mismatch.getVersion());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void not_accept_same_expected_and_actual() {
         final String value = "same-same";
+        thrown.expect(IllegalArgumentException.class);
         unexpectedValue(value, value, NEW_VALUE, VERSION);
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void not_unpackExpected_if_its_not_a_IntMismatch() {
         final ValueMismatch mismatch = expectedTrue(VERSION);
+        thrown.expect(RuntimeException.class);
         unpackExpected(mismatch);
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void not_unpackActual_if_its_not_a_IntMismatch() {
         final ValueMismatch mismatch = expectedTrue(VERSION);
+        thrown.expect(RuntimeException.class);
         unpackActual(mismatch);
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void not_unpackNewValue_if_its_not_a_IntMismatch() {
         final ValueMismatch mismatch = expectedTrue(VERSION);
+        thrown.expect(RuntimeException.class);
         unpackNewValue(mismatch);
     }
 

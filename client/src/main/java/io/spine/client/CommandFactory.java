@@ -222,13 +222,15 @@ public final class CommandFactory {
         return result;
     }
 
+    @SuppressWarnings("CheckReturnValue") // calling builder
     private static CommandContext.Builder newContextBuilder(@Nullable TenantId tenantId,
                                                             UserId userId,
                                                             ZoneOffset zoneOffset) {
-        final ActorContext.Builder actorContext = ActorContext.newBuilder()
-                                                              .setActor(userId)
-                                                              .setTimestamp(getCurrentTime())
-                                                              .setZoneOffset(zoneOffset);
+        ActorContext.Builder actorContext =
+                ActorContext.newBuilder()
+                            .setActor(userId)
+                            .setTimestamp(getCurrentTime())
+                            .setZoneOffset(zoneOffset);
         if (tenantId != null) {
             actorContext.setTenantId(tenantId);
         }
@@ -248,11 +250,13 @@ public final class CommandFactory {
      * @return new {@code CommandContext}
      */
     private static CommandContext contextBasedOn(CommandContext value) {
-        final ActorContext.Builder withCurrentTime = value.getActorContext()
-                                                          .toBuilder()
-                                                          .setTimestamp(getCurrentTime());
-        final CommandContext.Builder result = value.toBuilder()
-                                                   .setActorContext(withCurrentTime);
+        ActorContext.Builder withCurrentTime =
+                value.getActorContext()
+                     .toBuilder()
+                     .setTimestamp(getCurrentTime());
+        CommandContext.Builder result =
+                value.toBuilder()
+                     .setActorContext(withCurrentTime);
         return result.build();
     }
 }
