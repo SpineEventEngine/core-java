@@ -140,7 +140,13 @@ public class CommandStore implements AutoCloseable {
     public void store(Command command, Exception exception) {
         checkNotClosed();
         keepTenantId(command);
-        repository.store(command, Errors.fromThrowable(exception));
+        final TenantAwareOperation op = new Operation(this, command) {
+            @Override
+            public void run() {
+                repository.store(command, Errors.fromThrowable(exception));
+            }
+        };
+        op.execute();
     }
 
     /**
