@@ -59,6 +59,20 @@ public class ColumnShould {
         reserializeAndAssert(column);
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored") // Just check that operation passes without an exception.
+    @Test
+    public void restore_getter_when_its_not_null_without_errors() {
+        final EntityColumn column = forMethod("getVersion", VersionableEntity.class);
+        column.restoreGetter();
+    }
+
+    @SuppressWarnings("ResultOfMethodCallIgnored") // Just check that operation passes without an exception.
+    @Test
+    public void restore_value_converter_when_its_not_null_without_errors() {
+        final EntityColumn column = forMethod("getVersion", VersionableEntity.class);
+        column.restoreValueConverter();
+    }
+
     @Test
     public void support_toString() {
         final EntityColumn column = forMethod("getVersion", VersionableEntity.class);

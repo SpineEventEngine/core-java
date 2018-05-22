@@ -459,7 +459,8 @@ public class EntityColumn implements Serializable {
         valueConverter = restoreValueConverter();
     }
 
-    private Method restoreGetter() {
+    @VisibleForTesting
+    Method restoreGetter() {
         if (getter != null) {
             return getter;
         }
@@ -474,7 +475,8 @@ public class EntityColumn implements Serializable {
         }
     }
 
-    private ColumnValueConverter restoreValueConverter() {
+    @VisibleForTesting
+    ColumnValueConverter restoreValueConverter() {
         if (valueConverter != null) {
             return valueConverter;
         }
