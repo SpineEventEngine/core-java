@@ -26,7 +26,8 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.spine.client.ColumnFilter.Operator;
 import io.spine.protobuf.AnyPacker;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
 
 import java.util.Calendar;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -52,22 +53,28 @@ import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Verify.assertContainsAll;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Dmytro Dashenkov
  */
-public class ColumnFiltersShould {
+@DisplayName("ColumnFilters utility should")
+class ColumnFiltersTest {
 
     private static final String COLUMN_NAME = "preciseColumn";
     private static final Timestamp COLUMN_VALUE = getCurrentTime();
 
+    @SuppressWarnings("DuplicateStringLiteralInspection") // Display name for utility c-tor test.
     @Test
-    public void have_private_util_ctor() {
+    @DisplayName("have private utility constructor")
+    void haveUtilityCtor() {
         assertHasPrivateParameterlessCtor(ColumnFilters.class);
     }
 
+    @SuppressWarnings("DuplicateStringLiteralInspection") // Display name for null test.
     @Test
-    public void not_accept_nulls() {
+    @DisplayName("not accept nulls for non-Nullable public method arguments")
+    void passNullToleranceCheck() {
         new NullPointerTester()
                 .setDefault(Timestamp.class, Timestamp.getDefaultInstance())
                 .setDefault(ColumnFilter.class, ColumnFilter.getDefaultInstance())
@@ -75,32 +82,38 @@ public class ColumnFiltersShould {
     }
 
     @Test
-    public void create_EQUALS_instances() {
+    @DisplayName("create `equals` column filter instance")
+    void createEquals() {
         checkCreatesInstance(eq(COLUMN_NAME, COLUMN_VALUE), EQUAL);
     }
 
     @Test
-    public void create_GREATER_THAN_instances() {
+    @DisplayName("create `greater than` column filter instance")
+    void createGreaterThan() {
         checkCreatesInstance(gt(COLUMN_NAME, COLUMN_VALUE), GREATER_THAN);
     }
 
     @Test
-    public void create_GREATER_OR_EQUAL_instances() {
+    @DisplayName("create `greater than or equals` column filter instance")
+    void createGreaterOrEqual() {
         checkCreatesInstance(ge(COLUMN_NAME, COLUMN_VALUE), GREATER_OR_EQUAL);
     }
 
     @Test
-    public void create_LESS_THAN_instances() {
+    @DisplayName("create `less than` column filter instance")
+    void createLessThan() {
         checkCreatesInstance(lt(COLUMN_NAME, COLUMN_VALUE), LESS_THAN);
     }
 
     @Test
-    public void create_LESS_OR_EQUAL_instances() {
+    @DisplayName("create `less than or equals` column filter instance")
+    void createLessOrEqual() {
         checkCreatesInstance(le(COLUMN_NAME, COLUMN_VALUE), LESS_OR_EQUAL);
     }
 
     @Test
-    public void create_ALL_grouping_instances() {
+    @DisplayName("create `all` composite column filter")
+    void createAllGrouping() {
         final ColumnFilter[] filters = {
                 le(COLUMN_NAME, COLUMN_VALUE),
                 ge(COLUMN_NAME, COLUMN_VALUE)
@@ -109,7 +122,8 @@ public class ColumnFiltersShould {
     }
 
     @Test
-    public void create_EITHER_grouping_instances() {
+    @DisplayName("create `either` composite column filter")
+    void createEitherGrouping() {
         final ColumnFilter[] filters = {
                 lt(COLUMN_NAME, COLUMN_VALUE),
                 gt(COLUMN_NAME, COLUMN_VALUE)
@@ -118,7 +132,8 @@ public class ColumnFiltersShould {
     }
 
     @Test
-    public void create_ordering_filters_for_numbers() {
+    @DisplayName("create ordering column filters for numbers")
+    void createOrderFilterForNumber() {
         final double number = 3.14;
         final ColumnFilter filter = le("doubleColumn", number);
         assertNotNull(filter);
@@ -128,7 +143,8 @@ public class ColumnFiltersShould {
     }
 
     @Test
-    public void create_ordering_filters_for_strings() {
+    @DisplayName("create ordering column filters for strings")
+    void createOrderFilterForString() {
         final String string = "abc";
         final ColumnFilter filter = gt("stringColumn", string);
         assertNotNull(filter);
@@ -137,21 +153,24 @@ public class ColumnFiltersShould {
         assertEquals(string, value.getValue());
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void fail_to_create_ordering_filters_for_enums() {
-        ge("enumColumn", EQUAL);
+    @Test
+    @DisplayName("fail to create ordering column filters for enumerated types")
+    void notCreateOrderFilterForEnum() {
+        assertThrows(IllegalArgumentException.class, () -> ge("enumColumn", EQUAL));
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void fail_to_create_ordering_filters_for_non_primitive_numbers() {
+    @Test
+    @DisplayName("fail to create ordering column filters for non primitive number types")
+    void notCreateOrderFilterForNonPrimitiveNumber() {
         final AtomicInteger number = new AtomicInteger(42);
-        ge("atomicColumn", number);
+        assertThrows(IllegalArgumentException.class, () -> ge("atomicColumn", number));
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void fail_to_create_ordering_filters_for_not_supported_types() {
+    @Test
+    @DisplayName("fail to create ordering column filters for not supported types")
+    void notCreateOrderFilterForNotSupportedType() {
         final Comparable<?> value = Calendar.getInstance(); // Comparable but not supported
-        le("invalidColumn", value);
+        assertThrows(IllegalArgumentException.class, () -> le("invalidColumn", value));
     }
 
     private static void checkCreatesInstance(ColumnFilter filter,

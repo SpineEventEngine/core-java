@@ -24,7 +24,8 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.InvalidProtocolBufferException;
 import io.grpc.Metadata;
 import io.spine.base.Error;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
 
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static junit.framework.TestCase.assertTrue;
@@ -35,16 +36,20 @@ import static org.junit.Assert.fail;
 /**
  * @author Dmytro Grankin
  */
-public class MetadataConverterShould {
+@DisplayName("Metadata converter should")
+class MetadataConverterTest {
 
+    @SuppressWarnings("DuplicateStringLiteralInspection") // Display name for utility c-tor test.
     @Test
-    public void have_private_constructor() {
+    @DisplayName("have private utility constructor")
+    void haveUtilityCtor() {
         assertHasPrivateParameterlessCtor(MetadataConverter.class);
     }
 
     @SuppressWarnings("ConstantConditions") // A part of the test.
     @Test
-    public void return_metadata_containing_error() throws InvalidProtocolBufferException {
+    @DisplayName("convert error to metadata")
+    void convertError() throws InvalidProtocolBufferException {
         final Error error = Error.getDefaultInstance();
         final Metadata metadata = MetadataConverter.toMetadata(error);
         final byte[] bytes = metadata.get(MetadataConverter.KEY);
@@ -52,7 +57,8 @@ public class MetadataConverterShould {
     }
 
     @Test
-    public void return_error_extracted_form_metadata() {
+    @DisplayName("convert metadata to error")
+    void convertMetadata() {
         final Error expectedError = Error.getDefaultInstance();
         final Metadata metadata = MetadataConverter.toMetadata(expectedError);
 
@@ -61,7 +67,8 @@ public class MetadataConverterShould {
     }
 
     @Test
-    public void return_absent_if_metadata_is_empty() {
+    @DisplayName("return absent when processing empty metadata")
+    void processEmptyMetadata() {
         final Metadata metadata = new Metadata();
 
         assertFalse(MetadataConverter.toError(metadata)
@@ -69,7 +76,8 @@ public class MetadataConverterShould {
     }
 
     @Test
-    public void throw_wrapped_InvalidProtocolBufferException_if_bytes_are_invalid() {
+    @DisplayName("throw wrapped InvalidProtocolBufferException if metadata bytes are invalid")
+    void throwOnInvalidBytes() {
         final Metadata metadata = new Metadata();
         metadata.put(MetadataConverter.KEY, new byte[]{(byte) 1});
 
@@ -81,8 +89,10 @@ public class MetadataConverterShould {
         }
     }
 
+    @SuppressWarnings("DuplicateStringLiteralInspection") // Display name for null test.
     @Test
-    public void pass_the_null_tolerance_check() {
+    @DisplayName("not accept nulls for non-Nullable public method arguments")
+    void passNullToleranceCheck() {
         new NullPointerTester()
                 .testAllPublicStaticMethods(MetadataConverter.class);
     }

@@ -32,6 +32,7 @@ import io.spine.test.client.TestEntity;
 import io.spine.test.queries.ProjectId;
 import io.spine.type.TypeUrl;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -70,14 +71,16 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Dmytro Dashenkov
  */
-public class QueryBuilderShould extends ActorRequestFactoryShould {
+public class QueryBuilderTest extends ActorRequestFactoryTest {
 
     @Test
+    @DisplayName("not accept nulls on creation")
     public void not_accept_nulls_on_creation() {
         new NullPointerTester().testAllPublicStaticMethods(QueryBuilder.class);
     }
 
     @Test
+    @DisplayName("create queries with type only")
     public void create_queries_with_type_only() {
         final Class<? extends Message> testEntityClass = TestEntity.class;
         final Query query = factory().query()
@@ -93,6 +96,7 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
     }
 
     @Test
+    @DisplayName("create queries with ids")
     public void create_queries_with_ids() {
         final int id1 = 314;
         final int id2 = 271;
@@ -117,6 +121,7 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
     }
 
     @Test
+    @DisplayName("create queries with field mask")
     public void create_queries_with_field_mask() {
         final String fieldName = "TestEntity.firstField";
         final Query query = factory().query()
@@ -133,6 +138,7 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
     }
 
     @Test
+    @DisplayName("create queries with param")
     public void create_queries_with_param() {
         final String columnName = "myImaginaryColumn";
         final Object columnValue = 42;
@@ -159,6 +165,7 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
     }
 
     @Test
+    @DisplayName("create queries with multiple params")
     public void create_queries_with_multiple_params() {
         final String columnName1 = "myColumn";
         final Object columnValue1 = 42;
@@ -193,6 +200,7 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
     @SuppressWarnings("OverlyLongMethod")
         // A big test for the grouping operators proper building.
     @Test
+    @DisplayName("create queries with grouping params")
     public void create_queries_with_grouping_params() {
         final String establishedTimeColumn = "establishedTime";
         final String companySizeColumn = "companySize";
@@ -258,6 +266,7 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
     @SuppressWarnings("OverlyLongMethod")
         // A big test case covering the query arguments coexistence.
     @Test
+    @DisplayName("create queries with all arguments")
     public void create_queries_with_all_arguments() {
         final Class<? extends Message> testEntityClass = TestEntity.class;
         final int id1 = 314;
@@ -314,6 +323,7 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
     }
 
     @Test
+    @DisplayName("persist only last ids clause")
     public void persist_only_last_ids_clause() {
         final Iterable<?> genericIds = asList(newUuid(),
                                               -1,
@@ -352,6 +362,7 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
     }
 
     @Test
+    @DisplayName("persist only last field mask")
     public void persist_only_last_field_mask() {
         final Iterable<String> iterableFields = singleton("TestEntity.firstField");
         final String[] arrayFields = {"TestEntity.secondField"};
@@ -370,6 +381,7 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
     }
 
     @Test
+    @DisplayName("support toString")
     public void support_toString() {
         final Class<? extends Message> testEntityClass = TestEntity.class;
         final int id1 = 314;

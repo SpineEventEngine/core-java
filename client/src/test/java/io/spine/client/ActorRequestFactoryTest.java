@@ -28,7 +28,9 @@ import io.spine.core.UserId;
 import io.spine.test.client.TestEntity;
 import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
-import org.junit.Test;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
 
 import java.util.Set;
 
@@ -41,13 +43,15 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Base tests for the {@linkplain ActorRequestFactory} descendants.
  *
  * @author Alex Tymchenko
  */
-public abstract class ActorRequestFactoryShould {
+@DisplayName("Actor request factory should")
+abstract class ActorRequestFactoryTest {
 
     private final UserId actor = of(newUuid());
     private final ZoneOffset zoneOffset = ZoneOffsets.UTC;
@@ -74,24 +78,31 @@ public abstract class ActorRequestFactoryShould {
         return factory().actorContext();
     }
 
-    @Test(expected = NullPointerException.class)
-    public void require_actor_in_Builder() {
-        builder().setZoneOffset(zoneOffset)
-                 .build();
+    @Nested
+    @DisplayName("in Builder")
+    class BuilderTest {
+
+        @Test
+        @DisplayName("require actor")
+        void requireActor() {
+            assertThrows(NullPointerException.class, () -> builder().setZoneOffset(zoneOffset).build());
+        }
+
+        @Test
+        @DisplayName("return set values")
+        void returnSetValues() {
+            final ActorRequestFactory.Builder builder = builder()
+                    .setActor(actor)
+                    .setZoneOffset(zoneOffset);
+            assertNotNull(builder.getActor());
+            assertNotNull(builder.getZoneOffset());
+            assertNull(builder.getTenantId());
+        }
     }
 
     @Test
-    public void return_set_values_in_Builder() {
-        final ActorRequestFactory.Builder builder = builder()
-                .setActor(actor)
-                .setZoneOffset(zoneOffset);
-        assertNotNull(builder.getActor());
-        assertNotNull(builder.getZoneOffset());
-        assertNull(builder.getTenantId());
-    }
-
-    @Test
-    public void create_instance_by_user() {
+    @DisplayName("be created for the given user")
+    void beCreatedByUser() {
         final int currentOffset = ZoneOffsets.getDefault()
                                              .getAmountSeconds();
         final ActorRequestFactory aFactory = builder()
@@ -104,27 +115,32 @@ public abstract class ActorRequestFactoryShould {
     }
 
     @Test
-    public void create_instance_by_user_and_timezone() {
+    @DisplayName("be created for the given user and timezone")
+    void beCreatedByUserAndTimezone() {
         assertEquals(actor, factory().getActor());
         assertEquals(zoneOffset, factory().getZoneOffset());
     }
 
     @Test
-    public void be_single_tenant_by_default() {
+    @DisplayName("be single tenant by default")
+    void beSingleTenantByDefault() {
         assertNull(factory().getTenantId());
     }
 
     @Test
-    public void support_moving_between_timezones() {
+    @DisplayName("support moving between timezones")
+    void moveBetweenTimezones() {
         final ActorRequestFactory factoryInAnotherTimezone =
                 factory().switchTimezone(ZoneOffsets.ofHours(-8));
         assertNotEquals(factory().getZoneOffset(), factoryInAnotherTimezone.getZoneOffset());
     }
 
     @SuppressWarnings({"SerializableNonStaticInnerClassWithoutSerialVersionUID",
-            "SerializableInnerClassWithNonSerializableOuterClass"})
+            "SerializableInnerClassWithNonSerializableOuterClass",
+            "DuplicateStringLiteralInspection"}) // Display name for null test.
     @Test
-    public void not_accept_nulls_as_public_method_arguments() {
+    @DisplayName("not accept nulls for non-Nullable public method arguments")
+    void passNullToleranceCheck() {
         new NullPointerTester()
                 .setDefault(Message.class, TestEntity.getDefaultInstance())
                 .setDefault((new TypeToken<Class<? extends Message>>() {

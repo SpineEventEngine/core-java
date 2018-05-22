@@ -25,7 +25,8 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.spine.base.Time;
 import io.spine.grpc.LoggingObserver.Level;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
 import org.slf4j.event.EventRecodingLogger;
 import org.slf4j.event.LoggingEvent;
 import org.slf4j.event.SubstituteLoggingEvent;
@@ -41,25 +42,30 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Alexander Yevsyukov
  */
-public class LoggingObserverShould {
+@DisplayName("Logging observer should")
+class LoggingObserverTest {
 
     @Test
-    public void have_TRACE_level() {
+    @DisplayName("process log events on `TRACE` level")
+    void haveTraceLevel() {
         assertAtLevel(Level.TRACE);
     }
 
     @Test
-    public void have_DEBUG_levels() {
+    @DisplayName("process log events on have `DEBUG` level")
+    void haveDebugLevel() {
         assertAtLevel(Level.DEBUG);
     }
 
     @Test
-    public void have_INFO_level() {
+    @DisplayName("process log events on have `INFO` level")
+    void haveInfoLevel() {
         assertAtLevel(Level.INFO);
     }
 
     @Test
-    public void have_WARN_level() {
+    @DisplayName("process log events on have `WARN` level")
+    void haveWarnLevel() {
         assertAtLevel(Level.WARN);
     }
 
@@ -123,7 +129,8 @@ public class LoggingObserverShould {
     }
 
     @Test
-    public void log_error() {
+    @DisplayName("log error")
+    void logError() {
         final LoggingObserver<Object> observer = getObserver(Level.INFO);
         observer.onError(new RuntimeException("Testing logging observer"));
     }

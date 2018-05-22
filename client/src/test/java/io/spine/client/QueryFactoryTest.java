@@ -26,7 +26,8 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.test.client.TestEntity;
 import io.spine.test.client.TestEntityId;
 import io.spine.type.TypeUrl;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -39,18 +40,21 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Alex Tymchenko
  */
 @SuppressWarnings("LocalVariableNamingConvention")
-public class QueryFactoryShould extends ActorRequestFactoryShould {
+@DisplayName("Query factory should")
+class QueryFactoryTest extends ActorRequestFactoryTest {
 
     // See {@code client_requests} for declaration.
     private static final Class<TestEntity> TARGET_ENTITY_CLASS = TestEntity.class;
 
     @Test
-    public void compose_proper_read_all_query() {
+    @DisplayName("compose proper `read all` query")
+    void composeReadAll() {
         final Query readAllQuery = factory().query()
                                             .all(TARGET_ENTITY_CLASS);
         assertNotNull(readAllQuery);
@@ -61,7 +65,8 @@ public class QueryFactoryShould extends ActorRequestFactoryShould {
     }
 
     @Test
-    public void compose_proper_read_all_query_with_single_path() {
+    @DisplayName("compose proper `read all` query with single path mask")
+    void composeReadAllWithSinglePath() {
         final String expectedEntityPath = singleTestEntityPath();
         final Query readAllWithPathFilteringQuery =
                 factory().query()
@@ -73,8 +78,8 @@ public class QueryFactoryShould extends ActorRequestFactoryShould {
     }
 
     @Test
-    public void compose_proper_read_all_query_with_multiple_random_paths() {
-
+    @DisplayName("compose proper `read all` query with multiple random paths mask")
+    void composeReadAllWithMultiplePaths() {
         final String[] paths = multipleRandomPaths();
         final Query readAllWithPathFilteringQuery =
                 factory().query()
@@ -86,7 +91,8 @@ public class QueryFactoryShould extends ActorRequestFactoryShould {
     }
 
     @Test
-    public void compose_proper_read_by_ids_query() {
+    @DisplayName("compose proper `read by ids` query")
+    void composeReadByIds() {
         final Set<TestEntityId> testEntityIds = multipleIds();
         final Query readByIdsQuery = factory().query()
                                               .byIds(TARGET_ENTITY_CLASS, testEntityIds);
@@ -100,7 +106,8 @@ public class QueryFactoryShould extends ActorRequestFactoryShould {
     }
 
     @Test
-    public void compose_proper_read_by_ids_query_with_single_path() {
+    @DisplayName("compose proper `read by ids` query with single path mask")
+    void composeReadByIdsWithSinglePath() {
         final Set<TestEntityId> testEntityIds = multipleIds();
         final String expectedPath = singleTestEntityPath();
         final Query readByIdsWithSinglePathQuery = factory().query()
@@ -117,7 +124,8 @@ public class QueryFactoryShould extends ActorRequestFactoryShould {
     }
 
     @Test
-    public void compose_proper_read_by_ids_query_with_multiple_random_paths() {
+    @DisplayName("compose proper `read by ids` query with multiple random paths mask")
+    void composeReadByIdsWithMultiplePaths() {
         final Set<TestEntityId> testEntityIds = multipleIds();
         final String[] paths = multipleRandomPaths();
         final Query readByIdsWithSinglePathQuery = factory().query()
@@ -133,16 +141,20 @@ public class QueryFactoryShould extends ActorRequestFactoryShould {
         verifyMultiplePathsInQuery(paths, readByIdsWithSinglePathQuery);
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void fail_to_create_query_with_empty_IDs_with_mask() {
-        factory().query()
-                 .byIdsWithMask(TestEntity.class,
-                                Collections.<Message>emptySet(),
-                                "", "");
+    @Test
+    @DisplayName("fail to create query with mask when id list is empty")
+    void notCreateMaskedQueryFromEmptyIds() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            factory().query()
+                    .byIdsWithMask(TestEntity.class,
+                            Collections.<Message>emptySet(),
+                            "", "")
+        });
     }
 
     @Test
-    public void build_consistent_with_QueryBuilder_ID_queries() {
+    @DisplayName("build query by IDs consistently with QueryBuilder")
+    void buildIDQueryConsistently() {
         final Set<TestEntityId> ids = multipleIds();
         final Query fromFactory = factory().query()
                                            .byIds(TestEntity.class, ids);
@@ -154,7 +166,8 @@ public class QueryFactoryShould extends ActorRequestFactoryShould {
     }
 
     @Test
-    public void build_consistent_with_QueryBuilder_queries_with_mask() {
+    @DisplayName("build query by mask consistently with QueryBuilder")
+    void buildMaskQueryConsistently() {
         final String field1 = "TestEntity.firstField";
         final String field2 = "TesEntity.barField";
 
@@ -171,7 +184,8 @@ public class QueryFactoryShould extends ActorRequestFactoryShould {
     }
 
     @Test
-    public void build_consistent_with_QueryBuilder_all_queries() {
+    @DisplayName("build `read all` query consistently with QueryBuilder")
+    void buildReadAllQueryConsistently() {
         final Query fromFactory = factory().query().all(TestEntity.class);
         final Query fromBuilder = factory().query()
                                            .select(TestEntity.class)
@@ -181,7 +195,8 @@ public class QueryFactoryShould extends ActorRequestFactoryShould {
     }
 
     @Test
-    public void build_consistent_with_QueryBuilder_ID_queries_with_mask() {
+    @DisplayName("build query by IDs with mask consistently with QueryBuilder")
+    void buildIDsWithMaskQueryConsistently() {
         final String field1 = "TestEntity.secondField";
         final String field2 = "TesEntity.fooField";
 

@@ -41,7 +41,8 @@ import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
 import io.spine.type.TypeName;
 import io.spine.type.TypeUrl;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
 
 import java.util.List;
 
@@ -59,6 +60,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Tests for {@linkplain Commands Commands utility class}.
@@ -68,21 +70,25 @@ import static org.junit.Assert.assertTrue;
  *
  * @author Alexander Yevsyukov
  */
-public class CommandsShould {
+@DisplayName("Commands utility should")
+class CommandsTest {
 
     private static final FileDescriptor DEFAULT_FILE_DESCRIPTOR = Any.getDescriptor()
                                                                      .getFile();
 
     private final TestActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(CommandsShould.class);
+            TestActorRequestFactory.newInstance(CommandsTest.class);
 
+    @SuppressWarnings("DuplicateStringLiteralInspection") // Display name for utility c-tor test.
     @Test
-    public void have_private_ctor() {
+    @DisplayName("have private utility constructor")
+    void haveUtilityCtor() {
         assertHasPrivateParameterlessCtor(Commands.class);
     }
 
     @Test
-    public void sort_commands_by_timestamp() {
+    @DisplayName("sort given commands by timestamp")
+    void sortByTimestamp() {
         final Command cmd1 = requestFactory.createCommand(StringValue.getDefaultInstance(),
                                                           minutesAgo(1));
         final Command cmd2 = requestFactory.createCommand(Int64Value.getDefaultInstance(),
@@ -99,7 +105,8 @@ public class CommandsShould {
     }
 
     @Test
-    public void check_if_contexts_have_same_actor_and_tenantId() {
+    @DisplayName("check if command contexts have same actor and tenantId")
+    void checkSameActorAndTenantId() {
         final ActorContext.Builder actorContext =
                 ActorContext.newBuilder()
                             .setActor(GivenUserId.newUuid())
@@ -116,8 +123,10 @@ public class CommandsShould {
         assertTrue(sameActorAndTenant(c1, c2));
     }
 
+    @SuppressWarnings("DuplicateStringLiteralInspection") // Display name for null test.
     @Test
-    public void pass_null_tolerance_test() {
+    @DisplayName("not accept nulls for non-Nullable public method arguments")
+    void passNullToleranceCheck() {
         new NullPointerTester()
                 .setDefault(FileDescriptor.class, DEFAULT_FILE_DESCRIPTOR)
                 .setDefault(Timestamp.class, getCurrentTime())
@@ -132,7 +141,8 @@ public class CommandsShould {
     }
 
     @Test
-    public void generate_command_ids() {
+    @DisplayName("generate command ids")
+    void generateCommandId() {
         final CommandId id = Commands.generateId();
 
         assertFalse(Identifier.toString(id)
@@ -140,7 +150,8 @@ public class CommandsShould {
     }
 
     @Test
-    public void extract_message_from_command() {
+    @DisplayName("extract message from given command")
+    void extractMessage() {
         final StringValue message = toMessage("extract_message_from_command");
 
         final Command command = requestFactory.createCommand(message);
@@ -148,7 +159,8 @@ public class CommandsShould {
     }
 
     @Test
-    public void create_wereAfter_predicate() {
+    @DisplayName("create `wereAfter` predicate")
+    void createWereAfterPredicate() {
         final Command command = requestFactory.command()
                                               .create(BoolValue.getDefaultInstance());
         assertTrue(Commands.wereAfter(secondsAgo(5))
@@ -156,7 +168,8 @@ public class CommandsShould {
     }
 
     @Test
-    public void create_wereBetween_predicate() {
+    @DisplayName("create `wereBetween` predicate")
+    void createWereBetweenPredicate() {
         final Command command1 = requestFactory.createCommand(StringValue.getDefaultInstance(),
                                                               minutesAgo(5));
         final Command command2 = requestFactory.createCommand(Int64Value.getDefaultInstance(),
@@ -180,7 +193,8 @@ public class CommandsShould {
     }
 
     @Test
-    public void when_command_delay_is_set_then_consider_it_scheduled() {
+    @DisplayName("consider command scheduled when command delay is set")
+    void recognizeScheduled() {
         final CommandContext context = GivenCommandContext.withScheduledDelayOf(seconds(10));
         final Command cmd = requestFactory.command()
                                           .createBasedOnContext(
@@ -190,22 +204,25 @@ public class CommandsShould {
     }
 
     @Test
-    public void when_no_scheduling_options_then_consider_command_not_scheduled() {
+    @DisplayName("consider command not scheduled when no scheduling options are present")
+    void recognizeNotScheduled() {
         final Command cmd = requestFactory.createCommand(StringValue.getDefaultInstance());
         assertFalse(Commands.isScheduled(cmd));
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void when_set_negative_delay_then_throw_exception() {
+    @Test
+    @DisplayName("throw exception when command delay set to negative")
+    void throwOnNegativeDelay() {
         final CommandContext context = GivenCommandContext.withScheduledDelayOf(seconds(-10));
         final Command cmd = requestFactory.command()
                                           .createBasedOnContext(StringValue.getDefaultInstance(),
                                                                 context);
-        Commands.isScheduled(cmd);
+        assertThrows(IllegalArgumentException.class, () -> Commands.isScheduled(cmd));
     }
 
     @Test
-    public void provide_stringifier_for_CommandId() {
+    @DisplayName("provide stringifier for CommandId")
+    void provideStringifierForId() {
         final CommandId id = Commands.generateId();
 
         final String str = Stringifiers.toString(id);
@@ -213,19 +230,23 @@ public class CommandsShould {
         assertEquals(id, convertedBack);
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void throw_exception_if_checked_command_id_is_empty() {
-        Commands.checkValid(CommandId.getDefaultInstance());
+    @Test
+    @DisplayName("throw exception when checked command id is empty")
+    void throwOnEmptyId() {
+        assertThrows(IllegalArgumentException.class,
+                     () -> Commands.checkValid(CommandId.getDefaultInstance()));
     }
 
     @Test
-    public void return_value_id_when_checked() {
+    @DisplayName("return command id value when checked")
+    void returnIdWhenChecked() {
         final CommandId id = Commands.generateId();
         assertEquals(id, Commands.checkValid(id));
     }
 
     @Test
-    public void obtain_type_of_command() {
+    @DisplayName("obtain type of given command")
+    void obtainCommandType() {
         final Command command = requestFactory.generateCommand();
 
         final TypeName typeName = CommandEnvelope.of(command)
@@ -235,9 +256,10 @@ public class CommandsShould {
     }
 
     @Test
-    public void obtain_type_url_of_command() {
+    @DisplayName("obtain type url of given command")
+    void obtainCommandTypeUrl() {
         final ActorRequestFactory factory =
-                TestActorRequestFactory.newInstance(CommandsShould.class);
+                TestActorRequestFactory.newInstance(CommandsTest.class);
         final StringValue message = toMessage(Identifier.newUuid());
         final Command command = factory.command()
                                        .create(message);

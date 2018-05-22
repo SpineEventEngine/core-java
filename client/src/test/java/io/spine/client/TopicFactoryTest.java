@@ -27,7 +27,8 @@ import io.spine.test.client.TestEntity;
 import io.spine.test.client.TestEntityId;
 import io.spine.type.TypeUrl;
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
 
 import java.util.List;
 import java.util.Set;
@@ -40,15 +41,17 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Alex Tymchenko
  */
-public class TopicFactoryShould
-        extends ActorRequestFactoryShould {
+@DisplayName("Topic factory should")
+class TopicFactoryTest
+        extends ActorRequestFactoryTest {
 
     // See {@code client_requests.proto} for declaration.
     private static final Class<TestEntity> TARGET_ENTITY_CLASS = TestEntity.class;
     private static final TypeUrl TARGET_ENTITY_TYPE_NAME = TypeUrl.of(TARGET_ENTITY_CLASS);
 
     @Test
-    public void create_topic_for_all_entities_of_kind() {
+    @DisplayName("create topic for all entities of kind")
+    void createForAllOfKind() {
         final Topic topic = factory().topic().allOf(TARGET_ENTITY_CLASS);
 
         verifyTargetAndContext(topic);
@@ -60,7 +63,8 @@ public class TopicFactoryShould
     }
 
     @Test
-    public void create_topic_for_some_entities_of_kind() {
+    @DisplayName("create topic for specified entities of kind")
+    void createForSomeOfKind() {
 
         final Set<TestEntityId> ids = newHashSet(entityId(1), entityId(2),
                                                  entityId(3));
@@ -81,7 +85,8 @@ public class TopicFactoryShould
     }
 
     @Test
-    public void create_topic_for_given_target() {
+    @DisplayName("create topic for given target")
+    void createForGivenTarget() {
         final Target givenTarget = Targets.allOf(TARGET_ENTITY_CLASS);
         final Topic topic = factory().topic().forTarget(givenTarget);
 

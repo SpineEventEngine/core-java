@@ -35,15 +35,19 @@ import io.spine.time.Timestamps2;
 import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
 import io.spine.validate.ValidationException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class CommandFactoryShould extends ActorRequestFactoryShould {
+@DisplayName("Command factory should")
+class CommandFactoryTest extends ActorRequestFactoryTest {
 
     @Test
-    public void create_command_context() {
+    @DisplayName("create command context for the given parameters")
+    void createCommandContext() {
         final TenantId tenantId = GivenTenantId.newUuid();
         final UserId userId = GivenUserId.newUuid();
         final ZoneOffset zoneOffset = ZoneOffsets.ofHours(-3);
@@ -63,7 +67,8 @@ public class CommandFactoryShould extends ActorRequestFactoryShould {
     }
 
     @Test
-    public void create_new_instances_with_current_time() {
+    @DisplayName("assign current time to created command instance")
+    void createWithTimestamp() {
         // We are creating a range of +/- second between the call to make sure the timestamp
         // would fit into this range. The purpose of this test is to make sure it works with
         // this precision and to add coverage.
@@ -79,7 +84,8 @@ public class CommandFactoryShould extends ActorRequestFactoryShould {
     }
 
     @Test
-    public void create_new_instance_with_entity_version() {
+    @DisplayName("create new command instance with given entity version")
+    void createWithEntityVersion() {
         final Command command = factory().command()
                                          .create(StringValue.getDefaultInstance(), 2);
 
@@ -88,7 +94,8 @@ public class CommandFactoryShould extends ActorRequestFactoryShould {
     }
 
     @Test
-    public void set_tenant_ID_in_commands_when_created_with_tenant_ID() {
+    @DisplayName("assign own tenant ID to created commands")
+    void createWithTenantID() {
         final TenantId tenantId = TenantId.newBuilder()
                                           .setValue(getClass().getSimpleName())
                                           .build();
@@ -105,17 +112,17 @@ public class CommandFactoryShould extends ActorRequestFactoryShould {
                                       .getTenantId());
     }
 
-    @Test(expected = ValidationException.class)
-    public void throw_ValidationException_once_passed_invalid_Message() {
+    @Test
+    @DisplayName("throw ValidationException once passed invalid Message")
+    void notCreateFromInvalidMessage() {
         final RequiredFieldCommand invalidCommand = RequiredFieldCommand.getDefaultInstance();
-        factory().command()
-                 .create(invalidCommand);
+        assertThrows(ValidationException.class, () -> factory().command().create(invalidCommand));
     }
 
-    @Test(expected = ValidationException.class)
-    public void throw_ValidationException_once_passed_invalid_Message_with_version() {
+    @Test
+    @DisplayName("throw ValidationException once passed invalid Message with version")
+    void notCreateFromInvalidMessageWithVersion() {
         final RequiredFieldCommand invalidCommand = RequiredFieldCommand.getDefaultInstance();
-        factory().command()
-                 .create(invalidCommand, 42);
+        assertThrows(ValidationException.class, () -> factory().command().create(invalidCommand, 42));
     }
 }

@@ -29,7 +29,8 @@ import io.grpc.stub.StreamObserver;
 import io.spine.base.Error;
 import io.spine.core.Response;
 import io.spine.test.Tests;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
 import org.mockito.ArgumentMatchers;
 
 import java.util.List;
@@ -53,25 +54,30 @@ import static org.mockito.Mockito.verify;
 /**
  * @author Alex Tymchenko
  */
-public class StreamObserversShould {
+@DisplayName("StreamObservers utility should")
+class StreamObserversTest {
 
+    @SuppressWarnings("DuplicateStringLiteralInspection") // Display name for utility c-tor test.
     @Test
-    public void have_utility_ctor() {
+    @DisplayName("have private utility constructor")
+    void haveUtilityCtor() {
         assertHasPrivateParameterlessCtor(StreamObservers.class);
     }
 
     @Test
-    public void return_non_null_empty_observer() {
+    @DisplayName("provide non-null empty observer")
+    void createEmptyObserver() {
         final StreamObserver<Response> emptyObserver = noOpObserver();
         assertNotNull(emptyObserver);
         // Call methods just to add to coverage.
-        emptyObserver.onNext(Tests.<Response>nullRef());
-        emptyObserver.onError(Tests.<Throwable>nullRef());
+        emptyObserver.onNext(Tests.nullRef());
+        emptyObserver.onError(Tests.nullRef());
         emptyObserver.onCompleted();
     }
 
     @Test
-    public void create_proper_error_forwarding_observer() {
+    @DisplayName("create proper error-forwarding observer")
+    void createErrorForwardingObserver() {
         @SuppressWarnings("unchecked")  // to make the mock creation look simpler.
         final StreamObserver<Object> delegate = mock(StreamObserver.class);
 
@@ -89,7 +95,8 @@ public class StreamObserversShould {
     }
 
     @Test
-    public void create_proper_memoizing_observer() {
+    @DisplayName("create proper memoizing observer")
+    void createMemoizingObserver() {
         final MemoizingObserver<Object> observer = StreamObservers.memoizingObserver();
 
         checkFirstResponse(observer);
@@ -148,7 +155,8 @@ public class StreamObserversShould {
      **************************/
 
     @Test
-    public void return_Error_extracted_from_StatusRuntimeException_metadata() {
+    @DisplayName("return Error extracted from StatusRuntimeException metadata")
+    void extractFromStatusRuntimeException() {
         final Error expectedError = Error.getDefaultInstance();
         final Metadata metadata = MetadataConverter.toMetadata(expectedError);
         final StatusRuntimeException statusRuntimeException =
@@ -159,7 +167,8 @@ public class StreamObserversShould {
     }
 
     @Test
-    public void return_Error_extracted_form_StatusException_metadata() {
+    @DisplayName("return Error extracted from StatusException metadata")
+    void extractFromStatusException() {
         final Error expectedError = Error.getDefaultInstance();
         final Metadata metadata = MetadataConverter.toMetadata(expectedError);
         final StatusException statusException = INVALID_ARGUMENT.asException(metadata);
@@ -169,7 +178,8 @@ public class StreamObserversShould {
     }
 
     @Test
-    public void return_absent_if_passed_Throwable_is_not_status_exception() {
+    @DisplayName("return absent if passed Throwable is not status exception")
+    void processGenericThrowable() {
         final String msg = "Neither a StatusException nor a StatusRuntimeException.";
         final Exception exception = new Exception(msg);
 
@@ -178,7 +188,8 @@ public class StreamObserversShould {
     }
 
     @Test
-    public void return_absent_if_there_is_no_error_in_metadata() {
+    @DisplayName("return absent if there is no error in metadata")
+    void processMetadataWithoutError() {
         final Metadata emptyMetadata = new Metadata();
         final Throwable statusRuntimeEx = INVALID_ARGUMENT.asRuntimeException(emptyMetadata);
 

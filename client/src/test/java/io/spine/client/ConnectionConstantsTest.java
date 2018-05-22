@@ -20,7 +20,8 @@
 
 package io.spine.client;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
 
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.Assert.assertNotEquals;
@@ -28,15 +29,19 @@ import static org.junit.Assert.assertNotEquals;
 /**
  * @author Alexander Yevsyukov
  */
-public class ConnectionConstantsShould {
+@DisplayName("ConnectionConstants should")
+class ConnectionConstantsTest {
 
+    @SuppressWarnings("DuplicateStringLiteralInspection") // Display name for utility c-tor test.
     @Test
-    public void have_utility_ctor() {
+    @DisplayName("have private utility constructor")
+    void haveUtilityCtor() {
         assertHasPrivateParameterlessCtor(ConnectionConstants.class);
     }
 
     @Test
-    public void declare_default_grpc_port() {
+    @DisplayName("declare non-zero default grpc port")
+    void declareDefaultGrpcPort() {
         assertNotEquals(0, ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT);
     }
 }

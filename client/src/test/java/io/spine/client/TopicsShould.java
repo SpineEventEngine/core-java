@@ -21,22 +21,28 @@
 package io.spine.client;
 
 import io.spine.test.Tests;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
 
 import static org.junit.Assert.assertFalse;
 
 /**
  * @author Alexander Yeveyukov
  */
-public class TopicsShould {
+@DisplayName("Topics utility should")
+class TopicsShould {
 
+    @SuppressWarnings("DuplicateStringLiteralInspection") // Display name for utility c-tor test.
     @Test
-    public void have_utility_ctor() {
+    @DisplayName("have private utility constructor")
+    void haveUtilityCtor() {
         Tests.assertHasPrivateParameterlessCtor(Topics.class);
     }
 
+    @SuppressWarnings("DuplicateStringLiteralInspection") // Display name for null test.
     @Test
-    public void generate_id() {
+    @DisplayName("not accept nulls for non-Nullable public method arguments")
+    void passNullToleranceCheck() {
         assertFalse(Topics.generateId()
                           .getValue()
                           .isEmpty());
