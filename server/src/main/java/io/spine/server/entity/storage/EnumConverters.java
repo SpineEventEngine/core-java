@@ -20,6 +20,7 @@
 
 package io.spine.server.entity.storage;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
@@ -44,6 +45,8 @@ final class EnumConverters {
      * @return the converter for the given enum type and the source class
      */
     static EnumConverter createFor(EnumType enumType, Class<? extends Enum> sourceType) {
+        checkNotNull(enumType);
+        checkNotNull(sourceType);
         switch (enumType) {
             case ORDINAL:
                 return new OrdinalEnumConverter(sourceType);
