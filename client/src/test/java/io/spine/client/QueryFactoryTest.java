@@ -148,7 +148,7 @@ class QueryFactoryTest extends ActorRequestFactoryTest {
             factory().query()
                     .byIdsWithMask(TestEntity.class,
                             Collections.<Message>emptySet(),
-                            "", "")
+                            "", "");
         });
     }
 
