@@ -144,12 +144,11 @@ class QueryFactoryTest extends ActorRequestFactoryTest {
     @Test
     @DisplayName("fail to create query with mask when id list is empty")
     void notCreateMaskedQueryFromEmptyIds() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            factory().query()
-                    .byIdsWithMask(TestEntity.class,
-                            Collections.<Message>emptySet(),
-                            "", "");
-        });
+        assertThrows(IllegalArgumentException.class,
+                     () -> factory().query()
+                                    .byIdsWithMask(TestEntity.class,
+                                                   Collections.<Message>emptySet(),
+                                                   "", ""));
     }
 
     @Test
