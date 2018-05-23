@@ -99,7 +99,7 @@ public final class EventStream {
      * @return new {@code EventStream}
      */
     public static EventStream of(Event... events) {
-        final List<Event> eventList = ImmutableList.copyOf(events);
+        final List<Event> eventList = copyOf(events);
         return new EventStream(eventList);
     }
 
