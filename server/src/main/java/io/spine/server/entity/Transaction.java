@@ -42,7 +42,7 @@ import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static java.lang.String.format;
 
 /**
- * The abstract class for the {@linkplain TransactionalEntity} transactions.
+ * The abstract class for the {@linkplain TransactionalEntity entity} transactions.
  *
  * <p>The transaction is a set of changes made to an entity state or entity attributes
  * (e.g. version, lifecycle flags etc).
