@@ -26,16 +26,28 @@ import io.spine.server.event.EventStream;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
+ * An {@link EventPlayer} which plays events upon the given {@link Transaction}.
+ *
  * @author Dmytro Dashenkov
  */
 final class TransactionalEventPlayer implements EventPlayer {
 
     private final Transaction<?, ?, ?, ?> transaction;
 
+    /**
+     * Creates a new instance of {@code TransactionalEventPlayer}.
+     *
+     * @param transaction the transaction
+     */
     TransactionalEventPlayer(Transaction<?, ?, ?, ?> transaction) {
         this.transaction = checkNotNull(transaction);
     }
 
+    /**
+     * Plays the given events upon the underlying entity transaction.
+     *
+     * @param events {@inheritDoc}
+     */
     @Override
     public void play(EventStream events) {
         events.events()
@@ -46,6 +58,6 @@ final class TransactionalEventPlayer implements EventPlayer {
 
     @Override
     public String toString() {
-        return "EventPlayer.forTransactionOf()";
+        return "EventPlayer.forTransactionOf(...)";
     }
 }

@@ -270,6 +270,13 @@ public abstract class Aggregate<I,
         method.invoke(this, eventMessage);
     }
 
+    /**
+     * Plays the given event stream upon this aggregate in a transaction.
+     *
+     * <p>It is expected that the aggregate is currently in a transaction.
+     *
+     * @param events {@inheritDoc}
+     */
     @Override
     public void play(EventStream events) {
         final EventPlayer eventPlayer = EventPlayer.forTransactionOf(this);

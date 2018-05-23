@@ -61,6 +61,13 @@ public abstract class Projection<I,
         super(id);
     }
 
+    /**
+     * Plays the given event stream upon this projection in a transaction.
+     *
+     * <p>It is expected that the projection is currently in a transaction.
+     *
+     * @param events {@inheritDoc}
+     */
     @Override
     public void play(EventStream events) {
         final EventPlayer eventPlayer = EventPlayer.forTransactionOf(this);

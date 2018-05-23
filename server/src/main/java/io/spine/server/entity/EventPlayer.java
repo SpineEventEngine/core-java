@@ -25,12 +25,31 @@ import io.spine.server.event.EventStream;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
+ * Plays events upon a certain entity.
+ *
  * @author Dmytro Dashenkov
+ * @see TransactionalEventPlayer
  */
 public interface EventPlayer {
 
+    /**
+     * Plays the given {@link EventStream} upon the underlying entity.
+     *
+     * <p>Typically, the entity state is changed upon this operation.
+     *
+     * @param events the event steam to play
+     */
     void play(EventStream events);
 
+    /**
+     * Creates a transactional {@code EventPlayer} for the given
+     * {@linkplain TransactionalEntity entity}.
+     *
+     * <p>It is expected that the given entity is currently in a transaction.
+     *
+     * @param entity the entity to create the player for
+     * @return new instance on {@code EventPlayer}
+     */
     static EventPlayer forTransactionOf(TransactionalEntity<?, ?, ?> entity) {
         checkNotNull(entity);
         return new TransactionalEventPlayer(entity.tx());
