@@ -23,7 +23,6 @@ package io.spine.server.entity.storage;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
-import com.google.gson.internal.Primitives;
 import io.spine.annotation.Internal;
 import io.spine.server.entity.Entity;
 
@@ -38,8 +37,10 @@ import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
+import static com.google.gson.internal.Primitives.wrap;
 import static io.spine.server.entity.storage.ColumnRecords.getAnnotatedVersion;
+import static io.spine.server.entity.storage.ColumnValueConverters.of;
+import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.lang.String.format;
 import static java.lang.reflect.Modifier.isPublic;
@@ -198,13 +199,28 @@ public class EntityColumn implements Serializable {
 
     private final boolean nullable;
 
-    private EntityColumn(Method getter, String name, String storedName, boolean nullable) {
+    /**
+     * The converter for the column values which transforms the value obtained from the getter into
+     * the type suitable for persistence in the data storage.
+     *
+     * <p>The field is effectively final and is left non-final for serialization purposes only.
+     *
+     * <p>The only place where this field is updated, except the constructor, is
+     * {@link #readObject(ObjectInputStream)} method.
+     */
+    private transient ColumnValueConverter valueConverter;
+
+    private EntityColumn(Method getter,
+                         String name,
+                         String storedName,
+                         boolean nullable) {
         this.getter = getter;
         this.entityType = getter.getDeclaringClass();
         this.getterMethodName = getter.getName();
         this.name = name;
         this.storedName = storedName;
         this.nullable = nullable;
+        this.valueConverter = of(getter);
     }
 
     /**
@@ -216,20 +232,24 @@ public class EntityColumn implements Serializable {
     public static EntityColumn from(Method getter) {
         checkGetter(getter);
         final String nameForQuery = nameFromGetter(getter);
-        final String nameForStore = nameFromAnnotation(getter).or(nameForQuery);
+        final Method annotatedVersion = retrieveAnnotatedVersion(getter);
+        final String nameForStore = nameFromAnnotation(annotatedVersion).or(nameForQuery);
         final boolean nullable = getter.isAnnotationPresent(Nullable.class);
         return new EntityColumn(getter, nameForQuery, nameForStore, nullable);
     }
 
-    private static Optional<String> nameFromAnnotation(Method getter) {
+    private static Method retrieveAnnotatedVersion(Method getter) {
         final Optional<Method> optionalMethod = getAnnotatedVersion(getter);
         if (!optionalMethod.isPresent()) {
             throw newIllegalStateException("Method `%s` is not an entity column getter.", getter);
         }
-        final Method annotatedVersion = optionalMethod.get();
-        final String trimmedName = annotatedVersion.getAnnotation(Column.class)
-                                                   .name()
-                                                   .trim();
+        return optionalMethod.get();
+    }
+
+    private static Optional<String> nameFromAnnotation(Method getter) {
+        final String trimmedName = getter.getAnnotation(Column.class)
+                                         .name()
+                                         .trim();
         return trimmedName.isEmpty()
                ? Optional.<String>absent()
                : Optional.of(trimmedName);
@@ -253,7 +273,7 @@ public class EntityColumn implements Serializable {
         checkArgument(isPublic(modifiers) && !isStatic(modifiers),
                       "Entity column getter should be public instance method.");
         final Class<?> returnType = getter.getReturnType();
-        final Class<?> wrapped = Primitives.wrap(returnType);
+        final Class<?> wrapped = wrap(returnType);
         checkArgument(Serializable.class.isAssignableFrom(wrapped),
                       format("Cannot create column of non-serializable type %s by method %s.",
                              returnType,
@@ -307,7 +327,8 @@ public class EntityColumn implements Serializable {
             if (!nullable) {
                 checkNotNull(result, format("Not null getter %s returned null.", getter.getName()));
             }
-            return result;
+            final Serializable value = toPersistedValue(result);
+            return value;
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new IllegalStateException(
                     format("Could not invoke getter of property %s from object %s",
@@ -337,7 +358,51 @@ public class EntityColumn implements Serializable {
      * @return the type of the column
      */
     public Class getType() {
-        return getter.getReturnType();
+        return valueConverter.getSourceType();
+    }
+
+    /**
+     * Returns the type under which the column values are persisted in the data storage.
+     *
+     * <p>For the non-{@link Enumerated} entity columns this type will be equal to the one
+     * retrieved via the {@link #getType()}.
+     *
+     * <p>For the {@link Enumerated} columns, see {@link EnumConverter} implementations.
+     *
+     * @return the persistence type of the column values
+     */
+    public Class getPersistedType() {
+        return valueConverter.getTargetType();
+    }
+
+    /**
+     * Converts the column value into the value for persistence in the data storage.
+     *
+     * <p>This method can be used to transform the value obtained through the {@link EntityColumn}
+     * getter into the corresponding value used for persistence in the data storage.
+     *
+     * <p>The value type should be the same as the one obtained through the {@link #getType()}. The
+     * output value type will be the same as {@link #getPersistedType()}.
+     *
+     * <p>As the column value may be {@linkplain #isNullable() nullable}, and all {@code null}
+     * values are persisted in the data storage as {@code null}, i.e. without any conversion, for
+     * the {@code null} input argument this method will always return {@code null}.
+     *
+     * <p>The method is accessible outside of the {@link EntityColumn} class to enable the proper
+     * {@link io.spine.client.ColumnFilter} conversion for the {@link Enumerated} column values.
+     *
+     * @param columnValue the column value to convert
+     * @return the column value converted to the form used for persistence in the data storage
+     * @throws IllegalArgumentException if the value type is not equal to the {@linkplain #getType()
+     *                                  entity column type}
+     */
+    @Nullable
+    public Serializable toPersistedValue(@Nullable Object columnValue) {
+        if (columnValue == null) {
+            return null;
+        }
+        checkTypeMatches(columnValue);
+        return valueConverter.convert(columnValue);
     }
 
     @SuppressWarnings("NonFinalFieldReferenceInEquals") // `getter` field is effectively final
@@ -368,14 +433,37 @@ public class EntityColumn implements Serializable {
         return sb.toString();
     }
 
+    /**
+     * Checks that the passed value's type is the same as the {@linkplain #getType() entity column
+     * type}.
+     *
+     * @param value the value to check
+     * @throws IllegalArgumentException in case the check fails
+     */
+    private void checkTypeMatches(Object value) {
+        final Class<?> columnType = wrap(getType());
+        final Class<?> valueType = wrap(value.getClass());
+        if (!columnType.isAssignableFrom(valueType)) {
+            throw newIllegalArgumentException(
+                    "Passed value type %s doesn't match column type %s.",
+                    valueType.getCanonicalName(),
+                    columnType.getCanonicalName()
+            );
+        }
+    }
+
     private void readObject(ObjectInputStream inputStream) throws IOException,
                                                                   ClassNotFoundException {
         inputStream.defaultReadObject();
         getter = restoreGetter();
+        valueConverter = restoreValueConverter();
     }
 
-    private Method restoreGetter() {
-        checkState(getter == null, "Getter method is already restored.");
+    @VisibleForTesting
+    Method restoreGetter() {
+        if (getter != null) {
+            return getter;
+        }
         try {
             final Method method = entityType.getMethod(getterMethodName);
             return method;
@@ -385,6 +473,15 @@ public class EntityColumn implements Serializable {
                                            getterMethodName);
             throw new IllegalStateException(errorMsg, e);
         }
+    }
+
+    @VisibleForTesting
+    ColumnValueConverter restoreValueConverter() {
+        if (valueConverter != null) {
+            return valueConverter;
+        }
+        final ColumnValueConverter converter = of(getter);
+        return converter;
     }
 
     /**
