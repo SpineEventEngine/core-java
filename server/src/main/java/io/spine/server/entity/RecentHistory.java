@@ -23,6 +23,7 @@ package io.spine.server.entity;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
 import io.spine.core.Event;
+import io.spine.server.event.EventStream;
 
 import java.util.Deque;
 import java.util.Iterator;

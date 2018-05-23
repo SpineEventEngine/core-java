@@ -24,6 +24,7 @@ import com.google.protobuf.StringValue;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.server.command.TestEventFactory;
+import io.spine.server.event.EventStream;
 import io.spine.validate.StringValueVBuilder;
 import org.junit.Test;
 

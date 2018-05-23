@@ -20,6 +20,8 @@
 
 package io.spine.server.entity;
 
+import io.spine.server.event.EventStream;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**

@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity;
+package io.spine.server.event;
 
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
@@ -85,7 +85,6 @@ public final class EventStream {
         return count() == 0;
     }
 
-    @Internal
     public List<Event> events() {
         return unmodifiableList(events);
     }

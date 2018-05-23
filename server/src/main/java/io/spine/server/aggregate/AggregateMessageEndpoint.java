@@ -23,8 +23,8 @@ package io.spine.server.aggregate;
 import com.google.protobuf.Message;
 import io.spine.core.ActorMessageEnvelope;
 import io.spine.server.entity.EntityMessageEndpoint;
-import io.spine.server.entity.EventStream;
 import io.spine.server.entity.LifecycleFlags;
+import io.spine.server.event.EventStream;
 
 import java.util.List;
 
