@@ -27,7 +27,6 @@ import io.spine.server.command.TestEventFactory;
 import io.spine.validate.StringValueVBuilder;
 import org.junit.Test;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.test.TestValues.newUuidValue;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.eq;
@@ -47,7 +46,7 @@ public class EventPlayingEntityShould {
     @Test(expected = IllegalStateException.class)
     public void require_active_transaction_to_play_events() {
         new EpeEntity().play(
-                newArrayList(eventFactory.createEvent(StringValue.getDefaultInstance()))
+                EventStream.of(eventFactory.createEvent(StringValue.getDefaultInstance()))
         );
     }
 
@@ -59,7 +58,7 @@ public class EventPlayingEntityShould {
         final Event firstEvent = eventFactory.createEvent(newUuidValue());
         final Event secondEvent = eventFactory.createEvent(newUuidValue());
 
-        entity.play(newArrayList(firstEvent, secondEvent));
+        entity.play(EventStream.of(firstEvent, secondEvent));
 
         verifyEventApplied(txMock, firstEvent);
         verifyEventApplied(txMock, secondEvent);
@@ -90,7 +89,7 @@ public class EventPlayingEntityShould {
         }
 
         @Override
-        public void play(Iterable<Event> events) {
+        public void play(EventStream events) {
             EventPlayer.forTransaction(this).play(events);
         }
     }

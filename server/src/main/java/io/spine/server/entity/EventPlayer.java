@@ -20,8 +20,6 @@
 
 package io.spine.server.entity;
 
-import io.spine.core.Event;
-
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -29,7 +27,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public interface EventPlayer {
 
-    void play(Iterable<Event> events);
+    void play(EventStream events);
 
     static EventPlayer forTransaction(TransactionalEntity<?, ?, ?> entity) {
         checkNotNull(entity);

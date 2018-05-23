@@ -20,11 +20,9 @@
 
 package io.spine.server.entity;
 
-import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.lang.String.format;
 
 /**
  * @author Dmytro Dashenkov
@@ -38,11 +36,11 @@ final class TransactionalEventPlayer implements EventPlayer {
     }
 
     @Override
-    public void play(Iterable<Event> events) {
-        for (Event event : events) {
-            final EventEnvelope eventEnvelope = EventEnvelope.of(event);
-            transaction.apply(eventEnvelope);
-        }
+    public void play(EventStream events) {
+        events.events()
+              .stream()
+              .map(EventEnvelope::of)
+              .forEach(transaction::apply);
     }
 
     @Override

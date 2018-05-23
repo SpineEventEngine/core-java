@@ -20,12 +20,9 @@
 package io.spine.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Predicate;
-import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
-import io.grpc.Internal;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
@@ -42,6 +39,7 @@ import io.spine.server.command.CommandHandlerMethod;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.entity.EventPlayer;
 import io.spine.server.entity.EventPlayingEntity;
+import io.spine.server.entity.EventStream;
 import io.spine.server.event.EventFactory;
 import io.spine.server.event.EventReactorMethod;
 import io.spine.server.model.Model;
@@ -49,16 +47,15 @@ import io.spine.server.rejection.RejectionReactorMethod;
 import io.spine.validate.ValidatingBuilder;
 
 import javax.annotation.CheckReturnValue;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import static com.google.common.collect.FluentIterable.from;
 import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Lists.newArrayListWithCapacity;
-import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.Events.getMessage;
 import static io.spine.validate.Validate.isNotDefault;
+import static java.util.stream.Collectors.toList;
 
 /**
  * Abstract base for aggregates.
@@ -135,7 +132,7 @@ public abstract class Aggregate<I,
      *
      * @see #commitEvents()
      */
-    private final List<Event> uncommittedEvents = newLinkedList();
+    private EventStream uncommittedEvents = EventStream.empty();
 
     /** A guard for ensuring idempotency of messages dispatched by this aggregate. */
     private IdempotencyGuard idempotencyGuard;
@@ -192,10 +189,11 @@ public abstract class Aggregate<I,
      *
      * <p>In {@code Aggregate}, this method must be called only from within an event applier.
      *
+     * <p>Overridden to expose into the {@code io.spine.server.aggregate} package.
+     *
      * @throws IllegalStateException if the method is called from outside an event applier
      */
     @Override
-    @VisibleForTesting
     protected B getBuilder() {
         return super.getBuilder();
     }
@@ -215,7 +213,7 @@ public abstract class Aggregate<I,
         final CommandHandlerMethod method = thisClass().getHandler(command.getMessageClass());
         final List<? extends Message> messages =
                 method.invoke(this, command.getMessage(), command.getCommandContext());
-        return from(messages).filter(nonEmpty()).toList();
+        return nonEmpty(messages);
     }
 
     /**
@@ -232,7 +230,7 @@ public abstract class Aggregate<I,
         final EventReactorMethod method = thisClass().getReactor(event.getMessageClass());
         final List<? extends Message> messages =
                 method.invoke(this, event.getMessage(), event.getEventContext());
-        return from(messages).filter(nonEmpty()).toList();
+        return nonEmpty(messages);
     }
 
     /**
@@ -252,7 +250,13 @@ public abstract class Aggregate<I,
                                                                      commandClass);
         final List<? extends Message> messages =
                 method.invoke(this, rejection.getMessage(), rejection.getRejectionContext());
-        return from(messages).filter(nonEmpty()).toList();
+        return nonEmpty(messages);
+    }
+
+    private static List<? extends Message> nonEmpty(Collection<? extends Message> messages) {
+        return messages.stream()
+                       .filter(NonEmpty.PREDICATE)
+                       .collect(toList());
     }
 
     /**
@@ -263,6 +267,12 @@ public abstract class Aggregate<I,
     void invokeApplier(Message eventMessage) {
         final EventApplierMethod method = thisClass().getApplier(EventClass.of(eventMessage));
         method.invoke(this, eventMessage);
+    }
+
+    @Override
+    public void play(EventStream events) {
+        final EventPlayer eventPlayer = EventPlayer.forTransaction(this);
+        eventPlayer.play(events);
     }
 
     /**
@@ -282,8 +292,7 @@ public abstract class Aggregate<I,
         if (isNotDefault(snapshot)) {
             restore(snapshot);
         }
-        final List<Event> events = aggregateStateRecord.getEventList();
-
+        final EventStream events = EventStream.from(aggregateStateRecord);
         play(events);
         remember(events);
     }
@@ -300,7 +309,7 @@ public abstract class Aggregate<I,
         final EventFactory eventFactory =
                 EventFactory.on(origin, getProducerId());
 
-        final List<Event> events = newArrayListWithCapacity(messages.size());
+        final EventStream.Builder events = EventStream.newBuilder();
 
         Version projectedEventVersion = getVersion();
 
@@ -324,8 +333,9 @@ public abstract class Aggregate<I,
             }
             events.add(event);
         }
-        play(events);
-        uncommittedEvents.addAll(events);
+        final EventStream eventStream = events.build();
+        play(eventStream);
+        uncommittedEvents = uncommittedEvents.concat(eventStream);
     }
 
     /**
@@ -396,17 +406,16 @@ public abstract class Aggregate<I,
      * @return immutable view of all uncommitted events
      */
     @CheckReturnValue
-    List<Event> getUncommittedEvents() {
-        return ImmutableList.copyOf(uncommittedEvents);
+    EventStream getUncommittedEvents() {
+        return uncommittedEvents;
     }
 
     /**
      * Obtains the number of uncommitted events.
      */
-    @Internal
     @VisibleForTesting
     protected int uncommittedEventsCount() {
-        return uncommittedEvents.size();
+        return uncommittedEvents.count();
     }
 
     /**
@@ -414,11 +423,11 @@ public abstract class Aggregate<I,
      *
      * @return the list of events
      */
-    List<Event> commitEvents() {
-        final List<Event> result = ImmutableList.copyOf(uncommittedEvents);
-        uncommittedEvents.clear();
-        remember(result);
-        return result;
+    EventStream commitEvents() {
+        final EventStream events = uncommittedEvents;
+        uncommittedEvents = EventStream.empty();
+        remember(events);
+        return events;
     }
 
     /**
@@ -460,7 +469,7 @@ public abstract class Aggregate<I,
      * Creates an iterator of the aggregate event history with reverse traversal.
      *
      * <p>The records are returned sorted by timestamp in a descending order (from newer to older).
-     * 
+     *
      * <p>The iterator is empty if there's no history for the aggregate.
      *
      * @return new iterator instance
@@ -481,24 +490,10 @@ public abstract class Aggregate<I,
     }
 
     /**
-     * @return an instance of an {@linkplain NonEmpty non-empty predicate}
-     */
-    private static Predicate<Message> nonEmpty() {
-        return NonEmpty.INSTANCE;
-    }
-
-    @Override
-    public void play(Iterable<Event> events) {
-        final EventPlayer eventPlayer = EventPlayer.forTransaction(this);
-        eventPlayer.play(events);
-    }
-
-    /**
      * A predicate checking that message is not {@linkplain Empty empty}.
      */
-    private enum NonEmpty implements Predicate<Message> {
-
-        INSTANCE;
+    private enum NonEmpty implements java.util.function.Predicate<Message> {
+        PREDICATE;
 
         private static final Empty EMPTY = Empty.getDefaultInstance();
 
@@ -509,7 +504,7 @@ public abstract class Aggregate<I,
          * @return {@code true} if the message is not empty, {@code false} otherwise 
          */
         @Override
-        public boolean apply(Message message) {
+        public boolean test(Message message) {
             return !message.equals(EMPTY);
         }
     }

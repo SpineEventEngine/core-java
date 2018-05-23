@@ -25,6 +25,7 @@ import io.spine.core.Event;
 import io.spine.core.Subscribe;
 import io.spine.core.Version;
 import io.spine.core.Versions;
+import io.spine.server.entity.EventStream;
 import io.spine.server.entity.ThrowingValidatingBuilder;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionListener;
@@ -38,7 +39,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.annotation.Nullable;
-import java.util.Collections;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newLinkedList;
@@ -171,7 +171,7 @@ public class ProjectionTransactionShould
         final Projection<ProjectId, Project, PatchedProjectBuilder> entity = createEntity();
         final Version oldVersion = entity.getVersion();
         final Event event = createEvent(createEventMessage());
-        Projection.play(entity, Collections.singleton(event));
+        Projection.play(entity, EventStream.of(event));
         final Version expected = Versions.increment(oldVersion);
         assertEquals(expected.getNumber(), entity.getVersion().getNumber());
         assertNotEquals(event.getContext().getVersion(), entity.getVersion());

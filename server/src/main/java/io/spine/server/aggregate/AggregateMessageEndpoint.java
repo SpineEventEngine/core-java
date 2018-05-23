@@ -22,8 +22,8 @@ package io.spine.server.aggregate;
 
 import com.google.protobuf.Message;
 import io.spine.core.ActorMessageEnvelope;
-import io.spine.core.Event;
 import io.spine.server.entity.EntityMessageEndpoint;
+import io.spine.server.entity.EventStream;
 import io.spine.server.entity.LifecycleFlags;
 
 import java.util.List;
@@ -77,7 +77,7 @@ abstract class AggregateMessageEndpoint<I,
 
     @Override
     protected boolean isModified(A aggregate) {
-        final List<Event> events = aggregate.getUncommittedEvents();
+        final EventStream events = aggregate.getUncommittedEvents();
         return !events.isEmpty();
     }
 

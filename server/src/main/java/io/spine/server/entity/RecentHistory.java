@@ -84,15 +84,9 @@ public final class RecentHistory {
         return events.iterator();
     }
 
-    /**
-     * Adds events to the history.
-     *
-     * @param events events in the chronological order
-     */
-    void addAll(Iterable<Event> events) {
-        for (Event event : events) {
-            history.addFirst(event);
-        }
+    void append(EventStream stream) {
+        stream.events()
+              .forEach(history::addFirst);
     }
 
     @Override

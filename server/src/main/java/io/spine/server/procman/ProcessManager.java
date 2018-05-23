@@ -20,7 +20,6 @@
 
 package io.spine.server.procman;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
@@ -119,7 +118,6 @@ public abstract class ProcessManager<I,
      *         if the method is called from outside an event/rejection reactor or a command handler
      */
     @Override
-    @VisibleForTesting
     protected B getBuilder() {
         return super.getBuilder();
     }

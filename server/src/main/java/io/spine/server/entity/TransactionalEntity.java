@@ -23,7 +23,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
 import io.spine.core.Version;
 import io.spine.reflect.GenericTypeIndex;
 import io.spine.validate.ValidatingBuilder;
@@ -82,8 +81,8 @@ public abstract class TransactionalEntity<I,
     /**
      * Adds events to the {@linkplain #recentHistory() recent history}.
      */
-    protected void remember(Iterable<Event> events) {
-        recentHistory.addAll(events);
+    protected void remember(EventStream events) {
+        recentHistory.append(events);
     }
 
     /**
@@ -92,7 +91,6 @@ public abstract class TransactionalEntity<I,
     protected void clearRecentHistory() {
         recentHistory.clear();
     }
-
     /**
      * Determines whether the state of this entity or its lifecycle flags have been modified
      * since this entity instance creation.
