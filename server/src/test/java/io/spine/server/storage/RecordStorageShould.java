@@ -44,7 +44,7 @@ import io.spine.protobuf.TypeConverter;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.EntityWithLifecycle;
-import io.spine.server.entity.EventPlayingEntity;
+import io.spine.server.entity.TransactionalEntity;
 import io.spine.server.entity.FieldMasks;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.TestTransaction;
@@ -738,9 +738,9 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     }
 
     @SuppressWarnings("unused") // Reflective access
-    public static class TestCounterEntity<I> extends EventPlayingEntity<I,
-                                                                        Project,
-                                                                        ProjectVBuilder> {
+    public static class TestCounterEntity<I> extends TransactionalEntity<I,
+                                                                            Project,
+                                                                            ProjectVBuilder> {
 
         private int counter = 0;
 
