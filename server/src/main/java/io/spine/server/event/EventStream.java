@@ -21,7 +21,6 @@
 package io.spine.server.event;
 
 import com.google.common.base.Objects;
-import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import io.spine.core.Event;
