@@ -240,9 +240,9 @@ public abstract class TransactionalEntity<I,
 
     private B newBuilderInstance() {
         @SuppressWarnings("unchecked")   // it's safe, as we rely on the definition of this class.
-        final Class<? extends TransactionalEntity<I, S, B>> aClass =
-                (Class<? extends TransactionalEntity<I, S, B>>)getClass();
-        final Class<B> builderClass = TypeInfo.getBuilderClass(aClass);
+        final Class<? extends TransactionalEntity<I, S, B>> cls =
+                (Class<? extends TransactionalEntity<I, S, B>>) getClass();
+        final Class<B> builderClass = TypeInfo.getBuilderClass(cls);
         final B builder = ValidatingBuilders.newInstance(builderClass);
         return builder;
     }
@@ -283,8 +283,10 @@ public abstract class TransactionalEntity<I,
      */
     static class TypeInfo {
 
+        /**
+         * Prevents instantiation.
+         */
         private TypeInfo() {
-            // Prevent construction from outside.
         }
 
         /**

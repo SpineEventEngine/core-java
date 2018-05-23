@@ -795,8 +795,8 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
 
     @SuppressWarnings("unused") // Reflective access
     public static class TestCounterEntity<I> extends TransactionalEntity<I,
-                                                                            Project,
-                                                                            ProjectVBuilder> {
+                                                                         Project,
+                                                                         ProjectVBuilder> {
 
         private int counter = 0;
 

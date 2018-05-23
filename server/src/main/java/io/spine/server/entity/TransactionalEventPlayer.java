@@ -46,6 +46,6 @@ final class TransactionalEventPlayer implements EventPlayer {
 
     @Override
     public String toString() {
-        return "EventPlayer.forTransaction()";
+        return "EventPlayer.forTransactionOf()";
     }
 }

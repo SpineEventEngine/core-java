@@ -50,6 +50,7 @@ import javax.annotation.CheckReturnValue;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Predicate;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.base.Time.getCurrentTime;
@@ -271,7 +272,7 @@ public abstract class Aggregate<I,
 
     @Override
     public void play(EventStream events) {
-        final EventPlayer eventPlayer = EventPlayer.forTransaction(this);
+        final EventPlayer eventPlayer = EventPlayer.forTransactionOf(this);
         eventPlayer.play(events);
     }
 
@@ -492,7 +493,7 @@ public abstract class Aggregate<I,
     /**
      * A predicate checking that message is not {@linkplain Empty empty}.
      */
-    private enum NonEmpty implements java.util.function.Predicate<Message> {
+    private enum NonEmpty implements Predicate<Message> {
         PREDICATE;
 
         private static final Empty EMPTY = Empty.getDefaultInstance();

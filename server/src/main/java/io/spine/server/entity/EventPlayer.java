@@ -31,7 +31,7 @@ public interface EventPlayer {
 
     void play(EventStream events);
 
-    static EventPlayer forTransaction(TransactionalEntity<?, ?, ?> entity) {
+    static EventPlayer forTransactionOf(TransactionalEntity<?, ?, ?> entity) {
         checkNotNull(entity);
         return new TransactionalEventPlayer(entity.tx());
     }

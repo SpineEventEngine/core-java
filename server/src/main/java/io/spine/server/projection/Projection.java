@@ -63,7 +63,7 @@ public abstract class Projection<I,
 
     @Override
     public void play(EventStream events) {
-        final EventPlayer eventPlayer = EventPlayer.forTransaction(this);
+        final EventPlayer eventPlayer = EventPlayer.forTransactionOf(this);
         eventPlayer.play(events);
     }
 
