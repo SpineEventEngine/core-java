@@ -105,9 +105,10 @@ public abstract class EventPlayingEntity <I,
     @Internal
     public boolean isChanged() {
         final boolean lifecycleFlagsChanged = lifecycleFlagsChanged();
-        final boolean stateChanged = transaction != null
-                ? transaction.isStateChanged()
-                : this.stateChanged;
+        final Transaction<?, ?, ?, ?> tx = this.transaction;
+        final boolean stateChanged = tx != null
+                                     ? tx.isStateChanged()
+                                     : this.stateChanged;
 
         return stateChanged || lifecycleFlagsChanged;
     }
@@ -150,7 +151,8 @@ public abstract class EventPlayingEntity <I,
      */
     @VisibleForTesting
     boolean isTransactionInProgress() {
-        final boolean result = transaction != null && transaction.isActive();
+        final Transaction<?, ?, ?, ?> tx = this.transaction;
+        final boolean result = tx != null && tx.isActive();
         return result;
     }
 
