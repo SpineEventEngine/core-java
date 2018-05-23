@@ -139,7 +139,7 @@ public abstract class TransactionalEntity<I,
         return "Cannot modify entity state: transaction is not available.";
     }
 
-    private Transaction<I, ? extends TransactionalEntity<I,S,B>, S, B> tx() {
+    Transaction<I, ? extends TransactionalEntity<I,S,B>, S, B> tx() {
         ensureTransaction();
         return transaction;
     }
@@ -154,27 +154,6 @@ public abstract class TransactionalEntity<I,
         final Transaction<?, ?, ?, ?> tx = this.transaction;
         final boolean result = tx != null && tx.isActive();
         return result;
-    }
-
-    /**
-     * Plays the given events upon this entity.
-     *
-     * <p>Please note that the entity version is set according to the version of the event context.
-     * Therefore, if the passed event(s) are in fact so called "integration" events and originated
-     * from another application, they should be properly imported first.
-     * Otherwise, the version conflict is possible.
-     *
-     * <p>Execution of this method requires the {@linkplain #isTransactionInProgress()
-     * presence of active transaction}.
-     *
-     * @param events the events to play
-     */
-    protected void play(Iterable<Event> events) {
-        final Transaction<I, ? extends TransactionalEntity<I, S, B>, S, B> tx = tx();
-        for (Event event : events) {
-            final EventEnvelope eventEnvelope = EventEnvelope.of(event);
-            tx.apply(eventEnvelope);
-        }
     }
 
     @SuppressWarnings("ObjectEquality") // the refs must to point to the same object; see below.

@@ -40,6 +40,8 @@ import io.spine.core.Versions;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.command.CommandHandlerMethod;
 import io.spine.server.command.CommandHandlingEntity;
+import io.spine.server.entity.EventPlayer;
+import io.spine.server.entity.EventPlayingEntity;
 import io.spine.server.event.EventFactory;
 import io.spine.server.event.EventReactorMethod;
 import io.spine.server.model.Model;
@@ -125,7 +127,8 @@ import static io.spine.validate.Validate.isNotDefault;
 public abstract class Aggregate<I,
                                 S extends Message,
                                 B extends ValidatingBuilder<S, ? extends Message.Builder>>
-                extends CommandHandlingEntity<I, S, B> {
+        extends CommandHandlingEntity<I, S, B>
+        implements EventPlayingEntity<I, S> {
 
     /**
      * Events generated in the process of handling commands that were not yet committed.
@@ -482,6 +485,12 @@ public abstract class Aggregate<I,
      */
     private static Predicate<Message> nonEmpty() {
         return NonEmpty.INSTANCE;
+    }
+
+    @Override
+    public void play(Iterable<Event> events) {
+        final EventPlayer eventPlayer = EventPlayer.forTransaction(this);
+        eventPlayer.play(events);
     }
 
     /**

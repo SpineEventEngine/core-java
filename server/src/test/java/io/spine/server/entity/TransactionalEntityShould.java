@@ -21,10 +21,7 @@ package io.spine.server.entity;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
-import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
 import io.spine.core.Version;
-import io.spine.server.command.TestEventFactory;
 import io.spine.validate.StringValueVBuilder;
 import io.spine.validate.ValidatingBuilder;
 import org.junit.Test;
@@ -49,11 +46,8 @@ import static org.mockito.Mockito.when;
  */
 public class TransactionalEntityShould {
 
-    private final TestEventFactory eventFactory =
-            TestEventFactory.newInstance(TransactionalEntityShould.class);
-
     protected TransactionalEntity newEntity() {
-        return new EpeEntity(1L);
+        return new TeEntity(1L);
     }
 
     @Test
@@ -157,29 +151,6 @@ public class TransactionalEntityShould {
         entity.setDeleted(true);
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void require_active_transaction_to_play_events() {
-        newEntity().play(newArrayList(eventFactory.createEvent(StringValue.getDefaultInstance())));
-    }
-
-    @Test
-    public void delegate_applying_events_to_tx_when_playing() {
-        final TransactionalEntity entity = entityWithActiveTx(false);
-        final Transaction txMock = entity.getTransaction();
-        assertNotNull(txMock);
-        final Event firstEvent = eventFactory.createEvent(newUuidValue());
-        final Event secondEvent = eventFactory.createEvent(newUuidValue());
-
-        entity.play(newArrayList(firstEvent, secondEvent));
-
-        verifyEventApplied(txMock, firstEvent);
-        verifyEventApplied(txMock, secondEvent);
-    }
-
-    private static void verifyEventApplied(Transaction txMock, Event event) {
-        verify(txMock).apply(eq(EventEnvelope.of(event)));
-    }
-
     @Test
     public void return_tx_lifecycleFlags_if_tx_is_active() {
         final TransactionalEntity entity = entityWithInactiveTx();
@@ -245,7 +216,7 @@ public class TransactionalEntityShould {
         return entity;
     }
 
-    private static class EpeEntity
+    private static class TeEntity
             extends TransactionalEntity<Long, StringValue, StringValueVBuilder> {
 
         /**
@@ -255,7 +226,7 @@ public class TransactionalEntityShould {
          * @throws IllegalArgumentException if the ID is not of one of the
          *                                  {@linkplain Entity supported types}
          */
-        private EpeEntity(Long id) {
+        private TeEntity(Long id) {
             super(id);
         }
     }

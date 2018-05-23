@@ -26,6 +26,8 @@ import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
+import io.spine.server.entity.EventPlayer;
+import io.spine.server.entity.EventPlayingEntity;
 import io.spine.server.entity.TransactionalEntity;
 import io.spine.server.event.EventSubscriberMethod;
 import io.spine.server.model.Model;
@@ -47,7 +49,8 @@ import io.spine.validate.ValidatingBuilder;
 public abstract class Projection<I,
                                  M extends Message,
                                  B extends ValidatingBuilder<M, ? extends Message.Builder>>
-        extends TransactionalEntity<I, M, B> {
+        extends TransactionalEntity<I, M, B>
+        implements EventPlayingEntity<I, M> {
 
     /**
      * Creates a new instance.
@@ -104,5 +107,11 @@ public abstract class Projection<I,
     void apply(Message eventMessage, EventContext eventContext)  {
         final EventSubscriberMethod method = thisClass().getSubscriber(EventClass.of(eventMessage));
         method.invoke(this, eventMessage, eventContext);
+    }
+
+    @Override
+    public void play(Iterable<Event> events) {
+        final EventPlayer eventPlayer = EventPlayer.forTransaction(this);
+        eventPlayer.play(events);
     }
 }
