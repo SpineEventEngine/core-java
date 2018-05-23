@@ -59,15 +59,6 @@ public final class EventStream {
         return new EventStream(events);
     }
 
-    public EventStream concat(EventStream other) {
-        final int expectedSize = this.events.size() + other.events.size();
-        final List<Event> events = newArrayListWithCapacity(expectedSize);
-        events.addAll(this.events);
-        events.addAll(other.events);
-        final EventStream result = new EventStream(events);
-        return result;
-    }
-
     public static EventStream empty() {
         return Empty.INSTANCE.value;
     }
@@ -75,6 +66,15 @@ public final class EventStream {
     public static EventStream of(Event... events) {
         final List<Event> eventList = ImmutableList.copyOf(events);
         return new EventStream(eventList);
+    }
+
+    public EventStream concat(EventStream other) {
+        final int expectedSize = this.events.size() + other.events.size();
+        final List<Event> events = newArrayListWithCapacity(expectedSize);
+        events.addAll(this.events);
+        events.addAll(other.events);
+        final EventStream result = new EventStream(events);
+        return result;
     }
 
     public int count() {
