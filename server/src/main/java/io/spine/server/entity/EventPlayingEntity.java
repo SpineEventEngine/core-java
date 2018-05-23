@@ -21,8 +21,11 @@
 package io.spine.server.entity;
 
 import com.google.protobuf.Message;
+import io.spine.core.Event;
 
 /**
+ * A base for entities, which can play {@linkplain Event events}.
+ *
  * @author Dmytro Dashenkov
  */
 public interface EventPlayingEntity<I, S extends Message> extends Entity<I, S>, EventPlayer {

@@ -36,7 +36,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static io.spine.server.entity.TransactionalEntity.GenericParameter.STATE_BUILDER;
 
 /**
- * A base for entities, which can play {@linkplain Event events}.
+ * A base for entities, perform transactions {@linkplain Event events}.
  *
  * <p>Defines a transaction-based mechanism for state, version and lifecycle flags update.
  *
