@@ -21,14 +21,17 @@
 package io.spine.server.event;
 
 import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
+import com.google.protobuf.Empty;
 import io.spine.core.Event;
 import io.spine.server.aggregate.AggregateStateRecord;
 
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.copyOf;
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static com.google.common.collect.Lists.newLinkedList;
@@ -59,7 +62,10 @@ public final class EventStream {
 
     public static EventStream from(AggregateStateRecord record) {
         final List<Event> events = record.getEventList();
-        return new EventStream(events);
+        final EventStream result = events.isEmpty()
+                                   ? empty()
+                                   : new EventStream(events);
+        return result;
     }
 
     public static EventStream empty() {
@@ -67,17 +73,28 @@ public final class EventStream {
     }
 
     public static EventStream of(Event... events) {
-        final List<Event> eventList = ImmutableList.copyOf(events);
-        return new EventStream(eventList);
+        if (events.length == 0) {
+            return empty();
+        } else {
+            final List<Event> eventList = ImmutableList.copyOf(events);
+            return new EventStream(eventList);
+        }
     }
 
     public EventStream concat(EventStream other) {
-        final int expectedSize = this.events.size() + other.events.size();
-        final List<Event> events = newArrayListWithCapacity(expectedSize);
-        events.addAll(this.events);
-        events.addAll(other.events);
-        final EventStream result = new EventStream(events);
-        return result;
+        checkNotNull(other);
+        if (this.isEmpty()) {
+            return other;
+        } else if (other.isEmpty()) {
+            return this;
+        } else {
+            final int expectedSize = this.events.size() + other.events.size();
+            final List<Event> events = newArrayListWithCapacity(expectedSize);
+            events.addAll(this.events);
+            events.addAll(other.events);
+            final EventStream result = new EventStream(events);
+            return result;
+        }
     }
 
     public int count() {
