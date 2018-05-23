@@ -20,9 +20,10 @@
 
 package io.spine.server.event;
 
+import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import io.spine.annotation.Internal;
+import com.google.protobuf.Any;
 import io.spine.core.Event;
 import io.spine.server.aggregate.AggregateStateRecord;
 
@@ -31,8 +32,10 @@ import java.util.List;
 import static com.google.common.collect.ImmutableList.copyOf;
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static com.google.common.collect.Lists.newLinkedList;
+import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableList;
+import static java.util.stream.Collectors.joining;
 
 /**
  * @author Dmytro Dashenkov
@@ -87,6 +90,34 @@ public final class EventStream {
 
     public List<Event> events() {
         return unmodifiableList(events);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        EventStream that = (EventStream) o;
+        return Objects.equal(events, that.events);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(events);
+    }
+
+    @Override
+    public String toString() {
+        final String template = "EventStream[%s]";
+        final String eventTypes = events.stream()
+                                        .map(Event::getMessage)
+                                        .map(Any::getTypeUrl)
+                                        .collect(joining(", "));
+        final String result = format(template, eventTypes);
+        return result;
     }
 
     /**
