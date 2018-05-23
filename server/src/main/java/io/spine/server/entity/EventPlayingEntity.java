@@ -21,12 +21,9 @@
 package io.spine.server.entity;
 
 import com.google.protobuf.Message;
-import io.spine.core.Event;
 
 /**
  * @author Dmytro Dashenkov
  */
-public interface EventPlayingEntity<I, S extends Message> extends Entity<I, S> {
-
-    void play(Iterable<Event> events);
+public interface EventPlayingEntity<I, S extends Message> extends Entity<I, S>, EventPlayer {
 }
