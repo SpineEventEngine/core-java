@@ -23,6 +23,7 @@ package io.spine.model.assemble;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.ProtocolStringList;
 import io.spine.annotation.Internal;
+import io.spine.io.Files2;
 import io.spine.model.CommandHandlers;
 import io.spine.server.command.Assign;
 
@@ -39,6 +40,8 @@ import java.util.Set;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.google.common.collect.Sets.newTreeSet;
 import static com.google.common.io.Files.createParentDirs;
+import static io.spine.io.Files2.ensureFile;
+import static io.spine.io.Files2.existsNonEmpty;
 import static io.spine.validate.Validate.isDefault;
 
 /**
@@ -103,6 +106,7 @@ public class AssignLookup extends SpineAnnotationProcessor {
      *
      * @param file the file which may or may not contain the pre-assembled commandHandlers
      */
+    @SuppressWarnings("CheckReturnValue") // calling builder
     private void mergeOldHandlersFrom(File file) {
         final boolean fileWithData = existsNonEmpty(file);
         if (fileWithData) {
@@ -141,35 +145,12 @@ public class AssignLookup extends SpineAnnotationProcessor {
      * <p>Calling this method will cause the {@linkplain #commandHandlers current commandHandlers}
      * not to contain duplicate entries in any {@code repeated} field.
      */
+    @SuppressWarnings("CheckReturnValue") // calling builder
     private void removeDuplicates() {
-        final ProtocolStringList handlingTypesList = commandHandlers.getCommandHandlingTypesList();
-        final Set<String> commandHandlingTypes = newTreeSet(handlingTypesList);
+        ProtocolStringList list = commandHandlers.getCommandHandlingTypesList();
+        Set<String> types = newTreeSet(list);
         commandHandlers.clearCommandHandlingTypes()
-                       .addAllCommandHandlingTypes(commandHandlingTypes);
-    }
-
-    /**
-     * Ensures the given file existence.
-     *
-     * <p>Performs no action if the given file {@linkplain File#exists() exists}.
-     *
-     * <p>If the given file does not exist, it is created (with the parent dirs if required).
-     *
-     * @param file a file to create
-     */
-    private static void ensureFile(File file) {
-        try {
-            if (!file.exists()) {
-                createParentDirs(file);
-                file.createNewFile();
-            }
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    private static boolean existsNonEmpty(File file) {
-        return file.exists() && file.length() > 0;
+                       .addAllCommandHandlingTypes(types);
     }
 
     /**

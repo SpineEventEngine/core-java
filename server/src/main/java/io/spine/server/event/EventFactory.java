@@ -152,11 +152,13 @@ public class EventFactory {
                            .build();
     }
 
+    @SuppressWarnings("CheckReturnValue") // calling builder
     private EventContext createContext(@Nullable Version version) {
-        final Timestamp timestamp = getCurrentTime();
-        final EventContext.Builder builder = EventContext.newBuilder()
-                                                         .setTimestamp(timestamp)
-                                                         .setProducerId(producerId);
+        Timestamp timestamp = getCurrentTime();
+        EventContext.Builder builder =
+                EventContext.newBuilder()
+                            .setTimestamp(timestamp)
+                            .setProducerId(producerId);
         origin.setOriginFields(builder);
         if (version != null) {
             builder.setVersion(version);

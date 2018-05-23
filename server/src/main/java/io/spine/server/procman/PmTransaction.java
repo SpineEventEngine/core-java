@@ -58,6 +58,9 @@ class PmTransaction<I,
         super(processManager, state, version);
     }
 
+    //TODO:2018-05-23:alexander.yevsyukov: Check that we really can ignore events returned by
+    // event reactor method of a ProcessManager. This looks like a bug.
+    @SuppressWarnings("CheckReturnValue")
     @Override
     protected void dispatch(ProcessManager processManager, EventEnvelope event) {
         processManager.dispatchEvent(event);

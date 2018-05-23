@@ -103,8 +103,10 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
         return result;
     }
 
+    @SuppressWarnings("CheckReturnValue") // calling builder
+    @Nullable
     EntityRecord findAndApplyFieldMask(I givenId, FieldMask fieldMask) {
-        EntityRecord matchingResult = null;
+        EntityRecord result = null;
         for (I recordId : filtered.keySet()) {
             if (recordId.equals(givenId)) {
                 final Optional<EntityRecordWithColumns> record = get(recordId);
@@ -121,10 +123,10 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
                 final Any processed = pack(maskedState);
 
                 matchingRecord.setState(processed);
-                matchingResult = matchingRecord.build();
+                result = matchingRecord.build();
             }
         }
-        return matchingResult;
+        return result;
     }
 
     Map<I, EntityRecord> readAllRecords(FieldMask fieldMask) {

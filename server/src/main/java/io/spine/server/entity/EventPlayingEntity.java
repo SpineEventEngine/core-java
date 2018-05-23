@@ -57,7 +57,8 @@ public abstract class EventPlayingEntity <I,
      */
     private volatile boolean stateChanged;
 
-    private volatile @Nullable Transaction<I, ? extends EventPlayingEntity<I, S, B>, S, B> transaction;
+    private volatile
+    @Nullable Transaction<I, ? extends EventPlayingEntity<I, S, B>, S, B> transaction;
 
     /**
      * Creates a new instance.
