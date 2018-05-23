@@ -79,10 +79,12 @@ public class AssignLookup extends SpineAnnotationProcessor {
         return result;
     }
 
+    @SuppressWarnings("CheckReturnValue") // calling builder
     @Override
     protected void processElement(Element element) {
-        final TypeElement enclosingTypeElement = (TypeElement) element.getEnclosingElement();
-        final String typeName = enclosingTypeElement.getQualifiedName().toString();
+        TypeElement enclosingTypeElement = (TypeElement) element.getEnclosingElement();
+        String typeName = enclosingTypeElement.getQualifiedName()
+                                              .toString();
         commandHandlers.addCommandHandlingTypes(typeName);
     }
 
