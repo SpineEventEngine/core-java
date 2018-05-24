@@ -36,6 +36,7 @@ import java.util.Set;
 
 import static com.google.common.collect.Sets.newHashSet;
 import static io.spine.base.Identifier.newUuid;
+import static io.spine.client.CommonTestNames.NULL_TOLERANCE;
 import static io.spine.core.given.GivenUserId.of;
 import static io.spine.time.Timestamps2.isLaterThan;
 import static org.junit.Assert.assertEquals;
@@ -142,10 +143,9 @@ abstract class ActorRequestFactoryTest {
     }
 
     @SuppressWarnings({"SerializableNonStaticInnerClassWithoutSerialVersionUID",
-            "SerializableInnerClassWithNonSerializableOuterClass",
-            "DuplicateStringLiteralInspection"}) // Display name for null test.
+            "SerializableInnerClassWithNonSerializableOuterClass"})
     @Test
-    @DisplayName("not accept nulls for non-Nullable public method arguments")
+    @DisplayName(NULL_TOLERANCE)
     void passNullToleranceCheck() {
         new NullPointerTester()
                 .setDefault(Message.class, TestEntity.getDefaultInstance())

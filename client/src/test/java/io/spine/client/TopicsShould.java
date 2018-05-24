@@ -24,6 +24,8 @@ import io.spine.test.Tests;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static io.spine.client.CommonTestNames.NULL_TOLERANCE;
+import static io.spine.client.CommonTestNames.UTILITY_CTOR;
 import static org.junit.Assert.assertFalse;
 
 /**
@@ -32,16 +34,14 @@ import static org.junit.Assert.assertFalse;
 @DisplayName("Topics utility should")
 class TopicsShould {
 
-    @SuppressWarnings("DuplicateStringLiteralInspection") // Display name for utility c-tor test.
     @Test
-    @DisplayName("have private parameterless constructor")
+    @DisplayName(UTILITY_CTOR)
     void haveUtilityCtor() {
         Tests.assertHasPrivateParameterlessCtor(Topics.class);
     }
 
-    @SuppressWarnings("DuplicateStringLiteralInspection") // Display name for null test.
     @Test
-    @DisplayName("not accept nulls for non-Nullable public method arguments")
+    @DisplayName(NULL_TOLERANCE)
     void passNullToleranceCheck() {
         assertFalse(Topics.generateId()
                           .getValue()

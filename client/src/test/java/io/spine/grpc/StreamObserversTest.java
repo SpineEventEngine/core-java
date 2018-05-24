@@ -39,6 +39,7 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 import static io.grpc.Status.INVALID_ARGUMENT;
+import static io.spine.client.CommonTestNames.UTILITY_CTOR;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.Assert.assertEquals;
@@ -58,9 +59,8 @@ import static org.mockito.Mockito.verify;
 @DisplayName("StreamObservers utility should")
 class StreamObserversTest {
 
-    @SuppressWarnings("DuplicateStringLiteralInspection") // Display name for utility c-tor test.
     @Test
-    @DisplayName("have private parameterless constructor")
+    @DisplayName(UTILITY_CTOR)
     void haveUtilityCtor() {
         assertHasPrivateParameterlessCtor(StreamObservers.class);
     }

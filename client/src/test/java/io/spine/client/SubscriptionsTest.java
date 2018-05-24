@@ -23,6 +23,8 @@ import com.google.common.testing.NullPointerTester;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static io.spine.client.CommonTestNames.NULL_TOLERANCE;
+import static io.spine.client.CommonTestNames.UTILITY_CTOR;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
@@ -31,16 +33,14 @@ import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 @DisplayName("Subscriptions utility should")
 class SubscriptionsTest {
 
-    @SuppressWarnings("DuplicateStringLiteralInspection") // Display name for utility c-tor test.
     @Test
-    @DisplayName("have private parameterless constructor")
+    @DisplayName(UTILITY_CTOR)
     void haveUtilityCtor() {
         assertHasPrivateParameterlessCtor(Subscriptions.class);
     }
 
-    @SuppressWarnings("DuplicateStringLiteralInspection") // Display name for null test.
     @Test
-    @DisplayName("not accept nulls for non-Nullable public method arguments")
+    @DisplayName(NULL_TOLERANCE)
     void passNullToleranceCheck() {
         new NullPointerTester()
                 .testAllPublicStaticMethods(Subscriptions.class);

@@ -49,6 +49,7 @@ import static io.spine.client.ColumnFilters.eq;
 import static io.spine.client.ColumnFilters.ge;
 import static io.spine.client.ColumnFilters.gt;
 import static io.spine.client.ColumnFilters.le;
+import static io.spine.client.CommonTestNames.NULL_TOLERANCE;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.EITHER;
 import static io.spine.protobuf.TypeConverter.toObject;
@@ -75,9 +76,8 @@ import static org.junit.Assert.assertTrue;
 @DisplayName("Query builder should")
 class QueryBuilderTest extends ActorRequestFactoryTest {
 
-    @SuppressWarnings("DuplicateStringLiteralInspection") // Display name for null test.
     @Test
-    @DisplayName("not accept nulls for non-Nullable public method arguments")
+    @DisplayName(NULL_TOLERANCE)
     void notAcceptNulls() {
         new NullPointerTester().testAllPublicStaticMethods(QueryBuilder.class);
     }

@@ -20,28 +20,34 @@
 
 package io.spine.client;
 
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
-import static io.spine.client.CommonTestNames.UTILITY_CTOR;
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
-import static org.junit.Assert.assertNotEquals;
-
+//TODO:2018-05-24:dmytro.kuzmin: Move to the base.testlib
 /**
- * @author Alexander Yevsyukov
+ * A storage for common {@linkplain org.junit.jupiter.api.DisplayName test names}.
+ *
+ * <p>This class can be used to avoid string literal duplication when assigning
+ * {@link org.junit.jupiter.api.DisplayName} to the common {@linkplain org.junit.jupiter.api.Test
+ * test cases}.
+ *
+ * @author Dmytro Kuzmin
  */
-@DisplayName("ConnectionConstants should")
-class ConnectionConstantsTest {
+public class CommonTestNames {
 
-    @Test
-    @DisplayName(UTILITY_CTOR)
-    void haveUtilityCtor() {
-        assertHasPrivateParameterlessCtor(ConnectionConstants.class);
+    /**
+     * Prevents instantiation of this class.
+     */
+    private CommonTestNames() {
     }
 
-    @Test
-    @DisplayName("declare non-zero default gRPC port")
-    void declareDefaultGrpcPort() {
-        assertNotEquals(0, ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT);
-    }
+    /**
+     * A name for test cases checking that a class has private parameterless (aka "utility")
+     * constructor.
+     */
+    public static final String UTILITY_CTOR = "have private parameterless constructor";
+
+    /**
+     * A name for test cases checking that the class public methods do not accept {@code null} for
+     * their non-{@linkplain javax.annotation.Nullable nullable} arguments.
+     */
+    public static final String NULL_TOLERANCE =
+            "not accept nulls for non-Nullable public method arguments";
 }

@@ -46,6 +46,8 @@ import static io.spine.client.ColumnFilters.ge;
 import static io.spine.client.ColumnFilters.gt;
 import static io.spine.client.ColumnFilters.le;
 import static io.spine.client.ColumnFilters.lt;
+import static io.spine.client.CommonTestNames.NULL_TOLERANCE;
+import static io.spine.client.CommonTestNames.UTILITY_CTOR;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.EITHER;
@@ -65,16 +67,14 @@ class ColumnFiltersTest {
     private static final String COLUMN_NAME = "preciseColumn";
     private static final Timestamp COLUMN_VALUE = getCurrentTime();
 
-    @SuppressWarnings("DuplicateStringLiteralInspection") // Display name for utility c-tor test.
     @Test
-    @DisplayName("have private parameterless constructor")
+    @DisplayName(UTILITY_CTOR)
     void haveUtilityCtor() {
         assertHasPrivateParameterlessCtor(ColumnFilters.class);
     }
 
-    @SuppressWarnings("DuplicateStringLiteralInspection") // Display name for null test.
     @Test
-    @DisplayName("not accept nulls for non-Nullable public method arguments")
+    @DisplayName(NULL_TOLERANCE)
     void passNullToleranceCheck() {
         new NullPointerTester()
                 .setDefault(Timestamp.class, Timestamp.getDefaultInstance())

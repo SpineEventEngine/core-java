@@ -25,6 +25,8 @@ import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static io.spine.client.CommonTestNames.NULL_TOLERANCE;
+import static io.spine.client.CommonTestNames.UTILITY_CTOR;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -39,16 +41,14 @@ class QueriesTest {
     private static final String TARGET_ENTITY_TYPE_URL =
             "type.spine.io/spine.test.queries.TestEntity";
 
-    @SuppressWarnings("DuplicateStringLiteralInspection") // Display name for utility c-tor test.
     @Test
-    @DisplayName("have private parameterless constructor")
+    @DisplayName(UTILITY_CTOR)
     void haveUtilityCtor() {
         assertHasPrivateParameterlessCtor(Queries.class);
     }
 
-    @SuppressWarnings("DuplicateStringLiteralInspection") // Display name for null test.
     @Test
-    @DisplayName("not accept nulls for non-Nullable public method arguments")
+    @DisplayName(NULL_TOLERANCE)
     void passNullToleranceCheck() {
         new NullPointerTester()
                 .testAllPublicStaticMethods(Queries.class);

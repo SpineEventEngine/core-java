@@ -50,6 +50,8 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.protobuf.Descriptors.FileDescriptor;
 import static io.spine.base.Time.getCurrentTime;
+import static io.spine.client.CommonTestNames.NULL_TOLERANCE;
+import static io.spine.client.CommonTestNames.UTILITY_CTOR;
 import static io.spine.core.Commands.sameActorAndTenant;
 import static io.spine.core.given.GivenTenantId.newUuid;
 import static io.spine.protobuf.TypeConverter.toMessage;
@@ -80,9 +82,8 @@ class CommandsTest {
     private final TestActorRequestFactory requestFactory =
             TestActorRequestFactory.newInstance(CommandsTest.class);
 
-    @SuppressWarnings("DuplicateStringLiteralInspection") // Display name for utility c-tor test.
     @Test
-    @DisplayName("have private parameterless constructor")
+    @DisplayName(UTILITY_CTOR)
     void haveUtilityCtor() {
         assertHasPrivateParameterlessCtor(Commands.class);
     }
@@ -124,9 +125,8 @@ class CommandsTest {
         assertTrue(sameActorAndTenant(c1, c2));
     }
 
-    @SuppressWarnings("DuplicateStringLiteralInspection") // Display name for null test.
     @Test
-    @DisplayName("not accept nulls for non-Nullable public method arguments")
+    @DisplayName(NULL_TOLERANCE)
     void passNullToleranceCheck() {
         new NullPointerTester()
                 .setDefault(FileDescriptor.class, DEFAULT_FILE_DESCRIPTOR)
