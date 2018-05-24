@@ -85,7 +85,7 @@ class ColumnFiltersTest {
     @SuppressWarnings("InnerClassMayBeStatic") // JUnit 5 nested test classes cannot to be static.
     @Nested
     @DisplayName("when creating column filter")
-    class FilterCreationTest {
+    class CreateFilterTest {
 
         @Test
         @DisplayName("successfully create `equals` filter")
@@ -128,11 +128,11 @@ class ColumnFiltersTest {
     @SuppressWarnings("InnerClassMayBeStatic") // JUnit 5 nested test classes cannot to be static.
     @Nested
     @DisplayName("when creating composite column filter")
-    class CompositeFilterCreationTest {
+    class CreateCompositeFilterTest {
 
         @Test
         @DisplayName("successfully create `all` grouping")
-        void createAllGrouping() {
+        void createAll() {
             final ColumnFilter[] filters = {
                     le(COLUMN_NAME, COLUMN_VALUE),
                     ge(COLUMN_NAME, COLUMN_VALUE)
@@ -142,7 +142,7 @@ class ColumnFiltersTest {
 
         @Test
         @DisplayName("successfully create `either` grouping")
-        void createEitherGrouping() {
+        void createEither() {
             final ColumnFilter[] filters = {
                     lt(COLUMN_NAME, COLUMN_VALUE),
                     gt(COLUMN_NAME, COLUMN_VALUE)
@@ -161,11 +161,11 @@ class ColumnFiltersTest {
     @SuppressWarnings("InnerClassMayBeStatic") // JUnit 5 nested test classes cannot to be static.
     @Nested
     @DisplayName("when creating ordering filter")
-    class OrderingFilterCreationTest {
+    class CreateOrderingFilterTest {
 
         @Test
         @DisplayName("successfully create ordering filter for numbers")
-        void createOrderFilterForNumber() {
+        void createForNumber() {
             final double number = 3.14;
             final ColumnFilter filter = le("doubleColumn", number);
             assertNotNull(filter);
@@ -176,31 +176,31 @@ class ColumnFiltersTest {
 
         @Test
         @DisplayName("successfully create ordering filter for strings")
-        void createOrderFilterForString() {
-            final String string = "abc";
-            final ColumnFilter filter = gt("stringColumn", string);
+        void createForString() {
+            final String theString = "abc";
+            final ColumnFilter filter = gt("stringColumn", theString);
             assertNotNull(filter);
             assertEquals(GREATER_THAN, filter.getOperator());
             final StringValue value = AnyPacker.unpack(filter.getValue());
-            assertEquals(string, value.getValue());
+            assertEquals(theString, value.getValue());
         }
 
         @Test
         @DisplayName("fail to create ordering filter for enumerated types")
-        void notCreateOrderFilterForEnum() {
+        void failForEnum() {
             assertThrows(IllegalArgumentException.class, () -> ge("enumColumn", EQUAL));
         }
 
         @Test
         @DisplayName("fail to create ordering filter for non primitive number types")
-        void notCreateOrderFilterForNonPrimitiveNumber() {
+        void failForNonPrimitiveNumber() {
             final AtomicInteger number = new AtomicInteger(42);
             assertThrows(IllegalArgumentException.class, () -> ge("atomicColumn", number));
         }
 
         @Test
         @DisplayName("fail to create ordering filter for not supported types")
-        void notCreateOrderFilterForNotSupportedType() {
+        void failForNotSupportedType() {
             final Comparable<?> value = Calendar.getInstance(); // Comparable but not supported
             assertThrows(IllegalArgumentException.class, () -> le("invalidColumn", value));
         }

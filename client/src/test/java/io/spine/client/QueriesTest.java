@@ -55,8 +55,8 @@ class QueriesTest {
     }
 
     @Test
-    @DisplayName("obtain proper entity type url for known query target")
-    void returnTypeForKnownTarget() {
+    @DisplayName("obtain proper entity type url for known query target type")
+    void returnTypeForKnownType() {
         final Target target = Targets.allOf(TestEntity.class);
         final Query query = Query.newBuilder()
                                  .setTarget(target)
@@ -67,7 +67,7 @@ class QueriesTest {
     }
 
     @Test
-    @DisplayName("throw IllegalStateException for query target of unknown type")
+    @DisplayName("throw IllegalStateException for unknown query target type")
     void throwErrorForUnknownType() {
         final Target target = Target.newBuilder()
                                     .setType("nonexistent/message.type")

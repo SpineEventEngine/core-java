@@ -84,7 +84,7 @@ class QueryBuilderTest extends ActorRequestFactoryTest {
 
     @Nested
     @DisplayName("when creating queries")
-    class QueryCreationTest {
+    class CreateQueryTest {
 
         @Test
         @DisplayName("support queries by entity type only")

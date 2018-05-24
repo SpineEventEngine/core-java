@@ -106,7 +106,7 @@ class CommandsTest {
     }
 
     @Test
-    @DisplayName("check if command contexts have same actor and tenantId")
+    @DisplayName("check if command contexts have same actor and tenant id")
     void checkSameActorAndTenantId() {
         final ActorContext.Builder actorContext =
                 ActorContext.newBuilder()
@@ -142,7 +142,7 @@ class CommandsTest {
     }
 
     @Test
-    @DisplayName("generate command ids")
+    @DisplayName("generate command id")
     void generateCommandId() {
         final CommandId id = Commands.generateId();
 
@@ -161,7 +161,7 @@ class CommandsTest {
 
     @Nested
     @DisplayName("when creating predicate for commands")
-    class PredicatesCreationTest {
+    class CreatePredicateTest {
 
         @Test
         @DisplayName("support `wereAfter` predicate")
@@ -200,7 +200,7 @@ class CommandsTest {
 
     @Nested
     @DisplayName("when evaluating if command is scheduled")
-    class CommandScheduledTest {
+    class CheckScheduledTest {
 
         @Test
         @DisplayName("consider command scheduled when command delay is set")
@@ -233,7 +233,7 @@ class CommandsTest {
     }
 
     @Test
-    @DisplayName("provide stringifier for CommandId")
+    @DisplayName("provide stringifier for command id")
     void provideStringifierForId() {
         final CommandId id = Commands.generateId();
 
@@ -242,6 +242,7 @@ class CommandsTest {
         assertEquals(id, convertedBack);
     }
 
+    @SuppressWarnings("InnerClassMayBeStatic") // JUnit 5 nested test classes cannot to be static.
     @Nested
     @DisplayName("when checking if command is valid")
     class CheckValidTest {

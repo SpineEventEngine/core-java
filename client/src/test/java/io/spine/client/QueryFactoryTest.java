@@ -91,7 +91,7 @@ class QueryFactoryTest extends ActorRequestFactoryTest {
 
             @Test
             @DisplayName("create proper `read all` with mask query")
-            void composeReadAllWithSinglePath() {
+            void composeReadAllWithMask() {
                 final String expectedEntityPath = singleTestEntityPath();
                 final Query readAllWithPathFilteringQuery =
                         factory().query()
@@ -104,7 +104,7 @@ class QueryFactoryTest extends ActorRequestFactoryTest {
 
             @Test
             @DisplayName("create proper `read by ids` with mask query")
-            void composeReadByIdsWithSinglePath() {
+            void composeReadByIdsWithMask() {
                 final Set<TestEntityId> testEntityIds = multipleIds();
                 final String expectedPath = singleTestEntityPath();
                 final Query readByIdsWithSinglePathQuery = factory().query()
@@ -143,7 +143,7 @@ class QueryFactoryTest extends ActorRequestFactoryTest {
 
             @Test
             @DisplayName("create proper `read all` with mask query")
-            void composeReadAllWithMultiplePaths() {
+            void composeReadAllWithMask() {
                 final String[] paths = multipleRandomPaths();
                 final Query readAllWithPathFilteringQuery =
                         factory().query()
@@ -156,7 +156,7 @@ class QueryFactoryTest extends ActorRequestFactoryTest {
 
             @Test
             @DisplayName("create proper `read by ids` with mask query")
-            void composeReadByIdsWithMultiplePaths() {
+            void composeReadByIdsWithMask() {
                 final Set<TestEntityId> testEntityIds = multipleIds();
                 final String[] paths = multipleRandomPaths();
                 final Query readByIdsWithSinglePathQuery = factory().query()
@@ -190,7 +190,7 @@ class QueryFactoryTest extends ActorRequestFactoryTest {
 
         @Test
         @DisplayName("fail to create query with mask when id list is empty")
-        void notCreateMaskedQueryFromEmptyIds() {
+        void failForEmptyIds() {
             assertThrows(IllegalArgumentException.class,
                          () -> factory().query()
                                         .byIdsWithMask(TestEntity.class,
@@ -243,7 +243,7 @@ class QueryFactoryTest extends ActorRequestFactoryTest {
 
         @Test
         @DisplayName("build query by ids consistently")
-        void buildIDQueryConsistently() {
+        void buildSameIdQuery() {
             final Set<TestEntityId> ids = multipleIds();
             final Query fromFactory = factory().query()
                                                .byIds(TestEntity.class, ids);
@@ -256,7 +256,7 @@ class QueryFactoryTest extends ActorRequestFactoryTest {
 
         @Test
         @DisplayName("build query by mask consistently")
-        void buildMaskQueryConsistently() {
+        void buildSameMaskQuery() {
             final String field1 = "TestEntity.firstField";
             final String field2 = "TesEntity.barField";
 
@@ -274,7 +274,7 @@ class QueryFactoryTest extends ActorRequestFactoryTest {
 
         @Test
         @DisplayName("build `read all` query consistently")
-        void buildReadAllQueryConsistently() {
+        void buildSameReadAllQuery() {
             final Query fromFactory = factory().query()
                                                .all(TestEntity.class);
             final Query fromBuilder = factory().query()
@@ -286,7 +286,7 @@ class QueryFactoryTest extends ActorRequestFactoryTest {
 
         @Test
         @DisplayName("build query by ids with mask consistently")
-        void buildIDsWithMaskQueryConsistently() {
+        void buildSameIdsWithMaskQuery() {
             final String field1 = "TestEntity.secondField";
             final String field2 = "TesEntity.fooField";
 

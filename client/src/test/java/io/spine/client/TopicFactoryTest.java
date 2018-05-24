@@ -52,7 +52,7 @@ class TopicFactoryTest
 
     @Nested
     @DisplayName("when creating topic")
-    class TopicCreationTest {
+    class CreateTopicTest {
 
         @Test
         @DisplayName("support creation for all entities of kind")
@@ -70,7 +70,7 @@ class TopicFactoryTest
 
         @Test
         @DisplayName("support creation for specified entities of kind")
-        void createForEntitiesOfKind() {
+        void createForSomeOfKind() {
 
             final Set<TestEntityId> ids = newHashSet(entityId(1), entityId(2),
                                                      entityId(3));
@@ -93,7 +93,7 @@ class TopicFactoryTest
 
         @Test
         @DisplayName("support creation for given target")
-        void createForGivenTarget() {
+        void createForTarget() {
             final Target givenTarget = Targets.allOf(TARGET_ENTITY_CLASS);
             final Topic topic = factory().topic()
                                          .forTarget(givenTarget);
