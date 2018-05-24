@@ -117,6 +117,8 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
         }
     }
 
+    @SuppressWarnings("CheckReturnValue")
+        // OK to ignore stored command for the purpose of this test.
     @Test
     public void reschedule_commands_from_storage_in_parallel_on_build_if_thread_spawning_allowed() {
         final String mainThreadName = Thread.currentThread().getName();
@@ -151,6 +153,8 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
         assertNotEquals(mainThreadName, actualThreadName);
     }
 
+    @SuppressWarnings("CheckReturnValue")
+        // OK to ignore stored command for the purpose of this test.
     @Test
     public void reschedule_commands_from_storage_synchronously_on_build_if_thread_spawning_NOT_allowed() {
         final String mainThreadName = Thread.currentThread().getName();

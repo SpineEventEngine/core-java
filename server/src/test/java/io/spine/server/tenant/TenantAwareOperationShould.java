@@ -22,7 +22,9 @@ package io.spine.server.tenant;
 
 import io.spine.core.TenantId;
 import io.spine.test.Tests;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import static io.spine.core.given.GivenTenantId.newUuid;
 import static org.junit.Assert.assertEquals;
@@ -35,9 +37,13 @@ import static org.junit.Assert.assertFalse;
 // OK for the tests. We set right before we get().
 public class TenantAwareOperationShould {
 
-    @Test(expected = NullPointerException.class)
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
+
+    @Test
     public void do_not_accept_null_tenant() {
-        createOperation(Tests.<TenantId>nullRef());
+        thrown.expect(NullPointerException.class);
+        createOperation(Tests.nullRef());
     }
 
     @Test
@@ -105,10 +111,11 @@ public class TenantAwareOperationShould {
         assertEquals(tenant, getTenantFromRun(op));
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void do_not_allow_creating_instance_in_non_command_execution_without_current_tenant() {
         CurrentTenant.clear();
 
+        thrown.expect(IllegalStateException.class);
         // This should fail.
         createOperation();
     }

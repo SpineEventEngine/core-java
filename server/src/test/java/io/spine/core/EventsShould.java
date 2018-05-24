@@ -35,7 +35,9 @@ import io.spine.string.Stringifiers;
 import io.spine.test.Tests;
 import io.spine.type.TypeName;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.util.Comparator;
 import java.util.List;
@@ -80,6 +82,9 @@ public class EventsShould {
     private final BoolValue boolValue = toMessage(true);
     @SuppressWarnings("MagicNumber")
     private final DoubleValue doubleValue = toMessage(10.1);
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     @Before
     public void setUp() {
@@ -126,7 +131,7 @@ public class EventsShould {
         final Comparator<Event> comparator = Events.eventComparator();
         assertTrue(comparator.compare(event1, event2) < 0);
         assertTrue(comparator.compare(event2, event1) > 0);
-        assertTrue(comparator.compare(event1, event1) == 0);
+        assertEquals(0, comparator.compare(event1, event1));
     }
 
    @Test
@@ -178,8 +183,9 @@ public class EventsShould {
         assertEquals(id, convertedBack);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void reject_empty_event_id() {
+        thrown.expect(IllegalArgumentException.class);
         checkValid(EventId.getDefaultInstance());
     }
 
@@ -219,8 +225,9 @@ public class EventsShould {
         }
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void throw_NPE_when_getting_tenant_id_of_null_event() {
+        thrown.expect(NullPointerException.class);
         Events.getTenantId(Tests.<Event>nullRef());
     }
 

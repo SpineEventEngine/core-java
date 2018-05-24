@@ -87,6 +87,7 @@ public class CommandDispatcherRegistryTestEnv {
             handleProjectCreated(event.getProjectId());
         }
 
+        @SuppressWarnings("CheckReturnValue") // calling builder
         private void handleProjectCreated(ProjectId projectId) {
             final Project newState = getState().toBuilder()
                                                .setId(projectId)
@@ -103,6 +104,7 @@ public class CommandDispatcherRegistryTestEnv {
             handleTaskAdded(task);
         }
 
+        @SuppressWarnings("CheckReturnValue") // calling builder
         private void handleTaskAdded(Task task) {
             final Project newState = getState().toBuilder()
                                                .addTask(task)
@@ -117,6 +119,7 @@ public class CommandDispatcherRegistryTestEnv {
             handleProjectStarted();
         }
 
+        @SuppressWarnings("CheckReturnValue") // calling builder
         private void handleProjectStarted() {
             final Project newState = getState().toBuilder()
                                                .setStatus(Project.Status.STARTED)

@@ -22,7 +22,9 @@ package io.spine.server.tenant;
 
 import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import static io.spine.core.given.GivenTenantId.newUuid;
 
@@ -31,7 +33,10 @@ import static io.spine.core.given.GivenTenantId.newUuid;
  */
 public class TenantAwareFunction0Should {
 
-    @Test(expected = IllegalStateException.class)
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
+
+    @Test
     public void require_current_tenant_set() {
         final TenantAwareFunction0<Timestamp> whichTime = new TenantAwareFunction0<Timestamp>() {
             @Override
@@ -40,14 +45,16 @@ public class TenantAwareFunction0Should {
             }
         };
 
-        // This should pass.
+        // This should pass since we're executing the operation with the current tenant ID set.
         new TenantAwareOperation(newUuid()) {
+            @SuppressWarnings("CheckReturnValue") // can ignore in this test.
             @Override
             public void run() {
                 whichTime.execute();
             }
         }.execute();
 
+        thrown.expect(IllegalStateException.class);
         // This should fail.
         whichTime.execute();
     }
