@@ -158,7 +158,7 @@ class StreamObserversTest {
 
         @Test
         @DisplayName("return Error extracted from StatusRuntimeException metadata")
-        void extractFromStatusRuntimeException() {
+        void processStatusRuntimeException() {
             final Error expectedError = Error.getDefaultInstance();
             final Metadata metadata = MetadataConverter.toMetadata(expectedError);
             final StatusRuntimeException statusRuntimeException =
@@ -170,7 +170,7 @@ class StreamObserversTest {
 
         @Test
         @DisplayName("return Error extracted from StatusException metadata")
-        void extractFromStatusException() {
+        void processStatusException() {
             final Error expectedError = Error.getDefaultInstance();
             final Metadata metadata = MetadataConverter.toMetadata(expectedError);
             final StatusException statusException = INVALID_ARGUMENT.asException(metadata);

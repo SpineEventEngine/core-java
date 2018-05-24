@@ -46,7 +46,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class CommandFactoryTest extends ActorRequestFactoryTest {
 
     @Test
-    @DisplayName("create command context for the given parameters")
+    @DisplayName("create command context for given parameters")
     void createCommandContext() {
         final TenantId tenantId = GivenTenantId.newUuid();
         final UserId userId = GivenUserId.newUuid();
@@ -116,14 +116,15 @@ class CommandFactoryTest extends ActorRequestFactoryTest {
     @DisplayName("throw ValidationException once passed invalid Message")
     void notCreateFromInvalidMessage() {
         final RequiredFieldCommand invalidCommand = RequiredFieldCommand.getDefaultInstance();
-        assertThrows(ValidationException.class, () -> factory().command().create(invalidCommand));
+        assertThrows(ValidationException.class, () -> factory().command()
+                                                               .create(invalidCommand));
     }
 
     @Test
     @DisplayName("throw ValidationException once passed invalid Message with version")
     void notCreateFromInvalidMessageWithVersion() {
         final RequiredFieldCommand invalidCommand = RequiredFieldCommand.getDefaultInstance();
-        assertThrows(ValidationException.class,
-                     () -> factory().command().create(invalidCommand, 42));
+        assertThrows(ValidationException.class, () -> factory().command()
+                                                               .create(invalidCommand, 42));
     }
 }

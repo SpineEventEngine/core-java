@@ -52,19 +52,19 @@ class LoggingObserverTest {
     }
 
     @Test
-    @DisplayName("process log events on have `DEBUG` level")
+    @DisplayName("process log events on `DEBUG` level")
     void haveDebugLevel() {
         assertAtLevel(Level.DEBUG);
     }
 
     @Test
-    @DisplayName("process log events on have `INFO` level")
+    @DisplayName("process log events on `INFO` level")
     void haveInfoLevel() {
         assertAtLevel(Level.INFO);
     }
 
     @Test
-    @DisplayName("process log events on have `WARN` level")
+    @DisplayName("process log events on `WARN` level")
     void haveWarnLevel() {
         assertAtLevel(Level.WARN);
     }
@@ -129,7 +129,7 @@ class LoggingObserverTest {
     }
 
     @Test
-    @DisplayName("log error")
+    @DisplayName("log error occurred")
     void logError() {
         final LoggingObserver<Object> observer = getObserver(Level.INFO);
         observer.onError(new RuntimeException("Testing logging observer"));

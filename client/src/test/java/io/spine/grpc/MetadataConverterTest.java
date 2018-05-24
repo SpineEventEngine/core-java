@@ -48,7 +48,7 @@ class MetadataConverterTest {
 
     @SuppressWarnings("ConstantConditions") // A part of the test.
     @Test
-    @DisplayName("convert error to metadata")
+    @DisplayName("convert Error to Metadata")
     void convertError() throws InvalidProtocolBufferException {
         final Error error = Error.getDefaultInstance();
         final Metadata metadata = MetadataConverter.toMetadata(error);
@@ -57,7 +57,7 @@ class MetadataConverterTest {
     }
 
     @Test
-    @DisplayName("convert metadata to error")
+    @DisplayName("convert Metadata to Error")
     void convertMetadata() {
         final Error expectedError = Error.getDefaultInstance();
         final Metadata metadata = MetadataConverter.toMetadata(expectedError);
@@ -67,7 +67,7 @@ class MetadataConverterTest {
     }
 
     @Test
-    @DisplayName("return absent when processing empty metadata")
+    @DisplayName("return absent when converting empty Metadata")
     void processEmptyMetadata() {
         final Metadata metadata = new Metadata();
 
@@ -76,7 +76,7 @@ class MetadataConverterTest {
     }
 
     @Test
-    @DisplayName("throw wrapped InvalidProtocolBufferException if metadata bytes are invalid")
+    @DisplayName("throw wrapped InvalidProtocolBufferException if Metadata bytes are invalid")
     void throwOnInvalidBytes() {
         final Metadata metadata = new Metadata();
         metadata.put(MetadataConverter.KEY, new byte[]{(byte) 1});
