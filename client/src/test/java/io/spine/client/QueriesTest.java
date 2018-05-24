@@ -55,7 +55,7 @@ class QueriesTest {
     }
 
     @Test
-    @DisplayName("obtain proper entity type url for known query target type")
+    @DisplayName("obtain entity type url for known query target type")
     void returnTypeForKnownType() {
         final Target target = Targets.allOf(TestEntity.class);
         final Query query = Query.newBuilder()
