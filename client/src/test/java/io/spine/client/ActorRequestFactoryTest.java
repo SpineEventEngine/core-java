@@ -101,31 +101,36 @@ abstract class ActorRequestFactoryTest {
         }
     }
 
-    @Test
-    @DisplayName("be created for given user")
-    void beCreatedByUser() {
-        final int currentOffset = ZoneOffsets.getDefault()
-                                             .getAmountSeconds();
-        final ActorRequestFactory aFactory = builder()
-                .setActor(actor)
-                .build();
+    @Nested
+    @DisplayName("when created")
+    class OnCreationTest {
 
-        assertEquals(actor, aFactory.getActor());
-        assertEquals(currentOffset, aFactory.getZoneOffset()
-                                            .getAmountSeconds());
-    }
+        @Test
+        @DisplayName("store given user")
+        void storeUser() {
+            final int currentOffset = ZoneOffsets.getDefault()
+                                                 .getAmountSeconds();
+            final ActorRequestFactory aFactory = builder()
+                    .setActor(actor)
+                    .build();
 
-    @Test
-    @DisplayName("be created for given user and timezone")
-    void beCreatedByUserAndTimezone() {
-        assertEquals(actor, factory().getActor());
-        assertEquals(zoneOffset, factory().getZoneOffset());
-    }
+            assertEquals(actor, aFactory.getActor());
+            assertEquals(currentOffset, aFactory.getZoneOffset()
+                                                .getAmountSeconds());
+        }
 
-    @Test
-    @DisplayName("be single tenant by default")
-    void beSingleTenantByDefault() {
-        assertNull(factory().getTenantId());
+        @Test
+        @DisplayName("store given user and timezone")
+        void storeUserAndTimezone() {
+            assertEquals(actor, factory().getActor());
+            assertEquals(zoneOffset, factory().getZoneOffset());
+        }
+
+        @Test
+        @DisplayName("be single tenant")
+        void beSingleTenant() {
+            assertNull(factory().getTenantId());
+        }
     }
 
     @Test

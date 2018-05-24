@@ -27,6 +27,7 @@ import io.spine.test.client.TestEntity;
 import io.spine.test.client.TestEntityId;
 import io.spine.type.TypeUrl;
 import org.junit.Assert;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 
@@ -49,66 +50,71 @@ class TopicFactoryTest
     private static final Class<TestEntity> TARGET_ENTITY_CLASS = TestEntity.class;
     private static final TypeUrl TARGET_ENTITY_TYPE_NAME = TypeUrl.of(TARGET_ENTITY_CLASS);
 
-    @Test
-    @DisplayName("create topic for all entities of kind")
-    void createForAllOfKind() {
-        final Topic topic = factory().topic().allOf(TARGET_ENTITY_CLASS);
+    @Nested
+    @DisplayName("when creating topic")
+    class TopicCreationTest {
 
-        verifyTargetAndContext(topic);
+        @Test
+        @DisplayName("support creation for all entities of kind")
+        void createForAllOfKind() {
+            final Topic topic = factory().topic().allOf(TARGET_ENTITY_CLASS);
 
-        Assert.assertEquals(0, topic.getTarget()
-                                    .getFilters()
-                                    .getIdFilter()
-                                    .getIdsCount());
-    }
+            verifyTargetAndContext(topic);
 
-    @Test
-    @DisplayName("create topic for specified entities of kind")
-    void createForSomeOfKind() {
-
-        final Set<TestEntityId> ids = newHashSet(entityId(1), entityId(2),
-                                                 entityId(3));
-        final Topic topic = factory().topic().someOf(TARGET_ENTITY_CLASS, ids);
-
-        verifyTargetAndContext(topic);
-
-        final List<EntityId> actualIds = topic.getTarget()
-                                              .getFilters()
-                                              .getIdFilter()
-                                              .getIdsList();
-        assertEquals(ids.size(), actualIds.size());
-        for (EntityId actualId : actualIds) {
-            final Any rawId = actualId.getId();
-            final TestEntityId unpackedId = AnyPacker.unpack(rawId);
-            assertTrue(ids.contains(unpackedId));
+            Assert.assertEquals(0, topic.getTarget()
+                                        .getFilters()
+                                        .getIdFilter()
+                                        .getIdsCount());
         }
-    }
 
-    @Test
-    @DisplayName("create topic for given target")
-    void createForGivenTarget() {
-        final Target givenTarget = Targets.allOf(TARGET_ENTITY_CLASS);
-        final Topic topic = factory().topic().forTarget(givenTarget);
+        @Test
+        @DisplayName("support creation for specified entities of kind")
+        void createForEntitiesOfKind() {
 
-        verifyTargetAndContext(topic);
-    }
+            final Set<TestEntityId> ids = newHashSet(entityId(1), entityId(2),
+                                                     entityId(3));
+            final Topic topic = factory().topic().someOf(TARGET_ENTITY_CLASS, ids);
 
-    private void verifyTargetAndContext(Topic topic) {
-        assertNotNull(topic);
-        assertNotNull(topic.getId());
+            verifyTargetAndContext(topic);
 
-        assertEquals(TARGET_ENTITY_TYPE_NAME.value(), topic.getTarget()
-                                                           .getType());
-        assertEquals(FieldMask.getDefaultInstance(), topic.getFieldMask());
+            final List<EntityId> actualIds = topic.getTarget()
+                                                  .getFilters()
+                                                  .getIdFilter()
+                                                  .getIdsList();
+            assertEquals(ids.size(), actualIds.size());
+            for (EntityId actualId : actualIds) {
+                final Any rawId = actualId.getId();
+                final TestEntityId unpackedId = AnyPacker.unpack(rawId);
+                assertTrue(ids.contains(unpackedId));
+            }
+        }
 
-        final ActorContext actualContext = topic.getContext();
-        verifyContext(actualContext);
+        @Test
+        @DisplayName("support creation for given target")
+        void createForGivenTarget() {
+            final Target givenTarget = Targets.allOf(TARGET_ENTITY_CLASS);
+            final Topic topic = factory().topic().forTarget(givenTarget);
 
-    }
+            verifyTargetAndContext(topic);
+        }
 
-    private static TestEntityId entityId(int idValue) {
-        return TestEntityId.newBuilder()
-                           .setValue(idValue)
-                           .build();
+        private void verifyTargetAndContext(Topic topic) {
+            assertNotNull(topic);
+            assertNotNull(topic.getId());
+
+            assertEquals(TARGET_ENTITY_TYPE_NAME.value(), topic.getTarget()
+                                                               .getType());
+            assertEquals(FieldMask.getDefaultInstance(), topic.getFieldMask());
+
+            final ActorContext actualContext = topic.getContext();
+            verifyContext(actualContext);
+
+        }
+
+        private TestEntityId entityId(int idValue) {
+            return TestEntityId.newBuilder()
+                               .setValue(idValue)
+                               .build();
+        }
     }
 }

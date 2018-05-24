@@ -35,6 +35,7 @@ import io.spine.time.Timestamps2;
 import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
 import io.spine.validate.ValidationException;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 
@@ -66,65 +67,77 @@ class CommandFactoryTest extends ActorRequestFactoryTest {
         assertEquals(targetVersion, commandContext.getTargetVersion());
     }
 
-    @Test
-    @DisplayName("assign current time to created commands")
-    void createWithTimestamp() {
-        // We are creating a range of +/- second between the call to make sure the timestamp
-        // would fit into this range. The purpose of this test is to make sure it works with
-        // this precision and to add coverage.
-        final Timestamp beforeCall = TimeTests.Past.secondsAgo(1);
-        final Command command = factory().command()
-                                         .create(StringValue.getDefaultInstance());
-        final Timestamp afterCall = TimeTests.Future.secondsFromNow(1);
+    @Nested
+    @DisplayName("when creating command instance")
+    class CreateCommandTest {
 
-        assertTrue(Timestamps2.isBetween(
-                command.getContext()
-                       .getActorContext()
-                       .getTimestamp(), beforeCall, afterCall));
-    }
+        @Test
+        @DisplayName("assign current time to command")
+        void createWithTimestamp() {
+            // We are creating a range of +/- second between the call to make sure the timestamp
+            // would fit into this range. The purpose of this test is to make sure it works with
+            // this precision and to add coverage.
+            final Timestamp beforeCall = TimeTests.Past.secondsAgo(1);
+            final Command command = factory().command()
+                                             .create(StringValue.getDefaultInstance());
+            final Timestamp afterCall = TimeTests.Future.secondsFromNow(1);
 
-    @Test
-    @DisplayName("assign given entity version to created commands")
-    void createWithEntityVersion() {
-        final Command command = factory().command()
-                                         .create(StringValue.getDefaultInstance(), 2);
+            assertTrue(Timestamps2.isBetween(
+                    command.getContext()
+                           .getActorContext()
+                           .getTimestamp(), beforeCall, afterCall));
+        }
 
-        assertEquals(2, command.getContext()
-                               .getTargetVersion());
-    }
+        @Test
+        @DisplayName("assign given entity version to command")
+        void createWithEntityVersion() {
+            final Command command = factory().command()
+                                             .create(StringValue.getDefaultInstance(), 2);
 
-    @Test
-    @DisplayName("assign own tenant ID to created commands")
-    void createWithTenantID() {
-        final TenantId tenantId = TenantId.newBuilder()
-                                          .setValue(getClass().getSimpleName())
-                                          .build();
-        final ActorRequestFactory mtFactory = ActorRequestFactory.newBuilder()
-                                                                 .setTenantId(tenantId)
-                                                                 .setActor(getActor())
-                                                                 .setZoneOffset(getZoneOffset())
-                                                                 .build();
-        final Command command = mtFactory.command()
-                                         .create(StringValue.getDefaultInstance());
+            assertEquals(2, command.getContext()
+                                   .getTargetVersion());
+        }
 
-        assertEquals(tenantId, command.getContext()
-                                      .getActorContext()
-                                      .getTenantId());
-    }
+        @Test
+        @DisplayName("assign own tenant ID to command")
+        void createWithTenantID() {
+            final TenantId tenantId = TenantId.newBuilder()
+                                              .setValue(getClass().getSimpleName())
+                                              .build();
+            final ActorRequestFactory mtFactory = ActorRequestFactory.newBuilder()
+                                                                     .setTenantId(tenantId)
+                                                                     .setActor(getActor())
+                                                                     .setZoneOffset(getZoneOffset())
+                                                                     .build();
+            final Command command = mtFactory.command()
+                                             .create(StringValue.getDefaultInstance());
 
-    @Test
-    @DisplayName("throw ValidationException once passed invalid Message")
-    void notCreateFromInvalidMessage() {
-        final RequiredFieldCommand invalidCommand = RequiredFieldCommand.getDefaultInstance();
-        assertThrows(ValidationException.class, () -> factory().command()
-                                                               .create(invalidCommand));
-    }
+            assertEquals(tenantId, command.getContext()
+                                          .getActorContext()
+                                          .getTenantId());
+        }
 
-    @Test
-    @DisplayName("throw ValidationException once passed invalid Message with version")
-    void notCreateFromInvalidMessageWithVersion() {
-        final RequiredFieldCommand invalidCommand = RequiredFieldCommand.getDefaultInstance();
-        assertThrows(ValidationException.class, () -> factory().command()
-                                                               .create(invalidCommand, 42));
+        @Nested
+        @DisplayName("if supplied with invalid Message")
+        class OnInvalidMessageTest {
+
+            @Test
+            @DisplayName("throw ValidationException on creation attempt")
+            void notCreateFromInvalidMessage() {
+                final RequiredFieldCommand invalidCommand =
+                        RequiredFieldCommand.getDefaultInstance();
+                assertThrows(ValidationException.class, () -> factory().command()
+                                                                       .create(invalidCommand));
+            }
+
+            @Test
+            @DisplayName("throw ValidationException on creation with version attempt")
+            void notCreateFromInvalidMessageWithVersion() {
+                final RequiredFieldCommand invalidCommand =
+                        RequiredFieldCommand.getDefaultInstance();
+                assertThrows(ValidationException.class, () -> factory().command()
+                                                                       .create(invalidCommand, 42));
+            }
+        }
     }
 }

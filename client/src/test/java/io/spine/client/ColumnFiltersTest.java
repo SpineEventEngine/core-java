@@ -116,6 +116,13 @@ class ColumnFiltersTest {
         void createLessOrEqual() {
             checkCreatesInstance(le(COLUMN_NAME, COLUMN_VALUE), LESS_OR_EQUAL);
         }
+
+        private void checkCreatesInstance(ColumnFilter filter,
+                                          Operator operator) {
+            assertEquals(COLUMN_NAME, filter.getColumnName());
+            assertEquals(pack(COLUMN_VALUE), filter.getValue());
+            assertEquals(operator, filter.getOperator());
+        }
     }
 
     @SuppressWarnings("InnerClassMayBeStatic") // JUnit 5 nested test classes cannot to be static.
@@ -141,6 +148,13 @@ class ColumnFiltersTest {
                     gt(COLUMN_NAME, COLUMN_VALUE)
             };
             checkCreatesInstance(either(filters[0], filters[1]), EITHER, filters);
+        }
+
+        private void checkCreatesInstance(CompositeColumnFilter filter,
+                                          CompositeOperator operator,
+                                          ColumnFilter[] groupedFilters) {
+            assertEquals(operator, filter.getOperator());
+            assertContainsAll(filter.getFilterList(), groupedFilters);
         }
     }
 
@@ -190,19 +204,5 @@ class ColumnFiltersTest {
             final Comparable<?> value = Calendar.getInstance(); // Comparable but not supported
             assertThrows(IllegalArgumentException.class, () -> le("invalidColumn", value));
         }
-    }
-
-    private static void checkCreatesInstance(ColumnFilter filter,
-                                             Operator operator) {
-        assertEquals(COLUMN_NAME, filter.getColumnName());
-        assertEquals(pack(COLUMN_VALUE), filter.getValue());
-        assertEquals(operator, filter.getOperator());
-    }
-
-    private static void checkCreatesInstance(CompositeColumnFilter filter,
-                                             CompositeOperator operator,
-                                             ColumnFilter[] groupedFilters) {
-        assertEquals(operator, filter.getOperator());
-        assertContainsAll(filter.getFilterList(), groupedFilters);
     }
 }

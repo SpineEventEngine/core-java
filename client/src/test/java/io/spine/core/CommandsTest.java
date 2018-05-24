@@ -41,6 +41,7 @@ import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
 import io.spine.type.TypeName;
 import io.spine.type.TypeUrl;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 
@@ -158,66 +159,76 @@ class CommandsTest {
         assertEquals(message, Commands.getMessage(command));
     }
 
-    @Test
-    @DisplayName("create `wereAfter` predicate")
-    void createWereAfterPredicate() {
-        final Command command = requestFactory.command()
-                                              .create(BoolValue.getDefaultInstance());
-        assertTrue(Commands.wereAfter(secondsAgo(5))
-                           .apply(command));
+    @Nested
+    @DisplayName("when creating predicate for commands")
+    class PredicatesCreationTest {
+
+        @Test
+        @DisplayName("support `wereAfter` predicate")
+        void createWereAfterPredicate() {
+            final Command command = requestFactory.command()
+                                                  .create(BoolValue.getDefaultInstance());
+            assertTrue(Commands.wereAfter(secondsAgo(5))
+                               .apply(command));
+        }
+
+        @Test
+        @DisplayName("support `wereBetween` predicate")
+        void createWereBetweenPredicate() {
+            final Command command1 = requestFactory.createCommand(StringValue.getDefaultInstance(),
+                                                                  minutesAgo(5));
+            final Command command2 = requestFactory.createCommand(Int64Value.getDefaultInstance(),
+                                                                  minutesAgo(2));
+            final Command command3 = requestFactory.createCommand(BoolValue.getDefaultInstance(),
+                                                                  secondsAgo(30));
+            final Command command4 = requestFactory.createCommand(BoolValue.getDefaultInstance(),
+                                                                  secondsAgo(20));
+            final Command command5 = requestFactory.createCommand(BoolValue.getDefaultInstance(),
+                                                                  secondsAgo(5));
+
+            final ImmutableList<Command> commands =
+                    ImmutableList.of(command1, command2, command3, command4, command5);
+            final Iterable<Command> filter = Iterables.filter(
+                    commands,
+                    Commands.wereWithinPeriod(minutesAgo(3), secondsAgo(10))
+            );
+
+            assertEquals(3, FluentIterable.from(filter)
+                                          .size());
+        }
     }
 
-    @Test
-    @DisplayName("create `wereBetween` predicate")
-    void createWereBetweenPredicate() {
-        final Command command1 = requestFactory.createCommand(StringValue.getDefaultInstance(),
-                                                              minutesAgo(5));
-        final Command command2 = requestFactory.createCommand(Int64Value.getDefaultInstance(),
-                                                              minutesAgo(2));
-        final Command command3 = requestFactory.createCommand(BoolValue.getDefaultInstance(),
-                                                              secondsAgo(30));
-        final Command command4 = requestFactory.createCommand(BoolValue.getDefaultInstance(),
-                                                              secondsAgo(20));
-        final Command command5 = requestFactory.createCommand(BoolValue.getDefaultInstance(),
-                                                              secondsAgo(5));
+    @Nested
+    @DisplayName("when evaluating if command is scheduled")
+    class CommandScheduledTest {
 
-        final ImmutableList<Command> commands =
-                ImmutableList.of(command1, command2, command3, command4, command5);
-        final Iterable<Command> filter = Iterables.filter(
-                commands,
-                Commands.wereWithinPeriod(minutesAgo(3), secondsAgo(10))
-        );
+        @Test
+        @DisplayName("consider command scheduled when command delay is set")
+        void recognizeScheduled() {
+            final CommandContext context = GivenCommandContext.withScheduledDelayOf(seconds(10));
+            final Command cmd = requestFactory.command()
+                                              .createBasedOnContext(
+                                                      StringValue.getDefaultInstance(),
+                                                      context);
+            assertTrue(Commands.isScheduled(cmd));
+        }
 
-        assertEquals(3, FluentIterable.from(filter)
-                                      .size());
-    }
+        @Test
+        @DisplayName("consider command not scheduled when no scheduling options are present")
+        void recognizeNotScheduled() {
+            final Command cmd = requestFactory.createCommand(StringValue.getDefaultInstance());
+            assertFalse(Commands.isScheduled(cmd));
+        }
 
-    @Test
-    @DisplayName("consider command scheduled when command delay is set")
-    void recognizeScheduled() {
-        final CommandContext context = GivenCommandContext.withScheduledDelayOf(seconds(10));
-        final Command cmd = requestFactory.command()
-                                          .createBasedOnContext(
-                                                  StringValue.getDefaultInstance(),
-                                                  context);
-        assertTrue(Commands.isScheduled(cmd));
-    }
-
-    @Test
-    @DisplayName("consider command not scheduled when no scheduling options are present")
-    void recognizeNotScheduled() {
-        final Command cmd = requestFactory.createCommand(StringValue.getDefaultInstance());
-        assertFalse(Commands.isScheduled(cmd));
-    }
-
-    @Test
-    @DisplayName("throw exception when command delay set to negative")
-    void throwOnNegativeDelay() {
-        final CommandContext context = GivenCommandContext.withScheduledDelayOf(seconds(-10));
-        final Command cmd = requestFactory.command()
-                                          .createBasedOnContext(StringValue.getDefaultInstance(),
-                                                                context);
-        assertThrows(IllegalArgumentException.class, () -> Commands.isScheduled(cmd));
+        @Test
+        @DisplayName("throw exception when command delay set to negative")
+        void throwOnNegativeDelay() {
+            final CommandContext context = GivenCommandContext.withScheduledDelayOf(seconds(-10));
+            final Command cmd = requestFactory.command()
+                                              .createBasedOnContext(StringValue.getDefaultInstance(),
+                                                                    context);
+            assertThrows(IllegalArgumentException.class, () -> Commands.isScheduled(cmd));
+        }
     }
 
     @Test
@@ -230,23 +241,28 @@ class CommandsTest {
         assertEquals(id, convertedBack);
     }
 
-    @Test
-    @DisplayName("throw exception when checked command id is empty")
-    void throwOnEmptyId() {
-        assertThrows(IllegalArgumentException.class,
-                     () -> Commands.checkValid(CommandId.getDefaultInstance()));
-    }
+    @Nested
+    @DisplayName("when checking if command is valid")
+    class CheckValidTest {
 
-    @Test
-    @DisplayName("return command id value when checked")
-    void returnIdWhenChecked() {
-        final CommandId id = Commands.generateId();
-        assertEquals(id, Commands.checkValid(id));
+        @Test
+        @DisplayName("throw exception if checked command id is empty")
+        void throwOnEmptyId() {
+            assertThrows(IllegalArgumentException.class,
+                         () -> Commands.checkValid(CommandId.getDefaultInstance()));
+        }
+
+        @Test
+        @DisplayName("return command id value when checked")
+        void returnIdWhenChecked() {
+            final CommandId id = Commands.generateId();
+            assertEquals(id, Commands.checkValid(id));
+        }
     }
 
     @Test
     @DisplayName("obtain type of given command")
-    void obtainCommandType() {
+    void getCommandType() {
         final Command command = requestFactory.generateCommand();
 
         final TypeName typeName = CommandEnvelope.of(command)
@@ -257,7 +273,7 @@ class CommandsTest {
 
     @Test
     @DisplayName("obtain type url of given command")
-    void obtainCommandTypeUrl() {
+    void getCommandTypeUrl() {
         final ActorRequestFactory factory =
                 TestActorRequestFactory.newInstance(CommandsTest.class);
         final StringValue message = toMessage(Identifier.newUuid());
