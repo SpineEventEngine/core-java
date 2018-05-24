@@ -54,7 +54,7 @@ public class ProjectionShould {
         projection = Given.projectionOfClass(TestProjection.class)
                           .withId(newUuid())
                           .withVersion(1)
-                          .withState(TypeConverter.<String, StringValue>toMessage("Initial state"))
+                          .withState(TypeConverter.toMessage("Initial state"))
                           .build();
     }
 

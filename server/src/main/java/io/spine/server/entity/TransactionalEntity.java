@@ -108,7 +108,6 @@ public abstract class TransactionalEntity<I,
         final boolean stateChanged = tx != null
                                      ? tx.isStateChanged()
                                      : this.stateChanged;
-
         return stateChanged || lifecycleFlagsChanged;
     }
 

@@ -21,6 +21,7 @@
 package io.spine.server.projection;
 
 import com.google.protobuf.Message;
+import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
@@ -85,8 +86,9 @@ public abstract class Projection<I,
                     .asProjectionClass(getClass());
     }
 
-    protected void handle(EventEnvelope event) {
-        apply(event.getMessage(), event.getEventContext());
+    protected void handle(EventEnvelope envelope) {
+        final Event event = envelope.getOuterObject();
+        play(EventStream.of(event));
     }
 
     /**
