@@ -83,7 +83,7 @@ public class EventPlayingEntityShould {
 
     private static class EpeEntity
             extends TransactionalEntity<Long, StringValue, StringValueVBuilder>
-            implements EventPlayingEntity<Long, StringValue> {
+            implements EventPlayer {
 
         private EpeEntity() {
             super(0L);

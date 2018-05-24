@@ -38,7 +38,6 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.server.command.CommandHandlerMethod;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.entity.EventPlayer;
-import io.spine.server.entity.EventPlayingEntity;
 import io.spine.server.event.EventFactory;
 import io.spine.server.event.EventReactorMethod;
 import io.spine.server.event.EventStream;
@@ -126,7 +125,7 @@ public abstract class Aggregate<I,
                                 S extends Message,
                                 B extends ValidatingBuilder<S, ? extends Message.Builder>>
         extends CommandHandlingEntity<I, S, B>
-        implements EventPlayingEntity<I, S> {
+        implements EventPlayer {
 
     /**
      * Events generated in the process of handling commands that were not yet committed.
