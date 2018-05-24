@@ -34,7 +34,7 @@ import java.util.Set;
  * @author Alexander Yevsyukov
  */
 class AggregateRejectionEndpoint<I, A extends Aggregate<I, ?, ?>>
-        extends AggregateMessageEndpoint<I, A, RejectionEnvelope, Set<I>> {
+        extends AggregateEndpoint<I, A, RejectionEnvelope, Set<I>> {
 
     private AggregateRejectionEndpoint(AggregateRepository<I, A> repository,
                                        RejectionEnvelope envelope) {
