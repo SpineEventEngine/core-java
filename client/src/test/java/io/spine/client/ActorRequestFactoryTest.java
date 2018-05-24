@@ -85,7 +85,8 @@ abstract class ActorRequestFactoryTest {
         @Test
         @DisplayName("require actor")
         void requireActor() {
-            assertThrows(NullPointerException.class, () -> builder().setZoneOffset(zoneOffset).build());
+            assertThrows(NullPointerException.class, () -> builder().setZoneOffset(zoneOffset)
+                                                                    .build());
         }
 
         @Test
@@ -101,7 +102,7 @@ abstract class ActorRequestFactoryTest {
     }
 
     @Test
-    @DisplayName("be created for the given user")
+    @DisplayName("be created for given user")
     void beCreatedByUser() {
         final int currentOffset = ZoneOffsets.getDefault()
                                              .getAmountSeconds();
@@ -115,7 +116,7 @@ abstract class ActorRequestFactoryTest {
     }
 
     @Test
-    @DisplayName("be created for the given user and timezone")
+    @DisplayName("be created for given user and timezone")
     void beCreatedByUserAndTimezone() {
         assertEquals(actor, factory().getActor());
         assertEquals(zoneOffset, factory().getZoneOffset());

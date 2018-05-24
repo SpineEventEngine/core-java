@@ -29,6 +29,7 @@ import io.grpc.stub.StreamObserver;
 import io.spine.base.Error;
 import io.spine.core.Response;
 import io.spine.test.Tests;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.mockito.ArgumentMatchers;
@@ -59,7 +60,7 @@ class StreamObserversTest {
 
     @SuppressWarnings("DuplicateStringLiteralInspection") // Display name for utility c-tor test.
     @Test
-    @DisplayName("have private utility constructor")
+    @DisplayName("have private parameterless constructor")
     void haveUtilityCtor() {
         assertHasPrivateParameterlessCtor(StreamObservers.class);
     }
@@ -150,50 +151,52 @@ class StreamObserversTest {
         assertTrue(observer.isCompleted());
     }
 
-    /*
-     * Error extraction tests
-     **************************/
+    @SuppressWarnings("InnerClassMayBeStatic") // JUnit 5 nested classes cannot to be static.
+    @Nested
+    @DisplayName("when extracting from stream error")
+    class ErrorExtractionTest {
 
-    @Test
-    @DisplayName("return Error extracted from StatusRuntimeException metadata")
-    void extractFromStatusRuntimeException() {
-        final Error expectedError = Error.getDefaultInstance();
-        final Metadata metadata = MetadataConverter.toMetadata(expectedError);
-        final StatusRuntimeException statusRuntimeException =
-                INVALID_ARGUMENT.asRuntimeException(metadata);
+        @Test
+        @DisplayName("return Error extracted from StatusRuntimeException metadata")
+        void extractFromStatusRuntimeException() {
+            final Error expectedError = Error.getDefaultInstance();
+            final Metadata metadata = MetadataConverter.toMetadata(expectedError);
+            final StatusRuntimeException statusRuntimeException =
+                    INVALID_ARGUMENT.asRuntimeException(metadata);
 
-        assertEquals(expectedError, StreamObservers.fromStreamError(statusRuntimeException)
-                                                   .get());
-    }
+            assertEquals(expectedError, StreamObservers.fromStreamError(statusRuntimeException)
+                                                       .get());
+        }
 
-    @Test
-    @DisplayName("return Error extracted from StatusException metadata")
-    void extractFromStatusException() {
-        final Error expectedError = Error.getDefaultInstance();
-        final Metadata metadata = MetadataConverter.toMetadata(expectedError);
-        final StatusException statusException = INVALID_ARGUMENT.asException(metadata);
+        @Test
+        @DisplayName("return Error extracted from StatusException metadata")
+        void extractFromStatusException() {
+            final Error expectedError = Error.getDefaultInstance();
+            final Metadata metadata = MetadataConverter.toMetadata(expectedError);
+            final StatusException statusException = INVALID_ARGUMENT.asException(metadata);
 
-        assertEquals(expectedError, StreamObservers.fromStreamError(statusException)
-                                                   .get());
-    }
+            assertEquals(expectedError, StreamObservers.fromStreamError(statusException)
+                                                       .get());
+        }
 
-    @Test
-    @DisplayName("return absent if passed Throwable is not status exception")
-    void processGenericThrowable() {
-        final String msg = "Neither a StatusException nor a StatusRuntimeException.";
-        final Exception exception = new Exception(msg);
+        @Test
+        @DisplayName("return absent if passed Throwable is not status exception")
+        void processGenericThrowable() {
+            final String msg = "Neither a StatusException nor a StatusRuntimeException.";
+            final Exception exception = new Exception(msg);
 
-        assertFalse(StreamObservers.fromStreamError(exception)
-                                   .isPresent());
-    }
+            assertFalse(StreamObservers.fromStreamError(exception)
+                                       .isPresent());
+        }
 
-    @Test
-    @DisplayName("return absent if there is no error in metadata")
-    void processMetadataWithoutError() {
-        final Metadata emptyMetadata = new Metadata();
-        final Throwable statusRuntimeEx = INVALID_ARGUMENT.asRuntimeException(emptyMetadata);
+        @Test
+        @DisplayName("return absent if there is no error in metadata")
+        void processMetadataWithoutError() {
+            final Metadata emptyMetadata = new Metadata();
+            final Throwable statusRuntimeEx = INVALID_ARGUMENT.asRuntimeException(emptyMetadata);
 
-        assertFalse(StreamObservers.fromStreamError(statusRuntimeEx)
-                                   .isPresent());
+            assertFalse(StreamObservers.fromStreamError(statusRuntimeEx)
+                                       .isPresent());
+        }
     }
 }

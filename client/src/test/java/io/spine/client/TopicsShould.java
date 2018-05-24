@@ -34,7 +34,7 @@ class TopicsShould {
 
     @SuppressWarnings("DuplicateStringLiteralInspection") // Display name for utility c-tor test.
     @Test
-    @DisplayName("have private utility constructor")
+    @DisplayName("have private parameterless constructor")
     void haveUtilityCtor() {
         Tests.assertHasPrivateParameterlessCtor(Topics.class);
     }
