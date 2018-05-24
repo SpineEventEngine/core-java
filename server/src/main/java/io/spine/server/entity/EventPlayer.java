@@ -37,7 +37,7 @@ public interface EventPlayer {
      *
      * <p>Typically, the entity state is changed upon this operation.
      *
-     * @param events the event steam to play
+     * @param events the event stream to play
      */
     void play(EventStream events);
 
