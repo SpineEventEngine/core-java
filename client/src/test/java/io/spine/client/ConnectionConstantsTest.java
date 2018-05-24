@@ -40,7 +40,7 @@ class ConnectionConstantsTest {
     }
 
     @Test
-    @DisplayName("declare non-zero default grpc port")
+    @DisplayName("declare non-zero default gRPC port")
     void declareDefaultGrpcPort() {
         assertNotEquals(0, ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT);
     }

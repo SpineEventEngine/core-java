@@ -26,9 +26,9 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.spine.client.ColumnFilter.Operator;
 import io.spine.protobuf.AnyPacker;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.DisplayName;
 
 import java.util.Calendar;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -84,7 +84,7 @@ class ColumnFiltersTest {
 
     @SuppressWarnings("InnerClassMayBeStatic") // JUnit 5 nested test classes cannot to be static.
     @Nested
-    @DisplayName("on column filter creation")
+    @DisplayName("when creating column filter")
     class FilterCreationTest {
 
         @Test
@@ -127,7 +127,7 @@ class ColumnFiltersTest {
 
     @SuppressWarnings("InnerClassMayBeStatic") // JUnit 5 nested test classes cannot to be static.
     @Nested
-    @DisplayName("on composite column filter creation")
+    @DisplayName("when creating composite column filter")
     class CompositeFilterCreationTest {
 
         @Test
@@ -160,7 +160,7 @@ class ColumnFiltersTest {
 
     @SuppressWarnings("InnerClassMayBeStatic") // JUnit 5 nested test classes cannot to be static.
     @Nested
-    @DisplayName("on ordering filter creation")
+    @DisplayName("when creating ordering filter")
     class OrderingFilterCreationTest {
 
         @Test

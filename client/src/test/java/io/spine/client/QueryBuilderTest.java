@@ -406,7 +406,7 @@ class QueryBuilderTest extends ActorRequestFactoryTest {
     }
 
     @Test
-    @DisplayName("provide proper toString() method")
+    @DisplayName("provide proper `toString()` method")
     void supportToString() {
         final Class<? extends Message> testEntityClass = TestEntity.class;
         final int id1 = 314;

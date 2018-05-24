@@ -28,9 +28,9 @@ import io.spine.core.UserId;
 import io.spine.test.client.TestEntity;
 import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.DisplayName;
 
 import java.util.Set;
 

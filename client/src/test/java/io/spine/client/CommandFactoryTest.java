@@ -35,9 +35,9 @@ import io.spine.time.Timestamps2;
 import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
 import io.spine.validate.ValidationException;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.DisplayName;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -117,27 +117,22 @@ class CommandFactoryTest extends ActorRequestFactoryTest {
                                           .getTenantId());
         }
 
-        @Nested
-        @DisplayName("if supplied with invalid Message")
-        class OnInvalidMessageTest {
+        @Test
+        @DisplayName("throw ValidationException if supplied with invalid Message")
+        void notCreateFromInvalidMessage() {
+            final RequiredFieldCommand invalidCommand =
+                    RequiredFieldCommand.getDefaultInstance();
+            assertThrows(ValidationException.class, () -> factory().command()
+                                                                   .create(invalidCommand));
+        }
 
-            @Test
-            @DisplayName("throw ValidationException on creation attempt")
-            void notCreateFromInvalidMessage() {
-                final RequiredFieldCommand invalidCommand =
-                        RequiredFieldCommand.getDefaultInstance();
-                assertThrows(ValidationException.class, () -> factory().command()
-                                                                       .create(invalidCommand));
-            }
-
-            @Test
-            @DisplayName("throw ValidationException on creation with version attempt")
-            void notCreateFromInvalidMessageWithVersion() {
-                final RequiredFieldCommand invalidCommand =
-                        RequiredFieldCommand.getDefaultInstance();
-                assertThrows(ValidationException.class, () -> factory().command()
-                                                                       .create(invalidCommand, 42));
-            }
+        @Test
+        @DisplayName("throw ValidationException if supplied with invalid Message with version")
+        void notCreateFromInvalidMessageWithVersion() {
+            final RequiredFieldCommand invalidCommand =
+                    RequiredFieldCommand.getDefaultInstance();
+            assertThrows(ValidationException.class, () -> factory().command()
+                                                                   .create(invalidCommand, 42));
         }
     }
 }
