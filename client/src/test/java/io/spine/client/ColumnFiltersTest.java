@@ -26,6 +26,7 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.spine.client.ColumnFilter.Operator;
 import io.spine.protobuf.AnyPacker;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 
@@ -81,96 +82,114 @@ class ColumnFiltersTest {
                 .testAllPublicStaticMethods(ColumnFilters.class);
     }
 
-    @Test
-    @DisplayName("create `equals` column filter instance")
-    void createEquals() {
-        checkCreatesInstance(eq(COLUMN_NAME, COLUMN_VALUE), EQUAL);
+    @SuppressWarnings("InnerClassMayBeStatic") // JUnit 5 nested test classes cannot to be static.
+    @Nested
+    @DisplayName("on column filter creation")
+    class FilterCreationTest {
+
+        @Test
+        @DisplayName("successfully create `equals` filter")
+        void createEquals() {
+            checkCreatesInstance(eq(COLUMN_NAME, COLUMN_VALUE), EQUAL);
+        }
+
+        @Test
+        @DisplayName("successfully create `greater than` filter")
+        void createGreaterThan() {
+            checkCreatesInstance(gt(COLUMN_NAME, COLUMN_VALUE), GREATER_THAN);
+        }
+
+        @Test
+        @DisplayName("successfully create `greater than or equals` filter")
+        void createGreaterOrEqual() {
+            checkCreatesInstance(ge(COLUMN_NAME, COLUMN_VALUE), GREATER_OR_EQUAL);
+        }
+
+        @Test
+        @DisplayName("successfully create `less than` filter")
+        void createLessThan() {
+            checkCreatesInstance(lt(COLUMN_NAME, COLUMN_VALUE), LESS_THAN);
+        }
+
+        @Test
+        @DisplayName("successfully create `less than or equals` filter")
+        void createLessOrEqual() {
+            checkCreatesInstance(le(COLUMN_NAME, COLUMN_VALUE), LESS_OR_EQUAL);
+        }
     }
 
-    @Test
-    @DisplayName("create `greater than` column filter instance")
-    void createGreaterThan() {
-        checkCreatesInstance(gt(COLUMN_NAME, COLUMN_VALUE), GREATER_THAN);
+    @SuppressWarnings("InnerClassMayBeStatic") // JUnit 5 nested test classes cannot to be static.
+    @Nested
+    @DisplayName("on composite column filter creation")
+    class CompositeFilterCreationTest {
+
+        @Test
+        @DisplayName("successfully create `all` grouping")
+        void createAllGrouping() {
+            final ColumnFilter[] filters = {
+                    le(COLUMN_NAME, COLUMN_VALUE),
+                    ge(COLUMN_NAME, COLUMN_VALUE)
+            };
+            checkCreatesInstance(all(filters[0], filters[1]), ALL, filters);
+        }
+
+        @Test
+        @DisplayName("successfully create `either` grouping")
+        void createEitherGrouping() {
+            final ColumnFilter[] filters = {
+                    lt(COLUMN_NAME, COLUMN_VALUE),
+                    gt(COLUMN_NAME, COLUMN_VALUE)
+            };
+            checkCreatesInstance(either(filters[0], filters[1]), EITHER, filters);
+        }
     }
 
-    @Test
-    @DisplayName("create `greater than or equals` column filter instance")
-    void createGreaterOrEqual() {
-        checkCreatesInstance(ge(COLUMN_NAME, COLUMN_VALUE), GREATER_OR_EQUAL);
-    }
+    @SuppressWarnings("InnerClassMayBeStatic") // JUnit 5 nested test classes cannot to be static.
+    @Nested
+    @DisplayName("on ordering filter creation")
+    class OrderingFilterCreationTest {
 
-    @Test
-    @DisplayName("create `less than` column filter instance")
-    void createLessThan() {
-        checkCreatesInstance(lt(COLUMN_NAME, COLUMN_VALUE), LESS_THAN);
-    }
+        @Test
+        @DisplayName("successfully create ordering filter for numbers")
+        void createOrderFilterForNumber() {
+            final double number = 3.14;
+            final ColumnFilter filter = le("doubleColumn", number);
+            assertNotNull(filter);
+            assertEquals(LESS_OR_EQUAL, filter.getOperator());
+            final DoubleValue value = AnyPacker.unpack(filter.getValue());
+            assertEquals(number, value.getValue(), 0.0);
+        }
 
-    @Test
-    @DisplayName("create `less than or equals` column filter instance")
-    void createLessOrEqual() {
-        checkCreatesInstance(le(COLUMN_NAME, COLUMN_VALUE), LESS_OR_EQUAL);
-    }
+        @Test
+        @DisplayName("successfully create ordering filter for strings")
+        void createOrderFilterForString() {
+            final String string = "abc";
+            final ColumnFilter filter = gt("stringColumn", string);
+            assertNotNull(filter);
+            assertEquals(GREATER_THAN, filter.getOperator());
+            final StringValue value = AnyPacker.unpack(filter.getValue());
+            assertEquals(string, value.getValue());
+        }
 
-    @Test
-    @DisplayName("create `all` composite column filter")
-    void createAllGrouping() {
-        final ColumnFilter[] filters = {
-                le(COLUMN_NAME, COLUMN_VALUE),
-                ge(COLUMN_NAME, COLUMN_VALUE)
-        };
-        checkCreatesInstance(all(filters[0], filters[1]), ALL, filters);
-    }
+        @Test
+        @DisplayName("fail to create ordering filter for enumerated types")
+        void notCreateOrderFilterForEnum() {
+            assertThrows(IllegalArgumentException.class, () -> ge("enumColumn", EQUAL));
+        }
 
-    @Test
-    @DisplayName("create `either` composite column filter")
-    void createEitherGrouping() {
-        final ColumnFilter[] filters = {
-                lt(COLUMN_NAME, COLUMN_VALUE),
-                gt(COLUMN_NAME, COLUMN_VALUE)
-        };
-        checkCreatesInstance(either(filters[0], filters[1]), EITHER, filters);
-    }
+        @Test
+        @DisplayName("fail to create ordering filter for non primitive number types")
+        void notCreateOrderFilterForNonPrimitiveNumber() {
+            final AtomicInteger number = new AtomicInteger(42);
+            assertThrows(IllegalArgumentException.class, () -> ge("atomicColumn", number));
+        }
 
-    @Test
-    @DisplayName("create ordering column filters for numbers")
-    void createOrderFilterForNumber() {
-        final double number = 3.14;
-        final ColumnFilter filter = le("doubleColumn", number);
-        assertNotNull(filter);
-        assertEquals(LESS_OR_EQUAL, filter.getOperator());
-        final DoubleValue value = AnyPacker.unpack(filter.getValue());
-        assertEquals(number, value.getValue(), 0.0);
-    }
-
-    @Test
-    @DisplayName("create ordering column filters for strings")
-    void createOrderFilterForString() {
-        final String string = "abc";
-        final ColumnFilter filter = gt("stringColumn", string);
-        assertNotNull(filter);
-        assertEquals(GREATER_THAN, filter.getOperator());
-        final StringValue value = AnyPacker.unpack(filter.getValue());
-        assertEquals(string, value.getValue());
-    }
-
-    @Test
-    @DisplayName("fail to create ordering column filters for enumerated types")
-    void notCreateOrderFilterForEnum() {
-        assertThrows(IllegalArgumentException.class, () -> ge("enumColumn", EQUAL));
-    }
-
-    @Test
-    @DisplayName("fail to create ordering column filters for non primitive number types")
-    void notCreateOrderFilterForNonPrimitiveNumber() {
-        final AtomicInteger number = new AtomicInteger(42);
-        assertThrows(IllegalArgumentException.class, () -> ge("atomicColumn", number));
-    }
-
-    @Test
-    @DisplayName("fail to create ordering column filters for not supported types")
-    void notCreateOrderFilterForNotSupportedType() {
-        final Comparable<?> value = Calendar.getInstance(); // Comparable but not supported
-        assertThrows(IllegalArgumentException.class, () -> le("invalidColumn", value));
+        @Test
+        @DisplayName("fail to create ordering filter for not supported types")
+        void notCreateOrderFilterForNotSupportedType() {
+            final Comparable<?> value = Calendar.getInstance(); // Comparable but not supported
+            assertThrows(IllegalArgumentException.class, () -> le("invalidColumn", value));
+        }
     }
 
     private static void checkCreatesInstance(ColumnFilter filter,

@@ -67,7 +67,7 @@ class CommandFactoryTest extends ActorRequestFactoryTest {
     }
 
     @Test
-    @DisplayName("assign current time to created command instance")
+    @DisplayName("assign current time to created commands")
     void createWithTimestamp() {
         // We are creating a range of +/- second between the call to make sure the timestamp
         // would fit into this range. The purpose of this test is to make sure it works with
@@ -84,7 +84,7 @@ class CommandFactoryTest extends ActorRequestFactoryTest {
     }
 
     @Test
-    @DisplayName("create new command instance with given entity version")
+    @DisplayName("assign given entity version to created commands")
     void createWithEntityVersion() {
         final Command command = factory().command()
                                          .create(StringValue.getDefaultInstance(), 2);

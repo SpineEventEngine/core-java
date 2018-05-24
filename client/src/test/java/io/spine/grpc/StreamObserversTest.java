@@ -151,7 +151,7 @@ class StreamObserversTest {
         assertTrue(observer.isCompleted());
     }
 
-    @SuppressWarnings("InnerClassMayBeStatic") // JUnit 5 nested classes cannot to be static.
+    @SuppressWarnings("InnerClassMayBeStatic") // JUnit 5 nested test classes cannot to be static.
     @Nested
     @DisplayName("when extracting from stream error")
     class ErrorExtractionTest {

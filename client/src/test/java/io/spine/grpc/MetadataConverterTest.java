@@ -76,7 +76,7 @@ class MetadataConverterTest {
     }
 
     @Test
-    @DisplayName("throw wrapped InvalidProtocolBufferException if Metadata bytes are invalid")
+    @DisplayName("throw wrapped InvalidProtocolBufferException when Metadata bytes are invalid")
     void throwOnInvalidBytes() {
         final Metadata metadata = new Metadata();
         metadata.put(MetadataConverter.KEY, new byte[]{(byte) 1});
