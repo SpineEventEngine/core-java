@@ -27,9 +27,9 @@ import io.spine.test.client.TestEntity;
 import io.spine.test.client.TestEntityId;
 import io.spine.type.TypeUrl;
 import org.junit.Assert;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.DisplayName;
 
 import java.util.List;
 import java.util.Set;
@@ -57,7 +57,8 @@ class TopicFactoryTest
         @Test
         @DisplayName("support creation for all entities of kind")
         void createForAllOfKind() {
-            final Topic topic = factory().topic().allOf(TARGET_ENTITY_CLASS);
+            final Topic topic = factory().topic()
+                                         .allOf(TARGET_ENTITY_CLASS);
 
             verifyTargetAndContext(topic);
 
@@ -73,7 +74,8 @@ class TopicFactoryTest
 
             final Set<TestEntityId> ids = newHashSet(entityId(1), entityId(2),
                                                      entityId(3));
-            final Topic topic = factory().topic().someOf(TARGET_ENTITY_CLASS, ids);
+            final Topic topic = factory().topic()
+                                         .someOf(TARGET_ENTITY_CLASS, ids);
 
             verifyTargetAndContext(topic);
 
@@ -93,7 +95,8 @@ class TopicFactoryTest
         @DisplayName("support creation for given target")
         void createForGivenTarget() {
             final Target givenTarget = Targets.allOf(TARGET_ENTITY_CLASS);
-            final Topic topic = factory().topic().forTarget(givenTarget);
+            final Topic topic = factory().topic()
+                                         .forTarget(givenTarget);
 
             verifyTargetAndContext(topic);
         }

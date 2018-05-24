@@ -29,9 +29,9 @@ import io.grpc.stub.StreamObserver;
 import io.spine.base.Error;
 import io.spine.core.Response;
 import io.spine.test.Tests;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.DisplayName;
 import org.mockito.ArgumentMatchers;
 
 import java.util.List;
@@ -117,7 +117,8 @@ class StreamObserversTest {
     }
 
     private static void checkOnNext(MemoizingObserver<Object> observer) {
-        assertTrue(observer.responses().isEmpty());
+        assertTrue(observer.responses()
+                           .isEmpty());
 
         final Object firstResponse = new Object();
         observer.onNext(firstResponse);

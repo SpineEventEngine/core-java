@@ -26,9 +26,9 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.test.client.TestEntity;
 import io.spine.test.client.TestEntityId;
 import io.spine.type.TypeUrl;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.DisplayName;
 
 import java.util.Collection;
 import java.util.Collections;

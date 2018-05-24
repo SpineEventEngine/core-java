@@ -31,9 +31,9 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.test.client.TestEntity;
 import io.spine.test.queries.ProjectId;
 import io.spine.type.TypeUrl;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.DisplayName;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -99,7 +99,8 @@ class QueryBuilderTest extends ActorRequestFactoryTest {
             final Target target = query.getTarget();
             assertTrue(target.getIncludeAll());
 
-            assertEquals(TypeUrl.of(testEntityClass).value(), target.getType());
+            assertEquals(TypeUrl.of(testEntityClass)
+                                .value(), target.getType());
         }
 
         @Test
@@ -224,7 +225,8 @@ class QueryBuilderTest extends ActorRequestFactoryTest {
                                                        eq(countryColumn, countryName)))
                                          .build();
             final Target target = query.getTarget();
-            final List<CompositeColumnFilter> filters = target.getFilters().getFilterList();
+            final List<CompositeColumnFilter> filters = target.getFilters()
+                                                              .getFilterList();
             assertSize(2, filters);
 
             final CompositeColumnFilter firstFilter = filters.get(0);
@@ -248,7 +250,8 @@ class QueryBuilderTest extends ActorRequestFactoryTest {
             assertEquals(companySizeColumn, companySizeLowerBound.getColumnName());
             assertEquals(50L,
                          (long) toObject(companySizeLowerBound.getValue(), int.class));
-            assertEquals(ColumnFilter.Operator.GREATER_OR_EQUAL, companySizeLowerBound.getOperator());
+            assertEquals(ColumnFilter.Operator.GREATER_OR_EQUAL,
+                         companySizeLowerBound.getOperator());
 
             final ColumnFilter companySizeHigherBound = allColumnFilters.get(1);
             assertEquals(companySizeColumn, companySizeHigherBound.getColumnName());
@@ -268,7 +271,6 @@ class QueryBuilderTest extends ActorRequestFactoryTest {
                          toObject(countryFilter.getValue(), String.class));
             assertEquals(ColumnFilter.Operator.EQUAL, countryFilter.getOperator());
         }
-
 
         @SuppressWarnings("OverlyLongMethod")
         // A big test case covering the query arguments coexistence.
@@ -367,7 +369,8 @@ class QueryBuilderTest extends ActorRequestFactoryTest {
                 final Collection<EntityId> entityIds = filters.getIdFilter()
                                                               .getIdsList();
                 assertSize(messageIds.length, entityIds);
-                final Function<EntityId, ProjectId> transformer = new EntityIdUnpacker<>(ProjectId.class);
+                final Function<EntityId, ProjectId> transformer =
+                        new EntityIdUnpacker<>(ProjectId.class);
                 final Iterable<? extends Message> actualValues = transform(entityIds, transformer);
                 assertThat(actualValues, containsInAnyOrder(messageIds));
             }

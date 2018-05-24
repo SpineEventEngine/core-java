@@ -41,9 +41,9 @@ import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
 import io.spine.type.TypeName;
 import io.spine.type.TypeUrl;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.DisplayName;
 
 import java.util.List;
 
@@ -224,9 +224,10 @@ class CommandsTest {
         @DisplayName("throw exception when command delay set to negative")
         void throwOnNegativeDelay() {
             final CommandContext context = GivenCommandContext.withScheduledDelayOf(seconds(-10));
-            final Command cmd = requestFactory.command()
-                                              .createBasedOnContext(StringValue.getDefaultInstance(),
-                                                                    context);
+            final Command cmd =
+                    requestFactory.command()
+                                  .createBasedOnContext(StringValue.getDefaultInstance(),
+                                                        context);
             assertThrows(IllegalArgumentException.class, () -> Commands.isScheduled(cmd));
         }
     }

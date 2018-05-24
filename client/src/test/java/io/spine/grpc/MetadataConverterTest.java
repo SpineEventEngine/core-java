@@ -24,8 +24,8 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.InvalidProtocolBufferException;
 import io.grpc.Metadata;
 import io.spine.base.Error;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static junit.framework.TestCase.assertTrue;

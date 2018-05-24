@@ -21,8 +21,8 @@
 package io.spine.client;
 
 import io.spine.test.Tests;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static org.junit.Assert.assertFalse;
 

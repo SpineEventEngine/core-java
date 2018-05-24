@@ -20,8 +20,8 @@
 package io.spine.client;
 
 import com.google.common.testing.NullPointerTester;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 
