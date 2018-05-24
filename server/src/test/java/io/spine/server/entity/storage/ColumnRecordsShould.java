@@ -26,7 +26,7 @@ import io.spine.server.entity.EntityRecord;
 import io.spine.test.Tests;
 import org.junit.Test;
 
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;

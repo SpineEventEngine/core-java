@@ -60,7 +60,7 @@ import io.spine.testdata.Sample;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;

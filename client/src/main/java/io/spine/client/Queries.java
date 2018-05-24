@@ -25,7 +25,7 @@ import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
 import io.spine.type.TypeUrl;
 
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;

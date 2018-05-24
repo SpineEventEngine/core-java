@@ -32,7 +32,7 @@ import io.spine.test.event.ProjectId;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static io.spine.protobuf.TypeConverter.toMessage;
 import static org.junit.Assert.assertFalse;

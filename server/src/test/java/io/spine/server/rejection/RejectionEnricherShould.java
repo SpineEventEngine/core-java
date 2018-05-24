@@ -32,7 +32,7 @@ import io.spine.test.rejection.ProjectRejections;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static io.spine.server.rejection.given.Given.invalidProjectNameRejection;
 import static org.junit.Assert.assertNotEquals;

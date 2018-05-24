@@ -34,7 +34,7 @@ import io.spine.test.Tests;
 import io.spine.test.aggregate.ProjectId;
 import org.junit.Test;
 
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static io.spine.server.delivery.given.ShardedStreamTestEnv.anotherProjectsShardOne;
 import static io.spine.server.delivery.given.ShardedStreamTestEnv.anotherProjectsShardZero;

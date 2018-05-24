@@ -34,7 +34,7 @@ import io.spine.test.event.ProjectId;
 import io.spine.time.ZoneId;
 import io.spine.time.ZoneOffset;
 
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * @author Alexander Yevsyukov

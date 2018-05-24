@@ -28,7 +28,7 @@ import io.spine.core.UserId;
 import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
 
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.base.Time.getCurrentTime;

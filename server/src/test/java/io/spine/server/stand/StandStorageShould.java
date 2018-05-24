@@ -40,7 +40,7 @@ import io.spine.test.storage.TaskId;
 import io.spine.type.TypeUrl;
 import org.junit.Test;
 
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;

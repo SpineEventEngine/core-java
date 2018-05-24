@@ -37,7 +37,7 @@ import io.spine.validate.ConstraintViolation;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Collections;
 import java.util.List;
 

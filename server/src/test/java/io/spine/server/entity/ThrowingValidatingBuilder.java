@@ -23,7 +23,7 @@ import com.google.protobuf.Message;
 import io.spine.validate.AbstractValidatingBuilder;
 import io.spine.validate.ValidationException;
 
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

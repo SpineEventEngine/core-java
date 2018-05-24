@@ -43,7 +43,7 @@ import io.spine.test.command.event.CmdProjectStarted;
 import io.spine.test.command.event.CmdTaskAdded;
 import org.slf4j.Logger;
 
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;

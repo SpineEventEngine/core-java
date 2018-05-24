@@ -33,7 +33,7 @@ import io.spine.test.queries.ProjectId;
 import io.spine.type.TypeUrl;
 import org.junit.Test;
 
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Collection;
 import java.util.List;
 

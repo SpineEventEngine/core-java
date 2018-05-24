@@ -43,7 +43,7 @@ import io.spine.test.event.user.sharing.SharingRequestApproved;
 import io.spine.time.ZoneId;
 import io.spine.time.ZoneOffset;
 
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.base.Identifier.newUuid;

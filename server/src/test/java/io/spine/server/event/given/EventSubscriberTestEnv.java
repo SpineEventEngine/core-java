@@ -28,7 +28,7 @@ import io.spine.core.EventEnvelope;
 import io.spine.core.Subscribe;
 import io.spine.server.event.EventSubscriber;
 
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * @author Alexander Yevsyukov
