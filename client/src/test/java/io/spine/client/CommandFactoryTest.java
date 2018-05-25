@@ -68,7 +68,7 @@ class CommandFactoryTest extends ActorRequestFactoryTest {
     }
 
     @Nested
-    @DisplayName("when creating command instance")
+    @DisplayName("on command instance creation")
     class CreateCommandTest {
 
         @Test

@@ -120,7 +120,7 @@ abstract class ActorRequestFactoryTest {
 
     @Nested
     @DisplayName("when created")
-    class OnCreationTest {
+    class WhenCreatedTest {
 
         @Test
         @DisplayName("be single tenant")
