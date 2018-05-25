@@ -160,7 +160,8 @@ class QueryBuilderTest extends ActorRequestFactoryTest {
             assertFalse(target.getIncludeAll());
 
             final EntityFilters entityFilters = target.getFilters();
-            final List<CompositeColumnFilter> aggregatingColumnFilters = entityFilters.getFilterList();
+            final List<CompositeColumnFilter> aggregatingColumnFilters =
+                    entityFilters.getFilterList();
             assertSize(1, aggregatingColumnFilters);
             final CompositeColumnFilter aggregatingColumnFilter = aggregatingColumnFilters.get(0);
             final Collection<ColumnFilter> columnFilters = aggregatingColumnFilter.getFilterList();
@@ -190,7 +191,8 @@ class QueryBuilderTest extends ActorRequestFactoryTest {
             assertFalse(target.getIncludeAll());
 
             final EntityFilters entityFilters = target.getFilters();
-            final List<CompositeColumnFilter> aggregatingColumnFilters = entityFilters.getFilterList();
+            final List<CompositeColumnFilter> aggregatingColumnFilters =
+                    entityFilters.getFilterList();
             assertSize(1, aggregatingColumnFilters);
             final Collection<ColumnFilter> columnFilters = aggregatingColumnFilters.get(0)
                                                                                    .getFilterList();
@@ -314,7 +316,8 @@ class QueryBuilderTest extends ActorRequestFactoryTest {
             assertThat(intIdValues, containsInAnyOrder(id1, id2));
 
             // Check query params
-            final List<CompositeColumnFilter> aggregatingColumnFilters = entityFilters.getFilterList();
+            final List<CompositeColumnFilter> aggregatingColumnFilters =
+                    entityFilters.getFilterList();
             assertSize(1, aggregatingColumnFilters);
             final Collection<ColumnFilter> columnFilters = aggregatingColumnFilters.get(0)
                                                                                    .getFilterList();
