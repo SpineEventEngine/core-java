@@ -72,8 +72,7 @@ class TopicFactoryTest
         @DisplayName("support creation for specified entities of kind")
         void createForSomeOfKind() {
 
-            final Set<TestEntityId> ids = newHashSet(entityId(1), entityId(2),
-                                                     entityId(3));
+            final Set<TestEntityId> ids = newHashSet(entityId(1), entityId(2), entityId(3));
             final Topic topic = factory().topic()
                                          .someOf(TARGET_ENTITY_CLASS, ids);
 
