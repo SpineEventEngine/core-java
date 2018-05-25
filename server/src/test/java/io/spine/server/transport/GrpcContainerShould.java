@@ -24,7 +24,6 @@ import io.grpc.Server;
 import io.grpc.ServerServiceDefinition;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -112,7 +111,6 @@ public class GrpcContainerShould {
     }
 
     @Test
-    @Ignore
     public void stop_properly_upon_application_shutdown()
             throws NoSuchFieldException, IllegalAccessException, IOException {
         final Class<Runtime> runtimeClass = Runtime.class;
