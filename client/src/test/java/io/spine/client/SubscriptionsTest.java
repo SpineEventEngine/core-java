@@ -35,7 +35,7 @@ class SubscriptionsTest {
 
     @Test
     @DisplayName(UTILITY_CTOR)
-    void haveUtilityCtor() {
+    void haveUtilityConstructor() {
         assertHasPrivateParameterlessCtor(Subscriptions.class);
     }
 

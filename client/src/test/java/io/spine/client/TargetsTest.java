@@ -35,7 +35,7 @@ class TargetsTest {
 
     @Test
     @DisplayName(UTILITY_CTOR)
-    void haveUtilityCtor() {
+    void haveUtilityConstructor() {
         assertHasPrivateParameterlessCtor(Targets.class);
     }
 

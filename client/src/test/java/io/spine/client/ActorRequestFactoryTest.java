@@ -79,6 +79,22 @@ abstract class ActorRequestFactoryTest {
         return factory().actorContext();
     }
 
+    @SuppressWarnings({"SerializableNonStaticInnerClassWithoutSerialVersionUID",
+            "SerializableInnerClassWithNonSerializableOuterClass"})
+    @Test
+    @DisplayName(NULL_TOLERANCE)
+    void passNullToleranceCheck() {
+        new NullPointerTester()
+                .setDefault(Message.class, TestEntity.getDefaultInstance())
+                .setDefault((new TypeToken<Class<? extends Message>>() {
+                            }).getRawType(),
+                            TestEntity.class)
+                .setDefault((new TypeToken<Set<? extends Message>>() {
+                            }).getRawType(),
+                            newHashSet(Any.getDefaultInstance()))
+                .testInstanceMethods(factory(), NullPointerTester.Visibility.PUBLIC);
+    }
+
     @Nested
     @DisplayName("in Builder")
     class BuilderTest {
@@ -107,6 +123,12 @@ abstract class ActorRequestFactoryTest {
     class OnCreationTest {
 
         @Test
+        @DisplayName("be single tenant")
+        void beSingleTenant() {
+            assertNull(factory().getTenantId());
+        }
+
+        @Test
         @DisplayName("store given user")
         void storeUser() {
             final int currentOffset = ZoneOffsets.getDefault()
@@ -126,12 +148,6 @@ abstract class ActorRequestFactoryTest {
             assertEquals(actor, factory().getActor());
             assertEquals(zoneOffset, factory().getZoneOffset());
         }
-
-        @Test
-        @DisplayName("be single tenant")
-        void beSingleTenant() {
-            assertNull(factory().getTenantId());
-        }
     }
 
     @Test
@@ -140,22 +156,6 @@ abstract class ActorRequestFactoryTest {
         final ActorRequestFactory factoryInAnotherTimezone =
                 factory().switchTimezone(ZoneOffsets.ofHours(-8));
         assertNotEquals(factory().getZoneOffset(), factoryInAnotherTimezone.getZoneOffset());
-    }
-
-    @SuppressWarnings({"SerializableNonStaticInnerClassWithoutSerialVersionUID",
-            "SerializableInnerClassWithNonSerializableOuterClass"})
-    @Test
-    @DisplayName(NULL_TOLERANCE)
-    void passNullToleranceCheck() {
-        new NullPointerTester()
-                .setDefault(Message.class, TestEntity.getDefaultInstance())
-                .setDefault((new TypeToken<Class<? extends Message>>() {
-                            }).getRawType(),
-                            TestEntity.class)
-                .setDefault((new TypeToken<Set<? extends Message>>() {
-                            }).getRawType(),
-                            newHashSet(Any.getDefaultInstance()))
-                .testInstanceMethods(factory(), NullPointerTester.Visibility.PUBLIC);
     }
 
     void verifyContext(ActorContext actualContext) {

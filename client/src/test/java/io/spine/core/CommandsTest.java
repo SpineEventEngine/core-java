@@ -84,8 +84,24 @@ class CommandsTest {
 
     @Test
     @DisplayName(UTILITY_CTOR)
-    void haveUtilityCtor() {
+    void haveUtilityConstructor() {
         assertHasPrivateParameterlessCtor(Commands.class);
+    }
+
+    @Test
+    @DisplayName(NULL_TOLERANCE)
+    void passNullToleranceCheck() {
+        new NullPointerTester()
+                .setDefault(FileDescriptor.class, DEFAULT_FILE_DESCRIPTOR)
+                .setDefault(Timestamp.class, getCurrentTime())
+                .setDefault(Duration.class, Durations2.ZERO)
+                .setDefault(Command.class,
+                            requestFactory.createCommand(StringValue.getDefaultInstance(),
+                                                         minutesAgo(1)))
+                .setDefault(CommandContext.class, requestFactory.createCommandContext())
+                .setDefault(ZoneOffset.class, ZoneOffsets.UTC)
+                .setDefault(UserId.class, GivenUserId.newUuid())
+                .testStaticMethods(Commands.class, NullPointerTester.Visibility.PACKAGE);
     }
 
     @Test
@@ -123,22 +139,6 @@ class CommandsTest {
                               .build();
 
         assertTrue(sameActorAndTenant(c1, c2));
-    }
-
-    @Test
-    @DisplayName(NULL_TOLERANCE)
-    void passNullToleranceCheck() {
-        new NullPointerTester()
-                .setDefault(FileDescriptor.class, DEFAULT_FILE_DESCRIPTOR)
-                .setDefault(Timestamp.class, getCurrentTime())
-                .setDefault(Duration.class, Durations2.ZERO)
-                .setDefault(Command.class,
-                            requestFactory.createCommand(StringValue.getDefaultInstance(),
-                                                         minutesAgo(1)))
-                .setDefault(CommandContext.class, requestFactory.createCommandContext())
-                .setDefault(ZoneOffset.class, ZoneOffsets.UTC)
-                .setDefault(UserId.class, GivenUserId.newUuid())
-                .testStaticMethods(Commands.class, NullPointerTester.Visibility.PACKAGE);
     }
 
     @Test
@@ -242,7 +242,7 @@ class CommandsTest {
         assertEquals(id, convertedBack);
     }
 
-    @SuppressWarnings("InnerClassMayBeStatic") // JUnit 5 nested test classes cannot to be static.
+    @SuppressWarnings("InnerClassMayBeStatic") // JUnit 5 Nested classes cannot to be static.
     @Nested
     @DisplayName("when checking if command is valid")
     class CheckValidTest {

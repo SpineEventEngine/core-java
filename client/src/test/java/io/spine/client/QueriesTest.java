@@ -43,7 +43,7 @@ class QueriesTest {
 
     @Test
     @DisplayName(UTILITY_CTOR)
-    void haveUtilityCtor() {
+    void haveUtilityConstructor() {
         assertHasPrivateParameterlessCtor(Queries.class);
     }
 

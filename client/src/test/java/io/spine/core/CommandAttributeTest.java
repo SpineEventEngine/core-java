@@ -133,7 +133,7 @@ class CommandAttributeTest {
     }
 
     @Test
-    @DisplayName("fail when setting unsupported value type")
+    @DisplayName("fail on setting unsupported value type")
     void fail_on_unsupported_type() {
         final CommandAttribute<Object> attr = new CommandAttribute<Object>("o") {
         };

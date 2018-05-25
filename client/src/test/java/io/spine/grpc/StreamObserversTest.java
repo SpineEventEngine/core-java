@@ -61,7 +61,7 @@ class StreamObserversTest {
 
     @Test
     @DisplayName(UTILITY_CTOR)
-    void haveUtilityCtor() {
+    void haveUtilityConstructor() {
         assertHasPrivateParameterlessCtor(StreamObservers.class);
     }
 
@@ -152,7 +152,7 @@ class StreamObserversTest {
         assertTrue(observer.isCompleted());
     }
 
-    @SuppressWarnings("InnerClassMayBeStatic") // JUnit 5 nested test classes cannot to be static.
+    @SuppressWarnings("InnerClassMayBeStatic") // JUnit 5 Nested classes cannot to be static.
     @Nested
     @DisplayName("when extracting from stream error")
     class ErrorExtractionTest {

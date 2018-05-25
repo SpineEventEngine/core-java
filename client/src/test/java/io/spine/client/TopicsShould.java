@@ -36,7 +36,7 @@ class TopicsShould {
 
     @Test
     @DisplayName(UTILITY_CTOR)
-    void haveUtilityCtor() {
+    void haveUtilityConstructor() {
         Tests.assertHasPrivateParameterlessCtor(Topics.class);
     }
 

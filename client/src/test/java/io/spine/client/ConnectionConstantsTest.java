@@ -35,7 +35,7 @@ class ConnectionConstantsTest {
 
     @Test
     @DisplayName(UTILITY_CTOR)
-    void haveUtilityCtor() {
+    void haveUtilityConstructor() {
         assertHasPrivateParameterlessCtor(ConnectionConstants.class);
     }
 

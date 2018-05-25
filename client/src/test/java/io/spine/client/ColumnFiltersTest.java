@@ -69,7 +69,7 @@ class ColumnFiltersTest {
 
     @Test
     @DisplayName(UTILITY_CTOR)
-    void haveUtilityCtor() {
+    void haveUtilityConstructor() {
         assertHasPrivateParameterlessCtor(ColumnFilters.class);
     }
 
@@ -82,7 +82,7 @@ class ColumnFiltersTest {
                 .testAllPublicStaticMethods(ColumnFilters.class);
     }
 
-    @SuppressWarnings("InnerClassMayBeStatic") // JUnit 5 nested test classes cannot to be static.
+    @SuppressWarnings("InnerClassMayBeStatic") // JUnit 5 Nested classes cannot to be static.
     @Nested
     @DisplayName("when creating column filter")
     class CreateFilterTest {
@@ -125,7 +125,7 @@ class ColumnFiltersTest {
         }
     }
 
-    @SuppressWarnings("InnerClassMayBeStatic") // JUnit 5 nested test classes cannot to be static.
+    @SuppressWarnings("InnerClassMayBeStatic") // JUnit 5 Nested classes cannot to be static.
     @Nested
     @DisplayName("when creating composite column filter")
     class CreateCompositeFilterTest {
@@ -158,7 +158,7 @@ class ColumnFiltersTest {
         }
     }
 
-    @SuppressWarnings("InnerClassMayBeStatic") // JUnit 5 nested test classes cannot to be static.
+    @SuppressWarnings("InnerClassMayBeStatic") // JUnit 5 Nested classes cannot to be static.
     @Nested
     @DisplayName("when creating ordering filter")
     class CreateOrderingFilterTest {

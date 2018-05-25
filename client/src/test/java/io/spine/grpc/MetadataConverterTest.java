@@ -43,8 +43,15 @@ class MetadataConverterTest {
 
     @Test
     @DisplayName(UTILITY_CTOR)
-    void haveUtilityCtor() {
+    void haveUtilityConstructor() {
         assertHasPrivateParameterlessCtor(MetadataConverter.class);
+    }
+
+    @Test
+    @DisplayName(NULL_TOLERANCE)
+    void passNullToleranceCheck() {
+        new NullPointerTester()
+                .testAllPublicStaticMethods(MetadataConverter.class);
     }
 
     @SuppressWarnings("ConstantConditions") // A part of the test.
@@ -88,12 +95,5 @@ class MetadataConverterTest {
         } catch (IllegalStateException e) {
             assertTrue(e.getCause() instanceof InvalidProtocolBufferException);
         }
-    }
-
-    @Test
-    @DisplayName(NULL_TOLERANCE)
-    void passNullToleranceCheck() {
-        new NullPointerTester()
-                .testAllPublicStaticMethods(MetadataConverter.class);
     }
 }
