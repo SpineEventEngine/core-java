@@ -52,6 +52,7 @@ import static io.spine.client.CompositeColumnFilter.CompositeOperator;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.EITHER;
 import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.protobuf.TypeConverter.toAny;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Verify.assertContainsAll;
 import static org.junit.Assert.assertEquals;
@@ -66,6 +67,8 @@ class ColumnFiltersTest {
 
     private static final String COLUMN_NAME = "preciseColumn";
     private static final Timestamp COLUMN_VALUE = getCurrentTime();
+    private static final String ENUM_COLUMN_NAME = "enumColumn";
+    private static final Operator ENUM_COLUMN_VALUE = EQUAL;
 
     @Test
     @DisplayName(UTILITY_CTOR)
@@ -115,6 +118,15 @@ class ColumnFiltersTest {
         @DisplayName("successfully create `less than or equals` filter")
         void createLessOrEqual() {
             checkCreatesInstance(le(COLUMN_NAME, COLUMN_VALUE), LESS_OR_EQUAL);
+        }
+
+        @Test
+        @DisplayName("successfully create `equals` filter for enumerated types")
+        void createEqualsForEnum() {
+            final ColumnFilter filter = eq(ENUM_COLUMN_NAME, ENUM_COLUMN_VALUE);
+            assertEquals(ENUM_COLUMN_NAME, filter.getColumnName());
+            assertEquals(toAny(ENUM_COLUMN_VALUE), filter.getValue());
+            assertEquals(EQUAL, filter.getOperator());
         }
 
         private void checkCreatesInstance(ColumnFilter filter,
@@ -188,7 +200,8 @@ class ColumnFiltersTest {
         @Test
         @DisplayName("fail to create ordering filter for enumerated types")
         void failForEnum() {
-            assertThrows(IllegalArgumentException.class, () -> ge("enumColumn", EQUAL));
+            assertThrows(IllegalArgumentException.class,
+                         () -> ge(ENUM_COLUMN_NAME, ENUM_COLUMN_VALUE));
         }
 
         @Test
