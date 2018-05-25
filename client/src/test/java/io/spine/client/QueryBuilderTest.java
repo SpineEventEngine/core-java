@@ -87,7 +87,7 @@ class QueryBuilderTest extends ActorRequestFactoryTest {
     class CreateQueryTest {
 
         @Test
-        @DisplayName("create queries by only entity type")
+        @DisplayName("support queries by only entity type")
         void createWithType() {
             final Class<? extends Message> testEntityClass = TestEntity.class;
             final Query query = factory().query()
@@ -104,7 +104,7 @@ class QueryBuilderTest extends ActorRequestFactoryTest {
         }
 
         @Test
-        @DisplayName("create queries by id")
+        @DisplayName("support queries by id")
         void createWithIds() {
             final int id1 = 314;
             final int id2 = 271;
@@ -129,7 +129,7 @@ class QueryBuilderTest extends ActorRequestFactoryTest {
         }
 
         @Test
-        @DisplayName("create queries by field mask")
+        @DisplayName("support queries by field mask")
         void createWithFieldMask() {
             final String fieldName = "TestEntity.firstField";
             final Query query = factory().query()
@@ -146,7 +146,7 @@ class QueryBuilderTest extends ActorRequestFactoryTest {
         }
 
         @Test
-        @DisplayName("create queries by column filter")
+        @DisplayName("support queries by column filter")
         void createWithFilter() {
             final String columnName = "myImaginaryColumn";
             final Object columnValue = 42;
@@ -174,7 +174,7 @@ class QueryBuilderTest extends ActorRequestFactoryTest {
         }
 
         @Test
-        @DisplayName("create queries by multiple column filters")
+        @DisplayName("support queries by multiple column filters")
         void createWithMultipleFilters() {
             final String columnName1 = "myColumn";
             final Object columnValue1 = 42;
@@ -210,7 +210,7 @@ class QueryBuilderTest extends ActorRequestFactoryTest {
         @SuppressWarnings("OverlyLongMethod")
         // A big test for the grouping operators proper building.
         @Test
-        @DisplayName("create queries by column filter groupings")
+        @DisplayName("support queries by column filter groupings")
         void createWithFilterGrouping() {
             final String establishedTimeColumn = "establishedTime";
             final String companySizeColumn = "companySize";
@@ -277,7 +277,7 @@ class QueryBuilderTest extends ActorRequestFactoryTest {
         @SuppressWarnings("OverlyLongMethod")
         // A big test case covering the query arguments coexistence.
         @Test
-        @DisplayName("create queries by all available arguments")
+        @DisplayName("support queries by all available arguments")
         void createWithAllArguments() {
             final Class<? extends Message> testEntityClass = TestEntity.class;
             final int id1 = 314;

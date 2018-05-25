@@ -120,8 +120,7 @@ class CommandFactoryTest extends ActorRequestFactoryTest {
         @Test
         @DisplayName("throw ValidationException if supplied with invalid Message")
         void failForInvalidMessage() {
-            final RequiredFieldCommand invalidCommand =
-                    RequiredFieldCommand.getDefaultInstance();
+            final RequiredFieldCommand invalidCommand = RequiredFieldCommand.getDefaultInstance();
             assertThrows(ValidationException.class, () -> factory().command()
                                                                    .create(invalidCommand));
         }
@@ -129,8 +128,7 @@ class CommandFactoryTest extends ActorRequestFactoryTest {
         @Test
         @DisplayName("throw ValidationException if supplied with invalid Message with version")
         void failForInvalidMessageWithVersion() {
-            final RequiredFieldCommand invalidCommand =
-                    RequiredFieldCommand.getDefaultInstance();
+            final RequiredFieldCommand invalidCommand = RequiredFieldCommand.getDefaultInstance();
             assertThrows(ValidationException.class, () -> factory().command()
                                                                    .create(invalidCommand, 42));
         }
