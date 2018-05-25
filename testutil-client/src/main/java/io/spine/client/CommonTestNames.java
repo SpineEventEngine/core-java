@@ -21,6 +21,10 @@
 package io.spine.client;
 
 //TODO:2018-05-24:dmytro.kuzmin: Move to the base.testlib
+
+import com.google.common.annotations.VisibleForTesting;
+import io.spine.annotation.Internal;
+
 /**
  * A storage for the common JUnit {@linkplain org.junit.jupiter.api.DisplayName test names}.
  *
@@ -30,6 +34,8 @@ package io.spine.client;
  *
  * @author Dmytro Kuzmin
  */
+@Internal
+@VisibleForTesting
 public class CommonTestNames {
 
     /**
