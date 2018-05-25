@@ -22,7 +22,7 @@ package io.spine.client;
 
 //TODO:2018-05-24:dmytro.kuzmin: Move to the base.testlib
 /**
- * A storage for the common {@linkplain org.junit.jupiter.api.DisplayName test names}.
+ * A storage for the common JUnit {@linkplain org.junit.jupiter.api.DisplayName test names}.
  *
  * <p>This class can be used to avoid string literal duplication when assigning
  * {@link org.junit.jupiter.api.DisplayName} to the common {@linkplain org.junit.jupiter.api.Test
@@ -45,7 +45,7 @@ public class CommonTestNames {
     public static final String UTILITY_CTOR = "have private parameterless constructor";
 
     /**
-     * A name for test cases checking that the class public methods do not accept {@code null} for
+     * A name for test cases checking that class public methods do not accept {@code null} for
      * their non-{@linkplain javax.annotation.Nullable nullable} arguments.
      */
     public static final String NULL_TOLERANCE =
