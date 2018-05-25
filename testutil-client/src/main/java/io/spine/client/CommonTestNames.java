@@ -33,12 +33,6 @@ package io.spine.client;
 public class CommonTestNames {
 
     /**
-     * Prevents instantiation of this class.
-     */
-    private CommonTestNames() {
-    }
-
-    /**
      * A name for the test cases checking that a class has private parameterless (aka "utility")
      * constructor.
      */
@@ -50,4 +44,10 @@ public class CommonTestNames {
      */
     public static final String NULL_TOLERANCE =
             "not accept nulls for non-Nullable public method arguments";
+
+    /**
+     * Prevents instantiation of this class.
+     */
+    private CommonTestNames() {
+    }
 }
