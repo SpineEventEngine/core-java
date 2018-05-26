@@ -23,24 +23,28 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.StringValue;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author Alex Tymchenko
  */
-public class RejectionClassShould {
+@DisplayName("RejectionClass should")
+class RejectionClassTest {
 
     @Test
-    public void create_set_on_varargs() {
+    @DisplayName("create set on varargs")
+    void createSetOnVarargs() {
         assertEquals(3,
                      RejectionClass.setOf(BoolValue.class, Int32Value.class, StringValue.class)
                                    .size());
     }
 
     @Test
-    public void pass_null_tolerance_check() throws Exception {
+    @DisplayName("pass null tolerance check")
+    void passNullToleranceCheck() throws Exception {
         new NullPointerTester()
                 .testAllPublicStaticMethods(RejectionClass.class);
     }

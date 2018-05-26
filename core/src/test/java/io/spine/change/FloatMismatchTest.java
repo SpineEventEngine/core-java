@@ -21,34 +21,46 @@
 package io.spine.change;
 
 import com.google.common.testing.NullPointerTester;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.change.BooleanMismatch.expectedTrue;
-import static io.spine.change.DoubleMismatch.expectedNonZero;
-import static io.spine.change.DoubleMismatch.expectedZero;
-import static io.spine.change.DoubleMismatch.unexpectedValue;
-import static io.spine.change.DoubleMismatch.unpackActual;
-import static io.spine.change.DoubleMismatch.unpackExpected;
-import static io.spine.change.DoubleMismatch.unpackNewValue;
+import static io.spine.change.FloatMismatch.expectedNonZero;
+import static io.spine.change.FloatMismatch.expectedZero;
+import static io.spine.change.FloatMismatch.unexpectedValue;
+import static io.spine.change.FloatMismatch.unpackActual;
+import static io.spine.change.FloatMismatch.unpackExpected;
+import static io.spine.change.FloatMismatch.unpackNewValue;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class DoubleMismatchShould {
+@DisplayName("FloatMismatch should")
+class FloatMismatchTest {
 
     private static final int VERSION = 100;
-    private static final double EXPECTED = 18.39;
-    private static final double ACTUAL = 19.01;
-    private static final double NEW_VALUE = 14.52;
-    private static final double DELTA = 0.01;
+    private static final float EXPECTED = 18.39f;
+    private static final float ACTUAL = 19.01f;
+    private static final float NEW_VALUE = 14.52f;
+    private static final float DELTA = 0.01f;
 
     @Test
-    public void have_private_constructor() {
-        assertHasPrivateParameterlessCtor(DoubleMismatch.class);
+    @DisplayName("have private parameterless constructor")
+    void haveUtilityConstructor() {
+        assertHasPrivateParameterlessCtor(FloatMismatch.class);
     }
 
     @Test
-    public void return_mismatch_object_with_double_values() {
-        final ValueMismatch mismatch = DoubleMismatch.of(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
+    @DisplayName("pass the null tolerance check")
+    void passNullToleranceCheck() {
+        new NullPointerTester()
+                .testAllPublicStaticMethods(FloatMismatch.class);
+    }
+
+    @Test
+    @DisplayName("return ValueMismatch object with given float values")
+    void returnMismatchWithFloats() {
+        final ValueMismatch mismatch = FloatMismatch.of(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
 
         assertEquals(EXPECTED, unpackExpected(mismatch), DELTA);
         assertEquals(ACTUAL, unpackActual(mismatch), DELTA);
@@ -57,8 +69,9 @@ public class DoubleMismatchShould {
     }
 
     @Test
-    public void create_instance_for_expected_zero_amount() {
-        final double expected = 0.0;
+    @DisplayName("create ValueMismatch instance for expected zero amount")
+    void createForExpectedZero() {
+        final double expected = 0.0f;
         final ValueMismatch mismatch = expectedZero(ACTUAL, NEW_VALUE, VERSION);
 
         assertEquals(expected, unpackExpected(mismatch), DELTA);
@@ -68,8 +81,9 @@ public class DoubleMismatchShould {
     }
 
     @Test
-    public void create_instance_for_expected_non_zero_amount() {
-        final double actual = 0.0;
+    @DisplayName("create ValueMismatch instance for expected non zero amount")
+    void createForExpectedNonZero() {
+        final float actual = 0.0f;
         final ValueMismatch mismatch = expectedNonZero(EXPECTED, NEW_VALUE, VERSION);
 
         assertEquals(EXPECTED, unpackExpected(mismatch), DELTA);
@@ -79,7 +93,8 @@ public class DoubleMismatchShould {
     }
 
     @Test
-    public void create_instance_for_unexpected_int_value() {
+    @DisplayName("create ValueMismatch instance for unexpected float value")
+    void createForUnexpectedFloat() {
         final ValueMismatch mismatch = unexpectedValue(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
 
         assertEquals(EXPECTED, unpackExpected(mismatch), DELTA);
@@ -88,33 +103,32 @@ public class DoubleMismatchShould {
         assertEquals(VERSION, mismatch.getVersion());
     }
 
-    @Test(expected = RuntimeException.class)
-    public void not_unpackExpected_if_its_not_a_IntMismatch() {
+    @Test
+    @DisplayName("not unpackExpected if passed ValueMismatch is not a FloatMismatch")
+    void notUnpackExpectedForWrongType() {
         final ValueMismatch mismatch = expectedTrue(VERSION);
-        unpackExpected(mismatch);
-    }
-
-    @Test(expected = RuntimeException.class)
-    public void not_unpackActual_if_its_not_a_IntMismatch() {
-        final ValueMismatch mismatch = expectedTrue(VERSION);
-        unpackActual(mismatch);
-    }
-
-    @Test(expected = RuntimeException.class)
-    public void not_unpackNewValue_if_its_not_a_IntMismatch() {
-        final ValueMismatch mismatch = expectedTrue(VERSION);
-        unpackNewValue(mismatch);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void not_accept_same_expected_and_actual() {
-        final double value = 19.19;
-        unexpectedValue(value, value, NEW_VALUE, VERSION);
+        assertThrows(RuntimeException.class, () -> unpackExpected(mismatch));
     }
 
     @Test
-    public void pass_the_null_tolerance_check() {
-        new NullPointerTester()
-                .testAllPublicStaticMethods(DoubleMismatch.class);
+    @DisplayName("not unpackActual if passed ValueMismatch is not a FloatMismatch")
+    void notUnpackActualForWrongType() {
+        final ValueMismatch mismatch = expectedTrue(VERSION);
+        assertThrows(RuntimeException.class, () -> unpackActual(mismatch));
+    }
+
+    @Test
+    @DisplayName("not unpackNewValue if passed ValueMismatch is not a FloatMismatch")
+    void notUnpackNewValueForWrongType() {
+        final ValueMismatch mismatch = expectedTrue(VERSION);
+        assertThrows(RuntimeException.class, () -> unpackNewValue(mismatch));
+    }
+
+    @Test
+    @DisplayName("not accept same expected and actual values")
+    void notAcceptSameExpectedAndActual() {
+        final float value = 19.19f;
+        assertThrows(IllegalArgumentException.class,
+                     () -> unexpectedValue(value, value, NEW_VALUE, VERSION));
     }
 }

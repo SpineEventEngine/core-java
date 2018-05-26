@@ -21,7 +21,8 @@
 package io.spine.change;
 
 import com.google.common.testing.NullPointerTester;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.change.BooleanMismatch.expectedFalse;
 import static io.spine.change.BooleanMismatch.expectedTrue;
@@ -29,19 +30,30 @@ import static io.spine.change.BooleanMismatch.unpackActual;
 import static io.spine.change.BooleanMismatch.unpackExpected;
 import static io.spine.change.BooleanMismatch.unpackNewValue;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class BooleanMismatchShould {
+@DisplayName("BooleanMismatch should")
+class BooleanMismatchTest {
 
     private static final int VERSION = 2;
 
     @Test
-    public void have_private_constructor() {
+    @DisplayName("have private parameterless constructor")
+    void haveUtilityConstructor() {
         assertHasPrivateParameterlessCtor(BooleanMismatch.class);
     }
 
     @Test
-    public void create_ValueMismatch_instance_for_expectedFalse_case() {
+    @DisplayName("not accept nulls for non-Nullable public method arguments")
+    void passNullToleranceCheck() {
+        new NullPointerTester()
+                .testAllPublicStaticMethods(BooleanMismatch.class);
+    }
+
+    @Test
+    @DisplayName("create ValueMismatch instance for `expectedFalse` case")
+    void createForExpectedFalse() {
         final boolean expected = false;
         final boolean actual = true;
         final boolean newValue = true;
@@ -54,7 +66,8 @@ public class BooleanMismatchShould {
     }
 
     @Test
-    public void create_ValueMismatch_instance_for_expectedTrue_case() {
+    @DisplayName("create ValueMismatch instance for `expectedTrue` case")
+    void createForExpectedTrue() {
         final boolean expected = true;
         final boolean actual = false;
         final boolean newValue = false;
@@ -66,27 +79,24 @@ public class BooleanMismatchShould {
         assertEquals(VERSION, mismatch.getVersion());
     }
 
-    @Test(expected = RuntimeException.class)
-    public void not_unpackExpected_if_its_not_a_BooleanMismatch() {
+    @Test
+    @DisplayName("not unpackExpected if passed ValueMismatch is not a BooleanMismatch")
+    void notUnpackExpectedForWrongType() {
         final ValueMismatch mismatch = IntMismatch.of(1, 2, 3, VERSION);
-        BooleanMismatch.unpackExpected(mismatch);
-    }
-
-    @Test(expected = RuntimeException.class)
-    public void not_unpackActual_if_its_not_a_BooleanMismatch() {
-        final ValueMismatch mismatch = IntMismatch.of(1, 2, 3, VERSION);
-        BooleanMismatch.unpackActual(mismatch);
-    }
-
-    @Test(expected = RuntimeException.class)
-    public void not_unpackNewValue_if_its_not_a_BooleanMismatch() {
-        final ValueMismatch mismatch = IntMismatch.of(1, 2, 3, VERSION);
-        BooleanMismatch.unpackNewValue(mismatch);
+        assertThrows(RuntimeException.class, () -> BooleanMismatch.unpackExpected(mismatch));
     }
 
     @Test
-    public void pass_the_null_tolerance_check() {
-        new NullPointerTester()
-                .testAllPublicStaticMethods(BooleanMismatch.class);
+    @DisplayName("not unpackActual if passed ValueMismatch is not a BooleanMismatch")
+    void notUnpackActualForWrongType() {
+        final ValueMismatch mismatch = IntMismatch.of(1, 2, 3, VERSION);
+        assertThrows(RuntimeException.class, () -> BooleanMismatch.unpackActual(mismatch));
+    }
+
+    @Test
+    @DisplayName("not unpackNewValue if passed ValueMismatch is not a BooleanMismatch")
+    void notUnpackNewValueForWrongType() {
+        final ValueMismatch mismatch = IntMismatch.of(1, 2, 3, VERSION);
+        assertThrows(RuntimeException.class, () -> BooleanMismatch.unpackNewValue(mismatch));
     }
 }

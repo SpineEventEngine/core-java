@@ -39,7 +39,8 @@ import io.spine.time.OffsetTime;
 import io.spine.time.OffsetTimes;
 import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
 
@@ -47,15 +48,17 @@ import static com.google.protobuf.util.Timestamps.subtract;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.time.Durations2.minutes;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SuppressWarnings({"ConstantConditions" /* We pass `null` to some of the methods to check handling
                                         of preconditions */,
         "ResultOfMethodCallIgnored" /* ...when methods throw exceptions */,
         "ClassWithTooManyMethods",
         "OverlyCoupledClass" /* we test many data types and utility methods */})
-public class ChangesShould {
+@DisplayName("Changes utility should")
+class ChangesTest {
 
     private static final String ERR_PREVIOUS_VALUE_CANNOT_BE_NULL =
             "do_not_accept_null_previousValue";
@@ -65,319 +68,14 @@ public class ChangesShould {
             "do_not_accept_equal_values";
 
     @Test
-    public void have_private_constructor() {
+    @DisplayName("have private parameterless constructor")
+    void haveUtilityConstructor() {
         assertHasPrivateParameterlessCtor(Changes.class);
     }
 
-    @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_previousValue() {
-        Changes.of(null, ERR_PREVIOUS_VALUE_CANNOT_BE_NULL);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_newValue() {
-        Changes.of(ERR_NEW_VALUE_CANNOT_BE_NULL, null);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_byte_string_previousValue() {
-        Changes.of(null, ByteString.copyFromUtf8(ERR_PREVIOUS_VALUE_CANNOT_BE_NULL));
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_byte_string_newValue() {
-        Changes.of(ByteString.copyFromUtf8(ERR_NEW_VALUE_CANNOT_BE_NULL), null);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void do_not_accept_equal_string_values() {
-        final String value = ERR_VALUES_CANNOT_BE_EQUAL;
-        Changes.of(value, value);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void do_not_accept_equal_byte_string_values() {
-        final ByteString value = ByteString.copyFromUtf8(ERR_VALUES_CANNOT_BE_EQUAL);
-        Changes.of(value, value);
-    }
-
-    private static String randomUuid() {
-        return UUID.randomUUID()
-                   .toString();
-    }
-
     @Test
-    public void create_string_value_change() {
-        final String previousValue = randomUuid();
-        final String newValue = randomUuid();
-
-        final StringChange result = Changes.of(previousValue, newValue);
-
-        assertEquals(previousValue, result.getPreviousValue());
-        assertEquals(newValue, result.getNewValue());
-    }
-
-    @Test
-    public void create_byte_string_value_change() {
-        final ByteString previousValue = ByteString.copyFromUtf8(randomUuid());
-        final ByteString newValue = ByteString.copyFromUtf8(randomUuid());
-
-        final BytesChange result = Changes.of(previousValue, newValue);
-
-        assertEquals(previousValue, result.getPreviousValue());
-        assertEquals(newValue, result.getNewValue());
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_Timestamp_previousValue() {
-        Changes.of(null, getCurrentTime());
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_Timestamp_newValue() {
-        Changes.of(getCurrentTime(), null);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void do_not_accept_equal_Timestamp_values() {
-        final Timestamp now = getCurrentTime();
-        Changes.of(now, now);
-    }
-
-    @Test
-    public void create_TimestampChange_instance() {
-        final Timestamp fiveMinutesAgo = TimeTests.Past.minutesAgo(5);
-        final Timestamp now = getCurrentTime();
-
-        final TimestampChange result = Changes.of(fiveMinutesAgo, now);
-
-        assertEquals(fiveMinutesAgo, result.getPreviousValue());
-        assertEquals(now, result.getNewValue());
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void do_not_accept_equal_boolean_values() {
-        final boolean value = true;
-        Changes.of(value, value);
-    }
-
-    @Test
-    public void create_boolean_value_change() {
-        final boolean s1 = true;
-        final boolean s2 = false;
-
-        final BooleanChange result = Changes.of(s1, s2);
-
-        assertTrue(Boolean.compare(s1, result.getPreviousValue()) == 0);
-        assertTrue(Boolean.compare(s2, result.getNewValue()) == 0);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void do_not_accept_equal_double_values() {
-        final double value = 1961.0412;
-        Changes.of(value, value);
-    }
-
-    @Test
-    public void create_double_value_change() {
-        final double s1 = 1957.1004;
-        final double s2 = 1957.1103;
-
-        final DoubleChange result = Changes.of(s1, s2);
-
-        assertTrue(Double.compare(s1, result.getPreviousValue()) == 0);
-        assertTrue(Double.compare(s2, result.getNewValue()) == 0);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void do_not_accept_equal_float_values() {
-        final float value = 1543.0f;
-        Changes.of(value, value);
-    }
-
-    @Test
-    public void create_float_value_change() {
-        final float s1 = 1473.0219f;
-        final float s2 = 1543.0524f;
-
-        final FloatChange result = Changes.of(s1, s2);
-
-        assertTrue(Float.compare(s1, result.getPreviousValue()) == 0);
-        assertTrue(Float.compare(s2, result.getNewValue()) == 0);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void do_not_accept_equal_int32_values() {
-        final int value = 1614;
-        Changes.of(value, value);
-    }
-
-    @Test
-    public void create_int32_value_change() {
-        final int s1 = 1550;
-        final int s2 = 1616;
-
-        final Int32Change result = Changes.ofInt32(s1, s2);
-
-        assertTrue(Integer.compare(s1, result.getPreviousValue()) == 0);
-        assertTrue(Integer.compare(s2, result.getNewValue()) == 0);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void do_not_accept_equal_int64_values() {
-        final long value = 1666L;
-        Changes.of(value, value);
-    }
-
-    @Test
-    public void create_int64_value_change() {
-        final long s1 = 16420225L;
-        final long s2 = 17270320L;
-
-        final Int64Change result = Changes.ofInt64(s1, s2);
-
-        assertTrue(Long.compare(s1, result.getPreviousValue()) == 0);
-        assertTrue(Long.compare(s2, result.getNewValue()) == 0);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void do_not_accept_equal_uint32_values() {
-        final int value = 1776;
-        Changes.ofUInt32(value, value);
-    }
-
-    @Test
-    public void create_uint32_value_change() {
-        final int s1 = 16440925;
-        final int s2 = 17100919;
-
-        final UInt32Change result = Changes.ofUInt32(s1, s2);
-
-        assertTrue(Integer.compare(s1, result.getPreviousValue()) == 0);
-        assertTrue(Integer.compare(s2, result.getNewValue()) == 0);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void do_not_accept_equal_uint64_values() {
-        final long value = 1690L;
-        Changes.ofUInt64(value, value);
-    }
-
-    @Test
-    public void create_uint64_value_change() {
-        final long s1 = 16290414L;
-        final long s2 = 16950708L;
-
-        final UInt64Change result = Changes.ofUInt64(s1, s2);
-
-        assertTrue(Long.compare(s1, result.getPreviousValue()) == 0);
-        assertTrue(Long.compare(s2, result.getNewValue()) == 0);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void do_not_accept_equal_sint32_values() {
-        final int value = 1694;
-        Changes.ofSInt32(value, value);
-    }
-
-    @Test
-    public void create_sint32_value_change() {
-        final int s1 = 16550106;
-        final int s2 = 17050816;
-
-        final SInt32Change result = Changes.ofSInt32(s1, s2);
-
-        assertTrue(Integer.compare(s1, result.getPreviousValue()) == 0);
-        assertTrue(Integer.compare(s2, result.getNewValue()) == 0);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void do_not_accept_equal_sint64_values() {
-        final long value = 1729L;
-        Changes.ofSInt64(value, value);
-    }
-
-    @Test
-    public void create_sint64_value_change() {
-        final long s1 = 1666L;
-        final long s2 = 1736L;
-
-        final SInt64Change result = Changes.ofSInt64(s1, s2);
-
-        assertTrue(Long.compare(s1, result.getPreviousValue()) == 0);
-        assertTrue(Long.compare(s2, result.getNewValue()) == 0);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void do_not_accept_equal_fixed32_values() {
-        final int value = 1736;
-        Changes.ofFixed32(value, value);
-    }
-
-    @Test
-    public void create_fixed32_value_change() {
-        final int s1 = 17070415;
-        final int s2 = 17830918;
-
-        final Fixed32Change result = Changes.ofFixed32(s1, s2);
-
-        assertTrue(Integer.compare(s1, result.getPreviousValue()) == 0);
-        assertTrue(Integer.compare(s2, result.getNewValue()) == 0);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void do_not_accept_equal_fixed64_values() {
-        final long value = 1755L;
-        Changes.ofFixed64(value, value);
-    }
-
-    @Test
-    public void create_fixed64_value_change() {
-        final long s1 = 17240422L;
-        final long s2 = 18040212L;
-
-        final Fixed64Change result = Changes.ofFixed64(s1, s2);
-
-        assertTrue(Long.compare(s1, result.getPreviousValue()) == 0);
-        assertTrue(Long.compare(s2, result.getNewValue()) == 0);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void do_not_accept_equal_sfixed32_values() {
-        final int value = 1614;
-        Changes.ofSfixed32(value, value);
-    }
-
-    @Test
-    public void create_sfixed32_value_change() {
-        final int s1 = 1550;
-        final int s2 = 1616;
-
-        final Sfixed32Change result = Changes.ofSfixed32(s1, s2);
-
-        assertTrue(Integer.compare(s1, result.getPreviousValue()) == 0);
-        assertTrue(Integer.compare(s2, result.getNewValue()) == 0);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void do_not_accept_equal_sfixed64_values() {
-        final long value = 1666L;
-        Changes.ofSfixed64(value, value);
-    }
-
-    @Test
-    public void create_sfixed64_value_change() {
-        final long s1 = 16420225L;
-        final long s2 = 17270320L;
-
-        final Sfixed64Change result = Changes.ofSfixed64(s1, s2);
-
-        assertTrue(Long.compare(s1, result.getPreviousValue()) == 0);
-        assertTrue(Long.compare(s2, result.getNewValue()) == 0);
-    }
-
-    @Test
-    public void pass_the_null_tolerance_check() {
+    @DisplayName("pass the null tolerance check")
+    void passNullToleranceCheck() {
         new NullPointerTester()
                 .setDefault(ByteString.class, ByteString.EMPTY)
                 .setDefault(Timestamp.class, Time.getCurrentTime())
@@ -392,32 +90,388 @@ public class ChangesShould {
                 .testAllPublicStaticMethods(Changes.class);
     }
 
-    @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_Interval_previousValue() {
-        final Timestamp fourMinutesAgo = TimeTests.Past.minutesAgo(4);
-        final Timestamp now = getCurrentTime();
-        final Interval fourMinutes = Intervals.between(fourMinutesAgo, now);
-        Changes.of(null, fourMinutes);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_Interval_newValue() {
-        final Timestamp fourMinutesAgo = TimeTests.Past.minutesAgo(4);
-        final Timestamp now = getCurrentTime();
-        final Interval fourMinutes = Intervals.between(fourMinutesAgo, now);
-        Changes.of(fourMinutes, null);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void do_not_accept_equal_Interval_values() {
-        final Timestamp fourMinutesAgo = TimeTests.Past.minutesAgo(4);
-        final Timestamp now = getCurrentTime();
-        final Interval fourMinutes = Intervals.between(now, fourMinutesAgo);
-        Changes.of(fourMinutes, fourMinutes);
+    @Test
+    @DisplayName("not accept null previousValue")
+    void notAcceptNullPrevious() {
+        assertThrows(NullPointerException.class,
+                     () -> Changes.of(null, ERR_PREVIOUS_VALUE_CANNOT_BE_NULL));
     }
 
     @Test
-    public void create_IntervalChange_instance() {
+    @DisplayName("not accept null newValue")
+    void notAcceptNullNew() {
+        assertThrows(NullPointerException.class,
+                     () -> Changes.of(ERR_NEW_VALUE_CANNOT_BE_NULL, null));
+    }
+
+    @Test
+    @DisplayName("not accept null byte string previousValue")
+    void notAcceptNullByteStringPrevious() {
+        assertThrows(NullPointerException.class,
+                     () -> Changes.of(null,
+                                      ByteString.copyFromUtf8(ERR_PREVIOUS_VALUE_CANNOT_BE_NULL)));
+    }
+
+    @Test
+    @DisplayName("not accept null byte string newValue")
+    void notAcceptNullByteStringNew() {
+        assertThrows(NullPointerException.class,
+                     () -> Changes.of(ByteString.copyFromUtf8(ERR_NEW_VALUE_CANNOT_BE_NULL), null));
+    }
+
+    @Test
+    @DisplayName("not accept equal string values")
+    void notAcceptEqualStrings() {
+        final String value = ERR_VALUES_CANNOT_BE_EQUAL;
+        assertThrows(IllegalArgumentException.class, () -> Changes.of(value, value));
+    }
+
+    @Test
+    @DisplayName("not accept equal byte string values")
+    void notAcceptEqualByteStrings() {
+        final ByteString value = ByteString.copyFromUtf8(ERR_VALUES_CANNOT_BE_EQUAL);
+        assertThrows(IllegalArgumentException.class, () -> Changes.of(value, value));
+    }
+
+    private static String randomUuid() {
+        return UUID.randomUUID()
+                   .toString();
+    }
+
+    @Test
+    @DisplayName("create string value change")
+    void createStringChange() {
+        final String previousValue = randomUuid();
+        final String newValue = randomUuid();
+
+        final StringChange result = Changes.of(previousValue, newValue);
+
+        assertEquals(previousValue, result.getPreviousValue());
+        assertEquals(newValue, result.getNewValue());
+    }
+
+    @Test
+    @DisplayName("create byte string value change")
+    void createByteStringChange() {
+        final ByteString previousValue = ByteString.copyFromUtf8(randomUuid());
+        final ByteString newValue = ByteString.copyFromUtf8(randomUuid());
+
+        final BytesChange result = Changes.of(previousValue, newValue);
+
+        assertEquals(previousValue, result.getPreviousValue());
+        assertEquals(newValue, result.getNewValue());
+    }
+
+    @Test
+    @DisplayName("not accept null Timestamp previousValue")
+    void notAcceptNullTimestampPrevious() {
+        assertThrows(NullPointerException.class, () -> Changes.of(null, getCurrentTime()));
+    }
+
+    @Test
+    @DisplayName("not accept null Timestamp newValue")
+    void notAcceptNullTimestampNew() {
+        assertThrows(NullPointerException.class, () -> Changes.of(getCurrentTime(), null));
+    }
+
+    @Test
+    @DisplayName("not accept equal Timestamp values")
+    void notAcceptEqualTimestamps() {
+        final Timestamp now = getCurrentTime();
+        assertThrows(IllegalArgumentException.class, () -> Changes.of(now, now));
+    }
+
+    @Test
+    @DisplayName("create TimestampChange instance")
+    void createTimestampChange() {
+        final Timestamp fiveMinutesAgo = TimeTests.Past.minutesAgo(5);
+        final Timestamp now = getCurrentTime();
+
+        final TimestampChange result = Changes.of(fiveMinutesAgo, now);
+
+        assertEquals(fiveMinutesAgo, result.getPreviousValue());
+        assertEquals(now, result.getNewValue());
+    }
+
+    @Test
+    @DisplayName("not accept equal boolean values")
+    void notAcceptEqualBooleans() {
+        final boolean value = true;
+        assertThrows(IllegalArgumentException.class, () -> Changes.of(value, value));
+    }
+
+    @Test
+    @DisplayName("create boolean value change")
+    void createBooleanChange() {
+        final boolean s1 = true;
+        final boolean s2 = false;
+
+        final BooleanChange result = Changes.of(s1, s2);
+
+        assertTrue(Boolean.compare(s1, result.getPreviousValue()) == 0);
+        assertTrue(Boolean.compare(s2, result.getNewValue()) == 0);
+    }
+
+    @Test
+    @DisplayName("not accept equal double values")
+    void notAcceptEqualDoubles() {
+        final double value = 1961.0412;
+        assertThrows(IllegalArgumentException.class, () -> Changes.of(value, value));
+    }
+
+    @Test
+    @DisplayName("create double value change")
+    void createDoubleChange() {
+        final double s1 = 1957.1004;
+        final double s2 = 1957.1103;
+
+        final DoubleChange result = Changes.of(s1, s2);
+
+        assertTrue(Double.compare(s1, result.getPreviousValue()) == 0);
+        assertTrue(Double.compare(s2, result.getNewValue()) == 0);
+    }
+
+    @Test
+    @DisplayName("not accept equal float values")
+    void notAcceptEqualFloats() {
+        final float value = 1543.0f;
+        assertThrows(IllegalArgumentException.class, () -> Changes.of(value, value));
+    }
+
+    @Test
+    @DisplayName("create float value change")
+    void createFloatChange() {
+        final float s1 = 1473.0219f;
+        final float s2 = 1543.0524f;
+
+        final FloatChange result = Changes.of(s1, s2);
+
+        assertTrue(Float.compare(s1, result.getPreviousValue()) == 0);
+        assertTrue(Float.compare(s2, result.getNewValue()) == 0);
+    }
+
+    @Test
+    @DisplayName("not accept equal int32 values")
+    void notAcceptEqualInt32() {
+        final int value = 1614;
+        assertThrows(IllegalArgumentException.class, () -> Changes.of(value, value));
+    }
+
+    @Test
+    @DisplayName("create int32 value change")
+    void createInt32Change() {
+        final int s1 = 1550;
+        final int s2 = 1616;
+
+        final Int32Change result = Changes.ofInt32(s1, s2);
+
+        assertTrue(Integer.compare(s1, result.getPreviousValue()) == 0);
+        assertTrue(Integer.compare(s2, result.getNewValue()) == 0);
+    }
+
+    @Test
+    @DisplayName("not accept equal int64 values")
+    void notAcceptEqualInt64() {
+        final long value = 1666L;
+        assertThrows(IllegalArgumentException.class, () -> Changes.of(value, value));
+    }
+
+    @Test
+    @DisplayName("create int64 value change")
+    void createInt64Change() {
+        final long s1 = 16420225L;
+        final long s2 = 17270320L;
+
+        final Int64Change result = Changes.ofInt64(s1, s2);
+
+        assertTrue(Long.compare(s1, result.getPreviousValue()) == 0);
+        assertTrue(Long.compare(s2, result.getNewValue()) == 0);
+    }
+
+    @Test
+    @DisplayName("not accept equal uint32 values")
+    void notAcceptEqualUint32() {
+        final int value = 1776;
+        assertThrows(IllegalArgumentException.class, () -> Changes.ofUInt32(value, value));
+    }
+
+    @Test
+    @DisplayName("create uint32 value change")
+    void createUint32Change() {
+        final int s1 = 16440925;
+        final int s2 = 17100919;
+
+        final UInt32Change result = Changes.ofUInt32(s1, s2);
+
+        assertTrue(Integer.compare(s1, result.getPreviousValue()) == 0);
+        assertTrue(Integer.compare(s2, result.getNewValue()) == 0);
+    }
+
+    @Test
+    @DisplayName("not accept equal uint64 values")
+    void notAcceptEqualUint64() {
+        final long value = 1690L;
+        assertThrows(IllegalArgumentException.class, () -> Changes.ofUInt64(value, value));
+    }
+
+    @Test
+    @DisplayName("create uint64 value change")
+    void createUint64Change() {
+        final long s1 = 16290414L;
+        final long s2 = 16950708L;
+
+        final UInt64Change result = Changes.ofUInt64(s1, s2);
+
+        assertTrue(Long.compare(s1, result.getPreviousValue()) == 0);
+        assertTrue(Long.compare(s2, result.getNewValue()) == 0);
+    }
+
+    @Test
+    @DisplayName("not accept equal sint32 values")
+    void notAcceptEqualSint32() {
+        final int value = 1694;
+        assertThrows(IllegalArgumentException.class, () -> Changes.ofSInt32(value, value));
+    }
+
+    @Test
+    @DisplayName("create sint32 value change")
+    void createSint32Change() {
+        final int s1 = 16550106;
+        final int s2 = 17050816;
+
+        final SInt32Change result = Changes.ofSInt32(s1, s2);
+
+        assertTrue(Integer.compare(s1, result.getPreviousValue()) == 0);
+        assertTrue(Integer.compare(s2, result.getNewValue()) == 0);
+    }
+
+    @Test
+    @DisplayName("not accept equal sint64 values")
+    void notAcceptEqualSint64() {
+        final long value = 1729L;
+        assertThrows(IllegalArgumentException.class, () -> Changes.ofSInt64(value, value));
+    }
+
+    @Test
+    @DisplayName("create sint64 value change")
+    void createSint64Change() {
+        final long s1 = 1666L;
+        final long s2 = 1736L;
+
+        final SInt64Change result = Changes.ofSInt64(s1, s2);
+
+        assertTrue(Long.compare(s1, result.getPreviousValue()) == 0);
+        assertTrue(Long.compare(s2, result.getNewValue()) == 0);
+    }
+
+    @Test
+    @DisplayName("not accept equal fixed32 values")
+    void notAcceptEqualFixed32() {
+        final int value = 1736;
+        assertThrows(IllegalArgumentException.class, () -> Changes.ofFixed32(value, value));
+    }
+
+    @Test
+    @DisplayName("create fixed32 value change")
+    void createFixed32Change() {
+        final int s1 = 17070415;
+        final int s2 = 17830918;
+
+        final Fixed32Change result = Changes.ofFixed32(s1, s2);
+
+        assertTrue(Integer.compare(s1, result.getPreviousValue()) == 0);
+        assertTrue(Integer.compare(s2, result.getNewValue()) == 0);
+    }
+
+    @Test
+    @DisplayName("not accept equal fixed64 values")
+    void notAcceptEqualFixed64() {
+        final long value = 1755L;
+        assertThrows(IllegalArgumentException.class, () -> Changes.ofFixed64(value, value));
+    }
+
+    @Test
+    @DisplayName("create fixed64 value change")
+    void createFixed64Change() {
+        final long s1 = 17240422L;
+        final long s2 = 18040212L;
+
+        final Fixed64Change result = Changes.ofFixed64(s1, s2);
+
+        assertTrue(Long.compare(s1, result.getPreviousValue()) == 0);
+        assertTrue(Long.compare(s2, result.getNewValue()) == 0);
+    }
+
+    @Test
+    @DisplayName("not accept equal sfixed32 values")
+    void notAcceptEqualSfixed32() {
+        final int value = 1614;
+        assertThrows(IllegalArgumentException.class, () -> Changes.ofSfixed32(value, value));
+    }
+
+    @Test
+    @DisplayName("create sfixed32 value change")
+    void createSfixed32Change() {
+        final int s1 = 1550;
+        final int s2 = 1616;
+
+        final Sfixed32Change result = Changes.ofSfixed32(s1, s2);
+
+        assertTrue(Integer.compare(s1, result.getPreviousValue()) == 0);
+        assertTrue(Integer.compare(s2, result.getNewValue()) == 0);
+    }
+
+    @Test
+    @DisplayName("not accept equal sfixed64 values")
+    void notAcceptEqualSfixed64() {
+        final long value = 1666L;
+        assertThrows(IllegalArgumentException.class, () -> Changes.ofSfixed64(value, value));
+    }
+
+    @Test
+    @DisplayName("create sfixed64 value change")
+    void createSfixed64Change() {
+        final long s1 = 16420225L;
+        final long s2 = 17270320L;
+
+        final Sfixed64Change result = Changes.ofSfixed64(s1, s2);
+
+        assertTrue(Long.compare(s1, result.getPreviousValue()) == 0);
+        assertTrue(Long.compare(s2, result.getNewValue()) == 0);
+    }
+
+    @Test
+    @DisplayName("not accept null Interval previousValue")
+    void notAcceptNullIntervalPrevious() {
+        final Timestamp fourMinutesAgo = TimeTests.Past.minutesAgo(4);
+        final Timestamp now = getCurrentTime();
+        final Interval fourMinutes = Intervals.between(fourMinutesAgo, now);
+        assertThrows(NullPointerException.class, () -> Changes.of(null, fourMinutes));
+    }
+
+    @Test
+    @DisplayName("not accept null Interval newValue")
+    void notAcceptNullIntervalNew() {
+        final Timestamp fourMinutesAgo = TimeTests.Past.minutesAgo(4);
+        final Timestamp now = getCurrentTime();
+        final Interval fourMinutes = Intervals.between(fourMinutesAgo, now);
+        assertThrows(NullPointerException.class, () -> Changes.of(fourMinutes, null));
+    }
+
+    @Test
+    @DisplayName("not accept equal Interval values")
+    void notAcceptEqualIntervals() {
+        final Timestamp fourMinutesAgo = TimeTests.Past.minutesAgo(4);
+        final Timestamp now = getCurrentTime();
+        assertThrows(IllegalArgumentException.class, () -> {
+            final Interval fourMinutes = Intervals.between(now, fourMinutesAgo);
+            Changes.of(fourMinutes, fourMinutes);
+        });
+    }
+
+    @Test
+    @DisplayName("create IntervalChange instance")
+    void createIntervalChange() {
         final Timestamp fiveMinutesAgo = TimeTests.Past.minutesAgo(5);
         final Timestamp fourMinutesAgo = TimeTests.Past.minutesAgo(4);
         final Timestamp now = getCurrentTime();
@@ -430,26 +484,30 @@ public class ChangesShould {
         assertEquals(fiveMinutes, result.getNewValue());
     }
 
-    @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_LocalDate_previousValue() {
+    @Test
+    @DisplayName("not accept null LocalDate previousValue")
+    void notAcceptNullLocalDatePrevious() {
         final LocalDate today = LocalDates.now();
-        Changes.of(null, today);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_LocalDate_newValue() {
-        final LocalDate today = LocalDates.now();
-        Changes.of(today, null);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void do_not_accept_equal_LocalDate_values() {
-        final LocalDate today = LocalDates.now();
-        Changes.of(today, today);
+        assertThrows(NullPointerException.class, () -> Changes.of(null, today));
     }
 
     @Test
-    public void create_LocalDateChange_instance() {
+    @DisplayName("not accept null LocalDate newValue")
+    void notAcceptNullLocalDateNew() {
+        final LocalDate today = LocalDates.now();
+        assertThrows(NullPointerException.class, () -> Changes.of(today, null));
+    }
+
+    @Test
+    @DisplayName("not accept equal LocalDate values")
+    void notAcceptEqualLocalDates() {
+        final LocalDate today = LocalDates.now();
+        assertThrows(IllegalArgumentException.class, () -> Changes.of(today, today));
+    }
+
+    @Test
+    @DisplayName("create LocalDateChange instance")
+    void createLocalDateChange() {
         final LocalDate today = LocalDates.now();
         final LocalDate tomorrow = LocalDates.addDays(today, 1);
 
@@ -459,26 +517,30 @@ public class ChangesShould {
         assertEquals(tomorrow, result.getNewValue());
     }
 
-    @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_LocalTime_previousValue() {
+    @Test
+    @DisplayName("not accept null LocalTime previousValue")
+    void notAcceptNullLocalTimePrevious() {
         final LocalTime now = LocalTimes.now();
-        Changes.of(null, now);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_LocalTime_newValue() {
-        final LocalTime now = LocalTimes.now();
-        Changes.of(now, null);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void do_not_accept_equal_LocalTime_values() {
-        final LocalTime now = LocalTimes.now();
-        Changes.of(now, now);
+        assertThrows(NullPointerException.class, () -> Changes.of(null, now));
     }
 
     @Test
-    public void create_LocalTimeChange_instance() {
+    @DisplayName("not accept null LocalTime newValue")
+    void notAcceptNullLocalTimeNew() {
+        final LocalTime now = LocalTimes.now();
+        assertThrows(NullPointerException.class, () -> Changes.of(now, null));
+    }
+
+    @Test
+    @DisplayName("not accept equal LocalTime values")
+    void notAcceptEqualLocalTimes() {
+        final LocalTime now = LocalTimes.now();
+        assertThrows(IllegalArgumentException.class, () -> Changes.of(now, now));
+    }
+
+    @Test
+    @DisplayName("create LocalTimeChange instance")
+    void createLocalTimeChange() {
         final LocalTime now = LocalTimes.now();
         final LocalTime inFiveHours = LocalTimes.addHours(now, 5);
 
@@ -488,29 +550,33 @@ public class ChangesShould {
         assertEquals(inFiveHours, result.getNewValue());
     }
 
-    @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_OffsetDate_previousValue() {
+    @Test
+    @DisplayName("not accept null OffsetDate previousValue")
+    void notAcceptNullOffsetDatePrevious() {
         final ZoneOffset inLassVegas = ZoneOffsets.ofHours(8);
         final OffsetDate date = OffsetDates.now(inLassVegas);
-        Changes.of(null, date);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_OffsetDate_newValue() {
-        final ZoneOffset inKiev = ZoneOffsets.ofHours(3);
-        final OffsetDate date = OffsetDates.now(inKiev);
-        Changes.of(date, null);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void do_not_accept_equal_OffsetDate_values() {
-        final ZoneOffset inLuxembourg = ZoneOffsets.ofHours(1);
-        final OffsetDate date = OffsetDates.now(inLuxembourg);
-        Changes.of(date, date);
+        assertThrows(NullPointerException.class, () -> Changes.of(null, date));
     }
 
     @Test
-    public void create_OffsetDateChange_instance() {
+    @DisplayName("not accept null OffsetDate newValue")
+    void notAcceptNullOffsetDateNew() {
+        final ZoneOffset inKiev = ZoneOffsets.ofHours(3);
+        final OffsetDate date = OffsetDates.now(inKiev);
+        assertThrows(NullPointerException.class, () -> Changes.of(date, null));
+    }
+
+    @Test
+    @DisplayName("not accept equal OffsetDate values")
+    void notAcceptEqualOffsetDate() {
+        final ZoneOffset inLuxembourg = ZoneOffsets.ofHours(1);
+        final OffsetDate date = OffsetDates.now(inLuxembourg);
+        assertThrows(IllegalArgumentException.class, () -> Changes.of(date, date));
+    }
+
+    @Test
+    @DisplayName("create OffsetDateChange instance")
+    void createOffsetDateChange() {
         final ZoneOffset inKiev = ZoneOffsets.ofHours(3);
         final ZoneOffset inLuxembourg = ZoneOffsets.ofHours(1);
         final OffsetDate previousDate = OffsetDates.now(inKiev);
@@ -522,29 +588,33 @@ public class ChangesShould {
         assertEquals(newDate, result.getNewValue());
     }
 
-    @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_OffsetTime_previousValue() {
+    @Test
+    @DisplayName("not accept null OffsetTime previousValue")
+    void notAcceptNullOffsetTimePrevious() {
         final ZoneOffset inLassVegas = ZoneOffsets.ofHours(8);
         final OffsetTime now = OffsetTimes.now(inLassVegas);
-        Changes.of(null, now);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_OffsetTime_newValue() {
-        final ZoneOffset inKiev = ZoneOffsets.ofHours(3);
-        final OffsetTime now = OffsetTimes.now(inKiev);
-        Changes.of(now, null);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void do_not_accept_equal_OffsetTime_values() {
-        final ZoneOffset inLuxembourg = ZoneOffsets.ofHours(1);
-        final OffsetTime now = OffsetTimes.now(inLuxembourg);
-        Changes.of(now, now);
+        assertThrows(NullPointerException.class, () -> Changes.of(null, now));
     }
 
     @Test
-    public void create_OffsetTimeChange_instance() {
+    @DisplayName("not accept null OffsetTime newValue")
+    void notAcceptNullOffsetTimeNew() {
+        final ZoneOffset inKiev = ZoneOffsets.ofHours(3);
+        final OffsetTime now = OffsetTimes.now(inKiev);
+        assertThrows(NullPointerException.class, () -> Changes.of(now, null));
+    }
+
+    @Test
+    @DisplayName("not accept equal OffsetTime values")
+    void notAcceptEqualOffsetTimes() {
+        final ZoneOffset inLuxembourg = ZoneOffsets.ofHours(1);
+        final OffsetTime now = OffsetTimes.now(inLuxembourg);
+        assertThrows(IllegalArgumentException.class, () -> Changes.of(now, now));
+    }
+
+    @Test
+    @DisplayName("create OffsetTimeChange instance")
+    void createOffsetTimeChange() {
         final ZoneOffset inKiev = ZoneOffsets.ofHours(3);
         final ZoneOffset inLuxembourg = ZoneOffsets.ofHours(1);
         final OffsetTime previousTime = OffsetTimes.now(inKiev);
@@ -556,29 +626,33 @@ public class ChangesShould {
         assertEquals(newTime, result.getNewValue());
     }
 
-    @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_OffsetDateTime_previousValue() {
+    @Test
+    @DisplayName("not accept null OffsetDateTime previousValue")
+    void notAcceptNullOffsetDateTimePrevious() {
         final ZoneOffset inLassVegas = ZoneOffsets.ofHours(8);
         final OffsetDateTime now = OffsetDateTimes.now(inLassVegas);
-        Changes.of(null, now);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_OffsetDateTime_newValue() {
-        final ZoneOffset inKiev = ZoneOffsets.ofHours(3);
-        final OffsetDateTime now = OffsetDateTimes.now(inKiev);
-        Changes.of(now, null);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void do_not_accept_equal_OffsetDateTime_values() {
-        final ZoneOffset inLuxembourg = ZoneOffsets.ofHours(1);
-        final OffsetDateTime now = OffsetDateTimes.now(inLuxembourg);
-        Changes.of(now, now);
+        assertThrows(NullPointerException.class, () -> Changes.of(null, now));
     }
 
     @Test
-    public void create_OffsetDateTimeChange_instance() {
+    @DisplayName("not accept null OffsetDateTime newValue")
+    void notAcceptNullOffsetDateTimeNew() {
+        final ZoneOffset inKiev = ZoneOffsets.ofHours(3);
+        final OffsetDateTime now = OffsetDateTimes.now(inKiev);
+        assertThrows(NullPointerException.class, () -> Changes.of(now, null));
+    }
+
+    @Test
+    @DisplayName("not accept equal OffsetDateTime values")
+    void notAcceptEqualOffsetDateTimes() {
+        final ZoneOffset inLuxembourg = ZoneOffsets.ofHours(1);
+        final OffsetDateTime now = OffsetDateTimes.now(inLuxembourg);
+        assertThrows(IllegalArgumentException.class, () -> Changes.of(now, now));
+    }
+
+    @Test
+    @DisplayName("create OffsetDateTimeChange instance")
+    void createOffsetDateTimeChange() {
         final ZoneOffset inKiev = ZoneOffsets.ofHours(3);
         final ZoneOffset inLuxembourg = ZoneOffsets.ofHours(1);
         final OffsetDateTime previousDateTime = OffsetDateTimes.now(inKiev);

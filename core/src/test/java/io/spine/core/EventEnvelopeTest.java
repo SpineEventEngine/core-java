@@ -30,8 +30,7 @@ import static io.spine.base.Identifier.newUuid;
 /**
  * @author Dmytro Dashenkov
  */
-public class EventEnvelopeShould extends MessageEnvelopeShould<Event, EventEnvelope, EventClass> {
-
+class EventEnvelopeTest extends MessageEnvelopeTest<Event, EventEnvelope, EventClass> {
 
     @Override
     protected Event outerObject() {
@@ -44,7 +43,7 @@ public class EventEnvelopeShould extends MessageEnvelopeShould<Event, EventEnvel
                                                    .build();
 
         final EventId.Builder eventIdBuilder = EventId.newBuilder()
-                                                       .setValue(newUuid());
+                                                      .setValue(newUuid());
         final Event event = Event.newBuilder()
                                  .setId(eventIdBuilder)
                                  .setMessage(AnyPacker.pack(eventMessage))

@@ -22,7 +22,8 @@ package io.spine.change;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.StringValue;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.change.MessageMismatch.expectedDefault;
 import static io.spine.change.MessageMismatch.expectedNotDefault;
@@ -32,9 +33,10 @@ import static io.spine.change.MessageMismatch.unpackExpected;
 import static io.spine.change.MessageMismatch.unpackNewValue;
 import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class MessageMismatchShould {
+@DisplayName("MessageMismatch should")
+class MessageMismatchTest {
 
     private static final StringValue EXPECTED = toMessage("expected_value");
     private static final StringValue ACTUAL = toMessage("actual-value");
@@ -43,12 +45,21 @@ public class MessageMismatchShould {
     private static final int VERSION = 1;
 
     @Test
-    public void have_private_constructor() {
+    @DisplayName("have private parameterless constructor")
+    void haveUtilityConstructor() {
         assertHasPrivateParameterlessCtor(MessageMismatch.class);
     }
 
     @Test
-    public void create_instance_for_expected_default_value() {
+    @DisplayName("pass the null tolerance check")
+    void passNullToleranceCheck() {
+        new NullPointerTester()
+                .testAllPublicStaticMethods(MessageMismatch.class);
+    }
+
+    @Test
+    @DisplayName("create ValueMismatch instance for expected default value")
+    void createForExpectedDefault() {
         final ValueMismatch mismatch = expectedDefault(ACTUAL, NEW_VALUE, VERSION);
 
         assertEquals(DEFAULT_VALUE, unpackExpected(mismatch));
@@ -58,7 +69,8 @@ public class MessageMismatchShould {
     }
 
     @Test
-    public void create_instance_for_unexpected_default_when_clearing() {
+    @DisplayName("create ValueMismatch instance for unexpected default when clearing")
+    void createForUnexpectedDefaultWhenClearing() {
         final ValueMismatch mismatch = expectedNotDefault(EXPECTED, VERSION);
 
         assertEquals(EXPECTED, unpackExpected(mismatch));
@@ -73,7 +85,8 @@ public class MessageMismatchShould {
     }
 
     @Test
-    public void create_instance_for_unexpected_default_when_changing() {
+    @DisplayName("create ValueMismatch instance for unexpected default when changing")
+    void createForUnexpectedDefaultWhenChanging() {
         final ValueMismatch mismatch = expectedNotDefault(EXPECTED, NEW_VALUE, VERSION);
 
         assertEquals(EXPECTED, unpackExpected(mismatch));
@@ -86,18 +99,13 @@ public class MessageMismatchShould {
     }
 
     @Test
-    public void create_instance_for_unexpected_value() {
+    @DisplayName("create ValueMismatch instance for unexpected value")
+    void createForUnexpectedValue() {
         final ValueMismatch mismatch = unexpectedValue(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
 
         assertEquals(EXPECTED, unpackExpected(mismatch));
         assertEquals(ACTUAL, unpackActual(mismatch));
         assertEquals(NEW_VALUE, unpackNewValue(mismatch));
         assertEquals(VERSION, mismatch.getVersion());
-    }
-
-    @Test
-    public void pass_the_null_tolerance_check() {
-        new NullPointerTester()
-                .testAllPublicStaticMethods(MessageMismatch.class);
     }
 }
