@@ -55,8 +55,8 @@ import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.TypeConverter.toAny;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Verify.assertContainsAll;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
@@ -183,7 +183,7 @@ class ColumnFiltersTest {
             assertNotNull(filter);
             assertEquals(LESS_OR_EQUAL, filter.getOperator());
             final DoubleValue value = AnyPacker.unpack(filter.getValue());
-            assertEquals(number, value.getValue(), 0.0);
+            assertEquals(number, value.getValue());
         }
 
         @Test

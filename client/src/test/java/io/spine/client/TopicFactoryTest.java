@@ -26,7 +26,6 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.test.client.TestEntity;
 import io.spine.test.client.TestEntityId;
 import io.spine.type.TypeUrl;
-import org.junit.Assert;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -35,9 +34,9 @@ import java.util.List;
 import java.util.Set;
 
 import static com.google.common.collect.Sets.newHashSet;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Alex Tymchenko
@@ -62,10 +61,10 @@ class TopicFactoryTest
 
             verifyTargetAndContext(topic);
 
-            Assert.assertEquals(0, topic.getTarget()
-                                        .getFilters()
-                                        .getIdFilter()
-                                        .getIdsCount());
+            assertEquals(0, topic.getTarget()
+                                 .getFilters()
+                                 .getIdFilter()
+                                 .getIdsCount());
         }
 
         @Test

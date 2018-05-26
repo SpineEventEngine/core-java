@@ -39,12 +39,12 @@ import static io.spine.base.Identifier.newUuid;
 import static io.spine.client.CommonTestNames.NULL_TOLERANCE;
 import static io.spine.core.given.GivenUserId.of;
 import static io.spine.time.Timestamps2.isLaterThan;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Base tests for the {@linkplain ActorRequestFactory} descendants.

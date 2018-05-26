@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Test;
 
 import static io.spine.client.CommonTestNames.NULL_TOLERANCE;
 import static io.spine.client.CommonTestNames.UTILITY_CTOR;
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 /**
  * @author Alexander Yeveyukov

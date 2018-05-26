@@ -28,8 +28,8 @@ import org.junit.jupiter.api.Test;
 import static io.spine.client.CommonTestNames.NULL_TOLERANCE;
 import static io.spine.client.CommonTestNames.UTILITY_CTOR;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**

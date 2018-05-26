@@ -35,9 +35,9 @@ import org.slf4j.helpers.SubstituteLogger;
 import java.util.Queue;
 
 import static io.spine.base.Identifier.newUuid;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Alexander Yevsyukov

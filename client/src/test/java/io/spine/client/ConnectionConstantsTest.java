@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
 
 import static io.spine.client.CommonTestNames.UTILITY_CTOR;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 /**
  * @author Alexander Yevsyukov
