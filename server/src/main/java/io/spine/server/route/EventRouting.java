@@ -21,6 +21,7 @@
 package io.spine.server.route;
 
 import com.google.common.base.Optional;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
@@ -63,6 +64,7 @@ public final class EventRouting<I> extends MessageRouting<EventContext, EventCla
      * @param <I>          the type of entity identifiers returned by new routing
      * @return new routing instance
      */
+    @CanIgnoreReturnValue
     public static <I> EventRouting<I> withDefault(EventRoute<I, Message> defaultRoute) {
         checkNotNull(defaultRoute);
         return new EventRouting<>(defaultRoute);
@@ -84,6 +86,7 @@ public final class EventRouting<I> extends MessageRouting<EventContext, EventCla
      * @param newDefault the new route to be used as default
      * @return {@code this} to allow chained calls when configuring the routing
      */
+    @CanIgnoreReturnValue
     public EventRouting<I> replaceDefault(EventRoute<I, Message> newDefault) {
         return (EventRouting<I>) super.replaceDefault(newDefault);
     }
@@ -108,6 +111,7 @@ public final class EventRouting<I> extends MessageRouting<EventContext, EventCla
      * @return {@code this} to allow chained calls when configuring the routing
      * @throws IllegalStateException if the route for this event class is already set
      */
+    @CanIgnoreReturnValue
     public <E extends Message> EventRouting<I> route(Class<E> eventClass, EventRoute<I, E> via)
             throws IllegalStateException {
         @SuppressWarnings("unchecked") // The cast is required to adapt the type to internal API.

@@ -22,6 +22,7 @@ package io.spine.server.transport;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.grpc.BindableService;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
@@ -51,8 +52,7 @@ public class GrpcContainer {
     private final int port;
     private final ImmutableSet<ServerServiceDefinition> services;
 
-    @Nullable
-    private Server grpcServer;
+    private @Nullable Server grpcServer;
 
     public static Builder newBuilder() {
         return new Builder();
@@ -168,25 +168,21 @@ public class GrpcContainer {
         return builder.build();
     }
 
+    // Use stderr here since the logger may have been reset by its JVM shutdown hook.
+    @SuppressWarnings("UseOfSystemOutOrSystemErr")
     @VisibleForTesting
     Runnable getOnShutdownCallback() {
-        return new Runnable() {
-            // Use stderr here since the logger may have been reset by its JVM shutdown hook.
-            @SuppressWarnings("UseOfSystemOutOrSystemErr")
-            @Override
-            public void run() {
-                final String serverClass = GrpcContainer.this.getClass()
-                                                             .getName();
-                try {
-                    if (!isShutdown()) {
-                        System.err.println("Shutting down " +
-                                           serverClass + " since JVM is shutting down...");
-                        shutdown();
-                        System.err.println(serverClass + " shut down.");
-                    }
-                } catch (RuntimeException e) {
-                    e.printStackTrace(System.err);
+        return () -> {
+            final String serverClass = getClass().getName();
+            try {
+                if (!isShutdown()) {
+                    System.err.println("Shutting down " +
+                                       serverClass + " since JVM is shutting down...");
+                    shutdown();
+                    System.err.println(serverClass + " shut down.");
                 }
+            } catch (RuntimeException e) {
+                e.printStackTrace(System.err);
             }
         };
     }
@@ -205,11 +201,13 @@ public class GrpcContainer {
             return this.port;
         }
 
+        @CanIgnoreReturnValue
         public Builder addService(BindableService service) {
             serviceDefinitions.add(service.bindService());
             return this;
         }
 
+        @CanIgnoreReturnValue
         public Builder removeService(ServerServiceDefinition service) {
             serviceDefinitions.remove(service);
             return this;

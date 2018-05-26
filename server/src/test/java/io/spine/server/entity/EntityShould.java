@@ -186,6 +186,7 @@ public class EntityShould {
         assertEquals(1, version);
     }
 
+    @SuppressWarnings("CheckReturnValue") // New entity version number can be ignored in this test.
     @Test
     public void record_modification_time_when_incrementing_version() {
         final long timeBeforeincrement = TimeTests.currentTimeSeconds();

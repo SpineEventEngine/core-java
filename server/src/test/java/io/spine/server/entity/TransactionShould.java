@@ -23,6 +23,7 @@ import com.google.common.collect.Lists;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
+import io.spine.core.Events;
 import io.spine.core.Version;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.entity.Transaction.Phase;
@@ -32,7 +33,9 @@ import io.spine.validate.ConstraintViolation;
 import io.spine.validate.ValidatingBuilder;
 import io.spine.validate.ValidationException;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.mockito.ArgumentMatcher;
 
 import java.util.List;
@@ -40,7 +43,6 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.Versions.newVersion;
-import static io.spine.protobuf.AnyPacker.unpack;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
@@ -65,6 +67,9 @@ public abstract class TransactionShould<I,
 
     private final EventFactory eventFactory = TestEventFactory.newInstance(TransactionShould.class);
 
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
+    
     protected abstract Transaction<I, E, S, B> createTx(E entity);
 
     protected abstract Transaction<I, E, S, B> createTxWithState(E entity,
@@ -227,23 +232,27 @@ public abstract class TransactionShould<I,
         assertEquals(entity.getVersion(), newVersion);
     }
 
-    @Test(expected = IllegalStateException.class)
+    @SuppressWarnings("CheckReturnValue") // can ignore new entity version in this test.
+    @Test
     public void not_allow_injecting_state_if_entity_has_non_zero_version_already(){
-        final E entity = createEntity();
+         E entity = createEntity();
         entity.incrementVersion();
-        final S newState = createNewState();
-        final Version newVersion = someVersion();
+         S newState = createNewState();
+         Version newVersion = someVersion();
 
+        thrown.expect(IllegalStateException.class);
         createTxWithState(entity, newState, newVersion);
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void propagate_phase_failure_exception_as_ISE() {
-        final E entity = createEntity();
+         E entity = createEntity();
 
-        final Transaction<I, E, S, B> tx = createTx(entity);
+         Transaction<I, E, S, B> tx = createTx(entity);
 
-        final Event event = createEvent(createEventMessageThatFailsInHandler());
+         Event event = createEvent(createEventMessageThatFailsInHandler());
+
+        thrown.expect(IllegalStateException.class);
         applyEvent(tx, event);
     }
 
@@ -266,11 +275,11 @@ public abstract class TransactionShould<I,
 
     @Test
     public void propagate_exception_wrapped_as_ISE_if_commit_fails() {
-        final E entity = createEntity(someViolations());
-        final S newState = createNewState();
-        final Version version = someVersion();
+         E entity = createEntity(someViolations());
+         S newState = createNewState();
+         Version version = someVersion();
 
-        final Transaction<I, E, S, B> tx = createTxWithState(entity, newState, version);
+         Transaction<I, E, S, B> tx = createTxWithState(entity, newState, version);
         try {
             tx.commit();
             fail("Expected an exception due to a failed commit.");
@@ -279,16 +288,18 @@ public abstract class TransactionShould<I,
         }
     }
 
-    @Test(expected = InvalidEntityStateException.class)
+    @Test
     public void throw_InvalidEntityStateException_if_constraints_violated_on_commit() {
-        final E entity = createEntity();
+        E entity = createEntity();
 
-        final S newState = createNewState();
-        final Version version = someVersion();
+        S newState = createNewState();
+        Version version = someVersion();
 
-        final Transaction<I, E, S, B> tx = createTxWithState(entity, newState, version);
-        final ValidationException toThrow = validationException();
+        Transaction<I, E, S, B> tx = createTxWithState(entity, newState, version);
+        ValidationException toThrow = validationException();
         breakEntityValidation(entity, toThrow);
+        
+        thrown.expect(InvalidEntityStateException.class);
         tx.commit();
     }
 
@@ -331,7 +342,7 @@ public abstract class TransactionShould<I,
     }
 
     private static ValidationException validationException() {
-        final ValidationException ex = new ValidationException(Lists.<ConstraintViolation>newLinkedList());
+        final ValidationException ex = new ValidationException(Lists.newLinkedList());
         return ex;
     }
 
@@ -351,17 +362,14 @@ public abstract class TransactionShould<I,
     }
 
     private ArgumentMatcher<Phase<I, E, S, B>> matchesSuccessfulPhaseFor(final Event event) {
-        return new ArgumentMatcher<Phase<I, E, S, B>>() {
-            @Override
-            public boolean matches(Phase<I, E, S, B> phase) {
-                return checkPhase(event, phase, true);
-            }
-        };
+        return phase -> checkPhase(event, phase, true);
     }
 
     private static boolean checkPhase(Event event, Phase phase, boolean successful) {
-        return unpack(event.getMessage()).equals(phase.getEventMessage())
-                                  && event.getContext().equals(phase.getContext())
+        Message eventMessage = Events.getMessage(event);
+        return eventMessage.equals(phase.getEventMessage())
+                && event.getContext()
+                        .equals(phase.getContext())
                 && phase.isSuccessful() == successful;
     }
 

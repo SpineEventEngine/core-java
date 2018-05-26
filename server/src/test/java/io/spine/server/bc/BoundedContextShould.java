@@ -50,7 +50,9 @@ import io.spine.test.bc.SecretProject;
 import io.spine.test.bc.event.BcProjectCreated;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.lang.reflect.Field;
 import java.util.Map;
@@ -75,9 +77,9 @@ import static org.mockito.Mockito.when;
 /**
  * Messages used in this test suite are defined in:
  * <ul>
- *     <li>spine/test/bc/project.proto - data types
- *     <li>spine/test/bc/command_factory_should.proto — commands
- *     <li>spine/test/bc/events.proto — events.
+ * <li>spine/test/bc/project.proto - data types
+ * <li>spine/test/bc/command_factory_should.proto — commands
+ * <li>spine/test/bc/events.proto — events.
  * </ul>
  *
  * @author Alexander Litus
@@ -97,6 +99,47 @@ public class BoundedContextShould {
 
     private boolean handlersRegistered = false;
 
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
+
+    private static Object getObjectFromNestedEnumField(String fullClassName, String fieldName) {
+        Object result = null;
+        try {
+            final Class<?> aClass = Class.forName(fullClassName);
+            final Object enumConstant = aClass.getEnumConstants()[0];
+            final Field field = aClass.getDeclaredField(fieldName);
+            field.setAccessible(true);
+            result = field.get(enumConstant);
+        } catch (ClassNotFoundException e) {
+            failMissingClass(fullClassName);
+        } catch (NoSuchFieldException e) {
+            failMissingField(fieldName);
+        } catch (IllegalAccessException e) {
+            fail(e.getMessage());
+        }
+        assertNotNull(result);
+        return result;
+    }
+
+    private static void failMissingClass(String fullClassName) {
+        fail("Class " + fullClassName + " not found.");
+    }
+
+    private static void failMissingField(String fieldName) {
+        fail("Field " + fieldName + " should exist.");
+    }
+
+    private static void injectField(Object target, String fieldName, Object valueToInject) {
+        try {
+            final Field defaultStates = target.getClass()
+                                              .getDeclaredField(fieldName);
+            defaultStates.setAccessible(true);
+            defaultStates.set(target, valueToInject);
+        } catch (NoSuchFieldException | IllegalAccessException ignored) {
+            failMissingField(fieldName);
+        }
+    }
+
     @Before
     public void setUp() {
         ModelTests.clearModel();
@@ -108,7 +151,8 @@ public class BoundedContextShould {
     @After
     public void tearDown() throws Exception {
         if (handlersRegistered) {
-            boundedContext.getEventBus().unregister(subscriber);
+            boundedContext.getEventBus()
+                          .unregister(subscriber);
         }
         boundedContext.close();
     }
@@ -117,7 +161,8 @@ public class BoundedContextShould {
     private void registerAll() {
         final ProjectAggregateRepository repo = new ProjectAggregateRepository();
         boundedContext.register(repo);
-        boundedContext.getEventBus().register(subscriber);
+        boundedContext.getEventBus()
+                      .register(subscriber);
         handlersRegistered = true;
     }
 
@@ -148,7 +193,7 @@ public class BoundedContextShould {
         boundedContext.register(repository);
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void not_allow_two_aggregate_repositories_with_aggregates_with_the_same_state() {
         final ProjectAggregateRepository repository =
                 new ProjectAggregateRepository();
@@ -156,6 +201,8 @@ public class BoundedContextShould {
 
         final AnotherProjectAggregateRepository anotherRepo =
                 new AnotherProjectAggregateRepository();
+
+        thrown.expect(IllegalStateException.class);
         boundedContext.register(anotherRepo);
     }
 
@@ -182,7 +229,8 @@ public class BoundedContextShould {
 
         boundedContext.notify(event, observer);
 
-        assertEquals(Responses.statusOk(), observer.firstResponse().getStatus());
+        assertEquals(Responses.statusOk(), observer.firstResponse()
+                                                   .getStatus());
         assertEquals(subscriber.getHandledEvent(), msg);
     }
 
@@ -203,7 +251,9 @@ public class BoundedContextShould {
         final MemoizingObserver<Ack> observer = memoizingObserver();
         boundedContext.notify(event, observer);
 
-        assertEquals(ERROR, observer.firstResponse().getStatus().getStatusCase());
+        assertEquals(ERROR, observer.firstResponse()
+                                    .getStatus()
+                                    .getStatusCase());
     }
 
     @Test
@@ -242,12 +292,13 @@ public class BoundedContextShould {
         final EventStore eventStore = mock(EventStore.class);
         final BoundedContext bc = BoundedContext.newBuilder()
                                                 .setEventBus(EventBus.newBuilder()
-                                                .setEventStore(eventStore))
+                                                                     .setEventStore(eventStore))
                                                 .build();
         assertEquals(eventStore, bc.getEventBus()
                                    .getEventStore());
     }
 
+    @SuppressWarnings("unchecked") // OK for the purpose of the created Matcher.
     @Test
     public void propagate_registered_repositories_to_stand() {
         final BoundedContext boundedContext = BoundedContext.newBuilder()
@@ -255,7 +306,8 @@ public class BoundedContextShould {
         final Stand stand = Spy.ofClass(Stand.class)
                                .on(boundedContext);
 
-        verify(stand, never()).registerTypeSupplier(any(Repository.class));
+        final Repository any = any(Repository.class);
+        verify(stand, never()).registerTypeSupplier(any);
 
         final ProjectAggregateRepository repository =
                 new ProjectAggregateRepository();
@@ -263,8 +315,9 @@ public class BoundedContextShould {
         verify(stand).registerTypeSupplier(eq(repository));
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void match_multi_tenancy_with_CommandBus() {
+        thrown.expect(IllegalStateException.class);
         BoundedContext.newBuilder()
                       .setMultitenant(true)
                       .setCommandBus(CommandBus.newBuilder()
@@ -289,8 +342,9 @@ public class BoundedContextShould {
                                            .isMultitenant());
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void match_multi_tenancy_with_Stand() {
+        thrown.expect(IllegalStateException.class);
         BoundedContext.newBuilder()
                       .setMultitenant(true)
                       .setStand(Stand.newBuilder()
@@ -302,8 +356,8 @@ public class BoundedContextShould {
     @Test
     public void set_same_multitenancy_in_Stand() {
         BoundedContext bc = BoundedContext.newBuilder()
-                      .setMultitenant(true)
-                      .build();
+                                          .setMultitenant(true)
+                                          .build();
 
         assertEquals(bc.isMultitenant(), bc.getStand()
                                            .isMultitenant());
@@ -326,17 +380,17 @@ public class BoundedContextShould {
     @Test
     public void obtain_entity_types_by_visibility() {
         assertTrue(boundedContext.getEntityTypes(EntityOption.Visibility.FULL)
-                                  .isEmpty());
+                                 .isEmpty());
 
         registerAll();
 
         assertFalse(boundedContext.getEntityTypes(EntityOption.Visibility.FULL)
-                                 .isEmpty());
+                                  .isEmpty());
     }
 
-
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void throw_ISE_when_no_repository_registered() {
+        thrown.expect(IllegalStateException.class);
         // Attempt to get a repository without registering.
         boundedContext.findRepository(Project.class);
     }
@@ -366,52 +420,27 @@ public class BoundedContextShould {
      * {@code Model} and {@code BoundedContext}. However, previously such an issue was caught.
      * Therefore this test case ensures it's never happening again.
      */
+    @SuppressWarnings("ProhibitedExceptionCaught")
+        // NPE is specifically handled in this case to prevent such cases in the future.
     @Test(expected = NullPointerException.class)
     public void throw_NPE_when_registering_repository_and_default_state_is_null() {
         final ProjectAggregateRepository repository = new ProjectAggregateRepository();
         final Map mockMap = mock(Map.class);
         when(mockMap.get(any())).thenReturn(null);
-        final Object defaultStateRegistry = getObjectFromNestedEnumField(
-                DEFAULT_STATE_REGISTRY_FULL_CLASS_NAME, DEFAULT_STATE_REGISTRY_SINGLETON_FIELD_NAME);
+        final Object defaultStateRegistry =
+                getObjectFromNestedEnumField(
+                        DEFAULT_STATE_REGISTRY_FULL_CLASS_NAME,
+                        DEFAULT_STATE_REGISTRY_SINGLETON_FIELD_NAME
+                );
         injectField(defaultStateRegistry, DEFAULT_STATES_FIELD_NAME, mockMap);
 
         try {
             boundedContext.register(repository);
-        }catch (NullPointerException e) {
+        } catch (NullPointerException e) {
             // reassigning mock map to real map, to prevent failing other tests
             final Map<Class<? extends Entity>, Message> defaultState = newConcurrentMap();
             injectField(defaultStateRegistry, DEFAULT_STATES_FIELD_NAME, defaultState);
             throw e;
-        }
-    }
-
-    private Object getObjectFromNestedEnumField(String fullClassName, String fieldName) {
-        Object result = null;
-        try {
-            final Class<?> aClass = Class.forName(fullClassName);
-            final Object enumConstant = aClass.getEnumConstants()[0];
-            final Field field = aClass.getDeclaredField(fieldName);
-            field.setAccessible(true);
-            result = field.get(enumConstant);
-        } catch (ClassNotFoundException e) {
-            fail("Class " + fullClassName + " not found.");
-        } catch (NoSuchFieldException e) {
-            fail("Field " + fieldName + " should exist.");
-        } catch (IllegalAccessException e) {
-            fail(e.getMessage());
-        }
-        assertNotNull(result);
-        return result;
-    }
-
-    private void injectField(Object target, String fieldName, Object valueToInject) {
-        try {
-            final Field defaultStates = target.getClass()
-                                              .getDeclaredField(fieldName);
-            defaultStates.setAccessible(true);
-            defaultStates.set(target, valueToInject);
-        } catch (NoSuchFieldException | IllegalAccessException ignored) {
-            fail("Field " + fieldName + " should exist.");
         }
     }
 }

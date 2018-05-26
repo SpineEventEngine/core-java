@@ -24,7 +24,9 @@ import com.google.common.testing.NullPointerTester;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithManyGetters;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -46,10 +48,12 @@ public class EntityColumnCacheShould {
     private Class<? extends Entity> entityClass;
     private EntityColumnCache entityColumnCache;
 
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     @Before
     public void setUp() {
-        final Entity entity = new EntityWithManyGetters(STRING_ID);
+        Entity entity = new EntityWithManyGetters(STRING_ID);
         entityClass = entity.getClass();
         entityColumnCache = EntityColumnCache.initializeFor(entityClass);
     }
@@ -65,15 +69,16 @@ public class EntityColumnCacheShould {
         assertTrue(entityColumnCache.isEmpty());
     }
 
+    @SuppressWarnings("CheckReturnValue") 
+        // This test does not use the found columns, but simply checks that they are found.
     @Test
     public void cache_columns_on_first_access() {
-        final EntityColumnCache cacheForGetAll = EntityColumnCache.initializeFor(entityClass);
+        EntityColumnCache cacheForGetAll = EntityColumnCache.initializeFor(entityClass);
         cacheForGetAll.getColumns();
         assertFalse(cacheForGetAll.isEmpty());
 
-        final EntityColumnCache cacheForFind = EntityColumnCache.initializeFor(entityClass);
-        final String floatNullKey = "floatNull";
-        cacheForFind.findColumn(floatNullKey);
+        EntityColumnCache cacheForFind = EntityColumnCache.initializeFor(entityClass);
+        cacheForFind.findColumn("floatNull");
         assertFalse(cacheForFind.isEmpty());
     }
 
@@ -85,31 +90,32 @@ public class EntityColumnCacheShould {
 
     @Test
     public void retrieve_column_metadata_from_given_class() {
-        final String existingColumnName = "floatNull";
-        final EntityColumn retrievedColumn = entityColumnCache.findColumn(existingColumnName);
+        String existingColumnName = "floatNull";
+        EntityColumn retrievedColumn = entityColumnCache.findColumn(existingColumnName);
         assertNotNull(retrievedColumn);
         assertEquals(existingColumnName, retrievedColumn.getName());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void fail_to_retrieve_non_existing_column() {
-        final String nonExistingColumnName = "foo";
+        String nonExistingColumnName = "foo";
+        thrown.expect(IllegalArgumentException.class);
         entityColumnCache.findColumn(nonExistingColumnName);
     }
 
     @Test
     public void retain_stored_columns_order() {
-        final Collection<EntityColumn> columnsFromCache = entityColumnCache.getColumns();
+        Collection<EntityColumn> columnsFromCache = entityColumnCache.getColumns();
         assertNotNull(columnsFromCache);
 
-        final Collection<EntityColumn> columnsViaUtil = getAllColumns(entityClass);
+        Collection<EntityColumn> columnsViaUtil = getAllColumns(entityClass);
 
-        final int columnsFromCacheSize = columnsFromCache.size();
-        final int columnsViaUtilSize = columnsViaUtil.size();
+        int columnsFromCacheSize = columnsFromCache.size();
+        int columnsViaUtilSize = columnsViaUtil.size();
         assertEquals(columnsViaUtilSize, columnsFromCacheSize);
 
-        final List<EntityColumn> columnsFromCacheList = new ArrayList<EntityColumn>(columnsFromCache);
-        final List<EntityColumn> columnsViaUtilList = new ArrayList<EntityColumn>(columnsViaUtil);
+        List<EntityColumn> columnsFromCacheList = new ArrayList<>(columnsFromCache);
+        List<EntityColumn> columnsViaUtilList = new ArrayList<>(columnsViaUtil);
 
         assertEquals(columnsViaUtilList.get(0), columnsFromCacheList.get(0));
         assertEquals(columnsViaUtilList.get(1), columnsFromCacheList.get(1));

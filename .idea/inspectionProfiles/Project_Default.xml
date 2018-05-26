@@ -190,9 +190,6 @@
     </inspection_tool>
     <inspection_tool class="DoubleLiteralMayBeFloatLiteral" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="DuplicateBooleanBranch" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="DuplicateCondition" enabled="true" level="WARNING" enabled_by_default="true">
-      <option name="ignoreSideEffectConditions" value="true" />
-    </inspection_tool>
     <inspection_tool class="DuplicatePropertyInspection" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="CURRENT_FILE" value="true" />
       <option name="MODULE_WITH_DEPENDENCIES" value="false" />
@@ -762,6 +759,9 @@
       <option name="ignoreReferencesToLocalInnerClasses" value="true" />
     </inspection_tool>
     <inspection_tool class="UnsecureRandomNumberGeneration" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="UnstableApiUsage" enabled="true" level="WARNING" enabled_by_default="true">
+      <scope name="Tests" level="WEAK WARNING" enabled="true" />
+    </inspection_tool>
     <inspection_tool class="UnusedCatchParameter" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="m_ignoreCatchBlocksWithComments" value="true" />
       <option name="m_ignoreTestCases" value="true" />

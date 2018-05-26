@@ -36,6 +36,8 @@ public final class SwitchmanBureau extends AggregateRepository<String, Switchman
     /** The ID of the aggregate for which a {@link SetSwitch command} would be rejected. */
     public static final String MISSING_SWITCHMAN_NAME = "Petrovich";
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+        // can ignore the value since we're calling own builder-like method
     public SwitchmanBureau() {
         super();
         getCommandRouting().route(SetSwitch.class, new CommandRoute<String, SetSwitch>() {

@@ -34,10 +34,13 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.server.entity.Entity;
+import io.spine.server.storage.LifecycleFlagField;
 import io.spine.server.storage.RecordStorage;
 import io.spine.test.storage.ProjectId;
 import io.spine.testdata.Sample;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -46,6 +49,7 @@ import java.util.List;
 import static com.google.common.collect.Iterators.size;
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.EITHER;
+import static io.spine.server.entity.storage.EntityQueries.from;
 import static io.spine.server.storage.EntityField.version;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
@@ -61,110 +65,136 @@ import static org.junit.Assert.assertTrue;
  */
 public class EntityQueriesShould {
 
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
+
+    private static EntityQuery<?> createEntityQuery(EntityFilters filters,
+                                                    Class<? extends Entity> entityClass) {
+        Collection<EntityColumn> entityColumns = Columns.getAllColumns(entityClass);
+        return from(filters, entityColumns);
+    }
+
     @Test
     public void have_private_utility_ctor() {
         assertHasPrivateParameterlessCtor(EntityQueries.class);
     }
 
-    @SuppressWarnings("ConstantConditions") // The purpose of the check is passing null for @NotNull field.
-    @Test(expected = NullPointerException.class)
+    @SuppressWarnings("ConstantConditions")
+    // The purpose of the check is passing null for @NotNull field.
+    @Test
     public void not_accept_null_filters() {
-        EntityQueries.from(null, Collections.<EntityColumn>emptyList());
+        thrown.expect(NullPointerException.class);
+        from(null, Collections.emptyList());
     }
 
-    @SuppressWarnings("ConstantConditions") // The purpose of the check is passing null for @NotNull field.
-    @Test(expected = NullPointerException.class)
+    @SuppressWarnings("ConstantConditions")
+    // The purpose of the check is passing null for @NotNull field.
+    @Test
     public void not_accept_null_storage() {
-        final RecordStorage<?> storage = null;
-        EntityQueries.from(EntityFilters.getDefaultInstance(), storage);
+        RecordStorage<?> storage = null;
+        thrown.expect(NullPointerException.class);
+        from(EntityFilters.getDefaultInstance(), storage);
     }
 
-    @SuppressWarnings("ConstantConditions") // The purpose of the check is passing null for @NotNull field.
-    @Test(expected = NullPointerException.class)
+    @SuppressWarnings("ConstantConditions")
+    // The purpose of the check is passing null for @NotNull field.
+    @Test
     public void not_accept_null_entity_class() {
-        final Collection<EntityColumn> entityColumns = null;
-        EntityQueries.from(EntityFilters.getDefaultInstance(), entityColumns);
+        Collection<EntityColumn> entityColumns = null;
+        thrown.expect(NullPointerException.class);
+        from(EntityFilters.getDefaultInstance(), entityColumns);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void check_filter_type() {
         // Boolean EntityColumn queried for for an Integer value
-        final ColumnFilter filter = ColumnFilters.gt(archived.name(), 42);
-        final CompositeColumnFilter compositeFilter = ColumnFilters.all(filter);
-        final EntityFilters filters = EntityFilters.newBuilder()
-                                                   .addFilter(compositeFilter)
-                                                   .build();
+        ColumnFilter filter = ColumnFilters.gt(archived.name(), 42);
+        CompositeColumnFilter compositeFilter = ColumnFilters.all(filter);
+        EntityFilters filters =
+                EntityFilters.newBuilder()
+                             .addFilter(compositeFilter)
+                             .build();
+
+        thrown.expect(IllegalArgumentException.class);
         createEntityQuery(filters, AbstractVersionableEntity.class);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void not_create_query_for_non_existing_column() {
-        final ColumnFilter filter = ColumnFilters.eq("nonExistingColumn", 42);
-        final CompositeColumnFilter compositeFilter = ColumnFilters.all(filter);
-        final EntityFilters filters = EntityFilters.newBuilder()
-                .addFilter(compositeFilter)
-                .build();
+        ColumnFilter filter = ColumnFilters.eq("nonExistingColumn", 42);
+        CompositeColumnFilter compositeFilter = ColumnFilters.all(filter);
+        EntityFilters filters =
+                EntityFilters.newBuilder()
+                             .addFilter(compositeFilter)
+                             .build();
+
+        thrown.expect(IllegalArgumentException.class);
         createEntityQuery(filters, AbstractVersionableEntity.class);
     }
 
     @Test
     public void construct_empty_queries() {
-        final EntityFilters filters = EntityFilters.getDefaultInstance();
-        final EntityQuery<?> query = createEntityQuery(filters, AbstractEntity.class);
+        EntityFilters filters = EntityFilters.getDefaultInstance();
+        EntityQuery<?> query = createEntityQuery(filters, AbstractEntity.class);
         assertNotNull(query);
-        assertEquals(0, size(query.getParameters().iterator()));
-        assertTrue(query.getIds().isEmpty());
+        assertEquals(0, size(query.getParameters()
+                                  .iterator()));
+        assertTrue(query.getIds()
+                        .isEmpty());
     }
 
     @Test
     public void construct_non_empty_queries() {
-        final Message someGenericId = Sample.messageOfType(ProjectId.class);
-        final Any someId = AnyPacker.pack(someGenericId);
-        final EntityId entityId = EntityId.newBuilder()
-                                          .setId(someId)
-                                          .build();
-        final EntityIdFilter idFilter = EntityIdFilter.newBuilder()
-                                                      .addIds(entityId)
-                                                      .build();
-        final Version versionValue = Version.newBuilder()
-                                             .setNumber(1)
-                                             .build();
-        final BoolValue archivedValue = BoolValue.newBuilder()
-                                                 .setValue(true)
-                                                 .build();
-        final ColumnFilter versionFilter = ColumnFilters.eq(version.name(), versionValue);
-        final ColumnFilter archivedFilter = ColumnFilters.eq(archived.name(), archivedValue);
-        final CompositeColumnFilter aggregatingFilter =
-                CompositeColumnFilter.newBuilder()
-                                       .addFilter(versionFilter)
-                                       .addFilter(archivedFilter)
-                                       .setOperator(EITHER)
-                                       .build();
-        final EntityFilters filters = EntityFilters.newBuilder()
-                                                   .setIdFilter(idFilter)
-                                                   .addFilter(aggregatingFilter)
-                                                   .build();
-        final EntityQuery<?> query = createEntityQuery(filters, AbstractVersionableEntity.class);
+        Message someGenericId = Sample.messageOfType(ProjectId.class);
+        Any someId = AnyPacker.pack(someGenericId);
+        EntityId entityId = EntityId
+                .newBuilder()
+                .setId(someId)
+                .build();
+        EntityIdFilter idFilter = EntityIdFilter
+                .newBuilder()
+                .addIds(entityId)
+                .build();
+        Version v1 = Version
+                .newBuilder()
+                .setNumber(1)
+                .build();
+        BoolValue archived = BoolValue
+                .newBuilder()
+                .setValue(true)
+                .build();
+        ColumnFilter versionFilter = ColumnFilters
+                .eq(version.name(), v1);
+        ColumnFilter archivedFilter = ColumnFilters
+                .eq(LifecycleFlagField.archived.name(), archived);
+        CompositeColumnFilter aggregatingFilter = CompositeColumnFilter
+                .newBuilder()
+                .addFilter(versionFilter)
+                .addFilter(archivedFilter)
+                .setOperator(EITHER)
+                .build();
+        EntityFilters filters = EntityFilters
+                .newBuilder()
+                .setIdFilter(idFilter)
+                .addFilter(aggregatingFilter)
+                .build();
+        EntityQuery<?> query = createEntityQuery(filters, AbstractVersionableEntity.class);
         assertNotNull(query);
 
-        final Collection<?> ids = query.getIds();
+        Collection<?> ids = query.getIds();
         assertFalse(ids.isEmpty());
         assertSize(1, ids);
-        final Object singleId = ids.iterator().next();
+        Object singleId = ids.iterator()
+                             .next();
         assertEquals(someGenericId, singleId);
 
-        final List<CompositeQueryParameter> values = newArrayList(query.getParameters());
+        List<CompositeQueryParameter> values = newArrayList(query.getParameters());
         assertSize(1, values);
-        final CompositeQueryParameter singleParam = values.get(0);
-        final Collection<ColumnFilter> columnFilters = singleParam.getFilters()
-                                                                  .values();
+        CompositeQueryParameter singleParam = values.get(0);
+        Collection<ColumnFilter> columnFilters = singleParam.getFilters()
+                                                            .values();
         assertEquals(EITHER, singleParam.getOperator());
         assertContains(versionFilter, columnFilters);
         assertContains(archivedFilter, columnFilters);
-    }
-
-    private static EntityQuery<?> createEntityQuery(EntityFilters filters, Class<? extends Entity> entityClass) {
-        final Collection<EntityColumn> entityColumns = Columns.getAllColumns(entityClass);
-        return EntityQueries.from(filters, entityColumns);
     }
 }

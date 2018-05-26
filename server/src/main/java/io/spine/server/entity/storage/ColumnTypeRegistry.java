@@ -23,6 +23,7 @@ package io.spine.server.entity.storage;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.primitives.Primitives;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -133,6 +134,7 @@ public final class ColumnTypeRegistry<C extends ColumnType> {
 
         private final Map<Class, C> columnTypeMap = new HashMap<>();
 
+        /** Prevents instantiation from outside. */
         private Builder() {
         }
 
@@ -146,13 +148,14 @@ public final class ColumnTypeRegistry<C extends ColumnType> {
          * @param <J>        the Java type
          * @return self for call chaining
          */
+        @CanIgnoreReturnValue
         public <J> Builder<C> put(Class<J> javaType, ColumnType<J, ?, ?, ?> columnType) {
             checkNotNull(javaType);
             checkNotNull(columnType);
 
             @SuppressWarnings("unchecked")
-            final C columnTypeResolved = (C) columnType;
-            final Class<J> wrapped = Primitives.wrap(javaType);
+            C columnTypeResolved = (C) columnType;
+            Class<J> wrapped = Primitives.wrap(javaType);
             columnTypeMap.put(wrapped, columnTypeResolved);
             return this;
         }

@@ -27,9 +27,8 @@ import org.junit.Test;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.test.Tests.nullRef;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * This test suite tests {@link AbstractVersionableEntity#equals(Object)}.
@@ -53,24 +52,24 @@ public class EntityEqualsShould {
     public void assure_same_entities_are_equal() {
         final TestEntity another = TestEntity.withStateOf(entity);
 
-        assertTrue(entity.equals(another));
+        assertEquals(entity, another);
     }
 
     @SuppressWarnings("EqualsWithItself") // is the purpose of this method.
     @Test
     public void assure_entity_is_equal_to_itself() {
-        assertTrue(entity.equals(entity));
+        assertEquals(entity, entity);
     }
 
     @Test
     public void assure_entity_is_not_equal_to_null() {
-        assertFalse(entity.equals(nullRef()));
+        assertNotEquals(entity, nullRef());
     }
 
     @SuppressWarnings("EqualsBetweenInconvertibleTypes") // is the purpose of this method.
     @Test
     public void assure_entity_is_not_equal_to_object_of_another_class() {
-        assertFalse(entity.equals(newUuid()));
+        assertNotEquals(entity, newUuid());
     }
 
     @Test
@@ -78,7 +77,7 @@ public class EntityEqualsShould {
         final TestEntity another = TestEntity.newInstance(newUuid());
 
         assertNotEquals(entity.getId(), another.getId());
-        assertFalse(entity.equals(another));
+        assertNotEquals(entity, another);
     }
 
     @Test
@@ -87,14 +86,15 @@ public class EntityEqualsShould {
         another.updateState(Sample.messageOfType(Project.class), another.getVersion());
 
         assertNotEquals(entity.getState(), another.getState());
-        assertFalse(entity.equals(another));
+        assertNotEquals(entity, another);
     }
 
+    @SuppressWarnings("CheckReturnValue") // The entity version can be ignored in this test.
     @Test
     public void assure_entities_with_different_versions_are_not_equal() {
         final TestEntity another = TestEntity.withStateOf(entity);
         another.incrementVersion();
 
-        assertFalse(entity.equals(another));
+        assertNotEquals(entity, another);
     }
 }

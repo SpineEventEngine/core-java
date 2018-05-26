@@ -28,7 +28,9 @@ import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
 import io.spine.test.TestValues;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.util.Iterator;
 
@@ -47,6 +49,9 @@ public class EitherOfTwoShould {
 
     private EitherOfTwo<StringValue, Timestamp> eitherWithA;
     private EitherOfTwo<StringValue, Timestamp> eitherWithB;
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     @Before
     public void setUp() {
@@ -91,13 +96,15 @@ public class EitherOfTwoShould {
         assertFalse(iteratorB.hasNext());
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void prohibit_obtaining_the_other_value_B() {
+        thrown.expect(IllegalStateException.class);
         eitherWithA.getB();
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void prohibit_obtaining_the_other_value_A() {
+        thrown.expect(IllegalStateException.class);
         eitherWithB.getA();
     }
 
