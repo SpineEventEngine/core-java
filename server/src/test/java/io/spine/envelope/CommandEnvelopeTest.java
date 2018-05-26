@@ -24,7 +24,7 @@ import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
-import io.spine.core.MessageEnvelopeShould;
+import io.spine.core.MessageEnvelopeTest;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -33,11 +33,11 @@ import static org.junit.Assert.assertSame;
 /**
  * @author Alexander Yevsyukov
  */
-public class CommandEnvelopeShould
-        extends MessageEnvelopeShould<Command, CommandEnvelope, CommandClass> {
+public class CommandEnvelopeTest
+        extends MessageEnvelopeTest<Command, CommandEnvelope, CommandClass> {
 
     private final TestActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(CommandEnvelopeShould.class);
+            TestActorRequestFactory.newInstance(CommandEnvelopeTest.class);
 
     @Test
     public void obtain_command_context() {

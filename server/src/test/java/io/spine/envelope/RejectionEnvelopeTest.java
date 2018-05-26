@@ -24,7 +24,7 @@ import com.google.protobuf.Message;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.ActorContext;
 import io.spine.core.Command;
-import io.spine.core.MessageEnvelopeShould;
+import io.spine.core.MessageEnvelopeTest;
 import io.spine.core.Rejection;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
@@ -43,12 +43,12 @@ import static org.junit.Assert.assertEquals;
  *
  * @author Alex Tymchenko
  */
-public class RejectionEnvelopeShould extends MessageEnvelopeShould<Rejection,
+public class RejectionEnvelopeTest extends MessageEnvelopeTest<Rejection,
         RejectionEnvelope,
         RejectionClass> {
 
     private final TestActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(RejectionEnvelopeShould.class);
+            TestActorRequestFactory.newInstance(RejectionEnvelopeTest.class);
 
     @Override
     protected Rejection outerObject() {
