@@ -26,8 +26,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import static io.spine.core.given.GivenTenantId.newUuid;
-
 /**
  * @author Alexander Yevsyukov
  */
@@ -38,24 +36,12 @@ public class TenantAwareFunction0Should {
 
     @Test
     public void require_current_tenant_set() {
-        final TenantAwareFunction0<Timestamp> whichTime = new TenantAwareFunction0<Timestamp>() {
+        thrown.expect(IllegalStateException.class);
+        new TenantAwareFunction0<Timestamp>() {
             @Override
             public Timestamp apply() {
                 return Time.getCurrentTime();
             }
         };
-
-        // This should pass since we're executing the operation with the current tenant ID set.
-        new TenantAwareOperation(newUuid()) {
-            @SuppressWarnings("CheckReturnValue") // can ignore in this test.
-            @Override
-            public void run() {
-                whichTime.execute();
-            }
-        }.execute();
-
-        thrown.expect(IllegalStateException.class);
-        // This should fail.
-        whichTime.execute();
     }
 }

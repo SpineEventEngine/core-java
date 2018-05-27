@@ -301,15 +301,14 @@ public class BoundedContextShould {
     @SuppressWarnings("unchecked") // OK for the purpose of the created Matcher.
     @Test
     public void propagate_registered_repositories_to_stand() {
-        final BoundedContext boundedContext = BoundedContext.newBuilder()
-                                                            .build();
-        final Stand stand = Spy.ofClass(Stand.class)
-                               .on(boundedContext);
+        BoundedContext boundedContext = BoundedContext.newBuilder()
+                                                      .build();
+        Stand stand = Spy.ofClass(Stand.class)
+                         .on(boundedContext);
 
-        final Repository any = any(Repository.class);
-        verify(stand, never()).registerTypeSupplier(any);
+        verify(stand, never()).registerTypeSupplier(any());
 
-        final ProjectAggregateRepository repository =
+        ProjectAggregateRepository repository =
                 new ProjectAggregateRepository();
         boundedContext.register(repository);
         verify(stand).registerTypeSupplier(eq(repository));
