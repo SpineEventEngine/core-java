@@ -264,7 +264,7 @@ public class ProcessManagerShould {
         processManager.dispatchCommand(envelope);
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void throw_exception_if_dispatch_unknown_event() {
         StringValue unknownEvent = StringValue.getDefaultInstance();
         EventEnvelope envelope = EventEnvelope.of(eventFactory.createEvent(unknownEvent));

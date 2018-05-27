@@ -54,8 +54,8 @@ public class ColumnValueExtractorShould {
 
     @Test
     public void extract_column_values_from_entity() {
-        final EntityWithManyGetters entity = new EntityWithManyGetters(TEST_ENTITY_ID);
-        final Map<String, EntityColumn.MemoizedValue> columnValues = extractColumnValues(entity);
+        EntityWithManyGetters entity = new EntityWithManyGetters(TEST_ENTITY_ID);
+        Map<String, EntityColumn.MemoizedValue> columnValues = extractColumnValues(entity);
 
         assertSize(3, columnValues);
         assertEquals(entity.getSomeMessage(),
@@ -65,18 +65,18 @@ public class ColumnValueExtractorShould {
 
     @Test
     public void handle_null_column_values() {
-        final EntityWithManyGetters entity = new EntityWithManyGetters(TEST_ENTITY_ID);
-        final Map<String, EntityColumn.MemoizedValue> columnValues = extractColumnValues(entity);
+        EntityWithManyGetters entity = new EntityWithManyGetters(TEST_ENTITY_ID);
+        Map<String, EntityColumn.MemoizedValue> columnValues = extractColumnValues(entity);
 
-        final EntityColumn.MemoizedValue memoizedFloatNull = columnValues.get("floatNull");
+        EntityColumn.MemoizedValue memoizedFloatNull = columnValues.get("floatNull");
         assertNotNull(memoizedFloatNull);
         assertNull(memoizedFloatNull.getValue());
     }
 
     @Test
     public void allow_to_access_values_by_custom_column_name() {
-        final EntityWithManyGetters entity = new EntityWithManyGetters(TEST_ENTITY_ID);
-        final Map<String, EntityColumn.MemoizedValue> columnValues = extractColumnValues(entity);
+        EntityWithManyGetters entity = new EntityWithManyGetters(TEST_ENTITY_ID);
+        Map<String, EntityColumn.MemoizedValue> columnValues = extractColumnValues(entity);
 
         assertEquals(entity.getIntegerFieldValue(),
                 columnValues.get(CUSTOM_COLUMN_NAME)
@@ -85,8 +85,8 @@ public class ColumnValueExtractorShould {
 
     @Test
     public void extract_no_fields_if_none_defined() {
-        final Entity entity = new EntityWithNoStorageFields(TEST_ENTITY_ID);
-        final Map<String, EntityColumn.MemoizedValue> columnValues = extractColumnValues(entity);
+        Entity entity = new EntityWithNoStorageFields(TEST_ENTITY_ID);
+        Map<String, EntityColumn.MemoizedValue> columnValues = extractColumnValues(entity);
 
         assertNotNull(columnValues);
         assertEmpty(columnValues);
@@ -94,17 +94,18 @@ public class ColumnValueExtractorShould {
 
     @Test
     public void handle_non_public_entity_class() {
-        final Entity entity = new PrivateEntity(TEST_ENTITY_ID);
-        final Map<String, EntityColumn.MemoizedValue> columnValues = extractColumnValues(entity);
+        Entity entity = new PrivateEntity(TEST_ENTITY_ID);
+        Map<String, EntityColumn.MemoizedValue> columnValues = extractColumnValues(entity);
 
         assertNotNull(columnValues);
         assertEmpty(columnValues);
     }
 
 
-    private static <E extends Entity<?, ?>> Map<String, EntityColumn.MemoizedValue> extractColumnValues(E entity) {
-        final Collection<EntityColumn> entityColumns = getAllColumns(entity.getClass());
-        final ColumnValueExtractor columnValueExtractor = ColumnValueExtractor.create(entity, entityColumns);
+    private static <E extends Entity<?, ?>>
+    Map<String, EntityColumn.MemoizedValue> extractColumnValues(E entity) {
+        Collection<EntityColumn> entityColumns = getAllColumns(entity.getClass());
+        ColumnValueExtractor columnValueExtractor = ColumnValueExtractor.create(entity, entityColumns);
         return columnValueExtractor.extractColumnValues();
     }
 
