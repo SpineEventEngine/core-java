@@ -32,7 +32,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  *
  * @author Alexander Yevsyukov
  */
-class StringToZoneOffset implements Function<String, ZoneOffset> {
+public class StringToZoneOffset implements Function<String, ZoneOffset> {
     @Override
     public @Nullable ZoneOffset apply(@Nullable String input) {
         return input == null

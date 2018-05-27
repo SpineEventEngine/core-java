@@ -362,9 +362,8 @@ public abstract class Transaction<I,
         entity.updateStateChanged();
     }
 
-    @SuppressWarnings("CheckReturnValue") // calling builder method
     void initAll(S state, Version version) {
-        final B builder = getBuilder();
+        B builder = getBuilder();
         builder.clear();
         builder.mergeFrom(state);
         initVersion(version);

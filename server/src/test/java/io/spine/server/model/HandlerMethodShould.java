@@ -28,14 +28,14 @@ import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.test.Tests;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -47,9 +47,11 @@ public class HandlerMethodShould {
 
     private final HandlerMethod.Factory<OneParamMethod> factory = OneParamMethod.factory();
 
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
+
     private HandlerMethod<EventClass, EventContext> twoParamMethod;
     private HandlerMethod<EventClass, Empty> oneParamMethod;
-
     private Object target;
 
     @Before
@@ -59,10 +61,10 @@ public class HandlerMethodShould {
         oneParamMethod = new OneParamMethod(StubHandler.getOneParameterMethod());
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void do_not_accept_null_method() {
-        //noinspection ResultOfObjectAllocationIgnored
-        new TwoParamMethod(Tests.<Method>nullRef());
+        thrown.expect(NullPointerException.class);
+        new TwoParamMethod(Tests.nullRef());
     }
 
     @Test
@@ -85,8 +87,9 @@ public class HandlerMethodShould {
         assertEquals(BoolValue.class, HandlerMethod.getFirstParamType(oneParamMethod.getMethod()));
     }
 
+    @SuppressWarnings("CheckReturnValue") // can ignore the result in this test
     @Test
-    public void invoke_the_method_with_two_parameters() throws InvocationTargetException {
+    public void invoke_the_method_with_two_parameters() {
         twoParamMethod.invoke(target,
                               StringValue.getDefaultInstance(),
                               EventContext.getDefaultInstance());
@@ -94,8 +97,9 @@ public class HandlerMethodShould {
         assertTrue(((StubHandler) target).wasOnInvoked());
     }
 
+    @SuppressWarnings("CheckReturnValue") // can ignore the result in this test
     @Test
-    public void invoke_the_method_with_one_parameter() throws InvocationTargetException {
+    public void invoke_the_method_with_one_parameter() {
         oneParamMethod.invoke(target, BoolValue.getDefaultInstance(), Empty.getDefaultInstance());
 
         assertTrue(((StubHandler) target).wasHandleInvoked());
@@ -108,28 +112,25 @@ public class HandlerMethodShould {
 
     @Test
     public void be_equal_to_itself() {
-        //noinspection EqualsWithItself
-        assertTrue(twoParamMethod.equals(twoParamMethod));
+        assertEquals(twoParamMethod, twoParamMethod);
     }
 
     @Test
     public void be_not_equal_to_null() {
-        //noinspection ObjectEqualsNull
-        assertFalse(oneParamMethod.equals(null));
+        assertNotEquals(null, oneParamMethod);
     }
 
     @Test
     public void be_not_equal_to_another_class_instance() {
-        //noinspection EqualsBetweenInconvertibleTypes
-        assertFalse(twoParamMethod.equals(oneParamMethod));
+        assertNotEquals(twoParamMethod, oneParamMethod);
     }
 
     @Test
     public void compare_fields_in_equals() {
-        final HandlerMethod<EventClass, EventContext> anotherMethod =
+        HandlerMethod<EventClass, EventContext> anotherMethod =
                 new TwoParamMethod(StubHandler.getTwoParameterMethod());
 
-        assertTrue(twoParamMethod.equals(anotherMethod));
+        assertEquals(twoParamMethod, anotherMethod);
     }
 
     @Test
@@ -137,15 +138,15 @@ public class HandlerMethodShould {
         assertNotEquals(System.identityHashCode(twoParamMethod), twoParamMethod.hashCode());
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored") // Method is called only to throw exception.
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void do_not_be_created_from_method_with_checked_exception() {
+        thrown.expect(IllegalStateException.class);
         factory.create(StubHandler.getMethodWithCheckedException());
     }
 
     @Test
     public void be_normally_created_from_method_with_runtime_exception() {
-        final OneParamMethod method = factory.create(StubHandler.getMethodWithRuntimeException());
+        OneParamMethod method = factory.create(StubHandler.getMethodWithRuntimeException());
         assertEquals(StubHandler.getMethodWithRuntimeException(), method.getMethod());
     }
 
@@ -159,15 +160,6 @@ public class HandlerMethodShould {
         private boolean onInvoked;
         private boolean handleInvoked;
 
-        public void on(StringValue message, EventContext context) {
-            onInvoked = true;
-        }
-
-        @SuppressWarnings("unused") // The method is used via reflection.
-        private void handle(BoolValue message) {
-            handleInvoked = true;
-        }
-
         private static void throwCheckedException(BoolValue message) throws Exception {
             throw new IOException("Throw new checked exception");
         }
@@ -177,8 +169,8 @@ public class HandlerMethodShould {
         }
 
         private static Method getTwoParameterMethod() {
-            final Method method;
-            final Class<?> clazz = StubHandler.class;
+            Method method;
+            Class<?> clazz = StubHandler.class;
             try {
                 method = clazz.getMethod("on", StringValue.class, EventContext.class);
             } catch (NoSuchMethodException e) {
@@ -188,8 +180,8 @@ public class HandlerMethodShould {
         }
 
         private static Method getOneParameterMethod() {
-            final Method method;
-            final Class<?> clazz = StubHandler.class;
+            Method method;
+            Class<?> clazz = StubHandler.class;
             try {
                 method = clazz.getDeclaredMethod("handle", BoolValue.class);
             } catch (NoSuchMethodException e) {
@@ -199,8 +191,8 @@ public class HandlerMethodShould {
         }
 
         private static Method getMethodWithCheckedException() {
-            final Method method;
-            final Class<?> clazz = StubHandler.class;
+            Method method;
+            Class<?> clazz = StubHandler.class;
             try {
                 method = clazz.getDeclaredMethod("throwCheckedException", BoolValue.class);
             } catch (NoSuchMethodException e) {
@@ -210,14 +202,23 @@ public class HandlerMethodShould {
         }
 
         private static Method getMethodWithRuntimeException() {
-            final Method method;
-            final Class<?> clazz = StubHandler.class;
+            Method method;
+            Class<?> clazz = StubHandler.class;
             try {
                 method = clazz.getDeclaredMethod("throwRuntimeException", BoolValue.class);
             } catch (NoSuchMethodException e) {
                 throw new IllegalStateException(e);
             }
             return method;
+        }
+
+        public void on(StringValue message, EventContext context) {
+            onInvoked = true;
+        }
+
+        @SuppressWarnings("unused") // The method is used via reflection.
+        private void handle(BoolValue message) {
+            handleInvoked = true;
         }
 
         private boolean wasOnInvoked() {
@@ -252,18 +253,11 @@ public class HandlerMethodShould {
             super(method);
         }
 
-        @Override
-        public EventClass getMessageClass() {
-            return EventClass.of(rawMessageClass());
-        }
-
-        @Override
-        public HandlerKey key() {
-            throw new IllegalStateException("The method is not a target of the test.");
-        }
-
         public static Factory factory() {
             return Factory.getInstance();
+        }        @Override
+        public EventClass getMessageClass() {
+            return EventClass.of(rawMessageClass());
         }
 
         private static class Factory extends HandlerMethod.Factory<OneParamMethod> {
@@ -293,6 +287,9 @@ public class HandlerMethodShould {
             protected OneParamMethod createFromMethod(Method method) {
                 return new OneParamMethod(method);
             }
+        }        @Override
+        public HandlerKey key() {
+            throw new IllegalStateException("The method is not a target of the test.");
         }
     }
 }

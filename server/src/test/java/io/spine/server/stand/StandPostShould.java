@@ -63,44 +63,133 @@ public class StandPostShould {
 
     // **** Positive scenarios (unit) ****
 
-    @SuppressWarnings({"OverlyComplexAnonymousInnerClass", "ConstantConditions"})
+    private static BoundedContextAction[] getSeveralRepositoryDispatchCalls() {
+        BoundedContextAction[] result = new BoundedContextAction[Given.SEVERAL];
+
+        for (int i = 0; i < result.length; i++) {
+            result[i] = (i % 2 == 0)
+                        ? aggregateRepositoryDispatch()
+                        : projectionRepositoryDispatch();
+        }
+
+        return result;
+    }
+
+    // **** Integration scenarios (<source> -> StandFunnel -> Mock Stand) ****
+
+    private static void checkUpdatesDelivery(boolean isConcurrent,
+                                             BoundedContextAction... dispatchActions) {
+        checkNotNull(dispatchActions);
+
+        Executor executor = isConcurrent
+                            ? Executors.newFixedThreadPool(
+                Given.THREADS_COUNT_IN_POOL_EXECUTOR)
+                            : MoreExecutors.directExecutor();
+
+        BoundedContext boundedContext =
+                BoundedContext.newBuilder()
+                              .setStand(Stand.newBuilder())
+                              .build();
+
+        Stand stand = boundedContext.getStand();
+
+        for (BoundedContextAction dispatchAction : dispatchActions) {
+            dispatchAction.perform(boundedContext);
+        }
+
+        if (isConcurrent) {
+            try {
+                ((ExecutorService) executor).awaitTermination(Given.SEVERAL, TimeUnit.SECONDS);
+            } catch (InterruptedException ignored) {
+            }
+        }
+
+        verify(stand, times(dispatchActions.length)).update(any(EntityStateEnvelope.class));
+    }
+
+    @SuppressWarnings("CheckReturnValue") // can ignore the dispatch() result
+    private static BoundedContextAction aggregateRepositoryDispatch() {
+        return context -> {
+            // Init repository
+            final AggregateRepository<?, ?> repository = Given.aggregateRepo();
+
+            repository.initStorage(storageFactory(context.isMultitenant()));
+
+            try {
+                // Mock aggregate and mock stand are not able to handle events
+                // returned after command handling.
+                // This causes IllegalStateException to be thrown.
+                // Note that this is not the end of a test case,
+                // so we can't just "expect=IllegalStateException".
+                CommandEnvelope cmd = CommandEnvelope.of(Given.validCommand());
+                repository.dispatch(cmd);
+            } catch (IllegalStateException e) {
+                // Handle null event dispatching after the command is handled.
+
+                // Check if this error is caused by returning null or empty list after
+                // command processing.
+                // Proceed crash if it's not.
+                if (!e.getMessage()
+                      .contains("No record found for command ID: EMPTY")) {
+                    throw e;
+                }
+            }
+        };
+    }
+
+    @SuppressWarnings("CheckReturnValue") // can ignore the dispatch() result
+    private static BoundedContextAction projectionRepositoryDispatch() {
+        return context -> {
+            // Init repository
+            ProjectionRepository repository = Given.projectionRepo();
+            repository.initStorage(storageFactory(context.isMultitenant()));
+
+            // Dispatch an update from projection repo
+            repository.dispatch(EventEnvelope.of(Given.validEvent()));
+        };
+    }
+
+    private static StorageFactory storageFactory(boolean multitenant) {
+        BoundedContext bc = BoundedContext.newBuilder()
+                                          .setMultitenant(multitenant)
+                                          .build();
+        return bc.getStorageFactory();
+    }
+
     @Test
     public void deliver_updates() {
-        final AggregateRepository<ProjectId, Given.StandTestAggregate> repository =
+        AggregateRepository<ProjectId, Given.StandTestAggregate> repository =
                 Given.aggregateRepo();
-        final ProjectId entityId = ProjectId.newBuilder()
-                                            .setId("PRJ-001")
-                                            .build();
-        final Given.StandTestAggregate entity = repository.create(entityId);
-        final StringValue state = entity.getState();
-        final Version version = entity.getVersion();
+        ProjectId entityId = ProjectId
+                .newBuilder()
+                .setId("PRJ-001")
+                .build();
+        Given.StandTestAggregate entity = repository.create(entityId);
+        StringValue state = entity.getState();
+        Version version = entity.getVersion();
 
-        final Stand innerStand = Stand.newBuilder().build();
-        final Stand stand = spy(innerStand);
+        Stand innerStand = Stand.newBuilder()
+                                .build();
+        Stand stand = spy(innerStand);
 
         stand.post(requestFactory.createCommandContext()
                                  .getActorContext()
                                  .getTenantId(), entity);
 
-        final ArgumentMatcher<EntityStateEnvelope<?, ?>> argumentMatcher =
-                new ArgumentMatcher<EntityStateEnvelope<?, ?>>() {
-                    @Override
-                    public boolean matches(EntityStateEnvelope<?, ?> argument) {
-                        final boolean entityIdMatches = argument.getEntityId()
-                                                                .equals(entityId);
-                        final boolean versionMatches = version.equals(argument.getEntityVersion()
-                                                                              .orNull());
-                        final boolean stateMatches = argument.getMessage()
-                                                             .equals(state);
-                        return entityIdMatches &&
-                                versionMatches &&
-                                stateMatches;
-                    }
+        ArgumentMatcher<EntityStateEnvelope<?, ?>> argumentMatcher =
+                argument -> {
+                    boolean entityIdMatches = argument.getEntityId()
+                                                      .equals(entityId);
+                    boolean versionMatches = version.equals(argument.getEntityVersion()
+                                                                    .orNull());
+                    boolean stateMatches = argument.getMessage()
+                                                   .equals(state);
+                    return entityIdMatches &&
+                            versionMatches &&
+                            stateMatches;
                 };
         verify(stand).update(ArgumentMatchers.argThat(argumentMatcher));
     }
-
-    // **** Integration scenarios (<source> -> StandFunnel -> Mock Stand) ****
 
     @Test
     public void deliver_updates_from_projection_repository() {
@@ -122,144 +211,45 @@ public class StandPostShould {
         checkUpdatesDelivery(true, getSeveralRepositoryDispatchCalls());
     }
 
-    private static BoundedContextAction[] getSeveralRepositoryDispatchCalls() {
-        final BoundedContextAction[] result = new BoundedContextAction[Given.SEVERAL];
-
-        for (int i = 0; i < result.length; i++) {
-            result[i] = (i % 2 == 0)
-                    ? aggregateRepositoryDispatch()
-                    : projectionRepositoryDispatch();
-        }
-
-        return result;
-    }
-
-    private static void checkUpdatesDelivery(boolean isConcurrent,
-                                             BoundedContextAction... dispatchActions) {
-        checkNotNull(dispatchActions);
-
-        final Executor executor = isConcurrent
-                ? Executors.newFixedThreadPool(Given.THREADS_COUNT_IN_POOL_EXECUTOR)
-                : MoreExecutors.directExecutor();
-
-        final BoundedContext boundedContext =
-                BoundedContext.newBuilder()
-                              .setStand(Stand.newBuilder())
-                              .build();
-
-        final Stand stand = boundedContext.getStand();
-
-        for (BoundedContextAction dispatchAction : dispatchActions) {
-            dispatchAction.perform(boundedContext);
-        }
-
-        if (isConcurrent) {
-            try {
-                ((ExecutorService) executor).awaitTermination(Given.SEVERAL, TimeUnit.SECONDS);
-            } catch (InterruptedException ignored) {
-            }
-        }
-
-        verify(stand, times(dispatchActions.length)).update(any(EntityStateEnvelope.class));
-    }
-
-    private static BoundedContextAction aggregateRepositoryDispatch() {
-        return new BoundedContextAction() {
-            @Override
-            public void perform(BoundedContext context) {
-                // Init repository
-                final AggregateRepository<?, ?> repository = Given.aggregateRepo();
-
-                repository.initStorage(storageFactory(context.isMultitenant()));
-
-                try {
-                    // Mock aggregate and mock stand are not able to handle events
-                    // returned after command handling.
-                    // This causes IllegalStateException to be thrown.
-                    // Note that this is not the end of a test case,
-                    // so we can't just "expect=IllegalStateException".
-                    final CommandEnvelope cmd = CommandEnvelope.of(Given.validCommand());
-                    repository.dispatch(cmd);
-                } catch (IllegalStateException e) {
-                    // Handle null event dispatching after the command is handled.
-
-                    // Check if this error is caused by returning nuu or empty list after
-                    // command processing.
-                    // Proceed crash if it's not.
-                    if (!e.getMessage()
-                          .contains("No record found for command ID: EMPTY")) {
-                        throw e;
-                    }
-                }
-            }
-        };
-    }
-
-    private static BoundedContextAction projectionRepositoryDispatch() {
-        return new BoundedContextAction() {
-            @Override
-            public void perform(BoundedContext context) {
-                // Init repository
-                final ProjectionRepository repository = Given.projectionRepo();
-                repository.initStorage(storageFactory(context.isMultitenant()));
-
-                // Dispatch an update from projection repo
-                repository.dispatch(EventEnvelope.of(Given.validEvent()));
-            }
-        };
-    }
-
-    private static StorageFactory storageFactory(boolean multitenant) {
-        final BoundedContext bc = BoundedContext.newBuilder()
-                                                .setMultitenant(multitenant)
-                                                .build();
-        return bc.getStorageFactory();
-    }
-
-    @SuppressWarnings("MethodWithMultipleLoops")
     @Test
     public void deliver_updates_through_several_threads() throws InterruptedException {
-        final int threadsCount = Given.THREADS_COUNT_IN_POOL_EXECUTOR;
-        @SuppressWarnings("LocalVariableNamingConvention") // Too long variable name
-        final int threadExecutionMaxAwaitSeconds = Given.AWAIT_SECONDS;
+        int threadsCount = Given.THREADS_COUNT_IN_POOL_EXECUTOR;
 
-        final Set<String> threadInvocationRegistry = new ConcurrentSet<>();
+        Set<String> threadInvocationRegistry = new ConcurrentSet<>();
 
-        final Stand stand = Stand.newBuilder()
-                                 .build();
+        Stand stand = Stand.newBuilder()
+                           .build();
 
-        final ExecutorService executor = Executors.newFixedThreadPool(threadsCount);
+        ExecutorService executor = Executors.newFixedThreadPool(threadsCount);
 
-        final Runnable task = new Runnable() {
-            @Override
-            public void run() {
-                final String threadName = Thread.currentThread()
-                                                .getName();
-                Assert.assertFalse(threadInvocationRegistry.contains(threadName));
-                final ProjectId enitityId = ProjectId.newBuilder()
-                                                     .setId(Identifier.newUuid())
-                                                     .build();
-                final Given.StandTestAggregate entity = Given.aggregateRepo()
-                                                             .create(enitityId);
-                stand.post(requestFactory.createCommandContext()
-                                         .getActorContext()
-                                         .getTenantId(), entity);
+        Runnable task = () -> {
+            String threadName = Thread.currentThread()
+                                      .getName();
+            Assert.assertFalse(threadInvocationRegistry.contains(threadName));
+            ProjectId entityId = ProjectId
+                    .newBuilder()
+                    .setId(Identifier.newUuid())
+                    .build();
+            Given.StandTestAggregate entity = Given.aggregateRepo()
+                                                   .create(entityId);
+            stand.post(requestFactory.createCommandContext()
+                                     .getActorContext()
+                                     .getTenantId(), entity);
 
-                threadInvocationRegistry.add(threadName);
-            }
+            threadInvocationRegistry.add(threadName);
         };
 
         for (int i = 0; i < threadsCount; i++) {
             executor.execute(task);
         }
 
-        executor.awaitTermination(threadExecutionMaxAwaitSeconds, TimeUnit.SECONDS);
+        executor.awaitTermination(Given.AWAIT_SECONDS, TimeUnit.SECONDS);
 
         Assert.assertEquals(threadInvocationRegistry.size(), threadsCount);
-
     }
 
     private interface BoundedContextAction {
+
         void perform(BoundedContext context);
     }
 }

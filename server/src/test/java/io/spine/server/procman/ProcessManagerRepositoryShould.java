@@ -63,12 +63,13 @@ import io.spine.test.procman.command.PmThrowEntityAlreadyArchived;
 import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.event.PmTaskAdded;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Set;
 
@@ -107,6 +108,8 @@ public class ProcessManagerRepositoryShould
                                                 TenantId.newBuilder()
                                                         .setValue(newUuid())
                                                         .build());
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
     private BoundedContext boundedContext;
 
     @Override
@@ -172,26 +175,35 @@ public class ProcessManagerRepositoryShould
         return (ProcessManagerRepository<ProjectId, TestProcessManager, Project>) repository;
     }
 
-    private void testDispatchCommand(Message cmdMsg) throws InvocationTargetException {
-        final Command cmd = requestFactory.command()
-                                          .create(cmdMsg);
-        repository().dispatchCommand(CommandEnvelope.of(cmd));
+    @SuppressWarnings("CheckReturnValue")
+        // We can ignore the ID of the PM handling the command in the calling tests.
+    private void dispatchCommand(Command command) {
+        repository().dispatchCommand(CommandEnvelope.of(command));
+    }
+
+    private void testDispatchCommand(Message cmdMsg) {
+        Command cmd = requestFactory.command()
+                                    .create(cmdMsg);
+        dispatchCommand(cmd);
         assertTrue(TestProcessManager.processed(cmdMsg));
     }
 
+    @SuppressWarnings("CheckReturnValue") // can ignore IDs of target PMs in this test.
     private void testDispatchEvent(Message eventMessage) {
-        final CommandContext commandContext = requestFactory.createCommandContext();
+        CommandContext commandContext = requestFactory.createCommandContext();
 
         // EventContext should have CommandContext with appropriate TenantId to avoid usage
         // of different storages during command and event dispatching.
-        final EventContext eventContextWithTenantId = GivenEvent.context()
-                                                                .toBuilder()
-                                                                .setCommandContext(commandContext)
-                                                                .build();
-        final Event event = GivenEvent.withMessage(eventMessage)
-                                      .toBuilder()
-                                      .setContext(eventContextWithTenantId)
-                                      .build();
+        EventContext eventContextWithTenantId =
+                GivenEvent.context()
+                          .toBuilder()
+                          .setCommandContext(commandContext)
+                          .build();
+        Event event =
+                GivenEvent.withMessage(eventMessage)
+                          .toBuilder()
+                          .setContext(eventContextWithTenantId)
+                          .build();
         repository().dispatch(EventEnvelope.of(event));
         assertTrue(TestProcessManager.processed(eventMessage));
     }
@@ -209,18 +221,18 @@ public class ProcessManagerRepositoryShould
     }
 
     @Test
-    public void dispatch_event_to_archived_process_manager() throws InvocationTargetException {
-        final PmArchiveProcess archiveProcess = archiveProcess();
+    public void dispatch_event_to_archived_process_manager() {
+        PmArchiveProcess archiveProcess = archiveProcess();
         testDispatchCommand(archiveProcess);
-        final ProjectId projectId = archiveProcess.getProjectId();
+        ProjectId projectId = archiveProcess.getProjectId();
         TestProcessManager processManager = repository().findOrCreate(projectId);
         assertTrue(processManager.isArchived());
 
         // Dispatch an event to the archived process manager.
         testDispatchEvent(taskAdded());
         processManager = repository().findOrCreate(projectId);
-        final List<Task> addedTasks = processManager.getState()
-                                                    .getTaskList();
+        List<Task> addedTasks = processManager.getState()
+                                              .getTaskList();
         assertFalse(addedTasks.isEmpty());
 
         // Check that the process manager was not re-created before dispatching.
@@ -228,18 +240,18 @@ public class ProcessManagerRepositoryShould
     }
 
     @Test
-    public void dispatch_event_to_deleted_process_manager() throws InvocationTargetException {
-        final PmDeleteProcess deleteProcess = deleteProcess();
+    public void dispatch_event_to_deleted_process_manager() {
+        PmDeleteProcess deleteProcess = deleteProcess();
         testDispatchCommand(deleteProcess);
-        final ProjectId projectId = deleteProcess.getProjectId();
+        ProjectId projectId = deleteProcess.getProjectId();
         TestProcessManager processManager = repository().findOrCreate(projectId);
         assertTrue(processManager.isDeleted());
 
         // Dispatch an event to the deleted process manager.
         testDispatchEvent(taskAdded());
         processManager = repository().findOrCreate(projectId);
-        final List<Task> addedTasks = processManager.getState()
-                                                    .getTaskList();
+        List<Task> addedTasks = processManager.getState()
+                                              .getTaskList();
         assertFalse(addedTasks.isEmpty());
 
         // Check that the process manager was not re-created before dispatching.
@@ -247,30 +259,30 @@ public class ProcessManagerRepositoryShould
     }
 
     @Test
-    public void dispatch_command() throws InvocationTargetException {
+    public void dispatch_command() {
         testDispatchCommand(addTask());
     }
 
     @Test
-    public void dispatch_several_commands() throws InvocationTargetException {
+    public void dispatch_several_commands() {
         testDispatchCommand(createProject());
         testDispatchCommand(addTask());
         testDispatchCommand(startProject());
     }
 
     @Test
-    public void dispatch_command_to_archived_process_manager() throws InvocationTargetException {
-        final PmDeleteProcess deleteProcess = deleteProcess();
+    public void dispatch_command_to_archived_process_manager() {
+        PmDeleteProcess deleteProcess = deleteProcess();
         testDispatchCommand(deleteProcess);
-        final ProjectId projectId = deleteProcess.getProjectId();
+        ProjectId projectId = deleteProcess.getProjectId();
         TestProcessManager processManager = repository().findOrCreate(projectId);
         assertTrue(processManager.isDeleted());
 
         // Dispatch a command to the deleted process manager.
         testDispatchCommand(addTask());
         processManager = repository().findOrCreate(projectId);
-        final List<Task> addedTasks = processManager.getState()
-                                                    .getTaskList();
+        List<Task> addedTasks = processManager.getState()
+                                              .getTaskList();
         assertFalse(addedTasks.isEmpty());
 
         // Check that the process manager was not re-created before dispatching.
@@ -278,18 +290,18 @@ public class ProcessManagerRepositoryShould
     }
 
     @Test
-    public void dispatch_command_to_deleted_process_manager() throws InvocationTargetException {
-        final PmArchiveProcess archiveProcess = archiveProcess();
+    public void dispatch_command_to_deleted_process_manager() {
+        PmArchiveProcess archiveProcess = archiveProcess();
         testDispatchCommand(archiveProcess);
-        final ProjectId projectId = archiveProcess.getProjectId();
+        ProjectId projectId = archiveProcess.getProjectId();
         TestProcessManager processManager = repository().findOrCreate(projectId);
         assertTrue(processManager.isArchived());
 
         // Dispatch a command to the archived process manager.
         testDispatchCommand(addTask());
         processManager = repository().findOrCreate(projectId);
-        final List<Task> addedTasks = processManager.getState()
-                                                    .getTaskList();
+        List<Task> addedTasks = processManager.getState()
+                                              .getTaskList();
         assertFalse(addedTasks.isEmpty());
 
         // Check that the process manager was not re-created before dispatching.
@@ -297,35 +309,35 @@ public class ProcessManagerRepositoryShould
     }
 
     @Test
-    public void allow_ProcMan_have_unmodified_state_after_command_handling()
-            throws InvocationTargetException {
+    public void allow_ProcMan_have_unmodified_state_after_command_handling() {
         testDispatchCommand(doNothing());
     }
 
     @Test
-    public void dispatch_command_and_post_events() throws InvocationTargetException {
-        final RememberingSubscriber subscriber = new RememberingSubscriber();
+    public void dispatch_command_and_post_events() {
+        RememberingSubscriber subscriber = new RememberingSubscriber();
         boundedContext.getEventBus()
                       .register(subscriber);
 
         testDispatchCommand(addTask());
 
-        final PmTaskAdded message = subscriber.remembered;
+        PmTaskAdded message = subscriber.remembered;
         assertNotNull(message);
         assertEquals(ID, message.getProjectId());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void throw_exception_if_dispatch_unknown_command() {
-        final Command unknownCommand =
+        Command unknownCommand =
                 requestFactory.createCommand(Int32Value.getDefaultInstance());
-        final CommandEnvelope request = CommandEnvelope.of(unknownCommand);
+        CommandEnvelope request = CommandEnvelope.of(unknownCommand);
+        thrown.expect(IllegalArgumentException.class);
         repository().dispatchCommand(request);
     }
 
     @Test
     public void return_command_classes() {
-        final Set<CommandClass> commandClasses = repository().getCommandClasses();
+        Set<CommandClass> commandClasses = repository().getCommandClasses();
 
         assertContains(commandClasses,
                        PmCreateProject.class, PmCreateProject.class, PmStartProject.class);
@@ -333,7 +345,7 @@ public class ProcessManagerRepositoryShould
 
     @Test
     public void return_event_classes() {
-        final Set<EventClass> eventClasses = repository().getMessageClasses();
+        Set<EventClass> eventClasses = repository().getMessageClasses();
 
         assertContains(eventClasses,
                        PmProjectCreated.class, PmTaskAdded.class, PmProjectStarted.class);
@@ -341,7 +353,7 @@ public class ProcessManagerRepositoryShould
 
     @Test
     public void return_rejection_classes() {
-        final Set<RejectionClass> rejectionClasses = repository().getRejectionClasses();
+        Set<RejectionClass> rejectionClasses = repository().getRejectionClasses();
 
         assertContains(rejectionClasses,
                        EntityAlreadyArchived.class, EntityAlreadyDeleted.class);
@@ -349,16 +361,16 @@ public class ProcessManagerRepositoryShould
 
     @Test
     public void post_command_rejections() {
-        final ProjectId id = ProjectId.newBuilder()
-                                      .setId(newUuid())
-                                      .build();
-        final PmThrowEntityAlreadyArchived commandMsg =
+        ProjectId id = ProjectId.newBuilder()
+                                .setId(newUuid())
+                                .build();
+        PmThrowEntityAlreadyArchived commandMsg =
                 PmThrowEntityAlreadyArchived.newBuilder()
                                             .setProjectId(id)
                                             .build();
-        final Command command = requestFactory.createCommand(commandMsg);
-        repository().dispatchCommand(CommandEnvelope.of(command));
-        final StandardRejections.EntityAlreadyArchived expected =
+        Command command = requestFactory.createCommand(commandMsg);
+        dispatchCommand(command);
+        StandardRejections.EntityAlreadyArchived expected =
                 StandardRejections.EntityAlreadyArchived.newBuilder()
                                                         .setEntityId(AnyPacker.pack(id))
                                                         .build();
@@ -367,35 +379,36 @@ public class ProcessManagerRepositoryShould
 
     @Test
     public void dispatch_rejection() {
-        final CommandEnvelope ce = requestFactory.generateEnvelope();
-        final EntityAlreadyArchived rejectionMessage =
+        CommandEnvelope ce = requestFactory.generateEnvelope();
+        EntityAlreadyArchived rejectionMessage =
                 EntityAlreadyArchived.newBuilder()
                                      .setEntityId(Identifier.pack(newUuid()))
                                      .build();
-        final Rejection rejection = createRejection(rejectionMessage,
-                                                    ce.getCommand());
-        final ProjectId id = ProcessManagerRepositoryTestEnv.GivenCommandMessage.ID;
-        final Rejection.Builder builder =
+        Rejection rejection = createRejection(rejectionMessage,
+                                              ce.getCommand());
+        ProjectId id = ProcessManagerRepositoryTestEnv.GivenCommandMessage.ID;
+        Rejection.Builder builder =
                 rejection.toBuilder()
                          .setContext(rejection.getContext()
                                               .toBuilder()
                                               .setProducerId(Identifier.pack(id)));
-        final RejectionEnvelope re = RejectionEnvelope.of(builder.build());
+        RejectionEnvelope re = RejectionEnvelope.of(builder.build());
 
-        final Set<?> delivered = repository().dispatchRejection(re);
+        Set<?> delivered = repository().dispatchRejection(re);
 
         assertTrue(delivered.contains(id));
 
         assertTrue(TestProcessManager.processed(rejectionMessage));
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void throw_exception_on_attempt_to_register_in_bc_with_no_messages_handled() {
-        final SensoryDeprivedPmRepository repo = new SensoryDeprivedPmRepository();
-        final BoundedContext boundedContext = BoundedContext.newBuilder()
-                                                            .setMultitenant(false)
-                                                            .build();
+        SensoryDeprivedPmRepository repo = new SensoryDeprivedPmRepository();
+        BoundedContext boundedContext = BoundedContext.newBuilder()
+                                                      .setMultitenant(false)
+                                                      .build();
         repo.setBoundedContext(boundedContext);
+        thrown.expect(IllegalStateException.class);
         repo.onRegistered();
     }
 
@@ -404,8 +417,7 @@ public class ProcessManagerRepositoryShould
      */
     private static class RememberingSubscriber extends EventSubscriber {
 
-        @Nullable
-        private PmTaskAdded remembered;
+        private @Nullable PmTaskAdded remembered;
 
         @Subscribe
         void on(PmTaskAdded msg) {

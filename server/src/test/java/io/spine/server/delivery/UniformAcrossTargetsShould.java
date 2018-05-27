@@ -20,7 +20,9 @@
 package io.spine.server.delivery;
 
 import com.google.common.testing.EqualsTester;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import static io.spine.server.delivery.UniformAcrossTargets.forNumber;
 import static io.spine.server.delivery.UniformAcrossTargets.singleShard;
@@ -30,6 +32,9 @@ import static io.spine.server.delivery.UniformAcrossTargets.singleShard;
  */
 public class UniformAcrossTargetsShould {
 
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
+
     @Test
     public void support_equality() {
         new EqualsTester().addEqualityGroup(singleShard(), singleShard(), forNumber(1))
@@ -38,13 +43,15 @@ public class UniformAcrossTargetsShould {
                           .testEquals();
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void not_allow_negative_number_of_shards() {
+        thrown.expect(IllegalArgumentException.class);
         forNumber(-1);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void not_allow_zero_number_of_shards() {
+        thrown.expect(IllegalArgumentException.class);
         forNumber(0);
     }
 }

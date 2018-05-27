@@ -20,6 +20,7 @@
 package io.spine.server.delivery;
 
 import com.google.common.base.MoreObjects;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
@@ -372,6 +373,7 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
             return boundedContextName;
         }
 
+        @CanIgnoreReturnValue
         public B setBoundedContextName(BoundedContextName boundedContextName) {
             checkNotNull(boundedContextName);
             this.boundedContextName = boundedContextName;
@@ -382,6 +384,7 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
             return key;
         }
 
+        @CanIgnoreReturnValue
         public B setKey(ShardingKey key) {
             checkNotNull(key);
             this.key = key;
@@ -392,12 +395,14 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
             return tag;
         }
 
+        @CanIgnoreReturnValue
         public B setTag(DeliveryTag<E> tag) {
             checkNotNull(tag);
             this.tag = tag;
             return thisAsB();
         }
 
+        @CanIgnoreReturnValue
         public B setTargetIdClass(Class<I> targetIdClass) {
             checkNotNull(targetIdClass);
             this.targetIdClass = targetIdClass;
@@ -408,6 +413,7 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
             return targetIdClass;
         }
 
+        @CanIgnoreReturnValue
         public B setConsumer(ShardedStreamConsumer<I, E> consumer) {
             checkNotNull(consumer);
             this.consumer = consumer;

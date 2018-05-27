@@ -67,13 +67,6 @@ public class Given {
     private Given() {
     }
 
-    static ProjectId newProjectId() {
-        final String uuid = newUuid();
-        return ProjectId.newBuilder()
-                        .setId(uuid)
-                        .build();
-    }
-
     static class EventMessage {
 
         private EventMessage() {
@@ -81,20 +74,20 @@ public class Given {
 
         static AggTaskAdded taskAdded(ProjectId id) {
             return AggTaskAdded.newBuilder()
-                            .setProjectId(id)
-                            .build();
+                               .setProjectId(id)
+                               .build();
         }
 
         static AggProjectCreated projectCreated(ProjectId id) {
             return AggProjectCreated.newBuilder()
-                                 .setProjectId(id)
-                                 .build();
+                                    .setProjectId(id)
+                                    .build();
         }
 
         static AggProjectStarted projectStarted(ProjectId id) {
             return AggProjectStarted.newBuilder()
-                                 .setProjectId(id)
-                                 .build();
+                                    .setProjectId(id)
+                                    .build();
         }
     }
 
@@ -105,8 +98,8 @@ public class Given {
 
         public static AggCreateProject createProject(ProjectId id) {
             return AggCreateProject.newBuilder()
-                                .setProjectId(id)
-                                .build();
+                                   .setProjectId(id)
+                                   .build();
         }
     }
 
@@ -127,12 +120,12 @@ public class Given {
          * timestamp using default {@link ACommand} instance.
          */
         private static Command create(Message command, UserId userId, Timestamp when) {
-            final TenantId generatedTenantId = TenantId.newBuilder()
-                                                       .setValue(newUuid())
-                                                       .build();
-            final TestActorRequestFactory factory =
+            TenantId generatedTenantId = TenantId.newBuilder()
+                                                 .setValue(newUuid())
+                                                 .build();
+            TestActorRequestFactory factory =
                     TestActorRequestFactory.newInstance(userId, generatedTenantId);
-            final Command result = factory.createCommand(command, when);
+            Command result = factory.createCommand(command, when);
             return result;
         }
 
@@ -145,33 +138,44 @@ public class Given {
         }
 
         private static Command createProject(UserId userId, ProjectId projectId, Timestamp when) {
-            final AggCreateProject command = CommandMessage.createProject(projectId);
+            AggCreateProject command = CommandMessage.createProject(projectId);
             return create(command, userId, when);
         }
 
         static Command createCustomer() {
-            final LocalDate localDate = LocalDates.now();
-            final CustomerId customerId = CustomerId.newBuilder()
-                                                    .setRegistrationDate(localDate)
-                                                    .setNumber(customerNumber.get())
-                                                    .build();
+            LocalDate localDate = LocalDates.now();
+            CustomerId customerId = CustomerId
+                    .newBuilder()
+                    .setRegistrationDate(localDate)
+                    .setNumber(customerNumber.get())
+                    .build();
             customerNumber.incrementAndGet();
-            final PersonName personName = PersonName.newBuilder()
-                                                    .setGivenName("Kreat")
-                                                    .setFamilyName("C'Ustomer")
-                                                    .setHonorificSuffix("Cmd")
-                                                    .build();
-            final Customer customer = Customer.newBuilder()
-                                              .setId(customerId)
-                                              .setName(personName)
-                                              .build();
-            final Message msg = CreateCustomer.newBuilder()
-                                              .setCustomerId(customerId)
-                                              .setCustomer(customer)
-                                              .build();
-            final UserId userId = of(Identifier.newUuid());
-            final Command result = create(msg, userId, getCurrentTime());
+            PersonName personName = PersonName
+                    .newBuilder()
+                    .setGivenName("Kreat")
+                    .setFamilyName("C'Ustomer")
+                    .setHonorificSuffix("Cmd")
+                    .build();
+            Customer customer = Customer
+                    .newBuilder()
+                    .setId(customerId)
+                    .setName(personName)
+                    .build();
+            Message msg = CreateCustomer
+                    .newBuilder()
+                    .setCustomerId(customerId)
+                    .setCustomer(customer)
+                    .build();
+            UserId userId = of(Identifier.newUuid());
+            Command result = create(msg, userId, getCurrentTime());
             return result;
+        }
+
+        private static ProjectId newProjectId() {
+            String uuid = newUuid();
+            return ProjectId.newBuilder()
+                            .setId(uuid)
+                            .build();
         }
     }
 
@@ -193,6 +197,7 @@ public class Given {
 
     static class ProjectAggregateRepository
             extends AggregateRepository<ProjectId, ProjectAggregate> {
+
         ProjectAggregateRepository() {
             super();
         }
@@ -200,6 +205,7 @@ public class Given {
 
     private static class ProjectAggregate
             extends Aggregate<ProjectId, Project, ProjectVBuilder> {
+
         // an aggregate constructor must be public because it is used via reflection
         @SuppressWarnings("PublicConstructorInNonPublicClass")
         public ProjectAggregate(ProjectId id) {
@@ -218,7 +224,7 @@ public class Given {
 
         @Assign
         List<AggProjectStarted> handle(AggStartProject cmd, CommandContext ctx) {
-            final AggProjectStarted message = EventMessage.projectStarted(cmd.getProjectId());
+            AggProjectStarted message = EventMessage.projectStarted(cmd.getProjectId());
             return newArrayList(message);
         }
 
@@ -226,8 +232,7 @@ public class Given {
         void event(AggProjectCreated event) {
             getBuilder()
                     .setId(event.getProjectId())
-                    .setStatus(Status.CREATED)
-                    .build();
+                    .setStatus(Status.CREATED);
         }
 
         @Apply
@@ -238,13 +243,13 @@ public class Given {
         void event(AggProjectStarted event) {
             getBuilder()
                     .setId(event.getProjectId())
-                    .setStatus(Status.STARTED)
-                    .build();
+                    .setStatus(Status.STARTED);
         }
     }
 
     public static class CustomerAggregateRepository
             extends AggregateRepository<CustomerId, CustomerAggregate> {
+
         public CustomerAggregateRepository() {
             super();
         }
@@ -261,10 +266,11 @@ public class Given {
 
         @Assign
         CustomerCreated handle(CreateCustomer cmd, CommandContext ctx) {
-            final CustomerCreated event = CustomerCreated.newBuilder()
-                                                         .setCustomerId(cmd.getCustomerId())
-                                                         .setCustomer(cmd.getCustomer())
-                                                         .build();
+            CustomerCreated event = CustomerCreated
+                    .newBuilder()
+                    .setCustomerId(cmd.getCustomerId())
+                    .setCustomer(cmd.getCustomer())
+                    .build();
             return event;
         }
 

@@ -38,10 +38,10 @@ import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.test.command.CmdAddTask;
 import io.spine.test.command.CmdCreateProject;
+import io.spine.test.command.CmdStartProject;
 import io.spine.test.command.Project;
 import io.spine.test.command.ProjectId;
 import io.spine.test.command.ProjectVBuilder;
-import io.spine.test.command.CmdStartProject;
 import io.spine.test.command.Task;
 import io.spine.test.command.event.CmdProjectCreated;
 import io.spine.test.command.event.CmdProjectStarted;
@@ -87,7 +87,6 @@ public class CommandDispatcherRegistryTestEnv {
             handleProjectCreated(event.getProjectId());
         }
 
-        @SuppressWarnings("CheckReturnValue") // calling builder
         private void handleProjectCreated(ProjectId projectId) {
             final Project newState = getState().toBuilder()
                                                .setId(projectId)
@@ -104,7 +103,6 @@ public class CommandDispatcherRegistryTestEnv {
             handleTaskAdded(task);
         }
 
-        @SuppressWarnings("CheckReturnValue") // calling builder
         private void handleTaskAdded(Task task) {
             final Project newState = getState().toBuilder()
                                                .addTask(task)
@@ -119,7 +117,6 @@ public class CommandDispatcherRegistryTestEnv {
             handleProjectStarted();
         }
 
-        @SuppressWarnings("CheckReturnValue") // calling builder
         private void handleProjectStarted() {
             final Project newState = getState().toBuilder()
                                                .setStatus(Project.Status.STARTED)

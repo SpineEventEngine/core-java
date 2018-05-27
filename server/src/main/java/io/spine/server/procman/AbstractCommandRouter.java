@@ -106,6 +106,7 @@ abstract class AbstractCommandRouter<T extends AbstractCommandRouter> {
     /**
      * Adds all command messages from the passed iterable.
      */
+    @CanIgnoreReturnValue
     protected T addAll(Iterable<Message> iterable) {
         for (Message message : iterable) {
             add(message);

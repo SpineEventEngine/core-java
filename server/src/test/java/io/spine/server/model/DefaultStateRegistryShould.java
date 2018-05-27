@@ -54,69 +54,20 @@ public class DefaultStateRegistryShould {
     private DefaultStateRegistry registry;
     private Map<Object, Object> spyMap;
 
-    @Before
-    public void setUp() {
-        spyMap = spy(newConcurrentMap());
-        registry = DefaultStateRegistry.getInstance();
-        injectField(registry, DEFAULT_STATES_FIELD_NAME, spyMap);
-    }
-
-    @Test
-    public void verify_put_invoked_one_time_when_invoke_get_default_state_in_multithreaded_environment() {
-        final int numberOfEntities = 1000;
-        final Collection<Callable<Object>> tasks = newArrayListWithExpectedSize(numberOfEntities);
-        for (int i = 0; i < numberOfEntities; i++) {
-            tasks.add(Executors.callable(new Runnable() {
-                @Override
-                public void run() {
-                    final TestEntity testEntity = Given.entityOfClass(TestEntity.class)
-                                                       .build();
-                    testEntity.getDefaultState();
-                }
-            }));
-        }
-
-        executeInMultithreadedEnvironment(tasks);
-
-        final int expected = 1;
-        verify(spyMap, times(expected)).put(any(), any());
-        assertEquals(expected, spyMap.size());
-    }
-
-    @Test
-    public void verify_put_invoked_one_time_when_invoke_put_or_get_in_multithreaded_environment() {
-        final int numberOfEntities = 1000;
-        final Collection<Callable<Object>> tasks = newArrayListWithExpectedSize(numberOfEntities);
-        for (int i = 0; i < numberOfEntities; i++) {
-            tasks.add(Executors.callable(new Runnable() {
-                @Override
-                public void run() {
-                    registry.putOrGet(TimerSnapshot.class);
-                }
-            }));
-        }
-
-        executeInMultithreadedEnvironment(tasks);
-
-        final int expected = 1;
-        verify(spyMap, times(expected)).put(any(), any());
-        assertEquals(expected, spyMap.size());
-    }
-
-    private void executeInMultithreadedEnvironment(Collection<Callable<Object>> tasks) {
-        final ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime()
-                                                                             .availableProcessors() *
-                                                                              2);
+    private static void runParallel(Collection<Callable<Object>> tasks) {
+        ExecutorService executor =
+                Executors.newFixedThreadPool(Runtime.getRuntime()
+                                                    .availableProcessors() * 2);
         try {
             executor.invokeAll(tasks);
         } catch (InterruptedException ignored) {
         }
     }
 
-    private void injectField(Object target, String fieldName, Object valueToInject) {
+    private static void injectField(Object target, String fieldName, Object valueToInject) {
         try {
-            final Field defaultStates = target.getClass()
-                                                .getDeclaredField(fieldName);
+            Field defaultStates = target.getClass()
+                                        .getDeclaredField(fieldName);
             defaultStates.setAccessible(true);
             defaultStates.set(target, valueToInject);
         } catch (NoSuchFieldException | IllegalAccessException ignored) {
@@ -124,7 +75,57 @@ public class DefaultStateRegistryShould {
         }
     }
 
+    @Before
+    public void setUp() {
+        spyMap = spy(newConcurrentMap());
+        registry = DefaultStateRegistry.getInstance();
+        injectField(registry, DEFAULT_STATES_FIELD_NAME, spyMap);
+    }
+
+    @SuppressWarnings("CheckReturnValue")
+        /* We ignore the result of the getDefaultState() because we check the calls to the registry
+           via spies. */
+    @Test
+    public void invoke_put_once_when_calling_getDefaultState_in_multithreaded_environment() {
+        int numberOfEntities = 1000;
+        Collection<Callable<Object>> tasks = newArrayListWithExpectedSize(numberOfEntities);
+        for (int i = 0; i < numberOfEntities; i++) {
+            tasks.add(Executors.callable(() -> {
+                TestEntity testEntity = Given.entityOfClass(TestEntity.class)
+                                             .build();
+                testEntity.getDefaultState();
+            }));
+        }
+
+        runParallel(tasks);
+
+        int expected = 1;
+        verify(spyMap, times(expected)).put(any(), any());
+        assertEquals(expected, spyMap.size());
+    }
+
+    @SuppressWarnings("CheckReturnValue")
+        /* We ignore the result of the getDefaultState() because we check the calls to the registry
+           via spies. */
+    @Test
+    public void invoke_put_once_when_calling_putOrGet_in_multithreaded_environment() {
+        int numberOfEntities = 1000;
+        Collection<Callable<Object>> tasks = newArrayListWithExpectedSize(numberOfEntities);
+        for (int i = 0; i < numberOfEntities; i++) {
+            tasks.add(Executors.callable(() -> {
+                registry.get(TimerSnapshot.class);
+            }));
+        }
+
+        runParallel(tasks);
+
+        int expected = 1;
+        verify(spyMap, times(expected)).put(any(), any());
+        assertEquals(expected, spyMap.size());
+    }
+
     private static class TimerSnapshot extends AbstractEntity<Long, Timestamp> {
+
         protected TimerSnapshot(Long id) {
             super(id);
         }

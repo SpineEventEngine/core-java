@@ -167,7 +167,6 @@ public class AggregateTransactionShould
             return projectCreated(cmd.getProjectId(), cmd.getName());
         }
 
-        @SuppressWarnings("CheckReturnValue") // calling builder
         @Apply
         void event(AggProjectCreated event) {
             receivedEvents.add(event);
