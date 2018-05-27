@@ -29,10 +29,11 @@ import com.google.protobuf.StringValue;
 import io.spine.core.EventContext;
 import io.spine.server.outbus.enrich.given.EnrichmentFunctionTestEnv.GivenEventMessage;
 import io.spine.test.event.ProjectCreated;
-import org.junit.Before;
-import org.junit.Test;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -44,20 +45,21 @@ public class EnrichmentFunctionShould {
     private Function<ProjectCreated, ProjectCreated.Enrichment> function;
     private FieldEnrichment<ProjectCreated, ProjectCreated.Enrichment, EventContext> fieldEnrichment;
 
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
+
     @Before
     public void setUp() {
-        this.function = new Function<ProjectCreated, ProjectCreated.Enrichment>() {
-            @Nullable
-            @Override
-            public ProjectCreated.Enrichment apply(@Nullable ProjectCreated input) {
-                if (input == null) {
-                    return null;
-                }
-                final ProjectCreated.Enrichment result = ProjectCreated.Enrichment.newBuilder()
-                        .setProjectName(input.getProjectId().getId())
-                        .build();
-                return result;
+        this.function = input -> {
+            if (input == null) {
+                return null;
             }
+            ProjectCreated.Enrichment.Builder result = ProjectCreated.Enrichment
+                    .newBuilder()
+                    .setProjectName(
+                            input.getProjectId()
+                                 .getId());
+            return result.build();
         };
         this.fieldEnrichment = FieldEnrichment.of(ProjectCreated.class,
                                                   ProjectCreated.Enrichment.class,
@@ -73,40 +75,41 @@ public class EnrichmentFunctionShould {
                 .testAllPublicStaticMethods(FieldEnrichment.class);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void do_not_accept_same_source_and_target_class() {
-        final Function<StringValue, StringValue> func = new Function<StringValue, StringValue>() {
-            @Nullable
+        Function<StringValue, StringValue> func = new Function<StringValue, StringValue>() {
             @Override
-            public StringValue apply(@Nullable StringValue input) {
+            public @Nullable StringValue apply(@Nullable StringValue input) {
                 return null;
             }
         };
+
+        thrown.expect(IllegalArgumentException.class);
         FieldEnrichment.of(StringValue.class, StringValue.class, func);
     }
 
     @Test
-    public void return_sourceClass() throws Exception {
+    public void return_sourceClass() {
         assertEquals(ProjectCreated.class, fieldEnrichment.getSourceClass());
     }
 
     @Test
-    public void return_targetClass() throws Exception {
+    public void return_targetClass() {
         assertEquals(ProjectCreated.Enrichment.class, fieldEnrichment.getEnrichmentClass());
     }
 
     @Test
-    public void create_custom_instances() throws Exception {
+    public void create_custom_instances() {
         assertEquals(fieldEnrichment, FieldEnrichment.of(ProjectCreated.class,
                                                          ProjectCreated.Enrichment.class,
                                                          function));
     }
 
     @Test
-    public void apply_enrichment() throws Exception {
-        final ProjectCreated event = GivenEventMessage.projectCreated();
+    public void apply_enrichment() {
+        ProjectCreated event = GivenEventMessage.projectCreated();
 
-        final ProjectCreated.Enrichment enriched =
+        ProjectCreated.Enrichment enriched =
                 fieldEnrichment.apply(event, EventContext.getDefaultInstance());
 
         assertNotNull(enriched);
@@ -115,12 +118,12 @@ public class EnrichmentFunctionShould {
     }
 
     @Test
-    public void have_hashCode() throws Exception {
+    public void have_hashCode() {
         assertNotEquals(System.identityHashCode(fieldEnrichment), fieldEnrichment.hashCode());
     }
 
     @Test
-    public void have_toString() throws Exception {
+    public void have_toString() {
         final String str = fieldEnrichment.toString();
         assertTrue(str.contains(ProjectCreated.class.getName()));
         assertTrue(str.contains(ProjectCreated.Enrichment.class.getName()));
@@ -128,11 +131,10 @@ public class EnrichmentFunctionShould {
 
     @Test
     public void have_smart_equals() {
-        final FieldEnrichment<ProjectCreated, ProjectCreated.Enrichment, EventContext> anotherEnricher =
-                FieldEnrichment.of(
-                    ProjectCreated.class,
-                    ProjectCreated.Enrichment.class,
-                    function);
+        FieldEnrichment<ProjectCreated, ProjectCreated.Enrichment, EventContext> anotherEnricher =
+                FieldEnrichment.of(ProjectCreated.class,
+                                   ProjectCreated.Enrichment.class,
+                                   function);
         new EqualsTester().addEqualityGroup(fieldEnrichment, anotherEnricher)
                           .testEquals();
     }

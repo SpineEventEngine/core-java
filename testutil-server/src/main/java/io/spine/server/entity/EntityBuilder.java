@@ -28,8 +28,8 @@ import io.spine.base.Identifier;
 import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.test.ReflectiveBuilder;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.lang.reflect.Constructor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -123,12 +123,12 @@ public class EntityBuilder<E extends AbstractVersionableEntity<I, S>, I, S exten
 
     @Override
     public E build() {
-        final I id = id();
-        final E result = createEntity(id);
-        final S state = state(result);
-        final Timestamp timestamp = timestamp();
+        I id = id();
+        E result = createEntity(id);
+        S state = state(result);
+        Timestamp timestamp = timestamp();
 
-        final Version version = Versions.newVersion(this.version, timestamp);
+        Version version = Versions.newVersion(this.version, timestamp);
         setState(result, state, version);
         return result;
     }
@@ -166,7 +166,7 @@ public class EntityBuilder<E extends AbstractVersionableEntity<I, S>, I, S exten
 
     @Override
     protected Constructor<E> getConstructor() {
-        final Constructor<E> constructor = entityClass().getConstructor();
+        Constructor<E> constructor = entityClass().getConstructor();
         constructor.setAccessible(true);
         return constructor;
     }
@@ -175,7 +175,7 @@ public class EntityBuilder<E extends AbstractVersionableEntity<I, S>, I, S exten
      * Creates an empty entity instance.
      */
     protected E createEntity(I id) {
-        final E result = entityClass().createEntity(id);
+        E result = entityClass().createEntity(id);
         return result;
     }
 }
