@@ -27,7 +27,9 @@ import io.spine.test.Tests;
 import io.spine.test.command.event.MandatoryFieldEvent;
 import io.spine.validate.ValidationException;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import static io.spine.base.Identifier.pack;
 import static io.spine.test.TestValues.newUuidValue;
@@ -36,6 +38,9 @@ import static io.spine.test.TestValues.newUuidValue;
  * @author Alexander Yevsyukov
  */
 public class EventFactoryShould {
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     private final TestActorRequestFactory requestFactory =
             TestActorRequestFactory.newInstance(getClass());
@@ -49,19 +54,22 @@ public class EventFactoryShould {
         origin = requestFactory.generateEnvelope();
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void require_producer_id() {
-        EventFactory.on(origin, Tests.<Any>nullRef());
+        thrown.expect(NullPointerException.class);
+        EventFactory.on(origin, Tests.nullRef());
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void require_origin() {
+        thrown.expect(NullPointerException.class);
         EventFactory.on(Tests.<CommandEnvelope>nullRef(), producerId);
     }
 
-    @Test(expected = ValidationException.class)
+    @Test
     public void validate_event_messages_before_creation() {
-        final EventFactory factory = EventFactory.on(origin, producerId);
+        EventFactory factory = EventFactory.on(origin, producerId);
+        thrown.expect(ValidationException.class);
         factory.createEvent(MandatoryFieldEvent.getDefaultInstance(), null);
     }
 }

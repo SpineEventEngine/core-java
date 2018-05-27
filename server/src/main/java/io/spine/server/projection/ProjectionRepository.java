@@ -21,7 +21,6 @@
 package io.spine.server.projection;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
@@ -55,6 +54,7 @@ import io.spine.type.TypeName;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Set;
+import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Suppliers.memoize;
@@ -73,14 +73,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         implements Shardable {
 
     private final Supplier<ProjectionEventDelivery<I, P>> eventDeliverySupplier =
-            memoize(new Supplier<ProjectionEventDelivery<I, P>>() {
-                @Override
-                public ProjectionEventDelivery<I, P> get() {
-                    final ProjectionEventDelivery<I, P> result
-                            = new ProjectionEventDelivery<>(ProjectionRepository.this);
-                    return result;
-                }
-            });
+            memoize(() -> new ProjectionEventDelivery<>(this));
 
     /** An underlying entity storage used to store projections. */
     private RecordStorage<I> recordStorage;
@@ -89,7 +82,14 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      * Creates a new {@code ProjectionRepository}.
      */
     protected ProjectionRepository() {
-        super(EventProducers.<I>fromContext());
+        super(EventProducers.fromContext());
+    }
+
+    @VisibleForTesting
+    static Timestamp nullToDefault(@Nullable Timestamp timestamp) {
+        return timestamp == null
+               ? Timestamp.getDefaultInstance()
+               : timestamp;
     }
 
     /** Obtains {@link EventStore} from which to get events during catch-up. */
@@ -99,7 +99,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     }
 
     /** Obtains class information of projection managed by this repository. */
-    @SuppressWarnings("unchecked") // The cast is ensured by generic parameters of the repository.
+    @SuppressWarnings("unchecked")
+    // The cast is ensured by generic parameters of the repository.
     ProjectionClass<P> projectionClass() {
         return (ProjectionClass<P>) entityClass();
     }
@@ -112,8 +113,11 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     }
 
     @Override
-    public ProjectionClass<P> getShardedModelClass() {
-        return projectionClass();
+    public void close() {
+        ServerEnvironment.getInstance()
+                         .getSharding()
+                         .unregister(this);
+        super.close();
     }
 
     /**
@@ -126,10 +130,11 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     public void onRegistered() {
         super.onRegistered();
 
-        final boolean noEventSubscriptions = getMessageClasses().isEmpty();
+        boolean noEventSubscriptions = getMessageClasses().isEmpty();
         if (noEventSubscriptions) {
-            final boolean noExternalSubscriptions = getExternalEventDispatcher().getMessageClasses()
-                                                                                .isEmpty();
+            boolean noExternalSubscriptions =
+                    getExternalEventDispatcher().getMessageClasses()
+                                                .isEmpty();
             if (noExternalSubscriptions) {
                 throw newIllegalStateException(
                         "Projections of the repository %s have neither domestic nor external " +
@@ -142,27 +147,25 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
                          .register(this);
     }
 
+    @Override
+    protected ExternalMessageDispatcher<I> getExternalEventDispatcher() {
+        return new ProjectionExternalEventDispatcher();
+    }
+
     /**
      * Obtains event filters for event classes handled by projections of this repository.
      */
     private Set<EventFilter> createEventFilters() {
-        final ImmutableSet.Builder<EventFilter> builder = ImmutableSet.builder();
-        final Set<EventClass> eventClasses = getMessageClasses();
+        ImmutableSet.Builder<EventFilter> builder = ImmutableSet.builder();
+        Set<EventClass> eventClasses = getMessageClasses();
         for (EventClass eventClass : eventClasses) {
-            final String typeName = TypeName.of(eventClass.value())
-                                            .value();
+            String typeName = TypeName.of(eventClass.value())
+                                      .value();
             builder.add(EventFilter.newBuilder()
                                    .setEventType(typeName)
                                    .build());
         }
         return builder.build();
-    }
-
-    @VisibleForTesting
-    static Timestamp nullToDefault(@Nullable Timestamp timestamp) {
-        return timestamp == null
-               ? Timestamp.getDefaultInstance()
-               : timestamp;
     }
 
     /** Opens access to the {@link BoundedContext} of the repository to the package. */
@@ -182,9 +185,22 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      *
      * <p>Overrides to open the method to the package.
      */
+    @SuppressWarnings("RedundantMethodOverride") // see Javadoc
     @Override
     protected EntityStorageConverter<I, P, S> entityConverter() {
         return super.entityConverter();
+    }
+
+    /**
+     * Ensures that the repository has the storage.
+     *
+     * @return storage instance
+     * @throws IllegalStateException if the storage is null
+     */
+    @Override
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
+    protected RecordStorage<I> recordStorage() {
+        return checkStorage(recordStorage);
     }
 
     @Override
@@ -200,15 +216,13 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     }
 
     /**
-     * Ensures that the repository has the storage.
+     * {@inheritDoc}
      *
-     * @return storage instance
-     * @throws IllegalStateException if the storage is null
+     * <p>Overrides to expose the method to the package.
      */
     @Override
-    @SuppressWarnings("MethodDoesntCallSuperMethod")
-    protected RecordStorage<I> recordStorage() {
-        return checkStorage(recordStorage);
+    protected P findOrCreate(I id) {
+        return super.findOrCreate(id);
     }
 
     /**
@@ -219,7 +233,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      */
     protected ProjectionStorage<I> projectionStorage() {
         @SuppressWarnings("unchecked") // OK as we control the creation in createStorage().
-        final ProjectionStorage<I> storage = (ProjectionStorage<I>) getStorage();
+                ProjectionStorage<I> storage = (ProjectionStorage<I>) getStorage();
         return storage;
     }
 
@@ -227,29 +241,28 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     @Override
     public Set<EventClass> getMessageClasses() {
         return projectionClass().getEventSubscriptions();
-    }
-
-    @Override
+    }    @Override
     public Set<I> dispatch(EventEnvelope envelope) {
         return ProjectionEndpoint.handle(this, envelope);
     }
 
     @Internal
     public void writeLastHandledEventTime(Timestamp timestamp) {
+        checkNotNull(timestamp);
         projectionStorage().writeLastHandledEventTime(timestamp);
     }
 
     @Internal
     public Timestamp readLastHandledEventTime() {
-        return projectionStorage().readLastHandledEventTime();
+        Timestamp timestamp = projectionStorage().readLastHandledEventTime();
+        return nullToDefault(timestamp);
     }
 
     EventStreamQuery createStreamQuery() {
-        final Set<EventFilter> eventFilters = createEventFilters();
+        Set<EventFilter> eventFilters = createEventFilters();
 
         // Get the timestamp of the last event. This also ensures we have the storage.
-        final Timestamp timestamp = nullToDefault(
-                projectionStorage().readLastHandledEventTime());
+        Timestamp timestamp = readLastHandledEventTime();
         return EventStreamQuery.newBuilder()
                                .setAfter(timestamp)
                                .addAllFilter(eventFilters)
@@ -272,24 +285,9 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         return eventDeliverySupplier.get();
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Overrides to expose the method to the package.
-     */
-    @Override
-    protected P findOrCreate(I id) {
-        return super.findOrCreate(id);
-    }
-
     /** Exposes routing to the package. */
     EventRouting<I> eventRouting() {
         return getEventRouting();
-    }
-
-    @Override
-    protected ExternalMessageDispatcher<I> getExternalEventDispatcher() {
-        return new ProjectionExternalEventDispatcher();
     }
 
     @Override
@@ -300,7 +298,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     @Override
     public Iterable<ShardedStreamConsumer<?, ?>> getMessageConsumers() {
         final Iterable<ShardedStreamConsumer<?, ?>> result =
-                ImmutableList.<ShardedStreamConsumer<?, ?>>of(getEndpointDelivery().getConsumer());
+                ImmutableList.of(getEndpointDelivery().getConsumer());
         return result;
     }
 
@@ -311,11 +309,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     }
 
     @Override
-    public void close() {
-        ServerEnvironment.getInstance()
-                         .getSharding()
-                         .unregister(this);
-        super.close();
+    public ProjectionClass<P> getShardedModelClass() {
+        return projectionClass();
     }
 
     /**

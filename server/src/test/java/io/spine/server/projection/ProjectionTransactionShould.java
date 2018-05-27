@@ -34,10 +34,10 @@ import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.event.PrjProjectCreated;
 import io.spine.test.projection.event.PrjTaskAdded;
 import io.spine.validate.ConstraintViolation;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Collections;
 import java.util.List;
 
@@ -52,10 +52,10 @@ import static org.junit.Assert.assertTrue;
  */
 public class ProjectionTransactionShould
         extends TransactionShould<ProjectId,
-                                  Projection<ProjectId, Project,
-                                          ProjectionTransactionShould.PatchedProjectBuilder>,
-                                  Project,
-                                  ProjectionTransactionShould.PatchedProjectBuilder> {
+        Projection<ProjectId, Project,
+                ProjectionTransactionShould.PatchedProjectBuilder>,
+        Project,
+        ProjectionTransactionShould.PatchedProjectBuilder> {
 
     private static final ProjectId ID = ProjectId.newBuilder()
                                                  .setId("projection-transaction-should-project")
@@ -118,8 +118,8 @@ public class ProjectionTransactionShould
             Projection<ProjectId, Project, PatchedProjectBuilder> entity,
             Event event) {
 
-        final TestProjection aggregate = (TestProjection) entity;
-        final Message actualMessage = unpack(event.getMessage());
+        TestProjection aggregate = (TestProjection) entity;
+        Message actualMessage = unpack(event.getMessage());
         assertTrue(aggregate.getReceivedEvents()
                             .contains(actualMessage));
     }
@@ -127,15 +127,15 @@ public class ProjectionTransactionShould
     @Override
     protected Message createEventMessage() {
         return PrjProjectCreated.newBuilder()
-                             .setProjectId(ID)
-                             .build();
+                                .setProjectId(ID)
+                                .build();
     }
 
     @Override
     protected Message createEventMessageThatFailsInHandler() {
         return PrjTaskAdded.newBuilder()
-                        .setProjectId(ID)
-                        .build();
+                           .setProjectId(ID)
+                           .build();
     }
 
     @Override
@@ -156,7 +156,8 @@ public class ProjectionTransactionShould
     @Ignore
     @Test
     @Override
-    public void advance_version_from_event() {}
+    public void advance_version_from_event() {
+    }
 
     /**
      * Tests the version advancement strategy for the {@link Projection}s.
@@ -166,15 +167,18 @@ public class ProjectionTransactionShould
      * case substitutes {@link #advance_version_from_event()}, which tested the behavior of
      * {@link io.spine.server.entity.EntityVersioning#FROM_EVENT FROM_EVENT} strategy.
      */
+    @SuppressWarnings("CheckReturnValue") // can ignore value of play() in this test
     @Test
     public void increment_version_on_event() {
-        final Projection<ProjectId, Project, PatchedProjectBuilder> entity = createEntity();
-        final Version oldVersion = entity.getVersion();
-        final Event event = createEvent(createEventMessage());
+        Projection<ProjectId, Project, PatchedProjectBuilder> entity = createEntity();
+        Version oldVersion = entity.getVersion();
+        Event event = createEvent(createEventMessage());
         Projection.play(entity, Collections.singleton(event));
-        final Version expected = Versions.increment(oldVersion);
-        assertEquals(expected.getNumber(), entity.getVersion().getNumber());
-        assertNotEquals(event.getContext().getVersion(), entity.getVersion());
+        Version expected = Versions.increment(oldVersion);
+        assertEquals(expected.getNumber(), entity.getVersion()
+                                                 .getNumber());
+        assertNotEquals(event.getContext()
+                             .getVersion(), entity.getVersion());
     }
 
     @SuppressWarnings({"MethodMayBeStatic", "unused"})  // Methods accessed via reflection.

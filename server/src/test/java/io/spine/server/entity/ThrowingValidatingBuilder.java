@@ -22,7 +22,6 @@ package io.spine.server.entity;
 import com.google.protobuf.Message;
 import io.spine.validate.AbstractValidatingBuilder;
 import io.spine.validate.ValidationException;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -36,8 +35,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public abstract class ThrowingValidatingBuilder<M extends Message, B extends Message.Builder>
         extends AbstractValidatingBuilder<M, B> {
 
-    @Nullable
-    private RuntimeException shouldThrow;
+    private @Nullable RuntimeException shouldThrow;
 
     @Override
     public M build() throws ValidationException {
