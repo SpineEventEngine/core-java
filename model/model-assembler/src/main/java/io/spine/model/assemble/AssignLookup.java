@@ -23,7 +23,6 @@ package io.spine.model.assemble;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.ProtocolStringList;
 import io.spine.annotation.Internal;
-import io.spine.io.Files2;
 import io.spine.model.CommandHandlers;
 import io.spine.server.command.Assign;
 
@@ -39,7 +38,6 @@ import java.util.Set;
 
 import static com.google.common.collect.Sets.newHashSet;
 import static com.google.common.collect.Sets.newTreeSet;
-import static com.google.common.io.Files.createParentDirs;
 import static io.spine.io.Files2.ensureFile;
 import static io.spine.io.Files2.existsNonEmpty;
 import static io.spine.validate.Validate.isDefault;
