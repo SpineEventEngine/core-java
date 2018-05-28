@@ -322,13 +322,13 @@ public class EntityColumn implements Serializable {
      * @param source the {@link Entity} to get the Columns from
      * @return the value of the column represented by this instance
      */
-    public Serializable getFor(Entity<?, ?> source) {
+    public @Nullable Serializable getFor(Entity<?, ?> source) {
         try {
             final Serializable result = (Serializable) getter.invoke(source);
             if (!nullable) {
                 checkNotNull(result, format("Not null getter %s returned null.", getter.getName()));
             }
-            \Serializable value = toPersistedValue(result);
+            Serializable value = toPersistedValue(result);
             return value;
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new IllegalStateException(

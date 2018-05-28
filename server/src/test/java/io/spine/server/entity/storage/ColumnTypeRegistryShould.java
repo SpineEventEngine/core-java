@@ -44,7 +44,7 @@ import static org.mockito.Mockito.when;
 public class ColumnTypeRegistryShould {
 
     private static <T> EntityColumn mockProperty(Class<T> cls) {
-        final EntityColumn column = mock(EntityColumn.class);
+        EntityColumn column = mock(EntityColumn.class);
         when(column.getType()).thenReturn(cls);
         when(column.getPersistedType()).thenReturn(cls);
         return column;

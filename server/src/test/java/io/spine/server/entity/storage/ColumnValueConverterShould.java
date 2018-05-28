@@ -22,7 +22,9 @@ package io.spine.server.entity.storage;
 
 import com.google.common.testing.NullPointerTester;
 import io.spine.server.entity.storage.given.ColumnTestEnv.TaskStatus;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.io.Serializable;
 
@@ -34,6 +36,9 @@ import static org.junit.Assert.assertEquals;
  */
 public class ColumnValueConverterShould {
 
+    @Rule
+    public ExpectedException thrown = ExpectedException.none(); 
+    
     @Test
     public void not_accept_nulls() {
         ColumnValueConverter converter = new IdentityConverter(TaskStatus.class);
@@ -46,32 +51,33 @@ public class ColumnValueConverterShould {
 
     @Test
     public void perform_identity_conversion() {
-        final String value = "stringValue";
-        final ColumnValueConverter converter = new IdentityConverter(value.getClass());
-        final Serializable convertedObject = converter.convert(value);
+        String value = "stringValue";
+        ColumnValueConverter converter = new IdentityConverter(value.getClass());
+        Serializable convertedObject = converter.convert(value);
         assertEquals(value, convertedObject);
     }
 
     @Test
     public void convert_enum_to_ordinal_value() {
-        final TaskStatus value = SUCCESS;
-        final ColumnValueConverter converter = new OrdinalEnumConverter(value.getClass());
-        final Serializable convertedValue = converter.convert(value);
+        TaskStatus value = SUCCESS;
+        ColumnValueConverter converter = new OrdinalEnumConverter(value.getClass());
+        Serializable convertedValue = converter.convert(value);
         assertEquals(value.ordinal(), convertedValue);
     }
 
     @Test
     public void convert_enum_to_string_value() {
-        final TaskStatus value = SUCCESS;
-        final ColumnValueConverter converter = new StringEnumConverter(value.getClass());
-        final Serializable convertedValue = converter.convert(value);
+        TaskStatus value = SUCCESS;
+        ColumnValueConverter converter = new StringEnumConverter(value.getClass());
+        Serializable convertedValue = converter.convert(value);
         assertEquals(value.name(), convertedValue);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void not_support_wrong_value_type_conversion() {
-        final String value = "unsupportedValue";
-        final ColumnValueConverter converter = new OrdinalEnumConverter(TaskStatus.class);
+        String value = "unsupportedValue";
+        ColumnValueConverter converter = new OrdinalEnumConverter(TaskStatus.class);
+        thrown.expect(IllegalArgumentException.class);
         converter.convert(value);
     }
 }

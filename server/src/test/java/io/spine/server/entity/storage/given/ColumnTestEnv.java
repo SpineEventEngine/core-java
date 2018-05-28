@@ -27,7 +27,6 @@ import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.server.entity.VersionableEntity;
 import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.Enumerated;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static io.spine.server.entity.storage.EnumType.STRING;
