@@ -44,10 +44,12 @@ import static org.mockito.Mockito.when;
 public class ColumnTypeRegistryShould {
 
     private static <T> EntityColumn mockProperty(Class<T> cls) {
-        EntityColumn column = mock(EntityColumn.class);
+        final EntityColumn column = mock(EntityColumn.class);
         when(column.getType()).thenReturn(cls);
+        when(column.getPersistedType()).thenReturn(cls);
         return column;
     }
+
 
     @Test
     public void have_builder() {
@@ -132,7 +134,8 @@ public class ColumnTypeRegistryShould {
         }
 
         @Override
-        public void setColumnValue(StringBuilder storageRecord, String value,
+        public void setColumnValue(StringBuilder storageRecord,
+                                   String value,
                                    String columnIdentifier) {
             storageRecord.append(value);
         }
@@ -152,7 +155,8 @@ public class ColumnTypeRegistryShould {
         }
 
         @Override
-        public void setColumnValue(StringBuilder storageRecord, String value,
+        public void setColumnValue(StringBuilder storageRecord,
+                                   String value,
                                    String columnIdentifier) {
             storageRecord.append(value);
         }

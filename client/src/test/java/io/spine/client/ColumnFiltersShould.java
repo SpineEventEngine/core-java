@@ -50,6 +50,7 @@ import static io.spine.client.CompositeColumnFilter.CompositeOperator;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.EITHER;
 import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.protobuf.TypeConverter.toAny;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Verify.assertContainsAll;
 import static org.junit.Assert.assertEquals;
@@ -62,6 +63,8 @@ public class ColumnFiltersShould {
 
     private static final String COLUMN_NAME = "preciseColumn";
     private static final Timestamp COLUMN_VALUE = getCurrentTime();
+    private static final String ENUM_COLUMN_NAME = "enumColumn";
+    private static final Operator ENUM_COLUMN_VALUE = EQUAL;
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -105,8 +108,16 @@ public class ColumnFiltersShould {
     }
 
     @Test
+    public void create_EQUALS_instances_for_enums() {
+        ColumnFilter filter = eq(ENUM_COLUMN_NAME, ENUM_COLUMN_VALUE);
+        assertEquals(ENUM_COLUMN_NAME, filter.getColumnName());
+        assertEquals(toAny(ENUM_COLUMN_VALUE), filter.getValue());
+        assertEquals(EQUAL, filter.getOperator());
+    }
+
+    @Test
     public void create_ALL_grouping_instances() {
-        final ColumnFilter[] filters = {
+        ColumnFilter[] filters = {
                 le(COLUMN_NAME, COLUMN_VALUE),
                 ge(COLUMN_NAME, COLUMN_VALUE)
         };
@@ -115,7 +126,7 @@ public class ColumnFiltersShould {
 
     @Test
     public void create_EITHER_grouping_instances() {
-        final ColumnFilter[] filters = {
+        ColumnFilter[] filters = {
                 lt(COLUMN_NAME, COLUMN_VALUE),
                 gt(COLUMN_NAME, COLUMN_VALUE)
         };
@@ -124,8 +135,8 @@ public class ColumnFiltersShould {
 
     @Test
     public void create_ordering_filters_for_numbers() {
-        final double number = 3.14;
-        final ColumnFilter filter = le("doubleColumn", number);
+        double number = 3.14;
+        ColumnFilter filter = le("doubleColumn", number);
         assertNotNull(filter);
         assertEquals(LESS_OR_EQUAL, filter.getOperator());
         final DoubleValue value = AnyPacker.unpack(filter.getValue());
@@ -134,8 +145,8 @@ public class ColumnFiltersShould {
 
     @Test
     public void create_ordering_filters_for_strings() {
-        final String str = "abc";
-        final ColumnFilter filter = gt("stringColumn", str);
+        String str = "abc";
+        ColumnFilter filter = gt("stringColumn", str);
         assertNotNull(filter);
         assertEquals(GREATER_THAN, filter.getOperator());
         final StringValue value = AnyPacker.unpack(filter.getValue());
@@ -145,12 +156,12 @@ public class ColumnFiltersShould {
     @Test
     public void fail_to_create_ordering_filters_for_enums() {
         thrown.expect(IllegalArgumentException.class);
-        ge("enumColumn", EQUAL);
+        ge(ENUM_COLUMN_NAME, ENUM_COLUMN_VALUE);
     }
 
     @Test
     public void fail_to_create_ordering_filters_for_non_primitive_numbers() {
-        final AtomicInteger number = new AtomicInteger(42);
+        AtomicInteger number = new AtomicInteger(42);
 
         thrown.expect(IllegalArgumentException.class);
         ge("atomicColumn", number);
@@ -158,7 +169,7 @@ public class ColumnFiltersShould {
 
     @Test
     public void fail_to_create_ordering_filters_for_not_supported_types() {
-        final Comparable<?> value = Calendar.getInstance(); // Comparable but not supported
+        Comparable<?> value = Calendar.getInstance(); // Comparable but not supported
 
         thrown.expect(IllegalArgumentException.class);
         le("invalidColumn", value);

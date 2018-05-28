@@ -40,6 +40,7 @@ import org.junit.rules.ExpectedException;
 import java.lang.reflect.Method;
 
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
+import static io.spine.server.entity.storage.given.ColumnTestEnv.TaskStatus.SUCCESS;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -62,6 +63,20 @@ public class ColumnShould {
     public void be_serializable() {
         EntityColumn column = forMethod("getVersion", VersionableEntity.class);
         reserializeAndAssert(column);
+    }
+
+    @SuppressWarnings("ResultOfMethodCallIgnored") // Just check that operation passes without an exception.
+    @Test
+    public void restore_getter_when_its_not_null_without_errors() {
+        final EntityColumn column = forMethod("getVersion", VersionableEntity.class);
+        column.restoreGetter();
+    }
+
+    @SuppressWarnings("ResultOfMethodCallIgnored") // Just check that operation passes without an exception.
+    @Test
+    public void restore_value_converter_when_its_not_null_without_errors() {
+        final EntityColumn column = forMethod("getVersion", VersionableEntity.class);
+        column.restoreValueConverter();
     }
 
     @Test
@@ -224,6 +239,90 @@ public class ColumnShould {
     public void not_allow_redefine_column_annotation() {
         thrown.expect(IllegalStateException.class);
         forMethod("getVersion", EntityRedefiningColumnAnnotation.class);
+    }
+
+    @Test
+    public void be_constructed_from_enumerated_type_getter() {
+        final EntityColumn column = forMethod("getEnumOrdinal", TestEntity.class);
+        final Class<?> expectedType = Integer.class;
+        final Class actualType = column.getPersistedType();
+        assertEquals(expectedType, actualType);
+    }
+
+    @Test
+    public void return_same_persisted_type_for_non_enum_getter() {
+        final EntityColumn column = forMethod("getLong", TestEntity.class);
+        assertEquals(column.getType(), column.getPersistedType());
+    }
+
+    @Test
+    public void return_persistence_type_for_ordinal_enumerated_value() {
+        final EntityColumn column = forMethod("getEnumOrdinal", TestEntity.class);
+        final Class expectedType = Integer.class;
+        final Class actualType = column.getPersistedType();
+        assertEquals(expectedType, actualType);
+    }
+
+    @Test
+    public void return_persistence_type_for_string_enumerated_value() {
+        final EntityColumn column = forMethod("getEnumString", TestEntity.class);
+        final Class expectedType = String.class;
+        final Class actualType = column.getPersistedType();
+        assertEquals(expectedType, actualType);
+    }
+
+    @Test
+    public void memoize_value_of_enumerated_ordinal_column() {
+        final EntityColumn column = forMethod("getEnumOrdinal", TestEntity.class);
+        final TestEntity entity = new TestEntity("");
+        final MemoizedValue actualValue = column.memoizeFor(entity);
+        final int expectedValue = entity.getEnumOrdinal()
+                                  .ordinal();
+        assertEquals(expectedValue, actualValue.getValue());
+    }
+
+    @Test
+    public void memoize_value_of_enumerated_string_column() {
+        final EntityColumn column = forMethod("getEnumString", TestEntity.class);
+        final TestEntity entity = new TestEntity("");
+        final MemoizedValue actualValue = column.memoizeFor(entity);
+        final String expectedValue = entity.getEnumOrdinal()
+                                           .name();
+        assertEquals(expectedValue, actualValue.getValue());
+    }
+
+    @Test
+    public void convert_enumerated_value_to_persistence_type() {
+        final EntityColumn columnOrdinal = forMethod("getEnumOrdinal", TestEntity.class);
+        final Object ordinalValue = columnOrdinal.toPersistedValue(SUCCESS);
+        assertEquals(SUCCESS.ordinal(), ordinalValue);
+
+        final EntityColumn columnString = forMethod("getEnumString", TestEntity.class);
+        final Object stringValue = columnString.toPersistedValue(SUCCESS);
+        assertEquals(SUCCESS.name(), stringValue);
+    }
+
+    @Test
+    public void do_identity_conversion_for_non_enum_values() {
+        final EntityColumn column = forMethod("getLong", TestEntity.class);
+        final Object value = 15L;
+        final Object converted = column.toPersistedValue(value);
+        assertEquals(value, converted);
+    }
+
+    @Test
+    public void return_null_on_null_conversion() {
+        final EntityColumn column = forMethod("getLong", TestEntity.class);
+        final Object value = null;
+        final Object converted = column.toPersistedValue(value);
+        assertNull(converted);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void allow_conversion_only_for_type_stored_in_column() {
+        final EntityColumn column = forMethod("getEnumOrdinal", TestEntity.class);
+        final String value = "test";
+        column.toPersistedValue(value);
     }
 
     private static EntityColumn forMethod(String name, Class<?> enclosingClass) {

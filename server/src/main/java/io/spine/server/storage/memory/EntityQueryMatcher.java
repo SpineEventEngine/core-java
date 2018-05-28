@@ -141,16 +141,17 @@ final class EntityQueryMatcher<I> implements Predicate<EntityRecordWithColumns> 
         if (actualValue == null) {
             return false;
         }
-        final Object value;
+        final Object filterValue;
         final Any wrappedValue = filter.getValue();
-        final Class<?> sourceClass = actualValue.getSourceColumn()
-                                                .getType();
+        final EntityColumn sourceColumn = actualValue.getSourceColumn();
+        final Class<?> sourceClass = sourceColumn.getType();
         if (sourceClass != Any.class) {
-            value = toObject(wrappedValue, sourceClass);
+            filterValue = toObject(wrappedValue, sourceClass);
         } else {
-            value = wrappedValue;
+            filterValue = wrappedValue;
         }
-        final boolean result = eval(actualValue.getValue(), filter.getOperator(), value);
+        final Object columnValue = sourceColumn.toPersistedValue(filterValue);
+        final boolean result = eval(actualValue.getValue(), filter.getOperator(), columnValue);
         return result;
     }
 

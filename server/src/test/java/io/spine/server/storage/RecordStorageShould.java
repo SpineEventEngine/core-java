@@ -55,11 +55,13 @@ import io.spine.server.entity.storage.EntityColumn.MemoizedValue;
 import io.spine.server.entity.storage.EntityQueries;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
+import io.spine.server.entity.storage.Enumerated;
 import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectVBuilder;
 import io.spine.testdata.Sample;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.Test;
+import org.mockito.ArgumentMatcher;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -80,6 +82,7 @@ import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.TestTransaction.injectState;
 import static io.spine.server.entity.given.GivenLifecycleFlags.archived;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
+import static io.spine.server.entity.storage.EnumType.STRING;
 import static io.spine.server.entity.storage.TestEntityRecordWithColumnsFactory.createRecord;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.test.Tests.assertMatchesMask;
@@ -114,38 +117,6 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
                                           .setVersion(GivenVersion.withNumber(0))
                                           .build();
         return record;
-    }
-
-    protected static EntityRecordWithColumns withLifecycleColumns(EntityRecord record) {
-        LifecycleFlags flags = record.getLifecycleFlags();
-        Map<String, MemoizedValue> columns = ImmutableMap.of(
-                LifecycleColumns.ARCHIVED.columnName(),
-                booleanColumn(LifecycleColumns.ARCHIVED.column(), flags.getArchived()),
-                LifecycleColumns.DELETED.columnName(),
-                booleanColumn(LifecycleColumns.DELETED.column(), flags.getDeleted())
-        );
-        EntityRecordWithColumns result = createRecord(record, columns);
-        return result;
-    }
-
-    private static MemoizedValue booleanColumn(EntityColumn column, boolean value) {
-        MemoizedValue memoizedValue = mock(MemoizedValue.class);
-        when(memoizedValue.getSourceColumn()).thenReturn(column);
-        when(memoizedValue.getValue()).thenReturn(value);
-        return memoizedValue;
-    }
-
-    private static EntityRecordWithColumns withRecordAndNoFields(EntityRecord record) {
-        return argThat(argument -> argument.getRecord()
-                                           .equals(record)
-                && !argument.hasColumns());
-    }
-
-    private static void assertSingleRecord(EntityRecord expected, Iterator<EntityRecord> actual) {
-        assertTrue(actual.hasNext());
-        EntityRecord singleRecord = actual.next();
-        assertFalse(actual.hasNext());
-        assertEquals(expected, singleRecord);
     }
 
     /**
@@ -509,6 +480,18 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     }
 
     @Test
+    public void filter_records_by_ordinal_enum_columns() {
+        final String columnPath = "projectStatusOrdinal";
+        checkEnumColumnFilter(columnPath);
+    }
+
+    @Test
+    public void filter_records_by_string_enum_columns() {
+        final String columnPath = "projectStatusString";
+        checkEnumColumnFilter(columnPath);
+    }
+
+    @Test
     public void update_entity_column_values() {
         Project.Status initialStatus = DONE;
         @SuppressWarnings("UnnecessaryLocalVariable") // is used for documentation purposes.
@@ -720,6 +703,85 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         }
     }
 
+    /**
+     * A complex test case to check the correct {@link TestCounterEntity} filtering by the
+     * enumerated column returning {@link ProjectStatus}.
+     */
+    private void checkEnumColumnFilter(String columnPath) {
+        final Project.Status requiredValue = DONE;
+        final ProjectStatus value = Enum.valueOf(ProjectStatus.class, requiredValue.name());
+        final ColumnFilter status = eq(columnPath, value);
+        final CompositeColumnFilter aggregatingFilter = CompositeColumnFilter.newBuilder()
+                                                                             .setOperator(ALL)
+                                                                             .addFilter(status)
+                                                                             .build();
+        final EntityFilters filters = EntityFilters.newBuilder()
+                                                   .addFilter(aggregatingFilter)
+                                                   .build();
+
+        final RecordStorage<I> storage = getStorage();
+
+        final EntityQuery<I> query = EntityQueries.from(filters, storage);
+        final I idMatching = newId();
+        final I idWrong = newId();
+
+        final TestCounterEntity<I> matchingEntity = new TestCounterEntity<>(idMatching);
+        final TestCounterEntity<I> wrongEntity = new TestCounterEntity<>(idWrong);
+
+        matchingEntity.setStatus(requiredValue);
+        wrongEntity.setStatus(CANCELLED);
+
+        final EntityRecord fineRecord = newStorageRecord(idMatching, newState(idMatching));
+        final EntityRecord notFineRecord = newStorageRecord(idWrong, newState(idWrong));
+
+        final EntityRecordWithColumns recordRight = create(fineRecord, matchingEntity, storage);
+        final EntityRecordWithColumns recordWrong = create(notFineRecord, wrongEntity, storage);
+
+        storage.write(idMatching, recordRight);
+        storage.write(idWrong, recordWrong);
+
+        final Iterator<EntityRecord> readRecords = storage.readAll(query,
+                                                                   FieldMask.getDefaultInstance());
+        assertSingleRecord(fineRecord, readRecords);
+    }
+
+    protected static EntityRecordWithColumns withLifecycleColumns(EntityRecord record) {
+        final LifecycleFlags flags = record.getLifecycleFlags();
+        final Map<String, MemoizedValue> columns = ImmutableMap.of(
+                LifecycleColumns.ARCHIVED.columnName(),
+                booleanColumn(LifecycleColumns.ARCHIVED.column(), flags.getArchived()),
+                LifecycleColumns.DELETED.columnName(),
+                booleanColumn(LifecycleColumns.DELETED.column(), flags.getDeleted())
+        );
+        final EntityRecordWithColumns result = createRecord(record, columns);
+        return result;
+    }
+
+    private static MemoizedValue booleanColumn(EntityColumn column, boolean value) {
+        final MemoizedValue memoizedValue = mock(MemoizedValue.class);
+        when(memoizedValue.getSourceColumn()).thenReturn(column);
+        when(memoizedValue.getValue()).thenReturn(value);
+        return memoizedValue;
+    }
+
+    private static EntityRecordWithColumns withRecordAndNoFields(final EntityRecord record) {
+        return argThat(new ArgumentMatcher<EntityRecordWithColumns>() {
+            @Override
+            public boolean matches(EntityRecordWithColumns argument) {
+                return argument.getRecord()
+                               .equals(record)
+                        && !argument.hasColumns();
+            }
+        });
+    }
+
+    private static void assertSingleRecord(EntityRecord expected, Iterator<EntityRecord> actual) {
+        assertTrue(actual.hasNext());
+        final EntityRecord singleRecord = actual.next();
+        assertFalse(actual.hasNext());
+        assertEquals(expected, singleRecord);
+    }
+
     private EntityId toEntityId(I id) {
         Any packed = Identifier.pack(id);
         EntityId entityId = EntityId.newBuilder()
@@ -732,44 +794,6 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         RecordStorage<I> storage = getStorage();
         EntityRecord record = newStorageRecord(entity.getId(), entity.getState());
         storage.write(entity.getId(), create(record, entity, storage));
-    }
-
-    /**
-     * Entity columns representing lifecycle flags, {@code archived} and {@code deleted}.
-     *
-     * <p>These columns are present in each {@link EntityWithLifecycle} entity. For the purpose of
-     * tests being as close to the real production environment as possible, these columns are stored
-     * with the entity records, even if an actual entity is missing.
-     *
-     * <p>Note that there are cases, when a {@code RecordStorage} stores entity records with no such
-     * columns, e.g. the {@linkplain io.spine.server.event.EEntity event entity}. Thus, do not rely
-     * on these columns being present in all the entities by default when implementing
-     * a {@code RecordStorage}.
-     */
-    enum LifecycleColumns {
-
-        ARCHIVED("isArchived"),
-        DELETED("isDeleted");
-
-        private final EntityColumn column;
-
-        LifecycleColumns(String getterName) {
-            try {
-                this.column = EntityColumn.from(
-                        EntityWithLifecycle.class.getDeclaredMethod(getterName)
-                );
-            } catch (NoSuchMethodException e) {
-                throw illegalStateWithCauseOf(e);
-            }
-        }
-
-        EntityColumn column() {
-            return column;
-        }
-
-        String columnName() {
-            return column.getStoredName();
-        }
     }
 
     @SuppressWarnings("unused") // Reflective access
@@ -827,6 +851,17 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
             return getState().getStatusValue();
         }
 
+        @Column
+        public ProjectStatus getProjectStatusOrdinal() {
+            return Enum.valueOf(ProjectStatus.class, getState().getStatus().name());
+        }
+
+        @Column
+        @Enumerated(STRING)
+        public ProjectStatus getProjectStatusString() {
+            return Enum.valueOf(ProjectStatus.class, getState().getStatus().name());
+        }
+
         private void setStatus(Project.Status status) {
             final Project newState = Project.newBuilder(getState())
                                             .setStatus(status)
@@ -840,6 +875,61 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
 
         private void delete() {
             TestTransaction.delete(this);
+        }
+    }
+
+
+    /**
+     * The {@link TestCounterEntity} {@linkplain Project.Status project status} represented by the
+     * {@linkplain Enum Java Enum}.
+     *
+     * <p>Needed to check filtering by the {@link Enumerated} entity columns.
+     */
+    enum ProjectStatus {
+        UNDEFINED ,
+        CREATED,
+        STARTED,
+        DONE,
+        CANCELLED,
+        UNRECOGNIZED
+    }
+
+
+    /**
+     * Entity columns representing lifecycle flags, {@code archived} and {@code deleted}.
+     *
+     * <p>These columns are present in each {@link EntityWithLifecycle} entity. For the purpose of
+     * tests being as close to the real production environment as possible, these columns are stored
+     * with the entity records, even if an actual entity is missing.
+     *
+     * <p>Note that there are cases, when a {@code RecordStorage} stores entity records with no such
+     * columns, e.g. the {@linkplain io.spine.server.event.EEntity event entity}. Thus, do not rely
+     * on these columns being present in all the entities by default when implementing
+     * a {@code RecordStorage}.
+     */
+    enum LifecycleColumns {
+
+        ARCHIVED("isArchived"),
+        DELETED("isDeleted");
+
+        private final EntityColumn column;
+
+        LifecycleColumns(String getterName) {
+            try {
+                this.column = EntityColumn.from(
+                        EntityWithLifecycle.class.getDeclaredMethod(getterName)
+                );
+            } catch (NoSuchMethodException e) {
+                throw illegalStateWithCauseOf(e);
+            }
+        }
+
+        EntityColumn column() {
+            return column;
+        }
+
+        String columnName() {
+            return column.getStoredName();
         }
     }
 }

@@ -26,9 +26,12 @@ import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.server.entity.VersionableEntity;
 import io.spine.server.entity.storage.Column;
+import io.spine.server.entity.storage.Enumerated;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import static io.spine.server.entity.storage.EnumType.STRING;
+import static io.spine.server.entity.storage.given.ColumnTestEnv.TaskStatus.SUCCESS;
 import static io.spine.test.Tests.nullRef;
 import static org.junit.Assert.fail;
 
@@ -73,6 +76,23 @@ public class ColumnTestEnv {
         @Column
         public long getLong() {
             return 0;
+        }
+
+        @Column
+        public TaskStatus getEnumNotAnnotated() {
+            return SUCCESS;
+        }
+
+        @Column
+        @Enumerated
+        public TaskStatus getEnumOrdinal() {
+            return SUCCESS;
+        }
+
+        @Column
+        @Enumerated(STRING)
+        public TaskStatus getEnumString() {
+            return SUCCESS;
         }
 
         @Column
@@ -127,5 +147,12 @@ public class ColumnTestEnv {
         public int getValue() {
             return 0;
         }
+    }
+
+    public enum TaskStatus {
+        QUEUED,
+        EXECUTING,
+        FAILED,
+        SUCCESS
     }
 }
