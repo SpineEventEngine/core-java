@@ -215,9 +215,11 @@ public class EntityColumn implements Serializable {
      */
     public static EntityColumn from(Method getter) {
         checkGetter(getter);
-        final String nameForQuery = nameFromGetter(getter);
-        final String nameForStore = nameFromAnnotation(getter).or(nameForQuery);
-        final boolean nullable = getter.isAnnotationPresent(Nullable.class);
+        String nameForQuery = nameFromGetter(getter);
+        String nameForStore = nameFromAnnotation(getter).or(nameForQuery);
+
+        boolean nullable = getter.getAnnotatedReturnType()
+                                 .isAnnotationPresent(Nullable.class);
         return new EntityColumn(getter, nameForQuery, nameForStore, nullable);
     }
 

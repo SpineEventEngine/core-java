@@ -110,6 +110,8 @@ public class Columns {
 
     static IllegalArgumentException couldNotFindColumn(Class<? extends Entity> entityClass,
                                                        String columnName) {
+        checkNotNull(entityClass);
+        checkNotNull(columnName);
         throw new IllegalArgumentException(
                 format("Could not find an EntityColumn description for %s.%s.",
                         entityClass.getCanonicalName(),

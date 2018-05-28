@@ -104,16 +104,16 @@ public final class ColumnRecords {
      *                               in the scanned classes
      */
     static Optional<Method> getAnnotatedVersion(Method method) {
-        final Set<Method> annotatedVersions = newHashSet();
+        Set<Method> annotatedVersions = newHashSet();
         if (method.isAnnotationPresent(Column.class)) {
             annotatedVersions.add(method);
         }
-        final Class<?> declaringClass = method.getDeclaringClass();
-        final Iterable<Class<?>> ascendants = getSuperClassesAndInterfaces(declaringClass);
+        Class<?> declaringClass = method.getDeclaringClass();
+        Iterable<Class<?>> ascendants = getSuperClassesAndInterfaces(declaringClass);
         for (Class<?> ascendant : ascendants) {
-            final Optional<Method> optionalMethod = getMethodBySignature(ascendant, method);
+            Optional<Method> optionalMethod = getMethodBySignature(ascendant, method);
             if (optionalMethod.isPresent()) {
-                final Method ascendantMethod = optionalMethod.get();
+                Method ascendantMethod = optionalMethod.get();
                 if (ascendantMethod.isAnnotationPresent(Column.class)) {
                     annotatedVersions.add(ascendantMethod);
                 }
