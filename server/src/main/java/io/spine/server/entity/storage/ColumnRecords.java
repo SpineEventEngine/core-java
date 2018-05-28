@@ -33,6 +33,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Sets.newHashSet;
+import static java.lang.String.format;
 
 /**
  * A utility for dealing with the {@linkplain EntityRecordWithColumns} and
@@ -42,8 +43,8 @@ import static com.google.common.collect.Sets.newHashSet;
  */
 public final class ColumnRecords {
 
+    /** Prevent initialization of the utility class */
     private ColumnRecords() {
-        // Prevent initialization of the utility class
     }
 
     /**
@@ -53,43 +54,56 @@ public final class ColumnRecords {
      * The {@link io.spine.server.entity.EntityRecord EntityRecord} should be handled separately
      * while persisting a record.
      *
-     * @param destination         the representation of a record in the database; implementation
-     *                            specific
-     * @param recordWithColumns   the {@linkplain EntityRecordWithColumns} to persist
-     * @param columnTypeRegistry  the {@link io.spine.server.storage.Storage Storage}
-     *                            {@link ColumnTypeRegistry}
-     * @param mapColumnIdentifier a {@linkplain Function} mapping the column name
-     *                            {@linkplain EntityColumn#getStoredName()} for storing}
-     *                            to the database specific column identifier
-     * @param <D>                 the type of the database record
-     * @param <I>                 the type of the column identifier
+     * @param destination
+     *        the representation of a record in the database; implementation specific
+     * @param record
+     *        the {@linkplain EntityRecordWithColumns} to persist
+     * @param registry
+     *        the {@link io.spine.server.storage.Storage Storage} {@link ColumnTypeRegistry}
+     * @param mapColumnIdentifier
+     *        a {@linkplain Function} mapping the column name
+     *        {@linkplain EntityColumn#getStoredName()} for storing} to the database specific
+     *        column identifier
+     * @param <D>
+     *        the type of the database record
+     * @param <I>
+     *        the type of the column identifier
      */
     public static <D, I> void feedColumnsTo(
             D destination,
-            EntityRecordWithColumns recordWithColumns,
-            ColumnTypeRegistry<? extends ColumnType<?, ?, D, I>> columnTypeRegistry,
+            EntityRecordWithColumns record,
+            ColumnTypeRegistry<? extends ColumnType<?, ?, D, I>> registry,
             Function<String, I> mapColumnIdentifier) {
         checkNotNull(destination);
-        checkNotNull(recordWithColumns);
-        checkNotNull(columnTypeRegistry);
+        checkNotNull(record);
+        checkNotNull(registry);
         checkNotNull(mapColumnIdentifier);
-        checkArgument(recordWithColumns.hasColumns(),
-                      "Passed record has no Entity Columns.");
+        checkArgument(record.hasColumns(), "Passed record has no Entity Columns.");
 
-        for (String columnName : recordWithColumns.getColumnNames()) {
-            final I columnIdentifier = mapColumnIdentifier.apply(columnName);
-            checkNotNull(columnIdentifier);
-            final MemoizedValue columnValue = recordWithColumns.getColumnValue(columnName);
-            final EntityColumn columnMetadata = columnValue.getSourceColumn();
-            @SuppressWarnings("unchecked") // We don't know the exact types of the value
-            final ColumnType<Object, Object, D, I> columnType =
-                    (ColumnType<Object, Object, D, I>) columnTypeRegistry.get(columnMetadata);
-            checkArgument(columnType != null,
-                          String.format("ColumnType for %s could not be found.",
-                                        columnMetadata.getPersistedType()
-                                                      .getCanonicalName()));
-            setValue(columnValue, destination, columnIdentifier, columnType);
+        for (String columnName : record.getColumnNames()) {
+            feedColumn(record, columnName, destination, registry, mapColumnIdentifier);
         }
+    }
+
+    private static <D, I> void feedColumn(
+            EntityRecordWithColumns record,
+            String columnName,
+            D destination,
+            ColumnTypeRegistry<? extends ColumnType<?, ?, D, I>> registry,
+            Function<String, I> mapColumnIdentifier) {
+        I columnIdentifier = mapColumnIdentifier.apply(columnName);
+        checkNotNull(columnIdentifier);
+        MemoizedValue columnValue = record.getColumnValue(columnName);
+        EntityColumn columnMetadata = columnValue.getSourceColumn();
+
+        @SuppressWarnings("unchecked") // We don't know the exact types of the value
+        ColumnType<Object, Object, D, I> columnType =
+                (ColumnType<Object, Object, D, I>) registry.get(columnMetadata);
+        checkArgument(columnType != null,
+                      format("ColumnType for %s could not be found.",
+                                    columnMetadata.getPersistedType()
+                                                  .getCanonicalName()));
+        setValue(columnValue, destination, columnIdentifier, columnType);
     }
 
     /**
@@ -125,15 +139,15 @@ public final class ColumnRecords {
         if (annotatedVersions.isEmpty()) {
             return Optional.absent();
         } else {
-            final Method annotatedVersion = annotatedVersions.iterator()
+            Method annotatedVersion = annotatedVersions.iterator()
                                                              .next();
             return Optional.of(annotatedVersion);
         }
     }
 
     private static Iterable<Class<?>> getSuperClassesAndInterfaces(Class<?> cls) {
-        final Collection<Class<?>> interfaces = Arrays.asList(cls.getInterfaces());
-        final Collection<Class<?>> result = newHashSet(interfaces);
+        Collection<Class<?>> interfaces = Arrays.asList(cls.getInterfaces());
+        Collection<Class<?>> result = newHashSet(interfaces);
         Class<?> currentSuper = cls.getSuperclass();
         while (currentSuper != null) {
             result.add(currentSuper);
@@ -153,7 +167,7 @@ public final class ColumnRecords {
         checkArgument(!method.getDeclaringClass()
                              .equals(target));
         try {
-            final Method methodFromTarget = target.getMethod(method.getName(),
+            Method methodFromTarget = target.getMethod(method.getName(),
                                                              method.getParameterTypes());
             return Optional.of(methodFromTarget);
         } catch (NoSuchMethodException ignored) {
@@ -166,11 +180,11 @@ public final class ColumnRecords {
                                               I columnIdentifier,
                                               ColumnType<J, S, D, I> columnType) {
         @SuppressWarnings("unchecked") // Checked at runtime
-        final J initialValue = (J) columnValue.getValue();
+        J initialValue = (J) columnValue.getValue();
         if (initialValue == null) {
             columnType.setNull(destination, columnIdentifier);
         } else {
-            final S storedValue = columnType.convertColumnValue(initialValue);
+            S storedValue = columnType.convertColumnValue(initialValue);
             columnType.setColumnValue(destination, storedValue, columnIdentifier);
         }
     }
