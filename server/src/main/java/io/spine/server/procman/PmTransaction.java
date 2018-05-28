@@ -28,8 +28,6 @@ import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionListener;
 import io.spine.validate.ValidatingBuilder;
 
-import java.sql.Connection;
-
 /**
  * A transaction, within which {@linkplain ProcessManager ProcessManager instances} are modified.
  *
