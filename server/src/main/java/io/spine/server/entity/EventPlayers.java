@@ -42,7 +42,8 @@ public final class EventPlayers {
      * Creates a transactional {@link EventPlayer} for the given
      * {@linkplain TransactionalEntity entity}.
      *
-     * <p>It is expected that the given entity is currently in a transaction.
+     * <p>It is expected that the given entity is currently in a transaction. If this condition is
+     * not met, an {@code IllegalStateException} is {@linkplain TransactionalEntity#tx() thrown}.
      *
      * @param entity the entity to create the player for
      * @return new instance on {@code EventPlayer}
