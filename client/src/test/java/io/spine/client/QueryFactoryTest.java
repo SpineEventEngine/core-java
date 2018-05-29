@@ -51,7 +51,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("Query factory should")
 class QueryFactoryTest extends ActorRequestFactoryTest {
 
-    // See {@code client_requests} for declaration.
+    /** See {@code client_requests.proto} from {@link spine.test.queries} for declaration. */
     private static final Class<TestEntity> TARGET_ENTITY_CLASS = TestEntity.class;
 
     @Nested
