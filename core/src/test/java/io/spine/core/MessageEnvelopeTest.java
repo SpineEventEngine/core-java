@@ -38,8 +38,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  * @author Dmytro Dashenkov
  */
 public abstract class MessageEnvelopeTest<O extends Message,
-        E extends MessageEnvelope<?, O, ?>,
-        C extends MessageClass> {
+                                          E extends MessageEnvelope<?, O, ?>,
+                                          C extends MessageClass> {
 
     protected abstract O outerObject();
 
