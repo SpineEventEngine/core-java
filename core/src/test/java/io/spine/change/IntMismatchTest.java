@@ -66,8 +66,8 @@ class IntMismatchTest {
     class CreateMismatchTest {
 
         @Test
-        @DisplayName("successfully create instance from given int32 values")
-        void createMismatchWithInt32Values() {
+        @DisplayName("successfully create instance from given int values")
+        void createMismatchWithIntValues() {
             final ValueMismatch mismatch = IntMismatch.of(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
 
             assertEquals(EXPECTED, unpackExpected(mismatch));

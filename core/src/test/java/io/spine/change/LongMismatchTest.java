@@ -66,8 +66,8 @@ class LongMismatchTest {
     class CreateMismatchTest {
 
         @Test
-        @DisplayName("successfully create instance from given int64 values")
-        void createMismatchWithInt64Values() {
+        @DisplayName("successfully create instance from given long values")
+        void createMismatchWithLongValues() {
             final ValueMismatch mismatch = LongMismatch.of(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
 
             assertEquals(EXPECTED, unpackExpected(mismatch));
