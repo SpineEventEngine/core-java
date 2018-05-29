@@ -108,7 +108,7 @@ class BooleanMismatchTest {
         }
 
         @Test
-        @DisplayName("unpackNewValue if passed value is BooleanMismatch")
+        @DisplayName("unpackNewValue only if passed value is BooleanMismatch")
         void notUnpackNewValueForWrongType() {
             final ValueMismatch mismatch = IntMismatch.of(1, 2, 3, VERSION);
             assertThrows(RuntimeException.class, () -> BooleanMismatch.unpackNewValue(mismatch));
