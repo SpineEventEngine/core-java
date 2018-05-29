@@ -499,10 +499,8 @@ class ChangesTest {
         void notAcceptEqualIntervals() {
             final Timestamp fourMinutesAgo = TimeTests.Past.minutesAgo(4);
             final Timestamp now = getCurrentTime();
-            final Interval fourMinutes = Intervals.between(fourMinutesAgo, now);
-            assertThrows(IllegalArgumentException.class, () -> {
-                Changes.of(fourMinutes, fourMinutes);
-            });
+            final Interval interval = Intervals.between(fourMinutesAgo, now);
+            assertThrows(IllegalArgumentException.class, () -> Changes.of(interval, interval));
         }
 
         @Test
