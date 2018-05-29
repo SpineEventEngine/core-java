@@ -40,6 +40,7 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.server.command.CommandHandlerMethod;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.entity.EventPlayer;
+import io.spine.server.entity.EventPlayers;
 import io.spine.server.event.EventFactory;
 import io.spine.server.event.EventReactorMethod;
 import io.spine.server.model.Model;
@@ -273,8 +274,8 @@ public abstract class Aggregate<I,
 
     @Override
     public void play(Iterable<Event> events) {
-        EventPlayer.forTransactionOf(this)
-                   .play(events);
+        EventPlayers.forTransactionOf(this)
+                    .play(events);
     }
 
     /**

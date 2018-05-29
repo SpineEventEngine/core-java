@@ -55,9 +55,4 @@ final class TransactionalEventPlayer implements EventPlayer {
             transaction.apply(eventEnvelope);
         }
     }
-
-    @Override
-    public String toString() {
-        return "EventPlayer.forTransactionOf(...)";
-    }
 }

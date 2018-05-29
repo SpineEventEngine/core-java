@@ -21,22 +21,34 @@
 package io.spine.server.entity;
 
 import io.spine.annotation.Internal;
-import io.spine.core.Event;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Plays events upon a certain entity.
+ * The factory of {@link EventPlayer} instances.
  *
  * @author Dmytro Dashenkov
  */
 @Internal
-public interface EventPlayer {
+public final class EventPlayers {
 
     /**
-     * Plays the given events against the underlying entity.
-     *
-     * <p>Typically, the entity state is changed during this operation.
-     *
-     * @param events the event stream to play
+     * Prevents the utility class instantiation.
      */
-    void play(Iterable<Event> events);
+    private EventPlayers() {
+    }
+
+    /**
+     * Creates a transactional {@link EventPlayer} for the given
+     * {@linkplain TransactionalEntity entity}.
+     *
+     * <p>It is expected that the given entity is currently in a transaction.
+     *
+     * @param entity the entity to create the player for
+     * @return new instance on {@code EventPlayer}
+     */
+    public static EventPlayer forTransactionOf(TransactionalEntity<?, ?, ?> entity) {
+        checkNotNull(entity);
+        return new TransactionalEventPlayer(entity.tx());
+    }
 }

@@ -91,7 +91,7 @@ public class EventPlayingEntityShould {
 
         @Override
         public void play(Iterable<Event> events) {
-            EventPlayer.forTransactionOf(this).play(events);
+            EventPlayers.forTransactionOf(this).play(events);
         }
     }
 }
