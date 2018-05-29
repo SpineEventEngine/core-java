@@ -159,18 +159,6 @@ class ChangesTest {
         }
 
         @Test
-        @DisplayName("successfully create instance for int64 values")
-        void createInt64Change() {
-            final long s1 = 16420225L;
-            final long s2 = 17270320L;
-
-            final Int64Change result = Changes.ofInt64(s1, s2);
-
-            assertTrue(Long.compare(s1, result.getPreviousValue()) == 0);
-            assertTrue(Long.compare(s2, result.getNewValue()) == 0);
-        }
-
-        @Test
         @DisplayName("successfully create instance for int32 values")
         void createInt32Change() {
             final int s1 = 1550;
@@ -180,6 +168,18 @@ class ChangesTest {
 
             assertTrue(Integer.compare(s1, result.getPreviousValue()) == 0);
             assertTrue(Integer.compare(s2, result.getNewValue()) == 0);
+        }
+
+        @Test
+        @DisplayName("successfully create instance for int64 values")
+        void createInt64Change() {
+            final long s1 = 16420225L;
+            final long s2 = 17270320L;
+
+            final Int64Change result = Changes.ofInt64(s1, s2);
+
+            assertTrue(Long.compare(s1, result.getPreviousValue()) == 0);
+            assertTrue(Long.compare(s2, result.getNewValue()) == 0);
         }
 
         @Test
