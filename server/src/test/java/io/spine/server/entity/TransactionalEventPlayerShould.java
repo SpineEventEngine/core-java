@@ -46,14 +46,14 @@ public class TransactionalEventPlayerShould {
 
     @Test(expected = IllegalStateException.class)
     public void require_active_transaction_to_play_events() {
-        new EpeEntity().play(
+        new TxPlayingEntity().play(
                 newArrayList(eventFactory.createEvent(StringValue.getDefaultInstance()))
         );
     }
 
     @Test
     public void delegate_applying_events_to_tx_when_playing() {
-        final EpeEntity entity = entityWithActiveTx(false);
+        final TxPlayingEntity entity = entityWithActiveTx(false);
         final Transaction txMock = entity.getTransaction();
         assertNotNull(txMock);
         final Event firstEvent = eventFactory.createEvent(newUuidValue());
@@ -66,8 +66,8 @@ public class TransactionalEventPlayerShould {
     }
 
     @SuppressWarnings("unchecked")  // OK for the test.
-    private static EpeEntity entityWithActiveTx(boolean txChanged) {
-        final EpeEntity entity = new EpeEntity();
+    private static TxPlayingEntity entityWithActiveTx(boolean txChanged) {
+        final TxPlayingEntity entity = new TxPlayingEntity();
         final Transaction tx = spy(mock(Transaction.class));
         when(tx.isActive()).thenReturn(true);
         when(tx.isStateChanged()).thenReturn(txChanged);
@@ -81,11 +81,11 @@ public class TransactionalEventPlayerShould {
         verify(txMock).apply(eq(EventEnvelope.of(event)));
     }
 
-    private static class EpeEntity
+    private static class TxPlayingEntity
             extends TransactionalEntity<Long, StringValue, StringValueVBuilder>
             implements EventPlayer {
 
-        private EpeEntity() {
+        private TxPlayingEntity() {
             super(0L);
         }
 
