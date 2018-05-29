@@ -39,7 +39,7 @@ import static org.mockito.Mockito.when;
 /**
  * @author Dmytro Dashenkov
  */
-public class EventPlayingEntityShould {
+public class TransactionalEventPlayerShould {
 
     private final TestEventFactory eventFactory =
             TestEventFactory.newInstance(TransactionalEntityShould.class);
