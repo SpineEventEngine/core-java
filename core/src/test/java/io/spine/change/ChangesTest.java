@@ -547,6 +547,7 @@ class ChangesTest {
     @Nested
     @DisplayName("when given null values")
     class CreateFromNullTest {
+
         @Test
         @DisplayName("not accept null String previousValue")
         void notAcceptNullStringPrevious() {
