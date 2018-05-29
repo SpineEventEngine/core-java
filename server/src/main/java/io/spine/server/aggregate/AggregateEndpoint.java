@@ -38,12 +38,12 @@ import java.util.List;
  *            {@code Set<I>} for multicast
  * @author Alexander Yevsyukov
  */
-abstract class AggregateMessageEndpoint<I,
-                                        A extends Aggregate<I, ?, ?>,
-                                        M extends ActorMessageEnvelope<?, ?, ?>, R>
+abstract class AggregateEndpoint<I,
+                                 A extends Aggregate<I, ?, ?>,
+                                 M extends ActorMessageEnvelope<?, ?, ?>, R>
         extends EntityMessageEndpoint<I, A, M, R> {
 
-    AggregateMessageEndpoint(AggregateRepository<I, A> repository, M envelope) {
+    AggregateEndpoint(AggregateRepository<I, A> repository, M envelope) {
         super(repository, envelope);
     }
 

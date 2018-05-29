@@ -201,7 +201,7 @@ public class EventStore implements AutoCloseable {
     }
 
     /**
-     * Creates the steam with events matching the passed query.
+     * Creates the stream with events matching the passed query.
      *
      * @param request          the query with filtering parameters for the event history
      * @param responseObserver observer for the resulting stream

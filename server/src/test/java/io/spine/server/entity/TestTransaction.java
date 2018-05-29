@@ -36,27 +36,27 @@ public class TestTransaction {
     }
 
     /**
-     * A hack allowing to inject state and version into an {@code EventPlayingEntity} instance
+     * A hack allowing to inject state and version into an {@code TransactionalEntity} instance
      * by creating and committing a fake transaction.
      *
      * <p>To be used in tests only.
      */
-    public static void injectState(EventPlayingEntity entity, Message state, Version version) {
+    public static void injectState(TransactionalEntity entity, Message state, Version version) {
         final TestTx tx = new TestTx(entity, state, version);
         tx.commit();
     }
 
     /**
-     * A hack allowing to archive an {@code EventPlayingEntity} instance by creating and committing
+     * A hack allowing to archive an {@code TransactionalEntity} instance by creating and committing
      * a fake transaction.
      *
      * <p>To be used in tests only.
      */
-    public static void archive(EventPlayingEntity entity) {
+    public static void archive(TransactionalEntity entity) {
         final TestTx tx = new TestTx(entity) {
 
             @Override
-            protected void dispatch(EventPlayingEntity entity, EventEnvelope event) {
+            protected void dispatch(TransactionalEntity entity, EventEnvelope event) {
                 entity.setArchived(true);
             }
         };
@@ -66,16 +66,16 @@ public class TestTransaction {
     }
 
     /**
-     * A hack allowing to mark an {@code EventPlayingEntity} instance deleted by creating and
+     * A hack allowing to mark an {@code TransactionalEntity} instance deleted by creating and
      * committing a fake transaction.
      *
      * <p>To be used in tests only.
      */
-    public static void delete(EventPlayingEntity entity) {
+    public static void delete(TransactionalEntity entity) {
         final TestTx tx = new TestTx(entity) {
 
             @Override
-            protected void dispatch(EventPlayingEntity entity, EventEnvelope event) {
+            protected void dispatch(TransactionalEntity entity, EventEnvelope event) {
                 entity.setDeleted(true);
             }
         };
@@ -87,16 +87,16 @@ public class TestTransaction {
     @SuppressWarnings("unchecked")
     private static class TestTx extends Transaction {
 
-        protected TestTx(EventPlayingEntity entity) {
+        protected TestTx(TransactionalEntity entity) {
             super(entity);
         }
 
-        public TestTx(EventPlayingEntity entity, Message state, Version version) {
+        public TestTx(TransactionalEntity entity, Message state, Version version) {
             super(entity, state, version);
         }
 
         @Override
-        protected void dispatch(EventPlayingEntity entity, EventEnvelope event) {
+        protected void dispatch(TransactionalEntity entity, EventEnvelope event) {
             // NoOp by default
         }
 

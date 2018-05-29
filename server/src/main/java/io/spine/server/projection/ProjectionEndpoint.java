@@ -72,7 +72,7 @@ class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
         final P projection = repository().findOrCreate(entityId);
         final ProjectionTransaction<I, ?, ?> tx =
                 ProjectionTransaction.start((Projection<I, ?, ?>) projection);
-        projection.handle(envelope());
+        doDispatch(projection, envelope());
         tx.commit();
         store(projection);
     }
