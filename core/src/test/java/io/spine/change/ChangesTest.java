@@ -379,7 +379,7 @@ class ChangesTest {
 
     @Nested
     @DisplayName("when given equal values")
-    class EqualValuesTest {
+    class CreateFromEqualTest {
 
         @Test
         @DisplayName("not create string change")
