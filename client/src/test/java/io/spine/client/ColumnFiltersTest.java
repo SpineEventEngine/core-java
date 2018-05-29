@@ -46,13 +46,13 @@ import static io.spine.client.ColumnFilters.ge;
 import static io.spine.client.ColumnFilters.gt;
 import static io.spine.client.ColumnFilters.le;
 import static io.spine.client.ColumnFilters.lt;
-import static io.spine.client.CommonTestNames.NULL_TOLERANCE;
-import static io.spine.client.CommonTestNames.UTILITY_CTOR;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.EITHER;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.TypeConverter.toAny;
+import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Verify.assertContainsAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -72,13 +72,13 @@ class ColumnFiltersTest {
     private static final Operator ENUM_COLUMN_VALUE = EQUAL;
 
     @Test
-    @DisplayName(UTILITY_CTOR)
+    @DisplayName(HAVE_PARAMETERLESS_CTOR)
     void haveUtilityConstructor() {
         assertHasPrivateParameterlessCtor(ColumnFilters.class);
     }
 
     @Test
-    @DisplayName(NULL_TOLERANCE)
+    @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
         new NullPointerTester()
                 .setDefault(Timestamp.class, Timestamp.getDefaultInstance())

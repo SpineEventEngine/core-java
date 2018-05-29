@@ -49,10 +49,10 @@ import static io.spine.client.ColumnFilters.eq;
 import static io.spine.client.ColumnFilters.ge;
 import static io.spine.client.ColumnFilters.gt;
 import static io.spine.client.ColumnFilters.le;
-import static io.spine.client.CommonTestNames.NULL_TOLERANCE;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.EITHER;
 import static io.spine.protobuf.TypeConverter.toObject;
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.test.Verify.assertContains;
 import static io.spine.test.Verify.assertSize;
 import static io.spine.test.Verify.fail;
@@ -77,7 +77,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class QueryBuilderTest extends ActorRequestFactoryTest {
 
     @Test
-    @DisplayName(NULL_TOLERANCE)
+    @DisplayName(NOT_ACCEPT_NULLS)
     void notAcceptNulls() {
         new NullPointerTester().testAllPublicStaticMethods(QueryBuilder.class);
     }

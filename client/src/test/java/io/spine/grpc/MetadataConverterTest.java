@@ -27,8 +27,8 @@ import io.spine.base.Error;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.client.CommonTestNames.NULL_TOLERANCE;
-import static io.spine.client.CommonTestNames.UTILITY_CTOR;
+import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -42,13 +42,13 @@ import static org.junit.jupiter.api.Assertions.fail;
 class MetadataConverterTest {
 
     @Test
-    @DisplayName(UTILITY_CTOR)
+    @DisplayName(HAVE_PARAMETERLESS_CTOR)
     void haveUtilityConstructor() {
         assertHasPrivateParameterlessCtor(MetadataConverter.class);
     }
 
     @Test
-    @DisplayName(NULL_TOLERANCE)
+    @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
         new NullPointerTester()
                 .testAllPublicStaticMethods(MetadataConverter.class);

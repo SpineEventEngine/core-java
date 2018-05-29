@@ -39,11 +39,11 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 import static io.grpc.Status.INVALID_ARGUMENT;
-import static io.spine.client.CommonTestNames.UTILITY_CTOR;
 import static io.spine.grpc.StreamObservers.forwardErrorsOnly;
 import static io.spine.grpc.StreamObservers.fromStreamError;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.grpc.StreamObservers.noOpObserver;
+import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -63,7 +63,7 @@ import static org.mockito.Mockito.verify;
 class StreamObserversTest {
 
     @Test
-    @DisplayName(UTILITY_CTOR)
+    @DisplayName(HAVE_PARAMETERLESS_CTOR)
     void haveUtilityConstructor() {
         assertHasPrivateParameterlessCtor(StreamObservers.class);
     }
