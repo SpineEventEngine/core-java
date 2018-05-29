@@ -62,6 +62,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 /**
  * @author Dmytro Dashenkov
  */
+@SuppressWarnings("InnerClassMayBeStatic") // JUnit 5 Nested classes cannot to be static.
 @DisplayName("ColumnFilters utility should")
 class ColumnFiltersTest {
 
@@ -85,7 +86,6 @@ class ColumnFiltersTest {
                 .testAllPublicStaticMethods(ColumnFilters.class);
     }
 
-    @SuppressWarnings("InnerClassMayBeStatic") // JUnit 5 Nested classes cannot to be static.
     @Nested
     @DisplayName("when creating column filter")
     class CreateFilterTest {
@@ -137,7 +137,6 @@ class ColumnFiltersTest {
         }
     }
 
-    @SuppressWarnings("InnerClassMayBeStatic") // JUnit 5 Nested classes cannot to be static.
     @Nested
     @DisplayName("when creating composite column filter")
     class CreateCompositeFilterTest {
@@ -170,7 +169,6 @@ class ColumnFiltersTest {
         }
     }
 
-    @SuppressWarnings("InnerClassMayBeStatic") // JUnit 5 Nested classes cannot to be static.
     @Nested
     @DisplayName("when creating ordering filter")
     class CreateOrderingFilterTest {
