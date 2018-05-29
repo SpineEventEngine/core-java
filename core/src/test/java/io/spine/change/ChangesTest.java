@@ -395,7 +395,6 @@ class ChangesTest {
             assertThrows(IllegalArgumentException.class, () -> Changes.of(value, value));
         }
 
-
         @Test
         @DisplayName("not create Timestamp change")
         void notAcceptEqualTimestamps() {
