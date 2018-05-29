@@ -33,11 +33,11 @@ import static org.junit.Assert.assertSame;
 /**
  * @author Alexander Yevsyukov
  */
-public class CommandEnvelopeTest
+public class CommandEnvelopeShould
         extends MessageEnvelopeTest<Command, CommandEnvelope, CommandClass> {
 
     private final TestActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(CommandEnvelopeTest.class);
+            TestActorRequestFactory.newInstance(CommandEnvelopeShould.class);
 
     @Test
     public void obtain_command_context() {

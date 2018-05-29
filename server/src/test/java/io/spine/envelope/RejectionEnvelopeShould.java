@@ -43,12 +43,12 @@ import static org.junit.Assert.assertEquals;
  *
  * @author Alex Tymchenko
  */
-public class RejectionEnvelopeTest extends MessageEnvelopeTest<Rejection,
+public class RejectionEnvelopeShould extends MessageEnvelopeTest<Rejection,
         RejectionEnvelope,
         RejectionClass> {
 
     private final TestActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(RejectionEnvelopeTest.class);
+            TestActorRequestFactory.newInstance(RejectionEnvelopeShould.class);
 
     @Override
     protected Rejection outerObject() {
