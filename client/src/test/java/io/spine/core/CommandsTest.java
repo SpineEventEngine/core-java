@@ -175,19 +175,25 @@ class CommandsTest {
         @Test
         @DisplayName("support `wereBetween` predicate")
         void createWereBetweenPredicate() {
-            final Command command1 = requestFactory.createCommand(StringValue.getDefaultInstance(),
-                                                                  minutesAgo(5));
-            final Command command2 = requestFactory.createCommand(Int64Value.getDefaultInstance(),
-                                                                  minutesAgo(2));
-            final Command command3 = requestFactory.createCommand(BoolValue.getDefaultInstance(),
-                                                                  secondsAgo(30));
-            final Command command4 = requestFactory.createCommand(BoolValue.getDefaultInstance(),
-                                                                  secondsAgo(20));
-            final Command command5 = requestFactory.createCommand(BoolValue.getDefaultInstance(),
-                                                                  secondsAgo(5));
+            final Command fiveMinsAgo =
+                    requestFactory.createCommand(StringValue.getDefaultInstance(),
+                                                 minutesAgo(5));
+            final Command twoMinsAgo =
+                    requestFactory.createCommand(Int64Value.getDefaultInstance(),
+                                                 minutesAgo(2));
+            final Command thirtySecondsAgo =
+                    requestFactory.createCommand(BoolValue.getDefaultInstance(),
+                                                 secondsAgo(30));
+            final Command twentySecondsAgo =
+                    requestFactory.createCommand(BoolValue.getDefaultInstance(),
+                                                 secondsAgo(20));
+            final Command fiveSecondsAgo =
+                    requestFactory.createCommand(BoolValue.getDefaultInstance(),
+                                                 secondsAgo(5));
 
             final ImmutableList<Command> commands =
-                    ImmutableList.of(command1, command2, command3, command4, command5);
+                    ImmutableList.of(fiveMinsAgo, twoMinsAgo, thirtySecondsAgo, twentySecondsAgo,
+                                     fiveSecondsAgo);
             final Iterable<Command> filter = Iterables.filter(
                     commands,
                     Commands.wereWithinPeriod(minutesAgo(3), secondsAgo(10))
