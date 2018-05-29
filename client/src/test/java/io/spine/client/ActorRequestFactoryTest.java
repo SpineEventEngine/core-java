@@ -80,7 +80,7 @@ abstract class ActorRequestFactoryTest {
     }
 
     @SuppressWarnings({"SerializableNonStaticInnerClassWithoutSerialVersionUID",
-            "SerializableInnerClassWithNonSerializableOuterClass"})
+                       "SerializableInnerClassWithNonSerializableOuterClass"})
     @Test
     @DisplayName(NULL_TOLERANCE)
     void passNullToleranceCheck() {

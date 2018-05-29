@@ -47,7 +47,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * @author Alex Tymchenko
  */
 @SuppressWarnings({"LocalVariableNamingConvention",
-        "DuplicateStringLiteralInspection"}) // A lot of similar test display names.
+                   "DuplicateStringLiteralInspection"}) // A lot of similar test display names.
 @DisplayName("Query factory should")
 class QueryFactoryTest extends ActorRequestFactoryTest {
 
