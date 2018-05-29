@@ -26,6 +26,7 @@ import com.google.protobuf.StringValue;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -35,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class RejectionClassTest {
 
     @Test
-    @DisplayName("pass null tolerance check")
+    @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() throws Exception {
         new NullPointerTester()
                 .testAllPublicStaticMethods(RejectionClass.class);

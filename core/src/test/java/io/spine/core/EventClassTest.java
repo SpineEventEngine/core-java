@@ -20,16 +20,25 @@
 
 package io.spine.core;
 
+import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.StringValue;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DisplayName("EventClass should")
 class EventClassTest {
+
+    @Test
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void passNullToleranceCheck() throws Exception {
+        new NullPointerTester()
+                .testAllPublicStaticMethods(EventClass.class);
+    }
 
     @Test
     @DisplayName("create set on varargs")

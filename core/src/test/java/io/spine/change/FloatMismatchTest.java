@@ -32,6 +32,8 @@ import static io.spine.change.FloatMismatch.unexpectedValue;
 import static io.spine.change.FloatMismatch.unpackActual;
 import static io.spine.change.FloatMismatch.unpackExpected;
 import static io.spine.change.FloatMismatch.unpackNewValue;
+import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -48,13 +50,13 @@ class FloatMismatchTest {
     private static final float DELTA = 0.01f;
 
     @Test
-    @DisplayName("have private parameterless constructor")
+    @DisplayName(HAVE_PARAMETERLESS_CTOR)
     void haveUtilityConstructor() {
         assertHasPrivateParameterlessCtor(FloatMismatch.class);
     }
 
     @Test
-    @DisplayName("pass the null tolerance check")
+    @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
         new NullPointerTester()
                 .testAllPublicStaticMethods(FloatMismatch.class);

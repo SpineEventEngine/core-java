@@ -32,6 +32,8 @@ import static io.spine.change.LongMismatch.unexpectedValue;
 import static io.spine.change.LongMismatch.unpackActual;
 import static io.spine.change.LongMismatch.unpackExpected;
 import static io.spine.change.LongMismatch.unpackNewValue;
+import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -47,13 +49,13 @@ class LongMismatchTest {
     private static final int VERSION = 7;
 
     @Test
-    @DisplayName("have private parameterless constructor")
+    @DisplayName(HAVE_PARAMETERLESS_CTOR)
     void haveUtilityConstructor() {
         assertHasPrivateParameterlessCtor(LongMismatch.class);
     }
 
     @Test
-    @DisplayName("pass the null tolerance check")
+    @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
         new NullPointerTester()
                 .testAllPublicStaticMethods(LongMismatch.class);

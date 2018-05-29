@@ -25,6 +25,8 @@ import io.spine.core.given.GivenVersion;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -36,13 +38,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class VersionsTest {
 
     @Test
-    @DisplayName("have private parameterless ctor")
+    @DisplayName(HAVE_PARAMETERLESS_CTOR)
     void haveUtilityCtor() {
         assertHasPrivateParameterlessCtor(Versions.class);
     }
 
     @Test
-    @DisplayName("pass null tolerance check")
+    @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
         new NullPointerTester()
                 .setDefault(Version.class, Version.getDefaultInstance())

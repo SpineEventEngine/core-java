@@ -25,13 +25,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import javax.annotation.Nullable;
-
 import static io.spine.change.BooleanMismatch.expectedFalse;
 import static io.spine.change.BooleanMismatch.expectedTrue;
 import static io.spine.change.BooleanMismatch.unpackActual;
 import static io.spine.change.BooleanMismatch.unpackExpected;
 import static io.spine.change.BooleanMismatch.unpackNewValue;
+import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -44,13 +44,13 @@ class BooleanMismatchTest {
     private static final int VERSION = 2;
 
     @Test
-    @DisplayName("have private parameterless constructor")
+    @DisplayName(HAVE_PARAMETERLESS_CTOR)
     void haveUtilityConstructor() {
         assertHasPrivateParameterlessCtor(BooleanMismatch.class);
     }
 
     @Test
-    @DisplayName("not accept nulls for non-Nullable public method arguments")
+    @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
         new NullPointerTester()
                 .testAllPublicStaticMethods(BooleanMismatch.class);

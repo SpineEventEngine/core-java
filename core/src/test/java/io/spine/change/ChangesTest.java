@@ -47,6 +47,8 @@ import java.util.UUID;
 
 import static com.google.protobuf.util.Timestamps.subtract;
 import static io.spine.base.Time.getCurrentTime;
+import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.time.Durations2.minutes;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -70,13 +72,13 @@ class ChangesTest {
             "do_not_accept_equal_values";
 
     @Test
-    @DisplayName("have private parameterless constructor")
+    @DisplayName(HAVE_PARAMETERLESS_CTOR)
     void haveUtilityConstructor() {
         assertHasPrivateParameterlessCtor(Changes.class);
     }
 
     @Test
-    @DisplayName("pass the null tolerance check")
+    @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
         new NullPointerTester()
                 .setDefault(ByteString.class, ByteString.EMPTY)

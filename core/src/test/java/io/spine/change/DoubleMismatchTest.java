@@ -32,6 +32,8 @@ import static io.spine.change.DoubleMismatch.unexpectedValue;
 import static io.spine.change.DoubleMismatch.unpackActual;
 import static io.spine.change.DoubleMismatch.unpackExpected;
 import static io.spine.change.DoubleMismatch.unpackNewValue;
+import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -48,13 +50,13 @@ class DoubleMismatchTest {
     private static final double DELTA = 0.01;
 
     @Test
-    @DisplayName("have private parameterless constructor")
+    @DisplayName(HAVE_PARAMETERLESS_CTOR)
     void haveUtilityConstructor() {
         assertHasPrivateParameterlessCtor(DoubleMismatch.class);
     }
 
     @Test
-    @DisplayName("pass the null tolerance check")
+    @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
         new NullPointerTester()
                 .testAllPublicStaticMethods(DoubleMismatch.class);
