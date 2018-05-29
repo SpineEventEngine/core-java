@@ -57,10 +57,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SuppressWarnings({"ConstantConditions" /* We pass `null` to some of the methods to check handling
                                         of preconditions */,
-        "ResultOfMethodCallIgnored" /* ...when methods throw exceptions */,
-        "ClassWithTooManyMethods",
-        "OverlyCoupledClass" /* we test many data types and utility methods */,
-        "InnerClassMayBeStatic" /* JUnit 5 Nested classes cannot be static */})
+                   "ResultOfMethodCallIgnored" /* ...when methods throw exceptions */,
+                   "ClassWithTooManyMethods",
+                   "OverlyCoupledClass" /* we test many data types and utility methods */,
+                   "InnerClassMayBeStatic" /* JUnit 5 Nested classes cannot be static */})
 @DisplayName("Changes utility should")
 class ChangesTest {
 
