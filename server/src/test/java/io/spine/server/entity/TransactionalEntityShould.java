@@ -21,10 +21,7 @@ package io.spine.server.entity;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
-import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
 import io.spine.core.Version;
-import io.spine.server.command.TestEventFactory;
 import io.spine.validate.StringValueVBuilder;
 import io.spine.validate.ValidatingBuilder;
 import org.junit.Test;
@@ -47,18 +44,15 @@ import static org.mockito.Mockito.when;
 /**
  * @author Alex Tymchenko
  */
-public class EventPlayingEntityShould {
+public class TransactionalEntityShould {
 
-    private final TestEventFactory eventFactory =
-            TestEventFactory.newInstance(EventPlayingEntityShould.class);
-
-    protected EventPlayingEntity newEntity() {
-        return new EpeEntity(1L);
+    protected TransactionalEntity newEntity() {
+        return new TeEntity(1L);
     }
 
     @Test
     public void have_private_ctor_for_TypeInfo() {
-        assertHasPrivateParameterlessCtor(EventPlayingEntity.TypeInfo.class);
+        assertHasPrivateParameterlessCtor(TransactionalEntity.TypeInfo.class);
     }
 
     @Test
@@ -68,7 +62,7 @@ public class EventPlayingEntityShould {
 
     @Test
     public void become_changed_once_lifecycleFlags_are_updated() {
-        final EventPlayingEntity entity = newEntity();
+        final TransactionalEntity entity = newEntity();
         entity.setLifecycleFlags(LifecycleFlags.newBuilder()
                                                .setDeleted(true)
                                                .build());
@@ -88,7 +82,7 @@ public class EventPlayingEntityShould {
     @Test
     @SuppressWarnings("unchecked")  // OK for the test.
     public void allow_injecting_transaction() {
-        final EventPlayingEntity entity = newEntity();
+        final TransactionalEntity entity = newEntity();
         final Transaction tx = mock(Transaction.class);
         when(tx.getEntity()).thenReturn(entity);
         entity.injectTransaction(tx);
@@ -99,7 +93,7 @@ public class EventPlayingEntityShould {
     @Test(expected = IllegalStateException.class)
     @SuppressWarnings("unchecked")  // OK for the test.
     public void disallow_injecting_transaction_wrapped_around_another_entity_instance() {
-        final EventPlayingEntity entity = newEntity();
+        final TransactionalEntity entity = newEntity();
         final Transaction tx = mock(Transaction.class);
         when(tx.getEntity()).thenReturn(newEntity());
         entity.injectTransaction(tx);
@@ -107,28 +101,28 @@ public class EventPlayingEntityShould {
 
     @Test
     public void have_no_transaction_in_progress_until_tx_started() {
-        final EventPlayingEntity entity = entityWithInactiveTx();
+        final TransactionalEntity entity = entityWithInactiveTx();
 
         assertFalse(entity.isTransactionInProgress());
     }
 
     @Test
     public void have_transaction_in_progress_when_tx_is_active() {
-        final EventPlayingEntity entity = entityWithActiveTx(false);
+        final TransactionalEntity entity = entityWithActiveTx(false);
 
         assertTrue(entity.isTransactionInProgress());
     }
 
     @Test
     public void be_non_changed_if_transaction_isnt_changed() {
-        final EventPlayingEntity entity = entityWithActiveTx(false);
+        final TransactionalEntity entity = entityWithActiveTx(false);
 
         assertFalse(entity.isChanged());
     }
 
     @Test
     public void become_changed_if_transaction_state_changed() {
-        final EventPlayingEntity entity = entityWithActiveTx(true);
+        final TransactionalEntity entity = entityWithActiveTx(true);
 
         assertTrue(entity.isChanged());
     }
@@ -140,7 +134,7 @@ public class EventPlayingEntityShould {
 
     @Test(expected = IllegalStateException.class)
     public void fail_to_archive_with_inactive_transaction() {
-        final EventPlayingEntity entity = entityWithInactiveTx();
+        final TransactionalEntity entity = entityWithInactiveTx();
 
         entity.setArchived(true);
     }
@@ -152,37 +146,14 @@ public class EventPlayingEntityShould {
 
     @Test(expected = IllegalStateException.class)
     public void fail_to_delete_with_inactive_transaction() {
-        final EventPlayingEntity entity = entityWithInactiveTx();
+        final TransactionalEntity entity = entityWithInactiveTx();
 
         entity.setDeleted(true);
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void require_active_transaction_to_play_events() {
-        newEntity().play(newArrayList(eventFactory.createEvent(StringValue.getDefaultInstance())));
-    }
-
-    @Test
-    public void delegate_applying_events_to_tx_when_playing() {
-        final EventPlayingEntity entity = entityWithActiveTx(false);
-        final Transaction txMock = entity.getTransaction();
-        assertNotNull(txMock);
-        final Event firstEvent = eventFactory.createEvent(newUuidValue());
-        final Event secondEvent = eventFactory.createEvent(newUuidValue());
-
-        entity.play(newArrayList(firstEvent, secondEvent));
-
-        verifyEventApplied(txMock, firstEvent);
-        verifyEventApplied(txMock, secondEvent);
-    }
-
-    private static void verifyEventApplied(Transaction txMock, Event event) {
-        verify(txMock).apply(eq(EventEnvelope.of(event)));
-    }
-
     @Test
     public void return_tx_lifecycleFlags_if_tx_is_active() {
-        final EventPlayingEntity entity = entityWithInactiveTx();
+        final TransactionalEntity entity = entityWithInactiveTx();
         final LifecycleFlags originalFlags = entity.getLifecycleFlags();
 
         final LifecycleFlags modifiedFlags = originalFlags.toBuilder()
@@ -208,7 +179,7 @@ public class EventPlayingEntityShould {
 
     @Test
     public void return_builder_reflecting_current_state() {
-        final EventPlayingEntity entity = newEntity();
+        final TransactionalEntity entity = newEntity();
         final Message originalState = entity.builderFromState()
                                             .build();
 
@@ -223,8 +194,8 @@ public class EventPlayingEntityShould {
     }
 
     @SuppressWarnings("unchecked")  // OK for the test code.
-    private EventPlayingEntity entityWithInactiveTx() {
-        final EventPlayingEntity entity = newEntity();
+    private TransactionalEntity entityWithInactiveTx() {
+        final TransactionalEntity entity = newEntity();
 
         final Transaction tx = mock(Transaction.class);
         when(tx.isActive()).thenReturn(false);
@@ -234,8 +205,8 @@ public class EventPlayingEntityShould {
     }
 
     @SuppressWarnings("unchecked")  // OK for the test.
-    private EventPlayingEntity entityWithActiveTx(boolean txChanged) {
-        final EventPlayingEntity entity = newEntity();
+    private TransactionalEntity entityWithActiveTx(boolean txChanged) {
+        final TransactionalEntity entity = newEntity();
         final Transaction tx = spy(mock(Transaction.class));
         when(tx.isActive()).thenReturn(true);
         when(tx.isStateChanged()).thenReturn(txChanged);
@@ -245,8 +216,8 @@ public class EventPlayingEntityShould {
         return entity;
     }
 
-    private static class EpeEntity
-            extends EventPlayingEntity<Long, StringValue, StringValueVBuilder> {
+    private static class TeEntity
+            extends TransactionalEntity<Long, StringValue, StringValueVBuilder> {
 
         /**
          * Creates a new instance.
@@ -255,7 +226,7 @@ public class EventPlayingEntityShould {
          * @throws IllegalArgumentException if the ID is not of one of the
          *                                  {@linkplain Entity supported types}
          */
-        private EpeEntity(Long id) {
+        private TeEntity(Long id) {
             super(id);
         }
     }

@@ -20,12 +20,11 @@
 package io.spine.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
-import io.grpc.Internal;
+import io.spine.annotation.Internal;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
@@ -40,6 +39,8 @@ import io.spine.core.Versions;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.command.CommandHandlerMethod;
 import io.spine.server.command.CommandHandlingEntity;
+import io.spine.server.entity.EventPlayer;
+import io.spine.server.entity.EventPlayers;
 import io.spine.server.event.EventFactory;
 import io.spine.server.event.EventReactorMethod;
 import io.spine.server.model.Model;
@@ -47,16 +48,18 @@ import io.spine.server.rejection.RejectionReactorMethod;
 import io.spine.validate.ValidatingBuilder;
 
 import javax.annotation.CheckReturnValue;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Predicate;
 
-import static com.google.common.collect.FluentIterable.from;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.Events.getMessage;
 import static io.spine.validate.Validate.isNotDefault;
+import static java.util.stream.Collectors.toList;
 
 /**
  * Abstract base for aggregates.
@@ -125,7 +128,8 @@ import static io.spine.validate.Validate.isNotDefault;
 public abstract class Aggregate<I,
                                 S extends Message,
                                 B extends ValidatingBuilder<S, ? extends Message.Builder>>
-                extends CommandHandlingEntity<I, S, B> {
+        extends CommandHandlingEntity<I, S, B>
+        implements EventPlayer {
 
     /**
      * Events generated in the process of handling commands that were not yet committed.
@@ -212,7 +216,7 @@ public abstract class Aggregate<I,
         final CommandHandlerMethod method = thisClass().getHandler(command.getMessageClass());
         final List<? extends Message> messages =
                 method.invoke(this, command.getMessage(), command.getCommandContext());
-        return from(messages).filter(nonEmpty()).toList();
+        return nonEmpty(messages);
     }
 
     /**
@@ -229,7 +233,7 @@ public abstract class Aggregate<I,
         final EventReactorMethod method = thisClass().getReactor(event.getMessageClass());
         final List<? extends Message> messages =
                 method.invoke(this, event.getMessage(), event.getEventContext());
-        return from(messages).filter(nonEmpty()).toList();
+        return nonEmpty(messages);
     }
 
     /**
@@ -249,7 +253,13 @@ public abstract class Aggregate<I,
                                                                      commandClass);
         final List<? extends Message> messages =
                 method.invoke(this, rejection.getMessage(), rejection.getRejectionContext());
-        return from(messages).filter(nonEmpty()).toList();
+        return nonEmpty(messages);
+    }
+
+    private static List<? extends Message> nonEmpty(Collection<? extends Message> messages) {
+        return messages.stream()
+                       .filter(NonEmpty.PREDICATE)
+                       .collect(toList());
     }
 
     /**
@@ -260,6 +270,12 @@ public abstract class Aggregate<I,
     void invokeApplier(Message eventMessage) {
         final EventApplierMethod method = thisClass().getApplier(EventClass.of(eventMessage));
         method.invoke(this, eventMessage);
+    }
+
+    @Override
+    public void play(Iterable<Event> events) {
+        EventPlayers.forTransactionOf(this)
+                    .play(events);
     }
 
     /**
@@ -457,7 +473,7 @@ public abstract class Aggregate<I,
      * Creates an iterator of the aggregate event history with reverse traversal.
      *
      * <p>The records are returned sorted by timestamp in a descending order (from newer to older).
-     * 
+     *
      * <p>The iterator is empty if there's no history for the aggregate.
      *
      * @return new iterator instance
@@ -478,18 +494,10 @@ public abstract class Aggregate<I,
     }
 
     /**
-     * @return an instance of an {@linkplain NonEmpty non-empty predicate}
-     */
-    private static Predicate<Message> nonEmpty() {
-        return NonEmpty.INSTANCE;
-    }
-
-    /**
      * A predicate checking that message is not {@linkplain Empty empty}.
      */
     private enum NonEmpty implements Predicate<Message> {
-
-        INSTANCE;
+        PREDICATE;
 
         private static final Empty EMPTY = Empty.getDefaultInstance();
 
@@ -500,7 +508,7 @@ public abstract class Aggregate<I,
          * @return {@code true} if the message is not empty, {@code false} otherwise 
          */
         @Override
-        public boolean apply(Message message) {
+        public boolean test(Message message) {
             return !message.equals(EMPTY);
         }
     }
