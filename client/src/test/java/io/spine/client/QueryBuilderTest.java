@@ -339,7 +339,7 @@ class QueryBuilderTest extends ActorRequestFactoryTest {
         class MultipleClausesTest {
 
             @Test
-            @DisplayName("persist only last ids clause")
+            @DisplayName("persist only last IDs clause")
             void persistLastIds() {
                 final Iterable<?> genericIds = asList(newUuid(),
                                                       -1,

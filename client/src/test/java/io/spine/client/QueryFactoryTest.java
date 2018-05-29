@@ -71,7 +71,7 @@ class QueryFactoryTest extends ActorRequestFactoryTest {
         }
 
         @Test
-        @DisplayName("create proper `read by ids` query")
+        @DisplayName("create proper `read by IDs` query")
         void composeReadByIds() {
             final Set<TestEntityId> testEntityIds = multipleIds();
             final Query readByIdsQuery = factory().query()
@@ -103,7 +103,7 @@ class QueryFactoryTest extends ActorRequestFactoryTest {
             }
 
             @Test
-            @DisplayName("create proper `read by ids` with mask query")
+            @DisplayName("create proper `read by IDs` with mask query")
             void composeReadByIdsWithMask() {
                 final Set<TestEntityId> testEntityIds = multipleIds();
                 final String expectedPath = singleTestEntityPath();
@@ -155,7 +155,7 @@ class QueryFactoryTest extends ActorRequestFactoryTest {
             }
 
             @Test
-            @DisplayName("create proper `read by ids` with mask query")
+            @DisplayName("create proper `read by IDs` with mask query")
             void composeReadByIdsWithMask() {
                 final Set<TestEntityId> testEntityIds = multipleIds();
                 final String[] paths = multipleRandomPaths();
@@ -242,7 +242,7 @@ class QueryFactoryTest extends ActorRequestFactoryTest {
     class QueryBuilderSimilarityTest {
 
         @Test
-        @DisplayName("build query by ids consistently")
+        @DisplayName("build query by IDs consistently")
         void buildSameIdQuery() {
             final Set<TestEntityId> ids = multipleIds();
             final Query fromFactory = factory().query()
@@ -285,7 +285,7 @@ class QueryFactoryTest extends ActorRequestFactoryTest {
         }
 
         @Test
-        @DisplayName("build query by ids with mask consistently")
+        @DisplayName("build query by IDs with mask consistently")
         void buildSameIdsWithMaskQuery() {
             final String field1 = "TestEntity.secondField";
             final String field2 = "TesEntity.fooField";
