@@ -39,7 +39,7 @@ class VersionsTest {
 
     @Test
     @DisplayName(HAVE_PARAMETERLESS_CTOR)
-    void haveUtilityCtor() {
+    void haveUtilityConstructor() {
         assertHasPrivateParameterlessCtor(Versions.class);
     }
 
