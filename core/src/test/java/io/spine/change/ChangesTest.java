@@ -45,6 +45,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
 
+import static com.google.protobuf.ByteString.copyFromUtf8;
 import static com.google.protobuf.util.Timestamps.subtract;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
@@ -113,8 +114,8 @@ class ChangesTest {
         @Test
         @DisplayName("successfully create instance for byte string values")
         void createByteStringChange() {
-            final ByteString previousValue = ByteString.copyFromUtf8(randomUuid());
-            final ByteString newValue = ByteString.copyFromUtf8(randomUuid());
+            final ByteString previousValue = copyFromUtf8(randomUuid());
+            final ByteString newValue = copyFromUtf8(randomUuid());
 
             final BytesChange result = Changes.of(previousValue, newValue);
 
@@ -391,7 +392,7 @@ class ChangesTest {
         @Test
         @DisplayName("not create byte string change")
         void notAcceptEqualByteStrings() {
-            final ByteString value = ByteString.copyFromUtf8(ERR_VALUES_CANNOT_BE_EQUAL);
+            final ByteString value = copyFromUtf8(ERR_VALUES_CANNOT_BE_EQUAL);
             assertThrows(IllegalArgumentException.class, () -> Changes.of(value, value));
         }
 
@@ -566,14 +567,14 @@ class ChangesTest {
         void notAcceptNullByteStringPrevious() {
             assertThrows(NullPointerException.class,
                          () -> Changes.of(null,
-                                          ByteString.copyFromUtf8(ERR_PREVIOUS_VALUE_CANNOT_BE_NULL)));
+                                          copyFromUtf8(ERR_PREVIOUS_VALUE_CANNOT_BE_NULL)));
         }
 
         @Test
         @DisplayName("not accept null ByteString newValue")
         void notAcceptNullByteStringNew() {
             assertThrows(NullPointerException.class,
-                         () -> Changes.of(ByteString.copyFromUtf8(ERR_NEW_VALUE_CANNOT_BE_NULL), null));
+                         () -> Changes.of(copyFromUtf8(ERR_NEW_VALUE_CANNOT_BE_NULL), null));
         }
 
         @Test
