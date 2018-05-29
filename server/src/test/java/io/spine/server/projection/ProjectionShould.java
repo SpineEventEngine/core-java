@@ -20,6 +20,7 @@
 
 package io.spine.server.projection;
 
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.StringValue;
@@ -32,7 +33,6 @@ import io.spine.core.Versions;
 import io.spine.protobuf.TypeConverter;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.entity.given.Given;
-import io.spine.server.event.EventStream;
 import io.spine.validate.StringValueVBuilder;
 import org.junit.Before;
 import org.junit.Test;
@@ -104,7 +104,7 @@ public class ProjectionShould {
         final Event e1 = eventFactory.createEvent(strValue, nextVersion);
         final Event e2 = eventFactory.createEvent(intValue, Versions.increment(nextVersion));
 
-        final boolean projectionChanged = Projection.play(projection, EventStream.of(e1, e2));
+        final boolean projectionChanged = Projection.play(projection, ImmutableList.of(e1, e2));
 
         final String projectionState = projection.getState()
                                                  .getValue();

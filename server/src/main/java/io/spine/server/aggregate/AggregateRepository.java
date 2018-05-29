@@ -45,7 +45,6 @@ import io.spine.server.entity.Repository;
 import io.spine.server.event.DelegatingEventDispatcher;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcherDelegate;
-import io.spine.server.event.EventStream;
 import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.model.Model;
@@ -61,6 +60,7 @@ import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
 
 import javax.annotation.CheckReturnValue;
+import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -277,8 +277,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         final int snapshotTrigger = getSnapshotTrigger();
         final AggregateStorage<I> storage = aggregateStorage();
         int eventCount = storage.readEventCountAfterLastSnapshot(id);
-        final Iterable<Event> uncommittedEvents = aggregate.getUncommittedEvents()
-                                                           .events();
+        final Iterable<Event> uncommittedEvents = aggregate.getUncommittedEvents();
         for (Event event : uncommittedEvents) {
             storage.writeEvent(id, event);
             ++eventCount;
@@ -425,8 +424,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     /**
      * Posts passed events to {@link EventBus}.
      */
-    private void postEvents(EventStream eventStream) {
-        final Iterable<Event> events = eventStream.events();
+    private void postEvents(Iterable<Event> events) {
         getEventBus().post(events);
     }
 
@@ -547,7 +545,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * @param aggregate the updated aggregate
      */
     void onModifiedAggregate(TenantId tenantId, A aggregate) {
-        final EventStream events = aggregate.getUncommittedEvents();
+        final List<Event> events = aggregate.getUncommittedEvents();
         store(aggregate);
         updateStand(tenantId, aggregate);
         postEvents(events);

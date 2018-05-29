@@ -47,7 +47,6 @@ import io.spine.server.aggregate.given.aggregate.UserAggregate;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.DuplicateCommandException;
 import io.spine.server.entity.InvalidEntityStateException;
-import io.spine.server.event.EventStream;
 import io.spine.server.model.Model;
 import io.spine.server.model.ModelTests;
 import io.spine.test.TimeTests;
@@ -240,8 +239,8 @@ public class AggregateShould {
 
         // Get the first event since the command handler produces only one event message.
         final Aggregate<?, ?, ?> agg = this.aggregate;
-        final EventStream uncommittedEvents = agg.getUncommittedEvents();
-        final Event event = uncommittedEvents.events().get(0);
+        final List<Event> uncommittedEvents = agg.getUncommittedEvents();
+        final Event event = uncommittedEvents.get(0);
 
         assertEquals(this.aggregate.getVersion(), event.getContext()
                                                        .getVersion());
@@ -423,7 +422,7 @@ public class AggregateShould {
 
     @Test
     public void not_return_any_uncommitted_event_records_by_default() {
-        final EventStream events = aggregate().getUncommittedEvents();
+        final List<Event> events = aggregate().getUncommittedEvents();
 
         assertTrue(events.isEmpty());
     }
@@ -434,15 +433,15 @@ public class AggregateShould {
                                    command(addTask),
                                    command(startProject));
 
-        final EventStream events = aggregate().getUncommittedEvents();
+        final List<Event> events = aggregate().getUncommittedEvents();
 
-        assertContains(getEventClasses(events.events()),
+        assertContains(getEventClasses(events),
                        AggProjectCreated.class, AggTaskAdded.class, AggProjectStarted.class);
     }
 
     @Test
     public void not_return_any_event_records_when_commit_by_default() {
-        final EventStream events = aggregate().commitEvents();
+        final List<Event> events = aggregate().commitEvents();
 
         assertTrue(events.isEmpty());
     }
@@ -453,9 +452,9 @@ public class AggregateShould {
                                    command(addTask),
                                    command(startProject));
 
-        final EventStream events = aggregate().commitEvents();
+        final List<Event> events = aggregate().commitEvents();
 
-        assertContains(getEventClasses(events.events()),
+        assertContains(getEventClasses(events),
                        AggProjectCreated.class, AggTaskAdded.class, AggProjectStarted.class);
     }
 
@@ -465,10 +464,10 @@ public class AggregateShould {
                                    command(addTask),
                                    command(startProject));
 
-        final EventStream events = aggregate().commitEvents();
+        final List<Event> events = aggregate().commitEvents();
         assertFalse(events.isEmpty());
 
-        final EventStream emptyList = aggregate().commitEvents();
+        final List<Event> emptyList = aggregate().commitEvents();
         assertTrue(emptyList.isEmpty());
     }
 

@@ -20,7 +20,7 @@
 
 package io.spine.server.entity;
 
-import io.spine.server.event.EventStream;
+import io.spine.core.Event;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -28,18 +28,17 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * Plays events upon a certain entity.
  *
  * @author Dmytro Dashenkov
- * @see TransactionalEventPlayer
  */
 public interface EventPlayer {
 
     /**
-     * Plays the given {@link EventStream} upon the underlying entity.
+     * Plays the given events upon the underlying entity.
      *
      * <p>Typically, the entity state is changed upon this operation.
      *
      * @param events the event stream to play
      */
-    void play(EventStream events);
+    void play(Iterable<Event> events);
 
     /**
      * Creates a transactional {@code EventPlayer} for the given

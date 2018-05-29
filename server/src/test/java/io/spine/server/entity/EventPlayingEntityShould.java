@@ -24,10 +24,10 @@ import com.google.protobuf.StringValue;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.server.command.TestEventFactory;
-import io.spine.server.event.EventStream;
 import io.spine.validate.StringValueVBuilder;
 import org.junit.Test;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.test.TestValues.newUuidValue;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.eq;
@@ -47,7 +47,7 @@ public class EventPlayingEntityShould {
     @Test(expected = IllegalStateException.class)
     public void require_active_transaction_to_play_events() {
         new EpeEntity().play(
-                EventStream.of(eventFactory.createEvent(StringValue.getDefaultInstance()))
+                newArrayList(eventFactory.createEvent(StringValue.getDefaultInstance()))
         );
     }
 
@@ -59,7 +59,7 @@ public class EventPlayingEntityShould {
         final Event firstEvent = eventFactory.createEvent(newUuidValue());
         final Event secondEvent = eventFactory.createEvent(newUuidValue());
 
-        entity.play(EventStream.of(firstEvent, secondEvent));
+        entity.play(newArrayList(firstEvent, secondEvent));
 
         verifyEventApplied(txMock, firstEvent);
         verifyEventApplied(txMock, secondEvent);
@@ -90,7 +90,7 @@ public class EventPlayingEntityShould {
         }
 
         @Override
-        public void play(EventStream events) {
+        public void play(Iterable<Event> events) {
             EventPlayer.forTransactionOf(this).play(events);
         }
     }

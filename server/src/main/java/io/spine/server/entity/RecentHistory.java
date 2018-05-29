@@ -23,7 +23,6 @@ package io.spine.server.entity;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
 import io.spine.core.Event;
-import io.spine.server.event.EventStream;
 
 import java.util.Deque;
 import java.util.Iterator;
@@ -85,9 +84,15 @@ public final class RecentHistory {
         return events.iterator();
     }
 
-    void append(EventStream stream) {
-        stream.events()
-              .forEach(history::addFirst);
+    /**
+     * Adds events to the history.
+     *
+     * @param events events in the chronological order
+     */
+    void addAll(Iterable<Event> events) {
+        for (Event event : events) {
+            history.addFirst(event);
+        }
     }
 
     @Override

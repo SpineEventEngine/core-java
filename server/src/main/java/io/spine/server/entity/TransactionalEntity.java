@@ -25,7 +25,6 @@ import io.spine.annotation.Internal;
 import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.reflect.GenericTypeIndex;
-import io.spine.server.event.EventStream;
 import io.spine.validate.ValidatingBuilder;
 import io.spine.validate.ValidatingBuilders;
 
@@ -82,8 +81,8 @@ public abstract class TransactionalEntity<I,
     /**
      * Adds events to the {@linkplain #recentHistory() recent history}.
      */
-    protected void remember(EventStream events) {
-        recentHistory.append(events);
+    protected void remember(Iterable<Event> events) {
+        recentHistory.addAll(events);
     }
 
     /**
@@ -92,6 +91,7 @@ public abstract class TransactionalEntity<I,
     protected void clearRecentHistory() {
         recentHistory.clear();
     }
+
     /**
      * Determines whether the state of this entity or its lifecycle flags have been modified
      * since this entity instance creation.

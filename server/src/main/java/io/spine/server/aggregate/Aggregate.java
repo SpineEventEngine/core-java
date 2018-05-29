@@ -20,9 +20,11 @@
 package io.spine.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
+import io.spine.annotation.Internal;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
@@ -40,7 +42,6 @@ import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.entity.EventPlayer;
 import io.spine.server.event.EventFactory;
 import io.spine.server.event.EventReactorMethod;
-import io.spine.server.event.EventStream;
 import io.spine.server.model.Model;
 import io.spine.server.rejection.RejectionReactorMethod;
 import io.spine.validate.ValidatingBuilder;
@@ -52,6 +53,8 @@ import java.util.List;
 import java.util.function.Predicate;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Lists.newArrayListWithCapacity;
+import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.Events.getMessage;
 import static io.spine.validate.Validate.isNotDefault;
@@ -132,7 +135,7 @@ public abstract class Aggregate<I,
      *
      * @see #commitEvents()
      */
-    private EventStream uncommittedEvents = EventStream.empty();
+    private final List<Event> uncommittedEvents = newLinkedList();
 
     /** A guard for ensuring idempotency of messages dispatched by this aggregate. */
     private IdempotencyGuard idempotencyGuard;
@@ -189,11 +192,10 @@ public abstract class Aggregate<I,
      *
      * <p>In {@code Aggregate}, this method must be called only from within an event applier.
      *
-     * <p>Overridden to expose into the {@code io.spine.server.aggregate} package.
-     *
      * @throws IllegalStateException if the method is called from outside an event applier
      */
     @Override
+    @VisibleForTesting
     protected B getBuilder() {
         return super.getBuilder();
     }
@@ -269,17 +271,10 @@ public abstract class Aggregate<I,
         method.invoke(this, eventMessage);
     }
 
-    /**
-     * Plays the given event stream upon this aggregate in a transaction.
-     *
-     * <p>It is expected that the aggregate is currently in a transaction.
-     *
-     * @param events {@inheritDoc}
-     */
     @Override
-    public void play(EventStream events) {
-        final EventPlayer eventPlayer = EventPlayer.forTransactionOf(this);
-        eventPlayer.play(events);
+    public void play(Iterable<Event> events) {
+        EventPlayer.forTransactionOf(this)
+                   .play(events);
     }
 
     /**
@@ -299,7 +294,8 @@ public abstract class Aggregate<I,
         if (isNotDefault(snapshot)) {
             restore(snapshot);
         }
-        final EventStream events = EventStream.from(aggregateStateRecord);
+        final List<Event> events = aggregateStateRecord.getEventList();
+
         play(events);
         remember(events);
     }
@@ -316,7 +312,7 @@ public abstract class Aggregate<I,
         final EventFactory eventFactory =
                 EventFactory.on(origin, getProducerId());
 
-        final EventStream.Builder events = EventStream.newBuilder();
+        final List<Event> events = newArrayListWithCapacity(messages.size());
 
         Version projectedEventVersion = getVersion();
 
@@ -340,9 +336,8 @@ public abstract class Aggregate<I,
             }
             events.add(event);
         }
-        final EventStream eventStream = events.build();
-        play(eventStream);
-        uncommittedEvents = uncommittedEvents.concat(eventStream);
+        play(events);
+        uncommittedEvents.addAll(events);
     }
 
     /**
@@ -413,16 +408,17 @@ public abstract class Aggregate<I,
      * @return immutable view of all uncommitted events
      */
     @CheckReturnValue
-    EventStream getUncommittedEvents() {
-        return uncommittedEvents;
+    List<Event> getUncommittedEvents() {
+        return ImmutableList.copyOf(uncommittedEvents);
     }
 
     /**
      * Obtains the number of uncommitted events.
      */
+    @Internal
     @VisibleForTesting
     protected int uncommittedEventsCount() {
-        return uncommittedEvents.count();
+        return uncommittedEvents.size();
     }
 
     /**
@@ -430,11 +426,11 @@ public abstract class Aggregate<I,
      *
      * @return the list of events
      */
-    EventStream commitEvents() {
-        final EventStream events = uncommittedEvents;
-        uncommittedEvents = EventStream.empty();
-        remember(events);
-        return events;
+    List<Event> commitEvents() {
+        final List<Event> result = ImmutableList.copyOf(uncommittedEvents);
+        uncommittedEvents.clear();
+        remember(result);
+        return result;
     }
 
     /**

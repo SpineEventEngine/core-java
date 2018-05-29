@@ -27,7 +27,6 @@ import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.server.entity.EventPlayer;
 import io.spine.server.entity.TransactionalEntity;
-import io.spine.server.event.EventStream;
 import io.spine.server.event.EventSubscriberMethod;
 import io.spine.server.model.Model;
 import io.spine.validate.ValidatingBuilder;
@@ -61,19 +60,6 @@ public abstract class Projection<I,
         super(id);
     }
 
-    /**
-     * Plays the given event stream upon this projection in a transaction.
-     *
-     * <p>It is expected that the projection is currently in a transaction.
-     *
-     * @param events {@inheritDoc}
-     */
-    @Override
-    public void play(EventStream events) {
-        final EventPlayer eventPlayer = EventPlayer.forTransactionOf(this);
-        eventPlayer.play(events);
-    }
-
     @Override
     protected ProjectionClass<?> thisClass() {
         return (ProjectionClass<?>) super.thisClass();
@@ -85,9 +71,8 @@ public abstract class Projection<I,
                     .asProjectionClass(getClass());
     }
 
-    protected void handle(EventEnvelope envelope) {
-        final Event event = envelope.getOuterObject();
-        play(EventStream.of(event));
+    protected void handle(EventEnvelope event) {
+        apply(event.getMessage(), event.getEventContext());
     }
 
     /**
@@ -109,13 +94,13 @@ public abstract class Projection<I,
     /**
      * Plays events on the projection.
      *
-     * <p>Unlike {@link Projection#play(EventStream)} this static method opens the
+     * <p>Unlike {@link Projection#play(Iterable)} this static method opens the
      * {@linkplain ProjectionTransaction transaction} before events are played, and closes it after.
      *
      * @return {@code true} if the projection state was changed as the result of playing the events
      */
-    static boolean play(Projection<?, ?, ?> projection, EventStream events) {
-        final ProjectionTransaction<?, ?, ?> tx = ProjectionTransaction.start(projection);
+    static boolean play(Projection projection, Iterable<Event> events) {
+        final ProjectionTransaction tx = ProjectionTransaction.start(projection);
         projection.play(events);
         tx.commit();
         return projection.isChanged();
@@ -124,5 +109,11 @@ public abstract class Projection<I,
     void apply(Message eventMessage, EventContext eventContext)  {
         final EventSubscriberMethod method = thisClass().getSubscriber(EventClass.of(eventMessage));
         method.invoke(this, eventMessage, eventContext);
+    }
+
+    @Override
+    public void play(Iterable<Event> events) {
+        final EventPlayer eventPlayer = EventPlayer.forTransactionOf(this);
+        eventPlayer.play(events);
     }
 }
