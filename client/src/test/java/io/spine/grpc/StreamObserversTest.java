@@ -40,6 +40,9 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 import static io.grpc.Status.INVALID_ARGUMENT;
 import static io.spine.client.CommonTestNames.UTILITY_CTOR;
+import static io.spine.grpc.StreamObservers.forwardErrorsOnly;
+import static io.spine.grpc.StreamObservers.fromStreamError;
+import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -82,8 +85,7 @@ class StreamObserversTest {
         @SuppressWarnings("unchecked")  // to make the mock creation look simpler.
         final StreamObserver<Object> delegate = mock(StreamObserver.class);
 
-        final StreamObserver<Object> forwardingInstance = StreamObservers.forwardErrorsOnly(
-                delegate);
+        final StreamObserver<Object> forwardingInstance = forwardErrorsOnly(delegate);
 
         forwardingInstance.onNext(new Object());
         forwardingInstance.onCompleted();
@@ -98,7 +100,7 @@ class StreamObserversTest {
     @Test
     @DisplayName("create proper memoizing observer")
     void createMemoizingObserver() {
-        final MemoizingObserver<Object> observer = StreamObservers.memoizingObserver();
+        final MemoizingObserver<Object> observer = memoizingObserver();
 
         checkFirstResponse(observer);
         checkOnNext(observer);
@@ -165,8 +167,7 @@ class StreamObserversTest {
             final StatusRuntimeException statusRuntimeException =
                     INVALID_ARGUMENT.asRuntimeException(metadata);
 
-            assertEquals(expectedError, StreamObservers.fromStreamError(statusRuntimeException)
-                                                       .get());
+            assertEquals(expectedError, fromStreamError(statusRuntimeException).get());
         }
 
         @Test
@@ -176,8 +177,7 @@ class StreamObserversTest {
             final Metadata metadata = MetadataConverter.toMetadata(expectedError);
             final StatusException statusException = INVALID_ARGUMENT.asException(metadata);
 
-            assertEquals(expectedError, StreamObservers.fromStreamError(statusException)
-                                                       .get());
+            assertEquals(expectedError, fromStreamError(statusException).get());
         }
 
         @Test
@@ -186,8 +186,7 @@ class StreamObserversTest {
             final String msg = "Neither a StatusException nor a StatusRuntimeException.";
             final Exception exception = new Exception(msg);
 
-            assertFalse(StreamObservers.fromStreamError(exception)
-                                       .isPresent());
+            assertFalse(fromStreamError(exception).isPresent());
         }
 
         @Test
@@ -196,8 +195,7 @@ class StreamObserversTest {
             final Metadata emptyMetadata = new Metadata();
             final Throwable statusRuntimeEx = INVALID_ARGUMENT.asRuntimeException(emptyMetadata);
 
-            assertFalse(StreamObservers.fromStreamError(statusRuntimeEx)
-                                       .isPresent());
+            assertFalse(fromStreamError(statusRuntimeEx).isPresent());
         }
     }
 }
