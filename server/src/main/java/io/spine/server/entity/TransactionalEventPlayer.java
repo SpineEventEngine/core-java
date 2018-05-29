@@ -50,6 +50,7 @@ final class TransactionalEventPlayer implements EventPlayer {
      */
     @Override
     public void play(Iterable<Event> events) {
+        checkNotNull(events);
         for (Event event : events) {
             final EventEnvelope eventEnvelope = EventEnvelope.of(event);
             transaction.apply(eventEnvelope);
