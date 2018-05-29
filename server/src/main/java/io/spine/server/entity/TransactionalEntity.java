@@ -23,7 +23,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
 import io.spine.core.Version;
 import io.spine.reflect.GenericTypeIndex;
 import io.spine.validate.ValidatingBuilder;
@@ -33,10 +32,10 @@ import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static io.spine.server.entity.EventPlayingEntity.GenericParameter.STATE_BUILDER;
+import static io.spine.server.entity.TransactionalEntity.GenericParameter.STATE_BUILDER;
 
 /**
- * A base for entities, which can play {@linkplain Event events}.
+ * A base for entities, perform transactions {@linkplain Event events}.
  *
  * <p>Defines a transaction-based mechanism for state, version and lifecycle flags update.
  *
@@ -45,7 +44,7 @@ import static io.spine.server.entity.EventPlayingEntity.GenericParameter.STATE_B
  *
  * @author Alex Tymchenko
  */
-public abstract class EventPlayingEntity <I,
+public abstract class TransactionalEntity<I,
                                           S extends Message,
                                           B extends ValidatingBuilder<S, ? extends Message.Builder>>
                       extends AbstractVersionableEntity<I, S> {
@@ -59,7 +58,7 @@ public abstract class EventPlayingEntity <I,
     private volatile boolean stateChanged;
 
     @Nullable
-    private volatile Transaction<I, ? extends EventPlayingEntity<I, S, B>, S, B> transaction;
+    private volatile Transaction<I, ? extends TransactionalEntity<I, S, B>, S, B> transaction;
 
     /**
      * Creates a new instance.
@@ -68,7 +67,7 @@ public abstract class EventPlayingEntity <I,
      * @throws IllegalArgumentException if the ID is not of one of the
      *                                  {@linkplain Entity supported types}
      */
-    protected EventPlayingEntity(I id) {
+    protected TransactionalEntity(I id) {
         super(id);
     }
 
@@ -105,10 +104,10 @@ public abstract class EventPlayingEntity <I,
     @Internal
     public boolean isChanged() {
         final boolean lifecycleFlagsChanged = lifecycleFlagsChanged();
-        final boolean stateChanged = transaction != null
-                ? transaction.isStateChanged()
-                : this.stateChanged;
-
+        final Transaction<?, ?, ?, ?> tx = this.transaction;
+        final boolean stateChanged = tx != null
+                                     ? tx.isStateChanged()
+                                     : this.stateChanged;
         return stateChanged || lifecycleFlagsChanged;
     }
 
@@ -138,7 +137,7 @@ public abstract class EventPlayingEntity <I,
         return "Cannot modify entity state: transaction is not available.";
     }
 
-    private Transaction<I, ? extends EventPlayingEntity<I,S,B>, S, B> tx() {
+    Transaction<I, ? extends TransactionalEntity<I,S,B>, S, B> tx() {
         ensureTransaction();
         return transaction;
     }
@@ -150,33 +149,13 @@ public abstract class EventPlayingEntity <I,
      */
     @VisibleForTesting
     boolean isTransactionInProgress() {
-        final boolean result = transaction != null && transaction.isActive();
+        final Transaction<?, ?, ?, ?> tx = this.transaction;
+        final boolean result = tx != null && tx.isActive();
         return result;
     }
 
-    /**
-     * Plays the given events upon this entity.
-     *
-     * <p>Please note that the entity version is set according to the version of the event context.
-     * Therefore, if the passed event(s) are in fact so called "integration" events and originated
-     * from another application, they should be properly imported first.
-     * Otherwise, the version conflict is possible.
-     *
-     * <p>Execution of this method requires the {@linkplain #isTransactionInProgress()
-     * presence of active transaction}.
-     *
-     * @param events the events to play
-     */
-    protected void play(Iterable<Event> events) {
-        final Transaction<I, ? extends EventPlayingEntity<I, S, B>, S, B> tx = tx();
-        for (Event event : events) {
-            final EventEnvelope eventEnvelope = EventEnvelope.of(event);
-            tx.apply(eventEnvelope);
-        }
-    }
-
     @SuppressWarnings("ObjectEquality") // the refs must to point to the same object; see below.
-    void injectTransaction(Transaction<I, ? extends EventPlayingEntity<I, S, B>, S, B> tx) {
+    void injectTransaction(Transaction<I, ? extends TransactionalEntity<I, S, B>, S, B> tx) {
         checkNotNull(tx);
 
         /*
@@ -196,7 +175,7 @@ public abstract class EventPlayingEntity <I,
 
     @Nullable
     @VisibleForTesting
-    Transaction<I, ? extends EventPlayingEntity<I, S, B>, S, B> getTransaction() {
+    Transaction<I, ? extends TransactionalEntity<I, S, B>, S, B> getTransaction() {
         return transaction;
     }
 
@@ -260,9 +239,9 @@ public abstract class EventPlayingEntity <I,
 
     private B newBuilderInstance() {
         @SuppressWarnings("unchecked")   // it's safe, as we rely on the definition of this class.
-        final Class<? extends EventPlayingEntity<I, S, B>> aClass =
-                (Class<? extends EventPlayingEntity<I, S, B>>)getClass();
-        final Class<B> builderClass = TypeInfo.getBuilderClass(aClass);
+        final Class<? extends TransactionalEntity<I, S, B>> cls =
+                (Class<? extends TransactionalEntity<I, S, B>>) getClass();
+        final Class<B> builderClass = TypeInfo.getBuilderClass(cls);
         final B builder = ValidatingBuilders.newInstance(builderClass);
         return builder;
     }
@@ -270,7 +249,7 @@ public abstract class EventPlayingEntity <I,
     /**
      * Enumeration of generic type parameters of this class.
      */
-    enum GenericParameter implements GenericTypeIndex<EventPlayingEntity> {
+    enum GenericParameter implements GenericTypeIndex<TransactionalEntity> {
 
         /** The index of the generic type {@code <I>}. */
         ID(0),
@@ -293,28 +272,30 @@ public abstract class EventPlayingEntity <I,
         }
 
         @Override
-        public Class<?> getArgumentIn(Class<? extends EventPlayingEntity> cls) {
+        public Class<?> getArgumentIn(Class<? extends TransactionalEntity> cls) {
             return Default.getArgument(this, cls);
         }
     }
 
     /**
-     * Provides type information on classes extending {@code EventPlayingEntity}.
+     * Provides type information on classes extending {@code TransactionalEntity}.
      */
     static class TypeInfo {
 
+        /**
+         * Prevents instantiation.
+         */
         private TypeInfo() {
-            // Prevent construction from outside.
         }
 
         /**
          * Obtains the class of the {@linkplain ValidatingBuilder} for the given
-         * {@code EventPlayingEntity} descendant class {@code entityClass}.
+         * {@code TransactionalEntity} descendant class {@code entityClass}.
          */
         private static <I,
                         S extends Message,
                         B extends ValidatingBuilder<S, ? extends Message.Builder>>
-        Class<B> getBuilderClass(Class<? extends EventPlayingEntity<I, S, B>> entityClass) {
+        Class<B> getBuilderClass(Class<? extends TransactionalEntity<I, S, B>> entityClass) {
             checkNotNull(entityClass);
             @SuppressWarnings("unchecked") // The type is ensured by this class declaration.
             final Class<B> builderClass = (Class<B>)STATE_BUILDER.getArgumentIn(entityClass);

@@ -33,7 +33,7 @@ import java.util.List;
  * @author Alexander Yevsyukov
  */
 class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
-    extends AggregateMessageEndpoint<I, A, CommandEnvelope, I> {
+        extends AggregateEndpoint<I, A, CommandEnvelope, I> {
 
     private AggregateCommandEndpoint(AggregateRepository<I, A> repo, CommandEnvelope command) {
         super(repo, command);

@@ -31,7 +31,7 @@ import java.util.Objects;
 import static com.google.common.collect.Queues.newArrayDeque;
 
 /**
- * A copy of recent history of an {@linkplain io.spine.server.entity.EventPlayingEntity
+ * A copy of recent history of an {@linkplain TransactionalEntity
  * event-sourced entity}.
  *
  * <p>Any modifications to this object will not affect the real history of the entity.
