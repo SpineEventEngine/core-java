@@ -100,6 +100,7 @@ class LongMismatchTest {
             assertEquals(VERSION, mismatch.getVersion());
         }
 
+        @SuppressWarnings("Duplicates") // Common test case for different Mismatches.
         @Test
         @DisplayName("successfully create instance for unexpected long value")
         void createForUnexpectedLong() {

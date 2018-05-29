@@ -94,6 +94,7 @@ class StringMismatchTest {
             assertEquals(VERSION, mismatch.getVersion());
         }
 
+        @SuppressWarnings("Duplicates") // Common test case for different Mismatches.
         @Test
         @DisplayName("successfully create instance for unexpected value")
         void createForUnexpectedValue() {

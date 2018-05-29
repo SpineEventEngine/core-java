@@ -40,6 +40,7 @@ class EventClassTest {
                 .testAllPublicStaticMethods(EventClass.class);
     }
 
+    @SuppressWarnings("DuplicateStringLiteralInspection") // Common test display name.
     @Test
     @DisplayName("create set on varargs")
     void createSetOnVarargs() {

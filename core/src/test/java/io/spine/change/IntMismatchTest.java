@@ -100,6 +100,7 @@ class IntMismatchTest {
             assertEquals(VERSION, mismatch.getVersion());
         }
 
+        @SuppressWarnings("Duplicates") // Common test case for different Mismatches.
         @Test
         @DisplayName("successfully create instance for unexpected int value")
         void createForUnexpectedInt() {

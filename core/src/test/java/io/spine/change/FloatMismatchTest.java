@@ -101,6 +101,7 @@ class FloatMismatchTest {
             assertEquals(VERSION, mismatch.getVersion());
         }
 
+        @SuppressWarnings("Duplicates") // Common test case for different Mismatches.
         @Test
         @DisplayName("successfully create instance for unexpected float value")
         void createForUnexpectedFloat() {

@@ -42,6 +42,7 @@ class RejectionClassTest {
                 .testAllPublicStaticMethods(RejectionClass.class);
     }
 
+    @SuppressWarnings("DuplicateStringLiteralInspection") // Common test display name.
     @Test
     @DisplayName("create set on varargs")
     void createSetOnVarargs() {
