@@ -47,7 +47,6 @@ class EventClassTest {
         assertEquals(3, EventClass.setOf(
                 BoolValue.class,
                 Int32Value.class,
-                StringValue.class)
-                                  .size());
+                StringValue.class).size());
     }
 }
