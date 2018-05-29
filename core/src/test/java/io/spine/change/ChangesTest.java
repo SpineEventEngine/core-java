@@ -123,7 +123,7 @@ class ChangesTest {
         }
 
         @Test
-        @DisplayName("successfully create instance for TimestampChange values")
+        @DisplayName("successfully create instance for Timestamp values")
         void createTimestampChange() {
             final Timestamp fiveMinutesAgo = TimeTests.Past.minutesAgo(5);
             final Timestamp now = getCurrentTime();
