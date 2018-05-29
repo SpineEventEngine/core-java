@@ -23,6 +23,7 @@ package io.spine.change;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.StringValue;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.change.MessageMismatch.expectedDefault;
@@ -57,55 +58,63 @@ class MessageMismatchTest {
                 .testAllPublicStaticMethods(MessageMismatch.class);
     }
 
-    @Test
-    @DisplayName("create ValueMismatch instance for expected default value")
-    void createForExpectedDefault() {
-        final ValueMismatch mismatch = expectedDefault(ACTUAL, NEW_VALUE, VERSION);
+    @SuppressWarnings({"InnerClassMayBeStatic" /* JUnit 5 Nested classes cannot be static */,
+                       "DuplicateStringLiteralInspection" /* Nested class display name similar to
+                                                          others */})
+    @Nested
+    @DisplayName("when creating ValueMismatch")
+    class CreateMismatchTest {
 
-        assertEquals(DEFAULT_VALUE, unpackExpected(mismatch));
-        assertEquals(ACTUAL, unpackActual(mismatch));
-        assertEquals(NEW_VALUE, unpackNewValue(mismatch));
-        assertEquals(VERSION, mismatch.getVersion());
-    }
+        @Test
+        @DisplayName("successfully create instance for expected default value")
+        void createForExpectedDefault() {
+            final ValueMismatch mismatch = expectedDefault(ACTUAL, NEW_VALUE, VERSION);
 
-    @Test
-    @DisplayName("create ValueMismatch instance for unexpected default when clearing")
-    void createForUnexpectedDefaultWhenClearing() {
-        final ValueMismatch mismatch = expectedNotDefault(EXPECTED, VERSION);
+            assertEquals(DEFAULT_VALUE, unpackExpected(mismatch));
+            assertEquals(ACTUAL, unpackActual(mismatch));
+            assertEquals(NEW_VALUE, unpackNewValue(mismatch));
+            assertEquals(VERSION, mismatch.getVersion());
+        }
 
-        assertEquals(EXPECTED, unpackExpected(mismatch));
+        @Test
+        @DisplayName("successfully create instance for unexpected default when clearing")
+        void createForUnexpectedDefaultWhenClearing() {
+            final ValueMismatch mismatch = expectedNotDefault(EXPECTED, VERSION);
 
-        // Check that the actual value is default.
-        assertEquals(DEFAULT_VALUE, unpackActual(mismatch));
+            assertEquals(EXPECTED, unpackExpected(mismatch));
 
-        // Check that newValue has default value as the command intends to clear the field.
-        assertEquals(DEFAULT_VALUE, unpackNewValue(mismatch));
+            // Check that the actual value is default.
+            assertEquals(DEFAULT_VALUE, unpackActual(mismatch));
 
-        assertEquals(VERSION, mismatch.getVersion());
-    }
+            // Check that newValue has default value as the command intends to clear the field.
+            assertEquals(DEFAULT_VALUE, unpackNewValue(mismatch));
 
-    @Test
-    @DisplayName("create ValueMismatch instance for unexpected default when changing")
-    void createForUnexpectedDefaultWhenChanging() {
-        final ValueMismatch mismatch = expectedNotDefault(EXPECTED, NEW_VALUE, VERSION);
+            assertEquals(VERSION, mismatch.getVersion());
+        }
 
-        assertEquals(EXPECTED, unpackExpected(mismatch));
+        @Test
+        @DisplayName("successfully create instance for unexpected default when changing")
+        void createForUnexpectedDefaultWhenChanging() {
+            final ValueMismatch mismatch = expectedNotDefault(EXPECTED, NEW_VALUE, VERSION);
 
-        // Check that the actual value is default.
-        assertEquals(DEFAULT_VALUE, unpackActual(mismatch));
+            assertEquals(EXPECTED, unpackExpected(mismatch));
 
-        assertEquals(NEW_VALUE, unpackNewValue(mismatch));
-        assertEquals(VERSION, mismatch.getVersion());
-    }
+            // Check that the actual value is default.
+            assertEquals(DEFAULT_VALUE, unpackActual(mismatch));
 
-    @Test
-    @DisplayName("create ValueMismatch instance for unexpected value")
-    void createForUnexpectedValue() {
-        final ValueMismatch mismatch = unexpectedValue(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
+            assertEquals(NEW_VALUE, unpackNewValue(mismatch));
+            assertEquals(VERSION, mismatch.getVersion());
+        }
 
-        assertEquals(EXPECTED, unpackExpected(mismatch));
-        assertEquals(ACTUAL, unpackActual(mismatch));
-        assertEquals(NEW_VALUE, unpackNewValue(mismatch));
-        assertEquals(VERSION, mismatch.getVersion());
+        @Test
+        @DisplayName("successfully create instance for unexpected value")
+        void createForUnexpectedValue() {
+            final ValueMismatch mismatch = unexpectedValue(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
+
+            assertEquals(EXPECTED, unpackExpected(mismatch));
+            assertEquals(ACTUAL, unpackActual(mismatch));
+            assertEquals(NEW_VALUE, unpackNewValue(mismatch));
+            assertEquals(VERSION, mismatch.getVersion());
+        }
     }
 }

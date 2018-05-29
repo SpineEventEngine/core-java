@@ -22,6 +22,7 @@ package io.spine.change;
 
 import com.google.common.testing.NullPointerTester;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.change.BooleanMismatch.expectedTrue;
@@ -35,6 +36,8 @@ import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@SuppressWarnings({"InnerClassMayBeStatic" /* JUnit 5 Nested classes cannot be static */,
+                   "DuplicateStringLiteralInspection" /* A lot of similar test display names */})
 @DisplayName("StringMismatch should")
 class StringMismatchTest {
 
@@ -57,71 +60,81 @@ class StringMismatchTest {
                 .testAllPublicStaticMethods(StringMismatch.class);
     }
 
-    @Test
-    @DisplayName("create ValueMismatch instance for expected empty string")
-    void createForExpectedEmptyString() {
-        final ValueMismatch mismatch = expectedEmpty(ACTUAL, NEW_VALUE, VERSION);
+    @Nested
+    @DisplayName("when creating ValueMismatch")
+    class CreateMismatchTest {
 
-        assertEquals("", unpackExpected(mismatch));
-        assertEquals(ACTUAL, unpackActual(mismatch));
-        assertEquals(NEW_VALUE, unpackNewValue(mismatch));
-        assertEquals(VERSION, mismatch.getVersion());
+        @Test
+        @DisplayName("successfully create instance for expected empty string")
+        void createForExpectedEmptyString() {
+            final ValueMismatch mismatch = expectedEmpty(ACTUAL, NEW_VALUE, VERSION);
+
+            assertEquals("", unpackExpected(mismatch));
+            assertEquals(ACTUAL, unpackActual(mismatch));
+            assertEquals(NEW_VALUE, unpackNewValue(mismatch));
+            assertEquals(VERSION, mismatch.getVersion());
+        }
+
+        @Test
+        @DisplayName("successfully create instance for unexpected empty string")
+        void createForUnexpectedEmptyString() {
+            final ValueMismatch mismatch = expectedNotEmpty(EXPECTED, VERSION);
+
+            assertEquals(EXPECTED, unpackExpected(mismatch));
+
+            // Check that the actual value from the mismatch is an empty string.
+            assertEquals("", unpackActual(mismatch));
+
+            // We wanted to clear the field. Check that `newValue` is an empty string.
+            assertEquals("", unpackNewValue(mismatch));
+
+            // Check version.
+            assertEquals(VERSION, mismatch.getVersion());
+        }
+
+        @Test
+        @DisplayName("successfully create instance for unexpected value")
+        void createForUnexpectedValue() {
+            final ValueMismatch mismatch = unexpectedValue(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
+
+            assertEquals(EXPECTED, unpackExpected(mismatch));
+            assertEquals(ACTUAL, unpackActual(mismatch));
+            assertEquals(NEW_VALUE, unpackNewValue(mismatch));
+            assertEquals(VERSION, mismatch.getVersion());
+        }
+
+        @Test
+        @DisplayName("not accept same expected and actual values")
+        void notAcceptSameExpectedAndActual() {
+            final String value = "same-same";
+            assertThrows(IllegalArgumentException.class,
+                         () -> unexpectedValue(value, value, NEW_VALUE, VERSION));
+        }
     }
 
-    @Test
-    @DisplayName("create ValueMismatch instance for unexpected empty string")
-    void createForUnexpectedEmptyString() {
-        final ValueMismatch mismatch = expectedNotEmpty(EXPECTED, VERSION);
+    @Nested
+    @DisplayName("when unpacking passed ValueMismatch")
+    class UnpackMismatchTest {
 
-        assertEquals(EXPECTED, unpackExpected(mismatch));
+        @Test
+        @DisplayName("unpackExpected only if passed value is StringMismatch")
+        void notUnpackExpectedForWrongType() {
+            final ValueMismatch mismatch = expectedTrue(VERSION);
+            assertThrows(RuntimeException.class, () -> unpackExpected(mismatch));
+        }
 
-        // Check that the actual value from the mismatch is an empty string.
-        assertEquals("", unpackActual(mismatch));
+        @Test
+        @DisplayName("unpackActual only if passed value is StringMismatch")
+        void notUnpackActualForWrongType() {
+            final ValueMismatch mismatch = expectedTrue(VERSION);
+            assertThrows(RuntimeException.class, () -> unpackActual(mismatch));
+        }
 
-        // We wanted to clear the field. Check that `newValue` is an empty string.
-        assertEquals("", unpackNewValue(mismatch));
-
-        // Check version.
-        assertEquals(VERSION, mismatch.getVersion());
-    }
-
-    @Test
-    @DisplayName("create ValueMismatch instance for unexpected value")
-    void createForUnexpectedValue() {
-        final ValueMismatch mismatch = unexpectedValue(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
-
-        assertEquals(EXPECTED, unpackExpected(mismatch));
-        assertEquals(ACTUAL, unpackActual(mismatch));
-        assertEquals(NEW_VALUE, unpackNewValue(mismatch));
-        assertEquals(VERSION, mismatch.getVersion());
-    }
-
-    @Test
-    @DisplayName("not unpackExpected if passed ValueMismatch is not a StringMismatch")
-    void notUnpackExpectedForWrongType() {
-        final ValueMismatch mismatch = expectedTrue(VERSION);
-        assertThrows(RuntimeException.class, () -> unpackExpected(mismatch));
-    }
-
-    @Test
-    @DisplayName("not unpackActual if passed ValueMismatch is not a StringMismatch")
-    void notUnpackActualForWrongType() {
-        final ValueMismatch mismatch = expectedTrue(VERSION);
-        assertThrows(RuntimeException.class, () -> unpackActual(mismatch));
-    }
-
-    @Test
-    @DisplayName("not unpackNewValue if passed ValueMismatch is not a StringMismatch")
-    void notUnpackNewValueForWrongType() {
-        final ValueMismatch mismatch = expectedTrue(VERSION);
-        assertThrows(RuntimeException.class, () -> unpackNewValue(mismatch));
-    }
-
-    @Test
-    @DisplayName("not accept same expected and actual values")
-    void notAcceptSameExpectedAndActual() {
-        final String value = "same-same";
-        assertThrows(IllegalArgumentException.class,
-                     () -> unexpectedValue(value, value, NEW_VALUE, VERSION));
+        @Test
+        @DisplayName("unpackNewValue only if passed value is StringMismatch")
+        void notUnpackNewValueForWrongType() {
+            final ValueMismatch mismatch = expectedTrue(VERSION);
+            assertThrows(RuntimeException.class, () -> unpackNewValue(mismatch));
+        }
     }
 }

@@ -35,17 +35,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class RejectionClassTest {
 
     @Test
+    @DisplayName("pass null tolerance check")
+    void passNullToleranceCheck() throws Exception {
+        new NullPointerTester()
+                .testAllPublicStaticMethods(RejectionClass.class);
+    }
+
+    @Test
     @DisplayName("create set on varargs")
     void createSetOnVarargs() {
         assertEquals(3,
                      RejectionClass.setOf(BoolValue.class, Int32Value.class, StringValue.class)
                                    .size());
-    }
-
-    @Test
-    @DisplayName("pass null tolerance check")
-    void passNullToleranceCheck() throws Exception {
-        new NullPointerTester()
-                .testAllPublicStaticMethods(RejectionClass.class);
     }
 }

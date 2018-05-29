@@ -22,6 +22,7 @@ package io.spine.change;
 
 import com.google.common.testing.NullPointerTester;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.change.BooleanMismatch.expectedTrue;
@@ -35,6 +36,8 @@ import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@SuppressWarnings({"InnerClassMayBeStatic" /* JUnit 5 Nested classes cannot be static */,
+                   "DuplicateStringLiteralInspection" /* A lot of similar test display names */})
 @DisplayName("LongMismatch should")
 class LongMismatchTest {
 
@@ -56,78 +59,88 @@ class LongMismatchTest {
                 .testAllPublicStaticMethods(LongMismatch.class);
     }
 
-    @Test
-    @DisplayName("return ValueMismatch object with given int64 values")
-    void returnMismatchWithInt64Values() {
-        final ValueMismatch mismatch = LongMismatch.of(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
+    @Nested
+    @DisplayName("when creating ValueMismatch")
+    class CreateMismatchTest {
 
-        assertEquals(EXPECTED, unpackExpected(mismatch));
-        assertEquals(ACTUAL, unpackActual(mismatch));
-        assertEquals(NEW_VALUE, unpackNewValue(mismatch));
-        assertEquals(VERSION, mismatch.getVersion());
+        @Test
+        @DisplayName("successfully create instance from given int64 values")
+        void createMismatchWithInt64Values() {
+            final ValueMismatch mismatch = LongMismatch.of(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
+
+            assertEquals(EXPECTED, unpackExpected(mismatch));
+            assertEquals(ACTUAL, unpackActual(mismatch));
+            assertEquals(NEW_VALUE, unpackNewValue(mismatch));
+            assertEquals(VERSION, mismatch.getVersion());
+        }
+
+        @Test
+        @DisplayName("successfully create instance for expected zero amount")
+        void createForExpectedZero() {
+            final long expected = 0L;
+            final ValueMismatch mismatch = expectedZero(ACTUAL, NEW_VALUE, VERSION);
+
+            assertEquals(expected, unpackExpected(mismatch));
+            assertEquals(ACTUAL, unpackActual(mismatch));
+            assertEquals(NEW_VALUE, unpackNewValue(mismatch));
+            assertEquals(VERSION, mismatch.getVersion());
+        }
+
+        @Test
+        @DisplayName("successfully create instance for expected non zero amount")
+        void createForExpectedNonZero() {
+            final long actual = 0L;
+            final ValueMismatch mismatch = expectedNonZero(EXPECTED, NEW_VALUE, VERSION);
+
+            assertEquals(EXPECTED, unpackExpected(mismatch));
+            assertEquals(actual, unpackActual(mismatch));
+            assertEquals(NEW_VALUE, unpackNewValue(mismatch));
+            assertEquals(VERSION, mismatch.getVersion());
+        }
+
+        @Test
+        @DisplayName("successfully create instance for unexpected long value")
+        void createForUnexpectedLong() {
+            final ValueMismatch mismatch = unexpectedValue(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
+
+            assertEquals(EXPECTED, unpackExpected(mismatch));
+            assertEquals(ACTUAL, unpackActual(mismatch));
+            assertEquals(NEW_VALUE, unpackNewValue(mismatch));
+            assertEquals(VERSION, mismatch.getVersion());
+        }
+
+        @Test
+        @DisplayName("not accept same expected and actual values")
+        void notAcceptSameExpectedAndActual() {
+            final long value = 1919L;
+            assertThrows(IllegalArgumentException.class,
+                         () -> unexpectedValue(value, value, NEW_VALUE, VERSION));
+        }
     }
 
-    @Test
-    @DisplayName("create ValueMismatch instance for expected zero amount")
-    void createForExpectedZero() {
-        final long expected = 0L;
-        final ValueMismatch mismatch = expectedZero(ACTUAL, NEW_VALUE, VERSION);
+    @Nested
+    @DisplayName("when unpacking passed ValueMismatch")
+    class UnpackMismatchTest {
 
-        assertEquals(expected, unpackExpected(mismatch));
-        assertEquals(ACTUAL, unpackActual(mismatch));
-        assertEquals(NEW_VALUE, unpackNewValue(mismatch));
-        assertEquals(VERSION, mismatch.getVersion());
-    }
+        @Test
+        @DisplayName("unpackExpected only if passed value is LongMismatch")
+        void notUnpackExpectedForWrongType() {
+            final ValueMismatch mismatch = expectedTrue(VERSION);
+            assertThrows(RuntimeException.class, () -> unpackExpected(mismatch));
+        }
 
-    @Test
-    @DisplayName("create ValueMismatch instance for expected non zero amount")
-    void createForExpectedNonZero() {
-        final long actual = 0L;
-        final ValueMismatch mismatch = expectedNonZero(EXPECTED, NEW_VALUE, VERSION);
+        @Test
+        @DisplayName("unpackActual only if passed value is LongMismatch")
+        void notUnpackActualForWrongType() {
+            final ValueMismatch mismatch = expectedTrue(VERSION);
+            assertThrows(RuntimeException.class, () -> unpackActual(mismatch));
+        }
 
-        assertEquals(EXPECTED, unpackExpected(mismatch));
-        assertEquals(actual, unpackActual(mismatch));
-        assertEquals(NEW_VALUE, unpackNewValue(mismatch));
-        assertEquals(VERSION, mismatch.getVersion());
-    }
-
-    @Test
-    @DisplayName("create ValueMismatch instance for unexpected long value")
-    void createForUnexpectedLong() {
-        final ValueMismatch mismatch = unexpectedValue(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
-
-        assertEquals(EXPECTED, unpackExpected(mismatch));
-        assertEquals(ACTUAL, unpackActual(mismatch));
-        assertEquals(NEW_VALUE, unpackNewValue(mismatch));
-        assertEquals(VERSION, mismatch.getVersion());
-    }
-
-    @Test
-    @DisplayName("not unpackExpected if passed ValueMismatch is not a LongMismatch")
-    void notUnpackExpectedForWrongType() {
-        final ValueMismatch mismatch = expectedTrue(VERSION);
-        assertThrows(RuntimeException.class, () -> unpackExpected(mismatch));
-    }
-
-    @Test
-    @DisplayName("not unpackActual if passed ValueMismatch is not a LongMismatch")
-    void notUnpackActualForWrongType() {
-        final ValueMismatch mismatch = expectedTrue(VERSION);
-        assertThrows(RuntimeException.class, () -> unpackActual(mismatch));
-    }
-
-    @Test
-    @DisplayName("not unpackNewValue if passed ValueMismatch is not a LongMismatch")
-    void notUnpackNewValueForWrongType() {
-        final ValueMismatch mismatch = expectedTrue(VERSION);
-        assertThrows(RuntimeException.class, () -> unpackNewValue(mismatch));
-    }
-
-    @Test
-    @DisplayName("not accept same expected and actual values")
-    void notAcceptSameExpectedAndActual() {
-        final long value = 1919L;
-        assertThrows(IllegalArgumentException.class,
-                     () -> unexpectedValue(value, value, NEW_VALUE, VERSION));
+        @Test
+        @DisplayName("unpackNewValue only if passed value is LongMismatch")
+        void notUnpackNewValueForWrongType() {
+            final ValueMismatch mismatch = expectedTrue(VERSION);
+            assertThrows(RuntimeException.class, () -> unpackNewValue(mismatch));
+        }
     }
 }

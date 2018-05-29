@@ -51,7 +51,7 @@ class ResponsesTest {
     }
 
     @Test
-    @DisplayName("return false on not OK response")
+    @DisplayName("recognize not OK response")
     void recognizeNotOkResponse() {
         final Status status = Status.newBuilder()
                                     .setError(Error.getDefaultInstance())

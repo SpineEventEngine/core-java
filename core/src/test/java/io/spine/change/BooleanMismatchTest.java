@@ -22,7 +22,10 @@ package io.spine.change;
 
 import com.google.common.testing.NullPointerTester;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+
+import javax.annotation.Nullable;
 
 import static io.spine.change.BooleanMismatch.expectedFalse;
 import static io.spine.change.BooleanMismatch.expectedTrue;
@@ -33,6 +36,8 @@ import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@SuppressWarnings({"InnerClassMayBeStatic" /* JUnit 5 Nested classes cannot be static */,
+                   "DuplicateStringLiteralInspection" /* A lot of similar test display names */})
 @DisplayName("BooleanMismatch should")
 class BooleanMismatchTest {
 
@@ -51,52 +56,62 @@ class BooleanMismatchTest {
                 .testAllPublicStaticMethods(BooleanMismatch.class);
     }
 
-    @Test
-    @DisplayName("create ValueMismatch instance for `expectedFalse` case")
-    void createForExpectedFalse() {
-        final boolean expected = false;
-        final boolean actual = true;
-        final boolean newValue = true;
-        final ValueMismatch mismatch = expectedFalse(VERSION);
+    @Nested
+    @DisplayName("when creating ValueMismatch")
+    class CreateMismatchTest {
 
-        assertEquals(expected, unpackExpected(mismatch));
-        assertEquals(actual, unpackActual(mismatch));
-        assertEquals(newValue, unpackNewValue(mismatch));
-        assertEquals(VERSION, mismatch.getVersion());
+        @Test
+        @DisplayName("successfully create instance for `expectedFalse` case")
+        void createForExpectedFalse() {
+            final boolean expected = false;
+            final boolean actual = true;
+            final boolean newValue = true;
+            final ValueMismatch mismatch = expectedFalse(VERSION);
+
+            assertEquals(expected, unpackExpected(mismatch));
+            assertEquals(actual, unpackActual(mismatch));
+            assertEquals(newValue, unpackNewValue(mismatch));
+            assertEquals(VERSION, mismatch.getVersion());
+        }
+
+        @Test
+        @DisplayName("successfully create instance for `expectedTrue` case")
+        void createForExpectedTrue() {
+            final boolean expected = true;
+            final boolean actual = false;
+            final boolean newValue = false;
+            final ValueMismatch mismatch = expectedTrue(VERSION);
+
+            assertEquals(expected, unpackExpected(mismatch));
+            assertEquals(actual, unpackActual(mismatch));
+            assertEquals(newValue, unpackNewValue(mismatch));
+            assertEquals(VERSION, mismatch.getVersion());
+        }
     }
 
-    @Test
-    @DisplayName("create ValueMismatch instance for `expectedTrue` case")
-    void createForExpectedTrue() {
-        final boolean expected = true;
-        final boolean actual = false;
-        final boolean newValue = false;
-        final ValueMismatch mismatch = expectedTrue(VERSION);
+    @Nested
+    @DisplayName("when unpacking passed ValueMismatch")
+    class UnpackMismatchTest {
 
-        assertEquals(expected, unpackExpected(mismatch));
-        assertEquals(actual, unpackActual(mismatch));
-        assertEquals(newValue, unpackNewValue(mismatch));
-        assertEquals(VERSION, mismatch.getVersion());
-    }
+        @Test
+        @DisplayName("unpackExpected only if passed value is BooleanMismatch")
+        void notUnpackExpectedForWrongType() {
+            final ValueMismatch mismatch = IntMismatch.of(1, 2, 3, VERSION);
+            assertThrows(RuntimeException.class, () -> BooleanMismatch.unpackExpected(mismatch));
+        }
 
-    @Test
-    @DisplayName("not unpackExpected if passed ValueMismatch is not a BooleanMismatch")
-    void notUnpackExpectedForWrongType() {
-        final ValueMismatch mismatch = IntMismatch.of(1, 2, 3, VERSION);
-        assertThrows(RuntimeException.class, () -> BooleanMismatch.unpackExpected(mismatch));
-    }
+        @Test
+        @DisplayName("unpackActual only if passed value is BooleanMismatch")
+        void notUnpackActualForWrongType() {
+            final ValueMismatch mismatch = IntMismatch.of(1, 2, 3, VERSION);
+            assertThrows(RuntimeException.class, () -> BooleanMismatch.unpackActual(mismatch));
+        }
 
-    @Test
-    @DisplayName("not unpackActual if passed ValueMismatch is not a BooleanMismatch")
-    void notUnpackActualForWrongType() {
-        final ValueMismatch mismatch = IntMismatch.of(1, 2, 3, VERSION);
-        assertThrows(RuntimeException.class, () -> BooleanMismatch.unpackActual(mismatch));
-    }
-
-    @Test
-    @DisplayName("not unpackNewValue if passed ValueMismatch is not a BooleanMismatch")
-    void notUnpackNewValueForWrongType() {
-        final ValueMismatch mismatch = IntMismatch.of(1, 2, 3, VERSION);
-        assertThrows(RuntimeException.class, () -> BooleanMismatch.unpackNewValue(mismatch));
+        @Test
+        @DisplayName("unpackNewValue if passed value is BooleanMismatch")
+        void notUnpackNewValueForWrongType() {
+            final ValueMismatch mismatch = IntMismatch.of(1, 2, 3, VERSION);
+            assertThrows(RuntimeException.class, () -> BooleanMismatch.unpackNewValue(mismatch));
+        }
     }
 }
