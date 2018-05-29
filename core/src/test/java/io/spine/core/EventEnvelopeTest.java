@@ -24,12 +24,14 @@ import com.google.protobuf.Message;
 import io.spine.protobuf.AnyPacker;
 import io.spine.test.core.ProjectCreated;
 import io.spine.test.core.ProjectId;
+import org.junit.jupiter.api.DisplayName;
 
 import static io.spine.base.Identifier.newUuid;
 
 /**
  * @author Dmytro Dashenkov
  */
+@DisplayName("EventEnvelope should")
 class EventEnvelopeTest extends MessageEnvelopeTest<Event, EventEnvelope, EventClass> {
 
     @Override
