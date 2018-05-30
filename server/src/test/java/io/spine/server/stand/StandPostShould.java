@@ -31,6 +31,7 @@ import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.entity.EntityStateEnvelope;
 import io.spine.server.projection.ProjectionRepository;
+import io.spine.server.stand.Given.StandTestAggregate;
 import io.spine.server.storage.StorageFactory;
 import io.spine.test.projection.ProjectId;
 import org.junit.Assert;
@@ -67,9 +68,9 @@ public class StandPostShould {
         BoundedContextAction[] result = new BoundedContextAction[Given.SEVERAL];
 
         for (int i = 0; i < result.length; i++) {
-            result[i] = (i % 2 == 0)
-                        ? aggregateRepositoryDispatch()
-                        : projectionRepositoryDispatch();
+            result[i] = ((i % 2) == 0)
+                        ? StandPostShould::aggregateRepositoryDispatch
+                        : StandPostShould::projectionRepositoryDispatch;
         }
 
         return result;
@@ -107,64 +108,61 @@ public class StandPostShould {
         verify(stand, times(dispatchActions.length)).update(any(EntityStateEnvelope.class));
     }
 
-    @SuppressWarnings("CheckReturnValue") // can ignore the dispatch() result
-    private static BoundedContextAction aggregateRepositoryDispatch() {
-        return context -> {
-            // Init repository
-            final AggregateRepository<?, ?> repository = Given.aggregateRepo();
-
-            repository.initStorage(storageFactory(context.isMultitenant()));
-
-            try {
-                // Mock aggregate and mock stand are not able to handle events
-                // returned after command handling.
-                // This causes IllegalStateException to be thrown.
-                // Note that this is not the end of a test case,
-                // so we can't just "expect=IllegalStateException".
-                CommandEnvelope cmd = CommandEnvelope.of(Given.validCommand());
-                repository.dispatch(cmd);
-            } catch (IllegalStateException e) {
-                // Handle null event dispatching after the command is handled.
-
-                // Check if this error is caused by returning null or empty list after
-                // command processing.
-                // Proceed crash if it's not.
-                if (!e.getMessage()
-                      .contains("No record found for command ID: EMPTY")) {
-                    throw e;
-                }
-            }
-        };
-    }
-
-    @SuppressWarnings("CheckReturnValue") // can ignore the dispatch() result
-    private static BoundedContextAction projectionRepositoryDispatch() {
-        return context -> {
-            // Init repository
-            ProjectionRepository repository = Given.projectionRepo();
-            repository.initStorage(storageFactory(context.isMultitenant()));
-
-            // Dispatch an update from projection repo
-            repository.dispatch(EventEnvelope.of(Given.validEvent()));
-        };
-    }
-
     private static StorageFactory storageFactory(boolean multitenant) {
-        BoundedContext bc = BoundedContext.newBuilder()
-                                          .setMultitenant(multitenant)
-                                          .build();
+        BoundedContext bc = BoundedContext
+                .newBuilder()
+                .setMultitenant(multitenant)
+                .build();
         return bc.getStorageFactory();
+    }
+
+    /**
+     * Creates a repository and dispatches a command to it.
+     */
+    @SuppressWarnings("CheckReturnValue") // can ignore the dispatch() result
+    private static void aggregateRepositoryDispatch(BoundedContext context) {
+        // Init repository
+        AggregateRepository<?, ?> repository = Given.aggregateRepo();
+        repository.initStorage(storageFactory(context.isMultitenant()));
+
+        try {
+            // Mock aggregate and mock stand are not able to handle events
+            // returned after command handling.
+            // This causes IllegalStateException to be thrown.
+            // Note that this is not the end of a test case,
+            // so we can't just "expect=IllegalStateException".
+            CommandEnvelope cmd = CommandEnvelope.of(Given.validCommand());
+            repository.dispatch(cmd);
+        } catch (IllegalStateException e) {
+            // Handle null event dispatching after the command is handled.
+
+            // Check if this error is caused by returning null or empty list after
+            // command processing.
+            // Proceed crash if it's not.
+            if (!e.getMessage()
+                  .contains("No record found for command ID: EMPTY")) {
+                throw e;
+            }
+        }
+    }
+
+    @SuppressWarnings("CheckReturnValue") // can ignore the dispatch() result
+    private static void projectionRepositoryDispatch(BoundedContext context) {
+        ProjectionRepository repository = Given.projectionRepo();
+        repository.initStorage(storageFactory(context.isMultitenant()));
+
+        // Dispatch an update from projection repo
+        repository.dispatch(EventEnvelope.of(Given.validEvent()));
     }
 
     @Test
     public void deliver_updates() {
-        AggregateRepository<ProjectId, Given.StandTestAggregate> repository =
-                Given.aggregateRepo();
+        AggregateRepository<ProjectId, StandTestAggregate> repository = Given.aggregateRepo();
         ProjectId entityId = ProjectId
                 .newBuilder()
                 .setId("PRJ-001")
                 .build();
-        Given.StandTestAggregate entity = repository.create(entityId);
+        StandTestAggregate entity = repository.create(entityId);
         StringValue state = entity.getState();
         Version version = entity.getVersion();
 
@@ -184,21 +182,21 @@ public class StandPostShould {
                                                                     .orNull());
                     boolean stateMatches = argument.getMessage()
                                                    .equals(state);
-                    return entityIdMatches &&
-                            versionMatches &&
-                            stateMatches;
+                    return entityIdMatches
+                            && versionMatches
+                            && stateMatches;
                 };
         verify(stand).update(ArgumentMatchers.argThat(argumentMatcher));
     }
 
     @Test
     public void deliver_updates_from_projection_repository() {
-        checkUpdatesDelivery(false, projectionRepositoryDispatch());
+        checkUpdatesDelivery(false, StandPostShould::projectionRepositoryDispatch);
     }
 
     @Test
     public void deliver_updates_from_aggregate_repository() {
-        checkUpdatesDelivery(false, aggregateRepositoryDispatch());
+        checkUpdatesDelivery(false, StandPostShould::aggregateRepositoryDispatch);
     }
 
     @Test
@@ -230,8 +228,8 @@ public class StandPostShould {
                     .newBuilder()
                     .setId(Identifier.newUuid())
                     .build();
-            Given.StandTestAggregate entity = Given.aggregateRepo()
-                                                   .create(entityId);
+            StandTestAggregate entity = Given.aggregateRepo()
+                                             .create(entityId);
             stand.post(requestFactory.createCommandContext()
                                      .getActorContext()
                                      .getTenantId(), entity);
