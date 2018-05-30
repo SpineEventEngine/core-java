@@ -29,6 +29,7 @@ import io.spine.server.entity.ThrowingValidatingBuilder;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionListener;
 import io.spine.server.entity.TransactionShould;
+import io.spine.server.projection.ProjectionTransactionShould.PatchedProjectBuilder;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.event.PrjProjectCreated;
@@ -52,10 +53,9 @@ import static org.junit.Assert.assertTrue;
  */
 public class ProjectionTransactionShould
         extends TransactionShould<ProjectId,
-        Projection<ProjectId, Project,
-                ProjectionTransactionShould.PatchedProjectBuilder>,
-        Project,
-        ProjectionTransactionShould.PatchedProjectBuilder> {
+                                  Projection<ProjectId, Project, PatchedProjectBuilder>,
+                                  Project,
+                                  PatchedProjectBuilder> {
 
     private static final ProjectId ID = ProjectId.newBuilder()
                                                  .setId("projection-transaction-should-project")
@@ -63,34 +63,34 @@ public class ProjectionTransactionShould
 
     @Override
     protected Transaction<ProjectId,
-            Projection<ProjectId, Project, PatchedProjectBuilder>,
-            Project,
-            PatchedProjectBuilder>
+                          Projection<ProjectId, Project, PatchedProjectBuilder>,
+                          Project,
+                          PatchedProjectBuilder>
     createTx(Projection<ProjectId, Project, PatchedProjectBuilder> entity) {
         return new ProjectionTransaction<>(entity);
     }
 
     @Override
     protected Transaction<ProjectId,
-            Projection<ProjectId, Project, PatchedProjectBuilder>,
-            Project,
-            PatchedProjectBuilder> createTxWithState(
-            Projection<ProjectId, Project, PatchedProjectBuilder> entity, Project state,
-            Version version) {
+                          Projection<ProjectId, Project, PatchedProjectBuilder>,
+                          Project,
+                          PatchedProjectBuilder>
+    createTxWithState(Projection<ProjectId, Project, PatchedProjectBuilder> entity,
+                      Project state,
+                      Version version) {
         return new ProjectionTransaction<>(entity, state, version);
     }
 
     @Override
     protected Transaction<ProjectId,
-            Projection<ProjectId, Project, PatchedProjectBuilder>,
-            Project,
-            PatchedProjectBuilder>
+                          Projection<ProjectId, Project, PatchedProjectBuilder>,
+                          Project,
+                          PatchedProjectBuilder>
     createTxWithListener(Projection<ProjectId, Project, PatchedProjectBuilder> entity,
                          TransactionListener<ProjectId,
-                                 Projection<ProjectId,
-                                         Project,
-                                         PatchedProjectBuilder>,
-                                 Project, PatchedProjectBuilder> listener) {
+                                             Projection<ProjectId, Project, PatchedProjectBuilder>,
+                                             Project,
+                                             PatchedProjectBuilder> listener) {
         return new ProjectionTransaction<>(entity, listener);
     }
 
@@ -100,8 +100,8 @@ public class ProjectionTransactionShould
     }
 
     @Override
-    protected Projection<ProjectId, Project, PatchedProjectBuilder> createEntity(
-            List<ConstraintViolation> violations) {
+    protected Projection<ProjectId, Project, PatchedProjectBuilder>
+    createEntity(List<ConstraintViolation> violations) {
         return new TestProjection(ID, violations);
     }
 
@@ -114,9 +114,8 @@ public class ProjectionTransactionShould
     }
 
     @Override
-    protected void checkEventReceived(
-            Projection<ProjectId, Project, PatchedProjectBuilder> entity,
-            Event event) {
+    protected void checkEventReceived(Projection<ProjectId, Project, PatchedProjectBuilder> entity,
+                                      Event event) {
 
         TestProjection aggregate = (TestProjection) entity;
         Message actualMessage = unpack(event.getMessage());
