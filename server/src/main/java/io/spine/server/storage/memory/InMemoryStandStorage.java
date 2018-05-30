@@ -87,12 +87,12 @@ class InMemoryStandStorage extends StandStorage {
     }
 
     private static Iterator<EntityRecord> filterByType(Iterator<EntityRecord> records,
-                                                       final TypeUrl expectedType) {
-        final Iterator<EntityRecord> result =
+                                                       TypeUrl expectedType) {
+        Iterator<EntityRecord> result =
                 filter(records,
                        entityRecord -> {
                            checkNotNull(entityRecord);
-                           final TypeUrl actualType = ofEnclosed(entityRecord.getState());
+                           TypeUrl actualType = ofEnclosed(entityRecord.getState());
                            return expectedType.equals(actualType);
                        });
         return result;

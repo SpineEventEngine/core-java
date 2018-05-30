@@ -41,11 +41,11 @@ import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.ProjectVBuilder;
 import io.spine.testdata.Sample;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.Test;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;
@@ -70,20 +70,14 @@ import static org.junit.Assert.assertTrue;
  * @author Alexander Litus
  */
 public abstract class AggregateStorageShould
-        extends AbstractStorageShould<
-        ProjectId,
-        AggregateStateRecord,
-        AggregateReadRequest<ProjectId>,
-        AggregateStorage<ProjectId>
-        > {
+        extends AbstractStorageShould<ProjectId,
+                                      AggregateStateRecord,
+                                      AggregateReadRequest<ProjectId>,
+                                      AggregateStorage<ProjectId>> {
 
-    protected static final Function<AggregateEventRecord, Event> TO_EVENT =
-            new Function<AggregateEventRecord, Event>() {
-                @Override // return null because an exception won't be propagated in this case
-                public @Nullable Event apply(@Nullable AggregateEventRecord input) {
-                    return (input == null) ? null : input.getEvent();
-                }
-            };
+    private static final Function<AggregateEventRecord, Event> TO_EVENT =
+            record -> record != null ? record.getEvent() : null;
+            
     private final ProjectId id = Sample.messageOfType(ProjectId.class);
     private final TestEventFactory eventFactory = newInstance(AggregateStorageShould.class);
     private AggregateStorage<ProjectId> storage;
@@ -110,12 +104,14 @@ public abstract class AggregateStorageShould
     @Override
     protected AggregateStateRecord newStorageRecord() {
         List<AggregateEventRecord> records = sequenceFor(id);
-        List<Event> expectedEvents = transform(records, TO_EVENT);
-        AggregateStateRecord aggregateStateRecord =
-                AggregateStateRecord.newBuilder()
-                                    .addAllEvent(expectedEvents)
-                                    .build();
-        return aggregateStateRecord;
+        List<Event> expectedEvents = records.stream()
+                                            .map(TO_EVENT)
+                                            .collect(Collectors.toList());
+        AggregateStateRecord record = AggregateStateRecord
+                .newBuilder()
+                .addAllEvent(expectedEvents)
+                .build();
+        return record;
     }
 
     @Override
@@ -166,9 +162,9 @@ public abstract class AggregateStorageShould
     @Test
     public void return_absent_AggregateStateRecord_if_read_history_from_empty_storage() {
         AggregateReadRequest<ProjectId> readRequest = newReadRequest(id);
-        Optional<AggregateStateRecord> aggregateStateRecord = storage.read(readRequest);
+        Optional<AggregateStateRecord> record = storage.read(readRequest);
 
-        assertFalse(aggregateStateRecord.isPresent());
+        assertFalse(record.isPresent());
     }
 
     @Test

@@ -69,7 +69,6 @@ import io.spine.test.aggregate.event.AggUserNotified;
 import io.spine.test.aggregate.rejection.Rejections;
 import io.spine.test.aggregate.user.User;
 import io.spine.type.TypeUrl;
-import io.spine.util.Exceptions;
 import io.spine.validate.ConstraintViolation;
 import org.junit.After;
 import org.junit.Before;
@@ -109,6 +108,7 @@ import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.reassig
 import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.typeUrlOf;
 import static io.spine.server.entity.given.Given.aggregateOfClass;
 import static io.spine.test.Verify.assertSize;
+import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -180,7 +180,7 @@ public class AggregateShould {
         try {
             boundedContext.close();
         } catch (Exception e) {
-            throw Exceptions.illegalStateWithCauseOf(e);
+            throw illegalStateWithCauseOf(e);
         }
     }
 
@@ -582,8 +582,7 @@ public class AggregateShould {
             dispatchCommand(faultyAggregate, env(command.getMessage()));
             failNotThrows();
         } catch (RuntimeException e) {
-            @SuppressWarnings("ThrowableResultOfMethodCallIgnored") // We need it for checking.
-                    Throwable cause = getRootCause(e);
+            Throwable cause = getRootCause(e);
             assertTrue(cause instanceof IllegalStateException);
             assertEquals(FaultyAggregate.BROKEN_HANDLER, cause.getMessage());
         }
@@ -600,9 +599,7 @@ public class AggregateShould {
             dispatchCommand(faultyAggregate, env(command.getMessage()));
             failNotThrows();
         } catch (RuntimeException e) {
-            @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
-            // because we need it for checking.
-                    Throwable cause = getRootCause(e);
+            Throwable cause = getRootCause(e);
             assertTrue(cause instanceof IllegalStateException);
             assertEquals(FaultyAggregate.BROKEN_APPLIER, cause.getMessage());
         }
@@ -623,9 +620,7 @@ public class AggregateShould {
             tx.commit();
             failNotThrows();
         } catch (RuntimeException e) {
-            @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
-            // because we need it for checking.
-                    Throwable cause = getRootCause(e);
+            Throwable cause = getRootCause(e);
             assertTrue(cause instanceof IllegalStateException);
             assertEquals(FaultyAggregate.BROKEN_APPLIER, cause.getMessage());
         }
