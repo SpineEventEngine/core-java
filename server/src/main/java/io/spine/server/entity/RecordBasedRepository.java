@@ -152,22 +152,6 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     }
 
     /**
-     * Stores the passed entity record.
-     */
-    @Internal
-    public void storeRecord(EntityRecord record) {
-        E entity = toEntity(record);
-        store(entity);
-    }
-
-    @Internal
-    public EntityRecord findOrCreateRecord(I id) {
-        E entity = findOrCreate(id);
-        EntityRecordWithColumns recordWithColumns = toRecord(entity);
-        return recordWithColumns.getRecord();
-    }
-
-    /**
      * Finds an entity with the passed ID if this entity is
      * {@linkplain EntityWithLifecycle.Predicates#isEntityVisible() visible}.
      *
