@@ -58,11 +58,11 @@ class BooleanMismatchTest {
 
     @Nested
     @DisplayName("create ValueMismatch instance")
-    class CreateMismatchTest {
+    class Create {
 
         @Test
         @DisplayName("for `expectedFalse` case")
-        void createForExpectedFalse() {
+        void forExpectedFalse() {
             final boolean expected = false;
             final boolean actual = true;
             final boolean newValue = true;
@@ -76,7 +76,7 @@ class BooleanMismatchTest {
 
         @Test
         @DisplayName("for `expectedTrue` case")
-        void createForExpectedTrue() {
+        void forExpectedTrue() {
             final boolean expected = true;
             final boolean actual = false;
             final boolean newValue = false;
@@ -91,25 +91,25 @@ class BooleanMismatchTest {
 
     @Nested
     @DisplayName("if given non-boolean ValueMismatch, fail to unpack")
-    class UnpackMismatchTest {
+    class FailToUnpack {
 
         @Test
         @DisplayName("expected")
-        void notUnpackExpectedForWrongType() {
+        void expectedWithWrongType() {
             final ValueMismatch mismatch = IntMismatch.of(1, 2, 3, VERSION);
             assertThrows(RuntimeException.class, () -> BooleanMismatch.unpackExpected(mismatch));
         }
 
         @Test
         @DisplayName("actual")
-        void notUnpackActualForWrongType() {
+        void actualWithWrongType() {
             final ValueMismatch mismatch = IntMismatch.of(1, 2, 3, VERSION);
             assertThrows(RuntimeException.class, () -> BooleanMismatch.unpackActual(mismatch));
         }
 
         @Test
         @DisplayName("new value")
-        void notUnpackNewValueForWrongType() {
+        void newValueWithWrongType() {
             final ValueMismatch mismatch = IntMismatch.of(1, 2, 3, VERSION);
             assertThrows(RuntimeException.class, () -> BooleanMismatch.unpackNewValue(mismatch));
         }

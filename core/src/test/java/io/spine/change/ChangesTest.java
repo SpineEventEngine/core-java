@@ -98,11 +98,11 @@ class ChangesTest {
 
     @Nested
     @DisplayName("create value change for values of type")
-    class CreateChangeTest {
+    class Create {
 
         @Test
         @DisplayName("String")
-        void createStringChange() {
+        void forStrings() {
             final String previousValue = randomUuid();
             final String newValue = randomUuid();
 
@@ -114,7 +114,7 @@ class ChangesTest {
 
         @Test
         @DisplayName("ByteString")
-        void createByteStringChange() {
+        void forByteStrings() {
             final ByteString previousValue = copyFromUtf8(randomUuid());
             final ByteString newValue = copyFromUtf8(randomUuid());
 
@@ -126,7 +126,7 @@ class ChangesTest {
 
         @Test
         @DisplayName("Timestamp")
-        void createTimestampChange() {
+        void forTimestamps() {
             final Timestamp fiveMinutesAgo = TimeTests.Past.minutesAgo(5);
             final Timestamp now = getCurrentTime();
 
@@ -138,7 +138,7 @@ class ChangesTest {
 
         @Test
         @DisplayName("boolean")
-        void createBooleanChange() {
+        void forBooleans() {
             final boolean s1 = true;
             final boolean s2 = false;
 
@@ -150,7 +150,7 @@ class ChangesTest {
 
         @Test
         @DisplayName("double")
-        void createDoubleChange() {
+        void forDoubles() {
             final double s1 = 1957.1004;
             final double s2 = 1957.1103;
 
@@ -162,7 +162,7 @@ class ChangesTest {
 
         @Test
         @DisplayName("int32")
-        void createInt32Change() {
+        void forInt32s() {
             final int s1 = 1550;
             final int s2 = 1616;
 
@@ -174,7 +174,7 @@ class ChangesTest {
 
         @Test
         @DisplayName("int64")
-        void createInt64Change() {
+        void forInt64s() {
             final long s1 = 16420225L;
             final long s2 = 17270320L;
 
@@ -186,7 +186,7 @@ class ChangesTest {
 
         @Test
         @DisplayName("float")
-        void createFloatChange() {
+        void forFloats() {
             final float s1 = 1473.0219f;
             final float s2 = 1543.0524f;
 
@@ -198,7 +198,7 @@ class ChangesTest {
 
         @Test
         @DisplayName("uint32")
-        void createUint32Change() {
+        void forUint32s() {
             final int s1 = 16440925;
             final int s2 = 17100919;
 
@@ -210,7 +210,7 @@ class ChangesTest {
 
         @Test
         @DisplayName("uint64")
-        void createUint64Change() {
+        void forUint64s() {
             final long s1 = 16290414L;
             final long s2 = 16950708L;
 
@@ -222,7 +222,7 @@ class ChangesTest {
 
         @Test
         @DisplayName("sint32")
-        void createSint32Change() {
+        void forSint32s() {
             final int s1 = 16550106;
             final int s2 = 17050816;
 
@@ -234,7 +234,7 @@ class ChangesTest {
 
         @Test
         @DisplayName("sint64")
-        void createSint64Change() {
+        void forSint64s() {
             final long s1 = 1666L;
             final long s2 = 1736L;
 
@@ -246,7 +246,7 @@ class ChangesTest {
 
         @Test
         @DisplayName("fixed32")
-        void createFixed32Change() {
+        void forFixed32s() {
             final int s1 = 17070415;
             final int s2 = 17830918;
 
@@ -258,7 +258,7 @@ class ChangesTest {
 
         @Test
         @DisplayName("fixed64")
-        void createFixed64Change() {
+        void forFixed64s() {
             final long s1 = 17240422L;
             final long s2 = 18040212L;
 
@@ -270,7 +270,7 @@ class ChangesTest {
 
         @Test
         @DisplayName("sfixed32")
-        void createSfixed32Change() {
+        void forSfixed32s() {
             final int s1 = 1550;
             final int s2 = 1616;
 
@@ -282,7 +282,7 @@ class ChangesTest {
 
         @Test
         @DisplayName("sfixed64")
-        void createSfixed64Change() {
+        void forSfixed64s() {
             final long s1 = 16420225L;
             final long s2 = 17270320L;
 
@@ -294,7 +294,7 @@ class ChangesTest {
 
         @Test
         @DisplayName("Interval")
-        void createIntervalChange() {
+        void forIntervals() {
             final Timestamp fiveMinutesAgo = TimeTests.Past.minutesAgo(5);
             final Timestamp fourMinutesAgo = TimeTests.Past.minutesAgo(4);
             final Timestamp now = getCurrentTime();
@@ -309,7 +309,7 @@ class ChangesTest {
 
         @Test
         @DisplayName("LocalDate")
-        void createLocalDateChange() {
+        void forLocalDates() {
             final LocalDate today = LocalDates.now();
             final LocalDate tomorrow = LocalDates.addDays(today, 1);
 
@@ -321,7 +321,7 @@ class ChangesTest {
 
         @Test
         @DisplayName("LocalTime")
-        void createLocalTimeChange() {
+        void forLocalTimes() {
             final LocalTime now = LocalTimes.now();
             final LocalTime inFiveHours = LocalTimes.addHours(now, 5);
 
@@ -333,7 +333,7 @@ class ChangesTest {
 
         @Test
         @DisplayName("OffsetDate")
-        void createOffsetDateChange() {
+        void forOffsetDates() {
             final ZoneOffset inKiev = ZoneOffsets.ofHours(3);
             final ZoneOffset inLuxembourg = ZoneOffsets.ofHours(1);
             final OffsetDate previousDate = OffsetDates.now(inKiev);
@@ -347,7 +347,7 @@ class ChangesTest {
 
         @Test
         @DisplayName("OffsetTime")
-        void createOffsetTimeChange() {
+        void forOffsetTimes() {
             final ZoneOffset inKiev = ZoneOffsets.ofHours(3);
             final ZoneOffset inLuxembourg = ZoneOffsets.ofHours(1);
             final OffsetTime previousTime = OffsetTimes.now(inKiev);
@@ -361,7 +361,7 @@ class ChangesTest {
 
         @Test
         @DisplayName("OffsetDateTime")
-        void createOffsetDateTimeChange() {
+        void forOffsetDateTimes() {
             final ZoneOffset inKiev = ZoneOffsets.ofHours(3);
             final ZoneOffset inLuxembourg = ZoneOffsets.ofHours(1);
             final OffsetDateTime previousDateTime = OffsetDateTimes.now(inKiev);
@@ -381,123 +381,123 @@ class ChangesTest {
 
     @Nested
     @DisplayName("fail to create value change for equal values of type")
-    class CreateFromEqualTest {
+    class NotAcceptEqual {
 
         @Test
         @DisplayName("String")
-        void notAcceptEqualStrings() {
+        void strings() {
             final String value = ERR_VALUES_CANNOT_BE_EQUAL;
             assertThrows(IllegalArgumentException.class, () -> Changes.of(value, value));
         }
 
         @Test
         @DisplayName("ByteString")
-        void notAcceptEqualByteStrings() {
+        void byteStrings() {
             final ByteString value = copyFromUtf8(ERR_VALUES_CANNOT_BE_EQUAL);
             assertThrows(IllegalArgumentException.class, () -> Changes.of(value, value));
         }
 
         @Test
         @DisplayName("TimeStamp")
-        void notAcceptEqualTimestamps() {
+        void timestamps() {
             final Timestamp now = getCurrentTime();
             assertThrows(IllegalArgumentException.class, () -> Changes.of(now, now));
         }
 
         @Test
         @DisplayName("boolean")
-        void notAcceptEqualBooleans() {
+        void booleans() {
             final boolean value = true;
             assertThrows(IllegalArgumentException.class, () -> Changes.of(value, value));
         }
 
         @Test
         @DisplayName("double")
-        void notAcceptEqualDoubles() {
+        void doubles() {
             final double value = 1961.0412;
             assertThrows(IllegalArgumentException.class, () -> Changes.of(value, value));
         }
 
         @Test
         @DisplayName("float")
-        void notAcceptEqualFloats() {
+        void floats() {
             final float value = 1543.0f;
             assertThrows(IllegalArgumentException.class, () -> Changes.of(value, value));
         }
 
         @Test
         @DisplayName("int32")
-        void notAcceptEqualInt32() {
+        void int32s() {
             final int value = 1614;
             assertThrows(IllegalArgumentException.class, () -> Changes.of(value, value));
         }
 
         @Test
         @DisplayName("int64")
-        void notAcceptEqualInt64() {
+        void int64s() {
             final long value = 1666L;
             assertThrows(IllegalArgumentException.class, () -> Changes.of(value, value));
         }
 
         @Test
         @DisplayName("uint32")
-        void notAcceptEqualUint32() {
+        void uint32s() {
             final int value = 1776;
             assertThrows(IllegalArgumentException.class, () -> Changes.ofUInt32(value, value));
         }
 
         @Test
         @DisplayName("uint64")
-        void notAcceptEqualUint64() {
+        void uint64s() {
             final long value = 1690L;
             assertThrows(IllegalArgumentException.class, () -> Changes.ofUInt64(value, value));
         }
 
         @Test
         @DisplayName("sint32")
-        void notAcceptEqualSint32() {
+        void sint32s() {
             final int value = 1694;
             assertThrows(IllegalArgumentException.class, () -> Changes.ofSInt32(value, value));
         }
 
         @Test
         @DisplayName("sint64")
-        void notAcceptEqualSint64() {
+        void sint64s() {
             final long value = 1729L;
             assertThrows(IllegalArgumentException.class, () -> Changes.ofSInt64(value, value));
         }
 
         @Test
         @DisplayName("fixed32")
-        void notAcceptEqualFixed32() {
+        void fixed32s() {
             final int value = 1736;
             assertThrows(IllegalArgumentException.class, () -> Changes.ofFixed32(value, value));
         }
 
         @Test
         @DisplayName("fixed64")
-        void notAcceptEqualFixed64() {
+        void fixed64s() {
             final long value = 1755L;
             assertThrows(IllegalArgumentException.class, () -> Changes.ofFixed64(value, value));
         }
 
         @Test
         @DisplayName("sfixed32")
-        void notAcceptEqualSfixed32() {
+        void sfixed32s() {
             final int value = 1614;
             assertThrows(IllegalArgumentException.class, () -> Changes.ofSfixed32(value, value));
         }
 
         @Test
         @DisplayName("sfixed64")
-        void notAcceptEqualSfixed64() {
+        void sfixed64s() {
             final long value = 1666L;
             assertThrows(IllegalArgumentException.class, () -> Changes.ofSfixed64(value, value));
         }
 
         @Test
         @DisplayName("Interval")
-        void notAcceptEqualIntervals() {
+        void intervals() {
             final Timestamp fourMinutesAgo = TimeTests.Past.minutesAgo(4);
             final Timestamp now = getCurrentTime();
             final Interval interval = Intervals.between(fourMinutesAgo, now);
@@ -506,21 +506,21 @@ class ChangesTest {
 
         @Test
         @DisplayName("LocalDate")
-        void notAcceptEqualLocalDates() {
+        void localDates() {
             final LocalDate today = LocalDates.now();
             assertThrows(IllegalArgumentException.class, () -> Changes.of(today, today));
         }
 
         @Test
         @DisplayName("LocalTime")
-        void notAcceptEqualLocalTimes() {
+        void localTimes() {
             final LocalTime now = LocalTimes.now();
             assertThrows(IllegalArgumentException.class, () -> Changes.of(now, now));
         }
 
         @Test
         @DisplayName("OffsetDate")
-        void notAcceptEqualOffsetDate() {
+        void offsetDates() {
             final ZoneOffset inLuxembourg = ZoneOffsets.ofHours(1);
             final OffsetDate date = OffsetDates.now(inLuxembourg);
             assertThrows(IllegalArgumentException.class, () -> Changes.of(date, date));
@@ -528,7 +528,7 @@ class ChangesTest {
 
         @Test
         @DisplayName("OffsetTime")
-        void notAcceptEqualOffsetTimes() {
+        void offsetTimes() {
             final ZoneOffset inLuxembourg = ZoneOffsets.ofHours(1);
             final OffsetTime now = OffsetTimes.now(inLuxembourg);
             assertThrows(IllegalArgumentException.class, () -> Changes.of(now, now));
@@ -536,7 +536,7 @@ class ChangesTest {
 
         @Test
         @DisplayName("OffsetDateTime")
-        void notAcceptEqualOffsetDateTimes() {
+        void offsetDateTimes() {
             final ZoneOffset inLuxembourg = ZoneOffsets.ofHours(1);
             final OffsetDateTime now = OffsetDateTimes.now(inLuxembourg);
             assertThrows(IllegalArgumentException.class, () -> Changes.of(now, now));
@@ -545,25 +545,25 @@ class ChangesTest {
 
     @Nested
     @DisplayName("fail to create value change from null")
-    class CreateFromNullTest {
+    class NotAcceptNull {
 
         @Test
         @DisplayName("String previousValue")
-        void notAcceptNullStringPrevious() {
+        void stringPrevious() {
             assertThrows(NullPointerException.class,
                          () -> Changes.of(null, ERR_PREVIOUS_VALUE_CANNOT_BE_NULL));
         }
 
         @Test
         @DisplayName("String newValue")
-        void notAcceptNullStringNew() {
+        void stringNew() {
             assertThrows(NullPointerException.class,
                          () -> Changes.of(ERR_NEW_VALUE_CANNOT_BE_NULL, null));
         }
 
         @Test
         @DisplayName("ByteString previousValue")
-        void notAcceptNullByteStringPrevious() {
+        void byteStringPrevious() {
             assertThrows(NullPointerException.class,
                          () -> Changes.of(null,
                                           copyFromUtf8(ERR_PREVIOUS_VALUE_CANNOT_BE_NULL)));
@@ -571,26 +571,26 @@ class ChangesTest {
 
         @Test
         @DisplayName("ByteString newValue")
-        void notAcceptNullByteStringNew() {
+        void byteStringNew() {
             assertThrows(NullPointerException.class,
                          () -> Changes.of(copyFromUtf8(ERR_NEW_VALUE_CANNOT_BE_NULL), null));
         }
 
         @Test
         @DisplayName("Timestamp previousValue")
-        void notAcceptNullTimestampPrevious() {
+        void timestampPrevious() {
             assertThrows(NullPointerException.class, () -> Changes.of(null, getCurrentTime()));
         }
 
         @Test
         @DisplayName("Timestamp newValue")
-        void notAcceptNullTimestampNew() {
+        void timestampNew() {
             assertThrows(NullPointerException.class, () -> Changes.of(getCurrentTime(), null));
         }
 
         @Test
         @DisplayName("Interval previousValue")
-        void notAcceptNullIntervalPrevious() {
+        void intervalPrevious() {
             final Timestamp fourMinutesAgo = TimeTests.Past.minutesAgo(4);
             final Timestamp now = getCurrentTime();
             final Interval fourMinutes = Intervals.between(fourMinutesAgo, now);
@@ -599,7 +599,7 @@ class ChangesTest {
 
         @Test
         @DisplayName("Interval newValue")
-        void notAcceptNullIntervalNew() {
+        void intervalNew() {
             final Timestamp fourMinutesAgo = TimeTests.Past.minutesAgo(4);
             final Timestamp now = getCurrentTime();
             final Interval fourMinutes = Intervals.between(fourMinutesAgo, now);
@@ -608,35 +608,35 @@ class ChangesTest {
 
         @Test
         @DisplayName("LocalDate previousValue")
-        void notAcceptNullLocalDatePrevious() {
+        void localDatePrevious() {
             final LocalDate today = LocalDates.now();
             assertThrows(NullPointerException.class, () -> Changes.of(null, today));
         }
 
         @Test
         @DisplayName("LocalDate newValue")
-        void notAcceptNullLocalDateNew() {
+        void localDateNew() {
             final LocalDate today = LocalDates.now();
             assertThrows(NullPointerException.class, () -> Changes.of(today, null));
         }
 
         @Test
         @DisplayName("LocalTime previousValue")
-        void notAcceptNullLocalTimePrevious() {
+        void localTimePrevious() {
             final LocalTime now = LocalTimes.now();
             assertThrows(NullPointerException.class, () -> Changes.of(null, now));
         }
 
         @Test
         @DisplayName("LocalTime newValue")
-        void notAcceptNullLocalTimeNew() {
+        void localTimeNew() {
             final LocalTime now = LocalTimes.now();
             assertThrows(NullPointerException.class, () -> Changes.of(now, null));
         }
 
         @Test
         @DisplayName("OffsetDate previousValue")
-        void notAcceptNullOffsetDatePrevious() {
+        void offsetDatePrevious() {
             final ZoneOffset inLassVegas = ZoneOffsets.ofHours(8);
             final OffsetDate date = OffsetDates.now(inLassVegas);
             assertThrows(NullPointerException.class, () -> Changes.of(null, date));
@@ -644,7 +644,7 @@ class ChangesTest {
 
         @Test
         @DisplayName("OffsetDate newValue")
-        void notAcceptNullOffsetDateNew() {
+        void offsetDateNew() {
             final ZoneOffset inKiev = ZoneOffsets.ofHours(3);
             final OffsetDate date = OffsetDates.now(inKiev);
             assertThrows(NullPointerException.class, () -> Changes.of(date, null));
@@ -652,7 +652,7 @@ class ChangesTest {
 
         @Test
         @DisplayName("OffsetTime previousValue")
-        void notAcceptNullOffsetTimePrevious() {
+        void offsetTimePrevious() {
             final ZoneOffset inLassVegas = ZoneOffsets.ofHours(8);
             final OffsetTime now = OffsetTimes.now(inLassVegas);
             assertThrows(NullPointerException.class, () -> Changes.of(null, now));
@@ -660,7 +660,7 @@ class ChangesTest {
 
         @Test
         @DisplayName("OffsetTime newValue")
-        void notAcceptNullOffsetTimeNew() {
+        void offsetTimeNew() {
             final ZoneOffset inKiev = ZoneOffsets.ofHours(3);
             final OffsetTime now = OffsetTimes.now(inKiev);
             assertThrows(NullPointerException.class, () -> Changes.of(now, null));
@@ -668,7 +668,7 @@ class ChangesTest {
 
         @Test
         @DisplayName("OffsetDateTime previousValue")
-        void notAcceptNullOffsetDateTimePrevious() {
+        void offsetDateTimePrevious() {
             final ZoneOffset inLassVegas = ZoneOffsets.ofHours(8);
             final OffsetDateTime now = OffsetDateTimes.now(inLassVegas);
             assertThrows(NullPointerException.class, () -> Changes.of(null, now));
@@ -676,7 +676,7 @@ class ChangesTest {
 
         @Test
         @DisplayName("OffsetDateTime newValue")
-        void notAcceptNullOffsetDateTimeNew() {
+        void offsetDateTimeNew() {
             final ZoneOffset inKiev = ZoneOffsets.ofHours(3);
             final OffsetDateTime now = OffsetDateTimes.now(inKiev);
             assertThrows(NullPointerException.class, () -> Changes.of(now, null));

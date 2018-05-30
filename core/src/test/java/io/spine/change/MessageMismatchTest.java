@@ -65,11 +65,11 @@ class MessageMismatchTest {
                                                           others */})
     @Nested
     @DisplayName("create ValueMismatch instance")
-    class CreateMismatchTest {
+    class Create {
 
         @Test
         @DisplayName("for expected default value")
-        void createForExpectedDefault() {
+        void forExpectedDefault() {
             final ValueMismatch mismatch = expectedDefault(ACTUAL, NEW_VALUE, VERSION);
 
             assertEquals(DEFAULT_VALUE, unpackExpected(mismatch));
@@ -80,7 +80,7 @@ class MessageMismatchTest {
 
         @Test
         @DisplayName("for unexpected default when clearing")
-        void createForUnexpectedDefaultWhenClearing() {
+        void forUnexpectedDefaultWhenClearing() {
             final ValueMismatch mismatch = expectedNotDefault(EXPECTED, VERSION);
 
             assertEquals(EXPECTED, unpackExpected(mismatch));
@@ -96,7 +96,7 @@ class MessageMismatchTest {
 
         @Test
         @DisplayName("for unexpected default when changing")
-        void createForUnexpectedDefaultWhenChanging() {
+        void forUnexpectedDefaultWhenChanging() {
             final ValueMismatch mismatch = expectedNotDefault(EXPECTED, NEW_VALUE, VERSION);
 
             assertEquals(EXPECTED, unpackExpected(mismatch));
@@ -111,7 +111,7 @@ class MessageMismatchTest {
         @SuppressWarnings("Duplicates") // Common test case for different Mismatches.
         @Test
         @DisplayName("for unexpected value")
-        void createForUnexpectedValue() {
+        void forUnexpectedValue() {
             final ValueMismatch mismatch = unexpectedValue(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
 
             assertEquals(EXPECTED, unpackExpected(mismatch));

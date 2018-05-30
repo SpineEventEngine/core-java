@@ -64,11 +64,11 @@ class FloatMismatchTest {
 
     @Nested
     @DisplayName("create ValueMismatch instance")
-    class CreateMismatchTest {
+    class Create {
 
         @Test
         @DisplayName("from given float values")
-        void createMismatchWithFloats() {
+        void withFloats() {
             final ValueMismatch mismatch = FloatMismatch.of(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
 
             assertEquals(EXPECTED, unpackExpected(mismatch), DELTA);
@@ -79,7 +79,7 @@ class FloatMismatchTest {
 
         @Test
         @DisplayName("for expected zero amount")
-        void createForExpectedZero() {
+        void forExpectedZero() {
             final double expected = 0.0f;
             final ValueMismatch mismatch = expectedZero(ACTUAL, NEW_VALUE, VERSION);
 
@@ -91,7 +91,7 @@ class FloatMismatchTest {
 
         @Test
         @DisplayName("for expected non zero amount")
-        void createForExpectedNonZero() {
+        void forExpectedNonZero() {
             final float actual = 0.0f;
             final ValueMismatch mismatch = expectedNonZero(EXPECTED, NEW_VALUE, VERSION);
 
@@ -104,7 +104,7 @@ class FloatMismatchTest {
         @SuppressWarnings("Duplicates") // Common test case for different Mismatches.
         @Test
         @DisplayName("for unexpected float value")
-        void createForUnexpectedFloat() {
+        void forUnexpectedFloat() {
             final ValueMismatch mismatch = unexpectedValue(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
 
             assertEquals(EXPECTED, unpackExpected(mismatch), DELTA);
@@ -124,25 +124,25 @@ class FloatMismatchTest {
 
     @Nested
     @DisplayName("if given non-float ValueMismatch, fail to unpack")
-    class UnpackMismatchTest {
+    class FailToUnpack {
 
         @Test
         @DisplayName("expected")
-        void notUnpackExpectedForWrongType() {
+        void expectedWithWrongType() {
             final ValueMismatch mismatch = expectedTrue(VERSION);
             assertThrows(RuntimeException.class, () -> unpackExpected(mismatch));
         }
 
         @Test
         @DisplayName("actual")
-        void notUnpackActualForWrongType() {
+        void actualWithWrongType() {
             final ValueMismatch mismatch = expectedTrue(VERSION);
             assertThrows(RuntimeException.class, () -> unpackActual(mismatch));
         }
 
         @Test
         @DisplayName("new value")
-        void notUnpackNewValueForWrongType() {
+        void newValueWithWrongType() {
             final ValueMismatch mismatch = expectedTrue(VERSION);
             assertThrows(RuntimeException.class, () -> unpackNewValue(mismatch));
         }
