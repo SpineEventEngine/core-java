@@ -73,6 +73,7 @@ import io.spine.util.Exceptions;
 import io.spine.validate.ConstraintViolation;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Iterator;
@@ -765,6 +766,7 @@ public class AggregateShould {
      * {@link TaskAggregate#on(AggTaskAssigned) TaskAggregate#on(AggTaskAssigned)}.
      */
     @Test
+    @Ignore
     public void create_single_event_for_a_pair_of_events_with_empty_for_an_event_react() {
         final BoundedContext boundedContext = newTaskBoundedContext();
 

@@ -64,11 +64,11 @@ class MessageMismatchTest {
                        "DuplicateStringLiteralInspection" /* Nested class display name similar to
                                                           others */})
     @Nested
-    @DisplayName("when creating ValueMismatch")
+    @DisplayName("create ValueMismatch instance")
     class CreateMismatchTest {
 
         @Test
-        @DisplayName("successfully create instance for expected default value")
+        @DisplayName("for expected default value")
         void createForExpectedDefault() {
             final ValueMismatch mismatch = expectedDefault(ACTUAL, NEW_VALUE, VERSION);
 
@@ -79,7 +79,7 @@ class MessageMismatchTest {
         }
 
         @Test
-        @DisplayName("successfully create instance for unexpected default when clearing")
+        @DisplayName("for unexpected default when clearing")
         void createForUnexpectedDefaultWhenClearing() {
             final ValueMismatch mismatch = expectedNotDefault(EXPECTED, VERSION);
 
@@ -95,7 +95,7 @@ class MessageMismatchTest {
         }
 
         @Test
-        @DisplayName("successfully create instance for unexpected default when changing")
+        @DisplayName("for unexpected default when changing")
         void createForUnexpectedDefaultWhenChanging() {
             final ValueMismatch mismatch = expectedNotDefault(EXPECTED, NEW_VALUE, VERSION);
 
@@ -110,7 +110,7 @@ class MessageMismatchTest {
 
         @SuppressWarnings("Duplicates") // Common test case for different Mismatches.
         @Test
-        @DisplayName("successfully create instance for unexpected value")
+        @DisplayName("for unexpected value")
         void createForUnexpectedValue() {
             final ValueMismatch mismatch = unexpectedValue(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
 

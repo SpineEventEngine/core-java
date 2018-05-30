@@ -63,11 +63,11 @@ class FloatMismatchTest {
     }
 
     @Nested
-    @DisplayName("when creating ValueMismatch")
+    @DisplayName("create ValueMismatch instance")
     class CreateMismatchTest {
 
         @Test
-        @DisplayName("successfully create instance from given float values")
+        @DisplayName("from given float values")
         void createMismatchWithFloats() {
             final ValueMismatch mismatch = FloatMismatch.of(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
 
@@ -78,7 +78,7 @@ class FloatMismatchTest {
         }
 
         @Test
-        @DisplayName("successfully create instance for expected zero amount")
+        @DisplayName("for expected zero amount")
         void createForExpectedZero() {
             final double expected = 0.0f;
             final ValueMismatch mismatch = expectedZero(ACTUAL, NEW_VALUE, VERSION);
@@ -90,7 +90,7 @@ class FloatMismatchTest {
         }
 
         @Test
-        @DisplayName("successfully create instance for expected non zero amount")
+        @DisplayName("for expected non zero amount")
         void createForExpectedNonZero() {
             final float actual = 0.0f;
             final ValueMismatch mismatch = expectedNonZero(EXPECTED, NEW_VALUE, VERSION);
@@ -103,7 +103,7 @@ class FloatMismatchTest {
 
         @SuppressWarnings("Duplicates") // Common test case for different Mismatches.
         @Test
-        @DisplayName("successfully create instance for unexpected float value")
+        @DisplayName("for unexpected float value")
         void createForUnexpectedFloat() {
             final ValueMismatch mismatch = unexpectedValue(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
 
@@ -112,36 +112,36 @@ class FloatMismatchTest {
             assertEquals(NEW_VALUE, unpackNewValue(mismatch), DELTA);
             assertEquals(VERSION, mismatch.getVersion());
         }
+    }
 
-        @Test
-        @DisplayName("not accept same expected and actual values")
-        void notAcceptSameExpectedAndActual() {
-            final float value = 19.19f;
-            assertThrows(IllegalArgumentException.class,
-                         () -> unexpectedValue(value, value, NEW_VALUE, VERSION));
-        }
+    @Test
+    @DisplayName("not accept same expected and actual values")
+    void notAcceptSameExpectedAndActual() {
+        final float value = 19.19f;
+        assertThrows(IllegalArgumentException.class,
+                     () -> unexpectedValue(value, value, NEW_VALUE, VERSION));
     }
 
     @Nested
-    @DisplayName("when unpacking passed ValueMismatch")
+    @DisplayName("if given non-float ValueMismatch, fail to unpack")
     class UnpackMismatchTest {
 
         @Test
-        @DisplayName("unpackExpected only if passed value is FloatMismatch")
+        @DisplayName("expected")
         void notUnpackExpectedForWrongType() {
             final ValueMismatch mismatch = expectedTrue(VERSION);
             assertThrows(RuntimeException.class, () -> unpackExpected(mismatch));
         }
 
         @Test
-        @DisplayName("unpackActual only if passed value is FloatMismatch")
+        @DisplayName("actual")
         void notUnpackActualForWrongType() {
             final ValueMismatch mismatch = expectedTrue(VERSION);
             assertThrows(RuntimeException.class, () -> unpackActual(mismatch));
         }
 
         @Test
-        @DisplayName("unpackNewValue only if passed value is FloatMismatch")
+        @DisplayName("new value")
         void notUnpackNewValueForWrongType() {
             final ValueMismatch mismatch = expectedTrue(VERSION);
             assertThrows(RuntimeException.class, () -> unpackNewValue(mismatch));

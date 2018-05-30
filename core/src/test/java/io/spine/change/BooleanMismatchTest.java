@@ -57,11 +57,11 @@ class BooleanMismatchTest {
     }
 
     @Nested
-    @DisplayName("when creating ValueMismatch")
+    @DisplayName("create ValueMismatch instance")
     class CreateMismatchTest {
 
         @Test
-        @DisplayName("successfully create instance for `expectedFalse` case")
+        @DisplayName("for `expectedFalse` case")
         void createForExpectedFalse() {
             final boolean expected = false;
             final boolean actual = true;
@@ -75,7 +75,7 @@ class BooleanMismatchTest {
         }
 
         @Test
-        @DisplayName("successfully create instance for `expectedTrue` case")
+        @DisplayName("for `expectedTrue` case")
         void createForExpectedTrue() {
             final boolean expected = true;
             final boolean actual = false;
@@ -90,25 +90,25 @@ class BooleanMismatchTest {
     }
 
     @Nested
-    @DisplayName("when unpacking passed ValueMismatch")
+    @DisplayName("if given non-boolean ValueMismatch, fail to unpack")
     class UnpackMismatchTest {
 
         @Test
-        @DisplayName("unpackExpected only if passed value is BooleanMismatch")
+        @DisplayName("expected")
         void notUnpackExpectedForWrongType() {
             final ValueMismatch mismatch = IntMismatch.of(1, 2, 3, VERSION);
             assertThrows(RuntimeException.class, () -> BooleanMismatch.unpackExpected(mismatch));
         }
 
         @Test
-        @DisplayName("unpackActual only if passed value is BooleanMismatch")
+        @DisplayName("actual")
         void notUnpackActualForWrongType() {
             final ValueMismatch mismatch = IntMismatch.of(1, 2, 3, VERSION);
             assertThrows(RuntimeException.class, () -> BooleanMismatch.unpackActual(mismatch));
         }
 
         @Test
-        @DisplayName("unpackNewValue only if passed value is BooleanMismatch")
+        @DisplayName("new value")
         void notUnpackNewValueForWrongType() {
             final ValueMismatch mismatch = IntMismatch.of(1, 2, 3, VERSION);
             assertThrows(RuntimeException.class, () -> BooleanMismatch.unpackNewValue(mismatch));

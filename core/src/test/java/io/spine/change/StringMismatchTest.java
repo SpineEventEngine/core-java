@@ -63,11 +63,11 @@ class StringMismatchTest {
     }
 
     @Nested
-    @DisplayName("when creating ValueMismatch")
+    @DisplayName("create ValueMismatch instance")
     class CreateMismatchTest {
 
         @Test
-        @DisplayName("successfully create instance for expected empty string")
+        @DisplayName("for expected empty string")
         void createForExpectedEmptyString() {
             final ValueMismatch mismatch = expectedEmpty(ACTUAL, NEW_VALUE, VERSION);
 
@@ -78,7 +78,7 @@ class StringMismatchTest {
         }
 
         @Test
-        @DisplayName("successfully create instance for unexpected empty string")
+        @DisplayName("for unexpected empty string")
         void createForUnexpectedEmptyString() {
             final ValueMismatch mismatch = expectedNotEmpty(EXPECTED, VERSION);
 
@@ -96,7 +96,7 @@ class StringMismatchTest {
 
         @SuppressWarnings("Duplicates") // Common test case for different Mismatches.
         @Test
-        @DisplayName("successfully create instance for unexpected value")
+        @DisplayName("for unexpected value")
         void createForUnexpectedValue() {
             final ValueMismatch mismatch = unexpectedValue(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
 
@@ -105,36 +105,36 @@ class StringMismatchTest {
             assertEquals(NEW_VALUE, unpackNewValue(mismatch));
             assertEquals(VERSION, mismatch.getVersion());
         }
+    }
 
-        @Test
-        @DisplayName("not accept same expected and actual values")
-        void notAcceptSameExpectedAndActual() {
-            final String value = "same-same";
-            assertThrows(IllegalArgumentException.class,
-                         () -> unexpectedValue(value, value, NEW_VALUE, VERSION));
-        }
+    @Test
+    @DisplayName("not accept same expected and actual values")
+    void notAcceptSameExpectedAndActual() {
+        final String value = "same-same";
+        assertThrows(IllegalArgumentException.class,
+                     () -> unexpectedValue(value, value, NEW_VALUE, VERSION));
     }
 
     @Nested
-    @DisplayName("when unpacking passed ValueMismatch")
+    @DisplayName("if given non-string ValueMismatch, fail to unpack")
     class UnpackMismatchTest {
 
         @Test
-        @DisplayName("unpackExpected only if passed value is StringMismatch")
+        @DisplayName("expected")
         void notUnpackExpectedForWrongType() {
             final ValueMismatch mismatch = expectedTrue(VERSION);
             assertThrows(RuntimeException.class, () -> unpackExpected(mismatch));
         }
 
         @Test
-        @DisplayName("unpackActual only if passed value is StringMismatch")
+        @DisplayName("actual")
         void notUnpackActualForWrongType() {
             final ValueMismatch mismatch = expectedTrue(VERSION);
             assertThrows(RuntimeException.class, () -> unpackActual(mismatch));
         }
 
         @Test
-        @DisplayName("unpackNewValue only if passed value is StringMismatch")
+        @DisplayName("new value")
         void notUnpackNewValueForWrongType() {
             final ValueMismatch mismatch = expectedTrue(VERSION);
             assertThrows(RuntimeException.class, () -> unpackNewValue(mismatch));

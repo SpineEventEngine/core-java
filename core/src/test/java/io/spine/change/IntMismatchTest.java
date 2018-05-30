@@ -62,11 +62,11 @@ class IntMismatchTest {
     }
 
     @Nested
-    @DisplayName("when creating ValueMismatch")
+    @DisplayName("create ValueMismatch instance")
     class CreateMismatchTest {
 
         @Test
-        @DisplayName("successfully create instance from given int values")
+        @DisplayName("from given int values")
         void createMismatchWithIntValues() {
             final ValueMismatch mismatch = IntMismatch.of(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
 
@@ -77,7 +77,7 @@ class IntMismatchTest {
         }
 
         @Test
-        @DisplayName("successfully create instance for expected zero amount")
+        @DisplayName("for expected zero amount")
         void createForExpectedZero() {
             final int expected = 0;
             final ValueMismatch mismatch = expectedZero(ACTUAL, NEW_VALUE, VERSION);
@@ -89,7 +89,7 @@ class IntMismatchTest {
         }
 
         @Test
-        @DisplayName("successfully create instance for expected non zero amount")
+        @DisplayName("for expected non zero amount")
         void createForExpectedNonZero() {
             final int actual = 0;
             final ValueMismatch mismatch = expectedNonZero(EXPECTED, NEW_VALUE, VERSION);
@@ -102,7 +102,7 @@ class IntMismatchTest {
 
         @SuppressWarnings("Duplicates") // Common test case for different Mismatches.
         @Test
-        @DisplayName("successfully create instance for unexpected int value")
+        @DisplayName("for unexpected int value")
         void createForUnexpectedInt() {
             final ValueMismatch mismatch = unexpectedValue(EXPECTED, ACTUAL, NEW_VALUE,
                                                            VERSION);
@@ -112,36 +112,36 @@ class IntMismatchTest {
             assertEquals(NEW_VALUE, unpackNewValue(mismatch));
             assertEquals(VERSION, mismatch.getVersion());
         }
+    }
 
-        @Test
-        @DisplayName("not accept same expected and actual values")
-        void notAcceptSameExpectedAndActual() {
-            final int value = 5;
-            assertThrows(IllegalArgumentException.class,
-                         () -> unexpectedValue(value, value, NEW_VALUE, VERSION));
-        }
+    @Test
+    @DisplayName("not accept same expected and actual values")
+    void notAcceptSameExpectedAndActual() {
+        final int value = 5;
+        assertThrows(IllegalArgumentException.class,
+                     () -> unexpectedValue(value, value, NEW_VALUE, VERSION));
     }
 
     @Nested
-    @DisplayName("when unpacking passed ValueMismatch")
+    @DisplayName("if given non-int ValueMismatch, fail to unpack")
     class UnpackMismatchTest {
 
         @Test
-        @DisplayName("unpackExpected only if passed value is IntMismatch")
+        @DisplayName("expected")
         void notUnpackExpectedForWrongType() {
             final ValueMismatch mismatch = expectedTrue(VERSION);
             assertThrows(RuntimeException.class, () -> unpackExpected(mismatch));
         }
 
         @Test
-        @DisplayName("unpackActual only if passed value is IntMismatch")
+        @DisplayName("actual")
         void notUnpackActualForWrongType() {
             final ValueMismatch mismatch = expectedTrue(VERSION);
             assertThrows(RuntimeException.class, () -> unpackActual(mismatch));
         }
 
         @Test
-        @DisplayName("unpackNewValue only if passed value is IntMismatch")
+        @DisplayName("new value")
         void notUnpackNewValueForWrongType() {
             final ValueMismatch mismatch = expectedTrue(VERSION);
             assertThrows(RuntimeException.class, () -> unpackNewValue(mismatch));

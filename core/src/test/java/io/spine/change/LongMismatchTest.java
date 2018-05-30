@@ -62,11 +62,11 @@ class LongMismatchTest {
     }
 
     @Nested
-    @DisplayName("when creating ValueMismatch")
+    @DisplayName("create ValueMismatch instance")
     class CreateMismatchTest {
 
         @Test
-        @DisplayName("successfully create instance from given long values")
+        @DisplayName("from given long values")
         void createMismatchWithLongValues() {
             final ValueMismatch mismatch = LongMismatch.of(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
 
@@ -77,7 +77,7 @@ class LongMismatchTest {
         }
 
         @Test
-        @DisplayName("successfully create instance for expected zero amount")
+        @DisplayName("for expected zero amount")
         void createForExpectedZero() {
             final long expected = 0L;
             final ValueMismatch mismatch = expectedZero(ACTUAL, NEW_VALUE, VERSION);
@@ -89,7 +89,7 @@ class LongMismatchTest {
         }
 
         @Test
-        @DisplayName("successfully create instance for expected non zero amount")
+        @DisplayName("for expected non zero amount")
         void createForExpectedNonZero() {
             final long actual = 0L;
             final ValueMismatch mismatch = expectedNonZero(EXPECTED, NEW_VALUE, VERSION);
@@ -102,7 +102,7 @@ class LongMismatchTest {
 
         @SuppressWarnings("Duplicates") // Common test case for different Mismatches.
         @Test
-        @DisplayName("successfully create instance for unexpected long value")
+        @DisplayName("for unexpected long value")
         void createForUnexpectedLong() {
             final ValueMismatch mismatch = unexpectedValue(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
 
@@ -111,36 +111,36 @@ class LongMismatchTest {
             assertEquals(NEW_VALUE, unpackNewValue(mismatch));
             assertEquals(VERSION, mismatch.getVersion());
         }
+    }
 
-        @Test
-        @DisplayName("not accept same expected and actual values")
-        void notAcceptSameExpectedAndActual() {
-            final long value = 1919L;
-            assertThrows(IllegalArgumentException.class,
-                         () -> unexpectedValue(value, value, NEW_VALUE, VERSION));
-        }
+    @Test
+    @DisplayName("not accept same expected and actual values")
+    void notAcceptSameExpectedAndActual() {
+        final long value = 1919L;
+        assertThrows(IllegalArgumentException.class,
+                     () -> unexpectedValue(value, value, NEW_VALUE, VERSION));
     }
 
     @Nested
-    @DisplayName("when unpacking passed ValueMismatch")
+    @DisplayName("if given non-long ValueMismatch, fail to unpack")
     class UnpackMismatchTest {
 
         @Test
-        @DisplayName("unpackExpected only if passed value is LongMismatch")
+        @DisplayName("expected")
         void notUnpackExpectedForWrongType() {
             final ValueMismatch mismatch = expectedTrue(VERSION);
             assertThrows(RuntimeException.class, () -> unpackExpected(mismatch));
         }
 
         @Test
-        @DisplayName("unpackActual only if passed value is LongMismatch")
+        @DisplayName("actual")
         void notUnpackActualForWrongType() {
             final ValueMismatch mismatch = expectedTrue(VERSION);
             assertThrows(RuntimeException.class, () -> unpackActual(mismatch));
         }
 
         @Test
-        @DisplayName("unpackNewValue only if passed value is LongMismatch")
+        @DisplayName("new value")
         void notUnpackNewValueForWrongType() {
             final ValueMismatch mismatch = expectedTrue(VERSION);
             assertThrows(RuntimeException.class, () -> unpackNewValue(mismatch));
