@@ -72,9 +72,9 @@ public class CommandTestShould {
      *
      * <p>The factory gets:
      * <ul>
-     * <li>generated {@code UserId} for the actor.
-     * <li>UTC zone offset
-     * <li>{@code TenantId} based on the simple name of the passed class.
+     *   <li>generated {@code UserId} for the actor.
+     *   <li>UTC zone offset
+     *   <li>{@code TenantId} based on the simple name of the passed class.
      * </ul>
      */
     static ActorRequestFactory newRequestFactory(Class<?> clazz) {

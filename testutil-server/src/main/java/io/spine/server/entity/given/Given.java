@@ -72,12 +72,10 @@ public class Given {
     /**
      * Creates a builder for an {@code AggregatePart}.
      */
-    public static <
-            A extends AggregatePart<I, S, ?, R>,
-            I,
-            S extends Message,
-            R extends AggregateRoot<I>
-            >
+    public static <A extends AggregatePart<I, S, ?, R>,
+                   I,
+                   S extends Message,
+                   R extends AggregateRoot<I>>
     AggregatePartBuilder<A, I, S, R> aggregatePartOfClass(Class<A> partClass) {
         checkNotNull(partClass);
         AggregatePartBuilder<A, I, S, R> result = new AggregatePartBuilder<>();
@@ -88,12 +86,10 @@ public class Given {
     /**
      * Creates a builder for a {@code Projection}.
      */
-    public static <
-            P extends Projection<I, S, B>,
-            I,
-            S extends Message,
-            B extends ValidatingBuilder<S, ? extends Message.Builder>
-            >
+    public static <P extends Projection<I, S, B>,
+                   I,
+                   S extends Message,
+                   B extends ValidatingBuilder<S, ? extends Message.Builder>>
     ProjectionBuilder<P, I, S, B> projectionOfClass(Class<P> projectionClass) {
         checkNotNull(projectionClass);
         ProjectionBuilder<P, I, S, B> result = new ProjectionBuilder<>();
@@ -104,12 +100,10 @@ public class Given {
     /**
      * Creates a builder for a {@code ProcessManager}.
      */
-    public static <
-            P extends ProcessManager<I, S, B>,
-            I,
-            S extends Message,
-            B extends ValidatingBuilder<S, ?>
-            >
+    public static <P extends ProcessManager<I, S, B>,
+                   I,
+                   S extends Message,
+                   B extends ValidatingBuilder<S, ?>>
     ProcessManagerBuilder<P, I, S, B> processManagerOfClass(Class<P> pmClass) {
         checkNotNull(pmClass);
         ProcessManagerBuilder<P, I, S, B> result = new ProcessManagerBuilder<>();
