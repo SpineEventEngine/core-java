@@ -233,18 +233,16 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      * @throws IllegalStateException if the storage is null
      */
     protected ProjectionStorage<I> projectionStorage() {
-        @SuppressWarnings("unchecked") // OK as we control the creation in createStorage().
-                ProjectionStorage<I> storage = (ProjectionStorage<I>) getStorage();
+        @SuppressWarnings("unchecked") /* OK as we control the creation in createStorage(). */
+        ProjectionStorage<I> storage = (ProjectionStorage<I>) getStorage();
         return storage;
     }
 
-    /** {@inheritDoc} */
     @Override
     public Set<EventClass> getMessageClasses() {
         return projectionClass().getEventSubscriptions();
     }
 
-    /** {@inheritDoc} */
     @Override
     public Set<I> dispatch(EventEnvelope envelope) {
         return ProjectionEndpoint.handle(this, envelope);
