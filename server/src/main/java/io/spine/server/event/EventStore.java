@@ -22,6 +22,7 @@ package io.spine.server.event;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicates;
+import com.google.common.collect.Streams;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.TextFormat;
 import io.grpc.ServerServiceDefinition;
@@ -42,7 +43,6 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -84,10 +84,9 @@ public class EventStore implements AutoCloseable {
 
     private static void ensureSameTenant(Iterable<Event> events) {
         checkNotNull(events);
-        Set<TenantId> tenants =
-                StreamSupport.stream(events.spliterator(), false)
-                             .map(Events::getTenantId)
-                             .collect(Collectors.toSet());
+        Set<TenantId> tenants = Streams.stream(events)
+                                       .map(Events::getTenantId)
+                                       .collect(Collectors.toSet());
         checkArgument(tenants.size() == 1,
                       TENANT_MISMATCH_ERROR_MSG,
                       tenants);
