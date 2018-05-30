@@ -38,7 +38,6 @@ import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
-import org.mockito.ArgumentMatchers;
 
 import java.util.Set;
 import java.util.concurrent.Executor;
@@ -48,6 +47,7 @@ import java.util.concurrent.TimeUnit;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -186,7 +186,7 @@ public class StandPostShould {
                             && versionMatches
                             && stateMatches;
                 };
-        verify(stand).update(ArgumentMatchers.argThat(argumentMatcher));
+        verify(stand).update(argThat(argumentMatcher));
     }
 
     @Test
