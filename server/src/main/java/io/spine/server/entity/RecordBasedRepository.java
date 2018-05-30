@@ -109,14 +109,12 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         cacheEntityColumns();
     }
 
-    /** {@inheritDoc} */
     @Override
     public E create(I id) {
         E result = entityFactory().create(id);
         return result;
     }
 
-    /** {@inheritDoc} */
     @Override
     public void store(E entity) {
         EntityRecordWithColumns record = toRecord(entity);
@@ -131,7 +129,6 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         return result;
     }
 
-    /** {@inheritDoc} */
     @Override
     protected RecordStorage<I> createStorage(StorageFactory factory) {
         RecordStorage<I> result = factory.createRecordStorage(getEntityClass());
@@ -161,6 +158,13 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     public void storeRecord(EntityRecord record) {
         E entity = toEntity(record);
         store(entity);
+    }
+
+    @Internal
+    public EntityRecord findOrCreateRecord(I id) {
+        E entity = findOrCreate(id);
+        EntityRecordWithColumns recordWithColumns = toRecord(entity);
+        return recordWithColumns.getRecord();
     }
 
     /**
@@ -199,13 +203,6 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         }
         EntityRecord record = found.get();
         return Optional.of(record);
-    }
-
-    @Internal
-    public EntityRecord findOrCreateRecord(I id) {
-        E entity = findOrCreate(id);
-        EntityRecordWithColumns recordWithColumns = toRecord(entity);
-        return recordWithColumns.getRecord();
     }
 
     /**
