@@ -353,8 +353,8 @@ public class CommandBus extends Bus<Command,
          * the current runtime environment.
          */
         private static boolean detectThreadsAllowed() {
-            final boolean appEngine = ServerEnvironment.getInstance()
-                                                       .isAppEngine();
+            boolean appEngine = ServerEnvironment.getInstance()
+                                                 .isAppEngine();
             return !appEngine;
         }
 
@@ -495,8 +495,8 @@ public class CommandBus extends Bus<Command,
         }
 
         @SuppressWarnings("CheckReturnValue")
-            /* Calling registry() enforces creating the registry to make spying for CommandBus-es
-               in tests work. */
+            /* Calling registry() enforces creating the registry to make spying for CommandBus
+               instances in tests work. */
         private CommandBus createCommandBus() {
             CommandBus commandBus = new CommandBus(this);
             commandBus.registry();
@@ -511,8 +511,8 @@ public class CommandBus extends Bus<Command,
 
         @Override
         public UnsupportedCommandException handle(CommandEnvelope message) {
-            final Command command = message.getCommand();
-            final UnsupportedCommandException exception = new UnsupportedCommandException(command);
+            Command command = message.getCommand();
+            UnsupportedCommandException exception = new UnsupportedCommandException(command);
             commandStore().storeWithError(command, exception);
             return exception;
         }
