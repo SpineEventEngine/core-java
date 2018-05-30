@@ -22,7 +22,6 @@ package io.spine.server.storage;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
-import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
@@ -59,7 +58,6 @@ import io.spine.server.entity.storage.Enumerated;
 import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectVBuilder;
 import io.spine.testdata.Sample;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 
@@ -70,6 +68,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
@@ -150,11 +149,12 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
 
     private EntityRecord newStorageRecord(I id, Message state) {
         Any wrappedState = pack(state);
-        EntityRecord record = EntityRecord.newBuilder()
-                                          .setEntityId(pack(id))
-                                          .setState(wrappedState)
-                                          .setVersion(GivenVersion.withNumber(0))
-                                          .build();
+        EntityRecord record = EntityRecord
+                .newBuilder()
+                .setEntityId(pack(id))
+                .setState(wrappedState)
+                .setVersion(GivenVersion.withNumber(0))
+                .build();
         return record;
     }
 
@@ -290,8 +290,14 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         Collection<EntityRecord> actual = newArrayList(
                 storage.readMultiple(initial.keySet())
         );
+
         Collection<EntityRecord> expected =
-                Collections2.transform(initial.values(), EntityRecordWithColumns::getRecord);
+                initial.values()
+                       .stream()
+                       .map(recordWithColumns -> recordWithColumns != null
+                                                 ? recordWithColumns.getRecord()
+                                                 : null)
+                       .collect(Collectors.toList());
 
         assertEquals(expected.size(), actual.size());
         assertTrue(actual.containsAll(expected));
@@ -305,15 +311,9 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         RecordStorage<I> storage = getStorage();
 
         Function<EntityRecord, EntityRecordWithColumns> recordPacker =
-                new Function<EntityRecord, EntityRecordWithColumns>() {
-                    @Override
-                    public @Nullable EntityRecordWithColumns apply(@Nullable EntityRecord record) {
-                        if (record == null) {
-                            return null;
-                        }
-                        return withLifecycleColumns(record);
-                    }
-                };
+                record -> record != null
+                          ? withLifecycleColumns(record)
+                          : null;
         Map<I, EntityRecord> v1Records = new HashMap<>(recordCount);
         Map<I, EntityRecord> v2Records = new HashMap<>(recordCount);
 
@@ -893,7 +893,6 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         CANCELLED,
         UNRECOGNIZED
     }
-
 
     /**
      * Entity columns representing lifecycle flags, {@code archived} and {@code deleted}.
