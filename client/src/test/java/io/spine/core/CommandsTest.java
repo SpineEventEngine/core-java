@@ -160,12 +160,12 @@ class CommandsTest {
     }
 
     @Nested
-    @DisplayName("when creating predicate for commands")
-    class CreatePredicateTest {
+    @DisplayName("create command predicate of type")
+    class CreatePredicate {
 
         @Test
-        @DisplayName("support `wereAfter` predicate")
-        void createWereAfterPredicate() {
+        @DisplayName("`wereAfter`")
+        void wereAfter() {
             final Command command = requestFactory.command()
                                                   .create(BoolValue.getDefaultInstance());
             assertTrue(Commands.wereAfter(secondsAgo(5))
@@ -173,8 +173,8 @@ class CommandsTest {
         }
 
         @Test
-        @DisplayName("support `wereBetween` predicate")
-        void createWereBetweenPredicate() {
+        @DisplayName("`wereBetween`")
+        void wereBetween() {
             final Command fiveMinsAgo =
                     requestFactory.createCommand(StringValue.getDefaultInstance(),
                                                  minutesAgo(5));
@@ -204,38 +204,33 @@ class CommandsTest {
         }
     }
 
-    @Nested
-    @DisplayName("when evaluating if command is scheduled")
-    class CheckScheduledTest {
+    @Test
+    @DisplayName("consider command scheduled when command delay is set")
+    void recognizeScheduled() {
+        final CommandContext context = GivenCommandContext.withScheduledDelayOf(seconds(10));
+        final Command cmd = requestFactory.command()
+                                          .createBasedOnContext(
+                                                  StringValue.getDefaultInstance(),
+                                                  context);
+        assertTrue(Commands.isScheduled(cmd));
+    }
 
-        @Test
-        @DisplayName("consider command scheduled when command delay is set")
-        void recognizeScheduled() {
-            final CommandContext context = GivenCommandContext.withScheduledDelayOf(seconds(10));
-            final Command cmd = requestFactory.command()
-                                              .createBasedOnContext(
-                                                      StringValue.getDefaultInstance(),
-                                                      context);
-            assertTrue(Commands.isScheduled(cmd));
-        }
+    @Test
+    @DisplayName("consider command not scheduled when no scheduling options are present")
+    void recognizeNotScheduled() {
+        final Command cmd = requestFactory.createCommand(StringValue.getDefaultInstance());
+        assertFalse(Commands.isScheduled(cmd));
+    }
 
-        @Test
-        @DisplayName("consider command not scheduled when no scheduling options are present")
-        void recognizeNotScheduled() {
-            final Command cmd = requestFactory.createCommand(StringValue.getDefaultInstance());
-            assertFalse(Commands.isScheduled(cmd));
-        }
-
-        @Test
-        @DisplayName("throw exception when command delay set to negative")
-        void throwOnNegativeDelay() {
-            final CommandContext context = GivenCommandContext.withScheduledDelayOf(seconds(-10));
-            final Command cmd =
-                    requestFactory.command()
-                                  .createBasedOnContext(StringValue.getDefaultInstance(),
-                                                        context);
-            assertThrows(IllegalArgumentException.class, () -> Commands.isScheduled(cmd));
-        }
+    @Test
+    @DisplayName("throw exception when command delay set to negative")
+    void throwOnNegativeDelay() {
+        final CommandContext context = GivenCommandContext.withScheduledDelayOf(seconds(-10));
+        final Command cmd =
+                requestFactory.command()
+                              .createBasedOnContext(StringValue.getDefaultInstance(),
+                                                    context);
+        assertThrows(IllegalArgumentException.class, () -> Commands.isScheduled(cmd));
     }
 
     @Test
@@ -248,24 +243,18 @@ class CommandsTest {
         assertEquals(id, convertedBack);
     }
 
-    @SuppressWarnings("InnerClassMayBeStatic") // JUnit 5 Nested classes cannot to be static.
-    @Nested
-    @DisplayName("when checking if command is valid")
-    class CheckValidTest {
+    @Test
+    @DisplayName("throw exception if checked command id is empty")
+    void throwOnEmptyId() {
+        assertThrows(IllegalArgumentException.class,
+                     () -> Commands.checkValid(CommandId.getDefaultInstance()));
+    }
 
-        @Test
-        @DisplayName("throw exception if checked command id is empty")
-        void throwOnEmptyId() {
-            assertThrows(IllegalArgumentException.class,
-                         () -> Commands.checkValid(CommandId.getDefaultInstance()));
-        }
-
-        @Test
-        @DisplayName("return command id value when checked")
-        void returnIdWhenChecked() {
-            final CommandId id = Commands.generateId();
-            assertEquals(id, Commands.checkValid(id));
-        }
+    @Test
+    @DisplayName("return command id value when checked")
+    void returnIdWhenChecked() {
+        final CommandId id = Commands.generateId();
+        assertEquals(id, Commands.checkValid(id));
     }
 
     @Test

@@ -68,12 +68,12 @@ class CommandFactoryTest extends ActorRequestFactoryTest {
     }
 
     @Nested
-    @DisplayName("on command instance creation")
-    class CreateCommandTest {
+    @DisplayName("create command")
+    class CreateCommand {
 
         @Test
-        @DisplayName("assign current time to command")
-        void createWithTimestamp() {
+        @DisplayName("with current time")
+        void withTimestamp() {
             // We are creating a range of +/- second between the call to make sure the timestamp
             // would fit into this range. The purpose of this test is to make sure it works with
             // this precision and to add coverage.
@@ -89,8 +89,8 @@ class CommandFactoryTest extends ActorRequestFactoryTest {
         }
 
         @Test
-        @DisplayName("assign given entity version to command")
-        void createWithEntityVersion() {
+        @DisplayName("with given entity version")
+        void withEntityVersion() {
             final Command command = factory().command()
                                              .create(StringValue.getDefaultInstance(), 2);
 
@@ -99,8 +99,8 @@ class CommandFactoryTest extends ActorRequestFactoryTest {
         }
 
         @Test
-        @DisplayName("assign own tenant ID to command")
-        void createWithTenantID() {
+        @DisplayName("with own tenant ID")
+        void withOwnTenantID() {
             final TenantId tenantId = TenantId.newBuilder()
                                               .setValue(getClass().getSimpleName())
                                               .build();
@@ -116,18 +116,23 @@ class CommandFactoryTest extends ActorRequestFactoryTest {
                                           .getActorContext()
                                           .getTenantId());
         }
+    }
+
+    @Nested
+    @DisplayName("throw ValidationException when creating command")
+    class NotAccept {
 
         @Test
-        @DisplayName("throw ValidationException if supplied with invalid Message")
-        void failForInvalidMessage() {
+        @DisplayName("from invalid Message")
+        void invalidMessage() {
             final RequiredFieldCommand invalidCommand = RequiredFieldCommand.getDefaultInstance();
             assertThrows(ValidationException.class, () -> factory().command()
                                                                    .create(invalidCommand));
         }
 
         @Test
-        @DisplayName("throw ValidationException if supplied with invalid Message with version")
-        void failForInvalidMessageWithVersion() {
+        @DisplayName("from invalid Message with version")
+        void invalidMessageWithVersion() {
             final RequiredFieldCommand invalidCommand = RequiredFieldCommand.getDefaultInstance();
             assertThrows(ValidationException.class, () -> factory().command()
                                                                    .create(invalidCommand, 42));

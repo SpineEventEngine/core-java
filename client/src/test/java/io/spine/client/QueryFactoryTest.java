@@ -55,12 +55,12 @@ class QueryFactoryTest extends ActorRequestFactoryTest {
     private static final Class<TestEntity> TARGET_ENTITY_CLASS = TestEntity.class;
 
     @Nested
-    @DisplayName("when composing query")
-    class ComposeQueryTest {
+    @DisplayName("compose query of type")
+    class ComposeQuery {
 
         @Test
-        @DisplayName("create proper `read all` query")
-        void composeReadAll() {
+        @DisplayName("`read all`")
+        void readAll() {
             final Query readAllQuery = factory().query()
                                                 .all(TARGET_ENTITY_CLASS);
             assertNotNull(readAllQuery);
@@ -71,8 +71,8 @@ class QueryFactoryTest extends ActorRequestFactoryTest {
         }
 
         @Test
-        @DisplayName("create proper `read by IDs` query")
-        void composeReadByIds() {
+        @DisplayName("`read by IDs`")
+        void readByIds() {
             final Set<TestEntityId> testEntityIds = multipleIds();
             final Query readByIdsQuery = factory().query()
                                                   .byIds(TARGET_ENTITY_CLASS, testEntityIds);
@@ -85,117 +85,97 @@ class QueryFactoryTest extends ActorRequestFactoryTest {
             verifyIdFilter(testEntityIds, target.getFilters());
         }
 
-        @Nested
-        @DisplayName("given single path mask")
-        class SinglePathMaskTest {
+        @Test
+        @DisplayName("`read all` with single path mask")
+        void readAllWithSinglePath() {
+            final String expectedEntityPath = singleTestEntityPath();
+            final Query readAllWithPathFilteringQuery =
+                    factory().query()
+                             .allWithMask(TARGET_ENTITY_CLASS, expectedEntityPath);
+            assertNotNull(readAllWithPathFilteringQuery);
 
-            @Test
-            @DisplayName("create proper `read all` with mask query")
-            void composeReadAllWithMask() {
-                final String expectedEntityPath = singleTestEntityPath();
-                final Query readAllWithPathFilteringQuery =
-                        factory().query()
-                                 .allWithMask(TARGET_ENTITY_CLASS, expectedEntityPath);
-                assertNotNull(readAllWithPathFilteringQuery);
-
-                checkTypeCorrectAndFiltersEmpty(TARGET_ENTITY_CLASS, readAllWithPathFilteringQuery);
-                verifySinglePathInQuery(expectedEntityPath, readAllWithPathFilteringQuery);
-            }
-
-            @Test
-            @DisplayName("create proper `read by IDs` with mask query")
-            void composeReadByIdsWithMask() {
-                final Set<TestEntityId> testEntityIds = multipleIds();
-                final String expectedPath = singleTestEntityPath();
-                final Query readByIdsWithSinglePathQuery = factory().query()
-                                                                    .byIdsWithMask(
-                                                                            TARGET_ENTITY_CLASS,
-                                                                            testEntityIds,
-                                                                            expectedPath);
-                assertNotNull(readByIdsWithSinglePathQuery);
-
-                final Target target = checkTarget(TARGET_ENTITY_CLASS,
-                                                  readByIdsWithSinglePathQuery);
-
-                verifyIdFilter(testEntityIds, target.getFilters());
-                verifySinglePathInQuery(expectedPath, readByIdsWithSinglePathQuery);
-            }
-
-            private void verifySinglePathInQuery(String expectedEntityPath, Query query) {
-                final FieldMask fieldMask = query.getFieldMask();
-                assertEquals(1, fieldMask.getPathsCount());     // as we set the only path value.
-
-                final String firstPath = fieldMask.getPaths(0);
-                assertEquals(expectedEntityPath, firstPath);
-            }
-
-            private String singleTestEntityPath() {
-                return TestEntity.getDescriptor()
-                                 .getFields()
-                                 .get(1)
-                                 .getFullName();
-            }
-        }
-
-        @Nested
-        @DisplayName("given multiple random paths mask")
-        class MultiplePathMaskTest {
-
-            @Test
-            @DisplayName("create proper `read all` with mask query")
-            void composeReadAllWithMask() {
-                final String[] paths = multipleRandomPaths();
-                final Query readAllWithPathFilteringQuery =
-                        factory().query()
-                                 .allWithMask(TARGET_ENTITY_CLASS, paths);
-                assertNotNull(readAllWithPathFilteringQuery);
-
-                checkTypeCorrectAndFiltersEmpty(TARGET_ENTITY_CLASS, readAllWithPathFilteringQuery);
-                verifyMultiplePathsInQuery(paths, readAllWithPathFilteringQuery);
-            }
-
-            @Test
-            @DisplayName("create proper `read by IDs` with mask query")
-            void composeReadByIdsWithMask() {
-                final Set<TestEntityId> testEntityIds = multipleIds();
-                final String[] paths = multipleRandomPaths();
-                final Query readByIdsWithSinglePathQuery = factory().query()
-                                                                    .byIdsWithMask(
-                                                                            TARGET_ENTITY_CLASS,
-                                                                            testEntityIds,
-                                                                            paths);
-                assertNotNull(readByIdsWithSinglePathQuery);
-
-                final Target target = checkTarget(TARGET_ENTITY_CLASS,
-                                                  readByIdsWithSinglePathQuery);
-
-                verifyIdFilter(testEntityIds, target.getFilters());
-                verifyMultiplePathsInQuery(paths, readByIdsWithSinglePathQuery);
-            }
-
-            private void verifyMultiplePathsInQuery(String[] paths,
-                                                    Query readAllWithPathFilteringQuery) {
-                final FieldMask fieldMask = readAllWithPathFilteringQuery.getFieldMask();
-                assertEquals(paths.length, fieldMask.getPathsCount());
-                final ProtocolStringList pathsList = fieldMask.getPathsList();
-                for (String expectedPath : paths) {
-                    assertTrue(pathsList.contains(expectedPath));
-                }
-            }
-
-            private String[] multipleRandomPaths() {
-                return new String[]{"some", "random", "paths"};
-            }
+            checkTypeCorrectAndFiltersEmpty(TARGET_ENTITY_CLASS, readAllWithPathFilteringQuery);
+            verifySinglePathInQuery(expectedEntityPath, readAllWithPathFilteringQuery);
         }
 
         @Test
-        @DisplayName("fail to create query with mask when id list is empty")
-        void failForEmptyIds() {
-            assertThrows(IllegalArgumentException.class,
-                         () -> factory().query()
-                                        .byIdsWithMask(TestEntity.class,
-                                                       Collections.emptySet(),
-                                                       "", ""));
+        @DisplayName("`read by IDs` with single path mask")
+        void readByIdsWitSinglePath() {
+            final Set<TestEntityId> testEntityIds = multipleIds();
+            final String expectedPath = singleTestEntityPath();
+            final Query readByIdsWithSinglePathQuery = factory().query()
+                                                                .byIdsWithMask(
+                                                                        TARGET_ENTITY_CLASS,
+                                                                        testEntityIds,
+                                                                        expectedPath);
+            assertNotNull(readByIdsWithSinglePathQuery);
+
+            final Target target = checkTarget(TARGET_ENTITY_CLASS,
+                                              readByIdsWithSinglePathQuery);
+
+            verifyIdFilter(testEntityIds, target.getFilters());
+            verifySinglePathInQuery(expectedPath, readByIdsWithSinglePathQuery);
+        }
+
+        @Test
+        @DisplayName("`read all` with multiple paths mask")
+        void readAllWithMultiplePaths() {
+            final String[] paths = multipleRandomPaths();
+            final Query readAllWithPathFilteringQuery =
+                    factory().query()
+                             .allWithMask(TARGET_ENTITY_CLASS, paths);
+            assertNotNull(readAllWithPathFilteringQuery);
+
+            checkTypeCorrectAndFiltersEmpty(TARGET_ENTITY_CLASS, readAllWithPathFilteringQuery);
+            verifyMultiplePathsInQuery(paths, readAllWithPathFilteringQuery);
+        }
+
+        @Test
+        @DisplayName("`read by IDs` with multiple paths mask")
+        void readByIdsWithMultiplePaths() {
+            final Set<TestEntityId> testEntityIds = multipleIds();
+            final String[] paths = multipleRandomPaths();
+            final Query readByIdsWithSinglePathQuery = factory().query()
+                                                                .byIdsWithMask(
+                                                                        TARGET_ENTITY_CLASS,
+                                                                        testEntityIds,
+                                                                        paths);
+            assertNotNull(readByIdsWithSinglePathQuery);
+
+            final Target target = checkTarget(TARGET_ENTITY_CLASS,
+                                              readByIdsWithSinglePathQuery);
+
+            verifyIdFilter(testEntityIds, target.getFilters());
+            verifyMultiplePathsInQuery(paths, readByIdsWithSinglePathQuery);
+        }
+
+        private void verifySinglePathInQuery(String expectedEntityPath, Query query) {
+            final FieldMask fieldMask = query.getFieldMask();
+            assertEquals(1, fieldMask.getPathsCount());     // as we set the only path value.
+
+            final String firstPath = fieldMask.getPaths(0);
+            assertEquals(expectedEntityPath, firstPath);
+        }
+
+        private String singleTestEntityPath() {
+            return TestEntity.getDescriptor()
+                             .getFields()
+                             .get(1)
+                             .getFullName();
+        }
+
+        private void verifyMultiplePathsInQuery(String[] paths,
+                                                Query readAllWithPathFilteringQuery) {
+            final FieldMask fieldMask = readAllWithPathFilteringQuery.getFieldMask();
+            assertEquals(paths.length, fieldMask.getPathsCount());
+            final ProtocolStringList pathsList = fieldMask.getPathsList();
+            for (String expectedPath : paths) {
+                assertTrue(pathsList.contains(expectedPath));
+            }
+        }
+
+        private String[] multipleRandomPaths() {
+            return new String[]{"some", "random", "paths"};
         }
 
         private void checkFieldMaskEmpty(Query query) {
@@ -237,13 +217,23 @@ class QueryFactoryTest extends ActorRequestFactoryTest {
         }
     }
 
+    @Test
+    @DisplayName("fail to create query with mask when id list is empty")
+    void failForEmptyIds() {
+        assertThrows(IllegalArgumentException.class,
+                     () -> factory().query()
+                                    .byIdsWithMask(TestEntity.class,
+                                                   Collections.emptySet(),
+                                                   "", ""));
+    }
+
     @Nested
-    @DisplayName("when compared to QueryBuilder")
-    class QueryBuilderSimilarityTest {
+    @DisplayName("be consistent with QueryBuilder when creating query")
+    class CreateQuery {
 
         @Test
-        @DisplayName("build query by IDs consistently")
-        void buildSameIdQuery() {
+        @DisplayName("by IDs")
+        void byIdConsistently() {
             final Set<TestEntityId> ids = multipleIds();
             final Query fromFactory = factory().query()
                                                .byIds(TestEntity.class, ids);
@@ -255,8 +245,8 @@ class QueryFactoryTest extends ActorRequestFactoryTest {
         }
 
         @Test
-        @DisplayName("build query by mask consistently")
-        void buildSameMaskQuery() {
+        @DisplayName("by mask")
+        void byMaskConsistently() {
             final String field1 = "TestEntity.firstField";
             final String field2 = "TesEntity.barField";
 
@@ -273,8 +263,8 @@ class QueryFactoryTest extends ActorRequestFactoryTest {
         }
 
         @Test
-        @DisplayName("build `read all` query consistently")
-        void buildSameReadAllQuery() {
+        @DisplayName("`read all`")
+        void readAllConsistently() {
             final Query fromFactory = factory().query()
                                                .all(TestEntity.class);
             final Query fromBuilder = factory().query()
@@ -285,8 +275,8 @@ class QueryFactoryTest extends ActorRequestFactoryTest {
         }
 
         @Test
-        @DisplayName("build query by IDs with mask consistently")
-        void buildSameIdsWithMaskQuery() {
+        @DisplayName("by IDs with mask")
+        void byIdsWithMaskConsistently() {
             final String field1 = "TestEntity.secondField";
             final String field2 = "TesEntity.fooField";
 

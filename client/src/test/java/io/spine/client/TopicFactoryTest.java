@@ -50,12 +50,12 @@ class TopicFactoryTest
     private static final TypeUrl TARGET_ENTITY_TYPE_NAME = TypeUrl.of(TARGET_ENTITY_CLASS);
 
     @Nested
-    @DisplayName("when creating topic")
-    class CreateTopicTest {
+    @DisplayName("create topic")
+    class CreateTopic {
 
         @Test
-        @DisplayName("support creation for all entities of kind")
-        void createForAllOfKind() {
+        @DisplayName("for all entities of kind")
+        void forAllOfKind() {
             final Topic topic = factory().topic()
                                          .allOf(TARGET_ENTITY_CLASS);
 
@@ -68,8 +68,8 @@ class TopicFactoryTest
         }
 
         @Test
-        @DisplayName("support creation for specified entities of kind")
-        void createForSomeOfKind() {
+        @DisplayName("for specified entities of kind")
+        void forSomeOfKind() {
 
             final Set<TestEntityId> ids = newHashSet(entityId(1), entityId(2), entityId(3));
             final Topic topic = factory().topic()
@@ -90,8 +90,8 @@ class TopicFactoryTest
         }
 
         @Test
-        @DisplayName("support creation for given target")
-        void createForTarget() {
+        @DisplayName("for given target")
+        void forTarget() {
             final Target givenTarget = Targets.allOf(TARGET_ENTITY_CLASS);
             final Topic topic = factory().topic()
                                          .forTarget(givenTarget);

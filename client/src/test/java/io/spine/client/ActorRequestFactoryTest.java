@@ -95,42 +95,38 @@ abstract class ActorRequestFactoryTest {
                 .testInstanceMethods(factory(), NullPointerTester.Visibility.PUBLIC);
     }
 
-    @Nested
-    @DisplayName("in Builder")
-    class BuilderTest {
-
-        @Test
-        @DisplayName("require actor")
-        void requireActor() {
-            assertThrows(NullPointerException.class, () -> builder().setZoneOffset(zoneOffset)
-                                                                    .build());
-        }
-
-        @Test
-        @DisplayName("return set values")
-        void returnSetValues() {
-            final ActorRequestFactory.Builder builder = builder()
-                    .setActor(actor)
-                    .setZoneOffset(zoneOffset);
-            assertNotNull(builder.getActor());
-            assertNotNull(builder.getZoneOffset());
-            assertNull(builder.getTenantId());
-        }
+    @Test
+    @DisplayName("require actor in Builder")
+    void requireActorInBuilder() {
+        assertThrows(NullPointerException.class, () -> builder().setZoneOffset(zoneOffset)
+                                                                .build());
     }
 
+    @Test
+    @DisplayName("return values set in Builder")
+    void returnValuesSetInBuilder() {
+        final ActorRequestFactory.Builder builder = builder()
+                .setActor(actor)
+                .setZoneOffset(zoneOffset);
+        assertNotNull(builder.getActor());
+        assertNotNull(builder.getZoneOffset());
+        assertNull(builder.getTenantId());
+    }
+
+    @Test
+    @DisplayName("be single tenant by default")
+    void beSingleTenant() {
+        assertNull(factory().getTenantId());
+    }
+
+    @SuppressWarnings("unused") // Used via reflection by JUnit.
     @Nested
-    @DisplayName("when created")
-    class WhenCreatedTest {
+    @DisplayName("when created, store")
+    class Store {
 
         @Test
-        @DisplayName("be single tenant")
-        void beSingleTenant() {
-            assertNull(factory().getTenantId());
-        }
-
-        @Test
-        @DisplayName("store given user")
-        void storeUser() {
+        @DisplayName("given user")
+        void givenUser() {
             final int currentOffset = ZoneOffsets.getDefault()
                                                  .getAmountSeconds();
             final ActorRequestFactory aFactory = builder()
@@ -143,8 +139,8 @@ abstract class ActorRequestFactoryTest {
         }
 
         @Test
-        @DisplayName("store given user and timezone")
-        void storeUserAndTimezone() {
+        @DisplayName("given user and timezone")
+        void givenUserAndTimezone() {
             assertEquals(actor, factory().getActor());
             assertEquals(zoneOffset, factory().getZoneOffset());
         }
