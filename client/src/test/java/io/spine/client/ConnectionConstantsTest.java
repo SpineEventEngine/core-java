@@ -17,26 +17,31 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package io.spine.client;
 
-import com.google.common.testing.NullPointerTester;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
+import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 /**
- * @author Alex Tymchenko
+ * @author Alexander Yevsyukov
  */
-public class SubscriptionsShould {
+@DisplayName("ConnectionConstants should")
+class ConnectionConstantsTest {
 
     @Test
-    public void have_private_constructor() {
-        assertHasPrivateParameterlessCtor(Subscriptions.class);
+    @DisplayName(HAVE_PARAMETERLESS_CTOR)
+    void haveUtilityConstructor() {
+        assertHasPrivateParameterlessCtor(ConnectionConstants.class);
     }
 
     @Test
-    public void pass_null_tolerance_check() {
-        new NullPointerTester()
-                .testAllPublicStaticMethods(Subscriptions.class);
+    @DisplayName("declare non-zero default gRPC port")
+    void declareDefaultGrpcPort() {
+        assertNotEquals(0, ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT);
     }
 }

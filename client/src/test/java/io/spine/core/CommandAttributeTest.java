@@ -24,11 +24,13 @@ import com.google.protobuf.Empty;
 import com.google.protobuf.StringValue;
 import io.spine.base.Time;
 import io.spine.client.TestActorRequestFactory;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.protobuf.TypeConverter.toMessage;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Tests for {@linkplain CommandAttribute CommandAttribute API}.
@@ -38,15 +40,16 @@ import static org.junit.Assert.assertEquals;
  *
  * @author Alexander Yevsyukov
  */
-public class CommandAttributeShould {
+@DisplayName("Command attribute should")
+class CommandAttributeTest {
 
     private final TestActorRequestFactory factory =
-            TestActorRequestFactory.newInstance(CommandAttributeShould.class);
+            TestActorRequestFactory.newInstance(CommandAttributeTest.class);
 
     private CommandContext.Builder contextBuilder;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         Command command = factory.createCommand(Empty.getDefaultInstance(),
                                                 Time.getCurrentTime());
         contextBuilder = command.getContext()
@@ -61,7 +64,8 @@ public class CommandAttributeShould {
     }
 
     @Test
-    public void set_and_get_bool_attribute() {
+    @DisplayName("set and get bool attribute value")
+    void setAndGetBool() {
         final CommandAttribute<Boolean> attr = new CommandAttribute<Boolean>("flag") {
         };
         assertSetGet(attr, true);
@@ -69,7 +73,8 @@ public class CommandAttributeShould {
     }
 
     @Test
-    public void set_and_get_string_attribute() {
+    @DisplayName("set and get string attribute value")
+    void setAndGetString() {
         final CommandAttribute<String> attr = new CommandAttribute<String>("str") {
         };
         final String value = getClass().getName();
@@ -78,7 +83,8 @@ public class CommandAttributeShould {
     }
 
     @Test
-    public void set_and_get_long_attribute() {
+    @DisplayName("set and get long attribute value")
+    void setAndGetLong() {
         final CommandAttribute<Long> attr = new CommandAttribute<Long>("l-o-n-g") {
         };
         final Long value = 10101010L;
@@ -87,7 +93,8 @@ public class CommandAttributeShould {
     }
 
     @Test
-    public void set_and_get_int_attribute() {
+    @DisplayName("set and get int attribute value")
+    void setAndGetInt() {
         final CommandAttribute<Integer> attr = new CommandAttribute<Integer>("int") {
         };
         final Integer value = 1024;
@@ -96,7 +103,8 @@ public class CommandAttributeShould {
     }
 
     @Test
-    public void set_and_get_message_attribute() {
+    @DisplayName("set and get protobuf message attribute value")
+    void setAndGetMessage() {
         final CommandAttribute<StringValue> attr = new CommandAttribute<StringValue>("str-val") {
         };
         final StringValue value = toMessage(getClass().getName());
@@ -105,7 +113,8 @@ public class CommandAttributeShould {
     }
 
     @Test
-    public void set_and_get_float_attribute() {
+    @DisplayName("set and get float attribute value")
+    void setAndGetFloat() {
         final CommandAttribute<Float> attr = new CommandAttribute<Float>("flp") {
         };
         final Float value = 1024.512f;
@@ -114,7 +123,8 @@ public class CommandAttributeShould {
     }
 
     @Test
-    public void set_and_get_double_attribute() {
+    @DisplayName("set and get double attribute value")
+    void setAndGetDouble() {
         final CommandAttribute<Double> attr = new CommandAttribute<Double>("dbl") {
         };
         final Double value = 100.500;
@@ -122,14 +132,15 @@ public class CommandAttributeShould {
         assertSetGet(attr, value);
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void fail_on_unsupported_type() {
+    @Test
+    @DisplayName("fail on setting unsupported value type")
+    void fail_on_unsupported_type() {
         final CommandAttribute<Object> attr = new CommandAttribute<Object>("o") {
         };
 
         @SuppressWarnings("EmptyClass") final Object value = new Object() {
         };
 
-        attr.setValue(contextBuilder, value);
+        assertThrows(IllegalArgumentException.class, () -> attr.setValue(contextBuilder, value));
     }
 }
