@@ -235,7 +235,7 @@ public class EntityColumn implements Serializable {
         Method annotatedVersion = retrieveAnnotatedVersion(getter);
         String nameForStore = nameFromAnnotation(annotatedVersion).or(nameForQuery);
         boolean nullable = getter.getAnnotatedReturnType()
-                                  .isAnnotationPresent(Nullable.class);
+                                 .isAnnotationPresent(Nullable.class);
         return new EntityColumn(getter, nameForQuery, nameForStore, nullable);
     }
 
