@@ -358,12 +358,10 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      */
     private EntityQuery<I> toCompleteQuery(EntityQuery<I> src) {
         EntityQuery<I> completeQuery;
-        if (!src.isLifecycleAttributesSet()
-                && EntityWithLifecycle.class.isAssignableFrom(getEntityClass())) {
-            completeQuery = src.withLifecycleFlags(recordStorage());
-        } else {
-            completeQuery = src;
-        }
+        completeQuery = !src.isLifecycleAttributesSet()
+                                && EntityWithLifecycle.class.isAssignableFrom(getEntityClass())
+                        ? src.withLifecycleFlags(recordStorage())
+                        : src;
         return completeQuery;
     }
 
