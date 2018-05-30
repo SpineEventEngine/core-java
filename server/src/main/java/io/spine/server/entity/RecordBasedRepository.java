@@ -329,14 +329,14 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     /**
      * Creates an {@link EntityQuery} instance which has:
      * <ul>
-     * <li>All the parameters from the {@code src} Query;
-     * <li>At least one parameter limiting
-     * the {@link io.spine.server.storage.LifecycleFlagField Lifecycle Flags Columns}.
+     *     <li>All the parameters from the {@code src} Query;
+     *     <li>At least one parameter limiting
+     *         the {@link io.spine.server.storage.LifecycleFlagField Lifecycle Flags Columns}.
      * </ul>
      *
      * <p>If the {@code src} instance
      * {@linkplain EntityQuery#isLifecycleAttributesSet() contains the lifecycle attributes}, then
-     * it is returned with no change. Otherwise - a new instance containing the default values for
+     * it is returned with no change. Otherwise, a new instance containing the default values for
      * the Lifecycle attributes is returned.
      *
      * <p>The default values are:
@@ -353,8 +353,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      *
      * @param src the source {@link EntityQuery} to take the parameters from
      * @return an {@link EntityQuery} which includes
-     * the {@link io.spine.server.storage.LifecycleFlagField Lifecycle Flags Columns} unless
-     * they are not supported
+     *         the {@link io.spine.server.storage.LifecycleFlagField Lifecycle Flags Columns} unless
+     *         they are not supported
      */
     private EntityQuery<I> toCompleteQuery(EntityQuery<I> src) {
         EntityQuery<I> completeQuery;
