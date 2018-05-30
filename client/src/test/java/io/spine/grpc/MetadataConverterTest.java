@@ -24,27 +24,40 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.InvalidProtocolBufferException;
 import io.grpc.Metadata;
 import io.spine.base.Error;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
+import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * @author Dmytro Grankin
  */
-public class MetadataConverterShould {
+@DisplayName("Metadata converter should")
+class MetadataConverterTest {
 
     @Test
-    public void have_private_constructor() {
+    @DisplayName(HAVE_PARAMETERLESS_CTOR)
+    void haveUtilityConstructor() {
         assertHasPrivateParameterlessCtor(MetadataConverter.class);
+    }
+
+    @Test
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void passNullToleranceCheck() {
+        new NullPointerTester()
+                .testAllPublicStaticMethods(MetadataConverter.class);
     }
 
     @SuppressWarnings("ConstantConditions") // A part of the test.
     @Test
-    public void return_metadata_containing_error() throws InvalidProtocolBufferException {
+    @DisplayName("convert Error to Metadata")
+    void convertError() throws InvalidProtocolBufferException {
         final Error error = Error.getDefaultInstance();
         final Metadata metadata = MetadataConverter.toMetadata(error);
         final byte[] bytes = metadata.get(MetadataConverter.KEY);
@@ -52,7 +65,8 @@ public class MetadataConverterShould {
     }
 
     @Test
-    public void return_error_extracted_form_metadata() {
+    @DisplayName("convert Metadata to Error")
+    void convertMetadata() {
         final Error expectedError = Error.getDefaultInstance();
         final Metadata metadata = MetadataConverter.toMetadata(expectedError);
 
@@ -61,7 +75,8 @@ public class MetadataConverterShould {
     }
 
     @Test
-    public void return_absent_if_metadata_is_empty() {
+    @DisplayName("return absent when converting empty Metadata")
+    void processEmptyMetadata() {
         final Metadata metadata = new Metadata();
 
         assertFalse(MetadataConverter.toError(metadata)
@@ -69,7 +84,8 @@ public class MetadataConverterShould {
     }
 
     @Test
-    public void throw_wrapped_InvalidProtocolBufferException_if_bytes_are_invalid() {
+    @DisplayName("throw wrapped InvalidProtocolBufferException when Metadata bytes are invalid")
+    void throwOnInvalidBytes() {
         final Metadata metadata = new Metadata();
         metadata.put(MetadataConverter.KEY, new byte[]{(byte) 1});
 
@@ -79,11 +95,5 @@ public class MetadataConverterShould {
         } catch (IllegalStateException e) {
             assertTrue(e.getCause() instanceof InvalidProtocolBufferException);
         }
-    }
-
-    @Test
-    public void pass_the_null_tolerance_check() {
-        new NullPointerTester()
-                .testAllPublicStaticMethods(MetadataConverter.class);
     }
 }

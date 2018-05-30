@@ -28,26 +28,31 @@ import io.spine.core.UserId;
 import io.spine.test.client.TestEntity;
 import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 
 import static com.google.common.collect.Sets.newHashSet;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.core.given.GivenUserId.of;
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.time.Timestamps2.isLaterThan;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Base tests for the {@linkplain ActorRequestFactory} descendants.
  *
  * @author Alex Tymchenko
  */
-public abstract class ActorRequestFactoryShould {
+@DisplayName("Actor request factory should")
+abstract class ActorRequestFactoryTest {
 
     private final UserId actor = of(newUuid());
     private final ZoneOffset zoneOffset = ZoneOffsets.UTC;
@@ -74,57 +79,11 @@ public abstract class ActorRequestFactoryShould {
         return factory().actorContext();
     }
 
-    @Test(expected = NullPointerException.class)
-    public void require_actor_in_Builder() {
-        builder().setZoneOffset(zoneOffset)
-                 .build();
-    }
-
-    @Test
-    public void return_set_values_in_Builder() {
-        final ActorRequestFactory.Builder builder = builder()
-                .setActor(actor)
-                .setZoneOffset(zoneOffset);
-        assertNotNull(builder.getActor());
-        assertNotNull(builder.getZoneOffset());
-        assertNull(builder.getTenantId());
-    }
-
-    @Test
-    public void create_instance_by_user() {
-        final int currentOffset = ZoneOffsets.getDefault()
-                                             .getAmountSeconds();
-        final ActorRequestFactory aFactory = builder()
-                .setActor(actor)
-                .build();
-
-        assertEquals(actor, aFactory.getActor());
-        assertEquals(currentOffset, aFactory.getZoneOffset()
-                                            .getAmountSeconds());
-    }
-
-    @Test
-    public void create_instance_by_user_and_timezone() {
-        assertEquals(actor, factory().getActor());
-        assertEquals(zoneOffset, factory().getZoneOffset());
-    }
-
-    @Test
-    public void be_single_tenant_by_default() {
-        assertNull(factory().getTenantId());
-    }
-
-    @Test
-    public void support_moving_between_timezones() {
-        final ActorRequestFactory factoryInAnotherTimezone =
-                factory().switchTimezone(ZoneOffsets.ofHours(-8));
-        assertNotEquals(factory().getZoneOffset(), factoryInAnotherTimezone.getZoneOffset());
-    }
-
     @SuppressWarnings({"SerializableNonStaticInnerClassWithoutSerialVersionUID",
-            "SerializableInnerClassWithNonSerializableOuterClass"})
+                       "SerializableInnerClassWithNonSerializableOuterClass"})
     @Test
-    public void not_accept_nulls_as_public_method_arguments() {
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void passNullToleranceCheck() {
         new NullPointerTester()
                 .setDefault(Message.class, TestEntity.getDefaultInstance())
                 .setDefault((new TypeToken<Class<? extends Message>>() {
@@ -134,6 +93,69 @@ public abstract class ActorRequestFactoryShould {
                             }).getRawType(),
                             newHashSet(Any.getDefaultInstance()))
                 .testInstanceMethods(factory(), NullPointerTester.Visibility.PUBLIC);
+    }
+
+    @Nested
+    @DisplayName("in Builder")
+    class BuilderTest {
+
+        @Test
+        @DisplayName("require actor")
+        void requireActor() {
+            assertThrows(NullPointerException.class, () -> builder().setZoneOffset(zoneOffset)
+                                                                    .build());
+        }
+
+        @Test
+        @DisplayName("return set values")
+        void returnSetValues() {
+            final ActorRequestFactory.Builder builder = builder()
+                    .setActor(actor)
+                    .setZoneOffset(zoneOffset);
+            assertNotNull(builder.getActor());
+            assertNotNull(builder.getZoneOffset());
+            assertNull(builder.getTenantId());
+        }
+    }
+
+    @Nested
+    @DisplayName("when created")
+    class WhenCreatedTest {
+
+        @Test
+        @DisplayName("be single tenant")
+        void beSingleTenant() {
+            assertNull(factory().getTenantId());
+        }
+
+        @Test
+        @DisplayName("store given user")
+        void storeUser() {
+            final int currentOffset = ZoneOffsets.getDefault()
+                                                 .getAmountSeconds();
+            final ActorRequestFactory aFactory = builder()
+                    .setActor(actor)
+                    .build();
+
+            assertEquals(actor, aFactory.getActor());
+            assertEquals(currentOffset, aFactory.getZoneOffset()
+                                                .getAmountSeconds());
+        }
+
+        @Test
+        @DisplayName("store given user and timezone")
+        void storeUserAndTimezone() {
+            assertEquals(actor, factory().getActor());
+            assertEquals(zoneOffset, factory().getZoneOffset());
+        }
+    }
+
+    @Test
+    @DisplayName("support moving between timezones")
+    void moveBetweenTimezones() {
+        final ActorRequestFactory factoryInAnotherTimezone =
+                factory().switchTimezone(ZoneOffsets.ofHours(-8));
+        assertNotEquals(factory().getZoneOffset(), factoryInAnotherTimezone.getZoneOffset());
     }
 
     void verifyContext(ActorContext actualContext) {
