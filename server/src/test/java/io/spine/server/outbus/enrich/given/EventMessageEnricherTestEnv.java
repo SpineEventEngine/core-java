@@ -39,28 +39,18 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 public class EventMessageEnricherTestEnv {
 
+    /** Prevent instantiation of this utility class. */
     private EventMessageEnricherTestEnv() {
-        // Prevent instantiation of this utility class.
     }
 
     public static class Enrichment {
 
         private static final Function<EventId, String> EVENT_ID_TO_STRING =
-                new Function<EventId, String>() {
-                    @Override
-                    public @Nullable String apply(@Nullable EventId input) {
-                        return input == null ? "" : input.getValue();
-                    }
-                };
+                input -> input == null ? "" : input.getValue();
         private static final Function<Timestamp, String> TIMESTAMP_TO_STRING =
                 input -> input == null ? "" : input.toString();
         private static final Function<CommandContext, String> CMD_CONTEXT_TO_STRING =
-                new Function<CommandContext, String>() {
-                    @Override
-                    public String apply(@Nullable CommandContext input) {
-                        return input == null ? "" : input.toString();
-                    }
-                };
+                input -> input == null ? "" : input.toString();
         private static final Function<Any, String> ANY_TO_STRING =
                 input -> input == null ? "" : input.toString();
         private static final Function<Integer, String> VERSION_TO_STRING =

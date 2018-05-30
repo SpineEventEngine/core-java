@@ -23,7 +23,6 @@ package io.spine.server.event.given;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.core.Command;
@@ -42,12 +41,13 @@ import io.spine.test.command.CmdStartProject;
 import io.spine.test.command.event.CmdProjectCreated;
 import io.spine.test.command.event.CmdProjectStarted;
 import io.spine.test.command.event.CmdTaskAdded;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+
+import static com.google.common.collect.Lists.newLinkedList;
 
 /**
  * @author Alexander Yevsyukov
@@ -60,7 +60,7 @@ public class CommandHandlerTestEnv {
 
     public static class EventCatcher implements EventDispatcher<String> {
 
-        private final List<EventEnvelope> dispatched = Lists.newLinkedList();
+        private final List<EventEnvelope> dispatched = newLinkedList();
 
         @Override
         public Set<EventClass> getMessageClasses() {

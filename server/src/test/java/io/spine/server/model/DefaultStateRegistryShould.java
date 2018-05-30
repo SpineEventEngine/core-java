@@ -32,10 +32,11 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import static com.google.common.collect.Lists.newArrayListWithExpectedSize;
 import static com.google.common.collect.Maps.newConcurrentMap;
+import static java.util.concurrent.Executors.callable;
+import static java.util.concurrent.Executors.newFixedThreadPool;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -55,9 +56,8 @@ public class DefaultStateRegistryShould {
     private Map<Object, Object> spyMap;
 
     private static void runParallel(Collection<Callable<Object>> tasks) {
-        ExecutorService executor =
-                Executors.newFixedThreadPool(Runtime.getRuntime()
-                                                    .availableProcessors() * 2);
+        ExecutorService executor = newFixedThreadPool(Runtime.getRuntime()
+                                                             .availableProcessors() * 2);
         try {
             executor.invokeAll(tasks);
         } catch (InterruptedException ignored) {
@@ -90,7 +90,7 @@ public class DefaultStateRegistryShould {
         int numberOfEntities = 1000;
         Collection<Callable<Object>> tasks = newArrayListWithExpectedSize(numberOfEntities);
         for (int i = 0; i < numberOfEntities; i++) {
-            tasks.add(Executors.callable(() -> {
+            tasks.add(callable(() -> {
                 TestEntity testEntity = Given.entityOfClass(TestEntity.class)
                                              .build();
                 testEntity.getDefaultState();
@@ -112,7 +112,7 @@ public class DefaultStateRegistryShould {
         int numberOfEntities = 1000;
         Collection<Callable<Object>> tasks = newArrayListWithExpectedSize(numberOfEntities);
         for (int i = 0; i < numberOfEntities; i++) {
-            tasks.add(Executors.callable(() -> {
+            tasks.add(callable(() -> {
                 registry.get(TimerSnapshot.class);
             }));
         }

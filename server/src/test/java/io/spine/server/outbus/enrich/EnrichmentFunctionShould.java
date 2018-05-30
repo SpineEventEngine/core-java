@@ -56,9 +56,8 @@ public class EnrichmentFunctionShould {
             }
             ProjectCreated.Enrichment.Builder result = ProjectCreated.Enrichment
                     .newBuilder()
-                    .setProjectName(
-                            input.getProjectId()
-                                 .getId());
+                    .setProjectName(input.getProjectId()
+                                         .getId());
             return result.build();
         };
         this.fieldEnrichment = FieldEnrichment.of(ProjectCreated.class,
