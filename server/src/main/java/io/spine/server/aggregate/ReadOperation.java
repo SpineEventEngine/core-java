@@ -81,6 +81,7 @@ final class ReadOperation<I> {
         return Optional.of(result);
     }
 
+    @SuppressWarnings("CheckReturnValue") // calling builder
     private AggregateStateRecord buildRecord() {
         AggregateStateRecord.Builder builder = AggregateStateRecord.newBuilder();
         if (snapshot != null) {

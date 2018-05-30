@@ -22,7 +22,6 @@ package io.spine.server.entity.storage;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
-import com.google.common.base.Optional;
 import io.spine.annotation.Internal;
 import io.spine.server.entity.Entity;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -32,19 +31,17 @@ import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.gson.internal.Primitives.wrap;
-import static io.spine.server.entity.storage.ColumnRecords.getAnnotatedVersion;
 import static io.spine.server.entity.storage.ColumnValueConverters.of;
+import static io.spine.server.entity.storage.Methods.checkGetter;
+import static io.spine.server.entity.storage.Methods.hasNullableReturn;
+import static io.spine.server.entity.storage.Methods.nameFromAnnotation;
+import static io.spine.server.entity.storage.Methods.nameFromGetter;
+import static io.spine.server.entity.storage.Methods.retrieveAnnotatedVersion;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
-import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.lang.String.format;
-import static java.lang.reflect.Modifier.isPublic;
-import static java.lang.reflect.Modifier.isStatic;
 
 /**
  * The representation of a field of an {@link Entity} which is stored in the storage in the way
@@ -168,9 +165,6 @@ public class EntityColumn implements Serializable {
 
     private static final long serialVersionUID = 0L;
 
-    private static final String GETTER_PREFIX_REGEX = "(get)|(is)";
-    private static final Pattern GETTER_PREFIX_PATTERN = Pattern.compile(GETTER_PREFIX_REGEX);
-
     /**
      * <p>The getter which declares this {@code EntityColumn}.
      *
@@ -231,54 +225,11 @@ public class EntityColumn implements Serializable {
      */
     public static EntityColumn from(Method getter) {
         checkGetter(getter);
-        String nameForQuery = nameFromGetter(getter);
         Method annotatedVersion = retrieveAnnotatedVersion(getter);
+        String nameForQuery = nameFromGetter(getter);
         String nameForStore = nameFromAnnotation(annotatedVersion).or(nameForQuery);
-        boolean nullable = getter.getAnnotatedReturnType()
-                                 .isAnnotationPresent(Nullable.class);
+        boolean nullable = hasNullableReturn(getter);
         return new EntityColumn(getter, nameForQuery, nameForStore, nullable);
-    }
-
-    private static Method retrieveAnnotatedVersion(Method getter) {
-        Optional<Method> optionalMethod = getAnnotatedVersion(getter);
-        if (!optionalMethod.isPresent()) {
-            throw newIllegalStateException("Method `%s` is not an entity column getter.", getter);
-        }
-        return optionalMethod.get();
-    }
-
-    private static Optional<String> nameFromAnnotation(Method getter) {
-        final String trimmedName = getter.getAnnotation(Column.class)
-                                         .name()
-                                         .trim();
-        return trimmedName.isEmpty()
-               ? Optional.absent()
-               : Optional.of(trimmedName);
-    }
-
-    private static String nameFromGetter(Method getter) {
-        final Matcher prefixMatcher = GETTER_PREFIX_PATTERN.matcher(getter.getName());
-        final String nameWithoutPrefix = prefixMatcher.replaceFirst("");
-        return Character.toLowerCase(nameWithoutPrefix.charAt(0)) + nameWithoutPrefix.substring(1);
-    }
-
-    private static void checkGetter(Method getter) {
-        checkNotNull(getter);
-        checkArgument(GETTER_PREFIX_PATTERN.matcher(getter.getName())
-                                           .find() && getter.getParameterTypes().length == 0,
-                      "Method `%s` is not a getter.", getter);
-        checkArgument(getAnnotatedVersion(getter).isPresent(),
-                      format("Entity column getter should be annotated with `%s`.",
-                             Column.class.getName()));
-        final int modifiers = getter.getModifiers();
-        checkArgument(isPublic(modifiers) && !isStatic(modifiers),
-                      "Entity column getter should be public instance method.");
-        final Class<?> returnType = getter.getReturnType();
-        final Class<?> wrapped = wrap(returnType);
-        checkArgument(Serializable.class.isAssignableFrom(wrapped),
-                      format("Cannot create column of non-serializable type %s by method %s.",
-                             returnType,
-                             getter));
     }
 
     /**
@@ -324,7 +275,7 @@ public class EntityColumn implements Serializable {
      */
     public @Nullable Serializable getFor(Entity<?, ?> source) {
         try {
-            final Serializable result = (Serializable) getter.invoke(source);
+            Serializable result = (Serializable) getter.invoke(source);
             if (!nullable) {
                 checkNotNull(result, format("Not null getter %s returned null.", getter.getName()));
             }
