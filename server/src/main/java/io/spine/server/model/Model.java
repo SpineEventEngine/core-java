@@ -23,7 +23,6 @@ package io.spine.server.model;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.CommandClass;
@@ -49,6 +48,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Sets.intersection;
 
 /**
  * Stores information of message handling classes.
@@ -221,8 +221,7 @@ public class Model {
             if (modelClass instanceof CommandHandlingClass) {
                 CommandHandlingClass commandHandler = (CommandHandlingClass) modelClass;
                 Set<CommandClass> commandClasses = commandHandler.getCommands();
-                Sets.SetView<CommandClass> intersection =
-                        Sets.intersection(commandClasses, candidateCommands);
+                Set<CommandClass> intersection = intersection(commandClasses, candidateCommands);
                 if (intersection.size() > 0) {
                     map.put(intersection, commandHandler);
                 }
