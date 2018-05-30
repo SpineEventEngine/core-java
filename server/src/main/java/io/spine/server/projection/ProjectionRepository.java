@@ -72,6 +72,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         extends EventDispatchingRepository<I, P, S>
         implements Shardable {
 
+    @SuppressWarnings("ThisEscapedInObjectConstruction")
+        // OK since `this` is referenced from the supplier
     private final Supplier<ProjectionEventDelivery<I, P>> eventDeliverySupplier =
             memoize(() -> new ProjectionEventDelivery<>(this));
 
@@ -100,7 +102,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
 
     /** Obtains class information of projection managed by this repository. */
     @SuppressWarnings("unchecked")
-    // The cast is ensured by generic parameters of the repository.
+        // The cast is ensured by generic parameters of the repository.
     ProjectionClass<P> projectionClass() {
         return (ProjectionClass<P>) entityClass();
     }
@@ -208,9 +210,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
                        we create a specific type of a storage, not a regular entity storage created
                        in the parent. */)
     protected RecordStorage<I> createStorage(StorageFactory factory) {
-        final Class<P> projectionClass = getEntityClass();
-        final ProjectionStorage<I> projectionStorage =
-                factory.createProjectionStorage(projectionClass);
+        Class<P> projectionClass = getEntityClass();
+        ProjectionStorage<I> projectionStorage = factory.createProjectionStorage(projectionClass);
         this.recordStorage = projectionStorage.recordStorage();
         return projectionStorage;
     }
@@ -241,7 +242,10 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     @Override
     public Set<EventClass> getMessageClasses() {
         return projectionClass().getEventSubscriptions();
-    }    @Override
+    }
+
+    /** {@inheritDoc} */
+    @Override
     public Set<I> dispatch(EventEnvelope envelope) {
         return ProjectionEndpoint.handle(this, envelope);
     }
@@ -263,10 +267,11 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
 
         // Get the timestamp of the last event. This also ensures we have the storage.
         Timestamp timestamp = readLastHandledEventTime();
-        return EventStreamQuery.newBuilder()
-                               .setAfter(timestamp)
-                               .addAllFilter(eventFilters)
-                               .build();
+        EventStreamQuery.Builder builder = EventStreamQuery
+                .newBuilder()
+                .setAfter(timestamp)
+                .addAllFilter(eventFilters);
+        return builder.build();
     }
 
     /**
@@ -297,14 +302,14 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
 
     @Override
     public Iterable<ShardedStreamConsumer<?, ?>> getMessageConsumers() {
-        final Iterable<ShardedStreamConsumer<?, ?>> result =
+        Iterable<ShardedStreamConsumer<?, ?>> result =
                 ImmutableList.of(getEndpointDelivery().getConsumer());
         return result;
     }
 
     @Override
     public BoundedContextName getBoundedContextName() {
-        final BoundedContextName name = getBoundedContext().getName();
+        BoundedContextName name = getBoundedContext().getName();
         return name;
     }
 
@@ -321,7 +326,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
 
         @Override
         public Set<ExternalMessageClass> getMessageClasses() {
-            final Set<EventClass> eventClasses = projectionClass().getExternalEventSubscriptions();
+            Set<EventClass> eventClasses = projectionClass().getExternalEventSubscriptions();
             return ExternalMessageClass.fromEventClasses(eventClasses);
         }
 

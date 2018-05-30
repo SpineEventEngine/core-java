@@ -100,8 +100,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     protected final EntityClass<E> entityClass() {
         if (entityClass == null) {
             @SuppressWarnings("unchecked") // The type is ensured by the declaration of this class.
-            final Class<E> cast =
-                    (Class<E>)ENTITY.getArgumentIn(getClass());
+            Class<E> cast = (Class<E>) ENTITY.getArgumentIn(getClass());
             entityClass = getModelClass(cast);
         }
         return entityClass;
@@ -240,9 +239,24 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      */
     @Override
     public Iterator<E> iterator(Predicate<E> filter) {
-        final Iterator<E> unfiltered = new EntityIterator<>(this);
-        final Iterator<E> filtered = Iterators.filter(unfiltered, filter);
+        Iterator<E> unfiltered = new EntityIterator<>(this);
+        Iterator<E> filtered = Iterators.filter(unfiltered, filter);
         return filtered;
+    }
+
+    /**
+     * Initializes the storage using the passed factory.
+     *
+     * @param factory storage factory
+     * @throws IllegalStateException if the repository already has storage initialized
+     */
+    public void initStorage(StorageFactory factory) {
+        if (this.storage != null) {
+            throw newIllegalStateException("The repository %s already has storage %s.",
+                                           this, this.storage);
+        }
+
+        this.storage = createStorage(factory);
     }
 
     /**
@@ -274,19 +288,9 @@ public abstract class Repository<I, E extends Entity<I, ?>>
         return storage;
     }
 
-    /**
-     * Initializes the storage using the passed factory.
-     *
-     * @param factory storage factory
-     * @throws IllegalStateException if the repository already has storage initialized
-     */
-    public void initStorage(StorageFactory factory) {
-        if (this.storage != null) {
-            throw newIllegalStateException("The repository %s already has storage %s.",
-                                           this, this.storage);
-        }
-
-        this.storage = createStorage(factory);
+    private Storage<I, ?, ?> ensureStorage() {
+        checkState(storage != null, "No storage assigned in repository %s", this);
+        return storage;
     }
 
     /**
@@ -318,11 +322,6 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      */
     public boolean isOpen() {
         return storage != null;
-    }
-
-    private Storage<I, ?, ?> ensureStorage() {
-        checkState(storage != null, "No storage assigned in repository %s", this);
-        return storage;
     }
 
     /**
@@ -357,9 +356,9 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     protected void logError(String msgFormat,
                             MessageEnvelope envelope,
                             RuntimeException exception) {
-        final MessageClass messageClass = envelope.getMessageClass();
-        final String messageId = Stringifiers.toString(envelope.getId());
-        final String errorMessage = format(msgFormat, messageClass, messageId);
+        MessageClass messageClass = envelope.getMessageClass();
+        String messageId = Stringifiers.toString(envelope.getId());
+        String errorMessage = format(msgFormat, messageClass, messageId);
         log().error(errorMessage, exception);
     }
 
@@ -409,20 +408,20 @@ public abstract class Repository<I, E extends Entity<I, ?>>
 
         @Override
         public boolean hasNext() {
-            final boolean result = index.hasNext();
+            boolean result = index.hasNext();
             return result;
         }
 
         @Override
         public E next() {
-            final I id = index.next();
-            final Optional<E> loaded = repository.find(id);
+            I id = index.next();
+            Optional<E> loaded = repository.find(id);
             if (!loaded.isPresent()) {
-                final String idStr = Identifier.toString(id);
+                String idStr = Identifier.toString(id);
                 throw newIllegalStateException("Unable to load entity with ID: %s", idStr);
             }
 
-            final E entity = loaded.get();
+            E entity = loaded.get();
             return entity;
         }
 

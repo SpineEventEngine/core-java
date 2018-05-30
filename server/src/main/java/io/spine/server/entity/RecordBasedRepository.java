@@ -92,7 +92,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      */
     protected RecordStorage<I> recordStorage() {
         @SuppressWarnings("unchecked") // OK as we control the creation in createStorage().
-        final RecordStorage<I> storage = (RecordStorage<I>) getStorage();
+        RecordStorage<I> storage = (RecordStorage<I>) getStorage();
         return storage;
     }
 
@@ -112,29 +112,29 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     /** {@inheritDoc} */
     @Override
     public E create(I id) {
-        final E result = entityFactory().create(id);
+        E result = entityFactory().create(id);
         return result;
     }
 
     /** {@inheritDoc} */
     @Override
     public void store(E entity) {
-        final EntityRecordWithColumns record = toRecord(entity);
-        final RecordStorage<I> storage = recordStorage();
+        EntityRecordWithColumns record = toRecord(entity);
+        RecordStorage<I> storage = recordStorage();
         storage.write(entity.getId(), record);
     }
 
     @Override
     public Iterator<E> iterator(Predicate<E> filter) {
-        final Iterator<E> allEntities = loadAll();
-        final Iterator<E> result = filter(allEntities, filter);
+        Iterator<E> allEntities = loadAll();
+        Iterator<E> result = filter(allEntities, filter);
         return result;
     }
 
     /** {@inheritDoc} */
     @Override
     protected RecordStorage<I> createStorage(StorageFactory factory) {
-        final RecordStorage<I> result = factory.createRecordStorage(getEntityClass());
+        RecordStorage<I> result = factory.createRecordStorage(getEntityClass());
         return result;
     }
 
@@ -146,9 +146,9 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * @param entities the {@linkplain Entity Entities} to store
      */
     public void store(Collection<E> entities) {
-        final Map<I, EntityRecordWithColumns> records = newHashMapWithExpectedSize(entities.size());
+        Map<I, EntityRecordWithColumns> records = newHashMapWithExpectedSize(entities.size());
         for (E entity : entities) {
-            final EntityRecordWithColumns recordWithColumns = toRecord(entity);
+            EntityRecordWithColumns recordWithColumns = toRecord(entity);
             records.put(entity.getId(), recordWithColumns);
         }
         recordStorage().write(records);
@@ -159,7 +159,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      */
     @Internal
     public void storeRecord(EntityRecord record) {
-        final E entity = toEntity(record);
+        E entity = toEntity(record);
         store(entity);
     }
 
@@ -177,12 +177,12 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         if (!optional.isPresent()) {
             return Optional.absent();
         }
-        final EntityRecord record = optional.get();
-        final boolean recordVisible = isEntityVisible().apply(record.getLifecycleFlags());
+        EntityRecord record = optional.get();
+        boolean recordVisible = isEntityVisible().apply(record.getLifecycleFlags());
         if (!recordVisible) {
             return Optional.absent();
         }
-        final E entity = toEntity(record);
+        E entity = toEntity(record);
         return Optional.of(entity);
     }
 
@@ -191,20 +191,20 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * {@linkplain EntityWithLifecycle.Predicates#isEntityVisible()}.
      */
     private Optional<EntityRecord> findRecord(I id) {
-        final RecordStorage<I> storage = recordStorage();
-        final RecordReadRequest<I> request = new RecordReadRequest<>(id);
-        final Optional<EntityRecord> found = storage.read(request);
+        RecordStorage<I> storage = recordStorage();
+        RecordReadRequest<I> request = new RecordReadRequest<>(id);
+        Optional<EntityRecord> found = storage.read(request);
         if (!found.isPresent()) {
             return Optional.absent();
         }
-        final EntityRecord record = found.get();
+        EntityRecord record = found.get();
         return Optional.of(record);
     }
 
     @Internal
     public EntityRecord findOrCreateRecord(I id) {
-        final E entity = findOrCreate(id);
-        final EntityRecordWithColumns recordWithColumns = toRecord(entity);
+        E entity = findOrCreate(id);
+        EntityRecordWithColumns recordWithColumns = toRecord(entity);
         return recordWithColumns.getRecord();
     }
 
@@ -225,8 +225,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         if (!optional.isPresent()) {
             return create(id);
         }
-        final EntityRecord record = optional.get();
-        final E entity = toEntity(record);
+        EntityRecord record = optional.get();
+        E entity = toEntity(record);
         return entity;
     }
 
@@ -274,12 +274,11 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * @see #loadAll(Iterable)
      */
     public Iterator<E> loadAll(Iterable<I> ids, FieldMask fieldMask) {
-        final RecordStorage<I> storage = recordStorage();
-        final Iterator<EntityRecord> entityStorageRecords = storage.readMultiple(ids, fieldMask);
-        final Iterator<EntityRecord> presentRecords = filter(entityStorageRecords,
-                                                             Predicates.<EntityRecord>notNull());
-        final Function<EntityRecord, E> toEntity = entityConverter().reverse();
-        final Iterator<E> result = transform(presentRecords, toEntity);
+        RecordStorage<I> storage = recordStorage();
+        Iterator<EntityRecord> entityStorageRecords = storage.readMultiple(ids, fieldMask);
+        Iterator<EntityRecord> presentRecords = filter(entityStorageRecords, Predicates.notNull());
+        Function<EntityRecord, E> toEntity = entityConverter().reverse();
+        Iterator<E> result = transform(presentRecords, toEntity);
         return result;
     }
 
@@ -292,10 +291,10 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * @see #loadAll(Iterable)
      */
     public Iterator<E> loadAll() {
-        final RecordStorage<I> storage = recordStorage();
-        final Iterator<EntityRecord> records = storage.readAll();
-        final Function<EntityRecord, E> toEntity = entityConverter().reverse();
-        final Iterator<E> result = transform(records, toEntity);
+        RecordStorage<I> storage = recordStorage();
+        Iterator<EntityRecord> records = storage.readAll();
+        Function<EntityRecord, E> toEntity = entityConverter().reverse();
+        Iterator<E> result = transform(records, toEntity);
         return result;
     }
 
@@ -321,11 +320,11 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         checkNotNull(filters);
         checkNotNull(fieldMask);
 
-        final EntityQuery<I> entityQuery = EntityQueries.from(filters, recordStorage());
-        final EntityQuery<I> completeQuery = toCompleteQuery(entityQuery);
-        final Iterator<EntityRecord> records = recordStorage().readAll(completeQuery, fieldMask);
-        final Function<EntityRecord, E> toEntity = entityConverter().reverse();
-        final Iterator<E> result = transform(records, toEntity);
+        EntityQuery<I> entityQuery = EntityQueries.from(filters, recordStorage());
+        EntityQuery<I> completeQuery = toCompleteQuery(entityQuery);
+        Iterator<EntityRecord> records = recordStorage().readAll(completeQuery, fieldMask);
+        Function<EntityRecord, E> toEntity = entityConverter().reverse();
+        Iterator<E> result = transform(records, toEntity);
         return result;
     }
 
@@ -341,8 +340,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         checkNotNull(filters);
         checkNotNull(fieldMask);
 
-        final EntityQuery<I> entityQuery = EntityQueries.from(filters, recordStorage());
-        final EntityQuery<I> completeQuery = toCompleteQuery(entityQuery);
+        EntityQuery<I> entityQuery = EntityQueries.from(filters, recordStorage());
+        EntityQuery<I> completeQuery = toCompleteQuery(entityQuery);
         return recordStorage().readAll(completeQuery, fieldMask);
     }
 
@@ -377,7 +376,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * they are not supported
      */
     private EntityQuery<I> toCompleteQuery(EntityQuery<I> src) {
-        final EntityQuery<I> completeQuery;
+        EntityQuery<I> completeQuery;
         if (!src.isLifecycleAttributesSet()
                 && EntityWithLifecycle.class.isAssignableFrom(getEntityClass())) {
             completeQuery = src.withLifecycleFlags(recordStorage());
@@ -391,25 +390,27 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * Converts the passed entity into the record.
      */
     protected EntityRecordWithColumns toRecord(E entity) {
-        final EntityRecord entityRecord = entityConverter().convert(entity);
+        EntityRecord entityRecord = entityConverter().convert(entity);
         checkNotNull(entityRecord);
-        final EntityRecordWithColumns recordWithColumns =
+        EntityRecordWithColumns result =
                 EntityRecordWithColumns.create(entityRecord, entity, recordStorage());
-        return recordWithColumns;
+        return result;
     }
 
     private E toEntity(EntityRecord record) {
-        final E result = entityConverter().reverse()
-                                          .convert(record);
+        E result = entityConverter().reverse()
+                                    .convert(record);
+        checkNotNull(result);
         return result;
     }
 
     /**
-     * Retrieves the {@link EntityColumnCache} used by this repository's {@linkplain RecordStorage storage}.
+     * Retrieves the {@link EntityColumnCache} used by this repository's
+     * {@linkplain RecordStorage storage}.
      *
      * @return the entity column cache from the storage
-     * @throws IllegalStateException if the {@link EntityColumnCache} is not supported by this
-     *                               repository's storage
+     * @throws IllegalStateException
+     *         if the {@link EntityColumnCache} is not supported by this repository's storage
      */
     private EntityColumnCache columnCache() {
         return recordStorage().entityColumnCache();
@@ -419,7 +420,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * Caches {@link Column} definitions of the {@link Entity} class managed by this repository.
      *
      * <p>The process of caching columns also acts as a check of {@link Column} definitions,
-     * because {@linkplain Column columns} with incorrect definitions cannot be retrieved and stored.
+     * because {@linkplain Column columns} with incorrect definitions cannot be retrieved and
+     * stored.
      *
      * <p>If {@link Column} definitions are incorrect, the {@link IllegalStateException} is thrown.
      *
@@ -444,26 +446,25 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
             this.expectedIdClass = expectedIdClass;
         }
 
-        @Nullable
         @Override
-        public I apply(@Nullable EntityId input) {
+        public @Nullable I apply(@Nullable EntityId input) {
             checkNotNull(input);
-            final Any idAsAny = input.getId();
+            Any idAsAny = input.getId();
 
-            final TypeUrl typeUrl = TypeUrl.ofEnclosed(idAsAny);
-            final Class messageClass = typeUrl.getJavaClass();
+            TypeUrl typeUrl = TypeUrl.ofEnclosed(idAsAny);
+            Class messageClass = typeUrl.getJavaClass();
             checkIdClass(messageClass);
 
-            final Message idAsMessage = unpack(idAsAny);
+            Message idAsMessage = unpack(idAsAny);
 
-            @SuppressWarnings("unchecked")
-            // As the message class is the same as expected, the conversion is safe.
-            final I id = (I) idAsMessage;
+            @SuppressWarnings("unchecked") /* As the message class is the same as expected,
+                                              the conversion is safe. */
+            I id = (I) idAsMessage;
             return id;
         }
 
         private void checkIdClass(Class messageClass) {
-            final boolean classIsSame = expectedIdClass.equals(messageClass);
+            boolean classIsSame = expectedIdClass.equals(messageClass);
             if (!classIsSame) {
                 throw newIllegalStateException("Unexpected ID class encountered: %s. Expected: %s",
                                                messageClass, expectedIdClass);
