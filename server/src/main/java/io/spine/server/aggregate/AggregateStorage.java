@@ -29,17 +29,13 @@ import io.spine.core.EventContext;
 import io.spine.server.storage.AbstractStorage;
 import io.spine.server.storage.StorageWithLifecycleFlags;
 
-import java.util.Deque;
 import java.util.Iterator;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Lists.newLinkedList;
-import static com.google.protobuf.TextFormat.shortDebugString;
 import static com.google.protobuf.util.Timestamps.checkValid;
 import static io.spine.core.Events.clearEnrichments;
-import static io.spine.util.Exceptions.newIllegalStateException;
 import static io.spine.validate.Validate.checkNotEmptyOrBlank;
 
 /**
@@ -58,8 +54,19 @@ public abstract class AggregateStorage<I>
     }
 
     /**
+     * {@inheritDoc}
+     *
+     * <p>Opens the method for the package.
+     */
+    @SuppressWarnings("RedundantMethodOverride")
+    @Override
+    protected void checkNotClosed() throws IllegalStateException {
+        super.checkNotClosed();
+    }
+
+    /**
      * Forms and returns an {@link AggregateStateRecord} based on the
-     * {@linkplain #historyBackward(AggregateReadRequest) aggregate histor@Vhey}.
+     * {@linkplain #historyBackward(AggregateReadRequest) aggregate history}.
      *
      * @param request the aggregate read request based on which to form a record
      * @return the record instance or {@code Optional.absent()} if the
@@ -69,69 +76,8 @@ public abstract class AggregateStorage<I>
     @SuppressWarnings("CheckReturnValue") // calling builder method
     @Override
     public Optional<AggregateStateRecord> read(AggregateReadRequest<I> request) {
-        checkNotClosed();
-        checkNotNull(request);
-
-        final Deque<Event> history = newLinkedList();
-        Snapshot snapshot = null;
-
-        final Iterator<AggregateEventRecord> historyBackward = historyBackward(request);
-
-        if (!historyBackward.hasNext()) {
-            return Optional.absent();
-        }
-
-        while (historyBackward.hasNext()
-                && snapshot == null) {
-
-            final AggregateEventRecord record = historyBackward.next();
-
-            switch (record.getKindCase()) {
-                case EVENT:
-                    history.addFirst(record.getEvent());
-                    break;
-                case SNAPSHOT:
-                    snapshot = record.getSnapshot();
-                    break;
-                case KIND_NOT_SET:
-                default:
-                    throw newIllegalStateException("Event or snapshot missing in record: \"%s\"",
-                                                   shortDebugString(record));
-            }
-        }
-
-        final AggregateStateRecord.Builder builder = AggregateStateRecord.newBuilder();
-        if (snapshot != null) {
-            builder.setSnapshot(snapshot);
-        }
-        builder.addAllEvent(history);
-
-        final AggregateStateRecord result = builder.build();
-        checkAggregateStateRecord(result);
-        return Optional.of(result);
-    }
-
-    /**
-     * Ensures that the {@link AggregateStateRecord} is valid.
-     *
-     * <p>{@link AggregateStateRecord} is considered valid when one of the following is true:
-     * <ul>
-     *     <li>{@linkplain AggregateStateRecord#getSnapshot() snapshot} is not default;
-     *     <li>{@linkplain AggregateStateRecord#getEventList() event list} is not empty.
-     * </ul>
-     *
-     * @param record the record to check
-     * @throws IllegalStateException if the {@link AggregateStateRecord} is not valid
-     */
-    private static void checkAggregateStateRecord(AggregateStateRecord record)
-            throws IllegalStateException {
-        final boolean snapshotIsNotSet = record.getSnapshot()
-                                               .equals(Snapshot.getDefaultInstance());
-        if (snapshotIsNotSet && record.getEventList()
-                                      .isEmpty()) {
-            throw new IllegalStateException("AggregateStateRecord instance should have either "
-                                                    + "snapshot or non-empty event list.");
-        }
+        ReadOperation<I> op = new ReadOperation<>(this, request);
+        return op.perform();
     }
 
     /**
@@ -146,11 +92,11 @@ public abstract class AggregateStorage<I>
     public void write(I id, AggregateStateRecord events) {
         checkNotClosedAndArguments(id, events);
 
-        final List<Event> eventList = events.getEventList();
+        List<Event> eventList = events.getEventList();
         checkArgument(!eventList.isEmpty(), "Event list must not be empty.");
 
-        for (final Event event : eventList) {
-            final AggregateEventRecord record = toStorageRecord(event);
+        for (Event event : eventList) {
+            AggregateEventRecord record = toStorageRecord(event);
             writeRecord(id, record);
         }
     }
@@ -167,8 +113,8 @@ public abstract class AggregateStorage<I>
     void writeEvent(I id, Event event) {
         checkNotClosedAndArguments(id, event);
 
-        final Event eventWithoutEnrichments = clearEnrichments(event);
-        final AggregateEventRecord record = toStorageRecord(eventWithoutEnrichments);
+        Event eventWithoutEnrichments = clearEnrichments(event);
+        AggregateEventRecord record = toStorageRecord(eventWithoutEnrichments);
         writeRecord(id, record);
     }
 
@@ -181,7 +127,7 @@ public abstract class AggregateStorage<I>
     void writeSnapshot(I aggregateId, Snapshot snapshot) {
         checkNotClosedAndArguments(aggregateId, snapshot);
 
-        final AggregateEventRecord record = toStorageRecord(snapshot);
+        AggregateEventRecord record = toStorageRecord(snapshot);
         writeRecord(aggregateId, record);
     }
 
@@ -193,14 +139,14 @@ public abstract class AggregateStorage<I>
 
     private static AggregateEventRecord toStorageRecord(Event event) {
         checkArgument(event.hasContext(), "Event context must be set.");
-        final EventContext context = event.getContext();
+        EventContext context = event.getContext();
 
-        final String eventIdStr = Identifier.toString(event.getId());
+        String eventIdStr = Identifier.toString(event.getId());
         checkNotEmptyOrBlank(eventIdStr, "Event ID");
 
         checkArgument(event.hasMessage(), "Event message must be set.");
 
-        final Timestamp timestamp = checkValid(context.getTimestamp());
+        Timestamp timestamp = checkValid(context.getTimestamp());
 
         return AggregateEventRecord.newBuilder()
                                    .setTimestamp(timestamp)
@@ -209,7 +155,7 @@ public abstract class AggregateStorage<I>
     }
 
     private static AggregateEventRecord toStorageRecord(Snapshot snapshot) {
-        final Timestamp value = checkValid(snapshot.getTimestamp());
+        Timestamp value = checkValid(snapshot.getTimestamp());
         return AggregateEventRecord.newBuilder()
                                    .setTimestamp(value)
                                    .setSnapshot(snapshot)
