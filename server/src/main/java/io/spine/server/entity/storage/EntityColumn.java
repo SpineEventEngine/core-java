@@ -36,7 +36,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.gson.internal.Primitives.wrap;
 import static io.spine.server.entity.storage.ColumnValueConverters.of;
 import static io.spine.server.entity.storage.Methods.checkGetter;
-import static io.spine.server.entity.storage.Methods.hasNullableReturn;
+import static io.spine.server.entity.storage.Methods.mayReturnNull;
 import static io.spine.server.entity.storage.Methods.nameFromAnnotation;
 import static io.spine.server.entity.storage.Methods.nameFromGetter;
 import static io.spine.server.entity.storage.Methods.retrieveAnnotatedVersion;
@@ -228,7 +228,7 @@ public class EntityColumn implements Serializable {
         Method annotatedVersion = retrieveAnnotatedVersion(getter);
         String nameForQuery = nameFromGetter(getter);
         String nameForStore = nameFromAnnotation(annotatedVersion).or(nameForQuery);
-        boolean nullable = hasNullableReturn(getter);
+        boolean nullable = mayReturnNull(getter);
         return new EntityColumn(getter, nameForQuery, nameForStore, nullable);
     }
 

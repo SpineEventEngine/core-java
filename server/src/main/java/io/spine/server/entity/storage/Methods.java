@@ -39,7 +39,6 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.google.gson.internal.Primitives.wrap;
 import static io.spine.util.Exceptions.newIllegalStateException;
-import static java.lang.String.format;
 import static java.lang.reflect.Modifier.isPublic;
 import static java.lang.reflect.Modifier.isStatic;
 
@@ -85,7 +84,7 @@ class Methods {
         return result;
     }
 
-    static boolean hasNullableReturn(Method getter) {
+    static boolean mayReturnNull(Method getter) {
         AnnotatedType type = getter.getAnnotatedReturnType();
         boolean result = isNullable(type.getAnnotations());
         return result;
@@ -109,17 +108,17 @@ class Methods {
                               && getter.getParameterTypes().length == 0,
                       "Method `%s` is not a getter.", getter);
         checkArgument(getAnnotatedVersion(getter).isPresent(),
-                      format("Entity column getter should be annotated with `%s`.",
-                             Column.class.getName()));
+                      "Entity column getter should be annotated with `%s`.",
+                      Column.class.getName());
         int modifiers = getter.getModifiers();
         checkArgument(isPublic(modifiers) && !isStatic(modifiers),
                       "Entity column getter should be public instance method.");
         Class<?> returnType = getter.getReturnType();
         Class<?> wrapped = wrap(returnType);
         checkArgument(Serializable.class.isAssignableFrom(wrapped),
-                      format("Cannot create column of non-serializable type %s by method %s.",
-                             returnType,
-                             getter));
+                      "Cannot create column of non-serializable type %s by method %s.",
+                      returnType,
+                      getter);
     }
 
     /**
