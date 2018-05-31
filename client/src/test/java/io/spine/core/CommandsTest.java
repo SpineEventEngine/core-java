@@ -44,7 +44,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.protobuf.Descriptors.FileDescriptor;
@@ -59,7 +58,6 @@ import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.TimeTests.Past.minutesAgo;
 import static io.spine.test.TimeTests.Past.secondsAgo;
 import static io.spine.time.Durations2.seconds;
-import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -80,6 +78,9 @@ class CommandsTest {
 
     private static final FileDescriptor DEFAULT_FILE_DESCRIPTOR = Any.getDescriptor()
                                                                      .getFile();
+    private static final StringValue STR_MSG = StringValue.getDefaultInstance();
+    private static final Int64Value INT_64_MSG = Int64Value.getDefaultInstance();
+    private static final BoolValue BOOL_MSG = BoolValue.getDefaultInstance();
 
     private final TestActorRequestFactory requestFactory =
             TestActorRequestFactory.newInstance(CommandsTest.class);
@@ -97,9 +98,7 @@ class CommandsTest {
                 .setDefault(FileDescriptor.class, DEFAULT_FILE_DESCRIPTOR)
                 .setDefault(Timestamp.class, getCurrentTime())
                 .setDefault(Duration.class, Durations2.ZERO)
-                .setDefault(Command.class,
-                            requestFactory.createCommand(StringValue.getDefaultInstance(),
-                                                         minutesAgo(1)))
+                .setDefault(Command.class, requestFactory.createCommand(STR_MSG, minutesAgo(1)))
                 .setDefault(CommandContext.class, requestFactory.createCommandContext())
                 .setDefault(ZoneOffset.class, ZoneOffsets.UTC)
                 .setDefault(UserId.class, GivenUserId.newUuid())
@@ -109,12 +108,9 @@ class CommandsTest {
     @Test
     @DisplayName("sort given commands by timestamp")
     void sortByTimestamp() {
-        Command cmd1 = requestFactory.createCommand(StringValue.getDefaultInstance(),
-                                                    minutesAgo(1));
-        Command cmd2 = requestFactory.createCommand(Int64Value.getDefaultInstance(),
-                                                    secondsAgo(30));
-        Command cmd3 = requestFactory.createCommand(BoolValue.getDefaultInstance(),
-                                                    secondsAgo(5));
+        Command cmd1 = requestFactory.createCommand(STR_MSG, minutesAgo(1));
+        Command cmd2 = requestFactory.createCommand(INT_64_MSG, secondsAgo(30));
+        Command cmd3 = requestFactory.createCommand(BOOL_MSG, secondsAgo(5));
         List<Command> sortedCommands = newArrayList(cmd1, cmd2, cmd3);
         List<Command> commandsToSort = newArrayList(cmd3, cmd1, cmd2);
         assertNotEquals(sortedCommands, commandsToSort);
@@ -127,18 +123,18 @@ class CommandsTest {
     @Test
     @DisplayName("check if command contexts have same actor and tenant id")
     void checkSameActorAndTenantId() {
-        ActorContext.Builder actorContext =
-                ActorContext.newBuilder()
-                            .setActor(GivenUserId.newUuid())
-                            .setTenantId(newUuid());
-        CommandContext c1 =
-                CommandContext.newBuilder()
-                              .setActorContext(actorContext)
-                              .build();
-        CommandContext c2 =
-                CommandContext.newBuilder()
-                              .setActorContext(actorContext)
-                              .build();
+        ActorContext.Builder actorContext = ActorContext
+                .newBuilder()
+                .setActor(GivenUserId.newUuid())
+                .setTenantId(newUuid());
+        CommandContext c1 = CommandContext
+                .newBuilder()
+                .setActorContext(actorContext)
+                .build();
+        CommandContext c2 = CommandContext
+                .newBuilder()
+                .setActorContext(actorContext)
+                .build();
 
         assertTrue(sameActorAndTenant(c1, c2));
     }
@@ -147,7 +143,6 @@ class CommandsTest {
     @DisplayName("generate command id")
     void generateCommandId() {
         CommandId id = Commands.generateId();
-
         assertFalse(Identifier.toString(id)
                               .isEmpty());
     }
@@ -169,7 +164,7 @@ class CommandsTest {
         @DisplayName("`wereAfter`")
         void wereAfter() {
             Command command = requestFactory.command()
-                                            .create(BoolValue.getDefaultInstance());
+                                            .create(BOOL_MSG);
             assertTrue(Commands.wereAfter(secondsAgo(5))
                                .apply(command));
         }
@@ -177,33 +172,21 @@ class CommandsTest {
         @Test
         @DisplayName("`wereBetween`")
         void wereBetween() {
-            Command fiveMinsAgo =
-                    requestFactory.createCommand(StringValue.getDefaultInstance(),
-                                                 minutesAgo(5));
-            Command twoMinsAgo =
-                    requestFactory.createCommand(Int64Value.getDefaultInstance(),
-                                                 minutesAgo(2));
-            Command thirtySecondsAgo =
-                    requestFactory.createCommand(BoolValue.getDefaultInstance(),
-                                                 secondsAgo(30));
-            Command twentySecondsAgo =
-                    requestFactory.createCommand(BoolValue.getDefaultInstance(),
-                                                 secondsAgo(20));
-            Command fiveSecondsAgo =
-                    requestFactory.createCommand(BoolValue.getDefaultInstance(),
-                                                 secondsAgo(5));
+            Command fiveMinsAgo = requestFactory.createCommand(STR_MSG, minutesAgo(5));
+            Command twoMinsAgo = requestFactory.createCommand(INT_64_MSG, minutesAgo(2));
+            Command thirtySecondsAgo = requestFactory.createCommand(BOOL_MSG, secondsAgo(30));
+            Command twentySecondsAgo = requestFactory.createCommand(BOOL_MSG, secondsAgo(20));
+            Command fiveSecondsAgo = requestFactory.createCommand(BOOL_MSG, secondsAgo(5));
 
-            Iterable<Command> filter = Stream.of(fiveMinsAgo,
-                                                 twoMinsAgo,
-                                                 thirtySecondsAgo,
-                                                 twentySecondsAgo,
-                                                 fiveSecondsAgo)
-                                             .filter(wereWithinPeriod(minutesAgo(3), secondsAgo(10))
-                                                             ::apply)
-                                             .collect(toList());
-
-            assertEquals(3, StreamSupport.stream(filter.spliterator(), false)
-                                         .count());
+            long filteredCommands = Stream.of(fiveMinsAgo,
+                                              twoMinsAgo,
+                                              thirtySecondsAgo,
+                                              twentySecondsAgo,
+                                              fiveSecondsAgo)
+                                          .filter(wereWithinPeriod(minutesAgo(3), secondsAgo(10))
+                                                          ::apply)
+                                          .count();
+            assertEquals(3, filteredCommands);
         }
     }
 
@@ -212,16 +195,14 @@ class CommandsTest {
     void recognizeScheduled() {
         CommandContext context = GivenCommandContext.withScheduledDelayOf(seconds(10));
         Command cmd = requestFactory.command()
-                                    .createBasedOnContext(
-                                            StringValue.getDefaultInstance(),
-                                            context);
+                                    .createBasedOnContext(STR_MSG, context);
         assertTrue(Commands.isScheduled(cmd));
     }
 
     @Test
     @DisplayName("consider command not scheduled when no scheduling options are present")
     void recognizeNotScheduled() {
-        Command cmd = requestFactory.createCommand(StringValue.getDefaultInstance());
+        Command cmd = requestFactory.createCommand(STR_MSG);
         assertFalse(Commands.isScheduled(cmd));
     }
 
@@ -231,8 +212,7 @@ class CommandsTest {
         CommandContext context = GivenCommandContext.withScheduledDelayOf(seconds(-10));
         Command cmd =
                 requestFactory.command()
-                              .createBasedOnContext(StringValue.getDefaultInstance(),
-                                                    context);
+                              .createBasedOnContext(STR_MSG, context);
         assertThrows(IllegalArgumentException.class, () -> Commands.isScheduled(cmd));
     }
 
