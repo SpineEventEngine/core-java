@@ -45,7 +45,6 @@ import org.junit.Test;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;
@@ -62,6 +61,7 @@ import static io.spine.time.Durations2.seconds;
 import static io.spine.validate.Validate.isDefault;
 import static java.lang.Integer.MAX_VALUE;
 import static java.util.Collections.reverse;
+import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -106,7 +106,7 @@ public abstract class AggregateStorageShould
         List<AggregateEventRecord> records = sequenceFor(id);
         List<Event> expectedEvents = records.stream()
                                             .map(TO_EVENT)
-                                            .collect(Collectors.toList());
+                                            .collect(toList());
         AggregateStateRecord record = AggregateStateRecord
                 .newBuilder()
                 .addAllEvent(expectedEvents)

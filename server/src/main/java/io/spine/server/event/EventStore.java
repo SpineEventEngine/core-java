@@ -42,11 +42,11 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.Executor;
-import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Iterables.tryFind;
+import static java.util.stream.Collectors.toSet;
 
 /**
  * A store of all events in a bounded context.
@@ -86,7 +86,7 @@ public class EventStore implements AutoCloseable {
         checkNotNull(events);
         Set<TenantId> tenants = Streams.stream(events)
                                        .map(Events::getTenantId)
-                                       .collect(Collectors.toSet());
+                                       .collect(toSet());
         checkArgument(tenants.size() == 1,
                       TENANT_MISMATCH_ERROR_MSG,
                       tenants);
