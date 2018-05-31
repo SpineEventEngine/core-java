@@ -221,7 +221,7 @@ class CommandsTest {
     @Test
     @DisplayName("consider command not scheduled when no scheduling options are present")
     void recognizeNotScheduled() {
-        final Command cmd = requestFactory.createCommand(StringValue.getDefaultInstance());
+        Command cmd = requestFactory.createCommand(StringValue.getDefaultInstance());
         assertFalse(Commands.isScheduled(cmd));
     }
 
