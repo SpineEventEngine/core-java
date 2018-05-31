@@ -86,7 +86,7 @@ class ColumnFiltersTest {
 
     @Nested
     @DisplayName("create column filter of type")
-    class Create {
+    class CreateFilterOfType {
 
         @Test
         @DisplayName("`equals`")
@@ -137,7 +137,7 @@ class ColumnFiltersTest {
 
     @Nested
     @DisplayName("create composite column filter of type")
-    class CreateComposite {
+    class CreateCompositeFilterOfType {
 
         @Test
         @DisplayName("`all`")
@@ -169,7 +169,7 @@ class ColumnFiltersTest {
 
     @Nested
     @DisplayName("create ordering filter")
-    class CreateOrdering {
+    class CreateOrderingFilter {
 
         @Test
         @DisplayName("for numbers")
@@ -196,7 +196,7 @@ class ColumnFiltersTest {
 
     @Nested
     @DisplayName("fail to create ordering filter")
-    class FailToCreateOrdering {
+    class FailToCreateOrderingFilter {
 
         @Test
         @DisplayName("for enumerated types")
