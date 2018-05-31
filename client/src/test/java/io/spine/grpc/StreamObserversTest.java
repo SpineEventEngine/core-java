@@ -59,6 +59,7 @@ import static org.mockito.Mockito.verify;
 /**
  * @author Alex Tymchenko
  */
+@SuppressWarnings("InnerClassMayBeStatic") // JUnit 5 Nested classes cannot to be static.
 @DisplayName("StreamObservers utility should")
 class StreamObserversTest {
 
@@ -154,14 +155,13 @@ class StreamObserversTest {
         assertTrue(observer.isCompleted());
     }
 
-    @SuppressWarnings("InnerClassMayBeStatic") // JUnit 5 Nested classes cannot to be static.
     @Nested
-    @DisplayName("when extracting from stream error")
-    class ErrorExtractionTest {
+    @DisplayName("return Error extracted")
+    class ExtractError {
 
         @Test
-        @DisplayName("return Error extracted from StatusRuntimeException metadata")
-        void processStatusRuntimeException() {
+        @DisplayName("from StatusRuntimeException metadata")
+        void fromStatusRuntimeException() {
             final Error expectedError = Error.getDefaultInstance();
             final Metadata metadata = MetadataConverter.toMetadata(expectedError);
             final StatusRuntimeException statusRuntimeException =
@@ -171,18 +171,23 @@ class StreamObserversTest {
         }
 
         @Test
-        @DisplayName("return Error extracted from StatusException metadata")
-        void processStatusException() {
+        @DisplayName("from StatusException metadata")
+        void fromStatusException() {
             final Error expectedError = Error.getDefaultInstance();
             final Metadata metadata = MetadataConverter.toMetadata(expectedError);
             final StatusException statusException = INVALID_ARGUMENT.asException(metadata);
 
             assertEquals(expectedError, fromStreamError(statusException).get());
         }
+    }
+
+    @Nested
+    @DisplayName("return absent on Error extraction")
+    class ExtractAbsent {
 
         @Test
-        @DisplayName("return absent if passed Throwable is not status exception")
-        void processGenericThrowable() {
+        @DisplayName("from Throwable which is not status exception")
+        void fromGenericThrowable() {
             final String msg = "Neither a StatusException nor a StatusRuntimeException.";
             final Exception exception = new Exception(msg);
 
@@ -190,8 +195,8 @@ class StreamObserversTest {
         }
 
         @Test
-        @DisplayName("return absent if there is no error in metadata")
-        void processMetadataWithoutError() {
+        @DisplayName("from metadata without error")
+        void fromMetadataWithoutError() {
             final Metadata emptyMetadata = new Metadata();
             final Throwable statusRuntimeEx = INVALID_ARGUMENT.asRuntimeException(emptyMetadata);
 

@@ -83,12 +83,12 @@ class QueryBuilderTest extends ActorRequestFactoryTest {
     }
 
     @Nested
-    @DisplayName("when creating queries")
-    class CreateQueryTest {
+    @DisplayName("create query")
+    class CreateQuery {
 
         @Test
-        @DisplayName("support queries by only entity type")
-        void createWithType() {
+        @DisplayName("by only entity type")
+        void byType() {
             final Class<? extends Message> testEntityClass = TestEntity.class;
             final Query query = factory().query()
                                          .select(testEntityClass)
@@ -104,8 +104,8 @@ class QueryBuilderTest extends ActorRequestFactoryTest {
         }
 
         @Test
-        @DisplayName("support queries by id")
-        void createWithIds() {
+        @DisplayName("by id")
+        void byId() {
             final int id1 = 314;
             final int id2 = 271;
             final Query query = factory().query()
@@ -129,8 +129,8 @@ class QueryBuilderTest extends ActorRequestFactoryTest {
         }
 
         @Test
-        @DisplayName("support queries by field mask")
-        void createWithFieldMask() {
+        @DisplayName("by field mask")
+        void byFieldMask() {
             final String fieldName = "TestEntity.firstField";
             final Query query = factory().query()
                                          .select(TestEntity.class)
@@ -146,8 +146,8 @@ class QueryBuilderTest extends ActorRequestFactoryTest {
         }
 
         @Test
-        @DisplayName("support queries by column filter")
-        void createWithFilter() {
+        @DisplayName("by column filter")
+        void byFilter() {
             final String columnName = "myImaginaryColumn";
             final Object columnValue = 42;
 
@@ -174,8 +174,8 @@ class QueryBuilderTest extends ActorRequestFactoryTest {
         }
 
         @Test
-        @DisplayName("support queries by multiple column filters")
-        void createWithMultipleFilters() {
+        @DisplayName("by multiple column filters")
+        void byMultipleFilters() {
             final String columnName1 = "myColumn";
             final Object columnValue1 = 42;
             final String columnName2 = "oneMore";
@@ -210,8 +210,8 @@ class QueryBuilderTest extends ActorRequestFactoryTest {
         @SuppressWarnings("OverlyLongMethod")
         // A big test for the grouping operators proper building.
         @Test
-        @DisplayName("support queries by column filter groupings")
-        void createWithFilterGrouping() {
+        @DisplayName("by column filter grouping")
+        void byFilterGrouping() {
             final String establishedTimeColumn = "establishedTime";
             final String companySizeColumn = "companySize";
             final String countryColumn = "country";
@@ -277,8 +277,8 @@ class QueryBuilderTest extends ActorRequestFactoryTest {
         @SuppressWarnings("OverlyLongMethod")
         // A big test case covering the query arguments coexistence.
         @Test
-        @DisplayName("support queries by all available arguments")
-        void createWithAllArguments() {
+        @DisplayName("by all available arguments")
+        void byAllArguments() {
             final Class<? extends Message> testEntityClass = TestEntity.class;
             final int id1 = 314;
             final int id2 = 271;
@@ -334,70 +334,6 @@ class QueryBuilderTest extends ActorRequestFactoryTest {
             assertEquals(columnValue2, actualGenericValue2);
         }
 
-        @Nested
-        @DisplayName("if given multiple clauses")
-        class MultipleClausesTest {
-
-            @Test
-            @DisplayName("persist only last IDs clause")
-            void persistLastIds() {
-                final Iterable<?> genericIds = asList(newUuid(),
-                                                      -1,
-                                                      newMessageId());
-                final Long[] longIds = {1L, 2L, 3L};
-                final Message[] messageIds = {
-                        newMessageId(),
-                        newMessageId(),
-                        newMessageId()
-                };
-                final String[] stringIds = {
-                        newUuid(),
-                        newUuid(),
-                        newUuid()
-                };
-                final Integer[] intIds = {4, 5, 6};
-
-                final Query query = factory().query()
-                                             .select(TestEntity.class)
-                                             .byId(genericIds)
-                                             .byId(longIds)
-                                             .byId(stringIds)
-                                             .byId(intIds)
-                                             .byId(messageIds)
-                                             .build();
-                assertNotNull(query);
-
-                final Target target = query.getTarget();
-                final EntityFilters filters = target.getFilters();
-                final Collection<EntityId> entityIds = filters.getIdFilter()
-                                                              .getIdsList();
-                assertSize(messageIds.length, entityIds);
-                final Function<EntityId, ProjectId> transformer =
-                        new EntityIdUnpacker<>(ProjectId.class);
-                final Iterable<? extends Message> actualValues = transform(entityIds, transformer);
-                assertThat(actualValues, containsInAnyOrder(messageIds));
-            }
-
-            @Test
-            @DisplayName("persist only last field mask")
-            void persistLastFieldMask() {
-                final Iterable<String> iterableFields = singleton("TestEntity.firstField");
-                final String[] arrayFields = {"TestEntity.secondField"};
-
-                final Query query = factory().query()
-                                             .select(TestEntity.class)
-                                             .withMask(iterableFields)
-                                             .withMask(arrayFields)
-                                             .build();
-                assertNotNull(query);
-                final FieldMask mask = query.getFieldMask();
-
-                final Collection<String> maskFields = mask.getPathsList();
-                assertSize(arrayFields.length, maskFields);
-                assertThat(maskFields, contains(arrayFields));
-            }
-        }
-
         private ColumnFilter findByName(Iterable<ColumnFilter> filters, String name) {
             for (ColumnFilter filter : filters) {
                 if (filter.getColumnName()
@@ -408,6 +344,70 @@ class QueryBuilderTest extends ActorRequestFactoryTest {
             fail(format("No ColumnFilter found for %s.", name));
             // avoid returning `null`
             throw new RuntimeException("never happens unless JUnit is broken");
+        }
+    }
+
+    @Nested
+    @DisplayName("persist only last given")
+    class Persist {
+
+        @Test
+        @DisplayName("IDs clause")
+        void lastIds() {
+            final Iterable<?> genericIds = asList(newUuid(),
+                                                  -1,
+                                                  newMessageId());
+            final Long[] longIds = {1L, 2L, 3L};
+            final Message[] messageIds = {
+                    newMessageId(),
+                    newMessageId(),
+                    newMessageId()
+            };
+            final String[] stringIds = {
+                    newUuid(),
+                    newUuid(),
+                    newUuid()
+            };
+            final Integer[] intIds = {4, 5, 6};
+
+            final Query query = factory().query()
+                                         .select(TestEntity.class)
+                                         .byId(genericIds)
+                                         .byId(longIds)
+                                         .byId(stringIds)
+                                         .byId(intIds)
+                                         .byId(messageIds)
+                                         .build();
+            assertNotNull(query);
+
+            final Target target = query.getTarget();
+            final EntityFilters filters = target.getFilters();
+            final Collection<EntityId> entityIds = filters.getIdFilter()
+                                                          .getIdsList();
+            assertSize(messageIds.length, entityIds);
+            final Function<EntityId, ProjectId> transformer =
+                    new EntityIdUnpacker<>(ProjectId.class);
+            final Iterable<? extends Message> actualValues = transform(entityIds, transformer);
+            assertThat(actualValues, containsInAnyOrder(messageIds));
+        }
+
+        @Test
+        @DisplayName("field mask")
+        void lastFieldMask() {
+            final Iterable<String> iterableFields = singleton("TestEntity.firstField");
+            final String[] arrayFields = {"TestEntity.secondField"};
+
+            final Query query = factory().query()
+                                         .select(TestEntity.class)
+                                         .withMask(iterableFields)
+                                         .withMask(arrayFields)
+                                         .build();
+            assertNotNull(query);
+            final FieldMask mask = query.getFieldMask();
+
+            final Collection<String> maskFields = mask.getPathsList();
+            assertSize(arrayFields.length, maskFields);
+            assertThat(maskFields, contains(arrayFields));
         }
     }
 
