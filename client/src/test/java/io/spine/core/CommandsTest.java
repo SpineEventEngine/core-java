@@ -20,7 +20,6 @@
 
 package io.spine.core;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import com.google.protobuf.BoolValue;
@@ -44,12 +43,14 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.protobuf.Descriptors.FileDescriptor;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.Commands.sameActorAndTenant;
+import static io.spine.core.Commands.wereWithinPeriod;
 import static io.spine.core.given.GivenTenantId.newUuid;
 import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
@@ -192,13 +193,14 @@ class CommandsTest {
                     requestFactory.createCommand(BoolValue.getDefaultInstance(),
                                                  secondsAgo(5));
 
-            ImmutableList<Command> commands =
-                    ImmutableList.of(fiveMinsAgo, twoMinsAgo, thirtySecondsAgo, twentySecondsAgo,
-                                     fiveSecondsAgo);
-            Iterable<Command> filter = commands.stream()
-                                               .filter(Commands.wereWithinPeriod(
-                                                       minutesAgo(3), secondsAgo(10))::apply)
-                                               .collect(toList());
+            Iterable<Command> filter = Stream.of(fiveMinsAgo,
+                                                 twoMinsAgo,
+                                                 thirtySecondsAgo,
+                                                 twentySecondsAgo,
+                                                 fiveSecondsAgo)
+                                             .filter(wereWithinPeriod(minutesAgo(3), secondsAgo(10))
+                                                             ::apply)
+                                             .collect(toList());
 
             assertEquals(3, StreamSupport.stream(filter.spliterator(), false)
                                          .count());
