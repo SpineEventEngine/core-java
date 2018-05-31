@@ -44,7 +44,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -59,6 +58,7 @@ import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.TimeTests.Past.minutesAgo;
 import static io.spine.test.TimeTests.Past.secondsAgo;
 import static io.spine.time.Durations2.seconds;
+import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -198,7 +198,7 @@ class CommandsTest {
             Iterable<Command> filter = commands.stream()
                                                .filter(Commands.wereWithinPeriod(
                                                        minutesAgo(3), secondsAgo(10))::apply)
-                                               .collect(Collectors.toList());
+                                               .collect(toList());
 
             assertEquals(3, StreamSupport.stream(filter.spliterator(), false)
                                          .count());
@@ -214,9 +214,8 @@ class CommandsTest {
         void recognizeScheduled() {
             CommandContext context = GivenCommandContext.withScheduledDelayOf(seconds(10));
             Command cmd = requestFactory.command()
-                                        .createBasedOnContext(
-                                                StringValue.getDefaultInstance(),
-                                                context);
+                                        .createBasedOnContext(StringValue.getDefaultInstance(),
+                                                              context);
             assertTrue(Commands.isScheduled(cmd));
         }
 
@@ -233,8 +232,7 @@ class CommandsTest {
             CommandContext context = GivenCommandContext.withScheduledDelayOf(seconds(-10));
             Command cmd =
                     requestFactory.command()
-                                  .createBasedOnContext(StringValue.getDefaultInstance(),
-                                                        context);
+                                  .createBasedOnContext(StringValue.getDefaultInstance(), context);
             assertThrows(IllegalArgumentException.class, () -> Commands.isScheduled(cmd));
         }
     }
@@ -249,7 +247,8 @@ class CommandsTest {
         assertEquals(id, convertedBack);
     }
 
-    @SuppressWarnings("InnerClassMayBeStatic") // JUnit 5 Nested classes cannot to be static.
+    @SuppressWarnings({"ClassCanBeStatic", "InnerClassMayBeStatic"})
+        // JUnit 5 Nested classes cannot to be static.
     @Nested
     @DisplayName("when checking if command is valid")
     class CheckValidTest {
@@ -275,7 +274,7 @@ class CommandsTest {
         Command command = requestFactory.generateCommand();
 
         TypeName typeName = CommandEnvelope.of(command)
-                                                 .getTypeName();
+                                           .getTypeName();
         assertNotNull(typeName);
         assertEquals(StringValue.class.getSimpleName(), typeName.getSimpleName());
     }

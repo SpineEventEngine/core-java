@@ -33,7 +33,6 @@ import io.spine.core.UserId;
 import io.spine.protobuf.AnyPacker;
 import io.spine.time.ZoneOffset;
 import io.spine.validate.ValidationException;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -138,9 +137,9 @@ public final class CommandFactory {
         checkNotNull(context);
         checkValid(message);
 
-        final CommandContext newContext = contextBasedOn(context);
+        CommandContext newContext = contextBasedOn(context);
 
-        final Command result = createCommand(message, newContext);
+        Command result = createCommand(message, newContext);
         return result;
     }
 
@@ -158,10 +157,11 @@ public final class CommandFactory {
      */
     private static Command createCommand(Message message, CommandContext context) {
         final Any packed = AnyPacker.pack(message);
-        final Command.Builder result = Command.newBuilder()
-                                              .setId(Commands.generateId())
-                                              .setMessage(packed)
-                                              .setContext(context);
+        Command.Builder result = Command
+                .newBuilder()
+                .setId(Commands.generateId())
+                .setMessage(packed)
+                .setContext(context);
         return result.build();
     }
 
@@ -226,17 +226,18 @@ public final class CommandFactory {
     private static CommandContext.Builder newContextBuilder(@Nullable TenantId tenantId,
                                                             UserId userId,
                                                             ZoneOffset zoneOffset) {
-        ActorContext.Builder actorContext =
-                ActorContext.newBuilder()
-                            .setActor(userId)
-                            .setTimestamp(getCurrentTime())
-                            .setZoneOffset(zoneOffset);
+        ActorContext.Builder actorContext = ActorContext
+                .newBuilder()
+                .setActor(userId)
+                .setTimestamp(getCurrentTime())
+                .setZoneOffset(zoneOffset);
         if (tenantId != null) {
             actorContext.setTenantId(tenantId);
         }
 
-        final CommandContext.Builder result = CommandContext.newBuilder()
-                                                            .setActorContext(actorContext);
+        CommandContext.Builder result = CommandContext
+                .newBuilder()
+                .setActorContext(actorContext);
         return result;
     }
 
