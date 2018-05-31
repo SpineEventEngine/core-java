@@ -71,8 +71,8 @@ public final class CommandFactory {
         checkNotNull(message);
         checkValid(message);
 
-        final CommandContext context = createContext();
-        final Command result = createCommand(message, context);
+        CommandContext context = createContext();
+        Command result = createCommand(message, context);
         return result;
     }
 
@@ -93,8 +93,8 @@ public final class CommandFactory {
         checkNotNull(message);
         checkValid(message);
 
-        final CommandContext context = createContext(targetVersion);
-        final Command result = createCommand(message, context);
+        CommandContext context = createContext(targetVersion);
+        Command result = createCommand(message, context);
         return result;
     }
 
@@ -114,7 +114,7 @@ public final class CommandFactory {
         checkNotNull(context);
         checkValid(message);
 
-        final Command result = createCommand(message, context);
+        Command result = createCommand(message, context);
         return result;
     }
 
@@ -156,7 +156,7 @@ public final class CommandFactory {
      * @return a new command
      */
     private static Command createCommand(Message message, CommandContext context) {
-        final Any packed = AnyPacker.pack(message);
+        Any packed = AnyPacker.pack(message);
         Command.Builder result = Command
                 .newBuilder()
                 .setId(Commands.generateId())
@@ -196,7 +196,7 @@ public final class CommandFactory {
     private static CommandContext createContext(@Nullable TenantId tenantId,
                                                 UserId userId,
                                                 ZoneOffset zoneOffset) {
-        final CommandContext.Builder result = newContextBuilder(tenantId, userId, zoneOffset);
+        CommandContext.Builder result = newContextBuilder(tenantId, userId, zoneOffset);
         return result.build();
     }
 
@@ -216,8 +216,8 @@ public final class CommandFactory {
                                         UserId userId,
                                         ZoneOffset zoneOffset,
                                         int targetVersion) {
-        final CommandContext.Builder builder = newContextBuilder(tenantId, userId, zoneOffset);
-        final CommandContext result = builder.setTargetVersion(targetVersion)
+        CommandContext.Builder builder = newContextBuilder(tenantId, userId, zoneOffset);
+        CommandContext result = builder.setTargetVersion(targetVersion)
                                              .build();
         return result;
     }
