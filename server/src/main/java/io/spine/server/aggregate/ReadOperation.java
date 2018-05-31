@@ -58,27 +58,28 @@ final class ReadOperation<I> {
             return Optional.absent();
         }
 
-        while (historyBackward.hasNext()
-                && snapshot == null) {
-
+        while (historyBackward.hasNext() && snapshot == null) {
             AggregateEventRecord record = historyBackward.next();
-
-            switch (record.getKindCase()) {
-                case EVENT:
-                    history.addFirst(record.getEvent());
-                    break;
-                case SNAPSHOT:
-                    snapshot = record.getSnapshot();
-                    break;
-                case KIND_NOT_SET:
-                default:
-                    throw newIllegalStateException("Event or snapshot missing in record: \"%s\"",
-                                                   shortDebugString(record));
-            }
+            handleRecord(record);
         }
 
         AggregateStateRecord result = buildRecord();
         return Optional.of(result);
+    }
+
+    private void handleRecord(AggregateEventRecord record) {
+        switch (record.getKindCase()) {
+            case EVENT:
+                history.addFirst(record.getEvent());
+                break;
+            case SNAPSHOT:
+                snapshot = record.getSnapshot();
+                break;
+            case KIND_NOT_SET:
+            default:
+                throw newIllegalStateException("Event or snapshot missing in record: \"%s\"",
+                                               shortDebugString(record));
+        }
     }
 
     @SuppressWarnings("CheckReturnValue") // calling builder
