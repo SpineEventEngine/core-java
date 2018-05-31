@@ -31,6 +31,7 @@ import io.spine.server.aggregate.given.AggregateRepositoryViewTestEnv.AggregateW
 import io.spine.server.aggregate.given.AggregateRepositoryViewTestEnv.RepoOfAggregateWithLifecycle;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -76,6 +77,7 @@ public class AggregateRepositoryViewsShould {
     }
 
     @Test
+    @DisplayName("find aggregate if no status flags set")
     public void find_aggregate_if_no_status_flags_set() {
         aggregate = repository.find(id);
 
@@ -86,6 +88,7 @@ public class AggregateRepositoryViewsShould {
     }
 
     @Test
+    @DisplayName("find aggregates with archived status")
     public void find_aggregates_with_archived_status() {
         postCommand("archive");
 
@@ -98,6 +101,7 @@ public class AggregateRepositoryViewsShould {
     }
 
     @Test
+    @DisplayName("find aggregates with deleted status")
     public void find_aggregates_with_deleted_status() {
         postCommand("delete");
 

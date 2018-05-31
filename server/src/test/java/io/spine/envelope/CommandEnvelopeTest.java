@@ -25,7 +25,8 @@ import io.spine.core.Command;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.MessageEnvelopeTest;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
@@ -33,14 +34,17 @@ import static org.junit.Assert.assertSame;
 /**
  * @author Alexander Yevsyukov
  */
-public class CommandEnvelopeShould
-        extends MessageEnvelopeTest<Command, CommandEnvelope, CommandClass> {
+@SuppressWarnings("DuplicateStringLiteralInspection")
+// Similar test cases to RejectionEnvelopeTest.
+@DisplayName("CommandEnvelope should")
+class CommandEnvelopeTest extends MessageEnvelopeTest<Command, CommandEnvelope, CommandClass> {
 
     private final TestActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(CommandEnvelopeShould.class);
+            TestActorRequestFactory.newInstance(CommandEnvelopeTest.class);
 
     @Test
-    public void obtain_command_context() {
+    @DisplayName("obtain command context")
+    void getCommandContext() {
         final Command command = outerObject();
         final CommandEnvelope envelope = toEnvelope(command);
         assertEquals(command.getContext(), envelope.getCommandContext());
@@ -48,7 +52,8 @@ public class CommandEnvelopeShould
     }
 
     @Test
-    public void obtain_actor_context() {
+    @DisplayName("obtain actor context")
+    void getActorContext() {
         final Command command = outerObject();
         final CommandEnvelope envelope = toEnvelope(command);
 

@@ -31,7 +31,8 @@ import io.spine.core.RejectionEnvelope;
 import io.spine.core.Rejections;
 import io.spine.protobuf.AnyPacker;
 import io.spine.test.rejection.OperationRejections.CannotPerformBusinessOperation;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.base.Identifier.newUuid;
 import static org.junit.Assert.assertEquals;
@@ -43,12 +44,49 @@ import static org.junit.Assert.assertEquals;
  *
  * @author Alex Tymchenko
  */
-public class RejectionEnvelopeShould extends MessageEnvelopeTest<Rejection,
+@SuppressWarnings("DuplicateStringLiteralInspection")
+// Similar test cases to CommandEnvelopeTest.
+@DisplayName("RejectionEnvelope should")
+class RejectionEnvelopeTest extends MessageEnvelopeTest<Rejection,
         RejectionEnvelope,
         RejectionClass> {
 
     private final TestActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(RejectionEnvelopeShould.class);
+            TestActorRequestFactory.newInstance(RejectionEnvelopeTest.class);
+
+    @Test
+    @DisplayName("obtain command context")
+    void getCommandContext() {
+        final Rejection rejection = outerObject();
+        final Command command = rejection.getContext()
+                                         .getCommand();
+        final RejectionEnvelope envelope = toEnvelope(rejection);
+        assertEquals(command.getContext(), envelope.getCommandContext());
+    }
+
+    @Test
+    @DisplayName("obtain command message")
+    void getCommandMessage() {
+        final Rejection rejection = outerObject();
+        final Command command = rejection.getContext()
+                                         .getCommand();
+        final Message commandMessage = AnyPacker.unpack(command.getMessage());
+        final RejectionEnvelope envelope = toEnvelope(rejection);
+        assertEquals(commandMessage, envelope.getCommandMessage());
+    }
+
+    @Test
+    @DisplayName("obtain actor context")
+    void getActorContext() {
+        final RejectionEnvelope rejection = toEnvelope(outerObject());
+        final ActorContext actorContext = rejection.getActorContext();
+
+        /* Since we're using `TestActorRequestFactory` initialized with the class of this test suite
+           the actor ID should be the suite class name.
+         */
+        assertEquals(getClass().getName(), actorContext.getActor()
+                                                       .getValue());
+    }
 
     @Override
     protected Rejection outerObject() {
@@ -69,36 +107,5 @@ public class RejectionEnvelopeShould extends MessageEnvelopeTest<Rejection,
     @Override
     protected RejectionClass getMessageClass(Rejection obj) {
         return RejectionClass.of(obj);
-    }
-
-    @Test
-    public void obtain_command_context() {
-        final Rejection rejection = outerObject();
-        final Command command = rejection.getContext()
-                                         .getCommand();
-        final RejectionEnvelope envelope = toEnvelope(rejection);
-        assertEquals(command.getContext(), envelope.getCommandContext());
-    }
-
-    @Test
-    public void obtain_command_message() {
-        final Rejection rejection = outerObject();
-        final Command command = rejection.getContext()
-                                         .getCommand();
-        final Message commandMessage = AnyPacker.unpack(command.getMessage());
-        final RejectionEnvelope envelope = toEnvelope(rejection);
-        assertEquals(commandMessage, envelope.getCommandMessage());
-    }
-
-    @Test
-    public void obtain_actor_context() {
-        final RejectionEnvelope rejection = toEnvelope(outerObject());
-        final ActorContext actorContext = rejection.getActorContext();
-
-        /* Since we're using `TestActorRequestFactory` initialized with the class of this test suite
-           the actor ID should be the suite class name.
-         */
-        assertEquals(getClass().getName(), actorContext.getActor()
-                                                       .getValue());
     }
 }

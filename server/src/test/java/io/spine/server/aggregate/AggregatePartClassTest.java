@@ -26,24 +26,27 @@ import io.spine.server.aggregate.given.AggregatePartTestEnv.AnAggregateRoot;
 import io.spine.server.aggregate.given.AggregatePartTestEnv.WrongAggregatePart;
 import io.spine.server.model.ModelError;
 import io.spine.server.model.ModelTests;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.base.Identifier.newUuid;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Alexander Yevsyukov
  */
-public class AggregatePartClassShould {
+@DisplayName("AggregatePartClass should")
+class AggregatePartClassTest {
 
     private final AggregatePartClass<AnAggregatePart> partClass =
             new AggregatePartClass<>(AnAggregatePart.class);
     private AnAggregateRoot root;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         ModelTests.clearModel();
         final BoundedContext boundedContext = BoundedContext.newBuilder()
                                                             .build();
@@ -51,17 +54,22 @@ public class AggregatePartClassShould {
     }
 
     @Test
-    public void obtain_aggregate_part_constructor() {
+    @DisplayName("obtain aggregate part constructor")
+    void getAggregatePartConstructor() {
         assertNotNull(partClass.getConstructor());
     }
 
-    @Test(expected = ModelError.class)
-    public void throw_exception_when_aggregate_part_does_not_have_appropriate_constructor() {
-        new AggregatePartClass<>(WrongAggregatePart.class).getConstructor();
+    @Test
+    @DisplayName("throw exception when aggregate part does not have appropriate constructor")
+    void throwOnNoProperCtorAvailable() {
+        final AggregatePartClass<WrongAggregatePart> wrongPartClass =
+                new AggregatePartClass<>(WrongAggregatePart.class);
+        assertThrows(ModelError.class, wrongPartClass::getConstructor);
     }
 
     @Test
-    public void create_aggregate_part_entity() throws NoSuchMethodException {
+    @DisplayName("create aggregate part entity")
+    void createAggregatePartEntity() throws NoSuchMethodException {
         final AnAggregatePart part = partClass.createEntity(root);
 
         assertNotNull(part);

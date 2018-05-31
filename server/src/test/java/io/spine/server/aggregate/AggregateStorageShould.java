@@ -42,6 +42,7 @@ import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.ProjectVBuilder;
 import io.spine.testdata.Sample;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 
 import javax.annotation.Nullable;
 import java.util.Iterator;
@@ -126,6 +127,7 @@ public abstract class AggregateStorageShould
     }
 
     @Test
+    @DisplayName("return iterator over empty collection if read history from empty storage")
     public void return_iterator_over_empty_collection_if_read_history_from_empty_storage() {
         final Iterator<AggregateEventRecord> iterator = historyBackward();
 
@@ -133,6 +135,7 @@ public abstract class AggregateStorageShould
     }
 
     @Test
+    @DisplayName("return absent AggregateStateRecord if read history from empty storage")
     public void return_absent_AggregateStateRecord_if_read_history_from_empty_storage() {
         final AggregateReadRequest<ProjectId> readRequest = newReadRequest(id);
         final Optional<AggregateStateRecord> aggregateStateRecord = storage.read(readRequest);
@@ -141,36 +144,43 @@ public abstract class AggregateStorageShould
     }
 
     @Test(expected = NullPointerException.class)
+    @DisplayName("throw exception if try to read history by null id")
     public void throw_exception_if_try_to_read_history_by_null_id() {
         storage.historyBackward(Tests.<AggregateReadRequest<ProjectId>>nullRef());
     }
 
     @Test(expected = NullPointerException.class)
+    @DisplayName("throw exception if try to write null event")
     public void throw_exception_if_try_to_write_null_event() {
         storage.writeEvent(id, Tests.<Event>nullRef());
     }
 
     @Test(expected = NullPointerException.class)
+    @DisplayName("throw exception if try to write event by null id")
     public void throw_exception_if_try_to_write_event_by_null_id() {
         storage.writeEvent(Tests.<ProjectId>nullRef(), Event.getDefaultInstance());
     }
 
     @Test(expected = NullPointerException.class)
+    @DisplayName("throw exception if try to write null snapshot")
     public void throw_exception_if_try_to_write_null_snapshot() {
         storage.write(id, Tests.<AggregateStateRecord>nullRef());
     }
 
     @Test(expected = NullPointerException.class)
+    @DisplayName("throw exception if try to write snapshot by null id")
     public void throw_exception_if_try_to_write_snapshot_by_null_id() {
         storage.writeSnapshot(Tests.<ProjectId>nullRef(), Snapshot.getDefaultInstance());
     }
 
     @Test
+    @DisplayName("write read and one event by Message id")
     public void write_read_and_one_event_by_Message_id() {
         writeAndReadEventTest(id, storage);
     }
 
     @Test
+    @DisplayName("write and read event by String id")
     public void write_and_read_event_by_String_id() {
         final AggregateStorage<String> storage = newStorage(String.class,
                                                             TestAggregateWithIdString.class);
@@ -179,6 +189,7 @@ public abstract class AggregateStorageShould
     }
 
     @Test
+    @DisplayName("write and read event by Long id")
     public void write_and_read_event_by_Long_id() {
         final AggregateStorage<Long> storage = newStorage(Long.class,
                                                           TestAggregateWithIdLong.class);
@@ -187,6 +198,7 @@ public abstract class AggregateStorageShould
     }
 
     @Test
+    @DisplayName("write and read event by Integer id")
     public void write_and_read_event_by_Integer_id() {
         final AggregateStorage<Integer> storage = newStorage(Integer.class,
                                                              TestAggregateWithIdInteger.class);
@@ -195,6 +207,7 @@ public abstract class AggregateStorageShould
     }
 
     @Test
+    @DisplayName("write and read one record")
     public void write_and_read_one_record() {
         final AggregateEventRecord expected = StorageRecord.create(getCurrentTime());
 
@@ -208,6 +221,7 @@ public abstract class AggregateStorageShould
     }
 
     @Test
+    @DisplayName("read history of archived aggregate")
     public void read_history_of_archived_aggregate() {
         final LifecycleFlags archivedRecordFlags = LifecycleFlags.newBuilder()
                                                                  .setArchived(true)
@@ -217,6 +231,7 @@ public abstract class AggregateStorageShould
     }
 
     @Test
+    @DisplayName("read history of deleted aggregate")
     public void read_history_of_deleted_aggregate() {
         final LifecycleFlags deletedRecordFlags = LifecycleFlags.newBuilder()
                                                                 .setDeleted(true)
@@ -226,6 +241,7 @@ public abstract class AggregateStorageShould
     }
 
     @Test
+    @DisplayName("index archived aggregate")
     public void index_archived_aggregate() {
         final LifecycleFlags archivedRecordFlags = LifecycleFlags.newBuilder()
                                                                  .setArchived(true)
@@ -237,6 +253,7 @@ public abstract class AggregateStorageShould
     }
 
     @Test
+    @DisplayName("index deleted aggregate")
     public void index_deleted_aggregate() {
         final LifecycleFlags deletedRecordFlags = LifecycleFlags.newBuilder()
                                                                 .setDeleted(true)
@@ -248,6 +265,7 @@ public abstract class AggregateStorageShould
     }
 
     @Test
+    @DisplayName("write records and return sorted by timestamp descending")
     public void write_records_and_return_sorted_by_timestamp_descending() {
         final List<AggregateEventRecord> records = sequenceFor(id);
 
@@ -260,6 +278,7 @@ public abstract class AggregateStorageShould
     }
 
     @Test
+    @DisplayName("write records and return sorted by version descending")
     public void write_records_and_return_sorted_by_version_descending() {
         final int eventsNumber = 5;
         final List<AggregateEventRecord> records = newLinkedList();
@@ -281,6 +300,7 @@ public abstract class AggregateStorageShould
     }
 
     @Test
+    @DisplayName("sort by version rather then by timestamp")
     public void sort_by_version_rather_then_by_timestamp() {
         final Project state = Project.getDefaultInstance();
         final Version minVersion = zero();
@@ -302,6 +322,7 @@ public abstract class AggregateStorageShould
     }
 
     @Test
+    @DisplayName("write and read snapshot")
     public void write_and_read_snapshot() {
         final Snapshot expected = newSnapshot(getCurrentTime());
 
@@ -315,11 +336,13 @@ public abstract class AggregateStorageShould
     }
 
     @Test
+    @DisplayName("write records and load history if no snapshots")
     public void write_records_and_load_history_if_no_snapshots() {
         testWriteRecordsAndLoadHistory(getCurrentTime());
     }
 
     @Test
+    @DisplayName("write records and load history till last snapshot")
     public void write_records_and_load_history_till_last_snapshot() {
         final Duration delta = seconds(10);
         final Timestamp time1 = getCurrentTime();
@@ -333,11 +356,13 @@ public abstract class AggregateStorageShould
     }
 
     @Test
+    @DisplayName("return zero event count after last snapshot by default")
     public void return_zero_event_count_after_last_snapshot_by_default() {
         assertEquals(0, storage.readEventCountAfterLastSnapshot(id));
     }
 
     @Test
+    @DisplayName("write and read event count after last snapshot")
     public void write_and_read_event_count_after_last_snapshot() {
         final int expectedCount = 32;
         storage.writeEventCountAfterLastSnapshot(id, expectedCount);
@@ -348,6 +373,7 @@ public abstract class AggregateStorageShould
     }
 
     @Test
+    @DisplayName("rewrite event count after last snapshot")
     public void rewrite_event_count_after_last_snapshot() {
         final int primaryValue = 16;
         storage.writeEventCountAfterLastSnapshot(id, primaryValue);
@@ -360,6 +386,7 @@ public abstract class AggregateStorageShould
     }
 
     @Test
+    @DisplayName("continue history reading if snapshot was not found in first batch")
     public void continue_history_reading_if_snapshot_was_not_found_in_first_batch() {
         Version currentVersion = zero();
         final Snapshot snapshot = Snapshot.newBuilder()
@@ -386,6 +413,7 @@ public abstract class AggregateStorageShould
     }
 
     @Test
+    @DisplayName("not store enrichment for EventContext")
     public void not_store_enrichment_for_EventContext() {
         final EventContext enrichedContext = EventContext.newBuilder()
                                                          .setEnrichment(withOneAttribute())
@@ -404,6 +432,7 @@ public abstract class AggregateStorageShould
     }
 
     @Test
+    @DisplayName("not store enrichment for origin of RejectionContext type")
     public void not_store_enrichment_for_origin_of_RejectionContext_type() {
         final RejectionContext origin = RejectionContext.newBuilder()
                                                         .setEnrichment(withOneAttribute())
@@ -426,6 +455,7 @@ public abstract class AggregateStorageShould
     }
 
     @Test
+    @DisplayName("not store enrichment for origin of EventContext type")
     public void not_store_enrichment_for_origin_of_EventContext_type() {
         final EventContext origin = EventContext.newBuilder()
                                                 .setEnrichment(withOneAttribute())
@@ -448,6 +478,7 @@ public abstract class AggregateStorageShould
     }
 
     @Test
+    @DisplayName("read archived records")
     public void read_archived_records() {
         readRecordsWithLifecycle(LifecycleFlags.newBuilder()
                                                .setArchived(true)
@@ -455,6 +486,7 @@ public abstract class AggregateStorageShould
     }
 
     @Test
+    @DisplayName("read deleted records")
     public void read_deleted_records() {
         readRecordsWithLifecycle(LifecycleFlags.newBuilder()
                                                .setDeleted(true)
@@ -462,6 +494,7 @@ public abstract class AggregateStorageShould
     }
 
     @Test
+    @DisplayName("read archived and deleted records")
     public void read_archived_and_deleted_records() {
         readRecordsWithLifecycle(LifecycleFlags.newBuilder()
                                                .setArchived(true)
@@ -470,6 +503,7 @@ public abstract class AggregateStorageShould
     }
 
     @Test(expected = IllegalStateException.class)
+    @DisplayName("throw exception if try to write event count to closed storage")
     public void throw_exception_if_try_to_write_event_count_to_closed_storage() {
         close(storage);
 
@@ -477,6 +511,7 @@ public abstract class AggregateStorageShould
     }
 
     @Test(expected = IllegalStateException.class)
+    @DisplayName("throw exception if try to read event count from closed storage")
     public void throw_exception_if_try_to_read_event_count_from_closed_storage() {
         close(storage);
 

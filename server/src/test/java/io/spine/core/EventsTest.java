@@ -34,8 +34,9 @@ import io.spine.server.event.EventFactory;
 import io.spine.string.Stringifiers;
 import io.spine.test.Tests;
 import io.spine.type.TypeName;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.util.Comparator;
 import java.util.List;
@@ -52,11 +53,14 @@ import static io.spine.core.Events.sort;
 import static io.spine.core.given.EventsTestEnv.tenantId;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.TypeConverter.toMessage;
+import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Test functionality of {@link Events} utility class.
@@ -68,10 +72,11 @@ import static org.junit.Assert.fail;
  * @author Alexander Yevsyukov
  * @author Mykhailo Drachuk
  */
-public class EventsShould {
+@DisplayName("Events utility should")
+public class EventsTest {
 
     private static final TestActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(EventsShould.class);
+            TestActorRequestFactory.newInstance(EventsTest.class);
 
     private Event event;
     private EventContext context;
@@ -81,8 +86,8 @@ public class EventsShould {
     @SuppressWarnings("MagicNumber")
     private final DoubleValue doubleValue = toMessage(10.1);
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         final TestActorRequestFactory requestFactory =
                 TestActorRequestFactory.newInstance(getClass());
         final CommandEnvelope cmd = requestFactory.generateEnvelope();
@@ -94,19 +99,31 @@ public class EventsShould {
     }
 
     @Test
-    public void have_private_ctor() {
+    @DisplayName(HAVE_PARAMETERLESS_CTOR)
+    void haveUtilityConstructor() {
         assertHasPrivateParameterlessCtor(Events.class);
     }
 
     @Test
-    public void return_actor_from_EventContext() {
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void passNullToleranceCheck() {
+        new NullPointerTester()
+                .setDefault(StringValue.class, StringValue.getDefaultInstance())
+                .setDefault(EventContext.class, GivenEvent.context())
+                .testAllPublicStaticMethods(Events.class);
+    }
+
+    @Test
+    @DisplayName("obtain actor from event context")
+    void getActorFromContext() {
         assertEquals(context.getCommandContext()
                             .getActorContext()
                             .getActor(), getActor(context));
     }
 
     @Test
-    public void sort_events_by_time() {
+    @DisplayName("sort given events by time")
+    void sortEventsByTime() {
         final Event event1 = GivenEvent.occurredMinutesAgo(30);
         final Event event2 = GivenEvent.occurredMinutesAgo(20);
         final Event event3 = GivenEvent.occurredMinutesAgo(10);
@@ -119,7 +136,8 @@ public class EventsShould {
     }
 
     @Test
-    public void have_event_comparator() {
+    @DisplayName("provide event comparator")
+    void provideEventComparator() {
         final Event event1 = GivenEvent.occurredMinutesAgo(120);
         final Event event2 = GivenEvent.occurredMinutesAgo(2);
 
@@ -129,8 +147,9 @@ public class EventsShould {
         assertTrue(comparator.compare(event1, event1) == 0);
     }
 
-   @Test
-    public void get_message_from_event() {
+    @Test
+    @DisplayName("obtain message from event")
+    void getMessageFromEvent() {
         createEventAndAssertReturnedMessageFor(stringValue);
         createEventAndAssertReturnedMessageFor(boolValue);
         createEventAndAssertReturnedMessageFor(doubleValue);
@@ -143,7 +162,8 @@ public class EventsShould {
     }
 
     @Test
-    public void get_timestamp_from_event() {
+    @DisplayName("obtain timestamp from event")
+    void getTimestampFromEvent() {
         final Event event = GivenEvent.occurredMinutesAgo(1);
 
         assertEquals(event.getContext()
@@ -151,7 +171,8 @@ public class EventsShould {
     }
 
     @Test
-    public void get_producer_from_event_context() {
+    @DisplayName("obtain producer from event context")
+    void getProducerFromContext() {
         final StringValue msg = unpack(context.getProducerId());
 
         final String id = getProducer(context);
@@ -159,17 +180,9 @@ public class EventsShould {
         assertEquals(msg.getValue(), id);
     }
 
-
     @Test
-    public void pass_the_null_tolerance_check() {
-        new NullPointerTester()
-                .setDefault(StringValue.class, StringValue.getDefaultInstance())
-                .setDefault(EventContext.class, GivenEvent.context())
-                .testAllPublicStaticMethods(Events.class);
-    }
-
-    @Test
-    public void provide_EventId_stringifier() {
+    @DisplayName("provide stringifier for event id")
+    void provideEventIdStringifier() {
         final EventId id = event.getId();
         
         final String str = Stringifiers.toString(id);
@@ -178,19 +191,23 @@ public class EventsShould {
         assertEquals(id, convertedBack);
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void reject_empty_event_id() {
-        checkValid(EventId.getDefaultInstance());
+    @Test
+    @DisplayName("reject empty event id")
+    void rejectEmptyEventId() {
+        assertThrows(IllegalArgumentException.class,
+                     () -> checkValid(EventId.getDefaultInstance()));
     }
 
     @Test
-    public void accept_generated_event_id() {
+    @DisplayName("accept generated event id")
+    void acceptGeneratedEventId() {
         final EventId eventId = event.getId();
         assertEquals(eventId, checkValid(eventId));
     }
 
     @Test
-    public void obtain_type_name_of_event() {
+    @DisplayName("obtain type name of event")
+    void getTypeNameOfEvent() {
         final CommandEnvelope command = requestFactory.generateEnvelope();
         final StringValue producerId = toMessage(getClass().getSimpleName());
         final EventFactory ef = EventFactory.on(command, Identifier.pack(producerId));
@@ -203,7 +220,8 @@ public class EventsShould {
     }
 
     @Test
-    public void obtain_root_command_id() {
+    @DisplayName("obtain root command id")
+    void getRootCommandId() {
         final CommandEnvelope command = requestFactory.generateEnvelope();
         final StringValue producerId = toMessage(getClass().getSimpleName());
         final EventFactory ef = EventFactory.on(command, Identifier.pack(producerId));
@@ -213,19 +231,22 @@ public class EventsShould {
     }
 
     @Test
-    public void provide_empty_Iterable() {
+    @DisplayName("provide empty Iterable")
+    void provideEmptyIterable() {
         for (Object ignored : nothing()) {
             fail("Something found in nothing().");
         }
     }
 
-    @Test(expected = NullPointerException.class)
-    public void throw_NPE_when_getting_tenant_id_of_null_event() {
-        Events.getTenantId(Tests.<Event>nullRef());
+    @Test
+    @DisplayName("throw NPE when getting tenant id of null event")
+    void notAcceptNullEvent() {
+        assertThrows(NullPointerException.class, () -> Events.getTenantId(Tests.<Event>nullRef()));
     }
 
     @Test
-    public void provide_a_default_tenant_id_for_an_event_without_origin() {
+    @DisplayName("return default tenant id for event without origin")
+    void returnDefaultIdForEventWithoutOrigin() {
         final EventContext context = contextWithoutOrigin().build();
         final Event event = EventsTestEnv.event(context);
 
@@ -236,7 +257,8 @@ public class EventsShould {
     }
 
     @Test
-    public void provide_a_tenant_id_for_an_event_with_command_context() {
+    @DisplayName("return correct tenant id for event with command context")
+    void getTenantIdFromCommandContext() {
         final TenantId targetTenantId = tenantId();
         final CommandContext commandContext = EventsTestEnv.commandContext(targetTenantId);
         final EventContext context = contextWithoutOrigin().setCommandContext(commandContext).build();
@@ -249,7 +271,8 @@ public class EventsShould {
     }
 
     @Test
-    public void provide_a_tenant_id_for_an_event_with_rejection_context() {
+    @DisplayName("return correct tenant id for event with rejection context")
+    void getTenantIdFromRejectionContext() {
         final TenantId targetTenantId = tenantId();
         final RejectionContext rejectionContext = EventsTestEnv.rejectionContext(targetTenantId);
         final EventContext context = contextWithoutOrigin().setRejectionContext(rejectionContext)
@@ -262,7 +285,8 @@ public class EventsShould {
     }
 
     @Test
-    public void provide_a_default_tenant_id_for_an_event_with_rejection_context_without_command() {
+    @DisplayName("return default tenant id for event with rejection context without command")
+    void returnDefaultIdForRejectionContextWithoutCommand() {
         final RejectionContext rejectionContext = EventsTestEnv.rejectionContext();
         final EventContext context = contextWithoutOrigin().setRejectionContext(rejectionContext)
                                                            .build();
@@ -275,7 +299,8 @@ public class EventsShould {
     }
 
     @Test
-    public void provide_a_default_tenant_id_for_an_event_with_event_context_without_origin() {
+    @DisplayName("return default tenant id for event with event context without origin")
+    void returnDefaultIdForEventContextWithoutOrigin() {
         final EventContext context = contextWithoutOrigin().setEventContext(contextWithoutOrigin())
                                                            .build();
         final Event event = EventsTestEnv.event(context);
@@ -287,7 +312,8 @@ public class EventsShould {
     }
 
     @Test
-    public void provide_a_tenant_id_for_an_event_with_event_context_with_command_context() {
+    @DisplayName("return correct tenant id for event with event context with command context")
+    void getTenantIdFromEventContextWithCommandContext() {
         final TenantId targetTenantId = tenantId();
         final CommandContext commandContext = EventsTestEnv.commandContext(targetTenantId);
         final EventContext outerContext = contextWithoutOrigin().setCommandContext(commandContext)
@@ -302,7 +328,8 @@ public class EventsShould {
     }
 
     @Test
-    public void provide_a_tenant_id_for_an_event_with_event_context_with_rejection_context() {
+    @DisplayName("return correct tenant id for event with event context with rejection context")
+    void getTenantIdFromEventContextWithRejectionContext() {
         final TenantId targetTenantId = tenantId();
         final RejectionContext rejectionContext = EventsTestEnv.rejectionContext(targetTenantId);
         final EventContext outerContext =

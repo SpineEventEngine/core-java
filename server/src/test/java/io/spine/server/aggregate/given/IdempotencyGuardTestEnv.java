@@ -24,7 +24,7 @@ import com.google.protobuf.Message;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;
 import io.spine.core.TenantId;
-import io.spine.server.aggregate.AggregateShould;
+import io.spine.server.aggregate.AggregateTest;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggCreateProject;
 import io.spine.test.aggregate.command.AggStartProject;
@@ -65,7 +65,7 @@ public class IdempotencyGuardTestEnv {
     }
 
     public static TestActorRequestFactory newRequestFactory(TenantId tenantId) {
-        return TestActorRequestFactory.newInstance(AggregateShould.class, tenantId);
+        return TestActorRequestFactory.newInstance(AggregateTest.class, tenantId);
     }
 
     public static Command command(Message commandMessage, TenantId tenantId) {

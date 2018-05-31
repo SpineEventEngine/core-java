@@ -36,20 +36,23 @@ import io.spine.test.aggregate.command.AggAddTask;
 import io.spine.test.aggregate.command.AggCreateProject;
 import io.spine.test.aggregate.event.AggProjectCreated;
 import io.spine.test.aggregate.event.AggTaskAdded;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.server.aggregate.AggregatePartRepositoryLookup.createLookup;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class AggregatePartRepositoryLookupShould {
+@DisplayName("AggregatePartRepositoryLookup should")
+class AggregatePartRepositoryLookupTest {
 
     private BoundedContext boundedContext;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         ModelTests.clearModel();
         boundedContext = BoundedContext.newBuilder()
                                        .build();
@@ -61,7 +64,8 @@ public class AggregatePartRepositoryLookupShould {
     }
 
     @Test
-    public void find_a_repository() {
+    @DisplayName("find repository")
+    void findRepository() {
         AggregatePartRepositoryLookup lookup = createLookup(boundedContext,
                                                             ProjectId.class,
                                                             Project.class);
@@ -71,28 +75,31 @@ public class AggregatePartRepositoryLookupShould {
         assertTrue(repository instanceof ProjectPartRepository);
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void throw_if_repository_is_not_AggregatePartRepository() {
-        final AggregatePartRepositoryLookup lookup = createLookup(boundedContext,
-                                                                  TaskId.class,
-                                                                  Task.class);
-        lookup.find();
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void throw_if_repository_not_found() {
+    @Test
+    @DisplayName("throw if repository not found")
+    void throwOnRepositoryNotFound() {
         AggregatePartRepositoryLookup lookup = createLookup(boundedContext,
                                                             Timestamp.class,
                                                             StringValue.class);
-        lookup.find();
+        assertThrows(IllegalStateException.class, lookup::find);
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void throw_if_id_class_does_not_match() {
+    @Test
+    @DisplayName("throw if found repository is not AggregatePartRepository")
+    void throwOnWrongRepositoryTypeFound() {
+        final AggregatePartRepositoryLookup lookup = createLookup(boundedContext,
+                                                                  TaskId.class,
+                                                                  Task.class);
+        assertThrows(IllegalStateException.class, lookup::find);
+    }
+
+    @Test
+    @DisplayName("throw if repository id class does not match root id class")
+    void throwOnIdClassNotMatching() {
         AggregatePartRepositoryLookup lookup = createLookup(boundedContext,
                                                             TaskId.class,
                                                             Project.class);
-        lookup.find();
+        assertThrows(IllegalStateException.class, lookup::find);
     }
 
     /*

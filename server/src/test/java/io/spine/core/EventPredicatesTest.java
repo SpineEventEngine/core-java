@@ -24,88 +24,93 @@ import com.google.common.base.Predicate;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Timestamp;
 import io.spine.core.given.GivenEvent;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.EventPredicates.isAfter;
 import static io.spine.core.EventPredicates.isBefore;
 import static io.spine.core.EventPredicates.isBetween;
+import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.TimeTests.Past.minutesAgo;
 import static io.spine.test.TimeTests.Past.secondsAgo;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Alexander Yevsyukov
  */
-public class EventPredicatesShould {
+@DisplayName("EventPredicates utility should")
+class EventPredicatesTest {
 
     @Test
-    public void have_private_utility_ctor() {
+    @DisplayName(HAVE_PARAMETERLESS_CTOR)
+    void haveUtilityConstructor() {
         assertHasPrivateParameterlessCtor(EventPredicates.class);
     }
 
     @Test
-    public void pass_null_tolerance() {
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void passNullToleranceCheck() {
         new NullPointerTester()
                 .setDefault(Timestamp.class, getCurrentTime())
                 .testAllPublicStaticMethods(EventPredicates.class);
     }
 
-    /*
-     * IsAfter tests
-     *****************/
     @Test
-    public void return_false_from_null_input_in_IsAfter_predicate() {
+    @DisplayName("return false from null input in `IsAfter` predicate")
+    void returnFalseOnNullInIsAfter() {
         assertFalse(isAfter(secondsAgo(5)).apply(null));
     }
 
-    /*
-     * IsBefore tests
-     *****************/
-
     @Test
-    public void verify_if_an_event_is_after_another() {
+    @DisplayName("recognize if an event is after timestamp")
+    void performIsAfter() {
         final Predicate<Event> predicate = isAfter(minutesAgo(100));
         assertTrue(predicate.apply(GivenEvent.occurredMinutesAgo(20)));
         assertFalse(predicate.apply(GivenEvent.occurredMinutesAgo(360)));
     }
 
     @Test
-    public void return_false_from_null_input_in_IsBefore_predicate() {
+    @DisplayName("return false from null input in `IsBefore` predicate")
+    void returnFalseOnNullInIsBefore() {
         assertFalse(isBefore(secondsAgo(5)).apply(null));
     }
 
-    /*
-     * IsBefore tests
-     *****************/
-
     @Test
-    public void verify_if_an_event_is_before_another() {
+    @DisplayName("recognize if an event is before timestamp")
+    void performIsBefore() {
         final Predicate<Event> predicate = isBefore(minutesAgo(100));
         assertFalse(predicate.apply(GivenEvent.occurredMinutesAgo(20)));
         assertTrue(predicate.apply(GivenEvent.occurredMinutesAgo(360)));
     }
 
     @Test
-    public void return_null_from_null_input_in_IsBetween_predicate() {
+    @DisplayName("return false from null input in `IsBetween` predicate")
+    void returnFalseOnNullInIsBetween() {
         assertFalse(isBetween(secondsAgo(5), secondsAgo(1)).apply(null));
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void check_that_range_start_is_before_end() {
-        isBetween(minutesAgo(2), minutesAgo(10));
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void do_not_accept_zero_length_time_range() {
-        final Timestamp timestamp = minutesAgo(5);
-        isBetween(timestamp, timestamp);
+    @Test
+    @DisplayName("check that specified range start is before range end")
+    void checkStartBeforeEnd() {
+        assertThrows(IllegalArgumentException.class,
+                     () -> isBetween(minutesAgo(2), minutesAgo(10)));
     }
 
     @Test
-    public void verify_if_an_event_is_within_time_range() {
+    @DisplayName("not accept zero length time range")
+    void notAcceptZeroRange() {
+        final Timestamp timestamp = minutesAgo(5);
+        assertThrows(IllegalArgumentException.class, () -> isBetween(timestamp, timestamp));
+    }
+
+    @Test
+    @DisplayName("recognize if an event is within time range")
+    void performIsBetween() {
         final Event event = GivenEvent.occurredMinutesAgo(5);
 
         assertTrue(isBetween(minutesAgo(10), minutesAgo(1))

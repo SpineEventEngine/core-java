@@ -61,9 +61,10 @@ import io.spine.test.aggregate.command.AggStartProjectWithChildren;
 import io.spine.test.aggregate.event.AggProjectArchived;
 import io.spine.test.aggregate.event.AggProjectDeleted;
 import io.spine.testdata.Sample;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import java.util.Iterator;
@@ -76,6 +77,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -83,7 +85,8 @@ import static org.mockito.Mockito.verify;
 /**
  * @author Alexander Yevsyukov
  */
-public class AggregateRepositoryShould {
+@DisplayName("AggregateRepository should")
+public class AggregateRepositoryTest {
 
     private final TestActorRequestFactory requestFactory =
             TestActorRequestFactory.newInstance(getClass());
@@ -91,8 +94,8 @@ public class AggregateRepositoryShould {
     private BoundedContext boundedContext;
     private AggregateRepository<ProjectId, ProjectAggregate> repository;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         ModelTests.clearModel();
         boundedContext = BoundedContext.newBuilder()
                                        .build();
@@ -100,21 +103,23 @@ public class AggregateRepositoryShould {
         boundedContext.register(repository);
     }
 
-    @After
-    public void tearDown() throws Exception {
+    @AfterEach
+    void tearDown() throws Exception {
         repository.close();
         boundedContext.close();
     }
 
     @Test
-    public void do_not_create_new_aggregates_on_find() {
+    @DisplayName("not create new aggregates on find")
+    void notCreateNewAggregatesOnFind() {
         final ProjectId newId = Sample.messageOfType(ProjectId.class);
         final Optional<ProjectAggregate> optional = repository.find(newId);
         assertFalse(optional.isPresent());
     }
 
     @Test
-    public void store_and_load_aggregate() {
+    @DisplayName("store and load aggregate")
+    void storeAndLoadAggregate() {
         final ProjectId id = Sample.messageOfType(ProjectId.class);
         final ProjectAggregate expected = GivenAggregate.withUncommittedEvents(id);
 
@@ -128,7 +133,8 @@ public class AggregateRepositoryShould {
     }
 
     @Test
-    public void restore_aggregate_using_snapshot() {
+    @DisplayName("restore aggregate using snapshot")
+    void restoreAggregateUsingSnapshot() {
         final ProjectId id = Sample.messageOfType(ProjectId.class);
         final ProjectAggregate expected = GivenAggregate.withUncommittedEvents(id);
 
@@ -143,7 +149,8 @@ public class AggregateRepositoryShould {
     }
 
     @Test
-    public void store_snapshot_and_set_event_count_to_zero_if_needed() {
+    @DisplayName("store snapshot and set event count to zero if needed")
+    void storeSnapshotAndManageEventCount() {
         final ProjectAggregate aggregate = GivenAggregate.withUncommittedEvents();
         // This should make the repository write the snapshot.
         repository.setSnapshotTrigger(aggregate.uncommittedEventsCount());
@@ -156,7 +163,8 @@ public class AggregateRepositoryShould {
     }
 
     @Test
-    public void not_store_snapshot_if_not_needed() {
+    @DisplayName("not store snapshot if not needed")
+    void notStoreSnapshotIfNotNeeded() {
         final ProjectAggregate aggregate = GivenAggregate.withUncommittedEvents();
 
         repository.store(aggregate);
@@ -166,7 +174,8 @@ public class AggregateRepositoryShould {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void pass_initial_snapshot_trigger_to_AggregateReadRequest() {
+    @DisplayName("pass initial snapshot trigger to AggregateReadRequest")
+    void passInitialSnapshotTrigger() {
         final AggregateRepository<ProjectId, ProjectAggregate> repositorySpy = spy(repository);
         final AggregateStorage<ProjectId> storageSpy = spy(repositorySpy.aggregateStorage());
         doReturn(storageSpy).when(repositorySpy).aggregateStorage();
@@ -185,7 +194,8 @@ public class AggregateRepositoryShould {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void pass_updated_snapshot_trigger_to_AggregateReadRequest() {
+    @DisplayName("pass updated snapshot trigger to AggregateReadRequest")
+    void passUpdatedSnapshotTrigger() {
         final AggregateRepository<ProjectId, ProjectAggregate> repositorySpy = spy(repository);
         final AggregateStorage<ProjectId> storageSpy = spy(repositorySpy.aggregateStorage());
         doReturn(storageSpy).when(repositorySpy).aggregateStorage();
@@ -205,27 +215,32 @@ public class AggregateRepositoryShould {
     }
 
     @Test
-    public void return_aggregate_class() {
+    @DisplayName("return aggregate class")
+    void returnAggregateClass() {
         assertEquals(ProjectAggregate.class, repository.getEntityClass());
     }
 
     @Test
-    public void have_default_value_for_snapshot_trigger() {
+    @DisplayName("have default value for snapshot trigger")
+    void have_default_value_for_snapshot_trigger() {
         assertEquals(DEFAULT_SNAPSHOT_TRIGGER, repository.getSnapshotTrigger());
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void do_not_accept_negative_snapshot_trigger() {
-        repository.setSnapshotTrigger(-1);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void do_not_accept_zero_snapshot_trigger() {
-        repository.setSnapshotTrigger(0);
+    @Test
+    @DisplayName("not accept negative snapshot trigger")
+    void notAcceptNegativeSnapshotTrigger() {
+        assertThrows(IllegalArgumentException.class, () -> repository.setSnapshotTrigger(-1));
     }
 
     @Test
-    public void allow_to_change_snapshot_trigger() {
+    @DisplayName("not accept zero snapshot trigger")
+    void notAcceptZeroSnapshotTrigger() {
+        assertThrows(IllegalArgumentException.class, () -> repository.setSnapshotTrigger(0));
+    }
+
+    @Test
+    @DisplayName("allow to change snapshot trigger")
+    void allowToChangeSnapshotTrigger() {
         final int newSnapshotTrigger = 1000;
 
         repository.setSnapshotTrigger(newSnapshotTrigger);
@@ -234,7 +249,8 @@ public class AggregateRepositoryShould {
     }
 
     @Test
-    public void expose_classes_of_commands_of_its_aggregate() {
+    @DisplayName("expose classes of commands of its aggregate")
+    void exposeAggregateCommandClasses() {
         final Set<CommandClass> aggregateCommands =
                 Model.getInstance()
                      .asAggregateClass(ProjectAggregate.class)
@@ -245,7 +261,8 @@ public class AggregateRepositoryShould {
     }
 
     @Test
-    public void find_archived_aggregates() {
+    @DisplayName("find archived aggregates")
+    void findArchivedAggregates() {
         final ProjectAggregate aggregate = givenStoredAggregate();
 
         final AggregateTransaction tx = AggregateTransaction.start(aggregate);
@@ -258,7 +275,8 @@ public class AggregateRepositoryShould {
     }
 
     @Test
-    public void find_deleted_aggregates() {
+    @DisplayName("find deleted aggregates")
+    void findDeletedAggregates() {
         final ProjectAggregate aggregate = givenStoredAggregate();
 
         final AggregateTransaction tx = AggregateTransaction.start(aggregate);
@@ -271,8 +289,9 @@ public class AggregateRepositoryShould {
                               .isPresent());
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void throw_ISE_if_unable_to_load_entity_by_id_from_storage_index() {
+    @Test
+    @DisplayName("throw ISE if unable to load entity by id from storage index")
+    void throwWhenUnableToLoadEntity() {
         // Store a valid aggregate.
         givenStoredAggregate();
 
@@ -289,17 +308,19 @@ public class AggregateRepositoryShould {
                 repository.iterator(Predicates.<ProjectAggregate>alwaysTrue());
 
         // This should iterate through all and fail.
-        Lists.newArrayList(iterator);
+        assertThrows(IllegalStateException.class, () -> Lists.newArrayList(iterator));
     }
 
     @Test
-    public void expose_event_classes_on_which_aggregates_react() {
+    @DisplayName("expose event classes on which aggregates react")
+    void expose_event_classes_on_which_aggregates_react() {
         final Set<EventClass> eventClasses = repository.getEventClasses();
         assertTrue(eventClasses.contains(EventClass.of(AggProjectArchived.class)));
         assertTrue(eventClasses.contains(EventClass.of(AggProjectDeleted.class)));
     }
 
     @Test
+    @DisplayName("route events to aggregates")
     public void route_events_to_aggregates() {
         final ProjectAggregate parent = givenStoredAggregate();
         final ProjectAggregate child = givenStoredAggregate();
@@ -333,6 +354,7 @@ public class AggregateRepositoryShould {
     }
 
     @Test
+    @DisplayName("log error when event reaction fails")
     public void log_error_when_event_reaction_fails() {
         final FailingAggregateRepository repository = new FailingAggregateRepository();
         boundedContext.register(repository);
@@ -364,6 +386,7 @@ public class AggregateRepositoryShould {
     }
 
     @Test
+    @DisplayName("not pass command rejection to onError")
     public void not_pass_command_rejection_to_onError() {
         final FailingAggregateRepository repository = new FailingAggregateRepository();
         boundedContext.register(repository);
@@ -382,12 +405,15 @@ public class AggregateRepositoryShould {
         assertFalse(repository.isErrorLogged());
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
+    @DisplayName("now allow anemic aggregates")
     public void now_allow_anemic_aggregates() {
-        boundedContext.register(new AnemicAggregateRepository());
+        assertThrows(IllegalStateException.class,
+                     () -> boundedContext.register(new AnemicAggregateRepository()));
     }
 
     @Test
+    @DisplayName("allow aggregates react on events")
     public void allow_aggregates_react_on_events() {
         final ReactingRepository repository = new ReactingRepository();
         boundedContext.register(repository);
@@ -427,6 +453,7 @@ public class AggregateRepositoryShould {
     }
 
     @Test
+    @DisplayName("allow aggregates react on rejections")
     public void allow_aggregates_react_on_rejections() {
         boundedContext.register(new RejectingRepository());
         final RejectionReactingRepository repository = new RejectionReactingRepository();

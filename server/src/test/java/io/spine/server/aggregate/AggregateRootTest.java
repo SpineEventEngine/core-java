@@ -31,21 +31,24 @@ import io.spine.server.model.ModelTests;
 import io.spine.test.aggregate.ProjectDefinition;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.ProjectLifecycle;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Constructor;
 
 import static io.spine.base.Identifier.newUuid;
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.Assert.assertNotNull;
 
-public class AggregateRootShould {
+@DisplayName("AggregateRoot should")
+class AggregateRootTest {
 
     private AggregateRootTestEnv.ProjectRoot aggregateRoot;
     private BoundedContext boundedContext;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         ModelTests.clearModel();
         boundedContext = BoundedContext.newBuilder()
                                        .build();
@@ -58,7 +61,8 @@ public class AggregateRootShould {
     }
 
     @Test
-    public void pass_null_tolerance_test() throws NoSuchMethodException {
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void passNullToleranceCheck() throws NoSuchMethodException {
         final Constructor<AnAggregateRoot> ctor =
                 AnAggregateRoot.class.getDeclaredConstructor(BoundedContext.class, String.class);
         new NullPointerTester()
@@ -68,7 +72,8 @@ public class AggregateRootShould {
     }
 
     @Test
-    public void return_part_state_by_class() {
+    @DisplayName("obtain part state by its class")
+    void returnPartStateByClass() {
         final Message definitionPart = aggregateRoot.getPartState(ProjectDefinition.class);
         assertNotNull(definitionPart);
 

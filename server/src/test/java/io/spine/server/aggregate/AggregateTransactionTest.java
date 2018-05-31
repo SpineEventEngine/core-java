@@ -36,6 +36,7 @@ import io.spine.test.aggregate.command.AggCreateProject;
 import io.spine.test.aggregate.event.AggProjectCreated;
 import io.spine.test.aggregate.event.AggTaskAdded;
 import io.spine.validate.ConstraintViolation;
+import org.junit.jupiter.api.DisplayName;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -48,11 +49,13 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Alex Tymchenko
  */
-public class AggregateTransactionShould
+//TODO:2018-05-31:dmytro.kuzmin: Make package-private after TransactionShould migrated to JUnit 5
+@DisplayName("AggregateTransaction should")
+public class AggregateTransactionTest
         extends TransactionShould<ProjectId,
-        Aggregate<ProjectId, Project, AggregateTransactionShould.PatchedProjectBuilder>,
+        Aggregate<ProjectId, Project, AggregateTransactionTest.PatchedProjectBuilder>,
         Project,
-        AggregateTransactionShould.PatchedProjectBuilder> {
+        AggregateTransactionTest.PatchedProjectBuilder> {
 
     private static final ProjectId ID = ProjectId.newBuilder()
                                                  .setId("aggregate-transaction-should-project")

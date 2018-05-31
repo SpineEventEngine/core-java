@@ -26,6 +26,7 @@ import com.google.protobuf.StringValue;
 import io.spine.core.CommandContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
+import io.spine.server.aggregate.AggregateRepositoryTest;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.route.CommandRoute;
@@ -37,7 +38,7 @@ import static io.spine.server.storage.LifecycleFlagField.deleted;
 import static java.lang.String.format;
 
 /**
- * Test environment for {@link io.spine.server.aggregate.AggregateRepositoryShould}.
+ * Test environment for {@link AggregateRepositoryTest}.
  *
  * @author Alexander Yevsyukov
  */

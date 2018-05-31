@@ -32,8 +32,9 @@ import io.spine.server.delivery.AbstractMessageDeliveryShould;
 import io.spine.server.delivery.given.ParallelDispatcher;
 import io.spine.server.delivery.given.ThreadStats;
 import io.spine.test.aggregate.ProjectId;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.cannotStartProject;
 import static io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.projectCancelled;
@@ -43,10 +44,11 @@ import static io.spine.server.delivery.given.MessageDeliveryTestEnv.dispatchWait
 /**
  * @author Alex Tymchenko
  */
-public class AggregateMessageDeliveryShould extends AbstractMessageDeliveryShould {
+@DisplayName("AggregateMessageDelivery should")
+class AggregateMessageDeliveryTest extends AbstractMessageDeliveryShould {
 
     @Override
-    @Before
+    @BeforeEach
     public void setUp() {
         super.setUp();
         DeliveryProject.getStats()
@@ -54,7 +56,8 @@ public class AggregateMessageDeliveryShould extends AbstractMessageDeliveryShoul
     }
 
     @Test
-    public void dispatch_commands_to_single_shard_in_multithreaded_env() throws Exception {
+    @DisplayName("dispatch commands to single shard in multithreaded env")
+    void dispatchCommandsToShard() throws Exception {
         final ParallelDispatcher<ProjectId, Command> dispatcher =
                 new ParallelDispatcher<ProjectId, Command>(
                         42, 400, dispatchWaitTime()) {
@@ -79,7 +82,8 @@ public class AggregateMessageDeliveryShould extends AbstractMessageDeliveryShoul
     }
 
     @Test
-    public void dispatch_events_to_single_shard_in_multithreaded_env() throws Exception {
+    @DisplayName("dispatch events to single shard in multithreaded env")
+    void dispatchEventsToShard() throws Exception {
         final ParallelDispatcher<ProjectId, Event> dispatcher =
                 new ParallelDispatcher<ProjectId, Event>(
                         130, 500, dispatchWaitTime()) {
@@ -104,7 +108,8 @@ public class AggregateMessageDeliveryShould extends AbstractMessageDeliveryShoul
     }
 
     @Test
-    public void dispatch_rejections_to_single_shard_in_multithreaded_env() throws Exception {
+    @DisplayName("dispatch rejections to single shard in multithreaded env")
+    void dispatchRejectionsToShard() throws Exception {
         final ParallelDispatcher<ProjectId, Rejection> dispatcher =
                 new ParallelDispatcher<ProjectId, Rejection>(
                         36, 12, dispatchWaitTime()) {
@@ -129,7 +134,8 @@ public class AggregateMessageDeliveryShould extends AbstractMessageDeliveryShoul
     }
 
     @Test
-    public void dispatch_commands_to_several_shard_in_multithreaded_env() throws Exception {
+    @DisplayName("dispatch commands to several shards in multithreaded env")
+    void dispatchCommandsToSeveralShards() throws Exception {
         final ParallelDispatcher<ProjectId, Command> dispatcher =
                 new ParallelDispatcher<ProjectId, Command>(
                         23, 423, dispatchWaitTime()) {
@@ -153,7 +159,8 @@ public class AggregateMessageDeliveryShould extends AbstractMessageDeliveryShoul
     }
 
     @Test
-    public void dispatch_events_to_several_shards_in_multithreaded_env() throws Exception {
+    @DisplayName("dispatch events to several shards in multithreaded env")
+    void dispatchEventsToSeveralShards() throws Exception {
         final ParallelDispatcher<ProjectId, Event> dispatcher =
                 new ParallelDispatcher<ProjectId, Event>(
                         190, 900, dispatchWaitTime()) {
@@ -178,7 +185,8 @@ public class AggregateMessageDeliveryShould extends AbstractMessageDeliveryShoul
     }
 
     @Test
-    public void dispatch_rejections_to_several_shards_in_multithreaded_env() throws Exception {
+    @DisplayName("dispatch rejections to several shards in multithreaded env")
+    void dispatchRejectionsToSeveralShards() throws Exception {
         final ParallelDispatcher<ProjectId, Rejection> dispatcher =
                 new ParallelDispatcher<ProjectId, Rejection>(
                         40, 603, dispatchWaitTime()) {

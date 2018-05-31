@@ -46,9 +46,9 @@ import javax.annotation.Nullable;
  * an event or a rejection.
  *
  * @author Alexander Yevsyukkov
- * @see io.spine.server.aggregate.AggregateShould#create_single_event_for_a_pair_of_events_with_empty_for_a_command_dispatch
- * @see io.spine.server.aggregate.AggregateShould#create_single_event_for_a_pair_of_events_with_empty_for_an_event_react
- * @see io.spine.server.aggregate.AggregateShould#create_single_event_for_a_pair_of_events_with_empty_for_a_rejection_react
+ * @see io.spine.server.aggregate.AggregateTest#createSingleEventForPairFromCommandDispatch
+ * @see io.spine.server.aggregate.AggregateTest#createSingleEventForPairFromEventReact
+ * @see io.spine.server.aggregate.AggregateTest#createSingleEventForPairFromRejectionReact
  */
 public class TaskAggregate extends Aggregate<AggTaskId, AggTask, AggTaskVBuilder> {
 

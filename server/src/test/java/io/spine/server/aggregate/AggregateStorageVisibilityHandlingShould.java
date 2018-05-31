@@ -28,6 +28,7 @@ import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.ProjectVBuilder;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -57,6 +58,7 @@ public abstract class AggregateStorageVisibilityHandlingShould {
 
     @SuppressWarnings("OptionalGetWithoutIsPresent") // Checked in an assertion
     @Test
+    @DisplayName("write entity status of aggregate")
     public void write_entity_status_of_aggregate() {
         final LifecycleFlags status = LifecycleFlags.newBuilder()
                                                     .setArchived(true)
@@ -68,6 +70,7 @@ public abstract class AggregateStorageVisibilityHandlingShould {
     }
 
     @Test
+    @DisplayName("save whole status")
     public void save_whole_status() {
         final boolean archived = true;
         final boolean deleted = true;
@@ -81,6 +84,7 @@ public abstract class AggregateStorageVisibilityHandlingShould {
     }
 
     @Test
+    @DisplayName("retrieve empty status if never written")
     public void retrieve_empty_status_if_never_written() {
         final Optional<LifecycleFlags> entityStatus = storage.readLifecycleFlags(id);
         assertNotNull(entityStatus);

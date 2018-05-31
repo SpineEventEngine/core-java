@@ -44,7 +44,7 @@ import io.spine.core.React;
 import io.spine.core.RejectionContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
-import io.spine.server.aggregate.AggregateRepositoryShould;
+import io.spine.server.aggregate.AggregateRepositoryTest;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.entity.given.Given;
@@ -89,7 +89,7 @@ import static java.util.Collections.emptyList;
 public class AggregateRepositoryTestEnv {
 
     private static final TestActorRequestFactory factory =
-            TestActorRequestFactory.newInstance(AggregateRepositoryShould.class);
+            TestActorRequestFactory.newInstance(AggregateRepositoryTest.class);
 
     private AggregateRepositoryTestEnv() {
         // Prevent instantiation of this utility class.

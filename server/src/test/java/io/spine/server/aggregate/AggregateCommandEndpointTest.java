@@ -33,9 +33,10 @@ import io.spine.server.model.ModelTests;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggCreateProject;
 import io.spine.test.aggregate.event.AggProjectCreated;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.server.aggregate.given.Given.ACommand.addTask;
 import static io.spine.server.aggregate.given.Given.ACommand.createProject;
@@ -43,7 +44,8 @@ import static io.spine.server.aggregate.given.Given.ACommand.startProject;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-public class AggregateCommandEndpointShould {
+@DisplayName("AggregateCommandEndpoint should")
+class AggregateCommandEndpointTest {
 
     private BoundedContext boundedContext;
     private AggregateRepository<ProjectId, ProjectAggregate> repository;
@@ -51,8 +53,8 @@ public class AggregateCommandEndpointShould {
     private ProjectId projectId;
     private Subscriber subscriber;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         ModelTests.clearModel();
         boundedContext = BoundedContext.newBuilder()
                                        .setMultitenant(false)
@@ -70,14 +72,15 @@ public class AggregateCommandEndpointShould {
         boundedContext.register(repository);
     }
 
-    @After
-    public void tearDown() throws Exception {
+    @AfterEach
+    void tearDown() throws Exception {
         ProjectAggregate.clearCommandsHandled();
         boundedContext.close();
     }
 
     @Test
-    public void post_events_on_command_dispatching() {
+    @DisplayName("post events on command dispatching")
+    void postEventsOnCommandDispatching() {
         final CommandEnvelope cmd = CommandEnvelope.of(createProject(projectId));
 
         repository.dispatch(cmd);
@@ -87,7 +90,8 @@ public class AggregateCommandEndpointShould {
     }
 
     @Test
-    public void store_aggregate_on_command_dispatching() {
+    @DisplayName("store aggregate on command dispatching")
+    void storeAggregateOnCommandDispatching() {
         final CommandEnvelope cmd = CommandEnvelope.of(createProject(projectId));
         final AggCreateProject msg = (AggCreateProject) cmd.getMessage();
 
@@ -104,12 +108,14 @@ public class AggregateCommandEndpointShould {
     }
 
     @Test
-    public void dispatch_command() {
+    @DisplayName("dispatch command")
+    void dispatchCommand() {
         assertDispatches(createProject());
     }
 
     @Test
-    public void dispatch_several_commands() {
+    @DisplayName("dispatch several commands")
+    void dispatchSeveralCommands() {
         assertDispatches(createProject(projectId));
         assertDispatches(addTask(projectId));
         assertDispatches(startProject(projectId));

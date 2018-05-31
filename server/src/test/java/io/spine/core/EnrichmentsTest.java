@@ -29,8 +29,9 @@ import io.spine.base.Time;
 import io.spine.core.given.GivenEvent;
 import io.spine.server.command.TestEventFactory;
 import io.spine.type.TypeName;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.core.Enrichments.getEnrichment;
@@ -38,18 +39,21 @@ import static io.spine.core.Enrichments.getEnrichments;
 import static io.spine.core.given.GivenEvent.context;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.TypeConverter.toMessage;
+import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Alexander Yevsyukov
  */
-public class EnrichmentsShould {
+@DisplayName("Enrichments utility should")
+class EnrichmentsTest {
 
     private static final StringValue producerId =
-            toMessage(EnrichmentsShould.class.getSimpleName());
+            toMessage(EnrichmentsTest.class.getSimpleName());
     private final StringValue stringValue = toMessage(newUuid());
     private final BoolValue boolValue = toMessage(true);
     private TestEventFactory eventFactory;
@@ -76,15 +80,22 @@ public class EnrichmentsShould {
         return context;
     }
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         eventFactory = TestEventFactory.newInstance(pack(producerId), getClass());
         context = eventFactory.createEvent(Time.getCurrentTime())
                               .getContext();
     }
 
     @Test
-    public void pass_the_null_tolerance_check() {
+    @DisplayName(HAVE_PARAMETERLESS_CTOR)
+    void haveUtilityConstructor() {
+        assertHasPrivateParameterlessCtor(Enrichments.class);
+    }
+
+    @Test
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void passNullToleranceCheck() {
         new NullPointerTester()
                 .setDefault(StringValue.class, StringValue.getDefaultInstance())
                 .setDefault(EventContext.class, context())
@@ -93,19 +104,16 @@ public class EnrichmentsShould {
     }
 
     @Test
-    public void have_utility_ctor() {
-        assertHasPrivateParameterlessCtor(Enrichments.class);
-    }
-
-    @Test
-    public void return_true_if_event_enrichment_is_enabled() {
+    @DisplayName("recognize if event enrichment is enabled")
+    void recognizeEnrichmentEnabled() {
         final EventEnvelope event = EventEnvelope.of(eventFactory.createEvent(stringValue));
 
         assertTrue(event.isEnrichmentEnabled());
     }
 
     @Test
-    public void return_false_if_event_enrichment_is_disabled() {
+    @DisplayName("recognize if event enrichment is disabled")
+    void recognizeEnrichmentDisabled() {
         final EventEnvelope event = EventEnvelope.of(
                 GivenEvent.withDisabledEnrichmentOf(stringValue)
         );
@@ -116,7 +124,8 @@ public class EnrichmentsShould {
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     // We're sure the optional is populated in this method.
     @Test
-    public void return_all_event_enrichments() {
+    @DisplayName("obtain all event enrichments from context")
+    void getAllEnrichments() {
         final EventContext context = givenContextEnrichedWith(stringValue);
 
         final Optional<Enrichment.Container> enrichments = getEnrichments(context);
@@ -127,14 +136,16 @@ public class EnrichmentsShould {
     }
 
     @Test
-    public void return_optional_absent_if_no_event_enrichments() {
+    @DisplayName("return absent if there are no enrichments in context")
+    void returnAbsentOnNoEnrichments() {
         assertFalse(getEnrichments(context).isPresent());
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     // We're sure the optional is populated in this method.
     @Test
-    public void return_specific_event_enrichment() {
+    @DisplayName("obtain specific event enrichment from context")
+    void obtainSpecificEnrichment() {
         final EventContext context = givenContextEnrichedWith(stringValue);
 
         final Optional<? extends StringValue> enrichment =
@@ -145,12 +156,14 @@ public class EnrichmentsShould {
     }
 
     @Test
-    public void return_optional_absent_if_no_event_enrichments_when_getting_one() {
+    @DisplayName("return absent if there are no enrichments in context when searching for one")
+    void returnAbsentOnNoEnrichmentsSearch() {
         assertFalse(getEnrichment(StringValue.class, context).isPresent());
     }
 
     @Test
-    public void return_optional_absent_if_no_needed_event_enrichment_when_getting_one() {
+    @DisplayName("return absent if there is no specified enrichment in context")
+    void returnAbsentOnEnrichmentNotFound() {
         final EventContext context = givenContextEnrichedWith(boolValue);
         assertFalse(getEnrichment(StringValue.class, context).isPresent());
     }

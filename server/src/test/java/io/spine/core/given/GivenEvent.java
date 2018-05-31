@@ -25,7 +25,7 @@ import io.spine.base.Time;
 import io.spine.core.Enrichment;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
-import io.spine.core.EventsShould;
+import io.spine.core.EventsTest;
 import io.spine.core.Version;
 import io.spine.server.command.TestEventFactory;
 import io.spine.test.Tests;
@@ -41,7 +41,7 @@ public class GivenEvent {
 
     public static final TestEventFactory eventFactory =
             TestEventFactory.newInstance(toAny(GivenEvent.class.getSimpleName()),
-                                         EventsShould.class);
+                                         EventsTest.class);
 
     private GivenEvent() {
         // Prevent instantiation of this utility class.

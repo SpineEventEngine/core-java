@@ -39,14 +39,16 @@ import io.spine.test.aggregate.command.AggAddTask;
 import io.spine.test.aggregate.user.User;
 import io.spine.testdata.Sample;
 import io.spine.validate.ConstraintViolation;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Constructor;
 import java.util.List;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.server.entity.given.Given.aggregatePartOfClass;
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.test.Verify.assertSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -55,11 +57,12 @@ import static org.junit.Assert.fail;
  * @author Illia Shepilov
  */
 @SuppressWarnings("OverlyCoupledClass")
-public class AggregatePartShould {
+@DisplayName("AggregatePart should")
+class AggregatePartTest {
 
     private static final String TASK_DESCRIPTION = "Description";
     private static final TestActorRequestFactory factory =
-            TestActorRequestFactory.newInstance(AggregatePartShould.class);
+            TestActorRequestFactory.newInstance(AggregatePartTest.class);
     private BoundedContext boundedContext;
     private AnAggregateRoot root;
     private TaskPart taskPart;
@@ -71,8 +74,8 @@ public class AggregatePartShould {
                                          .create(commandMessage));
     }
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         ModelTests.clearModel();
         boundedContext = BoundedContext.newBuilder()
                                        .build();
@@ -88,26 +91,25 @@ public class AggregatePartShould {
     }
 
     @Test
-    public void not_accept_nulls_as_parameter_values() throws NoSuchMethodException {
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void passNullToleranceCheck() throws NoSuchMethodException {
         createNullPointerTester()
                 .testStaticMethods(AggregatePart.class, NullPointerTester.Visibility.PACKAGE);
-    }
-
-    @Test
-    public void not_accept_nulls_as_parameter_values_for_instance_methods()
-            throws NoSuchMethodException {
         createNullPointerTester().testAllPublicInstanceMethods(taskPart);
     }
 
     @Test
-    public void return_aggregate_part_state_by_class() {
+    @DisplayName("return aggregate part state by class")
+    void returnAggregatePartStateByClass() {
         taskRepository.store(taskPart);
         final Task task = taskDescriptionPart.getPartState(Task.class);
         assertEquals(TASK_DESCRIPTION, task.getDescription());
     }
 
+    @SuppressWarnings("DuplicateStringLiteralInspection") // Common test case with Aggregate.
     @Test
-    public void throw_InvalidEntityStateException_if_state_is_invalid() {
+    @DisplayName("throw InvalidEntityStateException if entity state is invalid")
+    void throwOnInvalidState() {
         final User user = User.newBuilder()
                               .setFirstName("|")
                               .setLastName("|")
@@ -127,8 +129,10 @@ public class AggregatePartShould {
         }
     }
 
+    @SuppressWarnings("DuplicateStringLiteralInspection") // Common test case with Aggregate.
     @Test
-    public void update_valid_entity_state() {
+    @DisplayName("update valid entity state")
+    void updateEntityState() {
         final User user = User.newBuilder()
                               .setFirstName("Firstname")
                               .setLastName("Lastname")
