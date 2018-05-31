@@ -21,32 +21,39 @@
 package io.spine.core;
 
 import io.spine.base.Error;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class ResponsesShould {
+@DisplayName("Responses utility should")
+class ResponsesTest {
 
     @Test
-    public void have_private_constructor() {
+    @DisplayName(HAVE_PARAMETERLESS_CTOR)
+    void haveUtilityConstructor() {
         assertHasPrivateParameterlessCtor(Responses.class);
     }
 
     @Test
-    public void return_OK_response() {
+    @DisplayName("return OK response")
+    void returnOkResponse() {
         checkNotNull(Responses.ok());
     }
 
     @Test
-    public void recognize_OK_response() {
+    @DisplayName("recognize OK response")
+    void recognizeOkResponse() {
         assertTrue(Responses.isOk(Responses.ok()));
     }
 
     @Test
-    public void return_false_if_not_OK_response() {
+    @DisplayName("recognize not OK response")
+    void recognizeNotOkResponse() {
         final Status status = Status.newBuilder()
                                     .setError(Error.getDefaultInstance())
                                     .build();
