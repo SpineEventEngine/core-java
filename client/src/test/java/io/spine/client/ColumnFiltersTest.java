@@ -39,8 +39,6 @@ import static io.spine.client.ColumnFilter.Operator.GREATER_OR_EQUAL;
 import static io.spine.client.ColumnFilter.Operator.GREATER_THAN;
 import static io.spine.client.ColumnFilter.Operator.LESS_OR_EQUAL;
 import static io.spine.client.ColumnFilter.Operator.LESS_THAN;
-import static io.spine.client.ColumnFilters.all;
-import static io.spine.client.ColumnFilters.either;
 import static io.spine.client.ColumnFilters.eq;
 import static io.spine.client.ColumnFilters.ge;
 import static io.spine.client.ColumnFilters.gt;
@@ -87,42 +85,42 @@ class ColumnFiltersTest {
     }
 
     @Nested
-    @DisplayName("when creating column filter")
-    class CreateFilterTest {
+    @DisplayName("create column filter of type")
+    class CreateFilterOfType {
 
         @Test
-        @DisplayName("successfully create `equals` filter")
-        void createEquals() {
+        @DisplayName("`equals`")
+        void equals() {
             checkCreatesInstance(eq(COLUMN_NAME, COLUMN_VALUE), EQUAL);
         }
 
         @Test
-        @DisplayName("successfully create `greater than` filter")
-        void createGreaterThan() {
+        @DisplayName("`greater than`")
+        void greaterThan() {
             checkCreatesInstance(gt(COLUMN_NAME, COLUMN_VALUE), GREATER_THAN);
         }
 
         @Test
-        @DisplayName("successfully create `greater than or equals` filter")
-        void createGreaterOrEqual() {
+        @DisplayName("`greater than or equals`")
+        void greaterOrEqual() {
             checkCreatesInstance(ge(COLUMN_NAME, COLUMN_VALUE), GREATER_OR_EQUAL);
         }
 
         @Test
-        @DisplayName("successfully create `less than` filter")
-        void createLessThan() {
+        @DisplayName("`less than`")
+        void lessThan() {
             checkCreatesInstance(lt(COLUMN_NAME, COLUMN_VALUE), LESS_THAN);
         }
 
         @Test
-        @DisplayName("successfully create `less than or equals` filter")
-        void createLessOrEqual() {
+        @DisplayName("`less than or equals`")
+        void lessOrEqual() {
             checkCreatesInstance(le(COLUMN_NAME, COLUMN_VALUE), LESS_OR_EQUAL);
         }
 
         @Test
-        @DisplayName("successfully create `equals` filter for enumerated types")
-        void createEqualsForEnum() {
+        @DisplayName("`equals` for enumerated types")
+        void equalsForEnum() {
             final ColumnFilter filter = eq(ENUM_COLUMN_NAME, ENUM_COLUMN_VALUE);
             assertEquals(ENUM_COLUMN_NAME, filter.getColumnName());
             assertEquals(toAny(ENUM_COLUMN_VALUE), filter.getValue());
@@ -138,27 +136,27 @@ class ColumnFiltersTest {
     }
 
     @Nested
-    @DisplayName("when creating composite column filter")
-    class CreateCompositeFilterTest {
+    @DisplayName("create composite column filter of type")
+    class CreateCompositeFilterOfType {
 
         @Test
-        @DisplayName("successfully create `all` grouping")
-        void createAll() {
+        @DisplayName("`all`")
+        void all() {
             final ColumnFilter[] filters = {
                     le(COLUMN_NAME, COLUMN_VALUE),
                     ge(COLUMN_NAME, COLUMN_VALUE)
             };
-            checkCreatesInstance(all(filters[0], filters[1]), ALL, filters);
+            checkCreatesInstance(ColumnFilters.all(filters[0], filters[1]), ALL, filters);
         }
 
         @Test
-        @DisplayName("successfully create `either` grouping")
-        void createEither() {
+        @DisplayName("`either`")
+        void either() {
             final ColumnFilter[] filters = {
                     lt(COLUMN_NAME, COLUMN_VALUE),
                     gt(COLUMN_NAME, COLUMN_VALUE)
             };
-            checkCreatesInstance(either(filters[0], filters[1]), EITHER, filters);
+            checkCreatesInstance(ColumnFilters.either(filters[0], filters[1]), EITHER, filters);
         }
 
         private void checkCreatesInstance(CompositeColumnFilter filter,
@@ -170,12 +168,12 @@ class ColumnFiltersTest {
     }
 
     @Nested
-    @DisplayName("when creating ordering filter")
-    class CreateOrderingFilterTest {
+    @DisplayName("create ordering filter")
+    class CreateOrderingFilter {
 
         @Test
-        @DisplayName("successfully create ordering filter for numbers")
-        void createForNumber() {
+        @DisplayName("for numbers")
+        void forNumbers() {
             final double number = 3.14;
             final ColumnFilter filter = le("doubleColumn", number);
             assertNotNull(filter);
@@ -185,8 +183,8 @@ class ColumnFiltersTest {
         }
 
         @Test
-        @DisplayName("successfully create ordering filter for strings")
-        void createForString() {
+        @DisplayName("for strings")
+        void forStrings() {
             final String theString = "abc";
             final ColumnFilter filter = gt("stringColumn", theString);
             assertNotNull(filter);
@@ -194,24 +192,29 @@ class ColumnFiltersTest {
             final StringValue value = AnyPacker.unpack(filter.getValue());
             assertEquals(theString, value.getValue());
         }
+    }
+
+    @Nested
+    @DisplayName("fail to create ordering filter")
+    class FailToCreateOrderingFilter {
 
         @Test
-        @DisplayName("fail to create ordering filter for enumerated types")
-        void failForEnum() {
+        @DisplayName("for enumerated types")
+        void forEnums() {
             assertThrows(IllegalArgumentException.class,
                          () -> ge(ENUM_COLUMN_NAME, ENUM_COLUMN_VALUE));
         }
 
         @Test
-        @DisplayName("fail to create ordering filter for non primitive number types")
-        void failForNonPrimitiveNumber() {
+        @DisplayName("for non primitive number types")
+        void forNonPrimitiveNumbers() {
             final AtomicInteger number = new AtomicInteger(42);
             assertThrows(IllegalArgumentException.class, () -> ge("atomicColumn", number));
         }
 
         @Test
-        @DisplayName("fail to create ordering filter for not supported types")
-        void failForNotSupportedType() {
+        @DisplayName("for not supported types")
+        void forUnsupportedTypes() {
             final Comparable<?> value = Calendar.getInstance(); // Comparable but not supported
             assertThrows(IllegalArgumentException.class, () -> le("invalidColumn", value));
         }

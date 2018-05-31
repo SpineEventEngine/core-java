@@ -23,33 +23,42 @@ package io.spine.change;
 import com.google.common.testing.NullPointerTester;
 import com.google.common.testing.NullPointerTester.Visibility;
 import com.google.protobuf.ByteString;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.change.Preconditions2.checkNewValueNotEmpty;
+import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class Preconditions2Should {
+@DisplayName("Preconditions2 utility should")
+class Preconditions2Test {
 
     @Test
-    public void have_private_constructor() {
+    @DisplayName(HAVE_PARAMETERLESS_CTOR)
+    void haveUtilityConstructor() {
         assertHasPrivateParameterlessCtor(Preconditions2.class);
     }
 
     @Test
-    public void pass_null_tolerance_test() {
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void passNullToleranceCheck() {
         new NullPointerTester()
                 .testStaticMethods(Preconditions2.class, Visibility.PACKAGE);
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void not_accept_empty_ByteString_value() {
+    @Test
+    @DisplayName("not accept empty ByteString value")
+    void failOnEmptyByteString() {
         final ByteString str = ByteString.EMPTY;
-        checkNewValueNotEmpty(str);
+        assertThrows(IllegalArgumentException.class, () -> checkNewValueNotEmpty(str));
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void not_accept_empty_String_value() {
+    @Test
+    @DisplayName("not accept empty String value")
+    void failOnEmptyString() {
         final String str = "";
-        checkNewValueNotEmpty(str);
+        assertThrows(IllegalArgumentException.class, () -> checkNewValueNotEmpty(str));
     }
 }

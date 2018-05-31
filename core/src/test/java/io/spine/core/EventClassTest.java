@@ -17,31 +17,36 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package io.spine.core;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.StringValue;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-/**
- * @author Alex Tymchenko
- */
-public class RejectionClassShould {
+@DisplayName("EventClass should")
+class EventClassTest {
 
     @Test
-    public void create_set_on_varargs() {
-        assertEquals(3,
-                     RejectionClass.setOf(BoolValue.class, Int32Value.class, StringValue.class)
-                                   .size());
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void passNullToleranceCheck() throws Exception {
+        new NullPointerTester()
+                .testAllPublicStaticMethods(EventClass.class);
     }
 
+    @SuppressWarnings("DuplicateStringLiteralInspection") // Common test display name.
     @Test
-    public void pass_null_tolerance_check() throws Exception {
-        new NullPointerTester()
-                .testAllPublicStaticMethods(RejectionClass.class);
+    @DisplayName("create set on varargs")
+    void createSetOnVarargs() {
+        assertEquals(3, EventClass.setOf(
+                BoolValue.class,
+                Int32Value.class,
+                StringValue.class).size());
     }
 }
