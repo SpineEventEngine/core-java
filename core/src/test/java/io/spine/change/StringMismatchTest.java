@@ -46,7 +46,6 @@ class StringMismatchTest {
     private static final String EXPECTED = "expected string";
     private static final String ACTUAL = "actual string";
     private static final String NEW_VALUE = "new value to set";
-
     private static final int VERSION = 1;
 
     @Test
