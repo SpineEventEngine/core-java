@@ -24,21 +24,22 @@ import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Message;
 import io.spine.type.MessageClass;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.validate.Validate.isDefault;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * An abstract test suite for all the tests of {@link MessageEnvelope} implementations.
  *
  * @author Dmytro Dashenkov
  */
-public abstract class MessageEnvelopeShould<O extends Message,
-                                            E extends MessageEnvelope<?, O, ?>,
-                                            C extends MessageClass> {
+public abstract class MessageEnvelopeTest<O extends Message,
+                                          E extends MessageEnvelope<?, O, ?>,
+                                          C extends MessageClass> {
 
     protected abstract O outerObject();
 
@@ -47,7 +48,8 @@ public abstract class MessageEnvelopeShould<O extends Message,
     protected abstract C getMessageClass(O obj);
 
     @Test
-    public void not_accept_nulls_on_construction() {
+    @DisplayName("not accept nulls on construction")
+    void notAcceptNullsOnConstruction() {
         final O obj = outerObject();
         @SuppressWarnings("unchecked") // Due to generics.
         final Class<O> objectClass = (Class<O>) obj.getClass();
@@ -59,14 +61,16 @@ public abstract class MessageEnvelopeShould<O extends Message,
     }
 
     @Test
-    public void obtain_outer_object() {
+    @DisplayName("obtain outer object")
+    void getOuterObject() {
         final O obj = outerObject();
         final E envelope = toEnvelope(obj);
         assertEquals(obj, envelope.getOuterObject());
     }
 
     @Test
-    public void extract_message() {
+    @DisplayName("extract message")
+    void extractMessage() {
         final E envelope = toEnvelope(outerObject());
         final Message commandMessage = envelope.getMessage();
         assertNotNull(commandMessage);
@@ -74,14 +78,16 @@ public abstract class MessageEnvelopeShould<O extends Message,
     }
 
     @Test
-    public void obtain_message_class() {
-        final O obj  = outerObject();
+    @DisplayName("obtain message class")
+    void getMessageClass() {
+        final O obj = outerObject();
         final E envelope = toEnvelope(obj);
         assertEquals(getMessageClass(obj), envelope.getMessageClass());
     }
 
     @Test
-    public void support_equality() {
+    @DisplayName("support equality")
+    void supportEquality() {
         final O oneMessage = outerObject();
         final O anotherMessage = outerObject();
 

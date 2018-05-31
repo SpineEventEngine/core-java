@@ -17,45 +17,37 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package io.spine.core;
 
 import com.google.common.testing.NullPointerTester;
-import io.spine.core.given.GivenVersion;
-import org.junit.Test;
+import com.google.protobuf.BoolValue;
+import com.google.protobuf.Int32Value;
+import com.google.protobuf.StringValue;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
-import static org.junit.Assert.assertEquals;
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * @author Alexander Yevsyukov
+ * @author Alex Tymchenko
  */
-public class VersionsShould {
+@DisplayName("RejectionClass should")
+class RejectionClassTest {
 
     @Test
-    public void have_private_utility_ctor() {
-        assertHasPrivateParameterlessCtor(Versions.class);
-    }
-
-    @Test
-    public void pass_null_tolerance_check() {
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void passNullToleranceCheck() throws Exception {
         new NullPointerTester()
-                .setDefault(Version.class, Version.getDefaultInstance())
-                .testAllPublicStaticMethods(Versions.class);
+                .testAllPublicStaticMethods(RejectionClass.class);
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void check_version_increment() {
-        Versions.checkIsIncrement(
-                GivenVersion.withNumber(2),
-                GivenVersion.withNumber(1)
-        );
-    }
-
+    @SuppressWarnings("DuplicateStringLiteralInspection") // Common test display name.
     @Test
-    public void increment() {
-        final Version v1 = GivenVersion.withNumber(1);
-        assertEquals(v1.getNumber() + 1, Versions.increment(v1)
-                                                 .getNumber());
+    @DisplayName("create set on varargs")
+    void createSetOnVarargs() {
+        assertEquals(3,
+                     RejectionClass.setOf(BoolValue.class, Int32Value.class, StringValue.class)
+                                   .size());
     }
 }
