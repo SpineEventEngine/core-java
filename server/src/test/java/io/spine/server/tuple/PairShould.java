@@ -29,7 +29,9 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.base.Time;
 import io.spine.test.TestValues;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.util.Iterator;
 
@@ -42,6 +44,9 @@ import static org.junit.Assert.assertFalse;
  */
 @SuppressWarnings("LocalVariableNamingConvention") // OK for tuple element values
 public class PairShould {
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     @Test
     public void pass_null_tolerance_check() {
@@ -64,23 +69,27 @@ public class PairShould {
                           .testEquals();
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void prohibit_default_A_value() {
+        thrown.expect(IllegalArgumentException.class);
         Pair.of(StringValue.getDefaultInstance(), BoolValue.of(true));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void prohibit_default_B_value() {
+        thrown.expect(IllegalArgumentException.class);
         Pair.of(BoolValue.of(false), TestValues.newUuidValue());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void prohibit_Empty_A() {
+        thrown.expect(IllegalArgumentException.class);
         Pair.of(Empty.getDefaultInstance(), BoolValue.of(true));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void prohibit_Empty_B() {
+        thrown.expect(IllegalArgumentException.class);
         Pair.of(BoolValue.of(true), Empty.getDefaultInstance());
     }
 

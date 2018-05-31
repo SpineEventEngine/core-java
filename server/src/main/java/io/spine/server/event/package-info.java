@@ -21,8 +21,10 @@
 /**
  * This package provides classes for server-side event processing.
  */
-
+@CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.server.event;
+
+import com.google.errorprone.annotations.CheckReturnValue;
 
 import javax.annotation.ParametersAreNonnullByDefault;

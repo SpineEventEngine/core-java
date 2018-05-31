@@ -22,9 +22,11 @@
  * This package provides interfaces and base classes for storages.
  */
 @SPI
+@CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.server.storage;
 
+import com.google.errorprone.annotations.CheckReturnValue;
 import io.spine.annotation.SPI;
 
 import javax.annotation.ParametersAreNonnullByDefault;

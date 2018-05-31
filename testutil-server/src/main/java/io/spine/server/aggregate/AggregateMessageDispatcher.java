@@ -20,6 +20,7 @@
 package io.spine.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.EventEnvelope;
@@ -39,7 +40,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class AggregateMessageDispatcher {
 
     /** Prevents instantiation of this utility class. */
-    private AggregateMessageDispatcher() {}
+    private AggregateMessageDispatcher() {
+    }
 
     /**
      * Dispatches the {@linkplain CommandEnvelope command envelope} and applies the resulting events
@@ -47,10 +49,11 @@ public class AggregateMessageDispatcher {
      *
      * @return the list of event messages.
      */
+    @CanIgnoreReturnValue
     public static List<? extends Message> dispatchCommand(Aggregate<?, ?, ?> aggregate,
                                                           CommandEnvelope envelope) {
         checkNotNull(envelope);
-        final List<? extends Message> eventMessages = aggregate.dispatchCommand(envelope);
+        List<? extends Message> eventMessages = aggregate.dispatchCommand(envelope);
         apply(aggregate, eventMessages, envelope);
         return eventMessages;
     }
@@ -61,10 +64,11 @@ public class AggregateMessageDispatcher {
      *
      * @return the list of event messages.
      */
+    @CanIgnoreReturnValue
     public static List<? extends Message> dispatchEvent(Aggregate<?, ?, ?> aggregate,
                                                         EventEnvelope envelope) {
         checkNotNull(envelope);
-        final List<? extends Message> eventMessages = aggregate.reactOn(envelope);
+        List<? extends Message> eventMessages = aggregate.reactOn(envelope);
         apply(aggregate, eventMessages, envelope);
         return eventMessages;
     }
@@ -75,11 +79,12 @@ public class AggregateMessageDispatcher {
      *
      * @return the list of event messages.
      */
+    @CanIgnoreReturnValue
     public static List<? extends Message> dispatchRejection(Aggregate<?, ?, ?> aggregate,
                                                             RejectionEnvelope envelope) {
         checkNotNull(envelope);
 
-        final List<? extends Message> eventMessages = aggregate.reactOn(envelope);
+        List<? extends Message> eventMessages = aggregate.reactOn(envelope);
         apply(aggregate, eventMessages, envelope);
         return eventMessages;
     }
@@ -87,7 +92,7 @@ public class AggregateMessageDispatcher {
     private static void apply(Aggregate<?, ?, ?> aggregate,
                               List<? extends Message> eventMessages,
                               MessageEnvelope envelope) {
-        final AggregateTransaction tx = AggregateTransaction.start(aggregate);
+        AggregateTransaction tx = AggregateTransaction.start(aggregate);
         aggregate.apply(eventMessages, envelope);
         tx.commit();
     }

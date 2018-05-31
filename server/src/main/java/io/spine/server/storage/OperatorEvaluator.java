@@ -23,8 +23,8 @@ package io.spine.server.storage;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkArgument;

@@ -29,8 +29,8 @@ import io.spine.core.Events;
 import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.storage.Column;
 import io.spine.type.TypeName;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Comparator;
 
 import static io.spine.core.Events.clearEnrichments;

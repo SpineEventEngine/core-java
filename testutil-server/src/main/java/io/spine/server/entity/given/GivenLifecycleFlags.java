@@ -27,12 +27,12 @@ import io.spine.server.entity.LifecycleFlags;
  */
 public class GivenLifecycleFlags {
 
+    /** Prevent instantiation of this utility class. */
     private GivenLifecycleFlags() {
-        // Prevent instantiation of this utility class.
     }
 
     /**
-     * Creates {@code Visibility} with archived flag set to {@code true}.
+     * Creates an instance with archived flag set to {@code true}.
      */
     public static LifecycleFlags archived() {
         return LifecycleFlags.newBuilder()
@@ -41,7 +41,7 @@ public class GivenLifecycleFlags {
     }
 
     /**
-     * Creates {@code Visibility} with deleted flag set to {@code true}.
+     * Creates an instance with deleted flag set to {@code true}.
      */
     public static LifecycleFlags deleted() {
         return LifecycleFlags.newBuilder()

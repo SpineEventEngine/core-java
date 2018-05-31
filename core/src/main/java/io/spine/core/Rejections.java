@@ -98,6 +98,7 @@ public final class Rejections {
         return builder.build();
     }
 
+    @SuppressWarnings("CheckReturnValue") // calling builder
     private static RejectionContext createContext(ThrowableMessage message, Command command) {
         final String stacktrace = Throwables.getStackTraceAsString(message);
         final RejectionContext.Builder builder =

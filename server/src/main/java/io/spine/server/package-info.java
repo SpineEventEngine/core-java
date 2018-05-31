@@ -24,8 +24,14 @@
  * <p>Some of the classes in this package are also generated from Protobuf.
  * Those classes represent general data structures for working with backend data in
  * a multi-language system.
+ *
+ * <p>Classes and interfaces under this package are <em>NOT</em> meant be at the client site
+ * of an application.
  */
+@CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.server;
+
+import com.google.errorprone.annotations.CheckReturnValue;
 
 import javax.annotation.ParametersAreNonnullByDefault;

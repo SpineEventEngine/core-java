@@ -76,6 +76,7 @@ public class ProcessManagerDispatcher {
     /**
      * Dispatches a {@linkplain RejectionEnvelope rejection} to the given {@code ProcessManager}.
      */
+    @SuppressWarnings("CheckReturnValue") // OK to ignore events in this test utility.
     public static void dispatch(ProcessManager<?, ?, ?> pm, RejectionEnvelope rejection) {
         checkNotNull(pm);
         checkNotNull(rejection);

@@ -43,72 +43,73 @@ import static org.mockito.Mockito.when;
  */
 public class ColumnTypeRegistryShould {
 
+    private static <T> EntityColumn mockProperty(Class<T> cls) {
+        EntityColumn column = mock(EntityColumn.class);
+        when(column.getType()).thenReturn(cls);
+        when(column.getPersistedType()).thenReturn(cls);
+        return column;
+    }
+
+
     @Test
     public void have_builder() {
-        final ColumnTypeRegistry.Builder builder = ColumnTypeRegistry.newBuilder();
+        ColumnTypeRegistry.Builder builder = ColumnTypeRegistry.newBuilder();
         assertNotNull(builder);
     }
 
     @Test
     public void have_default_empty_singleton_instance() {
-        final ColumnTypeRegistry emptyInstance = ColumnTypeRegistry.newBuilder()
-                                                                   .build();
+        ColumnTypeRegistry emptyInstance = ColumnTypeRegistry.newBuilder()
+                                                             .build();
         assertEmpty(emptyInstance.getColumnTypeMap());
     }
 
     @SuppressWarnings("MethodWithMultipleLoops") // OK for a test
     @Test
     public void store_column_types() {
-        final Collection<Class> classes = Arrays.<Class>asList(String.class,
-                                                               Integer.class,
-                                                               Date.class);
-        final ColumnTypeRegistry.Builder<?> registryBuilder =
-                ColumnTypeRegistry.<ColumnType>newBuilder();
+        Collection<Class> classes = Arrays.asList(String.class,
+                                                  Integer.class,
+                                                  Date.class);
+        ColumnTypeRegistry.Builder<?> registryBuilder =
+                ColumnTypeRegistry.newBuilder();
         for (Class<?> cls : classes) {
-            final ColumnType type = new AnyType();
+            ColumnType type = new AnyType();
             registryBuilder.put(cls, type);
         }
 
-        final ColumnTypeRegistry<?> registry = registryBuilder.build();
+        ColumnTypeRegistry<?> registry = registryBuilder.build();
 
         for (Class<?> cls : classes) {
-            final ColumnType type = registry.get(mockProperty(cls));
+            ColumnType type = registry.get(mockProperty(cls));
             Verify.assertInstanceOf(AnyType.class, type);
         }
     }
 
     @Test
     public void find_closest_superclass_column_type() {
-        final ColumnTypeRegistry<?> registry =
+        ColumnTypeRegistry<?> registry =
                 ColumnTypeRegistry.newBuilder()
                                   .put(GeneratedMessageV3.class, new GeneratedMessageType())
                                   .put(AbstractMessage.class, new AbstractMessageType())
                                   .build();
-        final EntityColumn column = mockProperty(Any.class);
-        final ColumnType type = registry.get(column);
+        EntityColumn column = mockProperty(Any.class);
+        ColumnType type = registry.get(column);
         assertNotNull(type);
         assertThat(type, instanceOf(GeneratedMessageType.class));
     }
 
     @Test
     public void map_primitives_autoboxed() {
-        final ColumnTypeRegistry<?> registry =
+        ColumnTypeRegistry<?> registry =
                 ColumnTypeRegistry.newBuilder()
                                   .put(Integer.class, new IntegerType())
                                   .build();
-        final ColumnType integerColumnType = registry.get(mockProperty(Integer.class));
+        ColumnType integerColumnType = registry.get(mockProperty(Integer.class));
         assertNotNull(integerColumnType);
-        final ColumnType intColumnType = registry.get(mockProperty(int.class));
+        ColumnType intColumnType = registry.get(mockProperty(int.class));
         assertNotNull(intColumnType);
 
         assertEquals(integerColumnType, intColumnType);
-    }
-
-    private static <T> EntityColumn mockProperty(Class<T> cls) {
-        final EntityColumn column = mock(EntityColumn.class);
-        when(column.getType()).thenReturn(cls);
-        when(column.getPersistedType()).thenReturn(cls);
-        return column;
     }
 
     private static class AnyType extends SimpleColumnType {
@@ -133,7 +134,9 @@ public class ColumnTypeRegistryShould {
         }
 
         @Override
-        public void setColumnValue(StringBuilder storageRecord, String value, String columnIdentifier) {
+        public void setColumnValue(StringBuilder storageRecord,
+                                   String value,
+                                   String columnIdentifier) {
             storageRecord.append(value);
         }
 
@@ -152,7 +155,9 @@ public class ColumnTypeRegistryShould {
         }
 
         @Override
-        public void setColumnValue(StringBuilder storageRecord, String value, String columnIdentifier) {
+        public void setColumnValue(StringBuilder storageRecord,
+                                   String value,
+                                   String columnIdentifier) {
             storageRecord.append(value);
         }
 

@@ -39,7 +39,9 @@ import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectVBuilder;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.util.Set;
 
@@ -71,6 +73,9 @@ public class QueryServiceShould {
     private final MemoizingObserver<QueryResponse> responseObserver =
             StreamObservers.memoizingObserver();
     private ProjectDetailsRepository projectDetailsRepository;
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     @Before
     public void setUp() {
@@ -141,20 +146,23 @@ public class QueryServiceShould {
         verify(customersContext.getStand(), never()).execute(query, responseObserver);
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void fail_to_create_with_removed_bounded_context_from_builder() {
         final BoundedContext boundedContext = BoundedContext.newBuilder()
                                                             .build();
 
         final QueryService.Builder builder = QueryService.newBuilder();
+
+        thrown.expect(IllegalStateException.class);
         builder.add(boundedContext)
                .remove(boundedContext)
                .build();
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void fail_to_create_with_no_bounded_context() {
+        thrown.expect(IllegalStateException.class);
         QueryService.newBuilder()
                     .build();
     }
@@ -207,7 +215,7 @@ public class QueryServiceShould {
     private static class ProjectDetails
             extends Projection<ProjectId, Project, ProjectVBuilder> {
 
-        public ProjectDetails(ProjectId id) {
+        private ProjectDetails(ProjectId id) {
             super(id);
         }
 

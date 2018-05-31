@@ -24,7 +24,7 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.core.ActorContext;
 
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Arrays;
 import java.util.Set;
 
@@ -181,12 +181,10 @@ public final class QueryFactory {
                        @Nullable FieldMask fieldMask) {
         checkNotNull(entityClass, "The class of Entity must be specified for a Query");
 
-        final Query.Builder builder = queryBuilderFor(entityClass,
-                                                      ids,
-                                                      columnFilters,
-                                                      fieldMask);
-        builder.setId(newQueryId())
-               .setContext(actorContext);
+        Query.Builder builder =
+                queryBuilderFor(entityClass, ids, columnFilters, fieldMask)
+                        .setId(newQueryId())
+                        .setContext(actorContext);
         return builder.build();
     }
 }

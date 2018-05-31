@@ -23,8 +23,8 @@ package io.spine.server.aggregate;
 import io.spine.annotation.Internal;
 import io.spine.server.BoundedContext;
 import io.spine.server.model.ModelError;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 

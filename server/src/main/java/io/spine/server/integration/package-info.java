@@ -21,8 +21,10 @@
 /**
  * This package contains classes and interfaces for communications between bounded contexts.
  */
-
+@CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.server.integration;
+
+import com.google.errorprone.annotations.CheckReturnValue;
 
 import javax.annotation.ParametersAreNonnullByDefault;

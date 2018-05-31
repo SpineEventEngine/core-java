@@ -22,9 +22,11 @@
  * This package contains internal utilities for obtaining Reflection information.
  */
 @Internal
+@CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.server.reflect;
 
+import com.google.errorprone.annotations.CheckReturnValue;
 import io.spine.annotation.Internal;
 
 import javax.annotation.ParametersAreNonnullByDefault;

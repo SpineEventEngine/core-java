@@ -23,11 +23,12 @@ import io.spine.core.BoundedContextName;
 import io.spine.server.BoundedContext;
 import io.spine.server.delivery.given.ShardedStreamTestEnv.TaskAggregateRepository;
 import io.spine.server.model.ModelTests;
-import io.spine.server.transport.TransportFactory;
 import io.spine.test.Tests;
 import io.spine.test.aggregate.ProjectId;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import static io.spine.server.delivery.given.ShardedStreamTestEnv.builder;
 import static org.junit.Assert.assertEquals;
@@ -39,74 +40,83 @@ import static org.mockito.Mockito.mock;
 @SuppressWarnings("unchecked")  // the numerous generic parameters are omitted to simplify tests.
 public class ShardedStreamBuilderShould {
 
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
+
     @Before
     public void setUp() {
         // as long as we refer to the Model in delivery tag initialization.
         ModelTests.clearModel();
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void not_accept_null_boundedContextName() {
-        builder().setBoundedContextName(Tests.<BoundedContextName>nullRef());
+        thrown.expect(NullPointerException.class);
+        builder().setBoundedContextName(Tests.nullRef());
     }
 
     @Test
     public void return_set_boundedContextName() {
-        final BoundedContextName value = BoundedContext.newName("ShardedStreams");
+        BoundedContextName value = BoundedContext.newName("ShardedStreams");
         assertEquals(value, builder().setBoundedContextName(value)
                                      .getBoundedContextName());
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void not_accept_null_key() {
-        builder().setKey(Tests.<ShardingKey>nullRef());
+        thrown.expect(NullPointerException.class);
+        builder().setKey(Tests.nullRef());
     }
 
     @Test
     public void return_set_key() {
-        final ShardingKey value = mock(ShardingKey.class);
+        ShardingKey value = mock(ShardingKey.class);
         assertEquals(value, builder().setKey(value)
                                      .getKey());
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void not_accept_null_tag() {
-        builder().setTag(Tests.<DeliveryTag>nullRef());
+        thrown.expect(NullPointerException.class);
+        builder().setTag(Tests.nullRef());
     }
 
     @Test
     public void return_set_tag() {
-        final DeliveryTag value = DeliveryTag.forCommandsOf(new TaskAggregateRepository());
+        DeliveryTag value = DeliveryTag.forCommandsOf(new TaskAggregateRepository());
         assertEquals(value, builder().setTag(value)
                                      .getTag());
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void not_accept_null_targetIdClass() {
-        builder().setTargetIdClass(Tests.<Class>nullRef());
+        thrown.expect(NullPointerException.class);
+        builder().setTargetIdClass(Tests.nullRef());
     }
 
     @Test
     public void return_set_targetIdClass() {
-        final Class value = ProjectId.class;
+        Class value = ProjectId.class;
         assertEquals(value, builder().setTargetIdClass(value)
                                      .getTargetIdClass());
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void not_accept_null_consumer() {
+        thrown.expect(NullPointerException.class);
         builder().setConsumer(Tests.<Consumer>nullRef());
     }
 
     @Test
     public void return_set_consumer() {
-        final Consumer value = mock(Consumer.class);
+        Consumer value = mock(Consumer.class);
         assertEquals(value, builder().setConsumer(value)
                                      .getConsumer());
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void not_accept_null_transportFactory() {
-        builder().build(Tests.<TransportFactory>nullRef());
+        thrown.expect(NullPointerException.class);
+        builder().build(Tests.nullRef());
     }
 }

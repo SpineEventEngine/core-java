@@ -21,11 +21,9 @@
 package io.spine.server.model;
 
 import com.google.protobuf.Message;
-import io.spine.protobuf.Messages;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityClass;
 
-import javax.annotation.CheckReturnValue;
 import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -61,11 +59,10 @@ class DefaultStateRegistry {
      * @param entityClass the class to check
      * @return {@code true} if there is a state for the passed class, {@code false} otherwise
      */
-    @CheckReturnValue
     boolean contains(Class<? extends Entity> entityClass) {
         lock.readLock().lock();
         try {
-            final boolean result = defaultStates.containsKey(entityClass);
+            boolean result = defaultStates.containsKey(entityClass);
             return result;
         } finally {
             lock.readLock().unlock();
@@ -73,19 +70,21 @@ class DefaultStateRegistry {
     }
 
     /**
-     * If {@link #defaultStates} does not contain state then save state and return it otherwise
-     * return saved state.
+     * Obtains the default state message for the passed entity class.
+     *
+     * <p>If the entity class was not registered before, its default state message is
+     * remembered. Otherwise, the previously stored message is returned.
      *
      * @param entityClass an entity class
      */
-    Message putOrGet(Class<? extends Entity> entityClass) {
+    Message get(Class<? extends Entity> entityClass) {
         lock.writeLock().lock();
         try {
             if (!contains(entityClass)) {
-                final Message defaultState = createDefaultState(entityClass);
+                Message defaultState = EntityClass.createDefaultState(entityClass);
                 defaultStates.put(entityClass, defaultState);
             }
-            final Message result = get(entityClass);
+            Message result = doGet(entityClass);
             return result;
         } finally {
             lock.writeLock().unlock();
@@ -97,33 +96,14 @@ class DefaultStateRegistry {
      *
      * @param entityClass an entity class
      */
-    @CheckReturnValue
-    Message get(Class<? extends Entity> entityClass) {
+    private Message doGet(Class<? extends Entity> entityClass) {
         lock.readLock().lock();
         try {
-            final Message state = defaultStates.get(entityClass);
+            Message state = defaultStates.get(entityClass);
             return state;
         } finally {
             lock.readLock().unlock();
         }
-    }
-
-    /**
-     * Creates default state by entity class.
-     *
-     * @return default state
-     */
-    private Message createDefaultState(Class<? extends Entity> entityClass) {
-        final Class<? extends Message> stateClass = getStateClass(entityClass);
-        final Message result = Messages.newInstance(stateClass);
-        return result;
-    }
-
-    /**
-     * Obtains the class of the entity state.
-     */
-    private Class<? extends Message> getStateClass(Class<? extends Entity> entityClass) {
-        return EntityClass.getStateClass(entityClass);
     }
 
     static DefaultStateRegistry getInstance() {

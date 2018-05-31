@@ -41,12 +41,13 @@ import io.spine.test.command.CmdStartProject;
 import io.spine.test.command.event.CmdProjectCreated;
 import io.spine.test.command.event.CmdProjectStarted;
 import io.spine.test.command.event.CmdTaskAdded;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 
-import javax.annotation.Nullable;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+
+import static com.google.common.collect.Lists.newLinkedList;
 
 /**
  * @author Alexander Yevsyukov
@@ -59,7 +60,7 @@ public class CommandHandlerTestEnv {
 
     public static class EventCatcher implements EventDispatcher<String> {
 
-        private final List<EventEnvelope> dispatched = new LinkedList<>();
+        private final List<EventEnvelope> dispatched = newLinkedList();
 
         @Override
         public Set<EventClass> getMessageClasses() {
@@ -93,10 +94,8 @@ public class CommandHandlerTestEnv {
 
         private final CommandHistory commandsHandled = new CommandHistory();
 
-        @Nullable
-        private CommandEnvelope lastErrorEnvelope;
-        @Nullable
-        private RuntimeException lastException;
+        private @Nullable CommandEnvelope lastErrorEnvelope;
+        private @Nullable RuntimeException lastException;
 
         public TestCommandHandler(EventBus eventBus) {
             super(eventBus);
@@ -106,8 +105,10 @@ public class CommandHandlerTestEnv {
             commandsHandled.assertHandled(expected);
         }
 
+        @SuppressWarnings("CheckReturnValue")
+            // can ignore the returned ID of the command handler in these tests
         public void handle(Command cmd) {
-            final CommandEnvelope commandEnvelope = CommandEnvelope.of(cmd);
+            CommandEnvelope commandEnvelope = CommandEnvelope.of(cmd);
             dispatch(commandEnvelope);
         }
 
@@ -146,19 +147,18 @@ public class CommandHandlerTestEnv {
             lastException = exception;
         }
 
-        @Nullable
-        public CommandEnvelope getLastErrorEnvelope() {
+        public @Nullable CommandEnvelope getLastErrorEnvelope() {
             return lastErrorEnvelope;
         }
 
-        @Nullable
-        public RuntimeException getLastException() {
+        public @Nullable RuntimeException getLastException() {
             return lastException;
         }
 
         private static ImmutableList<Message> createEventsOnStartProjectCmd() {
-            final ImmutableList.Builder<Message> builder = ImmutableList.builder();
-            builder.add(CmdProjectStarted.getDefaultInstance(), StringValue.getDefaultInstance());
+            ImmutableList.Builder<Message> builder = ImmutableList.<Message>builder()
+                    .add(CmdProjectStarted.getDefaultInstance(),
+                         StringValue.getDefaultInstance());
             return builder.build();
         }
     }

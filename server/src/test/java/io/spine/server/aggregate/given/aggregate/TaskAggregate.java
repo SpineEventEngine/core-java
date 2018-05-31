@@ -39,7 +39,7 @@ import io.spine.test.aggregate.task.AggTask;
 import io.spine.test.aggregate.task.AggTaskId;
 import io.spine.test.aggregate.task.AggTaskVBuilder;
 
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * An aggregate that fires a {@linkplain Pair pair} with an optional upon handling a command,

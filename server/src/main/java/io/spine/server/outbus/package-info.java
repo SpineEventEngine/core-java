@@ -22,8 +22,10 @@
  * This package provides classes for working with the
  * {@linkplain io.spine.server.commandbus.CommandBus bus} output.
  */
-
+@CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.server.outbus;
+
+import com.google.errorprone.annotations.CheckReturnValue;
 
 import javax.annotation.ParametersAreNonnullByDefault;

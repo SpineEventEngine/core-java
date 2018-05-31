@@ -43,8 +43,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class Given {
 
+    /** Prevents instantiation of this utility class. */
     private Given() {
-        // Prevent instantiation of this utility class.
     }
 
     /**
@@ -53,7 +53,7 @@ public class Given {
     public static <E extends AbstractVersionableEntity<I, S>, I, S extends Message>
     EntityBuilder<E, I, S> entityOfClass(Class<E> entityClass) {
         checkNotNull(entityClass);
-        final EntityBuilder<E, I, S> result = new EntityBuilder<>();
+        EntityBuilder<E, I, S> result = new EntityBuilder<>();
         result.setResultClass(entityClass);
         return result;
     }
@@ -62,9 +62,9 @@ public class Given {
      * Creates dynamic builder for building an {@code Aggregate}.
      */
     public static <A extends Aggregate<I, S, ?>, I, S extends Message>
-           AggregateBuilder<A, I, S> aggregateOfClass(Class<A> aggregateClass) {
+    AggregateBuilder<A, I, S> aggregateOfClass(Class<A> aggregateClass) {
         checkNotNull(aggregateClass);
-        final AggregateBuilder<A, I, S> result = new AggregateBuilder<>();
+        AggregateBuilder<A, I, S> result = new AggregateBuilder<>();
         result.setResultClass(aggregateClass);
         return result;
     }
@@ -78,7 +78,7 @@ public class Given {
                    R extends AggregateRoot<I>>
     AggregatePartBuilder<A, I, S, R> aggregatePartOfClass(Class<A> partClass) {
         checkNotNull(partClass);
-        final AggregatePartBuilder<A, I, S, R> result = new AggregatePartBuilder<>();
+        AggregatePartBuilder<A, I, S, R> result = new AggregatePartBuilder<>();
         result.setResultClass(partClass);
         return result;
     }
@@ -87,12 +87,12 @@ public class Given {
      * Creates a builder for a {@code Projection}.
      */
     public static <P extends Projection<I, S, B>,
-            I,
-            S extends Message,
-            B extends ValidatingBuilder<S, ? extends Message.Builder>>
+                   I,
+                   S extends Message,
+                   B extends ValidatingBuilder<S, ? extends Message.Builder>>
     ProjectionBuilder<P, I, S, B> projectionOfClass(Class<P> projectionClass) {
         checkNotNull(projectionClass);
-        final ProjectionBuilder<P, I, S, B> result = new ProjectionBuilder<>();
+        ProjectionBuilder<P, I, S, B> result = new ProjectionBuilder<>();
         result.setResultClass(projectionClass);
         return result;
     }
@@ -100,11 +100,13 @@ public class Given {
     /**
      * Creates a builder for a {@code ProcessManager}.
      */
-    public static
-    <P extends ProcessManager<I, S, B>, I, S extends Message, B extends ValidatingBuilder<S, ?>>
-           ProcessManagerBuilder<P, I, S, B> processManagerOfClass(Class<P> pmClass) {
+    public static <P extends ProcessManager<I, S, B>,
+                   I,
+                   S extends Message,
+                   B extends ValidatingBuilder<S, ?>>
+    ProcessManagerBuilder<P, I, S, B> processManagerOfClass(Class<P> pmClass) {
         checkNotNull(pmClass);
-        final ProcessManagerBuilder<P, I, S, B> result = new ProcessManagerBuilder<>();
+        ProcessManagerBuilder<P, I, S, B> result = new ProcessManagerBuilder<>();
         result.setResultClass(pmClass);
         return result;
     }

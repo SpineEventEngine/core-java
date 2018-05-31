@@ -70,12 +70,12 @@ import io.spine.time.ZoneOffsets;
 import io.spine.type.TypeUrl;
 import io.spine.validate.Validate;
 import io.spine.validate.ValidationError;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 import org.mockito.ArgumentMatchers;
 
-import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -156,9 +156,10 @@ public class StandShould extends TenantAwareTest {
     }
 
     protected static ActorRequestFactory createRequestFactory(@Nullable TenantId tenant) {
-        final ActorRequestFactory.Builder builder = ActorRequestFactory.newBuilder()
-                                                         .setActor(of(newUuid()))
-                                                         .setZoneOffset(ZoneOffsets.UTC);
+        ActorRequestFactory.Builder builder = ActorRequestFactory
+                .newBuilder()
+                .setActor(of(newUuid()))
+                .setZoneOffset(ZoneOffsets.UTC);
         if (tenant != null) {
             builder.setTenantId(tenant);
         }

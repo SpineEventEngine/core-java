@@ -20,7 +20,7 @@
 
 package io.spine.server.entity;
 
-import com.google.protobuf.Descriptors;
+import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.FieldMask;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
@@ -29,7 +29,9 @@ import io.spine.test.aggregate.Task;
 import io.spine.test.aggregate.TaskId;
 import io.spine.test.commandservice.customer.Customer;
 import io.spine.type.TypeUrl;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -43,13 +45,17 @@ import static java.lang.String.format;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
 
 /**
  * @author Dmytro Dashenkov
  */
 public class FieldMasksShould {
 
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
+    
     @Test
     public void have_private_constructor() {
         assertHasPrivateParameterlessCtor(FieldMasks.class);
@@ -57,34 +63,34 @@ public class FieldMasksShould {
 
     @Test
     public void create_masks_for_given_field_tags() {
-        final Descriptors.Descriptor descriptor = Project.getDescriptor();
-        final int[] fieldNumbers = {1, 2, 3};
+        Descriptor descriptor = Project.getDescriptor();
+        int[] fieldNumbers = {1, 2, 3};
         @SuppressWarnings("DuplicateStringLiteralInspection")
-        final String[] fieldNames = {"id", "name", "task"};
-        final FieldMask mask = FieldMasks.maskOf(descriptor, fieldNumbers);
+        String[] fieldNames = {"id", "name", "task"};
+        FieldMask mask = FieldMasks.maskOf(descriptor, fieldNumbers);
 
-        final List<String> paths = mask.getPathsList();
+        List<String> paths = mask.getPathsList();
         assertSize(fieldNumbers.length, paths);
 
         for (int i = 0; i < paths.size(); i++) {
-            final String expectedPath = descriptor.getFullName() + '.' + fieldNames[i];
+            String expectedPath = descriptor.getFullName() + '.' + fieldNames[i];
             assertEquals(expectedPath, paths.get(i));
         }
     }
 
     @Test
     public void retrieve_default_field_mask_if_no_field_tags_requested() {
-        final Descriptors.Descriptor descriptor = Project.getDescriptor();
-        final FieldMask mask = FieldMasks.maskOf(descriptor);
+        Descriptor descriptor = Project.getDescriptor();
+        FieldMask mask = FieldMasks.maskOf(descriptor);
         assertEquals(FieldMask.getDefaultInstance(), mask);
     }
 
     @Test
     public void apply_mask_to_single_message() {
-        final FieldMask fieldMask = Given.fieldMask(Project.ID_FIELD_NUMBER, Project.NAME_FIELD_NUMBER);
-        final Project original = Given.newProject("some-string-id");
+        FieldMask fieldMask = Given.fieldMask(Project.ID_FIELD_NUMBER, Project.NAME_FIELD_NUMBER);
+        Project original = Given.newProject("some-string-id");
 
-        final Project masked = FieldMasks.applyMask(fieldMask, original, Given.TYPE);
+        Project masked = FieldMasks.applyMask(fieldMask, original, Given.TYPE);
 
         assertNotEquals(original, masked);
         assertMatchesMask(masked, fieldMask);
@@ -93,18 +99,18 @@ public class FieldMasksShould {
     @SuppressWarnings({"MethodWithMultipleLoops", "ObjectEquality"})
     @Test
     public void apply_mask_to_message_collections() {
-        final FieldMask fieldMask = Given.fieldMask(Project.STATUS_FIELD_NUMBER,
+        FieldMask fieldMask = Given.fieldMask(Project.STATUS_FIELD_NUMBER,
                                                     Project.TASK_FIELD_NUMBER);
-        final int count = 5;
+        int count = 5;
 
-        final Collection<Project> original = new LinkedList<>();
+        Collection<Project> original = new LinkedList<>();
 
         for (int i = 0; i < count; i++) {
-            final Project project = Given.newProject(format("project-%s", i));
+            Project project = Given.newProject(format("project-%s", i));
             original.add(project);
         }
 
-        final Collection<Project> masked = FieldMasks.applyMask(fieldMask, original, Given.TYPE);
+        Collection<Project> masked = FieldMasks.applyMask(fieldMask, original, Given.TYPE);
 
         assertSize(original.size(), masked);
 
@@ -122,56 +128,56 @@ public class FieldMasksShould {
 
     @Test
     public void apply_only_non_empty_mask_to_single_item() {
-        final FieldMask emptyMask = Given.fieldMask();
+        FieldMask emptyMask = Given.fieldMask();
 
-        final Project origin = Given.newProject("read_whole_message");
-        final Project clone = Project.newBuilder(origin)
+        Project origin = Given.newProject("read_whole_message");
+        Project clone = Project.newBuilder(origin)
                                      .build();
 
-        final Project processed = FieldMasks.applyMask(emptyMask, origin, Given.TYPE);
+        Project processed = FieldMasks.applyMask(emptyMask, origin, Given.TYPE);
 
         // Check object itself was returned
-        assertTrue(processed == origin);
+        assertSame(processed, origin);
 
         // Check object was not changed
-        assertTrue(processed.equals(clone));
+        assertEquals(processed, clone);
     }
 
     @SuppressWarnings({"ObjectEquality", "MethodWithMultipleLoops"})
     @Test
     public void apply_only_non_empty_mask_to_collection() {
-        final FieldMask emptyMask = Given.fieldMask();
+        FieldMask emptyMask = Given.fieldMask();
 
-        final Collection<Project> original = new LinkedList<>();
-        final int count = 5;
+        Collection<Project> original = new LinkedList<>();
+        int count = 5;
 
         for (int i = 0; i < count; i++) {
-            final Project project = Given.newProject(format("test-data--%s", i));
+            Project project = Given.newProject(format("test-data--%s", i));
             original.add(project);
         }
 
-        final Collection<Project> processed = FieldMasks.applyMask(emptyMask, original, Given.TYPE);
+        Collection<Project> processed = FieldMasks.applyMask(emptyMask, original, Given.TYPE);
 
         assertSize(original.size(), processed);
 
         // The argument is not returned
-        assertFalse(original == processed);
+        assertNotSame(original, processed);
 
         // A copy of the argument is returned (Collection type may differ)
-        final Iterator<Project> processedProjects = processed.iterator();
+        Iterator<Project> processedProjects = processed.iterator();
 
         for (Project anOriginal : original) {
-            assertTrue(processedProjects.next()
-                                        .equals(anOriginal));
+            assertEquals(processedProjects.next(), anOriginal);
         }
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void fail_to_mask_message_if_passed_type_does_not_match() {
-        final FieldMask mask = Given.fieldMask(Project.ID_FIELD_NUMBER);
+        FieldMask mask = Given.fieldMask(Project.ID_FIELD_NUMBER);
 
-        final Project origin = Given.newProject("some-string");
+        Project origin = Given.newProject("some-string");
 
+        thrown.expect(IllegalArgumentException.class);
         FieldMasks.applyMask(mask, origin, Given.OTHER_TYPE);
     }
 
@@ -180,27 +186,27 @@ public class FieldMasksShould {
         private static final TypeUrl TYPE = TypeUrl.of(Project.class);
         private static final TypeUrl OTHER_TYPE = TypeUrl.of(Customer.class);
 
-        private static final Descriptors.Descriptor TYPE_DESCRIPTOR = Project.getDescriptor();
+        private static final Descriptor TYPE_DESCRIPTOR = Project.getDescriptor();
 
         private static Project newProject(String id) {
-            final ProjectId projectId = ProjectId.newBuilder()
+            ProjectId projectId = ProjectId.newBuilder()
                                                  .setId(id)
                                                  .build();
-            final Task first = Task.newBuilder()
+            Task first = Task.newBuilder()
                                    .setTaskId(TaskId.newBuilder()
                                                     .setId(1)
                                                     .build())
                                    .setTitle("First Task")
                                    .build();
 
-            final Task second = Task.newBuilder()
+            Task second = Task.newBuilder()
                                     .setTaskId(TaskId.newBuilder()
                                                      .setId(2)
                                                      .build())
                                     .setTitle("Second Task")
                                     .build();
 
-            final Project project = Project.newBuilder()
+            Project project = Project.newBuilder()
                                            .setId(projectId)
                                            .setName(format("Test project : %s", id))
                                            .addTask(first)

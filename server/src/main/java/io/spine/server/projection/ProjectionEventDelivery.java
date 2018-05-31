@@ -45,7 +45,7 @@ public class ProjectionEventDelivery<I, P extends Projection<I, ?, ?>>
                          EventShardedStream.Builder<I>> {
 
     protected ProjectionEventDelivery(ProjectionRepository<I, P, ?> repository) {
-        super(new ProjectionEventConsumer<I, P>(repository));
+        super(new ProjectionEventConsumer<>(repository));
     }
 
     private static class ProjectionEventConsumer<I, P extends Projection<I, ?, ?>>

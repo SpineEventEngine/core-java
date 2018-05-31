@@ -28,8 +28,7 @@ import io.spine.client.TestActorRequestFactory;
 import io.spine.core.ActorContext;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
-
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -50,11 +49,9 @@ public abstract class CommandTest<C extends Message> {
 
     private final ActorRequestFactory requestFactory;
 
-    @Nullable
-    private C commandMessage;
+    private @Nullable C commandMessage;
 
-    @Nullable
-    private Command command;
+    private @Nullable Command command;
 
     /**
      * Creates instance with the passed {@code ActorRequestFactory}.
@@ -76,11 +73,11 @@ public abstract class CommandTest<C extends Message> {
      * @return new command instance with the modified timestamp
      */
     private static Command adjustTimestamp(Command command, Timestamp timestamp) {
-        final CommandContext context = command.getContext();
-        final ActorContext.Builder withTime = context.getActorContext()
-                                                     .toBuilder()
-                                                     .setTimestamp(timestamp);
-        final Command.Builder commandBuilder =
+        CommandContext context = command.getContext();
+        ActorContext.Builder withTime = context.getActorContext()
+                                               .toBuilder()
+                                               .setTimestamp(timestamp);
+        Command.Builder commandBuilder =
                 command.toBuilder()
                        .setContext(context.toBuilder()
                                           .setActorContext(withTime));

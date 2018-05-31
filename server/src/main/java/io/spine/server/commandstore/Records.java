@@ -29,8 +29,8 @@ import io.spine.core.CommandId;
 import io.spine.core.CommandStatus;
 import io.spine.server.commandbus.CommandRecord;
 import io.spine.server.commandbus.ProcessingStatus;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Iterator;
 
 import static io.spine.base.Identifier.EMPTY_ID;

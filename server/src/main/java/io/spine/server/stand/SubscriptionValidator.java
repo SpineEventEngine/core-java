@@ -25,8 +25,7 @@ import io.spine.client.Subscription;
 import io.spine.client.SubscriptionValidationError;
 import io.spine.core.TenantId;
 import io.spine.server.tenant.TenantAwareFunction;
-
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

@@ -34,7 +34,9 @@ import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.test.entity.ProjectId;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.util.Iterator;
 import java.util.List;
@@ -52,6 +54,9 @@ public class RepositoryShould {
     private Repository<ProjectId, ProjectEntity> repository;
     private StorageFactory storageFactory;
     private TenantId tenantId;
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     private static ProjectId createId(String value) {
         return ProjectId.newBuilder()
@@ -78,8 +83,9 @@ public class RepositoryShould {
      * Tests of initialization
      **************************/
 
-    @Test(expected = ModelError.class)
+    @Test
     public void check_for_entity_id_class() {
+        thrown.expect(ModelError.class);
         new RepoForEntityWithUnsupportedId().getIdClass();
     }
 
@@ -88,8 +94,9 @@ public class RepositoryShould {
         assertFalse(new TestRepo().isRegistered());
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void not_allow_getting_BoundedContext_before_registration() {
+        thrown.expect(IllegalStateException.class);
         new TestRepo().getBoundedContext();
     }
 
@@ -97,9 +104,11 @@ public class RepositoryShould {
      * Tests of regular work
      **************************/
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void reject_repeated_storage_initialization() {
         repository.initStorage(storageFactory);
+
+        thrown.expect(IllegalStateException.class);
         repository.initStorage(storageFactory);
     }
 
@@ -108,8 +117,9 @@ public class RepositoryShould {
         assertFalse(repository.isStorageAssigned());
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void throw_ISE_on_getting_unassigned_storage() {
+    @Test
+    public void prohibit_obtaining_unassigned_storage() {
+        thrown.expect(IllegalStateException.class);
         repository.getStorage();
     }
 
@@ -120,14 +130,8 @@ public class RepositoryShould {
         assertNotNull(repository.getStorage());
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void allow_initializing_storage_only_once() {
-        repository.initStorage(storageFactory);
-        repository.initStorage(storageFactory);
-    }
-
     @Test
-    public void close_storage_on_close() throws Exception {
+    public void close_storage_on_close() {
         repository.initStorage(storageFactory);
 
         final RecordStorage<?> storage = (RecordStorage<?>) repository.getStorage();
@@ -138,7 +142,7 @@ public class RepositoryShould {
     }
 
     @Test
-    public void disconnect_from_storage_on_close() throws Exception {
+    public void disconnect_from_storage_on_close() {
         repository.initStorage(storageFactory);
 
         repository.close();
@@ -182,8 +186,7 @@ public class RepositoryShould {
                 new TenantAwareFunction0<Iterator<ProjectEntity>>(tenantId) {
                     @Override
                     public Iterator<ProjectEntity> apply() {
-                        return repository.iterator(
-                                Predicates.<ProjectEntity>alwaysTrue());
+                        return repository.iterator(Predicates.alwaysTrue());
                     }
                 };
         return op.execute();

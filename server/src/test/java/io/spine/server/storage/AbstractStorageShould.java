@@ -21,13 +21,15 @@
 package io.spine.server.storage;
 
 import com.google.common.base.Optional;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.server.entity.Entity;
 import io.spine.test.Tests;
-import io.spine.test.Verify;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -35,6 +37,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import static com.google.common.collect.Sets.newHashSet;
+import static io.spine.test.Verify.assertContainsAll;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -66,6 +69,9 @@ public abstract class AbstractStorageShould<I,
                                             S extends AbstractStorage<I, M, R>> {
 
     private S storage;
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     @Before
     public void setUpAbstractStorageTest() {
@@ -139,25 +145,26 @@ public abstract class AbstractStorageShould<I,
     /** Writes a record, reads it and asserts it is the same as the expected one. */
     @SuppressWarnings("OptionalGetWithoutIsPresent") // We do check.
     protected void writeAndReadRecordTest(I id) {
-        final M expected = writeRecord(id);
+        M expected = writeRecord(id);
 
-        final R readRequest = newReadRequest(id);
-        final Optional<M> actual = storage.read(readRequest);
+        R readRequest = newReadRequest(id);
+        Optional<M> actual = storage.read(readRequest);
 
         assertTrue(actual.isPresent());
         assertEquals(expected, actual.get());
     }
 
+    @CanIgnoreReturnValue
     private M writeRecord(I id) {
-        final M expected = newStorageRecord();
+        M expected = newStorageRecord();
         storage.write(id, expected);
         return expected;
     }
 
     @Test
     public void handle_absence_of_record_with_passed_id() {
-        final R readRequest = newReadRequest(newId());
-        final Optional<M> record = storage.read(readRequest);
+        R readRequest = newReadRequest(newId());
+        Optional<M> record = storage.read(readRequest);
 
         assertResultForMissingId(record);
     }
@@ -167,19 +174,22 @@ public abstract class AbstractStorageShould<I,
         assertFalse(record.isPresent());
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void throw_exception_if_read_by_null_id() {
-        storage.read(Tests.<R>nullRef());
+        thrown.expect(NullPointerException.class);
+        storage.read(Tests.nullRef());
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void throw_exception_if_write_by_null_id() {
-        storage.write(Tests.<I>nullRef(), newStorageRecord());
+        thrown.expect(NullPointerException.class);
+        storage.write(Tests.nullRef(), newStorageRecord());
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void throw_exception_if_write_null_record() {
-        storage.write(newId(), Tests.<M>nullRef());
+        thrown.expect(NullPointerException.class);
+        storage.write(newId(), Tests.nullRef());
     }
 
     @Test
@@ -196,38 +206,38 @@ public abstract class AbstractStorageShould<I,
 
     @Test
     public void rewrite_record_if_write_by_the_same_id() {
-        final I id = newId();
+        I id = newId();
         writeAndReadRecordTest(id);
         writeAndReadRecordTest(id);
     }
 
     @Test
     public void have_index_on_ID() {
-        final Iterator<I> index = storage.index();
+        Iterator<I> index = storage.index();
         assertNotNull(index);
     }
 
     @Test
     public void index_all_IDs() {
-        final int recordCount = 10;
-        final Set<I> ids = new HashSet<>(recordCount);
+        int recordCount = 10;
+        Set<I> ids = new HashSet<>(recordCount);
         for (int i = 0; i < recordCount; i++) {
-            final I id = newId();
+            I id = newId();
             writeRecord(id);
             ids.add(id);
         }
 
-        final Iterator<I> index = storage.index();
-        final Collection<I> indexValues = newHashSet(index);
+        Iterator<I> index = storage.index();
+        Collection<I> indexValues = newHashSet(index);
 
         assertEquals(ids.size(), indexValues.size());
-        Verify.assertContainsAll(indexValues, (I[]) ids.toArray());
+        assertContainsAll(indexValues, (I[]) ids.toArray());
     }
 
     @Test
     public void have_immutable_index() {
         writeRecord(newId());
-        final Iterator<I> index = storage.index();
+        Iterator<I> index = storage.index();
         assertTrue(index.hasNext());
         try {
             index.remove();
@@ -240,10 +250,11 @@ public abstract class AbstractStorageShould<I,
         }
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void assure_it_is_closed() throws Exception {
+    @Test
+    public void assure_it_is_closed() {
         closeAndFailIfException(storage);
 
+        thrown.expect(IllegalStateException.class);
         storage.checkNotClosed();
     }
 
@@ -258,42 +269,45 @@ public abstract class AbstractStorageShould<I,
     }
 
     @Test
-    public void return_false_if_it_not_opened() throws Exception {
+    public void return_false_if_it_not_opened() {
         storage.close();
 
         assertFalse(storage.isOpen());
     }
 
     @Test
-    public void return_true_if_it_is_closed() throws Exception {
+    public void return_true_if_it_is_closed() {
         storage.close();
 
         assertTrue(storage.isClosed());
     }
 
     @Test
-    public void return_false_if_it_not_closed() throws Exception {
+    public void return_false_if_it_not_closed() {
         assertFalse(storage.isClosed());
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void close_itself_and_throw_exception_if_read_after() throws Exception {
+    @Test
+    public void close_itself_and_throw_exception_if_read_after() {
         closeAndFailIfException(storage);
 
-        final R readRequest = newReadRequest(newId());
+        R readRequest = newReadRequest(newId());
+        thrown.expect(IllegalStateException.class);
         storage.read(readRequest);
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void close_itself_and_throw_exception_if_write_after() throws Exception {
+    @Test
+    public void close_itself_and_throw_exception_if_write_after() {
         closeAndFailIfException(storage);
 
+        thrown.expect(IllegalStateException.class);
         storage.write(newId(), newStorageRecord());
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void throw_exception_if_close_twice() throws Exception {
+    @Test
+    public void throw_exception_if_close_twice() {
         storage.close();
+        thrown.expect(IllegalStateException.class);
         storage.close();
     }
 
@@ -301,10 +315,10 @@ public abstract class AbstractStorageShould<I,
                                                                checking via #contains(Object). */)
     @Test
     public void return_unique_ID() {
-        final int checkCount = 10;
-        final Set<I> ids = newHashSet();
+        int checkCount = 10;
+        Set<I> ids = newHashSet();
         for (int i = 0; i < checkCount; i++) {
-            final I newId = newId();
+            I newId = newId();
             if (ids.contains(newId)) {
                 fail("AbstractStorageShould.newId() should return unique IDs.");
             }

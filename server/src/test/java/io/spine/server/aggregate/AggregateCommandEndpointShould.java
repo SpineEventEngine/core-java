@@ -78,25 +78,27 @@ public class AggregateCommandEndpointShould {
 
     @Test
     public void post_events_on_command_dispatching() {
-        final CommandEnvelope cmd = CommandEnvelope.of(createProject(projectId));
+        CommandEnvelope cmd = CommandEnvelope.of(createProject(projectId));
 
-        repository.dispatch(cmd);
+        ProjectId id = repository.dispatch(cmd);
+        assertEquals(projectId, id);
 
-        final AggProjectCreated msg = subscriber.remembered;
+        AggProjectCreated msg = subscriber.remembered;
         assertEquals(projectId, msg.getProjectId());
     }
 
     @Test
     public void store_aggregate_on_command_dispatching() {
-        final CommandEnvelope cmd = CommandEnvelope.of(createProject(projectId));
-        final AggCreateProject msg = (AggCreateProject) cmd.getMessage();
+        CommandEnvelope cmd = CommandEnvelope.of(createProject(projectId));
+        AggCreateProject msg = (AggCreateProject) cmd.getMessage();
 
-        repository.dispatch(cmd);
+        ProjectId id = repository.dispatch(cmd);
+        assertEquals(projectId, id);
 
-        final Optional<ProjectAggregate> optional = repository.find(projectId);
+        Optional<ProjectAggregate> optional = repository.find(projectId);
         assertTrue(optional.isPresent());
 
-        final ProjectAggregate aggregate = optional.get();
+        ProjectAggregate aggregate = optional.get();
         assertEquals(projectId, aggregate.getId());
 
         assertEquals(msg.getName(), aggregate.getState()
@@ -119,8 +121,10 @@ public class AggregateCommandEndpointShould {
      * Utility methods.
      ****************************/
 
+    @SuppressWarnings("CheckReturnValue")
+        // ignore ID of the aggregate returned by the repository
     private void assertDispatches(Command cmd) {
-        final CommandEnvelope envelope = CommandEnvelope.of(cmd);
+        CommandEnvelope envelope = CommandEnvelope.of(cmd);
         repository.dispatch(envelope);
         ProjectAggregate.assertHandled(cmd);
     }

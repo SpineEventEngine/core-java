@@ -27,7 +27,8 @@ import io.spine.core.RejectionContext;
 import io.spine.core.RejectionEnvelope;
 import io.spine.server.model.given.Given;
 import io.spine.server.rejection.given.FaultySubscriber;
-import io.spine.server.rejection.given.RejectionSubscriberMethodTestEnv;
+import io.spine.server.rejection.given.RejectionSubscriberMethodTestEnv.InvalidNoAnnotation;
+import io.spine.server.rejection.given.RejectionSubscriberMethodTestEnv.InvalidNoParams;
 import io.spine.server.rejection.given.RejectionSubscriberMethodTestEnv.InvalidNotMessage;
 import io.spine.server.rejection.given.RejectionSubscriberMethodTestEnv.InvalidOneNotMsgParam;
 import io.spine.server.rejection.given.RejectionSubscriberMethodTestEnv.InvalidTooManyParams;
@@ -41,7 +42,6 @@ import io.spine.test.reflect.ReflectRejections.InvalidProjectName;
 import io.spine.test.rejection.command.RjUpdateProjectName;
 import org.junit.Test;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import static io.spine.protobuf.AnyPacker.pack;
@@ -67,23 +67,25 @@ public class RejectionSubscriberMethodShould {
                 .testAllPublicStaticMethods(RejectionSubscriberMethod.class);
     }
 
+    @SuppressWarnings("CheckReturnValue") // can ignore the result of invoke() in this test
     @Test
-    public void invoke_subscriber_method() throws InvocationTargetException {
-        final ValidThreeParams subscriberObject = new ValidThreeParams();
-        final RejectionSubscriberMethod method =
+    public void invoke_subscriber_method() {
+        ValidThreeParams subscriberObject = new ValidThreeParams();
+        RejectionSubscriberMethod method =
                 new RejectionSubscriberMethod(subscriberObject.getMethod());
-        final InvalidProjectName rejectionMessage = Given.RejectionMessage.invalidProjectName();
+        InvalidProjectName rejectionMessage = Given.RejectionMessage.invalidProjectName();
 
-        final RejectionContext.Builder builder = RejectionContext.newBuilder();
-        final CommandContext commandContext =
-                CommandContext.newBuilder()
-                              .setTargetVersion(1020)
-                              .build();
-        final RjUpdateProjectName commandMessage = RjUpdateProjectName.getDefaultInstance();
-        builder.setCommand(Command.newBuilder()
-                                  .setMessage(pack(commandMessage))
-                                  .setContext(commandContext));
-        final RejectionContext rejectionContext = builder.build();
+        CommandContext commandContext = CommandContext
+                .newBuilder()
+                .setTargetVersion(1020)
+                .build();
+        RjUpdateProjectName commandMessage = RjUpdateProjectName.getDefaultInstance();
+        RejectionContext.Builder builder = RejectionContext
+                .newBuilder()
+                .setCommand(Command.newBuilder()
+                                   .setMessage(pack(commandMessage))
+                                   .setContext(commandContext));
+        RejectionContext rejectionContext = builder.build();
 
         method.invoke(subscriberObject, rejectionMessage, rejectionContext);
 
@@ -92,9 +94,10 @@ public class RejectionSubscriberMethodShould {
         assertEquals(commandContext, subscriberObject.getLastCommandContext());
     }
 
+    @SuppressWarnings("CheckReturnValue") // can ignore the result of dispatch() in this test
     @Test
     public void catch_exceptions_caused_by_subscribers() {
-        final VerifiableSubscriber faultySubscriber = new FaultySubscriber();
+        VerifiableSubscriber faultySubscriber = new FaultySubscriber();
 
         faultySubscriber.dispatch(RejectionEnvelope.of(invalidProjectNameRejection()));
 
@@ -103,77 +106,77 @@ public class RejectionSubscriberMethodShould {
 
     @Test
     public void consider_subscriber_with_two_msg_param_valid() {
-        final Method subscriber = new ValidTwoParams().getMethod();
+        Method subscriber = new ValidTwoParams().getMethod();
 
         assertIsRejectionSubscriber(subscriber, true);
     }
 
     @Test
     public void consider_subscriber_with_both_messages_and_context_params_valid() {
-        final Method subscriber = new ValidThreeParams().getMethod();
+        Method subscriber = new ValidThreeParams().getMethod();
 
         assertIsRejectionSubscriber(subscriber, true);
     }
 
     @Test
     public void consider_not_public_subscriber_valid() {
-        final Method method = new ValidButPrivate().getMethod();
+        Method method = new ValidButPrivate().getMethod();
 
         assertIsRejectionSubscriber(method, true);
     }
 
     @Test
     public void consider_not_annotated_subscriber_invalid() {
-        final Method subscriber = new RejectionSubscriberMethodTestEnv.InvalidNoAnnotation().getMethod();
+        Method subscriber = new InvalidNoAnnotation().getMethod();
 
         assertIsRejectionSubscriber(subscriber, false);
     }
 
     @Test
     public void consider_subscriber_without_params_invalid() {
-        final Method subscriber = new RejectionSubscriberMethodTestEnv.InvalidNoParams().getMethod();
+        Method subscriber = new InvalidNoParams().getMethod();
 
         assertIsRejectionSubscriber(subscriber, false);
     }
 
     @Test
     public void consider_subscriber_with_too_many_params_invalid() {
-        final Method subscriber = new InvalidTooManyParams().getMethod();
+        Method subscriber = new InvalidTooManyParams().getMethod();
 
         assertIsRejectionSubscriber(subscriber, false);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void throw_exception_on_attempt_to_create_instance_for_a_method_with_too_many_params() {
-        final Method illegalMethod = new InvalidTooManyParams().getMethod();
+        Method illegalMethod = new InvalidTooManyParams().getMethod();
 
         new RejectionSubscriberMethod(illegalMethod);
     }
 
     @Test
     public void consider_subscriber_with_one_invalid_param_invalid() {
-        final Method subscriber = new InvalidOneNotMsgParam().getMethod();
+        Method subscriber = new InvalidOneNotMsgParam().getMethod();
 
         assertIsRejectionSubscriber(subscriber, false);
     }
 
     @Test
     public void consider_subscriber_with_first_not_message_param_invalid() {
-        final Method subscriber = new InvalidTwoParamsFirstInvalid().getMethod();
+        Method subscriber = new InvalidTwoParamsFirstInvalid().getMethod();
 
         assertIsRejectionSubscriber(subscriber, false);
     }
 
     @Test
     public void consider_subscriber_with_second_not_context_param_invalid() {
-        final Method subscriber = new InvalidTwoParamsSecondInvalid().getMethod();
+        Method subscriber = new InvalidTwoParamsSecondInvalid().getMethod();
 
         assertIsRejectionSubscriber(subscriber, false);
     }
 
     @Test
     public void consider_not_void_subscriber_invalid() {
-        final Method subscriber = new InvalidNotMessage().getMethod();
+        Method subscriber = new InvalidNotMessage().getMethod();
 
         assertIsRejectionSubscriber(subscriber, false);
     }

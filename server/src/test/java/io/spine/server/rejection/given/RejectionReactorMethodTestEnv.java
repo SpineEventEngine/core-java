@@ -27,7 +27,7 @@ import io.spine.core.React;
 import io.spine.test.reflect.ReflectRejections.InvalidProjectName;
 import io.spine.test.rejection.command.RjUpdateProjectName;
 
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import java.lang.reflect.Method;
 
 /**

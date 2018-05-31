@@ -31,7 +31,9 @@ import com.google.protobuf.UInt32Value;
 import io.spine.base.Time;
 import io.spine.test.TestValues;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.util.Iterator;
 
@@ -52,6 +54,9 @@ public class TripletShould {
                                              .build();
 
     private Triplet<StringValue, BoolValue, UInt32Value> triplet;
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     @Before
     public void setUp() {
@@ -79,18 +84,21 @@ public class TripletShould {
                           .testEquals();
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void prohibit_default_A_value() {
+        thrown.expect(IllegalArgumentException.class);
         Triplet.of(StringValue.getDefaultInstance(), b, c);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void prohibit_default_B_value() {
+        thrown.expect(IllegalArgumentException.class);
         Triplet.of(a, StringValue.getDefaultInstance(), c);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void prohibit_default_C_value() {
+        thrown.expect(IllegalArgumentException.class);
         Triplet.of(a, b, StringValue.getDefaultInstance());
     }
 

@@ -50,6 +50,7 @@ public class CommandRouter extends AbstractCommandRouter<CommandRouter> {
      *
      * @return the event with the source and produced commands
      */
+    @SuppressWarnings("CheckReturnValue") // calling builder
     public CommandRouted routeAll() {
         final CommandRouted.Builder result = CommandRouted.newBuilder();
         result.setSource(getSource());

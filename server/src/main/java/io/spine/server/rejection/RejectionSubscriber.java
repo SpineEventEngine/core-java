@@ -61,7 +61,7 @@ public class RejectionSubscriber implements RejectionDispatcher<String> {
      * the subscriber, or empty set if dispatching failed
      */
     @Override
-    public Set<String> dispatch(final RejectionEnvelope envelope) {
+    public Set<String> dispatch(RejectionEnvelope envelope) {
         final Command originCommand = envelope.getOuterObject()
                                               .getContext()
                                               .getCommand();

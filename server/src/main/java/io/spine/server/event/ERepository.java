@@ -24,7 +24,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Timestamp;
 import io.spine.client.ColumnFilter;
@@ -34,10 +33,12 @@ import io.spine.core.Event;
 import io.spine.core.EventId;
 import io.spine.server.entity.DefaultRecordBasedRepository;
 import io.spine.server.storage.RecordStorage;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Iterators.filter;
@@ -51,7 +52,6 @@ import static io.spine.client.CompositeColumnFilter.CompositeOperator.EITHER;
 import static io.spine.server.event.EEntity.CREATED_TIME_COLUMN;
 import static io.spine.server.event.EEntity.TYPE_COLUMN;
 import static io.spine.server.event.EEntity.comparator;
-import static java.util.Collections.sort;
 
 /**
  * A storage used by {@link EventStore} for keeping event data.
@@ -67,9 +67,8 @@ class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> 
 
     private static final Function<EEntity, Event> GET_EVENT =
             new Function<EEntity, Event>() {
-                @Nullable
                 @Override
-                public Event apply(@Nullable EEntity input) {
+                public @Nullable Event apply(@Nullable EEntity input) {
                     if (input == null) {
                         return null;
                     }
@@ -96,7 +95,7 @@ class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> 
         final Predicate<EEntity> detailedLookupFilter = createEntityFilter(query);
         final Iterator<EEntity> filtered = filter(entities, detailedLookupFilter);
         final List<EEntity> entityList = newArrayList(filtered);
-        sort(entityList, comparator());
+        entityList.sort(comparator());
         final Iterator<Event> result = transform(entityList.iterator(), getEvent());
         return result;
     }
@@ -107,7 +106,9 @@ class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> 
     }
 
     void store(Iterable<Event> events) {
-        final Iterable<EEntity> entities = Iterables.transform(events, EventToEEntity.instance());
+        final Iterable<EEntity> entities = StreamSupport.stream(events.spliterator(), false)
+                                                        .map(EventToEEntity.instance())
+                                                        .collect(Collectors.toList());
         store(newArrayList(entities));
     }
 
@@ -129,6 +130,7 @@ class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> 
      * @param query the source {@link EventStreamQuery} to get the info from
      * @return new instance of {@link EntityFilters} filtering the events
      */
+    @SuppressWarnings("CheckReturnValue") // calling builder
     @VisibleForTesting
     static EntityFilters toEntityFilters(EventStreamQuery query) {
         final EntityFilters.Builder builder = EntityFilters.newBuilder();
@@ -146,6 +148,7 @@ class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> 
         return builder.build();
     }
 
+    @SuppressWarnings("CheckReturnValue") // calling builder
     private static Optional<CompositeColumnFilter> timeFilter(EventStreamQuery query) {
         final CompositeColumnFilter.Builder timeFilter = CompositeColumnFilter.newBuilder()
                                                                               .setOperator(ALL);
@@ -163,14 +166,16 @@ class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> 
         return buildFilter(timeFilter);
     }
 
+    @SuppressWarnings("CheckReturnValue") // calling builder
     private static Optional<CompositeColumnFilter> typeFilter(EventStreamQuery query) {
-        final CompositeColumnFilter.Builder typeFilter = CompositeColumnFilter.newBuilder()
-                                                                              .setOperator(EITHER);
+        CompositeColumnFilter.Builder typeFilter =
+                CompositeColumnFilter.newBuilder()
+                                     .setOperator(EITHER);
         for (EventFilter eventFilter : query.getFilterList()) {
-            final String type = eventFilter.getEventType();
-            if (!type.trim()
-                     .isEmpty()) {
-                final ColumnFilter filter = eq(TYPE_COLUMN, type);
+            String type = eventFilter.getEventType()
+                                     .trim();
+            if (!type.isEmpty()) {
+                ColumnFilter filter = eq(TYPE_COLUMN, type);
                 typeFilter.addFilter(filter);
             }
         }

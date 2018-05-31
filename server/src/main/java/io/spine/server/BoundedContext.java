@@ -50,11 +50,10 @@ import io.spine.server.tenant.TenantIndex;
 import io.spine.server.transport.TransportFactory;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.type.TypeName;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.CheckReturnValue;
-import javax.annotation.Nullable;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -232,7 +231,6 @@ public final class BoundedContext
     /**
      * @return {@code true} if the bounded context serves many organizations
      */
-    @CheckReturnValue
     public boolean isMultitenant() {
         return multitenant;
     }

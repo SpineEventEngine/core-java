@@ -22,7 +22,10 @@
  * This package provides classes for working with command rejections.
  */
 
+@CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.server.rejection;
+
+import com.google.errorprone.annotations.CheckReturnValue;
 
 import javax.annotation.ParametersAreNonnullByDefault;

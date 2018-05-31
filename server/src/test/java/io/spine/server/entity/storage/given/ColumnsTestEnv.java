@@ -29,8 +29,7 @@ import io.spine.server.entity.storage.Column;
 import io.spine.test.entity.Project;
 import io.spine.test.entity.ProjectId;
 import io.spine.testdata.Sample;
-
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * @author Dmytro Grankin
@@ -68,9 +67,8 @@ public class ColumnsTestEnv {
             return 0;
         }
 
-        @Nullable
         @Column
-        public Float getFloatNull() {
+        public @Nullable Float getFloatNull() {
             return null;
         }
 

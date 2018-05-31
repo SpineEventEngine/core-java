@@ -40,8 +40,8 @@ import io.spine.server.tenant.CommandOperation;
 import io.spine.server.tenant.TenantAwareFunction;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.server.tenant.TenantIndex;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Iterator;
 
 import static com.google.common.base.Preconditions.checkNotNull;

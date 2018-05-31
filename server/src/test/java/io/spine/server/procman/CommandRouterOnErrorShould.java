@@ -29,7 +29,9 @@ import io.spine.core.CommandEnvelope;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.util.Set;
 
@@ -39,6 +41,9 @@ import static io.spine.protobuf.TypeConverter.toMessage;
  * @author Alexaneder Yevsyukov
  */
 public class CommandRouterOnErrorShould extends AbstractCommandRouterShould<CommandRouter> {
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     /**
      * Creates a router with mocked {@code CommandBus} which always calls
@@ -52,11 +57,11 @@ public class CommandRouterOnErrorShould extends AbstractCommandRouterShould<Comm
         return new CommandRouter(commandBus, sourceMessage, commandContext);
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void throw_IllegalStateException_when_caught_error_when_posting() {
-        final BoundedContext boundedContext = BoundedContext.newBuilder()
-                                                            .build();
-        final CommandBus commandBus = boundedContext.getCommandBus();
+        BoundedContext boundedContext = BoundedContext.newBuilder()
+                                                      .build();
+        CommandBus commandBus = boundedContext.getCommandBus();
 
         // Register dispatcher for `StringValue` message type.
         // Fails each time of dispatch().
@@ -77,12 +82,13 @@ public class CommandRouterOnErrorShould extends AbstractCommandRouterShould<Comm
             }
         });
 
-        final StringValue sourceMessage = toMessage(getClass().getSimpleName());
-        final CommandContext sourceContext = getRequestFactory().createCommandContext();
+        StringValue sourceMessage = toMessage(getClass().getSimpleName());
+        CommandContext sourceContext = getRequestFactory().createCommandContext();
 
-        final CommandRouter router = createRouter(commandBus, sourceMessage, sourceContext);
+        CommandRouter router = createRouter(commandBus, sourceMessage, sourceContext);
         router.addAll(getMessages());
 
+        thrown.expect(IllegalStateException.class);
         router.routeAll();
     }
 }

@@ -24,7 +24,9 @@ import com.google.common.base.Predicate;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Timestamp;
 import io.spine.core.given.GivenEvent;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.EventPredicates.isAfter;
@@ -40,6 +42,9 @@ import static org.junit.Assert.assertTrue;
  * @author Alexander Yevsyukov
  */
 public class EventPredicatesShould {
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     @Test
     public void have_private_utility_ctor() {
@@ -83,7 +88,7 @@ public class EventPredicatesShould {
 
     @Test
     public void verify_if_an_event_is_before_another() {
-        final Predicate<Event> predicate = isBefore(minutesAgo(100));
+        Predicate<Event> predicate = isBefore(minutesAgo(100));
         assertFalse(predicate.apply(GivenEvent.occurredMinutesAgo(20)));
         assertTrue(predicate.apply(GivenEvent.occurredMinutesAgo(360)));
     }
@@ -93,14 +98,16 @@ public class EventPredicatesShould {
         assertFalse(isBetween(secondsAgo(5), secondsAgo(1)).apply(null));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void check_that_range_start_is_before_end() {
+        thrown.expect(IllegalArgumentException.class);
         isBetween(minutesAgo(2), minutesAgo(10));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void do_not_accept_zero_length_time_range() {
-        final Timestamp timestamp = minutesAgo(5);
+        Timestamp timestamp = minutesAgo(5);
+        thrown.expect(IllegalArgumentException.class);
         isBetween(timestamp, timestamp);
     }
 
@@ -108,10 +115,8 @@ public class EventPredicatesShould {
     public void verify_if_an_event_is_within_time_range() {
         final Event event = GivenEvent.occurredMinutesAgo(5);
 
-        assertTrue(isBetween(minutesAgo(10), minutesAgo(1))
-                           .apply(event));
+        assertTrue(isBetween(minutesAgo(10), minutesAgo(1)).apply(event));
 
-        assertFalse(isBetween(minutesAgo(2), minutesAgo(1))
-                            .apply(event));
+        assertFalse(isBetween(minutesAgo(2), minutesAgo(1)).apply(event));
     }
 }

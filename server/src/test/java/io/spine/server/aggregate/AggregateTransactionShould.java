@@ -36,11 +36,11 @@ import io.spine.test.aggregate.command.AggCreateProject;
 import io.spine.test.aggregate.event.AggProjectCreated;
 import io.spine.test.aggregate.event.AggTaskAdded;
 import io.spine.validate.ConstraintViolation;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.List;
 
-import static com.google.common.collect.Lists.newLinkedList;
+import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.aggregate.given.Given.EventMessage.projectCreated;
 import static org.junit.Assert.assertTrue;
@@ -142,7 +142,7 @@ public class AggregateTransactionShould
     static class TestAggregate
             extends Aggregate<ProjectId, Project, PatchedProjectBuilder> {
 
-        private final List<Message> receivedEvents = newLinkedList();
+        private final List<Message> receivedEvents = newArrayList();
         private final List<ConstraintViolation> violations;
 
         private TestAggregate(ProjectId id) {
@@ -170,10 +170,11 @@ public class AggregateTransactionShould
         @Apply
         void event(AggProjectCreated event) {
             receivedEvents.add(event);
-            final Project newState = Project.newBuilder(getState())
-                                            .setId(event.getProjectId())
-                                            .setName(event.getName())
-                                            .build();
+            Project newState = Project
+                    .newBuilder(getState())
+                    .setId(event.getProjectId())
+                    .setName(event.getName())
+                    .build();
             getBuilder().mergeFrom(newState);
         }
 

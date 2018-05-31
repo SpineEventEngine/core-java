@@ -21,6 +21,7 @@ package io.spine.server.rejection;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Predicate;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.RejectionContext;
@@ -68,6 +69,7 @@ public class RejectionSubscriberMethod extends RejectionHandlerMethod {
      * @param context
      *        the context of the rejection
      */
+    @CanIgnoreReturnValue
     @Override
     public Object invoke(Object target, Message rejectionMessage, RejectionContext context) {
         ensureExternalMatch(this, context.getExternal());

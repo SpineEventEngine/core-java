@@ -34,7 +34,9 @@ import io.spine.test.entity.SubscribableAggregate;
 import io.spine.type.TypeName;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.util.List;
 import java.util.Set;
@@ -54,6 +56,9 @@ public class VisibilityGuardShould {
     private VisibilityGuard guard;
     private List<Repository> repositories;
     private BoundedContext boundedContext;
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     @Before
     public void setUp() {
@@ -94,15 +99,15 @@ public class VisibilityGuardShould {
 
     @Test
     public void obtain_repos_by_visibility() {
-        final Set<TypeName> full = guard.getEntityTypes(Visibility.FULL);
+        Set<TypeName> full = guard.getEntityTypes(Visibility.FULL);
         assertEquals(1, full.size());
         assertTrue(full.contains(TypeName.of(FullAccessAggregate.class)));
 
-        final Set<TypeName> subscribable = guard.getEntityTypes(Visibility.SUBSCRIBE);
+        Set<TypeName> subscribable = guard.getEntityTypes(Visibility.SUBSCRIBE);
         assertEquals(1, subscribable.size());
         assertTrue(subscribable.contains(TypeName.of(SubscribableAggregate.class)));
 
-        final Set<TypeName> hidden = guard.getEntityTypes(Visibility.NONE);
+        Set<TypeName> hidden = guard.getEntityTypes(Visibility.NONE);
         assertEquals(1, hidden.size());
         assertTrue(hidden.contains(TypeName.of(HiddenAggregate.class)));
     }
@@ -116,13 +121,15 @@ public class VisibilityGuardShould {
         }
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void do_not_allow_double_registration() {
+        thrown.expect(IllegalStateException.class);
         register(new ExposedRepository());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void reject_unregistered_state_class() {
+        thrown.expect(IllegalArgumentException.class);
         guard.getRepository(Empty.class);
     }
 

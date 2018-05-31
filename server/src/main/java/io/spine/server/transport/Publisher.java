@@ -19,6 +19,7 @@
  */
 package io.spine.server.transport;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import io.spine.core.Ack;
 import io.spine.server.integration.ExternalMessage;
@@ -40,6 +41,7 @@ public interface Publisher extends MessageChannel {
      * @return an acknowledgment of message publishing
      * @see Ack
      */
+    @CanIgnoreReturnValue
     @SuppressWarnings("UnusedReturnValue")      // Return value is planned for future use.
     Ack publish(Any id, ExternalMessage message);
 }

@@ -24,8 +24,7 @@ import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import io.spine.server.tuple.Element.AValue;
 import io.spine.server.tuple.Element.BValue;
-
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Optional.fromNullable;
 import static com.google.common.base.Preconditions.checkNotNull;

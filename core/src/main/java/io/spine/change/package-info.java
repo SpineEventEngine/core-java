@@ -22,7 +22,10 @@
  * This package contains classes and interfaces for working with field value changes.
  */
 
+@CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.change;
+
+import com.google.errorprone.annotations.CheckReturnValue;
 
 import javax.annotation.ParametersAreNonnullByDefault;

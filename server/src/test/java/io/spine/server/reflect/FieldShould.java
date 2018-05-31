@@ -41,7 +41,9 @@ import io.spine.test.reflect.MessageWithStringValue;
 import io.spine.test.reflect.TestEnum;
 import io.spine.test.reflect.TestEnumValue;
 import io.spine.type.TypeUrl;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -50,6 +52,16 @@ import static org.junit.Assert.assertFalse;
  * @author Alexander Yevsyukov
  */
 public class FieldShould {
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
+
+    private static void assertReturnsFieldClass(Class<?> expectedClass, Descriptor msgDescriptor) {
+        FieldDescriptor field = msgDescriptor.getFields()
+                                             .get(0);
+
+        assertEquals(expectedClass, Field.getFieldClass(field));
+    }
 
     @Test
     public void pass_null_tolerance_check() {
@@ -61,7 +73,7 @@ public class FieldShould {
     @SuppressWarnings("OptionalGetWithoutIsPresent") // OK as the field is present in this type.
     @Test
     public void return_name() {
-        final String fieldName = "seconds";
+        String fieldName = "seconds";
         assertEquals(fieldName, Field.newField(Timestamp.class, fieldName)
                                      .get()
                                      .getName());
@@ -76,22 +88,16 @@ public class FieldShould {
     @SuppressWarnings("OptionalGetWithoutIsPresent") // OK since we know the field is present.
     @Test
     public void return_absent_for_default_Any_field() {
-        final Field messageField = Field.newField(Command.class, "message")
-                                        .get();
-        final Optional<Message> value = messageField.getValue(Command.getDefaultInstance());
+        Field messageField = Field.newField(Command.class, "message")
+                                  .get();
+        Optional<Message> value = messageField.getValue(Command.getDefaultInstance());
         assertFalse(value.isPresent());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void reject_field_filter_without_a_field_name() {
+        thrown.expect(IllegalArgumentException.class);
         Field.forFilter(Timestamp.class, FieldFilter.getDefaultInstance());
-    }
-
-    private static void assertReturnsFieldClass(Class<?> expectedClass, Descriptor msgDescriptor) {
-        final FieldDescriptor field = msgDescriptor.getFields()
-                                                   .get(0);
-
-        assertEquals(expectedClass, Field.getFieldClass(field));
     }
 
     @Test
@@ -141,10 +147,10 @@ public class FieldShould {
 
     @Test
     public void pass_the_null_tolerance_check() {
-        final FieldDescriptor defaultFieldDescriptor = StringValue.getDefaultInstance()
-                                                                  .getDescriptorForType()
-                                                                  .getFields()
-                                                                  .get(0);
+        FieldDescriptor defaultFieldDescriptor = StringValue.getDefaultInstance()
+                                                            .getDescriptorForType()
+                                                            .getFields()
+                                                            .get(0);
         new NullPointerTester()
                 .setDefault(TypeUrl.class, TypeUrl.of(StringValue.class))
                 .setDefault(FieldDescriptor.class, defaultFieldDescriptor)

@@ -26,7 +26,10 @@
  * <p>In-memory storage supports multitenancy. Data for each tenant is stored
  * in a "slice" represented by a data class prefixed with {@code Tenant}.
  */
+@CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.server.storage.memory;
+
+import com.google.errorprone.annotations.CheckReturnValue;
 
 import javax.annotation.ParametersAreNonnullByDefault;

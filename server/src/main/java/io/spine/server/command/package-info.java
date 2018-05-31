@@ -21,7 +21,10 @@
 /**
  * This package provides classes and interfaces related to command processing at the server side.
  */
+@CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.server.command;
+
+import com.google.errorprone.annotations.CheckReturnValue;
 
 import javax.annotation.ParametersAreNonnullByDefault;

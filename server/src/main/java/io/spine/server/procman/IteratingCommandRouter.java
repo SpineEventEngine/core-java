@@ -62,6 +62,7 @@ public class IteratingCommandRouter extends AbstractCommandRouter<IteratingComma
      * </ul>
      * @see CommandRouted#getMessageToFollowList()
      */
+    @SuppressWarnings("CheckReturnValue") // calling builder
     protected CommandRouted routeFirst() {
         final CommandRouted.Builder result = CommandRouted.newBuilder();
         result.setSource(getSource());

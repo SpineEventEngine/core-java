@@ -44,7 +44,9 @@ import io.spine.server.tenant.TenantAwareTest;
 import io.spine.test.Tests;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.util.Iterator;
 import java.util.List;
@@ -78,6 +80,9 @@ public class StorageShould extends TenantAwareTest {
 
     private static final Error defaultError = Error.getDefaultInstance();
     private static final Rejection DEFAULT_REJECTION = Rejection.getDefaultInstance();
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     private CRepository repository;
 
@@ -264,72 +269,79 @@ public class StorageShould extends TenantAwareTest {
      * Check that exception is thrown if try to pass null to methods.
      **************************************************************/
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void throw_exception_if_try_to_store_null() {
+        thrown.expect(NullPointerException.class);
         repository.store(Tests.<Command>nullRef());
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void throw_exception_if_try_to_set_OK_status_by_null_ID() {
-        repository.setOkStatus(Tests.<CommandId>nullRef());
+        thrown.expect(NullPointerException.class);
+        repository.setOkStatus(Tests.nullRef());
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void throw_exception_if_try_to_set_error_status_by_null_ID() {
+        thrown.expect(NullPointerException.class);
         repository.updateStatus(Tests.<CommandId>nullRef(), defaultError);
     }
 
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_try_to_set_rejection_status_by_null_ID() {
-        repository.updateStatus(Tests.<CommandId>nullRef(), DEFAULT_REJECTION);
+        repository.updateStatus(Tests.nullRef(), DEFAULT_REJECTION);
     }
 
     /*
      * Check that exception is thrown if try to use closed storage.
      **************************************************************/
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void throw_exception_if_try_to_store_cmd_to_closed_storage() {
         repository.close();
+        thrown.expect(IllegalStateException.class);
         repository.store(Given.ACommand.createProject());
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void throw_exception_if_try_to_store_cmd_with_error_to_closed_storage() throws
-                                                                                   Exception {
+    @Test
+    public void throw_exception_if_try_to_store_cmd_with_error_to_closed_storage() {
         repository.close();
+        thrown.expect(IllegalStateException.class);
         repository.store(Given.ACommand.createProject(), newError());
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void throw_exception_if_try_to_store_cmd_with_status_to_closed_storage() throws
-                                                                                    Exception {
+    @Test
+    public void throw_exception_if_try_to_store_cmd_with_status_to_closed_storage() {
         repository.close();
+        thrown.expect(IllegalStateException.class);
         repository.store(Given.ACommand.createProject(), OK);
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void throw_exception_if_try_to_load_commands_by_status_from_closed_storage() throws
-                                                                                        Exception {
+    @Test
+    public void throw_exception_if_try_to_load_commands_by_status_from_closed_storage() {
         repository.close();
+        thrown.expect(IllegalStateException.class);
         repository.iterator(OK);
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void throw_exception_if_try_to_set_OK_status_using_closed_storage() {
         repository.close();
+        thrown.expect(IllegalStateException.class);
         repository.setOkStatus(generateId());
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void throw_exception_if_try_to_set_ERROR_status_using_closed_storage() {
         repository.close();
+        thrown.expect(IllegalStateException.class);
         repository.updateStatus(generateId(), newError());
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void throw_exception_if_try_to_set_REJECTED_status_using_closed_storage() {
         repository.close();
+        thrown.expect(IllegalStateException.class);
         repository.updateStatus(generateId(), newRejection());
     }
 

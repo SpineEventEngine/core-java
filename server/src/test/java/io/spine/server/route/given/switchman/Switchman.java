@@ -49,6 +49,7 @@ public final class Switchman extends Aggregate<String, UInt32Value, UInt32ValueV
                                       .build();
     }
 
+    @SuppressWarnings("CheckReturnValue") // calling builder
     @Apply
     void event(SwitchPositionConfirmed event) {
         getBuilder().setValue(getState().getValue() + 1);

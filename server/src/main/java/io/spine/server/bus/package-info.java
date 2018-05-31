@@ -21,8 +21,10 @@
 /**
  * This package contains classes and interfaces for abstract {@code Bus}.
  */
-
+@CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.server.bus;
+
+import com.google.errorprone.annotations.CheckReturnValue;
 
 import javax.annotation.ParametersAreNonnullByDefault;

@@ -29,7 +29,6 @@ import io.spine.server.entity.Repository;
 import io.spine.server.entity.VersionableEntity;
 import io.spine.type.TypeUrl;
 
-import javax.annotation.CheckReturnValue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -87,7 +86,6 @@ class InMemoryTypeRegistry implements TypeRegistry {
         return result;
     }
 
-    @CheckReturnValue
     @Override
     public ImmutableSet<TypeUrl> getTypes() {
         final ImmutableSet.Builder<TypeUrl> resultBuilder = ImmutableSet.builder();
@@ -98,7 +96,6 @@ class InMemoryTypeRegistry implements TypeRegistry {
         return result;
     }
 
-    @CheckReturnValue
     @Override
     public ImmutableSet<TypeUrl> getAggregateTypes() {
         final ImmutableSet<TypeUrl> result = ImmutableSet.copyOf(knownAggregateTypes);

@@ -27,7 +27,9 @@ import io.spine.server.aggregate.given.AggregatePartTestEnv.WrongAggregatePart;
 import io.spine.server.model.ModelError;
 import io.spine.server.model.ModelTests;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import static io.spine.base.Identifier.newUuid;
 import static org.junit.Assert.assertEquals;
@@ -42,11 +44,14 @@ public class AggregatePartClassShould {
             new AggregatePartClass<>(AnAggregatePart.class);
     private AnAggregateRoot root;
 
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
+
     @Before
     public void setUp() {
         ModelTests.clearModel();
-        final BoundedContext boundedContext = BoundedContext.newBuilder()
-                                                            .build();
+        BoundedContext boundedContext = BoundedContext.newBuilder()
+                                                      .build();
         root = new AnAggregateRoot(boundedContext, newUuid());
     }
 
@@ -55,13 +60,14 @@ public class AggregatePartClassShould {
         assertNotNull(partClass.getConstructor());
     }
 
-    @Test(expected = ModelError.class)
+    @Test
     public void throw_exception_when_aggregate_part_does_not_have_appropriate_constructor() {
+        thrown.expect(ModelError.class);
         new AggregatePartClass<>(WrongAggregatePart.class).getConstructor();
     }
 
     @Test
-    public void create_aggregate_part_entity() throws NoSuchMethodException {
+    public void create_aggregate_part_entity() {
         final AnAggregatePart part = partClass.createEntity(root);
 
         assertNotNull(part);

@@ -33,8 +33,7 @@ import io.spine.core.UserId;
 import io.spine.protobuf.AnyPacker;
 import io.spine.time.ZoneOffset;
 import io.spine.validate.ValidationException;
-
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.base.Time.getCurrentTime;
@@ -72,8 +71,8 @@ public final class CommandFactory {
         checkNotNull(message);
         checkValid(message);
 
-        final CommandContext context = createContext();
-        final Command result = createCommand(message, context);
+        CommandContext context = createContext();
+        Command result = createCommand(message, context);
         return result;
     }
 
@@ -94,8 +93,8 @@ public final class CommandFactory {
         checkNotNull(message);
         checkValid(message);
 
-        final CommandContext context = createContext(targetVersion);
-        final Command result = createCommand(message, context);
+        CommandContext context = createContext(targetVersion);
+        Command result = createCommand(message, context);
         return result;
     }
 
@@ -115,7 +114,7 @@ public final class CommandFactory {
         checkNotNull(context);
         checkValid(message);
 
-        final Command result = createCommand(message, context);
+        Command result = createCommand(message, context);
         return result;
     }
 
@@ -138,9 +137,9 @@ public final class CommandFactory {
         checkNotNull(context);
         checkValid(message);
 
-        final CommandContext newContext = contextBasedOn(context);
+        CommandContext newContext = contextBasedOn(context);
 
-        final Command result = createCommand(message, newContext);
+        Command result = createCommand(message, newContext);
         return result;
     }
 
@@ -157,11 +156,12 @@ public final class CommandFactory {
      * @return a new command
      */
     private static Command createCommand(Message message, CommandContext context) {
-        final Any packed = AnyPacker.pack(message);
-        final Command.Builder result = Command.newBuilder()
-                                              .setId(Commands.generateId())
-                                              .setMessage(packed)
-                                              .setContext(context);
+        Any packed = AnyPacker.pack(message);
+        Command.Builder result = Command
+                .newBuilder()
+                .setId(Commands.generateId())
+                .setMessage(packed)
+                .setContext(context);
         return result.build();
     }
 
@@ -196,7 +196,7 @@ public final class CommandFactory {
     private static CommandContext createContext(@Nullable TenantId tenantId,
                                                 UserId userId,
                                                 ZoneOffset zoneOffset) {
-        final CommandContext.Builder result = newContextBuilder(tenantId, userId, zoneOffset);
+        CommandContext.Builder result = newContextBuilder(tenantId, userId, zoneOffset);
         return result.build();
     }
 
@@ -216,25 +216,28 @@ public final class CommandFactory {
                                         UserId userId,
                                         ZoneOffset zoneOffset,
                                         int targetVersion) {
-        final CommandContext.Builder builder = newContextBuilder(tenantId, userId, zoneOffset);
-        final CommandContext result = builder.setTargetVersion(targetVersion)
+        CommandContext.Builder builder = newContextBuilder(tenantId, userId, zoneOffset);
+        CommandContext result = builder.setTargetVersion(targetVersion)
                                              .build();
         return result;
     }
 
+    @SuppressWarnings("CheckReturnValue") // calling builder
     private static CommandContext.Builder newContextBuilder(@Nullable TenantId tenantId,
                                                             UserId userId,
                                                             ZoneOffset zoneOffset) {
-        final ActorContext.Builder actorContext = ActorContext.newBuilder()
-                                                              .setActor(userId)
-                                                              .setTimestamp(getCurrentTime())
-                                                              .setZoneOffset(zoneOffset);
+        ActorContext.Builder actorContext = ActorContext
+                .newBuilder()
+                .setActor(userId)
+                .setTimestamp(getCurrentTime())
+                .setZoneOffset(zoneOffset);
         if (tenantId != null) {
             actorContext.setTenantId(tenantId);
         }
 
-        final CommandContext.Builder result = CommandContext.newBuilder()
-                                                            .setActorContext(actorContext);
+        CommandContext.Builder result = CommandContext
+                .newBuilder()
+                .setActorContext(actorContext);
         return result;
     }
 
@@ -248,11 +251,13 @@ public final class CommandFactory {
      * @return new {@code CommandContext}
      */
     private static CommandContext contextBasedOn(CommandContext value) {
-        final ActorContext.Builder withCurrentTime = value.getActorContext()
-                                                          .toBuilder()
-                                                          .setTimestamp(getCurrentTime());
-        final CommandContext.Builder result = value.toBuilder()
-                                                   .setActorContext(withCurrentTime);
+        ActorContext.Builder withCurrentTime =
+                value.getActorContext()
+                     .toBuilder()
+                     .setTimestamp(getCurrentTime());
+        CommandContext.Builder result =
+                value.toBuilder()
+                     .setActorContext(withCurrentTime);
         return result.build();
     }
 }

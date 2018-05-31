@@ -28,10 +28,13 @@ import io.spine.client.ActorRequestFactory;
 import io.spine.core.Command;
 import io.spine.core.Commands;
 import io.spine.core.TenantId;
+import io.spine.test.Tests;
 import io.spine.test.TimeTests;
 import io.spine.time.ZoneOffsets;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import static io.spine.core.given.GivenUserId.newUuid;
 import static io.spine.test.TestValues.newUuidValue;
@@ -44,6 +47,9 @@ import static org.junit.Assert.assertFalse;
  */
 public class CommandTestShould {
 
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
+
     private CommandTest<StringValue> commandTest;
 
     /**
@@ -53,12 +59,32 @@ public class CommandTestShould {
      * has correctly working {@link ActorRequestFactory}.
      */
     private static void createAndAssertCommand(CommandTest<StringValue> commandTest) {
-        final StringValue commandMessage = newUuidValue();
-        final Command command = commandTest.createCommand(commandMessage);
+        StringValue commandMessage = newUuidValue();
+        Command command = commandTest.createCommand(commandMessage);
 
         checkNotDefault(command);
         assertEquals(commandMessage, Commands.getMessage(command));
         checkNotDefault(command.getContext());
+    }
+
+    /**
+     * Creates a test instance of {@code ActorRequestFactory}.
+     *
+     * <p>The factory gets:
+     * <ul>
+     *   <li>generated {@code UserId} for the actor.
+     *   <li>UTC zone offset
+     *   <li>{@code TenantId} based on the simple name of the passed class.
+     * </ul>
+     */
+    static ActorRequestFactory newRequestFactory(Class<?> clazz) {
+        return ActorRequestFactory.newBuilder()
+                                  .setActor(newUuid())
+                                  .setZoneOffset(ZoneOffsets.UTC)
+                                  .setTenantId(TenantId.newBuilder()
+                                                       .setValue(clazz.getSimpleName())
+                                                       .build())
+                                  .build();
     }
 
     @Before
@@ -80,82 +106,68 @@ public class CommandTestShould {
 
     @Test
     public void accept_custom_ActorRequestFactory() {
-        final Class<? extends CommandTestShould> clazz = getClass();
-        final CommandTest<StringValue> commandTestWithFactory =
+        Class<? extends CommandTestShould> clazz = getClass();
+        CommandTest<StringValue> commandTestWithFactory =
                 new TestCommandTest(newRequestFactory(clazz));
 
         createAndAssertCommand(commandTestWithFactory);
     }
 
-    /**
-     * Creates a test instance of {@code ActorRequestFactory}.
-     *
-     * <p>The factory gets:
-     * <ul>
-     *     <li>generated {@code UserId} for the actor.
-     *     <li>UTC zone offset
-     *     <li>{@code TenantId} based on the simple name of the passed class.
-     * </ul>
-     */
-    static ActorRequestFactory newRequestFactory(Class<?> clazz) {
-        return ActorRequestFactory.newBuilder()
-                             .setActor(newUuid())
-                             .setZoneOffset(ZoneOffsets.UTC)
-                             .setTenantId(TenantId.newBuilder()
-                                                  .setValue(clazz.getSimpleName())
-                                                  .build())
-                             .build();
-    }
-
     @Test
     public void have_empty_state_before_command_creation() {
-        assertFalse(commandTest.commandMessage().isPresent());
-        assertFalse(commandTest.commandContext().isPresent());
-        assertFalse(commandTest.command().isPresent());
+        assertFalse(commandTest.commandMessage()
+                               .isPresent());
+        assertFalse(commandTest.commandContext()
+                               .isPresent());
+        assertFalse(commandTest.command()
+                               .isPresent());
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent") // This test verifies that Optionals
-                                                     // are initialized.
+    // are initialized.
     @Test
     public void stores_command_after_creation() {
-        final StringValue commandMessage = newUuidValue();
-        final Command command = commandTest.createCommand(commandMessage);
+        StringValue commandMessage = newUuidValue();
+        Command command = commandTest.createCommand(commandMessage);
 
-        assertEquals(commandMessage, commandTest.commandMessage().get());
-        assertEquals(command.getContext(), commandTest.commandContext().get());
-        assertEquals(command, commandTest.command().get());
+        assertEquals(commandMessage, commandTest.commandMessage()
+                                                .get());
+        assertEquals(command.getContext(), commandTest.commandContext()
+                                                      .get());
+        assertEquals(command, commandTest.command()
+                                         .get());
     }
 
     @Test
     public void create_command_with_custom_Timestamp() {
-        final StringValue commandMessage = newUuidValue();
-        final Timestamp timestamp = TimeTests.Past.minutesAgo(5);
-        final Command command = commandTest.createCommand(commandMessage, timestamp);
+        StringValue commandMessage = newUuidValue();
+        Timestamp timestamp = TimeTests.Past.minutesAgo(5);
+        Command command = commandTest.createCommand(commandMessage, timestamp);
 
         assertEquals(timestamp, command.getContext()
                                        .getActorContext()
                                        .getTimestamp());
     }
 
-    @SuppressWarnings("ConstantConditions") // Passing `null` is the purpose of the test.
-    @Test(expected = NullPointerException.class)
+    @Test
     public void do_not_accept_null_command_message_for_different_command() {
-        commandTest.createDifferentCommand(null);
+        thrown.expect(NullPointerException.class);
+        commandTest.createDifferentCommand(Tests.nullRef());
     }
 
     @Test
     public void create_different_command() {
-        final Message anotherCommandMsg = Time.getCurrentTime();
-        final Command anotherCommand = commandTest.createDifferentCommand(anotherCommandMsg);
+        Message anotherCommandMsg = Time.getCurrentTime();
+        Command anotherCommand = commandTest.createDifferentCommand(anotherCommandMsg);
 
         assertEquals(anotherCommandMsg, Commands.getMessage(anotherCommand));
     }
 
     @Test
     public void create_different_command_with_timestamp() {
-        final Message anotherCommandMsg = Time.getCurrentTime();
-        final Timestamp timestamp = TimeTests.Past.minutesAgo(30);
-        final Command anotherCommand =
+        Message anotherCommandMsg = Time.getCurrentTime();
+        Timestamp timestamp = TimeTests.Past.minutesAgo(30);
+        Command anotherCommand =
                 commandTest.createDifferentCommand(anotherCommandMsg, timestamp);
 
         assertEquals(anotherCommandMsg, Commands.getMessage(anotherCommand));
@@ -168,11 +180,12 @@ public class CommandTestShould {
      * The test class for verifying the behaviour of the abstract parent.
      */
     private static class TestCommandTest extends CommandTest<StringValue> {
-        protected TestCommandTest(ActorRequestFactory requestFactory) {
+
+        private TestCommandTest(ActorRequestFactory requestFactory) {
             super(requestFactory);
         }
 
-        protected TestCommandTest() {
+        private TestCommandTest() {
             super();
         }
 

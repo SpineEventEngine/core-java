@@ -21,7 +21,10 @@
 /**
  * Utilities for verification of Spine project model.
  */
+@CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.model.verify;
+
+import com.google.errorprone.annotations.CheckReturnValue;
 
 import javax.annotation.ParametersAreNonnullByDefault;

@@ -21,8 +21,8 @@
 package io.spine.server.model;
 
 import com.google.common.base.Predicate;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 import java.lang.reflect.Method;
 
 import static com.google.common.base.Preconditions.checkNotNull;

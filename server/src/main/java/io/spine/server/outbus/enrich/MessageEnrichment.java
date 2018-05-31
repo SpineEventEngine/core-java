@@ -26,8 +26,8 @@ import com.google.protobuf.Internal;
 import com.google.protobuf.Message;
 import io.spine.core.EventContext;
 import io.spine.server.reflect.Field;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
 

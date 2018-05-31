@@ -50,7 +50,9 @@ import io.spine.test.reflect.ProjectId;
 import io.spine.test.reflect.command.RefCreateProject;
 import io.spine.test.reflect.event.RefProjectCreated;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -72,6 +74,9 @@ import static org.mockito.Mockito.verify;
  */
 public class CommandHandlerMethodShould {
 
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
+
     private static final TestActorRequestFactory requestFactory =
             TestActorRequestFactory.newInstance(CommandHandlerMethodShould.class);
 
@@ -82,10 +87,10 @@ public class CommandHandlerMethodShould {
     }
 
     private static void assertCauseAndId(HandlerMethodFailedException e, Object handlerId) {
-        final Throwable cause = getRootCause(e);
+        Throwable cause = getRootCause(e);
 
         assertTrue(cause instanceof ThrowableMessage);
-        final ThrowableMessage thrown = (ThrowableMessage) cause;
+        ThrowableMessage thrown = (ThrowableMessage) cause;
 
         assertTrue(thrown.producerId()
                          .isPresent());
@@ -110,129 +115,132 @@ public class CommandHandlerMethodShould {
 
     @Test
     public void invoke_handler_method_which_returns_one_message() {
-        final ValidHandlerTwoParams handlerObject = spy(new ValidHandlerTwoParams());
-        final CommandHandlerMethod handler = from(handlerObject.getHandler());
-        final RefCreateProject cmd = createProject();
+        ValidHandlerTwoParams handlerObject = spy(new ValidHandlerTwoParams());
+        CommandHandlerMethod handler = from(handlerObject.getHandler());
+        RefCreateProject cmd = createProject();
 
-        final List<? extends Message> events = handler.invoke(handlerObject, cmd, emptyContext);
+        List<? extends Message> events = handler.invoke(handlerObject, cmd, emptyContext);
 
         verify(handlerObject, times(1))
                 .handleTest(cmd, emptyContext);
         assertEquals(1, events.size());
-        final RefProjectCreated event = (RefProjectCreated) events.get(0);
+        RefProjectCreated event = (RefProjectCreated) events.get(0);
         assertEquals(cmd.getProjectId(), event.getProjectId());
     }
 
     @Test
     public void invoke_handler_method_and_return_message_list() {
-        final ValidHandlerOneParamReturnsList handlerObject =
+        ValidHandlerOneParamReturnsList handlerObject =
                 spy(new ValidHandlerOneParamReturnsList());
-        final CommandHandlerMethod handler = from(handlerObject.getHandler());
-        final RefCreateProject cmd = createProject();
+        CommandHandlerMethod handler = from(handlerObject.getHandler());
+        RefCreateProject cmd = createProject();
 
-        final List<? extends Message> events = handler.invoke(handlerObject, cmd, emptyContext);
+        List<? extends Message> events = handler.invoke(handlerObject, cmd, emptyContext);
 
         verify(handlerObject, times(1)).handleTest(cmd);
         assertEquals(1, events.size());
-        final RefProjectCreated event = (RefProjectCreated) events.get(0);
+        RefProjectCreated event = (RefProjectCreated) events.get(0);
         assertEquals(cmd.getProjectId(), event.getProjectId());
     }
 
     @Test
     public void consider_handler_with_one_msg_param_valid() {
-        final Method handler = new ValidHandlerOneParam().getHandler();
+        Method handler = new ValidHandlerOneParam().getHandler();
 
         assertIsCommandHandler(handler, true);
     }
 
     @Test
     public void consider_handler_with_one_msg_param_which_returns_list_valid() {
-        final Method handler = new ValidHandlerOneParamReturnsList().getHandler();
+        Method handler = new ValidHandlerOneParamReturnsList().getHandler();
 
         assertIsCommandHandler(handler, true);
     }
 
     @Test
     public void consider_handler_with_msg_and_context_params_valid() {
-        final Method handler = new ValidHandlerTwoParams().getHandler();
+        Method handler = new ValidHandlerTwoParams().getHandler();
 
         assertIsCommandHandler(handler, true);
     }
 
     @Test
     public void consider_handler_with_msg_and_context_params_which_returns_list_valid() {
-        final Method handler = new ValidHandlerTwoParamsReturnsList().getHandler();
+        Method handler = new ValidHandlerTwoParamsReturnsList().getHandler();
 
         assertIsCommandHandler(handler, true);
     }
 
     @Test
     public void consider_not_public_handler_valid() {
-        final Method method = new ValidHandlerButPrivate().getHandler();
+        Method method = new ValidHandlerButPrivate().getHandler();
 
         assertIsCommandHandler(method, true);
     }
 
     @Test
     public void consider_not_annotated_handler_invalid() {
-        final Method handler = new InvalidHandlerNoAnnotation().getHandler();
+        Method handler = new InvalidHandlerNoAnnotation().getHandler();
 
         assertIsCommandHandler(handler, false);
     }
 
     @Test
     public void consider_handler_without_params_invalid() {
-        final Method handler = new InvalidHandlerNoParams().getHandler();
+        Method handler = new InvalidHandlerNoParams().getHandler();
 
         assertIsCommandHandler(handler, false);
     }
 
     @Test
     public void consider_handler_with_too_many_params_invalid() {
-        final Method handler = new InvalidHandlerTooManyParams().getHandler();
+        Method handler = new InvalidHandlerTooManyParams().getHandler();
 
         assertIsCommandHandler(handler, false);
     }
 
     @Test
     public void consider_handler_with_one_invalid_param_invalid() {
-        final Method handler = new InvalidHandlerOneNotMsgParam().getHandler();
+        Method handler = new InvalidHandlerOneNotMsgParam().getHandler();
 
         assertIsCommandHandler(handler, false);
     }
 
     @Test
     public void consider_handler_with_first_not_message_param_invalid() {
-        final Method handler = new InvalidHandlerTwoParamsFirstInvalid().getHandler();
+        Method handler = new InvalidHandlerTwoParamsFirstInvalid().getHandler();
 
         assertIsCommandHandler(handler, false);
     }
 
     @Test
     public void consider_handler_with_second_not_context_param_invalid() {
-        final Method handler = new InvalidHandlerTwoParamsSecondInvalid().getHandler();
+        Method handler = new InvalidHandlerTwoParamsSecondInvalid().getHandler();
 
         assertIsCommandHandler(handler, false);
     }
 
     @Test
     public void consider_void_handler_invalid() {
-        final Method handler = new InvalidHandlerReturnsVoid().getHandler();
+        Method handler = new InvalidHandlerReturnsVoid().getHandler();
 
         assertIsCommandHandler(handler, false);
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void throw_ISE_for_not_handled_command_type() {
-        final CommandHandler handler = new ValidHandlerOneParam();
-        final CommandEnvelope cmd = requestFactory.createEnvelope(startProject());
+        CommandHandler handler = new ValidHandlerOneParam();
+        CommandEnvelope cmd = requestFactory.createEnvelope(startProject());
+
+        thrown.expect(IllegalStateException.class);
         handler.dispatch(cmd);
     }
 
+    @SuppressWarnings("CheckReturnValue") // no need as the call to dispatch() throws
     @Test
     public void set_producer_ID_if_command_handler() {
-        final CommandHandler handler = new RejectingHandler();
-        final CommandEnvelope envelope = requestFactory.createEnvelope(createProject());
+        CommandHandler handler = new RejectingHandler();
+        CommandEnvelope envelope = requestFactory.createEnvelope(createProject());
         try {
             handler.dispatch(envelope);
         } catch (HandlerMethodFailedException e) {
@@ -240,12 +248,13 @@ public class CommandHandlerMethodShould {
         }
     }
 
+    @SuppressWarnings("CheckReturnValue") // no need as the call to dispatchCommand() throws
     @Test
     public void set_producer_ID_if_entity() {
-        final RefCreateProject commandMessage = createProject();
-        final Aggregate<ProjectId, ?, ?> entity =
+        RefCreateProject commandMessage = createProject();
+        Aggregate<ProjectId, ?, ?> entity =
                 new RejectingAggregate(commandMessage.getProjectId());
-        final CommandEnvelope cmd = requestFactory.createEnvelope(commandMessage);
+        CommandEnvelope cmd = requestFactory.createEnvelope(commandMessage);
         try {
             AggregateMessageDispatcher.dispatchCommand(entity, cmd);
         } catch (HandlerMethodFailedException e) {

@@ -23,7 +23,9 @@ package io.spine.server.storage;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;
 import static com.google.protobuf.util.Timestamps.add;
@@ -44,10 +46,16 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Dmytro Dashenkov
  */
-@SuppressWarnings({"Duplicates", "ClassWithTooManyMethods"})
-    // 1 - Comparison tests are similar but cannot be simplified to one.
-    // 2 - Many test cases required.
+@SuppressWarnings({
+        "Duplicates",
+        "ClassWithTooManyMethods"
+            /* 1 - Comparison tests are similar but cannot be simplified to one.
+               2 - Many test cases required. */
+})
 public class OperatorEvaluatorShould {
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     @Test
     public void not_accept_nulls() {
@@ -58,9 +66,9 @@ public class OperatorEvaluatorShould {
     @SuppressWarnings("RedundantStringConstructorCall") // We need an equal but not the same object
     @Test
     public void compare_equal_instances() {
-        final String left = "myobject";
-        final Object right = new String(left);
-        final Object third = new String(left);
+        String left = "myobject";
+        Object right = new String(left);
+        Object third = new String(left);
 
         // The checks taken from the java.lang.Object.equals Javadoc
         assertTrue("basic", eval(left, EQUAL, right));
@@ -73,8 +81,8 @@ public class OperatorEvaluatorShould {
 
     @Test
     public void compare_not_equal_instances() {
-        final Object left = "one!";
-        final Object right = "another!";
+        Object left = "one!";
+        Object right = "another!";
 
         assertFalse("direct order check", eval(left, EQUAL, right));
         assertFalse("reverse order check", eval(right, EQUAL, left));
@@ -82,10 +90,10 @@ public class OperatorEvaluatorShould {
 
     @Test
     public void compare_timestamps_by_GT() {
-        final Duration delta = seconds(5);
-        final Timestamp small = getCurrentTime();
-        final Timestamp medium = add(small, delta);
-        final Timestamp big = add(medium, delta);
+        Duration delta = seconds(5);
+        Timestamp small = getCurrentTime();
+        Timestamp medium = add(small, delta);
+        Timestamp big = add(medium, delta);
 
         assertTrue(eval(medium, GREATER_THAN, small));
         assertTrue(eval(big, GREATER_THAN, medium));
@@ -98,10 +106,10 @@ public class OperatorEvaluatorShould {
 
     @Test
     public void compare_timestamps_by_GE() {
-        final Duration delta = seconds(5);
-        final Timestamp small = getCurrentTime();
-        final Timestamp medium = add(small, delta);
-        final Timestamp big = add(medium, delta);
+        Duration delta = seconds(5);
+        Timestamp small = getCurrentTime();
+        Timestamp medium = add(small, delta);
+        Timestamp big = add(medium, delta);
 
         assertTrue(eval(medium, GREATER_OR_EQUAL, small));
         assertTrue(eval(big, GREATER_OR_EQUAL, medium));
@@ -114,10 +122,10 @@ public class OperatorEvaluatorShould {
 
     @Test
     public void compare_timestamps_by_LT() {
-        final Duration delta = seconds(5);
-        final Timestamp small = getCurrentTime();
-        final Timestamp medium = add(small, delta);
-        final Timestamp big = add(medium, delta);
+        Duration delta = seconds(5);
+        Timestamp small = getCurrentTime();
+        Timestamp medium = add(small, delta);
+        Timestamp big = add(medium, delta);
 
         assertTrue(eval(medium, LESS_THAN, big));
         assertTrue(eval(small, LESS_THAN, medium));
@@ -130,10 +138,10 @@ public class OperatorEvaluatorShould {
 
     @Test
     public void compare_timestamps_by_LE() {
-        final Duration delta = seconds(5);
-        final Timestamp small = getCurrentTime();
-        final Timestamp medium = add(small, delta);
-        final Timestamp big = add(medium, delta);
+        Duration delta = seconds(5);
+        Timestamp small = getCurrentTime();
+        Timestamp medium = add(small, delta);
+        Timestamp big = add(medium, delta);
 
         assertTrue(eval(medium, LESS_OR_EQUAL, big));
         assertTrue(eval(small, LESS_OR_EQUAL, medium));
@@ -204,35 +212,39 @@ public class OperatorEvaluatorShould {
         assertLessOrEqual(42.999, 43.0);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void fail_to_compare_unsupported_types_by_GT() {
+        thrown.expect(IllegalArgumentException.class);
         eval(FaultyComparisonType.INSTANCE, GREATER_THAN, FaultyComparisonType.INSTANCE);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void fail_to_compare_unsupported_types_by_GE() {
+        thrown.expect(IllegalArgumentException.class);
         eval(FaultyComparisonType.INSTANCE, GREATER_OR_EQUAL, FaultyComparisonType.INSTANCE);
-
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void fail_to_compare_unsupported_types_by_LT() {
+        thrown.expect(IllegalArgumentException.class);
         eval(FaultyComparisonType.INSTANCE, LESS_THAN, FaultyComparisonType.INSTANCE);
-
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void fail_to_compare_unsupported_types_by_LE() {
+        thrown.expect(IllegalArgumentException.class);
         eval(FaultyComparisonType.INSTANCE, LESS_OR_EQUAL, FaultyComparisonType.INSTANCE);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void fail_to_compare_different_types() {
+        thrown.expect(IllegalArgumentException.class);
         eval("7", GREATER_THAN, 6);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void fail_to_compare_by_an_invalid_operator() {
+        thrown.expect(IllegalArgumentException.class);
         eval("a", CFO_UNDEFINED, "b");
     }
 

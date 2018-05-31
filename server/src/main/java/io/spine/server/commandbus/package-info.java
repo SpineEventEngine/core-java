@@ -22,7 +22,10 @@
  * This package provides classes and interfaces related to
  * {@link io.spine.server.commandbus.CommandBus CommandBus} and its configuration.
  */
+@CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.server.commandbus;
+
+import com.google.errorprone.annotations.CheckReturnValue;
 
 import javax.annotation.ParametersAreNonnullByDefault;
