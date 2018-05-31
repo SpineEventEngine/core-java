@@ -17,34 +17,33 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package io.spine.client;
 
-import io.spine.test.Tests;
+import com.google.common.testing.NullPointerTester;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
- * @author Alexander Yeveyukov
+ * @author Alex Tymchenko
  */
-@DisplayName("Topics utility should")
-class TopicsShould {
+@DisplayName("Targets utility should")
+class TargetsTest {
 
     @Test
     @DisplayName(HAVE_PARAMETERLESS_CTOR)
     void haveUtilityConstructor() {
-        Tests.assertHasPrivateParameterlessCtor(Topics.class);
+        assertHasPrivateParameterlessCtor(Targets.class);
     }
 
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
-        assertFalse(Topics.generateId()
-                          .getValue()
-                          .isEmpty());
+        new NullPointerTester()
+                .testAllPublicStaticMethods(Targets.class);
     }
+
 }

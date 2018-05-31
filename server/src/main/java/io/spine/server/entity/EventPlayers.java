@@ -17,26 +17,39 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.client;
 
-import com.google.common.testing.NullPointerTester;
-import org.junit.Test;
+package io.spine.server.entity;
 
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import io.spine.annotation.Internal;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * @author Alex Tymchenko
+ * The factory of {@link EventPlayer} instances.
+ *
+ * @author Dmytro Dashenkov
  */
-public class SubscriptionsShould {
+@Internal
+public final class EventPlayers {
 
-    @Test
-    public void have_private_constructor() {
-        assertHasPrivateParameterlessCtor(Subscriptions.class);
+    /**
+     * Prevents the utility class instantiation.
+     */
+    private EventPlayers() {
     }
 
-    @Test
-    public void pass_null_tolerance_check() {
-        new NullPointerTester()
-                .testAllPublicStaticMethods(Subscriptions.class);
+    /**
+     * Creates a transactional {@link EventPlayer} for the given
+     * {@linkplain TransactionalEntity entity}.
+     *
+     * <p>It is expected that the given entity is currently in a transaction. If this condition is
+     * not met, an {@code IllegalStateException} is {@linkplain TransactionalEntity#tx() thrown}.
+     *
+     * @param entity the entity to create the player for
+     * @return new instance on {@code EventPlayer}
+     */
+    public static EventPlayer forTransactionOf(TransactionalEntity<?, ?, ?> entity) {
+        checkNotNull(entity);
+        return new TransactionalEventPlayer(entity.tx());
     }
 }

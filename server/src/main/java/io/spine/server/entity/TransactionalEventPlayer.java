@@ -18,33 +18,42 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.client;
+package io.spine.server.entity;
 
-import io.spine.test.Tests;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import io.spine.core.Event;
+import io.spine.core.EventEnvelope;
 
-import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
-import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * @author Alexander Yeveyukov
+ * An {@link EventPlayer} which plays events upon the given {@link Transaction}.
+ *
+ * @author Dmytro Dashenkov
  */
-@DisplayName("Topics utility should")
-class TopicsShould {
+final class TransactionalEventPlayer implements EventPlayer {
 
-    @Test
-    @DisplayName(HAVE_PARAMETERLESS_CTOR)
-    void haveUtilityConstructor() {
-        Tests.assertHasPrivateParameterlessCtor(Topics.class);
+    private final Transaction<?, ?, ?, ?> transaction;
+
+    /**
+     * Creates a new instance of {@code TransactionalEventPlayer}.
+     *
+     * @param transaction the transaction
+     */
+    TransactionalEventPlayer(Transaction<?, ?, ?, ?> transaction) {
+        this.transaction = checkNotNull(transaction);
     }
 
-    @Test
-    @DisplayName(NOT_ACCEPT_NULLS)
-    void passNullToleranceCheck() {
-        assertFalse(Topics.generateId()
-                          .getValue()
-                          .isEmpty());
+    /**
+     * Plays the given events upon the underlying entity transaction.
+     *
+     * @param events {@inheritDoc}
+     */
+    @Override
+    public void play(Iterable<Event> events) {
+        checkNotNull(events);
+        for (Event event : events) {
+            final EventEnvelope eventEnvelope = EventEnvelope.of(event);
+            transaction.apply(eventEnvelope);
+        }
     }
 }

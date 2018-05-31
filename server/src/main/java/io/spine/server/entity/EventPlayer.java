@@ -18,25 +18,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.client;
+package io.spine.server.entity;
 
-import org.junit.Test;
-
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
-import static org.junit.Assert.assertNotEquals;
+import io.spine.annotation.Internal;
+import io.spine.core.Event;
 
 /**
- * @author Alexander Yevsyukov
+ * Plays events upon a certain entity.
+ *
+ * @author Dmytro Dashenkov
  */
-public class ConnectionConstantsShould {
+@Internal
+public interface EventPlayer {
 
-    @Test
-    public void have_utility_ctor() {
-        assertHasPrivateParameterlessCtor(ConnectionConstants.class);
-    }
-
-    @Test
-    public void declare_default_grpc_port() {
-        assertNotEquals(0, ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT);
-    }
+    /**
+     * Plays the given events against the underlying entity.
+     *
+     * <p>Typically, the entity state is changed during this operation.
+     *
+     * @param events the event stream to play
+     */
+    void play(Iterable<Event> events);
 }

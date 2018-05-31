@@ -366,8 +366,8 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
         E activeEntity = repository.create(activeId);
         E archivedEntity = repository.create(archivedId);
         E deletedEntity = repository.create(deletedId);
-        delete((EventPlayingEntity) deletedEntity);
-        archive((EventPlayingEntity) archivedEntity);
+        delete((TransactionalEntity) deletedEntity);
+        archive((TransactionalEntity) archivedEntity);
 
         // Fill the storage
         repository.store(activeEntity);
@@ -392,8 +392,8 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
         E activeEntity = repository.create(activeId);
         E archivedEntity = repository.create(archivedId);
         E deletedEntity = repository.create(deletedId);
-        delete((EventPlayingEntity) deletedEntity);
-        archive((EventPlayingEntity) archivedEntity);
+        delete((TransactionalEntity) deletedEntity);
+        archive((TransactionalEntity) archivedEntity);
 
         // Fill the storage
         repository.store(activeEntity);

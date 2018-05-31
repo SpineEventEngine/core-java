@@ -22,57 +22,62 @@ package io.spine.client;
 import com.google.common.testing.NullPointerTester;
 import io.spine.test.client.TestEntity;
 import io.spine.type.TypeUrl;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
+import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Alex Tymchenko
  */
-public class QueriesShould {
+@DisplayName("Queries utility should")
+class QueriesTest {
 
     private static final String TARGET_ENTITY_TYPE_URL =
             "type.spine.io/spine.test.queries.TestEntity";
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
     @Test
-    public void have_private_constructor() {
+    @DisplayName(HAVE_PARAMETERLESS_CTOR)
+    void haveUtilityConstructor() {
         assertHasPrivateParameterlessCtor(Queries.class);
     }
 
     @Test
-    public void pass_null_tolerance_check() {
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void passNullToleranceCheck() {
         new NullPointerTester()
                 .testAllPublicStaticMethods(Queries.class);
     }
 
     @Test
-    public void return_proper_type_for_known_target() {
-        final Target target = Targets.allOf(TestEntity.class);
-        final Query query = Query.newBuilder()
-                                 .setTarget(target)
-                                 .build();
-        final TypeUrl type = Queries.typeOf(query);
+    @DisplayName("obtain entity type url for known query target type")
+    void returnTypeUrlForKnownType() {
+        Target target = Targets.allOf(TestEntity.class);
+        Query query = Query
+                .newBuilder()
+                .setTarget(target)
+                .build();
+        TypeUrl type = Queries.typeOf(query);
         assertNotNull(type);
         assertEquals(TARGET_ENTITY_TYPE_URL, type.toString());
     }
 
     @Test
-    public void throw_ISE_for_unknown_type() {
-        final Target target = Target.newBuilder()
-                                    .setType("nonexistent/message.type")
-                                    .build();
-        final Query query = Query.newBuilder()
-                                 .setTarget(target)
-                                 .build();
-
-        thrown.expect(IllegalStateException.class);
-        Queries.typeOf(query);
+    @DisplayName("throw IllegalStateException for unknown query target type")
+    void throwErrorForUnknownType() {
+        Target target = Target
+                .newBuilder()
+                .setType("nonexistent/message.type")
+                .build();
+        Query query = Query
+                .newBuilder()
+                .setTarget(target)
+                .build();
+        assertThrows(IllegalStateException.class, () -> Queries.typeOf(query));
     }
 }

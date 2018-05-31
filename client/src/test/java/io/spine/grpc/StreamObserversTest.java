@@ -29,7 +29,9 @@ import io.grpc.stub.StreamObserver;
 import io.spine.base.Error;
 import io.spine.core.Response;
 import io.spine.test.Tests;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 
 import java.util.List;
@@ -37,14 +39,18 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 import static io.grpc.Status.INVALID_ARGUMENT;
+import static io.spine.grpc.StreamObservers.forwardErrorsOnly;
+import static io.spine.grpc.StreamObservers.fromStreamError;
+import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.grpc.StreamObservers.noOpObserver;
+import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -53,30 +59,33 @@ import static org.mockito.Mockito.verify;
 /**
  * @author Alex Tymchenko
  */
-public class StreamObserversShould {
+@DisplayName("StreamObservers utility should")
+class StreamObserversTest {
 
     @Test
-    public void have_utility_ctor() {
+    @DisplayName(HAVE_PARAMETERLESS_CTOR)
+    void haveUtilityConstructor() {
         assertHasPrivateParameterlessCtor(StreamObservers.class);
     }
 
     @Test
-    public void return_non_null_empty_observer() {
+    @DisplayName("provide non-null empty observer")
+    void createEmptyObserver() {
         final StreamObserver<Response> emptyObserver = noOpObserver();
         assertNotNull(emptyObserver);
         // Call methods just to add to coverage.
-        emptyObserver.onNext(Tests.<Response>nullRef());
-        emptyObserver.onError(Tests.<Throwable>nullRef());
+        emptyObserver.onNext(Tests.nullRef());
+        emptyObserver.onError(Tests.nullRef());
         emptyObserver.onCompleted();
     }
 
     @Test
-    public void create_proper_error_forwarding_observer() {
+    @DisplayName("create proper error-forwarding observer")
+    void createErrorForwardingObserver() {
         @SuppressWarnings("unchecked")  // to make the mock creation look simpler.
         final StreamObserver<Object> delegate = mock(StreamObserver.class);
 
-        final StreamObserver<Object> forwardingInstance = StreamObservers.forwardErrorsOnly(
-                delegate);
+        final StreamObserver<Object> forwardingInstance = forwardErrorsOnly(delegate);
 
         forwardingInstance.onNext(new Object());
         forwardingInstance.onCompleted();
@@ -89,8 +98,9 @@ public class StreamObserversShould {
     }
 
     @Test
-    public void create_proper_memoizing_observer() {
-        final MemoizingObserver<Object> observer = StreamObservers.memoizingObserver();
+    @DisplayName("create proper memoizing observer")
+    void createMemoizingObserver() {
+        final MemoizingObserver<Object> observer = memoizingObserver();
 
         checkFirstResponse(observer);
         checkOnNext(observer);
@@ -109,7 +119,8 @@ public class StreamObserversShould {
     }
 
     private static void checkOnNext(MemoizingObserver<Object> observer) {
-        assertTrue(observer.responses().isEmpty());
+        assertTrue(observer.responses()
+                           .isEmpty());
 
         final Object firstResponse = new Object();
         observer.onNext(firstResponse);
@@ -143,46 +154,48 @@ public class StreamObserversShould {
         assertTrue(observer.isCompleted());
     }
 
-    /*
-     * Error extraction tests
-     **************************/
+    @SuppressWarnings("InnerClassMayBeStatic") // JUnit 5 Nested classes cannot to be static.
+    @Nested
+    @DisplayName("when extracting from stream error")
+    class ErrorExtractionTest {
 
-    @Test
-    public void return_Error_extracted_from_StatusRuntimeException_metadata() {
-        final Error expectedError = Error.getDefaultInstance();
-        final Metadata metadata = MetadataConverter.toMetadata(expectedError);
-        final StatusRuntimeException statusRuntimeException =
-                INVALID_ARGUMENT.asRuntimeException(metadata);
+        @Test
+        @DisplayName("return Error extracted from StatusRuntimeException metadata")
+        void processStatusRuntimeException() {
+            final Error expectedError = Error.getDefaultInstance();
+            final Metadata metadata = MetadataConverter.toMetadata(expectedError);
+            final StatusRuntimeException statusRuntimeException =
+                    INVALID_ARGUMENT.asRuntimeException(metadata);
 
-        assertEquals(expectedError, StreamObservers.fromStreamError(statusRuntimeException)
-                                                   .get());
-    }
+            assertEquals(expectedError, fromStreamError(statusRuntimeException).get());
+        }
 
-    @Test
-    public void return_Error_extracted_form_StatusException_metadata() {
-        final Error expectedError = Error.getDefaultInstance();
-        final Metadata metadata = MetadataConverter.toMetadata(expectedError);
-        final StatusException statusException = INVALID_ARGUMENT.asException(metadata);
+        @Test
+        @DisplayName("return Error extracted from StatusException metadata")
+        void processStatusException() {
+            final Error expectedError = Error.getDefaultInstance();
+            final Metadata metadata = MetadataConverter.toMetadata(expectedError);
+            final StatusException statusException = INVALID_ARGUMENT.asException(metadata);
 
-        assertEquals(expectedError, StreamObservers.fromStreamError(statusException)
-                                                   .get());
-    }
+            assertEquals(expectedError, fromStreamError(statusException).get());
+        }
 
-    @Test
-    public void return_absent_if_passed_Throwable_is_not_status_exception() {
-        final String msg = "Neither a StatusException nor a StatusRuntimeException.";
-        final Exception exception = new Exception(msg);
+        @Test
+        @DisplayName("return absent if passed Throwable is not status exception")
+        void processGenericThrowable() {
+            final String msg = "Neither a StatusException nor a StatusRuntimeException.";
+            final Exception exception = new Exception(msg);
 
-        assertFalse(StreamObservers.fromStreamError(exception)
-                                   .isPresent());
-    }
+            assertFalse(fromStreamError(exception).isPresent());
+        }
 
-    @Test
-    public void return_absent_if_there_is_no_error_in_metadata() {
-        final Metadata emptyMetadata = new Metadata();
-        final Throwable statusRuntimeEx = INVALID_ARGUMENT.asRuntimeException(emptyMetadata);
+        @Test
+        @DisplayName("return absent if there is no error in metadata")
+        void processMetadataWithoutError() {
+            final Metadata emptyMetadata = new Metadata();
+            final Throwable statusRuntimeEx = INVALID_ARGUMENT.asRuntimeException(emptyMetadata);
 
-        assertFalse(StreamObservers.fromStreamError(statusRuntimeEx)
-                                   .isPresent());
+            assertFalse(fromStreamError(statusRuntimeEx).isPresent());
+        }
     }
 }

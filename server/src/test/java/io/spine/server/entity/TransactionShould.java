@@ -56,12 +56,12 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 
 /**
  * Base class for testing the {@linkplain Transaction transactions} for different
- * {@linkplain EventPlayingEntity EventPlayingEntity} implementations.
+ * {@linkplain TransactionalEntity TransactionalEntity} implementations.
  *
  * @author Alex Tymchenko
  */
 public abstract class TransactionShould<I,
-        E extends EventPlayingEntity<I, S, B>,
+        E extends TransactionalEntity<I, S, B>,
         S extends Message,
         B extends ValidatingBuilder<S, ? extends Message.Builder>> {
 
