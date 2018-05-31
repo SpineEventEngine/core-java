@@ -23,7 +23,6 @@ import com.google.common.collect.Lists;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
-import io.spine.core.Events;
 import io.spine.core.Version;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.entity.Transaction.Phase;
@@ -42,6 +41,7 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.base.Time.getCurrentTime;
+import static io.spine.core.Events.getMessage;
 import static io.spine.core.Versions.newVersion;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -84,12 +84,15 @@ public abstract class TransactionShould<I,
         return newArrayList(expectedViolation);
     }
 
-    private static boolean checkPhase(Event event, Phase phase, boolean successful) {
-        Message eventMessage = Events.getMessage(event);
-        return eventMessage.equals(phase.getEventMessage())
-                && event.getContext()
-                        .equals(phase.getContext())
-                && phase.isSuccessful() == successful;
+    private static boolean checkPhase(Event event, Phase phase) {
+        Message eventMessage = getMessage(event);
+        boolean equalMessages = eventMessage.equals(phase.getEventMessage());
+        boolean equalContexts = event.getContext()
+                                     .equals(phase.getContext());
+        boolean isSuccessful = phase.isSuccessful();
+        return equalMessages
+                && equalContexts
+                && isSuccessful;
     }
 
     private static Version someVersion() {
@@ -170,7 +173,7 @@ public abstract class TransactionShould<I,
                           .size());
         Phase<I, E, S, B> phase = tx.getPhases()
                                     .get(0);
-        assertTrue(checkPhase(event, phase, true));
+        assertTrue(checkPhase(event, phase));
     }
 
     @Test
@@ -381,7 +384,7 @@ public abstract class TransactionShould<I,
     }
 
     private ArgumentMatcher<Phase<I, E, S, B>> matchesSuccessfulPhaseFor(Event event) {
-        return phase -> checkPhase(event, phase, true);
+        return phase -> checkPhase(event, phase);
     }
 
     private void applyEvent(Transaction<I, E, S, B> tx, Event event) {
