@@ -384,16 +384,3 @@ idea {
 apply from: spineJacocoScript
 
 apply from: publishPlugin
-
-apply plugin: spineGcsPlugin
-
-cleanGCS {
-    final Properties properties = new Properties()
-    final File gcsProperties = project.file("gcs.properties")
-    properties.load(gcsProperties.newDataInputStream())
-
-    authKeyPath = "gcs-auth-key.json"
-    bucketName = properties.getProperty("artifacts.bucket")
-    targetFolder = properties.getProperty("artifacts.folder")
-    threshold = TimeCategory.getDays(10)
-}
