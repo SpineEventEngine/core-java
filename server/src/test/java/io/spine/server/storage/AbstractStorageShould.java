@@ -25,11 +25,9 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.server.entity.Entity;
 import io.spine.test.Tests;
-import org.junit.Rule;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.rules.ExpectedException;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -43,6 +41,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * An abstract base for test suites testing storages.
@@ -69,9 +68,6 @@ public abstract class AbstractStorageShould<I,
                                             S extends AbstractStorage<I, M, R>> {
 
     private S storage;
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
 
     @BeforeEach
     public void setUpAbstractStorageTest() {
@@ -176,20 +172,18 @@ public abstract class AbstractStorageShould<I,
 
     @Test
     public void throw_exception_if_read_by_null_id() {
-        thrown.expect(NullPointerException.class);
-        storage.read(Tests.nullRef());
+        assertThrows(NullPointerException.class, () -> storage.read(Tests.nullRef()));
     }
 
     @Test
     public void throw_exception_if_write_by_null_id() {
-        thrown.expect(NullPointerException.class);
-        storage.write(Tests.nullRef(), newStorageRecord());
+        assertThrows(NullPointerException.class,
+                     () -> storage.write(Tests.nullRef(), newStorageRecord()));
     }
 
     @Test
     public void throw_exception_if_write_null_record() {
-        thrown.expect(NullPointerException.class);
-        storage.write(newId(), Tests.nullRef());
+        assertThrows(NullPointerException.class, () -> storage.write(newId(), Tests.nullRef()));
     }
 
     @Test
@@ -254,8 +248,7 @@ public abstract class AbstractStorageShould<I,
     public void assure_it_is_closed() {
         closeAndFailIfException(storage);
 
-        thrown.expect(IllegalStateException.class);
-        storage.checkNotClosed();
+        assertThrows(IllegalStateException.class, () -> storage.checkNotClosed());
     }
 
     @Test
@@ -292,23 +285,21 @@ public abstract class AbstractStorageShould<I,
         closeAndFailIfException(storage);
 
         R readRequest = newReadRequest(newId());
-        thrown.expect(IllegalStateException.class);
-        storage.read(readRequest);
+        assertThrows(IllegalStateException.class, () -> storage.read(readRequest));
     }
 
     @Test
     public void close_itself_and_throw_exception_if_write_after() {
         closeAndFailIfException(storage);
 
-        thrown.expect(IllegalStateException.class);
-        storage.write(newId(), newStorageRecord());
+        assertThrows(IllegalStateException.class,
+                     () -> storage.write(newId(), newStorageRecord()));
     }
 
     @Test
     public void throw_exception_if_close_twice() {
         storage.close();
-        thrown.expect(IllegalStateException.class);
-        storage.close();
+        assertThrows(IllegalStateException.class, () -> storage.close());
     }
 
     @SuppressWarnings("MismatchedQueryAndUpdateOfCollection"/* Storing of generated objects and

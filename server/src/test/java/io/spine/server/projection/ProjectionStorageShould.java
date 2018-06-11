@@ -52,6 +52,7 @@ import static io.spine.base.Time.getCurrentTime;
 import static io.spine.test.Tests.assertMatchesMask;
 import static io.spine.test.Verify.assertContains;
 import static io.spine.test.Verify.assertSize;
+import static io.spine.test.Verify.assertThrows;
 import static io.spine.testdata.TestEntityStorageRecordFactory.newEntityStorageRecord;
 import static java.lang.String.format;
 import static org.junit.Assert.assertEquals;
@@ -205,8 +206,8 @@ public abstract class ProjectionStorageShould
 
     @Test
     public void throw_exception_if_write_null_event_time() {
-        thrown.expect(NullPointerException.class);
-        storage.writeLastHandledEventTime(Tests.nullRef());
+        assertThrows(NullPointerException.class,
+                     () -> storage.writeLastHandledEventTime(Tests.nullRef()));
     }
 
     @Test

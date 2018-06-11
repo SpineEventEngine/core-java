@@ -41,6 +41,7 @@ import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.ProjectVBuilder;
 import io.spine.testdata.Sample;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -99,6 +100,7 @@ public abstract class AggregateStorageTest
     }
 
     @Override
+    @BeforeEach
     public void setUpAbstractStorageTest() {
         super.setUpAbstractStorageTest();
         storage = getStorage();
