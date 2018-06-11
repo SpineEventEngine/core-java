@@ -159,11 +159,13 @@ class EventApplierMethodTest {
     }
 
     private static void assertIsEventApplier(Method applier) {
-        assertTrue(EventApplierMethod.predicate().apply(applier));
+        assertTrue(EventApplierMethod.predicate()
+                                     .apply(applier));
     }
 
     private static void assertIsNotEventApplier(Method applier) {
-        assertFalse(EventApplierMethod.predicate().apply(applier));
+        assertFalse(EventApplierMethod.predicate()
+                                      .apply(applier));
     }
 
     /*
@@ -222,8 +224,8 @@ class EventApplierMethodTest {
     }
 
     private abstract static class TestEventApplier extends Aggregate<Long,
-                                                                     StringValue,
-                                                                     StringValueVBuilder> {
+            StringValue,
+            StringValueVBuilder> {
 
         protected TestEventApplier() {
             super(0L);
@@ -234,7 +236,8 @@ class EventApplierMethodTest {
         public Method getMethod() {
             final Method[] methods = getClass().getDeclaredMethods();
             for (Method method : methods) {
-                if (method.getName().equals(APPLIER_METHOD_NAME)) {
+                if (method.getName()
+                          .equals(APPLIER_METHOD_NAME)) {
                     method.setAccessible(true);
                     return method;
                 }

@@ -693,9 +693,9 @@ public class AggregateTest {
     @DisplayName("update valid entity state")
     void updateEntityState() {
         User user = User.newBuilder()
-                              .setFirstName("Fname")
-                              .setLastName("Lname")
-                              .build();
+                        .setFirstName("Fname")
+                        .setLastName("Lname")
+                        .build();
         UserAggregate aggregate = aggregateOfClass(UserAggregate.class)
                 .withId(getClass().getName())
                 .withVersion(1)

@@ -27,8 +27,8 @@ import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.ProjectVBuilder;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -101,7 +101,6 @@ public abstract class AggregateStorageVisibilityHandlingTest {
         assertEquals(archived, status.getArchived());
         assertEquals(deleted, status.getDeleted());
     }
-
 
     private static class TestAggregate
             extends Aggregate<ProjectId, Project, ProjectVBuilder> {

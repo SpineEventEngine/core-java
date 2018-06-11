@@ -128,7 +128,7 @@ class AggregateCommandEndpointTest {
      ****************************/
 
     @SuppressWarnings("CheckReturnValue")
-        // ignore ID of the aggregate returned by the repository
+    // ignore ID of the aggregate returned by the repository
     private void assertDispatches(Command cmd) {
         CommandEnvelope envelope = CommandEnvelope.of(cmd);
         repository.dispatch(envelope);

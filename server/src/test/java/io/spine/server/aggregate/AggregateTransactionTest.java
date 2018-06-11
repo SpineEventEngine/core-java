@@ -36,8 +36,8 @@ import io.spine.test.aggregate.command.AggCreateProject;
 import io.spine.test.aggregate.event.AggProjectCreated;
 import io.spine.test.aggregate.event.AggTaskAdded;
 import io.spine.validate.ConstraintViolation;
-import org.junit.jupiter.api.DisplayName;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.junit.jupiter.api.DisplayName;
 
 import java.util.List;
 
@@ -138,7 +138,8 @@ public class AggregateTransactionTest
     protected void breakEntityValidation(
             Aggregate<ProjectId, Project, PatchedProjectBuilder> entity,
             RuntimeException toThrow) {
-        entity.getBuilder().setShouldThrow(toThrow);
+        entity.getBuilder()
+              .setShouldThrow(toThrow);
     }
 
     @SuppressWarnings({"MethodMayBeStatic", "unused"})  // Methods accessed via reflection.
@@ -159,7 +160,7 @@ public class AggregateTransactionTest
 
         @Override
         protected List<ConstraintViolation> checkEntityState(Project newState) {
-            if(violations != null) {
+            if (violations != null) {
                 return ImmutableList.copyOf(violations);
             }
             return super.checkEntityState(newState);

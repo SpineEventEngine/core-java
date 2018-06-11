@@ -64,7 +64,7 @@ class IdempotencyGuardTest {
         repository = new IgTestAggregateRepository();
         boundedContext.register(repository);
     }
-    
+
     @AfterEach
     void tearDown() throws Exception {
         repository.close();
