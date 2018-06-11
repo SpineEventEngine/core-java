@@ -33,7 +33,8 @@ import io.spine.core.TenantId;
  */
 public class EventsTestEnv {
 
-    private EventsTestEnv() { }
+    private EventsTestEnv() {
+    }
 
     public static RejectionContext rejectionContext(TenantId id) {
         final Command command = Command.newBuilder()

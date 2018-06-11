@@ -96,7 +96,7 @@ public class AggregateRepositoryViewTestEnv {
         /**
          * Custom {@code IdCommandFunction} that parses an aggregate ID from {@code StringValue}.
          */
-        private static final CommandRoute<Long,Message> parsingRoute =
+        private static final CommandRoute<Long, Message> parsingRoute =
                 new CommandRoute<Long, Message>() {
 
                     private static final long serialVersionUID = 0L;

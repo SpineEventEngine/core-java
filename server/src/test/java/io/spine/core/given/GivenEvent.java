@@ -26,7 +26,6 @@ import io.spine.core.Enrichment;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventsTest;
-import io.spine.core.Version;
 import io.spine.server.command.TestEventFactory;
 import io.spine.test.Tests;
 
@@ -49,7 +48,7 @@ public class GivenEvent {
 
     public static EventContext context() {
         final Event event = eventFactory.createEvent(Time.getCurrentTime(),
-                                                     Tests.<Version>nullRef());
+                                                     Tests.nullRef());
         return event.getContext();
     }
 

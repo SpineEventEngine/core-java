@@ -19,7 +19,6 @@
  */
 package io.spine.server.aggregate;
 
-import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.Rejection;
@@ -74,7 +73,7 @@ class AggregateMessageDeliveryTest extends AbstractMessageDeliveryShould {
                     @Override
                     protected void postToBus(BoundedContext context, Command command) {
                         context.getCommandBus()
-                               .post(command, StreamObservers.<Ack>noOpObserver());
+                               .post(command, StreamObservers.noOpObserver());
                     }
                 };
 
@@ -100,7 +99,7 @@ class AggregateMessageDeliveryTest extends AbstractMessageDeliveryShould {
                     @Override
                     protected void postToBus(BoundedContext context, Event event) {
                         context.getEventBus()
-                               .post(event, StreamObservers.<Ack>noOpObserver());
+                               .post(event, StreamObservers.noOpObserver());
                     }
                 };
 
@@ -126,7 +125,7 @@ class AggregateMessageDeliveryTest extends AbstractMessageDeliveryShould {
                     @Override
                     protected void postToBus(BoundedContext context, Rejection rejection) {
                         context.getRejectionBus()
-                               .post(rejection, StreamObservers.<Ack>noOpObserver());
+                               .post(rejection, StreamObservers.noOpObserver());
                     }
                 };
 
@@ -152,7 +151,7 @@ class AggregateMessageDeliveryTest extends AbstractMessageDeliveryShould {
                     @Override
                     protected void postToBus(BoundedContext context, Command command) {
                         context.getCommandBus()
-                               .post(command, StreamObservers.<Ack>noOpObserver());
+                               .post(command, StreamObservers.noOpObserver());
                     }
                 };
         dispatcher.dispatchMessagesTo(new TripleShardProjectRepository());
@@ -177,7 +176,7 @@ class AggregateMessageDeliveryTest extends AbstractMessageDeliveryShould {
                     @Override
                     protected void postToBus(BoundedContext context, Event event) {
                         context.getEventBus()
-                               .post(event, StreamObservers.<Ack>noOpObserver());
+                               .post(event, StreamObservers.noOpObserver());
                     }
                 };
 
@@ -203,7 +202,7 @@ class AggregateMessageDeliveryTest extends AbstractMessageDeliveryShould {
                     @Override
                     protected void postToBus(BoundedContext context, Rejection rejection) {
                         context.getRejectionBus()
-                               .post(rejection, StreamObservers.<Ack>noOpObserver());
+                               .post(rejection, StreamObservers.noOpObserver());
                     }
                 };
 

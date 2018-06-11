@@ -23,7 +23,7 @@ package io.spine.server.aggregate.given.aggregate;
 import io.spine.test.aggregate.ProjectId;
 
 /**
- * Test environment repository for {@linkplain io.spine.server.aggregate.IdempotencyGuardShould
+ * Test environment repository for {@linkplain io.spine.server.aggregate.IdempotencyGuardTest
  * IdempotencyGuard tests}.
  *
  * @author Mykhailo Drachuk

@@ -23,7 +23,7 @@ package io.spine.server.storage.memory;
 import com.google.protobuf.Message;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateStorage;
-import io.spine.server.aggregate.AggregateStorageShould;
+import io.spine.server.aggregate.AggregateStorageTest;
 import io.spine.server.entity.Entity;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.validate.ValidatingBuilder;
@@ -31,7 +31,7 @@ import io.spine.validate.ValidatingBuilder;
 /**
  * @author Alexander Litus
  */
-public class InMemoryAggregateStorageShould extends AggregateStorageShould {
+class InMemoryAggregateStorageShould extends AggregateStorageTest {
 
     @Override
     protected AggregateStorage<ProjectId> newStorage(Class<? extends Entity> cls) {

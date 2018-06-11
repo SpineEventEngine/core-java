@@ -25,10 +25,10 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.server.entity.Entity;
 import io.spine.test.Tests;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.ExpectedException;
 
 import java.util.Collection;
@@ -73,12 +73,12 @@ public abstract class AbstractStorageShould<I,
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
-    @Before
+    @BeforeEach
     public void setUpAbstractStorageTest() {
         storage = newStorage(getTestEntityClass());
     }
 
-    @After
+    @AfterEach
     public void tearDownAbstractStorageTest() {
         close(storage);
     }

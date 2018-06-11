@@ -29,8 +29,8 @@ import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.given.AggregateRepositoryViewTestEnv.AggregateWithLifecycle;
 import io.spine.server.aggregate.given.AggregateRepositoryViewTestEnv.RepoOfAggregateWithLifecycle;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 
 import static org.junit.Assert.assertFalse;
@@ -39,7 +39,8 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Alexander Yevsyukov
  */
-public class AggregateRepositoryViewsShould {
+@DisplayName("AggregateRepository views should")
+class AggregateRepositoryViewsTest {
 
     /** The Aggregate ID used in all tests */
     private static final Long id = 100L;
@@ -53,8 +54,8 @@ public class AggregateRepositoryViewsShould {
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType") // It's on purpose for tests.
     private Optional<AggregateWithLifecycle> aggregate;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         boundedContext = BoundedContext.newBuilder()
                                        .build();
         repository = new RepoOfAggregateWithLifecycle();
@@ -78,7 +79,7 @@ public class AggregateRepositoryViewsShould {
 
     @Test
     @DisplayName("find aggregate if no status flags set")
-    public void find_aggregate_if_no_status_flags_set() {
+    void findAggregatesWithNoStatus() {
         aggregate = repository.find(id);
 
         assertTrue(aggregate.isPresent());
@@ -89,7 +90,7 @@ public class AggregateRepositoryViewsShould {
 
     @Test
     @DisplayName("find aggregates with archived status")
-    public void find_aggregates_with_archived_status() {
+    void findArchivedAggregates() {
         postCommand("archive");
 
         aggregate = repository.find(id);
@@ -102,7 +103,7 @@ public class AggregateRepositoryViewsShould {
 
     @Test
     @DisplayName("find aggregates with deleted status")
-    public void find_aggregates_with_deleted_status() {
+    void findDeletedAggregates() {
         postCommand("delete");
 
         aggregate = repository.find(id);

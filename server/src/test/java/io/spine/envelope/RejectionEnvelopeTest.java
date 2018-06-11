@@ -91,7 +91,8 @@ class RejectionEnvelopeTest extends MessageEnvelopeTest<Rejection,
     @Override
     protected Rejection outerObject() {
         final Message commandMessage = Int32Value.getDefaultInstance();
-        final Command command = requestFactory.command().create(commandMessage);
+        final Command command = requestFactory.command()
+                                              .create(commandMessage);
         final Message rejectionMessage = CannotPerformBusinessOperation.newBuilder()
                                                                        .setOperationId(newUuid())
                                                                        .build();

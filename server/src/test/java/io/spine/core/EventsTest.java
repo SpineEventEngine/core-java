@@ -94,7 +94,7 @@ public class EventsTest {
         final StringValue producerId = toMessage(getClass().getSimpleName());
         EventFactory eventFactory = EventFactory.on(cmd, Identifier.pack(producerId));
         event = eventFactory.createEvent(Time.getCurrentTime(),
-                                                     Tests.<Version>nullRef());
+                                         Tests.nullRef());
         context = event.getContext();
     }
 
@@ -122,7 +122,7 @@ public class EventsTest {
     }
 
     @Test
-    @DisplayName("sort given events by time")
+    @DisplayName("sort given events by timestamp")
     void sortEventsByTime() {
         final Event event1 = GivenEvent.occurredMinutesAgo(30);
         final Event event2 = GivenEvent.occurredMinutesAgo(20);
@@ -184,7 +184,7 @@ public class EventsTest {
     @DisplayName("provide stringifier for event id")
     void provideEventIdStringifier() {
         final EventId id = event.getId();
-        
+
         final String str = Stringifiers.toString(id);
         final EventId convertedBack = Stringifiers.fromString(str, EventId.class);
 
@@ -211,7 +211,7 @@ public class EventsTest {
         final CommandEnvelope command = requestFactory.generateEnvelope();
         final StringValue producerId = toMessage(getClass().getSimpleName());
         final EventFactory ef = EventFactory.on(command, Identifier.pack(producerId));
-        final Event event = ef.createEvent(Time.getCurrentTime(), Tests.<Version>nullRef());
+        final Event event = ef.createEvent(Time.getCurrentTime(), Tests.nullRef());
 
         final TypeName typeName = EventEnvelope.of(event)
                                                .getTypeName();
@@ -225,7 +225,7 @@ public class EventsTest {
         final CommandEnvelope command = requestFactory.generateEnvelope();
         final StringValue producerId = toMessage(getClass().getSimpleName());
         final EventFactory ef = EventFactory.on(command, Identifier.pack(producerId));
-        final Event event = ef.createEvent(Time.getCurrentTime(), Tests.<Version>nullRef());
+        final Event event = ef.createEvent(Time.getCurrentTime(), Tests.nullRef());
 
         assertEquals(command.getId(), Events.getRootCommandId(event));
     }
@@ -241,7 +241,7 @@ public class EventsTest {
     @Test
     @DisplayName("throw NPE when getting tenant id of null event")
     void notAcceptNullEvent() {
-        assertThrows(NullPointerException.class, () -> Events.getTenantId(Tests.<Event>nullRef()));
+        assertThrows(NullPointerException.class, () -> Events.getTenantId(Tests.nullRef()));
     }
 
     @Test
@@ -261,7 +261,8 @@ public class EventsTest {
     void getTenantIdFromCommandContext() {
         final TenantId targetTenantId = tenantId();
         final CommandContext commandContext = EventsTestEnv.commandContext(targetTenantId);
-        final EventContext context = contextWithoutOrigin().setCommandContext(commandContext).build();
+        final EventContext context = contextWithoutOrigin().setCommandContext(commandContext)
+                                                           .build();
         final Event event = EventsTestEnv.event(context);
 
         final TenantId tenantId = Events.getTenantId(event);

@@ -37,7 +37,7 @@ import static io.spine.server.aggregate.given.Given.EventMessage.projectStarted;
 
 /**
  * An aggregate class for {@linkplain
- * io.spine.server.aggregate.IdempotencyGuardShould IdempotencyGuard tests}.
+ * io.spine.server.aggregate.IdempotencyGuardTest IdempotencyGuard tests}.
  *
  * @author Mykhailo Drachuk
  */

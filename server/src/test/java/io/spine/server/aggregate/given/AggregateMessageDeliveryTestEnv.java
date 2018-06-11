@@ -59,7 +59,8 @@ import static java.util.Collections.emptyList;
 public class AggregateMessageDeliveryTestEnv {
 
     /** Prevents instantiation of this test environment class. */
-    private AggregateMessageDeliveryTestEnv() {}
+    private AggregateMessageDeliveryTestEnv() {
+    }
 
     public static Command startProject() {
         final ProjectId projectId = projectId();
@@ -110,7 +111,6 @@ public class AggregateMessageDeliveryTestEnv {
     public static Rejection cannotStartProject() {
         final ProjectId projectId = projectId();
 
-
         final AggStartProject cmdMessage = AggStartProject.newBuilder()
                                                           .setProjectId(projectId)
                                                           .build();
@@ -118,7 +118,7 @@ public class AggregateMessageDeliveryTestEnv {
 
         final Rejection result = Rejections.toRejection(
                 new io.spine.test.aggregate.rejection.AggCannotStartArchivedProject(
-                        projectId, Lists.<ProjectId>newArrayList()),
+                        projectId, Lists.newArrayList()),
                 command);
         return result;
     }

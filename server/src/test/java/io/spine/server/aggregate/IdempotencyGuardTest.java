@@ -88,7 +88,7 @@ class IdempotencyGuardTest {
     }
 
     @Test
-    @DisplayName("not throw when the command was handled but the snapshot was made")
+    @DisplayName("not throw when command was handled but snapshot was made")
     void notThrowForCommandHandledAfterSnapshot() {
         repository.setSnapshotTrigger(1);
 
@@ -107,7 +107,7 @@ class IdempotencyGuardTest {
     }
 
     @Test
-    @DisplayName("not throw if the command was not handled")
+    @DisplayName("not throw if command was not handled")
     void notThrowForCommandNotHandled() {
         final TenantId tenantId = newTenantId();
         final ProjectId projectId = newProjectId();

@@ -98,7 +98,8 @@ class RejectionsTest {
     @DisplayName("recognize if given class represents rejection message")
     void filterRejectionClasses() {
         assertTrue(
-                isRejection(io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived.class)
+                isRejection(
+                        io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived.class)
         );
         assertFalse(isRejection(Timestamp.class));
     }

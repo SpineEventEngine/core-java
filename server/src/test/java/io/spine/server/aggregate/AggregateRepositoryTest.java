@@ -326,7 +326,7 @@ public class AggregateRepositoryTest {
 
     @Test
     @DisplayName("expose event classes on which aggregates react")
-    void expose_event_classes_on_which_aggregates_react() {
+    void exposeAggregateEventClasses() {
         Set<EventClass> eventClasses = repository.getEventClasses();
         assertTrue(eventClasses.contains(EventClass.of(AggProjectArchived.class)));
         assertTrue(eventClasses.contains(EventClass.of(AggProjectDeleted.class)));
@@ -334,7 +334,7 @@ public class AggregateRepositoryTest {
 
     @Test
     @DisplayName("route events to aggregates")
-    public void route_events_to_aggregates() {
+    void routeEventsToAggregates() {
         ProjectAggregate parent = givenStoredAggregate();
         ProjectAggregate child = givenStoredAggregate();
 
@@ -368,7 +368,7 @@ public class AggregateRepositoryTest {
 
     @Test
     @DisplayName("log error when event reaction fails")
-    public void log_error_when_event_reaction_fails() {
+    void logErrorWhenEventReactionFails() {
         FailingAggregateRepository repository = new FailingAggregateRepository();
         boundedContext.register(repository);
 
@@ -399,8 +399,8 @@ public class AggregateRepositoryTest {
     }
 
     @Test
-    @DisplayName("not pass command rejection to onError")
-    public void not_pass_command_rejection_to_onError() {
+    @DisplayName("not pass command rejection to `onError`")
+    void notPassCommandRejectionToOnError() {
         FailingAggregateRepository repository = new FailingAggregateRepository();
         boundedContext.register(repository);
 
@@ -419,15 +419,15 @@ public class AggregateRepositoryTest {
     }
 
     @Test
-    @DisplayName("now allow anemic aggregates")
-    public void now_allow_anemic_aggregates() {
+    @DisplayName("not allow anemic aggregates")
+    void notAllowAnemicAggregates() {
         assertThrows(IllegalStateException.class,
                      () -> boundedContext.register(new AnemicAggregateRepository()));
     }
 
     @Test
-    @DisplayName("allow aggregates react on events")
-    public void allow_aggregates_react_on_events() {
+    @DisplayName("allow aggregates to react on events")
+    void allowAggregatesReactOnEvents() {
         ReactingRepository repository = new ReactingRepository();
         boundedContext.register(repository);
 
@@ -471,8 +471,8 @@ public class AggregateRepositoryTest {
      **************************************************************************************/
 
     @Test
-    @DisplayName("allow aggregates react on rejections")
-    public void allow_aggregates_react_on_rejections() {
+    @DisplayName("allow aggregates to react on rejections")
+    void allowAggregatesReactOnRejections() {
         boundedContext.register(new RejectingRepository());
         RejectionReactingRepository repository = new RejectionReactingRepository();
         boundedContext.register(repository);

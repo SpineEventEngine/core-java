@@ -58,7 +58,7 @@ import io.spine.server.entity.storage.Enumerated;
 import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectVBuilder;
 import io.spine.testdata.Sample;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatcher;
 
 import java.util.Collection;
@@ -96,6 +96,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -340,12 +341,13 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
                                       .iterator(), secondRevision);
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void fail_to_write_visibility_to_non_existing_record() {
         I id = newId();
         RecordStorage<I> storage = getStorage();
 
-        storage.writeLifecycleFlags(id, archived());
+        assertThrows(IllegalStateException.class,
+                     () -> storage.writeLifecycleFlags(id, archived()));
     }
 
     @Test

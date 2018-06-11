@@ -113,7 +113,7 @@ class AggregatePartRepositoryLookupTest {
 
     private static class ProjectPart extends AggregatePart<ProjectId,
                                                            Project,
-            ProjectVBuilder,
+                                                           ProjectVBuilder,
                                                            ProjectRoot> {
         private ProjectPart(ProjectRoot root) {
             super(root);
@@ -122,9 +122,9 @@ class AggregatePartRepositoryLookupTest {
         @Assign
         public AggProjectCreated handle(AggCreateProject msg, CommandContext context) {
             return AggProjectCreated.newBuilder()
-                                 .setProjectId(msg.getProjectId())
-                                 .setName(msg.getName())
-                                 .build();
+                                    .setProjectId(msg.getProjectId())
+                                    .setName(msg.getName())
+                                    .build();
         }
 
         @Apply
@@ -164,8 +164,8 @@ class AggregatePartRepositoryLookupTest {
         @Assign
         public AggTaskAdded handle(AggAddTask cmd) {
             return AggTaskAdded.newBuilder()
-                            .setProjectId(cmd.getProjectId())
-                            .build();
+                               .setProjectId(cmd.getProjectId())
+                               .build();
         }
 
         @Apply

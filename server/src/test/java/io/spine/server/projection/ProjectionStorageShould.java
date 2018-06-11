@@ -34,9 +34,9 @@ import io.spine.test.Tests;
 import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectId;
 import io.spine.test.storage.Task;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -115,12 +115,12 @@ public abstract class ProjectionStorageShould
                         .build();
     }
 
-    @Before
+    @BeforeEach
     public void setUpProjectionStorageTest() {
         storage = getStorage();
     }
 
-    @After
+    @AfterEach
     public void tearDownProjectionStorageTest() {
         close(storage);
     }

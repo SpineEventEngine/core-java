@@ -38,7 +38,6 @@ import io.spine.test.aggregate.rejection.Rejections;
 import io.spine.test.aggregate.task.AggTask;
 import io.spine.test.aggregate.task.AggTaskId;
 import io.spine.test.aggregate.task.AggTaskVBuilder;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
