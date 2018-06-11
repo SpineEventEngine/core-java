@@ -23,11 +23,11 @@ package io.spine.server.storage;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Supplier;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.base.Environment;
 import io.spine.core.BoundedContextName;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
-
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalStateException;
@@ -58,15 +58,12 @@ public final class StorageFactorySwitch implements Supplier<StorageFactory> {
     /** The name of the BoundedContext where this switch works. */
     private final BoundedContextName boundedContextName;
 
-    @Nullable
-    private Supplier<StorageFactory> productionSupplier;
+    private @Nullable Supplier<StorageFactory> productionSupplier;
 
-    @Nullable
-    private Supplier<StorageFactory> testsSupplier;
+    private @Nullable Supplier<StorageFactory> testsSupplier;
 
     /** Cached instance of the StorageFactory supplied by one of the suppliers. */
-    @Nullable
-    private StorageFactory storageFactory;
+    private @Nullable StorageFactory storageFactory;
 
     private final boolean multitenant;
 
@@ -90,12 +87,12 @@ public final class StorageFactorySwitch implements Supplier<StorageFactory> {
     /**
      * Initializes the current singleton instance with the suppliers.
      *
-     *
      * @param productionSupplier the supplier for the production mode
      * @param testsSupplier the supplier for the tests mode.
      *                      If {@code null} is passed {@link InMemoryStorageFactory} will be used
      * @return this
      */
+    @CanIgnoreReturnValue
     public StorageFactorySwitch init(Supplier<StorageFactory> productionSupplier,
                                      @Nullable Supplier<StorageFactory> testsSupplier) {
         this.productionSupplier = checkNotNull(productionSupplier);

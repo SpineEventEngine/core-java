@@ -21,8 +21,10 @@
 /**
  * This package contains classes and interfaces for event enrichment.
  */
-
+@CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.server.outbus.enrich;
+
+import com.google.errorprone.annotations.CheckReturnValue;
 
 import javax.annotation.ParametersAreNonnullByDefault;

@@ -144,7 +144,7 @@ public class EventsTest {
         final Comparator<Event> comparator = Events.eventComparator();
         assertTrue(comparator.compare(event1, event2) < 0);
         assertTrue(comparator.compare(event2, event1) > 0);
-        assertTrue(comparator.compare(event1, event1) == 0);
+        assertEquals(0, comparator.compare(event1, event1));
     }
 
     @Test

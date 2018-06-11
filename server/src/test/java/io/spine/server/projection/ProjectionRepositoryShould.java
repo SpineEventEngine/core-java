@@ -20,6 +20,7 @@
 
 package io.spine.server.projection;
 
+import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
@@ -57,10 +58,11 @@ import io.spine.test.projection.event.PrjProjectStarted;
 import io.spine.test.projection.event.PrjTaskAdded;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -79,9 +81,43 @@ import static org.junit.Assert.assertTrue;
 public class ProjectionRepositoryShould
         extends RecordBasedRepositoryShould<TestProjection, ProjectId, Project> {
 
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
+
     private static final Any PRODUCER_ID = Identifier.pack(GivenEventMessage.ENTITY_ID);
 
     private BoundedContext boundedContext;
+
+    private static TestEventFactory newEventFactory(TenantId tenantId, Any producerId) {
+        TestActorRequestFactory requestFactory =
+                TestActorRequestFactory.newInstance(ProjectionRepositoryShould.class, tenantId);
+        return TestEventFactory.newInstance(producerId, requestFactory);
+    }
+
+    private static Event createEvent(TenantId tenantId,
+                                     Message eventMessage,
+                                     Any producerId,
+                                     Timestamp when) {
+        Version version = Versions.increment(Versions.zero());
+        return newEventFactory(tenantId, producerId).createEvent(eventMessage,
+                                                                 version,
+                                                                 when);
+    }
+
+    /**
+     * Simulates updating TenantIndex, which occurs during command processing
+     * in multi-tenant context.
+     */
+    private static void keepTenantIdFromEvent(BoundedContext boundedContext, Event event) {
+        TenantId tenantId = event.getContext()
+                                 .getCommandContext()
+                                 .getActorContext()
+                                 .getTenantId();
+        if (boundedContext.isMultitenant()) {
+            boundedContext.getTenantIndex()
+                          .keep(tenantId);
+        }
+    }
 
     private ProjectionRepository<ProjectId, TestProjection, Project> repository() {
         return (ProjectionRepository<ProjectId, TestProjection, Project>) repository;
@@ -94,22 +130,23 @@ public class ProjectionRepositoryShould
 
     @Override
     protected TestProjection createEntity() {
-        final TestProjection projection = Given.projectionOfClass(TestProjection.class)
-                                               .withId(ProjectId.newBuilder()
-                                                                .setId(newUuid())
-                                                                .build())
-                                               .build();
+        TestProjection projection =
+                Given.projectionOfClass(TestProjection.class)
+                     .withId(ProjectId.newBuilder()
+                                      .setId(newUuid())
+                                      .build())
+                     .build();
         return projection;
     }
 
     @Override
     protected List<TestProjection> createEntities(int count) {
-        final List<TestProjection> projections = new LinkedList<>();
+        List<TestProjection> projections = Lists.newArrayList();
 
         for (int i = 0; i < count; i++) {
-            final TestProjection projection = Given.projectionOfClass(TestProjection.class)
-                                                   .withId(createId(i))
-                                                   .build();
+            TestProjection projection = Given.projectionOfClass(TestProjection.class)
+                                             .withId(createId(i))
+                                             .build();
             projections.add(projection);
         }
 
@@ -126,16 +163,21 @@ public class ProjectionRepositoryShould
     @Override
     @Before
     public void setUp() {
-        boundedContext = BoundedContext.newBuilder()
-                                       .setName(getClass().getSimpleName())
-                                       .setMultitenant(true)
-                                       .build();
+        boundedContext = BoundedContext
+                .newBuilder()
+                .setName(getClass().getSimpleName())
+                .setMultitenant(true)
+                .build();
         super.setUp();
 
         boundedContext.register(repository);
 
         TestProjection.clearMessageDeliveryHistory();
     }
+
+    /*
+     * Tests
+     ************/
 
     /**
      * Closes the BoundedContest and shuts down the gRPC service.
@@ -148,29 +190,9 @@ public class ProjectionRepositoryShould
         boundedContext.close();
     }
 
-    private static TestEventFactory newEventFactory(TenantId tenantId, Any producerId) {
-        final TestActorRequestFactory requestFactory =
-                TestActorRequestFactory.newInstance(ProjectionRepositoryShould.class, tenantId);
-        return TestEventFactory.newInstance(producerId, requestFactory);
-    }
-
-    private static Event createEvent(TenantId tenantId,
-                                     Message eventMessage,
-                                     Any producerId,
-                                     Timestamp when) {
-        final Version version = Versions.increment(Versions.zero());
-        return newEventFactory(tenantId, producerId).createEvent(eventMessage,
-                                                                 version,
-                                                                 when);
-    }
-
-    /*
-     * Tests
-     ************/
-
     @Test
     public void dispatch_event_and_load_projection() {
-        final PrjProjectStarted msg = GivenEventMessage.projectStarted();
+        PrjProjectStarted msg = GivenEventMessage.projectStarted();
 
         // Ensure no instances are present in the repository now.
         assertFalse(repository().loadAll()
@@ -181,15 +203,15 @@ public class ProjectionRepositoryShould
 
         // Post an event message and grab the ID of the projection, which processed it.
         checkDispatchesEvent(msg);
-        final Set<ProjectId> projectIds = TestProjection.whoProcessed(msg);
-        assertTrue(projectIds.size() == 1);
-        final ProjectId receiverId = projectIds.iterator()
-                                               .next();
+        Set<ProjectId> projectIds = TestProjection.whoProcessed(msg);
+        assertEquals(1, projectIds.size());
+        ProjectId receiverId = projectIds.iterator()
+                                         .next();
 
         // Check that the projection item has actually been stored and now can be loaded.
-        final Iterator<TestProjection> allItems = repository().loadAll();
+        Iterator<TestProjection> allItems = repository().loadAll();
         assertTrue(allItems.hasNext());
-        final TestProjection storedProjection = allItems.next();
+        TestProjection storedProjection = allItems.next();
         assertFalse(allItems.hasNext());
 
         // Check that the stored instance has the same ID as the instance that handled the event.
@@ -205,17 +227,17 @@ public class ProjectionRepositoryShould
 
     @Test
     public void dispatch_event_to_archived_projection() {
-        final PrjProjectArchived projectArchived = GivenEventMessage.projectArchived();
+        PrjProjectArchived projectArchived = GivenEventMessage.projectArchived();
         checkDispatchesEvent(projectArchived);
-        final ProjectId projectId = projectArchived.getProjectId();
+        ProjectId projectId = projectArchived.getProjectId();
         TestProjection projection = repository().findOrCreate(projectId);
         assertTrue(projection.isArchived());
 
         // Dispatch an event to the archived projection.
         checkDispatchesEvent(GivenEventMessage.taskAdded());
         projection = repository().findOrCreate(projectId);
-        final List<Task> addedTasks = projection.getState()
-                                                      .getTaskList();
+        List<Task> addedTasks = projection.getState()
+                                          .getTaskList();
         assertFalse(addedTasks.isEmpty());
 
         // Check that the projection was not re-created before dispatching.
@@ -224,62 +246,53 @@ public class ProjectionRepositoryShould
 
     @Test
     public void dispatch_event_to_deleted_projection() {
-        final PrjProjectDeleted projectDeleted = GivenEventMessage.projectDeleted();
+        PrjProjectDeleted projectDeleted = GivenEventMessage.projectDeleted();
         checkDispatchesEvent(projectDeleted);
-        final ProjectId projectId = projectDeleted.getProjectId();
+        ProjectId projectId = projectDeleted.getProjectId();
         TestProjection projection = repository().findOrCreate(projectId);
         assertTrue(projection.isDeleted());
 
         // Dispatch an event to the deleted projection.
         checkDispatchesEvent(GivenEventMessage.taskAdded());
         projection = repository().findOrCreate(projectId);
-        final List<Task> addedTasks = projection.getState()
-                                                      .getTaskList();
+        List<Task> addedTasks = projection.getState()
+                                          .getTaskList();
         assertTrue(projection.isDeleted());
 
         // Check that the projection was not re-created before dispatching.
         assertFalse(addedTasks.isEmpty());
     }
 
+    @SuppressWarnings("CheckReturnValue") // can ignore dispatch() result in this test
+    private void dispatchEvent(Event event) {
+        repository().dispatch(EventEnvelope.of(event));
+    }
+
     private void checkDispatchesEvent(Message eventMessage) {
-        final TestEventFactory eventFactory = newEventFactory(tenantId(), PRODUCER_ID);
-        final Event event = eventFactory.createEvent(eventMessage);
+        TestEventFactory eventFactory = newEventFactory(tenantId(), PRODUCER_ID);
+        Event event = eventFactory.createEvent(eventMessage);
 
         keepTenantIdFromEvent(boundedContext, event);
 
-        repository().dispatch(EventEnvelope.of(event));
+        dispatchEvent(event);
         assertTrue(TestProjection.processed(eventMessage));
-    }
-
-    /**
-     * Simulates updating TenantIndex, which occurs during command processing
-     * in multi-tenant context.
-     */
-    private static void keepTenantIdFromEvent(BoundedContext boundedContext, Event event) {
-        final TenantId tenantId = event.getContext()
-                                       .getCommandContext()
-                                       .getActorContext()
-                                       .getTenantId();
-        if (boundedContext.isMultitenant()) {
-            boundedContext.getTenantIndex()
-                          .keep(tenantId);
-        }
     }
 
     @Test
     public void log_error_if_dispatch_unknown_event() {
-        final StringValue unknownEventMessage = StringValue.getDefaultInstance();
+        StringValue unknownEventMessage = StringValue.getDefaultInstance();
 
-        final Event event = GivenEvent.withMessage(unknownEventMessage);
+        Event event = GivenEvent.withMessage(unknownEventMessage);
 
-        repository().dispatch(EventEnvelope.of(event));
+        dispatchEvent(event);
 
-        TestProjectionRepository testRepo = (TestProjectionRepository)repository();
+        TestProjectionRepository testRepo = (TestProjectionRepository) repository();
 
         assertTrue(testRepo.getLastErrorEnvelope() instanceof EventEnvelope);
         assertEquals(Events.getMessage(event), testRepo.getLastErrorEnvelope()
                                                        .getMessage());
-        assertEquals(event, testRepo.getLastErrorEnvelope().getOuterObject());
+        assertEquals(event, testRepo.getLastErrorEnvelope()
+                                    .getOuterObject());
 
         // It must be "illegal argument type" since projections of this repository
         // do not handle such events.
@@ -288,7 +301,7 @@ public class ProjectionRepositoryShould
 
     @Test
     public void return_event_classes() {
-        final Set<EventClass> eventClasses = repository().getMessageClasses();
+        Set<EventClass> eventClasses = repository().getMessageClasses();
         TestEventClasses.assertContains(eventClasses,
                                         PrjProjectCreated.class,
                                         PrjTaskAdded.class,
@@ -297,32 +310,33 @@ public class ProjectionRepositoryShould
 
     @Test
     public void return_entity_storage() {
-        final RecordStorage<ProjectId> recordStorage = repository().recordStorage();
+        RecordStorage<ProjectId> recordStorage = repository().recordStorage();
         assertNotNull(recordStorage);
     }
 
     @Test
     public void convert_null_timestamp_to_default() {
-        final Timestamp timestamp = getCurrentTime();
+        Timestamp timestamp = getCurrentTime();
         assertEquals(timestamp, ProjectionRepository.nullToDefault(timestamp));
         assertEquals(Timestamp.getDefaultInstance(), ProjectionRepository.nullToDefault(null));
     }
 
+    @SuppressWarnings("CheckReturnValue") // can ignore dispatch() result in this test
     @Test
     public void do_not_create_record_if_entity_is_not_updated() {
-        final NoOpTaskNamesRepository repo = new NoOpTaskNamesRepository();
+        NoOpTaskNamesRepository repo = new NoOpTaskNamesRepository();
         boundedContext.register(repo);
 
         assertFalse(repo.loadAll()
                         .hasNext());
 
-        final Event event = createEvent(tenantId(),
-                                        GivenEventMessage.projectCreated(),
-                                        PRODUCER_ID,
-                                        getCurrentTime());
+        Event event = createEvent(tenantId(),
+                                  GivenEventMessage.projectCreated(),
+                                  PRODUCER_ID,
+                                  getCurrentTime());
         repo.dispatch(EventEnvelope.of(event));
 
-        final Iterator<?> items = repo.loadAll();
+        Iterator<?> items = repo.loadAll();
         assertFalse(items.hasNext());
     }
 
@@ -333,7 +347,7 @@ public class ProjectionRepositoryShould
      */
     @Test
     public void expose_read_and_write_methods_for_last_handled_event_timestamp() {
-        repository().readLastHandledEventTime();
+        assertNotNull(repository().readLastHandledEventTime());
         repository().writeLastHandledEventTime(Time.getCurrentTime());
     }
 
@@ -364,13 +378,16 @@ public class ProjectionRepositoryShould
         assertNotNull(repository().boundedContext());
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void throw_exception_on_attempt_to_register_in_bc_with_no_messages_handled() {
-        final SensoryDeprivedProjectionRepository repo = new SensoryDeprivedProjectionRepository();
-        final BoundedContext boundedContext = BoundedContext.newBuilder()
-                                                            .setMultitenant(false)
-                                                            .build();
+        SensoryDeprivedProjectionRepository repo = new SensoryDeprivedProjectionRepository();
+        BoundedContext boundedContext = BoundedContext
+                .newBuilder()
+                .setMultitenant(false)
+                .build();
         repo.setBoundedContext(boundedContext);
+
+        thrown.expect(IllegalStateException.class);
         repo.onRegistered();
     }
 }

@@ -30,7 +30,9 @@ import com.google.protobuf.UInt32Value;
 import io.spine.base.Time;
 import io.spine.test.TestValues;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.util.Iterator;
 
@@ -55,6 +57,9 @@ public class EitherOfFourShould {
     private EitherOfFour<StringValue, BoolValue, Timestamp, UInt32Value> eitherWithB;
     private EitherOfFour<StringValue, BoolValue, Timestamp, UInt32Value> eitherWithC;
     private EitherOfFour<StringValue, BoolValue, Timestamp, UInt32Value> eitherWithD;
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     @Before
     public void setUp() {
@@ -117,63 +122,75 @@ public class EitherOfFourShould {
         assertFalse(iteratorD.hasNext());
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void prohibit_obtaining_the_other_value_A_B() {
+        thrown.expect(IllegalStateException.class);
         eitherWithA.getB();
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void prohibit_obtaining_the_other_value_A_C() {
+        thrown.expect(IllegalStateException.class);
         eitherWithA.getC();
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void prohibit_obtaining_the_other_value_A_D() {
+        thrown.expect(IllegalStateException.class);
         eitherWithA.getD();
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void prohibit_obtaining_the_other_value_B_A() {
+        thrown.expect(IllegalStateException.class);
         eitherWithB.getA();
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void prohibit_obtaining_the_other_value_B_C() {
+        thrown.expect(IllegalStateException.class);
         eitherWithB.getC();
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void prohibit_obtaining_the_other_value_B_D() {
+        thrown.expect(IllegalStateException.class);
         eitherWithB.getD();
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void prohibit_obtaining_the_other_value_C_A() {
+        thrown.expect(IllegalStateException.class);
         eitherWithC.getA();
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void prohibit_obtaining_the_other_value_C_B() {
+        thrown.expect(IllegalStateException.class);
         eitherWithC.getB();
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void prohibit_obtaining_the_other_value_C_D() {
+        thrown.expect(IllegalStateException.class);
         eitherWithC.getD();
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void prohibit_obtaining_the_other_value_D_A() {
+        thrown.expect(IllegalStateException.class);
         eitherWithD.getA();
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void prohibit_obtaining_the_other_value_D_B() {
+        thrown.expect(IllegalStateException.class);
         eitherWithD.getB();
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void prohibit_obtaining_the_other_value_D_C() {
+        thrown.expect(IllegalStateException.class);
         eitherWithD.getC();
     }
 

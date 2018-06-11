@@ -25,7 +25,7 @@ import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Collection;
 
 import static com.google.common.collect.Collections2.transform;

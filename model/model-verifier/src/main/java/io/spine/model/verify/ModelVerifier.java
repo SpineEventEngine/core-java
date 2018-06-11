@@ -28,13 +28,12 @@ import io.spine.server.command.CommandHandler;
 import io.spine.server.model.Model;
 import io.spine.server.procman.ProcessManager;
 import io.spine.tools.gradle.ProjectHierarchy;
-import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.tasks.compile.JavaCompile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -75,42 +74,47 @@ final class ModelVerifier {
      *
      * @param spineModel the listing of the Spine model classes
      */
-    @SuppressWarnings({
-            "IfStatementWithTooManyBranches", // OK in this case.
-            "unchecked" // Checked by the `if` statements
-    })
     void verify(CommandHandlers spineModel) {
+        Logger log = log();
         for (String commandHandlingClass : spineModel.getCommandHandlingTypesList()) {
             final Class<?> cls;
             try {
-                log().debug("Trying to load class \'{}\'", commandHandlingClass);
+                log.debug("Trying to load class \'{}\'", commandHandlingClass);
                 cls = getModelClass(commandHandlingClass);
             } catch (ClassNotFoundException e) {
-                log().warn("Failed to load class {}." +
-                                   " Consider using io.spine.tools.spine-model-verifier plugin" +
-                                   " only for the modules with the sufficient classpath.",
-                           commandHandlingClass);
+                log.warn("Failed to load class {}." +
+                         " Consider using io.spine.tools.spine-model-verifier plugin" +
+                         " only for the modules with the sufficient classpath.",
+                         commandHandlingClass);
                 continue;
             }
-            if (Aggregate.class.isAssignableFrom(cls)) {
-                final Class<? extends Aggregate> aggregateClass =
-                        (Class<? extends Aggregate>) cls;
-                model.asAggregateClass(aggregateClass);
-                log().debug("\'{}\' classified as Aggregate type.", aggregateClass);
-            } else if (ProcessManager.class.isAssignableFrom(cls)) {
-                final Class<? extends ProcessManager> procManClass =
-                        (Class<? extends ProcessManager>) cls;
-                model.asProcessManagerClass(procManClass);
-                log().debug("\'{}\' classified as ProcessManager type.", procManClass);
-            } else if (CommandHandler.class.isAssignableFrom(cls)) {
-                final Class<? extends CommandHandler> commandHandler =
-                        (Class<? extends CommandHandler>) cls;
-                model.asCommandHandlerClass(commandHandler);
-                log().debug("\'{}\' classified as CommandHandler type.", commandHandler);
-            } else {
-                throw newIllegalArgumentException("Class %s is not a command handling type.",
-                                                  cls.getName());
-            }
+            verifyClass(cls);
+        }
+    }
+
+    @SuppressWarnings({
+            "unchecked" /* Checked by the `if` statements */,
+            "CheckReturnValue" /* Returned values for asXxxClass() are ignored because we use
+                                  these methods only for verification of the classes. */
+    })
+    private void verifyClass(Class<?> cls) {
+        Logger log = log();
+        if (Aggregate.class.isAssignableFrom(cls)) {
+            Class<? extends Aggregate> aggregateClass = (Class<? extends Aggregate>) cls;
+            model.asAggregateClass(aggregateClass);
+            log.debug("\'{}\' classified as Aggregate type.", aggregateClass);
+        } else if (ProcessManager.class.isAssignableFrom(cls)) {
+            Class<? extends ProcessManager> procManClass = (Class<? extends ProcessManager>) cls;
+            model.asProcessManagerClass(procManClass);
+            log.debug("\'{}\' classified as ProcessManager type.", procManClass);
+        } else if (CommandHandler.class.isAssignableFrom(cls)) {
+            Class<? extends CommandHandler> commandHandler = (Class<? extends CommandHandler>) cls;
+            model.asCommandHandlerClass(commandHandler);
+            log.debug("\'{}\' classified as CommandHandler type.", commandHandler);
+        } else {
+            throw newIllegalArgumentException(
+                    "Class %s is not a command handling type.", cls.getName()
+            );
         }
     }
 
@@ -134,17 +138,14 @@ final class ModelVerifier {
 
     private static Collection<JavaCompile> allJavaCompile(Project project) {
         final Collection<JavaCompile> tasks = newLinkedList();
-        ProjectHierarchy.applyToAll(project.getRootProject(), new Action<Project>() {
-            @Override
-            public void execute(Project project) {
-                tasks.addAll(javaCompile(project));
-            }
-        });
+        ProjectHierarchy.applyToAll(project.getRootProject(),
+                                    p -> tasks.addAll(javaCompile(p)));
         return tasks;
     }
 
     private static Collection<JavaCompile> javaCompile(Project project) {
-        return project.getTasks().withType(JavaCompile.class);
+        return project.getTasks()
+                      .withType(JavaCompile.class);
     }
 
     private static URL[] extractDestinationDirs(Collection<JavaCompile> tasks) {

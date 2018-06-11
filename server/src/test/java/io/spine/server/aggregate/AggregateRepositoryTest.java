@@ -94,6 +94,12 @@ public class AggregateRepositoryTest {
     private BoundedContext boundedContext;
     private AggregateRepository<ProjectId, ProjectAggregate> repository;
 
+    private static ProjectId givenAggregateId(String id) {
+        return ProjectId.newBuilder()
+                        .setId(id)
+                        .build();
+    }
+
     @BeforeEach
     void setUp() {
         ModelTests.clearModel();
@@ -112,37 +118,41 @@ public class AggregateRepositoryTest {
     @Test
     @DisplayName("not create new aggregates on find")
     void notCreateNewAggregatesOnFind() {
-        final ProjectId newId = Sample.messageOfType(ProjectId.class);
-        final Optional<ProjectAggregate> optional = repository.find(newId);
+        ProjectId newId = Sample.messageOfType(ProjectId.class);
+        Optional<ProjectAggregate> optional = repository.find(newId);
         assertFalse(optional.isPresent());
     }
 
     @Test
     @DisplayName("store and load aggregate")
     void storeAndLoadAggregate() {
-        final ProjectId id = Sample.messageOfType(ProjectId.class);
-        final ProjectAggregate expected = GivenAggregate.withUncommittedEvents(id);
+        ProjectId id = Sample.messageOfType(ProjectId.class);
+        ProjectAggregate expected = GivenAggregate.withUncommittedEvents(id);
 
         repository.store(expected);
-        final ProjectAggregate actual = repository.find(id)
-                                                  .get();
+        ProjectAggregate actual = assertFound(id);
 
         assertTrue(isNotDefault(actual.getState()));
         assertEquals(expected.getId(), actual.getId());
         assertEquals(expected.getState(), actual.getState());
     }
 
+    private ProjectAggregate assertFound(ProjectId id) {
+        Optional<ProjectAggregate> optional = repository.find(id);
+        assertTrue(optional.isPresent());
+        return optional.get();
+    }
+
     @Test
     @DisplayName("restore aggregate using snapshot")
     void restoreAggregateUsingSnapshot() {
-        final ProjectId id = Sample.messageOfType(ProjectId.class);
-        final ProjectAggregate expected = GivenAggregate.withUncommittedEvents(id);
+        ProjectId id = Sample.messageOfType(ProjectId.class);
+        ProjectAggregate expected = GivenAggregate.withUncommittedEvents(id);
 
         repository.setSnapshotTrigger(expected.uncommittedEventsCount());
         repository.store(expected);
 
-        final ProjectAggregate actual = repository.find(id)
-                                                  .get();
+        ProjectAggregate actual = assertFound(id);
 
         assertEquals(expected.getId(), actual.getId());
         assertEquals(expected.getState(), actual.getState());
@@ -151,12 +161,12 @@ public class AggregateRepositoryTest {
     @Test
     @DisplayName("store snapshot and set event count to zero if needed")
     void storeSnapshotAndManageEventCount() {
-        final ProjectAggregate aggregate = GivenAggregate.withUncommittedEvents();
+        ProjectAggregate aggregate = GivenAggregate.withUncommittedEvents();
         // This should make the repository write the snapshot.
         repository.setSnapshotTrigger(aggregate.uncommittedEventsCount());
 
         repository.store(aggregate);
-        final AggregateStateRecord record = readRecord(aggregate);
+        AggregateStateRecord record = readRecord(aggregate);
         assertTrue(record.hasSnapshot());
         assertEquals(0, repository.aggregateStorage()
                                   .readEventCountAfterLastSnapshot(aggregate.getId()));
@@ -165,51 +175,53 @@ public class AggregateRepositoryTest {
     @Test
     @DisplayName("not store snapshot if not needed")
     void notStoreSnapshotIfNotNeeded() {
-        final ProjectAggregate aggregate = GivenAggregate.withUncommittedEvents();
+        ProjectAggregate aggregate = GivenAggregate.withUncommittedEvents();
 
         repository.store(aggregate);
-        final AggregateStateRecord record = readRecord(aggregate);
+        AggregateStateRecord record = readRecord(aggregate);
         assertFalse(record.hasSnapshot());
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "CheckReturnValue" /* calling mock */})
     @Test
     @DisplayName("pass initial snapshot trigger to AggregateReadRequest")
     void passInitialSnapshotTrigger() {
-        final AggregateRepository<ProjectId, ProjectAggregate> repositorySpy = spy(repository);
-        final AggregateStorage<ProjectId> storageSpy = spy(repositorySpy.aggregateStorage());
-        doReturn(storageSpy).when(repositorySpy).aggregateStorage();
+        AggregateRepository<ProjectId, ProjectAggregate> repositorySpy = spy(repository);
+        AggregateStorage<ProjectId> storageSpy = spy(repositorySpy.aggregateStorage());
+        doReturn(storageSpy).when(repositorySpy)
+                            .aggregateStorage();
 
-        final ProjectId id = Sample.messageOfType(ProjectId.class);
+        ProjectId id = Sample.messageOfType(ProjectId.class);
         repositorySpy.loadOrCreate(id);
 
-        final ArgumentCaptor<AggregateReadRequest<ProjectId>> requestCaptor =
+        ArgumentCaptor<AggregateReadRequest<ProjectId>> requestCaptor =
                 ArgumentCaptor.forClass(AggregateReadRequest.class);
         verify(storageSpy).read(requestCaptor.capture());
 
-        final AggregateReadRequest<ProjectId> passedRequest = requestCaptor.getValue();
+        AggregateReadRequest<ProjectId> passedRequest = requestCaptor.getValue();
         assertEquals(id, passedRequest.getRecordId());
         assertEquals(repositorySpy.getSnapshotTrigger(), passedRequest.getBatchSize());
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "CheckReturnValue" /* calling mock */})
     @Test
     @DisplayName("pass updated snapshot trigger to AggregateReadRequest")
     void passUpdatedSnapshotTrigger() {
-        final AggregateRepository<ProjectId, ProjectAggregate> repositorySpy = spy(repository);
-        final AggregateStorage<ProjectId> storageSpy = spy(repositorySpy.aggregateStorage());
-        doReturn(storageSpy).when(repositorySpy).aggregateStorage();
+        AggregateRepository<ProjectId, ProjectAggregate> repositorySpy = spy(repository);
+        AggregateStorage<ProjectId> storageSpy = spy(repositorySpy.aggregateStorage());
+        doReturn(storageSpy).when(repositorySpy)
+                            .aggregateStorage();
 
-        final int nonDefaultSnapshotTrigger = DEFAULT_SNAPSHOT_TRIGGER * 2;
+        int nonDefaultSnapshotTrigger = DEFAULT_SNAPSHOT_TRIGGER * 2;
         repositorySpy.setSnapshotTrigger(nonDefaultSnapshotTrigger);
-        final ProjectId id = Sample.messageOfType(ProjectId.class);
+        ProjectId id = Sample.messageOfType(ProjectId.class);
         repositorySpy.loadOrCreate(id);
 
-        final ArgumentCaptor<AggregateReadRequest<ProjectId>> requestCaptor =
+        ArgumentCaptor<AggregateReadRequest<ProjectId>> requestCaptor =
                 ArgumentCaptor.forClass(AggregateReadRequest.class);
         verify(storageSpy).read(requestCaptor.capture());
 
-        final AggregateReadRequest<ProjectId> passedRequest = requestCaptor.getValue();
+        AggregateReadRequest<ProjectId> passedRequest = requestCaptor.getValue();
         assertEquals(id, passedRequest.getRecordId());
         assertEquals(nonDefaultSnapshotTrigger, passedRequest.getBatchSize());
     }
@@ -241,7 +253,7 @@ public class AggregateRepositoryTest {
     @Test
     @DisplayName("allow to change snapshot trigger")
     void allowToChangeSnapshotTrigger() {
-        final int newSnapshotTrigger = 1000;
+        int newSnapshotTrigger = 1000;
 
         repository.setSnapshotTrigger(newSnapshotTrigger);
 
@@ -251,11 +263,11 @@ public class AggregateRepositoryTest {
     @Test
     @DisplayName("expose classes of commands of its aggregate")
     void exposeAggregateCommandClasses() {
-        final Set<CommandClass> aggregateCommands =
+        Set<CommandClass> aggregateCommands =
                 Model.getInstance()
                      .asAggregateClass(ProjectAggregate.class)
                      .getCommands();
-        final Set<CommandClass> exposedByRepository = repository.getMessageClasses();
+        Set<CommandClass> exposedByRepository = repository.getMessageClasses();
 
         assertTrue(exposedByRepository.containsAll(aggregateCommands));
     }
@@ -263,32 +275,33 @@ public class AggregateRepositoryTest {
     @Test
     @DisplayName("find archived aggregates")
     void findArchivedAggregates() {
-        final ProjectAggregate aggregate = givenStoredAggregate();
+        ProjectAggregate aggregate = givenStoredAggregate();
 
-        final AggregateTransaction tx = AggregateTransaction.start(aggregate);
+        AggregateTransaction tx = AggregateTransaction.start(aggregate);
         aggregate.setArchived(true);
         tx.commit();
         repository.store(aggregate);
 
         assertTrue(repository.find(aggregate.getId())
-                              .isPresent());
+                             .isPresent());
     }
 
     @Test
     @DisplayName("find deleted aggregates")
     void findDeletedAggregates() {
-        final ProjectAggregate aggregate = givenStoredAggregate();
+        ProjectAggregate aggregate = givenStoredAggregate();
 
-        final AggregateTransaction tx = AggregateTransaction.start(aggregate);
+        AggregateTransaction tx = AggregateTransaction.start(aggregate);
         aggregate.setDeleted(true);
         tx.commit();
 
         repository.store(aggregate);
 
         assertTrue(repository.find(aggregate.getId())
-                              .isPresent());
+                             .isPresent());
     }
 
+    @SuppressWarnings("CheckReturnValue") // The returned value is not used in this test.
     @Test
     @DisplayName("throw ISE if unable to load entity by id from storage index")
     void throwWhenUnableToLoadEntity() {
@@ -296,7 +309,7 @@ public class AggregateRepositoryTest {
         givenStoredAggregate();
 
         // Store a troublesome entity, which cannot be loaded.
-        final TenantAwareOperation op = new TenantAwareOperation(newUuid()) {
+        TenantAwareOperation op = new TenantAwareOperation(newUuid()) {
             @Override
             public void run() {
                 givenStoredAggregateWithId(ProjectAggregateRepository.troublesome.getId());
@@ -304,8 +317,8 @@ public class AggregateRepositoryTest {
         };
         op.execute();
 
-        final Iterator<ProjectAggregate> iterator =
-                repository.iterator(Predicates.<ProjectAggregate>alwaysTrue());
+        Iterator<ProjectAggregate> iterator =
+                repository.iterator(Predicates.alwaysTrue());
 
         // This should iterate through all and fail.
         assertThrows(IllegalStateException.class, () -> Lists.newArrayList(iterator));
@@ -314,7 +327,7 @@ public class AggregateRepositoryTest {
     @Test
     @DisplayName("expose event classes on which aggregates react")
     void expose_event_classes_on_which_aggregates_react() {
-        final Set<EventClass> eventClasses = repository.getEventClasses();
+        Set<EventClass> eventClasses = repository.getEventClasses();
         assertTrue(eventClasses.contains(EventClass.of(AggProjectArchived.class)));
         assertTrue(eventClasses.contains(EventClass.of(AggProjectDeleted.class)));
     }
@@ -322,32 +335,32 @@ public class AggregateRepositoryTest {
     @Test
     @DisplayName("route events to aggregates")
     public void route_events_to_aggregates() {
-        final ProjectAggregate parent = givenStoredAggregate();
-        final ProjectAggregate child = givenStoredAggregate();
+        ProjectAggregate parent = givenStoredAggregate();
+        ProjectAggregate child = givenStoredAggregate();
 
         assertTrue(repository.find(parent.getId())
                              .isPresent());
         assertTrue(repository.find(child.getId())
                              .isPresent());
 
-        final TestEventFactory factory = TestEventFactory.newInstance(getClass());
-        final AggProjectArchived msg = AggProjectArchived.newBuilder()
-                                                         .setProjectId(parent.getId())
-                                                         .addChildProjectId(child.getId())
-                                                         .build();
-        final Event event = factory.createEvent(msg);
+        TestEventFactory factory = TestEventFactory.newInstance(getClass());
+        AggProjectArchived msg = AggProjectArchived.newBuilder()
+                                                   .setProjectId(parent.getId())
+                                                   .addChildProjectId(child.getId())
+                                                   .build();
+        Event event = factory.createEvent(msg);
 
         boundedContext.getEventBus()
                       .post(event);
 
         // Check that the child aggregate was archived.
-        final Optional<ProjectAggregate> childAfterArchive = repository.find(child.getId());
+        Optional<ProjectAggregate> childAfterArchive = repository.find(child.getId());
         assertTrue(childAfterArchive.isPresent());
         assertTrue(childAfterArchive.get()
                                     .isArchived());
         // The parent should not be archived since the dispatch route uses only
         // child aggregates from the `ProjectArchived` event.
-        final Optional<ProjectAggregate> parentAfterArchive = repository.find(parent.getId());
+        Optional<ProjectAggregate> parentAfterArchive = repository.find(parent.getId());
         assertTrue(parentAfterArchive.isPresent());
         assertFalse(parentAfterArchive.get()
                                       .isArchived());
@@ -356,13 +369,13 @@ public class AggregateRepositoryTest {
     @Test
     @DisplayName("log error when event reaction fails")
     public void log_error_when_event_reaction_fails() {
-        final FailingAggregateRepository repository = new FailingAggregateRepository();
+        FailingAggregateRepository repository = new FailingAggregateRepository();
         boundedContext.register(repository);
 
-        final TestEventFactory factory = TestEventFactory.newInstance(getClass());
+        TestEventFactory factory = TestEventFactory.newInstance(getClass());
 
         // Passing negative float value should cause an exception.
-        final EventEnvelope envelope =
+        EventEnvelope envelope =
                 EventEnvelope.of(factory.createEvent(FloatValue.newBuilder()
                                                                .setValue(-412.0f)
                                                                .build()));
@@ -370,16 +383,16 @@ public class AggregateRepositoryTest {
                       .post(envelope.getOuterObject());
 
         assertTrue(repository.isErrorLogged());
-        final RuntimeException lastException = repository.getLastException();
+        RuntimeException lastException = repository.getLastException();
         assertTrue(lastException instanceof HandlerMethodFailedException);
 
-        final HandlerMethodFailedException methodFailedException =
+        HandlerMethodFailedException methodFailedException =
                 (HandlerMethodFailedException) lastException;
 
         assertEquals(envelope.getMessage(), methodFailedException.getDispatchedMessage());
         assertEquals(envelope.getEventContext(), methodFailedException.getMessageContext());
 
-        final MessageEnvelope lastErrorEnvelope = repository.getLastErrorEnvelope();
+        MessageEnvelope lastErrorEnvelope = repository.getLastErrorEnvelope();
         assertNotNull(lastErrorEnvelope);
         assertTrue(lastErrorEnvelope instanceof EventEnvelope);
         assertEquals(envelope.getMessage(), lastErrorEnvelope.getMessage());
@@ -388,14 +401,14 @@ public class AggregateRepositoryTest {
     @Test
     @DisplayName("not pass command rejection to onError")
     public void not_pass_command_rejection_to_onError() {
-        final FailingAggregateRepository repository = new FailingAggregateRepository();
+        FailingAggregateRepository repository = new FailingAggregateRepository();
         boundedContext.register(repository);
 
-        final TestActorRequestFactory requestFactory =
+        TestActorRequestFactory requestFactory =
                 TestActorRequestFactory.newInstance(getClass());
 
         // Passing negative long value to `FailingAggregate` should cause a rejection.
-        final CommandEnvelope ce = CommandEnvelope.of(
+        CommandEnvelope ce = CommandEnvelope.of(
                 requestFactory.createCommand(UInt64Value.newBuilder()
                                                         .setValue(-100_000_000L)
                                                         .build()));
@@ -415,24 +428,24 @@ public class AggregateRepositoryTest {
     @Test
     @DisplayName("allow aggregates react on events")
     public void allow_aggregates_react_on_events() {
-        final ReactingRepository repository = new ReactingRepository();
+        ReactingRepository repository = new ReactingRepository();
         boundedContext.register(repository);
 
-        final ProjectId parentId = givenAggregateId("parent");
-        final ProjectId childId = givenAggregateId("child");
+        ProjectId parentId = givenAggregateId("parent");
+        ProjectId childId = givenAggregateId("child");
 
         /**
          * Create event factory for which producer ID would be the `parentId`.
          * Custom routing set by {@linkplain ReactingRepository()} would use
          * child IDs from the event.
          */
-        final TestEventFactory factory = TestEventFactory.newInstance(Identifier.pack(parentId),
-                                                                      getClass());
-        final AggProjectArchived msg = AggProjectArchived.newBuilder()
-                                                         .setProjectId(parentId)
-                                                         .addChildProjectId(childId)
-                                                         .build();
-        final Event event = factory.createEvent(msg);
+        TestEventFactory factory = TestEventFactory.newInstance(Identifier.pack(parentId),
+                                                                getClass());
+        AggProjectArchived msg = AggProjectArchived.newBuilder()
+                                                   .setProjectId(parentId)
+                                                   .addChildProjectId(childId)
+                                                   .build();
+        Event event = factory.createEvent(msg);
 
         // Posting this event should archive the aggregate.
         boundedContext.getEventBus()
@@ -440,7 +453,7 @@ public class AggregateRepositoryTest {
 
         // Check that the aggregate marked itself as `archived`, and therefore became invisible
         // to regular queries.
-        final Optional<ReactingAggregate> optional = repository.find(childId);
+        Optional<ReactingAggregate> optional = repository.find(childId);
 
         // The aggregate was created because of dispatching.
         assertTrue(optional.isPresent());
@@ -452,24 +465,29 @@ public class AggregateRepositoryTest {
                              .getValue());
     }
 
+    /*
+     * Test environment methods that use internals of this test suite
+     * (and because of that are not moved to the test environment outside of this class).
+     **************************************************************************************/
+
     @Test
     @DisplayName("allow aggregates react on rejections")
     public void allow_aggregates_react_on_rejections() {
         boundedContext.register(new RejectingRepository());
-        final RejectionReactingRepository repository = new RejectionReactingRepository();
+        RejectionReactingRepository repository = new RejectionReactingRepository();
         boundedContext.register(repository);
 
-        final ProjectId parentId = givenAggregateId("rejectingParent");
-        final ProjectId childId1 = givenAggregateId("acceptingChild-1");
-        final ProjectId childId2 = givenAggregateId("acceptingChild-2");
-        final ProjectId childId3 = givenAggregateId("acceptingChild-3");
+        ProjectId parentId = givenAggregateId("rejectingParent");
+        ProjectId childId1 = givenAggregateId("acceptingChild-1");
+        ProjectId childId2 = givenAggregateId("acceptingChild-2");
+        ProjectId childId3 = givenAggregateId("acceptingChild-3");
 
-        final StreamObserver<Ack> observer = StreamObservers.noOpObserver();
-        final CommandBus commandBus = boundedContext.getCommandBus();
+        StreamObserver<Ack> observer = StreamObservers.noOpObserver();
+        CommandBus commandBus = boundedContext.getCommandBus();
 
         // Create the parent project.
-        final ImmutableSet<ProjectId> childProjects = ImmutableSet.of(childId1, childId2, childId3);
-        final Command createParent = requestFactory.createCommand(
+        ImmutableSet<ProjectId> childProjects = ImmutableSet.of(childId1, childId2, childId3);
+        Command createParent = requestFactory.createCommand(
                 AggCreateProjectWithChildren.newBuilder()
                                             .setProjectId(parentId)
                                             .addAllChildProjectId(childProjects)
@@ -478,7 +496,7 @@ public class AggregateRepositoryTest {
         commandBus.post(createParent, observer);
 
         // Fire a command which would cause rejection.
-        final Command startProject = requestFactory.createCommand(
+        Command startProject = requestFactory.createCommand(
                 AggStartProjectWithChildren.newBuilder()
                                            .setProjectId(parentId)
                                            .build()
@@ -486,51 +504,41 @@ public class AggregateRepositoryTest {
         commandBus.post(startProject, observer);
 
         for (ProjectId childProject : childProjects) {
-            final Optional<RejectionReactingAggregate> optional = repository.find(childProject);
+            Optional<RejectionReactingAggregate> optional = repository.find(childProject);
             assertTrue(optional.isPresent());
 
             // Check that all the aggregates:
             // 1. got Rejections.AggCannotStartArchivedProject;
             // 2. produced the state the event;
             // 3. applied the event.
-            final String value = optional.get()
-                                         .getState()
-                                         .getValue();
+            String value = optional.get()
+                                   .getState()
+                                   .getValue();
             assertEquals(RejectionReactingAggregate.PARENT_ARCHIVED, value);
         }
     }
 
-    /*
-     * Test environment methods that use internals of this test suite
-     * (and because of that are not moved to the test environment outside of this class).
-     **************************************************************************************/
-
     private ProjectAggregate givenStoredAggregate() {
-        final ProjectId id = Sample.messageOfType(ProjectId.class);
-        final ProjectAggregate aggregate = GivenAggregate.withUncommittedEvents(id);
+        ProjectId id = Sample.messageOfType(ProjectId.class);
+        ProjectAggregate aggregate = GivenAggregate.withUncommittedEvents(id);
 
         repository.store(aggregate);
         return aggregate;
     }
 
     private void givenStoredAggregateWithId(String id) {
-        final ProjectId projectId = givenAggregateId(id);
-        final ProjectAggregate aggregate = GivenAggregate.withUncommittedEvents(projectId);
+        ProjectId projectId = givenAggregateId(id);
+        ProjectAggregate aggregate = GivenAggregate.withUncommittedEvents(projectId);
 
         repository.store(aggregate);
     }
 
-    private static ProjectId givenAggregateId(String id) {
-        return ProjectId.newBuilder()
-                        .setId(id)
-                        .build();
-    }
-
     private AggregateStateRecord readRecord(ProjectAggregate aggregate) {
-        final AggregateReadRequest<ProjectId> request =
+        AggregateReadRequest<ProjectId> request =
                 new AggregateReadRequest<>(aggregate.getId(), DEFAULT_SNAPSHOT_TRIGGER);
-        return repository.aggregateStorage()
-                         .read(request)
-                         .get();
+        Optional<AggregateStateRecord> optional = repository.aggregateStorage()
+                                                            .read(request);
+        assertTrue(optional.isPresent());
+        return optional.get();
     }
 }

@@ -22,22 +22,36 @@ package io.spine.server.entity.storage;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.common.testing.NullPointerTester.Visibility;
-import io.spine.server.entity.storage.given.ColumnsTestEnv.*;
+import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithColumnFromInterface;
+import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithManyGetters;
+import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithManyGettersDescendant;
+import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithNoStorageFields;
+import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithRepeatedColumnNames;
+import io.spine.server.entity.storage.given.ColumnsTestEnv.RealLifeEntity;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.util.Collection;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.server.entity.storage.ColumnReader.forClass;
 import static io.spine.server.storage.EntityField.version;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
-import static io.spine.test.Verify.*;
+import static io.spine.test.Verify.assertFalse;
+import static io.spine.test.Verify.assertNotNull;
+import static io.spine.test.Verify.assertSize;
+import static io.spine.test.Verify.assertTrue;
 import static io.spine.validate.Validate.checkNotEmptyOrBlank;
 
 /**
  * @author Dmytro Kuzmin
  */
 public class ColumnReaderShould {
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     @Test
     public void pass_null_check() {
@@ -46,8 +60,8 @@ public class ColumnReaderShould {
 
     @Test
     public void retrieve_entity_columns_from_class() {
-        final ColumnReader columnReader = ColumnReader.forClass(EntityWithManyGetters.class);
-        final Collection<EntityColumn> entityColumns = columnReader.readColumns();
+        ColumnReader columnReader = forClass(EntityWithManyGetters.class);
+        Collection<EntityColumn> entityColumns = columnReader.readColumns();
 
         assertSize(3, entityColumns);
         assertTrue(containsColumn(entityColumns, "someMessage"));
@@ -57,38 +71,39 @@ public class ColumnReaderShould {
 
     @Test
     public void handle_class_without_columns() {
-        final ColumnReader columnReader = ColumnReader.forClass(EntityWithNoStorageFields.class);
-        final Collection<EntityColumn> entityColumns = columnReader.readColumns();
+        ColumnReader columnReader = forClass(EntityWithNoStorageFields.class);
+        Collection<EntityColumn> entityColumns = columnReader.readColumns();
 
         assertNotNull(entityColumns);
         assertTrue(entityColumns.isEmpty());
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void throw_error_on_invalid_column_definitions() {
-        final ColumnReader columnReader = ColumnReader.forClass(EntityWithRepeatedColumnNames.class);
+        ColumnReader columnReader = forClass(EntityWithRepeatedColumnNames.class);
+        thrown.expect(IllegalStateException.class);
         columnReader.readColumns();
     }
 
 
     @Test
     public void ignore_non_public_getters_with_column_annotation_from_super_class() {
-        final ColumnReader columnReader = ColumnReader.forClass(EntityWithManyGettersDescendant.class);
-        final Collection<EntityColumn> entityColumns = columnReader.readColumns();
+        ColumnReader columnReader = forClass(EntityWithManyGettersDescendant.class);
+        Collection<EntityColumn> entityColumns = columnReader.readColumns();
         assertSize(3, entityColumns);
     }
 
     @Test
     public void ignore_static_members() {
-        final ColumnReader columnReader = ColumnReader.forClass(EntityWithManyGetters.class);
-        final Collection<EntityColumn> entityColumns = columnReader.readColumns();
+        ColumnReader columnReader = forClass(EntityWithManyGetters.class);
+        Collection<EntityColumn> entityColumns = columnReader.readColumns();
         assertFalse(containsColumn(entityColumns, "staticMember"));
     }
 
     @Test
     public void handle_inherited_fields() {
-        final ColumnReader columnReader = ColumnReader.forClass(RealLifeEntity.class);
-        final Collection<EntityColumn> entityColumns = columnReader.readColumns();
+        ColumnReader columnReader = forClass(RealLifeEntity.class);
+        Collection<EntityColumn> entityColumns = columnReader.readColumns();
 
         assertSize(5, entityColumns);
         assertTrue(containsColumn(entityColumns, archived.name()));
@@ -100,8 +115,8 @@ public class ColumnReaderShould {
 
     @Test
     public void obtain_fields_from_implemented_interfaces() {
-        final ColumnReader columnReader = ColumnReader.forClass(EntityWithColumnFromInterface.class);
-        final Collection<EntityColumn> entityColumns = columnReader.readColumns();
+        ColumnReader columnReader = forClass(EntityWithColumnFromInterface.class);
+        Collection<EntityColumn> entityColumns = columnReader.readColumns();
 
         assertSize(1, entityColumns);
         assertTrue(containsColumn(entityColumns, "integerFieldValue"));
@@ -112,8 +127,7 @@ public class ColumnReaderShould {
         checkNotEmptyOrBlank(columnName, "column name");
 
         for (EntityColumn column : entityColumns) {
-            if (column.getName()
-                    .equals(columnName)) {
+            if (columnName.equals(column.getName())) {
                 return true;
             }
         }

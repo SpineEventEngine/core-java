@@ -27,8 +27,7 @@ import io.spine.core.Version;
 import io.spine.reflect.GenericTypeIndex;
 import io.spine.validate.ValidatingBuilder;
 import io.spine.validate.ValidatingBuilders;
-
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -57,8 +56,8 @@ public abstract class TransactionalEntity<I,
      */
     private volatile boolean stateChanged;
 
-    @Nullable
-    private volatile Transaction<I, ? extends TransactionalEntity<I, S, B>, S, B> transaction;
+    private volatile
+    @Nullable Transaction<I, ? extends TransactionalEntity<I, S, B>, S, B> transaction;
 
     /**
      * Creates a new instance.
@@ -103,11 +102,11 @@ public abstract class TransactionalEntity<I,
      */
     @Internal
     public boolean isChanged() {
-        final boolean lifecycleFlagsChanged = lifecycleFlagsChanged();
-        final Transaction<?, ?, ?, ?> tx = this.transaction;
-        final boolean stateChanged = tx != null
-                                     ? tx.isStateChanged()
-                                     : this.stateChanged;
+        boolean lifecycleFlagsChanged = lifecycleFlagsChanged();
+        Transaction<?, ?, ?, ?> tx = this.transaction;
+        boolean stateChanged = tx != null
+                               ? tx.isStateChanged()
+                               : this.stateChanged;
         return stateChanged || lifecycleFlagsChanged;
     }
 
@@ -123,10 +122,11 @@ public abstract class TransactionalEntity<I,
         return tx().getBuilder();
     }
 
-    private void ensureTransaction() {
+    private Transaction<I, ? extends TransactionalEntity<I,S,B>, S, B> ensureTransaction() {
         if (!isTransactionInProgress()) {
             throw new IllegalStateException(getMissingTxMessage());
         }
+        return transaction;
     }
 
     /**
@@ -138,8 +138,7 @@ public abstract class TransactionalEntity<I,
     }
 
     Transaction<I, ? extends TransactionalEntity<I,S,B>, S, B> tx() {
-        ensureTransaction();
-        return transaction;
+        return ensureTransaction();
     }
 
     /**
@@ -149,8 +148,8 @@ public abstract class TransactionalEntity<I,
      */
     @VisibleForTesting
     boolean isTransactionInProgress() {
-        final Transaction<?, ?, ?, ?> tx = this.transaction;
-        final boolean result = tx != null && tx.isActive();
+        Transaction<?, ?, ?, ?> tx = this.transaction;
+        boolean result = tx != null && tx.isActive();
         return result;
     }
 

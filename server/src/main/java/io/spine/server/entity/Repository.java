@@ -24,6 +24,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Supplier;
 import com.google.common.collect.Iterators;
+import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import io.spine.base.Identifier;
 import io.spine.core.MessageEnvelope;
 import io.spine.logging.Logging;
@@ -36,11 +37,10 @@ import io.spine.server.storage.StorageFactory;
 import io.spine.string.Stringifiers;
 import io.spine.type.MessageClass;
 import io.spine.type.TypeUrl;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 
-import javax.annotation.CheckReturnValue;
-import javax.annotation.Nullable;
-import javax.annotation.OverridingMethodsMustInvokeSuper;
 import java.util.Iterator;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -68,16 +68,14 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      * <p>This field is null when a repository is not {@linkplain
      * BoundedContext#register(Repository) registered} yet.
      */
-    @Nullable
-    private BoundedContext boundedContext;
+    private @MonotonicNonNull BoundedContext boundedContext;
 
     /**
      * Model class of entities managed by this repository.
      *
      * <p>This field is null if {@link #entityClass()} is never called.
      */
-    @Nullable
-    private volatile EntityClass<E> entityClass;
+    private volatile @MonotonicNonNull EntityClass<E> entityClass;
 
     /**
      * The data storage for this repository.
@@ -85,8 +83,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      * <p>This field is null if the storage was not {@linkplain #initStorage(StorageFactory)
      * initialized} or the repository was {@linkplain #close() closed}.
      */
-    @Nullable
-    private Storage<I, ?, ?> storage;
+    private @Nullable Storage<I, ?, ?> storage;
 
     /** Lazily initialized logger. */
     private final Supplier<Logger> loggerSupplier = Logging.supplyFor(getClass());
@@ -103,8 +100,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     protected final EntityClass<E> entityClass() {
         if (entityClass == null) {
             @SuppressWarnings("unchecked") // The type is ensured by the declaration of this class.
-            final Class<E> cast =
-                    (Class<E>)ENTITY.getArgumentIn((Class<? extends Repository<I, E>>) getClass());
+            Class<E> cast = (Class<E>) ENTITY.getArgumentIn(getClass());
             entityClass = getModelClass(cast);
         }
         return entityClass;
@@ -121,14 +117,12 @@ public abstract class Repository<I, E extends Entity<I, ?>>
 
     /** Returns the class of IDs used by this repository. */
     @SuppressWarnings("unchecked") // The cast is ensured by generic parameters of the repository.
-    @CheckReturnValue
     public Class<I> getIdClass() {
         return (Class<I>) entityClass().getIdClass();
     }
 
     /** Returns the class of entities managed by this repository. */
     @SuppressWarnings("unchecked") // The cast is ensured by generic parameters of the repository.
-    @CheckReturnValue
     public Class<E> getEntityClass() {
         return (Class<E>) entityClass().value();
     }
@@ -137,7 +131,6 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      * Returns the {@link TypeUrl} for the state objects wrapped by entities
      * managed by this repository
      */
-    @CheckReturnValue
     public TypeUrl getEntityStateType() {
         return entityClass().getStateType();
     }
@@ -225,7 +218,6 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      * @param id the id of the entity
      * @return new entity instance
      */
-    @CheckReturnValue
     public abstract E create(I id);
 
     /**
@@ -247,9 +239,24 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      */
     @Override
     public Iterator<E> iterator(Predicate<E> filter) {
-        final Iterator<E> unfiltered = new EntityIterator<>(this);
-        final Iterator<E> filtered = Iterators.filter(unfiltered, filter);
+        Iterator<E> unfiltered = new EntityIterator<>(this);
+        Iterator<E> filtered = Iterators.filter(unfiltered, filter);
         return filtered;
+    }
+
+    /**
+     * Initializes the storage using the passed factory.
+     *
+     * @param factory storage factory
+     * @throws IllegalStateException if the repository already has storage initialized
+     */
+    public void initStorage(StorageFactory factory) {
+        if (this.storage != null) {
+            throw newIllegalStateException("The repository %s already has storage %s.",
+                                           this, this.storage);
+        }
+
+        this.storage = createStorage(factory);
     }
 
     /**
@@ -259,7 +266,6 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      *
      * @throws IllegalStateException if the storage is not assigned
      */
-    @CheckReturnValue
     protected final Storage<I, ?, ?> getStorage() {
         return checkStorage(this.storage);
     }
@@ -282,19 +288,9 @@ public abstract class Repository<I, E extends Entity<I, ?>>
         return storage;
     }
 
-    /**
-     * Initializes the storage using the passed factory.
-     *
-     * @param factory storage factory
-     * @throws IllegalStateException if the repository already has storage initialized
-     */
-    public void initStorage(StorageFactory factory) {
-        if (this.storage != null) {
-            throw newIllegalStateException("The repository %s already has storage %s.",
-                                           this, this.storage);
-        }
-
-        this.storage = createStorage(factory);
+    private Storage<I, ?, ?> ensureStorage() {
+        checkState(storage != null, "No storage assigned in repository %s", this);
+        return storage;
     }
 
     /**
@@ -326,11 +322,6 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      */
     public boolean isOpen() {
         return storage != null;
-    }
-
-    private Storage<I, ?, ?> ensureStorage() {
-        checkState(storage != null, "No storage assigned in repository %s", this);
-        return storage;
     }
 
     /**
@@ -365,9 +356,9 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     protected void logError(String msgFormat,
                             MessageEnvelope envelope,
                             RuntimeException exception) {
-        final MessageClass messageClass = envelope.getMessageClass();
-        final String messageId = Stringifiers.toString(envelope.getId());
-        final String errorMessage = format(msgFormat, messageClass, messageId);
+        MessageClass messageClass = envelope.getMessageClass();
+        String messageId = Stringifiers.toString(envelope.getId());
+        String errorMessage = format(msgFormat, messageClass, messageId);
         log().error(errorMessage, exception);
     }
 
@@ -417,20 +408,20 @@ public abstract class Repository<I, E extends Entity<I, ?>>
 
         @Override
         public boolean hasNext() {
-            final boolean result = index.hasNext();
+            boolean result = index.hasNext();
             return result;
         }
 
         @Override
         public E next() {
-            final I id = index.next();
-            final Optional<E> loaded = repository.find(id);
+            I id = index.next();
+            Optional<E> loaded = repository.find(id);
             if (!loaded.isPresent()) {
-                final String idStr = Identifier.toString(id);
+                String idStr = Identifier.toString(id);
                 throw newIllegalStateException("Unable to load entity with ID: %s", idStr);
             }
 
-            final E entity = loaded.get();
+            E entity = loaded.get();
             return entity;
         }
 

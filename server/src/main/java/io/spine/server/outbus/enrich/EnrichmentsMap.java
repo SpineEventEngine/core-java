@@ -32,8 +32,8 @@ import io.spine.option.OptionsProto;
 import io.spine.type.KnownTypes;
 import io.spine.type.TypeName;
 import io.spine.type.TypeUrl;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;

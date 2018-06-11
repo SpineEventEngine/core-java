@@ -40,7 +40,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.base.Identifier.newUuid;
 import static io.spine.server.aggregate.AggregatePartRepositoryLookup.createLookup;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -56,21 +55,17 @@ class AggregatePartRepositoryLookupTest {
         ModelTests.clearModel();
         boundedContext = BoundedContext.newBuilder()
                                        .build();
-        final ProjectId id = ProjectId.newBuilder()
-                                      .setId(newUuid())
-                                      .build();
-        boundedContext.register(new ProjectPartRepository(boundedContext));
-        boundedContext.register(new TaskAggregateRepository(boundedContext));
+        boundedContext.register(new ProjectPartRepository());
+        boundedContext.register(new TaskAggregateRepository());
     }
 
     @Test
     @DisplayName("find repository")
     void findRepository() {
-        AggregatePartRepositoryLookup lookup = createLookup(boundedContext,
-                                                            ProjectId.class,
-                                                            Project.class);
+        AggregatePartRepositoryLookup lookup =
+                createLookup(boundedContext, ProjectId.class, Project.class);
 
-        final AggregatePartRepository repository = lookup.find();
+        AggregatePartRepository repository = lookup.find();
         assertNotNull(repository);
         assertTrue(repository instanceof ProjectPartRepository);
     }
@@ -78,27 +73,24 @@ class AggregatePartRepositoryLookupTest {
     @Test
     @DisplayName("throw if repository not found")
     void throwOnRepositoryNotFound() {
-        AggregatePartRepositoryLookup lookup = createLookup(boundedContext,
-                                                            Timestamp.class,
-                                                            StringValue.class);
+        AggregatePartRepositoryLookup lookup =
+                createLookup(boundedContext, Timestamp.class, StringValue.class);
         assertThrows(IllegalStateException.class, lookup::find);
     }
 
     @Test
     @DisplayName("throw if found repository is not AggregatePartRepository")
     void throwOnWrongRepositoryTypeFound() {
-        final AggregatePartRepositoryLookup lookup = createLookup(boundedContext,
-                                                                  TaskId.class,
-                                                                  Task.class);
+        AggregatePartRepositoryLookup lookup =
+                createLookup(boundedContext, TaskId.class, Task.class);
         assertThrows(IllegalStateException.class, lookup::find);
     }
 
     @Test
     @DisplayName("throw if repository id class does not match root id class")
     void throwOnIdClassNotMatching() {
-        AggregatePartRepositoryLookup lookup = createLookup(boundedContext,
-                                                            TaskId.class,
-                                                            Project.class);
+        AggregatePartRepositoryLookup lookup =
+                createLookup(boundedContext, TaskId.class, Project.class);
         assertThrows(IllegalStateException.class, lookup::find);
     }
 
@@ -144,7 +136,7 @@ class AggregatePartRepositoryLookupTest {
 
     private static class ProjectPartRepository
             extends AggregatePartRepository<ProjectId, ProjectPart, ProjectRoot> {
-        private ProjectPartRepository(BoundedContext boundedContext) {
+        private ProjectPartRepository() {
             super();
         }
     }
@@ -162,10 +154,9 @@ class AggregatePartRepositoryLookupTest {
         }
     }
 
-    private static class TaskAggregatePart extends AggregatePart<TaskId,
-                                                                 Task,
-                                                                 TaskVBuilder,
-                                                                 TaskRoot> {
+    private static class TaskAggregatePart
+            extends AggregatePart<TaskId, Task, TaskVBuilder, TaskRoot> {
+
         private TaskAggregatePart(TaskRoot root) {
             super(root);
         }
@@ -179,16 +170,16 @@ class AggregatePartRepositoryLookupTest {
 
         @Apply
         public void apply(AggTaskAdded event) {
-            final Task task = event.getTask();
+            Task task = event.getTask();
             getBuilder().setTitle(task.getTitle())
-                        .setDescription(task.getDescription())
-                        .build();
+                        .setDescription(task.getDescription());
         }
     }
 
-    private static class TaskAggregateRepository extends AggregateRepository<TaskId,
-                                                                             TaskAggregatePart> {
-        private TaskAggregateRepository(BoundedContext boundedContext) {
+    private static class TaskAggregateRepository
+            extends AggregateRepository<TaskId, TaskAggregatePart> {
+
+        private TaskAggregateRepository() {
             super();
         }
     }

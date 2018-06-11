@@ -20,6 +20,7 @@
 
 package io.spine.testdata;
 
+import com.google.common.base.Charsets;
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Descriptors;
@@ -112,7 +113,7 @@ public class Sample {
             return result;
         }
 
-        final M.Builder builder = builderForType(clazz);
+        final Message.Builder builder = builderForType(clazz);
         @SuppressWarnings("unchecked") // Checked cast
         final M result = (M) builder.build();
 
@@ -154,7 +155,7 @@ public class Sample {
             case STRING:
                 final byte[] bytes = new byte[8];
                 random.nextBytes(bytes);
-                return new String(bytes);
+                return new String(bytes, Charsets.UTF_8);
             case BYTE_STRING:
                 final byte[] bytesPrimitive = new byte[8];
                 random.nextBytes(bytesPrimitive);

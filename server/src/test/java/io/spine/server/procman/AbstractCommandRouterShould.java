@@ -20,9 +20,7 @@
 
 package io.spine.server.procman;
 
-import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
@@ -38,9 +36,9 @@ import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
 import org.junit.Before;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static io.spine.core.Commands.sameActorAndTenant;
 import static io.spine.protobuf.TypeConverter.toMessage;
@@ -142,15 +140,8 @@ public abstract class AbstractCommandRouterShould<T extends AbstractCommandRoute
     }
 
     static List<StringValue> unpackAll(List<Any> anyList) {
-        return Lists.transform(anyList, new Function<Any, StringValue>() {
-            @Nullable
-            @Override
-            public StringValue apply(@Nullable Any input) {
-                if (input == null) {
-                    return null;
-                }
-                return AnyPacker.unpack(input);
-            }
-        });
+        return anyList.stream()
+                      .map(AnyPacker::<StringValue>unpack)
+                      .collect(Collectors.toList());
     }
 }

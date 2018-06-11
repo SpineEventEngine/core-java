@@ -32,7 +32,9 @@ import io.spine.test.event.enrichment.EnrichmentBoundWithMultipleFieldsWithDiffe
 import io.spine.test.event.enrichment.GranterEventsEnrichment;
 import io.spine.test.event.enrichment.ProjectCreatedEnrichmentAnotherPackage;
 import io.spine.test.event.user.UserDeletedEvent;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -57,9 +59,12 @@ public class ReferenceValidatorShould {
     private static final String USER_GOOGLE_UID_FIELD = "user_google_uid";
     private final Enricher enricher = Enrichment.newEventEnricher();
 
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
+
     @Test
     public void initialize_with_valid_enricher() {
-        final ReferenceValidator validator =
+        ReferenceValidator validator =
                 new ReferenceValidator(enricher,
                                        ProjectCreated.class,
                                        ProjectCreatedEnrichmentAnotherPackage.class);
@@ -68,96 +73,97 @@ public class ReferenceValidatorShould {
 
     @Test
     public void store_valid_map_of_enrichment_fields_after_validation() {
-        final ReferenceValidator validator
+        ReferenceValidator validator
                 = new ReferenceValidator(enricher,
                                          UserDeletedEvent.class,
                                          EnrichmentBoundWithMultipleFieldsWithDifferentNames.class);
-        final ValidationResult result = validator.validate();
-        final Multimap<FieldDescriptor, FieldDescriptor> fieldMap = result.getFieldMap();
+        ValidationResult result = validator.validate();
+        Multimap<FieldDescriptor, FieldDescriptor> fieldMap = result.getFieldMap();
         assertNotNull(fieldMap);
         assertFalse(fieldMap.isEmpty());
         assertSize(1, fieldMap);
 
-        final Iterator<? extends Map.Entry<?, ? extends Collection<?>>> fieldsIterator =
+        Iterator<? extends Map.Entry<?, ? extends Collection<?>>> fieldsIterator =
                 fieldMap.asMap()
                         .entrySet()
                         .iterator();
         assertTrue(fieldsIterator.hasNext());
-        final Map.Entry<?, ? extends Collection<?>> entry = fieldsIterator.next();
+        Map.Entry<?, ? extends Collection<?>> entry = fieldsIterator.next();
 
         @SuppressWarnings("unchecked")
-        final Map.Entry<FieldDescriptor, Collection<FieldDescriptor>> fieldEntry
+        Map.Entry<FieldDescriptor, Collection<FieldDescriptor>> fieldEntry
                 = (Map.Entry<FieldDescriptor, Collection<FieldDescriptor>>) entry;
 
-        final FieldDescriptor eventField = fieldEntry.getKey();
-        final String eventFieldName = eventField.getName();
+        FieldDescriptor eventField = fieldEntry.getKey();
+        String eventFieldName = eventField.getName();
         assertEquals("deleted_uid", eventFieldName);
 
-        final Collection<FieldDescriptor> enrichmentFields = fieldEntry.getValue();
+        Collection<FieldDescriptor> enrichmentFields = fieldEntry.getValue();
         assertFalse(enrichmentFields.isEmpty());
         assertSize(1, enrichmentFields);
 
-        final Iterator<FieldDescriptor> enrichmentFieldIterator = enrichmentFields.iterator();
+        Iterator<FieldDescriptor> enrichmentFieldIterator = enrichmentFields.iterator();
         assertTrue(enrichmentFieldIterator.hasNext());
 
-        final FieldDescriptor enrichmentField = enrichmentFieldIterator.next();
-        final String enrichmentFieldName = enrichmentField.getName();
+        FieldDescriptor enrichmentField = enrichmentFieldIterator.next();
+        String enrichmentFieldName = enrichmentField.getName();
         assertEquals(USER_GOOGLE_UID_FIELD, enrichmentFieldName);
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void fail_validation_if_enrichment_is_not_declared() {
-        final ReferenceValidator validator = new ReferenceValidator(enricher,
-                                                                    UserDeletedEvent.class,
-                                                                    GranterEventsEnrichment.class);
+        ReferenceValidator validator = new ReferenceValidator(enricher,
+                                                              UserDeletedEvent.class,
+                                                              GranterEventsEnrichment.class);
+        thrown.expect(IllegalStateException.class);
         validator.validate();
     }
 
     @Test
     public void skip_mapping_if_no_mapping_function_is_defined() {
-        final Enricher<?, ?> mockEnricher = mock(Enricher.class);
+        Enricher<?, ?> mockEnricher = mock(Enricher.class);
         when(mockEnricher.functionFor(any(Class.class), any(Class.class)))
-                .thenReturn(Optional.<EnrichmentFunction<?, ?, ?>>absent());
-        final ReferenceValidator validator
+                .thenReturn(Optional.absent());
+        ReferenceValidator validator
                 = new ReferenceValidator(mockEnricher,
                                          UserDeletedEvent.class,
                                          EnrichmentBoundWithMultipleFieldsWithDifferentNames.class);
-        final ValidationResult result = validator.validate();
-        final List<EnrichmentFunction<?, ?, ?>> functions = result.getFunctions();
+        ValidationResult result = validator.validate();
+        List<EnrichmentFunction<?, ?, ?>> functions = result.getFunctions();
         assertTrue(functions.isEmpty());
-        final Multimap<FieldDescriptor, FieldDescriptor> fields = result.getFieldMap();
+        Multimap<FieldDescriptor, FieldDescriptor> fields = result.getFieldMap();
         assertEmpty(fields);
     }
 
     @Test
     public void handle_separator_spaces_in_by_argument() {
-        final ReferenceValidator validator
+        ReferenceValidator validator
                 = new ReferenceValidator(enricher,
                                          TaskAdded.class,
                                          EnrichmentBoundWithFieldsSeparatedWithSpaces.class);
-        final ValidationResult result = validator.validate();
-        final Multimap<FieldDescriptor, FieldDescriptor> fieldMap = result.getFieldMap();
+        ValidationResult result = validator.validate();
+        Multimap<FieldDescriptor, FieldDescriptor> fieldMap = result.getFieldMap();
         assertFalse(fieldMap.isEmpty());
         assertSize(1, fieldMap);
 
-        final Iterator<Map.Entry<FieldDescriptor, Collection<FieldDescriptor>>> mapIterator =
+        Iterator<Map.Entry<FieldDescriptor, Collection<FieldDescriptor>>> mapIterator =
                 fieldMap.asMap()
                         .entrySet()
                         .iterator();
         assertTrue(mapIterator.hasNext());
-        final Map.Entry<FieldDescriptor, Collection<FieldDescriptor>> singleEntry =
+        Map.Entry<FieldDescriptor, Collection<FieldDescriptor>> singleEntry =
                 mapIterator.next();
-        final FieldDescriptor boundField = singleEntry.getKey();
+        FieldDescriptor boundField = singleEntry.getKey();
 
-        final String boundFieldName = boundField.getName();
+        String boundFieldName = boundField.getName();
         assertEquals("project_id", boundFieldName);
 
-        final Collection<FieldDescriptor> targets = singleEntry.getValue();
+        Collection<FieldDescriptor> targets = singleEntry.getValue();
         assertSize(1, targets);
 
-        final FieldDescriptor targetField = targets.iterator()
-                                                   .next();
-        final String targetFieldName = targetField.getName();
+        FieldDescriptor targetField = targets.iterator()
+                                             .next();
+        String targetFieldName = targetField.getName();
         assertEquals(USER_GOOGLE_UID_FIELD, targetFieldName);
     }
 }

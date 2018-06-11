@@ -24,8 +24,10 @@
  *
  * <p>Should be used in test purposes only.
  */
-
+@CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.server.transport.memory;
+
+import com.google.errorprone.annotations.CheckReturnValue;
 
 import javax.annotation.ParametersAreNonnullByDefault;

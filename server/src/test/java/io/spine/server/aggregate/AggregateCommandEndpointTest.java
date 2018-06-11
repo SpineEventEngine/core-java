@@ -81,26 +81,28 @@ class AggregateCommandEndpointTest {
     @Test
     @DisplayName("post events on command dispatching")
     void postEventsOnCommandDispatching() {
-        final CommandEnvelope cmd = CommandEnvelope.of(createProject(projectId));
+        CommandEnvelope cmd = CommandEnvelope.of(createProject(projectId));
 
-        repository.dispatch(cmd);
+        ProjectId id = repository.dispatch(cmd);
+        assertEquals(projectId, id);
 
-        final AggProjectCreated msg = subscriber.remembered;
+        AggProjectCreated msg = subscriber.remembered;
         assertEquals(projectId, msg.getProjectId());
     }
 
     @Test
     @DisplayName("store aggregate on command dispatching")
     void storeAggregateOnCommandDispatching() {
-        final CommandEnvelope cmd = CommandEnvelope.of(createProject(projectId));
-        final AggCreateProject msg = (AggCreateProject) cmd.getMessage();
+        CommandEnvelope cmd = CommandEnvelope.of(createProject(projectId));
+        AggCreateProject msg = (AggCreateProject) cmd.getMessage();
 
-        repository.dispatch(cmd);
+        ProjectId id = repository.dispatch(cmd);
+        assertEquals(projectId, id);
 
-        final Optional<ProjectAggregate> optional = repository.find(projectId);
+        Optional<ProjectAggregate> optional = repository.find(projectId);
         assertTrue(optional.isPresent());
 
-        final ProjectAggregate aggregate = optional.get();
+        ProjectAggregate aggregate = optional.get();
         assertEquals(projectId, aggregate.getId());
 
         assertEquals(msg.getName(), aggregate.getState()
@@ -125,8 +127,10 @@ class AggregateCommandEndpointTest {
      * Utility methods.
      ****************************/
 
+    @SuppressWarnings("CheckReturnValue")
+        // ignore ID of the aggregate returned by the repository
     private void assertDispatches(Command cmd) {
-        final CommandEnvelope envelope = CommandEnvelope.of(cmd);
+        CommandEnvelope envelope = CommandEnvelope.of(cmd);
         repository.dispatch(envelope);
         ProjectAggregate.assertHandled(cmd);
     }

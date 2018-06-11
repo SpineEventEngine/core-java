@@ -41,6 +41,7 @@ import io.spine.server.projection.ProjectionStorage;
 import io.spine.server.stand.AggregateStateId;
 import io.spine.server.stand.StandStorage;
 import io.spine.type.TypeUrl;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -114,6 +115,7 @@ public abstract class RecordStorage<I>
      *         or {@code Optional.absent()} if there is no record matching this request
      * @see    #read(RecordReadRequest)
      */
+    @SuppressWarnings("CheckReturnValue") // calling builder method
     public Optional<EntityRecord> read(RecordReadRequest<I> request, FieldMask fieldMask) {
         final Optional<EntityRecord> rawResult = read(request);
 
@@ -342,8 +344,8 @@ public abstract class RecordStorage<I>
     protected abstract Iterator<EntityRecord> readMultipleRecords(Iterable<I> ids);
 
     /** @see BulkStorageOperationsMixin#readMultiple(java.lang.Iterable) */
-    protected abstract Iterator<EntityRecord> readMultipleRecords(Iterable<I> ids,
-                                                                  FieldMask fieldMask);
+    protected abstract Iterator<@Nullable EntityRecord> readMultipleRecords(Iterable<I> ids,
+                                                                            FieldMask fieldMask);
 
     /** @see BulkStorageOperationsMixin#readAll() */
     protected abstract Iterator<EntityRecord> readAllRecords();

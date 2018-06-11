@@ -115,17 +115,20 @@ class AggregatePartTest {
                               .setLastName("|")
                               .build();
         try {
-            aggregatePartOfClass(AnAggregatePart.class).withRoot(root)
-                                                       .withId(getClass().getName())
-                                                       .withVersion(1)
-                                                       .withState(user)
-                                                       .build();
+            aggregatePartOfClass(AnAggregatePart.class)
+                    .withRoot(root)
+                    .withId(getClass().getName())
+                    .withVersion(1)
+                    .withState(user)
+                    .build();
             fail();
         } catch (InvalidEntityStateException e) {
-            final List<ConstraintViolation> violations = e.getError()
-                                                          .getValidationError()
-                                                          .getConstraintViolationList();
-            assertSize(user.getAllFields().size(), violations);
+            List<ConstraintViolation> violations =
+                    e.getError()
+                     .getValidationError()
+                     .getConstraintViolationList();
+            assertSize(user.getAllFields()
+                           .size(), violations);
         }
     }
 
@@ -133,22 +136,25 @@ class AggregatePartTest {
     @Test
     @DisplayName("update valid entity state")
     void updateEntityState() {
-        final User user = User.newBuilder()
-                              .setFirstName("Firstname")
-                              .setLastName("Lastname")
-                              .build();
-        aggregatePartOfClass(AnAggregatePart.class).withRoot(root)
-                                                   .withId(getClass().getName())
-                                                   .withVersion(1)
-                                                   .withState(user)
-                                                   .build();
+        User user = User.newBuilder()
+                        .setFirstName("Firstname")
+                        .setLastName("Lastname")
+                        .build();
+        AnAggregatePart part = aggregatePartOfClass(AnAggregatePart.class)
+                .withRoot(root)
+                .withId(getClass().getName())
+                .withVersion(1)
+                .withState(user)
+                .build();
+
+        assertEquals(user, part.getState());
     }
 
     private NullPointerTester createNullPointerTester() throws NoSuchMethodException {
-        final Constructor constructor =
+        Constructor constructor =
                 AnAggregateRoot.class
                         .getDeclaredConstructor(BoundedContext.class, String.class);
-        final NullPointerTester tester = new NullPointerTester();
+        NullPointerTester tester = new NullPointerTester();
         tester.setDefault(Constructor.class, constructor)
               .setDefault(BoundedContext.class, boundedContext)
               .setDefault(AggregateRoot.class, root);
@@ -156,7 +162,7 @@ class AggregatePartTest {
     }
 
     private void prepareAggregatePart() {
-        final AggAddTask addTask =
+        AggAddTask addTask =
                 ((AggAddTask.Builder) Sample.builderForType(AggAddTask.class))
                         .setProjectId(ProjectId.newBuilder()
                                                .setId("agg-part-ID"))

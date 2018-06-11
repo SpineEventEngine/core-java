@@ -29,8 +29,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.validate.Validate.checkNotEmptyOrBlank;
-import static java.lang.String.format;
+import static io.spine.server.entity.storage.Columns.checkColumnName;
+import static io.spine.server.entity.storage.Columns.couldNotFindColumn;
 import static java.util.Collections.synchronizedMap;
 
 /**
@@ -104,17 +104,14 @@ public class EntityColumnCache {
      * @throws IllegalArgumentException if the {@link EntityColumn} is not found
      */
     public EntityColumn findColumn(String columnName) {
-        checkNotEmptyOrBlank(columnName, "entity column name");
+        checkColumnName(columnName);
 
         ensureColumnsCached();
 
-        final EntityColumn entityColumn = entityColumnData.get(columnName);
+        EntityColumn entityColumn = entityColumnData.get(columnName);
 
         if (entityColumn == null) {
-            throw new IllegalArgumentException(
-                    format("Could not find an EntityColumn description for %s.%s.",
-                            entityClass.getCanonicalName(),
-                            columnName));
+            throw couldNotFindColumn(entityClass, columnName);
         }
         return entityColumn;
     }

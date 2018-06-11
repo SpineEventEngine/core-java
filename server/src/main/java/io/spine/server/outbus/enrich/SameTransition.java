@@ -21,8 +21,7 @@
 package io.spine.server.outbus.enrich;
 
 import com.google.common.base.Predicate;
-
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

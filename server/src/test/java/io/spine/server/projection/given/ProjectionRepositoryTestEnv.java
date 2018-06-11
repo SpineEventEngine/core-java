@@ -41,7 +41,7 @@ import io.spine.test.projection.event.PrjProjectDeleted;
 import io.spine.test.projection.event.PrjProjectStarted;
 import io.spine.test.projection.event.PrjTaskAdded;
 
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Set;
 
 public class ProjectionRepositoryTestEnv {

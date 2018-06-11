@@ -27,7 +27,9 @@ import io.spine.server.model.ModelError;
 import io.spine.test.TimeTests;
 import io.spine.time.Interval;
 import io.spine.time.Intervals;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.lang.reflect.Constructor;
 
@@ -41,35 +43,38 @@ import static org.junit.Assert.assertTrue;
  */
 public class EntityClassShould {
 
-    private final EntityClass<NanoEntity> entityClass = new EntityClass<>(
-            (Class<? extends NanoEntity>) NanoEntity.class);
+    private final EntityClass<NanoEntity> entityClass =
+            new EntityClass<>((Class<? extends NanoEntity>) NanoEntity.class);
 
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
+    
     @Test
     public void return_id_class() {
         @SuppressWarnings("unchecked") //
-        final Class<Long> actual = (Class<Long>) entityClass.getIdClass();
+        Class<Long> actual = (Class<Long>) entityClass.getIdClass();
         assertEquals(Long.class, actual);
     }
 
     @Test
     public void obtain_entity_constructor() {
-        final Constructor<NanoEntity> ctor = entityClass.getConstructor();
+        Constructor<NanoEntity> ctor = entityClass.getConstructor();
         assertNotNull(ctor);
     }
 
     @Test
     public void create_and_initialize_entity_instance() {
-        final Long id = 100L;
-        final Timestamp before = TimeTests.Past.secondsAgo(1);
+        Long id = 100L;
+        Timestamp before = TimeTests.Past.secondsAgo(1);
 
         // Create and init the entity.
-        final EntityClass<NanoEntity> entityClass = new EntityClass<>(NanoEntity.class);
-        final AbstractVersionableEntity<Long, StringValue> entity = entityClass.createEntity(id);
+        EntityClass<NanoEntity> entityClass = new EntityClass<>(NanoEntity.class);
+        AbstractVersionableEntity<Long, StringValue> entity = entityClass.createEntity(id);
 
-        final Timestamp after = Time.getCurrentTime();
+        Timestamp after = Time.getCurrentTime();
 
         // The interval with a much earlier start to allow non-zero interval on faster computers.
-        final Interval whileWeCreate = Intervals.between(before, after);
+        Interval whileWeCreate = Intervals.between(before, after);
 
         assertEquals(id, entity.getId());
         assertEquals(0, entity.getVersion()
@@ -80,8 +85,9 @@ public class EntityClassShould {
         assertFalse(entity.isDeleted());
     }
 
-    @Test(expected = ModelError.class)
+    @Test
     public void complain_when_there_is_no_one_arg_constructor_for_entity_class() {
+        thrown.expect(ModelError.class);
         new EntityClass<>(NoArgEntity.class).getConstructor();
     }
 

@@ -54,12 +54,12 @@ public class DelegatingRejectionDispatcherShould {
         delegate = new EmptyRejectionDispatcherDelegate();
         delegatingDispatcher = DelegatingRejectionDispatcher.of(delegate);
 
-        final Command command = requestFactory.generateCommand();
-        final Message rejectionMessage =
+        Command command = requestFactory.generateCommand();
+        Message rejectionMessage =
                 EntityAlreadyDeleted.newBuilder()
                                     .setEntityId(Identifier.pack(getClass().getName()))
                                     .build();
-        final Rejection rejection = Rejections.createRejection(rejectionMessage, command);
+        Rejection rejection = Rejections.createRejection(rejectionMessage, command);
         rejectionEnvelope = RejectionEnvelope.of(rejection);
     }
 
@@ -76,6 +76,7 @@ public class DelegatingRejectionDispatcherShould {
                      delegate.getRejectionClasses());
     }
 
+    @SuppressWarnings("CheckReturnValue") // can ignore in this test
     @Test
     public void dispatch_rejection() {
         delegatingDispatcher.dispatch(rejectionEnvelope);

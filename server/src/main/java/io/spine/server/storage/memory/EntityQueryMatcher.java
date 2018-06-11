@@ -33,8 +33,8 @@ import io.spine.server.entity.storage.EntityColumn.MemoizedValue;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.entity.storage.QueryParameters;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Map;
 

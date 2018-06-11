@@ -112,6 +112,7 @@ public class RejectionEnvelope
      *
      * @param builder event context builder into which the origin related fields are set
      */
+    @SuppressWarnings("CheckReturnValue") // calling builder
     @Override
     public void setOriginFields(EventContext.Builder builder) {
         final RejectionContext context = getOuterObject().getContext();

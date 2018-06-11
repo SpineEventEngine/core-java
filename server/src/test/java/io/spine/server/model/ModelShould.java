@@ -49,6 +49,7 @@ public class ModelShould {
         model.clear();
     }
 
+    @SuppressWarnings("CheckReturnValue") // returned values are not used in this test
     @Test
     public void not_allow_duplicated_command_handlers() {
         try {
@@ -62,6 +63,7 @@ public class ModelShould {
         }
     }
 
+    @SuppressWarnings("CheckReturnValue") // returned values are not used in this test
     @Test
     public void not_allow_more_than_one_command_duplication() {
         try {
@@ -78,12 +80,12 @@ public class ModelShould {
 
     @Test
     public void return_default_state_for_entity_class() {
-        final Message defaultState = model.getDefaultState(MAggregate.class);
+        Message defaultState = model.getDefaultState(MAggregate.class);
         assertNotNull("Default state cannot be null for the entity class.", defaultState);
     }
 
     private static void assertContainsClassName(DuplicateCommandHandlerError error, Class<?> cls) {
-        final String errorMessage = error.getMessage();
+        String errorMessage = error.getMessage();
         assertTrue(errorMessage.contains(cls.getName()));
     }
 

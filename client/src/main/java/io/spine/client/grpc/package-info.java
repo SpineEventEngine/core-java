@@ -25,6 +25,8 @@
  */
 
 @Internal
+@CheckReturnValue
 package io.spine.client.grpc;
 
+import com.google.errorprone.annotations.CheckReturnValue;
 import io.spine.annotation.Internal;

@@ -24,8 +24,6 @@ import com.google.common.base.Objects;
 import io.spine.string.StringifierRegistry;
 import io.spine.type.TypeUrl;
 
-import javax.annotation.CheckReturnValue;
-
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -55,7 +53,6 @@ public final class AggregateStateId<I> {
         this.stateType = checkNotNull(stateType);
     }
 
-    @CheckReturnValue
     public static <I> AggregateStateId of(I aggregateId, TypeUrl stateType) {
         return new AggregateStateId<>(aggregateId, stateType);
     }

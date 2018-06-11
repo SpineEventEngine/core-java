@@ -21,7 +21,10 @@
 /**
  * This package provides common types for analyzing Spine model at compile time.
  */
+@CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.model;
+
+import com.google.errorprone.annotations.CheckReturnValue;
 
 import javax.annotation.ParametersAreNonnullByDefault;

@@ -23,8 +23,9 @@ package io.spine.server.entity;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.test.entity.number.NaturalNumber;
-import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -39,6 +40,9 @@ import static org.junit.Assert.fail;
  * @author Illia Shepilov
  */
 public class AbstractEntityShould {
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     /**
      * Ensures that {@link AbstractEntity#updateState(Message)} is final so that
@@ -84,9 +88,11 @@ public class AbstractEntityShould {
     }
 
     @SuppressWarnings("ConstantConditions") // The goal of the test.
-    @Test(expected = NullPointerException.class)
+    @Test
     public void not_accept_null_to_checkEntityState() {
-        final AnEntity entity = new AnEntity(0L);
+        AnEntity entity = new AnEntity(0L);
+
+        thrown.expect(NullPointerException.class);
         entity.checkEntityState(null);
     }
 

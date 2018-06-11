@@ -23,7 +23,10 @@
  * event-sourcing applications.
  */
 
+@CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.core;
+
+import com.google.errorprone.annotations.CheckReturnValue;
 
 import javax.annotation.ParametersAreNonnullByDefault;

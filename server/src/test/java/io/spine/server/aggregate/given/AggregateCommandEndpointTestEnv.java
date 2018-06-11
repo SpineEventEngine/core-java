@@ -42,8 +42,8 @@ import io.spine.test.aggregate.event.AggTaskAdded;
  */
 public class AggregateCommandEndpointTestEnv {
 
+    /** Prevent instantiation of this utility class. */
     private AggregateCommandEndpointTestEnv() {
-        // Prevent instantiation of this utility class.
     }
 
     public static class ProjectAggregate
@@ -68,9 +68,9 @@ public class AggregateCommandEndpointTestEnv {
         AggProjectCreated handle(AggCreateProject msg, CommandContext context) {
             commandsHandled.add(msg, context);
             return AggProjectCreated.newBuilder()
-                                 .setProjectId(msg.getProjectId())
-                                 .setName(msg.getName())
-                                 .build();
+                                    .setProjectId(msg.getProjectId())
+                                    .setName(msg.getName())
+                                    .build();
         }
 
         @Apply

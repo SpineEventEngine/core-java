@@ -23,8 +23,7 @@ package io.spine.server.storage.memory;
 import com.google.common.base.Function;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
-
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * The {@link Function} converting the {@link EntityRecordWithColumns} into {@link EntityRecord}.

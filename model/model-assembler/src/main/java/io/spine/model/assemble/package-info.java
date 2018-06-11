@@ -21,7 +21,10 @@
 /**
  * This package provides tools for assembling the Spine model at compile time.
  */
+@CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.model.assemble;
+
+import com.google.errorprone.annotations.CheckReturnValue;
 
 import javax.annotation.ParametersAreNonnullByDefault;

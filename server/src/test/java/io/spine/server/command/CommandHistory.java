@@ -47,12 +47,12 @@ public class CommandHistory {
     }
 
     public boolean contains(Command command) {
-        final Message message = Commands.getMessage(command);
+        Message message = Commands.getMessage(command);
 
         if (messages.contains(message)) {
-            final int messageIndex = messages.indexOf(message);
-            final CommandContext actualContext = command.getContext();
-            final CommandContext storedContext = contexts.get(messageIndex);
+            int messageIndex = messages.indexOf(message);
+            CommandContext actualContext = command.getContext();
+            CommandContext storedContext = contexts.get(messageIndex);
             return actualContext.equals(storedContext);
         }
 
@@ -65,9 +65,9 @@ public class CommandHistory {
     }
 
     public void assertHandled(Command expected) {
-        final String cmdName = Commands.getMessage(expected)
-                                       .getClass()
-                                       .getName();
+        String cmdName = Commands.getMessage(expected)
+                                 .getClass()
+                                 .getName();
         assertTrue("Expected but wasn't handled, command: " + cmdName, contains(expected));
     }
 }

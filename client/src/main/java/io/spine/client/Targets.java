@@ -26,7 +26,7 @@ import io.spine.annotation.Internal;
 import io.spine.protobuf.AnyPacker;
 import io.spine.type.TypeUrl;
 
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Collections;
 import java.util.Set;
 
@@ -75,6 +75,7 @@ public final class Targets {
         return result;
     }
 
+    @SuppressWarnings("CheckReturnValue") // calling builder
     static Target composeTarget(Class<? extends Message> entityClass,
                                 @Nullable Set<? extends Message> ids,
                                 @Nullable Set<CompositeColumnFilter> columnFilters) {

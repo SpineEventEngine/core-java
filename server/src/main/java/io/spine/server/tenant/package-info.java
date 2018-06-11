@@ -21,8 +21,10 @@
 /**
  * This package contains classes and interfaces for supporting multi-tenancy.
  */
-
+@CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.server.tenant;
+
+import com.google.errorprone.annotations.CheckReturnValue;
 
 import javax.annotation.ParametersAreNonnullByDefault;

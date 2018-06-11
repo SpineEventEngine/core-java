@@ -23,9 +23,11 @@
  */
 
 @Internal
+@CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.server.integration.grpc;
 
+import com.google.errorprone.annotations.CheckReturnValue;
 import io.spine.annotation.Internal;
 
 import javax.annotation.ParametersAreNonnullByDefault;

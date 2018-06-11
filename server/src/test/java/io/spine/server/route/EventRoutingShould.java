@@ -63,6 +63,7 @@ public class EventRoutingShould {
 
         private static final long serialVersionUID = 0L;
 
+        @SuppressWarnings("AssignmentOrReturnOfFieldWithMutableType") // return immutable instance
         @Override
         public Set<Long> apply(StringValue message, EventContext context) {
             return CUSTOM_ROUTE;

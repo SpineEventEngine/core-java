@@ -20,6 +20,7 @@
 
 package io.spine.server.aggregate;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.server.entity.EntityBuilder;
 import io.spine.server.entity.EntityClass;
@@ -53,6 +54,7 @@ public class AggregatePartBuilder<A extends AggregatePart<I, S, ?, R>,
         return this;
     }
 
+    @CanIgnoreReturnValue
     @Override
     public AggregatePartBuilder<A, I, S, R> setResultClass(Class<A> entityClass) {
         super.setResultClass(entityClass);

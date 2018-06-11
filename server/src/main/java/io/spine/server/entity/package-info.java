@@ -21,7 +21,10 @@
 /**
  * This package contains classes and interfaces defining entity-oriented API and base functionality.
  */
+@CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.server.entity;
+
+import com.google.errorprone.annotations.CheckReturnValue;
 
 import javax.annotation.ParametersAreNonnullByDefault;

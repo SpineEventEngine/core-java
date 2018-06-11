@@ -29,7 +29,9 @@ import com.google.protobuf.UInt32Value;
 import io.spine.base.Time;
 import io.spine.test.TestValues;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.util.Iterator;
 
@@ -52,6 +54,9 @@ public class EitherOfThreeShould {
     private EitherOfThree<StringValue, UInt32Value, Timestamp> eitherWithA;
     private EitherOfThree<StringValue, UInt32Value, Timestamp> eitherWithB;
     private EitherOfThree<StringValue, UInt32Value, Timestamp> eitherWithC;
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     @Before
     public void setUp() {
@@ -105,33 +110,39 @@ public class EitherOfThreeShould {
         assertFalse(iteratorC.hasNext());
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void prohibit_obtaining_the_other_value_A_B() {
+        thrown.expect(IllegalStateException.class);
         eitherWithA.getB();
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void prohibit_obtaining_the_other_value_A_C() {
+        thrown.expect(IllegalStateException.class);
         eitherWithA.getC();
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void prohibit_obtaining_the_other_value_B_A() {
+        thrown.expect(IllegalStateException.class);
         eitherWithB.getA();
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void prohibit_obtaining_the_other_value_B_C() {
+        thrown.expect(IllegalStateException.class);
         eitherWithB.getC();
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void prohibit_obtaining_the_other_value_C_A() {
+        thrown.expect(IllegalStateException.class);
         eitherWithC.getA();
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void prohibit_obtaining_the_other_value_C_B() {
+        thrown.expect(IllegalStateException.class);
         eitherWithC.getB();
     }
 

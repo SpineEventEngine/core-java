@@ -89,10 +89,13 @@ public final class Log extends Aggregate<Long, LogState, LogStateVBuilder> {
     /**
      * The repository with default routing functions that route to the singleton aggregate.
      */
-    @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
+    @SuppressWarnings({
+            "SerializableInnerClassWithNonSerializableOuterClass",
+            "AssignmentOrReturnOfFieldWithMutableType" // returning immutable impl.
+    })
     public static final class Repository extends AggregateRepository<Long, Log> {
 
-        private static final Set<Long> SINGLETON_ID_SET = ImmutableSet.of(ID);
+        private static final ImmutableSet<Long> SINGLETON_ID_SET = ImmutableSet.of(ID);
 
         public Repository() {
             super();

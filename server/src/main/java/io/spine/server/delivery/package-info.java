@@ -138,7 +138,10 @@
  * to hold all the known consumers and their streams.  Its instance belongs to the {@code Sharding}
  * service and is JVM-wide as well.
  */
+@CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.server.delivery;
+
+import com.google.errorprone.annotations.CheckReturnValue;
 
 import javax.annotation.ParametersAreNonnullByDefault;

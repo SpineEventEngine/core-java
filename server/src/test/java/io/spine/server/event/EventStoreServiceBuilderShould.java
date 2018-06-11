@@ -25,7 +25,9 @@ import io.spine.server.BoundedContext;
 import io.spine.server.storage.StorageFactory;
 import io.spine.test.Tests;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.util.concurrent.Executor;
 
@@ -34,44 +36,53 @@ import static org.junit.Assert.assertNotNull;
 
 public class EventStoreServiceBuilderShould {
 
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
+
     private StorageFactory storageFactory;
     private EventStore.ServiceBuilder builder;
 
     @Before
     public void setUp() {
-        final BoundedContext bc = BoundedContext.newBuilder()
-                                                .setMultitenant(true)
-                                                .build();
+        BoundedContext bc = BoundedContext
+                .newBuilder()
+                .setMultitenant(true)
+                .build();
         storageFactory = bc.getStorageFactory();
         builder = EventStore.newServiceBuilder();
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void throw_NPE_on_null_executor() {
-        builder.setStreamExecutor(Tests.<Executor>nullRef());
+        thrown.expect(NullPointerException.class);
+        builder.setStreamExecutor(Tests.nullRef());
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void throw_NPE_on_null_EventStorage() {
-        builder.setStreamExecutor(Tests.<Executor>nullRef());
+        thrown.expect(NullPointerException.class);
+        builder.setStreamExecutor(Tests.nullRef());
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void throw_NPE_on_non_set_streamExecutor() {
+        thrown.expect(NullPointerException.class);
         builder.setStorageFactory(storageFactory)
                .build();
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void throw_NPE_on_non_set_eventStorage() {
+        thrown.expect(NullPointerException.class);
         builder.setStreamExecutor(newExecutor())
                .build();
     }
 
     @Test
     public void return_set_streamExecutor() {
-        final Executor executor = newExecutor();
-        assertEquals(executor, builder.setStreamExecutor(executor).getStreamExecutor());
+        Executor executor = newExecutor();
+        assertEquals(executor, builder.setStreamExecutor(executor)
+                                      .getStreamExecutor());
     }
 
     @Test

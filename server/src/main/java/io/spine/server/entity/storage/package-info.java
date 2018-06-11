@@ -22,7 +22,10 @@
  * This package contains classes and interfaces for working with
  * {@link io.spine.server.entity.Entity entity} storage representation.
  */
+@CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.server.entity.storage;
+
+import com.google.errorprone.annotations.CheckReturnValue;
 
 import javax.annotation.ParametersAreNonnullByDefault;

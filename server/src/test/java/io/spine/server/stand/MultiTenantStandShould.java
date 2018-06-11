@@ -55,7 +55,7 @@ public class MultiTenantStandShould extends StandShould {
     @Before
     public void setUp() {
         super.setUp();
-        final TenantId tenantId = newUuid();
+        TenantId tenantId = newUuid();
 
         setCurrentTenant(tenantId);
         setMultitenant(true);
@@ -69,52 +69,51 @@ public class MultiTenantStandShould extends StandShould {
 
     @Test
     public void not_allow_reading_aggregate_records_for_another_tenant() {
-        final Stand stand = doCheckReadingCustomersById(15);
+        Stand stand = doCheckReadingCustomersById(15);
 
-        final TenantId anotherTenant = newUuid();
-        final ActorRequestFactory requestFactory = createRequestFactory(anotherTenant);
+        TenantId anotherTenant = newUuid();
+        ActorRequestFactory requestFactory = createRequestFactory(anotherTenant);
 
-        final Query readAllCustomers = requestFactory.query().all(Customer.class);
+        Query readAllCustomers = requestFactory.query()
+                                               .all(Customer.class);
 
-        final MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
+        MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
         stand.execute(readAllCustomers, responseObserver);
-        final QueryResponse response = responseObserver.getResponseHandled();
+        QueryResponse response = responseObserver.getResponseHandled();
         assertTrue(Responses.isOk(response.getResponse()));
         assertEquals(0, response.getMessagesCount());
     }
 
     @Test
     public void not_trigger_updates_of_aggregate_records_for_another_tenant_subscriptions() {
-        final StandStorage standStorage =
+        StandStorage standStorage =
                 InMemoryStorageFactory.newInstance(newName(getClass().getSimpleName()),
                                                    isMultitenant())
                                       .createStandStorage();
-        final Stand stand = prepareStandWithAggregateRepo(standStorage);
+        Stand stand = prepareStandWithAggregateRepo(standStorage);
 
         // --- Default Tenant
-        final ActorRequestFactory requestFactory = getRequestFactory();
-        final MemoizeEntityUpdateCallback defaultTenantCallback = subscribeToAllOf(stand,
-                                                                                   requestFactory,
-                                                                                   Customer.class);
+        ActorRequestFactory requestFactory = getRequestFactory();
+        MemoizeEntityUpdateCallback defaultTenantCallback =
+                subscribeToAllOf(stand, requestFactory, Customer.class);
 
         // --- Another Tenant
-        final TenantId anotherTenant = newUuid();
-        final ActorRequestFactory anotherFactory = createRequestFactory(anotherTenant);
-        final MemoizeEntityUpdateCallback anotherCallback = subscribeToAllOf(stand,
-                                                                             anotherFactory,
-                                                                             Customer.class);
+        TenantId anotherTenant = newUuid();
+        ActorRequestFactory anotherFactory = createRequestFactory(anotherTenant);
+        MemoizeEntityUpdateCallback anotherCallback =
+                subscribeToAllOf(stand, anotherFactory, Customer.class);
 
         // Trigger updates in Default Tenant.
-        final Map.Entry<CustomerId, Customer> sampleData =
+        Map.Entry<CustomerId, Customer> sampleData =
                 fillSampleCustomers(1).entrySet()
                                       .iterator()
                                       .next();
-        final CustomerId customerId = sampleData.getKey();
-        final Customer customer = sampleData.getValue();
-        final Version stateVersion = GivenVersion.withNumber(1);
+        CustomerId customerId = sampleData.getKey();
+        Customer customer = sampleData.getValue();
+        Version stateVersion = GivenVersion.withNumber(1);
         stand.update(asEnvelope(customerId, customer, stateVersion));
 
-        final Any packedState = AnyPacker.pack(customer);
+        Any packedState = AnyPacker.pack(customer);
         // Verify that Default Tenant callback has got the update.
         assertEquals(packedState, defaultTenantCallback.getNewEntityState());
 
@@ -125,8 +124,9 @@ public class MultiTenantStandShould extends StandShould {
     protected MemoizeEntityUpdateCallback subscribeToAllOf(Stand stand,
                                                            ActorRequestFactory requestFactory,
                                                            Class<? extends Message> entityClass) {
-        final Topic allCustomers = requestFactory.topic().allOf(entityClass);
-        final MemoizeEntityUpdateCallback callback = new MemoizeEntityUpdateCallback();
+        Topic allCustomers = requestFactory.topic()
+                                           .allOf(entityClass);
+        MemoizeEntityUpdateCallback callback = new MemoizeEntityUpdateCallback();
         subscribeAndActivate(stand, allCustomers, callback);
 
         assertNull(callback.getNewEntityState());

@@ -48,8 +48,8 @@ class AggregatePartClassTest {
     @BeforeEach
     void setUp() {
         ModelTests.clearModel();
-        final BoundedContext boundedContext = BoundedContext.newBuilder()
-                                                            .build();
+        BoundedContext boundedContext = BoundedContext.newBuilder()
+                                                      .build();
         root = new AnAggregateRoot(boundedContext, newUuid());
     }
 
@@ -62,7 +62,7 @@ class AggregatePartClassTest {
     @Test
     @DisplayName("throw exception when aggregate part does not have appropriate constructor")
     void throwOnNoProperCtorAvailable() {
-        final AggregatePartClass<WrongAggregatePart> wrongPartClass =
+        AggregatePartClass<WrongAggregatePart> wrongPartClass =
                 new AggregatePartClass<>(WrongAggregatePart.class);
         assertThrows(ModelError.class, wrongPartClass::getConstructor);
     }
@@ -70,7 +70,7 @@ class AggregatePartClassTest {
     @Test
     @DisplayName("create aggregate part entity")
     void createAggregatePartEntity() throws NoSuchMethodException {
-        final AnAggregatePart part = partClass.createEntity(root);
+        AnAggregatePart part = partClass.createEntity(root);
 
         assertNotNull(part);
         assertEquals(root.getId(), part.getId());

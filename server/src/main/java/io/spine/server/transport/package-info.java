@@ -24,7 +24,10 @@
  *
  * <p>Typical transport options include gRPC servers, messaging system integration etc.
  */
+@CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.server.transport;
+
+import com.google.errorprone.annotations.CheckReturnValue;
 
 import javax.annotation.ParametersAreNonnullByDefault;

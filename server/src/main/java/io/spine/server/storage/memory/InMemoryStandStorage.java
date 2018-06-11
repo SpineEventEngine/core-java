@@ -20,7 +20,6 @@
 package io.spine.server.storage.memory;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
 import com.google.protobuf.FieldMask;
 import io.spine.core.BoundedContextName;
 import io.spine.server.entity.AbstractVersionableEntity;
@@ -32,8 +31,8 @@ import io.spine.server.stand.StandStorage;
 import io.spine.server.storage.RecordReadRequest;
 import io.spine.server.storage.RecordStorage;
 import io.spine.type.TypeUrl;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -88,16 +87,13 @@ class InMemoryStandStorage extends StandStorage {
     }
 
     private static Iterator<EntityRecord> filterByType(Iterator<EntityRecord> records,
-                                                       final TypeUrl expectedType) {
-        final Iterator<EntityRecord> result =
+                                                       TypeUrl expectedType) {
+        Iterator<EntityRecord> result =
                 filter(records,
-                       new Predicate<EntityRecord>() {
-                           @Override
-                           public boolean apply(@Nullable EntityRecord entityRecord) {
-                               checkNotNull(entityRecord);
-                               final TypeUrl actualType = ofEnclosed(entityRecord.getState());
-                               return expectedType.equals(actualType);
-                           }
+                       entityRecord -> {
+                           checkNotNull(entityRecord);
+                           TypeUrl actualType = ofEnclosed(entityRecord.getState());
+                           return expectedType.equals(actualType);
                        });
         return result;
     }
@@ -112,7 +108,6 @@ class InMemoryStandStorage extends StandStorage {
         return recordStorage().delete(id);
     }
 
-    @Nullable
     @Override
     protected Optional<EntityRecord> readRecord(AggregateStateId id) {
         final RecordReadRequest<AggregateStateId> request = new RecordReadRequest<>(id);
@@ -125,8 +120,8 @@ class InMemoryStandStorage extends StandStorage {
     }
 
     @Override
-    protected Iterator<EntityRecord> readMultipleRecords(Iterable<AggregateStateId> ids,
-                                                         FieldMask fieldMask) {
+    protected Iterator<@Nullable EntityRecord> readMultipleRecords(Iterable<AggregateStateId> ids,
+                                                                   FieldMask fieldMask) {
         return recordStorage().readMultiple(ids, fieldMask);
     }
 
@@ -141,9 +136,8 @@ class InMemoryStandStorage extends StandStorage {
     }
 
     @Override
-    protected Iterator<EntityRecord> readAllRecords(
-            EntityQuery<AggregateStateId> query,
-            FieldMask fieldMask) {
+    protected Iterator<EntityRecord> readAllRecords(EntityQuery<AggregateStateId> query,
+                                                    FieldMask fieldMask) {
         return recordStorage().readAll(query, fieldMask);
     }
 

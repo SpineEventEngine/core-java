@@ -29,7 +29,7 @@ import io.spine.string.Stringifiers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static io.spine.util.Exceptions.unsupported;
 import static java.lang.String.format;

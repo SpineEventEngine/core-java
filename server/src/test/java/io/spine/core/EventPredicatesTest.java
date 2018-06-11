@@ -83,7 +83,7 @@ class EventPredicatesTest {
     @Test
     @DisplayName("recognize if an event is before timestamp")
     void performIsBefore() {
-        final Predicate<Event> predicate = isBefore(minutesAgo(100));
+        Predicate<Event> predicate = isBefore(minutesAgo(100));
         assertFalse(predicate.apply(GivenEvent.occurredMinutesAgo(20)));
         assertTrue(predicate.apply(GivenEvent.occurredMinutesAgo(360)));
     }
@@ -104,7 +104,7 @@ class EventPredicatesTest {
     @Test
     @DisplayName("not accept zero length time range")
     void notAcceptZeroRange() {
-        final Timestamp timestamp = minutesAgo(5);
+        Timestamp timestamp = minutesAgo(5);
         assertThrows(IllegalArgumentException.class, () -> isBetween(timestamp, timestamp));
     }
 
@@ -113,10 +113,8 @@ class EventPredicatesTest {
     void performIsBetween() {
         final Event event = GivenEvent.occurredMinutesAgo(5);
 
-        assertTrue(isBetween(minutesAgo(10), minutesAgo(1))
-                           .apply(event));
+        assertTrue(isBetween(minutesAgo(10), minutesAgo(1)).apply(event));
 
-        assertFalse(isBetween(minutesAgo(2), minutesAgo(1))
-                            .apply(event));
+        assertFalse(isBetween(minutesAgo(2), minutesAgo(1)).apply(event));
     }
 }

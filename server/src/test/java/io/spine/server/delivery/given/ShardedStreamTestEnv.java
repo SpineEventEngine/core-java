@@ -77,7 +77,7 @@ public class ShardedStreamTestEnv {
     private static final CommandShardedStream<TaskId> tasksShardOne;
 
     static {
-        final Model model = Model.getInstance();
+        Model model = Model.getInstance();
         projectAggregateClass = model.asAggregateClass(ProjectAggregate.class);
         taskAggregateClass = model.asAggregateClass(TaskAggregate.class);
         projectRepo = new ProjectAggregateRepository();
@@ -85,11 +85,11 @@ public class ShardedStreamTestEnv {
         projectsShardOneKey = shardingKeyOf(projectAggregateClass, 1);
         commandsToProjects = DeliveryTag.forCommandsOf(projectRepo);
 
-        final TaskAggregateRepository taskRepo = new TaskAggregateRepository();
-        final BoundedContextName tasksContextName = taskRepo.getBoundedContextName();
-        final ShardingKey tasksShardZeroKey = shardingKeyOf(taskAggregateClass, 0);
-        final ShardingKey tasksShardOneKey = shardingKeyOf(taskAggregateClass, 1);
-        final DeliveryTag<CommandEnvelope> commandsToTask = DeliveryTag.forCommandsOf(taskRepo);
+        TaskAggregateRepository taskRepo = new TaskAggregateRepository();
+        BoundedContextName tasksContextName = taskRepo.getBoundedContextName();
+        ShardingKey tasksShardZeroKey = shardingKeyOf(taskAggregateClass, 0);
+        ShardingKey tasksShardOneKey = shardingKeyOf(taskAggregateClass, 1);
+        DeliveryTag<CommandEnvelope> commandsToTask = DeliveryTag.forCommandsOf(taskRepo);
 
         projectsShardZero = streamToProject(transportFactory,
                                             projectsContextName,
@@ -111,7 +111,7 @@ public class ShardedStreamTestEnv {
                                                   projectsShardOneKey,
                                                   commandsToProjects);
 
-        final ShardedStreamConsumer<TaskId, CommandEnvelope> taskConsumer = dummyConsumer();
+        ShardedStreamConsumer<TaskId, CommandEnvelope> taskConsumer = dummyConsumer();
         tasksShardZero = streamToTask(tasksContextName,
                                       tasksShardZeroKey,
                                       commandsToTask,
@@ -122,23 +122,24 @@ public class ShardedStreamTestEnv {
                                      taskConsumer);
     }
 
+    /**
+     * Prevents this test environment utility from initialization.
+     */
+    private ShardedStreamTestEnv() {
+    }
+
     private static CommandShardedStream<TaskId>
     streamToTask(BoundedContextName contextName,
                  ShardingKey key,
                  DeliveryTag<CommandEnvelope> tag,
                  ShardedStreamConsumer<TaskId, CommandEnvelope> consumer) {
-        return CommandShardedStream.<TaskId>newBuilder().setBoundedContextName(contextName)
-                                                        .setKey(key)
-                                                        .setTag(tag)
-                                                        .setConsumer(consumer)
-                                                        .setTargetIdClass(TaskId.class)
-                                                        .build(transportFactory);
-    }
-
-    /**
-     * Prevents this test environment utility from initialization.
-     */
-    private ShardedStreamTestEnv() {
+        return CommandShardedStream.<TaskId>newBuilder()
+                .setBoundedContextName(contextName)
+                .setKey(key)
+                .setTag(tag)
+                .setConsumer(consumer)
+                .setTargetIdClass(TaskId.class)
+                .build(transportFactory);
     }
 
     public static CommandShardedStream<ProjectId> projectsShardZero() {
@@ -167,22 +168,22 @@ public class ShardedStreamTestEnv {
 
     public static CommandShardedStream<ProjectId>
     streamToShardWithFactory(TransportFactory factory) {
-        final CommandShardedStream.Builder<ProjectId> builder = CommandShardedStream.newBuilder();
-        final ShardedStreamConsumer<ProjectId, CommandEnvelope> consumer = dummyConsumer();
+        CommandShardedStream.Builder<ProjectId> builder = CommandShardedStream.newBuilder();
+        ShardedStreamConsumer<ProjectId, CommandEnvelope> consumer = dummyConsumer();
         builder.setBoundedContextName(projectsContextName)
                .setKey(projectsShardZeroKey)
                .setTag(commandsToProjects)
                .setConsumer(consumer)
                .setTargetIdClass(ProjectId.class);
-        final CommandShardedStream<ProjectId> result = builder.build(factory);
+        CommandShardedStream<ProjectId> result = builder.build(factory);
         return result;
     }
 
     private static CommandShardedStream<ProjectId>
     streamToProject(TransportFactory factory, BoundedContextName contextName,
                     ShardingKey key, DeliveryTag<CommandEnvelope> tag) {
-        final CommandShardedStream.Builder<ProjectId> builder = CommandShardedStream.newBuilder();
-        final ShardedStreamConsumer<ProjectId, CommandEnvelope> consumer = dummyConsumer();
+        CommandShardedStream.Builder<ProjectId> builder = CommandShardedStream.newBuilder();
+        ShardedStreamConsumer<ProjectId, CommandEnvelope> consumer = dummyConsumer();
         return builder.setBoundedContextName(contextName)
                       .setKey(key)
                       .setTag(tag)
@@ -229,19 +230,29 @@ public class ShardedStreamTestEnv {
     }
 
     public static TransportFactory
-    customFactory(final Function<StreamObserver<ExternalMessage>, Void> observerCallback) {
+    customFactory(Function<StreamObserver<ExternalMessage>, Void> observerCallback) {
         return new InMemoryTransportFactory() {
             @Override
             protected Subscriber newSubscriber(ChannelId channelId) {
                 return new InMemorySubscriber(channelId) {
                     @Override
                     public void onMessage(ExternalMessage message) {
-                        final Iterable<StreamObserver<ExternalMessage>> observers = getObservers();
+                        Iterable<StreamObserver<ExternalMessage>> observers = getObservers();
                         for (StreamObserver<ExternalMessage> observer : observers) {
                             observerCallback.apply(observer);
                         }
                     }
                 };
+            }
+        };
+    }
+
+    public static CommandShardedStream.AbstractBuilder builder() {
+        return new ShardedStream.AbstractBuilder() {
+            @Override
+            protected ShardedStream createStream() {
+                throw newIllegalStateException("Method mustn't be called " +
+                                                       "in the `AbstractBuilder` tests");
             }
         };
     }
@@ -293,19 +304,10 @@ public class ShardedStreamTestEnv {
 
     public static class TaskAggregateRepository
             extends AggregateRepository<TaskId, TaskAggregate> {
+
         @Override
         public BoundedContextName getBoundedContextName() {
             return tasksContextName;
         }
-    }
-
-    public static CommandShardedStream.AbstractBuilder builder() {
-        return new ShardedStream.AbstractBuilder() {
-            @Override
-            protected ShardedStream createStream() {
-                throw newIllegalStateException("Method mustn't be called " +
-                                                       "in the `AbstractBuilder` tests");
-            }
-        };
     }
 }

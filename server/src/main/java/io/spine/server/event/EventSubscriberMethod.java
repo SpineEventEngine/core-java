@@ -21,6 +21,7 @@
 package io.spine.server.event;
 
 import com.google.common.base.Predicate;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
@@ -71,6 +72,7 @@ public final class EventSubscriberMethod extends HandlerMethod<EventClass, Event
         return Factory.getInstance();
     }
 
+    @CanIgnoreReturnValue // since event subscriber methods do not return values
     @Override
     public Object invoke(Object target, Message message, EventContext context) {
         ensureExternalMatch(this, context.getExternal());

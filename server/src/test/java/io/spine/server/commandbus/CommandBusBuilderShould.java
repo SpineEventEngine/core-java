@@ -32,9 +32,12 @@ import io.spine.server.transport.TransportFactory;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.test.Tests;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import static io.spine.server.BoundedContext.newName;
+import static io.spine.server.tenant.TenantAwareTest.createTenantIndex;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -45,13 +48,13 @@ import static org.mockito.Mockito.mock;
  * @author Alexander Yevsyukov
  */
 @SuppressWarnings("ConstantConditions")
-public class CommandBusBuilderShould extends BusBuilderShould<CommandBus.Builder,
-                                                              CommandEnvelope,
-                                                              Command> {
+public class CommandBusBuilderShould
+        extends BusBuilderShould<CommandBus.Builder, CommandEnvelope, Command> {
 
     private CommandStore commandStore;
 
-    private TransportFactory transportFactory;
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     @Override
     protected CommandBus.Builder builder() {
@@ -61,22 +64,22 @@ public class CommandBusBuilderShould extends BusBuilderShould<CommandBus.Builder
     @Before
     public void setUp() {
         final boolean multitenant = true;
-        final InMemoryStorageFactory storageFactory =
+        InMemoryStorageFactory storageFactory =
                 InMemoryStorageFactory.newInstance(newName(getClass().getSimpleName()),
                                                    multitenant);
-        final TenantIndex tenantIndex =
-                TenantAwareTest.createTenantIndex(multitenant, storageFactory);
+        TenantIndex tenantIndex = createTenantIndex(multitenant, storageFactory);
         commandStore = new CommandStore(storageFactory, tenantIndex);
-        transportFactory = InMemoryTransportFactory.newInstance();
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void not_accept_null_CommandStore() {
-        builder().setCommandStore(Tests.<CommandStore>nullRef());
+        thrown.expect(NullPointerException.class);
+        builder().setCommandStore(Tests.nullRef());
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void not_allow_to_omit_setting_CommandStore() {
+        thrown.expect(IllegalStateException.class);
         CommandBus.newBuilder().build();
     }
 
@@ -94,6 +97,8 @@ public class CommandBusBuilderShould extends BusBuilderShould<CommandBus.Builder
         final CommandBus.Builder builder = builder().setCommandStore(commandStore)
                                                     .setCommandScheduler(expectedScheduler);
 
+        assertTrue(builder.getCommandScheduler()
+                          .isPresent());
         assertEquals(expectedScheduler, builder.getCommandScheduler()
                                                .get());
 
@@ -110,6 +115,8 @@ public class CommandBusBuilderShould extends BusBuilderShould<CommandBus.Builder
 
         final CommandBus.Builder builder = builder().setCommandStore(commandStore)
                                                     .setRejectionBus(expectedRejectionBus);
+        assertTrue(builder.getRejectionBus()
+                          .isPresent());
         assertEquals(expectedRejectionBus, builder.getRejectionBus()
                                                   .get());
     }

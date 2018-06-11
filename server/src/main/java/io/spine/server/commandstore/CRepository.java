@@ -33,8 +33,8 @@ import io.spine.core.Rejection;
 import io.spine.server.commandbus.CommandRecord;
 import io.spine.server.commandbus.ProcessingStatus;
 import io.spine.server.entity.DefaultRecordBasedRepository;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Iterator;
 
 import static com.google.common.collect.Iterators.transform;

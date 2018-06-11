@@ -24,7 +24,7 @@ import com.google.common.base.Predicate;
 import com.google.protobuf.Timestamp;
 import io.spine.time.Timestamps2;
 
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;

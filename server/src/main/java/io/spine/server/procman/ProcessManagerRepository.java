@@ -59,7 +59,6 @@ import io.spine.server.route.EventRouting;
 import io.spine.server.route.RejectionProducers;
 import io.spine.server.route.RejectionRouting;
 
-import javax.annotation.CheckReturnValue;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -339,7 +338,7 @@ public abstract class ProcessManagerRepository<I,
      * @return IDs of process managers who successfully consumed the rejection
      */
     @Override
-    public Set<I> dispatchRejection(final RejectionEnvelope rejection) {
+    public Set<I> dispatchRejection(RejectionEnvelope rejection) {
         return PmRejectionEndpoint.handle(this, rejection);
     }
 
@@ -379,7 +378,6 @@ public abstract class ProcessManagerRepository<I,
      * @return loaded or created process manager instance
      */
     @Override
-    @CheckReturnValue
     protected P findOrCreate(I id) {
         final P result = super.findOrCreate(id);
         final CommandBus commandBus = getBoundedContext().getCommandBus();

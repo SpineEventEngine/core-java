@@ -22,6 +22,7 @@ package io.spine.server.tuple;
 
 import com.google.common.base.Optional;
 import com.google.common.testing.EqualsTester;
+import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
 import io.spine.test.TestValues;
 import org.junit.Test;
@@ -35,8 +36,8 @@ public class ElementShould {
 
     @Test
     public void support_equality() {
-        new EqualsTester().addEqualityGroup(new Element(Time.getCurrentTime()),
-                                            new Element(Time.getCurrentTime()))
+        Timestamp time = Time.getCurrentTime();
+        new EqualsTester().addEqualityGroup(new Element(time), new Element(time))
                           .addEqualityGroup(new Element(TestValues.newUuidValue()))
                           .addEqualityGroup(new Element(Optional.absent()))
                           .testEquals();

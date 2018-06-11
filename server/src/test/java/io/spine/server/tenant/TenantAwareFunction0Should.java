@@ -22,33 +22,26 @@ package io.spine.server.tenant;
 
 import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
+import org.junit.Rule;
 import org.junit.Test;
-
-import static io.spine.core.given.GivenTenantId.newUuid;
+import org.junit.rules.ExpectedException;
 
 /**
  * @author Alexander Yevsyukov
  */
 public class TenantAwareFunction0Should {
 
-    @Test(expected = IllegalStateException.class)
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
+
+    @Test
     public void require_current_tenant_set() {
-        final TenantAwareFunction0<Timestamp> whichTime = new TenantAwareFunction0<Timestamp>() {
+        thrown.expect(IllegalStateException.class);
+        new TenantAwareFunction0<Timestamp>() {
             @Override
             public Timestamp apply() {
                 return Time.getCurrentTime();
             }
         };
-
-        // This should pass.
-        new TenantAwareOperation(newUuid()) {
-            @Override
-            public void run() {
-                whichTime.execute();
-            }
-        }.execute();
-
-        // This should fail.
-        whichTime.execute();
     }
 }

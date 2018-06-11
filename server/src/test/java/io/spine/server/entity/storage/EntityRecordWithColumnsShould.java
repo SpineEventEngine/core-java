@@ -31,7 +31,9 @@ import io.spine.server.entity.VersionableEntity;
 import io.spine.server.entity.given.Given;
 import io.spine.test.entity.Project;
 import io.spine.testdata.Sample;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -56,32 +58,43 @@ import static org.mockito.Mockito.mock;
  */
 public class EntityRecordWithColumnsShould {
 
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
+
+    private static EntityRecordWithColumns newRecord() {
+        return of(Sample.messageOfType(EntityRecord.class),
+                  Collections.emptyMap());
+    }
+
+    private static EntityRecordWithColumns newEmptyRecord() {
+        return of(EntityRecord.getDefaultInstance());
+    }
+
     @Test
     public void be_serializable() {
-        final EntityRecord record = Sample.messageOfType(EntityRecord.class);
-        final VersionableEntity<?, ?> entity = Given.entityOfClass(TestEntity.class)
-                                                    .withVersion(1)
-                                                    .build();
-        final String columnName = version.name();
-        final EntityColumn column = findColumn(VersionableEntity.class, columnName);
-        final MemoizedValue value = column.memoizeFor(entity);
+        EntityRecord record = Sample.messageOfType(EntityRecord.class);
+        VersionableEntity<?, ?> entity = Given.entityOfClass(TestEntity.class)
+                                              .withVersion(1)
+                                              .build();
+        String columnName = version.name();
+        EntityColumn column = findColumn(VersionableEntity.class, columnName);
+        MemoizedValue value = column.memoizeFor(entity);
 
-        final Map<String, MemoizedValue> columns = singletonMap(columnName, value);
-        final EntityRecordWithColumns recordWithColumns = of(record, columns);
+        Map<String, MemoizedValue> columns = singletonMap(columnName, value);
+        EntityRecordWithColumns recordWithColumns = of(record, columns);
         reserializeAndAssert(recordWithColumns);
     }
 
     @Test
     public void initialize_with_record_and_storage_fields() {
-        final EntityRecordWithColumns record = of(EntityRecord.getDefaultInstance(),
-                                                  Collections.<String, MemoizedValue>emptyMap());
+        EntityRecordWithColumns record = of(EntityRecord.getDefaultInstance(),
+                                            Collections.emptyMap());
         assertNotNull(record);
     }
 
     @Test
     public void initialize_with_record_only() {
-        final EntityRecordWithColumns record =
-                of(EntityRecord.getDefaultInstance());
+        EntityRecordWithColumns record = newEmptyRecord();
         assertNotNull(record);
     }
 
@@ -94,19 +107,19 @@ public class EntityRecordWithColumnsShould {
 
     @Test
     public void store_record() {
-        final EntityRecordWithColumns recordWithFields = newRecord();
-        final EntityRecord record = recordWithFields.getRecord();
+        EntityRecordWithColumns recordWithFields = newRecord();
+        EntityRecord record = recordWithFields.getRecord();
         assertNotNull(record);
     }
 
     @Test
     public void store_column_values() {
-        final MemoizedValue mockValue = mock(MemoizedValue.class);
-        final String columnName = "some-key";
-        final Map<String, MemoizedValue> columnsExpected = singletonMap(columnName, mockValue);
-        final EntityRecordWithColumns record = of(Sample.messageOfType(EntityRecord.class),
-                                                  columnsExpected);
-        final Collection<String> columnNames = record.getColumnNames();
+        MemoizedValue mockValue = mock(MemoizedValue.class);
+        String columnName = "some-key";
+        Map<String, MemoizedValue> columnsExpected = singletonMap(columnName, mockValue);
+        EntityRecordWithColumns record = of(Sample.messageOfType(EntityRecord.class),
+                                            columnsExpected);
+        Collection<String> columnNames = record.getColumnNames();
         assertSize(1, columnNames);
         assertTrue(columnNames.contains(columnName));
         assertEquals(mockValue, record.getColumnValue(columnName));
@@ -114,41 +127,41 @@ public class EntityRecordWithColumnsShould {
 
     @Test
     public void return_empty_names_collection_if_no_storage_fields() {
-        final EntityRecordWithColumns record = of(EntityRecord.getDefaultInstance());
+        EntityRecordWithColumns record = newEmptyRecord();
         assertFalse(record.hasColumns());
-        final Collection<String> names = record.getColumnNames();
+        Collection<String> names = record.getColumnNames();
         assertTrue(names.isEmpty());
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void throw_on_attempt_to_get_value_by_non_existent_name() {
-        final EntityRecordWithColumns record = of(EntityRecord.getDefaultInstance());
+        EntityRecordWithColumns record = newEmptyRecord();
+
+        thrown.expect(IllegalStateException.class);
         record.getColumnValue("");
     }
 
     @Test
     public void not_have_columns_if_values_list_is_empty() {
-        final EntityWithoutColumns entity = new EntityWithoutColumns("ID");
-        final Class<? extends Entity> entityClass = entity.getClass();
-        final Collection<EntityColumn> entityColumns = Columns.getAllColumns(entityClass);
-        final Map<String, MemoizedValue> columnValues = extractColumnValues(entity, entityColumns);
+        EntityWithoutColumns entity = new EntityWithoutColumns("ID");
+        Class<? extends Entity> entityClass = entity.getClass();
+        Collection<EntityColumn> entityColumns = Columns.getAllColumns(entityClass);
+        Map<String, MemoizedValue> columnValues = extractColumnValues(entity, entityColumns);
         assertTrue(columnValues.isEmpty());
 
-        final EntityRecordWithColumns record = of(EntityRecord.getDefaultInstance(), columnValues);
+        EntityRecordWithColumns record = of(EntityRecord.getDefaultInstance(), columnValues);
         assertFalse(record.hasColumns());
     }
 
     @Test
     public void have_equals() {
-        final MemoizedValue mockValue = mock(MemoizedValue.class);
-        final EntityRecordWithColumns noFieldsEnvelope =
-                of(EntityRecord.getDefaultInstance()
-                );
-        final EntityRecordWithColumns emptyFieldsEnvelope = of(
+        MemoizedValue mockValue = mock(MemoizedValue.class);
+        EntityRecordWithColumns noFieldsEnvelope = newEmptyRecord();
+        EntityRecordWithColumns emptyFieldsEnvelope = of(
                 EntityRecord.getDefaultInstance(),
-                Collections.<String, MemoizedValue>emptyMap()
+                Collections.emptyMap()
         );
-        final EntityRecordWithColumns notEmptyFieldsEnvelope =
+        EntityRecordWithColumns notEmptyFieldsEnvelope =
                 of(
                         EntityRecord.getDefaultInstance(),
                         singletonMap("key", mockValue)
@@ -160,20 +173,15 @@ public class EntityRecordWithColumnsShould {
                 .testEquals();
     }
 
-    private static EntityRecordWithColumns newRecord() {
-        return of(Sample.messageOfType(EntityRecord.class),
-                  Collections.<String, MemoizedValue>emptyMap());
-    }
+    private static class TestEntity extends AbstractVersionableEntity<String, Project> {
 
-    public static class TestEntity extends AbstractVersionableEntity<String, Project> {
-
-        protected TestEntity(String id) {
+        private TestEntity(String id) {
             super(id);
         }
     }
 
-    public static class EntityWithoutColumns extends AbstractEntity<String, Any> {
-        protected EntityWithoutColumns(String id) {
+    private static class EntityWithoutColumns extends AbstractEntity<String, Any> {
+        private EntityWithoutColumns(String id) {
             super(id);
         }
     }

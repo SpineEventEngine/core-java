@@ -31,8 +31,7 @@ import io.spine.core.MessageEnvelope;
 import io.spine.core.TenantId;
 import io.spine.core.Version;
 import io.spine.string.Stringifiers;
-
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static io.spine.util.Exceptions.unsupported;
 

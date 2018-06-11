@@ -42,47 +42,49 @@ public class ERepositoryShould {
 
     @Test
     public void convert_empty_query_to_empty_EntityFilters() {
-        final EventStreamQuery query = EventStreamQuery.newBuilder()
-                                                       .build();
-        final EntityFilters entityFilters = toEntityFilters(query);
+        EventStreamQuery query = EventStreamQuery.newBuilder()
+                                                 .build();
+        EntityFilters entityFilters = toEntityFilters(query);
         assertTrue(entityFilters.getFilterList()
                                 .isEmpty());
     }
 
     @Test
     public void convert_time_query_to_EntityFilters() {
-        final EventStreamQuery query = EventStreamQuery.newBuilder()
-                                                       .setAfter(Timestamps.MIN_VALUE)
-                                                       .setBefore(Timestamps.MAX_VALUE)
-                                                       .build();
-        final EntityFilters entityFilters = toEntityFilters(query);
+        EventStreamQuery query = EventStreamQuery
+                .newBuilder()
+                .setAfter(Timestamps.MIN_VALUE)
+                .setBefore(Timestamps.MAX_VALUE)
+                .build();
+        EntityFilters entityFilters = toEntityFilters(query);
         assertEquals(1, entityFilters.getFilterCount());
 
-        final CompositeColumnFilter compositeFilter = entityFilters.getFilter(0);
-        final List<ColumnFilter> columnFilters = compositeFilter.getFilterList();
+        CompositeColumnFilter compositeFilter = entityFilters.getFilter(0);
+        List<ColumnFilter> columnFilters = compositeFilter.getFilterList();
         assertEquals(CompositeOperator.ALL, compositeFilter.getOperator());
         assertEquals(2, columnFilters.size());
     }
 
     @Test
     public void convert_type_query_to_EntityFilters() {
-        final String typeName = " com.example.EventType ";
-        final EventFilter validFilter = filterForType(typeName);
-        final EventFilter invalidFilter = filterForType("   ");
-        final EventStreamQuery query = EventStreamQuery.newBuilder()
-                                                       .addFilter(validFilter)
-                                                       .addFilter(invalidFilter)
-                                                       .build();
-        final EntityFilters entityFilters = toEntityFilters(query);
+        String typeName = " com.example.EventType ";
+        EventFilter validFilter = filterForType(typeName);
+        EventFilter invalidFilter = filterForType("   ");
+        EventStreamQuery query = EventStreamQuery
+                .newBuilder()
+                .addFilter(validFilter)
+                .addFilter(invalidFilter)
+                .build();
+        EntityFilters entityFilters = toEntityFilters(query);
         assertEquals(1, entityFilters.getFilterCount());
 
-        final CompositeColumnFilter compositeFilter = entityFilters.getFilter(0);
-        final List<ColumnFilter> columnFilters = compositeFilter.getFilterList();
+        CompositeColumnFilter compositeFilter = entityFilters.getFilter(0);
+        List<ColumnFilter> columnFilters = compositeFilter.getFilterList();
         assertEquals(CompositeOperator.EITHER, compositeFilter.getOperator());
         assertEquals(1, columnFilters.size());
-        final Any typeNameAsAny = columnFilters.get(0)
-                                               .getValue();
-        assertEquals(typeName, toObject(typeNameAsAny, String.class));
+        Any typeNameAsAny = columnFilters.get(0)
+                                         .getValue();
+        assertEquals(typeName.trim(), toObject(typeNameAsAny, String.class));
     }
 
     private static EventFilter filterForType(String typeName) {

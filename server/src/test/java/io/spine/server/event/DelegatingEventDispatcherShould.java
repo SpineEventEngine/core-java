@@ -35,7 +35,7 @@ import io.spine.server.integration.ExternalMessages;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Set;
 
 import static io.spine.test.TestValues.newUuidValue;

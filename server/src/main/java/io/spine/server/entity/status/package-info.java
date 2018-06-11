@@ -23,9 +23,11 @@
  */
 
 @SPI
+@CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.server.entity.status;
 
+import com.google.errorprone.annotations.CheckReturnValue;
 import io.spine.annotation.SPI;
 
 import javax.annotation.ParametersAreNonnullByDefault;

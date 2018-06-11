@@ -33,7 +33,7 @@ import io.spine.string.Stringifier;
 import io.spine.string.StringifierRegistry;
 import io.spine.time.Timestamps2;
 
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;

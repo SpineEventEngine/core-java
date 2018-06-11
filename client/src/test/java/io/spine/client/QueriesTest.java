@@ -57,11 +57,12 @@ class QueriesTest {
     @Test
     @DisplayName("obtain entity type url for known query target type")
     void returnTypeUrlForKnownType() {
-        final Target target = Targets.allOf(TestEntity.class);
-        final Query query = Query.newBuilder()
-                                 .setTarget(target)
-                                 .build();
-        final TypeUrl type = Queries.typeOf(query);
+        Target target = Targets.allOf(TestEntity.class);
+        Query query = Query
+                .newBuilder()
+                .setTarget(target)
+                .build();
+        TypeUrl type = Queries.typeOf(query);
         assertNotNull(type);
         assertEquals(TARGET_ENTITY_TYPE_URL, type.toString());
     }
@@ -69,12 +70,14 @@ class QueriesTest {
     @Test
     @DisplayName("throw IllegalStateException for unknown query target type")
     void throwErrorForUnknownType() {
-        final Target target = Target.newBuilder()
-                                    .setType("nonexistent/message.type")
-                                    .build();
-        final Query query = Query.newBuilder()
-                                 .setTarget(target)
-                                 .build();
+        Target target = Target
+                .newBuilder()
+                .setType("nonexistent/message.type")
+                .build();
+        Query query = Query
+                .newBuilder()
+                .setTarget(target)
+                .build();
         assertThrows(IllegalStateException.class, () -> Queries.typeOf(query));
     }
 }

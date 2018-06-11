@@ -30,7 +30,9 @@ import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.test.Tests;
 import io.spine.validate.MessageValidator;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
@@ -49,6 +51,9 @@ public class EventBusBuilderShould extends BusBuilderShould<EventBus.Builder,
                                                             EventEnvelope,
                                                             Event> {
 
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
+    
     private StorageFactory storageFactory;
 
     @Override
@@ -58,15 +63,17 @@ public class EventBusBuilderShould extends BusBuilderShould<EventBus.Builder,
 
     @Before
     public void setUp() {
-        final BoundedContext bc = BoundedContext.newBuilder()
-                                                .setMultitenant(true)
-                                                .build();
+        BoundedContext bc = BoundedContext
+                .newBuilder()
+                .setMultitenant(true)
+                .build();
         this.storageFactory = bc.getStorageFactory();
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void do_not_accept_null_EventStore() {
-        builder().setEventStore(Tests.<EventStore>nullRef());
+        thrown.expect(NullPointerException.class);
+        builder().setEventStore(Tests.nullRef());
     }
 
     @Test
@@ -78,7 +85,7 @@ public class EventBusBuilderShould extends BusBuilderShould<EventBus.Builder,
 
     @Test
     public void return_EventStore_if_set() {
-        final EventStore mock = mock(EventStore.class);
+        EventStore mock = mock(EventStore.class);
         assertEquals(mock, builder().setEventStore(mock)
                                     .getEventStore()
                                     .get());
@@ -86,15 +93,16 @@ public class EventBusBuilderShould extends BusBuilderShould<EventBus.Builder,
 
     @Test
     public void return_stream_Executor_for_EventStore_if_set() {
-        final Executor mock = mock(Executor.class);
+        Executor mock = mock(Executor.class);
         assertEquals(mock, builder().setEventStoreStreamExecutor(mock)
                                     .getEventStoreStreamExecutor()
                                     .get());
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void do_not_accept_null_EventValidator() {
-        builder().setEventValidator(Tests.<MessageValidator>nullRef());
+        thrown.expect(NullPointerException.class);
+        builder().setEventValidator(Tests.nullRef());
     }
 
     @Test
@@ -105,8 +113,9 @@ public class EventBusBuilderShould extends BusBuilderShould<EventBus.Builder,
                                          .get());
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void require_set_EventStore_or_StorageFactory() {
+        thrown.expect(IllegalStateException.class);
         EventBus.newBuilder()
                 .build();
     }
@@ -120,14 +129,14 @@ public class EventBusBuilderShould extends BusBuilderShould<EventBus.Builder,
 
     @Test
     public void accept_null_Enricher() {
-        assertNull(builder().setEnricher(Tests.<EventEnricher>nullRef())
+        assertNull(builder().setEnricher(Tests.nullRef())
                             .getEnricher()
                             .orNull());
     }
 
     @Test
     public void return_set_Enricher() {
-        final EventEnricher enricher = mock(EventEnricher.class);
+        EventEnricher enricher = mock(EventEnricher.class);
 
         assertEquals(enricher, builder().setStorageFactory(storageFactory)
                                         .setEnricher(enricher)
@@ -135,62 +144,60 @@ public class EventBusBuilderShould extends BusBuilderShould<EventBus.Builder,
                                         .get());
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void not_accept_StorageFactory_if_EventStore_already_specified() {
-        final EventBus.Builder builder = builder().setEventStore(mock(EventStore.class));
+        EventBus.Builder builder = builder().setEventStore(mock(EventStore.class));
+        thrown.expect(IllegalStateException.class);
         builder.setStorageFactory(storageFactory);
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void not_accept_EventStore_if_StorageFactory_already_specified() {
-        final EventBus.Builder builder = builder().setStorageFactory(mock(StorageFactory.class));
+        EventBus.Builder builder = builder().setStorageFactory(mock(StorageFactory.class));
+        thrown.expect(IllegalStateException.class);
         builder.setEventStore(mock(EventStore.class));
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void not_accept_EventStore_if_EventStoreStreamExecutor_already_specified() {
-        final EventBus.Builder builder = builder().setEventStoreStreamExecutor(
-                mock(Executor.class));
+        EventBus.Builder builder = builder().setEventStoreStreamExecutor(mock(Executor.class));
+        thrown.expect(IllegalStateException.class);
         builder.setEventStore(mock(EventStore.class));
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void not_accept_EventStoreStreamExecutor_if_EventStore_already_specified() {
-        final EventBus.Builder builder = builder().setEventStore(mock(EventStore.class));
+        EventBus.Builder builder = builder().setEventStore(mock(EventStore.class));
+        thrown.expect(IllegalStateException.class);
         builder.setEventStoreStreamExecutor(mock(Executor.class));
     }
 
     @Test
     public void use_directExecutor_if_EventStoreStreamExecutor_not_set() {
-        final EventBus.Builder builder = builder().setStorageFactory(storageFactory);
-        final EventBus build = builder.build();
-        final Executor streamExecutor = build.getEventStore()
-                                             .getStreamExecutor();
+        EventBus build = builder()
+                .setStorageFactory(storageFactory)
+                .build();
+        Executor streamExecutor = build.getEventStore()
+                                       .getStreamExecutor();
         ensureExecutorDirect(streamExecutor);
     }
 
     @Test
     public void use_passed_executor() {
-        final CountDownLatch executorUsageLatch = new CountDownLatch(1);
-        final Executor simpleExecutor = new Executor() {
-            @Override
-            public void execute(Runnable command) {
+        CountDownLatch executorUsageLatch = new CountDownLatch(1);
 
-                // Decrease the counter to ensure this method has been called.
-                executorUsageLatch.countDown();
-            }
-        };
-        final EventBus.Builder builder = builder().setStorageFactory(storageFactory)
-                                                  .setEventStoreStreamExecutor(simpleExecutor);
-        final EventBus build = builder.build();
-        final Executor streamExecutor = build.getEventStore()
-                                             .getStreamExecutor();
+        // Decrease the counter to ensure this method has been called.
+        Executor simpleExecutor = command -> executorUsageLatch.countDown();
+        EventBus.Builder builder = builder().setStorageFactory(storageFactory)
+                                            .setEventStoreStreamExecutor(simpleExecutor);
+        EventBus build = builder.build();
+        Executor streamExecutor = build.getEventStore()
+                                       .getStreamExecutor();
         streamExecutor.execute(mock(Runnable.class));
         try {
-            /**
-             * The executor configured to operate synchronously,
-             * so the latch should already be {@code zero} at this point.
-             **/
+            /* The executor configured to operate synchronously,
+               so the latch should already be zero at this point.
+             */
             executorUsageLatch.await(0, TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
             fail("The specified executor was not used.");
@@ -199,13 +206,14 @@ public class EventBusBuilderShould extends BusBuilderShould<EventBus.Builder,
 
     @Test
     public void allow_custom_message_validators() {
-        final StorageFactory storageFactory =
+        StorageFactory storageFactory =
                 StorageFactorySwitch.newInstance(newName("test"), false)
                                     .get();
-        final MessageValidator validator = mock(MessageValidator.class);
-        final EventBus eventBus = builder().setEventValidator(validator)
-                                           .setStorageFactory(storageFactory)
-                                           .build();
+        MessageValidator validator = mock(MessageValidator.class);
+        EventBus eventBus = builder()
+                .setEventValidator(validator)
+                .setStorageFactory(storageFactory)
+                .build();
         assertEquals(validator, eventBus.getMessageValidator());
     }
 
@@ -215,23 +223,20 @@ public class EventBusBuilderShould extends BusBuilderShould<EventBus.Builder,
         assertEquals(LoggingObserver.Level.TRACE, builder().getLogLevelForPost());
 
         // Check setting new value.
-        final EventBus.Builder builder = builder();
-        final LoggingObserver.Level newLevel = LoggingObserver.Level.DEBUG;
+        EventBus.Builder builder = builder();
+        LoggingObserver.Level newLevel = LoggingObserver.Level.DEBUG;
 
         assertSame(builder, builder.setLogLevelForPost(newLevel));
         assertEquals(newLevel, builder.getLogLevelForPost());
     }
 
     private static void ensureExecutorDirect(Executor streamExecutor) {
-        final long mainThreadId = Thread.currentThread()
+        long mainThreadId = Thread.currentThread()
                                         .getId();
-        streamExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                final long runnableThreadId = Thread.currentThread()
-                                                    .getId();
-                assertEquals(mainThreadId, runnableThreadId);
-            }
+        streamExecutor.execute(() -> {
+            long runnableThreadId = Thread.currentThread()
+                                                .getId();
+            assertEquals(mainThreadId, runnableThreadId);
         });
     }
 }

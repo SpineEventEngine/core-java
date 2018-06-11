@@ -67,6 +67,7 @@ public abstract class BusBuilderShould<B extends Bus.AbstractBuilder<E, T, ?>,
                              .contains(filter));
     }
 
+    @SuppressWarnings("CheckReturnValue") // calling builder
     @Test
     public void preserve_filters_order() {
         @SuppressWarnings("unchecked")

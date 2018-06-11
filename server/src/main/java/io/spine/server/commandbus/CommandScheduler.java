@@ -29,9 +29,8 @@ import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandId;
 import io.spine.server.bus.BusFilter;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.CheckReturnValue;
-import javax.annotation.Nullable;
 import java.util.Set;
 
 import static com.google.common.base.Optional.absent;
@@ -57,11 +56,9 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
 
     private boolean isActive = true;
 
-    @Nullable
-    private CommandBus commandBus;
+    private @Nullable CommandBus commandBus;
 
-    @Nullable
-    private Rescheduler rescheduler;
+    private @Nullable Rescheduler rescheduler;
 
     protected CommandScheduler() {
     }
@@ -126,7 +123,6 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
      * @throws IllegalStateException if {@code CommandBus} was not
      * {@linkplain #setCommandBus(CommandBus) set} prior to calling this method
      */
-    @CheckReturnValue
     protected CommandBus commandBus() {
         checkState(commandBus != null, "CommandBus is not set");
         return commandBus;
