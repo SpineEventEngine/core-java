@@ -32,8 +32,8 @@ import io.spine.server.procman.given.PmMessageDeliveryTestEnv.DeliveryPm;
 import io.spine.server.procman.given.PmMessageDeliveryTestEnv.QuadrupleShardPmRepository;
 import io.spine.server.procman.given.PmMessageDeliveryTestEnv.SingleShardPmRepository;
 import io.spine.test.procman.ProjectId;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.server.delivery.given.MessageDeliveryTestEnv.dispatchWaitTime;
 import static io.spine.server.procman.given.PmMessageDeliveryTestEnv.cannotStartProject;
@@ -46,7 +46,7 @@ import static io.spine.server.procman.given.PmMessageDeliveryTestEnv.projectStar
 public class PmMessageDeliveryShould extends AbstractMessageDeliveryShould {
 
     @Override
-    @Before
+    @BeforeEach
     public void setUp() {
         super.setUp();
         DeliveryPm.getStats()

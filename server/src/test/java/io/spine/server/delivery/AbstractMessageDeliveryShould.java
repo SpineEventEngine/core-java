@@ -24,8 +24,8 @@ import io.spine.server.ServerEnvironment;
 import io.spine.server.transport.TransportFactory;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.server.transport.memory.SingleThreadInMemTransportFactory;
-import org.junit.After;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 
 import static io.spine.server.model.ModelTests.clearModel;
 
@@ -39,13 +39,13 @@ import static io.spine.server.model.ModelTests.clearModel;
  */
 public abstract class AbstractMessageDeliveryShould {
 
-    @Before
+    @BeforeEach
     public void setUp() {
         clearModel();
         switchToShardingWithTransport(getTransport());
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         switchToShardingWithTransport(InMemoryTransportFactory.newInstance());
     }
