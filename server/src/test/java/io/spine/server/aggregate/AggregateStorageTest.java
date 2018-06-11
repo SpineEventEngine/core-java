@@ -66,6 +66,7 @@ import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Alexander Litus
@@ -174,36 +175,36 @@ public abstract class AggregateStorageTest
     @Test
     @DisplayName("throw exception when trying to read history by null ID")
     void notReadByNullId() {
-        thrown.expect(NullPointerException.class);
-        storage.historyBackward(Tests.nullRef());
+        assertThrows(NullPointerException.class,
+                     () -> storage.historyBackward(Tests.nullRef()));
     }
 
     @Test
     @DisplayName("throw exception when trying to write null event")
     void notWriteNullEvent() {
-        thrown.expect(NullPointerException.class);
-        storage.writeEvent(id, Tests.nullRef());
+        assertThrows(NullPointerException.class,
+                     () -> storage.writeEvent(id, Tests.nullRef()));
     }
 
     @Test
     @DisplayName("throw exception when trying to write event by null ID")
     void notWriteEventByNullId() {
-        thrown.expect(NullPointerException.class);
-        storage.writeEvent(Tests.nullRef(), Event.getDefaultInstance());
+        assertThrows(NullPointerException.class,
+                     () -> storage.writeEvent(Tests.nullRef(), Event.getDefaultInstance()));
     }
 
     @Test
     @DisplayName("throw exception when trying to write null snapshot")
     void notWriteNullSnapshot() {
-        thrown.expect(NullPointerException.class);
-        storage.write(id, Tests.nullRef());
+        assertThrows(NullPointerException.class,
+                     () -> storage.write(id, Tests.nullRef()));
     }
 
     @Test
     @DisplayName("throw exception when trying to write snapshot by null ID")
     void notWriteSnapshotByNullId() {
-        thrown.expect(NullPointerException.class);
-        storage.writeSnapshot(Tests.nullRef(), Snapshot.getDefaultInstance());
+        assertThrows(NullPointerException.class,
+                     () -> storage.writeSnapshot(Tests.nullRef(), Snapshot.getDefaultInstance()));
     }
 
     @Test
@@ -540,8 +541,8 @@ public abstract class AggregateStorageTest
     void notWriteEventCountToClosedStorage() {
         close(storage);
 
-        thrown.expect(IllegalStateException.class);
-        storage.writeEventCountAfterLastSnapshot(id, 5);
+        assertThrows(IllegalStateException.class,
+                     () -> storage.writeEventCountAfterLastSnapshot(id, 5));
     }
 
     @Test
@@ -549,8 +550,8 @@ public abstract class AggregateStorageTest
     void notReadEventCountFromClosedStorage() {
         close(storage);
 
-        thrown.expect(IllegalStateException.class);
-        storage.readEventCountAfterLastSnapshot(id);
+        assertThrows(IllegalStateException.class,
+                     () -> storage.readEventCountAfterLastSnapshot(id));
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent") // OK as we write right before we get.
