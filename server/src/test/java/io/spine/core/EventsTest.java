@@ -36,6 +36,7 @@ import io.spine.test.Tests;
 import io.spine.type.TypeName;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Comparator;
@@ -72,6 +73,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * @author Alexander Yevsyukov
  * @author Mykhailo Drachuk
  */
+@SuppressWarnings("DuplicateStringLiteralInspection")
+// Simple test names duplicates with random literals.
 @DisplayName("Events utility should")
 public class EventsTest {
 
@@ -113,12 +116,80 @@ public class EventsTest {
                 .testAllPublicStaticMethods(Events.class);
     }
 
+    @Nested
+    @DisplayName("given event context, obtain")
+    class GetFromContext {
+
+        @Test
+        @DisplayName("actor")
+        void actor() {
+            assertEquals(context.getCommandContext()
+                                .getActorContext()
+                                .getActor(), getActor(context));
+        }
+
+        @Test
+        @DisplayName("producer")
+        void producer() {
+            final StringValue msg = unpack(context.getProducerId());
+
+            final String id = getProducer(context);
+
+            assertEquals(msg.getValue(), id);
+        }
+    }
+
+    @Nested
+    @DisplayName("given event, obtain")
+    class GetFromEvent {
+
+        @Test
+        @DisplayName("message")
+        void message() {
+            createEventAndAssertReturnedMessageFor(stringValue);
+            createEventAndAssertReturnedMessageFor(boolValue);
+            createEventAndAssertReturnedMessageFor(doubleValue);
+        }
+
+        @Test
+        @DisplayName("timestamp")
+        void timestamp() {
+            final Event event = GivenEvent.occurredMinutesAgo(1);
+
+            assertEquals(event.getContext()
+                              .getTimestamp(), getTimestamp(event));
+        }
+
+        @Test
+        @DisplayName("root command id")
+        void rootCommandId() {
+            final CommandEnvelope command = requestFactory.generateEnvelope();
+            final StringValue producerId = toMessage(getClass().getSimpleName());
+            final EventFactory ef = EventFactory.on(command, Identifier.pack(producerId));
+            final Event event = ef.createEvent(Time.getCurrentTime(), Tests.nullRef());
+
+            assertEquals(command.getId(), Events.getRootCommandId(event));
+        }
+
+        private void createEventAndAssertReturnedMessageFor(Message msg) {
+            final Event event = GivenEvent.withMessage(msg);
+
+            assertEquals(msg, getMessage(event));
+        }
+    }
+
     @Test
-    @DisplayName("obtain actor from event context")
-    void getActorFromContext() {
-        assertEquals(context.getCommandContext()
-                            .getActorContext()
-                            .getActor(), getActor(context));
+    @DisplayName("obtain type name of event")
+    void getTypeNameOfEvent() {
+        final CommandEnvelope command = requestFactory.generateEnvelope();
+        final StringValue producerId = toMessage(getClass().getSimpleName());
+        final EventFactory ef = EventFactory.on(command, Identifier.pack(producerId));
+        final Event event = ef.createEvent(Time.getCurrentTime(), Tests.nullRef());
+
+        final TypeName typeName = EventEnvelope.of(event)
+                                               .getTypeName();
+        assertNotNull(typeName);
+        assertEquals(Timestamp.class.getSimpleName(), typeName.getSimpleName());
     }
 
     @Test
@@ -148,39 +219,6 @@ public class EventsTest {
     }
 
     @Test
-    @DisplayName("obtain message from event")
-    void getMessageFromEvent() {
-        createEventAndAssertReturnedMessageFor(stringValue);
-        createEventAndAssertReturnedMessageFor(boolValue);
-        createEventAndAssertReturnedMessageFor(doubleValue);
-    }
-
-    private static void createEventAndAssertReturnedMessageFor(Message msg) {
-        final Event event = GivenEvent.withMessage(msg);
-
-        assertEquals(msg, getMessage(event));
-    }
-
-    @Test
-    @DisplayName("obtain timestamp from event")
-    void getTimestampFromEvent() {
-        final Event event = GivenEvent.occurredMinutesAgo(1);
-
-        assertEquals(event.getContext()
-                          .getTimestamp(), getTimestamp(event));
-    }
-
-    @Test
-    @DisplayName("obtain producer from event context")
-    void getProducerFromContext() {
-        final StringValue msg = unpack(context.getProducerId());
-
-        final String id = getProducer(context);
-
-        assertEquals(msg.getValue(), id);
-    }
-
-    @Test
     @DisplayName("provide stringifier for event id")
     void provideEventIdStringifier() {
         final EventId id = event.getId();
@@ -189,6 +227,14 @@ public class EventsTest {
         final EventId convertedBack = Stringifiers.fromString(str, EventId.class);
 
         assertEquals(id, convertedBack);
+    }
+
+    @Test
+    @DisplayName("provide empty Iterable")
+    void provideEmptyIterable() {
+        for (Object ignored : nothing()) {
+            fail("Something found in nothing().");
+        }
     }
 
     @Test
@@ -206,143 +252,126 @@ public class EventsTest {
     }
 
     @Test
-    @DisplayName("obtain type name of event")
-    void getTypeNameOfEvent() {
-        final CommandEnvelope command = requestFactory.generateEnvelope();
-        final StringValue producerId = toMessage(getClass().getSimpleName());
-        final EventFactory ef = EventFactory.on(command, Identifier.pack(producerId));
-        final Event event = ef.createEvent(Time.getCurrentTime(), Tests.nullRef());
-
-        final TypeName typeName = EventEnvelope.of(event)
-                                               .getTypeName();
-        assertNotNull(typeName);
-        assertEquals(Timestamp.class.getSimpleName(), typeName.getSimpleName());
-    }
-
-    @Test
-    @DisplayName("obtain root command id")
-    void getRootCommandId() {
-        final CommandEnvelope command = requestFactory.generateEnvelope();
-        final StringValue producerId = toMessage(getClass().getSimpleName());
-        final EventFactory ef = EventFactory.on(command, Identifier.pack(producerId));
-        final Event event = ef.createEvent(Time.getCurrentTime(), Tests.nullRef());
-
-        assertEquals(command.getId(), Events.getRootCommandId(event));
-    }
-
-    @Test
-    @DisplayName("provide empty Iterable")
-    void provideEmptyIterable() {
-        for (Object ignored : nothing()) {
-            fail("Something found in nothing().");
-        }
-    }
-
-    @Test
     @DisplayName("throw NPE when getting tenant id of null event")
     void notAcceptNullEvent() {
         assertThrows(NullPointerException.class, () -> Events.getTenantId(Tests.nullRef()));
     }
 
-    @Test
-    @DisplayName("return default tenant id for event without origin")
-    void returnDefaultIdForEventWithoutOrigin() {
-        final EventContext context = contextWithoutOrigin().build();
-        final Event event = EventsTestEnv.event(context);
+    @Nested
+    @DisplayName("return default tenant id")
+    class GetDefaultTenantId {
 
-        final TenantId tenantId = Events.getTenantId(event);
+        @Test
+        @DisplayName("for event without origin")
+        void forNoOrigin() {
+            final EventContext context = contextWithoutOrigin().build();
+            final Event event = EventsTestEnv.event(context);
 
-        final TenantId defaultTenantId = TenantId.getDefaultInstance();
-        assertEquals(defaultTenantId, tenantId);
+            final TenantId tenantId = Events.getTenantId(event);
+
+            final TenantId defaultTenantId = TenantId.getDefaultInstance();
+            assertEquals(defaultTenantId, tenantId);
+        }
+
+        @Test
+        @DisplayName("for event with rejection context without command")
+        void forRejectionContextWithoutCommand() {
+            final RejectionContext rejectionContext = EventsTestEnv.rejectionContext();
+            final EventContext context = contextWithoutOrigin().setRejectionContext(
+                    rejectionContext)
+                                                               .build();
+            final Event event = EventsTestEnv.event(context);
+
+            final TenantId tenantId = Events.getTenantId(event);
+
+            final TenantId defaultTenantId = TenantId.getDefaultInstance();
+            assertEquals(defaultTenantId, tenantId);
+        }
+
+        @Test
+        @DisplayName("for event with event context without origin")
+        void forEventContextWithoutOrigin() {
+            final EventContext context = contextWithoutOrigin().setEventContext(
+                    contextWithoutOrigin())
+                                                               .build();
+            final Event event = EventsTestEnv.event(context);
+
+            final TenantId tenantId = Events.getTenantId(event);
+
+            final TenantId defaultTenantId = TenantId.getDefaultInstance();
+            assertEquals(defaultTenantId, tenantId);
+        }
     }
 
-    @Test
-    @DisplayName("return correct tenant id for event with command context")
-    void getTenantIdFromCommandContext() {
-        final TenantId targetTenantId = tenantId();
-        final CommandContext commandContext = EventsTestEnv.commandContext(targetTenantId);
-        final EventContext context = contextWithoutOrigin().setCommandContext(commandContext)
-                                                           .build();
-        final Event event = EventsTestEnv.event(context);
+    @Nested
+    @DisplayName("provide tenant id")
+    class GetTenantId {
 
-        final TenantId tenantId = Events.getTenantId(event);
+        @Test
+        @DisplayName("for event with command context")
+        void forCommandContext() {
+            final TenantId targetTenantId = tenantId();
+            final CommandContext commandContext = EventsTestEnv.commandContext(targetTenantId);
+            final EventContext context = contextWithoutOrigin().setCommandContext(commandContext)
+                                                               .build();
+            final Event event = EventsTestEnv.event(context);
 
-        assertEquals(targetTenantId, tenantId);
+            final TenantId tenantId = Events.getTenantId(event);
 
-    }
+            assertEquals(targetTenantId, tenantId);
 
-    @Test
-    @DisplayName("return correct tenant id for event with rejection context")
-    void getTenantIdFromRejectionContext() {
-        final TenantId targetTenantId = tenantId();
-        final RejectionContext rejectionContext = EventsTestEnv.rejectionContext(targetTenantId);
-        final EventContext context = contextWithoutOrigin().setRejectionContext(rejectionContext)
-                                                           .build();
-        final Event event = EventsTestEnv.event(context);
+        }
 
-        final TenantId tenantId = Events.getTenantId(event);
+        @Test
+        @DisplayName("for event with rejection context")
+        void forRejectionContext() {
+            final TenantId targetTenantId = tenantId();
+            final RejectionContext rejectionContext = EventsTestEnv.rejectionContext(
+                    targetTenantId);
+            final EventContext context = contextWithoutOrigin().setRejectionContext(
+                    rejectionContext)
+                                                               .build();
+            final Event event = EventsTestEnv.event(context);
 
-        assertEquals(targetTenantId, tenantId);
-    }
+            final TenantId tenantId = Events.getTenantId(event);
 
-    @Test
-    @DisplayName("return default tenant id for event with rejection context without command")
-    void returnDefaultIdForRejectionContextWithoutCommand() {
-        final RejectionContext rejectionContext = EventsTestEnv.rejectionContext();
-        final EventContext context = contextWithoutOrigin().setRejectionContext(rejectionContext)
-                                                           .build();
-        final Event event = EventsTestEnv.event(context);
+            assertEquals(targetTenantId, tenantId);
+        }
 
-        final TenantId tenantId = Events.getTenantId(event);
+        @Test
+        @DisplayName("for event with event context with command context")
+        void forEventContextWithCommandContext() {
+            final TenantId targetTenantId = tenantId();
+            final CommandContext commandContext = EventsTestEnv.commandContext(targetTenantId);
+            final EventContext outerContext = contextWithoutOrigin().setCommandContext(
+                    commandContext)
+                                                                    .build();
+            final EventContext context = contextWithoutOrigin().setEventContext(outerContext)
+                                                               .build();
+            final Event event = EventsTestEnv.event(context);
 
-        final TenantId defaultTenantId = TenantId.getDefaultInstance();
-        assertEquals(defaultTenantId, tenantId);
-    }
+            final TenantId tenantId = Events.getTenantId(event);
 
-    @Test
-    @DisplayName("return default tenant id for event with event context without origin")
-    void returnDefaultIdForEventContextWithoutOrigin() {
-        final EventContext context = contextWithoutOrigin().setEventContext(contextWithoutOrigin())
-                                                           .build();
-        final Event event = EventsTestEnv.event(context);
+            assertEquals(targetTenantId, tenantId);
+        }
 
-        final TenantId tenantId = Events.getTenantId(event);
+        @Test
+        @DisplayName("for event with event context with rejection context")
+        void forEventContextWithRejectionContext() {
+            final TenantId targetTenantId = tenantId();
+            final RejectionContext rejectionContext = EventsTestEnv.rejectionContext(
+                    targetTenantId);
+            final EventContext outerContext =
+                    contextWithoutOrigin().setRejectionContext(rejectionContext)
+                                          .build();
+            final EventContext context = contextWithoutOrigin().setEventContext(outerContext)
+                                                               .build();
+            final Event event = EventsTestEnv.event(context);
 
-        final TenantId defaultTenantId = TenantId.getDefaultInstance();
-        assertEquals(defaultTenantId, tenantId);
-    }
+            final TenantId tenantId = Events.getTenantId(event);
 
-    @Test
-    @DisplayName("return correct tenant id for event with event context with command context")
-    void getTenantIdFromEventContextWithCommandContext() {
-        final TenantId targetTenantId = tenantId();
-        final CommandContext commandContext = EventsTestEnv.commandContext(targetTenantId);
-        final EventContext outerContext = contextWithoutOrigin().setCommandContext(commandContext)
-                                                                .build();
-        final EventContext context = contextWithoutOrigin().setEventContext(outerContext)
-                                                           .build();
-        final Event event = EventsTestEnv.event(context);
-
-        final TenantId tenantId = Events.getTenantId(event);
-
-        assertEquals(targetTenantId, tenantId);
-    }
-
-    @Test
-    @DisplayName("return correct tenant id for event with event context with rejection context")
-    void getTenantIdFromEventContextWithRejectionContext() {
-        final TenantId targetTenantId = tenantId();
-        final RejectionContext rejectionContext = EventsTestEnv.rejectionContext(targetTenantId);
-        final EventContext outerContext =
-                contextWithoutOrigin().setRejectionContext(rejectionContext)
-                                      .build();
-        final EventContext context = contextWithoutOrigin().setEventContext(outerContext)
-                                                           .build();
-        final Event event = EventsTestEnv.event(context);
-
-        final TenantId tenantId = Events.getTenantId(event);
-
-        assertEquals(targetTenantId, tenantId);
+            assertEquals(targetTenantId, tenantId);
+        }
     }
 
     private EventContext.Builder contextWithoutOrigin() {

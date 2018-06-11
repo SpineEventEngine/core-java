@@ -25,12 +25,10 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Timestamp;
 import io.spine.core.given.GivenEvent;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.base.Time.getCurrentTime;
-import static io.spine.core.EventPredicates.isAfter;
-import static io.spine.core.EventPredicates.isBefore;
-import static io.spine.core.EventPredicates.isBetween;
 import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
@@ -43,6 +41,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * @author Alexander Yevsyukov
  */
+@SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"})
+// JUnit 5 Nested classes cannot to be static.
 @DisplayName("EventPredicates utility should")
 class EventPredicatesTest {
 
@@ -60,61 +60,75 @@ class EventPredicatesTest {
                 .testAllPublicStaticMethods(EventPredicates.class);
     }
 
-    @Test
-    @DisplayName("return false from null input in `IsAfter` predicate")
-    void returnFalseOnNullInIsAfter() {
-        assertFalse(isAfter(secondsAgo(5)).apply(null));
+    @Nested
+    @DisplayName("return false on null input")
+    class ReturnFalseOnNull {
+
+        @Test
+        @DisplayName("in `IsAfter` predicate")
+        void inIsAfter() {
+            assertFalse(EventPredicates.isAfter(secondsAgo(5)).apply(null));
+        }
+
+        @Test
+        @DisplayName("in `IsBefore` predicate")
+        void inIsBefore() {
+            assertFalse(EventPredicates.isBefore(secondsAgo(5)).apply(null));
+        }
+
+        @Test
+        @DisplayName("in `IsBetween` predicate")
+        void inIsBetween() {
+            assertFalse(EventPredicates.isBetween(secondsAgo(5), secondsAgo(1)).apply(null));
+        }
     }
 
-    @Test
-    @DisplayName("recognize if an event is after timestamp")
-    void performIsAfter() {
-        final Predicate<Event> predicate = isAfter(minutesAgo(100));
-        assertTrue(predicate.apply(GivenEvent.occurredMinutesAgo(20)));
-        assertFalse(predicate.apply(GivenEvent.occurredMinutesAgo(360)));
+    @Nested
+    @DisplayName("create")
+    class CreatePredicate {
+
+        @Test
+        @DisplayName("`IsAfter` predicate")
+        void isAfter() {
+            final Predicate<Event> predicate = EventPredicates.isAfter(minutesAgo(100));
+            assertTrue(predicate.apply(GivenEvent.occurredMinutesAgo(20)));
+            assertFalse(predicate.apply(GivenEvent.occurredMinutesAgo(360)));
+        }
+
+        @Test
+        @DisplayName("`isBefore` predicate")
+        void isBefore() {
+            Predicate<Event> predicate = EventPredicates.isBefore(minutesAgo(100));
+            assertFalse(predicate.apply(GivenEvent.occurredMinutesAgo(20)));
+            assertTrue(predicate.apply(GivenEvent.occurredMinutesAgo(360)));
+        }
+
+        @Test
+        @DisplayName("`isBetween` predicate")
+        void isBetween() {
+            final Event event = GivenEvent.occurredMinutesAgo(5);
+            assertTrue(EventPredicates.isBetween(minutesAgo(10), minutesAgo(1)).apply(event));
+            assertFalse(EventPredicates.isBetween(minutesAgo(2), minutesAgo(1)).apply(event));
+        }
     }
 
-    @Test
-    @DisplayName("return false from null input in `IsBefore` predicate")
-    void returnFalseOnNullInIsBefore() {
-        assertFalse(isBefore(secondsAgo(5)).apply(null));
-    }
+    @Nested
+    @DisplayName("for `inBetween` predicate, not accept range")
+    class NotAcceptRange {
 
-    @Test
-    @DisplayName("recognize if an event is before timestamp")
-    void performIsBefore() {
-        Predicate<Event> predicate = isBefore(minutesAgo(100));
-        assertFalse(predicate.apply(GivenEvent.occurredMinutesAgo(20)));
-        assertTrue(predicate.apply(GivenEvent.occurredMinutesAgo(360)));
-    }
+        @Test
+        @DisplayName("with start after end")
+        void withStartAfterEnd() {
+            assertThrows(IllegalArgumentException.class,
+                         () -> EventPredicates.isBetween(minutesAgo(2), minutesAgo(10)));
+        }
 
-    @Test
-    @DisplayName("return false from null input in `IsBetween` predicate")
-    void returnFalseOnNullInIsBetween() {
-        assertFalse(isBetween(secondsAgo(5), secondsAgo(1)).apply(null));
-    }
-
-    @Test
-    @DisplayName("check that specified range start is before range end")
-    void checkStartBeforeEnd() {
-        assertThrows(IllegalArgumentException.class,
-                     () -> isBetween(minutesAgo(2), minutesAgo(10)));
-    }
-
-    @Test
-    @DisplayName("not accept zero length time range")
-    void notAcceptZeroRange() {
-        Timestamp timestamp = minutesAgo(5);
-        assertThrows(IllegalArgumentException.class, () -> isBetween(timestamp, timestamp));
-    }
-
-    @Test
-    @DisplayName("recognize if an event is within time range")
-    void performIsBetween() {
-        final Event event = GivenEvent.occurredMinutesAgo(5);
-
-        assertTrue(isBetween(minutesAgo(10), minutesAgo(1)).apply(event));
-
-        assertFalse(isBetween(minutesAgo(2), minutesAgo(1)).apply(event));
+        @Test
+        @DisplayName("of zero length")
+        void ofZeroLength() {
+            Timestamp timestamp = minutesAgo(5);
+            assertThrows(IllegalArgumentException.class,
+                         () -> EventPredicates.isBetween(timestamp, timestamp));
+        }
     }
 }
