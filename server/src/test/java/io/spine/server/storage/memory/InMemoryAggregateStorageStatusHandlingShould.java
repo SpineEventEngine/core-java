@@ -28,7 +28,8 @@ import io.spine.test.aggregate.ProjectId;
 /**
  * @author Dmytro Dashenkov.
  */
-public class InMemoryAggregateStorageStatusHandlingShould extends AggregateStorageVisibilityHandlingTest {
+public class InMemoryAggregateStorageStatusHandlingShould
+        extends AggregateStorageVisibilityHandlingTest {
 
     @Override
     protected AggregateStorage<ProjectId> getAggregateStorage(
