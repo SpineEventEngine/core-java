@@ -465,11 +465,6 @@ public class AggregateRepositoryTest {
                              .getValue());
     }
 
-    /*
-     * Test environment methods that use internals of this test suite
-     * (and because of that are not moved to the test environment outside of this class).
-     **************************************************************************************/
-
     @Test
     @DisplayName("allow aggregates to react on rejections")
     void allowAggregatesReactOnRejections() {
@@ -517,6 +512,11 @@ public class AggregateRepositoryTest {
             assertEquals(RejectionReactingAggregate.PARENT_ARCHIVED, value);
         }
     }
+
+    /*
+     * Test environment methods that use internals of this test suite
+     * (and because of that are not moved to the test environment outside of this class).
+     **************************************************************************************/
 
     private ProjectAggregate givenStoredAggregate() {
         ProjectId id = Sample.messageOfType(ProjectId.class);
