@@ -44,7 +44,7 @@ class AggregateReadRequestTest {
     }
 
     @Test
-    @DisplayName("not accept non positive batch size")
+    @DisplayName("not accept non-positive batch size")
     void notAcceptNonPositiveBatchSize() {
         assertThrows(IllegalArgumentException.class, () -> new AggregateReadRequest<>(ID, 0));
     }
