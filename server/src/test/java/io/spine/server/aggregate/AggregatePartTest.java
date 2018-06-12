@@ -50,8 +50,8 @@ import static io.spine.base.Identifier.newUuid;
 import static io.spine.server.entity.given.Given.aggregatePartOfClass;
 import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.test.Verify.assertSize;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * @author Illia Shepilov
@@ -106,7 +106,8 @@ class AggregatePartTest {
         assertEquals(TASK_DESCRIPTION, task.getDescription());
     }
 
-    @SuppressWarnings("DuplicateStringLiteralInspection") // Common test case with Aggregate.
+    @SuppressWarnings({"DuplicateStringLiteralInspection" /* Common test case with Aggregate. */,
+            "CheckReturnValue" /* Method called to throw exception. */})
     @Test
     @DisplayName("throw InvalidEntityStateException if entity state is invalid")
     void throwOnInvalidState() {
@@ -121,7 +122,7 @@ class AggregatePartTest {
                     .withVersion(1)
                     .withState(user)
                     .build();
-            fail();
+            fail("Should have thrown InvalidEntityStateException.");
         } catch (InvalidEntityStateException e) {
             List<ConstraintViolation> violations =
                     e.getError()

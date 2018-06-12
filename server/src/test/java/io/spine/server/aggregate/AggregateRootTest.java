@@ -39,7 +39,7 @@ import java.lang.reflect.Constructor;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @DisplayName("AggregateRoot should")
 class AggregateRootTest {

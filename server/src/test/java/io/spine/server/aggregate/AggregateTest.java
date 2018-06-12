@@ -109,13 +109,13 @@ import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.typeUrl
 import static io.spine.server.entity.given.Given.aggregateOfClass;
 import static io.spine.test.Verify.assertSize;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * @author Alexander Litus
@@ -710,7 +710,9 @@ public class AggregateTest {
         assertThrows(IllegalStateException.class, () -> new IntAggregate(100).getBuilder());
     }
 
-    @SuppressWarnings("DuplicateStringLiteralInspection") // Common test case with AggregatePart.
+    @SuppressWarnings({"DuplicateStringLiteralInspection"
+            /* Common test case with AggregatePart. */,
+            "CheckReturnValue" /* Method called to throw exception. */})
     @Test
     @DisplayName("throw InvalidEntityStateException if entity state is invalid")
     void throwOnInvalidState() {
@@ -723,7 +725,7 @@ public class AggregateTest {
                                                  .withVersion(1)
                                                  .withState(user)
                                                  .build();
-            fail();
+            fail("Should have thrown InvalidEntityStateException.");
         } catch (InvalidEntityStateException e) {
             List<ConstraintViolation> violations = e.getError()
                                                     .getValidationError()
