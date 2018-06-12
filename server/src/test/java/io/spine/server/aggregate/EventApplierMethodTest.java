@@ -29,6 +29,7 @@ import io.spine.test.reflect.event.RefProjectCreated;
 import io.spine.testdata.Sample;
 import io.spine.validate.StringValueVBuilder;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.InvocationTargetException;
@@ -40,6 +41,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+@SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
+        /* JUnit 5 Nested classes cannot to be static. */})
 @DisplayName("EventApplierMethod should")
 class EventApplierMethodTest {
 
@@ -54,8 +57,42 @@ class EventApplierMethodTest {
                 .testAllPublicStaticMethods(EventApplierMethod.class);
     }
 
+    @SuppressWarnings("DuplicateStringLiteralInspection") // Common test display name.
+    @Nested
+    @DisplayName("provide")
+    class Provide {
+
+        @Test
+        @DisplayName("factory instance")
+        void factoryInstance() {
+            assertNotNull(factory);
+        }
+
+        @Test
+        @DisplayName("method class")
+        void methodClass() {
+            assertEquals(EventApplierMethod.class, factory.getMethodClass());
+        }
+
+        @Test
+        @DisplayName("method predicate")
+        void methodPredicate() {
+            assertEquals(EventApplierMethod.predicate(), factory.getPredicate());
+        }
+    }
+
     @Test
-    @DisplayName("invoke applier method")
+    @DisplayName("be properly created from factory")
+    void beCreated() {
+        final Method method = new ValidApplier().getMethod();
+
+        final EventApplierMethod actual = factory.create(method);
+
+        assertEquals(EventApplierMethod.from(method), actual);
+    }
+
+    @Test
+    @DisplayName("allow invocation")
     void invokeApplierMethod() throws InvocationTargetException {
         final ValidApplier applierObject = new ValidApplier();
         final EventApplierMethod applier = EventApplierMethod.from(applierObject.getMethod());
@@ -67,34 +104,6 @@ class EventApplierMethodTest {
     }
 
     @Test
-    @DisplayName("return factory instance")
-    void returnFactoryInstance() {
-        assertNotNull(factory);
-    }
-
-    @Test
-    @DisplayName("return method class")
-    void returnMethodClass() {
-        assertEquals(EventApplierMethod.class, factory.getMethodClass());
-    }
-
-    @Test
-    @DisplayName("create method")
-    void createMethod() {
-        final Method method = new ValidApplier().getMethod();
-
-        final EventApplierMethod actual = factory.create(method);
-
-        assertEquals(EventApplierMethod.from(method), actual);
-    }
-
-    @Test
-    @DisplayName("return method predicate")
-    void returnMethodPredicate() {
-        assertEquals(EventApplierMethod.predicate(), factory.getPredicate());
-    }
-
-    @Test
     @DisplayName("check method access modifier")
     void checkMethodAccessModifier() {
         final Method method = new ValidApplierButNotPackagePrivate().getMethod();
@@ -102,70 +111,80 @@ class EventApplierMethodTest {
         factory.checkAccessModifier(method);
     }
 
-    @Test
-    @DisplayName("consider applier with one message parameter valid")
-    void considerApplierWithOneMsgParamValid() {
-        final Method applier = new ValidApplier().getMethod();
+    @Nested
+    @DisplayName("consider applier valid")
+    class ConsiderApplierValid {
 
-        assertIsEventApplier(applier);
+        @Test
+        @DisplayName("when it has one message parameter")
+        void whenHasOneMessageParameter() {
+            final Method applier = new ValidApplier().getMethod();
+
+            assertIsEventApplier(applier);
+        }
+
+        @Test
+        @DisplayName("when it's not private")
+        void whenNotPrivate() {
+            final Method method = new ValidApplierButNotPackagePrivate().getMethod();
+
+            assertIsEventApplier(method);
+        }
+
+        private void assertIsEventApplier(Method applier) {
+            assertTrue(EventApplierMethod.predicate()
+                                         .apply(applier));
+        }
     }
 
-    @Test
-    @DisplayName("consider not private applier valid")
-    void considerNotPrivateApplierValid() {
-        final Method method = new ValidApplierButNotPackagePrivate().getMethod();
+    @Nested
+    @DisplayName("consider applier invalid")
+    class ConsiderApplierInvalid {
 
-        assertIsEventApplier(method);
-    }
+        @Test
+        @DisplayName("when it's not annotated")
+        void whenItsNotAnnotated() {
+            final Method applier = new InvalidApplierNoAnnotation().getMethod();
 
-    @Test
-    @DisplayName("consider not annotated applier invalid")
-    void considerNotAnnotatedApplierInvalid() {
-        final Method applier = new InvalidApplierNoAnnotation().getMethod();
+            assertIsNotEventApplier(applier);
+        }
 
-        assertIsNotEventApplier(applier);
-    }
+        @Test
+        @DisplayName("when it has no params")
+        void considerApplierWithoutParamsInvalid() {
+            final Method applier = new InvalidApplierNoParams().getMethod();
 
-    @Test
-    @DisplayName("consider applier without params invalid")
-    void considerApplierWithoutParamsInvalid() {
-        final Method applier = new InvalidApplierNoParams().getMethod();
+            assertIsNotEventApplier(applier);
+        }
 
-        assertIsNotEventApplier(applier);
-    }
+        @Test
+        @DisplayName("when it has too many params")
+        void whenItHasTooManyParams() {
+            final Method applier = new InvalidApplierTooManyParams().getMethod();
 
-    @Test
-    @DisplayName("consider applier with too many params invalid")
-    void considerApplierWithTooManyParamsInvalid() {
-        final Method applier = new InvalidApplierTooManyParams().getMethod();
+            assertIsNotEventApplier(applier);
+        }
 
-        assertIsNotEventApplier(applier);
-    }
+        @Test
+        @DisplayName("when it has one param of invalid type")
+        void whenItHasOneInvalidParam() {
+            final Method applier = new InvalidApplierOneNotMsgParam().getMethod();
 
-    @Test
-    @DisplayName("consider applier with one invalid param invalid")
-    void considerApplierWithOneInvalidParamInvalid() {
-        final Method applier = new InvalidApplierOneNotMsgParam().getMethod();
+            assertIsNotEventApplier(applier);
+        }
 
-        assertIsNotEventApplier(applier);
-    }
+        @Test
+        @DisplayName("when it has non-void return type")
+        void whenItReturnsNonVoidType() {
+            final Method applier = new InvalidApplierNotVoid().getMethod();
 
-    @Test
-    @DisplayName("consider applier with non void return type invalid")
-    void considerNotVoidApplierInvalid() {
-        final Method applier = new InvalidApplierNotVoid().getMethod();
+            assertIsNotEventApplier(applier);
+        }
 
-        assertIsNotEventApplier(applier);
-    }
-
-    private static void assertIsEventApplier(Method applier) {
-        assertTrue(EventApplierMethod.predicate()
-                                     .apply(applier));
-    }
-
-    private static void assertIsNotEventApplier(Method applier) {
-        assertFalse(EventApplierMethod.predicate()
-                                      .apply(applier));
+        private void assertIsNotEventApplier(Method applier) {
+            assertFalse(EventApplierMethod.predicate()
+                                          .apply(applier));
+        }
     }
 
     /*
