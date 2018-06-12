@@ -43,7 +43,7 @@ import static io.spine.server.delivery.given.MessageDeliveryTestEnv.dispatchWait
 /**
  * @author Alex Tymchenko
  */
-@DisplayName("AggregateMessageDelivery should")
+@DisplayName("Aggregate message delivery should")
 class AggregateMessageDeliveryTest extends AbstractMessageDeliveryShould {
 
     @Override
