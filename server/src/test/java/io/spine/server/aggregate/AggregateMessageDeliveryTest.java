@@ -178,7 +178,7 @@ class AggregateMessageDeliveryTest extends AbstractMessageDeliveryShould {
 
         @Test
         @DisplayName("to single shard")
-        void dispatchRejectionsToShard() throws Exception {
+        void toSingleShard() throws Exception {
             final ParallelDispatcher<ProjectId, Rejection> dispatcher =
                     new ParallelDispatcher<ProjectId, Rejection>(
                             36, 12, dispatchWaitTime()) {
@@ -204,7 +204,7 @@ class AggregateMessageDeliveryTest extends AbstractMessageDeliveryShould {
 
         @Test
         @DisplayName("to several shards")
-        void dispatchRejectionsToSeveralShards() throws Exception {
+        void toSeveralShards() throws Exception {
             final ParallelDispatcher<ProjectId, Rejection> dispatcher =
                     new ParallelDispatcher<ProjectId, Rejection>(
                             40, 603, dispatchWaitTime()) {
