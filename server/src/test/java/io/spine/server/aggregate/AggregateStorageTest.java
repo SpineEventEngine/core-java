@@ -72,7 +72,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 /**
  * @author Alexander Litus
  */
-@DisplayName("AggregateStorage should")
 public abstract class AggregateStorageTest
         extends AbstractStorageShould<ProjectId,
                                       AggregateStateRecord,
