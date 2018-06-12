@@ -396,7 +396,8 @@ public class AggregateTest {
             AggregateWithMissingApplier aggregate = new AggregateWithMissingApplier(ID);
 
             // Pass a command for which the target aggregate does not have a handling method.
-            assertThrows(IllegalStateException.class, () -> dispatchCommand(aggregate, env(addTask)));
+            assertThrows(IllegalStateException.class,
+                         () -> dispatchCommand(aggregate, env(addTask)));
         }
 
         @Test
