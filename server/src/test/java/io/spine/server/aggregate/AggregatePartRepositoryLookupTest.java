@@ -87,7 +87,7 @@ class AggregatePartRepositoryLookupTest {
     }
 
     @Test
-    @DisplayName("throw if repository id class does not match root id class")
+    @DisplayName("throw if found repository id class does not match root id class")
     void throwOnIdClassNotMatching() {
         AggregatePartRepositoryLookup lookup =
                 createLookup(boundedContext, TaskId.class, Project.class);
