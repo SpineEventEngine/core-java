@@ -45,9 +45,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * an event or a rejection.
  *
  * @author Alexander Yevsyukkov
- * @see io.spine.server.aggregate.AggregateTest#createSingleEventForPairFromCommandDispatch
- * @see io.spine.server.aggregate.AggregateTest#createSingleEventForPairFromEventReact
- * @see io.spine.server.aggregate.AggregateTest#createSingleEventForPairFromRejectionReact
+ * @see io.spine.server.aggregate.AggregateTest.CreateSingleEventForPair
  */
 public class TaskAggregate extends Aggregate<AggTaskId, AggTask, AggTaskVBuilder> {
 
@@ -84,8 +82,7 @@ public class TaskAggregate extends Aggregate<AggTaskId, AggTask, AggTaskVBuilder
      * Creates a new {@link AggTaskAssigned} event message with provided values. If the
      * {@linkplain UserId assignee} is a default empty instance returns {@code null}.
      */
-    @Nullable
-    private static AggTaskAssigned taskAssignedOrNull(AggTaskId id, UserId assignee) {
+    private static @Nullable AggTaskAssigned taskAssignedOrNull(AggTaskId id, UserId assignee) {
         final UserId emptyUserId = UserId.getDefaultInstance();
         if (assignee.equals(emptyUserId)) {
             return null;
@@ -155,8 +152,7 @@ public class TaskAggregate extends Aggregate<AggTaskId, AggTask, AggTaskVBuilder
         return Pair.withNullable(newAssigneeNotified, previousAssigneeNotified);
     }
 
-    @Nullable
-    private static AggUserNotified userNotifiedOrNull(AggTaskId taskId, UserId userId) {
+    private static @Nullable AggUserNotified userNotifiedOrNull(AggTaskId taskId, UserId userId) {
         if (userId.equals(EMPTY_USER_ID)) {
             return null;
         }

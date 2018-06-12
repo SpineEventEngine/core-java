@@ -371,10 +371,8 @@ public class AggregateRepositoryTestEnv {
             extends AggregateRepository<Long, FailingAggregate> {
 
         private boolean errorLogged;
-        @Nullable
-        private MessageEnvelope lastErrorEnvelope;
-        @Nullable
-        private RuntimeException lastException;
+        private @Nullable MessageEnvelope lastErrorEnvelope;
+        private @Nullable RuntimeException lastException;
 
         @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
         public FailingAggregateRepository() {
@@ -428,13 +426,11 @@ public class AggregateRepositoryTestEnv {
             return errorLogged;
         }
 
-        @Nullable
-        public MessageEnvelope getLastErrorEnvelope() {
+        public @Nullable MessageEnvelope getLastErrorEnvelope() {
             return lastErrorEnvelope;
         }
 
-        @Nullable
-        public RuntimeException getLastException() {
+        public @Nullable RuntimeException getLastException() {
             return lastException;
         }
     }

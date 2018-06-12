@@ -86,8 +86,9 @@ import static org.mockito.Mockito.verify;
 /**
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"})
-// JUnit 5 Nested classes cannot to be static.
+@SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
+        /* JUnit 5 Nested classes cannot to be static. */,
+        "DuplicateStringLiteralInspection" /* Common test display names */})
 @DisplayName("AggregateRepository should")
 public class AggregateRepositoryTest {
 
