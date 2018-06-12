@@ -259,7 +259,7 @@ public class EventsTest {
 
     @Nested
     @DisplayName("return default tenant id")
-    class GetDefaultTenantId {
+    class ReturnDefaultTenantId {
 
         @Test
         @DisplayName("for event without origin")
@@ -304,12 +304,12 @@ public class EventsTest {
     }
 
     @Nested
-    @DisplayName("provide tenant id")
+    @DisplayName("retrieve tenant id")
     class GetTenantId {
 
         @Test
-        @DisplayName("for event with command context")
-        void forCommandContext() {
+        @DisplayName("from event with command context")
+        void fromCommandContext() {
             final TenantId targetTenantId = tenantId();
             final CommandContext commandContext = EventsTestEnv.commandContext(targetTenantId);
             final EventContext context = contextWithoutOrigin().setCommandContext(commandContext)
@@ -323,8 +323,8 @@ public class EventsTest {
         }
 
         @Test
-        @DisplayName("for event with rejection context")
-        void forRejectionContext() {
+        @DisplayName("from event with rejection context")
+        void fromRejectionContext() {
             final TenantId targetTenantId = tenantId();
             final RejectionContext rejectionContext = EventsTestEnv.rejectionContext(
                     targetTenantId);
@@ -339,8 +339,8 @@ public class EventsTest {
         }
 
         @Test
-        @DisplayName("for event with event context with command context")
-        void forEventContextWithCommandContext() {
+        @DisplayName("from event with event context with command context")
+        void fromEventContextWithCommandContext() {
             final TenantId targetTenantId = tenantId();
             final CommandContext commandContext = EventsTestEnv.commandContext(targetTenantId);
             final EventContext outerContext = contextWithoutOrigin().setCommandContext(
@@ -356,8 +356,8 @@ public class EventsTest {
         }
 
         @Test
-        @DisplayName("for event with event context with rejection context")
-        void forEventContextWithRejectionContext() {
+        @DisplayName("from event with event context with rejection context")
+        void fromEventContextWithRejectionContext() {
             final TenantId targetTenantId = tenantId();
             final RejectionContext rejectionContext = EventsTestEnv.rejectionContext(
                     targetTenantId);
