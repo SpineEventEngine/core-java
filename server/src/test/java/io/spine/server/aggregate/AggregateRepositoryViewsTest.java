@@ -74,7 +74,7 @@ class AggregateRepositoryViewsTest {
                 requestFactory.command()
                               .create(RepoOfAggregateWithLifecycle.createCommandMessage(id, cmd));
         boundedContext.getCommandBus()
-                      .post(command, StreamObservers.<Ack>noOpObserver());
+                      .post(command, StreamObservers.noOpObserver());
     }
 
     @Test
