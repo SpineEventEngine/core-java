@@ -74,7 +74,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * @author Mykhailo Drachuk
  */
 @SuppressWarnings("DuplicateStringLiteralInspection")
-// Simple test names duplicates with random literals.
+// Simple test names duplicate random literals.
 @DisplayName("Events utility should")
 public class EventsTest {
 
