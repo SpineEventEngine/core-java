@@ -123,13 +123,13 @@ public class AggregateRepositoryTest {
     class Expose {
 
         @Test
-        @DisplayName("its aggregate class")
+        @DisplayName("aggregate class")
         void aggregateClass() {
             assertEquals(ProjectAggregate.class, repository.getEntityClass());
         }
 
         @Test
-        @DisplayName("command classes handled by its aggregate")
+        @DisplayName("command classes handled by aggregate")
         void aggregateCommandClasses() {
             Set<CommandClass> aggregateCommands =
                     Model.getInstance()
@@ -141,7 +141,7 @@ public class AggregateRepositoryTest {
         }
 
         @Test
-        @DisplayName("event classes on which its aggregate reacts")
+        @DisplayName("event classes on which aggregate reacts")
         void aggregateEventClasses() {
             Set<EventClass> eventClasses = repository.getEventClasses();
             assertTrue(eventClasses.contains(EventClass.of(AggProjectArchived.class)));
