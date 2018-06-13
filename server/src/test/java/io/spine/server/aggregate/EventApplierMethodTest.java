@@ -82,7 +82,7 @@ class EventApplierMethodTest {
 
     @Test
     @DisplayName("be properly created from factory")
-    void beCreated() {
+    void beCreatedFromFactory() {
         final Method method = new ValidApplier().getMethod();
 
         final EventApplierMethod actual = factory.create(method);
