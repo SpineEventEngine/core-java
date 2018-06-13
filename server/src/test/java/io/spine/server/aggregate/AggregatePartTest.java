@@ -56,7 +56,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 /**
  * @author Illia Shepilov
  */
-@SuppressWarnings("OverlyCoupledClass")
+@SuppressWarnings({"OverlyCoupledClass",
+        "DuplicateStringLiteralInspection" /* Common test display names */})
 @DisplayName("AggregatePart should")
 class AggregatePartTest {
 
@@ -106,8 +107,7 @@ class AggregatePartTest {
         assertEquals(TASK_DESCRIPTION, task.getDescription());
     }
 
-    @SuppressWarnings({"DuplicateStringLiteralInspection" /* Common test case with Aggregate. */,
-            "CheckReturnValue" /* Method called to throw exception. */})
+    @SuppressWarnings("CheckReturnValue") // Method called to throw exception.
     @Test
     @DisplayName("throw InvalidEntityStateException if entity state is invalid")
     void throwOnInvalidState() {
@@ -133,7 +133,6 @@ class AggregatePartTest {
         }
     }
 
-    @SuppressWarnings("DuplicateStringLiteralInspection") // Common test case with Aggregate.
     @Test
     @DisplayName("update valid entity state")
     void updateEntityState() {

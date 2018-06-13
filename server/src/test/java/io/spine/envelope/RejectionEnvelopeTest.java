@@ -54,6 +54,28 @@ class RejectionEnvelopeTest extends MessageEnvelopeTest<Rejection,
     private final TestActorRequestFactory requestFactory =
             TestActorRequestFactory.newInstance(RejectionEnvelopeTest.class);
 
+    @Override
+    protected Rejection outerObject() {
+        final Message commandMessage = Int32Value.getDefaultInstance();
+        final Command command = requestFactory.command()
+                                              .create(commandMessage);
+        final Message rejectionMessage = CannotPerformBusinessOperation.newBuilder()
+                                                                       .setOperationId(newUuid())
+                                                                       .build();
+        final Rejection rejection = Rejections.createRejection(rejectionMessage, command);
+        return rejection;
+    }
+
+    @Override
+    protected RejectionEnvelope toEnvelope(Rejection obj) {
+        return RejectionEnvelope.of(obj);
+    }
+
+    @Override
+    protected RejectionClass getMessageClass(Rejection obj) {
+        return RejectionClass.of(obj);
+    }
+
     @Test
     @DisplayName("obtain command context")
     void getCommandContext() {
@@ -86,27 +108,5 @@ class RejectionEnvelopeTest extends MessageEnvelopeTest<Rejection,
          */
         assertEquals(getClass().getName(), actorContext.getActor()
                                                        .getValue());
-    }
-
-    @Override
-    protected Rejection outerObject() {
-        final Message commandMessage = Int32Value.getDefaultInstance();
-        final Command command = requestFactory.command()
-                                              .create(commandMessage);
-        final Message rejectionMessage = CannotPerformBusinessOperation.newBuilder()
-                                                                       .setOperationId(newUuid())
-                                                                       .build();
-        final Rejection rejection = Rejections.createRejection(rejectionMessage, command);
-        return rejection;
-    }
-
-    @Override
-    protected RejectionEnvelope toEnvelope(Rejection obj) {
-        return RejectionEnvelope.of(obj);
-    }
-
-    @Override
-    protected RejectionClass getMessageClass(Rejection obj) {
-        return RejectionClass.of(obj);
     }
 }

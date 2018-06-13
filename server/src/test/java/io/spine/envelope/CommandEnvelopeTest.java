@@ -42,6 +42,21 @@ class CommandEnvelopeTest extends MessageEnvelopeTest<Command, CommandEnvelope, 
     private final TestActorRequestFactory requestFactory =
             TestActorRequestFactory.newInstance(CommandEnvelopeTest.class);
 
+    @Override
+    protected Command outerObject() {
+        return requestFactory.generateCommand();
+    }
+
+    @Override
+    protected CommandEnvelope toEnvelope(Command obj) {
+        return CommandEnvelope.of(obj);
+    }
+
+    @Override
+    protected CommandClass getMessageClass(Command obj) {
+        return CommandClass.of(obj);
+    }
+
     @Test
     @DisplayName("obtain command context")
     void getCommandContext() {
@@ -59,20 +74,5 @@ class CommandEnvelopeTest extends MessageEnvelopeTest<Command, CommandEnvelope, 
 
         assertEquals(command.getContext()
                             .getActorContext(), envelope.getActorContext());
-    }
-
-    @Override
-    protected Command outerObject() {
-        return requestFactory.generateCommand();
-    }
-
-    @Override
-    protected CommandEnvelope toEnvelope(Command obj) {
-        return CommandEnvelope.of(obj);
-    }
-
-    @Override
-    protected CommandClass getMessageClass(Command obj) {
-        return CommandClass.of(obj);
     }
 }

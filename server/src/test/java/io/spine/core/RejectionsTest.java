@@ -105,7 +105,7 @@ class RejectionsTest {
     }
 
     @Test
-    @DisplayName("generate rejection id based on command id")
+    @DisplayName("generate rejection id upon command id")
     void generateRejectionIdUponCommandId() {
         final CommandId commandId = Commands.generateId();
         final RejectionId actual = Rejections.generateId(commandId);

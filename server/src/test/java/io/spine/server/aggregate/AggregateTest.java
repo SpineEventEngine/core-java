@@ -155,10 +155,6 @@ public class AggregateTest {
         return result;
     }
 
-    private static void failNotThrows() {
-        fail("Should have thrown RuntimeException.");
-    }
-
     private static List<Event> generateProjectEvents() {
         String projectName = AggregateTest.class.getSimpleName();
         List<Event> events = ImmutableList.<Event>builder()
@@ -213,8 +209,8 @@ public class AggregateTest {
     }
 
     @Nested
-    @DisplayName("provide")
-    class Provide {
+    @DisplayName("expose")
+    class Expose {
 
         @Test
         @DisplayName("handled command classes")
@@ -703,6 +699,10 @@ public class AggregateTest {
                 assertEquals(FaultyAggregate.BROKEN_APPLIER, cause.getMessage());
             }
         }
+
+        private void failNotThrows() {
+            fail("Should have thrown RuntimeException.");
+        }
     }
 
     @Test
@@ -711,9 +711,7 @@ public class AggregateTest {
         assertThrows(IllegalStateException.class, () -> new IntAggregate(100).getBuilder());
     }
 
-    @SuppressWarnings({"DuplicateStringLiteralInspection"
-            /* Common test case with AggregatePart. */,
-            "CheckReturnValue" /* Method called to throw exception. */})
+    @SuppressWarnings("CheckReturnValue") // Method called to throw exception.
     @Test
     @DisplayName("throw InvalidEntityStateException if entity state is invalid")
     void throwOnInvalidState() {
@@ -736,7 +734,6 @@ public class AggregateTest {
         }
     }
 
-    @SuppressWarnings("DuplicateStringLiteralInspection") // Common test case with AggregatePart.
     @Test
     @DisplayName("update valid entity state")
     void updateEntityState() {
@@ -845,7 +842,7 @@ public class AggregateTest {
          * TaskAggregate#handle(AggAssignTask)}.
          */
         @Test
-        @DisplayName("for command dispatch")
+        @DisplayName("in case of command dispatch")
         void fromCommandDispatch() {
             BoundedContext boundedContext = newTaskBoundedContext();
 
@@ -884,7 +881,7 @@ public class AggregateTest {
          * {@link TaskAggregate#on(AggTaskAssigned) TaskAggregate#on(AggTaskAssigned)}.
          */
         @Test
-        @DisplayName("for event react")
+        @DisplayName("in case of event react")
         void fromEventReact() {
             BoundedContext boundedContext = newTaskBoundedContext();
 
@@ -932,7 +929,7 @@ public class AggregateTest {
          * TaskAggregate.on(AggCannotReassignUnassignedTask)}.
          */
         @Test
-        @DisplayName("for rejection react")
+        @DisplayName("in case of rejection react")
         void fromRejectionReact() {
             BoundedContext boundedContext = newTaskBoundedContext();
 

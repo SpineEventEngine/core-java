@@ -57,7 +57,6 @@ class EventApplierMethodTest {
                 .testAllPublicStaticMethods(EventApplierMethod.class);
     }
 
-    @SuppressWarnings("DuplicateStringLiteralInspection") // Common test display name.
     @Nested
     @DisplayName("provide")
     class Provide {
@@ -243,8 +242,8 @@ class EventApplierMethodTest {
     }
 
     private abstract static class TestEventApplier extends Aggregate<Long,
-            StringValue,
-            StringValueVBuilder> {
+                                                                     StringValue,
+                                                                     StringValueVBuilder> {
 
         protected TestEventApplier() {
             super(0L);
@@ -255,8 +254,7 @@ class EventApplierMethodTest {
         public Method getMethod() {
             final Method[] methods = getClass().getDeclaredMethods();
             for (Method method : methods) {
-                if (method.getName()
-                          .equals(APPLIER_METHOD_NAME)) {
+                if (method.getName().equals(APPLIER_METHOD_NAME)) {
                     method.setAccessible(true);
                     return method;
                 }

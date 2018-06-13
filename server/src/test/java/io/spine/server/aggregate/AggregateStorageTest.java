@@ -331,6 +331,46 @@ public abstract class AggregateStorageTest
     }
 
     @Nested
+    @DisplayName("read records with status")
+    class ReadRecords {
+
+        @Test
+        @DisplayName("`archived`")
+        void archived() {
+            readRecordsWithLifecycle(LifecycleFlags.newBuilder()
+                                                   .setArchived(true)
+                                                   .build());
+        }
+
+        @Test
+        @DisplayName("`deleted`")
+        void deleted() {
+            readRecordsWithLifecycle(LifecycleFlags.newBuilder()
+                                                   .setDeleted(true)
+                                                   .build());
+        }
+
+        @Test
+        @DisplayName("`archived` and `deleted`")
+        void archivedAndDeleted() {
+            readRecordsWithLifecycle(LifecycleFlags.newBuilder()
+                                                   .setArchived(true)
+                                                   .setDeleted(true)
+                                                   .build());
+        }
+
+        private void readRecordsWithLifecycle(LifecycleFlags flags) {
+            AggregateStateRecord record = newStorageRecord();
+            storage.write(id, record);
+            storage.writeLifecycleFlags(id, flags);
+            Optional<AggregateStateRecord> read = storage.read(newReadRequest(id));
+            assertTrue(read.isPresent());
+            AggregateStateRecord readRecord = read.get();
+            assertEquals(record, readRecord);
+        }
+    }
+
+    @Nested
     @DisplayName("write records and return them")
     class WriteRecordsAndReturn {
 
@@ -432,8 +472,8 @@ public abstract class AggregateStorageTest
     }
 
     @Nested
-    @DisplayName("return event count")
-    class ReturnEventCount {
+    @DisplayName("properly read event count")
+    class ReadEventCount {
 
         @Test
         @DisplayName("set to default zero value")
@@ -560,46 +600,6 @@ public abstract class AggregateStorageTest
                                                .getContext()
                                                .getEventContext();
             assertTrue(isDefault(loadedOrigin.getEnrichment()));
-        }
-    }
-
-    @Nested
-    @DisplayName("read records with status")
-    class ReadRecords {
-
-        @Test
-        @DisplayName("`archived`")
-        void archived() {
-            readRecordsWithLifecycle(LifecycleFlags.newBuilder()
-                                                   .setArchived(true)
-                                                   .build());
-        }
-
-        @Test
-        @DisplayName("`deleted`")
-        void deleted() {
-            readRecordsWithLifecycle(LifecycleFlags.newBuilder()
-                                                   .setDeleted(true)
-                                                   .build());
-        }
-
-        @Test
-        @DisplayName("`archived` and `deleted`")
-        void archivedAndDeleted() {
-            readRecordsWithLifecycle(LifecycleFlags.newBuilder()
-                                                   .setArchived(true)
-                                                   .setDeleted(true)
-                                                   .build());
-        }
-
-        private void readRecordsWithLifecycle(LifecycleFlags flags) {
-            AggregateStateRecord record = newStorageRecord();
-            storage.write(id, record);
-            storage.writeLifecycleFlags(id, flags);
-            Optional<AggregateStateRecord> read = storage.read(newReadRequest(id));
-            assertTrue(read.isPresent());
-            AggregateStateRecord readRecord = read.get();
-            assertEquals(record, readRecord);
         }
     }
 

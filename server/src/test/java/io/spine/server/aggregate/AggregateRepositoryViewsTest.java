@@ -88,7 +88,7 @@ class AggregateRepositoryViewsTest {
     }
 
     @Test
-    @DisplayName("find aggregates with archived status")
+    @DisplayName("find aggregates with `archived` status")
     void findArchivedAggregates() {
         postCommand("archive");
 
@@ -101,7 +101,7 @@ class AggregateRepositoryViewsTest {
     }
 
     @Test
-    @DisplayName("find aggregates with deleted status")
+    @DisplayName("find aggregates with `deleted` status")
     void findDeletedAggregates() {
         postCommand("delete");
 

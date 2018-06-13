@@ -138,8 +138,7 @@ public class AggregateTransactionTest
     protected void breakEntityValidation(
             Aggregate<ProjectId, Project, PatchedProjectBuilder> entity,
             RuntimeException toThrow) {
-        entity.getBuilder()
-              .setShouldThrow(toThrow);
+        entity.getBuilder().setShouldThrow(toThrow);
     }
 
     @SuppressWarnings({"MethodMayBeStatic", "unused"})  // Methods accessed via reflection.

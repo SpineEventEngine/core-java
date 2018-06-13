@@ -171,25 +171,25 @@ public class EventsTest {
             assertEquals(command.getId(), Events.getRootCommandId(event));
         }
 
+        @Test
+        @DisplayName("type name")
+        void typeName() {
+            final CommandEnvelope command = requestFactory.generateEnvelope();
+            final StringValue producerId = toMessage(getClass().getSimpleName());
+            final EventFactory ef = EventFactory.on(command, Identifier.pack(producerId));
+            final Event event = ef.createEvent(Time.getCurrentTime(), Tests.nullRef());
+
+            final TypeName typeName = EventEnvelope.of(event)
+                                                   .getTypeName();
+            assertNotNull(typeName);
+            assertEquals(Timestamp.class.getSimpleName(), typeName.getSimpleName());
+        }
+
         private void createEventAndAssertReturnedMessageFor(Message msg) {
             final Event event = GivenEvent.withMessage(msg);
 
             assertEquals(msg, getMessage(event));
         }
-    }
-
-    @Test
-    @DisplayName("obtain type name of event")
-    void getTypeNameOfEvent() {
-        final CommandEnvelope command = requestFactory.generateEnvelope();
-        final StringValue producerId = toMessage(getClass().getSimpleName());
-        final EventFactory ef = EventFactory.on(command, Identifier.pack(producerId));
-        final Event event = ef.createEvent(Time.getCurrentTime(), Tests.nullRef());
-
-        final TypeName typeName = EventEnvelope.of(event)
-                                               .getTypeName();
-        assertNotNull(typeName);
-        assertEquals(Timestamp.class.getSimpleName(), typeName.getSimpleName());
     }
 
     @Test
@@ -249,12 +249,6 @@ public class EventsTest {
     void acceptGeneratedEventId() {
         final EventId eventId = event.getId();
         assertEquals(eventId, checkValid(eventId));
-    }
-
-    @Test
-    @DisplayName("throw NPE when getting tenant id of null event")
-    void notAcceptNullEvent() {
-        assertThrows(NullPointerException.class, () -> Events.getTenantId(Tests.nullRef()));
     }
 
     @Nested
@@ -372,6 +366,12 @@ public class EventsTest {
 
             assertEquals(targetTenantId, tenantId);
         }
+    }
+
+    @Test
+    @DisplayName("throw NPE when getting tenant id of null event")
+    void notAcceptNullEvent() {
+        assertThrows(NullPointerException.class, () -> Events.getTenantId(Tests.nullRef()));
     }
 
     private EventContext.Builder contextWithoutOrigin() {
