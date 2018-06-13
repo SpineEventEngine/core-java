@@ -333,7 +333,7 @@ public class EventsTest {
         }
 
         @Test
-        @DisplayName("from event with event context with command context")
+        @DisplayName("from event with event context originated from command context")
         void fromEventContextWithCommandContext() {
             final TenantId targetTenantId = tenantId();
             final CommandContext commandContext = EventsTestEnv.commandContext(targetTenantId);
@@ -350,7 +350,7 @@ public class EventsTest {
         }
 
         @Test
-        @DisplayName("from event with event context with rejection context")
+        @DisplayName("from event with event context originated from rejection context")
         void fromEventContextWithRejectionContext() {
             final TenantId targetTenantId = tenantId();
             final RejectionContext rejectionContext = EventsTestEnv.rejectionContext(
