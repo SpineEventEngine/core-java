@@ -161,7 +161,7 @@ public class EventsTest {
         }
 
         @Test
-        @DisplayName("root command id")
+        @DisplayName("root command ID")
         void rootCommandId() {
             final CommandEnvelope command = requestFactory.generateEnvelope();
             final StringValue producerId = toMessage(getClass().getSimpleName());
@@ -219,7 +219,7 @@ public class EventsTest {
     }
 
     @Test
-    @DisplayName("provide stringifier for event id")
+    @DisplayName("provide stringifier for event ID")
     void provideEventIdStringifier() {
         final EventId id = event.getId();
 
@@ -238,21 +238,21 @@ public class EventsTest {
     }
 
     @Test
-    @DisplayName("reject empty event id")
+    @DisplayName("reject empty event ID")
     void rejectEmptyEventId() {
         assertThrows(IllegalArgumentException.class,
                      () -> checkValid(EventId.getDefaultInstance()));
     }
 
     @Test
-    @DisplayName("accept generated event id")
+    @DisplayName("accept generated event ID")
     void acceptGeneratedEventId() {
         final EventId eventId = event.getId();
         assertEquals(eventId, checkValid(eventId));
     }
 
     @Nested
-    @DisplayName("return default tenant id")
+    @DisplayName("return default tenant ID")
     class ReturnDefaultTenantId {
 
         @Test
@@ -298,7 +298,7 @@ public class EventsTest {
     }
 
     @Nested
-    @DisplayName("retrieve tenant id")
+    @DisplayName("retrieve tenant ID")
     class GetTenantId {
 
         @Test
@@ -369,7 +369,7 @@ public class EventsTest {
     }
 
     @Test
-    @DisplayName("throw NPE when getting tenant id of null event")
+    @DisplayName("throw NPE when getting tenant ID of null event")
     void notAcceptNullEvent() {
         assertThrows(NullPointerException.class, () -> Events.getTenantId(Tests.nullRef()));
     }
