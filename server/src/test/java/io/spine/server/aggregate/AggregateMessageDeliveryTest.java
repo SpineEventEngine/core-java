@@ -176,8 +176,7 @@ class AggregateMessageDeliveryTest extends AbstractMessageDeliveryShould {
         @DisplayName("to single shard")
         void toSingleShard() throws Exception {
             final ParallelDispatcher<ProjectId, Rejection> dispatcher =
-                    new ParallelDispatcher<ProjectId, Rejection>(
-                            36, 12, dispatchWaitTime()) {
+                    new ParallelDispatcher<ProjectId, Rejection>(36, 12, dispatchWaitTime()) {
                         @Override
                         protected ThreadStats<ProjectId> getStats() {
                             return DeliveryProject.getStats();
@@ -202,8 +201,7 @@ class AggregateMessageDeliveryTest extends AbstractMessageDeliveryShould {
         @DisplayName("to several shards")
         void toSeveralShards() throws Exception {
             final ParallelDispatcher<ProjectId, Rejection> dispatcher =
-                    new ParallelDispatcher<ProjectId, Rejection>(
-                            40, 603, dispatchWaitTime()) {
+                    new ParallelDispatcher<ProjectId, Rejection>(40, 603, dispatchWaitTime()) {
                         @Override
                         protected ThreadStats<ProjectId> getStats() {
                             return DeliveryProject.getStats();
