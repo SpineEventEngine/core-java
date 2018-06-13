@@ -111,14 +111,14 @@ public class AggregateRepositoryTestEnv {
     }
 
     /**
-     * Assigns a new {@link BoundedContext} instance to the stored {@link #boundedContext}.
+     * Assigns a new {@link BoundedContext} instance to the test {@link #boundedContext}.
      */
     public static void resetBoundedContext() {
         boundedContext = newBoundedContext();
     }
 
     /**
-     * Assigns a new {@link AggregateRepository} instance to the stored {@link #repository}.
+     * Assigns a new {@link AggregateRepository} instance to the test {@link #repository}.
      */
     public static void resetRepository() {
         repository = newRepository();
