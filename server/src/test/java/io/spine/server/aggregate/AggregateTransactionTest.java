@@ -37,22 +37,25 @@ import io.spine.test.aggregate.event.AggProjectCreated;
 import io.spine.test.aggregate.event.AggTaskAdded;
 import io.spine.validate.ConstraintViolation;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.junit.jupiter.api.DisplayName;
 
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.aggregate.given.Given.EventMessage.projectCreated;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Alex Tymchenko
  */
-public class AggregateTransactionShould
+//TODO:2018-05-31:dmytro.kuzmin: Make package-private after TransactionShould migrated to JUnit 5
+@DisplayName("AggregateTransaction should")
+public class AggregateTransactionTest
         extends TransactionShould<ProjectId,
-        Aggregate<ProjectId, Project, AggregateTransactionShould.PatchedProjectBuilder>,
+        Aggregate<ProjectId, Project, AggregateTransactionTest.PatchedProjectBuilder>,
         Project,
-        AggregateTransactionShould.PatchedProjectBuilder> {
+        AggregateTransactionTest.PatchedProjectBuilder> {
 
     private static final ProjectId ID = ProjectId.newBuilder()
                                                  .setId("aggregate-transaction-should-project")
@@ -156,7 +159,7 @@ public class AggregateTransactionShould
 
         @Override
         protected List<ConstraintViolation> checkEntityState(Project newState) {
-            if(violations != null) {
+            if (violations != null) {
                 return ImmutableList.copyOf(violations);
             }
             return super.checkEntityState(newState);

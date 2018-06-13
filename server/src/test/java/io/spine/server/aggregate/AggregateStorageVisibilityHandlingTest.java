@@ -26,20 +26,22 @@ import io.spine.server.entity.LifecycleFlags;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.ProjectVBuilder;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Tests covering the behavior of the {@link AggregateStorage} regarding the {@link LifecycleFlags}.
  *
  * @author Dmytro Dashenkov.
  */
-public abstract class AggregateStorageVisibilityHandlingShould {
+@DisplayName("AggregateStorage, when saving aggregate with lifecycle flags, should")
+public abstract class AggregateStorageVisibilityHandlingTest {
 
     protected abstract AggregateStorage<ProjectId> getAggregateStorage(
             Class<? extends Aggregate<ProjectId, ?, ?>> aggregateClass);
@@ -50,14 +52,15 @@ public abstract class AggregateStorageVisibilityHandlingShould {
                                           .setId(Identifier.newUuid())
                                           .build();
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         storage = getAggregateStorage(TestAggregate.class);
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent") // Checked in an assertion
     @Test
-    public void write_entity_status_of_aggregate() {
+    @DisplayName("write entity status of aggregate")
+    void writeEntityStatusOfAggregate() {
         final LifecycleFlags status = LifecycleFlags.newBuilder()
                                                     .setArchived(true)
                                                     .build();
@@ -68,7 +71,8 @@ public abstract class AggregateStorageVisibilityHandlingShould {
     }
 
     @Test
-    public void save_whole_status() {
+    @DisplayName("save whole status")
+    void saveWholeStatus() {
         final boolean archived = true;
         final boolean deleted = true;
         final LifecycleFlags expected = LifecycleFlags.newBuilder()
@@ -81,7 +85,8 @@ public abstract class AggregateStorageVisibilityHandlingShould {
     }
 
     @Test
-    public void retrieve_empty_status_if_never_written() {
+    @DisplayName("retrieve empty status if it is never written")
+    void getEmptyStatusIfNeverWritten() {
         final Optional<LifecycleFlags> entityStatus = storage.readLifecycleFlags(id);
         assertNotNull(entityStatus);
         assertFalse(entityStatus.isPresent());
@@ -96,7 +101,6 @@ public abstract class AggregateStorageVisibilityHandlingShould {
         assertEquals(archived, status.getArchived());
         assertEquals(deleted, status.getDeleted());
     }
-
 
     private static class TestAggregate
             extends Aggregate<ProjectId, Project, ProjectVBuilder> {

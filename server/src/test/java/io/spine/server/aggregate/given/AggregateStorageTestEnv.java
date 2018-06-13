@@ -25,6 +25,4 @@ public class AggregateStorageTestEnv {
     private AggregateStorageTestEnv() {
         // Prevent instantiation of this utility class.
     }
-
-
 }

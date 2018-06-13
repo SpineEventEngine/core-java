@@ -22,28 +22,36 @@ package io.spine.server.aggregate;
 
 import com.google.common.testing.EqualsTester;
 import io.spine.test.Tests;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Dmytro Grankin
  */
-public class AggregateReadRequestShould {
+@DisplayName("AggregateReadRequest should")
+class AggregateReadRequestTest {
 
     private static final String ID = "ID";
     private static final int BATCH_SIZE = 10;
 
-    @Test(expected = NullPointerException.class)
-    public void not_accept_null_ID() {
-        new AggregateReadRequest<>(Tests.<String>nullRef(), BATCH_SIZE);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void not_accept_non_positive_batch_size() {
-        new AggregateReadRequest<>(ID, 0);
+    @Test
+    @DisplayName("not accept null ID")
+    void notAcceptNullID() {
+        assertThrows(NullPointerException.class,
+                     () -> new AggregateReadRequest<>(Tests.<String>nullRef(), BATCH_SIZE));
     }
 
     @Test
-    public void consider_request_with_same_ID_equal() {
+    @DisplayName("not accept non-positive batch size")
+    void notAcceptNonPositiveBatchSize() {
+        assertThrows(IllegalArgumentException.class, () -> new AggregateReadRequest<>(ID, 0));
+    }
+
+    @Test
+    @DisplayName("consider request with same ID equal")
+    void considerRequestWithSameIdEqual() {
         final AggregateReadRequest<String> first = new AggregateReadRequest<>(ID, BATCH_SIZE);
         final int differentBatch = first.getBatchSize() * 2;
         final AggregateReadRequest<String> second = new AggregateReadRequest<>(ID,

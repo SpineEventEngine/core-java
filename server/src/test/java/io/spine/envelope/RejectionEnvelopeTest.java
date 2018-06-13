@@ -31,10 +31,11 @@ import io.spine.core.RejectionEnvelope;
 import io.spine.core.Rejections;
 import io.spine.protobuf.AnyPacker;
 import io.spine.test.rejection.OperationRejections.CannotPerformBusinessOperation;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.base.Identifier.newUuid;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Test of {@link RejectionEnvelope}.
@@ -43,17 +44,20 @@ import static org.junit.Assert.assertEquals;
  *
  * @author Alex Tymchenko
  */
-public class RejectionEnvelopeShould extends MessageEnvelopeTest<Rejection,
+@SuppressWarnings("DuplicateStringLiteralInspection") // Similar test cases to CommandEnvelopeTest.
+@DisplayName("RejectionEnvelope should")
+class RejectionEnvelopeTest extends MessageEnvelopeTest<Rejection,
         RejectionEnvelope,
         RejectionClass> {
 
     private final TestActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(RejectionEnvelopeShould.class);
+            TestActorRequestFactory.newInstance(RejectionEnvelopeTest.class);
 
     @Override
     protected Rejection outerObject() {
         final Message commandMessage = Int32Value.getDefaultInstance();
-        final Command command = requestFactory.command().create(commandMessage);
+        final Command command = requestFactory.command()
+                                              .create(commandMessage);
         final Message rejectionMessage = CannotPerformBusinessOperation.newBuilder()
                                                                        .setOperationId(newUuid())
                                                                        .build();
@@ -72,7 +76,8 @@ public class RejectionEnvelopeShould extends MessageEnvelopeTest<Rejection,
     }
 
     @Test
-    public void obtain_command_context() {
+    @DisplayName("obtain command context")
+    void getCommandContext() {
         final Rejection rejection = outerObject();
         final Command command = rejection.getContext()
                                          .getCommand();
@@ -81,7 +86,8 @@ public class RejectionEnvelopeShould extends MessageEnvelopeTest<Rejection,
     }
 
     @Test
-    public void obtain_command_message() {
+    @DisplayName("obtain command message")
+    void getCommandMessage() {
         final Rejection rejection = outerObject();
         final Command command = rejection.getContext()
                                          .getCommand();
@@ -91,7 +97,8 @@ public class RejectionEnvelopeShould extends MessageEnvelopeTest<Rejection,
     }
 
     @Test
-    public void obtain_actor_context() {
+    @DisplayName("obtain actor context")
+    void getActorContext() {
         final RejectionEnvelope rejection = toEnvelope(outerObject());
         final ActorContext actorContext = rejection.getActorContext();
 

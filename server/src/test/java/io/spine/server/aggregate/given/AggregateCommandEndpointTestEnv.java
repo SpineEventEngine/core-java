@@ -83,8 +83,8 @@ public class AggregateCommandEndpointTestEnv {
         AggTaskAdded handle(AggAddTask msg, CommandContext context) {
             commandsHandled.add(msg, context);
             return AggTaskAdded.newBuilder()
-                            .setProjectId(msg.getProjectId())
-                            .build();
+                               .setProjectId(msg.getProjectId())
+                               .build();
         }
 
         @Apply
@@ -96,8 +96,8 @@ public class AggregateCommandEndpointTestEnv {
         AggProjectStarted handle(AggStartProject msg, CommandContext context) {
             commandsHandled.add(msg, context);
             return AggProjectStarted.newBuilder()
-                                 .setProjectId(msg.getProjectId())
-                                 .build();
+                                    .setProjectId(msg.getProjectId())
+                                    .build();
         }
 
         @Apply

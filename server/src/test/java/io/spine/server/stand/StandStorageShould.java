@@ -39,7 +39,7 @@ import io.spine.test.storage.Task;
 import io.spine.test.storage.TaskId;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
 import java.util.Iterator;

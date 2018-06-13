@@ -19,7 +19,7 @@
  */
 
 /**
- * Test environment classes for {@linkplain io.spine.server.aggregate.AggregateShould
+ * Test environment classes for {@linkplain io.spine.server.aggregate.AggregateTest
  * Aggregate tests}.
  */
 @ParametersAreNonnullByDefault

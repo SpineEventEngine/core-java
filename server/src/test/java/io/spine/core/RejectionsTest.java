@@ -30,19 +30,22 @@ import io.spine.base.ThrowableMessage;
 import io.spine.base.Time;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.protobuf.AnyPacker;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.core.Rejections.causedByRejection;
 import static io.spine.core.Rejections.getProducer;
 import static io.spine.core.Rejections.isRejection;
 import static io.spine.core.Rejections.toRejection;
+import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.test.TestValues.newUuidValue;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static java.lang.String.format;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Tests for {@link Rejections} utility class.
@@ -53,7 +56,8 @@ import static org.junit.Assert.assertTrue;
  *
  * @author Alexander Yevsyukov
  */
-public class RejectionsShould {
+@DisplayName("Rejections utility should")
+class RejectionsTest {
 
     private final TestActorRequestFactory requestFactory =
             TestActorRequestFactory.newInstance(getClass());
@@ -62,8 +66,9 @@ public class RejectionsShould {
     private Command command;
 
     private Rejection rejection;
-    @Before
-    public void setUp() {
+
+    @BeforeEach
+    void setUp() {
         rejectionMessage = newUuidValue();
         command = requestFactory.createCommand(Time.getCurrentTime());
 
@@ -74,20 +79,14 @@ public class RejectionsShould {
     }
 
     @Test
-    public void have_utility_ctor() {
+    @DisplayName(HAVE_PARAMETERLESS_CTOR)
+    void haveUtilityConstructor() {
         assertHasPrivateParameterlessCtor(Rejections.class);
     }
 
     @Test
-    public void filter_rejection_classes() {
-        assertTrue(
-                isRejection(io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived.class)
-        );
-        assertFalse(isRejection(Timestamp.class));
-    }
-
-    @Test
-    public void pass_null_tolerance_check() {
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void passNullToleranceCheck() {
         new NullPointerTester()
                 .setDefault(Command.class, Command.getDefaultInstance())
                 .setDefault(CommandId.class, CommandId.getDefaultInstance())
@@ -96,7 +95,18 @@ public class RejectionsShould {
     }
 
     @Test
-    public void generate_rejection_id_upon_command_id() {
+    @DisplayName("recognize if given class represents rejection message")
+    void filterRejectionClasses() {
+        assertTrue(
+                isRejection(
+                        io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived.class)
+        );
+        assertFalse(isRejection(Timestamp.class));
+    }
+
+    @Test
+    @DisplayName("generate rejection ID upon command ID")
+    void generateRejectionIdUponCommandId() {
         final CommandId commandId = Commands.generateId();
         final RejectionId actual = Rejections.generateId(commandId);
 
@@ -105,7 +115,8 @@ public class RejectionsShould {
     }
 
     @Test
-    public void convert_throwable_message_to_rejection_message() {
+    @DisplayName("convert throwable message to rejection message")
+    void convertThrowableMessageToRejection() {
         assertEquals(rejectionMessage, AnyPacker.unpack(rejection.getMessage()));
         assertFalse(rejection.getContext()
                              .getStacktrace()
@@ -118,14 +129,16 @@ public class RejectionsShould {
     }
 
     @Test
-    public void obtain_rejection_producer_if_set() {
+    @DisplayName("obtain rejection producer if set")
+    void getRejectionProducerIfSet() {
         // We initialized producer ID as the name of this test class in setUp().
         final Optional<Object> producer = Rejections.getProducer(rejection.getContext());
         assertEquals(getClass().getName(), producer.get());
     }
 
     @Test
-    public void return_empty_optional_if_producer_not_set() {
+    @DisplayName("return absent if rejection producer is not set")
+    void returnAbsentOnEmptyProducer() {
         final TestThrowableMessage freshThrowable = new TestThrowableMessage(rejectionMessage);
         final Rejection freshRejection = toRejection(freshThrowable, command);
         assertFalse(getProducer(freshRejection.getContext()).isPresent());
@@ -136,7 +149,8 @@ public class RejectionsShould {
             "SerializableInnerClassWithNonSerializableOuterClass" /* Does not refer anything. */
     })
     @Test
-    public void tell_if_RuntimeException_was_called_by_command_rejection() {
+    @DisplayName("tell if RuntimeException was caused by command rejection")
+    void recognizeExceptionCausedByRejection() {
         assertFalse(causedByRejection(new RuntimeException()));
         final ThrowableMessage throwableMessage = new ThrowableMessage(Time.getCurrentTime()) {
             private static final long serialVersionUID = 0L;

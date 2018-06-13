@@ -31,9 +31,10 @@ import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.DuplicateCommandException;
 import io.spine.server.model.ModelTests;
 import io.spine.test.aggregate.ProjectId;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.core.CommandEnvelope.of;
 import static io.spine.grpc.StreamObservers.noOpObserver;
@@ -42,17 +43,19 @@ import static io.spine.server.aggregate.given.IdempotencyGuardTestEnv.createProj
 import static io.spine.server.aggregate.given.IdempotencyGuardTestEnv.newProjectId;
 import static io.spine.server.aggregate.given.IdempotencyGuardTestEnv.newTenantId;
 import static io.spine.server.aggregate.given.IdempotencyGuardTestEnv.startProject;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
- * @author Mykhailo Drachuks
+ * @author Mykhailo Drachuk
  */
-public class IdempotencyGuardShould {
+@DisplayName("IdempotencyGuard should")
+class IdempotencyGuardTest {
 
     private BoundedContext boundedContext;
     private IgTestAggregateRepository repository;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         ModelTests.clearModel();
         boundedContext = BoundedContext.newBuilder()
                                        .setMultitenant(true)
@@ -61,15 +64,16 @@ public class IdempotencyGuardShould {
         repository = new IgTestAggregateRepository();
         boundedContext.register(repository);
     }
-    
-    @After
-    public void tearDown() throws Exception {
+
+    @AfterEach
+    void tearDown() throws Exception {
         repository.close();
         boundedContext.close();
     }
 
-    @Test(expected = DuplicateCommandException.class)
-    public void throw_DuplicateCommandException_when_the_command_was_handled_since_last_snapshot() {
+    @Test
+    @DisplayName("throw DuplicateCommandException when command was handled since last snapshot")
+    void throwExceptionForDuplicateCommand() {
         final TenantId tenantId = newTenantId();
         final ProjectId projectId = newProjectId();
         final Command createCommand = command(createProject(projectId), tenantId);
@@ -80,11 +84,12 @@ public class IdempotencyGuardShould {
 
         final IgTestAggregate aggregate = repository.loadAggregate(tenantId, projectId);
         final IdempotencyGuard guard = new IdempotencyGuard(aggregate);
-        guard.check(of(createCommand));
+        assertThrows(DuplicateCommandException.class, () -> guard.check(of(createCommand)));
     }
 
     @Test
-    public void not_throw_when_the_command_was_handled_but_the_snapshot_was_made() {
+    @DisplayName("not throw exception when command was handled but snapshot was made")
+    void notThrowForCommandHandledAfterSnapshot() {
         repository.setSnapshotTrigger(1);
 
         final TenantId tenantId = newTenantId();
@@ -102,7 +107,8 @@ public class IdempotencyGuardShould {
     }
 
     @Test
-    public void not_throw_if_the_command_was_not_handled() {
+    @DisplayName("not throw exception if command was not handled")
+    void notThrowForCommandNotHandled() {
         final TenantId tenantId = newTenantId();
         final ProjectId projectId = newProjectId();
         final Command createCommand = command(createProject(projectId), tenantId);
@@ -113,7 +119,8 @@ public class IdempotencyGuardShould {
     }
 
     @Test
-    public void not_throw_if_another_command_was_handled() {
+    @DisplayName("not throw exception if another command was handled")
+    void notThrowIfAnotherCommandHandled() {
         final TenantId tenantId = newTenantId();
         final ProjectId projectId = newProjectId();
         final Command createCommand = command(createProject(projectId), tenantId);
@@ -128,6 +135,4 @@ public class IdempotencyGuardShould {
         final IdempotencyGuard guard = new IdempotencyGuard(aggregate);
         guard.check(of(startCommand));
     }
-
-
 }

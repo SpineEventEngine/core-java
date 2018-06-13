@@ -36,24 +36,22 @@ import io.spine.test.aggregate.command.AggAddTask;
 import io.spine.test.aggregate.command.AggCreateProject;
 import io.spine.test.aggregate.event.AggProjectCreated;
 import io.spine.test.aggregate.event.AggTaskAdded;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.server.aggregate.AggregatePartRepositoryLookup.createLookup;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class AggregatePartRepositoryLookupShould {
+@DisplayName("AggregatePartRepositoryLookup should")
+class AggregatePartRepositoryLookupTest {
 
     private BoundedContext boundedContext;
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         ModelTests.clearModel();
         boundedContext = BoundedContext.newBuilder()
                                        .build();
@@ -62,7 +60,8 @@ public class AggregatePartRepositoryLookupShould {
     }
 
     @Test
-    public void find_a_repository() {
+    @DisplayName("find repository")
+    void findRepository() {
         AggregatePartRepositoryLookup lookup =
                 createLookup(boundedContext, ProjectId.class, Project.class);
 
@@ -72,27 +71,27 @@ public class AggregatePartRepositoryLookupShould {
     }
 
     @Test
-    public void throw_if_repository_is_not_AggregatePartRepository() {
-        AggregatePartRepositoryLookup lookup =
-                createLookup(boundedContext, TaskId.class, Task.class);
-        thrown.expect(IllegalStateException.class);
-        lookup.find();
-    }
-
-    @Test
-    public void throw_if_repository_not_found() {
+    @DisplayName("throw IllegalStateException if repository isn't found")
+    void throwOnRepositoryNotFound() {
         AggregatePartRepositoryLookup lookup =
                 createLookup(boundedContext, Timestamp.class, StringValue.class);
-        thrown.expect(IllegalStateException.class);
-        lookup.find();
+        assertThrows(IllegalStateException.class, lookup::find);
     }
 
     @Test
-    public void throw_if_id_class_does_not_match() {
+    @DisplayName("throw IllegalStateException if the repo found is not AggregatePartRepository")
+    void throwOnWrongRepositoryTypeFound() {
+        AggregatePartRepositoryLookup lookup =
+                createLookup(boundedContext, TaskId.class, Task.class);
+        assertThrows(IllegalStateException.class, lookup::find);
+    }
+
+    @Test
+    @DisplayName("throw IllegalStateException if the ID class of the repo found does not match the ID class of its root")
+    void throwOnIdClassNotMatching() {
         AggregatePartRepositoryLookup lookup =
                 createLookup(boundedContext, TaskId.class, Project.class);
-        thrown.expect(IllegalStateException.class);
-        lookup.find();
+        assertThrows(IllegalStateException.class, lookup::find);
     }
 
     /*
@@ -114,7 +113,7 @@ public class AggregatePartRepositoryLookupShould {
 
     private static class ProjectPart extends AggregatePart<ProjectId,
                                                            Project,
-            ProjectVBuilder,
+                                                           ProjectVBuilder,
                                                            ProjectRoot> {
         private ProjectPart(ProjectRoot root) {
             super(root);
@@ -123,9 +122,9 @@ public class AggregatePartRepositoryLookupShould {
         @Assign
         public AggProjectCreated handle(AggCreateProject msg, CommandContext context) {
             return AggProjectCreated.newBuilder()
-                                 .setProjectId(msg.getProjectId())
-                                 .setName(msg.getName())
-                                 .build();
+                                    .setProjectId(msg.getProjectId())
+                                    .setName(msg.getName())
+                                    .build();
         }
 
         @Apply
@@ -165,8 +164,8 @@ public class AggregatePartRepositoryLookupShould {
         @Assign
         public AggTaskAdded handle(AggAddTask cmd) {
             return AggTaskAdded.newBuilder()
-                            .setProjectId(cmd.getProjectId())
-                            .build();
+                               .setProjectId(cmd.getProjectId())
+                               .build();
         }
 
         @Apply
@@ -179,7 +178,7 @@ public class AggregatePartRepositoryLookupShould {
 
     private static class TaskAggregateRepository
             extends AggregateRepository<TaskId, TaskAggregatePart> {
-        
+
         private TaskAggregateRepository() {
             super();
         }

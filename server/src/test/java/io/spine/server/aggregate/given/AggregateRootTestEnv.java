@@ -89,8 +89,8 @@ public class AggregateRootTestEnv {
         @Assign
         AggProjectStarted handle(AggStartProject msg) {
             final AggProjectStarted result = AggProjectStarted.newBuilder()
-                                                        .setProjectId(msg.getProjectId())
-                                                        .build();
+                                                              .setProjectId(msg.getProjectId())
+                                                              .build();
             return result;
         }
 

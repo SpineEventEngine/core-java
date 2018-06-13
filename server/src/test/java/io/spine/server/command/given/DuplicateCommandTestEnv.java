@@ -32,7 +32,7 @@ import io.spine.server.BoundedContext;
 import io.spine.server.CommandService;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
-import io.spine.server.aggregate.AggregateShould;
+import io.spine.server.aggregate.AggregateTest;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.transport.GrpcContainer;
@@ -87,7 +87,7 @@ public class DuplicateCommandTestEnv {
     }
 
     private static TestActorRequestFactory newRequestFactory(TenantId tenantId) {
-        return TestActorRequestFactory.newInstance(AggregateShould.class, tenantId);
+        return TestActorRequestFactory.newInstance(AggregateTest.class, tenantId);
     }
 
     /**

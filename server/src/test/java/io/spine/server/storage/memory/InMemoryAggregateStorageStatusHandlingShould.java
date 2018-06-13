@@ -22,13 +22,14 @@ package io.spine.server.storage.memory;
 
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateStorage;
-import io.spine.server.aggregate.AggregateStorageVisibilityHandlingShould;
+import io.spine.server.aggregate.AggregateStorageVisibilityHandlingTest;
 import io.spine.test.aggregate.ProjectId;
 
 /**
  * @author Dmytro Dashenkov.
  */
-public class InMemoryAggregateStorageStatusHandlingShould extends AggregateStorageVisibilityHandlingShould {
+public class InMemoryAggregateStorageStatusHandlingShould
+        extends AggregateStorageVisibilityHandlingTest {
 
     @Override
     protected AggregateStorage<ProjectId> getAggregateStorage(

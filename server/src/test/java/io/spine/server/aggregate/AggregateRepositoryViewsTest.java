@@ -23,22 +23,23 @@ package io.spine.server.aggregate;
 import com.google.common.base.Optional;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.TestActorRequestFactory;
-import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.given.AggregateRepositoryViewTestEnv.AggregateWithLifecycle;
 import io.spine.server.aggregate.given.AggregateRepositoryViewTestEnv.RepoOfAggregateWithLifecycle;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Alexander Yevsyukov
  */
-public class AggregateRepositoryViewsShould {
+@DisplayName("AggregateRepository views should")
+class AggregateRepositoryViewsTest {
 
     /** The Aggregate ID used in all tests */
     private static final Long id = 100L;
@@ -52,8 +53,8 @@ public class AggregateRepositoryViewsShould {
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType") // It's on purpose for tests.
     private Optional<AggregateWithLifecycle> aggregate;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         boundedContext = BoundedContext.newBuilder()
                                        .build();
         repository = new RepoOfAggregateWithLifecycle();
@@ -72,11 +73,12 @@ public class AggregateRepositoryViewsShould {
                 requestFactory.command()
                               .create(RepoOfAggregateWithLifecycle.createCommandMessage(id, cmd));
         boundedContext.getCommandBus()
-                      .post(command, StreamObservers.<Ack>noOpObserver());
+                      .post(command, StreamObservers.noOpObserver());
     }
 
     @Test
-    public void find_aggregate_if_no_status_flags_set() {
+    @DisplayName("find aggregate if no status flags are set")
+    void findAggregatesWithNoStatus() {
         aggregate = repository.find(id);
 
         assertTrue(aggregate.isPresent());
@@ -86,7 +88,8 @@ public class AggregateRepositoryViewsShould {
     }
 
     @Test
-    public void find_aggregates_with_archived_status() {
+    @DisplayName("find aggregates with `archived` status")
+    void findArchivedAggregates() {
         postCommand("archive");
 
         aggregate = repository.find(id);
@@ -98,7 +101,8 @@ public class AggregateRepositoryViewsShould {
     }
 
     @Test
-    public void find_aggregates_with_deleted_status() {
+    @DisplayName("find aggregates with `deleted` status")
+    void findDeletedAggregates() {
         postCommand("delete");
 
         aggregate = repository.find(id);

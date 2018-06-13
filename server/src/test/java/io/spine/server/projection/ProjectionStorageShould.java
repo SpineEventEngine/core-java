@@ -34,9 +34,9 @@ import io.spine.test.Tests;
 import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectId;
 import io.spine.test.storage.Task;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -52,6 +52,7 @@ import static io.spine.base.Time.getCurrentTime;
 import static io.spine.test.Tests.assertMatchesMask;
 import static io.spine.test.Verify.assertContains;
 import static io.spine.test.Verify.assertSize;
+import static io.spine.test.Verify.assertThrows;
 import static io.spine.testdata.TestEntityStorageRecordFactory.newEntityStorageRecord;
 import static java.lang.String.format;
 import static org.junit.Assert.assertEquals;
@@ -115,12 +116,12 @@ public abstract class ProjectionStorageShould
                         .build();
     }
 
-    @Before
+    @BeforeEach
     public void setUpProjectionStorageTest() {
         storage = getStorage();
     }
 
-    @After
+    @AfterEach
     public void tearDownProjectionStorageTest() {
         close(storage);
     }
@@ -205,8 +206,8 @@ public abstract class ProjectionStorageShould
 
     @Test
     public void throw_exception_if_write_null_event_time() {
-        thrown.expect(NullPointerException.class);
-        storage.writeLastHandledEventTime(Tests.nullRef());
+        assertThrows(NullPointerException.class,
+                     () -> storage.writeLastHandledEventTime(Tests.nullRef()));
     }
 
     @Test

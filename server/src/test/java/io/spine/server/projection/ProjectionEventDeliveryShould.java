@@ -30,8 +30,8 @@ import io.spine.server.projection.given.ProjectionEventDeliveryTestEnv.DeliveryP
 import io.spine.server.projection.given.ProjectionEventDeliveryTestEnv.SingleShardProjectRepository;
 import io.spine.server.projection.given.ProjectionEventDeliveryTestEnv.TripleShardProjectRepository;
 import io.spine.test.projection.ProjectId;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.server.delivery.given.MessageDeliveryTestEnv.dispatchWaitTime;
 import static io.spine.server.projection.given.ProjectionEventDeliveryTestEnv.projectCreated;
@@ -42,7 +42,7 @@ import static io.spine.server.projection.given.ProjectionEventDeliveryTestEnv.pr
 public class ProjectionEventDeliveryShould extends AbstractMessageDeliveryShould {
 
     @Override
-    @Before
+    @BeforeEach
     public void setUp() {
         super.setUp();
         DeliveryProjection.getStats()
