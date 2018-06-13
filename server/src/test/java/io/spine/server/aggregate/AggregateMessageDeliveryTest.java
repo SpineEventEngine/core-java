@@ -66,8 +66,7 @@ class AggregateMessageDeliveryTest extends AbstractMessageDeliveryShould {
         @DisplayName("to single shard")
         void toSingleShard() throws Exception {
             final ParallelDispatcher<ProjectId, Command> dispatcher =
-                    new ParallelDispatcher<ProjectId, Command>(
-                            42, 400, dispatchWaitTime()) {
+                    new ParallelDispatcher<ProjectId, Command>(42, 400, dispatchWaitTime()) {
                         @Override
                         protected ThreadStats<ProjectId> getStats() {
                             return DeliveryProject.getStats();
@@ -92,8 +91,7 @@ class AggregateMessageDeliveryTest extends AbstractMessageDeliveryShould {
         @DisplayName("to several shards")
         void toSeveralShards() throws Exception {
             final ParallelDispatcher<ProjectId, Command> dispatcher =
-                    new ParallelDispatcher<ProjectId, Command>(
-                            23, 423, dispatchWaitTime()) {
+                    new ParallelDispatcher<ProjectId, Command>(23, 423, dispatchWaitTime()) {
                         @Override
                         protected ThreadStats<ProjectId> getStats() {
                             return DeliveryProject.getStats();
@@ -123,8 +121,7 @@ class AggregateMessageDeliveryTest extends AbstractMessageDeliveryShould {
         @DisplayName("to single shard")
         void toSingleShard() throws Exception {
             final ParallelDispatcher<ProjectId, Event> dispatcher =
-                    new ParallelDispatcher<ProjectId, Event>(
-                            130, 500, dispatchWaitTime()) {
+                    new ParallelDispatcher<ProjectId, Event>(130, 500, dispatchWaitTime()) {
                         @Override
                         protected ThreadStats<ProjectId> getStats() {
                             return DeliveryProject.getStats();
@@ -149,8 +146,7 @@ class AggregateMessageDeliveryTest extends AbstractMessageDeliveryShould {
         @DisplayName("to several shards")
         void toSeveralShards() throws Exception {
             final ParallelDispatcher<ProjectId, Event> dispatcher =
-                    new ParallelDispatcher<ProjectId, Event>(
-                            190, 900, dispatchWaitTime()) {
+                    new ParallelDispatcher<ProjectId, Event>(190, 900, dispatchWaitTime()) {
                         @Override
                         protected ThreadStats<ProjectId> getStats() {
                             return DeliveryProject.getStats();
