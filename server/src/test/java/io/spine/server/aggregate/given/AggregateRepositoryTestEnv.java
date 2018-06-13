@@ -42,9 +42,11 @@ import io.spine.core.EventContext;
 import io.spine.core.MessageEnvelope;
 import io.spine.core.React;
 import io.spine.core.RejectionContext;
+import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.AggregateRepositoryTest;
+import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.entity.given.Given;
@@ -88,17 +90,81 @@ import static java.util.Collections.emptyList;
 @SuppressWarnings({"TypeMayBeWeakened", "ResultOfMethodCallIgnored"})
 public class AggregateRepositoryTestEnv {
 
-    private static final TestActorRequestFactory factory =
-            TestActorRequestFactory.newInstance(AggregateRepositoryTest.class);
+    private static final TestActorRequestFactory requestFactory = newRequestFactory();
+    private static BoundedContext boundedContext = newBoundedContext();
+    private static ProjectAggregateRepository repository = newRepository();
 
     private AggregateRepositoryTestEnv() {
         // Prevent instantiation of this utility class.
     }
 
+    public static TestActorRequestFactory requestFactory() {
+        return requestFactory;
+    }
+
+    public static BoundedContext boundedContext() {
+        return boundedContext;
+    }
+
+    public static AggregateRepository<ProjectId, ProjectAggregate> repository() {
+        return repository;
+    }
+
+    /**
+     * Assigns a new {@link BoundedContext} instance to the stored {@link #boundedContext}.
+     */
+    public static void resetBoundedContext() {
+        boundedContext = newBoundedContext();
+    }
+
+    /**
+     * Assigns a new {@link AggregateRepository} instance to the stored {@link #repository}.
+     */
+    public static void resetRepository() {
+        repository = newRepository();
+    }
+
+    public static ProjectId givenAggregateId(String id) {
+        return ProjectId.newBuilder()
+                        .setId(id)
+                        .build();
+    }
+
+    public static ProjectAggregate givenStoredAggregate() {
+        ProjectId id = Sample.messageOfType(ProjectId.class);
+        ProjectAggregate aggregate = GivenAggregate.withUncommittedEvents(id);
+
+        repository.store(aggregate);
+        return aggregate;
+    }
+
+    public static void givenStoredAggregateWithId(String id) {
+        ProjectId projectId = givenAggregateId(id);
+        ProjectAggregate aggregate = GivenAggregate.withUncommittedEvents(projectId);
+
+        repository.store(aggregate);
+    }
+
+    private static TestActorRequestFactory newRequestFactory() {
+        final TestActorRequestFactory requestFactory =
+                TestActorRequestFactory.newInstance(AggregateRepositoryTest.class);
+        return requestFactory;
+    }
+
+    private static BoundedContext newBoundedContext() {
+        final BoundedContext context = BoundedContext.newBuilder()
+                                                     .build();
+        return context;
+    }
+
+    private static ProjectAggregateRepository newRepository() {
+        return new ProjectAggregateRepository();
+    }
+
     /** Generates a command for the passed message and wraps it into the envelope. */
     private static CommandEnvelope env(Message commandMessage) {
-        return CommandEnvelope.of(factory.command()
-                                         .create(commandMessage));
+        return CommandEnvelope.of(requestFactory.command()
+                                                .create(commandMessage));
     }
 
     /** Utility factory for test aggregates. */
@@ -253,6 +319,9 @@ public class AggregateRepositoryTestEnv {
 
     /**
      * The repository of positive scenarios {@linkplain ProjectAggregate  aggregates}.
+     *
+     * <p>It also widens visibility of the {@link AggregateRepository#store(Aggregate)} and
+     * {@link AggregateRepository#aggregateStorage()} methods so they can be used in this test env.
      */
     @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
     public static class ProjectAggregateRepository
@@ -293,6 +362,16 @@ public class AggregateRepositoryTestEnv {
                 return Optional.absent();
             }
             return super.find(id);
+        }
+
+        @Override
+        public void store(ProjectAggregate aggregate) {
+            super.store(aggregate);
+        }
+
+        @Override
+        public AggregateStorage<ProjectId> aggregateStorage() {
+            return super.aggregateStorage();
         }
     }
 
