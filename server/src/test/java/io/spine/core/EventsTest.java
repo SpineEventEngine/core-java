@@ -369,7 +369,7 @@ public class EventsTest {
     }
 
     @Test
-    @DisplayName("throw NPE when getting tenant ID of null event")
+    @DisplayName("throw NullPointerException when getting tenant ID of null event")
     void notAcceptNullEvent() {
         assertThrows(NullPointerException.class, () -> Events.getTenantId(Tests.nullRef()));
     }

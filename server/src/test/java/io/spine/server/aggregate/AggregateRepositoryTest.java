@@ -345,7 +345,7 @@ public class AggregateRepositoryTest {
 
     @SuppressWarnings("CheckReturnValue") // The returned value is not used in this test.
     @Test
-    @DisplayName("throw ISE if unable to load entity by id from storage index")
+    @DisplayName("throw IllegalStateException if unable to load entity by id from storage index")
     void throwWhenUnableToLoadEntity() {
         // Store a valid aggregate.
         givenStoredAggregate();
