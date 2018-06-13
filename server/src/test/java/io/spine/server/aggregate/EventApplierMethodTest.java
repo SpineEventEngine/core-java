@@ -112,11 +112,11 @@ class EventApplierMethodTest {
 
     @Nested
     @DisplayName("consider applier valid when")
-    class ConsiderApplierValid {
+    class ConsiderApplierValidWhen {
 
         @Test
         @DisplayName("it has one message parameter")
-        void whenHasOneMessageParameter() {
+        void hasOneMessageParameter() {
             final Method applier = new ValidApplier().getMethod();
 
             assertIsEventApplier(applier);
@@ -124,7 +124,7 @@ class EventApplierMethodTest {
 
         @Test
         @DisplayName("it's not private")
-        void whenNotPrivate() {
+        void isNotPrivate() {
             final Method method = new ValidApplierButNotPackagePrivate().getMethod();
 
             assertIsEventApplier(method);
@@ -138,11 +138,11 @@ class EventApplierMethodTest {
 
     @Nested
     @DisplayName("consider applier invalid when")
-    class ConsiderApplierInvalid {
+    class ConsiderApplierInvalidWhen {
 
         @Test
         @DisplayName("it's not annotated")
-        void whenItsNotAnnotated() {
+        void isNotAnnotated() {
             final Method applier = new InvalidApplierNoAnnotation().getMethod();
 
             assertIsNotEventApplier(applier);
@@ -150,7 +150,7 @@ class EventApplierMethodTest {
 
         @Test
         @DisplayName("it has no params")
-        void considerApplierWithoutParamsInvalid() {
+        void hasNoParams() {
             final Method applier = new InvalidApplierNoParams().getMethod();
 
             assertIsNotEventApplier(applier);
@@ -158,7 +158,7 @@ class EventApplierMethodTest {
 
         @Test
         @DisplayName("it has too many params")
-        void whenItHasTooManyParams() {
+        void hasTooManyParams() {
             final Method applier = new InvalidApplierTooManyParams().getMethod();
 
             assertIsNotEventApplier(applier);
@@ -166,7 +166,7 @@ class EventApplierMethodTest {
 
         @Test
         @DisplayName("it has one param of invalid type")
-        void whenItHasOneInvalidParam() {
+        void hasOneInvalidParam() {
             final Method applier = new InvalidApplierOneNotMsgParam().getMethod();
 
             assertIsNotEventApplier(applier);
@@ -174,7 +174,7 @@ class EventApplierMethodTest {
 
         @Test
         @DisplayName("it has non-void return type")
-        void whenItReturnsNonVoidType() {
+        void returnsNonVoidType() {
             final Method applier = new InvalidApplierNotVoid().getMethod();
 
             assertIsNotEventApplier(applier);
