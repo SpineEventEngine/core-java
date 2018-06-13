@@ -195,7 +195,7 @@ public class AggregateRepositoryTest {
     class ManageSnapshots {
 
         @Test
-        @DisplayName("when required to store snapshot")
+        @DisplayName("when it's required to store snapshot")
         void whenNeededToStore() {
             ProjectAggregate aggregate = GivenAggregate.withUncommittedEvents();
             // This should make the repository write the snapshot.
@@ -209,7 +209,7 @@ public class AggregateRepositoryTest {
         }
 
         @Test
-        @DisplayName("when storing snapshot not needed")
+        @DisplayName("when storing snapshot isn't needed")
         void whenStoreNotNeeded() {
             ProjectAggregate aggregate = GivenAggregate.withUncommittedEvents();
 
@@ -336,7 +336,7 @@ public class AggregateRepositoryTest {
     }
 
     @Test
-    @DisplayName("not create new aggregates on find")
+    @DisplayName("not create new aggregates upon lookup")
     void notCreateNewAggregatesOnFind() {
         ProjectId newId = Sample.messageOfType(ProjectId.class);
         Optional<ProjectAggregate> optional = repository.find(newId);

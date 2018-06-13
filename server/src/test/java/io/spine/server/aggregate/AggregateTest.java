@@ -397,7 +397,7 @@ public class AggregateTest {
         }
 
         @Test
-        @DisplayName("event applier for non state-neutral event")
+        @DisplayName("event applier for the event emitted in a result of command handling")
         void eventApplier() {
             ModelTests.clearModel();
             AggregateWithMissingApplier aggregate =
