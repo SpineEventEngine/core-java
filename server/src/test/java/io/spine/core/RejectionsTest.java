@@ -137,7 +137,7 @@ class RejectionsTest {
     }
 
     @Test
-    @DisplayName("return absent if rejection producer not set")
+    @DisplayName("return absent if rejection producer is not set")
     void returnAbsentOnEmptyProducer() {
         final TestThrowableMessage freshThrowable = new TestThrowableMessage(rejectionMessage);
         final Rejection freshRejection = toRejection(freshThrowable, command);

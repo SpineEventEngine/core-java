@@ -85,7 +85,7 @@ public abstract class AggregateStorageVisibilityHandlingTest {
     }
 
     @Test
-    @DisplayName("retrieve empty status if never written")
+    @DisplayName("retrieve empty status if it is never written")
     void getEmptyStatusIfNeverWritten() {
         final Optional<LifecycleFlags> entityStatus = storage.readLifecycleFlags(id);
         assertNotNull(entityStatus);

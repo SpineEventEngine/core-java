@@ -71,7 +71,7 @@ class AggregatePartRepositoryLookupTest {
     }
 
     @Test
-    @DisplayName("throw if repository not found")
+    @DisplayName("throw IllegalStateException if repository isn't found")
     void throwOnRepositoryNotFound() {
         AggregatePartRepositoryLookup lookup =
                 createLookup(boundedContext, Timestamp.class, StringValue.class);
@@ -79,7 +79,7 @@ class AggregatePartRepositoryLookupTest {
     }
 
     @Test
-    @DisplayName("throw if found repository is not AggregatePartRepository")
+    @DisplayName("throw IllegalStateException if the repo found is not AggregatePartRepository")
     void throwOnWrongRepositoryTypeFound() {
         AggregatePartRepositoryLookup lookup =
                 createLookup(boundedContext, TaskId.class, Task.class);

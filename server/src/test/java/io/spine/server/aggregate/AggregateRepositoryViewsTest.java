@@ -77,7 +77,7 @@ class AggregateRepositoryViewsTest {
     }
 
     @Test
-    @DisplayName("find aggregate if no status flags set")
+    @DisplayName("find aggregate if no status flags are set")
     void findAggregatesWithNoStatus() {
         aggregate = repository.find(id);
 
