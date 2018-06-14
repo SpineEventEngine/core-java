@@ -456,7 +456,7 @@ class BoundedContextTest {
         try {
             assertThrows(NullPointerException.class, () -> boundedContext.register(repository));
         } finally {
-            // Reassign default state to real map to prevent failing other tests.
+            // Reassign default state registry to real map to prevent failing other tests.
             final Map<Class<? extends Entity>, Message> defaultState = newConcurrentMap();
             injectField(defaultStateRegistry, DEFAULT_STATES_FIELD_NAME, defaultState);
         }
