@@ -31,6 +31,7 @@ import io.spine.server.tenant.TenantIndex;
 import io.spine.test.Tests;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -54,24 +55,125 @@ class BoundedContextBuilderTest {
                                 .setMultitenant(multitenant);
     }
 
-    @Test
-    @DisplayName("return name if it was set")
-    void returnNameIfSet() {
-        final String nameString = getClass().getName();
-        assertEquals(nameString, BoundedContext.newBuilder()
-                                               .setName(nameString)
-                                               .getName());
+    @SuppressWarnings("ResultOfMethodCallIgnored") // Methods are called to throw exception.
+    @Nested
+    @DisplayName("not accept null")
+    class NotAcceptNull {
+
+        @Test
+        @DisplayName("CommandBus")
+        void commandBus() {
+            assertThrows(NullPointerException.class, () -> builder.setCommandBus(Tests.nullRef()));
+        }
+
+        @Test
+        @DisplayName("EventBus")
+        void eventBus() {
+            assertThrows(NullPointerException.class, () -> builder.setEventBus(Tests.nullRef()));
+        }
+
+        @Test
+        @DisplayName("IntegrationBus")
+        void integrationBus() {
+            assertThrows(NullPointerException.class,
+                         () -> builder.setIntegrationBus(Tests.nullRef()));
+        }
     }
 
-    @Test
-    @DisplayName("return storage factory supplier if it was set")
-    void returnStorageFactorySupplierIfSet() {
-        @SuppressWarnings("unchecked") // OK for this mock.
-                Supplier<StorageFactory> mock = mock(Supplier.class);
+    @Nested
+    @DisplayName("return")
+    class Return {
 
-        assertEquals(mock, builder.setStorageFactorySupplier(mock)
-                                  .getStorageFactorySupplier()
-                                  .get());
+        @Test
+        @DisplayName("CommandBus Builder")
+        void commandBusBuilder() {
+            final CommandBus.Builder expected = CommandBus.newBuilder();
+            builder = BoundedContext.newBuilder()
+                                    .setCommandBus(expected);
+            assertEquals(expected, builder.getCommandBus()
+                                          .get());
+        }
+
+        @Test
+        @DisplayName("EventBus Builder")
+        void eventBusBuilder() {
+            final EventBus.Builder expected = EventBus.newBuilder();
+            builder.setEventBus(expected);
+            assertEquals(expected, builder.getEventBus()
+                                          .get());
+        }
+
+        @Test
+        @DisplayName("IntegrationBus Builder")
+        void integrationBusBuilder() {
+            final IntegrationBus.Builder expected = IntegrationBus.newBuilder();
+            builder.setIntegrationBus(expected);
+            assertEquals(expected, builder.getIntegrationBus()
+                                          .get());
+        }
+
+        @Test
+        @DisplayName("name if it was set")
+        void nameIfSet() {
+            final String nameString = getClass().getName();
+            assertEquals(nameString, BoundedContext.newBuilder()
+                                                   .setName(nameString)
+                                                   .getName());
+        }
+
+        @Test
+        @DisplayName("StorageFactory supplier if it was set")
+        void storageFactorySupplierIfSet() {
+            @SuppressWarnings("unchecked") // OK for this mock.
+                    Supplier<StorageFactory> mock = mock(Supplier.class);
+
+            assertEquals(mock, builder.setStorageFactorySupplier(mock)
+                                      .getStorageFactorySupplier()
+                                      .get());
+        }
+    }
+
+    @Nested
+    @DisplayName("if not given custom, create default")
+    class CreateDefault {
+
+        @Test
+        @DisplayName("TenantIndex")
+        void tenantIndex() {
+            assertNotNull(BoundedContext.newBuilder()
+                                        .setMultitenant(true)
+                                        .build()
+                                        .getTenantIndex());
+        }
+
+        @Test
+        @DisplayName("CommandBus")
+        void commandBus() {
+            // Pass EventBus to builder initialization, and do NOT pass CommandBus.
+            final BoundedContext boundedContext = builder
+                    .setEventBus(EventBus.newBuilder())
+                    .build();
+            assertNotNull(boundedContext.getCommandBus());
+        }
+
+        @Test
+        @DisplayName("EventBus")
+        void eventBus() {
+            // Pass CommandBus.Builder to builder initialization, and do NOT pass EventBus.
+            final BoundedContext boundedContext = builder
+                    .setMultitenant(true)
+                    .setCommandBus(CommandBus.newBuilder())
+                    .build();
+            assertNotNull(boundedContext.getEventBus());
+        }
+
+        @Test
+        @DisplayName("CommandBus and EventBus")
+        void commandBusAndEventBus() {
+            final BoundedContext boundedContext = builder.build();
+            assertNotNull(boundedContext.getCommandBus());
+            assertNotNull(boundedContext.getEventBus());
+        }
     }
 
     @Test
@@ -80,40 +182,6 @@ class BoundedContextBuilderTest {
         assertFalse(builder.setStorageFactorySupplier(Tests.nullRef())
                            .getStorageFactorySupplier()
                            .isPresent());
-    }
-
-    @Test
-    @DisplayName("not accept null CommandDispatcher")
-    void notAcceptNullCommandDispatcher() {
-        assertThrows(NullPointerException.class, () -> builder.setCommandBus(Tests.nullRef()));
-    }
-
-    @Test
-    @DisplayName("return CommandBus Builder")
-    void returnCommandBusBuilder() {
-        final CommandBus.Builder expected = CommandBus.newBuilder();
-        builder = BoundedContext.newBuilder()
-                                .setCommandBus(expected);
-        assertEquals(expected, builder.getCommandBus()
-                                      .get());
-    }
-
-    @Test
-    @DisplayName("return EventBus Builder")
-    void returnEventBusBuilder() {
-        final EventBus.Builder expected = EventBus.newBuilder();
-        builder.setEventBus(expected);
-        assertEquals(expected, builder.getEventBus()
-                                      .get());
-    }
-
-    @Test
-    @DisplayName("return IntegrationBus Builder")
-    void returnIntegrationBusBuilder() {
-        final IntegrationBus.Builder expected = IntegrationBus.newBuilder();
-        builder.setIntegrationBus(expected);
-        assertEquals(expected, builder.getIntegrationBus()
-                                      .get());
     }
 
     @Test
@@ -141,57 +209,7 @@ class BoundedContextBuilderTest {
     }
 
     @Test
-    @DisplayName("create default TenantIndex if not configured")
-    void createDefaultTenantIndex() {
-        assertNotNull(BoundedContext.newBuilder()
-                                    .setMultitenant(true)
-                                    .build()
-                                    .getTenantIndex());
-    }
-
-    @Test
-    @DisplayName("not accept null EventBus")
-    void notAcceptNullEventBus() {
-        assertThrows(NullPointerException.class, () -> builder.setEventBus(Tests.nullRef()));
-    }
-
-    @Test
-    @DisplayName("create CommandBus if it was not set")
-    void createCommandBusIfNotSet() {
-        // Pass EventBus to builder initialization, and do NOT pass CommandBus.
-        final BoundedContext boundedContext = builder
-                .setEventBus(EventBus.newBuilder())
-                .build();
-        assertNotNull(boundedContext.getCommandBus());
-    }
-
-    @Test
-    @DisplayName("create EventBus if it was not set")
-    void createEventBusIfNotSet() {
-        // Pass CommandBus.Builder to builder initialization, and do NOT pass EventBus.
-        final BoundedContext boundedContext = builder
-                .setMultitenant(true)
-                .setCommandBus(CommandBus.newBuilder())
-                .build();
-        assertNotNull(boundedContext.getEventBus());
-    }
-
-    @Test
-    @DisplayName("create both CommandBus and EventBus if not set")
-    void createCommandBusAndEventBusIfNotSet() {
-        final BoundedContext boundedContext = builder.build();
-        assertNotNull(boundedContext.getCommandBus());
-        assertNotNull(boundedContext.getEventBus());
-    }
-
-    @Test
-    @DisplayName("not accept null IntegrationBus")
-    void notAcceptNullIntegrationBus() {
-        assertThrows(NullPointerException.class, () -> builder.setIntegrationBus(Tests.nullRef()));
-    }
-
-    @Test
-    @DisplayName("match multitenancy state of BoundedContext and CommandBus if single tenant")
+    @DisplayName("not accept CommandBus with different multitenancy state")
     void matchMultitenancyOfCommandBus() {
         final CommandBus.Builder commandBus = CommandBus.newBuilder()
                                                         .setMultitenant(true)
