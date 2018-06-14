@@ -125,7 +125,7 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
     }
 
     @SuppressWarnings("CheckReturnValue")
-        // OK to ignore stored command for the purpose of this test.
+    // OK to ignore stored command for the purpose of this test.
     @Test
     @DisplayName("reschedule commands from storage in parallel on build if thread spawning is allowed")
     void rescheduleFromStorageInParallel() {
@@ -162,7 +162,7 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
     }
 
     @SuppressWarnings("CheckReturnValue")
-        // OK to ignore stored command for the purpose of this test.
+    // OK to ignore stored command for the purpose of this test.
     @Test
     @DisplayName("reschedule commands from storage synchronously on build if thread spawning NOT allowed")
     void rescheduleFromStorageSynchronously() {
@@ -266,7 +266,7 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
      * <p>The method is not {@code static} to allow Mockito spy on the created anonymous class instance.
      *
      * @param targetThreadName the builder of the thread name that will be created upon command scheduling
-     * @param latch the instance of the {@code CountDownLatch} to await the execution finishing
+     * @param latch            the instance of the {@code CountDownLatch} to await the execution finishing
      * @return newly created instance
      */
     @SuppressWarnings("MethodMayBeStatic") // see Javadoc.

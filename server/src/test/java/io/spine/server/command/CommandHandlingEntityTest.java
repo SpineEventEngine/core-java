@@ -77,7 +77,6 @@ class CommandHandlingEntityTest {
         return msg().getValue();
     }
 
-
     private static class HandlingEntity extends CommandHandlingEntity<Long,
                                                                       StringValue,
                                                                       StringValueVBuilder> {

@@ -152,7 +152,7 @@ abstract class CommandStoreTest extends AbstractCommandBusTestSuite {
 
     @Test
     @DisplayName("set command status to error when handler throws exception")
-     void setCommandStatusToErrorWhenHandlerThrows() {
+    void setCommandStatusToErrorWhenHandlerThrows() {
         ModelTests.clearModel();
 
         final RuntimeException exception = new IllegalStateException("handler throws");
@@ -383,7 +383,8 @@ abstract class CommandStoreTest extends AbstractCommandBusTestSuite {
 
         @Override
         public Set<CommandClass> getMessageClasses() {
-            return CommandClass.setOf(CmdCreateProject.class, CmdStartProject.class, CmdAddTask.class);
+            return CommandClass.setOf(CmdCreateProject.class, CmdStartProject.class,
+                                      CmdAddTask.class);
         }
 
         @Override
