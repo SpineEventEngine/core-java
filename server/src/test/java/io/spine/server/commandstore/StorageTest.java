@@ -23,22 +23,15 @@ package io.spine.server.commandstore;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import com.google.protobuf.Any;
 import io.spine.base.Error;
 import io.spine.base.Identifier;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandId;
 import io.spine.core.CommandStatus;
-import io.spine.core.Commands;
 import io.spine.core.Rejection;
-import io.spine.core.RejectionContext;
-import io.spine.core.RejectionId;
-import io.spine.core.Rejections;
 import io.spine.server.commandbus.CommandRecord;
 import io.spine.server.commandbus.Given;
-import io.spine.server.commandbus.ProcessingStatus;
 import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.server.tenant.TenantAwareTest;
 import io.spine.test.Tests;
@@ -51,7 +44,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.CommandStatus.ERROR;
 import static io.spine.core.CommandStatus.OK;
 import static io.spine.core.CommandStatus.RECEIVED;
@@ -59,12 +51,14 @@ import static io.spine.core.CommandStatus.REJECTED;
 import static io.spine.core.CommandStatus.SCHEDULED;
 import static io.spine.core.Commands.generateId;
 import static io.spine.core.given.GivenTenantId.newUuid;
-import static io.spine.protobuf.TypeConverter.toAny;
 import static io.spine.server.BoundedContext.newName;
 import static io.spine.server.commandbus.Given.CommandMessage.createProjectMessage;
 import static io.spine.server.commandstore.CommandTestUtil.checkRecord;
 import static io.spine.server.commandstore.Records.newRecordBuilder;
 import static io.spine.server.commandstore.Records.toCommandIterator;
+import static io.spine.server.commandstore.given.StorageTestEnv.newError;
+import static io.spine.server.commandstore.given.StorageTestEnv.newRejection;
+import static io.spine.server.commandstore.given.StorageTestEnv.newStorageRecord;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -101,35 +95,9 @@ class StorageTest extends TenantAwareTest {
         clearCurrentTenant();
     }
 
-    private static CommandRecord newStorageRecord() {
-        final Command command = Given.ACommand.createProject();
-        final String commandType = CommandEnvelope.of(command)
-                                                  .getTypeName()
-                                                  .value();
-
-        final CommandRecord.Builder builder =
-                CommandRecord.newBuilder()
-                             .setCommandType(commandType)
-                             .setCommandId(command.getId())
-                             .setCommand(command)
-                             .setTimestamp(getCurrentTime())
-                             .setStatus(ProcessingStatus.newBuilder()
-                                                        .setCode(RECEIVED));
-        return builder.build();
-    }
-
     /*
      * Storing and loading tests.
      ****************************/
-
-    private Optional<CommandRecord> read(CommandId commandId) {
-        final Optional<CEntity> entity = repository.find(commandId);
-        if (entity.isPresent()) {
-            return Optional.of(entity.get()
-                                     .getState());
-        }
-        return Optional.absent();
-    }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we store.
     @Test
@@ -139,7 +107,7 @@ class StorageTest extends TenantAwareTest {
         final CommandId commandId = command.getId();
 
         repository.store(command);
-        final CommandRecord record = read(commandId).get();
+        final CommandRecord record = readRecord(commandId).get();
 
         checkRecord(record, command, RECEIVED);
     }
@@ -153,7 +121,7 @@ class StorageTest extends TenantAwareTest {
         final Error error = newError();
 
         repository.store(command, error);
-        final CommandRecord record = read(commandId).get();
+        final CommandRecord record = readRecord(commandId).get();
 
         checkRecord(record, command, ERROR);
         assertEquals(error, record.getStatus()
@@ -185,7 +153,7 @@ class StorageTest extends TenantAwareTest {
         final CommandStatus status = SCHEDULED;
 
         repository.store(command, status);
-        final CommandRecord record = read(commandId).get();
+        final CommandRecord record = readRecord(commandId).get();
 
         checkRecord(record, command, status);
     }
@@ -218,11 +186,11 @@ class StorageTest extends TenantAwareTest {
     @Test
     @DisplayName("set ok command status")
     void setOkCommandStatus() {
-        givenNewRecord();
+        storeNewRecord();
 
         repository.setOkStatus(id);
 
-        final CommandRecord actual = read(id).get();
+        final CommandRecord actual = readRecord(id).get();
         assertEquals(OK, actual.getStatus()
                                .getCode());
     }
@@ -231,12 +199,12 @@ class StorageTest extends TenantAwareTest {
     @Test
     @DisplayName("set error command status")
     void setErrorCommandStatus() {
-        givenNewRecord();
+        storeNewRecord();
         final Error error = newError();
 
         repository.updateStatus(id, error);
 
-        final CommandRecord actual = read(id).get();
+        final CommandRecord actual = readRecord(id).get();
         assertEquals(ERROR, actual.getStatus().getCode());
         assertEquals(error, actual.getStatus().getError());
     }
@@ -245,12 +213,12 @@ class StorageTest extends TenantAwareTest {
     @Test
     @DisplayName("set rejected command status")
     void setRejectedCommandStatus() {
-        givenNewRecord();
+        storeNewRecord();
         final Rejection rejection = newRejection();
 
         repository.updateStatus(id, rejection);
 
-        final CommandRecord actual = read(id).get();
+        final CommandRecord actual = readRecord(id).get();
         assertEquals(REJECTED, actual.getStatus()
                                      .getCode());
         assertEquals(rejection, actual.getStatus()
@@ -378,30 +346,19 @@ class StorageTest extends TenantAwareTest {
         }
     }
 
-    private void givenNewRecord() {
+    private void storeNewRecord() {
         final CommandRecord record = newStorageRecord();
         id = record.getCommandId();
         repository.store(record.getCommand());
     }
 
-    private static Error newError() {
-        return Error.newBuilder()
-                    .setType("error type 123")
-                    .setCode(5)
-                    .setMessage("error message 123")
-                    .setStacktrace("stacktrace")
-                    .build();
+    private Optional<CommandRecord> readRecord(CommandId commandId) {
+        final Optional<CEntity> entity = repository.find(commandId);
+        if (entity.isPresent()) {
+            return Optional.of(entity.get()
+                                     .getState());
+        }
+        return Optional.absent();
     }
 
-    private static Rejection newRejection() {
-        final Any packedMessage = toAny("newRejection");
-        final RejectionId id = Rejections.generateId(Commands.generateId());
-        return Rejection.newBuilder()
-                        .setId(id)
-                        .setMessage(packedMessage)
-                        .setContext(RejectionContext.newBuilder()
-                                                    .setStacktrace("rejection stacktrace")
-                                                    .setTimestamp(getCurrentTime()))
-                        .build();
-    }
 }

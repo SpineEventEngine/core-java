@@ -20,18 +20,13 @@
 
 package io.spine.server.command;
 
-import com.google.common.collect.ImmutableList;
-import com.google.protobuf.Message;
-import com.google.protobuf.StringValue;
-import io.spine.core.CommandEnvelope;
-import io.spine.validate.StringValueVBuilder;
+import io.spine.server.command.given.CommandHandlingEntityTestEnv.HandlingEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
-
-import static io.spine.test.TestValues.newUuidValue;
+import static io.spine.server.command.given.CommandHandlingEntityTestEnv.msg;
+import static io.spine.server.command.given.CommandHandlingEntityTestEnv.str;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -61,32 +56,5 @@ class CommandHandlingEntityTest {
         assertEquals(version, entity.expectedEmpty(str(), str()).getVersion());
         assertEquals(version, entity.expectedNotEmpty(str()).getVersion());
         assertEquals(version, entity.unexpectedValue(str(), str(), str()).getVersion());
-    }
-
-    /**
-     * @return generated {@code StringValue} based on generated UUID
-     */
-    private static StringValue msg() {
-        return newUuidValue();
-    }
-
-    /**
-     * @return generated {@code String} based on generated UUID
-     */
-    private static String str() {
-        return msg().getValue();
-    }
-
-    private static class HandlingEntity extends CommandHandlingEntity<Long,
-                                                                      StringValue,
-                                                                      StringValueVBuilder> {
-        private HandlingEntity(Long id) {
-            super(id);
-        }
-
-        @Override
-        protected List<? extends Message> dispatchCommand(CommandEnvelope cmd) {
-            return ImmutableList.of();
-        }
     }
 }

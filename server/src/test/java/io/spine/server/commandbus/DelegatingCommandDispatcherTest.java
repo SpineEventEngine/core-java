@@ -20,14 +20,11 @@
 
 package io.spine.server.commandbus;
 
-import com.google.common.collect.ImmutableSet;
 import io.spine.client.TestActorRequestFactory;
-import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
+import io.spine.server.commandbus.given.DelegatingCommandDispatcherTestEnv.EmptyCommandDispatcherDelegate;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.util.Set;
 
 import static org.junit.Assert.assertTrue;
 
@@ -48,30 +45,5 @@ class DelegatingCommandDispatcherTest {
         delegatingDispatcher.onError(commandEnvelope, new RuntimeException(getClass().getName()));
 
         assertTrue(delegate.onErrorCalled());
-    }
-
-    private static final class EmptyCommandDispatcherDelegate
-            implements CommandDispatcherDelegate<String> {
-
-        private boolean onErrorCalled;
-
-        @Override
-        public Set<CommandClass> getCommandClasses() {
-            return ImmutableSet.of();
-        }
-
-        @Override
-        public String dispatchCommand(CommandEnvelope envelope) {
-            return getClass().getName();
-        }
-
-        @Override
-        public void onError(CommandEnvelope envelope, RuntimeException exception) {
-            onErrorCalled = true;
-        }
-
-        boolean onErrorCalled() {
-            return onErrorCalled;
-        }
     }
 }

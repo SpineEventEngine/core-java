@@ -24,19 +24,13 @@ import com.google.protobuf.Message;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Ack;
 import io.spine.core.Command;
-import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandValidationError;
 import io.spine.core.Rejection;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.bus.EnvelopeValidator;
-import io.spine.server.command.Assign;
-import io.spine.server.command.CommandHandler;
-import io.spine.server.event.EventBus;
-import io.spine.test.command.CmdAddTask;
-import io.spine.test.command.event.CmdTaskAdded;
+import io.spine.server.commandbus.given.SingleTenantCommandBusTestEnv.FaultyHandler;
 import io.spine.test.reflect.InvalidProjectName;
-import io.spine.test.reflect.ProjectId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -140,28 +134,5 @@ class SingleTenantCommandBusTest extends AbstractCommandBusTestSuite {
         final Message commandMessage = Given.CommandMessage.createProjectMessage();
         return TestActorRequestFactory.newInstance(SingleTenantCommandBusTest.class)
                                       .createCommand(commandMessage);
-    }
-
-    /**
-     * A {@code CommandHandler}, which throws a rejection upon a command.
-     */
-    private static class FaultyHandler extends CommandHandler {
-
-        private final InvalidProjectName rejection =
-                new InvalidProjectName(ProjectId.getDefaultInstance());
-
-        private FaultyHandler(EventBus eventBus) {
-            super(eventBus);
-        }
-
-        @SuppressWarnings("unused")     // does nothing, but throws a rejection.
-        @Assign
-        CmdTaskAdded handle(CmdAddTask msg, CommandContext context) throws InvalidProjectName {
-            throw rejection;
-        }
-
-        private InvalidProjectName getThrowable() {
-            return rejection;
-        }
     }
 }

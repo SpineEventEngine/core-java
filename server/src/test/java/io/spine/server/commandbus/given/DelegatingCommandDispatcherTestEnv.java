@@ -18,37 +18,43 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.bus;
+package io.spine.server.commandbus.given;
 
-import io.spine.server.bus.given.MulticastDispatcherIdentityTestEnv.IdentityDispatcher;
-import io.spine.test.Tests;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import com.google.common.collect.ImmutableSet;
+import io.spine.core.CommandClass;
+import io.spine.core.CommandEnvelope;
+import io.spine.server.commandbus.CommandDispatcherDelegate;
 
 import java.util.Set;
 
-import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+public class DelegatingCommandDispatcherTestEnv {
 
-/**
- * @author Alexander Yevsyukov
- */
-@DisplayName("MulticastDispatcher.Identity utility should")
-class MulticastDispatcherIdentityTest {
-
-    @Test
-    @DisplayName(HAVE_PARAMETERLESS_CTOR)
-    void haveUtilityConstructor() {
-        Tests.assertHasPrivateParameterlessCtor(MulticastDispatcher.Identity.class);
+    /** Prevents instantiation of this utility class. */
+    private DelegatingCommandDispatcherTestEnv() {
     }
 
-    @Test
-    @DisplayName("return dispatcher identity")
-    void returnDispatcherIdentity() throws Exception {
-        final Set<String> set = MulticastDispatcher.Identity.of(new IdentityDispatcher());
+    public static final class EmptyCommandDispatcherDelegate
+            implements CommandDispatcherDelegate<String> {
 
-        assertTrue(set.contains(IdentityDispatcher.ID));
-        assertEquals(1, set.size());
+        private boolean onErrorCalled;
+
+        @Override
+        public Set<CommandClass> getCommandClasses() {
+            return ImmutableSet.of();
+        }
+
+        @Override
+        public String dispatchCommand(CommandEnvelope envelope) {
+            return getClass().getName();
+        }
+
+        @Override
+        public void onError(CommandEnvelope envelope, RuntimeException exception) {
+            onErrorCalled = true;
+        }
+
+        public boolean onErrorCalled() {
+            return onErrorCalled;
+        }
     }
 }

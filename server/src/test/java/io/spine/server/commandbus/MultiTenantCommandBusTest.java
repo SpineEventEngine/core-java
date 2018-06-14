@@ -21,17 +21,15 @@
 package io.spine.server.commandbus;
 
 import com.google.common.testing.NullPointerTester;
-import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Error;
 import io.spine.core.Command;
 import io.spine.core.CommandClass;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandValidationError;
-import io.spine.core.MessageEnvelope;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.command.CommandHandler;
+import io.spine.server.commandbus.given.MultitenantCommandBusTestEnv.AddTaskDispatcher;
 import io.spine.server.rejection.RejectionBus;
 import io.spine.test.command.CmdAddTask;
 import io.spine.test.command.CmdCreateProject;
@@ -290,39 +288,5 @@ class MultiTenantCommandBusTest extends AbstractCommandBusTestSuite {
 
         assertTrue(cmdClasses.contains(CommandClass.of(CmdCreateProject.class)));
         assertTrue(cmdClasses.contains(CommandClass.of(CmdAddTask.class)));
-    }
-
-    /*
-     * Test utility methods.
-     ***********************/
-
-    /**
-     * The dispatcher that remembers that
-     * {@link CommandDispatcher#dispatch(MessageEnvelope) dispatch()}
-     * was called.
-     */
-    private static class AddTaskDispatcher implements CommandDispatcher<Message> {
-
-        private boolean dispatcherInvoked = false;
-
-        @Override
-        public Set<CommandClass> getMessageClasses() {
-            return CommandClass.setOf(CmdAddTask.class);
-        }
-
-        @Override
-        public Message dispatch(CommandEnvelope envelope) {
-            dispatcherInvoked = true;
-            return Empty.getDefaultInstance();
-        }
-
-        @Override
-        public void onError(CommandEnvelope envelope, RuntimeException exception) {
-            // Do nothing.
-        }
-
-        public boolean wasDispatcherInvoked() {
-            return dispatcherInvoked;
-        }
     }
 }
