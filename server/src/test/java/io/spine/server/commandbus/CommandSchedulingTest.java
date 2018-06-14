@@ -28,7 +28,8 @@ import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.test.Tests;
 import io.spine.time.Durations2;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import java.util.List;
@@ -45,27 +46,30 @@ import static io.spine.server.commandbus.Given.ACommand.createProject;
 import static io.spine.server.commandbus.Given.ACommand.startProject;
 import static io.spine.test.TimeTests.Past.minutesAgo;
 import static io.spine.time.Durations2.minutes;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-
-public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
+@SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
+@DisplayName("Command scheduling mechanism should")
+class CommandSchedulingTest extends AbstractCommandBusTestSuite {
 
     private final TestActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(CommandSchedulingShould.class);
+            TestActorRequestFactory.newInstance(CommandSchedulingTest.class);
 
-    public CommandSchedulingShould() {
+    CommandSchedulingTest() {
         super(true);
     }
 
     @Test
-    public void store_scheduled_command_and_return_OK() {
+    @DisplayName("store scheduled command to CommandStore and return OK")
+    void storeScheduledCommand() {
         commandBus.register(createProjectHandler);
         final Command cmd = createProject(/*delay=*/minutes(1));
 
@@ -76,7 +80,8 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
     }
 
     @Test
-    public void schedule_command_if_delay_is_set() {
+    @DisplayName("schedule command if delay is set")
+    void scheduleIfDelayIsSet() {
         commandBus.register(createProjectHandler);
         final Command cmd = createProject(/*delay=*/minutes(1));
 
@@ -86,7 +91,8 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
     }
 
     @Test
-    public void not_schedule_command_if_no_scheduling_options_are_set() {
+    @DisplayName("not schedule command if no scheduling options are set")
+    void notScheduleIfNoOptionsAreSet() {
         commandBus.register(new CreateProjectHandler());
 
         final Command command = createProject();
@@ -97,7 +103,8 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
     }
 
     @Test
-    public void reschedule_commands_from_storage() {
+    @DisplayName("reschedule commands from storage")
+    void rescheduleCommandsFromStorage() {
         final Timestamp schedulingTime = minutesAgo(3);
         final Duration delayPrimary = Durations2.fromMinutes(5);
         final Duration newDelayExpected = Durations2.fromMinutes(2); // = 5 - 3
@@ -120,7 +127,8 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
     @SuppressWarnings("CheckReturnValue")
         // OK to ignore stored command for the purpose of this test.
     @Test
-    public void reschedule_commands_from_storage_in_parallel_on_build_if_thread_spawning_allowed() {
+    @DisplayName("reschedule commands from storage in parallel on build if thread spawning is allowed")
+    void rescheduleFromStorageInParallel() {
         final String mainThreadName = Thread.currentThread().getName();
         final StringBuilder threadNameUponScheduling = new StringBuilder(0);
         final CountDownLatch latch = new CountDownLatch(1);
@@ -156,7 +164,8 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
     @SuppressWarnings("CheckReturnValue")
         // OK to ignore stored command for the purpose of this test.
     @Test
-    public void reschedule_commands_from_storage_synchronously_on_build_if_thread_spawning_NOT_allowed() {
+    @DisplayName("reschedule commands from storage synchronously on build if thread spawning NOT allowed")
+    void rescheduleFromStorageSynchronously() {
         final String mainThreadName = Thread.currentThread().getName();
         final StringBuilder threadNameUponScheduling = new StringBuilder(0);
         final CountDownLatch latch = new CountDownLatch(1);
@@ -183,7 +192,8 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
     }
 
     @Test
-    public void post_previously_scheduled_command() {
+    @DisplayName("post previously scheduled command")
+    void postPreviouslyScheduled() {
         CommandBus spy = spy(commandBus);
         spy.register(createProjectHandler);
         Command command = storeSingleCommandForRescheduling();
@@ -193,14 +203,17 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
         verify(spy).doPost(eq(CommandEnvelope.of(command)));
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void reject_previously_scheduled_command_if_no_endpoint_found() {
+    @Test
+    @DisplayName("reject previously scheduled command if no endpoint found")
+    void rejectPreviouslyScheduledWithoutEndpoint() {
         Command command = storeSingleCommandForRescheduling();
-        commandBus.postPreviouslyScheduled(command);
+        assertThrows(IllegalStateException.class,
+                     () -> commandBus.postPreviouslyScheduled(command));
     }
 
     @Test
-    public void update_schedule_options() {
+    @DisplayName("update schedule options")
+    void updateScheduleOptions() {
         final Command cmd = requestFactory.command()
                                           .create(toMessage(newUuid()));
         final Timestamp schedulingTime = getCurrentTime();
@@ -216,7 +229,8 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
     }
 
     @Test
-    public void update_scheduling_time() {
+    @DisplayName("update scheduling time")
+    void updateSchedulingTime() {
         final Command cmd = requestFactory.command()
                                           .create(toMessage(newUuid()));
         final Timestamp schedulingTime = getCurrentTime();

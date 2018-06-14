@@ -20,12 +20,15 @@
 
 package io.spine.server.commandbus;
 
+import org.junit.jupiter.api.DisplayName;
+
 /**
  * @author Alexander Yevsyukov
  */
-public class MultiTenantCommandStoreShould extends CommandStoreShould {
+@DisplayName("Multi tenant CommandStore should")
+class MultiTenantCommandStoreTest extends CommandStoreTest {
 
-    public MultiTenantCommandStoreShould() {
+    MultiTenantCommandStoreTest() {
         super(true);
     }
 }

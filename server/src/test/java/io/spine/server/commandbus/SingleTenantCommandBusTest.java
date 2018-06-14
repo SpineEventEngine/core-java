@@ -37,7 +37,9 @@ import io.spine.test.command.CmdAddTask;
 import io.spine.test.command.event.CmdTaskAdded;
 import io.spine.test.reflect.InvalidProjectName;
 import io.spine.test.reflect.ProjectId;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.core.CommandValidationError.INVALID_COMMAND;
 import static io.spine.core.CommandValidationError.TENANT_INAPPLICABLE;
@@ -48,37 +50,40 @@ import static io.spine.server.commandbus.Given.ACommand.addTask;
 import static io.spine.server.commandbus.Given.ACommand.createProject;
 import static io.spine.server.tenant.TenantAwareOperation.isTenantSet;
 import static io.spine.validate.Validate.isNotDefault;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Alexander Yevsyukov
  */
-public class SingleTenantCommandBusShould extends AbstractCommandBusTestSuite {
+@DisplayName("Single tenant CommandBus should")
+class SingleTenantCommandBusTest extends AbstractCommandBusTestSuite {
 
-    public SingleTenantCommandBusShould() {
+    SingleTenantCommandBusTest() {
         super(false);
     }
 
     @Override
-    @Test
+    @BeforeEach
     public void setUp() {
         super.setUp();
         commandBus.register(createProjectHandler);
     }
 
     @Test
-    public void post_command_and_do_not_set_current_tenant() {
+    @DisplayName("post command and do not set current tenant")
+    void postCommandAndNotSetTenant() {
         commandBus.post(newCommandWithoutTenantId(), observer);
 
         assertFalse(isTenantSet());
     }
 
     @Test
-    public void reject_invalid_command() {
+    @DisplayName("reject invalid command")
+    void rejectInvalidCommand() {
         final Command cmd = newCommandWithoutContext();
 
         commandBus.post(cmd, observer);
@@ -90,7 +95,8 @@ public class SingleTenantCommandBusShould extends AbstractCommandBusTestSuite {
     }
 
     @Test
-    public void reject_multitenant_command_in_single_tenant_context() {
+    @DisplayName("reject multitenant command in single tenant context")
+    void rejectMultitenantCommand() {
         // Create a multi-tenant command.
         final Command cmd = createProject();
 
@@ -103,7 +109,8 @@ public class SingleTenantCommandBusShould extends AbstractCommandBusTestSuite {
     }
 
     @Test
-    public void propagate_rejections_to_rejection_bus() {
+    @DisplayName("propagate rejections to rejection bus")
+    void propagateRejectionsToRejectionBus() {
         final FaultyHandler faultyHandler = new FaultyHandler(eventBus);
         commandBus.register(faultyHandler);
 
@@ -121,7 +128,8 @@ public class SingleTenantCommandBusShould extends AbstractCommandBusTestSuite {
     }
 
     @Test
-    public void create_validator_once() {
+    @DisplayName("create validator once")
+    void createValidatorOnce() {
         final EnvelopeValidator<CommandEnvelope> validator = commandBus.getValidator();
         assertNotNull(validator);
         assertSame(validator, commandBus.getValidator());
@@ -130,7 +138,7 @@ public class SingleTenantCommandBusShould extends AbstractCommandBusTestSuite {
     @Override
     protected Command newCommand() {
         final Message commandMessage = Given.CommandMessage.createProjectMessage();
-        return TestActorRequestFactory.newInstance(SingleTenantCommandBusShould.class)
+        return TestActorRequestFactory.newInstance(SingleTenantCommandBusTest.class)
                                       .createCommand(commandMessage);
     }
 

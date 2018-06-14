@@ -49,10 +49,9 @@ import io.spine.server.model.ModelTests;
 import io.spine.test.reflect.ProjectId;
 import io.spine.test.reflect.command.RefCreateProject;
 import io.spine.test.reflect.event.RefProjectCreated;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -62,8 +61,10 @@ import static io.spine.server.command.CommandHandlerMethod.from;
 import static io.spine.server.command.CommandHandlerMethod.predicate;
 import static io.spine.server.model.given.Given.CommandMessage.createProject;
 import static io.spine.server.model.given.Given.CommandMessage.startProject;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -72,13 +73,11 @@ import static org.mockito.Mockito.verify;
  * @author Alexander Litus
  * @author Alexander Yevsyukov
  */
-public class CommandHandlerMethodShould {
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
+@DisplayName("CommandHandlerMethod should")
+class CommandHandlerMethodTest {
 
     private static final TestActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(CommandHandlerMethodShould.class);
+            TestActorRequestFactory.newInstance(CommandHandlerMethodTest.class);
 
     private static final CommandContext emptyContext = CommandContext.getDefaultInstance();
 
@@ -98,13 +97,14 @@ public class CommandHandlerMethodShould {
                                                         .get()));
     }
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         ModelTests.clearModel();
     }
 
     @Test
-    public void pass_null_tolerance_check() {
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void passNullToleranceCheck() {
         new NullPointerTester()
                 .setDefault(CommandEnvelope.class,
                             requestFactory.generateEnvelope())
@@ -114,7 +114,8 @@ public class CommandHandlerMethodShould {
     }
 
     @Test
-    public void invoke_handler_method_which_returns_one_message() {
+    @DisplayName("invoke handler method which returns one Message")
+    void invokeMethodReturningOneMessage() {
         ValidHandlerTwoParams handlerObject = spy(new ValidHandlerTwoParams());
         CommandHandlerMethod handler = from(handlerObject.getHandler());
         RefCreateProject cmd = createProject();
@@ -129,7 +130,8 @@ public class CommandHandlerMethodShould {
     }
 
     @Test
-    public void invoke_handler_method_and_return_message_list() {
+    @DisplayName("invoke handler method which returns Message list")
+    void invokerMethodReturningMessageList() {
         ValidHandlerOneParamReturnsList handlerObject =
                 spy(new ValidHandlerOneParamReturnsList());
         CommandHandlerMethod handler = from(handlerObject.getHandler());
@@ -144,101 +146,114 @@ public class CommandHandlerMethodShould {
     }
 
     @Test
-    public void consider_handler_with_one_msg_param_valid() {
+    @DisplayName("consider handler with one Message param valid")
+    void considerOneMessageParamValid() {
         Method handler = new ValidHandlerOneParam().getHandler();
 
         assertIsCommandHandler(handler, true);
     }
 
     @Test
-    public void consider_handler_with_one_msg_param_which_returns_list_valid() {
+    @DisplayName("consider handler with one Message param which returns list valid")
+    void considerOneMessageParamAndReturnListValid() {
         Method handler = new ValidHandlerOneParamReturnsList().getHandler();
 
         assertIsCommandHandler(handler, true);
     }
 
     @Test
-    public void consider_handler_with_msg_and_context_params_valid() {
+    @DisplayName("consider handler with Message and context params valid")
+    void considerMessageAndContextParamsValid() {
         Method handler = new ValidHandlerTwoParams().getHandler();
 
         assertIsCommandHandler(handler, true);
     }
 
     @Test
-    public void consider_handler_with_msg_and_context_params_which_returns_list_valid() {
+    @DisplayName("consider handler with Message and context params which returns list valid")
+    void considerMessageAndContextParamWithListReturnValid() {
         Method handler = new ValidHandlerTwoParamsReturnsList().getHandler();
 
         assertIsCommandHandler(handler, true);
     }
 
     @Test
-    public void consider_not_public_handler_valid() {
+    @DisplayName("consider non-public handler valid")
+    void considerNonPublicValid() {
         Method method = new ValidHandlerButPrivate().getHandler();
 
         assertIsCommandHandler(method, true);
     }
 
     @Test
-    public void consider_not_annotated_handler_invalid() {
+    @DisplayName("consider not annotated handler invalid")
+    void considerNotAnnotatedInvalid() {
         Method handler = new InvalidHandlerNoAnnotation().getHandler();
 
         assertIsCommandHandler(handler, false);
     }
 
     @Test
-    public void consider_handler_without_params_invalid() {
+    @DisplayName("consider handler without params invalid")
+    void considerNoParamsInvalid() {
         Method handler = new InvalidHandlerNoParams().getHandler();
 
         assertIsCommandHandler(handler, false);
     }
 
     @Test
-    public void consider_handler_with_too_many_params_invalid() {
+    @DisplayName("consider handler with too many params invalid")
+    void considerTooManyParamsInvalid() {
         Method handler = new InvalidHandlerTooManyParams().getHandler();
 
         assertIsCommandHandler(handler, false);
     }
 
     @Test
-    public void consider_handler_with_one_invalid_param_invalid() {
+    @DisplayName("consider handler with one invalid param invalid")
+    void considerOneInvalidParamInvalid() {
         Method handler = new InvalidHandlerOneNotMsgParam().getHandler();
 
         assertIsCommandHandler(handler, false);
     }
 
     @Test
-    public void consider_handler_with_first_not_message_param_invalid() {
+    @DisplayName("consider handler with first non-Message param invalid")
+    void considerFirstNonMessageParamInvalid() {
         Method handler = new InvalidHandlerTwoParamsFirstInvalid().getHandler();
 
         assertIsCommandHandler(handler, false);
     }
 
     @Test
-    public void consider_handler_with_second_not_context_param_invalid() {
+    @DisplayName("consider handler with second non-context param invalid")
+    void considerSecondNonContextParamInvalid() {
         Method handler = new InvalidHandlerTwoParamsSecondInvalid().getHandler();
 
         assertIsCommandHandler(handler, false);
     }
 
     @Test
-    public void consider_void_handler_invalid() {
+    @DisplayName("consider handler with void return type invalid")
+    void considerVoidReturnInvalid() {
         Method handler = new InvalidHandlerReturnsVoid().getHandler();
 
         assertIsCommandHandler(handler, false);
     }
 
     @Test
-    public void throw_ISE_for_not_handled_command_type() {
+    @DisplayName("throw ISE for not handled command type")
+    void throwForNotHandledCommandType() {
         CommandHandler handler = new ValidHandlerOneParam();
         CommandEnvelope cmd = requestFactory.createEnvelope(startProject());
 
-        thrown.expect(IllegalStateException.class);
-        handler.dispatch(cmd);
+        assertThrows(IllegalStateException.class, () -> handler.dispatch(cmd));
     }
 
     @SuppressWarnings("CheckReturnValue") // no need as the call to dispatch() throws
     @Test
-    public void set_producer_ID_if_command_handler() {
+    @DisplayName("set producer ID when dispatching to command handler")
+    void setProducerIdIfCommandHandler() {
         CommandHandler handler = new RejectingHandler();
         CommandEnvelope envelope = requestFactory.createEnvelope(createProject());
         try {
@@ -250,7 +265,8 @@ public class CommandHandlerMethodShould {
 
     @SuppressWarnings("CheckReturnValue") // no need as the call to dispatchCommand() throws
     @Test
-    public void set_producer_ID_if_entity() {
+    @DisplayName("set producer ID when dispatching to entity")
+    void setProducerIdIfEntity() {
         RefCreateProject commandMessage = createProject();
         Aggregate<ProjectId, ?, ?> entity =
                 new RejectingAggregate(commandMessage.getProjectId());

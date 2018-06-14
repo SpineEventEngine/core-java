@@ -21,12 +21,12 @@ package io.spine.server.rejection;
 
 import io.spine.core.Rejection;
 import io.spine.core.RejectionEnvelope;
-import io.spine.server.bus.BusBuilderShould;
+import io.spine.server.bus.BusBuilderTest;
 
 /**
  * @author Alex Tymchenko
  */
-public class RejectionBusBuilderShould extends BusBuilderShould<RejectionBus.Builder,
+public class RejectionBusBuilderShould extends BusBuilderTest<RejectionBus.Builder,
         RejectionEnvelope,
         Rejection> {
 

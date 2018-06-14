@@ -24,16 +24,19 @@ import com.google.common.collect.ImmutableSet;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 
 import static org.junit.Assert.assertTrue;
 
-public class DelegatingCommandDispatcherShould {
+@DisplayName("DelegatingCommandDispatcher should")
+class DelegatingCommandDispatcherTest {
 
     @Test
-    public void delegate_onError() throws Exception {
+    @DisplayName("delegate `onError`")
+    void delegateOnError() throws Exception {
         final EmptyCommandDispatcherDelegate delegate = new EmptyCommandDispatcherDelegate();
 
         final DelegatingCommandDispatcher<String> delegatingDispatcher =

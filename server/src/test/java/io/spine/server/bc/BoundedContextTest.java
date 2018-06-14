@@ -48,11 +48,10 @@ import io.spine.test.Spy;
 import io.spine.test.bc.Project;
 import io.spine.test.bc.SecretProject;
 import io.spine.test.bc.event.BcProjectCreated;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
 import java.util.Map;
@@ -61,11 +60,12 @@ import static com.google.common.collect.Maps.newConcurrentMap;
 import static io.spine.core.Status.StatusCase.ERROR;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
@@ -79,16 +79,17 @@ import static org.mockito.Mockito.when;
  *
  * <p>Messages used in this test suite are defined in:
  * <ul>
- *     <li>spine/test/bc/project.proto - data types
- *     <li>spine/test/bc/command_factory_test.proto — commands
- *     <li>spine/test/bc/events.proto — events.
+ * <li>spine/test/bc/project.proto - data types
+ * <li>spine/test/bc/command_factory_test.proto — commands
+ * <li>spine/test/bc/events.proto — events.
  * </ul>
  *
  * @author Alexander Litus
  * @author Alexander Yevsyukov
  * @author Dmitry Ganzha
  */
-public class BoundedContextShould {
+@DisplayName("BoundedContext should")
+class BoundedContextTest {
 
     private static final String DEFAULT_STATES_FIELD_NAME = "defaultStates";
     private static final String DEFAULT_STATE_REGISTRY_FULL_CLASS_NAME =
@@ -100,9 +101,6 @@ public class BoundedContextShould {
     private BoundedContext boundedContext;
 
     private boolean handlersRegistered = false;
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
 
     private static Object getObjectFromNestedEnumField(String fullClassName, String fieldName) {
         Object result = null;
@@ -142,16 +140,16 @@ public class BoundedContextShould {
         }
     }
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         ModelTests.clearModel();
         boundedContext = BoundedContext.newBuilder()
                                        .setMultitenant(true)
                                        .build();
     }
 
-    @After
-    public void tearDown() throws Exception {
+    @AfterEach
+    void tearDown() throws Exception {
         if (handlersRegistered) {
             boundedContext.getEventBus()
                           .unregister(subscriber);
@@ -169,34 +167,40 @@ public class BoundedContextShould {
     }
 
     @Test
-    public void return_EventBus() {
+    @DisplayName("return EventBus")
+    void returnEventBus() {
         assertNotNull(boundedContext.getEventBus());
     }
 
     @Test
-    public void return_RejectionBus() {
+    @DisplayName("return RejectionBus")
+    void returnRejectionBus() {
         assertNotNull(boundedContext.getRejectionBus());
     }
 
     @Test
-    public void return_IntegrationBus() {
+    @DisplayName("return IntegrationBus")
+    void returnIntegrationBus() {
         assertNotNull(boundedContext.getIntegrationBus());
     }
 
     @Test
-    public void return_CommandDispatcher() {
+    @DisplayName("return CommandDispatcher")
+    void returnCommandDispatcher() {
         assertNotNull(boundedContext.getCommandBus());
     }
 
     @Test
-    public void register_AggregateRepository() {
+    @DisplayName("register AggregateRepository")
+    void registerAggregateRepository() {
         final ProjectAggregateRepository repository =
                 new ProjectAggregateRepository();
         boundedContext.register(repository);
     }
 
     @Test
-    public void not_allow_two_aggregate_repositories_with_aggregates_with_the_same_state() {
+    @DisplayName("not allow two aggregate repositories with aggregates with same state")
+    void notAllowAggregateRepositoriesWithSameState() {
         final ProjectAggregateRepository repository =
                 new ProjectAggregateRepository();
         boundedContext.register(repository);
@@ -204,12 +208,12 @@ public class BoundedContextShould {
         final AnotherProjectAggregateRepository anotherRepo =
                 new AnotherProjectAggregateRepository();
 
-        thrown.expect(IllegalStateException.class);
-        boundedContext.register(anotherRepo);
+        assertThrows(IllegalStateException.class, () -> boundedContext.register(anotherRepo));
     }
 
     @Test
-    public void register_ProcessManagerRepository() {
+    @DisplayName("register ProcessManagerRepository")
+    void registerProcessManagerRepository() {
         ModelTests.clearModel();
 
         final ProjectPmRepo repository = new ProjectPmRepo();
@@ -217,13 +221,15 @@ public class BoundedContextShould {
     }
 
     @Test
-    public void register_ProjectionRepository() {
+    @DisplayName("register ProjectionRepository")
+    void registerProjectionRepository() {
         final ProjectReportRepository repository = new ProjectReportRepository();
         boundedContext.register(repository);
     }
 
     @Test
-    public void notify_integration_event_subscriber() {
+    @DisplayName("notify integration event subscriber")
+    void notifyIntegrationEventSubscriber() {
         registerAll();
         final MemoizingObserver<Ack> observer = memoizingObserver();
         final IntegrationEvent event = Given.AnIntegrationEvent.projectCreated();
@@ -237,7 +243,8 @@ public class BoundedContextShould {
     }
 
     @Test
-    public void not_notify_integration_event_subscriber_if_event_is_invalid() {
+    @DisplayName("not notify integration event subscriber if event is invalid")
+    void notNotifySubscriberOnInvalidEvent() {
         final BoundedContext boundedContext = BoundedContext.newBuilder()
                                                             .setMultitenant(true)
                                                             .build();
@@ -259,7 +266,8 @@ public class BoundedContextShould {
     }
 
     @Test
-    public void tell_if_set_multitenant() {
+    @DisplayName("tell if set multitenant")
+    void tellIfSetMultitenant() {
         final BoundedContext bc = BoundedContext.newBuilder()
                                                 .setMultitenant(true)
                                                 .build();
@@ -267,14 +275,16 @@ public class BoundedContextShould {
     }
 
     @Test
-    public void assign_storage_during_registration_if_repository_does_not_have_storage() {
+    @DisplayName("assign storage during registration if repository does not have storage")
+    void assignStorageOnRegisteringRepo() {
         final ProjectAggregateRepository repository = new ProjectAggregateRepository();
         boundedContext.register(repository);
         assertTrue(repository.isStorageAssigned());
     }
 
     @Test
-    public void not_change_storage_during_registration_if_a_repository_has_one() {
+    @DisplayName("not change storage during registration if repository has one")
+    void notChangeStorageOnRegisteringRepo() {
         final ProjectAggregateRepository repository = new ProjectAggregateRepository();
         final Repository spy = spy(repository);
         boundedContext.register(repository);
@@ -282,7 +292,8 @@ public class BoundedContextShould {
     }
 
     @Test
-    public void set_storage_factory_for_EventBus() {
+    @DisplayName("set storage factory for EventBus")
+    void setEventBusStorageFactory() {
         final BoundedContext bc = BoundedContext.newBuilder()
                                                 .setEventBus(EventBus.newBuilder())
                                                 .build();
@@ -290,7 +301,8 @@ public class BoundedContextShould {
     }
 
     @Test
-    public void do_not_set_storage_factory_if_EventStore_is_set() {
+    @DisplayName("not set storage factory if EventStore is set")
+    void notChangeBusEventStore() {
         final EventStore eventStore = mock(EventStore.class);
         final BoundedContext bc = BoundedContext.newBuilder()
                                                 .setEventBus(EventBus.newBuilder()
@@ -302,7 +314,8 @@ public class BoundedContextShould {
 
     @SuppressWarnings("unchecked") // OK for the purpose of the created Matcher.
     @Test
-    public void propagate_registered_repositories_to_stand() {
+    @DisplayName("propagate registered repositories to stand")
+    void propagateRepositoriesToStand() {
         BoundedContext boundedContext = BoundedContext.newBuilder()
                                                       .build();
         Stand stand = Spy.ofClass(Stand.class)
@@ -317,17 +330,19 @@ public class BoundedContextShould {
     }
 
     @Test
-    public void match_multi_tenancy_with_CommandBus() {
-        thrown.expect(IllegalStateException.class);
-        BoundedContext.newBuilder()
-                      .setMultitenant(true)
-                      .setCommandBus(CommandBus.newBuilder()
-                                               .setMultitenant(false))
-                      .build();
+    @DisplayName("match multitenancy state of CommandBus")
+    void matchMultitenancyOfCommandBus() {
+        final CommandBus.Builder commandBus = CommandBus.newBuilder()
+                                                        .setMultitenant(false);
+        assertThrows(IllegalStateException.class, () -> BoundedContext.newBuilder()
+                                                                      .setMultitenant(true)
+                                                                      .setCommandBus(commandBus)
+                                                                      .build());
     }
 
     @Test
-    public void set_multi_tenancy_in_CommandBus() {
+    @DisplayName("assign own multitenancy state to CommandBus")
+    void setMultiTenancyInCommandBus() {
         BoundedContext bc = BoundedContext.newBuilder()
                                           .setMultitenant(true)
                                           .build();
@@ -344,18 +359,19 @@ public class BoundedContextShould {
     }
 
     @Test
-    public void match_multi_tenancy_with_Stand() {
-        thrown.expect(IllegalStateException.class);
-        BoundedContext.newBuilder()
-                      .setMultitenant(true)
-                      .setStand(Stand.newBuilder()
-                                     .setMultitenant(false))
-                      .build();
-
+    @DisplayName("match multitenancy state of Stand")
+    void matchMultiTenancyOfStand() {
+        final Stand.Builder stand = Stand.newBuilder()
+                                         .setMultitenant(false);
+        assertThrows(IllegalStateException.class, () -> BoundedContext.newBuilder()
+                                                                      .setMultitenant(true)
+                                                                      .setStand(stand)
+                                                                      .build());
     }
 
     @Test
-    public void set_same_multitenancy_in_Stand() {
+    @DisplayName("assign own multitenancy state to Stand")
+    void setMultitenancyInStand() {
         BoundedContext bc = BoundedContext.newBuilder()
                                           .setMultitenant(true)
                                           .build();
@@ -379,7 +395,8 @@ public class BoundedContextShould {
      * for how visibility filtering works.
      */
     @Test
-    public void obtain_entity_types_by_visibility() {
+    @DisplayName("obtain entity types by visibility")
+    void getEntityTypesByVisibility() {
         assertTrue(boundedContext.getEntityTypes(EntityOption.Visibility.FULL)
                                  .isEmpty());
 
@@ -390,14 +407,16 @@ public class BoundedContextShould {
     }
 
     @Test
-    public void throw_ISE_when_no_repository_registered() {
-        thrown.expect(IllegalStateException.class);
+    @DisplayName("throw ISE when no repository for specified entity state class found")
+    void throwOnNoRepoFound() {
         // Attempt to get a repository without registering.
-        boundedContext.findRepository(Project.class);
+        assertThrows(IllegalStateException.class,
+                     () -> boundedContext.findRepository(Project.class));
     }
 
     @Test
-    public void do_not_expose_invisible_aggregate() {
+    @DisplayName("not expose invisible aggregate")
+    void notExposeInvisibleAggregate() {
         ModelTests.clearModel();
 
         boundedContext.register(new SecretProjectRepository());
@@ -421,10 +440,9 @@ public class BoundedContextShould {
      * {@code Model} and {@code BoundedContext}. However, previously such an issue was caught.
      * Therefore this test case ensures it's never happening again.
      */
-    @SuppressWarnings("ProhibitedExceptionCaught")
-        // NPE is specifically handled in this case to prevent such cases in the future.
-    @Test(expected = NullPointerException.class)
-    public void throw_NPE_when_registering_repository_and_default_state_is_null() {
+    @Test
+    @DisplayName("throw NPE when registering repository and default state is null")
+    void throwOnRegisterWithNullDefaultState() {
         final ProjectAggregateRepository repository = new ProjectAggregateRepository();
         final Map mockMap = mock(Map.class);
         when(mockMap.get(any())).thenReturn(null);
@@ -436,12 +454,11 @@ public class BoundedContextShould {
         injectField(defaultStateRegistry, DEFAULT_STATES_FIELD_NAME, mockMap);
 
         try {
-            boundedContext.register(repository);
-        } catch (NullPointerException e) {
-            // reassigning mock map to real map, to prevent failing other tests
+            assertThrows(NullPointerException.class, () -> boundedContext.register(repository));
+        } finally {
+            // Reassign default state to real map to prevent failing other tests.
             final Map<Class<? extends Entity>, Message> defaultState = newConcurrentMap();
             injectField(defaultStateRegistry, DEFAULT_STATES_FIELD_NAME, defaultState);
-            throw e;
         }
     }
 }

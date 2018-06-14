@@ -25,29 +25,32 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.core.CommandEnvelope;
 import io.spine.validate.StringValueVBuilder;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
 import static io.spine.test.TestValues.newUuidValue;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author Alexander Yevsyukov
  */
-public class CommandHandlingEntityShould {
+@DisplayName("CommandHandlingEntity should")
+class CommandHandlingEntityTest {
 
     /** The object we test. */
     private HandlingEntity entity;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         entity = new HandlingEntity(1L);
     }
 
     @Test
-    public void set_version_when_creating_mismatches() {
+    @DisplayName("assign own version to created mismatches")
+    void assignVersionToMismatches() {
         final int version = entity.getVersion().getNumber();
 
         assertEquals(version, entity.expectedDefault(msg(), msg()).getVersion());

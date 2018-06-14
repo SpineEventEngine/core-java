@@ -42,11 +42,10 @@ import io.spine.server.commandbus.ProcessingStatus;
 import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.server.tenant.TenantAwareTest;
 import io.spine.test.Tests;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.util.Iterator;
 import java.util.List;
@@ -66,30 +65,29 @@ import static io.spine.server.commandbus.Given.CommandMessage.createProjectMessa
 import static io.spine.server.commandstore.CommandTestUtil.checkRecord;
 import static io.spine.server.commandstore.Records.newRecordBuilder;
 import static io.spine.server.commandstore.Records.toCommandIterator;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Alexander Litus
  * @author Alexander Yevsyukov
  */
 @SuppressWarnings("ConstantConditions")
-public class StorageShould extends TenantAwareTest {
+@DisplayName("Storage should")
+class StorageTest extends TenantAwareTest {
 
     private static final Error defaultError = Error.getDefaultInstance();
     private static final Rejection DEFAULT_REJECTION = Rejection.getDefaultInstance();
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
 
     private CRepository repository;
 
     private CommandId id;
 
-    @Before
-    public void setUpCommandStorageTest() {
+    @BeforeEach
+    void setUpCommandStorageTest() {
         setCurrentTenant(newUuid());
         repository = new CRepository();
         final StorageFactorySwitch storageSwitch =
@@ -97,8 +95,8 @@ public class StorageShould extends TenantAwareTest {
         repository.initStorage(storageSwitch.get());
     }
 
-    @After
-    public void tearDownCommandStorageTest() {
+    @AfterEach
+    void tearDownCommandStorageTest() {
         repository.close();
         clearCurrentTenant();
     }
@@ -135,7 +133,8 @@ public class StorageShould extends TenantAwareTest {
 
     @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we store.
     @Test
-    public void store_and_read_command() {
+    @DisplayName("store and read command")
+    void storeAndReadCommand() {
         final Command command = Given.ACommand.createProject();
         final CommandId commandId = command.getId();
 
@@ -147,7 +146,8 @@ public class StorageShould extends TenantAwareTest {
 
     @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we store.
     @Test
-    public void store_command_with_error() {
+    @DisplayName("store command with error")
+    void storeCommandWithError() {
         final Command command = Given.ACommand.createProject();
         final CommandId commandId = command.getId();
         final Error error = newError();
@@ -161,7 +161,8 @@ public class StorageShould extends TenantAwareTest {
     }
 
     @Test
-    public void store_command_with_error_and_generate_ID_if_needed() {
+    @DisplayName("store command with error and generate ID if needed")
+    void storeCmdWithErrorAndGenerateId() {
         final TestActorRequestFactory factory = TestActorRequestFactory.newInstance(getClass());
         final Command command = factory.createCommand(createProjectMessage());
         final Error error = newError();
@@ -177,7 +178,8 @@ public class StorageShould extends TenantAwareTest {
 
     @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we store.
     @Test
-    public void store_command_with_status() {
+    @DisplayName("store command with status")
+    void storeCommandWithStatus() {
         final Command command = Given.ACommand.createProject();
         final CommandId commandId = command.getId();
         final CommandStatus status = SCHEDULED;
@@ -189,7 +191,8 @@ public class StorageShould extends TenantAwareTest {
     }
 
     @Test
-    public void load_commands_by_status() {
+    @DisplayName("load commands by status")
+    void loadCommandsByStatus() {
         final List<Command> commands = ImmutableList.of(Given.ACommand.createProject(),
                                                         Given.ACommand.addTask(),
                                                         Given.ACommand.startProject());
@@ -213,7 +216,8 @@ public class StorageShould extends TenantAwareTest {
 
     @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we update status.
     @Test
-    public void set_ok_command_status() {
+    @DisplayName("set ok command status")
+    void setOkCommandStatus() {
         givenNewRecord();
 
         repository.setOkStatus(id);
@@ -225,7 +229,8 @@ public class StorageShould extends TenantAwareTest {
 
     @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we update status.
     @Test
-    public void set_error_command_status() {
+    @DisplayName("set error command status")
+    void setErrorCommandStatus() {
         givenNewRecord();
         final Error error = newError();
 
@@ -238,7 +243,8 @@ public class StorageShould extends TenantAwareTest {
 
     @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we update status.
     @Test
-    public void set_rejected_command_status() {
+    @DisplayName("set rejected command status")
+    void setRejectedCommandStatus() {
         givenNewRecord();
         final Rejection rejection = newRejection();
 
@@ -255,8 +261,10 @@ public class StorageShould extends TenantAwareTest {
      * Conversion tests.
      *******************/
 
+    @SuppressWarnings("DuplicateStringLiteralInspection") // Common test case.
     @Test
-    public void convert_cmd_to_record() {
+    @DisplayName("convert command to record")
+    void convertCommandToRecord() {
         final Command command = Given.ACommand.createProject();
         final CommandStatus status = RECEIVED;
 
@@ -270,26 +278,29 @@ public class StorageShould extends TenantAwareTest {
      **************************************************************/
 
     @Test
-    public void throw_exception_if_try_to_store_null() {
-        thrown.expect(NullPointerException.class);
-        repository.store(Tests.<Command>nullRef());
+    @DisplayName("throw NPE if try to store null")
+    void throwWhenStoringNull() {
+        assertThrows(NullPointerException.class, () -> repository.store(Tests.<Command>nullRef()));
     }
 
     @Test
-    public void throw_exception_if_try_to_set_OK_status_by_null_ID() {
-        thrown.expect(NullPointerException.class);
-        repository.setOkStatus(Tests.nullRef());
+    @DisplayName("throw NPE if try to set OK status by null ID")
+    void notSetOkForNullId() {
+        assertThrows(NullPointerException.class, () -> repository.setOkStatus(Tests.nullRef()));
     }
 
     @Test
-    public void throw_exception_if_try_to_set_error_status_by_null_ID() {
-        thrown.expect(NullPointerException.class);
-        repository.updateStatus(Tests.<CommandId>nullRef(), defaultError);
+    @DisplayName("throw NPE if try to set error status by null ID")
+    void notSetErrorForNullId() {
+        assertThrows(NullPointerException.class,
+                     () -> repository.updateStatus(Tests.nullRef(), defaultError));
     }
 
-    @Test(expected = NullPointerException.class)
-    public void throw_exception_if_try_to_set_rejection_status_by_null_ID() {
-        repository.updateStatus(Tests.nullRef(), DEFAULT_REJECTION);
+    @Test
+    @DisplayName("throw NPE if try to set rejection status by null ID")
+    void notSetRejectionForNullId() {
+        assertThrows(NullPointerException.class,
+                     () -> repository.updateStatus(Tests.nullRef(), DEFAULT_REJECTION));
     }
 
     /*
@@ -297,56 +308,62 @@ public class StorageShould extends TenantAwareTest {
      **************************************************************/
 
     @Test
-    public void throw_exception_if_try_to_store_cmd_to_closed_storage() {
+    @DisplayName("throw ISE if try to store command to closed storage")
+    void notStoreCmdWhenClosed() {
         repository.close();
-        thrown.expect(IllegalStateException.class);
-        repository.store(Given.ACommand.createProject());
+        assertThrows(IllegalStateException.class,
+                     () -> repository.store(Given.ACommand.createProject()));
     }
 
     @Test
-    public void throw_exception_if_try_to_store_cmd_with_error_to_closed_storage() {
+    @DisplayName("throw ISE if try to store command with error to closed storage")
+    void notStoreCmdWithErrorWhenClosed() {
         repository.close();
-        thrown.expect(IllegalStateException.class);
-        repository.store(Given.ACommand.createProject(), newError());
+        assertThrows(IllegalStateException.class,
+                     () -> repository.store(Given.ACommand.createProject(), newError()));
     }
 
     @Test
-    public void throw_exception_if_try_to_store_cmd_with_status_to_closed_storage() {
+    @DisplayName("throw ISE if try to store command with status to closed storage")
+    void notStoreCmdWithStatusWhenClosed() {
         repository.close();
-        thrown.expect(IllegalStateException.class);
-        repository.store(Given.ACommand.createProject(), OK);
+        assertThrows(IllegalStateException.class,
+                     () -> repository.store(Given.ACommand.createProject(), OK));
     }
 
     @Test
-    public void throw_exception_if_try_to_load_commands_by_status_from_closed_storage() {
+    @DisplayName("throw ISE if try to load commands by status from closed storage")
+    void notLoadByStatusWhenClosed() {
         repository.close();
-        thrown.expect(IllegalStateException.class);
-        repository.iterator(OK);
+        assertThrows(IllegalStateException.class, () -> repository.iterator(OK));
     }
 
     @Test
-    public void throw_exception_if_try_to_set_OK_status_using_closed_storage() {
+    @DisplayName("throw ISE if try to set OK status using closed storage")
+    void notSetOkStatusWhenClosed() {
         repository.close();
-        thrown.expect(IllegalStateException.class);
-        repository.setOkStatus(generateId());
+        assertThrows(IllegalStateException.class, () -> repository.setOkStatus(generateId()));
     }
 
     @Test
-    public void throw_exception_if_try_to_set_ERROR_status_using_closed_storage() {
+    @DisplayName("throw ISE if try to set ERROR status using closed storage")
+    void notSetErrorStatusWhenClosed() {
         repository.close();
-        thrown.expect(IllegalStateException.class);
-        repository.updateStatus(generateId(), newError());
+        assertThrows(IllegalStateException.class,
+                     () -> repository.updateStatus(generateId(), newError()));
     }
 
     @Test
-    public void throw_exception_if_try_to_set_REJECTED_status_using_closed_storage() {
+    @DisplayName("throw ISE if try to set REJECTED status using closed storage")
+    void notSetRejectionStatusWhenClosed() {
         repository.close();
-        thrown.expect(IllegalStateException.class);
-        repository.updateStatus(generateId(), newRejection());
+        assertThrows(IllegalStateException.class,
+                     () -> repository.updateStatus(generateId(), newRejection()));
     }
 
     @Test
-    public void provide_null_accepting_record_retrieval_func() {
+    @DisplayName("provide null accepting record retrieval function")
+    void provideNullAcceptingRecordFunc() {
         assertNull(CRepository.getRecordFunc()
                               .apply(null));
     }

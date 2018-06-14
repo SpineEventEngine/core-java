@@ -28,7 +28,7 @@ import io.spine.core.Commands;
 
 import java.util.List;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Test utility for keeping the history of command messages and their contexts
@@ -68,6 +68,6 @@ public class CommandHistory {
         String cmdName = Commands.getMessage(expected)
                                  .getClass()
                                  .getName();
-        assertTrue("Expected but wasn't handled, command: " + cmdName, contains(expected));
+        assertTrue(contains(expected), "Expected but wasn't handled, command: " + cmdName);
     }
 }

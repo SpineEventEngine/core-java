@@ -29,29 +29,34 @@ import io.spine.server.integration.IntegrationBus;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.test.Tests;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
-@SuppressWarnings({"OptionalGetWithoutIsPresent", "ConstantConditions"})
-public class BoundedContextBuilderShould {
+@SuppressWarnings({"OptionalGetWithoutIsPresent", "ConstantConditions",
+        "DuplicateStringLiteralInspection" /* Common test display names. */})
+@DisplayName("BoundedContext Builder should")
+class BoundedContextBuilderTest {
 
     private BoundedContext.Builder builder;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         final boolean multitenant = true;
         builder = BoundedContext.newBuilder()
                                 .setMultitenant(multitenant);
     }
 
     @Test
-    public void return_name_if_it_was_set() {
+    @DisplayName("return name if it was set")
+    void returnNameIfSet() {
         final String nameString = getClass().getName();
         assertEquals(nameString, BoundedContext.newBuilder()
                                                .setName(nameString)
@@ -59,9 +64,10 @@ public class BoundedContextBuilderShould {
     }
 
     @Test
-    public void return_storage_factory_supplier_if_it_was_set() {
+    @DisplayName("return storage factory supplier if it was set")
+    void returnStorageFactorySupplierIfSet() {
         @SuppressWarnings("unchecked") // OK for this mock.
-        Supplier<StorageFactory> mock = mock(Supplier.class);
+                Supplier<StorageFactory> mock = mock(Supplier.class);
 
         assertEquals(mock, builder.setStorageFactorySupplier(mock)
                                   .getStorageFactorySupplier()
@@ -69,19 +75,22 @@ public class BoundedContextBuilderShould {
     }
 
     @Test
-    public void allow_clearing_storage_factory_supplier() {
-        assertFalse(builder.setStorageFactorySupplier(Tests.<Supplier<StorageFactory>>nullRef())
+    @DisplayName("allow clearing storage factory supplier")
+    void allowClearStorageFactorySupplier() {
+        assertFalse(builder.setStorageFactorySupplier(Tests.nullRef())
                            .getStorageFactorySupplier()
                            .isPresent());
     }
 
-    @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_CommandDispatcher() {
-        builder.setCommandBus(Tests.<CommandBus.Builder>nullRef());
+    @Test
+    @DisplayName("not accept null CommandDispatcher")
+    void notAcceptNullCommandDispatcher() {
+        assertThrows(NullPointerException.class, () -> builder.setCommandBus(Tests.nullRef()));
     }
 
     @Test
-    public void return_CommandBus_Builder() {
+    @DisplayName("return CommandBus Builder")
+    void returnCommandBusBuilder() {
         final CommandBus.Builder expected = CommandBus.newBuilder();
         builder = BoundedContext.newBuilder()
                                 .setCommandBus(expected);
@@ -90,7 +99,8 @@ public class BoundedContextBuilderShould {
     }
 
     @Test
-    public void return_EventBus_builder() {
+    @DisplayName("return EventBus Builder")
+    void returnEventBusBuilder() {
         final EventBus.Builder expected = EventBus.newBuilder();
         builder.setEventBus(expected);
         assertEquals(expected, builder.getEventBus()
@@ -98,7 +108,8 @@ public class BoundedContextBuilderShould {
     }
 
     @Test
-    public void return_IntegrationBus_builder() {
+    @DisplayName("return IntegrationBus Builder")
+    void returnIntegrationBusBuilder() {
         final IntegrationBus.Builder expected = IntegrationBus.newBuilder();
         builder.setIntegrationBus(expected);
         assertEquals(expected, builder.getIntegrationBus()
@@ -106,19 +117,22 @@ public class BoundedContextBuilderShould {
     }
 
     @Test
-    public void support_multitenantcy() {
+    @DisplayName("support multitenancy")
+    void supportMultitenancy() {
         builder.setMultitenant(true);
         assertTrue(builder.isMultitenant());
     }
 
     @Test
-    public void be_single_tenant_by_default() {
+    @DisplayName("be single tenant by default")
+    void beSingleTenantByDefault() {
         assertFalse(BoundedContext.newBuilder()
                                   .isMultitenant());
     }
 
     @Test
-    public void allow_TenantIndex_configuration() {
+    @DisplayName("allow TenantIndex configuration")
+    void allowTenantIndexConfiguration() {
         final TenantIndex tenantIndex = mock(TenantIndex.class);
         assertEquals(tenantIndex, BoundedContext.newBuilder()
                                                 .setTenantIndex(tenantIndex)
@@ -127,20 +141,23 @@ public class BoundedContextBuilderShould {
     }
 
     @Test
-    public void create_default_TenantIndex_if_not_configured() {
+    @DisplayName("create default TenantIndex if not configured")
+    void createDefaultTenantIndex() {
         assertNotNull(BoundedContext.newBuilder()
                                     .setMultitenant(true)
                                     .build()
                                     .getTenantIndex());
     }
 
-    @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_EventBus() {
-        builder.setEventBus(Tests.<EventBus.Builder>nullRef());
+    @Test
+    @DisplayName("not accept null EventBus")
+    void notAcceptNullEventBus() {
+        assertThrows(NullPointerException.class, () -> builder.setEventBus(Tests.nullRef()));
     }
 
     @Test
-    public void create_CommandBus_if_it_was_not_set() {
+    @DisplayName("create CommandBus if it was not set")
+    void createCommandBusIfNotSet() {
         // Pass EventBus to builder initialization, and do NOT pass CommandBus.
         final BoundedContext boundedContext = builder
                 .setEventBus(EventBus.newBuilder())
@@ -149,7 +166,8 @@ public class BoundedContextBuilderShould {
     }
 
     @Test
-    public void create_EventBus_if_it_was_not_set() {
+    @DisplayName("create EventBus if it was not set")
+    void createEventBusIfNotSet() {
         // Pass CommandBus.Builder to builder initialization, and do NOT pass EventBus.
         final BoundedContext boundedContext = builder
                 .setMultitenant(true)
@@ -159,25 +177,28 @@ public class BoundedContextBuilderShould {
     }
 
     @Test
-    public void create_both_CommandBus_and_EventBus_if_not_set() {
+    @DisplayName("create both CommandBus and EventBus if not set")
+    void createCommandBusAndEventBusIfNotSet() {
         final BoundedContext boundedContext = builder.build();
         assertNotNull(boundedContext.getCommandBus());
         assertNotNull(boundedContext.getEventBus());
     }
 
-    @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_IntegrationBus() {
-        builder.setIntegrationBus(Tests.<IntegrationBus.Builder>nullRef());
+    @Test
+    @DisplayName("not accept null IntegrationBus")
+    void notAcceptNullIntegrationBus() {
+        assertThrows(NullPointerException.class, () -> builder.setIntegrationBus(Tests.nullRef()));
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void match_multitenance_state_of_BoundedContext_and_CommandBus_if_single_tenant() {
+    @Test
+    @DisplayName("match multitenancy state of BoundedContext and CommandBus if single tenant")
+    void matchMultitenancyOfCommandBus() {
         final CommandBus.Builder commandBus = CommandBus.newBuilder()
-                                                .setMultitenant(true)
-                                                .setCommandStore(mock(CommandStore.class));
-        BoundedContext.newBuilder()
-                       .setMultitenant(false)
-                       .setCommandBus(commandBus)
-                       .build();
+                                                        .setMultitenant(true)
+                                                        .setCommandStore(mock(CommandStore.class));
+        assertThrows(IllegalStateException.class, () -> BoundedContext.newBuilder()
+                                                                      .setMultitenant(false)
+                                                                      .setCommandBus(commandBus)
+                                                                      .build());
     }
 }

@@ -24,26 +24,31 @@ import com.google.common.collect.ImmutableSet;
 import io.spine.core.MessageEnvelope;
 import io.spine.test.Tests;
 import io.spine.type.MessageClass;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 
 import static io.spine.base.Identifier.newUuid;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Alexander Yevsyukov
  */
-public class MulticastDispatcherIdentityShould {
+@DisplayName("MulticastDispatcher.Identity utility should")
+class MulticastDispatcherIdentityTest {
 
     @Test
-    public void have_utility_ctor() {
+    @DisplayName(HAVE_PARAMETERLESS_CTOR)
+    void haveUtilityConstructor() {
         Tests.assertHasPrivateParameterlessCtor(MulticastDispatcher.Identity.class);
     }
 
     @Test
-    public void return_dispatcher_identity() throws Exception {
+    @DisplayName("return dispatcher identity")
+    void returnDispatcherIdentity() throws Exception {
         final Set<String> set = MulticastDispatcher.Identity.of(new IdentityTest());
 
         assertTrue(set.contains(IdentityTest.ID));

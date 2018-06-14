@@ -35,7 +35,8 @@ import io.spine.server.command.CommandHandler;
 import io.spine.server.rejection.RejectionBus;
 import io.spine.test.command.CmdAddTask;
 import io.spine.test.command.CmdCreateProject;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 
@@ -44,22 +45,47 @@ import static io.spine.core.CommandValidationError.UNSUPPORTED_COMMAND;
 import static io.spine.core.Status.StatusCase.ERROR;
 import static io.spine.server.commandbus.Given.ACommand.addTask;
 import static io.spine.server.commandbus.Given.ACommand.createProject;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.isA;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-public class MultiTenantCommandBusShould extends AbstractCommandBusTestSuite {
+@SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
+@DisplayName("Multi tenant CommandBus should")
+class MultiTenantCommandBusTest extends AbstractCommandBusTestSuite {
 
-    public MultiTenantCommandBusShould() {
+    MultiTenantCommandBusTest() {
         super(true);
     }
 
+    /*
+     * Test of illegal arguments for post()
+     ***************************************/
+
     @Test
-    public void allow_to_specify_rejection_bus_via_builder() {
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void passNullToleranceCheck() throws NoSuchMethodException {
+        new NullPointerTester()
+                .setDefault(Command.class, Command.getDefaultInstance())
+                .setDefault(StreamObserver.class, StreamObservers.noOpObserver())
+                .testAllPublicInstanceMethods(commandBus);
+    }
+
+    @Test
+    @DisplayName("not accept default command on post")
+    void notAcceptDefaultCommand() {
+        assertThrows(IllegalArgumentException.class,
+                     () -> commandBus.post(Command.getDefaultInstance(), observer));
+    }
+
+    @Test
+    @DisplayName("allow to specify rejection bus via builder")
+    void setRejectionBusViaBuilder() {
         final RejectionBus expectedRejectionBus = mock(RejectionBus.class);
         final CommandBus commandBus = CommandBus.newBuilder()
                                                 .setCommandStore(commandStore)
@@ -72,12 +98,14 @@ public class MultiTenantCommandBusShould extends AbstractCommandBusTestSuite {
     }
 
     @Test
-    public void have_log() {
+    @DisplayName("have log")
+    void haveLog() {
         assertNotNull(Log.log());
     }
 
     @Test
-    public void have_rejection_bus_if_no_custom_set() {
+    @DisplayName("have RejectionBus if no custom one was set")
+    void haveRejectionBusIfNoCustomSet() {
         final CommandBus bus = CommandBus.newBuilder()
                                          .setCommandStore(commandStore)
                                          .build();
@@ -85,21 +113,24 @@ public class MultiTenantCommandBusShould extends AbstractCommandBusTestSuite {
     }
 
     @Test
-    public void close_CommandStore_when_closed() throws Exception {
+    @DisplayName("close CommandStore when closed")
+    void closeCommandStoreWhenClosed() throws Exception {
         commandBus.close();
 
         verify(commandStore).close();
     }
 
     @Test
-    public void close_RejectionBus_when_closed() throws Exception {
+    @DisplayName("close RejectionBus when closed")
+    void closeRejectionBusWhenClosed() throws Exception {
         commandBus.close();
 
         verify(rejectionBus).close();
     }
 
     @Test
-    public void shutdown_CommandScheduler_when_closed() throws Exception {
+    @DisplayName("shutdown CommandScheduler when closed")
+    void shutdownCommandSchedulerWhenClosed() throws Exception {
         commandBus.close();
 
         verify(scheduler).shutdown();
@@ -110,7 +141,8 @@ public class MultiTenantCommandBusShould extends AbstractCommandBusTestSuite {
      ***************************/
 
     @Test
-    public void verify_tenant_id_attribute_if_multitenant() {
+    @DisplayName("verify tenant id attribute if multitenant")
+    void requireTenantIdIfMultitenant() {
         commandBus.register(createProjectHandler);
         final Command cmd = newCommandWithoutTenantId();
 
@@ -123,7 +155,8 @@ public class MultiTenantCommandBusShould extends AbstractCommandBusTestSuite {
     }
 
     @Test
-    public void return_UnsupportedCommandException_when_there_is_neither_handler_nor_dispatcher() {
+    @DisplayName("return UnsupportedCommandException when there is neither handler nor dispatcher")
+    void returnExceptionOnNoHandlerAndDispatcher() {
         final Command command = addTask();
         commandBus.post(command, observer);
 
@@ -137,7 +170,8 @@ public class MultiTenantCommandBusShould extends AbstractCommandBusTestSuite {
      * Registration and un-registration tests
      *****************************************/
     @Test
-    public void register_command_dispatcher() {
+    @DisplayName("register command dispatcher")
+    void registerCommandDispatcher() {
         commandBus.register(new AddTaskDispatcher());
 
         commandBus.post(addTask(), observer);
@@ -146,7 +180,8 @@ public class MultiTenantCommandBusShould extends AbstractCommandBusTestSuite {
     }
 
     @Test
-    public void unregister_command_dispatcher() {
+    @DisplayName("unregister command dispatcher")
+    void unregisterCommandDispatcher() {
         final CommandDispatcher<Message> dispatcher = new AddTaskDispatcher();
         commandBus.register(dispatcher);
         commandBus.unregister(dispatcher);
@@ -159,7 +194,8 @@ public class MultiTenantCommandBusShould extends AbstractCommandBusTestSuite {
     }
 
     @Test
-    public void register_command_handler() {
+    @DisplayName("register command handler")
+    void registerCommandHandler() {
         commandBus.register(new CreateProjectHandler());
 
         commandBus.post(createProject(), observer);
@@ -168,7 +204,8 @@ public class MultiTenantCommandBusShould extends AbstractCommandBusTestSuite {
     }
 
     @Test
-    public void unregister_command_handler() {
+    @DisplayName("unregister command handler")
+    void unregisterCommandHandler() {
         final CommandHandler handler = newCommandHandler();
 
         commandBus.register(handler);
@@ -186,28 +223,12 @@ public class MultiTenantCommandBusShould extends AbstractCommandBusTestSuite {
     }
 
     /*
-     * Test of illegal arguments for post()
-     ***************************************/
-
-    @Test
-    public void not_accept_nulls() throws NoSuchMethodException {
-        new NullPointerTester()
-                .setDefault(Command.class, Command.getDefaultInstance())
-                .setDefault(StreamObserver.class, StreamObservers.noOpObserver())
-                .testAllPublicInstanceMethods(commandBus);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void not_accept_default_command() {
-        commandBus.post(Command.getDefaultInstance(), observer);
-    }
-
-    /*
      * Command processing tests
      ***************************/
 
     @Test
-    public void post_command_and_return_OK_response() {
+    @DisplayName("post command and return OK response")
+    void postCommandAndReturnOkResponse() {
         commandBus.register(createProjectHandler);
 
         final Command command = createProject();
@@ -217,7 +238,8 @@ public class MultiTenantCommandBusShould extends AbstractCommandBusTestSuite {
     }
 
     @Test
-    public void store_command_when_posted() {
+    @DisplayName("store command when posted")
+    void storeCommandWhenPosted() {
         commandBus.register(createProjectHandler);
         final Command cmd = createProject();
 
@@ -227,7 +249,8 @@ public class MultiTenantCommandBusShould extends AbstractCommandBusTestSuite {
     }
 
     @Test
-    public void store_invalid_command_with_error_status() {
+    @DisplayName("store invalid command with error status")
+    void storeInvalidCommandWithErrorStatus() {
         commandBus.register(createProjectHandler);
         final Command cmd = newCommandWithoutContext();
 
@@ -237,7 +260,8 @@ public class MultiTenantCommandBusShould extends AbstractCommandBusTestSuite {
     }
 
     @Test
-    public void invoke_handler_when_command_posted() {
+    @DisplayName("invoke handler when command posted")
+    void invokeHandlerWhenCommandPosted() {
         commandBus.register(createProjectHandler);
 
         commandBus.post(createProject(), observer);
@@ -246,7 +270,8 @@ public class MultiTenantCommandBusShould extends AbstractCommandBusTestSuite {
     }
 
     @Test
-    public void invoke_dispatcher_when_command_posted() {
+    @DisplayName("invoke dispatcher when command posted")
+    void invokeDispatcherWhenCommandPosted() {
         final AddTaskDispatcher dispatcher = new AddTaskDispatcher();
         commandBus.register(dispatcher);
 
@@ -256,7 +281,8 @@ public class MultiTenantCommandBusShould extends AbstractCommandBusTestSuite {
     }
 
     @Test
-    public void return_supported_classes() {
+    @DisplayName("return supported classes")
+    void returnSupportedClasses() {
         commandBus.register(createProjectHandler);
         commandBus.register(new AddTaskDispatcher());
 

@@ -23,31 +23,33 @@ package io.spine.server.bus;
 import com.google.protobuf.Message;
 import io.spine.core.MessageEnvelope;
 import io.spine.server.rejection.RejectionBusBuilderShould;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.util.Deque;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 /**
  * The abstract test suite for the tests of the builders of buses.
  *
  * @author Dmytro Dashenkov
- * @see io.spine.server.commandbus.CommandBusBuilderShould
+ * @see io.spine.server.commandbus.CommandBusBuilderTest
  * @see io.spine.server.event.EventBusBuilderShould
  * @see RejectionBusBuilderShould
  */
-public abstract class BusBuilderShould<B extends Bus.AbstractBuilder<E, T, ?>,
-                                       E extends MessageEnvelope<?, T, ?>,
-                                       T extends Message> {
+public abstract class BusBuilderTest<B extends Bus.AbstractBuilder<E, T, ?>,
+                                     E extends MessageEnvelope<?, T, ?>,
+                                     T extends Message> {
 
     protected abstract B builder();
 
     @Test
-    public void allow_adding_filter() {
+    @DisplayName("allow adding filter")
+    void allowAddingFilter() {
         @SuppressWarnings("unchecked")
         final BusFilter<E> filter = mock(BusFilter.class);
 
@@ -57,7 +59,8 @@ public abstract class BusBuilderShould<B extends Bus.AbstractBuilder<E, T, ?>,
     }
 
     @Test
-    public void allow_removing_filter() {
+    @DisplayName("allow removing filter")
+    void allowRemovingFilter() {
         @SuppressWarnings("unchecked")
         final BusFilter<E> filter = mock(BusFilter.class);
 
@@ -69,7 +72,8 @@ public abstract class BusBuilderShould<B extends Bus.AbstractBuilder<E, T, ?>,
 
     @SuppressWarnings("CheckReturnValue") // calling builder
     @Test
-    public void preserve_filters_order() {
+    @DisplayName("preserve filters order")
+    void preserveFiltersOrder() {
         @SuppressWarnings("unchecked")
         final BusFilter<E> first = mock(BusFilter.class);
         @SuppressWarnings("unchecked")

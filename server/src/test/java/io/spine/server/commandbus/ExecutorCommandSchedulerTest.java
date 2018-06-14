@@ -27,17 +27,18 @@ import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.given.GivenCommandContext;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.server.commandbus.Given.CommandMessage.addTask;
 import static io.spine.server.commandbus.Given.CommandMessage.createProjectMessage;
 import static io.spine.time.Durations2.milliseconds;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -47,7 +48,9 @@ import static org.mockito.Mockito.verify;
 /**
  * @author Alexander Litus
  */
-public class ExecutorCommandSchedulerShould {
+@SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
+@DisplayName("ExecutorCommandScheduler should")
+class ExecutorCommandSchedulerTest {
 
     private static final long DELAY_MS = 1100;
 
@@ -57,24 +60,25 @@ public class ExecutorCommandSchedulerShould {
     private static final int WAIT_FOR_PROPAGATION_MS = 300;
 
     private final CommandFactory commandFactory =
-            TestActorRequestFactory.newInstance(ExecutorCommandSchedulerShould.class).command();
+            TestActorRequestFactory.newInstance(ExecutorCommandSchedulerTest.class).command();
 
     private CommandScheduler scheduler;
     private CommandContext context;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         scheduler = spy(ExecutorCommandScheduler.class);
         context = GivenCommandContext.withScheduledDelayOf(DELAY);
     }
 
-    @After
-    public void tearDown() {
+    @AfterEach
+    void tearDown() {
         scheduler.shutdown();
     }
 
     @Test
-    public void schedule_command_if_delay_is_set() {
+    @DisplayName("schedule command if delay is set")
+    void scheduleCommandIfDelaySet() {
         final Command cmdPrimary =
                 commandFactory.createBasedOnContext(createProjectMessage(), context);
         final ArgumentCaptor<Command> commandCaptor = ArgumentCaptor.forClass(Command.class);
@@ -89,7 +93,8 @@ public class ExecutorCommandSchedulerShould {
     }
 
     @Test
-    public void not_schedule_command_with_same_id_twice() {
+    @DisplayName("not schedule command with same id twice")
+    void notScheduleCommandWithSameId() {
         final String id = newUuid();
 
         final Command expectedCmd = commandFactory.createBasedOnContext(createProjectMessage(id),
@@ -108,7 +113,8 @@ public class ExecutorCommandSchedulerShould {
     }
 
     @Test
-    public void throw_exception_if_is_shutdown() {
+    @DisplayName("throw ISE on scheduling attempt if is shutdown")
+    void throwExceptionIfIsShutdown() {
         scheduler.shutdown();
         try {
             scheduler.schedule(Given.ACommand.createProject());

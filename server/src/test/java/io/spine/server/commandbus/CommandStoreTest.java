@@ -43,10 +43,11 @@ import io.spine.test.command.CmdAddTask;
 import io.spine.test.command.CmdCreateProject;
 import io.spine.test.command.CmdStartProject;
 import io.spine.test.command.event.CmdProjectCreated;
-import org.junit.Test;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import javax.annotation.Nonnull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.List;
 import java.util.Set;
 
@@ -61,18 +62,19 @@ import static io.spine.server.commandbus.Given.ACommand.createProject;
 import static io.spine.server.commandbus.Given.ACommand.startProject;
 import static io.spine.server.commandbus.Given.CommandMessage.createProjectMessage;
 import static io.spine.time.Durations2.fromMinutes;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.verify;
 
-public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
+abstract class CommandStoreTest extends AbstractCommandBusTestSuite {
 
-    CommandStoreShould(boolean multitenant) {
+    CommandStoreTest(boolean multitenant) {
         super(multitenant);
     }
 
     @Test
-    public void set_command_status_to_OK_when_handler_returns() {
+    @DisplayName("set command status to OK when handler returns")
+    void setCommandStatusToOk() {
         commandBus.register(createProjectHandler);
 
         final Command command = requestFactory.command()
@@ -89,7 +91,8 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
     }
 
     @Test
-    public void set_command_status_to_error_when_dispatcher_throws() {
+    @DisplayName("set command status to error when dispatcher throws exception")
+    void setCommandStatusToErrorWhenDispatcherThrows() {
         final ThrowingDispatcher dispatcher = new ThrowingDispatcher();
         commandBus.register(dispatcher);
         final Command command = requestFactory.command()
@@ -109,7 +112,8 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
     }
 
     @Test
-    public void set_command_status_to_rejection_when_handler_throws_rejection() {
+    @DisplayName("set command status to rejection when handler throws rejection")
+    void setCommandStatusToRejection() {
         ModelTests.clearModel();
 
         final TestRejection rejection = new TestRejection();
@@ -138,9 +142,8 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
     private ProcessingStatus getStatus(CommandId commandId, final TenantId tenantId) {
         final TenantAwareFunction<CommandId, ProcessingStatus> func =
                 new TenantAwareFunction<CommandId, ProcessingStatus>(tenantId) {
-                    @Nullable
                     @Override
-                    public ProcessingStatus apply(@Nullable CommandId input) {
+                    public @Nullable ProcessingStatus apply(@Nullable CommandId input) {
                         return commandStore.getStatus(checkNotNull(input));
                     }
                 };
@@ -148,7 +151,8 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
     }
 
     @Test
-    public void set_command_status_to_error_when_handler_throws_exception() {
+    @DisplayName("set command status to error when handler throws exception")
+     void setCommandStatusToErrorWhenHandlerThrows() {
         ModelTests.clearModel();
 
         final RuntimeException exception = new IllegalStateException("handler throws");
@@ -196,7 +200,8 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
     }
 
     @Test
-    public void set_expired_scheduled_command_status_to_error_if_time_to_post_them_passed() {
+    @DisplayName("set expired scheduled command status to error if time to post them passed")
+    void setExpiredScheduledCommandStatusToError() {
         final List<Command> commands = newArrayList(createProject(),
                                                     addTask(),
                                                     startProject());
@@ -223,7 +228,8 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
     }
 
     @Test
-    public void store_given_command() {
+    @DisplayName("store given command")
+    void storeGivenCommand() {
         final Command command = requestFactory.command()
                                               .create(createProjectMessage());
         commandStore.store(command);
@@ -238,7 +244,8 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
     }
 
     @Test
-    public void store_given_command_with_status() {
+    @DisplayName("store given command with status")
+    void storeGivenCommandWithStatus() {
         final Command command = requestFactory.command()
                                               .create(createProjectMessage());
         final CommandStatus commandStatus = CommandStatus.OK;
@@ -254,7 +261,8 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
     }
 
     @Test
-    public void store_given_command_with_error() {
+    @DisplayName("store given command with error")
+    void storeGivenCommandWithError() {
         final Command command = requestFactory.command()
                                               .create(createProjectMessage());
         @SuppressWarnings("ThrowableNotThrown") // Creation without throwing needed for test.
@@ -272,7 +280,8 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
     }
 
     @Test
-    public void store_given_command_with_exception() {
+    @DisplayName("store given command with exception")
+    void storeGivenCommandWithException() {
         final Command command = requestFactory.command()
                                               .create(createProjectMessage());
         @SuppressWarnings("ThrowableNotThrown") // Creation without throwing needed for test.
@@ -293,7 +302,7 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
      * A stub handler that throws passed `ThrowableMessage` in the command handler method,
      * rejecting the command.
      *
-     * @see #set_command_status_to_rejection_when_handler_throws_rejection()
+     * @see #setCommandStatusToRejection()
      */
     private class RejectingCreateProjectHandler extends CommandHandler {
 
@@ -306,7 +315,7 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
         }
 
         @Assign
-        @SuppressWarnings({"unused"})
+        @SuppressWarnings("unused")
             // Reflective access.
         CmdProjectCreated handle(CmdCreateProject msg,
                                  CommandContext context) throws ThrowableMessage {
@@ -326,7 +335,7 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
     /**
      * A stub handler that throws passed `RuntimeException` in the command handler method.
      *
-     * @see #set_command_status_to_error_when_handler_throws_exception()
+     * @see #setCommandStatusToErrorWhenHandlerThrows()
      */
     private class ThrowingCreateProjectHandler extends CommandHandler {
 
@@ -339,7 +348,7 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
         }
 
         @Assign
-        @SuppressWarnings({"unused"})
+        @SuppressWarnings("unused")
             // Reflective access.
         CmdProjectCreated handle(CmdCreateProject msg, CommandContext context) {
             throw exception;

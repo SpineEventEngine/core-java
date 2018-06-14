@@ -18,25 +18,28 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.commandbus;
+package io.spine.server.bus;
 
-import com.google.protobuf.Message;
-import io.spine.client.TestActorRequestFactory;
-import io.spine.core.Command;
+import com.google.common.collect.Lists;
+import io.spine.core.EventEnvelope;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Alexander Yevsyukov
  */
-public class SingleTenantCommandStoreShould extends CommandStoreShould {
+@DisplayName("FilterChain should")
+class FilterChainTest {
 
-    public SingleTenantCommandStoreShould() {
-        super(false);
-    }
+    @Test
+    @DisplayName("not allow closing twice")
+    void notAllowClosingTwice() throws Exception {
+        FilterChain<EventEnvelope, BusFilter<EventEnvelope>> chain =
+                new FilterChain<>(Lists.<BusFilter<EventEnvelope>>newArrayList());
 
-    @Override
-    protected Command newCommand() {
-        final Message commandMessage = Given.CommandMessage.createProjectMessage();
-        return TestActorRequestFactory.newInstance(SingleTenantCommandBusShould.class)
-                                      .createCommand(commandMessage);
+        chain.close();
+        assertThrows(IllegalStateException.class, chain::close);
     }
 }

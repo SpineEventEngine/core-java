@@ -18,41 +18,27 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.commandstore;
+package io.spine.server.commandbus;
 
+import com.google.protobuf.Message;
+import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;
-import io.spine.core.CommandStatus;
-import io.spine.server.commandbus.CommandRecord;
-import io.spine.server.commandbus.Given;
-import org.junit.Test;
-
-import static io.spine.server.commandstore.CommandTestUtil.checkRecord;
-import static io.spine.server.commandstore.Records.newRecordBuilder;
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import org.junit.jupiter.api.DisplayName;
 
 /**
- * @author Alexander Yevsykov
+ * @author Alexander Yevsyukov
  */
-public class RecordsShould {
+@DisplayName("Single tenant CommandStore should")
+class SingleTenantCommandStoreTest extends CommandStoreTest {
 
-    @Test
-    public void have_utility_ctor() {
-        assertHasPrivateParameterlessCtor(Records.class);
+    SingleTenantCommandStoreTest() {
+        super(false);
     }
 
-    /*
-     * Conversion tests.
-     *******************/
-
-    @Test
-    public void convert_cmd_to_record() {
-        final Command command = Given.ACommand.createProject();
-        final CommandStatus status = CommandStatus.RECEIVED;
-
-        final CommandRecord record = newRecordBuilder(command,
-                                                      status,
-                                                      null).build();
-
-        checkRecord(record, command, status);
+    @Override
+    protected Command newCommand() {
+        final Message commandMessage = Given.CommandMessage.createProjectMessage();
+        return TestActorRequestFactory.newInstance(SingleTenantCommandBusTest.class)
+                                      .createCommand(commandMessage);
     }
 }
