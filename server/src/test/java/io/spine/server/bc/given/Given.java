@@ -38,7 +38,8 @@ import static io.spine.server.BoundedContext.newName;
 
 public class Given {
 
-    private Given() {}
+    private Given() {
+    }
 
     public static class AggregateId {
 
@@ -66,14 +67,14 @@ public class Given {
 
         public static BcTaskAdded taskAdded(ProjectId id) {
             return BcTaskAdded.newBuilder()
-                            .setProjectId(id)
-                            .build();
+                              .setProjectId(id)
+                              .build();
         }
 
         public static BcProjectStarted projectStarted(ProjectId id) {
             return BcProjectStarted.newBuilder()
-                                 .setProjectId(id)
-                                 .build();
+                                   .setProjectId(id)
+                                   .build();
         }
     }
 
