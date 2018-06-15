@@ -51,6 +51,7 @@ import io.spine.test.bc.event.BcProjectCreated;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
@@ -88,6 +89,9 @@ import static org.mockito.Mockito.when;
  * @author Alexander Yevsyukov
  * @author Dmitry Ganzha
  */
+@SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
+        /* JUnit 5 Nested classes cannot to be static. */,
+        "DuplicateStringLiteralInspection" /* Common test display names. */})
 @DisplayName("BoundedContext should")
 class BoundedContextTest {
 
@@ -166,150 +170,71 @@ class BoundedContextTest {
         handlersRegistered = true;
     }
 
-    @Test
-    @DisplayName("return EventBus")
-    void returnEventBus() {
-        assertNotNull(boundedContext.getEventBus());
+    @Nested
+    @DisplayName("return")
+    class Return {
+
+        @Test
+        @DisplayName("EventBus")
+        void eventBus() {
+            assertNotNull(boundedContext.getEventBus());
+        }
+
+        @Test
+        @DisplayName("RejectionBus")
+        void rejectionBus() {
+            assertNotNull(boundedContext.getRejectionBus());
+        }
+
+        @Test
+        @DisplayName("IntegrationBus")
+        void integrationBus() {
+            assertNotNull(boundedContext.getIntegrationBus());
+        }
+
+        @Test
+        @DisplayName("CommandDispatcher")
+        void commandDispatcher() {
+            assertNotNull(boundedContext.getCommandBus());
+        }
+
+        @Test
+        @DisplayName("multitenancy state")
+        void tellIfSetMultitenant() {
+            final BoundedContext bc = BoundedContext.newBuilder()
+                                                    .setMultitenant(true)
+                                                    .build();
+            assertTrue(bc.isMultitenant());
+        }
     }
 
-    @Test
-    @DisplayName("return RejectionBus")
-    void returnRejectionBus() {
-        assertNotNull(boundedContext.getRejectionBus());
-    }
+    @Nested
+    @DisplayName("register")
+    class Register {
 
-    @Test
-    @DisplayName("return IntegrationBus")
-    void returnIntegrationBus() {
-        assertNotNull(boundedContext.getIntegrationBus());
-    }
+        @Test
+        @DisplayName("AggregateRepository")
+        void registerAggregateRepository() {
+            final ProjectAggregateRepository repository =
+                    new ProjectAggregateRepository();
+            boundedContext.register(repository);
+        }
 
-    @Test
-    @DisplayName("return CommandDispatcher")
-    void returnCommandDispatcher() {
-        assertNotNull(boundedContext.getCommandBus());
-    }
+        @Test
+        @DisplayName("ProcessManagerRepository")
+        void processManagerRepository() {
+            ModelTests.clearModel();
 
-    @Test
-    @DisplayName("register AggregateRepository")
-    void registerAggregateRepository() {
-        final ProjectAggregateRepository repository =
-                new ProjectAggregateRepository();
-        boundedContext.register(repository);
-    }
+            final ProjectPmRepo repository = new ProjectPmRepo();
+            boundedContext.register(repository);
+        }
 
-    @Test
-    @DisplayName("not allow two aggregate repositories with aggregates with same state")
-    void notAllowAggregateRepositoriesWithSameState() {
-        final ProjectAggregateRepository repository =
-                new ProjectAggregateRepository();
-        boundedContext.register(repository);
-
-        final AnotherProjectAggregateRepository anotherRepo =
-                new AnotherProjectAggregateRepository();
-
-        assertThrows(IllegalStateException.class, () -> boundedContext.register(anotherRepo));
-    }
-
-    @Test
-    @DisplayName("register ProcessManagerRepository")
-    void registerProcessManagerRepository() {
-        ModelTests.clearModel();
-
-        final ProjectPmRepo repository = new ProjectPmRepo();
-        boundedContext.register(repository);
-    }
-
-    @Test
-    @DisplayName("register ProjectionRepository")
-    void registerProjectionRepository() {
-        final ProjectReportRepository repository = new ProjectReportRepository();
-        boundedContext.register(repository);
-    }
-
-    @Test
-    @DisplayName("notify integration event subscriber")
-    void notifyIntegrationEventSubscriber() {
-        registerAll();
-        final MemoizingObserver<Ack> observer = memoizingObserver();
-        final IntegrationEvent event = Given.AnIntegrationEvent.projectCreated();
-        final Message msg = unpack(event.getMessage());
-
-        boundedContext.notify(event, observer);
-
-        assertEquals(Responses.statusOk(), observer.firstResponse()
-                                                   .getStatus());
-        assertEquals(subscriber.getHandledEvent(), msg);
-    }
-
-    @Test
-    @DisplayName("not notify integration event subscriber if event is invalid")
-    void notNotifySubscriberOnInvalidEvent() {
-        final BoundedContext boundedContext = BoundedContext.newBuilder()
-                                                            .setMultitenant(true)
-                                                            .build();
-
-        // Unsupported message.
-        final Any invalidMsg = AnyPacker.pack(BcProjectCreated.getDefaultInstance());
-        final IntegrationEvent event =
-                Given.AnIntegrationEvent.projectCreated()
-                                        .toBuilder()
-                                        .setMessage(invalidMsg)
-                                        .build();
-
-        final MemoizingObserver<Ack> observer = memoizingObserver();
-        boundedContext.notify(event, observer);
-
-        assertEquals(ERROR, observer.firstResponse()
-                                    .getStatus()
-                                    .getStatusCase());
-    }
-
-    @Test
-    @DisplayName("tell if set multitenant")
-    void tellIfSetMultitenant() {
-        final BoundedContext bc = BoundedContext.newBuilder()
-                                                .setMultitenant(true)
-                                                .build();
-        assertTrue(bc.isMultitenant());
-    }
-
-    @Test
-    @DisplayName("assign storage during registration if repository does not have storage")
-    void assignStorageOnRegisteringRepo() {
-        final ProjectAggregateRepository repository = new ProjectAggregateRepository();
-        boundedContext.register(repository);
-        assertTrue(repository.isStorageAssigned());
-    }
-
-    @Test
-    @DisplayName("not change storage during registration if repository has one")
-    void notChangeStorageOnRegisteringRepo() {
-        final ProjectAggregateRepository repository = new ProjectAggregateRepository();
-        final Repository spy = spy(repository);
-        boundedContext.register(repository);
-        verify(spy, never()).initStorage(any(StorageFactory.class));
-    }
-
-    @Test
-    @DisplayName("set storage factory for EventBus")
-    void setEventBusStorageFactory() {
-        final BoundedContext bc = BoundedContext.newBuilder()
-                                                .setEventBus(EventBus.newBuilder())
-                                                .build();
-        assertNotNull(bc.getEventBus());
-    }
-
-    @Test
-    @DisplayName("not set storage factory if EventStore is set")
-    void notChangeBusEventStore() {
-        final EventStore eventStore = mock(EventStore.class);
-        final BoundedContext bc = BoundedContext.newBuilder()
-                                                .setEventBus(EventBus.newBuilder()
-                                                                     .setEventStore(eventStore))
-                                                .build();
-        assertEquals(eventStore, bc.getEventBus()
-                                   .getEventStore());
+        @Test
+        @DisplayName("ProjectionRepository")
+        void projectionRepository() {
+            final ProjectReportRepository repository = new ProjectReportRepository();
+            boundedContext.register(repository);
+        }
     }
 
     @SuppressWarnings("unchecked") // OK for the purpose of the created Matcher.
@@ -330,61 +255,165 @@ class BoundedContextTest {
     }
 
     @Test
-    @DisplayName("match multitenancy state of CommandBus")
-    void matchMultitenancyOfCommandBus() {
-        final CommandBus.Builder commandBus = CommandBus.newBuilder()
-                                                        .setMultitenant(false);
-        assertThrows(IllegalStateException.class, () -> BoundedContext.newBuilder()
-                                                                      .setMultitenant(true)
-                                                                      .setCommandBus(commandBus)
-                                                                      .build());
+    @DisplayName("not allow two aggregate repositories with aggregates of same state")
+    void throwOnSameAggregateState() {
+        final ProjectAggregateRepository repository =
+                new ProjectAggregateRepository();
+        boundedContext.register(repository);
+
+        final AnotherProjectAggregateRepository anotherRepo =
+                new AnotherProjectAggregateRepository();
+
+        assertThrows(IllegalStateException.class, () -> boundedContext.register(anotherRepo));
+    }
+
+    @Nested
+    @DisplayName("manage event subscriber notifications")
+    class ManageEventSubscriberNotifications {
+
+        @Test
+        @DisplayName("when event is valid")
+        void forValidEvent() {
+            registerAll();
+            final MemoizingObserver<Ack> observer = memoizingObserver();
+            final IntegrationEvent event = Given.AnIntegrationEvent.projectCreated();
+            final Message msg = unpack(event.getMessage());
+
+            boundedContext.notify(event, observer);
+
+            assertEquals(Responses.statusOk(), observer.firstResponse()
+                                                       .getStatus());
+            assertEquals(subscriber.getHandledEvent(), msg);
+        }
+
+        @Test
+        @DisplayName("when event is invalid")
+        void forInvalidEvent() {
+            final BoundedContext boundedContext = BoundedContext.newBuilder()
+                                                                .setMultitenant(true)
+                                                                .build();
+
+            // Unsupported message.
+            final Any invalidMsg = AnyPacker.pack(BcProjectCreated.getDefaultInstance());
+            final IntegrationEvent event =
+                    Given.AnIntegrationEvent.projectCreated()
+                                            .toBuilder()
+                                            .setMessage(invalidMsg)
+                                            .build();
+
+            final MemoizingObserver<Ack> observer = memoizingObserver();
+            boundedContext.notify(event, observer);
+
+            assertEquals(ERROR, observer.firstResponse()
+                                        .getStatus()
+                                        .getStatusCase());
+        }
     }
 
     @Test
-    @DisplayName("assign own multitenancy state to CommandBus")
-    void setMultiTenancyInCommandBus() {
-        BoundedContext bc = BoundedContext.newBuilder()
-                                          .setMultitenant(true)
-                                          .build();
-
-        assertEquals(bc.isMultitenant(), bc.getCommandBus()
-                                           .isMultitenant());
-
-        bc = BoundedContext.newBuilder()
-                           .setMultitenant(false)
-                           .build();
-
-        assertEquals(bc.isMultitenant(), bc.getCommandBus()
-                                           .isMultitenant());
+    @DisplayName("assign storage during registration if repository does not have one")
+    void setStorageOnRegister() {
+        final ProjectAggregateRepository repository = new ProjectAggregateRepository();
+        boundedContext.register(repository);
+        assertTrue(repository.isStorageAssigned());
     }
 
     @Test
-    @DisplayName("match multitenancy state of Stand")
-    void matchMultiTenancyOfStand() {
-        final Stand.Builder stand = Stand.newBuilder()
-                                         .setMultitenant(false);
-        assertThrows(IllegalStateException.class, () -> BoundedContext.newBuilder()
-                                                                      .setMultitenant(true)
-                                                                      .setStand(stand)
-                                                                      .build());
+    @DisplayName("not change storage during registration if repository has one")
+    void notOverrideStorage() {
+        final ProjectAggregateRepository repository = new ProjectAggregateRepository();
+        final Repository spy = spy(repository);
+        boundedContext.register(repository);
+        verify(spy, never()).initStorage(any(StorageFactory.class));
     }
 
     @Test
-    @DisplayName("assign own multitenancy state to Stand")
-    void setMultitenancyInStand() {
-        BoundedContext bc = BoundedContext.newBuilder()
-                                          .setMultitenant(true)
-                                          .build();
+    @DisplayName("set storage factory for EventBus")
+    void setEventBusStorageFactory() {
+        final BoundedContext bc = BoundedContext.newBuilder()
+                                                .setEventBus(EventBus.newBuilder())
+                                                .build();
+        assertNotNull(bc.getEventBus());
+    }
 
-        assertEquals(bc.isMultitenant(), bc.getStand()
-                                           .isMultitenant());
+    @Test
+    @DisplayName("not set storage factory for EventBus if EventStore is set")
+    void useEventStoreIfSet() {
+        final EventStore eventStore = mock(EventStore.class);
+        final BoundedContext bc = BoundedContext.newBuilder()
+                                                .setEventBus(EventBus.newBuilder()
+                                                                     .setEventStore(eventStore))
+                                                .build();
+        assertEquals(eventStore, bc.getEventBus()
+                                   .getEventStore());
+    }
 
-        bc = BoundedContext.newBuilder()
-                           .setMultitenant(false)
-                           .build();
+    @Nested
+    @DisplayName("match multitenancy state of")
+    class MatchMultitenancyState {
 
-        assertEquals(bc.isMultitenant(), bc.getStand()
-                                           .isMultitenant());
+        @Test
+        @DisplayName("CommandBus")
+        void ofCommandBus() {
+            final CommandBus.Builder commandBus = CommandBus.newBuilder()
+                                                            .setMultitenant(false);
+            assertThrows(IllegalStateException.class, () -> BoundedContext.newBuilder()
+                                                                          .setMultitenant(true)
+                                                                          .setCommandBus(commandBus)
+                                                                          .build());
+        }
+
+        @Test
+        @DisplayName("Stand")
+        void ofStand() {
+            final Stand.Builder stand = Stand.newBuilder()
+                                             .setMultitenant(false);
+            assertThrows(IllegalStateException.class, () -> BoundedContext.newBuilder()
+                                                                          .setMultitenant(true)
+                                                                          .setStand(stand)
+                                                                          .build());
+        }
+    }
+
+    @Nested
+    @DisplayName("assign own multitenancy state to")
+    class AssignMultitenancyState {
+
+        @Test
+        @DisplayName("CommandBus")
+        void toCommandBus() {
+            BoundedContext bc = BoundedContext.newBuilder()
+                                              .setMultitenant(true)
+                                              .build();
+
+            assertEquals(bc.isMultitenant(), bc.getCommandBus()
+                                               .isMultitenant());
+
+            bc = BoundedContext.newBuilder()
+                               .setMultitenant(false)
+                               .build();
+
+            assertEquals(bc.isMultitenant(), bc.getCommandBus()
+                                               .isMultitenant());
+        }
+
+        @Test
+        @DisplayName("Stand")
+        void toStand() {
+            BoundedContext bc = BoundedContext.newBuilder()
+                                              .setMultitenant(true)
+                                              .build();
+
+            assertEquals(bc.isMultitenant(), bc.getStand()
+                                               .isMultitenant());
+
+            bc = BoundedContext.newBuilder()
+                               .setMultitenant(false)
+                               .build();
+
+            assertEquals(bc.isMultitenant(), bc.getStand()
+                                               .isMultitenant());
+        }
     }
 
     /**
