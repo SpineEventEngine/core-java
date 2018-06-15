@@ -51,6 +51,7 @@ import io.spine.test.reflect.command.RefCreateProject;
 import io.spine.test.reflect.event.RefProjectCreated;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
@@ -73,6 +74,9 @@ import static org.mockito.Mockito.verify;
  * @author Alexander Litus
  * @author Alexander Yevsyukov
  */
+@SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
+        /* JUnit 5 Nested classes cannot to be static. */,
+        "DuplicateStringLiteralInspection" /* Common test display names. */})
 @DisplayName("CommandHandlerMethod should")
 class CommandHandlerMethodTest {
 
@@ -113,168 +117,188 @@ class CommandHandlerMethodTest {
                 .testAllPublicStaticMethods(CommandHandlerMethod.class);
     }
 
-    @Test
-    @DisplayName("invoke handler method which returns one Message")
-    void invokeMethodReturningOneMessage() {
-        ValidHandlerTwoParams handlerObject = spy(new ValidHandlerTwoParams());
-        CommandHandlerMethod handler = from(handlerObject.getHandler());
-        RefCreateProject cmd = createProject();
+    @Nested
+    @DisplayName("invoke handler method which returns")
+    class InvokeHandlerMethod {
 
-        List<? extends Message> events = handler.invoke(handlerObject, cmd, emptyContext);
+        @Test
+        @DisplayName("one Message")
+        void returningMessage() {
+            ValidHandlerTwoParams handlerObject = spy(new ValidHandlerTwoParams());
+            CommandHandlerMethod handler = from(handlerObject.getHandler());
+            RefCreateProject cmd = createProject();
 
-        verify(handlerObject, times(1))
-                .handleTest(cmd, emptyContext);
-        assertEquals(1, events.size());
-        RefProjectCreated event = (RefProjectCreated) events.get(0);
-        assertEquals(cmd.getProjectId(), event.getProjectId());
+            List<? extends Message> events = handler.invoke(handlerObject, cmd, emptyContext);
+
+            verify(handlerObject, times(1))
+                    .handleTest(cmd, emptyContext);
+            assertEquals(1, events.size());
+            RefProjectCreated event = (RefProjectCreated) events.get(0);
+            assertEquals(cmd.getProjectId(), event.getProjectId());
+        }
+
+        @Test
+        @DisplayName("Message list")
+        void returningMessageList() {
+            ValidHandlerOneParamReturnsList handlerObject =
+                    spy(new ValidHandlerOneParamReturnsList());
+            CommandHandlerMethod handler = from(handlerObject.getHandler());
+            RefCreateProject cmd = createProject();
+
+            List<? extends Message> events = handler.invoke(handlerObject, cmd, emptyContext);
+
+            verify(handlerObject, times(1)).handleTest(cmd);
+            assertEquals(1, events.size());
+            RefProjectCreated event = (RefProjectCreated) events.get(0);
+            assertEquals(cmd.getProjectId(), event.getProjectId());
+        }
+    }
+
+    @Nested
+    @DisplayName("consider handler valid with")
+    class ConsiderHandlerValidWith {
+
+        @Test
+        @DisplayName("one Message param")
+        void messageParam() {
+            Method handler = new ValidHandlerOneParam().getHandler();
+
+            assertIsCommandHandler(handler, true);
+        }
+
+        @Test
+        @DisplayName("one Message param and list return type")
+        void messageParamAndListReturn() {
+            Method handler = new ValidHandlerOneParamReturnsList().getHandler();
+
+            assertIsCommandHandler(handler, true);
+        }
+
+        @Test
+        @DisplayName("Message and context params")
+        void messageAndContextParam() {
+            Method handler = new ValidHandlerTwoParams().getHandler();
+
+            assertIsCommandHandler(handler, true);
+        }
+
+        @Test
+        @DisplayName("Message and context params, and list return type")
+        void messageAndContextParamAndListReturn() {
+            Method handler = new ValidHandlerTwoParamsReturnsList().getHandler();
+
+            assertIsCommandHandler(handler, true);
+        }
+
+        @Test
+        @DisplayName("non-public access")
+        void nonPublicAccess() {
+            Method method = new ValidHandlerButPrivate().getHandler();
+
+            assertIsCommandHandler(method, true);
+        }
+    }
+
+    @Nested
+    @DisplayName("consider handler invalid with")
+    class ConsiderHandlerInvalidWith {
+
+        @Test
+        @DisplayName("no annotation")
+        void noAnnotation() {
+            Method handler = new InvalidHandlerNoAnnotation().getHandler();
+
+            assertIsCommandHandler(handler, false);
+        }
+
+        @Test
+        @DisplayName("no params")
+        void noParams() {
+            Method handler = new InvalidHandlerNoParams().getHandler();
+
+            assertIsCommandHandler(handler, false);
+        }
+
+        @Test
+        @DisplayName("too many params")
+        void tooManyParams() {
+            Method handler = new InvalidHandlerTooManyParams().getHandler();
+
+            assertIsCommandHandler(handler, false);
+        }
+
+        @Test
+        @DisplayName("one invalid param")
+        void oneInvalidParam() {
+            Method handler = new InvalidHandlerOneNotMsgParam().getHandler();
+
+            assertIsCommandHandler(handler, false);
+        }
+
+        @Test
+        @DisplayName("first non-Message param")
+        void firstNonMessageParam() {
+            Method handler = new InvalidHandlerTwoParamsFirstInvalid().getHandler();
+
+            assertIsCommandHandler(handler, false);
+        }
+
+        @Test
+        @DisplayName("second non-context param")
+        void secondNonContextParam() {
+            Method handler = new InvalidHandlerTwoParamsSecondInvalid().getHandler();
+
+            assertIsCommandHandler(handler, false);
+        }
+
+        @Test
+        @DisplayName("void return type")
+        void voidReturnType() {
+            Method handler = new InvalidHandlerReturnsVoid().getHandler();
+
+            assertIsCommandHandler(handler, false);
+        }
     }
 
     @Test
-    @DisplayName("invoke handler method which returns Message list")
-    void invokerMethodReturningMessageList() {
-        ValidHandlerOneParamReturnsList handlerObject =
-                spy(new ValidHandlerOneParamReturnsList());
-        CommandHandlerMethod handler = from(handlerObject.getHandler());
-        RefCreateProject cmd = createProject();
-
-        List<? extends Message> events = handler.invoke(handlerObject, cmd, emptyContext);
-
-        verify(handlerObject, times(1)).handleTest(cmd);
-        assertEquals(1, events.size());
-        RefProjectCreated event = (RefProjectCreated) events.get(0);
-        assertEquals(cmd.getProjectId(), event.getProjectId());
-    }
-
-    @Test
-    @DisplayName("consider handler with one Message param valid")
-    void considerOneMessageParamValid() {
-        Method handler = new ValidHandlerOneParam().getHandler();
-
-        assertIsCommandHandler(handler, true);
-    }
-
-    @Test
-    @DisplayName("consider handler with one Message param which returns list valid")
-    void considerOneMessageParamAndReturnListValid() {
-        Method handler = new ValidHandlerOneParamReturnsList().getHandler();
-
-        assertIsCommandHandler(handler, true);
-    }
-
-    @Test
-    @DisplayName("consider handler with Message and context params valid")
-    void considerMessageAndContextParamsValid() {
-        Method handler = new ValidHandlerTwoParams().getHandler();
-
-        assertIsCommandHandler(handler, true);
-    }
-
-    @Test
-    @DisplayName("consider handler with Message and context params which returns list valid")
-    void considerMessageAndContextParamWithListReturnValid() {
-        Method handler = new ValidHandlerTwoParamsReturnsList().getHandler();
-
-        assertIsCommandHandler(handler, true);
-    }
-
-    @Test
-    @DisplayName("consider non-public handler valid")
-    void considerNonPublicValid() {
-        Method method = new ValidHandlerButPrivate().getHandler();
-
-        assertIsCommandHandler(method, true);
-    }
-
-    @Test
-    @DisplayName("consider not annotated handler invalid")
-    void considerNotAnnotatedInvalid() {
-        Method handler = new InvalidHandlerNoAnnotation().getHandler();
-
-        assertIsCommandHandler(handler, false);
-    }
-
-    @Test
-    @DisplayName("consider handler without params invalid")
-    void considerNoParamsInvalid() {
-        Method handler = new InvalidHandlerNoParams().getHandler();
-
-        assertIsCommandHandler(handler, false);
-    }
-
-    @Test
-    @DisplayName("consider handler with too many params invalid")
-    void considerTooManyParamsInvalid() {
-        Method handler = new InvalidHandlerTooManyParams().getHandler();
-
-        assertIsCommandHandler(handler, false);
-    }
-
-    @Test
-    @DisplayName("consider handler with one invalid param invalid")
-    void considerOneInvalidParamInvalid() {
-        Method handler = new InvalidHandlerOneNotMsgParam().getHandler();
-
-        assertIsCommandHandler(handler, false);
-    }
-
-    @Test
-    @DisplayName("consider handler with first non-Message param invalid")
-    void considerFirstNonMessageParamInvalid() {
-        Method handler = new InvalidHandlerTwoParamsFirstInvalid().getHandler();
-
-        assertIsCommandHandler(handler, false);
-    }
-
-    @Test
-    @DisplayName("consider handler with second non-context param invalid")
-    void considerSecondNonContextParamInvalid() {
-        Method handler = new InvalidHandlerTwoParamsSecondInvalid().getHandler();
-
-        assertIsCommandHandler(handler, false);
-    }
-
-    @Test
-    @DisplayName("consider handler with void return type invalid")
-    void considerVoidReturnInvalid() {
-        Method handler = new InvalidHandlerReturnsVoid().getHandler();
-
-        assertIsCommandHandler(handler, false);
-    }
-
-    @Test
-    @DisplayName("throw ISE for not handled command type")
-    void throwForNotHandledCommandType() {
+    @DisplayName("throw ISE when dispatching command of not handled type")
+    void notDispatchNotHandledCommand() {
         CommandHandler handler = new ValidHandlerOneParam();
         CommandEnvelope cmd = requestFactory.createEnvelope(startProject());
 
         assertThrows(IllegalStateException.class, () -> handler.dispatch(cmd));
     }
 
-    @SuppressWarnings("CheckReturnValue") // no need as the call to dispatch() throws
-    @Test
-    @DisplayName("set producer ID when dispatching to command handler")
-    void setProducerIdIfCommandHandler() {
-        CommandHandler handler = new RejectingHandler();
-        CommandEnvelope envelope = requestFactory.createEnvelope(createProject());
-        try {
-            handler.dispatch(envelope);
-        } catch (HandlerMethodFailedException e) {
-            assertCauseAndId(e, handler.getId());
-        }
-    }
+    @Nested
+    @DisplayName("set producer ID when dispatching to")
+    class SetProducerId {
 
-    @SuppressWarnings("CheckReturnValue") // no need as the call to dispatchCommand() throws
-    @Test
-    @DisplayName("set producer ID when dispatching to entity")
-    void setProducerIdIfEntity() {
-        RefCreateProject commandMessage = createProject();
-        Aggregate<ProjectId, ?, ?> entity =
-                new RejectingAggregate(commandMessage.getProjectId());
-        CommandEnvelope cmd = requestFactory.createEnvelope(commandMessage);
-        try {
-            AggregateMessageDispatcher.dispatchCommand(entity, cmd);
-        } catch (HandlerMethodFailedException e) {
-            assertCauseAndId(e, entity.getId());
+        @SuppressWarnings("CheckReturnValue") // no need as the call to dispatch() throws
+        @Test
+        @DisplayName("command handler")
+        void onDispatchToHandler() {
+            CommandHandler handler = new RejectingHandler();
+            CommandEnvelope envelope = requestFactory.createEnvelope(createProject());
+            try {
+                handler.dispatch(envelope);
+            } catch (HandlerMethodFailedException e) {
+                assertCauseAndId(e, handler.getId());
+            }
+        }
+
+        @SuppressWarnings("CheckReturnValue") // no need as the call to dispatchCommand() throws
+        @Test
+        @DisplayName("entity")
+        void onDispatchToEntity() {
+            RefCreateProject commandMessage = createProject();
+            Aggregate<ProjectId, ?, ?> entity =
+                    new RejectingAggregate(commandMessage.getProjectId());
+            CommandEnvelope cmd = requestFactory.createEnvelope(commandMessage);
+            try {
+                AggregateMessageDispatcher.dispatchCommand(entity, cmd);
+            } catch (HandlerMethodFailedException e) {
+                assertCauseAndId(e, entity.getId());
+            }
         }
     }
 }
