@@ -239,7 +239,7 @@ class BoundedContextTest {
 
     @SuppressWarnings("unchecked") // OK for the purpose of the created Matcher.
     @Test
-    @DisplayName("propagate registered repositories to stand")
+    @DisplayName("propagate registered repositories to Stand")
     void propagateRepositoriesToStand() {
         BoundedContext boundedContext = BoundedContext.newBuilder()
                                                       .build();

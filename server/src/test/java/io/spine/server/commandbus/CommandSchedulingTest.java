@@ -274,10 +274,13 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
     /**
      * Creates a new thread-aware scheduler spied by Mockito.
      *
-     * <p>The method is not {@code static} to allow Mockito spy on the created anonymous class instance.
+     * <p>The method is not {@code static} to allow Mockito spy on the created anonymous class
+     * instance.
      *
-     * @param targetThreadName the builder of the thread name that will be created upon command scheduling
-     * @param latch            the instance of the {@code CountDownLatch} to await the execution finishing
+     * @param targetThreadName the builder of the thread name that will be created upon command
+     *                         scheduling
+     * @param latch            the instance of the {@code CountDownLatch} to await the execution
+     *                         finishing
      * @return newly created instance
      */
     @SuppressWarnings("MethodMayBeStatic") // see Javadoc.
