@@ -114,7 +114,7 @@ class BoundedContextBuilderTest {
 
         @Test
         @DisplayName("name if it was set")
-        void nameIfSet() {
+        void name() {
             final String nameString = getClass().getName();
             assertEquals(nameString, BoundedContext.newBuilder()
                                                    .setName(nameString)
@@ -123,7 +123,7 @@ class BoundedContextBuilderTest {
 
         @Test
         @DisplayName("StorageFactory supplier if it was set")
-        void storageFactorySupplierIfSet() {
+        void storageFactorySupplier() {
             @SuppressWarnings("unchecked") // OK for this mock.
                     Supplier<StorageFactory> mock = mock(Supplier.class);
 
@@ -178,7 +178,7 @@ class BoundedContextBuilderTest {
 
     @Test
     @DisplayName("allow clearing storage factory supplier")
-    void allowClearStorageFactorySupplier() {
+    void clearStorageFactorySupplier() {
         assertFalse(builder.setStorageFactorySupplier(Tests.nullRef())
                            .getStorageFactorySupplier()
                            .isPresent());
@@ -200,7 +200,7 @@ class BoundedContextBuilderTest {
 
     @Test
     @DisplayName("allow TenantIndex configuration")
-    void allowTenantIndexConfiguration() {
+    void setTenantIndex() {
         final TenantIndex tenantIndex = mock(TenantIndex.class);
         assertEquals(tenantIndex, BoundedContext.newBuilder()
                                                 .setTenantIndex(tenantIndex)
@@ -210,7 +210,7 @@ class BoundedContextBuilderTest {
 
     @Test
     @DisplayName("not accept CommandBus with different multitenancy state")
-    void matchMultitenancyOfCommandBus() {
+    void matchCommandBusMultitenancy() {
         final CommandBus.Builder commandBus = CommandBus.newBuilder()
                                                         .setMultitenant(true)
                                                         .setCommandStore(mock(CommandStore.class));
