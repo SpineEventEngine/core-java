@@ -444,8 +444,8 @@ class BoundedContextTest {
     }
 
     @Test
-    @DisplayName("not expose invisible aggregate")
-    void notExposeInvisibleAggregate() {
+    @DisplayName("not expose invisible aggregates")
+    void notExposeInvisibleAggregates() {
         ModelTests.clearModel();
 
         boundedContext.register(new SecretProjectRepository());

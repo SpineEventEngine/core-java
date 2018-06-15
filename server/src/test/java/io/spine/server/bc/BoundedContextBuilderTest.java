@@ -133,6 +133,14 @@ class BoundedContextBuilderTest {
         }
     }
 
+    @Test
+    @DisplayName("allow clearing storage factory supplier")
+    void clearStorageFactorySupplier() {
+        assertFalse(builder.setStorageFactorySupplier(Tests.nullRef())
+                           .getStorageFactorySupplier()
+                           .isPresent());
+    }
+
     @Nested
     @DisplayName("if not given custom, create default")
     class CreateDefault {
@@ -168,7 +176,7 @@ class BoundedContextBuilderTest {
         }
 
         @Test
-        @DisplayName("CommandBus and EventBus")
+        @DisplayName("CommandBus and EventBus simultaneously")
         void commandBusAndEventBus() {
             final BoundedContext boundedContext = builder.build();
             assertNotNull(boundedContext.getCommandBus());
@@ -177,11 +185,10 @@ class BoundedContextBuilderTest {
     }
 
     @Test
-    @DisplayName("allow clearing storage factory supplier")
-    void clearStorageFactorySupplier() {
-        assertFalse(builder.setStorageFactorySupplier(Tests.nullRef())
-                           .getStorageFactorySupplier()
-                           .isPresent());
+    @DisplayName("be single tenant by default")
+    void beSingleTenantByDefault() {
+        assertFalse(BoundedContext.newBuilder()
+                                  .isMultitenant());
     }
 
     @Test
@@ -189,13 +196,6 @@ class BoundedContextBuilderTest {
     void supportMultitenancy() {
         builder.setMultitenant(true);
         assertTrue(builder.isMultitenant());
-    }
-
-    @Test
-    @DisplayName("be single tenant by default")
-    void beSingleTenantByDefault() {
-        assertFalse(BoundedContext.newBuilder()
-                                  .isMultitenant());
     }
 
     @Test
