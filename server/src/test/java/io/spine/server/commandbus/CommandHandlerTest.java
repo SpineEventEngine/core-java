@@ -37,6 +37,7 @@ import io.spine.server.model.ModelTests;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.event.EventRecodingLogger;
@@ -58,6 +59,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * @author Alexander Litus
  */
+@SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
 @DisplayName("CommandHandler should")
 class CommandHandlerTest {
 
@@ -92,18 +94,28 @@ class CommandHandlerTest {
                 .testAllPublicInstanceMethods(handler);
     }
 
-    @Test
-    @DisplayName("handle command")
-    void handleCommand() {
-        assertHandles(Given.ACommand.createProject());
-    }
+    @Nested
+    @DisplayName("handle")
+    class Handle {
 
-    @Test
-    @DisplayName("handle several commands")
-    void handleSeveralCommands() {
-        assertHandles(Given.ACommand.createProject());
-        assertHandles(Given.ACommand.addTask());
-        assertHandles(Given.ACommand.startProject());
+        @Test
+        @DisplayName("command")
+        void command() {
+            assertHandles(Given.ACommand.createProject());
+        }
+
+        @Test
+        @DisplayName("several commands")
+        void severalCommands() {
+            assertHandles(Given.ACommand.createProject());
+            assertHandles(Given.ACommand.addTask());
+            assertHandles(Given.ACommand.startProject());
+        }
+
+        private void assertHandles(Command cmd) {
+            handler.handle(cmd);
+            handler.assertHandled(cmd);
+        }
     }
 
     @Test
@@ -125,51 +137,56 @@ class CommandHandlerTest {
         }
     }
 
-    @Test
-    @DisplayName("generate non zero hash code if handler has non empty id")
-    void generateNonZeroHashCodeForNonEmptyId() {
-        final int hashCode = handler.hashCode();
+    @Nested
+    @DisplayName("provide `hashCode` method such that")
+    class ProvideHashCode {
 
-        assertTrue(hashCode != 0);
+        @Test
+        @DisplayName("for non empty handler ID non-zero hashcode is generated")
+        void nonZeroForNonEmptyId() {
+            final int hashCode = handler.hashCode();
+
+            assertTrue(hashCode != 0);
+        }
+
+        @Test
+        @DisplayName("for same handler instances same hashcode is generated")
+        void sameForSameInstances() {
+            assertEquals(handler.hashCode(), handler.hashCode());
+        }
     }
 
-    @Test
-    @DisplayName("generate same hash code for same instances")
-    void generateHashCodeConsistently() {
-        assertEquals(handler.hashCode(), handler.hashCode());
-    }
+    @Nested
+    @DisplayName("provide `equals` method such that")
+    class ProvideEqualsSuchThat {
 
-    @Test
-    @DisplayName("assure same handlers are equal")
-    void assureEqualToSame() {
-        final TestCommandHandler same = new TestCommandHandler(eventBus);
+        @Test
+        @DisplayName("same handlers are equal")
+        void equalsToSame() {
+            final TestCommandHandler same = new TestCommandHandler(eventBus);
 
-        assertTrue(handler.equals(same));
-    }
+            assertTrue(handler.equals(same));
+        }
 
-    @SuppressWarnings("EqualsWithItself") // is the goal of the test
-    @Test
-    @DisplayName("assure handler is equal to itself")
-    void assureIsEqualToItself() {
-        assertTrue(handler.equals(handler));
-    }
+        @SuppressWarnings("EqualsWithItself") // is the goal of the test
+        @Test
+        @DisplayName("handler is equal to itself")
+        void equalsToSelf() {
+            assertTrue(handler.equals(handler));
+        }
 
-    @Test
-    @DisplayName("assure handler is not equal to null")
-    void assureNotEqualToNull() {
-        assertFalse(handler.equals(nullRef()));
-    }
+        @Test
+        @DisplayName("handler is not equal to null")
+        void notEqualsToNull() {
+            assertFalse(handler.equals(nullRef()));
+        }
 
-    @SuppressWarnings("EqualsBetweenInconvertibleTypes") // is the goal of the test
-    @Test
-    @DisplayName("assure handler is not equal to object of another class")
-    void assureNotEqualToOtherClass() {
-        assertFalse(handler.equals(newUuid()));
-    }
-
-    private void assertHandles(Command cmd) {
-        handler.handle(cmd);
-        handler.assertHandled(cmd);
+        @SuppressWarnings("EqualsBetweenInconvertibleTypes") // is the goal of the test
+        @Test
+        @DisplayName("handler is not equal to object of another class")
+        void notEqualsToOtherClass() {
+            assertFalse(handler.equals(newUuid()));
+        }
     }
 
     @Test
