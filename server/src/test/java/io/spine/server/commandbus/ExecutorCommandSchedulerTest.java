@@ -95,7 +95,7 @@ class ExecutorCommandSchedulerTest {
     }
 
     @Test
-    @DisplayName("not schedule command with same id twice")
+    @DisplayName("not schedule command with same ID twice")
     void notScheduleCommandWithSameId() {
         final String id = newUuid();
 

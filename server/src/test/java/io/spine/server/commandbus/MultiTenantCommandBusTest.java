@@ -142,7 +142,7 @@ class MultiTenantCommandBusTest extends AbstractCommandBusTestSuite {
     }
 
     @Test
-    @DisplayName("verify tenant id attribute if multitenant")
+    @DisplayName("verify tenant ID attribute if multitenant")
     void requireTenantId() {
         commandBus.register(createProjectHandler);
         final Command cmd = newCommandWithoutTenantId();
