@@ -38,6 +38,7 @@ import io.spine.test.Tests;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Iterator;
@@ -69,7 +70,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * @author Alexander Litus
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings("ConstantConditions")
+@SuppressWarnings({"ConstantConditions",
+        "DuplicateStringLiteralInspection" /* Common test display names. */})
 @DisplayName("Storage should")
 class StorageTest extends TenantAwareTest {
 
@@ -95,139 +97,137 @@ class StorageTest extends TenantAwareTest {
         clearCurrentTenant();
     }
 
-    /*
-     * Storing and loading tests.
-     ****************************/
+    @Nested
+    @DisplayName("store and read")
+    class StoreAndRead {
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we store.
-    @Test
-    @DisplayName("store and read command")
-    void storeAndReadCommand() {
-        final Command command = Given.ACommand.createProject();
-        final CommandId commandId = command.getId();
+        @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we store.
+        @Test
+        @DisplayName("command")
+        void command() {
+            final Command command = Given.ACommand.createProject();
+            final CommandId commandId = command.getId();
 
-        repository.store(command);
-        final CommandRecord record = readRecord(commandId).get();
+            repository.store(command);
+            final CommandRecord record = readRecord(commandId).get();
 
-        checkRecord(record, command, RECEIVED);
-    }
+            checkRecord(record, command, RECEIVED);
+        }
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we store.
-    @Test
-    @DisplayName("store command with error")
-    void storeCommandWithError() {
-        final Command command = Given.ACommand.createProject();
-        final CommandId commandId = command.getId();
-        final Error error = newError();
+        @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we store.
+        @Test
+        @DisplayName("command with error")
+        void commandWithError() {
+            final Command command = Given.ACommand.createProject();
+            final CommandId commandId = command.getId();
+            final Error error = newError();
 
-        repository.store(command, error);
-        final CommandRecord record = readRecord(commandId).get();
+            repository.store(command, error);
+            final CommandRecord record = readRecord(commandId).get();
 
-        checkRecord(record, command, ERROR);
-        assertEquals(error, record.getStatus()
-                                  .getError());
-    }
+            checkRecord(record, command, ERROR);
+            assertEquals(error, record.getStatus()
+                                      .getError());
+        }
 
-    @Test
-    @DisplayName("store command with error and generate ID if needed")
-    void storeCmdWithErrorAndGenerateId() {
-        final TestActorRequestFactory factory = TestActorRequestFactory.newInstance(getClass());
-        final Command command = factory.createCommand(createProjectMessage());
-        final Error error = newError();
+        @Test
+        @DisplayName("command with error having no ID")
+        void commandWithErrorWithoutId() {
+            final TestActorRequestFactory factory = TestActorRequestFactory.newInstance(getClass());
+            final Command command = factory.createCommand(createProjectMessage());
+            final Error error = newError();
 
-        repository.store(command, error);
-        final List<CommandRecord> records = Lists.newArrayList(repository.iterator(ERROR));
+            repository.store(command, error);
+            final List<CommandRecord> records = Lists.newArrayList(repository.iterator(ERROR));
 
-        assertEquals(1, records.size());
-        final String commandIdStr = Identifier.toString(records.get(0)
-                                                               .getCommandId());
-        assertFalse(commandIdStr.isEmpty());
-    }
+            assertEquals(1, records.size());
+            final String commandIdStr = Identifier.toString(records.get(0)
+                                                                   .getCommandId());
+            assertFalse(commandIdStr.isEmpty());
+        }
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we store.
-    @Test
-    @DisplayName("store command with status")
-    void storeCommandWithStatus() {
-        final Command command = Given.ACommand.createProject();
-        final CommandId commandId = command.getId();
-        final CommandStatus status = SCHEDULED;
+        @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we store.
+        @Test
+        @DisplayName("command with status")
+        void commandWithStatus() {
+            final Command command = Given.ACommand.createProject();
+            final CommandId commandId = command.getId();
+            final CommandStatus status = SCHEDULED;
 
-        repository.store(command, status);
-        final CommandRecord record = readRecord(commandId).get();
+            repository.store(command, status);
+            final CommandRecord record = readRecord(commandId).get();
 
-        checkRecord(record, command, status);
-    }
+            checkRecord(record, command, status);
+        }
 
-    @Test
-    @DisplayName("load commands by status")
-    void loadCommandsByStatus() {
-        final List<Command> commands = ImmutableList.of(Given.ACommand.createProject(),
-                                                        Given.ACommand.addTask(),
-                                                        Given.ACommand.startProject());
-        final CommandStatus status = SCHEDULED;
+        @Test
+        @DisplayName("multiple commands with status")
+        void multipleCommandsWithStatus() {
+            final List<Command> commands = ImmutableList.of(Given.ACommand.createProject(),
+                                                            Given.ACommand.addTask(),
+                                                            Given.ACommand.startProject());
+            final CommandStatus status = SCHEDULED;
 
-        store(commands, status);
-        // store an extra command with another status
-        repository.store(Given.ACommand.createProject(), ERROR);
+            store(commands, status);
+            // store an extra command with another status
+            repository.store(Given.ACommand.createProject(), ERROR);
 
-        final Iterator<CommandRecord> iterator = repository.iterator(status);
-        final List<Command> actualCommands = newArrayList(toCommandIterator(iterator));
-        assertEquals(commands.size(), actualCommands.size());
-        for (Command cmd : actualCommands) {
-            assertTrue(commands.contains(cmd));
+            final Iterator<CommandRecord> iterator = repository.iterator(status);
+            final List<Command> actualCommands = newArrayList(toCommandIterator(iterator));
+            assertEquals(commands.size(), actualCommands.size());
+            for (Command cmd : actualCommands) {
+                assertTrue(commands.contains(cmd));
+            }
         }
     }
 
-    /*
-     * Update command status tests.
-     ******************************/
+    @Nested
+    @DisplayName("set command status to")
+    class SetCommandStatusTo {
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we update status.
-    @Test
-    @DisplayName("set ok command status")
-    void setOkCommandStatus() {
-        storeNewRecord();
+        @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we update status.
+        @Test
+        @DisplayName("ok")
+        void ok() {
+            storeNewRecord();
 
-        repository.setOkStatus(id);
+            repository.setOkStatus(id);
 
-        final CommandRecord actual = readRecord(id).get();
-        assertEquals(OK, actual.getStatus()
-                               .getCode());
+            final CommandRecord actual = readRecord(id).get();
+            assertEquals(OK, actual.getStatus()
+                                   .getCode());
+        }
+
+        @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we update status.
+        @Test
+        @DisplayName("error")
+        void error() {
+            storeNewRecord();
+            final Error error = newError();
+
+            repository.updateStatus(id, error);
+
+            final CommandRecord actual = readRecord(id).get();
+            assertEquals(ERROR, actual.getStatus().getCode());
+            assertEquals(error, actual.getStatus().getError());
+        }
+
+        @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we update status.
+        @Test
+        @DisplayName("rejection")
+        void rejection() {
+            storeNewRecord();
+            final Rejection rejection = newRejection();
+
+            repository.updateStatus(id, rejection);
+
+            final CommandRecord actual = readRecord(id).get();
+            assertEquals(REJECTED, actual.getStatus()
+                                         .getCode());
+            assertEquals(rejection, actual.getStatus()
+                                          .getRejection());
+        }
     }
-
-    @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we update status.
-    @Test
-    @DisplayName("set error command status")
-    void setErrorCommandStatus() {
-        storeNewRecord();
-        final Error error = newError();
-
-        repository.updateStatus(id, error);
-
-        final CommandRecord actual = readRecord(id).get();
-        assertEquals(ERROR, actual.getStatus().getCode());
-        assertEquals(error, actual.getStatus().getError());
-    }
-
-    @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we update status.
-    @Test
-    @DisplayName("set rejected command status")
-    void setRejectedCommandStatus() {
-        storeNewRecord();
-        final Rejection rejection = newRejection();
-
-        repository.updateStatus(id, rejection);
-
-        final CommandRecord actual = readRecord(id).get();
-        assertEquals(REJECTED, actual.getStatus()
-                                     .getCode());
-        assertEquals(rejection, actual.getStatus()
-                                      .getRejection());
-    }
-
-    /*
-     * Conversion tests.
-     *******************/
 
     @SuppressWarnings("DuplicateStringLiteralInspection") // Common test case.
     @Test
@@ -245,88 +245,94 @@ class StorageTest extends TenantAwareTest {
      * Check that exception is thrown if try to pass null to methods.
      **************************************************************/
 
-    @Test
-    @DisplayName("throw NPE if try to store null")
-    void throwWhenStoringNull() {
-        assertThrows(NullPointerException.class, () -> repository.store(Tests.<Command>nullRef()));
+    @Nested
+    @DisplayName("not accept null")
+    class NotAcceptNull {
+
+        @Test
+        @DisplayName("command for storing")
+        void command() {
+            assertThrows(NullPointerException.class, () -> repository.store(Tests.<Command>nullRef()));
+        }
+
+        @Test
+        @DisplayName("command ID for setting ok status")
+        void commandIdForOkStatus() {
+            assertThrows(NullPointerException.class, () -> repository.setOkStatus(Tests.nullRef()));
+        }
+
+        @Test
+        @DisplayName("command ID for setting error status")
+        void commandIdForErrorStatus() {
+            assertThrows(NullPointerException.class,
+                         () -> repository.updateStatus(Tests.nullRef(), defaultError));
+        }
+
+        @Test
+        @DisplayName("command ID for setting rejection status")
+        void commandIdForRejectionStatus() {
+            assertThrows(NullPointerException.class,
+                         () -> repository.updateStatus(Tests.nullRef(), DEFAULT_REJECTION));
+        }
     }
 
-    @Test
-    @DisplayName("throw NPE if try to set OK status by null ID")
-    void notSetOkForNullId() {
-        assertThrows(NullPointerException.class, () -> repository.setOkStatus(Tests.nullRef()));
-    }
+    @Nested
+    @DisplayName("if closed, throw ISE on")
+    class ThrowIseIfClosed {
 
-    @Test
-    @DisplayName("throw NPE if try to set error status by null ID")
-    void notSetErrorForNullId() {
-        assertThrows(NullPointerException.class,
-                     () -> repository.updateStatus(Tests.nullRef(), defaultError));
-    }
+        @Test
+        @DisplayName("storing command")
+        void whenStoringCmd() {
+            repository.close();
+            assertThrows(IllegalStateException.class,
+                         () -> repository.store(Given.ACommand.createProject()));
+        }
 
-    @Test
-    @DisplayName("throw NPE if try to set rejection status by null ID")
-    void notSetRejectionForNullId() {
-        assertThrows(NullPointerException.class,
-                     () -> repository.updateStatus(Tests.nullRef(), DEFAULT_REJECTION));
-    }
+        @Test
+        @DisplayName("storing command with error")
+        void whenStoringCmdWithError() {
+            repository.close();
+            assertThrows(IllegalStateException.class,
+                         () -> repository.store(Given.ACommand.createProject(), newError()));
+        }
 
-    /*
-     * Check that exception is thrown if try to use closed storage.
-     **************************************************************/
+        @Test
+        @DisplayName("storing command with status")
+        void whenStoringCmdWithStatus() {
+            repository.close();
+            assertThrows(IllegalStateException.class,
+                         () -> repository.store(Given.ACommand.createProject(), OK));
+        }
 
-    @Test
-    @DisplayName("throw ISE if try to store command to closed storage")
-    void notStoreCmdWhenClosed() {
-        repository.close();
-        assertThrows(IllegalStateException.class,
-                     () -> repository.store(Given.ACommand.createProject()));
-    }
+        @Test
+        @DisplayName("loading commands by status")
+        void whenLoadingCmd() {
+            repository.close();
+            assertThrows(IllegalStateException.class, () -> repository.iterator(OK));
+        }
 
-    @Test
-    @DisplayName("throw ISE if try to store command with error to closed storage")
-    void notStoreCmdWithErrorWhenClosed() {
-        repository.close();
-        assertThrows(IllegalStateException.class,
-                     () -> repository.store(Given.ACommand.createProject(), newError()));
-    }
+        @Test
+        @DisplayName("setting `OK` status")
+        void whenSettingOk() {
+            repository.close();
+            assertThrows(IllegalStateException.class, () -> repository.setOkStatus(generateId()));
+        }
 
-    @Test
-    @DisplayName("throw ISE if try to store command with status to closed storage")
-    void notStoreCmdWithStatusWhenClosed() {
-        repository.close();
-        assertThrows(IllegalStateException.class,
-                     () -> repository.store(Given.ACommand.createProject(), OK));
-    }
+        @Test
+        @DisplayName("setting `ERROR` status")
+        void whenSettingError() {
+            repository.close();
+            assertThrows(IllegalStateException.class,
+                         () -> repository.updateStatus(generateId(), newError()));
+        }
 
-    @Test
-    @DisplayName("throw ISE if try to load commands by status from closed storage")
-    void notLoadByStatusWhenClosed() {
-        repository.close();
-        assertThrows(IllegalStateException.class, () -> repository.iterator(OK));
-    }
-
-    @Test
-    @DisplayName("throw ISE if try to set OK status using closed storage")
-    void notSetOkStatusWhenClosed() {
-        repository.close();
-        assertThrows(IllegalStateException.class, () -> repository.setOkStatus(generateId()));
-    }
-
-    @Test
-    @DisplayName("throw ISE if try to set ERROR status using closed storage")
-    void notSetErrorStatusWhenClosed() {
-        repository.close();
-        assertThrows(IllegalStateException.class,
-                     () -> repository.updateStatus(generateId(), newError()));
-    }
-
-    @Test
-    @DisplayName("throw ISE if try to set REJECTED status using closed storage")
-    void notSetRejectionStatusWhenClosed() {
-        repository.close();
-        assertThrows(IllegalStateException.class,
-                     () -> repository.updateStatus(generateId(), newRejection()));
+        @Test
+        @DisplayName("setting `REJECTED` status")
+        void whenSettingRejected() {
+            repository.close();
+            assertThrows(IllegalStateException.class,
+                         () -> repository.updateStatus(generateId(), newRejection()));
+        }
     }
 
     @Test
