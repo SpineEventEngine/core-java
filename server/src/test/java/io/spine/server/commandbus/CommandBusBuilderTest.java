@@ -30,6 +30,7 @@ import io.spine.server.tenant.TenantIndex;
 import io.spine.test.Tests;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.server.BoundedContext.newName;
@@ -44,7 +45,8 @@ import static org.mockito.Mockito.mock;
 /**
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings("ConstantConditions")
+@SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
+@DisplayName("CommandBus Builder should")
 class CommandBusBuilderTest
         extends BusBuilderTest<CommandBus.Builder, CommandEnvelope, Command> {
 
@@ -86,65 +88,70 @@ class CommandBusBuilderTest
         assertNotNull(commandBus);
     }
 
-    @Test
-    @DisplayName("allow to specify command scheduler")
-    void setCommandScheduler() {
-        final CommandScheduler expectedScheduler = mock(CommandScheduler.class);
+    @Nested
+    @DisplayName("allow to specify")
+    class AllowToSpecify {
 
-        final CommandBus.Builder builder = builder().setCommandStore(commandStore)
-                                                    .setCommandScheduler(expectedScheduler);
+        @Test
+        @DisplayName("CommandScheduler")
+        void commandScheduler() {
+            final CommandScheduler expectedScheduler = mock(CommandScheduler.class);
 
-        assertTrue(builder.getCommandScheduler()
-                          .isPresent());
-        assertEquals(expectedScheduler, builder.getCommandScheduler()
-                                               .get());
+            final CommandBus.Builder builder = builder().setCommandStore(commandStore)
+                                                        .setCommandScheduler(expectedScheduler);
 
-        final CommandBus commandBus = builder.build();
-        assertNotNull(commandBus);
+            assertTrue(builder.getCommandScheduler()
+                              .isPresent());
+            assertEquals(expectedScheduler, builder.getCommandScheduler()
+                                                   .get());
 
-        final CommandScheduler actualScheduler = commandBus.scheduler();
-        assertEquals(expectedScheduler, actualScheduler);
-    }
+            final CommandBus commandBus = builder.build();
+            assertNotNull(commandBus);
 
-    @Test
-    @DisplayName("allow to specify rejection bus")
-    void setRejectionBus() {
-        final RejectionBus expectedRejectionBus = mock(RejectionBus.class);
+            final CommandScheduler actualScheduler = commandBus.scheduler();
+            assertEquals(expectedScheduler, actualScheduler);
+        }
 
-        final CommandBus.Builder builder = builder().setCommandStore(commandStore)
-                                                    .setRejectionBus(expectedRejectionBus);
-        assertTrue(builder.getRejectionBus()
-                          .isPresent());
-        assertEquals(expectedRejectionBus, builder.getRejectionBus()
-                                                  .get());
-    }
+        @Test
+        @DisplayName("RejectionBus")
+        void rejectionBus() {
+            final RejectionBus expectedRejectionBus = mock(RejectionBus.class);
 
-    @Test
-    @DisplayName("allow to specify if thread spawn allowed")
-    void setThreadSpawnAllowed() {
-        assertTrue(builder().setThreadSpawnAllowed(true)
-                            .isThreadSpawnAllowed());
+            final CommandBus.Builder builder = builder().setCommandStore(commandStore)
+                                                        .setRejectionBus(expectedRejectionBus);
+            assertTrue(builder.getRejectionBus()
+                              .isPresent());
+            assertEquals(expectedRejectionBus, builder.getRejectionBus()
+                                                      .get());
+        }
 
-        assertFalse(CommandBus.newBuilder()
-                              .setThreadSpawnAllowed(false)
-                              .isThreadSpawnAllowed());
-    }
+        @Test
+        @DisplayName("if thread spawn allowed")
+        void ifThreadSpawnAllowed() {
+            assertTrue(builder().setThreadSpawnAllowed(true)
+                                .isThreadSpawnAllowed());
 
-    @Test
-    @DisplayName("allow to specify if CommandBus is multitenant")
-    void setIsMultitenant() {
-        assertTrue(builder().setMultitenant(true)
-                            .isMultitenant());
-        assertFalse(builder().setMultitenant(false)
-                             .isMultitenant());
-    }
+            assertFalse(CommandBus.newBuilder()
+                                  .setThreadSpawnAllowed(false)
+                                  .isThreadSpawnAllowed());
+        }
 
-    @Test
-    @DisplayName("allow to specify command store")
-    void setCommandStore() {
-        final CommandStore commandStore = mock(CommandStore.class);
+        @Test
+        @DisplayName("if CommandBus is multitenant")
+        void ifIsMultitenant() {
+            assertTrue(builder().setMultitenant(true)
+                                .isMultitenant());
+            assertFalse(builder().setMultitenant(false)
+                                 .isMultitenant());
+        }
 
-        assertEquals(commandStore, builder().setCommandStore(commandStore)
-                                            .getCommandStore());
+        @Test
+        @DisplayName("CommandStore")
+        void commandStore() {
+            final CommandStore commandStore = mock(CommandStore.class);
+
+            assertEquals(commandStore, builder().setCommandStore(commandStore)
+                                                .getCommandStore());
+        }
     }
 }
