@@ -23,7 +23,6 @@ package io.spine.server.commandbus;
 import com.google.protobuf.Message;
 import io.spine.core.CommandClass;
 import io.spine.server.BoundedContext;
-import io.spine.server.command.CommandHandler;
 import io.spine.server.commandbus.given.CommandDispatcherRegistryTestEnv.AddTaskDispatcher;
 import io.spine.server.commandbus.given.CommandDispatcherRegistryTestEnv.AllCommandDispatcher;
 import io.spine.server.commandbus.given.CommandDispatcherRegistryTestEnv.AllCommandHandler;
@@ -40,6 +39,7 @@ import io.spine.test.command.CmdCreateProject;
 import io.spine.test.command.CmdStartProject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Set;
@@ -97,70 +97,83 @@ class CommandDispatcherRegistryTest {
         }
     }
 
-    /*
-     * Registration tests.
-     *********************/
+    @Nested
+    @DisplayName("register")
+    class Register {
 
-    @Test
-    @DisplayName("unregister all handlers and dispatchers")
-    void clearHandlersAndDispatchers() {
-        registry.register(new CreateProjectHandler(eventBus));
-        registry.register(new AddTaskDispatcher());
+        @Test
+        @DisplayName("command dispatcher")
+        void commandDispatcher() {
+            registry.register(new AllCommandDispatcher());
 
-        registry.unregisterAll();
+            assertSupported(CmdCreateProject.class, CmdAddTask.class, CmdStartProject.class);
+        }
 
-        assertTrue(registry.getRegisteredMessageClasses().isEmpty());
+        @Test
+        @DisplayName("command handler")
+        void commandHandler() {
+            registry.register(new AllCommandHandler(eventBus));
+
+            assertSupported(CmdCreateProject.class, CmdAddTask.class, CmdStartProject.class);
+        }
     }
 
-    @Test
-    @DisplayName("state that no commands are supported if nothing registered")
-    void stateNothingSupportedWhenEmpty() {
-        assertNotSupported(CmdCreateProject.class, CmdAddTask.class, CmdStartProject.class);
+    @Nested
+    @DisplayName("unregister")
+    class Unregister {
+
+        @Test
+        @DisplayName("command dispatcher")
+        void commandDispatcher() {
+            final CommandDispatcher<Message> dispatcher = new AllCommandDispatcher();
+
+            registry.register(dispatcher);
+            registry.unregister(dispatcher);
+
+            assertNotSupported(CmdCreateProject.class, CmdAddTask.class, CmdStartProject.class);
+        }
+
+        @Test
+        @DisplayName("command handler")
+        void commandHandler() {
+            final AllCommandHandler handler = new AllCommandHandler(eventBus);
+
+            registry.register(handler);
+            registry.unregister(handler);
+
+            assertNotSupported(CmdCreateProject.class, CmdAddTask.class, CmdStartProject.class);
+        }
+
+        @Test
+        @DisplayName("all command handlers and dispatchers")
+        void everything() {
+            registry.register(new CreateProjectHandler(eventBus));
+            registry.register(new AddTaskDispatcher());
+
+            registry.unregisterAll();
+
+            assertTrue(registry.getRegisteredMessageClasses().isEmpty());
+        }
     }
 
-    @Test
-    @DisplayName("register command dispatcher")
-    void registerCommandDispatcher() {
-        registry.register(new AllCommandDispatcher());
+    @Nested
+    @DisplayName("not accept empty")
+    class NotAcceptEmpty {
 
-        assertSupported(CmdCreateProject.class, CmdAddTask.class, CmdStartProject.class);
-    }
+        @Test
+        @DisplayName("command dispatcher")
+        void commandDispatcher() {
+            assertThrows(IllegalArgumentException.class,
+                         () -> registry.register(new EmptyDispatcher()));
+        }
 
-    @Test
-    @DisplayName("unregister command dispatcher")
-    void unregisterCommandDispatcher() {
-        final CommandDispatcher<Message> dispatcher = new AllCommandDispatcher();
+        @Test
+        @DisplayName("command handler")
+        void commandHandler() {
+            assertThrows(IllegalArgumentException.class,
+                         () -> registry.register(new EmptyCommandHandler(eventBus)));
+        }
 
-        registry.register(dispatcher);
-        registry.unregister(dispatcher);
-
-        assertNotSupported(CmdCreateProject.class, CmdAddTask.class, CmdStartProject.class);
-    }
-
-    @Test
-    @DisplayName("register command handler")
-    void registerCommandHandler() {
-        registry.register(new AllCommandHandler(eventBus));
-
-        assertSupported(CmdCreateProject.class, CmdAddTask.class, CmdStartProject.class);
-    }
-
-    @Test
-    @DisplayName("unregister command handler")
-    void unregisterCommandHandler() {
-        final AllCommandHandler handler = new AllCommandHandler(eventBus);
-
-        registry.register(handler);
-        registry.unregister(handler);
-
-        assertNotSupported(CmdCreateProject.class, CmdAddTask.class, CmdStartProject.class);
-    }
-
-    @Test
-    @DisplayName("not accept empty dispatchers")
-    void notAcceptEmptyDispatchers() {
-        assertThrows(IllegalArgumentException.class,
-                     () -> registry.register(new EmptyDispatcher()));
     }
 
     /**
@@ -175,55 +188,54 @@ class CommandDispatcherRegistryTest {
     }
 
     @Test
-    @DisplayName("not accept command handlers without methods")
-    void notAcceptCommandHandlersWithoutMethods() {
-        assertThrows(IllegalArgumentException.class,
-                     () -> registry.register(new EmptyCommandHandler(eventBus)));
-    }
-
-    @Test
-    @DisplayName("not allow another dispatcher for already registered commands")
-    void notAllowDispatcherForAlreadyRegistered() {
-        registry.register(new AllCommandDispatcher());
-        assertThrows(IllegalArgumentException.class,
-                     () -> registry.register(new AllCommandDispatcher()));
-    }
-
-    /*
-     * Tests for not overriding handlers by dispatchers and vice versa.
-     ******************************************************************/
-
-    @Test
-    @DisplayName("not allow to register dispatcher for command with registered handler")
-    void notAllowToOverrideHandler() {
-        registry.register(new CreateProjectHandler(eventBus));
-        assertThrows(IllegalArgumentException.class,
-                     () -> registry.register(new CreateProjectDispatcher()));
-    }
-
-    @Test
-    @DisplayName("not allow to register handler for command with registered dispatcher")
-    void notAllowToOverrideDispatcher() {
-        registry.register(new CreateProjectDispatcher());
-        assertThrows(IllegalArgumentException.class,
-                     () -> registry.register(new CreateProjectHandler(eventBus)));
-    }
-
-    @Test
-    @DisplayName("unregister handler")
-    void unregisterHandler() {
-        final CommandHandler handler = new CreateProjectHandler(eventBus);
-        registry.register(handler);
-        registry.unregister(handler);
-        assertNotSupported(CmdCreateProject.class);
-    }
-
-    @Test
-    @DisplayName("return both dispatched and handled commands")
+    @DisplayName("state both dispatched and handled commands as supported")
     void returnCommandsBothDispatchedAndHandled() {
         registry.register(new CreateProjectHandler(eventBus));
         registry.register(new AddTaskDispatcher());
 
         assertSupported(CmdCreateProject.class, CmdAddTask.class);
+    }
+
+    @Test
+    @DisplayName("state that no commands are supported when nothing registered")
+    void stateNothingSupportedWhenEmpty() {
+        assertNotSupported(CmdCreateProject.class, CmdAddTask.class, CmdStartProject.class);
+    }
+
+    @Nested
+    @DisplayName("not allow to override")
+    class NotOverride {
+
+        @Test
+        @DisplayName("registered dispatcher by another dispatcher")
+        void dispatcherByDispatcher() {
+            registry.register(new AllCommandDispatcher());
+            assertThrows(IllegalArgumentException.class,
+                         () -> registry.register(new AllCommandDispatcher()));
+        }
+
+        @Test
+        @DisplayName("registered handler by another handler")
+        void handlerByHandler() {
+            registry.register(new CreateProjectHandler(eventBus));
+            assertThrows(IllegalArgumentException.class,
+                         () -> registry.register(new CreateProjectHandler(eventBus)));
+        }
+
+        @Test
+        @DisplayName("registered dispatcher by handler")
+        void dispatcherByHandler() {
+            registry.register(new CreateProjectDispatcher());
+            assertThrows(IllegalArgumentException.class,
+                         () -> registry.register(new CreateProjectHandler(eventBus)));
+        }
+
+        @Test
+        @DisplayName("registered handler by dispatcher")
+        void handlerByDispatcher() {
+            registry.register(new CreateProjectHandler(eventBus));
+            assertThrows(IllegalArgumentException.class,
+                         () -> registry.register(new CreateProjectDispatcher()));
+        }
     }
 }
