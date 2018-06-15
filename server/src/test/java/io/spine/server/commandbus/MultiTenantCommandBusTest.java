@@ -34,6 +34,7 @@ import io.spine.server.rejection.RejectionBus;
 import io.spine.test.command.CmdAddTask;
 import io.spine.test.command.CmdCreateProject;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Set;
@@ -61,10 +62,6 @@ class MultiTenantCommandBusTest extends AbstractCommandBusTestSuite {
         super(true);
     }
 
-    /*
-     * Test of illegal arguments for post()
-     ***************************************/
-
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() throws NoSuchMethodException {
@@ -81,18 +78,32 @@ class MultiTenantCommandBusTest extends AbstractCommandBusTestSuite {
                      () -> commandBus.post(Command.getDefaultInstance(), observer));
     }
 
-    @Test
-    @DisplayName("allow to specify rejection bus via builder")
-    void setRejectionBusViaBuilder() {
-        final RejectionBus expectedRejectionBus = mock(RejectionBus.class);
-        final CommandBus commandBus = CommandBus.newBuilder()
-                                                .setCommandStore(commandStore)
-                                                .setRejectionBus(expectedRejectionBus)
-                                                .build();
-        assertNotNull(commandBus);
+    @Nested
+    @DisplayName("have RejectionBus")
+    class HaveRejectionBus {
 
-        final RejectionBus actualRejectionBus = commandBus.rejectionBus();
-        assertEquals(expectedRejectionBus, actualRejectionBus);
+        @Test
+        @DisplayName("default if no custom one was specified")
+        void setToDefault() {
+            final CommandBus bus = CommandBus.newBuilder()
+                                             .setCommandStore(commandStore)
+                                             .build();
+            assertNotNull(bus.rejectionBus());
+        }
+
+        @Test
+        @DisplayName("custom if specified via Builder")
+        void setToCustom() {
+            final RejectionBus expectedRejectionBus = mock(RejectionBus.class);
+            final CommandBus commandBus = CommandBus.newBuilder()
+                                                    .setCommandStore(commandStore)
+                                                    .setRejectionBus(expectedRejectionBus)
+                                                    .build();
+            assertNotNull(commandBus);
+
+            final RejectionBus actualRejectionBus = commandBus.rejectionBus();
+            assertEquals(expectedRejectionBus, actualRejectionBus);
+        }
     }
 
     @Test
@@ -101,46 +112,38 @@ class MultiTenantCommandBusTest extends AbstractCommandBusTestSuite {
         assertNotNull(Log.log());
     }
 
-    @Test
-    @DisplayName("have RejectionBus if no custom one was set")
-    void haveRejectionBusIfNoCustomSet() {
-        final CommandBus bus = CommandBus.newBuilder()
-                                         .setCommandStore(commandStore)
-                                         .build();
-        assertNotNull(bus.rejectionBus());
+    @Nested
+    @DisplayName("when closed, shutdown")
+    class ShutdownWhenClosed {
+
+        @Test
+        @DisplayName("CommandStore")
+        void commandStore() throws Exception {
+            commandBus.close();
+
+            verify(commandStore).close();
+        }
+
+        @Test
+        @DisplayName("RejectionBus")
+        void rejectionBus() throws Exception {
+            commandBus.close();
+
+            verify(rejectionBus).close();
+        }
+
+        @Test
+        @DisplayName("CommandScheduler")
+        void commandScheduler() throws Exception {
+            commandBus.close();
+
+            verify(scheduler).shutdown();
+        }
     }
-
-    @Test
-    @DisplayName("close CommandStore when closed")
-    void closeCommandStoreWhenClosed() throws Exception {
-        commandBus.close();
-
-        verify(commandStore).close();
-    }
-
-    @Test
-    @DisplayName("close RejectionBus when closed")
-    void closeRejectionBusWhenClosed() throws Exception {
-        commandBus.close();
-
-        verify(rejectionBus).close();
-    }
-
-    @Test
-    @DisplayName("shutdown CommandScheduler when closed")
-    void shutdownCommandSchedulerWhenClosed() throws Exception {
-        commandBus.close();
-
-        verify(scheduler).shutdown();
-    }
-
-    /*
-     * Command validation tests.
-     ***************************/
 
     @Test
     @DisplayName("verify tenant id attribute if multitenant")
-    void requireTenantIdIfMultitenant() {
+    void requireTenantId() {
         commandBus.register(createProjectHandler);
         final Command cmd = newCommandWithoutTenantId();
 
@@ -154,7 +157,7 @@ class MultiTenantCommandBusTest extends AbstractCommandBusTestSuite {
 
     @Test
     @DisplayName("return UnsupportedCommandException when there is neither handler nor dispatcher")
-    void returnExceptionOnNoHandlerAndDispatcher() {
+    void requireHandlerOrDispatcher() {
         final Command command = addTask();
         commandBus.post(command, observer);
 
@@ -164,69 +167,72 @@ class MultiTenantCommandBusTest extends AbstractCommandBusTestSuite {
                           command);
     }
 
-    /*
-     * Registration and un-registration tests
-     *****************************************/
-    @Test
-    @DisplayName("register command dispatcher")
-    void registerCommandDispatcher() {
-        commandBus.register(new AddTaskDispatcher());
+    @Nested
+    @DisplayName("register")
+    class Register {
 
-        commandBus.post(addTask(), observer);
+        @Test
+        @DisplayName("command dispatcher")
+        void commandDispatcher() {
+            commandBus.register(new AddTaskDispatcher());
 
-        assertTrue(observer.isCompleted());
+            commandBus.post(addTask(), observer);
+
+            assertTrue(observer.isCompleted());
+        }
+
+        @Test
+        @DisplayName("command handler")
+        void commandHandler() {
+            commandBus.register(new CreateProjectHandler());
+
+            commandBus.post(createProject(), observer);
+
+            assertTrue(observer.isCompleted());
+        }
     }
 
-    @Test
-    @DisplayName("unregister command dispatcher")
-    void unregisterCommandDispatcher() {
-        final CommandDispatcher<Message> dispatcher = new AddTaskDispatcher();
-        commandBus.register(dispatcher);
-        commandBus.unregister(dispatcher);
+    @Nested
+    @DisplayName("unregister")
+    class Unregister {
 
-        commandBus.post(addTask(), observer);
+        @Test
+        @DisplayName("command dispatcher")
+        void commandDispatcher() {
+            final CommandDispatcher<Message> dispatcher = new AddTaskDispatcher();
+            commandBus.register(dispatcher);
+            commandBus.unregister(dispatcher);
 
-        assertEquals(ERROR, observer.firstResponse()
-                                    .getStatus()
-                                    .getStatusCase());
+            commandBus.post(addTask(), observer);
+
+            assertEquals(ERROR, observer.firstResponse()
+                                        .getStatus()
+                                        .getStatusCase());
+        }
+
+        @Test
+        @DisplayName("command handler")
+        void commandHandler() {
+            final CommandHandler handler = newCommandHandler();
+
+            commandBus.register(handler);
+            commandBus.unregister(handler);
+
+            commandBus.post(createProject(), observer);
+
+            assertEquals(ERROR, observer.firstResponse()
+                                        .getStatus()
+                                        .getStatusCase());
+        }
+
+        CreateProjectHandler newCommandHandler() {
+            return new CreateProjectHandler();
+        }
     }
-
-    @Test
-    @DisplayName("register command handler")
-    void registerCommandHandler() {
-        commandBus.register(new CreateProjectHandler());
-
-        commandBus.post(createProject(), observer);
-
-        assertTrue(observer.isCompleted());
-    }
-
-    @Test
-    @DisplayName("unregister command handler")
-    void unregisterCommandHandler() {
-        final CommandHandler handler = newCommandHandler();
-
-        commandBus.register(handler);
-        commandBus.unregister(handler);
-
-        commandBus.post(createProject(), observer);
-
-        assertEquals(ERROR, observer.firstResponse()
-                                    .getStatus()
-                                    .getStatusCase());
-    }
-
-    CreateProjectHandler newCommandHandler() {
-        return new CreateProjectHandler();
-    }
-
-    /*
-     * Command processing tests
-     ***************************/
 
     @Test
     @DisplayName("post command and return OK response")
-    void postCommandAndReturnOkResponse() {
+    void postCommand() {
         commandBus.register(createProjectHandler);
 
         final Command command = createProject();
@@ -235,52 +241,62 @@ class MultiTenantCommandBusTest extends AbstractCommandBusTestSuite {
         checkResult(command);
     }
 
-    @Test
-    @DisplayName("store command when posted")
-    void storeCommandWhenPosted() {
-        commandBus.register(createProjectHandler);
-        final Command cmd = createProject();
+    @Nested
+    @DisplayName("store")
+    class StoreWhenPosted {
 
-        commandBus.post(cmd, observer);
+        @Test
+        @DisplayName("valid command when posted")
+        void validCommand() {
+            commandBus.register(createProjectHandler);
+            final Command cmd = createProject();
 
-        verify(commandStore).store(cmd);
+            commandBus.post(cmd, observer);
+
+            verify(commandStore).store(cmd);
+        }
+
+        @Test
+        @DisplayName("invalid command with error status")
+        void invalidCommand() {
+            commandBus.register(createProjectHandler);
+            final Command cmd = newCommandWithoutContext();
+
+            commandBus.post(cmd, observer);
+
+            verify(commandStore).store(eq(cmd), isA(Error.class));
+        }
+    }
+
+    @Nested
+    @DisplayName("when command posted, invoke")
+    class Invoke {
+
+        @Test
+        @DisplayName("command handler")
+        void commandHandler() {
+            commandBus.register(createProjectHandler);
+
+            commandBus.post(createProject(), observer);
+
+            assertTrue(createProjectHandler.wasHandlerInvoked());
+        }
+
+        @Test
+        @DisplayName("command dispatcher")
+        void commandDispatcher() {
+            final AddTaskDispatcher dispatcher = new AddTaskDispatcher();
+            commandBus.register(dispatcher);
+
+            commandBus.post(addTask(), observer);
+
+            assertTrue(dispatcher.wasDispatcherInvoked());
+        }
     }
 
     @Test
-    @DisplayName("store invalid command with error status")
-    void storeInvalidCommandWithErrorStatus() {
-        commandBus.register(createProjectHandler);
-        final Command cmd = newCommandWithoutContext();
-
-        commandBus.post(cmd, observer);
-
-        verify(commandStore).store(eq(cmd), isA(Error.class));
-    }
-
-    @Test
-    @DisplayName("invoke handler when command posted")
-    void invokeHandlerWhenCommandPosted() {
-        commandBus.register(createProjectHandler);
-
-        commandBus.post(createProject(), observer);
-
-        assertTrue(createProjectHandler.wasHandlerInvoked());
-    }
-
-    @Test
-    @DisplayName("invoke dispatcher when command posted")
-    void invokeDispatcherWhenCommandPosted() {
-        final AddTaskDispatcher dispatcher = new AddTaskDispatcher();
-        commandBus.register(dispatcher);
-
-        commandBus.post(addTask(), observer);
-
-        assertTrue(dispatcher.wasDispatcherInvoked());
-    }
-
-    @Test
-    @DisplayName("return supported classes")
-    void returnSupportedClasses() {
+    @DisplayName("expose supported classes")
+    void exposeSupportedClasses() {
         commandBus.register(createProjectHandler);
         commandBus.register(new AddTaskDispatcher());
 
