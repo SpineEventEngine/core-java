@@ -33,6 +33,7 @@ import io.spine.server.commandbus.given.SingleTenantCommandBusTestEnv.FaultyHand
 import io.spine.test.reflect.InvalidProjectName;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.core.CommandValidationError.INVALID_COMMAND;
@@ -69,42 +70,47 @@ class SingleTenantCommandBusTest extends AbstractCommandBusTestSuite {
 
     @Test
     @DisplayName("post command and do not set current tenant")
-    void postCommandAndNotSetTenant() {
+    void postCommandWithoutTenant() {
         commandBus.post(newCommandWithoutTenantId(), observer);
 
         assertFalse(isTenantSet());
     }
 
-    @Test
-    @DisplayName("reject invalid command")
-    void rejectInvalidCommand() {
-        final Command cmd = newCommandWithoutContext();
+    @Nested
+    @DisplayName("reject")
+    class Reject {
 
-        commandBus.post(cmd, observer);
+        @Test
+        @DisplayName("invalid command")
+        void invalidCommand() {
+            final Command cmd = newCommandWithoutContext();
 
-        checkCommandError(observer.firstResponse(),
-                          INVALID_COMMAND,
-                          CommandValidationError.getDescriptor().getFullName(),
-                          cmd);
-    }
+            commandBus.post(cmd, observer);
 
-    @Test
-    @DisplayName("reject multitenant command in single tenant context")
-    void rejectMultitenantCommand() {
-        // Create a multi-tenant command.
-        final Command cmd = createProject();
+            checkCommandError(observer.firstResponse(),
+                              INVALID_COMMAND,
+                              CommandValidationError.getDescriptor().getFullName(),
+                              cmd);
+        }
 
-        commandBus.post(cmd, observer);
+        @Test
+        @DisplayName("multitenant command in single tenant context")
+        void multitenantCommandIfSingleTenant() {
+            // Create a multi-tenant command.
+            final Command cmd = createProject();
 
-        checkCommandError(observer.firstResponse(),
-                          TENANT_INAPPLICABLE,
-                          InvalidCommandException.class,
-                          cmd);
+            commandBus.post(cmd, observer);
+
+            checkCommandError(observer.firstResponse(),
+                              TENANT_INAPPLICABLE,
+                              InvalidCommandException.class,
+                              cmd);
+        }
     }
 
     @Test
     @DisplayName("propagate rejections to rejection bus")
-    void propagateRejectionsToRejectionBus() {
+    void propagateRejections() {
         final FaultyHandler faultyHandler = new FaultyHandler(eventBus);
         commandBus.register(faultyHandler);
 
