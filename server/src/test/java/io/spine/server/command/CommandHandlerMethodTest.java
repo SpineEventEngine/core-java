@@ -89,18 +89,6 @@ class CommandHandlerMethodTest {
         assertEquals(isHandler, predicate().apply(handler));
     }
 
-    private static void assertCauseAndId(HandlerMethodFailedException e, Object handlerId) {
-        Throwable cause = getRootCause(e);
-
-        assertTrue(cause instanceof ThrowableMessage);
-        ThrowableMessage thrown = (ThrowableMessage) cause;
-
-        assertTrue(thrown.producerId()
-                         .isPresent());
-        assertEquals(handlerId, Identifier.unpack(thrown.producerId()
-                                                        .get()));
-    }
-
     @BeforeEach
     void setUp() {
         ModelTests.clearModel();
@@ -299,6 +287,18 @@ class CommandHandlerMethodTest {
             } catch (HandlerMethodFailedException e) {
                 assertCauseAndId(e, entity.getId());
             }
+        }
+
+        private void assertCauseAndId(HandlerMethodFailedException e, Object handlerId) {
+            Throwable cause = getRootCause(e);
+
+            assertTrue(cause instanceof ThrowableMessage);
+            ThrowableMessage thrown = (ThrowableMessage) cause;
+
+            assertTrue(thrown.producerId()
+                             .isPresent());
+            assertEquals(handlerId, Identifier.unpack(thrown.producerId()
+                                                            .get()));
         }
     }
 }

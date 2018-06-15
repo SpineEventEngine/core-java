@@ -179,6 +179,12 @@ class StorageTest extends TenantAwareTest {
                 assertTrue(commands.contains(cmd));
             }
         }
+
+        private void store(Iterable<Command> commands, CommandStatus status) {
+            for (Command cmd : commands) {
+                repository.store(cmd, status);
+            }
+        }
     }
 
     @Nested
@@ -226,6 +232,12 @@ class StorageTest extends TenantAwareTest {
                                          .getCode());
             assertEquals(rejection, actual.getStatus()
                                           .getRejection());
+        }
+
+        private void storeNewRecord() {
+            final CommandRecord record = newStorageRecord();
+            id = record.getCommandId();
+            repository.store(record.getCommand());
         }
     }
 
@@ -340,22 +352,6 @@ class StorageTest extends TenantAwareTest {
     void provideNullAcceptingRecordFunc() {
         assertNull(CRepository.getRecordFunc()
                               .apply(null));
-    }
-
-    /*
-     * Utils.
-     **************************************************************/
-
-    private void store(Iterable<Command> commands, CommandStatus status) {
-        for (Command cmd : commands) {
-            repository.store(cmd, status);
-        }
-    }
-
-    private void storeNewRecord() {
-        final CommandRecord record = newStorageRecord();
-        id = record.getCommandId();
-        repository.store(record.getCommand());
     }
 
     private Optional<CommandRecord> readRecord(CommandId commandId) {
