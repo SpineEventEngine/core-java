@@ -45,6 +45,7 @@ import io.spine.test.command.CmdStartProject;
 import io.spine.test.command.event.CmdProjectCreated;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import javax.annotation.Nonnull;
@@ -66,77 +67,237 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.verify;
 
+@SuppressWarnings({"DuplicateStringLiteralInspection" /* Common test display names. */,
+        "unused" /* JUnit 5 Nested classes considered unused in abstract test class */})
 abstract class CommandStoreTest extends AbstractCommandBusTestSuite {
 
     CommandStoreTest(boolean multitenant) {
         super(multitenant);
     }
 
-    @Test
-    @DisplayName("set command status to OK when handler returns")
-    void setCommandStatusToOk() {
-        commandBus.register(createProjectHandler);
+    @Nested
+    @DisplayName("set command status to")
+    class SetCommandStatusTo {
 
-        final Command command = requestFactory.command()
-                                              .create(createProjectMessage());
-        commandBus.post(command, observer);
+        @Test
+        @DisplayName("OK when handler returns")
+        void ok() {
+            commandBus.register(createProjectHandler);
 
-        final TenantId tenantId = command.getContext()
-                                         .getActorContext()
-                                         .getTenantId();
-        final CommandId commandId = command.getId();
-        final ProcessingStatus status = getStatus(commandId, tenantId);
+            final Command command = requestFactory.command()
+                                                  .create(createProjectMessage());
+            commandBus.post(command, observer);
 
-        assertEquals(CommandStatus.OK, status.getCode());
+            final TenantId tenantId = command.getContext()
+                                             .getActorContext()
+                                             .getTenantId();
+            final CommandId commandId = command.getId();
+            final ProcessingStatus status = getStatus(commandId, tenantId);
+
+            assertEquals(CommandStatus.OK, status.getCode());
+        }
+
+        @Test
+        @DisplayName("error when dispatcher throws exception")
+        void errorForDispatcherException() {
+            final ThrowingDispatcher dispatcher = new ThrowingDispatcher();
+            commandBus.register(dispatcher);
+            final Command command = requestFactory.command()
+                                                  .create(createProjectMessage());
+
+            commandBus.post(command, observer);
+
+            // Check that the logging was called.
+            final CommandEnvelope envelope = CommandEnvelope.of(command);
+            verify(log).errorHandling(dispatcher.exception,
+                                      envelope.getMessage(),
+                                      envelope.getId());
+
+            // Check that the command status has the correct code,
+            // and the error matches the thrown exception.
+            assertHasErrorStatusWithMessage(envelope, dispatcher.exception.getMessage());
+        }
+
+        @Test
+        @DisplayName("error when handler throws exception")
+        void errorForHandlerException() {
+            ModelTests.clearModel();
+
+            final RuntimeException exception = new IllegalStateException("handler throws");
+            final Command command = givenThrowingHandler(exception);
+            final CommandEnvelope envelope = CommandEnvelope.of(command);
+
+            commandBus.post(command, observer);
+
+            // Check that the logging was called.
+            verify(log).errorHandling(eq(exception),
+                                      eq(envelope.getMessage()),
+                                      eq(envelope.getId()));
+
+            final String errorMessage = exception.getMessage();
+            assertHasErrorStatusWithMessage(envelope, errorMessage);
+        }
+
+        @Test
+        @DisplayName("rejection when handler throws rejection")
+        void rejectionForHandlerRejection() {
+            ModelTests.clearModel();
+
+            final TestRejection rejection = new TestRejection();
+            final Command command = givenRejectingHandler(rejection);
+            final CommandId commandId = command.getId();
+            final Message commandMessage = getMessage(command);
+
+            commandBus.post(command, observer);
+
+            // Check that the logging was called.
+            verify(log).rejectedWith(eq(rejection), eq(commandMessage), eq(commandId));
+
+            // Check that the status has the correct code,
+            // and the rejection matches the thrown rejection.
+            final TenantId tenantId = command.getContext()
+                                             .getActorContext()
+                                             .getTenantId();
+            final ProcessingStatus status = getStatus(commandId, tenantId);
+
+            assertEquals(CommandStatus.REJECTED, status.getCode());
+            assertEquals(toRejection(rejection, command).getMessage(),
+                         status.getRejection()
+                               .getMessage());
+        }
+
+        @Test
+        @DisplayName("error for expired scheduled command")
+        void errorForExpiredCommand() {
+            final List<Command> commands = newArrayList(createProject(),
+                                                        addTask(),
+                                                        startProject());
+            final Duration delay = fromMinutes(5);
+            final Timestamp schedulingTime = TimeTests.Past.minutesAgo(10); // time to post passed
+            storeAsScheduled(commands, delay, schedulingTime);
+
+            commandBus.rescheduleCommands();
+
+            for (Command cmd : commands) {
+                final CommandEnvelope envelope = CommandEnvelope.of(cmd);
+                final Message msg = envelope.getMessage();
+                final CommandId id = envelope.getId();
+
+                // Check the expired status error was set.
+                final ProcessingStatus status = getProcessingStatus(envelope);
+
+                // Check that the logging was called.
+                verify(log).errorExpiredCommand(msg, id);
+
+                final Error expected = CommandExpiredException.commandExpired(cmd);
+                assertEquals(expected, status.getError());
+            }
+        }
+
+        /**
+         * Checks that the command status has the correct code, and the stored error message matches the
+         * passed message.
+         *
+         * <p>The check is performed as a tenant-aware function using the tenant ID from the command.
+         */
+        private void assertHasErrorStatusWithMessage(CommandEnvelope commandEnvelope,
+                                                     String errorMessage) {
+            final ProcessingStatus status = getProcessingStatus(commandEnvelope);
+            assertEquals(CommandStatus.ERROR, status.getCode());
+            assertEquals(errorMessage, status.getError()
+                                             .getMessage());
+        }
+
+        private ProcessingStatus getProcessingStatus(CommandEnvelope commandEnvelope) {
+            final TenantId tenantId = commandEnvelope.getCommandContext()
+                                                     .getActorContext()
+                                                     .getTenantId();
+            final TenantAwareFunction<CommandId, ProcessingStatus> func =
+                    new TenantAwareFunction<CommandId, ProcessingStatus>(tenantId) {
+                        @Override
+                        public ProcessingStatus apply(@Nullable CommandId input) {
+                            return commandStore.getStatus(checkNotNull(input));
+                        }
+                    };
+            final ProcessingStatus result = func.execute(commandEnvelope.getId());
+            return result;
+        }
     }
 
-    @Test
-    @DisplayName("set command status to error when dispatcher throws exception")
-    void setCommandStatusToErrorWhenDispatcherThrows() {
-        final ThrowingDispatcher dispatcher = new ThrowingDispatcher();
-        commandBus.register(dispatcher);
-        final Command command = requestFactory.command()
-                                              .create(createProjectMessage());
+    @Nested
+    @DisplayName("store")
+    class Store {
 
-        commandBus.post(command, observer);
+        @Test
+        @DisplayName("command")
+        void command() {
+            final Command command = requestFactory.command()
+                                                  .create(createProjectMessage());
+            commandStore.store(command);
 
-        // Check that the logging was called.
-        final CommandEnvelope envelope = CommandEnvelope.of(command);
-        verify(log).errorHandling(dispatcher.exception,
-                                  envelope.getMessage(),
-                                  envelope.getId());
+            final TenantId tenantId = command.getContext()
+                                             .getActorContext()
+                                             .getTenantId();
+            final CommandId commandId = command.getId();
+            final ProcessingStatus status = getStatus(commandId, tenantId);
 
-        // Check that the command status has the correct code,
-        // and the error matches the thrown exception.
-        assertHasErrorStatusWithMessage(envelope, dispatcher.exception.getMessage());
-    }
+            assertEquals(CommandStatus.RECEIVED, status.getCode());
+        }
 
-    @Test
-    @DisplayName("set command status to rejection when handler throws rejection")
-    void setCommandStatusToRejection() {
-        ModelTests.clearModel();
+        @Test
+        @DisplayName("command with status")
+        void commandWithStatus() {
+            final Command command = requestFactory.command()
+                                                  .create(createProjectMessage());
+            final CommandStatus commandStatus = CommandStatus.OK;
+            commandStore.store(command, commandStatus);
 
-        final TestRejection rejection = new TestRejection();
-        final Command command = givenRejectingHandler(rejection);
-        final CommandId commandId = command.getId();
-        final Message commandMessage = getMessage(command);
+            final TenantId tenantId = command.getContext()
+                                             .getActorContext()
+                                             .getTenantId();
+            final CommandId commandId = command.getId();
+            final ProcessingStatus status = getStatus(commandId, tenantId);
 
-        commandBus.post(command, observer);
+            assertEquals(commandStatus, status.getCode());
+        }
 
-        // Check that the logging was called.
-        verify(log).rejectedWith(eq(rejection), eq(commandMessage), eq(commandId));
+        @Test
+        @DisplayName("command with error")
+        void commandWithError() {
+            final Command command = requestFactory.command()
+                                                  .create(createProjectMessage());
+            @SuppressWarnings("ThrowableNotThrown") // Creation without throwing needed for test.
+            final DuplicateCommandException exception = of(command);
+            commandStore.storeWithError(command, exception);
 
-        // Check that the status has the correct code,
-        // and the rejection matches the thrown rejection.
-        final TenantId tenantId = command.getContext()
-                                         .getActorContext()
-                                         .getTenantId();
-        final ProcessingStatus status = getStatus(commandId, tenantId);
+            final TenantId tenantId = command.getContext()
+                                             .getActorContext()
+                                             .getTenantId();
+            final CommandId commandId = command.getId();
+            final ProcessingStatus status = getStatus(commandId, tenantId);
 
-        assertEquals(CommandStatus.REJECTED, status.getCode());
-        assertEquals(toRejection(rejection, command).getMessage(),
-                     status.getRejection()
-                           .getMessage());
+            assertEquals(CommandStatus.ERROR, status.getCode());
+            assertEquals(exception.asError(), status.getError());
+        }
+
+        @Test
+        @DisplayName("command with exception")
+        void commandWithException() {
+            final Command command = requestFactory.command()
+                                                  .create(createProjectMessage());
+            @SuppressWarnings("ThrowableNotThrown") // Creation without throwing needed for test.
+            final DuplicateCommandException exception = of(command);
+            commandStore.store(command, exception);
+
+            final TenantId tenantId = command.getContext()
+                                             .getActorContext()
+                                             .getTenantId();
+            final CommandId commandId = command.getId();
+            final ProcessingStatus status = getStatus(commandId, tenantId);
+
+            assertEquals(CommandStatus.ERROR, status.getCode());
+            assertEquals(fromThrowable(exception), status.getError());
+        }
     }
 
     private ProcessingStatus getStatus(CommandId commandId, final TenantId tenantId) {
@@ -150,159 +311,11 @@ abstract class CommandStoreTest extends AbstractCommandBusTestSuite {
         return func.execute(commandId);
     }
 
-    @Test
-    @DisplayName("set command status to error when handler throws exception")
-    void setCommandStatusToErrorWhenHandlerThrows() {
-        ModelTests.clearModel();
-
-        final RuntimeException exception = new IllegalStateException("handler throws");
-        final Command command = givenThrowingHandler(exception);
-        final CommandEnvelope envelope = CommandEnvelope.of(command);
-
-        commandBus.post(command, observer);
-
-        // Check that the logging was called.
-        verify(log).errorHandling(eq(exception),
-                                  eq(envelope.getMessage()),
-                                  eq(envelope.getId()));
-
-        final String errorMessage = exception.getMessage();
-        assertHasErrorStatusWithMessage(envelope, errorMessage);
-    }
-
-    /**
-     * Checks that the command status has the correct code, and the stored error message matches the
-     * passed message.
-     *
-     * <p>The check is performed as a tenant-aware function using the tenant ID from the command.
-     */
-    private void assertHasErrorStatusWithMessage(CommandEnvelope commandEnvelope,
-                                                 String errorMessage) {
-        final ProcessingStatus status = getProcessingStatus(commandEnvelope);
-        assertEquals(CommandStatus.ERROR, status.getCode());
-        assertEquals(errorMessage, status.getError()
-                                         .getMessage());
-    }
-
-    private ProcessingStatus getProcessingStatus(CommandEnvelope commandEnvelope) {
-        final TenantId tenantId = commandEnvelope.getCommandContext()
-                                                 .getActorContext()
-                                                 .getTenantId();
-        final TenantAwareFunction<CommandId, ProcessingStatus> func =
-                new TenantAwareFunction<CommandId, ProcessingStatus>(tenantId) {
-                    @Override
-                    public ProcessingStatus apply(@Nullable CommandId input) {
-                        return commandStore.getStatus(checkNotNull(input));
-                    }
-                };
-        final ProcessingStatus result = func.execute(commandEnvelope.getId());
-        return result;
-    }
-
-    @Test
-    @DisplayName("set expired scheduled command status to error if time to post them passed")
-    void setExpiredScheduledCommandStatusToError() {
-        final List<Command> commands = newArrayList(createProject(),
-                                                    addTask(),
-                                                    startProject());
-        final Duration delay = fromMinutes(5);
-        final Timestamp schedulingTime = TimeTests.Past.minutesAgo(10); // time to post passed
-        storeAsScheduled(commands, delay, schedulingTime);
-
-        commandBus.rescheduleCommands();
-
-        for (Command cmd : commands) {
-            final CommandEnvelope envelope = CommandEnvelope.of(cmd);
-            final Message msg = envelope.getMessage();
-            final CommandId id = envelope.getId();
-
-            // Check the expired status error was set.
-            final ProcessingStatus status = getProcessingStatus(envelope);
-
-            // Check that the logging was called.
-            verify(log).errorExpiredCommand(msg, id);
-
-            final Error expected = CommandExpiredException.commandExpired(cmd);
-            assertEquals(expected, status.getError());
-        }
-    }
-
-    @Test
-    @DisplayName("store given command")
-    void storeGivenCommand() {
-        final Command command = requestFactory.command()
-                                              .create(createProjectMessage());
-        commandStore.store(command);
-
-        final TenantId tenantId = command.getContext()
-                                         .getActorContext()
-                                         .getTenantId();
-        final CommandId commandId = command.getId();
-        final ProcessingStatus status = getStatus(commandId, tenantId);
-
-        assertEquals(CommandStatus.RECEIVED, status.getCode());
-    }
-
-    @Test
-    @DisplayName("store given command with status")
-    void storeGivenCommandWithStatus() {
-        final Command command = requestFactory.command()
-                                              .create(createProjectMessage());
-        final CommandStatus commandStatus = CommandStatus.OK;
-        commandStore.store(command, commandStatus);
-
-        final TenantId tenantId = command.getContext()
-                                         .getActorContext()
-                                         .getTenantId();
-        final CommandId commandId = command.getId();
-        final ProcessingStatus status = getStatus(commandId, tenantId);
-
-        assertEquals(commandStatus, status.getCode());
-    }
-
-    @Test
-    @DisplayName("store given command with error")
-    void storeGivenCommandWithError() {
-        final Command command = requestFactory.command()
-                                              .create(createProjectMessage());
-        @SuppressWarnings("ThrowableNotThrown") // Creation without throwing needed for test.
-        final DuplicateCommandException exception = of(command);
-        commandStore.storeWithError(command, exception);
-
-        final TenantId tenantId = command.getContext()
-                                         .getActorContext()
-                                         .getTenantId();
-        final CommandId commandId = command.getId();
-        final ProcessingStatus status = getStatus(commandId, tenantId);
-
-        assertEquals(CommandStatus.ERROR, status.getCode());
-        assertEquals(exception.asError(), status.getError());
-    }
-
-    @Test
-    @DisplayName("store given command with exception")
-    void storeGivenCommandWithException() {
-        final Command command = requestFactory.command()
-                                              .create(createProjectMessage());
-        @SuppressWarnings("ThrowableNotThrown") // Creation without throwing needed for test.
-        final DuplicateCommandException exception = of(command);
-        commandStore.store(command, exception);
-
-        final TenantId tenantId = command.getContext()
-                                         .getActorContext()
-                                         .getTenantId();
-        final CommandId commandId = command.getId();
-        final ProcessingStatus status = getStatus(commandId, tenantId);
-
-        assertEquals(CommandStatus.ERROR, status.getCode());
-        assertEquals(fromThrowable(exception), status.getError());
-    }
-
     /**
      * A stub handler that throws passed `ThrowableMessage` in the command handler method,
      * rejecting the command.
      *
-     * @see #setCommandStatusToRejection()
+     * @see SetCommandStatusTo#rejectionForHandlerRejection()
      */
     private class RejectingCreateProjectHandler extends CommandHandler {
 
@@ -335,7 +348,7 @@ abstract class CommandStoreTest extends AbstractCommandBusTestSuite {
     /**
      * A stub handler that throws passed `RuntimeException` in the command handler method.
      *
-     * @see #setCommandStatusToErrorWhenHandlerThrows()
+     * @see SetCommandStatusTo#errorForHandlerException()
      */
     private class ThrowingCreateProjectHandler extends CommandHandler {
 
@@ -364,18 +377,11 @@ abstract class CommandStoreTest extends AbstractCommandBusTestSuite {
         return command;
     }
 
-    /*
-     * Throwables
-     ********************/
-
-    private static class TestRejection extends ThrowableMessage {
-        private static final long serialVersionUID = 0L;
-
-        private TestRejection() {
-            super(TypeConverter.<String, StringValue>toMessage(TestRejection.class.getName()));
-        }
-    }
-
+    /**
+     * A stub dispatcher that throws `RuntimeException` in the command dispatching method.
+     *
+     * @see SetCommandStatusTo#errorForDispatcherException()
+     */
     private static class ThrowingDispatcher implements CommandDispatcher<Message> {
 
         @SuppressWarnings("ThrowableInstanceNeverThrown")
@@ -395,6 +401,18 @@ abstract class CommandStoreTest extends AbstractCommandBusTestSuite {
         @Override
         public void onError(CommandEnvelope envelope, RuntimeException exception) {
             // Do nothing.
+        }
+    }
+
+    /*
+     * Throwables
+     ********************/
+
+    private static class TestRejection extends ThrowableMessage {
+        private static final long serialVersionUID = 0L;
+
+        private TestRejection() {
+            super(TypeConverter.<String, StringValue>toMessage(TestRejection.class.getName()));
         }
     }
 }
