@@ -68,6 +68,14 @@ class CommandBusBuilderTest
     }
 
     @Test
+    @DisplayName("create new CommandBus instance")
+    void createNewInstance() {
+        final CommandBus commandBus = builder().setCommandStore(commandStore)
+                                               .build();
+        assertNotNull(commandBus);
+    }
+
+    @Test
     @DisplayName("not accept null CommandStore")
     void notAcceptNullCommandStore() {
         assertThrows(NullPointerException.class, () -> builder().setCommandStore(Tests.nullRef()));
@@ -78,14 +86,6 @@ class CommandBusBuilderTest
     void notAllowToOmitSettingCommandStore() {
         assertThrows(IllegalStateException.class, () -> CommandBus.newBuilder()
                                                                   .build());
-    }
-
-    @Test
-    @DisplayName("create new CommandBus instance")
-    void createNewInstance() {
-        final CommandBus commandBus = builder().setCommandStore(commandStore)
-                                               .build();
-        assertNotNull(commandBus);
     }
 
     @Nested

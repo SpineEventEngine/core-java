@@ -267,6 +267,44 @@ class BoundedContextTest {
         assertThrows(IllegalStateException.class, () -> boundedContext.register(anotherRepo));
     }
 
+    @Test
+    @DisplayName("assign storage during registration if repository does not have one")
+    void setStorageOnRegister() {
+        final ProjectAggregateRepository repository = new ProjectAggregateRepository();
+        boundedContext.register(repository);
+        assertTrue(repository.isStorageAssigned());
+    }
+
+    @Test
+    @DisplayName("not change storage during registration if repository has one")
+    void notOverrideStorage() {
+        final ProjectAggregateRepository repository = new ProjectAggregateRepository();
+        final Repository spy = spy(repository);
+        boundedContext.register(repository);
+        verify(spy, never()).initStorage(any(StorageFactory.class));
+    }
+
+    @Test
+    @DisplayName("set storage factory for EventBus")
+    void setEventBusStorageFactory() {
+        final BoundedContext bc = BoundedContext.newBuilder()
+                                                .setEventBus(EventBus.newBuilder())
+                                                .build();
+        assertNotNull(bc.getEventBus());
+    }
+
+    @Test
+    @DisplayName("not set storage factory for EventBus if EventStore is set")
+    void useEventStoreIfSet() {
+        final EventStore eventStore = mock(EventStore.class);
+        final BoundedContext bc = BoundedContext.newBuilder()
+                                                .setEventBus(EventBus.newBuilder()
+                                                                     .setEventStore(eventStore))
+                                                .build();
+        assertEquals(eventStore, bc.getEventBus()
+                                   .getEventStore());
+    }
+
     @Nested
     @DisplayName("manage event subscriber notifications")
     class ManageEventSubscriberNotifications {
@@ -308,44 +346,6 @@ class BoundedContextTest {
                                         .getStatus()
                                         .getStatusCase());
         }
-    }
-
-    @Test
-    @DisplayName("assign storage during registration if repository does not have one")
-    void setStorageOnRegister() {
-        final ProjectAggregateRepository repository = new ProjectAggregateRepository();
-        boundedContext.register(repository);
-        assertTrue(repository.isStorageAssigned());
-    }
-
-    @Test
-    @DisplayName("not change storage during registration if repository has one")
-    void notOverrideStorage() {
-        final ProjectAggregateRepository repository = new ProjectAggregateRepository();
-        final Repository spy = spy(repository);
-        boundedContext.register(repository);
-        verify(spy, never()).initStorage(any(StorageFactory.class));
-    }
-
-    @Test
-    @DisplayName("set storage factory for EventBus")
-    void setEventBusStorageFactory() {
-        final BoundedContext bc = BoundedContext.newBuilder()
-                                                .setEventBus(EventBus.newBuilder())
-                                                .build();
-        assertNotNull(bc.getEventBus());
-    }
-
-    @Test
-    @DisplayName("not set storage factory for EventBus if EventStore is set")
-    void useEventStoreIfSet() {
-        final EventStore eventStore = mock(EventStore.class);
-        final BoundedContext bc = BoundedContext.newBuilder()
-                                                .setEventBus(EventBus.newBuilder()
-                                                                     .setEventStore(eventStore))
-                                                .build();
-        assertEquals(eventStore, bc.getEventBus()
-                                   .getEventStore());
     }
 
     @Nested

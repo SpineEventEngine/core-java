@@ -248,15 +248,6 @@ class CommandHandlerMethodTest {
         }
     }
 
-    @Test
-    @DisplayName("throw ISE when dispatching command of not handled type")
-    void notDispatchNotHandledCommand() {
-        CommandHandler handler = new ValidHandlerOneParam();
-        CommandEnvelope cmd = requestFactory.createEnvelope(startProject());
-
-        assertThrows(IllegalStateException.class, () -> handler.dispatch(cmd));
-    }
-
     @Nested
     @DisplayName("set producer ID when dispatching to")
     class SetProducerId {
@@ -300,5 +291,14 @@ class CommandHandlerMethodTest {
             assertEquals(handlerId, Identifier.unpack(thrown.producerId()
                                                             .get()));
         }
+    }
+
+    @Test
+    @DisplayName("throw ISE when dispatching command of not handled type")
+    void notDispatchNotHandledCommand() {
+        CommandHandler handler = new ValidHandlerOneParam();
+        CommandEnvelope cmd = requestFactory.createEnvelope(startProject());
+
+        assertThrows(IllegalStateException.class, () -> handler.dispatch(cmd));
     }
 }

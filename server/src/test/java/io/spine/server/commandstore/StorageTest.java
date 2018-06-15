@@ -98,6 +98,37 @@ class StorageTest extends TenantAwareTest {
     }
 
     @Nested
+    @DisplayName("not accept null")
+    class NotAcceptNull {
+
+        @Test
+        @DisplayName("command for storing")
+        void command() {
+            assertThrows(NullPointerException.class, () -> repository.store(Tests.<Command>nullRef()));
+        }
+
+        @Test
+        @DisplayName("command ID for setting ok status")
+        void commandIdForOkStatus() {
+            assertThrows(NullPointerException.class, () -> repository.setOkStatus(Tests.nullRef()));
+        }
+
+        @Test
+        @DisplayName("command ID for setting error status")
+        void commandIdForErrorStatus() {
+            assertThrows(NullPointerException.class,
+                         () -> repository.updateStatus(Tests.nullRef(), defaultError));
+        }
+
+        @Test
+        @DisplayName("command ID for setting rejection status")
+        void commandIdForRejectionStatus() {
+            assertThrows(NullPointerException.class,
+                         () -> repository.updateStatus(Tests.nullRef(), DEFAULT_REJECTION));
+        }
+    }
+
+    @Nested
     @DisplayName("store and read")
     class StoreAndRead {
 
@@ -251,41 +282,6 @@ class StorageTest extends TenantAwareTest {
         final CommandRecord record = newRecordBuilder(command, status, null).build();
 
         checkRecord(record, command, status);
-    }
-
-    /*
-     * Check that exception is thrown if try to pass null to methods.
-     **************************************************************/
-
-    @Nested
-    @DisplayName("not accept null")
-    class NotAcceptNull {
-
-        @Test
-        @DisplayName("command for storing")
-        void command() {
-            assertThrows(NullPointerException.class, () -> repository.store(Tests.<Command>nullRef()));
-        }
-
-        @Test
-        @DisplayName("command ID for setting ok status")
-        void commandIdForOkStatus() {
-            assertThrows(NullPointerException.class, () -> repository.setOkStatus(Tests.nullRef()));
-        }
-
-        @Test
-        @DisplayName("command ID for setting error status")
-        void commandIdForErrorStatus() {
-            assertThrows(NullPointerException.class,
-                         () -> repository.updateStatus(Tests.nullRef(), defaultError));
-        }
-
-        @Test
-        @DisplayName("command ID for setting rejection status")
-        void commandIdForRejectionStatus() {
-            assertThrows(NullPointerException.class,
-                         () -> repository.updateStatus(Tests.nullRef(), DEFAULT_REJECTION));
-        }
     }
 
     @Nested
