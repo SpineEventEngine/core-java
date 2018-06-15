@@ -59,7 +59,7 @@ class CommandValidatorViolationCheckTest {
 
     @Test
     @DisplayName("not allow commands without IDs")
-    void notAllowCommandsWithoutIds() {
+    void notAllowDefaultId() {
         final Command cmd = Given.ACommand.createProject();
         final Command unidentifiableCommand = cmd.toBuilder()
                                                  .setId(CommandId.getDefaultInstance())
@@ -72,7 +72,7 @@ class CommandValidatorViolationCheckTest {
 
     @Test
     @DisplayName("return violations if command has invalid Message")
-    void returnViolationsForInvalidMessage() {
+    void notAllowInvalidMessage() {
         final Any invalidMessagePacked = AnyPacker.pack(CmdCreateProject.getDefaultInstance());
         final Command commandWithEmptyMessage = Command.newBuilder()
                                                        .setId(generateId())
@@ -88,7 +88,7 @@ class CommandValidatorViolationCheckTest {
 
     @Test
     @DisplayName("return violations if command has invalid context")
-    void returnViolationsForInvalidContext() {
+    void notAllowInvalidContext() {
         final Command command = TestActorRequestFactory.newInstance(getClass())
                                                        .createCommand(createProjectMessage(),
                                                                       Time.getCurrentTime());
