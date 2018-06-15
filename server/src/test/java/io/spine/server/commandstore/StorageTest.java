@@ -104,7 +104,8 @@ class StorageTest extends TenantAwareTest {
         @Test
         @DisplayName("command for storing")
         void command() {
-            assertThrows(NullPointerException.class, () -> repository.store(Tests.<Command>nullRef()));
+            assertThrows(NullPointerException.class,
+                         () -> repository.store(Tests.<Command>nullRef()));
         }
 
         @Test
@@ -245,8 +246,10 @@ class StorageTest extends TenantAwareTest {
             repository.updateStatus(id, error);
 
             final CommandRecord actual = readRecord(id).get();
-            assertEquals(ERROR, actual.getStatus().getCode());
-            assertEquals(error, actual.getStatus().getError());
+            assertEquals(ERROR, actual.getStatus()
+                                      .getCode());
+            assertEquals(error, actual.getStatus()
+                                      .getError());
         }
 
         @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we update status.

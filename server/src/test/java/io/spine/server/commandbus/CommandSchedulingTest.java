@@ -137,7 +137,8 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
             final String mainThreadName = Thread.currentThread().getName();
             final StringBuilder threadNameUponScheduling = new StringBuilder(0);
             final CountDownLatch latch = new CountDownLatch(1);
-            final CommandScheduler scheduler = threadAwareScheduler(threadNameUponScheduling, latch);
+            final CommandScheduler scheduler =
+                    threadAwareScheduler(threadNameUponScheduling, latch);
             storeSingleCommandForRescheduling();
 
             // Create CommandBus specific for this test.
@@ -174,7 +175,8 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
             final String mainThreadName = Thread.currentThread().getName();
             final StringBuilder threadNameUponScheduling = new StringBuilder(0);
             final CountDownLatch latch = new CountDownLatch(1);
-            final CommandScheduler scheduler = threadAwareScheduler(threadNameUponScheduling, latch);
+            final CommandScheduler scheduler =
+                    threadAwareScheduler(threadNameUponScheduling, latch);
             storeSingleCommandForRescheduling();
 
             // Create CommandBus specific for this test.
