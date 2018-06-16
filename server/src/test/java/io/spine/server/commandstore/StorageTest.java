@@ -72,7 +72,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 @SuppressWarnings({"ConstantConditions",
         "DuplicateStringLiteralInspection" /* Common test display names. */})
-@DisplayName("Storage should")
+@DisplayName("Command Storage should")
 class StorageTest extends TenantAwareTest {
 
     private static final Error defaultError = Error.getDefaultInstance();
