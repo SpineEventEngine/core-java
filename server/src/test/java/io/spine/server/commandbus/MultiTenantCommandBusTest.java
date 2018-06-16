@@ -156,7 +156,7 @@ class MultiTenantCommandBusTest extends AbstractCommandBusTestSuite {
     }
 
     @Test
-    @DisplayName("return UnsupportedCommandException when there is neither handler nor dispatcher")
+    @DisplayName("state command not supported when there is neither handler nor dispatcher for it")
     void requireHandlerOrDispatcher() {
         final Command command = addTask();
         commandBus.post(command, observer);
