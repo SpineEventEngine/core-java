@@ -80,9 +80,9 @@ import static org.mockito.Mockito.when;
  *
  * <p>Messages used in this test suite are defined in:
  * <ul>
- * <li>spine/test/bc/project.proto - data types
- * <li>spine/test/bc/command_factory_test.proto — commands
- * <li>spine/test/bc/events.proto — events.
+ *     <li>spine/test/bc/project.proto - data types
+ *     <li>spine/test/bc/command_factory_test.proto — commands
+ *     <li>spine/test/bc/events.proto — events.
  * </ul>
  *
  * @author Alexander Litus
