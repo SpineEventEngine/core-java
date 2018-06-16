@@ -294,8 +294,8 @@ class CommandHandlerMethodTest {
     }
 
     @Test
-    @DisplayName("throw ISE when dispatching command of not handled type")
-    void notDispatchNotHandledCmd() {
+    @DisplayName("throw ISE when dispatching command of non-handled type")
+    void notDispatchNonHandledCmd() {
         CommandHandler handler = new ValidHandlerOneParam();
         CommandEnvelope cmd = requestFactory.createEnvelope(startProject());
 
