@@ -83,7 +83,7 @@ class CommandBusBuilderTest
 
     @Test
     @DisplayName("not allow to omit setting CommandStore")
-    void notAllowToOmitSettingCommandStore() {
+    void neverOmitCommandStore() {
         assertThrows(IllegalStateException.class, () -> CommandBus.newBuilder()
                                                                   .build());
     }
@@ -126,7 +126,7 @@ class CommandBusBuilderTest
         }
 
         @Test
-        @DisplayName("if thread spawn allowed")
+        @DisplayName("if thread spawn is allowed")
         void ifThreadSpawnAllowed() {
             assertTrue(builder().setThreadSpawnAllowed(true)
                                 .isThreadSpawnAllowed());

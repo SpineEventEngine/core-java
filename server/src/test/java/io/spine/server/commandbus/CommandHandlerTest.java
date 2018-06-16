@@ -99,7 +99,7 @@ class CommandHandlerTest {
     class Handle {
 
         @Test
-        @DisplayName("command")
+        @DisplayName("one command")
         void command() {
             assertHandles(Given.ACommand.createProject());
         }
@@ -119,8 +119,8 @@ class CommandHandlerTest {
     }
 
     @Test
-    @DisplayName("post generated events to event bus")
-    void postGeneratedEventsToEventBus() {
+    @DisplayName("post generated events to EventBus")
+    void postGeneratedEventsToBus() {
         final Command cmd = Given.ACommand.startProject();
 
         final EventCatcher eventCatcher = new EventCatcher();
@@ -142,7 +142,7 @@ class CommandHandlerTest {
     class ProvideHashCode {
 
         @Test
-        @DisplayName("for non empty handler ID non-zero hashcode is generated")
+        @DisplayName("for non-empty handler ID non-zero hashcode is generated")
         void nonZeroForNonEmptyId() {
             final int hashCode = handler.hashCode();
 

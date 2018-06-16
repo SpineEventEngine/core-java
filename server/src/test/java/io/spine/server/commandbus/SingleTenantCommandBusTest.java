@@ -82,7 +82,7 @@ class SingleTenantCommandBusTest extends AbstractCommandBusTestSuite {
 
         @Test
         @DisplayName("invalid command")
-        void invalidCommand() {
+        void invalidCmd() {
             final Command cmd = newCommandWithoutContext();
 
             commandBus.post(cmd, observer);
@@ -95,7 +95,7 @@ class SingleTenantCommandBusTest extends AbstractCommandBusTestSuite {
 
         @Test
         @DisplayName("multitenant command in single tenant context")
-        void multitenantCommandIfSingleTenant() {
+        void multitenantCmdIfSingleTenant() {
             // Create a multi-tenant command.
             final Command cmd = createProject();
 

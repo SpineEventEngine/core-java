@@ -145,7 +145,7 @@ class CommandDispatcherRegistryTest {
         }
 
         @Test
-        @DisplayName("all command handlers and dispatchers")
+        @DisplayName("all command dispatchers and handlers")
         void everything() {
             registry.register(new CreateProjectHandler(eventBus));
             registry.register(new AddTaskDispatcher());
@@ -182,14 +182,14 @@ class CommandDispatcherRegistryTest {
      */
     @Test
     @DisplayName("accept empty process manager repository dispatcher")
-    void acceptEmptyProcessManagerRepositoryDispatcher() {
+    void acceptEmptyProcessManagerRepository() {
         final NoCommandsDispatcherRepo pmRepo = new NoCommandsDispatcherRepo();
         registry.register(DelegatingCommandDispatcher.of(pmRepo));
     }
 
     @Test
     @DisplayName("state both dispatched and handled commands as supported")
-    void returnCommandsBothDispatchedAndHandled() {
+    void supportDispatchedAndHandled() {
         registry.register(new CreateProjectHandler(eventBus));
         registry.register(new AddTaskDispatcher());
 
@@ -197,8 +197,8 @@ class CommandDispatcherRegistryTest {
     }
 
     @Test
-    @DisplayName("state that no commands are supported when nothing registered")
-    void stateNothingSupportedWhenEmpty() {
+    @DisplayName("state that no commands are supported when nothing is registered")
+    void supportNothingWhenEmpty() {
         assertNotSupported(CmdCreateProject.class, CmdAddTask.class, CmdStartProject.class);
     }
 

@@ -25,7 +25,7 @@ import org.junit.jupiter.api.DisplayName;
 /**
  * @author Alexander Yevsyukov
  */
-@DisplayName("Multi tenant CommandStore should")
+@DisplayName("Multitenant CommandStore should")
 class MultiTenantCommandStoreTest extends CommandStoreTest {
 
     MultiTenantCommandStoreTest() {

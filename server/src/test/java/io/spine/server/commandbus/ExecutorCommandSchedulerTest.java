@@ -78,7 +78,7 @@ class ExecutorCommandSchedulerTest {
 
     @Test
     @DisplayName("schedule command if delay is set")
-    void scheduleCommandIfDelaySet() {
+    void scheduleCmdIfDelaySet() {
         final Command cmdPrimary =
                 commandFactory.createBasedOnContext(createProjectMessage(), context);
         final ArgumentCaptor<Command> commandCaptor = ArgumentCaptor.forClass(Command.class);
@@ -96,7 +96,7 @@ class ExecutorCommandSchedulerTest {
 
     @Test
     @DisplayName("not schedule command with same ID twice")
-    void notScheduleCommandWithSameId() {
+    void notScheduleCmdWithSameId() {
         final String id = newUuid();
 
         final Command expectedCmd = commandFactory.createBasedOnContext(createProjectMessage(id),
@@ -115,7 +115,7 @@ class ExecutorCommandSchedulerTest {
     }
 
     @Test
-    @DisplayName("throw ISE on scheduling attempt if is shutdown")
+    @DisplayName("throw ISE on scheduling attempt when is shutdown")
     void throwExceptionIfIsShutdown() {
         scheduler.shutdown();
         try {

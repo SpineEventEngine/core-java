@@ -69,7 +69,7 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
     }
 
     @Test
-    @DisplayName("store scheduled command to CommandStore and return OK")
+    @DisplayName("store scheduled command to CommandStore and return `OK`")
     void storeScheduledCommand() {
         commandBus.register(createProjectHandler);
         final Command cmd = createProject(/*delay=*/minutes(1));
@@ -105,7 +105,7 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
 
     @Test
     @DisplayName("reschedule commands from storage")
-    void rescheduleCommandsFromStorage() {
+    void rescheduleCmdsFromStorage() {
         final Timestamp schedulingTime = minutesAgo(3);
         final Duration delayPrimary = Durations2.fromMinutes(5);
         final Duration newDelayExpected = Durations2.fromMinutes(2); // = 5 - 3
@@ -212,7 +212,7 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
     }
 
     @Test
-    @DisplayName("reject previously scheduled command if no endpoint found")
+    @DisplayName("reject previously scheduled command if no endpoint is found")
     void rejectPreviouslyScheduledWithoutEndpoint() {
         Command command = storeSingleCommandForRescheduling();
         assertThrows(IllegalStateException.class,

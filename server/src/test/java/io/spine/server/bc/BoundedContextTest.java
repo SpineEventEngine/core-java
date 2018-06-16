@@ -200,7 +200,7 @@ class BoundedContextTest {
 
         @Test
         @DisplayName("multitenancy state")
-        void tellIfSetMultitenant() {
+        void ifSetMultitenant() {
             final BoundedContext bc = BoundedContext.newBuilder()
                                                     .setMultitenant(true)
                                                     .build();
@@ -214,7 +214,7 @@ class BoundedContextTest {
 
         @Test
         @DisplayName("AggregateRepository")
-        void registerAggregateRepository() {
+        void aggregateRepository() {
             final ProjectAggregateRepository repository =
                     new ProjectAggregateRepository();
             boundedContext.register(repository);
@@ -276,7 +276,7 @@ class BoundedContextTest {
     }
 
     @Test
-    @DisplayName("not change storage during registration if repository has one")
+    @DisplayName("not override storage during registration if repository has one")
     void notOverrideStorage() {
         final ProjectAggregateRepository repository = new ProjectAggregateRepository();
         final Repository spy = spy(repository);
@@ -436,7 +436,7 @@ class BoundedContextTest {
     }
 
     @Test
-    @DisplayName("throw ISE when no repository for specified entity state class found")
+    @DisplayName("throw ISE when no repository is found for specified entity state class")
     void throwOnNoRepoFound() {
         // Attempt to get a repository without registering.
         assertThrows(IllegalStateException.class,

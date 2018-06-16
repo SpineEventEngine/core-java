@@ -55,7 +55,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 @SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
-@DisplayName("Multi tenant CommandBus should")
+@DisplayName("Multitenant CommandBus should")
 class MultiTenantCommandBusTest extends AbstractCommandBusTestSuite {
 
     MultiTenantCommandBusTest() {
@@ -92,7 +92,7 @@ class MultiTenantCommandBusTest extends AbstractCommandBusTestSuite {
         }
 
         @Test
-        @DisplayName("custom if specified via Builder")
+        @DisplayName("custom if one was specified via Builder")
         void setToCustom() {
             final RejectionBus expectedRejectionBus = mock(RejectionBus.class);
             final CommandBus commandBus = CommandBus.newBuilder()
@@ -142,7 +142,7 @@ class MultiTenantCommandBusTest extends AbstractCommandBusTestSuite {
     }
 
     @Test
-    @DisplayName("verify tenant ID attribute if multitenant")
+    @DisplayName("verify tenant ID attribute if is multitenant")
     void requireTenantId() {
         commandBus.register(createProjectHandler);
         final Command cmd = newCommandWithoutTenantId();
@@ -231,7 +231,7 @@ class MultiTenantCommandBusTest extends AbstractCommandBusTestSuite {
     }
 
     @Test
-    @DisplayName("post command and return OK response")
+    @DisplayName("post command and return `OK` response")
     void postCommand() {
         commandBus.register(createProjectHandler);
 
@@ -246,7 +246,7 @@ class MultiTenantCommandBusTest extends AbstractCommandBusTestSuite {
     class StoreWhenPosted {
 
         @Test
-        @DisplayName("valid command when posted")
+        @DisplayName("valid command when it is posted")
         void validCommand() {
             commandBus.register(createProjectHandler);
             final Command cmd = createProject();
@@ -257,7 +257,7 @@ class MultiTenantCommandBusTest extends AbstractCommandBusTestSuite {
         }
 
         @Test
-        @DisplayName("invalid command with error status")
+        @DisplayName("invalid command with `ERROR` status")
         void invalidCommand() {
             commandBus.register(createProjectHandler);
             final Command cmd = newCommandWithoutContext();
@@ -269,7 +269,7 @@ class MultiTenantCommandBusTest extends AbstractCommandBusTestSuite {
     }
 
     @Nested
-    @DisplayName("when command posted, invoke")
+    @DisplayName("when command is posted, invoke")
     class Invoke {
 
         @Test

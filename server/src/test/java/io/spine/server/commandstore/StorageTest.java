@@ -109,20 +109,20 @@ class StorageTest extends TenantAwareTest {
         }
 
         @Test
-        @DisplayName("command ID for setting ok status")
+        @DisplayName("command ID for setting `OK` status")
         void commandIdForOkStatus() {
             assertThrows(NullPointerException.class, () -> repository.setOkStatus(Tests.nullRef()));
         }
 
         @Test
-        @DisplayName("command ID for setting error status")
+        @DisplayName("command ID for setting `ERROR` status")
         void commandIdForErrorStatus() {
             assertThrows(NullPointerException.class,
                          () -> repository.updateStatus(Tests.nullRef(), defaultError));
         }
 
         @Test
-        @DisplayName("command ID for setting rejection status")
+        @DisplayName("command ID for setting `REJECTED` status")
         void commandIdForRejectionStatus() {
             assertThrows(NullPointerException.class,
                          () -> repository.updateStatus(Tests.nullRef(), DEFAULT_REJECTION));

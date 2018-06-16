@@ -48,8 +48,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class CommandValidatorViolationCheckTest {
 
     @Test
-    @DisplayName("validate command and return empty violations list if it is valid")
-    void returnNoViolationsForValidCommand() {
+    @DisplayName("validate command and return empty violations list if command is valid")
+    void returnNothingForValidCmd() {
         final Command cmd = Given.ACommand.createProject();
 
         final List<ConstraintViolation> violations = inspect(CommandEnvelope.of(cmd));

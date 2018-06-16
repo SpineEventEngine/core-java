@@ -163,7 +163,7 @@ class CommandHandlerMethodTest {
         }
 
         @Test
-        @DisplayName("Message and context params")
+        @DisplayName("Message and Context params")
         void messageAndContextParam() {
             Method handler = new ValidHandlerTwoParams().getHandler();
 
@@ -171,7 +171,7 @@ class CommandHandlerMethodTest {
         }
 
         @Test
-        @DisplayName("Message and context params, and list return type")
+        @DisplayName("Message and Context params, and list return type")
         void messageAndContextParamAndListReturn() {
             Method handler = new ValidHandlerTwoParamsReturnsList().getHandler();
 
@@ -232,7 +232,7 @@ class CommandHandlerMethodTest {
         }
 
         @Test
-        @DisplayName("second non-context param")
+        @DisplayName("second non-Context param")
         void secondNonContextParam() {
             Method handler = new InvalidHandlerTwoParamsSecondInvalid().getHandler();
 
@@ -295,7 +295,7 @@ class CommandHandlerMethodTest {
 
     @Test
     @DisplayName("throw ISE when dispatching command of not handled type")
-    void notDispatchNotHandledCommand() {
+    void notDispatchNotHandledCmd() {
         CommandHandler handler = new ValidHandlerOneParam();
         CommandEnvelope cmd = requestFactory.createEnvelope(startProject());
 
