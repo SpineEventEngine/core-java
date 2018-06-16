@@ -248,8 +248,7 @@ class BoundedContextTest {
 
         verify(stand, never()).registerTypeSupplier(any());
 
-        ProjectAggregateRepository repository =
-                new ProjectAggregateRepository();
+        ProjectAggregateRepository repository = new ProjectAggregateRepository();
         boundedContext.register(repository);
         verify(stand).registerTypeSupplier(eq(repository));
     }
@@ -257,8 +256,7 @@ class BoundedContextTest {
     @Test
     @DisplayName("not allow two aggregate repositories with aggregates of same state")
     void throwOnSameAggregateState() {
-        final ProjectAggregateRepository repository =
-                new ProjectAggregateRepository();
+        final ProjectAggregateRepository repository = new ProjectAggregateRepository();
         boundedContext.register(repository);
 
         final AnotherProjectAggregateRepository anotherRepo =
