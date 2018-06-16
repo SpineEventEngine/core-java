@@ -19,7 +19,7 @@
  */
 
 /**
- * Test environments for test of the {@code io.spine.server.commandstore} package.
+ * Test environments for tests of the {@code io.spine.server.commandstore} package.
  */
 
 @ParametersAreNonnullByDefault
