@@ -225,7 +225,7 @@ class StorageTest extends TenantAwareTest {
 
         @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we update status.
         @Test
-        @DisplayName("ok")
+        @DisplayName("`OK`")
         void ok() {
             storeNewRecord();
 
@@ -238,7 +238,7 @@ class StorageTest extends TenantAwareTest {
 
         @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we update status.
         @Test
-        @DisplayName("error")
+        @DisplayName("`ERROR`")
         void error() {
             storeNewRecord();
             final Error error = newError();
@@ -254,7 +254,7 @@ class StorageTest extends TenantAwareTest {
 
         @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we update status.
         @Test
-        @DisplayName("rejection")
+        @DisplayName("`REJECTED`")
         void rejection() {
             storeNewRecord();
             final Rejection rejection = newRejection();

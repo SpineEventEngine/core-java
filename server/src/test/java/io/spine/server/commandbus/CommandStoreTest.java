@@ -80,7 +80,7 @@ abstract class CommandStoreTest extends AbstractCommandBusTestSuite {
     class SetCommandStatusTo {
 
         @Test
-        @DisplayName("OK when handler returns")
+        @DisplayName("`OK` when handler returns")
         void ok() {
             commandBus.register(createProjectHandler);
 
@@ -98,7 +98,7 @@ abstract class CommandStoreTest extends AbstractCommandBusTestSuite {
         }
 
         @Test
-        @DisplayName("error when dispatcher throws exception")
+        @DisplayName("`ERROR` when dispatcher throws exception")
         void errorForDispatcherException() {
             final ThrowingDispatcher dispatcher = new ThrowingDispatcher();
             commandBus.register(dispatcher);
@@ -119,7 +119,7 @@ abstract class CommandStoreTest extends AbstractCommandBusTestSuite {
         }
 
         @Test
-        @DisplayName("error when handler throws exception")
+        @DisplayName("`ERROR` when handler throws exception")
         void errorForHandlerException() {
             ModelTests.clearModel();
 
@@ -139,7 +139,7 @@ abstract class CommandStoreTest extends AbstractCommandBusTestSuite {
         }
 
         @Test
-        @DisplayName("rejection when handler throws rejection")
+        @DisplayName("`REJECTED` when handler throws rejection")
         void rejectionForHandlerRejection() {
             ModelTests.clearModel();
 
@@ -167,7 +167,7 @@ abstract class CommandStoreTest extends AbstractCommandBusTestSuite {
         }
 
         @Test
-        @DisplayName("error for expired scheduled command")
+        @DisplayName("`ERROR` for expired scheduled command")
         void errorForExpiredCommand() {
             final List<Command> commands = newArrayList(createProject(),
                                                         addTask(),
