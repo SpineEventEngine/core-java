@@ -195,10 +195,11 @@ abstract class CommandStoreTest extends AbstractCommandBusTestSuite {
         }
 
         /**
-         * Checks that the command status has the correct code, and the stored error message matches the
-         * passed message.
+         * Checks that the command status has the correct code, and the stored error message
+         * matches the passed message.
          *
-         * <p>The check is performed as a tenant-aware function using the tenant ID from the command.
+         * <p>The check is performed as a tenant-aware function using the tenant ID from the
+         * command.
          */
         private void assertHasErrorStatusWithMessage(CommandEnvelope commandEnvelope,
                                                      String errorMessage) {
