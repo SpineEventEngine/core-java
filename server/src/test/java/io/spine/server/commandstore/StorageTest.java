@@ -82,6 +82,15 @@ class StorageTest extends TenantAwareTest {
 
     private CommandId id;
 
+    private Optional<CommandRecord> readRecord(CommandId commandId) {
+        final Optional<CEntity> entity = repository.find(commandId);
+        if (entity.isPresent()) {
+            return Optional.of(entity.get()
+                                     .getState());
+        }
+        return Optional.absent();
+    }
+
     @BeforeEach
     void setUpCommandStorageTest() {
         setCurrentTenant(newUuid());
@@ -352,14 +361,4 @@ class StorageTest extends TenantAwareTest {
         assertNull(CRepository.getRecordFunc()
                               .apply(null));
     }
-
-    private Optional<CommandRecord> readRecord(CommandId commandId) {
-        final Optional<CEntity> entity = repository.find(commandId);
-        if (entity.isPresent()) {
-            return Optional.of(entity.get()
-                                     .getState());
-        }
-        return Optional.absent();
-    }
-
 }
