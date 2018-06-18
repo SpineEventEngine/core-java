@@ -70,7 +70,7 @@ class EventStoreServiceBuilderTest {
         }
 
         @Test
-        @DisplayName("stream executor not set")
+        @DisplayName("stream executor being not set")
         void streamExecutorNotSet() {
             assertThrows(NullPointerException.class,
                          () -> builder.setStorageFactory(storageFactory)
@@ -78,7 +78,7 @@ class EventStoreServiceBuilderTest {
         }
 
         @Test
-        @DisplayName("event storage not set")
+        @DisplayName("event storage being not set")
         void eventStorageNotSet() {
             assertThrows(NullPointerException.class,
                          () -> builder.setStreamExecutor(newExecutor())

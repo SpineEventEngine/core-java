@@ -56,7 +56,7 @@ class ShardedStreamBuilderTest {
     class NotAcceptNull {
 
         @Test
-        @DisplayName("boundedContextName")
+        @DisplayName("BoundedContext name")
         void boundedContextName() {
             assertThrows(NullPointerException.class,
                          () -> builder().setBoundedContextName(Tests.nullRef()));
@@ -75,7 +75,7 @@ class ShardedStreamBuilderTest {
         }
 
         @Test
-        @DisplayName("targetIdClass")
+        @DisplayName("target ID class")
         void targetIdClass() {
             assertThrows(NullPointerException.class,
                          () -> builder().setTargetIdClass(Tests.nullRef()));
@@ -89,7 +89,7 @@ class ShardedStreamBuilderTest {
         }
 
         @Test
-        @DisplayName("transportFactory")
+        @DisplayName("transport factory")
         void transportFactory() {
             assertThrows(NullPointerException.class, () -> builder().build(Tests.nullRef()));
         }
@@ -100,7 +100,7 @@ class ShardedStreamBuilderTest {
     class ReturnSet {
 
         @Test
-        @DisplayName("boundedContextName")
+        @DisplayName("BoundedContext name")
         void boundedContextName() {
             BoundedContextName value = BoundedContext.newName("ShardedStreams");
             assertEquals(value, builder().setBoundedContextName(value)
@@ -124,7 +124,7 @@ class ShardedStreamBuilderTest {
         }
 
         @Test
-        @DisplayName("targetIdClass")
+        @DisplayName("target ID class")
         void targetIdClass() {
             Class value = ProjectId.class;
             assertEquals(value, builder().setTargetIdClass(value)

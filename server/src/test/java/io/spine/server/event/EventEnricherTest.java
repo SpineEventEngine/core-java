@@ -128,7 +128,7 @@ public class EventEnricherTest {
     }
 
     @Test
-    @DisplayName("enrich event with several fields by same source id")
+    @DisplayName("enrich event with several fields by same source ID")
     void enrichSeveralFieldsProperly() {
         final ProjectCreated msg = GivenEventMessage.projectCreated();
         final ProjectId projectId = msg.getProjectId();

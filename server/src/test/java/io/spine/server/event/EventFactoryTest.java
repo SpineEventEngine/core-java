@@ -53,7 +53,7 @@ class EventFactoryTest {
     }
 
     @Test
-    @DisplayName("require producer id")
+    @DisplayName("require producer ID")
     void requireProducerId() {
         assertThrows(NullPointerException.class, () -> EventFactory.on(origin, Tests.nullRef()));
     }

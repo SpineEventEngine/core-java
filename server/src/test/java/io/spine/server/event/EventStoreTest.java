@@ -203,7 +203,7 @@ public class EventStoreTest {
     }
 
     @Test
-    @DisplayName("fail to store events of different tenants in a single operation")
+    @DisplayName("fail to store events of different tenants in single operation")
     void rejectEventsFromDifferentTenants() {
         final TenantId firstTenantId = TenantId.newBuilder()
                                                .setValue("abc")

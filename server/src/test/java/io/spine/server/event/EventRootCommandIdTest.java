@@ -106,7 +106,7 @@ public class EventRootCommandIdTest {
         }
 
         @Test
-        @DisplayName("aggregate and returning multiple events")
+        @DisplayName("aggregate in case command returns multiple events")
         void aggregateForMultipleEvents() {
             final Command command = command(addTasks(projectId(), 3));
 
@@ -134,7 +134,7 @@ public class EventRootCommandIdTest {
         }
 
         @Test
-        @DisplayName("process manager and returning multiple events")
+        @DisplayName("process manager in case command returns multiple events")
         void processManagerForMultipleEvents() {
             final Command command = command(inviteTeamMembers(teamId(), 3));
 

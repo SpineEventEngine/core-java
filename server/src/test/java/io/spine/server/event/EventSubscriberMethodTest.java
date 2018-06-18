@@ -173,7 +173,7 @@ class EventSubscriberMethodTest {
         }
 
         @Test
-        @DisplayName("Rejection class type")
+        @DisplayName("Rejection type")
         void rejectionClassType() {
             final Method rejectionSubscriber = new ARejectionSubscriber().getMethod();
 
