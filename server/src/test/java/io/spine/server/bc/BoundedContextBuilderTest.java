@@ -50,9 +50,8 @@ class BoundedContextBuilderTest {
 
     @BeforeEach
     void setUp() {
-        final boolean multitenant = true;
         builder = BoundedContext.newBuilder()
-                                .setMultitenant(multitenant);
+                                .setMultitenant(true);
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored") // Methods are called to throw exception.
