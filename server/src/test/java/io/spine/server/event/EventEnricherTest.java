@@ -21,14 +21,12 @@
 package io.spine.server.event;
 
 import com.google.common.base.Function;
-import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Subscribe;
 import io.spine.core.UserId;
 import io.spine.server.BoundedContext;
-import io.spine.server.command.TestEventFactory;
 import io.spine.server.event.given.EventEnricherTestEnv.GivenEvent;
 import io.spine.server.event.given.EventEnricherTestEnv.GivenEventMessage;
 import io.spine.test.event.ProjectCompleted;
@@ -47,11 +45,11 @@ import org.junit.jupiter.api.Test;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.core.Enrichments.getEnrichment;
 import static io.spine.protobuf.TypeConverter.toMessage;
-import static io.spine.server.command.TestEventFactory.newInstance;
 import static io.spine.server.event.given.EventEnricherTestEnv.Enrichment.GetProjectName;
 import static io.spine.server.event.given.EventEnricherTestEnv.Enrichment.GetProjectOwnerId;
 import static io.spine.server.event.given.EventEnricherTestEnv.Enrichment.newEventEnricher;
 import static io.spine.server.event.given.EventEnricherTestEnv.GivenEvent.projectStarted;
+import static io.spine.server.event.given.EventEnricherTestEnv.createEvent;
 import static io.spine.testdata.TestBoundedContextFactory.MultiTenant.newBoundedContext;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -59,7 +57,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("EventEnricher should")
-class EventEnricherTest {
+public class EventEnricherTest {
 
     private BoundedContext boundedContext;
     private EventBus eventBus;
@@ -67,12 +65,6 @@ class EventEnricherTest {
     private EventEnricher enricher;
     private final Function<ProjectId, String> getProjectName = new GetProjectName();
     private final Function<ProjectId, UserId> getProjectOwnerId = new GetProjectOwnerId();
-
-    private static Event createEvent(Message msg) {
-        final TestEventFactory eventFactory = newInstance(EventEnricherTest.class);
-        final Event event = eventFactory.createEvent(msg);
-        return event;
-    }
 
     @BeforeEach
     void setUp() {
@@ -212,7 +204,7 @@ class EventEnricherTest {
      * {@linkplain io.spine.server.event.given.EventEnricherTestEnv environment class} .
      */
     @SuppressWarnings({"OptionalGetWithoutIsPresent", "InstanceVariableNamingConvention",
-                       "ConstantConditions"})
+            "ConstantConditions"})
     private static class TestEventSubscriber extends EventSubscriber {
 
         private ProjectCreated.Enrichment projectCreatedEnrichment;

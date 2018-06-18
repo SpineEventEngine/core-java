@@ -24,7 +24,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
-import io.grpc.stub.StreamObserver;
 import io.spine.base.Time;
 import io.spine.core.ActorContext;
 import io.spine.core.CommandContext;
@@ -34,12 +33,9 @@ import io.spine.core.RejectionContext;
 import io.spine.core.TenantId;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.BoundedContext;
-import io.spine.server.command.TestEventFactory;
-import io.spine.test.event.ProjectCreated;
+import io.spine.server.event.given.EventStoreTestEnv.ResponseObserver;
 import io.spine.test.event.TaskAdded;
-import io.spine.testdata.Sample;
 import io.spine.time.Durations2;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -54,6 +50,9 @@ import static com.google.protobuf.util.Timestamps.subtract;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.given.GivenEnrichment.withOneAttribute;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
+import static io.spine.server.event.given.EventStoreTestEnv.assertDone;
+import static io.spine.server.event.given.EventStoreTestEnv.projectCreated;
+import static io.spine.server.event.given.EventStoreTestEnv.taskAdded;
 import static io.spine.test.Verify.assertContainsAll;
 import static io.spine.test.Verify.assertSize;
 import static io.spine.type.TypeName.of;
@@ -62,15 +61,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * @author Dmytro Dashenkov
  */
 @DisplayName("EventStore should")
-class EventStoreTest {
-
-    private static TestEventFactory eventFactory = null;
+public class EventStoreTest {
 
     private EventStore eventStore;
 
@@ -83,11 +79,6 @@ class EventStoreTest {
                          .setStreamExecutor(MoreExecutors.directExecutor())
                          .withDefaultLogger()
                          .build();
-    }
-
-    @BeforeAll
-    static void prepare() {
-        eventFactory = TestEventFactory.newInstance(EventStoreTest.class);
     }
 
     @BeforeEach
@@ -301,51 +292,5 @@ class EventStoreTest {
                                                          .getContext()
                                                          .getEventContext();
         assertTrue(isDefault(loadedOriginContext.getEnrichment()));
-    }
-
-    /*
-     * Test environment
-     *********************/
-
-    private static Event projectCreated(Timestamp when) {
-        final ProjectCreated msg = Sample.messageOfType(ProjectCreated.class);
-        return eventFactory.createEvent(msg, null, when);
-    }
-
-    private static Event taskAdded(Timestamp when) {
-        final TaskAdded msg = Sample.messageOfType(TaskAdded.class);
-        return eventFactory.createEvent(msg, null, when);
-    }
-
-    private static void assertDone(AtomicBoolean done) {
-        if (!done.get()) {
-            fail("Please use the MoreExecutors.directExecutor in EventStore for tests.");
-        }
-    }
-
-    private static class ResponseObserver implements StreamObserver<Event> {
-
-        private final Collection<Event> resultStorage;
-        private final AtomicBoolean doneFlag;
-
-        private ResponseObserver(Collection<Event> resultStorage, AtomicBoolean doneFlag) {
-            this.resultStorage = resultStorage;
-            this.doneFlag = doneFlag;
-        }
-
-        @Override
-        public void onNext(Event value) {
-            resultStorage.add(value);
-        }
-
-        @Override
-        public void onError(Throwable t) {
-            fail(t.getMessage());
-        }
-
-        @Override
-        public void onCompleted() {
-            doneFlag.getAndSet(true);
-        }
     }
 }

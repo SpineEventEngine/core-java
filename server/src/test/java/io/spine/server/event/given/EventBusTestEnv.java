@@ -22,6 +22,7 @@ package io.spine.server.event.given;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.Error;
@@ -33,7 +34,9 @@ import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
+import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
+import io.spine.core.Subscribe;
 import io.spine.core.TenantId;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.aggregate.Aggregate;
@@ -44,8 +47,11 @@ import io.spine.server.command.Assign;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventBusTest;
+import io.spine.server.event.EventDispatcher;
 import io.spine.server.event.EventStreamQuery;
+import io.spine.server.event.EventSubscriber;
 import io.spine.server.tenant.TenantAwareOperation;
+import io.spine.test.event.EBProjectArchived;
 import io.spine.test.event.EBProjectCreated;
 import io.spine.test.event.EBTaskAdded;
 import io.spine.test.event.Project;
@@ -60,6 +66,7 @@ import io.spine.test.event.command.EBCreateProject;
 import io.spine.testdata.Sample;
 
 import java.util.List;
+import java.util.Set;
 
 import static com.google.common.base.Optional.absent;
 import static io.spine.base.Identifier.newUuid;
@@ -255,7 +262,95 @@ public class EventBusTestEnv {
         }
     }
 
-    private static class EventMessage {
+    /**
+     * {@link EBProjectCreated} subscriber that does nothing.
+     *
+     * <p>Can be used for the event to get pass the {@link io.spine.server.bus.DeadMessageFilter}.
+     */
+    public static class EBProjectCreatedNoOpSubscriber extends EventSubscriber {
+
+        @Subscribe
+        public void on(EBProjectCreated message, EventContext context) {
+            // Do nothing.
+        }
+    }
+
+    public static class EBProjectArchivedSubscriber extends EventSubscriber {
+
+        private Message eventMessage;
+
+        @Subscribe
+        public void on(EBProjectArchived message, EventContext ignored) {
+            this.eventMessage = message;
+        }
+
+        public Message getEventMessage() {
+            return eventMessage;
+        }
+    }
+
+    public static class ProjectCreatedSubscriber extends EventSubscriber {
+
+        private Message eventMessage;
+        private EventContext eventContext;
+
+        @Subscribe
+        public void on(ProjectCreated eventMsg, EventContext context) {
+            this.eventMessage = eventMsg;
+            this.eventContext = context;
+        }
+
+        public Message getEventMessage() {
+            return eventMessage;
+        }
+
+        public EventContext getEventContext() {
+            return eventContext;
+        }
+    }
+
+    /**
+     * {@link EBTaskAdded} subscriber that does nothing. Can be used for the event to get pass the
+     * {@link io.spine.server.bus.DeadMessageFilter}.
+     */
+    public static class EBTaskAddedNoOpSubscriber extends EventSubscriber {
+
+        @Subscribe
+        public void on(EBTaskAdded message, EventContext context) {
+            // Do nothing.
+        }
+    }
+
+    /**
+     * A simple dispatcher class, which only dispatch and does not have own event
+     * subscribing methods.
+     */
+    public static class BareDispatcher implements EventDispatcher<String> {
+
+        private boolean dispatchCalled = false;
+
+        @Override
+        public Set<EventClass> getMessageClasses() {
+            return ImmutableSet.of(EventClass.of(ProjectCreated.class));
+        }
+
+        @Override
+        public Set<String> dispatch(EventEnvelope event) {
+            dispatchCalled = true;
+            return Identity.of(this);
+        }
+
+        @Override
+        public void onError(EventEnvelope envelope, RuntimeException exception) {
+            // Do nothing.
+        }
+
+        public boolean isDispatchCalled() {
+            return dispatchCalled;
+        }
+    }
+
+    public static class EventMessage {
 
         private static final ProjectStarted PROJECT_STARTED = projectStarted(PROJECT_ID);
 

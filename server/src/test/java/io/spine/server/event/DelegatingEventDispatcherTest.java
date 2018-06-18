@@ -20,24 +20,20 @@
 
 package io.spine.server.event;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.StringValue;
 import io.spine.core.Event;
-import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.server.BoundedContext;
 import io.spine.server.command.TestEventFactory;
+import io.spine.server.event.given.DelegatingEventDispatcherTestEnv.EmptyEventDispatcherDelegate;
 import io.spine.server.integration.ExternalMessage;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.integration.ExternalMessages;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.util.Set;
 
 import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.test.TestValues.newUuidValue;
@@ -67,6 +63,7 @@ class DelegatingEventDispatcherTest {
                 .testAllPublicStaticMethods(DelegatingEventDispatcher.class);
     }
 
+    @SuppressWarnings("DuplicateStringLiteralInspection") // Common test case.
     @Test
     @DisplayName("delegate `onError`")
     void delegateOnError() {
@@ -100,47 +97,5 @@ class DelegatingEventDispatcherTest {
         extMessageDispatcher.onError(externalMessageEnvelope, exception);
 
         assertTrue(delegate.onErrorCalled());
-    }
-
-    /*
-     * Test environment
-     ********************/
-
-    private static final class EmptyEventDispatcherDelegate
-            implements EventDispatcherDelegate<String> {
-
-        private boolean onErrorCalled;
-
-        private @Nullable RuntimeException lastException;
-
-        @Override
-        public Set<EventClass> getEventClasses() {
-            return ImmutableSet.of();
-        }
-
-        @Override
-        public Set<EventClass> getExternalEventClasses() {
-            return ImmutableSet.of();
-        }
-
-        @Override
-        public Set<String> dispatchEvent(EventEnvelope envelope) {
-            // Do nothing.
-            return ImmutableSet.of();
-        }
-
-        @Override
-        public void onError(EventEnvelope envelope, RuntimeException exception) {
-            onErrorCalled = true;
-            lastException = exception;
-        }
-
-        private boolean onErrorCalled() {
-            return onErrorCalled;
-        }
-
-        private @Nullable RuntimeException getLastException() {
-            return lastException;
-        }
     }
 }

@@ -20,27 +20,26 @@
 
 package io.spine.server.event;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Int32Value;
-import com.google.protobuf.Message;
 import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
-import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.core.EventId;
 import io.spine.core.Events;
-import io.spine.core.Subscribe;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.commandbus.CommandBus;
+import io.spine.server.event.given.EventBusTestEnv.BareDispatcher;
+import io.spine.server.event.given.EventBusTestEnv.EBProjectArchivedSubscriber;
+import io.spine.server.event.given.EventBusTestEnv.EBProjectCreatedNoOpSubscriber;
+import io.spine.server.event.given.EventBusTestEnv.EBTaskAddedNoOpSubscriber;
 import io.spine.server.event.given.EventBusTestEnv.GivenEvent;
+import io.spine.server.event.given.EventBusTestEnv.ProjectCreatedSubscriber;
 import io.spine.server.event.given.EventBusTestEnv.ProjectRepository;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.StorageFactorySwitch;
-import io.spine.test.event.EBProjectArchived;
-import io.spine.test.event.EBProjectCreated;
 import io.spine.test.event.EBTaskAdded;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.Task;
@@ -493,94 +492,6 @@ public class EventBusTest {
         try {
             bc.close();
         } catch (Exception ignored) {
-        }
-    }
-
-    /**
-     * {@link EBProjectCreated} subscriber that does nothing.
-     *
-     * <p>Can be used for the event to get pass the {@link io.spine.server.bus.DeadMessageFilter}.
-     */
-    private static class EBProjectCreatedNoOpSubscriber extends EventSubscriber {
-
-        @Subscribe
-        public void on(EBProjectCreated message, EventContext context) {
-            // Do nothing.
-        }
-    }
-
-    private static class EBProjectArchivedSubscriber extends EventSubscriber {
-
-        private Message eventMessage;
-
-        @Subscribe
-        public void on(EBProjectArchived message, EventContext ignored) {
-            this.eventMessage = message;
-        }
-
-        public Message getEventMessage() {
-            return eventMessage;
-        }
-    }
-
-    private static class ProjectCreatedSubscriber extends EventSubscriber {
-
-        private Message eventMessage;
-        private EventContext eventContext;
-
-        @Subscribe
-        public void on(ProjectCreated eventMsg, EventContext context) {
-            this.eventMessage = eventMsg;
-            this.eventContext = context;
-        }
-
-        public Message getEventMessage() {
-            return eventMessage;
-        }
-
-        private EventContext getEventContext() {
-            return eventContext;
-        }
-    }
-
-    /**
-     * {@link EBTaskAdded} subscriber that does nothing. Can be used for the event to get pass the
-     * {@link io.spine.server.bus.DeadMessageFilter}.
-     */
-    private static class EBTaskAddedNoOpSubscriber extends EventSubscriber {
-
-        @Subscribe
-        public void on(EBTaskAdded message, EventContext context) {
-            // Do nothing.
-        }
-    }
-
-    /**
-     * A simple dispatcher class, which only dispatch and does not have own event
-     * subscribing methods.
-     */
-    private static class BareDispatcher implements EventDispatcher<String> {
-
-        private boolean dispatchCalled = false;
-
-        @Override
-        public Set<EventClass> getMessageClasses() {
-            return ImmutableSet.of(EventClass.of(ProjectCreated.class));
-        }
-
-        @Override
-        public Set<String> dispatch(EventEnvelope event) {
-            dispatchCalled = true;
-            return Identity.of(this);
-        }
-
-        @Override
-        public void onError(EventEnvelope envelope, RuntimeException exception) {
-            // Do nothing.
-        }
-
-        private boolean isDispatchCalled() {
-            return dispatchCalled;
         }
     }
 }
